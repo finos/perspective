@@ -10,37 +10,54 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::prelude::*;
+:host {
+    .tab-gutter {
+        border-color: var(--inactive--color,#6e6e6e);
+        display: flex;
 
-use super::ColumnLocator;
+        .tab.tab-padding {
+            flex: 1;
+            cursor: unset;
+            .tab-title {
+                border-right: none;
+            }
+            .tab-border {
+                border-right: none;
+            }
+        }
 
-#[derive(PartialEq, Clone, Properties)]
-pub struct ExprEditButtonProps {
-    pub name: String,
-    pub is_expression: bool,
-    pub on_open_expr_panel: Callback<ColumnLocator>,
-}
+        .tab {
+            //TODO: This needs to be a variable color. Which one?
+            background: rgba(0,0,0,0.125);
+            border-right: 1px solid var(--inactive--color,#6e6e6e);
+            user-select: none;
+            cursor: pointer;
 
-// TODO: Move this logic to ColumnSettingsSidebar
-// Button should just pass the name to the on_open callback, and the sidebar
-// should render it. generally, rendering logic should live on the closest
-// component
-/// A button that goes into a column-list for a custom expression
-/// when pressed, it opens up the expression editor side-panel.
-#[function_component]
-pub fn ExprEditButton(p: &ExprEditButtonProps) -> Html {
-    let onmousedown = yew::use_callback(
-        |_, p| {
-            let name = if p.is_expression {
-                ColumnLocator::Expr(Some(p.name.clone()))
-            } else {
-                ColumnLocator::Plain(p.name.clone())
-            };
-            p.on_open_expr_panel.emit(name)
-        },
-        p.clone(),
-    );
-    html! {
-        <span { onmousedown } class="expression-edit-button"></span>
+            .tab-title {
+                font-size: 12px;
+                padding: 10px;
+                border-bottom: 1px solid var(--inactive--color,#6e6e6e); 
+            }
+            .tab-border {
+                height: 2px;
+                width: 100%;
+                background-color: var(--inactive--color,#6e6e6e);
+                margin-top: 1px;
+            }
+
+            &.selected {
+                background: unset;
+                border-bottom: 1px transparent;
+
+                .tab-title {
+                    border-bottom: 1px transparent;
+                    border-right: none;
+                }
+                .tab-border {
+                    background-color: transparent;
+                    border-right: none;
+                }
+           }
+        }
     }
 }

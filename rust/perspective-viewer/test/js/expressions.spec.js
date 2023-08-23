@@ -48,6 +48,7 @@ async function type_expression_test(page, expr) {
         "#editor",
         "#content"
     );
+    // TODO: This catches indefinitely.
     const result = await page.evaluate(async () => {
         const elem = document
             .querySelector("perspective-viewer")
@@ -91,6 +92,7 @@ test.describe("Expressions", () => {
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
 
+        // TODO: This catches indefinitely.
         await page.waitForFunction(() => {
             const root = document
                 .querySelector("perspective-viewer")
@@ -118,6 +120,7 @@ test.describe("Expressions", () => {
     test("Close expression editor with button", async ({ page }) => {
         await page.evaluate(openSidebarAndScrollToBottom);
 
+        // TODO: This catches indefinitely.
         await page.waitForFunction(
             () =>
                 !!document

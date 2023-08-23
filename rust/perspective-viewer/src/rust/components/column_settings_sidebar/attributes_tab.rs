@@ -13,59 +13,35 @@
 use wasm_bindgen::JsValue;
 use yew::{function_component, html, Callback, Html, Properties};
 
-use crate::components::containers::sidebar::SidebarCloseButton;
 use crate::components::expression_editor::ExpressionEditor;
+use crate::components::viewer::ColumnLocator;
 use crate::config::ViewConfigUpdate;
-use crate::derive_model;
 use crate::model::UpdateAndRender;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::ApiFuture;
-
-/// The state of the Expression Editor side panel
-#[derive(Debug, Clone, PartialEq)]
-pub enum ExpressionPanelState {
-    /// The expression editor is closed.
-    Closed,
-
-    /// Not an expression column
-    NoExpr(String),
-
-    /// The editor is opened, and will create a new column when saved.
-    NewExpr,
-
-    /// The editor is opened, and updating an existing expression.
-    ///
-    /// # Arguments
-    ///
-    /// * The alias that is being edited.
-    UpdateExpr(String),
-}
+use crate::{derive_model, html_template};
 
 #[derive(PartialEq, Clone, Properties)]
-pub struct ExprEditorPanelProps {
+pub struct AttributesTabProps {
+    pub selected_column: ColumnLocator,
+    pub on_close: Callback<()>,
     pub session: Session,
     pub renderer: Renderer,
-
-    /// How to render the editor, with an already existing expression,
-    /// or a new expression.
-    pub editor_state: ExpressionPanelState,
-
-    /// When this callback is called, the expression editor will close.
-    pub on_close: Callback<()>,
 }
-
-derive_model!(Renderer, Session for ExprEditorPanelProps);
+derive_model!(Renderer, Session for AttributesTabProps);
 
 #[function_component]
-pub fn ExprEditorPanel(p: &ExprEditorPanelProps) -> Html {
+pub fn AttributesTab(p: &AttributesTabProps) -> Html {
     let is_validating = yew::use_state_eq(|| false);
     let on_save = yew::use_callback(
         |v, p| {
-            match &p.editor_state {
-                ExpressionPanelState::NewExpr => save_expr(v, p),
-                ExpressionPanelState::UpdateExpr(alias) => update_expr(alias, &v, p),
-                _ => {}
+            match &p.selected_column {
+                ColumnLocator::Expr(None) => save_expr(v, p),
+                ColumnLocator::Expr(Some(alias)) => update_expr(alias, &v, p),
+                _ => {
+                    tracing::error!("Tried to save expression in bad state!")
+                }
             }
 
             p.on_close.emit(());
@@ -82,7 +58,7 @@ pub fn ExprEditorPanel(p: &ExprEditorPanelProps) -> Html {
 
     let on_delete = yew::use_callback(
         |(), p| {
-            if let ExpressionPanelState::UpdateExpr(ref s) = p.editor_state {
+            if let ColumnLocator::Expr(Some(ref s)) = p.selected_column {
                 delete_expr(s, p);
             }
 
@@ -93,33 +69,25 @@ pub fn ExprEditorPanel(p: &ExprEditorPanelProps) -> Html {
 
     let alias = yew::use_memo(
         |s| match s {
-            ExpressionPanelState::UpdateExpr(s) => Some(s.clone()),
+            ColumnLocator::Expr(Some(s)) => Some(s.clone()),
             _ => None,
         },
-        p.editor_state.clone(),
+        p.selected_column.clone(),
     );
-
-    html! {
-        <div
-            class="sidebar_column expr_editor_column"
-            validating={ if *is_validating { Some("") } else { None } }>
-            <SidebarCloseButton id={ "expr_editor_close_button" } on_close_sidebar={ &p.on_close }></SidebarCloseButton>
-            <div id="expr_panel_header">
-                <span id="expr_panel_header_title">{ "Edit Expression" }</span>
-            </div>
-            <div id="expr_panel_border"></div>
+    html_template! {
+        if matches!(p.selected_column, ColumnLocator::Expr(_)) {
+            <div class="item_title">{"Expression Editor"}</div>
             <ExpressionEditor
                 { on_save }
                 { on_validate }
                 { on_delete }
                 session = { &p.session }
-                alias = { (*alias).clone() }>
-            </ExpressionEditor>
-        </div>
+                alias = { (*alias).clone() }
+            />
+        }
     }
 }
-
-fn update_expr(name: &str, new_expression: &JsValue, props: &ExprEditorPanelProps) {
+fn update_expr(name: &str, new_expression: &JsValue, props: &AttributesTabProps) {
     let n = name.to_string();
     let exp = new_expression.clone();
     let sesh = props.session.clone();
@@ -131,7 +99,7 @@ fn update_expr(name: &str, new_expression: &JsValue, props: &ExprEditorPanelProp
     });
 }
 
-fn save_expr(expression: JsValue, props: &ExprEditorPanelProps) {
+fn save_expr(expression: JsValue, props: &AttributesTabProps) {
     let task = {
         let expression = expression.as_string().unwrap();
         let mut expressions = props.session.get_view_config().expressions.clone();
@@ -146,7 +114,7 @@ fn save_expr(expression: JsValue, props: &ExprEditorPanelProps) {
     ApiFuture::spawn(task);
 }
 
-fn delete_expr(expr_name: &str, props: &ExprEditorPanelProps) {
+fn delete_expr(expr_name: &str, props: &AttributesTabProps) {
     let session = &props.session;
     let expression = session
         .metadata()

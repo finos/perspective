@@ -129,7 +129,6 @@ export async function createModel(regular, table, view, extend = {}) {
         _num_rows: num_rows,
         _schema,
         _ids: [],
-        _open_column_styles_menu: [],
         _plugin_background,
         _color,
         _pos_fg_color,

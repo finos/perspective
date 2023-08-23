@@ -68,13 +68,6 @@ export function restore(token) {
     }
 
     const datagrid = this.regular_table;
-    try {
-        datagrid._resetAutoSize();
-    } catch (e) {
-        // Do nothing;  this may fail if no auto size info has been read.
-        // TODO fix this regular-table API
-    }
-
     restore_column_size_overrides.call(this, overrides, true);
     datagrid[PRIVATE_PLUGIN_SYMBOL] = token.columns;
 }

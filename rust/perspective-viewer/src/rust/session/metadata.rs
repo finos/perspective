@@ -14,6 +14,7 @@ use std::collections::{HashMap, HashSet};
 use std::iter::IntoIterator;
 use std::ops::{Deref, DerefMut};
 
+use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::utils::*;
@@ -184,6 +185,23 @@ impl SessionMetadata {
         ));
 
         is_expr.unwrap_or_default()
+    }
+
+    pub fn get_column_locator(&self, name: Option<String>) -> Option<ColumnLocator> {
+        if let Some(name) = name {
+            self.as_ref().and_then(|meta| {
+                if self.is_column_expression(&name) {
+                    Some(ColumnLocator::Expr(Some(name)))
+                } else {
+                    meta.column_names
+                        .iter()
+                        .find_map(|n| (n == &name).then_some(ColumnLocator::Plain(name.clone())))
+                }
+            })
+        } else {
+            // new expr
+            Some(ColumnLocator::Expr(None))
+        }
     }
 
     pub fn get_edit_port(&self) -> Option<f64> {

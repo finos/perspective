@@ -19,7 +19,9 @@ pub mod radio_list;
 pub mod radio_list_item;
 pub mod scroll_panel;
 pub mod select;
+pub mod sidebar;
 pub mod split_panel;
+pub mod tablist;
 
 #[cfg(test)]
 mod tests;

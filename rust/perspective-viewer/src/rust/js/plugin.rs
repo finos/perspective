@@ -92,6 +92,7 @@ extern "C" {
 
     #[wasm_bindgen(method, catch)]
     pub async fn resize(this: &JsPerspectiveViewerPlugin) -> ApiResult<JsValue>;
+
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq)]

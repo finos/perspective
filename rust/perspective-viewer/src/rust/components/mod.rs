@@ -36,6 +36,7 @@ pub mod string_column_style;
 pub mod style;
 pub mod viewer;
 
+pub mod column_settings_sidebar;
 #[cfg(test)]
 mod tests;
 

@@ -33,7 +33,6 @@ pub enum DatetimeFormatType {
     Simple(SimpleDatetimeStyleConfig),
 }
 
-
 /// A model for the JSON serialized style configuration for a column of type
 /// `datetime`.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -67,7 +66,7 @@ impl Default for DatetimeColumnStyleConfig {
 
 derive_wasm_abi!(DatetimeColumnStyleConfig, FromWasmAbi, IntoWasmAbi);
 
-#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize, Debug)]
 pub struct DatetimeColumnStyleDefaultConfig {
     pub color: String,
 }

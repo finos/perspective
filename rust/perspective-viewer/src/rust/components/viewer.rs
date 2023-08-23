@@ -18,13 +18,13 @@ use yew::prelude::*;
 
 use super::column_selector::ColumnSelector;
 use super::containers::split_panel::SplitPanel;
-use super::expression_panel_sidebar::EditorState;
 use super::font_loader::{FontLoader, FontLoaderProps, FontLoaderStatus};
 use super::plugin_selector::PluginSelector;
 use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
 use super::style::{LocalStyle, StyleProvider};
-use crate::components::expression_panel_sidebar::ExprEditorPanel;
+use crate::components::column_settings_sidebar::ColumnSettingsSidebar;
+use crate::components::containers::sidebar::SidebarCloseButton;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::model::*;
@@ -33,6 +33,14 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
+
+/// A ColumnLocator is a combination of the column's type and its name.
+/// It's used to locate columns for the column_settings_sidebar.
+#[derive(Clone, Debug, PartialEq)]
+pub enum ColumnLocator {
+    Plain(String),
+    Expr(Option<String>),
+}
 
 #[derive(Properties)]
 pub struct PerspectiveViewerProps {
@@ -69,7 +77,10 @@ pub enum PerspectiveViewerMsg {
     PreloadFontsUpdate,
     ViewConfigChanged,
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
-    ExpressionEditor(EditorState),
+    /// this is really more like "open the specified column"
+    /// since we call ToggleColumnSettings(None, None) to clear the selected
+    /// column
+    ToggleColumnSettings(Option<ColumnLocator>, Option<Sender<()>>),
 }
 
 pub struct PerspectiveViewer {
@@ -77,7 +88,8 @@ pub struct PerspectiveViewer {
     on_rendered: Option<Sender<()>>,
     fonts: FontLoaderProps,
     settings_open: bool,
-    editor_state: EditorState,
+    /// The column which will be opened in the ColumnSettingsSidebar
+    selected_column: Option<ColumnLocator>,
     on_resize: Rc<PubSub<()>>,
     on_dimensions_reset: Rc<PubSub<()>>,
     _subscriptions: [Subscription; 1],
@@ -112,7 +124,7 @@ impl Component for PerspectiveViewer {
             on_rendered: None,
             fonts: FontLoaderProps::new(&elem, callback),
             settings_open: false,
-            editor_state: EditorState::Closed,
+            selected_column: None,
             on_resize: Default::default(),
             on_dimensions_reset: Default::default(),
             _subscriptions: [session_sub],
@@ -120,7 +132,7 @@ impl Component for PerspectiveViewer {
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        let needs_update = self.editor_state != EditorState::Closed;
+        let needs_update = self.selected_column.is_some();
         match msg {
             PerspectiveViewerMsg::PreloadFontsUpdate => true,
             PerspectiveViewerMsg::Resize => {
@@ -128,7 +140,7 @@ impl Component for PerspectiveViewer {
                 false
             }
             PerspectiveViewerMsg::Reset(all, sender) => {
-                self.editor_state = EditorState::Closed;
+                self.selected_column = None;
                 clone!(
                     ctx.props().renderer,
                     ctx.props().session,
@@ -175,7 +187,7 @@ impl Component for PerspectiveViewer {
             PerspectiveViewerMsg::ToggleSettingsComplete(SettingsUpdate::SetDefault, resolve)
                 if self.settings_open =>
             {
-                self.editor_state = EditorState::Closed;
+                self.selected_column = None;
                 self.settings_open = false;
                 self.on_rendered = Some(resolve);
                 true
@@ -184,7 +196,7 @@ impl Component for PerspectiveViewer {
                 SettingsUpdate::Update(force),
                 resolve,
             ) if force != self.settings_open => {
-                self.editor_state = EditorState::Closed;
+                self.selected_column = None;
                 self.settings_open = force;
                 self.on_rendered = Some(resolve);
                 true
@@ -192,17 +204,17 @@ impl Component for PerspectiveViewer {
             PerspectiveViewerMsg::ToggleSettingsComplete(_, resolve)
                 if matches!(self.fonts.get_status(), FontLoaderStatus::Finished) =>
             {
-                self.editor_state = EditorState::Closed;
+                self.selected_column = None;
                 resolve.send(()).expect("Orphan render");
                 false
             }
             PerspectiveViewerMsg::ToggleSettingsComplete(_, resolve) => {
-                self.editor_state = EditorState::Closed;
+                self.selected_column = None;
                 self.on_rendered = Some(resolve);
                 true
             }
             PerspectiveViewerMsg::ViewConfigChanged => {
-                self.editor_state = EditorState::Closed;
+                self.selected_column = None;
                 needs_update
             }
             PerspectiveViewerMsg::RenderLimits(dimensions) => {
@@ -213,13 +225,30 @@ impl Component for PerspectiveViewer {
                     false
                 }
             }
-            PerspectiveViewerMsg::ExpressionEditor(new_state) => {
-                if self.editor_state == new_state {
-                    false
+            PerspectiveViewerMsg::ToggleColumnSettings(selected_column, sender) => {
+                let (open, column_name) = if self.selected_column == selected_column {
+                    self.selected_column = None;
+                    (false, None)
                 } else {
-                    self.editor_state = new_state;
-                    true
+                    self.selected_column = selected_column.clone();
+
+                    selected_column
+                        .map(|c| match c {
+                            ColumnLocator::Plain(s) => (true, Some(s)),
+                            ColumnLocator::Expr(maybe_s) => (true, maybe_s),
+                        })
+                        .unwrap_or_default()
+                };
+
+                ctx.props()
+                    .presentation
+                    .column_settings_open_changed
+                    .emit_all((open, column_name));
+
+                if let Some(sender) = sender {
+                    sender.send(()).unwrap();
                 }
+                true
             }
         }
     }
@@ -266,12 +295,9 @@ impl Component for PerspectiveViewer {
             class.push("titled");
         }
 
-        let on_open_expr_panel = ctx.link().callback(|s: Option<String>| {
-            PerspectiveViewerMsg::ExpressionEditor(
-                s.map(EditorState::UpdateExpr)
-                    .unwrap_or(EditorState::NewExpr),
-            )
-        });
+        let on_open_expr_panel = ctx
+            .link()
+            .callback(|c| PerspectiveViewerMsg::ToggleColumnSettings(Some(c), None));
         let on_reset = ctx
             .link()
             .callback(|all| PerspectiveViewerMsg::Reset(all, None));
@@ -284,7 +310,8 @@ impl Component for PerspectiveViewer {
                         id="app_panel"
                         reverse=true
                         on_reset={ self.on_dimensions_reset.callback() }
-                        on_resize_finished={ ctx.props().render_callback() }>
+                        on_resize_finished={ ctx.props().render_callback() }
+                        >
                         <div id="settings_panel" class="sidebar_column noselect split-panel orient-vertical">
                             <SidebarCloseButton
                                 id={ "settings_close_button" }
@@ -301,7 +328,7 @@ impl Component for PerspectiveViewer {
                                 on_resize={ &self.on_resize }
                                 on_open_expr_panel={ &on_open_expr_panel }
                                 on_dimensions_reset={ &self.on_dimensions_reset }
-                                editor_state={ self.editor_state.clone() }>
+                                selected_column={ self.selected_column.clone() }>
                             </ColumnSelector>
                         </div>
                         <div id="main_column">
@@ -320,13 +347,14 @@ impl Component for PerspectiveViewer {
                                 </RenderWarning>
                                 <slot></slot>
                             </div>
-                            if !matches!(self.editor_state, EditorState::Closed) {
+                            if let Some(selected_column) = self.selected_column.clone() {
                                 <SplitPanel id="modal_panel" reverse=true>
-                                    <ExprEditorPanel
+                                    <ColumnSettingsSidebar
                                         session = { &ctx.props().session }
                                         renderer = { &ctx.props().renderer }
-                                        editor_state = { self.editor_state.clone() }
-                                        on_close = { ctx.link().callback(|_| PerspectiveViewerMsg::ExpressionEditor(EditorState::Closed)) } />
+                                        {selected_column}
+                                        on_close = {ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None))}
+                                    />
                                     <></>
                                 </SplitPanel>
                             }
@@ -418,20 +446,5 @@ impl PerspectiveViewer {
                 });
             }
         };
-    }
-}
-
-#[derive(PartialEq, Clone, Properties)]
-pub struct SidebarCloseButtonProps {
-    pub on_close_sidebar: Callback<()>,
-    pub id: AttrValue,
-}
-
-#[function_component]
-pub fn SidebarCloseButton(p: &SidebarCloseButtonProps) -> Html {
-    let onclick = yew::use_callback(|_, cb| cb.emit(()), p.on_close_sidebar.clone());
-    let id = &p.id;
-    html! {
-        <div { onclick } { id } class="sidebar_close_button"></div>
     }
 }

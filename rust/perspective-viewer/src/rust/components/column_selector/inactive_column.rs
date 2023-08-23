@@ -15,6 +15,7 @@ use web_sys::*;
 use yew::prelude::*;
 
 use super::expression_toolbar::*;
+use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
@@ -34,7 +35,7 @@ pub struct InactiveColumnProps {
     pub renderer: Renderer,
     pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
-    pub on_open_expr_panel: Callback<Option<String>>,
+    pub on_open_expr_panel: Callback<ColumnLocator>,
 }
 
 impl PartialEq for InactiveColumnProps {
@@ -209,6 +210,7 @@ impl Component for InactiveColumn {
                             <ExprEditButton
                                 name={ ctx.props().name.clone() }
                                 on_open_expr_panel={ &ctx.props().on_open_expr_panel }
+                                is_expression={true}
                             ></ExprEditButton>
                         }
                     </div>

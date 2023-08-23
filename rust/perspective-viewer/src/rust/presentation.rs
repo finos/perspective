@@ -46,6 +46,7 @@ pub struct PresentationHandle {
     is_settings_open: RefCell<bool>,
     is_workspace: RefCell<Option<bool>>,
     pub settings_open_changed: PubSub<bool>,
+    pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
     pub title_changed: PubSub<Option<String>>,
 }
@@ -62,6 +63,7 @@ impl Presentation {
             name: Default::default(),
             theme_data: Default::default(),
             settings_open_changed: Default::default(),
+            column_settings_open_changed: Default::default(),
             is_settings_open: Default::default(),
             is_workspace: Default::default(),
             theme_config_updated: PubSub::default(),

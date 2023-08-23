@@ -11,10 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { sortHandler } from "./sort.js";
-import { activate_plugin_menu } from "../style_menu.js";
 import { expandCollapseHandler } from "./expand_collapse.js";
 
-export async function mousedown_listener(regularTable, event) {
+export async function mousedown_listener(regularTable, viewer, event) {
     if (event.which !== 1) {
         return;
     }
@@ -38,27 +37,9 @@ export async function mousedown_listener(regularTable, event) {
     }
 
     if (target.classList.contains("psp-menu-enabled")) {
-        target.classList.add("psp-menu-open");
         const meta = regularTable.getMeta(target);
         const column_name = meta.column_header?.[this._config.split_by.length];
-        const column_type = this._schema[column_name];
-        this._open_column_styles_menu.unshift(meta._virtual_x);
-        if (
-            column_type === "string" ||
-            column_type === "date" ||
-            column_type === "datetime"
-        ) {
-            activate_plugin_menu.call(this, regularTable, target);
-        } else {
-            const [min, max] = await this._view.get_min_max(column_name);
-            let bound = Math.max(Math.abs(min), Math.abs(max));
-            if (bound > 1) {
-                bound = Math.round(bound * 100) / 100;
-            }
-
-            activate_plugin_menu.call(this, regularTable, target, bound);
-        }
-
+        await viewer.toggleColumnSettings(column_name);
         event.preventDefault();
         event.stopImmediatePropagation();
     } else if (target.classList.contains("psp-sort-enabled")) {

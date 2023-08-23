@@ -20,7 +20,7 @@ use super::containers::radio_list_item::RadioListItem;
 use super::form::color_range_selector::*;
 use super::form::number_input::*;
 use super::modal::*;
-use super::style::{LocalStyle, StyleProvider};
+use super::style::LocalStyle;
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
@@ -53,11 +53,9 @@ pub enum NumberColumnStyleMsg {
 /// object and a default version without `Option<>`
 #[derive(Properties)]
 pub struct NumberColumnStyleProps {
-    #[prop_or_default]
-    pub config: NumberColumnStyleConfig,
+    pub config: Option<NumberColumnStyleConfig>,
 
-    #[prop_or_default]
-    pub default_config: NumberColumnStyleDefaultConfig,
+    pub default_config: Option<NumberColumnStyleDefaultConfig>,
 
     #[prop_or_default]
     pub on_change: Callback<NumberColumnStyleConfig>,
@@ -85,6 +83,7 @@ impl NumberColumnStyleProps {}
 /// JSON serializable config record and the defaults record).
 pub struct NumberColumnStyle {
     config: NumberColumnStyleConfig,
+    default_config: NumberColumnStyleDefaultConfig,
     fg_mode: NumberForegroundMode,
     bg_mode: NumberBackgroundMode,
     pos_fg_color: String,
@@ -101,11 +100,17 @@ impl Component for NumberColumnStyle {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-        Self::reset(&ctx.props().config, &ctx.props().default_config)
+        Self::reset(
+            &ctx.props().config.clone().unwrap_or_default(),
+            &ctx.props().default_config.clone().unwrap_or_default(),
+        )
     }
 
     fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
-        let mut new = Self::reset(&ctx.props().config, &ctx.props().default_config);
+        let mut new = Self::reset(
+            &ctx.props().config.clone().unwrap_or_default(),
+            &ctx.props().default_config.clone().unwrap_or_default(),
+        );
         std::mem::swap(self, &mut new);
         true
     }
@@ -119,7 +124,7 @@ impl Component for NumberColumnStyle {
             }
             NumberColumnStyleMsg::FixedChanged(fixed) => {
                 let fixed = match fixed.parse::<u32>() {
-                    Ok(x) if x != ctx.props().default_config.fixed => Some(x),
+                    Ok(x) if x != self.default_config.fixed => Some(x),
                     Ok(_) => None,
                     Err(_) if fixed.is_empty() => Some(0),
                     Err(_) => None,
@@ -234,11 +239,11 @@ impl Component for NumberColumnStyle {
                         self.config.fg_gradient = Some(x);
                     }
                     (Fg, Err(_)) if gradient.is_empty() => {
-                        self.fg_gradient = ctx.props().default_config.fg_gradient;
-                        self.config.fg_gradient = Some(ctx.props().default_config.fg_gradient);
+                        self.fg_gradient = self.default_config.fg_gradient;
+                        self.config.fg_gradient = Some(self.default_config.fg_gradient);
                     }
                     (Fg, Err(_)) => {
-                        self.fg_gradient = ctx.props().default_config.fg_gradient;
+                        self.fg_gradient = self.default_config.fg_gradient;
                         self.config.fg_gradient = None;
                     }
                     (Bg, Ok(x)) => {
@@ -246,11 +251,11 @@ impl Component for NumberColumnStyle {
                         self.config.bg_gradient = Some(x);
                     }
                     (Bg, Err(_)) if gradient.is_empty() => {
-                        self.bg_gradient = ctx.props().default_config.bg_gradient;
-                        self.config.bg_gradient = Some(ctx.props().default_config.bg_gradient);
+                        self.bg_gradient = self.default_config.bg_gradient;
+                        self.config.bg_gradient = Some(self.default_config.bg_gradient);
                     }
                     (Bg, Err(_)) => {
-                        self.bg_gradient = ctx.props().default_config.bg_gradient;
+                        self.bg_gradient = self.default_config.bg_gradient;
                         self.config.bg_gradient = None;
                     }
                 };
@@ -276,7 +281,7 @@ impl Component for NumberColumnStyle {
         let fixed_value = self
             .config
             .fixed
-            .unwrap_or(ctx.props().default_config.fixed)
+            .unwrap_or(self.default_config.fixed)
             .to_string();
 
         // Color enabled/disabled oninput callback
@@ -362,82 +367,80 @@ impl Component for NumberColumnStyle {
             }
         };
 
-        html! {
-            <StyleProvider>
-                <LocalStyle href={ css!("column-style") } />
-                <div id="column-style-container">
-                    <div class="column-style-label">
-                        <label id="fixed-examples" class="indent">{
-                            self.make_fixed_text(ctx)
-                        }</label>
-                    </div>
-                    <div class="row section">
-                        <input type="checkbox" checked=true disabled=true/>
-                        <input
-                            id="fixed-param"
-                            class="parameter"
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={ fixed_value }
-                            oninput={ fixed_oninput }/>
-                    </div>
-                    <div class="column-style-label">
-                        <label class="indent">{ "Foreground" }</label>
-                    </div>
-                    <div class="section">
-                        <input
-                            type="checkbox"
-                            oninput={ fg_enabled_oninput }
-                            checked={ self.config.number_fg_mode.is_enabled() } />
-                        <RadioList<NumberForegroundMode>
-                            class="indent"
-                            name="foreground-list"
-                            disabled={ !self.config.number_fg_mode.is_enabled() }
-                            selected={ selected_fg_mode }
-                            on_change={ fg_mode_changed } >
-
-                            <RadioListItem<NumberForegroundMode>
-                                value={ NumberForegroundMode::Color }>
-                                { fg_color_controls }
-                            </RadioListItem<NumberForegroundMode>>
-                            <RadioListItem<NumberForegroundMode>
-                                value={ NumberForegroundMode::Bar }>
-                                { fg_bar_controls }
-                            </RadioListItem<NumberForegroundMode>>
-                        </RadioList<NumberForegroundMode>>
-                    </div>
-                    <div class="column-style-label">
-                        <label class="indent">{ "Background" }</label>
-                    </div>
-                    <div class="section">
-                        <input
-                            type="checkbox"
-                            oninput={ bg_enabled_oninput }
-                            checked={ !self.config.number_bg_mode.is_disabled() } />
-                        <RadioList<NumberBackgroundMode>
-                            class="indent"
-                            name="background-list"
-                            disabled={ self.config.number_bg_mode.is_disabled() }
-                            selected={ selected_bg_mode }
-                            on_change={ bg_mode_changed } >
-
-                            <RadioListItem<NumberBackgroundMode>
-                                value={ NumberBackgroundMode::Color }>
-                                { bg_color_controls }
-                            </RadioListItem<NumberBackgroundMode>>
-                            <RadioListItem<NumberBackgroundMode>
-                                value={ NumberBackgroundMode::Gradient }>
-                                { bg_gradient_controls }
-                            </RadioListItem<NumberBackgroundMode>>
-                            <RadioListItem<NumberBackgroundMode>
-                                value={ NumberBackgroundMode::Pulse }>
-                                { bg_pulse_controls }
-                            </RadioListItem<NumberBackgroundMode>>
-                        </RadioList<NumberBackgroundMode>>
-                    </div>
+        html_template! {
+            <LocalStyle href={ css!("column-style") } />
+            <div id="column-style-container">
+                <div class="column-style-label">
+                    <label id="fixed-examples" class="indent">{
+                        self.make_fixed_text(ctx)
+                    }</label>
                 </div>
-            </StyleProvider>
+                <div class="row section">
+                    <input type="checkbox" checked=true disabled=true/>
+                    <input
+                        id="fixed-param"
+                        class="parameter"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={ fixed_value }
+                        oninput={ fixed_oninput }/>
+                </div>
+                <div class="column-style-label">
+                    <label class="indent">{ "Foreground" }</label>
+                </div>
+                <div class="section">
+                    <input
+                        type="checkbox"
+                        oninput={ fg_enabled_oninput }
+                        checked={ self.config.number_fg_mode.is_enabled() } />
+                    <RadioList<NumberForegroundMode>
+                        class="indent"
+                        name="foreground-list"
+                        disabled={ !self.config.number_fg_mode.is_enabled() }
+                        selected={ selected_fg_mode }
+                        on_change={ fg_mode_changed } >
+
+                        <RadioListItem<NumberForegroundMode>
+                            value={ NumberForegroundMode::Color }>
+                            { fg_color_controls }
+                        </RadioListItem<NumberForegroundMode>>
+                        <RadioListItem<NumberForegroundMode>
+                            value={ NumberForegroundMode::Bar }>
+                            { fg_bar_controls }
+                        </RadioListItem<NumberForegroundMode>>
+                    </RadioList<NumberForegroundMode>>
+                </div>
+                <div class="column-style-label">
+                    <label class="indent">{ "Background" }</label>
+                </div>
+                <div class="section">
+                    <input
+                        type="checkbox"
+                        oninput={ bg_enabled_oninput }
+                        checked={ !self.config.number_bg_mode.is_disabled() } />
+                    <RadioList<NumberBackgroundMode>
+                        class="indent"
+                        name="background-list"
+                        disabled={ self.config.number_bg_mode.is_disabled() }
+                        selected={ selected_bg_mode }
+                        on_change={ bg_mode_changed } >
+
+                        <RadioListItem<NumberBackgroundMode>
+                            value={ NumberBackgroundMode::Color }>
+                            { bg_color_controls }
+                        </RadioListItem<NumberBackgroundMode>>
+                        <RadioListItem<NumberBackgroundMode>
+                            value={ NumberBackgroundMode::Gradient }>
+                            { bg_gradient_controls }
+                        </RadioListItem<NumberBackgroundMode>>
+                        <RadioListItem<NumberBackgroundMode>
+                            value={ NumberBackgroundMode::Pulse }>
+                            { bg_pulse_controls }
+                        </RadioListItem<NumberBackgroundMode>>
+                    </RadioList<NumberBackgroundMode>>
+                </div>
+            </div>
         }
     }
 }
@@ -451,8 +454,8 @@ impl NumberColumnStyle {
                 pos_fg_color: Some(pos_color),
                 neg_fg_color: Some(neg_color),
                 ..
-            } if *pos_color == ctx.props().default_config.pos_fg_color
-                && *neg_color == ctx.props().default_config.neg_fg_color =>
+            } if *pos_color == self.default_config.pos_fg_color
+                && *neg_color == self.default_config.neg_fg_color =>
             {
                 config.pos_fg_color = None;
                 config.neg_fg_color = None;
@@ -465,8 +468,8 @@ impl NumberColumnStyle {
                 pos_bg_color: Some(pos_color),
                 neg_bg_color: Some(neg_color),
                 ..
-            } if *pos_color == ctx.props().default_config.pos_bg_color
-                && *neg_color == ctx.props().default_config.neg_bg_color =>
+            } if *pos_color == self.default_config.pos_bg_color
+                && *neg_color == self.default_config.neg_bg_color =>
             {
                 config.pos_bg_color = None;
                 config.neg_bg_color = None;
@@ -519,11 +522,11 @@ impl NumberColumnStyle {
     }
 
     /// Human readable precision hint, e.g. "Prec 0.001" for `{fixed: 3}`.
-    fn make_fixed_text(&self, ctx: &Context<Self>) -> String {
+    fn make_fixed_text(&self, _ctx: &Context<Self>) -> String {
         let fixed = match self.config.fixed {
             Some(x) if x > 0 => format!("0.{}1", "0".repeat(x as usize - 1)),
-            None if ctx.props().default_config.fixed > 0 => {
-                let n = ctx.props().default_config.fixed as usize - 1;
+            None if self.default_config.fixed > 0 => {
+                let n = self.default_config.fixed as usize - 1;
                 format!("0.{}1", "0".repeat(n))
             }
             Some(_) | None => "1".to_owned(),
@@ -591,6 +594,7 @@ impl NumberColumnStyle {
 
         Self {
             config,
+            default_config: default_config.clone(),
             fg_mode,
             bg_mode,
             pos_fg_color,

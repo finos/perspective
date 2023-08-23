@@ -13,6 +13,35 @@
 import { PRIVATE_PLUGIN_SYMBOL } from "../model";
 import { save_column_size_overrides } from "../model/column_overrides.js";
 
+export function get_default_config(model, column_type) {
+    let default_config;
+    if (column_type === "integer" || column_type === "float") {
+        default_config = {
+            fg_gradient: 0,
+            pos_fg_color: model._pos_fg_color[0],
+            neg_fg_color: model._neg_fg_color[0],
+            number_fg_mode: "color",
+            bg_gradient: 0,
+            pos_bg_color: model._pos_bg_color[0],
+            neg_bg_color: model._neg_bg_color[0],
+            number_bg_mode: "disabled",
+        };
+    } else {
+        // date, datetime, string, boolean
+        default_config = {
+            color: model._color[0],
+            bg_color: model._color[0],
+        };
+    }
+
+    if (column_type === "float") {
+        default_config.fixed = 2;
+    } else if (column_type === "integer") {
+        default_config.fixed = 0;
+    }
+    return default_config;
+}
+
 /**
  * Serialize the state of this plugin to a token.
  *
@@ -55,6 +84,20 @@ export function save() {
 
             token.columns[col].column_size_override =
                 column_size_overrides[col];
+        }
+
+        if (this.model) {
+            token.default_config = {};
+            for (let val of [
+                "string",
+                "float",
+                "integer",
+                "bool",
+                "date",
+                "datetime",
+            ]) {
+                token.default_config[val] = get_default_config(this.model, val);
+            }
         }
 
         return JSON.parse(JSON.stringify(token));

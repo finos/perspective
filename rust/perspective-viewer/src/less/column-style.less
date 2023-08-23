@@ -20,225 +20,222 @@
 }
 
 :host {
-    position: fixed;
-    z-index: 10000;
-    padding: 8px 12px;
-    outline: none;
-    background-color: #ffffff;
-    font-size: 12px;
-    border: inherit;
-    user-select: none;
-
-    select {
-        height: auto;
-        padding-bottom: 2px;
-        border-bottom: 1px solid var(--input--border-color, #ccc);
-    }
-
     #column-style-container {
-        margin-bottom: 4px;
-    }
-
-    label {
-        font-size: 8px;
-        width: 100%;
-    }
-
-    input[type="checkbox"] {
-        float: left;
-    }
-
-    input.parameter {
-        width: 80px;
-        background: none;
-        color: inherit;
-        border: 0px solid transparent;
+        padding: 8px 12px;
         outline: none;
-    }
+        background-color: #ffffff;
+        font-size: 12px;
+        border: inherit;
+        user-select: none;
 
-    input.parameter[type="number"] {
-        flex: 1 1 auto;
-        text-align: right;
-        border-bottom-width: 1px;
-        border-color: var(
-            --input--border-color,
-            var(--inactive--color, inherit)
-        );
-    }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        opacity: 1;
-        background: transparent;
-        background-color: transparent;
-    }
-
-    .column-style-label {
-        display: flex;
-        padding: 4px 0px;
-    }
-
-    .indent {
-        margin-left: 24px;
-    }
-
-    input[type="checkbox"],
-    & > div > div > span:first-child {
-        width: 24px;
-        margin: 0;
-    }
-
-    input[type="checkbox"] {
-        appearance: none;
-
-        &:checked:after {
-            -webkit-mask-image: var(--column-checkbox-on--mask-image);
-            mask-image: var(--column-checkbox-on--mask-image);
+        &.no-style {
+            font-style: italic;
+            background-color: #8b868045;
         }
 
-        &[disabled]:after {
-            opacity: 0.2s;
+        select {
+            height: auto;
+            padding-bottom: 2px;
+            border-bottom: 1px solid var(--input--border-color, #ccc);
         }
 
-        &:after {
-            @include icon;
-            height: 13px;
-            width: 13px;
-            -webkit-mask-image: var(--column-checkbox-off--mask-image);
-            mask-image: var(--column-checkbox-off--mask-image);
+        label {
+            font-size: 8px;
+            width: 100%;
         }
 
-        &:hover:after {
-            -webkit-mask-image: var(--column-checkbox-hover--mask-image);
-            mask-image: var(--column-checkbox-hover--mask-image);
-        }
-    }
-
-    input[type="radio"] {
-        appearance: none;
-
-        &:checked:after {
-            -webkit-mask-image: var(--column-radio-on--mask-image);
-            mask-image: var(--column-radio-on--mask-image);
+        input.parameter {
+            background: none;
+            color: inherit;
+            border: 0px solid transparent;
+            outline: none;
         }
 
-        &:after {
-            @include icon;
-            width: 10px;
-            height: 10px;
-            -webkit-mask-image: var(--column-radio-off--mask-image);
-            mask-image: var(--column-radio-off--mask-image);
+        input.parameter[type="number"] {
+            flex: 1 1 auto;
+            text-align: right;
+            border-bottom-width: 1px;
+            border-color: var(
+                --input--border-color,
+                var(--inactive--color, inherit)
+            );
         }
 
-        &:hover:after {
-            -webkit-mask-image: var(--column-radio-hover--mask-image);
-            mask-image: var(--column-radio-hover--mask-image);
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+            background: transparent;
+            background-color: transparent;
         }
-    }
 
-    div.section {
-        margin-right: 6px;
-        margin-bottom: 8px;
-        flex: 1 1 100%;
-    }
+        .column-style-label {
+            display: flex;
+            padding: 4px 0px;
+        }
 
-    div.inner_section {
-        margin-top: 4px;
-        width: 0px;
-        margin-bottom: 8px;
-        flex: 1 1 100%;
-    }
+        .indent {
+            margin-left: 24px;
+        }
 
-    div.row {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-    }
+        input[type="checkbox"],
+        & > div > div > span:first-child {
+            width: 24px;
+            margin: 0;
+        }
 
-    input[type="color"] {
-        width: 36px;
-        height: 36px;
-        cursor: pointer;
-        padding: 0;
-        margin-right: 4px;
-        font-family: inherit;
-        overflow: hidden;
-        border-radius: 3px;
+        input[type="checkbox"] {
+            float: left;
+            appearance: none;
 
-        &:before {
-            position: absolute;
-            font-family: var(--button--font-family, inherit);
+            &:checked:before {
+                -webkit-mask-image: var(--column-checkbox-on--mask-image);
+                mask-image: var(--column-checkbox-on--mask-image);
+            }
+
+            &[disabled]:before {
+                opacity: 0.2s;
+            }
+
+            &:before {
+                @include icon;
+                height: 13px;
+                width: 13px;
+                -webkit-mask-image: var(--column-checkbox-off--mask-image);
+                mask-image: var(--column-checkbox-off--mask-image);
+            }
+
+            &:hover:before {
+                -webkit-mask-image: var(--column-checkbox-hover--mask-image);
+                mask-image: var(--column-checkbox-hover--mask-image);
+            }
+        }
+
+        input[type="radio"] {
+            appearance: none;
+
+            &:checked:before {
+                -webkit-mask-image: var(--column-radio-on--mask-image);
+                mask-image: var(--column-radio-on--mask-image);
+            }
+
+            &:before {
+                @include icon;
+                width: 10px;
+                height: 10px;
+                -webkit-mask-image: var(--column-radio-off--mask-image);
+                mask-image: var(--column-radio-off--mask-image);
+            }
+
+            &:hover:before {
+                -webkit-mask-image: var(--column-radio-hover--mask-image);
+                mask-image: var(--column-radio-hover--mask-image);
+            }
+        }
+
+        div.section {
+            margin-right: 6px;
+            margin-bottom: 8px;
+            flex: 1 1 100%;
+        }
+
+        div.inner_section {
             margin-top: 4px;
-            margin-left: 12px;
-            font-size: 20px;
-            content: var(--column-style-pos-color--content, "+");
-            color: white;
+            width: 0px;
+            margin-bottom: 8px;
+            flex: 1 1 100%;
         }
 
-        &#neg-color-param:before {
-            content: var(--column-style-neg-color--content, "-");
-        }
-    }
-
-    ::-webkit-color-swatch-wrapper {
-        padding: 0;
-    }
-
-    ::-webkit-color-swatch {
-        border: 0;
-        border-radius: 0;
-    }
-
-    ::-moz-color-swatch,
-    ::-moz-focus-inner {
-        border: 0;
-    }
-
-    ::-moz-focus-inner {
-        padding: 0;
-    }
-
-    .operator {
-        font-family: "Roboto Mono", monospace;
-        white-space: pre;
-    }
-
-    input[disabled]:after {
-        opacity: 0.5;
-    }
-
-    input.parameter[disabled] {
-        opacity: 0.5;
-    }
-
-    input[type="checkbox"]:not(:disabled) {
-        cursor: pointer;
-    }
-
-    button#datetime_format {
-        appearance: none;
-        background: none;
-        color: inherit;
-        border: 1px solid var(--inactive--color);
-        border-radius: 3px;
-        font-family: inherit;
-        padding: 6px;
-        font-size: 10px;
-        width: 100%;
-        cursor: pointer;
-
-        &:before {
-            content: attr(data-title);
+        div.row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
-        &:hover {
-            border-color: var(--icon--color);
-            background-color: var(--icon--color);
-            color: var(--plugin--background);
+        input[type="color"] {
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            padding: 0;
+            margin-right: 4px;
+            font-family: inherit;
+            overflow: hidden;
+            border-radius: 3px;
+
+            &:before {
+                position: absolute;
+                font-family: var(--button--font-family, inherit);
+                margin-top: 4px;
+                margin-left: 12px;
+                font-size: 20px;
+                content: var(--column-style-pos-color--content, "+");
+                color: white;
+            }
+
+            &#neg-color-param:before {
+                content: var(--column-style-neg-color--content, "-");
+            }
         }
 
-        &:hover:before {
-            content: attr(data-title-hover);
+        ::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        ::-webkit-color-swatch {
+            border: 0;
+            border-radius: 0;
+        }
+
+        ::-moz-color-swatch,
+        ::-moz-focus-inner {
+            border: 0;
+        }
+
+        ::-moz-focus-inner {
+            padding: 0;
+        }
+
+        .operator {
+            font-family: "Roboto Mono", monospace;
+            white-space: pre;
+        }
+
+        input[disabled]:before {
+            opacity: 0.5;
+        }
+
+        input.parameter[disabled] {
+            opacity: 0.5;
+        }
+
+        input[type="checkbox"]:not(:disabled) {
+            cursor: pointer;
+        }
+
+        button#datetime_format {
+            appearance: none;
+            background: none;
+            color: inherit;
+            border: 1px solid var(--inactive--color);
+            border-radius: 3px;
+            font-family: inherit;
+            padding: 6px;
+            font-size: 10px;
+            width: 100%;
+            cursor: pointer;
+
+            &:before {
+                content: attr(data-title);
+            }
+
+            &:hover {
+                border-color: var(--icon--color);
+                background-color: var(--icon--color);
+                color: var(--plugin--background);
+            }
+
+            &:hover:before {
+                content: attr(data-title-hover);
+            }
         }
     }
 }

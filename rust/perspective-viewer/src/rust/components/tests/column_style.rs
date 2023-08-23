@@ -48,7 +48,7 @@ pub async fn test_initial_fixed() {
 
     test_html! {
         <div ref={ panel_div.clone() }>
-            <NumberColumnStyle config={config}>
+            <NumberColumnStyle  config={config}>
             </NumberColumnStyle>
         </div>
     };

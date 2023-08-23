@@ -18,12 +18,61 @@ function get_psp_type(metadata) {
     }
 }
 
+export function style_selected_column(regularTable, selectedColumn) {
+    const group_header_trs = Array.from(
+        regularTable.children[0].children[0].children
+    );
+    const len = group_header_trs.length;
+    if (len <= 1) {
+        group_header_trs[0]?.setAttribute("id", "psp-column-edit-buttons");
+    } else {
+        group_header_trs.forEach((tr, i) => {
+            let id =
+                i === len - 2
+                    ? "psp-column-titles"
+                    : i === len - 1
+                    ? "psp-column-edit-buttons"
+                    : null;
+            id ? tr.setAttribute("id", id) : tr.removeAttribute("id");
+        });
+    }
+
+    const settings_open =
+        regularTable.parentElement.parentElement.hasAttribute("settings");
+    if (settings_open) {
+        // if settings_open, you will never have less than 2 trs but possibly more e.g. with group-by.
+        // edit and title are guaranteed to be the last two rows
+        let titles = Array.from(group_header_trs[len - 2].children);
+        let editBtns = Array.from(group_header_trs[len - 1].children);
+        if (titles && editBtns) {
+            // clear any sticky styles from tr changes
+            group_header_trs.slice(0, len - 2).forEach((tr) => {
+                Array.from(tr.children).forEach((th) => {
+                    th.classList.toggle("psp-menu-open", false);
+                });
+            });
+            let zipped = titles.map((title, i) => [title, editBtns[i]]);
+            zipped.forEach(([title, editBtn]) => {
+                let open = title.innerText === selectedColumn;
+                title.classList.toggle("psp-menu-open", open);
+                editBtn.classList.toggle("psp-menu-open", open);
+            });
+        }
+    }
+}
+
 export function column_header_style_listener(regularTable) {
     let group_header_trs = Array.from(
         regularTable.children[0].children[0].children
     );
 
     if (group_header_trs.length > 0) {
+        style_selected_column.call(
+            this,
+            regularTable,
+            this._column_settings_selected_column
+        );
+
         let [col_headers] = group_header_trs.splice(
             this._config.split_by.length,
             1
@@ -48,6 +97,7 @@ export function column_header_style_listener(regularTable) {
 }
 
 function style_column_header_row(regularTable, col_headers, is_menu_row) {
+    // regular header styling
     const header_depth = regularTable._view_cache.config.row_pivots.length - 1;
     for (const td of col_headers?.children) {
         const metadata = regularTable.getMeta(td);
@@ -88,10 +138,6 @@ function style_column_header_row(regularTable, col_headers, is_menu_row) {
         const is_datetime = type === "datetime";
         td.classList.toggle("psp-align-right", is_numeric);
         td.classList.toggle("psp-align-left", !is_numeric);
-        td.classList.toggle(
-            "psp-menu-open",
-            this._open_column_styles_menu[0] === metadata._virtual_x
-        );
 
         td.classList.toggle(
             "psp-menu-enabled",

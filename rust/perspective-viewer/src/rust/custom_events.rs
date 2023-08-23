@@ -31,7 +31,7 @@ use crate::*;
 /// on `CustomElements`, but when it is `drop()` the Custom Element will no
 /// longer dispatch events such as `"perspective-config-change"`.
 #[derive(Clone)]
-pub struct CustomEvents(Rc<(CustomEventsDataRc, [Subscription; 4])>);
+pub struct CustomEvents(Rc<(CustomEventsDataRc, [Subscription; 5])>);
 
 #[derive(Clone)]
 struct CustomEventsDataRc(Rc<CustomEventsData>);
@@ -82,6 +82,15 @@ impl CustomEvents {
             }
         });
 
+        let column_settings_sub = presentation.column_settings_open_changed.add_listener({
+            clone!(data);
+            move |(open, column_name)| {
+                tracing::debug!("column_settings_open_changed: {open}, {column_name:?}");
+                data.dispatch_column_settings_open_changed(open, column_name);
+                // column_settings is ethereal; do not change the config
+            }
+        });
+
         let plugin_sub = renderer.plugin_changed.add_listener({
             clone!(data);
             move |plugin| {
@@ -100,6 +109,7 @@ impl CustomEvents {
         Self(Rc::new((data, [
             theme_sub,
             settings_sub,
+            column_settings_sub,
             plugin_sub,
             view_sub,
         ])))
@@ -118,6 +128,19 @@ impl CustomEventsDataRc {
         self.elem
             .toggle_attribute_with_force("settings", open)
             .unwrap();
+        self.elem.dispatch_event(&event.unwrap()).unwrap();
+    }
+
+    fn dispatch_column_settings_open_changed(&self, open: bool, column_name: Option<String>) {
+        let mut event_init = web_sys::CustomEventInit::new();
+        event_init.detail(&JsValue::from(
+            json!( {"open": open, "column_name": column_name} ),
+        ));
+        let event = web_sys::CustomEvent::new_with_event_init_dict(
+            "perspective-toggle-column-settings",
+            &event_init,
+        );
+
         self.elem.dispatch_event(&event.unwrap()).unwrap();
     }
 

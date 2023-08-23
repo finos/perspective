@@ -12,12 +12,11 @@
 
 use yew::prelude::*;
 
-use crate::components::expression_panel_sidebar::EditorState;
-
+use super::ColumnLocator;
 #[derive(Clone, PartialEq, Properties)]
 pub struct AddExpressionButtonProps {
-    pub on_open_expr_panel: Callback<Option<String>>,
-    pub editor_state: EditorState,
+    pub on_open_expr_panel: Callback<ColumnLocator>,
+    pub selected_column: Option<ColumnLocator>,
 }
 
 /// `onmouseover` is triggered incorrectly on the `DragTarget` of a
@@ -48,8 +47,8 @@ pub fn AddExpressionButton(p: &AddExpressionButtonProps) -> Html {
         is_mouseover.setter(),
     );
 
-    let onmousedown = p.on_open_expr_panel.reform(|_| None);
-    let class = if *is_mouseover || matches!(p.editor_state, EditorState::NewExpr) {
+    let onmousedown = p.on_open_expr_panel.reform(|_| ColumnLocator::Expr(None));
+    let class = if *is_mouseover || matches!(p.selected_column, Some(ColumnLocator::Expr(None))) {
         classes!("dragdrop-hover")
     } else {
         classes!()
