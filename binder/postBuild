@@ -1,11 +1,2 @@
 #!/bin/bash
-python3 -m pip install -U perspective-python
-
-export NODE_OPTIONS=--max-old-space-size=32768
-
-VERSION=$(python3 -m pip show perspective-python | awk '/Version: (.+?)/ { print $2 }')
-EXTENSIONS="@jupyter-widgets/jupyterlab-manager @finos/perspective-jupyterlab@$VERSION"
-
-jupyter labextension install $EXTENSIONS --no-build
-jupyter lab build --dev-build=False --minimize=False
 jupyter serverextension enable --py jupyterlab
