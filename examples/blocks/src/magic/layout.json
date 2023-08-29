@@ -1,0 +1,150 @@
+{
+    "sizes": [1],
+    "detail": {
+        "main": {
+            "type": "split-area",
+            "orientation": "vertical",
+            "children": [
+                {
+                    "type": "tab-area",
+                    "widgets": ["PERSPECTIVE_GENERATED_ID_0"],
+                    "currentIndex": 0
+                },
+                {
+                    "type": "split-area",
+                    "orientation": "horizontal",
+                    "children": [
+                        {
+                            "type": "tab-area",
+                            "widgets": ["PERSPECTIVE_GENERATED_ID_3"],
+                            "currentIndex": 0
+                        },
+                        {
+                            "type": "tab-area",
+                            "widgets": ["PERSPECTIVE_GENERATED_ID_4"],
+                            "currentIndex": 0
+                        }
+                    ],
+                    "sizes": [0.5, 0.5]
+                }
+            ],
+            "sizes": [0.5, 0.5]
+        }
+    },
+    "mode": "globalFilters",
+    "viewers": {
+        "PERSPECTIVE_GENERATED_ID_0": {
+            "plugin": "Datagrid",
+            "plugin_config": {
+                "columns": {},
+                "editable": false,
+                "scroll_lock": false
+            },
+            "settings": false,
+            "theme": "Pro Light",
+            "title": "deck",
+            "group_by": [],
+            "split_by": [],
+            "columns": [
+                "count",
+                "name",
+                "setCode",
+                "number",
+                "manaCost",
+                "convertedManaCost",
+                "types",
+                "manaValue",
+                "type",
+                "types_0",
+                "types_1",
+                "types_2",
+                "toughness",
+                "availability",
+                "availability_0",
+                "borderColor",
+                "colorIdentity",
+                "colorIdentity_0",
+                "colors",
+                "colors_0",
+                "colors_1",
+                "colors_2",
+                "colors_3",
+                "finishes",
+                "finishes_0",
+                "flavorText",
+                "frameVersion",
+                "keywords",
+                "keywords_0",
+                "keywords_1",
+                "keywords_2",
+                "language",
+                "layout",
+                "power",
+                "printings",
+                "printings_0",
+                "printings_1",
+                "promoTypes",
+                "promoTypes_0",
+                "promoTypes_1",
+                "promoTypes_2",
+                "rarity",
+                "scryfallId",
+                "securityStamp",
+                "subtypes",
+                "subtypes_0",
+                "supertypes",
+                "text",
+                "uuid",
+                "edhrecRank",
+                "edhrecSaltiness",
+                "artist",
+                "artistIds",
+                "artistIds_0"
+            ],
+            "filter": [],
+            "sort": [],
+            "expressions": [],
+            "aggregates": {},
+            "master": false,
+            "table": "deck",
+            "linked": false
+        },
+        "PERSPECTIVE_GENERATED_ID_3": {
+            "plugin": "Y Area",
+            "plugin_config": {},
+            "settings": false,
+            "theme": "Pro Light",
+            "title": "Mana Curve",
+            "group_by": ["convertedManaCost"],
+            "split_by": ["colorIdentity_0"],
+            "columns": ["count"],
+            "filter": [["types_0", "!=", "Land"]],
+            "sort": [["name", "desc"]],
+            "expressions": [],
+            "aggregates": {},
+            "master": false,
+            "table": "deck",
+            "linked": false
+        },
+        "PERSPECTIVE_GENERATED_ID_4": {
+            "plugin": "Heatmap",
+            "plugin_config": {},
+            "settings": false,
+            "theme": "Pro Light",
+            "title": "EDHREC Rank Heatmap",
+            "group_by": ["bucket(\"edhrecRank\", 1000)"],
+            "split_by": ["convertedManaCost"],
+            "columns": ["count"],
+            "filter": [["types_0", "!=", "Land"]],
+            "sort": [["name", "desc"]],
+            "expressions": ["bucket(\"edhrecRank\", 1000)"],
+            "aggregates": {
+                "count": "count",
+                "convertedManaCost": "count"
+            },
+            "master": false,
+            "table": "deck",
+            "linked": false
+        }
+    }
+}

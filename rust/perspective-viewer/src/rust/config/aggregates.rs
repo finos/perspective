@@ -211,6 +211,24 @@ impl FromStr for Aggregate {
     }
 }
 
+/// for both Date and DateTime types.
+const DATE_TIME_AGGREGATES: &[SingleAggregate] = &[
+    SingleAggregate::Any,
+    SingleAggregate::Count,
+    SingleAggregate::DistinctCount,
+    SingleAggregate::Dominant,
+    SingleAggregate::First,
+    SingleAggregate::High,
+    SingleAggregate::Low,
+    SingleAggregate::Max,
+    SingleAggregate::Min,
+    SingleAggregate::Join,
+    SingleAggregate::Last,
+    SingleAggregate::LastByIndex,
+    SingleAggregate::Median,
+    SingleAggregate::Unique,
+];
+
 const STRING_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::Any,
     SingleAggregate::Count,
@@ -255,15 +273,23 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
 impl Type {
     pub fn aggregates_iter(&self) -> Box<dyn Iterator<Item = Aggregate>> {
         match self {
-            Self::Bool | Self::Date | Self::Datetime | Self::String => Box::new(
+            Self::Date | Self::Datetime => Box::new(
+                DATE_TIME_AGGREGATES
+                    .iter()
+                    .copied()
+                    .map(Aggregate::SingleAggregate),
+            ),
+            Self::Bool | Self::String => Box::new(
                 STRING_AGGREGATES
                     .iter()
-                    .map(|x| Aggregate::SingleAggregate(*x)),
+                    .copied()
+                    .map(Aggregate::SingleAggregate),
             ),
             Self::Integer | Self::Float => Box::new(
                 NUMBER_AGGREGATES
                     .iter()
-                    .map(|x| Aggregate::SingleAggregate(*x)),
+                    .copied()
+                    .map(Aggregate::SingleAggregate),
             ),
         }
     }
