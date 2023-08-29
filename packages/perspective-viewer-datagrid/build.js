@@ -60,7 +60,6 @@ async function compile_css() {
     add(builder1, "./pro.less");
     add(builder1, "./mitered-headers.less");
     add(builder1, "./row-hover.less");
-    add(builder1, "./column-plugin.less");
     add(builder1, "./regular_table.less");
     fs.writeFileSync(
         "dist/css/perspective-viewer-datagrid.css",

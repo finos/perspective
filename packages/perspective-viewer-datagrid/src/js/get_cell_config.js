@@ -35,7 +35,7 @@ export default async function getCellConfig(
     let column_filters = [];
     if (column_paths) {
         const split_by_values = column_paths.split("|");
-        result.column_names = [split_by_values[split_by_values.length - 1]];
+        result.column_names = [split_by_values[split_by.length]];
         column_filters = split_by
             .map((pivot, index) => {
                 const pivot_value = split_by_values[index];

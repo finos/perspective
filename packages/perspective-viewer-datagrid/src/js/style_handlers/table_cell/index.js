@@ -33,7 +33,7 @@ export function table_cell_style_listener(regularTable) {
         for (const td of tr.children) {
             const metadata = regularTable.getMeta(td);
             const column_name =
-                metadata.column_header?.[metadata.column_header?.length - 1];
+                metadata.column_header?.[this._config.split_by.length];
 
             let type = get_psp_type.call(this, metadata);
             const plugin = plugins[column_name];

@@ -37,7 +37,7 @@ export function editable_style_listener(table, viewer) {
         const meta = table.getMeta(td);
         const type = this.get_psp_type(meta);
         if (edit && this._is_editable[meta.x]) {
-            const col_name = meta.column_header[meta.column_header.length - 1];
+            const col_name = meta.column_header[this._config.split_by.length];
             if (type === "string" && plugins[col_name]?.format === "link") {
                 td.toggleAttribute("contenteditable", false);
                 td.classList.toggle("boolean-editable", false);

@@ -43,6 +43,7 @@ export function group_header_style_listener(regularTable) {
             td.classList.toggle("psp-header-sort-desc", false);
             td.classList.toggle("psp-header-sort-col-asc", false);
             td.classList.toggle("psp-header-sort-col-desc", false);
+            td.classList.toggle("psp-sort-enabled", false);
 
             let cell = row.cells[x],
                 xx = x,

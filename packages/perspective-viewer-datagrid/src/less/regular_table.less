@@ -13,7 +13,6 @@
 @import "./pro.less";
 @import "./mitered-headers.less";
 @import "./row-hover.less";
-@import "./column-plugin.less";
 
 // Row Selection
 
@@ -24,6 +23,44 @@
     display: inline-block;
     -webkit-mask-size: cover;
     mask-size: cover;
+}
+
+perspective-viewer:not([settings]) tr.rt-autosize + tr th {
+    height: 0px;
+    span {
+        display: none;
+    }
+}
+
+perspective-viewer[settings] {
+    .psp-menu-enabled {
+        padding: 0 6px;
+        font-size: 8px;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .psp-menu-enabled:hover,
+    tr:not(.rt-autosize) .psp-menu-open {
+        color: var(--plugin--background);
+        background-color: var(--icon--color);
+        cursor: pointer;
+    }
+
+    tr:not(.rt-autosize) .psp-menu-open {
+        &:before {
+            @include icon;
+            height: 8px;
+            width: 10px;
+            -webkit-mask-image: var(--column-settings-icon--mask-image);
+            mask-image: var(--column-settings-icon--mask-image);
+            margin-right: 4px;
+            background-color: var(--plugin--background);
+        }
+    }
+}
+
+.psp-sort-enabled:hover {
+    cursor: pointer;
 }
 
 .psp-row-selected,

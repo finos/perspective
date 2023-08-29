@@ -37,15 +37,10 @@ export async function mousedown_listener(regularTable, event) {
         return;
     }
 
-    const rect = target.getBoundingClientRect();
-    if (
-        target.classList.contains("psp-menu-enabled") &&
-        event.clientY - rect.top > 16
-    ) {
+    if (target.classList.contains("psp-menu-enabled")) {
         target.classList.add("psp-menu-open");
         const meta = regularTable.getMeta(target);
-        const column_name =
-            meta.column_header?.[meta.column_header?.length - 1];
+        const column_name = meta.column_header?.[this._config.split_by.length];
         const column_type = this._schema[column_name];
         this._open_column_styles_menu.unshift(meta._virtual_x);
         if (
@@ -66,10 +61,7 @@ export async function mousedown_listener(regularTable, event) {
 
         event.preventDefault();
         event.stopImmediatePropagation();
-    } else if (
-        target.classList.contains("psp-header-leaf") &&
-        !target.classList.contains("psp-header-corner")
-    ) {
+    } else if (target.classList.contains("psp-sort-enabled")) {
         sortHandler.call(this, regularTable, event, target);
         event.stopImmediatePropagation();
     }

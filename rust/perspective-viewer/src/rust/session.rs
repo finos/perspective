@@ -124,6 +124,10 @@ impl Session {
         false
     }
 
+    pub fn has_table(&self) -> bool {
+        self.borrow().table.is_some()
+    }
+
     pub fn get_table(&self) -> Option<JsPerspectiveTable> {
         self.borrow().table.clone()
     }

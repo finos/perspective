@@ -34,7 +34,7 @@ export function format_cell(
     }
 
     // TODO don't do this on every cell render ...
-    const title = parts[parts.length - 1];
+    const title = parts[this._config.split_by.length];
     const type =
         (use_table_schema && this._table_schema[title]) ||
         this._schema[title] ||
