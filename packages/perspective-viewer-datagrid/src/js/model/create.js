@@ -115,7 +115,7 @@ export async function createModel(regular, table, view, extend = {}) {
     const _column_types = [];
     for (const column_path of _column_paths) {
         const column_path_parts = column_path.split("|");
-        const column = column_path_parts[column_path_parts.length - 1];
+        const column = column_path_parts[config.split_by.length];
         _column_types.push(_schema[column]);
         _is_editable.push(!!table_schema[column]);
     }

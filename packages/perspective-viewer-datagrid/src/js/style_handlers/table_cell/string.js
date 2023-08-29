@@ -17,9 +17,7 @@ import {
 } from "../../color_utils.js";
 
 export function cell_style_string(plugin, td, metadata) {
-    const column_name =
-        metadata.column_header?.[metadata.column_header?.length - 1];
-
+    const column_name = metadata.column_header?.[this._config.split_by.length];
     const [hex, r, g, b, gradhex] = (() => {
         if (plugin?.color !== undefined) {
             return plugin.color;

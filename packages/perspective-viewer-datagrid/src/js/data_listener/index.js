@@ -71,6 +71,9 @@ export function createDataListener() {
             column_headers = [],
             column_paths = [];
 
+        const is_settings_open =
+            regularTable.parentElement.parentElement.hasAttribute("settings");
+
         // for (const path of this._column_paths.slice(x0, x1)) {
         for (
             let ipath = x0;
@@ -91,6 +94,10 @@ export function createDataListener() {
                 )
             );
             metadata.push(column);
+            if (is_settings_open) {
+                path_parts.push("Edit");
+            }
+
             column_headers.push(path_parts);
             column_paths.push(path);
         }
@@ -124,6 +131,10 @@ export function createDataListener() {
             column_headers,
             data,
             metadata,
+            column_header_merge_depth: Math.max(
+                0,
+                this._config.split_by.length
+            ),
         };
     };
 }

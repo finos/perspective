@@ -321,6 +321,12 @@ impl PerspectiveViewerElement {
                 mut view_config,
             } = ViewerConfigUpdate::decode(&update)?;
 
+            if !session.has_table() {
+                if let OptionalUpdate::Update(x) = settings {
+                    presentation.set_settings_attribute(x);
+                }
+            }
+
             if let OptionalUpdate::Update(title) = title {
                 presentation.set_title(Some(title));
             } else if matches!(title, OptionalUpdate::SetDefault) {

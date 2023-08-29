@@ -12,7 +12,7 @@
 
 export async function sortHandler(regularTable, event, target) {
     const meta = regularTable.getMeta(target);
-    const column_name = meta.column_header[meta.column_header.length - 1];
+    const column_name = meta.column_header[this._config.split_by.length];
     const sort_method = event.shiftKey ? append_sort : override_sort;
     const sort = sort_method.call(this, column_name);
     this._preserve_focus_state = true;

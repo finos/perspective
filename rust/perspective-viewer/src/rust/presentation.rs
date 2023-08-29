@@ -95,6 +95,12 @@ impl Presentation {
         self.is_workspace.borrow().unwrap()
     }
 
+    pub fn set_settings_attribute(&self, opt: bool) {
+        self.viewer_elem
+            .toggle_attribute_with_force("settings", opt)
+            .unwrap();
+    }
+
     pub fn is_settings_open(&self) -> bool {
         *self.is_settings_open.borrow()
     }
@@ -103,9 +109,7 @@ impl Presentation {
         let open_state = open.unwrap_or_else(|| !*self.is_settings_open.borrow());
         if *self.is_settings_open.borrow() != open_state {
             *self.is_settings_open.borrow_mut() = open_state;
-            self.viewer_elem
-                .toggle_attribute_with_force("settings", open_state)?;
-
+            self.set_settings_attribute(open_state);
             self.settings_open_changed.emit_all(open_state);
         }
 
