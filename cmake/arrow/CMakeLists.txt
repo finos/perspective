@@ -210,7 +210,7 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/task_util.cc
 )
 
-if(PSP_PYTHON_BUILD)
+if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
     set(ARROW_SRCS
         ${ARROW_SRCS}
         # use standard reader in Python builds.
