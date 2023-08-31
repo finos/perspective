@@ -10,8 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test } from "@playwright/test";
-import { compareContentsToSnapshot } from "@finos/perspective-test";
+import { test, expect } from "@playwright/test";
+import {
+    compareContentsToSnapshot,
+    shadow_type,
+} from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -55,6 +58,39 @@ test.describe("Regression tests", () => {
 
         await compareContentsToSnapshot(contents, [
             "regressions-not_in-filter-works-correctly.txt",
+        ]);
+    });
+
+    test("Numeric filter input does not trigger render on trailing zeroes", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.restore({
+                filter: [["Sales", ">", 1.1]],
+                settings: true,
+            });
+        });
+
+        // await new Promise((x) => setTimeout(x, 10000));
+
+        await shadow_type(
+            page,
+            "0001",
+            true,
+            "perspective-viewer",
+            "input.num-filter"
+        );
+
+        const value = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            return viewer.shadowRoot.querySelector("input.num-filter").value;
+        });
+
+        expect(value).toEqual("1.10001");
+        const contents = await get_contents(page);
+        await compareContentsToSnapshot(contents, [
+            "numeric-filter-input-does-not-trigger-render-on-trailing-zeroes.txt",
         ]);
     });
 });

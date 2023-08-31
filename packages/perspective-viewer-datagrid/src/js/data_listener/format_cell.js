@@ -24,7 +24,7 @@ const FORMAT_CACHE = new FormatterCache();
  * @returns
  */
 export function format_cell(
-    parts,
+    title,
     val,
     plugins = {},
     use_table_schema = false
@@ -33,8 +33,6 @@ export function format_cell(
         return "-";
     }
 
-    // TODO don't do this on every cell render ...
-    const title = parts[this._config.split_by.length];
     const type =
         (use_table_schema && this._table_schema[title]) ||
         this._schema[title] ||

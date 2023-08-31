@@ -87,7 +87,7 @@ export function createDataListener() {
                 column.map((x) =>
                     format_cell.call(
                         this,
-                        path_parts,
+                        path_parts[this._config.split_by.length],
                         x,
                         regularTable[PRIVATE_PLUGIN_SYMBOL]
                     )
