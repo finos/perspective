@@ -14,11 +14,15 @@
 
 div.PSPContainer {
     overflow: auto;
-    resize: both;
     padding-right: 5px;
     padding-bottom: 5px;
     height: 100%;
+    width: 100%;
     flex: 1;
+}
+
+.jp-Notebook div.PSPContainer {
+    resize: vertical;
 }
 
 // Widget height for Jupyterlab
@@ -30,11 +34,6 @@ div.PSPContainer {
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea {
     max-height: unset;
     margin: auto;
-}
-
-// Widget height for Voila
-.jp-OutputArea-output div.PSPContainer {
-    height: 520px;
 }
 
 // Widget height for Jupyter Notebook
