@@ -53,9 +53,8 @@ pub struct FilterColumnProps {
 }
 
 impl PartialEq for FilterColumnProps {
-    fn eq(&self, _rhs: &Self) -> bool {
-        false
-        // self.idx == other.idx && self.filter == other.filter
+    fn eq(&self, rhs: &Self) -> bool {
+        self.idx == rhs.idx && self.filter == rhs.filter && self.on_keydown == rhs.on_keydown
     }
 }
 
@@ -219,13 +218,15 @@ impl FilterColumnProps {
         };
 
         if let Some(input) = filter_input {
-            filter_column.2 = input;
-            let update = ViewConfigUpdate {
-                filter: Some(filter),
-                ..ViewConfigUpdate::default()
-            };
+            if input != filter_column.2 {
+                filter_column.2 = input;
+                let update = ViewConfigUpdate {
+                    filter: Some(filter),
+                    ..ViewConfigUpdate::default()
+                };
 
-            ApiFuture::spawn(self.update_and_render(update));
+                ApiFuture::spawn(self.update_and_render(update));
+            }
         }
     }
 }
