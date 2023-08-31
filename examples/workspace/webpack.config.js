@@ -49,7 +49,7 @@ module.exports = {
         ],
     },
     devServer: {
-        contentBase: [
+        static: [
             path.join(__dirname, "dist"),
             path.join(__dirname, "../../node_modules/superstore-arrow"),
         ],

@@ -12,6 +12,7 @@
 
 import perspective from "@finos/perspective";
 import "@finos/perspective-workspace";
+import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
@@ -37,18 +38,30 @@ const DEFAULT_LAYOUT = {
         },
     },
     viewers: {
-        One: { table: "superstore", editable: true },
+        One: {
+            table: "superstore",
+            title: "Test Widget I",
+            editable: true,
+            linked: true,
+        },
+        Two: {
+            table: "superstore",
+            title: "Test Widget II (modified)",
+            linked: true,
+        },
         Three: {
             table: "superstore",
-            name: "Test Widget III (modified)",
+            title: "Test Widget III (modified)",
             group_by: ["State"],
             columns: ["Sales", "Profit"],
+            linked: true,
         },
         Four: {
             table: "superstore",
-            name: "Test Widget IV (modified)",
+            title: "Test Widget IV (modified)",
             group_by: ["Category", "Sub-Category"],
             columns: ["Sales", "Profit"],
+            linked: true,
         },
     },
 };
