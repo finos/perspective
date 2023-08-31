@@ -1,3 +1,21 @@
+# [v2.5.1](https://github.com/finos/perspective/releases/tag/v2.5.1)
+
+_31 August 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.5.0...v2.5.1))
+
+Features
+
+- Datagrid column header configuration UX update [#2351](https://github.com/finos/perspective/pull/2351)
+
+Fixes
+
+- Fix filter number validation with trailing zeroes [#2353](https://github.com/finos/perspective/pull/2353)
+- Fix Jupyter plugin resize behavior [#2352](https://github.com/finos/perspective/pull/2352)
+
+Misc
+
+- Update webpack dev server configuration options, fixes for perspective 2.0+ [#2350](https://github.com/finos/perspective/pull/2350)
+- Fix binder installation to not manage dependencies seperately [#2342](https://github.com/finos/perspective/pull/2342)
+
 # [v2.5.0](https://github.com/finos/perspective/releases/tag/v2.5.0)
 
 _14 August 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.4.0...v2.5.0))

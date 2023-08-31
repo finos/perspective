@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-d3fc",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "description": "Perspective.js D3FC Plugin",
     "unpkg": "./dist/cdn/perspective-viewer-d3fc.js",
     "jsdelivr": "./dist/cdn/perspective-viewer-d3fc.js",
@@ -43,8 +43,8 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^2.5.0",
-        "@finos/perspective-viewer": "^2.5.0",
+        "@finos/perspective": "^2.5.1",
+        "@finos/perspective-viewer": "^2.5.1",
         "chroma-js": "^1.3.4",
         "d3fc": "^15.2.4",
         "d3-selection": "^3.0.0",
@@ -54,8 +54,8 @@
         "gradient-parser": "1.0.2"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "^2.5.0",
-        "@finos/perspective-test": "^2.5.0",
+        "@finos/perspective-esbuild-plugin": "^2.5.1",
+        "@finos/perspective-test": "^2.5.1",
         "@prospective.co/procss": "^0.1.13"
     }
 }

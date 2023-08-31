@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-webpack-plugin",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {
@@ -25,8 +25,8 @@
         "worker-loader": "^3.0.7"
     },
     "peerDependencies": {
-        "@finos/perspective": "^2.5.0",
-        "@finos/perspective-viewer": "^2.5.0",
+        "@finos/perspective": "^2.5.1",
+        "@finos/perspective-viewer": "^2.5.1",
         "webpack": "^5.60.0"
     }
 }
