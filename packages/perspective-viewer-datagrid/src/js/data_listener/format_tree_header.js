@@ -28,7 +28,7 @@ export function* format_tree_header(paths = [], row_headers, regularTable) {
         path = path.slice(0, path.length - 1).fill("");
         const formatted = format_cell.call(
             this,
-            [row_headers[path.length - 1]],
+            row_headers[path.length - 1],
             last,
             plugins,
             true

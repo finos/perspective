@@ -11,7 +11,11 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test } from "@playwright/test";
-import { run_standard_tests } from "@finos/perspective-test";
+import {
+    compareContentsToSnapshot,
+    compareLightDOMContents,
+    run_standard_tests,
+} from "@finos/perspective-test";
 
 async function getDatagridContents(page) {
     return await page.evaluate(async () => {
@@ -39,4 +43,20 @@ test.describe("Datagrid with superstore data set", () => {
     });
 
     run_standard_tests("perspective-viewer-datagrid", getDatagridContents);
+
+    test("Row headers are printed correctly", async ({ page }) => {
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+                group_by: ["Ship Date"],
+                split_by: ["Ship Mode"],
+                columns: ["Sales", "Quantity", "Discount", "Profit"],
+            });
+        });
+
+        compareContentsToSnapshot(
+            await getDatagridContents(page),
+            "row-headers-are-printed-correctly"
+        );
+    });
 });
