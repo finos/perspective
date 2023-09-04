@@ -139,7 +139,6 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:theme", this.theme_changed, this);
         this.model.on("change:settings", this.settings_changed, this);
-        this.model.on("change:title", this.title_changed, this);
 
         /**
          * Request a table from the manager. If a table has been loaded, proxy
@@ -498,12 +497,6 @@ export class PerspectiveView extends DOMWidgetView {
     settings_changed() {
         this.luminoWidget.restore({
             settings: this.model.get("settings"),
-        });
-    }
-
-    title_changed() {
-        this.luminoWidget.restore({
-            title: this.model.get("title"),
         });
     }
 }
