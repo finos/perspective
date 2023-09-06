@@ -369,7 +369,7 @@ impl Component for NumberColumnStyle {
 
         html_template! {
             <LocalStyle href={ css!("column-style") } />
-            <div id="column-style-container">
+            <div id="column-style-container" class="number-column-style-container">
                 <div class="column-style-label">
                     <label id="fixed-examples" class="indent">{
                         self.make_fixed_text(ctx)

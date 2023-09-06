@@ -24,6 +24,7 @@ use crate::components::column_settings_sidebar::style_tab::StyleTab;
 use crate::components::containers::sidebar::Sidebar;
 use crate::components::containers::tablist::TabList;
 use crate::components::style::LocalStyle;
+use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::{clone, css, html_template};
@@ -47,6 +48,7 @@ pub struct ColumnSettingsProps {
     pub on_close: Callback<()>,
     pub session: Session,
     pub renderer: Renderer,
+    pub presentation: Presentation,
 }
 
 #[function_component]
@@ -77,10 +79,18 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
         p.on_close,
         p.session,
         p.renderer,
+        p.presentation,
         column_name
     );
     let match_fn = Callback::from(move |tab| {
-        clone!(selected_column, on_close, session, renderer, column_name);
+        clone!(
+            selected_column,
+            on_close,
+            session,
+            renderer,
+            presentation,
+            column_name
+        );
         match tab {
             ColumnSettingsTab::Attributes => html! {
                 <AttributesTab
@@ -95,6 +105,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                     { column_name }
                     { session }
                     { renderer }
+                    { presentation }
                 />
             },
         }

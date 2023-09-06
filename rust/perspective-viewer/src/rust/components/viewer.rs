@@ -352,6 +352,7 @@ impl Component for PerspectiveViewer {
                                     <ColumnSettingsSidebar
                                         session = { &ctx.props().session }
                                         renderer = { &ctx.props().renderer }
+                                        presentation = {&ctx.props().presentation}
                                         {selected_column}
                                         on_close = {ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None))}
                                     />

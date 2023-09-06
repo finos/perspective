@@ -76,14 +76,16 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
     );
     html_template! {
         if matches!(p.selected_column, ColumnLocator::Expr(_)) {
-            <div class="item_title">{"Expression Editor"}</div>
-            <ExpressionEditor
-                { on_save }
-                { on_validate }
-                { on_delete }
-                session = { &p.session }
-                alias = { (*alias).clone() }
-            />
+            <div id="attributes-tab">
+                <div class="item_title">{"Expression Editor"}</div>
+                <ExpressionEditor
+                    { on_save }
+                    { on_validate }
+                    { on_delete }
+                    session = { &p.session }
+                    alias = { (*alias).clone() }
+                />
+            </div>
         }
     }
 }

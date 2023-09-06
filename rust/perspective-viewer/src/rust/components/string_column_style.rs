@@ -200,7 +200,7 @@ impl Component for StringColumnStyle {
 
         html_template! {
             <LocalStyle href={ css!("column-style") } />
-            <div id="column-style-container">
+            <div id="column-style-container" class="string-column-style-container">
                 <div class="column-style-label">
                     <label class="indent">{ "Format" }</label>
                 </div>

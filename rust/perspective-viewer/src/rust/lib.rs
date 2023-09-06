@@ -40,12 +40,8 @@ use utils::JsValueSerdeExt;
 use wasm_bindgen::prelude::*;
 
 use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
-// use crate::custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
-// use crate::custom_elements::datetime_column_style::PerspectiveDatetimeColumnStyleElement;
 use crate::custom_elements::debug_plugin::PerspectiveDebugPluginElement;
 use crate::custom_elements::export_dropdown::ExportDropDownMenuElement;
-// use crate::custom_elements::number_column_style::PerspectiveNumberColumnStyleElement;
-// use crate::custom_elements::string_column_style::PerspectiveStringColumnStyleElement;
 use crate::custom_elements::viewer::PerspectiveViewerElement;
 use crate::utils::{define_web_component, ApiResult};
 
@@ -90,10 +86,6 @@ pub fn bootstrap_web_components(psp: &JsValue) {
         define_web_component::<PerspectiveDebugPluginElement>(psp);
     }
 
-    // define_web_component::<PerspectiveDateColumnStyleElement>(psp);
-    // define_web_component::<PerspectiveDatetimeColumnStyleElement>(psp);
-    // define_web_component::<PerspectiveStringColumnStyleElement>(psp);
-    // define_web_component::<PerspectiveNumberColumnStyleElement>(psp);
     define_web_component::<ExportDropDownMenuElement>(psp);
     define_web_component::<CopyDropDownMenuElement>(psp);
 }

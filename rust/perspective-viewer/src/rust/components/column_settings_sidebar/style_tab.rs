@@ -23,15 +23,17 @@ use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
 use crate::components::style::LocalStyle;
 use crate::config::Type;
+use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::JsValueSerdeExt;
 use crate::{clone, css, html_template};
 
-#[derive(PartialEq, Clone, Properties)]
+#[derive(Clone, PartialEq, Properties)]
 pub struct StyleTabProps {
     pub session: Session,
     pub renderer: Renderer,
+    pub presentation: Presentation,
     pub column_name: String,
 }
 
@@ -54,6 +56,7 @@ struct Config {
 /// This function sends the config to the plugin using its `restore` method
 fn send_config<T: Serialize + Debug>(
     renderer: Renderer,
+    presentation: Presentation,
     view: JsValue,
     column_name: String,
     column_config: T,
@@ -74,6 +77,9 @@ fn send_config<T: Serialize + Debug>(
                 .await
                 .expect("Unable to call update!");
         });
+        // send a config update event in case we need to listen for it outside of the
+        // viewer
+        presentation.column_settings_updated.emit_all(js_config);
     } else {
         tracing::warn!("Could not restore and restyle plugin!");
     }
@@ -136,12 +142,18 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
     let view = (*view).clone();
     let title = format!("{} Styling", ty.to_capitalized());
 
-    clone!(p.renderer, p.column_name);
+    clone!(p.renderer, p.presentation, p.column_name);
     let opt_html = match ty {
         Type::String => {
             get_column_config(&renderer, &column_name, ty).map(|(config, default_config)| {
                 let on_change = Callback::from(move |config| {
-                    send_config(renderer.clone(), view.clone(), column_name.clone(), config);
+                    send_config(
+                        renderer.clone(),
+                        presentation.clone(),
+                        view.clone(),
+                        column_name.clone(),
+                        config,
+                    );
                 });
                 html_template! {
                     <div class="item_title">{title.clone()}</div>
@@ -154,7 +166,13 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
         Type::Datetime | Type::Date => {
             get_column_config(&renderer, &column_name, ty).map(|(config, default_config)| {
                 let on_change = Callback::from(move |config| {
-                    send_config(renderer.clone(), view.clone(), column_name.clone(), config);
+                    send_config(
+                        renderer.clone(),
+                        presentation.clone(),
+                        view.clone(),
+                        column_name.clone(),
+                        config,
+                    );
                 });
                 html_template! {
                     <div class="item_title">{title.clone()}</div>
@@ -172,7 +190,13 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
         Type::Integer | Type::Float => {
             get_column_config(&renderer, &column_name, ty).map(|(config, default_config)| {
                 let on_change = Callback::from(move |config| {
-                    send_config(renderer.clone(), view.clone(), column_name.clone(), config);
+                    send_config(
+                        renderer.clone(),
+                        presentation.clone(),
+                        view.clone(),
+                        column_name.clone(),
+                        config,
+                    );
                 });
                 html_template! {
                     <div class="item_title">{title.clone()}</div>
@@ -184,7 +208,7 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
         }
         _ => None,
     };
-    opt_html.unwrap_or(html_template! {
+    let inner = opt_html.unwrap_or(html_template! {
         <div class="item_title">{title}</div>
         <div class="style_contents">
             <LocalStyle href={ css!("column-style") } />
@@ -192,5 +216,9 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                 <div class="style-contents">{ "No styles available" }</div>
             </div>
         </div>
-    })
+    });
+
+    html! {
+        <div id="style-tab">{inner}</div>
+    }
 }

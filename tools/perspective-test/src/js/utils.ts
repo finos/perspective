@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { expect, Page } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 
 /**
  * Clean a `<svg>` for serialization/comparison.
@@ -113,6 +113,13 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
     return content;
 };
 
+/**
+ * Compares the content of an HTML element to a snapshot.
+ * To generate new snapshots, you need to delete ../tools/, ../dist/ and ../results.tar.gz
+ * and run the tests again.
+ * @param contents
+ * @param snapshotPath
+ */
 export async function compareContentsToSnapshot(
     contents: string,
     snapshotPath: string[]
@@ -159,6 +166,12 @@ export async function compareShadowDOMContents(page, snapshotFileName) {
     await compareContentsToSnapshot(contents, [snapshotFileName]);
 }
 
+/**
+ * Clicks on an element, passing through shadow roots if necessary.
+ * TODO: Playwright already does this with locators.
+ * @param page
+ * @param path
+ */
 export async function shadow_click(page, ...path): Promise<void> {
     await page.evaluate(
         ({ path }) => {
@@ -188,6 +201,14 @@ export async function shadow_click(page, ...path): Promise<void> {
     );
 }
 
+/**
+ * Types in an element, passing through shadow  roots if necessary.
+ * TODO: Playwright already does this with locators.
+ * @param page
+ * @param content
+ * @param is_incremental
+ * @param path
+ */
 export async function shadow_type(
     page,
     content,
@@ -246,6 +267,11 @@ export async function shadow_type(
     );
 }
 
+/**
+ * Blurs the active element on the page, passing through shadow roots.
+ * TODO: Playwright already does this with locators.
+ * @param page
+ */
 export async function shadow_blur(page): Promise<void> {
     await page.evaluate(() => {
         let elem = document.activeElement;
@@ -255,4 +281,53 @@ export async function shadow_blur(page): Promise<void> {
             elem = shadowRoot ? shadowRoot.activeElement : null;
         }
     });
+}
+
+/**
+ * Compares two locators to see if they match the same node in the DOM.
+ * @param left
+ * @param right
+ * @param page
+ */
+export async function compareNodes(left: Locator, right: Locator, page: Page) {
+    let leftEl = await left.elementHandle();
+    let rightEl = await right.elementHandle();
+    return await page.evaluate(
+        async (compare) => {
+            return compare.leftEl?.isEqualNode(compare.rightEl) || false;
+        },
+        {
+            leftEl,
+            rightEl,
+        }
+    );
+}
+
+/**
+ * Adds an event listener and returns a handle which, when awaited, will check if the event has been triggered.
+ * @param page
+ * @param event
+ */
+export async function getEventListener(page: Page, eventName: string) {
+    let hasListener = await page.evaluate((eventName) => {
+        let viewer = document.querySelector("perspective-viewer");
+        if (!viewer) {
+            return false;
+        } else {
+            viewer.addEventListener(eventName, async (event) => {
+                window.__PSP_TEST_LAST_EVENT__ = eventName;
+            });
+            return true;
+        }
+    }, eventName);
+    expect(hasListener).toBe(true);
+
+    // TODO: This should wait for the event to fire instead of just checking.
+    // That would require something like an abort handler and a timeout,
+    // or to race two promises, or something like that. I wasn't able to figure it out but this still works.
+    return async () =>
+        await page.evaluate(
+            (eventName) => window.__PSP_TEST_LAST_EVENT__ === eventName,
+            eventName
+        );
 }
