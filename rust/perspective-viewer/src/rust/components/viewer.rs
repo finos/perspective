@@ -75,7 +75,6 @@ pub enum PerspectiveViewerMsg {
     ToggleSettingsInit(Option<SettingsUpdate>, Option<Sender<ApiResult<JsValue>>>),
     ToggleSettingsComplete(SettingsUpdate, Sender<()>),
     PreloadFontsUpdate,
-    ViewConfigChanged,
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
     /// this is really more like "open the specified column"
     /// since we call ToggleColumnSettings(None, None) to clear the selected
@@ -112,7 +111,7 @@ impl Component for PerspectiveViewer {
                 } else {
                     vec![
                         PerspectiveViewerMsg::RenderLimits(Some(x)),
-                        PerspectiveViewerMsg::ViewConfigChanged,
+                        PerspectiveViewerMsg::ToggleColumnSettings(None, None),
                     ]
                 }
             });
@@ -212,10 +211,6 @@ impl Component for PerspectiveViewer {
                 self.selected_column = None;
                 self.on_rendered = Some(resolve);
                 true
-            }
-            PerspectiveViewerMsg::ViewConfigChanged => {
-                self.selected_column = None;
-                needs_update
             }
             PerspectiveViewerMsg::RenderLimits(dimensions) => {
                 if self.dimensions != dimensions {

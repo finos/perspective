@@ -13,15 +13,20 @@
 import { Locator, Page, expect, test } from "@playwright/test";
 import { PageView } from "./page";
 
+type ViewParameter = "groupby" | "splitby" | "orderby" | "where";
+
 export class SettingsPanel {
     pageView: PageView;
     container: Locator;
     closeButton: Locator;
-    // TODO: Don't nest these, it's confusing.
     activeColumns: ActiveColumns;
     inactiveColumns: InactiveColumns;
     addExpressionButton: Locator;
     pluginSelector: Locator;
+    groupbyInput: Locator;
+    splitbyInput: Locator;
+    orderbyInput: Locator;
+    whereInput: Locator;
 
     constructor(view: PageView) {
         this.pageView = view;
@@ -32,6 +37,10 @@ export class SettingsPanel {
         this.inactiveColumns = new InactiveColumns(this.pageView);
         this.addExpressionButton = viewer.locator("#add-expression");
         this.pluginSelector = viewer.locator("#plugin_selector_container");
+        this.groupbyInput = viewer.locator("#group_by input");
+        this.splitbyInput = viewer.locator("#split_by input");
+        this.orderbyInput = viewer.locator("#sort input");
+        this.whereInput = viewer.locator("#filter input");
     }
     /**
      * Creates and saves a new expression column.
@@ -58,6 +67,60 @@ export class SettingsPanel {
         expect(await saveBtn.isDisabled()).toBe(false);
         await saveBtn.click();
         await this.inactiveColumns.getColumnByName(name);
+    }
+    /**
+     * Shorthand for setViewParamter("groupby", name)
+     */
+    async groupby(name: string) {
+        return await this.setViewParameter("groupby", name);
+    }
+    /**
+     * Shorthand for setViewParamter("splitby", name)
+     */
+    async splitby(name: string) {
+        return await this.setViewParameter("splitby", name);
+    }
+    /**
+     * Shorthand for setViewParamter("orderby", name)
+     */
+    async orderby(name: string) {
+        return await this.setViewParameter("orderby", name);
+    }
+    /**
+     * Shorthand for setViewParamter("where", name)
+     */
+    async where(name: string) {
+        return await this.setViewParameter("where", name);
+    }
+    /**
+     * Sets a view parameter ("groupby", "splitby", "orderby", or "where") to the specified column name.
+     * @param type
+     * @param name
+     */
+    async setViewParameter(type: ViewParameter, name: string) {
+        let locator: Locator;
+        switch (type) {
+            case "groupby":
+                locator = this.groupbyInput;
+                break;
+            case "orderby":
+                locator = this.orderbyInput;
+                break;
+            case "splitby":
+                locator = this.splitbyInput;
+                break;
+            case "where":
+                locator = this.whereInput;
+                break;
+            default:
+                throw "Invalid type passed!";
+        }
+        await locator.type(name);
+        await this.pageView.page
+            .locator("perspective-dropdown .selected")
+            .first() // NOTE: There probably shouldn't actually be more than one.
+            .waitFor();
+        await locator.press("Enter");
     }
     /**
      * Selects a plugin by it's display name, i.e. the innerText of the .plugin-select-item
@@ -111,7 +174,9 @@ export class ActiveColumns {
         this.view = view;
         this.container = view.container.locator("#active-columns");
         this.topPanel = view.container.locator("#top_panel");
-        this.columnSelector = view.container.locator(".column-selector-column");
+        this.columnSelector = view.container.locator(
+            "#active-columns :not(.top-panel) .column-selector-column"
+        );
         this.newColumnInput = view.container.locator(
             ".column-selector-column .column-empty input"
         );

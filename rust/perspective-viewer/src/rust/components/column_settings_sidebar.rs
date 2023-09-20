@@ -43,13 +43,18 @@ impl Display for ColumnSettingsTab {
 }
 impl Tab for ColumnSettingsTab {}
 
-#[derive(PartialEq, Clone, Properties)]
+#[derive(Clone, Properties)]
 pub struct ColumnSettingsProps {
     pub selected_column: ColumnLocator,
     pub on_close: Callback<()>,
     pub session: Session,
     pub renderer: Renderer,
     pub presentation: Presentation,
+}
+impl PartialEq for ColumnSettingsProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.selected_column == other.selected_column
+    }
 }
 
 #[function_component]

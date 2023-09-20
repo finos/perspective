@@ -10,9 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { Locator, Page } from "@playwright/test";
+import { Locator, Page, expect } from "@playwright/test";
 import { ColumnSettingsSidebar } from "./column_settings";
-import { SettingsPanel } from "./settings_panel";
+import { ColumnType, SettingsPanel } from "./settings_panel";
 import { DataGridPlugin } from "./plugins";
 
 /**
@@ -56,5 +56,36 @@ export class PageView {
     async closeSettingsPanel() {
         await this.settingsCloseButton.click();
         await this.settingsPanel.container.waitFor({ state: "hidden" });
+    }
+
+    async getOrCreateColumnByType(type: ColumnType) {
+        let settingsPanel = this.settingsPanel;
+        await this.openSettingsPanel();
+        let col = settingsPanel.activeColumns.getColumnByType(type);
+        if (await col.container.isHidden()) {
+            let expr: string = "";
+            switch (type) {
+                case "string":
+                    expr = "'foo'";
+                    break;
+                case "integer":
+                    expr = "1";
+                    break;
+                case "float":
+                    expr = "1.1";
+                case "date":
+                    expr = "date(0,0,0)";
+                case "datetime":
+                    expr = "now()";
+                case "numeric":
+                    expr = "1";
+                case "calendar":
+                    expr = "now()";
+            }
+            await this.settingsPanel.createNewExpression("expr", expr);
+            await settingsPanel.activeColumns.activateColumn("expr");
+        }
+        await expect(col.container).toBeVisible();
+        return col;
     }
 }

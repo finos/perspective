@@ -32,6 +32,14 @@ export class ColumnSettingsSidebar {
             ".tab:not(.tab-padding) .tab-title"
         );
     }
+
+    async openTab(name: string) {
+        let locator = this.tabTitle.filter({ hasText: name });
+        await locator.click();
+        await this.container
+            .locator(".tab.selected", { hasText: name })
+            .waitFor({ timeout: 1000 });
+    }
 }
 
 export class AttributesTab {

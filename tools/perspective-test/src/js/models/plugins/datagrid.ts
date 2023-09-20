@@ -27,18 +27,32 @@ export class RegularTable {
     table: Locator;
     columnTitleRow: Locator;
     editBtnRow: Locator;
+    openColumnEditBtn: Locator;
+    realTitles: Locator;
+    realEditBtns: Locator;
 
     constructor(parent: Locator) {
         this.element = parent.locator("regular-table");
         this.table = this.element.locator("table");
         this.columnTitleRow = this.element.locator("#psp-column-titles");
         this.editBtnRow = this.element.locator("#psp-column-edit-buttons");
+        this.openColumnEditBtn = this.editBtnRow.locator(".psp-menu-open");
+        this.realTitles = this.columnTitleRow.locator(
+            "th:not(.psp-header-group-corner)"
+        );
+        this.realEditBtns = this.editBtnRow.locator(
+            "th:not(.psp-header-group-corner)"
+        );
     }
 
     async getTitleIdx(name: string) {
-        let ths = await this.columnTitleRow.locator("th").all();
+        let ths = await this.realTitles.all();
         for (let [i, locator] of ths.entries()) {
             if ((await locator.innerText()) === name) {
+                this.element.evaluate(
+                    (_, i) => console.log("getTitleIdx returned:", i),
+                    i
+                );
                 return i;
             }
         }
@@ -57,6 +71,6 @@ export class RegularTable {
     async getFirstCellByColumnName(name: string) {
         let n = await this.getTitleIdx(name);
         expect(n).not.toBe(-1);
-        return this.table.locator("tbody tr").first().locator("*").nth(n);
+        return this.table.locator("tbody tr").first().locator("td").nth(n);
     }
 }

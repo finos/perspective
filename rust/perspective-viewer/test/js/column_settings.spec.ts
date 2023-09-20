@@ -129,4 +129,23 @@ test.describe("Plugin Styles", () => {
         await checkTab(sidebar, true, false);
         await sidebar.styleTab.container.waitFor();
     });
+    test("View updates don't re-render sidebar", async ({ page }) => {
+        await page.evaluate(async () => {
+            let table = await window.__TEST_WORKER__.table({ x: [0] });
+            window.__TEST_TABLE__ = table;
+            let viewer = document.querySelector("perspective-viewer");
+            viewer?.load(table);
+        });
+
+        let view = new PageView(page);
+        let settingsPanel = await view.openSettingsPanel();
+        let col = settingsPanel.activeColumns.getFirstVisibleColumn();
+        await col.editBtn.click();
+        await view.columnSettingsSidebar.container.waitFor();
+        await page.evaluate(() => {
+            window.__TEST_TABLE__.update({ x: [1] });
+        });
+        await page.locator("tbody tr").nth(1).waitFor();
+        await expect(view.columnSettingsSidebar.container).toBeVisible();
+    });
 });
