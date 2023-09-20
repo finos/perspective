@@ -214,7 +214,6 @@ describe_jupyter(
                 });
 
                 // Check default config
-                config.plugin_config.default_config = {};
                 expect(config).toEqual({
                     aggregates: {},
                     columns: [
@@ -239,7 +238,6 @@ describe_jupyter(
                     plugin: "Datagrid",
                     plugin_config: {
                         columns: {},
-                        default_config: {},
                         editable: false,
                         scroll_lock: false,
                     },
@@ -301,8 +299,6 @@ w.theme = "Pro Dark"`
                 });
 
                 // Check default config
-                // don't worry about the details of the plugin's default_config, it only pertains to column styles
-                config.plugin_config.default_config = {};
                 expect(config).toEqual({
                     aggregates: {},
                     columns: [
@@ -327,7 +323,6 @@ w.theme = "Pro Dark"`
                     plugin: "Datagrid",
                     plugin_config: {
                         columns: {},
-                        default_config: {},
                         editable: false,
                         scroll_lock: false,
                     },

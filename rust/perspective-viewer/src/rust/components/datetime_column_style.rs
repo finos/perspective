@@ -74,7 +74,7 @@ pub struct DatetimeColumnStyleProps {
 
     pub config: Option<DatetimeColumnStyleConfig>,
 
-    pub default_config: Option<DatetimeColumnStyleDefaultConfig>,
+    pub default_config: DatetimeColumnStyleDefaultConfig,
 
     #[prop_or_default]
     pub on_change: Callback<DatetimeColumnStyleConfig>,
@@ -148,7 +148,7 @@ impl Component for DatetimeColumnStyle {
         ctx.set_modal_link();
         Self {
             config: ctx.props().config.clone().unwrap_or_default(),
-            default_config: ctx.props().default_config.clone().unwrap_or_default(),
+            default_config: ctx.props().default_config.clone(),
         }
     }
 

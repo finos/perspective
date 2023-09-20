@@ -187,8 +187,10 @@ impl SessionMetadata {
         is_expr.unwrap_or_default()
     }
 
+    /// This function will find a currently existing column. If you want to
+    /// create a new expression column, use ColumnLocator::Expr(None)
     pub fn get_column_locator(&self, name: Option<String>) -> Option<ColumnLocator> {
-        if let Some(name) = name {
+        name.and_then(|name| {
             self.as_ref().and_then(|meta| {
                 if self.is_column_expression(&name) {
                     Some(ColumnLocator::Expr(Some(name)))
@@ -198,10 +200,7 @@ impl SessionMetadata {
                         .find_map(|n| (n == &name).then_some(ColumnLocator::Plain(name.clone())))
                 }
             })
-        } else {
-            // new expr
-            Some(ColumnLocator::Expr(None))
-        }
+        })
     }
 
     pub fn get_edit_port(&self) -> Option<f64> {

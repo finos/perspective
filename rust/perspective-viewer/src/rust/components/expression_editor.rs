@@ -40,6 +40,17 @@ pub struct ExpressionEditorProps {
     pub alias: Option<String>,
 }
 
+pub fn get_new_column_name(session: &Session) -> String {
+    let mut i = 0;
+    loop {
+        i += 1;
+        let name = format!("New Column {i}");
+        if session.metadata().get_column_table_type(&name).is_none() {
+            return name;
+        }
+    }
+}
+
 impl ExpressionEditorProps {
     fn initial_expr(&self) -> Rc<String> {
         let txt = if let Some(ref alias) = self.alias {
@@ -48,15 +59,7 @@ impl ExpressionEditorProps {
                 .get_expression_by_alias(alias)
                 .unwrap_or_default()
         } else {
-            let mut i = 1;
-            let mut name = "New Column 1".to_owned();
-            let config = self.session.metadata();
-            while config.get_column_table_type(&name).is_some() {
-                i += 1;
-                name = format!("New Column {}", i);
-            }
-
-            format!("// {}\n", name)
+            format!("// {}\n", get_new_column_name(&self.session))
         };
 
         txt.into()

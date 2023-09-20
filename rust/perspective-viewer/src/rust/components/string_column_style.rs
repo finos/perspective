@@ -37,7 +37,7 @@ pub enum StringColumnStyleMsg {
 pub struct StringColumnStyleProps {
     pub config: Option<StringColumnStyleConfig>,
 
-    pub default_config: Option<StringColumnStyleDefaultConfig>,
+    pub default_config: StringColumnStyleDefaultConfig,
 
     #[prop_or_default]
     pub on_change: Callback<StringColumnStyleConfig>,
@@ -109,7 +109,7 @@ impl Component for StringColumnStyle {
         ctx.set_modal_link();
         Self {
             config: ctx.props().config.clone().unwrap_or_default(),
-            default_config: ctx.props().default_config.clone().unwrap_or_default(),
+            default_config: ctx.props().default_config.clone(),
         }
     }
 

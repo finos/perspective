@@ -14,7 +14,6 @@ use wasm_bindgen::JsValue;
 use yew::{function_component, html, Callback, Html, Properties};
 
 use crate::components::expression_editor::ExpressionEditor;
-use crate::components::viewer::ColumnLocator;
 use crate::config::ViewConfigUpdate;
 use crate::model::UpdateAndRender;
 use crate::renderer::Renderer;
@@ -24,7 +23,7 @@ use crate::{derive_model, html_template};
 
 #[derive(PartialEq, Clone, Properties)]
 pub struct AttributesTabProps {
-    pub selected_column: ColumnLocator,
+    pub selected_column: Option<String>,
     pub on_close: Callback<()>,
     pub session: Session,
     pub renderer: Renderer,
@@ -37,11 +36,8 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
     let on_save = yew::use_callback(
         |v, p| {
             match &p.selected_column {
-                ColumnLocator::Expr(None) => save_expr(v, p),
-                ColumnLocator::Expr(Some(alias)) => update_expr(alias, &v, p),
-                _ => {
-                    tracing::error!("Tried to save expression in bad state!")
-                }
+                None => save_expr(v, p),
+                Some(alias) => update_expr(alias, &v, p),
             }
 
             p.on_close.emit(());
@@ -58,7 +54,7 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
 
     let on_delete = yew::use_callback(
         |(), p| {
-            if let ColumnLocator::Expr(Some(ref s)) = p.selected_column {
+            if let Some(ref s) = p.selected_column {
                 delete_expr(s, p);
             }
 
@@ -67,26 +63,17 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
         p.clone(),
     );
 
-    let alias = yew::use_memo(
-        |s| match s {
-            ColumnLocator::Expr(Some(s)) => Some(s.clone()),
-            _ => None,
-        },
-        p.selected_column.clone(),
-    );
     html_template! {
-        if matches!(p.selected_column, ColumnLocator::Expr(_)) {
-            <div id="attributes-tab">
-                <div class="item_title">{"Expression Editor"}</div>
-                <ExpressionEditor
-                    { on_save }
-                    { on_validate }
-                    { on_delete }
-                    session = { &p.session }
-                    alias = { (*alias).clone() }
-                />
-            </div>
-        }
+        <div id="attributes-tab">
+            <div class="item_title">{"Expression Editor"}</div>
+            <ExpressionEditor
+                { on_save }
+                { on_validate }
+                { on_delete }
+                session = { &p.session }
+                alias = { p.selected_column.clone() }
+            />
+        </div>
     }
 }
 fn update_expr(name: &str, new_expression: &JsValue, props: &AttributesTabProps) {

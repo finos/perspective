@@ -23,6 +23,7 @@ use crate::components::column_settings_sidebar::attributes_tab::AttributesTab;
 use crate::components::column_settings_sidebar::style_tab::StyleTab;
 use crate::components::containers::sidebar::Sidebar;
 use crate::components::containers::tablist::TabList;
+use crate::components::expression_editor::get_new_column_name;
 use crate::components::style::LocalStyle;
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
@@ -54,8 +55,8 @@ pub struct ColumnSettingsProps {
 #[function_component]
 pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     let column_name = match p.selected_column.clone() {
-        ColumnLocator::Expr(maybe_name) => maybe_name.unwrap_or("New Column".to_string()),
-        ColumnLocator::Plain(name) => name,
+        ColumnLocator::Expr(Some(name)) | ColumnLocator::Plain(name) => name,
+        ColumnLocator::Expr(None) => get_new_column_name(&p.session),
     };
 
     let column_type = p.session.metadata().get_column_view_type(&column_name);
@@ -92,14 +93,20 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
             column_name
         );
         match tab {
-            ColumnSettingsTab::Attributes => html! {
-                <AttributesTab
-                    { selected_column }
-                    { on_close }
-                    { session }
-                    { renderer }
-                />
-            },
+            ColumnSettingsTab::Attributes => {
+                let selected_column = match selected_column {
+                    ColumnLocator::Expr(s) => s,
+                    _ => panic!("Tried to open Attributes tab for non-expression column!"),
+                };
+                html! {
+                    <AttributesTab
+                        { selected_column }
+                        { on_close }
+                        { session }
+                        { renderer }
+                    />
+                }
+            }
             ColumnSettingsTab::Style => html! {
                 <StyleTab
                     { column_name }
@@ -117,9 +124,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
             {title}
             on_close={p.on_close.clone()}
             id_prefix="column_settings"
-            icon={html_template!{
-                <span id="column_settings_icon"></span>
-            }}
+            icon={"column_settings_icon"}
         >
             <TabList<ColumnSettingsTab> {tabs} {match_fn} />
         </Sidebar>

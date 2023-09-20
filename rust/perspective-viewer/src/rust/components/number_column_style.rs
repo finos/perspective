@@ -53,9 +53,11 @@ pub enum NumberColumnStyleMsg {
 /// object and a default version without `Option<>`
 #[derive(Properties)]
 pub struct NumberColumnStyleProps {
+    #[cfg_attr(test, prop_or_default)]
     pub config: Option<NumberColumnStyleConfig>,
 
-    pub default_config: Option<NumberColumnStyleDefaultConfig>,
+    #[cfg_attr(test, prop_or_default)]
+    pub default_config: NumberColumnStyleDefaultConfig,
 
     #[prop_or_default]
     pub on_change: Callback<NumberColumnStyleConfig>,
@@ -102,14 +104,14 @@ impl Component for NumberColumnStyle {
         ctx.set_modal_link();
         Self::reset(
             &ctx.props().config.clone().unwrap_or_default(),
-            &ctx.props().default_config.clone().unwrap_or_default(),
+            &ctx.props().default_config.clone(),
         )
     }
 
     fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         let mut new = Self::reset(
             &ctx.props().config.clone().unwrap_or_default(),
-            &ctx.props().default_config.clone().unwrap_or_default(),
+            &ctx.props().default_config.clone(),
         );
         std::mem::swap(self, &mut new);
         true

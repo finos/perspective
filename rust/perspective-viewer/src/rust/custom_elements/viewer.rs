@@ -618,11 +618,12 @@ impl PerspectiveViewerElement {
         std::ptr::addr_of!(*self)
     }
 
-    /// Opens the column edit sidebar for a specific column.
-    /// The Viewer component will then send a
-    /// "perspective-toggle-column-settings" event to the plugin with the
-    /// currently selected column. The plugin should respond to the event to
-    /// highlight the selected column appropriately.
+    /// Asynchronously opens the column settings for a specific column.
+    /// When finished, the `<perspective-viewer>` element will emit a
+    /// "perspective-toggle-column-settings" CustomEvent.
+    /// The event's details property has two fields: `{open: bool, column_name?:
+    /// string}`. The CustomEvent is also fired whenever the user toggles the
+    /// sidebar manually.
     #[wasm_bindgen(js_name = "toggleColumnSettings")]
     pub fn toggle_column_settings(&self, column_name: String) -> ApiFuture<()> {
         clone!(self.session, self.root);

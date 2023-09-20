@@ -22,11 +22,14 @@ use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
 use crate::components::style::LocalStyle;
-use crate::config::Type;
+use crate::config::{
+    DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig, NumberColumnStyleConfig,
+    NumberColumnStyleDefaultConfig, StringColumnStyleConfig, StringColumnStyleDefaultConfig, Type,
+};
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::utils::JsValueSerdeExt;
+use crate::utils::{ApiFuture, JsValueSerdeExt};
 use crate::{clone, css, html_template};
 
 #[derive(Clone, PartialEq, Properties)]
@@ -50,32 +53,27 @@ struct DefaultConfig {
 #[derive(Serialize, Deserialize, Debug)]
 struct Config {
     columns: HashMap<String, serde_json::Value>,
-    default_config: Option<DefaultConfig>,
 }
 
 /// This function sends the config to the plugin using its `restore` method
 fn send_config<T: Serialize + Debug>(
-    renderer: Renderer,
-    presentation: Presentation,
+    renderer: &Renderer,
+    presentation: &Presentation,
     view: JsValue,
     column_name: String,
     column_config: T,
 ) {
-    let current_config = get_config(&renderer);
+    let current_config = get_config(renderer);
     let elem = renderer.get_active_plugin().unwrap();
-    if let Some(mut current_config) = current_config {
+    if let Some((mut current_config, _)) = current_config {
         current_config
             .columns
             .insert(column_name, serde_json::to_value(column_config).unwrap());
         let js_config = JsValue::from_serde_ext(&current_config).unwrap();
         elem.restore(&js_config);
-        // we don't need to block yew's rendering to restyle the element,
-        // nor do we need any returned result, nor do we care if it fails.
-        wasm_bindgen_futures::spawn_local(async move {
+        ApiFuture::spawn(async move {
             let view = view.unchecked_into();
-            elem.update(&view, None, None, false)
-                .await
-                .expect("Unable to call update!");
+            elem.update(&view, None, None, false).await
         });
         // send a config update event in case we need to listen for it outside of the
         // viewer
@@ -85,47 +83,56 @@ fn send_config<T: Serialize + Debug>(
     }
 }
 
-/// This function retrieves the plugin's config using its `save` method.
-fn get_config(renderer: &Renderer) -> Option<Config> {
-    let config = renderer.get_active_plugin().unwrap().save();
-    let stringval = js_sys::JSON::stringify(&config)
+fn jsval_to_type<T: DeserializeOwned>(val: &JsValue) -> Result<T, serde_json::Error> {
+    let stringval = js_sys::JSON::stringify(val)
         .ok()
         .and_then(|s| s.as_string())
         .unwrap_or_default();
-    serde_json::from_str(&stringval).ok()
+    serde_json::from_str(&stringval)
 }
 
-fn get_column_config<T: DeserializeOwned + Debug, D: DeserializeOwned + Debug>(
+/// This function retrieves the plugin's config using its `save` method.
+/// It also introduces the `default_config` field for the plugin.
+/// If this field does not exist, the plugin is considered to be unstylable.
+fn get_config(renderer: &Renderer) -> Option<(Config, DefaultConfig)> {
+    let plugin = renderer.get_active_plugin().unwrap();
+    let config = plugin.save();
+    let default_config = JsValue::from(plugin.default_config());
+    let config = jsval_to_type(&config).ok();
+    let default_config = jsval_to_type(&default_config).ok();
+    config.zip(default_config)
+}
+
+fn get_column_config<
+    ConfigType: DeserializeOwned + Debug,
+    DefaultConfigType: DeserializeOwned + Debug,
+>(
     renderer: &Renderer,
     column_name: &str,
     ty: Type,
-) -> Option<(Option<T>, Option<D>)> {
-    get_config(renderer).map(|mut config| {
-        (
-            config.columns.remove(column_name).and_then(|val| {
-                serde_json::from_value(val)
-                    .map_err(|e| tracing::warn!("Could not deserialize config with error {e:?}"))
-                    .ok()
-            }),
-            config
-                .default_config
-                .map(|dc| match ty {
-                    Type::String => dc.string,
-                    Type::Datetime => dc.datetime,
-                    Type::Date => dc.date,
-                    Type::Integer => dc.integer,
-                    Type::Float => dc.float,
-                    Type::Bool => dc.bool,
-                })
-                .and_then(|val| {
-                    serde_json::from_value(val)
-                        .map_err(|e| {
-                            tracing::warn!("Could not deserialize default_config with error {e:?}")
-                        })
-                        .ok()
-                }),
-        )
-    })
+) -> Result<(Option<ConfigType>, DefaultConfigType), String> {
+    get_config(renderer)
+        .ok_or_else(|| "Could not get_config!".into())
+        .and_then(|(mut config, default_config)| {
+            let current_config = if let Some(config) = config.columns.remove(column_name) {
+                serde_json::from_value(config)
+                    .map_err(|e| format!("Could not deserialize config with error {e:?}"))?
+            } else {
+                None
+            };
+
+            let val = match ty {
+                Type::String => default_config.string,
+                Type::Datetime => default_config.datetime,
+                Type::Date => default_config.date,
+                Type::Integer => default_config.integer,
+                Type::Float => default_config.float,
+                Type::Bool => default_config.bool,
+            };
+            serde_json::from_value(val)
+                .map_err(|e| format!("Could not deserialize default_config with error {e:?}"))
+                .map(|default_config| (current_config, default_config))
+        })
 }
 
 #[function_component]
@@ -143,13 +150,17 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
     let title = format!("{} Styling", ty.to_capitalized());
 
     clone!(p.renderer, p.presentation, p.column_name);
-    let opt_html = match ty {
-        Type::String => {
-            get_column_config(&renderer, &column_name, ty).map(|(config, default_config)| {
+    let opt_html =
+        match ty {
+            Type::String => get_column_config::<
+                StringColumnStyleConfig,
+                StringColumnStyleDefaultConfig,
+            >(&renderer, &column_name, ty)
+            .map(|(config, default_config)| {
                 let on_change = Callback::from(move |config| {
                     send_config(
-                        renderer.clone(),
-                        presentation.clone(),
+                        &renderer,
+                        &presentation,
                         view.clone(),
                         column_name.clone(),
                         config,
@@ -161,14 +172,16 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                         <StringColumnStyle  { config } {default_config} {on_change} />
                     </div>
                 }
-            })
-        }
-        Type::Datetime | Type::Date => {
-            get_column_config(&renderer, &column_name, ty).map(|(config, default_config)| {
+            }),
+            Type::Datetime | Type::Date => get_column_config::<
+                DatetimeColumnStyleConfig,
+                DatetimeColumnStyleDefaultConfig,
+            >(&renderer, &column_name, ty)
+            .map(|(config, default_config)| {
                 let on_change = Callback::from(move |config| {
                     send_config(
-                        renderer.clone(),
-                        presentation.clone(),
+                        &renderer,
+                        &presentation,
                         view.clone(),
                         column_name.clone(),
                         config,
@@ -185,14 +198,16 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                             />
                     </div>
                 }
-            })
-        }
-        Type::Integer | Type::Float => {
-            get_column_config(&renderer, &column_name, ty).map(|(config, default_config)| {
+            }),
+            Type::Integer | Type::Float => get_column_config::<
+                NumberColumnStyleConfig,
+                NumberColumnStyleDefaultConfig,
+            >(&renderer, &column_name, ty)
+            .map(|(config, default_config)| {
                 let on_change = Callback::from(move |config| {
                     send_config(
-                        renderer.clone(),
-                        presentation.clone(),
+                        &renderer,
+                        &presentation,
                         view.clone(),
                         column_name.clone(),
                         config,
@@ -204,19 +219,25 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                         <NumberColumnStyle  { config } {default_config} {on_change} />
                     </div>
                 }
-            })
-        }
-        _ => None,
-    };
-    let inner = opt_html.unwrap_or(html_template! {
-        <div class="item_title">{title}</div>
-        <div class="style_contents">
-            <LocalStyle href={ css!("column-style") } />
-            <div id="column-style-container" class="no-style">
-                <div class="style-contents">{ "No styles available" }</div>
+            }),
+            _ => Err("Booleans aren't styled yet.".into()),
+        };
+    let inner = if let Ok(html) = opt_html {
+        html
+    } else {
+        // do the tracing logs
+        tracing::warn!("{}", opt_html.unwrap_err());
+        // return the default impl
+        html_template! {
+            <div class="item_title">{title}</div>
+            <div class="style_contents">
+                <LocalStyle href={ css!("column-style") } />
+                <div id="column-style-container" class="no-style">
+                    <div class="style-contents">{ "No styles available" }</div>
+                </div>
             </div>
-        </div>
-    });
+        }
+    };
 
     html! {
         <div id="style-tab">{inner}</div>
