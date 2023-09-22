@@ -16,7 +16,7 @@ import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.j
 
 // TODO: Better options for hosting?
 //       http://raw.githack.com/faq#no-uptime-guarantee
-let DATA_URL = "http://localhost:8083/nypdccrb.arrow";
+let DATA_URL = "http://localhost:8080/dist/nypd/nypdccrb.arrow";
 // "https://rawcdn.githack.com/new-york-civil-liberties-union/NYPD-Misconduct-Complaint-Database-Updated/f6cea944b347c96eb26b76323013640dff4b3d00/CCRB%20Complaint%20Database%20Raw%2004.28.2023.zip?min=1";
 
 let LAYOUTS = localStorage.getItem("layouts")

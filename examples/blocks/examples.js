@@ -13,6 +13,8 @@
 const LOCAL_EXAMPLES = [
     "editable",
     "file",
+    "nypd",
+    "magic",
     "fractal",
     "market",
     "raycasting",
@@ -37,19 +39,9 @@ exports.get_examples = function get_examples(
             name: "jupyterlab",
         },
         {
-            img: "https://perspective.finos.org/img/mtg_preview.png",
-            url: "https://texodus.github.io/mtg-perspective/?seasons-in-the-abyss-67",
-            name: "magic",
-        },
-        {
             img: "https://raw.githubusercontent.com/sc1f/pudgy-penguin-perspective/pages/meta.png",
             url: "https://sc1f.github.io/pudgy-penguin-perspective/",
             name: "nft",
-        },
-        {
-            img: "https://texodus.github.io/nypd-ccrb/preview.png",
-            url: "https://texodus.github.io/nypd-ccrb/",
-            name: "nypd ccrb",
         },
     ];
 

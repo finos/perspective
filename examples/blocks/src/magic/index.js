@@ -58,7 +58,7 @@ async function getDeckTable(name, decks) {
 
 async function createMainTable() {
     window.message.textContent = "Downloading...";
-    let url = "http://localhost:8082/data/all_identifiers.arrow";
+    let url = "/dist/magic/all_identifiers.arrow";
     const res = await fetch(url);
     const b = await res.blob();
     const ab = await new Response(b).arrayBuffer();

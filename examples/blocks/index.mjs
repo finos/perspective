@@ -30,7 +30,7 @@ const replacements = {
     "perspective-workspace/dist/cdn/perspective-workspace.js": `perspective-workspace@${version}/dist/cdn/perspective-workspace.js`,
 };
 
-export function dist_examples(
+export async function dist_examples(
     outpath = `${__dirname}/../../docs/static/blocks`
 ) {
     sh`mkdir -p ${outpath}`.runSync();
@@ -45,9 +45,14 @@ export function dist_examples(
     for (const name of LOCAL_EXAMPLES) {
         // Copy
         if (fs.existsSync(`${__dirname}/src/${name}`)) {
+            // Copy
             for (const filename of fs.readdirSync(`${__dirname}/src/${name}`)) {
                 sh`mkdir -p ${outpath}/${name}`.runSync();
-                if (filename.endsWith(".js") || filename.endsWith(".html")) {
+                if (
+                    filename.endsWith(".mjs") ||
+                    filename.endsWith(".js") ||
+                    filename.endsWith(".html")
+                ) {
                     let filecontents = fs
                         .readFileSync(`${__dirname}/src/${name}/${filename}`)
                         .toString();
@@ -61,6 +66,11 @@ export function dist_examples(
                         `${outpath}/${name}/${filename}`,
                         filecontents
                     );
+
+                    if (filename.endsWith("build.mjs")) {
+                        console.log("Building " + name);
+                        await import(`${__dirname}/dist/${name}/build.mjs`);
+                    }
                 } else if (filename !== ".git") {
                     sh`cp ${__dirname}/src/${name}/${filename} ${outpath}/${name}/${filename}`.runSync();
                 }
