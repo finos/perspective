@@ -19,6 +19,7 @@ use super::aggregate_selector::*;
 use super::expression_toolbar::*;
 use super::InPlaceColumn;
 use crate::components::column_selector::EmptyColumn;
+use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
@@ -40,7 +41,7 @@ pub struct ActiveColumnProps {
     pub ondragenter: Callback<()>,
     pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
-    pub on_open_expr_panel: Callback<Option<String>>,
+    pub on_open_expr_panel: Callback<ColumnLocator>,
 
     #[prop_or_default]
     pub is_aggregated: bool,
@@ -366,12 +367,11 @@ impl Component for ActiveColumn {
                                     <span class="column-selector--spacer"></span>
                                 }
 
-                                if is_expression {
-                                    <ExprEditButton
-                                        name={ name.clone() }
-                                        on_open_expr_panel={ &ctx.props().on_open_expr_panel }
-                                    ></ExprEditButton>
-                                }
+                                <ExprEditButton
+                                    name={ name.clone() }
+                                    on_open_expr_panel={ &ctx.props().on_open_expr_panel }
+                                    { is_expression }
+                                ></ExprEditButton>
                             </div>
                         </div>
                     </div>

@@ -123,8 +123,7 @@ impl NumberBackgroundMode {
     }
 }
 
-#[cfg_attr(test, derive(Debug))]
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 pub struct NumberColumnStyleConfig {
     #[serde(default = "NumberForegroundMode::default")]
     #[serde(skip_serializing_if = "NumberForegroundMode::is_color")]

@@ -45,8 +45,8 @@ impl ModalLink<DatetimeStyleSimple> for DatetimeStyleSimpleProps {
 }
 
 impl PartialEq for DatetimeStyleSimpleProps {
-    fn eq(&self, other: &Self) -> bool {
-        self.config == other.config
+    fn eq(&self, _other: &Self) -> bool {
+        false
     }
 }
 
@@ -99,6 +99,17 @@ impl Component for DatetimeStyleSimple {
                 self.dispatch_config(ctx);
                 true
             }
+        }
+    }
+
+    // Always re-render when config changes.
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
+        let mut new_config = ctx.props().config.clone();
+        if self.config != new_config {
+            std::mem::swap(&mut self.config, &mut new_config);
+            true
+        } else {
+            false
         }
     }
 

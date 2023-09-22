@@ -15,6 +15,7 @@ mod simple;
 
 use std::sync::LazyLock;
 
+use derivative::Derivative;
 use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
@@ -25,7 +26,7 @@ use super::containers::radio_list_item::RadioListItem;
 use super::containers::select::*;
 use super::form::color_selector::*;
 use super::modal::{ModalLink, SetModalLink};
-use super::style::{LocalStyle, StyleProvider};
+use super::style::LocalStyle;
 use crate::components::datetime_column_style::custom::DatetimeStyleCustom;
 use crate::components::datetime_column_style::simple::DatetimeStyleSimple;
 use crate::config::*;
@@ -66,20 +67,20 @@ pub enum DatetimeColumnStyleMsg {
     ColorChanged(String),
 }
 
-#[derive(Properties)]
+#[derive(Properties, Derivative)]
+#[derivative(Debug)]
 pub struct DatetimeColumnStyleProps {
     pub enable_time_config: bool,
 
-    #[prop_or_default]
-    pub config: DatetimeColumnStyleConfig,
+    pub config: Option<DatetimeColumnStyleConfig>,
 
-    #[prop_or_default]
     pub default_config: DatetimeColumnStyleDefaultConfig,
 
     #[prop_or_default]
     pub on_change: Callback<DatetimeColumnStyleConfig>,
 
     #[prop_or_default]
+    #[derivative(Debug = "ignore")]
     weak_link: WeakScope<DatetimeColumnStyle>,
 }
 
@@ -90,8 +91,8 @@ impl ModalLink<DatetimeColumnStyle> for DatetimeColumnStyleProps {
 }
 
 impl PartialEq for DatetimeColumnStyleProps {
-    fn eq(&self, other: &Self) -> bool {
-        self.config == other.config
+    fn eq(&self, _other: &Self) -> bool {
+        false
     }
 }
 
@@ -101,6 +102,7 @@ impl PartialEq for DatetimeColumnStyleProps {
 #[derive(Debug)]
 pub struct DatetimeColumnStyle {
     config: DatetimeColumnStyleConfig,
+    default_config: DatetimeColumnStyleDefaultConfig,
 }
 
 impl DatetimeColumnStyle {
@@ -117,7 +119,7 @@ impl DatetimeColumnStyle {
             .config
             .color
             .clone()
-            .unwrap_or_else(|| ctx.props().default_config.color.to_owned());
+            .unwrap_or_else(|| self.default_config.color.to_owned());
 
         let color_props = props!(ColorProps { color, on_color });
         match &self.config.datetime_color_mode {
@@ -145,7 +147,19 @@ impl Component for DatetimeColumnStyle {
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
         Self {
-            config: ctx.props().config.clone(),
+            config: ctx.props().config.clone().unwrap_or_default(),
+            default_config: ctx.props().default_config.clone(),
+        }
+    }
+
+    // Always re-render when config changes.
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
+        let mut new_config = ctx.props().config.clone().unwrap_or_default();
+        if self.config != new_config {
+            std::mem::swap(&mut self.config, &mut new_config);
+            true
+        } else {
+            false
         }
     }
 
@@ -230,91 +244,89 @@ impl Component for DatetimeColumnStyle {
             .link()
             .callback(|_| DatetimeColumnStyleMsg::TimezoneEnabled);
 
-        html! {
-            <StyleProvider>
-                <LocalStyle href={ css!("column-style") } />
-                <div id="column-style-container">
+        html_template! {
+            <LocalStyle href={ css!("column-style") } />
+            <div id="column-style-container" class="datetime-column-style-container">
+                <div class="column-style-label">
+                    <label class="indent">{ "Color" }</label>
+                </div>
+                <div class="section">
+                    <input
+                        type="checkbox"
+                        oninput={ color_enabled_oninput }
+                        checked={ self.config.datetime_color_mode.is_some() } />
+
+                    <RadioList<DatetimeColorMode>
+                        class="indent"
+                        name="color-radio-list"
+                        disabled={ self.config.datetime_color_mode.is_none() }
+                        selected={ selected_color_mode }
+                        on_change={ color_mode_changed } >
+
+                        <RadioListItem<DatetimeColorMode>
+                            value={ DatetimeColorMode::Foreground }>
+                            { foreground_controls }
+                        </RadioListItem<DatetimeColorMode>>
+                        <RadioListItem<DatetimeColorMode>
+                            value={ DatetimeColorMode::Background }>
+                            { background_controls }
+                        </RadioListItem<DatetimeColorMode>>
+                    </RadioList<DatetimeColorMode>>
+                </div>
+
+                if ctx.props().enable_time_config {
                     <div class="column-style-label">
-                        <label class="indent">{ "Color" }</label>
+                        <label class="indent">{ "Timezone" }</label>
                     </div>
                     <div class="section">
                         <input
                             type="checkbox"
-                            oninput={ color_enabled_oninput }
-                            checked={ self.config.datetime_color_mode.is_some() } />
+                            onchange={ on_time_zone_reset }
+                            checked={ self.config.time_zone.is_some() } />
 
-                        <RadioList<DatetimeColorMode>
-                            class="indent"
-                            name="color-radio-list"
-                            disabled={ self.config.datetime_color_mode.is_none() }
-                            selected={ selected_color_mode }
-                            on_change={ color_mode_changed } >
-
-                            <RadioListItem<DatetimeColorMode>
-                                value={ DatetimeColorMode::Foreground }>
-                                { foreground_controls }
-                            </RadioListItem<DatetimeColorMode>>
-                            <RadioListItem<DatetimeColorMode>
-                                value={ DatetimeColorMode::Background }>
-                                { background_controls }
-                            </RadioListItem<DatetimeColorMode>>
-                        </RadioList<DatetimeColorMode>>
+                        <Select<String>
+                            wrapper_class="indent"
+                            values={ ALL_TIMEZONES.iter().cloned().collect::<Vec<_>>() }
+                            selected={ self.config.time_zone.as_ref().unwrap_or(&*USER_TIMEZONE).clone() }
+                            on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged) }>
+                        </Select<String>>
                     </div>
+                }
 
+
+                if let DatetimeFormatType::Simple(config) = &self.config._format {
                     if ctx.props().enable_time_config {
-                        <div class="column-style-label">
-                            <label class="indent">{ "Timezone" }</label>
-                        </div>
-                        <div class="section">
-                            <input
-                                type="checkbox"
-                                onchange={ on_time_zone_reset }
-                                checked={ self.config.time_zone.is_some() } />
-
-                            <Select<String>
-                                wrapper_class="indent"
-                                values={ ALL_TIMEZONES.iter().cloned().collect::<Vec<_>>() }
-                                selected={ self.config.time_zone.as_ref().unwrap_or(&*USER_TIMEZONE).clone() }
-                                on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged) }>
-                            </Select<String>>
-                        </div>
+                        <button
+                            id="datetime_format"
+                            data-title={ "Simple" }
+                            data-title-hover={ "Switch to Custom" }
+                            onclick={ ctx.link().callback(|_| DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged(CustomDatetimeStyleConfig::default()))}>
+                        </button>
                     }
 
-
-                    if let DatetimeFormatType::Simple(config) = &self.config._format {
-                        if ctx.props().enable_time_config {
-                            <button
-                                id="datetime_format"
-                                data-title={ "Simple" }
-                                data-title-hover={ "Switch to Custom" }
-                                onclick={ ctx.link().callback(|_| DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged(CustomDatetimeStyleConfig::default()))}>
-                            </button>
-                        }
-
-                        <DatetimeStyleSimple
-                            enable_time_config={ ctx.props().enable_time_config }
-                            on_change={ ctx.link().callback(DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged) }
-                            config={ config.clone() }>
-                        </DatetimeStyleSimple>
-                    } else if let DatetimeFormatType::Custom(config) = &self.config._format {
-                        if ctx.props().enable_time_config {
-                            <button
-                                id="datetime_format"
-                                data-title={ "Custom" }
-                                data-title-hover={ "Switch to Simple" }
-                                onclick={ ctx.link().callback(|_| DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig::default()))}>
-                            </button>
-                        }
-
-                        <DatetimeStyleCustom
-                            enable_time_config={ ctx.props().enable_time_config }
-                            on_change={ ctx.link().callback(DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged) }
-                            config={ config.clone() }>
-                        </DatetimeStyleCustom>
+                    <DatetimeStyleSimple
+                        enable_time_config={ ctx.props().enable_time_config }
+                        on_change={ ctx.link().callback(DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged) }
+                        config={ config.clone() }>
+                    </DatetimeStyleSimple>
+                } else if let DatetimeFormatType::Custom(config) = &self.config._format {
+                    if ctx.props().enable_time_config {
+                        <button
+                            id="datetime_format"
+                            data-title={ "Custom" }
+                            data-title-hover={ "Switch to Simple" }
+                            onclick={ ctx.link().callback(|_| DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig::default()))}>
+                        </button>
                     }
 
-                </div>
-            </StyleProvider>
+                    <DatetimeStyleCustom
+                        enable_time_config={ ctx.props().enable_time_config }
+                        on_change={ ctx.link().callback(DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged) }
+                        config={ config.clone() }>
+                    </DatetimeStyleCustom>
+                }
+
+            </div>
         }
     }
 }

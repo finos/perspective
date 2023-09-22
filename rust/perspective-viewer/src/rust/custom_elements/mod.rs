@@ -12,15 +12,11 @@
 
 mod column_dropdown;
 pub mod copy_dropdown;
-pub mod date_column_style;
-pub mod datetime_column_style;
 pub mod debug_plugin;
 pub mod export_dropdown;
 mod filter_dropdown;
 mod function_dropdown;
 pub mod modal;
-pub mod number_column_style;
-pub mod string_column_style;
 pub mod viewer;
 
 pub use self::column_dropdown::*;

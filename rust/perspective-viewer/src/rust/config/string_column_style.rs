@@ -96,20 +96,22 @@ impl FromStr for FormatMode {
     }
 }
 
-#[cfg_attr(test, derive(Debug))]
-#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StringColumnStyleConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub format: Option<FormatMode>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub string_color_mode: Option<StringColorMode>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub color: Option<String>,
 }
 
-#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StringColumnStyleDefaultConfig {
     pub color: String,
 }

@@ -10,6 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-export * from "./utils";
-export * from "./simple_viewer_tests";
-export * from "./models/page";
+import * as DataGridPlugin from "./plugins/datagrid";
+
+export { DataGridPlugin };

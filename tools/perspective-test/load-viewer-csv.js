@@ -19,6 +19,7 @@ async function load() {
     const worker = perspective.worker();
     const table = worker.table(csv);
     await viewer.load(table);
+    window.__TEST_WORKER__ = worker;
 }
 
 await load();

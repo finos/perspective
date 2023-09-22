@@ -10,6 +10,28 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-export * from "./utils";
-export * from "./simple_viewer_tests";
-export * from "./models/page";
+import perspective from "/perspective.js";
+
+async function load() {
+    let resp = await fetch("/@finos/perspective-test/assets/superstore.csv");
+    let csv = await resp.text();
+    const viewer = document.querySelector("perspective-viewer");
+    const worker = perspective.worker();
+    const table = worker.table(csv);
+    await viewer.load(table);
+    const config = {
+        plugin: "datagrid",
+        group_by: ["Region", "State"],
+        split_by: ["Category", "Sub-Category"],
+        columns: ["Sales", "Profit"],
+        master: false,
+        name: "Sales Report",
+        table: "superstore",
+        linked: false,
+        title: "Sales Report 2",
+    };
+    await viewer.restore(config);
+}
+
+await load();
+window.__TEST_PERSPECTIVE_READY__ = true;

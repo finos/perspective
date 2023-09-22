@@ -51,10 +51,8 @@ async function type_expression_test(page, expr) {
     const result = await page.evaluate(async () => {
         const elem = document
             .querySelector("perspective-viewer")
-            .shadowRoot.querySelector(".expr_editor_column");
-        return (
-            elem.querySelector("button").getAttribute("disabled") || "MISSING"
-        );
+            .shadowRoot.querySelector("#editor-container");
+        return elem.querySelector("button").getAttribute("disabled");
     });
 
     //await page.evaluate(() => document.activeElement.blur());
@@ -94,7 +92,7 @@ test.describe("Expressions", () => {
         await page.waitForFunction(() => {
             const root = document
                 .querySelector("perspective-viewer")
-                .shadowRoot.querySelector(".expr_editor_column");
+                .shadowRoot.querySelector("#editor-container");
 
             return !!root;
         });
@@ -102,7 +100,7 @@ test.describe("Expressions", () => {
         const editor = await page.waitForFunction(async () => {
             const root = document
                 .querySelector("perspective-viewer")
-                .shadowRoot.querySelector(".expr_editor_column");
+                .shadowRoot.querySelector("#editor-container");
             return root.querySelector("#content");
         });
 
@@ -127,21 +125,20 @@ test.describe("Expressions", () => {
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
 
-        await page.waitForSelector(".expr_editor_column");
+        await page.waitForSelector("#editor-container");
         await page.evaluate(async () => {
             let root = document.querySelector("perspective-viewer").shadowRoot;
-            await root.querySelector("#expr_editor_close_button").click();
+            await root.querySelector("#column_settings_close_button").click();
         });
 
-        await page.waitForSelector(".expr_editor_column", {
+        await page.waitForSelector("#editor-container", {
             state: "hidden",
         });
 
         const contents = await page.evaluate(async () => {
             let root = document.querySelector("perspective-viewer").shadowRoot;
             return (
-                root.querySelector(".expr_editor_column")?.innerHTML ||
-                "MISSING"
+                root.querySelector("#editor-container")?.innerHTML || "MISSING"
             );
         });
 
@@ -213,7 +210,7 @@ test.describe("Expressions", () => {
         await shadow_click(
             page,
             "perspective-viewer",
-            ".expr_editor_column",
+            "#editor-container",
             "button"
         );
 

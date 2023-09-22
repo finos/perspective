@@ -13,20 +13,6 @@
 import { test, expect } from "@playwright/test";
 import { compareContentsToSnapshot } from "@finos/perspective-test";
 
-async function get_contents(
-    page,
-    selector = "perspective-viewer perspective-viewer-datagrid regular-table",
-    shadow = false
-) {
-    return await page.evaluate(
-        async ({ selector, shadow }) => {
-            const viewer = document.querySelector(selector);
-            return (shadow ? viewer.shadowRoot : viewer).innerHTML || "MISSING";
-        },
-        { selector, shadow }
-    );
-}
-
 async function test_column(page, selector, selector2) {
     const { x, y } = await page.evaluate(async (selector) => {
         const viewer = document.querySelector("perspective-viewer");
@@ -49,13 +35,14 @@ async function test_column(page, selector, selector2) {
     }, selector);
 
     await page.mouse.click(x, y);
-    const style_menu = await page.waitForSelector(
-        `perspective-${selector2}-column-style`
-    );
+    const column_style_selector = `#column-style-container.${selector2}-column-style-container`;
+    await page.waitForSelector(column_style_selector);
 
     await new Promise((x) => setTimeout(x, 3000));
 
-    return get_contents(page, ` perspective-${selector2}-column-style`, true);
+    return await page
+        .locator(`perspective-viewer ${column_style_selector}`)
+        .innerHTML();
 }
 
 test.describe("Column Style Tests", () => {
@@ -88,6 +75,12 @@ test.describe("Column Style Tests", () => {
             viewer.addEventListener("perspective-config-update", (evt) => {
                 window.__events__.push(evt);
             });
+            viewer.addEventListener(
+                "perspective-column-style-change",
+                (evt) => {
+                    window.__events__.push(evt);
+                }
+            );
 
             // Find the column config menu button
             const header_button = viewer.querySelector(
@@ -109,12 +102,12 @@ test.describe("Column Style Tests", () => {
 
         // Await the style menu existing on the page
         const style_menu = await page.waitForSelector(
-            "perspective-number-column-style"
+            "#column-style-container"
         );
 
         const { x: xx, y: yy } = await page.evaluate(async (style_menu) => {
             // Find the 'bar' button
-            const bar_button = style_menu.shadowRoot.querySelector(
+            const bar_button = style_menu.querySelector(
                 '#radio-list-1[name="foreground-list"]'
             );
 
@@ -139,7 +132,7 @@ test.describe("Column Style Tests", () => {
         });
 
         // Expect 1 event
-        expect(count).toEqual(1);
+        expect(count).toEqual(2);
     });
 
     test("Column style menu opens for numeric columns", async ({ page }) => {

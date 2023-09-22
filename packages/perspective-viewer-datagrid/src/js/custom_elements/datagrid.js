@@ -15,6 +15,7 @@ import { restore } from "../plugin/restore.js";
 import { connectedCallback } from "../plugin/connected";
 import { save } from "../plugin/save";
 import { draw } from "../plugin/draw";
+import getDefaultConfig from "../default_config.js";
 
 /**
  * The custom element class for this plugin.  The interface methods for this
@@ -64,6 +65,11 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
      */
     get priority() {
         return 1;
+    }
+
+    /** opt-in to column styling */
+    get default_config() {
+        return getDefaultConfig.call(this);
     }
 
     async draw(view) {

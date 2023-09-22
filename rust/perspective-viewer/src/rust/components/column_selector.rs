@@ -34,8 +34,8 @@ use self::config_selector::ConfigSelector;
 use self::inactive_column::*;
 use super::containers::scroll_panel::*;
 use super::containers::split_panel::{Orientation, SplitPanel};
-use super::expression_panel_sidebar::EditorState;
 use super::style::LocalStyle;
+use super::viewer::ColumnLocator;
 use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
 use crate::model::*;
@@ -50,10 +50,10 @@ pub struct ColumnSelectorProps {
     pub renderer: Renderer,
     pub dragdrop: DragDrop,
 
-    pub on_open_expr_panel: Callback<Option<String>>,
+    pub on_open_expr_panel: Callback<ColumnLocator>,
 
     /// This is passed to the add_expression_button for styling.
-    pub editor_state: EditorState,
+    pub selected_column: Option<ColumnLocator>,
 
     #[prop_or_default]
     pub on_resize: Option<Rc<PubSub<()>>>,
@@ -320,7 +320,7 @@ impl Component for ColumnSelector {
             <ScrollPanelItem key={ "__add_expression__" } size={ size }>
                 <AddExpressionButton
                     on_open_expr_panel={ &ctx.props().on_open_expr_panel }
-                    editor_state={ ctx.props().editor_state.clone() }>
+                    selected_column={ ctx.props().selected_column.clone() }>
                 </AddExpressionButton>
             </ScrollPanelItem>
         };

@@ -47,3 +47,16 @@ impl Display for Type {
         })
     }
 }
+impl Type {
+    pub fn to_capitalized(&self) -> String {
+        match self {
+            Type::String => "String",
+            Type::Datetime => "Datetime",
+            Type::Date => "Date",
+            Type::Integer => "Integer",
+            Type::Float => "Float",
+            Type::Bool => "Boolean",
+        }
+        .into()
+    }
+}

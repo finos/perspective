@@ -617,4 +617,22 @@ impl PerspectiveViewerElement {
     pub fn unsafe_get_model(&self) -> *const PerspectiveViewerElement {
         std::ptr::addr_of!(*self)
     }
+
+    /// Asynchronously opens the column settings for a specific column.
+    /// When finished, the `<perspective-viewer>` element will emit a
+    /// "perspective-toggle-column-settings" CustomEvent.
+    /// The event's details property has two fields: `{open: bool, column_name?:
+    /// string}`. The CustomEvent is also fired whenever the user toggles the
+    /// sidebar manually.
+    #[wasm_bindgen(js_name = "toggleColumnSettings")]
+    pub fn toggle_column_settings(&self, column_name: String) -> ApiFuture<()> {
+        clone!(self.session, self.root);
+        ApiFuture::new(async move {
+            let locator = session.metadata().get_column_locator(Some(column_name));
+            let task = root.borrow().as_apierror()?.send_message_async(|sender| {
+                PerspectiveViewerMsg::ToggleColumnSettings(locator, Some(sender))
+            });
+            task.await.map_err(|_| ApiError::from("Cancelled"))
+        })
+    }
 }

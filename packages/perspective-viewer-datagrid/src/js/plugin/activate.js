@@ -10,7 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { column_header_style_listener } from "../style_handlers/column_header.js";
+import {
+    column_header_style_listener,
+    style_selected_column,
+} from "../style_handlers/column_header.js";
 import { group_header_style_listener } from "../style_handlers/group_header.js";
 import { table_cell_style_listener } from "../style_handlers/table_cell";
 import {
@@ -68,7 +71,7 @@ export async function activate(view) {
 
         this.regular_table.addEventListener(
             "mousedown",
-            mousedown_listener.bind(this.model, this.regular_table)
+            mousedown_listener.bind(this.model, this.regular_table, viewer)
         );
 
         // Row selection
@@ -151,6 +154,24 @@ export async function activate(view) {
                 viewer,
                 selected_position_map
             )
+        );
+
+        // viewer event listeners
+        viewer.addEventListener(
+            "perspective-toggle-column-settings",
+            (event) => {
+                style_selected_column(
+                    this.regular_table,
+                    event.detail.column_name
+                );
+                if (!event.detail.open) {
+                    this.model._column_settings_selected_column = null;
+                    return;
+                }
+
+                this.model._column_settings_selected_column =
+                    event.detail.column_name;
+            }
         );
 
         this._initialized = true;
