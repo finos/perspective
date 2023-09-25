@@ -68,8 +68,10 @@ async function createMainTable() {
 }
 
 window.addEventListener("load", async () => {
+    // either "deck" or "all".
     let main = createMainTable();
-    let layout = await (await fetch("./layout.json")).json();
+    let allLayout = await (await fetch("./all_layout.json")).json();
+    let deckLayout = await (await fetch("./layout.json")).json();
     let decks = await (await fetch("./decks.json")).json();
     let names = Object.keys(decks);
     for (let name of names) {
@@ -77,18 +79,27 @@ window.addEventListener("load", async () => {
         opt.value = opt.textContent = name;
         window.deck_selector.appendChild(opt);
     }
+
+    const allCardsOption = document.createElement("option");
+    allCardsOption.value = allCardsOption.textContent = "all";
+    window.deck_selector.appendChild(allCardsOption);
+
     window.deck_selector.addEventListener("change", async () => {
-        // swap the underlying table in the workspace.
-        window.workspace.tables.set(
-            "deck",
-            getDeckTable(window.deck_selector.value, decks)
-        );
-        // window.workspace.innerHTML = "";
+        let which = window.deck_selector.value;
+        let newTable;
+        if (which === "all") {
+            await window.workspace.restore(allLayout);
+            newTable = DECKS["__mainLibrary"];
+        } else {
+            await window.workspace.restore(deckLayout);
+            newTable = getDeckTable(window.deck_selector.value, decks);
+        }
+        window.workspace.tables.set("deck", newTable);
     });
     main = await main;
     DECKS["__mainLibrary"] = main;
     window.workspace.tables.set("deck", getDeckTable(names[0], decks));
-    await window.workspace.restore(layout);
+    await window.workspace.restore(deckLayout);
 
     await window.workspace.restore(decks[names[0]]);
 });

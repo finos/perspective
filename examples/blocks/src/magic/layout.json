@@ -119,7 +119,7 @@
             "split_by": ["colorIdentity_0"],
             "columns": ["count"],
             "filter": [["types_0", "!=", "Land"]],
-            "sort": [["name", "desc"]],
+            "sort": [],
             "expressions": [],
             "aggregates": {},
             "master": false,

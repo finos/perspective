@@ -1,0 +1,81 @@
+{
+    "sizes": [1],
+    "detail": {
+        "main": {
+            "type": "tab-area",
+            "widgets": ["PERSPECTIVE_GENERATED_ID_3"],
+            "currentIndex": 0
+        }
+    },
+    "mode": "globalFilters",
+    "viewers": {
+        "PERSPECTIVE_GENERATED_ID_3": {
+            "plugin": "Datagrid",
+            "plugin_config": {
+                "columns": {},
+                "editable": false,
+                "scroll_lock": false
+            },
+            "settings": true,
+            "title": "All Cards",
+            "group_by": [],
+            "split_by": [],
+            "columns": [
+                "name",
+                "type",
+                "manaCost",
+                "colors",
+                "colors_1",
+                "colors_2",
+                "colors_3",
+                "colorIdentity",
+                "colorIdentity_0",
+                "borderColor",
+                "availability",
+                "availability_0",
+                "finishes",
+                "finishes_0",
+                "flavorText",
+                "frameVersion",
+                "keywords",
+                "keywords_0",
+                "keywords_1",
+                "keywords_2",
+                "language",
+                "layout",
+                "number",
+                "power",
+                "printings",
+                "printings_0",
+                "printings_1",
+                "promoTypes",
+                "promoTypes_0",
+                "promoTypes_1",
+                "promoTypes_2",
+                "rarity",
+                "securityStamp",
+                "setCode",
+                "subtypes",
+                "subtypes_0",
+                "supertypes",
+                "text",
+                "toughness",
+                "types",
+                "types_0",
+                "types_1",
+                "types_2",
+                "convertedManaCost",
+                "edhrecRank",
+                "edhrecSaltiness",
+                "manaValue"
+            ],
+            "filter": [],
+            "sort": [],
+            "expressions": [],
+            "aggregates": {},
+            "master": false,
+            "table": "deck",
+            "linked": false
+        }
+    }
+}
