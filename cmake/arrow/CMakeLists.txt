@@ -138,9 +138,20 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/writer.cc
 
+    # JSON
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/converter.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/chunker.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/chunked_builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/object_parser.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/object_writer.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/options.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/parser.cc
+    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/reader.cc
+
     # IPC
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/dictionary.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json_simple.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/message.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/metadata_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/options.cc
@@ -154,11 +165,11 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/expression.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc    
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/ordering.cc
 
-    
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/registry.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_basic.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_mode.cc
@@ -239,7 +250,8 @@ else()
         ${ARROW_SRCS}
         # Use our vendored reader that does not use threads.
         ${PSP_CPP_SRC}/src/cpp/vendor/single_threaded_reader.cpp
-        ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp)
+        ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_csv_reader.cpp
+        ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_json_reader.cpp)
 endif()
 
 set_property(SOURCE util/io_util.cc

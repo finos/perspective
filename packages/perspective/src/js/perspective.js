@@ -109,7 +109,7 @@ export default function (Module) {
         op,
         is_update,
         is_arrow,
-        is_csv,
+        is_csv_or_json,
         port_id
     ) {
         // C++ constructor cannot take null values - use default values if
@@ -130,7 +130,7 @@ export default function (Module) {
             op,
             is_update,
             is_arrow,
-            is_csv,
+            is_csv_or_json,
             port_id
         );
 
@@ -1854,7 +1854,7 @@ export default function (Module) {
         let schema = this._Table.get_schema();
         let types = schema.types();
         let is_arrow = false;
-        let is_csv = false;
+        let is_csv_or_json = false;
 
         pdata = accessor;
 
@@ -1865,7 +1865,7 @@ export default function (Module) {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            is_csv = true;
+            is_csv_or_json = true;
             is_arrow = true;
             pdata = data;
         } else {
@@ -1914,7 +1914,7 @@ export default function (Module) {
                 op,
                 true,
                 is_arrow,
-                is_csv,
+                is_csv_or_json,
                 options.port_id
             ).delete();
             this.initialized = true;
@@ -2074,7 +2074,7 @@ export default function (Module) {
             let data_accessor;
             let is_arrow = false;
             let overridden_types = {};
-            let is_csv = false;
+            let is_csv_or_json = false;
 
             if (
                 data instanceof ArrayBuffer ||
@@ -2086,7 +2086,7 @@ export default function (Module) {
                 if (data[0] === ",") {
                     data = "_" + data;
                 }
-                is_csv = true;
+                is_csv_or_json = true;
                 is_arrow = true;
                 data_accessor = data;
             } else {
@@ -2116,7 +2116,7 @@ export default function (Module) {
                     op,
                     false,
                     is_arrow,
-                    is_csv,
+                    is_csv_or_json,
                     0
                 );
 

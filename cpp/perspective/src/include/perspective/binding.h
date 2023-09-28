@@ -224,7 +224,7 @@ namespace binding {
     template <typename T>
     std::shared_ptr<Table> make_table(T table, T accessor, std::uint32_t limit,
         const std::string& index, t_op op, bool is_update, bool is_arrow,
-        bool is_csv, t_uindex port_id);
+        bool is_csv_or_json, t_uindex port_id);
 
     /******************************************************************************
      *

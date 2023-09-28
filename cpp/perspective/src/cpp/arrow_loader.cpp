@@ -157,6 +157,21 @@ namespace apachearrow {
     }
 
     void
+    ArrowLoader::init_json(std::string& json, bool is_update,
+        std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
+            psp_schema) {
+        m_table = jsonToTable(json, is_update, psp_schema);
+
+        std::shared_ptr<arrow::Schema> schema = m_table->schema();
+        std::vector<std::shared_ptr<arrow::Field>> fields = schema->fields();
+
+        for (auto field : fields) {
+            m_names.push_back(field->name());
+            m_types.push_back(convert_type(field->type()->name()));
+        }
+    }
+
+    void
     ArrowLoader::fill_table(t_data_table& tbl, const t_schema& input_schema,
         const std::string& index, std::uint32_t offset, std::uint32_t limit,
         bool is_update) {

@@ -5,8 +5,10 @@
  * This file is part of the Perspective library, distributed under the terms of
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
- * Originally forked from 
+ * Originally forked from
  * https://github.com/apache/arrow/blob/apache-arrow-1.0.1/cpp/src/arrow/csv/reader.cc
+ * Currently using
+ * https://github.com/apache/arrow/blob/apache-arrow-12.0.0/cpp/src/arrow/csv/reader.cc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,17 +29,17 @@
  */
 
 /* * * * WARNING * * *
- * 
- * This file and respective header is a fork of 
- * https://github.com/apache/arrow/blob/apache-arrow-1.0.1/cpp/src/arrow/csv/reader.cc
+ *
+ * This file and respective header is a fork of
+ * https://github.com/apache/arrow/blob/apache-arrow-12.0.0/cpp/src/arrow/csv/reader.cc
  * which removes references to `std::thread` such that compilation under
  * Emscripten is possible.  It should not be modified directly.
- * 
+ *
  * TODO Pending a better solution or upstream fix ..
- * 
+ *
 */
 
-#include <perspective/vendor/arrow_single_threaded_reader.h>
+#include <perspective/vendor/arrow_single_threaded_csv_reader.h>
 
 #include <cstdint>
 #include <cstring>

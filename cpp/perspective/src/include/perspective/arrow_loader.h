@@ -23,7 +23,7 @@
 #include <arrow/util/decimal.h>
 #include <arrow/io/memory.h>
 #include <arrow/ipc/reader.h>
-#include <perspective/arrow_csv.h>
+#include <perspective/arrow_format.h>
 
 namespace perspective {
 namespace apachearrow {
@@ -46,6 +46,15 @@ namespace apachearrow {
          * @param ptr
          */
         void init_csv(std::string& csv, bool is_update,
+            std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
+                schema);
+
+        /**
+         * @brief Initialize the arrow loader with a JSON.
+         *
+         * @param ptr
+         */
+        void init_json(std::string& json, bool is_update,
             std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
                 schema);
 

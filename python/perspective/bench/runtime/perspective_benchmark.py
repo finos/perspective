@@ -76,6 +76,7 @@ class PerspectiveBenchmark(Suite):
         `Runner` can find the tests at runtime."""
         self.benchmark_table_arrow()
         self.benchmark_table_csv()
+        self.benchmark_table_json()
         self.benchmark_view_zero()
         self.benchmark_view_one()
         self.benchmark_view_two()
@@ -100,6 +101,14 @@ class PerspectiveBenchmark(Suite):
         test_meta = make_meta("table", "csv")
         func = Benchmark(lambda: Table(csv), meta=test_meta)
         setattr(self, "table_csv", func)
+
+    def benchmark_table_json(self):
+        """Benchmark table from json separately as it requires opening the
+        Arrow file from the filesystem."""
+        json = self._view.to_json()
+        test_meta = make_meta("table", "json")
+        func = Benchmark(lambda: Table(json), meta=test_meta)
+        setattr(self, "table_json", func)
 
     def benchmark_view_zero(self):
         """Benchmark view creation with zero pivots."""
@@ -184,6 +193,7 @@ class PerspectiveBenchmark(Suite):
         for name in (
             "arrow",
             "csv",
+            "json",
             "columns",
             "records",
         ):
@@ -197,6 +207,7 @@ class PerspectiveBenchmark(Suite):
         for name in (
             "arrow",
             "csv",
+            "json",
             "columns",
             "records",
         ):
@@ -214,6 +225,7 @@ class PerspectiveBenchmark(Suite):
         for name in (
             "arrow",
             "csv",
+            "json",
             "columns",
             "records",
         ):

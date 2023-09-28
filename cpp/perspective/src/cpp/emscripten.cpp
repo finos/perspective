@@ -14,6 +14,7 @@
 #include <perspective/arrow_loader.h>
 #include <perspective/arrow_writer.h>
 #include <arrow/csv/api.h>
+#include <arrow/json/api.h>
 #include <boost/optional.hpp>
 
 using namespace emscripten;
@@ -1135,7 +1136,7 @@ namespace binding {
     std::shared_ptr<Table>
     make_table(t_val table, t_data_accessor accessor, std::uint32_t limit,
         const std::string& index, t_op op, bool is_update, bool is_arrow,
-        bool is_csv, t_uindex port_id) {
+        bool is_csv_or_json, t_uindex port_id) {
         bool table_initialized = has_value(table);
         std::shared_ptr<t_pool> pool;
         std::shared_ptr<Table> tbl;
@@ -1160,7 +1161,7 @@ namespace binding {
         bool is_delete = op == OP_DELETE;
 
         if (is_arrow && !is_delete) {
-            if (is_csv) {
+            if (is_csv_or_json) {
                 std::string s = accessor.as<std::string>();
                 auto map = std::unordered_map<std::string,
                     std::shared_ptr<arrow::DataType>>();
@@ -1355,7 +1356,7 @@ namespace binding {
                 is_update);
         }
 
-        if (is_arrow && !is_csv) {
+        if (is_arrow && !is_csv_or_json) {
             free((void*)ptr);
         }
 

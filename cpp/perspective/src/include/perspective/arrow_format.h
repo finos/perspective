@@ -29,5 +29,14 @@ namespace apachearrow {
         std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
             schema);
 
+    /**
+     * @brief Initialize the arrow loader with a JSON.
+     *
+     * @param ptr
+     */
+    std::shared_ptr<::arrow::Table> jsonToTable(std::string& csv, bool is_update,
+        std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
+            schema);
+
 } // namespace apachearrow
 } // namespace perspective

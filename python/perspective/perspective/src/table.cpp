@@ -35,7 +35,7 @@ namespace binding {
     _make_table_py(std::shared_ptr<Table> tbl, std::shared_ptr<t_gnode> gnode,
         std::shared_ptr<t_pool> pool, std::uint32_t offset,
         t_data_accessor accessor, std::uint32_t limit, std::string index,
-        t_op op, bool is_update, bool is_arrow, bool is_csv, t_uindex port_id) {
+        t_op op, bool is_update, bool is_arrow, bool is_csv_or_json, t_uindex port_id) {
         bool table_initialized = is_update;
         void* ptr = nullptr;
 
@@ -46,17 +46,17 @@ namespace binding {
 
         // don't call `is_numpy` on an arrow binary
         bool is_numpy
-            = !is_arrow && !is_csv && accessor.attr("_is_numpy").cast<bool>();
+            = !is_arrow && !is_csv_or_json && accessor.attr("_is_numpy").cast<bool>();
 
         // Determine metadata
         bool is_delete = op == OP_DELETE;
         if (is_arrow && !is_delete) {
-            std::string csv_string;
+            std::string csv_or_json_as_string;
             std::int32_t binary_size;
 
-            if (is_csv) {
-                // Load a string in CSV format
-                csv_string = accessor.cast<std::string>();
+            if (is_csv_or_json) {
+                // Cast binding string to std::string
+                csv_or_json_as_string = accessor.cast<std::string>();
             } else {
                 // Load an arrow binary
                 py::bytes bytes = accessor.cast<py::bytes>();
@@ -70,7 +70,7 @@ namespace binding {
                 PSP_GIL_UNLOCK();
 
                 // With the GIL released, load the arrow
-                if (is_csv) {
+                if (is_csv_or_json) {
                     auto map = std::unordered_map<std::string,
                         std::shared_ptr<arrow::DataType>>();
 
@@ -135,7 +135,18 @@ namespace binding {
                         }
                     }
 
-                    arrow_loader.init_csv(csv_string, is_update, map);
+                    // Check if string is JSON or CSV
+                    if (csv_or_json_as_string.length() < 2) {
+                        // default to empty JSON if empty/minimally malformed string
+                        csv_or_json_as_string = "{}";
+                    }
+
+                    // Now parse the JSON / CSV
+                    if (csv_or_json_as_string[0] == '{' || csv_or_json_as_string[0] == '[') {
+                        arrow_loader.init_json(csv_or_json_as_string, is_update, map);
+                     } else {
+                        arrow_loader.init_csv(csv_or_json_as_string, is_update, map);
+                     }
                 } else {
                     arrow_loader.initialize((uintptr_t)ptr, binary_size);
                 }
@@ -294,7 +305,7 @@ namespace binding {
                 is_update);
         }
 
-        if (is_arrow && !is_csv) {
+        if (is_arrow && !is_csv_or_json) {
             free(ptr);
         }
 
@@ -307,7 +318,7 @@ namespace binding {
 
     std::shared_ptr<Table>
     make_table_py(t_data_accessor accessor, std::uint32_t limit,
-        std::string index, t_op op, bool is_arrow, bool is_csv,
+        std::string index, t_op op, bool is_arrow, bool is_csv_or_json,
         t_uindex port_id) {
 
         std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
@@ -315,12 +326,12 @@ namespace binding {
         std::shared_ptr<t_gnode> gnode;
 
         return _make_table_py(tbl, gnode, pool, 0, accessor, limit, index, op,
-            false, is_arrow, is_csv, port_id);
+            false, is_arrow, is_csv_or_json, port_id);
     }
 
     std::shared_ptr<Table>
     update_table_py(t_val table, t_data_accessor accessor, std::uint32_t limit,
-        std::string index, t_op op, bool is_arrow, bool is_csv,
+        std::string index, t_op op, bool is_arrow, bool is_csv_or_json,
         t_uindex port_id) {
 
         std::shared_ptr<Table> tbl = table.cast<std::shared_ptr<Table>>();
@@ -332,7 +343,7 @@ namespace binding {
         std::uint32_t offset = tbl->get_offset();
 
         return _make_table_py(tbl, gnode, pool, offset, accessor, limit, index,
-            op, true, is_arrow, is_csv, port_id);
+            op, true, is_arrow, is_csv_or_json, port_id);
     }
 
 } // namespace binding

@@ -5,8 +5,10 @@
  * This file is part of the Perspective library, distributed under the terms of
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
- * Originally forked from 
+ * Originally forked from
  * https://github.com/apache/arrow/blob/apache-arrow-1.0.1/cpp/src/arrow/csv/reader.h
+ * Currently using
+ * https://github.com/apache/arrow/blob/apache-arrow-12.0.0/cpp/src/arrow/csv/reader.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -63,11 +65,12 @@ class ARROW_EXPORT TableReader {
                                                    const ReadOptions&,
                                                    const ParseOptions&,
                                                    const ConvertOptions&);
-
-  ARROW_DEPRECATED("Use MemoryPool-less variant (the IOContext holds a pool already)")
-  static Result<std::shared_ptr<TableReader>> Make(
-      MemoryPool* pool, io::IOContext io_context, std::shared_ptr<io::InputStream> input,
-      const ReadOptions&, const ParseOptions&, const ConvertOptions&);
+  // ARROW_DEPRECATED(
+  //     "Deprecated in 4.0.0. "
+  //     "Use MemoryPool-less variant (the IOContext holds a pool already)")
+  // static Result<std::shared_ptr<TableReader>> Make(
+  //     MemoryPool* pool, io::IOContext io_context, std::shared_ptr<io::InputStream> input,
+  //     const ReadOptions&, const ParseOptions&, const ConvertOptions&);
 };
 
 }  // namespace csv

@@ -418,6 +418,7 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/aggregate.cpp
     ${PSP_CPP_SRC}/src/cpp/aggspec.cpp
     ${PSP_CPP_SRC}/src/cpp/arg_sort.cpp
+    ${PSP_CPP_SRC}/src/cpp/arrow_format.cpp
     ${PSP_CPP_SRC}/src/cpp/arrow_loader.cpp
     ${PSP_CPP_SRC}/src/cpp/arrow_writer.cpp
     ${PSP_CPP_SRC}/src/cpp/base.cpp
@@ -501,7 +502,6 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/view.cpp
     ${PSP_CPP_SRC}/src/cpp/view_config.cpp
     ${PSP_CPP_SRC}/src/cpp/vocab.cpp
-    ${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
 )
 
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
@@ -509,7 +509,8 @@ set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
 )
 
 set(WASM_SOURCE_FILES ${SOURCE_FILES}
-    # ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
+    # ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_csv_reader.cpp
+    # ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_json_reader.cpp
 )
 
 set(PYTHON_BINDING_SOURCE_FILES

@@ -71,6 +71,42 @@ class TestTable(object):
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {"str": ["abc", "", "ghi"], "float": [None, 2.5, None]}
 
+    def test_table_json(self):
+        data = """{"a": 1, "b": 3.4, "c": "abc", "d": true}
+        {"a": 2, "b": 4.5, "c": "def", "d": true}
+        {"a": 3, "b": 6.7, "c": "ghi", "d": false}"""
+        tbl = Table(data)
+        assert tbl.schema() == {"a": int, "b": float, "c": str, "d": bool}
+        view = tbl.view()
+        assert view.to_dict() == {"a": [1, 2, 3], "b": [3.4, 4.5, 6.7], "c": ["abc", "def", "ghi"], "d": [True, True, False]}
+
+    def test_table_json_with_nulls(self):
+        data = """{"a": 1, "b": 3.4, "c": "abc", "d": true}
+        {"a": 2, "b": null, "c": "def", "d": true}
+        {"a": 3, "b": 6.7, "c": null, "d": false}"""
+        tbl = Table(data)
+        assert tbl.schema() == {"a": int, "b": float, "c": str, "d": bool}
+        view = tbl.view()
+        assert view.to_dict() == {"a": [1, 2, 3], "b": [3.4, None, 6.7], "c": ["abc", "def", None], "d": [True, True, False]}
+
+    def test_table_json_with_nulls_updated(self):
+        data = """{"a": 1, "b": null}"""
+        tbl = Table(data, index="a")
+        assert tbl.schema() == {"a": int, "b": str}
+        view = tbl.view()
+        assert view.to_dict() == {"a": [1], "b": [None]}
+        tbl.update("""{"a": 2, "b": "hey"}""")
+        assert view.to_dict() == {"a": [1, 2], "b": [None, "hey"]}
+
+    def test_table_json_array_type(self):
+        data = """[{"a": 1, "b": 3.4, "c": "abc", "d": true},{"a": 2, "b": 4.5, "c": "def", "d": true}, {"a": 3, "b": 6.7, "c": "ghi", "d": false}]"""
+        tbl = Table(data)
+        assert tbl.schema() == {"a": int, "b": float, "c": str, "d": bool}
+        view = tbl.view()
+        assert view.to_dict() == {"a": [1, 2, 3], "b": [3.4, 4.5, 6.7], "c": ["abc", "def", "ghi"], "d": [True, True, False]}
+        tbl.update("""[{"a": 4, "b": 9.9, "c": "yep", "d": true}]""")
+        assert view.to_dict() == {"a": [1, 2, 3, 4], "b": [3.4, 4.5, 6.7, 9.9], "c": ["abc", "def", "ghi", "yep"], "d": [True, True, False, True]}
+
     def test_table_string_column_with_nulls_update_and_filter(self):
         tbl = Table([{"a": "1", "b": 2, "c": "3"}, {"a": "2", "b": 3, "c": "4"}, {"a": "3", "b": 3, "c": None}], index="a")
         view = tbl.view(filter=[["c", "==", "4"]])

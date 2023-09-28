@@ -11,16 +11,21 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 #include <perspective/base.h>
-#include <perspective/arrow_csv.h>
+#include <perspective/arrow_format.h>
 #include <arrow/util/value_parsing.h>
 #include <arrow/io/memory.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 #ifdef PSP_ENABLE_WASM
 // This causes build warnings
 // https://github.com/emscripten-core/emscripten/issues/8574
-#include <perspective/vendor/arrow_single_threaded_reader.h>
+#include <perspective/vendor/arrow_single_threaded_csv_reader.h>
+#include <perspective/vendor/arrow_single_threaded_json_reader.h>
 #else
 #include <arrow/csv/reader.h>
+#include <arrow/json/reader.h>
 #endif
 
 template <class TimePoint>
@@ -423,6 +428,64 @@ namespace apachearrow {
             io_context, input, read_options, parse_options, convert_options);
 
         std::shared_ptr<arrow::csv::TableReader> reader = *maybe_reader;
+
+        auto maybe_table = reader->Read();
+        if (!maybe_table.ok()) {
+            PSP_COMPLAIN_AND_ABORT(maybe_table.status().ToString());
+        }
+        return *maybe_table;
+    }
+
+    std::shared_ptr<::arrow::Table>
+    jsonToTable(std::string& json, bool is_update,
+        std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
+            schema) {
+
+        // NOTE: Arrow only supports JSONL/NDJSON as of 12.0.0, so convert if needed
+        // This incurs some overhead, but in general it should still be better in C++
+        // than doing from host language.
+        if(json[0] == '[') {
+            rapidjson::Document document;
+            document.Parse(json.c_str());
+
+            if(!document.IsArray()) {
+                PSP_COMPLAIN_AND_ABORT("Unable to convert detected JSON array to JSONL");
+            }
+
+            std::string new_json;
+            rapidjson::StringBuffer buffer;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+            auto arr = document.GetArray();
+            for (rapidjson::Value::ConstValueIterator itr = arr.Begin(); itr != arr.End(); ++itr) {
+                if(!itr->IsObject()) {
+                    PSP_COMPLAIN_AND_ABORT("Unable to convert detected JSON array to JSONL - Values of JSON array must be objects");
+                }
+
+                itr->Accept(writer);
+                new_json += buffer.GetString();
+                new_json += "\n";
+                buffer.Clear();
+            }
+
+            json = new_json;
+        }
+
+        arrow::io::IOContext io_context = arrow::io::default_io_context();
+        auto input = std::make_shared<arrow::io::BufferReader>(json);
+        auto read_options = arrow::json::ReadOptions::Defaults();
+        auto parse_options = arrow::json::ParseOptions::Defaults();
+        // #ifdef PSP_PARALLEL_FOR
+        //         read_options.use_threads = true;
+        // #else
+        //         read_options.use_threads = false;
+        // #endif
+        read_options.use_threads = false;
+        parse_options.newlines_in_values = true;
+
+        auto maybe_reader = arrow::json::TableReader::Make(
+            io_context.pool(), input, read_options, parse_options);
+
+        std::shared_ptr<arrow::json::TableReader> reader = *maybe_reader;
 
         auto maybe_table = reader->Read();
         if (!maybe_table.ok()) {
