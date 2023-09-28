@@ -16,7 +16,7 @@
                 "editable": false,
                 "scroll_lock": false
             },
-            "settings": true,
+            "settings": false,
             "title": "All Cards",
             "group_by": [],
             "split_by": [],

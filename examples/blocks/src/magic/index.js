@@ -16,10 +16,10 @@ const WORKER = perspective.worker();
 
 let DECKS = {};
 
-async function createDeck(deck, library) {
+async function createDeck(rawDeck, library) {
     let fragments = [];
     let multis = [];
-    for (let card of deck) {
+    for (let card of rawDeck) {
         let frag = `("setCode" == '${card[0]}' and "number" == '${card[1]}')`;
         fragments.push(frag);
         if (card[2] !== 1) {
@@ -43,13 +43,13 @@ async function createDeck(deck, library) {
     return WORKER.table(data);
 }
 
-async function getDeckTable(name, decks) {
+async function getDeckTable(name, rawDecks) {
     let main = DECKS["__mainLibrary"];
     if (DECKS[name] !== undefined) {
         return DECKS[name];
     }
     window.message.textContent = "Building deck...";
-    let deck = await createDeck(decks[name], main);
+    let deck = await createDeck(rawDecks[name], main);
     console.log("New Deck: ", deck);
     DECKS[name] = deck;
     window.message.textContent = "";
@@ -72,8 +72,8 @@ window.addEventListener("load", async () => {
     let main = createMainTable();
     let allLayout = await (await fetch("./all_layout.json")).json();
     let deckLayout = await (await fetch("./layout.json")).json();
-    let decks = await (await fetch("./decks.json")).json();
-    let names = Object.keys(decks);
+    let rawDecks = await (await fetch("./decks.json")).json();
+    let names = Object.keys(rawDecks);
     for (let name of names) {
         const opt = document.createElement("option");
         opt.value = opt.textContent = name;
@@ -89,17 +89,17 @@ window.addEventListener("load", async () => {
         let newTable;
         if (which === "all") {
             await window.workspace.restore(allLayout);
-            newTable = DECKS["__mainLibrary"];
+            window.workspace.tables.set("deck", DECKS["__mainLibrary"]);
         } else {
             await window.workspace.restore(deckLayout);
-            newTable = getDeckTable(window.deck_selector.value, decks);
+            window.workspace.tables.set(
+                "deck",
+                await getDeckTable(window.deck_selector.value, rawDecks)
+            );
         }
-        window.workspace.tables.set("deck", newTable);
     });
     main = await main;
     DECKS["__mainLibrary"] = main;
-    window.workspace.tables.set("deck", getDeckTable(names[0], decks));
+    window.workspace.tables.set("deck", getDeckTable(names[0], rawDecks));
     await window.workspace.restore(deckLayout);
-
-    await window.workspace.restore(decks[names[0]]);
 });
