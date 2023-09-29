@@ -22,7 +22,7 @@ use super::form::number_input::*;
 use super::modal::*;
 use super::style::LocalStyle;
 use crate::config::*;
-use crate::js::JsPerspectiveView;
+use crate::session::Session;
 use crate::utils::WeakScope;
 use crate::*;
 
@@ -67,7 +67,7 @@ pub struct NumberColumnStyleProps {
     #[prop_or_default]
     pub weak_link: WeakScope<NumberColumnStyle>,
 
-    pub view: Option<JsValue>,
+    pub session: Option<Session>,
     pub column_name: Option<String>,
 }
 
@@ -108,18 +108,12 @@ impl Component for NumberColumnStyle {
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
 
-        if let Some(view) = ctx.props().view.clone() && let Some(column_name) = ctx.props().column_name.clone() {
-            ctx.link().send_future(async {
-                let view = view.unchecked_into::<JsPerspectiveView>();
-                let min_max = view._get_min_max(column_name.into()).await.unwrap();
-                let abs_max = min_max.unchecked_into::<js_sys::Array>()
-                    .to_vec()
-                    .iter()
-                    .map(|val| val.as_f64().unwrap())
-                    .fold(0.0, |accum, val| max!(accum, val.abs()));
-
+        if let Some(session) = ctx.props().session.clone() && let Some(column_name) = ctx.props().column_name.clone() {
+            ctx.link().send_future(async move {
+                let view = session.get_view().unwrap();
+                let min_max = view.get_min_max(&column_name).await.unwrap();
+                let abs_max = max!(min_max.0.abs(), min_max.1.abs());
                 let gradient_val = (abs_max * 100.).round() / 100.;
-
                 NumberColumnStyleMsg::DefaultGradientChanged(gradient_val)
             });
         }

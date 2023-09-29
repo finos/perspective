@@ -38,6 +38,7 @@ pub struct ExpressionEditorProps {
     pub on_validate: Callback<bool>,
     pub on_delete: Option<Callback<()>>,
     pub alias: Option<String>,
+    pub disabled: bool,
 }
 
 pub fn get_new_column_name(session: &Session) -> String {
@@ -169,12 +170,14 @@ impl Component for ExpressionEditor {
             Some(!ctx.props().session.is_column_expression_in_use(alias))
         }
         .unwrap_or_default();
+        clone!(ctx.props().disabled);
 
         html_template! {
             <LocalStyle href={ css!("expression-editor") } />
             <SplitPanel orientation={ Orientation::Vertical }>
                 <div id="editor-container">
                     <CodeEditor
+                        {disabled}
                         expr={ &self.expr }
                         error={ self.error.clone().map(|x| x.into()) }
                         { oninput }

@@ -68,8 +68,10 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     /** opt-in to column styling */
-    get default_config() {
-        return getDefaultConfig.call(this);
+    get plugin_attributes() {
+        return {
+            style: getDefaultConfig.call(this),
+        };
     }
 
     async draw(view) {

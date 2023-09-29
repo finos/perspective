@@ -17,6 +17,7 @@ use yew::prelude::*;
 
 use crate::components::viewer::*;
 use crate::config::*;
+use crate::custom_events::CustomEvents;
 use crate::dragdrop::*;
 use crate::js::*;
 use crate::presentation::Presentation;
@@ -34,6 +35,7 @@ async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Se
     let session = Session::default();
     let renderer = Renderer::new(&elem);
     let theme = Presentation::new(&elem);
+    let events = CustomEvents::new(&elem, &session, &renderer, &theme);
     let dragdrop = DragDrop::default();
     let div = test_html! {
         <PerspectiveViewer
@@ -42,6 +44,7 @@ async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Se
             dragdrop={ dragdrop }
             renderer={ renderer }
             session={ session.clone() }
+            custom_events={events}
             presentation={ theme }>
         </PerspectiveViewer>
     };

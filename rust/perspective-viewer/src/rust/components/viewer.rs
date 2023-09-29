@@ -26,6 +26,7 @@ use super::style::{LocalStyle, StyleProvider};
 use crate::components::column_settings_sidebar::ColumnSettingsSidebar;
 use crate::components::containers::sidebar::SidebarCloseButton;
 use crate::config::*;
+use crate::custom_events::CustomEvents;
 use crate::dragdrop::*;
 use crate::model::*;
 use crate::presentation::Presentation;
@@ -41,6 +42,14 @@ pub enum ColumnLocator {
     Plain(String),
     Expr(Option<String>),
 }
+impl ColumnLocator {
+    pub fn name(&self) -> Option<&String> {
+        match self {
+            ColumnLocator::Plain(s) => Some(s),
+            ColumnLocator::Expr(s) => s.as_ref(),
+        }
+    }
+}
 
 #[derive(Properties)]
 pub struct PerspectiveViewerProps {
@@ -49,6 +58,7 @@ pub struct PerspectiveViewerProps {
     pub renderer: Renderer,
     pub presentation: Presentation,
     pub dragdrop: DragDrop,
+    pub custom_events: CustomEvents,
 
     #[prop_or_default]
     pub weak_link: WeakScope<PerspectiveViewer>,
@@ -347,7 +357,7 @@ impl Component for PerspectiveViewer {
                                     <ColumnSettingsSidebar
                                         session = { &ctx.props().session }
                                         renderer = { &ctx.props().renderer }
-                                        presentation = {&ctx.props().presentation}
+                                        custom_events = {&ctx.props().custom_events}
                                         {selected_column}
                                         on_close = {ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None))}
                                     />

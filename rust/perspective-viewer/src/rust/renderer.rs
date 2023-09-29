@@ -241,6 +241,8 @@ impl Renderer {
             .await
     }
 
+    /// This will take a future which _should_ create a new view and then will
+    /// draw it.
     pub async fn draw(
         &self,
         session: impl Future<Output = Result<&Session, ApiError>>,
@@ -248,6 +250,7 @@ impl Renderer {
         self.draw_plugin(session, false).await
     }
 
+    /// This will update an already existing view
     pub async fn update(&self, session: &Session) -> ApiResult<()> {
         self.draw_plugin(async { Ok(session) }, true).await
     }

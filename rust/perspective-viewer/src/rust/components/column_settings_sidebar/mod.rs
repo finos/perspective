@@ -9,84 +9,8 @@
 // ┃ This file is part of the Perspective library, distributed under the terms ┃
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+mod attributes_tab;
+mod sidebar;
+mod style_tab;
 
-:host {
-    #editor-container {
-        display: flex;
-        flex-direction: column;
-        min-width: 0px;
-        border: 1px solid var(--inactive--color);
-        background-color: var(--plugin--background);
-        border-radius: 3px;
-        overflow: hidden;
-
-        .error {
-            flex: 1 1 auto;
-            width: 0px;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 12px;
-            color: var(--error--color);
-        }
-    }
-
-    .split-panel.orient-vertical
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
-        height: 300px;
-    }
-
-    .split-panel.orient-horizontal
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
-        width: 400px;
-    }
-
-    #horizontal-resize {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 8px;
-
-        &:hover {
-            cursor: ew-resize;
-            background: rgba(0, 0, 0, 0.05);
-        }
-    }
-
-    #psp-expression-editor-actions {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 36px;
-        padding: 0 12px;
-    }
-
-    .psp-expression-editor__button {
-        font-family: inherit;
-        font-size: 12px;
-        border: 1px solid var(--icon--color);
-        margin-left: 6px;
-        height: 18px;
-        padding: 2px 12px;
-        display: flex;
-        align-items: center;
-        background: none;
-        color: inherit;
-
-        &:not([disabled]):hover {
-            cursor: pointer;
-            background-color: var(--icon--color);
-            color: var(--plugin--background);
-        }
-
-        &[disabled] {
-            cursor: not-allowed;
-            opacity: 0.2;
-        }
-    }
-}
+pub use sidebar::*;

@@ -12,7 +12,7 @@
 
 :host {
     .tab-gutter {
-        border-color: var(--inactive--color,#6e6e6e);
+        border-color: var(--inactive--color, #6e6e6e);
         display: flex;
 
         .tab.tab-padding {
@@ -28,20 +28,20 @@
 
         .tab {
             //TODO: This needs to be a variable color. Which one?
-            background: rgba(0,0,0,0.125);
-            border-right: 1px solid var(--inactive--color,#6e6e6e);
+            background: rgba(0, 0, 0, 0.125);
+            border-right: 1px solid var(--inactive--color, #6e6e6e);
             user-select: none;
             cursor: pointer;
 
             .tab-title {
                 font-size: 12px;
                 padding: 10px;
-                border-bottom: 1px solid var(--inactive--color,#6e6e6e); 
+                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
             }
             .tab-border {
                 height: 2px;
                 width: 100%;
-                background-color: var(--inactive--color,#6e6e6e);
+                background-color: var(--inactive--color, #6e6e6e);
                 margin-top: 1px;
             }
 
@@ -57,7 +57,23 @@
                     background-color: transparent;
                     border-right: none;
                 }
-           }
+            }
+        }
+    }
+    .tab-content {
+        * {
+            font-size: 12px;
+        }
+        .tab-section {
+            padding: 1em;
+            border-bottom: 1px solid var(--inactive--border-color);
+        }
+        .text {
+            font-size: 14px;
+            margin-left: 1em;
+        }
+        .item_title {
+            margin-bottom: 1em;
         }
     }
 }

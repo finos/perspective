@@ -17,8 +17,10 @@ pub mod export_dropdown;
 mod filter_dropdown;
 mod function_dropdown;
 pub mod modal;
+pub mod row_dropdown;
 pub mod viewer;
 
 pub use self::column_dropdown::*;
 pub use self::filter_dropdown::*;
 pub use self::function_dropdown::*;
+pub use self::row_dropdown::*;

@@ -41,6 +41,9 @@
         &:only-child {
             padding-right: 12px;
         }
+        &.none:only-child {
+            padding-left: 12px;
+        }
     }
 
     .column-selector--spacer {
@@ -72,6 +75,10 @@
         left: 15px;
         top: 4.5px;
         @include icon;
+    }
+
+    .none:before {
+        content: none;
     }
 
     .integer:before {
@@ -106,463 +113,460 @@
 }
 
 :host {
-    #settings_panel {
-        #add-expression {
-            border: var(--column-add--border, none);
-            min-height: 24px;
-            flex-direction: row;
-            font-size: 12px;
-            border: 1px solid transparent;
-            background-color: #8b868045;
-            border-radius: 2px;
-            display: flex;
-            align-items: center;
-            margin-right: 7px;
-            cursor: pointer;
+    #add-expression {
+        border: var(--column-add--border, none);
+        min-height: 24px;
+        flex-direction: row;
+        font-size: 12px;
+        border: 1px solid transparent;
+        background-color: #8b868045;
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        margin-right: 7px;
+        cursor: pointer;
 
-            // Button icon
+        // Button icon
+        &:before {
+            @include icon;
+            width: 14px;
+            height: 14px;
+            margin-left: 12px;
+            -webkit-mask-image: var(--add-expression-icon--mask-image);
+            mask-image: var(--add-expression-icon--mask-image);
+        }
+
+        // Text label of the button e.g. "New Column"
+        & > span {
+            align-self: center;
+            margin-left: 7.5px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        &.modal-target,
+        &.dragdrop-hover {
+            color: var(--plugin--background);
+            background-color: var(--icon--color);
             &:before {
-                @include icon;
-                width: 14px;
-                height: 14px;
-                margin-left: 12px;
-                -webkit-mask-image: var(--add-expression-icon--mask-image);
-                mask-image: var(--add-expression-icon--mask-image);
-            }
-
-            // Text label of the button e.g. "New Column"
-            & > span {
-                align-self: center;
-                margin-left: 7.5px;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                pointer-events: none;
-            }
-
-            &.modal-target,
-            &.dragdrop-hover {
-                color: var(--plugin--background);
-                background-color: var(--icon--color);
-                &:before {
-                    background-color: var(--plugin--background);
-                }
+                background-color: var(--plugin--background);
             }
         }
+    }
 
-        .dragdrop-highlight {
-            .pivot-column-border,
-            .column-selector-column-border {
-                border: 1px solid var(--icon--color);
-            }
-        }
-
-        .column-selector-column-border,
-        .pivot-column-border {
-            &.snap-drag-image {
-                background-color: var(--plugin--background) !important;
-                border: 1px solid var(--icon--color) !important;
-                position: absolute !important;
-                pointer-events: none;
-                left: 0;
-                z-index: -100000;
-                width: 100%;
-                height: 24px;
-
-                .sort-icon,
-                label,
-                .dropdown-width-container {
-                    display: none;
-                }
-
-                .aggregate-selector-wrapper {
-                    min-width: 0px;
-                    max-width: 0px;
-                }
-            }
-        }
-
+    .dragdrop-highlight {
+        .pivot-column-border,
         .column-selector-column-border {
-            flex: 1 1 auto;
-            overflow: hidden;
-            position: relative;
-            display: inline-flex;
-            border: 1px solid transparent;
-            border-radius: 2px;
+            border: 1px solid var(--icon--color);
         }
+    }
 
-        .column-selector-border.snap-drag-image {
-            & > *:not(.column_name) {
+    .column-selector-column-border,
+    .pivot-column-border {
+        &.snap-drag-image {
+            background-color: var(--plugin--background) !important;
+            border: 1px solid var(--icon--color) !important;
+            position: absolute !important;
+            pointer-events: none;
+            left: 0;
+            z-index: -100000;
+            width: 100%;
+            height: 24px;
+
+            .sort-icon,
+            label,
+            .dropdown-width-container {
                 display: none;
             }
 
-            .column_name {
-                padding-left: 23px !important;
+            .aggregate-selector-wrapper {
+                min-width: 0px;
+                max-width: 0px;
             }
         }
+    }
 
-        .dragdrop-highlight .column-selector-column .column-selector-border,
-        .dragdrop-highlight
-            .column-selector-column
-            .column-selector-draggable.empty-named,
-        .dragdrop-highlight
-            #top_panel
-            .pivot-column.column-empty
-            .pivot-column-draggable {
-            border-color: var(--icon--color);
+    .column-selector-column-border {
+        flex: 1 1 auto;
+        overflow: hidden;
+        position: relative;
+        display: inline-flex;
+        border: 1px solid transparent;
+        border-radius: 2px;
+    }
+
+    .column-selector-border.snap-drag-image {
+        & > *:not(.column_name) {
+            display: none;
         }
 
-        .column-selector-column {
-            display: flex;
-            flex-direction: row-reverse;
-            align-items: center;
-            font-size: 12px;
+        .column_name {
+            padding-left: 23px !important;
+        }
+    }
 
-            // Expression column toolbar buttons
-            span.expression-edit-button,
-            span.expression-delete-button {
-                padding-top: 1px;
-                font-family: var(--button--font-family, inherit);
-                cursor: pointer;
+    .dragdrop-highlight .column-selector-column .column-selector-border,
+    .dragdrop-highlight
+        .column-selector-column
+        .column-selector-draggable.empty-named,
+    .dragdrop-highlight
+        #top_panel
+        .pivot-column.column-empty
+        .pivot-column-draggable {
+        border-color: var(--icon--color);
+    }
+
+    .column-selector-column {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+        font-size: 12px;
+
+        // Expression column toolbar buttons
+        span.expression-edit-button,
+        span.expression-delete-button {
+            padding-top: 1px;
+            font-family: var(--button--font-family, inherit);
+            cursor: pointer;
+            opacity: 1;
+            color: #999;
+
+            &:hover {
                 opacity: 1;
-                color: #999;
-
-                &:hover {
-                    opacity: 1;
-                    color: var(--active--color, #000);
-                }
-            }
-
-            span.expression-delete-button {
-                // padding-right: 1.5px;
-                padding-left: 5px;
-                margin-right: 8px;
-                margin-left: auto;
-
-                &:before {
-                    content: var(--column-close--content, "close");
-                }
-            }
-
-            span.expression-delete-button + span.expression-edit-button {
-                margin-left: 0px;
-            }
-
-            span.expression-edit-button {
-                padding-right: 8px;
-                margin-left: auto;
-
-                &:before {
-                    @include icon;
-                    height: 14px;
-                    width: 14px;
-                    -webkit-mask-image: var(--column-settings-icon--mask-image);
-                    mask-image: var(--column-settings-icon--mask-image);
-                }
-            }
-
-            .column-selector-draggable {
-                cursor: move;
-                display: flex;
-                align-items: start;
-                font-size: 12px;
-                flex-grow: 1;
-                color: inherit;
-                box-sizing: border-box;
-                flex-direction: row;
-                align-items: stretch;
-                position: relative;
-                min-height: 28px;
-                padding-bottom: 4px;
-
-                &.show-aggregate {
-                    .column_name {
-                        padding-left: 5px;
-                    }
-                }
-
-                &.empty-named {
-                    cursor: auto;
-                    padding-bottom: 0px;
-                    margin-bottom: 4px;
-                    min-height: 24px;
-                }
-
-                &:not(.empty-named) .column-selector-column-border:before {
-                    margin: 0px 0 0 6px; // TODO
-                    flex: 0 0 auto; // TODO
-                    @include icon;
-                    height: 12px;
-                    width: 5px;
-                    -webkit-mask-image: var(--column-drag-handle--mask-image);
-                    mask-image: var(--column-drag-handle--mask-image);
-                }
+                color: var(--active--color, #000);
             }
         }
 
-        .is_column_active.inactive {
-            min-width: 0px;
-            margin: 0 6px 0 0;
+        span.expression-delete-button {
+            // padding-right: 1.5px;
+            padding-left: 5px;
+            margin-right: 8px;
+            margin-left: auto;
+
+            &:before {
+                content: var(--column-close--content, "close");
+            }
+        }
+
+        span.expression-delete-button + span.expression-edit-button {
+            margin-left: 0px;
+        }
+
+        span.expression-edit-button {
+            padding-right: 8px;
+            margin-left: auto;
+
+            &:before {
+                @include icon;
+                height: 14px;
+                width: 14px;
+                -webkit-mask-image: var(--column-settings-icon--mask-image);
+                mask-image: var(--column-settings-icon--mask-image);
+            }
+        }
+
+        .column-selector-draggable {
+            cursor: move;
+            display: flex;
+            align-items: start;
+            font-size: 12px;
+            flex-grow: 1;
+            color: inherit;
+            box-sizing: border-box;
+            flex-direction: row;
+            align-items: stretch;
+            position: relative;
+            min-height: 28px;
+            padding-bottom: 4px;
+
+            &.show-aggregate {
+                .column_name {
+                    padding-left: 5px;
+                }
+            }
+
+            &.empty-named {
+                cursor: auto;
+                padding-bottom: 0px;
+                margin-bottom: 4px;
+                min-height: 24px;
+            }
+
+            &:not(.empty-named) .column-selector-column-border:before {
+                margin: 0px 0 0 6px; // TODO
+                flex: 0 0 auto; // TODO
+                @include icon;
+                height: 12px;
+                width: 5px;
+                -webkit-mask-image: var(--column-drag-handle--mask-image);
+                mask-image: var(--column-drag-handle--mask-image);
+            }
+        }
+    }
+
+    .is_column_active.inactive {
+        min-width: 0px;
+        margin: 0 6px 0 0;
+    }
+
+    .is_column_active {
+        display: inline-flex;
+        overflow: hidden;
+        padding-bottom: 4px;
+        flex: 0 0 auto;
+        cursor: pointer;
+        font-size: var(--column-selector--font-size, 14px);
+        font-family: var(
+            --column-selector--font-family,
+            var(--button--font-family, inherit)
+        ) !important;
+
+        &.select-mode {
+            margin: 0 6.5px;
+            // Width of the icon, which is not always present
+            min-width: 14px;
+        }
+
+        &,
+        &.toggle-mode {
+            margin: 0 6.5px;
+            min-width: 14px;
+        }
+    }
+
+    #selected-columns {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #active-columns,
+    #sub-columns {
+        display: flex;
+        flex: 0 1 auto;
+        overflow-x: hidden !important;
+        overflow-y: scroll;
+        min-height: 20%;
+
+        &::-webkit-scrollbar-thumb {
+            border: 0 solid var(--icon--color);
+            border-left-width: 1px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        &::-webkit-scrollbar,
+        &::-webkit-scrollbar-corner {
+            background-color: transparent;
+            width: 6px;
+        }
+    }
+
+    #sub-columns:before {
+        font-size: 9px;
+        padding: var(--column_type--padding, 0px 0px 0px 0px);
+        position: absolute;
+        margin-top: 14px;
+        top: 0;
+        content: "All Columns";
+    }
+
+    #sub-columns #add-expression {
+        margin-top: 28px;
+        margin-bottom: 4px;
+    }
+
+    #sub-columns .column-selector-column.column-selector-column-hidden {
+        overflow: hidden;
+        height: 0;
+        margin-bottom: 0px;
+    }
+
+    #sub-columns {
+        position: relative;
+        flex: 0 10000000 auto;
+    }
+
+    #active-columns {
+        display: flex;
+        padding-bottom: 8px;
+    }
+
+    #active-columns,
+    #column_settings_sidebar {
+        .is_column_active:before {
+            @include icon;
+        }
+
+        .is_column_active.select-mode {
+            &:before {
+                width: 14px;
+                height: 14px;
+                -webkit-mask-image: var(--column-radio-on--mask-image);
+                mask-image: var(--column-radio-on--mask-image);
+            }
+
+            &:not(.required):hover:before {
+                -webkit-mask-image: var(--column-radio-hover--mask-image);
+                mask-image: var(--column-radio-hover--mask-image);
+            }
+        }
+
+        .is_column_active.toggle-mode {
+            &:before {
+                width: 14px;
+                height: 14px;
+                -webkit-mask-image: var(--column-checkbox-on--mask-image);
+                mask-image: var(--column-checkbox-on--mask-image);
+            }
+
+            &:not(.required):hover:before {
+                -webkit-mask-image: var(--column-checkbox-hover--mask-image);
+                mask-image: var(--column-checkbox-hover--mask-image);
+            }
         }
 
         .is_column_active {
-            display: inline-flex;
-            overflow: hidden;
-            padding-bottom: 4px;
-            flex: 0 0 auto;
-            cursor: pointer;
-            font-size: var(--column-selector--font-size, 14px);
-            font-family: var(
-                --column-selector--font-family,
-                var(--button--font-family, inherit)
-            ) !important;
-
-            &.select-mode {
-                margin: 0 6.5px;
-                // Width of the icon, which is not always present
-                min-width: 14px;
-            }
-
-            &,
-            &.toggle-mode {
-                margin: 0 6.5px;
-                min-width: 14px;
-            }
-        }
-
-        #selected-columns {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #active-columns,
-        #sub-columns {
-            display: flex;
-            flex: 0 1 auto;
-            overflow-x: hidden !important;
-            overflow-y: scroll;
-            min-height: 20%;
-
-            &::-webkit-scrollbar-thumb {
-                border: 0 solid var(--icon--color);
-                border-left-width: 1px;
-            }
-
-            &::-webkit-scrollbar-thumb:hover {
-                background-color: rgba(0, 0, 0, 0.1);
-            }
-
-            &::-webkit-scrollbar,
-            &::-webkit-scrollbar-corner {
-                background-color: transparent;
-                width: 6px;
-            }
-        }
-
-        #sub-columns:before {
-            font-size: 9px;
-            padding: var(--column_type--padding, 0px 0px 0px 0px);
-            position: absolute;
-            margin-top: 14px;
-            top: 0;
-            content: "All Columns";
-        }
-
-        #sub-columns #add-expression {
-            margin-top: 28px;
-            margin-bottom: 4px;
-        }
-
-        #sub-columns .column-selector-column.column-selector-column-hidden {
-            overflow: hidden;
-            height: 0;
-            margin-bottom: 0px;
-        }
-
-        #sub-columns {
-            position: relative;
-            flex: 0 10000000 auto;
-        }
-
-        #active-columns {
-            display: flex;
-            padding-bottom: 8px;
-
-            .is_column_active:before {
-                @include icon;
-            }
-
-            .is_column_active.select-mode {
-                &:before {
-                    width: 14px;
-                    height: 14px;
-                    -webkit-mask-image: var(--column-radio-on--mask-image);
-                    mask-image: var(--column-radio-on--mask-image);
-                }
-
-                &:not(.required):hover:before {
-                    -webkit-mask-image: var(--column-radio-hover--mask-image);
-                    mask-image: var(--column-radio-hover--mask-image);
-                }
-            }
-
-            .is_column_active.toggle-mode {
-                &:before {
-                    width: 14px;
-                    height: 14px;
-                    -webkit-mask-image: var(--column-checkbox-on--mask-image);
-                    mask-image: var(--column-checkbox-on--mask-image);
-                }
-
-                &:not(.required):hover:before {
-                    -webkit-mask-image: var(
-                        --column-checkbox-hover--mask-image
-                    );
-                    mask-image: var(--column-checkbox-hover--mask-image);
-                }
-            }
-
-            .is_column_active {
-                &.required {
-                    // color: var(--inactive--color, #ccc);
-                    opacity: 0.3;
-                    cursor: not-allowed;
-                    cursor: initial;
-                }
-
-                &.inactive:before {
-                    content: "";
-                    background: none;
-                }
-            }
-
-            .column-selector-column {
-                position: relative;
-
-                .column-selector-draggable {
-                    width: calc(100% - 27px);
-                }
-
-                .column-selector-column-border {
-                    border-color: var(--inactive--color);
-                    background-color: var(--plugin--background);
-                }
-
-                &:before {
-                    font-size: 9px;
-                    left: 0px;
-                    padding: var(--column_type--padding, 0px 0px 0px 0px);
-                    position: absolute;
-                    margin-top: -43px;
-                    content: attr(data-label);
-                }
-
-                &[data-label] {
-                    margin-top: 22px;
-                }
-            }
-        }
-
-        .dragover,
-        .column-selector-column .column-selector-draggable.empty-named {
-            background-color: #8b868045;
-            border-color: transparent;
-            border-radius: 2px;
-        }
-
-        .dragover-container .is_column_active {
-            opacity: 0;
-            margin: 0 6px 0 0;
-            min-width: 0px;
-            width: 0px;
-        }
-
-        .column-selector-column .column-selector-draggable.dragover {
-            border: 1px solid var(--icon--color);
-            position: relative;
-            &:before {
-                content: " ";
-                position: absolute;
-                z-index: -1;
-                top: 5px;
-                left: 5px;
-                right: 5px;
-                bottom: 5px;
-                border-radius: 2px;
-                background-color: var(--icon--color);
+            &.required {
+                // color: var(--inactive--color, #ccc);
                 opacity: 0.3;
+                cursor: not-allowed;
+                cursor: initial;
             }
 
-            & > * {
-                opacity: 0;
+            &.inactive:before {
+                content: "";
+                background: none;
             }
         }
 
         .column-selector-column {
+            position: relative;
+
+            .column-selector-draggable {
+                width: calc(100% - 27px);
+            }
+
             .column-selector-column-border {
-                background-color: #8b868045;
-                border: 1px solid transparent;
-                align-items: center;
+                border-color: var(--inactive--color);
+                background-color: var(--plugin--background);
+            }
+
+            &:before {
+                font-size: 9px;
+                left: 0px;
+                padding: var(--column_type--padding, 0px 0px 0px 0px);
+                position: absolute;
+                margin-top: -43px;
+                content: attr(data-label);
+            }
+
+            &[data-label] {
+                margin-top: 22px;
+            }
+        }
+    }
+
+    .dragover,
+    .column-selector-column .column-selector-draggable.empty-named {
+        background-color: #8b868045;
+        border-color: transparent;
+        border-radius: 2px;
+    }
+
+    .dragover-container .is_column_active {
+        opacity: 0;
+        margin: 0 6px 0 0;
+        min-width: 0px;
+        width: 0px;
+    }
+
+    .column-selector-column .column-selector-draggable.dragover {
+        border: 1px solid var(--icon--color);
+        position: relative;
+        &:before {
+            content: " ";
+            position: absolute;
+            z-index: -1;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 2px;
+            background-color: var(--icon--color);
+            opacity: 0.3;
+        }
+
+        & > * {
+            opacity: 0;
+        }
+    }
+
+    .column-selector-column {
+        .column-selector-column-border {
+            background-color: #8b868045;
+            border: 1px solid transparent;
+            align-items: center;
+        }
+    }
+
+    #active-columns .column-selector-column.dragdrop-hover,
+    #active-columns.dragdrop-highlight .column-selector-column,
+    .column-selector-column.dragdrop-hover {
+        .column-selector-column-border {
+            border-color: var(--icon--color);
+        }
+    }
+
+    // Inactive Columns are the columns in the column selector not currently
+    // selected for the `columns` field of the `ViewConfig`.
+    #sub-columns {
+        & > div:not(:empty) {
+            margin-bottom: 6px;
+        }
+
+        &:empty {
+            display: none;
+            margin: 0px;
+        }
+
+        .is_column_active:before {
+            @include icon;
+        }
+
+        .is_column_active.select-mode {
+            &:before {
+                width: 14px;
+                height: 14px;
+                -webkit-mask-image: var(--column-radio-off--mask-image);
+                mask-image: var(--column-radio-off--mask-image);
+            }
+            &:hover:before {
+                -webkit-mask-image: var(--column-radio-hover--mask-image);
+                mask-image: var(--column-radio-hover--mask-image);
             }
         }
 
-        #active-columns .column-selector-column.dragdrop-hover,
-        #active-columns.dragdrop-highlight .column-selector-column,
-        .column-selector-column.dragdrop-hover {
-            .column-selector-column-border {
-                border-color: var(--icon--color);
+        .is_column_active.toggle-mode {
+            &:before {
+                width: 14px;
+                height: 14px;
+                -webkit-mask-image: var(--column-checkbox-off--mask-image);
+                mask-image: var(--column-checkbox-off--mask-image);
+            }
+
+            &:hover:before {
+                -webkit-mask-image: var(--column-checkbox-hover--mask-image);
+                mask-image: var(--column-checkbox-hover--mask-image);
             }
         }
 
-        // Inactive Columns are the columns in the column selector not currently
-        // selected for the `columns` field of the `ViewConfig`.
-        #sub-columns {
-            & > div:not(:empty) {
-                margin-bottom: 6px;
-            }
-
-            &:empty {
-                display: none;
-                margin: 0px;
-            }
-
-            .is_column_active:before {
-                @include icon;
-            }
-
-            .is_column_active.select-mode {
-                &:before {
-                    width: 14px;
-                    height: 14px;
-                    -webkit-mask-image: var(--column-radio-off--mask-image);
-                    mask-image: var(--column-radio-off--mask-image);
-                }
-                &:hover:before {
-                    -webkit-mask-image: var(--column-radio-hover--mask-image);
-                    mask-image: var(--column-radio-hover--mask-image);
-                }
-            }
-
-            .is_column_active.toggle-mode {
-                &:before {
-                    width: 14px;
-                    height: 14px;
-                    -webkit-mask-image: var(--column-checkbox-off--mask-image);
-                    mask-image: var(--column-checkbox-off--mask-image);
-                }
-
-                &:hover:before {
-                    -webkit-mask-image: var(
-                        --column-checkbox-hover--mask-image
-                    );
-                    mask-image: var(--column-checkbox-hover--mask-image);
-                }
-            }
-
-            .column-selector-column {
-                .column-selector-draggable {
-                    width: calc(100% - 27px);
-                }
+        .column-selector-column {
+            .column-selector-draggable {
+                width: calc(100% - 27px);
             }
         }
     }

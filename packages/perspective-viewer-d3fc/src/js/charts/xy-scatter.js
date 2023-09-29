@@ -16,7 +16,7 @@ import { axisFactory } from "../axis/axisFactory";
 import { chartCanvasFactory } from "../axis/chartFactory";
 import {
     pointSeriesCanvas,
-    symbolTypeFromGroups,
+    symbolTypeFromColumn,
 } from "../series/pointSeriesCanvas";
 import { pointData } from "../data/pointData";
 import {
@@ -52,9 +52,64 @@ function interpolate_scale([x1, y1], [x2, y2]) {
     };
 }
 
+/**
+ * Overrides specific symbols based on plugin settings. This modifies in-place _and_ returns the value.
+ * @param {any} settings
+ * @param {d3.ScaleOrdinal} symbols
+ */
+function overrideSymbols(settings, symbols) {
+    const symbolCol = settings.realValues[4];
+    let domain = symbols.domain();
+    let range = symbols.range();
+    settings.columns?.[symbolCol]?.symbols?.forEach(({ key, value }) => {
+        // TODO: Define custom symbol types based on the values passed in here.
+        // https://d3js.org/d3-shape/symbol#custom-symbols
+        let symbolType = d3.symbolCircle;
+        // https://d3js.org/d3-shape/symbol#symbolsFill
+        switch (value) {
+            case "circle":
+                symbolType = d3.symbolCircle;
+                break;
+            case "square":
+                symbolType = d3.symbolSquare;
+                break;
+            case "cross":
+                symbolType = d3.symbolCross;
+                break;
+            case "diamond":
+                symbolType = d3.symbolDiamond;
+                break;
+            case "star":
+                symbolType = d3.symbolStar;
+                break;
+            case "triangle":
+                symbolType = d3.symbolTriangle;
+                break;
+            case "wye":
+                symbolType = d3.symbolWye;
+                break;
+        }
+
+        let i = domain.findIndex((val) => val === key);
+        if (i === -1) {
+            console.error(
+                `Could not find row with value ${key} when overriding symbols!`
+            );
+        }
+        range[i] = symbolType;
+    });
+    symbols.range(range);
+    return symbols;
+}
+
 function xyScatter(container, settings) {
+    const symbolCol = settings.realValues[4];
     const data = pointData(settings, filterDataByGroup(settings));
-    const symbols = symbolTypeFromGroups(settings);
+    const symbols = overrideSymbols(
+        settings,
+        symbolTypeFromColumn(settings, symbolCol)
+    );
+
     let color = null;
     let legend = null;
 
@@ -64,13 +119,13 @@ function xyScatter(container, settings) {
     let isColoredByString =
         settings.mainValues.find((x) => x.name === colorByValue)?.type ===
         "string";
-    let hasSplitBy = settings.splitValues.length > 0;
+    let hasSymbol = !!symbolCol;
 
     if (hasColorBy) {
         if (isColoredByString) {
-            if (hasSplitBy) {
+            if (hasSymbol) {
                 color = seriesColorsFromDistinct(settings, data);
-                // TODO: Legend should have cartesian product labels (ColorBy|SplitBy)
+                // TODO: Legend should have cartesian product labels (ColorBy|Symbol)
                 // For now, just use monocolor legends.
                 legend = symbolLegend().settings(settings).scale(symbols);
             } else {
@@ -91,7 +146,7 @@ function xyScatter(container, settings) {
         ? seriesLinearRange(settings, data, "size").range([10, 10000])
         : null;
 
-    const label = settings.realValues[4];
+    const label = settings.realValues[5];
 
     const scale_factor = interpolate_scale([600, 0.1], [1600, 1])(container);
     const series = fc
@@ -101,7 +156,7 @@ function xyScatter(container, settings) {
             data.map((series) =>
                 pointSeriesCanvas(
                     settings,
-                    series.key,
+                    symbolCol,
                     size,
                     color,
                     label,
@@ -170,7 +225,15 @@ xyScatter.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis", "Color", "Size", "Label", "Tooltip"],
+        names: [
+            "X Axis",
+            "Y Axis",
+            "Color",
+            "Size",
+            "Symbol",
+            "Label",
+            "Tooltip",
+        ],
     },
     selectMode: "toggle",
 };

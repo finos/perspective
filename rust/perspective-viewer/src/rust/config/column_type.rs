@@ -14,7 +14,7 @@ use std::fmt::Display;
 
 use serde::Deserialize;
 
-#[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
+#[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug)]
 pub enum Type {
     #[serde(rename = "string")]
     String,
