@@ -2,8 +2,10 @@
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
 
-        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/pro.css" />
-        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/pro.css" />
+        <!-- <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/pro.css" />
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/pro.css" /> -->
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/pro-dark.css" />
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css" />
 
         <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
         <script type="module" src="/node_modules/@finos/perspective-workspace/dist/cdn/perspective-workspace.js"></script>
@@ -15,9 +17,13 @@
     </head>
     <body>
         <div id="header">
+            <a href="https://perspective.finos.org">
+                <img height="12" src="https://raw.githubusercontent.com/finos/perspective/master/docs/static/svg/perspective-logo-dark.svg" />
+            </a>
+            <label>Magic: the Gathering Deck Demo</label>
             <select id="deck_selector"></select>
             <span id="message"></span>
         </div>
-        <perspective-workspace id="workspace"></perspective-workspace>
+        <perspective-workspace theme="Pro Dark" id="workspace"></perspective-workspace>
     </body>
 </html>

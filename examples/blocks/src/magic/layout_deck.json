@@ -7,7 +7,7 @@
             "children": [
                 {
                     "type": "tab-area",
-                    "widgets": ["PERSPECTIVE_GENERATED_ID_0"],
+                    "widgets": ["card_grid"],
                     "currentIndex": 0
                 },
                 {
@@ -16,12 +16,12 @@
                     "children": [
                         {
                             "type": "tab-area",
-                            "widgets": ["PERSPECTIVE_GENERATED_ID_3"],
+                            "widgets": ["mana_curve"],
                             "currentIndex": 0
                         },
                         {
                             "type": "tab-area",
-                            "widgets": ["PERSPECTIVE_GENERATED_ID_4"],
+                            "widgets": ["rank_heatmap"],
                             "currentIndex": 0
                         }
                     ],
@@ -33,7 +33,7 @@
     },
     "mode": "globalFilters",
     "viewers": {
-        "PERSPECTIVE_GENERATED_ID_0": {
+        "card_grid": {
             "plugin": "Datagrid",
             "plugin_config": {
                 "columns": {},
@@ -41,8 +41,8 @@
                 "scroll_lock": false
             },
             "settings": false,
-            "theme": "Pro Light",
-            "title": "deck",
+            "theme": "Pro Dark",
+            "title": "Deck",
             "group_by": [],
             "split_by": [],
             "columns": [
@@ -109,11 +109,11 @@
             "table": "deck",
             "linked": false
         },
-        "PERSPECTIVE_GENERATED_ID_3": {
+        "mana_curve": {
             "plugin": "Y Area",
             "plugin_config": {},
             "settings": false,
-            "theme": "Pro Light",
+            "theme": "Pro Dark",
             "title": "Mana Curve",
             "group_by": ["convertedManaCost"],
             "split_by": ["colorIdentity_0"],
@@ -126,11 +126,11 @@
             "table": "deck",
             "linked": false
         },
-        "PERSPECTIVE_GENERATED_ID_4": {
+        "rank_heatmap": {
             "plugin": "Heatmap",
             "plugin_config": {},
             "settings": false,
-            "theme": "Pro Light",
+            "theme": "Pro Dark",
             "title": "EDHREC Rank Heatmap",
             "group_by": ["bucket(\"edhrecRank\", 1000)"],
             "split_by": ["convertedManaCost"],

@@ -14,8 +14,6 @@ import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.j
 
 const WORKER = perspective.worker();
 
-let DECKS = {};
-
 async function createDeck(rawDeck, library) {
     let fragments = [];
     let multis = [];
@@ -43,21 +41,23 @@ async function createDeck(rawDeck, library) {
     return WORKER.table(data);
 }
 
-async function getDeckTable(name, rawDecks) {
-    let main = DECKS["__mainLibrary"];
-    if (DECKS[name] !== undefined) {
-        return DECKS[name];
+async function ensureDeckTable(name, deckContents) {
+    if (window.workspace.tables.has(name)) {
+        return window.workspace.tables.get(name);
+    } else {
+        let library = window.workspace.tables.get("__mainLibrary");
+        console.log("Making ", name);
+        window.message.textContent = "Building deck...";
+        let deck = await createDeck(deckContents[name], library);
+        window.workspace.addTable(name, deck);
+        window.message.textContent = "";
+        console.log("Made ", name, await deck.num_rows());
+        return deck;
     }
-    window.message.textContent = "Building deck...";
-    let deck = await createDeck(rawDecks[name], main);
-    console.log("New Deck: ", deck);
-    DECKS[name] = deck;
-    window.message.textContent = "";
-    return DECKS[name];
 }
 
-async function createMainTable() {
-    window.message.textContent = "Downloading...";
+async function loadLibrary() {
+    window.message.textContent = "Downloading all cards...";
     let url = "/dist/magic/all_identifiers.arrow";
     const res = await fetch(url);
     const b = await res.blob();
@@ -68,38 +68,44 @@ async function createMainTable() {
 }
 
 window.addEventListener("load", async () => {
-    // either "deck" or "all".
-    let main = createMainTable();
-    let allLayout = await (await fetch("./all_layout.json")).json();
-    let deckLayout = await (await fetch("./layout.json")).json();
-    let rawDecks = await (await fetch("./decks.json")).json();
-    let names = Object.keys(rawDecks);
-    for (let name of names) {
+    let main = loadLibrary();
+    let allLayout = await fetch("./layout_all.json").then((d) => d.json());
+    let baseDeckLayout = await fetch("./layout_deck.json").then((d) =>
+        d.json()
+    );
+    let layouts = {
+        __mainLibrary: allLayout,
+    };
+    let rawDecks = await fetch("./decks.json").then((d) => d.json());
+    let deckNames = Object.keys(rawDecks);
+    for (let name of deckNames) {
         const opt = document.createElement("option");
         opt.value = opt.textContent = name;
         window.deck_selector.appendChild(opt);
+        let layout = structuredClone(baseDeckLayout);
+        layout.viewers.card_grid.table = name;
+        layout.viewers.mana_curve.table = name;
+        layout.viewers.rank_heatmap.table = name;
+        layouts[name] = layout;
     }
-
     const allCardsOption = document.createElement("option");
-    allCardsOption.value = allCardsOption.textContent = "all";
+    allCardsOption.value = "__mainLibrary";
+    allCardsOption.textContent = "Browse All Cards";
     window.deck_selector.appendChild(allCardsOption);
 
-    window.deck_selector.addEventListener("change", async () => {
-        let which = window.deck_selector.value;
-        let newTable;
-        if (which === "all") {
-            await window.workspace.restore(allLayout);
-            window.workspace.tables.set("deck", DECKS["__mainLibrary"]);
-        } else {
-            await window.workspace.restore(deckLayout);
-            window.workspace.tables.set(
-                "deck",
-                await getDeckTable(window.deck_selector.value, rawDecks)
-            );
-        }
+    window.deck_selector.addEventListener("change", async (event) => {
+        let which = event.target.value;
+        await ensureDeckTable(which, rawDecks);
+        console.log(`Rendering '${which}'`, window.workspace.tables, layouts);
+        // FIXME: The layout does not re-set to use the new table if we do not first
+        //        go through the library layout.
+        //        Seems if only the 'table' property is changed, nothing happens.
+        await window.workspace.restore(layouts[which]);
     });
-    main = await main;
-    DECKS["__mainLibrary"] = main;
-    window.workspace.tables.set("deck", getDeckTable(names[0], rawDecks));
-    await window.workspace.restore(deckLayout);
+    const initialLayout = deckNames[0];
+    window.workspace.tables.set("__mainLibrary", await main);
+    let t = await ensureDeckTable(initialLayout, rawDecks);
+    console.log("First render: ", layouts[initialLayout], t);
+    window.workspace.tables.set(deckNames[0], t);
+    await window.workspace.restore(layouts[initialLayout]);
 });
