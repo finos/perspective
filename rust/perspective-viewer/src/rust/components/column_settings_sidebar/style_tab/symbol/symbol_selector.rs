@@ -10,83 +10,42 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-:host {
-    #editor-container {
-        display: flex;
-        flex-direction: column;
-        min-width: 0px;
-        border: 1px solid var(--inactive--color);
-        background-color: var(--plugin--background);
-        border-radius: 3px;
-        overflow: hidden;
+use itertools::Itertools;
+use yew::{function_component, html, Callback, Html, Properties};
 
-        .error {
-            flex: 1 1 auto;
-            width: 0px;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 12px;
-            color: var(--error--color);
-        }
-    }
+use crate::components::containers::select::{Select, SelectItem};
+use crate::config::plugin::Symbol;
 
-    .split-panel.orient-vertical
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
-        height: 300px;
-    }
+#[derive(Properties, PartialEq)]
+pub struct SymbolSelectorProps {
+    pub selected_value: Option<String>,
+    pub values: Vec<Symbol>,
+    pub callback: Callback<Symbol>,
+}
 
-    .split-panel.orient-horizontal
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
-        width: 400px;
-    }
+#[function_component(SymbolSelector)]
+pub fn symbol_selector(p: &SymbolSelectorProps) -> Html {
+    let values = p
+        .values
+        .clone()
+        .into_iter()
+        .map(SelectItem::Option)
+        .collect_vec();
 
-    #horizontal-resize {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 8px;
+    let selected = p
+        .values
+        .iter()
+        .find(|sym| {
+            p.selected_value
+                .as_ref()
+                .map(|selected| sym.name == *selected)
+                .unwrap_or_default()
+        })
+        .cloned()
+        .unwrap_or_else(|| p.values.first().cloned().unwrap());
 
-        &:hover {
-            cursor: ew-resize;
-            background: rgba(0, 0, 0, 0.05);
-        }
-    }
-
-    #psp-expression-editor-actions {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 36px;
-        padding: 0 12px;
-    }
-
-    .psp-expression-editor__button {
-        font-family: inherit;
-        font-size: 12px;
-        border: 1px solid var(--icon--color);
-        margin-left: 6px;
-        height: 18px;
-        padding: 2px 12px;
-        display: flex;
-        align-items: center;
-        background: none;
-        color: inherit;
-
-        &:not([disabled]):hover {
-            cursor: pointer;
-            background-color: var(--icon--color);
-            color: var(--plugin--background);
-        }
-
-        &[disabled] {
-            cursor: not-allowed;
-            opacity: 0.2;
-        }
+    html! {
+        // TODO: This probably should be a modal with a preview of the SVG symbol
+        <Select<Symbol> {values} {selected} on_select={p.callback.clone()}/>
     }
 }

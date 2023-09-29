@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use itertools::Itertools;
 use js_sys::Array;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
@@ -188,6 +189,18 @@ impl JsPerspectiveView {
     async_typed!(_schema, schema(&self) -> JsPerspectiveViewSchema);
 
     async_typed!(_delete, delete(self) -> ());
+
+    pub async fn get_min_max(&self, col: &str) -> ApiResult<(f64, f64)> {
+        let vec = self
+            ._get_min_max(col.into())
+            .await?
+            .unchecked_into::<js_sys::Array>()
+            .to_vec()
+            .into_iter()
+            .map(|jsval| jsval.as_f64().unwrap())
+            .collect_vec();
+        Ok((vec[0], vec[1]))
+    }
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]

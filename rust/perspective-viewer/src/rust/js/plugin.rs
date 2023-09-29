@@ -52,7 +52,7 @@ extern "C" {
     pub fn config_column_names(this: &JsPerspectiveViewerPlugin) -> Option<js_sys::Array>;
 
     #[wasm_bindgen(method, getter)]
-    pub fn default_config(this: &JsPerspectiveViewerPlugin) -> Option<js_sys::Object>;
+    pub fn plugin_attributes(this: &JsPerspectiveViewerPlugin) -> Option<js_sys::Object>;
 
     #[wasm_bindgen(method, getter)]
     pub fn priority(this: &JsPerspectiveViewerPlugin) -> Option<i32>;

@@ -49,6 +49,10 @@ views.forEach(async (plugin) => {
                 return "OpenStreetMap";
             }
 
+            get plugin_attributes() {
+                return {};
+            }
+
             async restyle(view) {
                 mapView.restyle(this.shadowRoot.children[1]);
             }

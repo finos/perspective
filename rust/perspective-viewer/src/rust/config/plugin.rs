@@ -10,83 +10,58 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-:host {
-    #editor-container {
-        display: flex;
-        flex-direction: column;
-        min-width: 0px;
-        border: 1px solid var(--inactive--color);
-        background-color: var(--plugin--background);
-        border-radius: 3px;
-        overflow: hidden;
+use std::collections::HashMap;
+use std::fmt::Debug;
 
-        .error {
-            flex: 1 1 auto;
-            width: 0px;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 12px;
-            color: var(--error--color);
-        }
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct Symbol {
+    /// the name of the symbol
+    pub name: String,
+    /// unescaped HTML string
+    pub html: String,
+}
+impl std::fmt::Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.name)
     }
+}
 
-    .split-panel.orient-vertical
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
-        height: 300px;
-    }
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct SymbolAttributes {
+    /// a vec of SVGs to render
+    pub symbols: Vec<Symbol>,
+}
 
-    .split-panel.orient-horizontal
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
-        width: 400px;
-    }
+/// The default style configurations per type, as retrived by
+/// plugin.plugin_attributes
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct DefaultStyleAttributes {
+    pub string: serde_json::Value,
+    pub datetime: serde_json::Value,
+    pub date: serde_json::Value,
+    pub integer: serde_json::Value,
+    pub float: serde_json::Value,
+    pub bool: serde_json::Value,
+}
 
-    #horizontal-resize {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 8px;
+/// The data needed to populate a column's settings. These are typically default
+/// values, a listing of possible values, or other basic configuration settings
+/// for the plugin. This is the result of calling plugin.plugin_attributes
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct PluginAttributes {
+    pub symbol: Option<SymbolAttributes>,
+    pub style: Option<DefaultStyleAttributes>,
+    // color: ColorAttributes,
+    // axis: AxisAttributes,
+    //...
+}
 
-        &:hover {
-            cursor: ew-resize;
-            background: rgba(0, 0, 0, 0.05);
-        }
-    }
-
-    #psp-expression-editor-actions {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 36px;
-        padding: 0 12px;
-    }
-
-    .psp-expression-editor__button {
-        font-family: inherit;
-        font-size: 12px;
-        border: 1px solid var(--icon--color);
-        margin-left: 6px;
-        height: 18px;
-        padding: 2px 12px;
-        display: flex;
-        align-items: center;
-        background: none;
-        color: inherit;
-
-        &:not([disabled]):hover {
-            cursor: pointer;
-            background-color: var(--icon--color);
-            color: var(--plugin--background);
-        }
-
-        &[disabled] {
-            cursor: not-allowed;
-            opacity: 0.2;
-        }
-    }
+/// The configuration which is created as the result of calling plugin.save
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct PluginConfig {
+    /// Refers to the currently active columns. Maps name to configuration.
+    #[serde(default)]
+    pub columns: HashMap<String, serde_json::Value>,
 }

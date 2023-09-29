@@ -10,236 +10,90 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::collections::HashMap;
-use std::fmt::Debug;
+mod column_style;
+mod symbol;
 
-use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::{JsCast, JsValue};
-use yew::{function_component, html, Callback, Html, Properties};
+use yew::{function_component, html, Html, Properties};
 
-use crate::components::datetime_column_style::DatetimeColumnStyle;
-use crate::components::number_column_style::NumberColumnStyle;
-use crate::components::string_column_style::StringColumnStyle;
-use crate::components::style::LocalStyle;
-use crate::config::{
-    DatetimeColumnStyleDefaultConfig, NumberColumnStyleDefaultConfig,
-    StringColumnStyleDefaultConfig, Type,
-};
-use crate::presentation::Presentation;
+use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
+use crate::components::column_settings_sidebar::style_tab::symbol::SymbolAttr;
+use crate::config::plugin::{PluginAttributes, PluginConfig};
+use crate::config::Type;
+use crate::custom_events::CustomEvents;
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::utils::{ApiFuture, JsValueSerdeExt};
-use crate::{clone, css, html_template};
+use crate::utils::JsValueSerdeExt;
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct StyleTabProps {
+    pub custom_events: CustomEvents,
     pub session: Session,
     pub renderer: Renderer,
-    pub presentation: Presentation,
+
+    pub ty: Type,
     pub column_name: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct DefaultConfig {
-    string: serde_json::Value,
-    datetime: serde_json::Value,
-    date: serde_json::Value,
-    integer: serde_json::Value,
-    float: serde_json::Value,
-    bool: serde_json::Value,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Config {
-    columns: HashMap<String, serde_json::Value>,
-}
-
-/// This function sends the config to the plugin using its `restore` method
-fn send_config<T: Serialize + Debug>(
-    renderer: &Renderer,
-    presentation: &Presentation,
-    view: JsValue,
-    column_name: String,
-    column_config: T,
-) {
-    let current_config = get_config(renderer);
-    let elem = renderer.get_active_plugin().unwrap();
-    if let Some((mut current_config, _)) = current_config {
-        current_config
-            .columns
-            .insert(column_name, serde_json::to_value(column_config).unwrap());
-        let js_config = JsValue::from_serde_ext(&current_config).unwrap();
-        elem.restore(&js_config);
-        ApiFuture::spawn(async move {
-            let view = view.unchecked_into();
-            elem.update(&view, None, None, false).await
-        });
-        // send a config update event in case we need to listen for it outside of the
-        // viewer
-        presentation.column_settings_updated.emit_all(js_config);
-    } else {
-        tracing::warn!("Could not restore and restyle plugin!");
-    }
-}
-
-fn jsval_to_type<T: DeserializeOwned>(val: &JsValue) -> Result<T, serde_json::Error> {
-    let stringval = js_sys::JSON::stringify(val)
-        .ok()
-        .and_then(|s| s.as_string())
-        .unwrap_or_default();
-    serde_json::from_str(&stringval)
-}
-
-/// This function retrieves the plugin's config using its `save` method.
-/// It also introduces the `default_config` field for the plugin.
-/// If this field does not exist, the plugin is considered to be unstylable.
-fn get_config(renderer: &Renderer) -> Option<(Config, DefaultConfig)> {
-    let plugin = renderer.get_active_plugin().unwrap();
-    let config = plugin.save();
-    let default_config = JsValue::from(plugin.default_config());
-    let config = jsval_to_type(&config).ok();
-    let default_config = jsval_to_type(&default_config).ok();
-    config.zip(default_config)
-}
-
-fn get_column_config<
-    ConfigType: DeserializeOwned + Debug,
-    DefaultConfigType: DeserializeOwned + Debug,
->(
-    renderer: &Renderer,
-    column_name: &str,
-    ty: Type,
-) -> Result<(Option<ConfigType>, DefaultConfigType), String> {
-    get_config(renderer)
-        .ok_or_else(|| "Could not get_config!".into())
-        .and_then(|(mut config, default_config)| {
-            let current_config = if let Some(config) = config.columns.remove(column_name) {
-                serde_json::from_value(config)
-                    .map_err(|e| format!("Could not deserialize config with error {e:?}"))?
-            } else {
-                None
-            };
-
-            let val = match ty {
-                Type::String => default_config.string,
-                Type::Datetime => default_config.datetime,
-                Type::Date => default_config.date,
-                Type::Integer => default_config.integer,
-                Type::Float => default_config.float,
-                Type::Bool => default_config.bool,
-            };
-            serde_json::from_value(val)
-                .map_err(|e| format!("Could not deserialize default_config with error {e:?}"))
-                .map(|default_config| (current_config, default_config))
-        })
+    pub config: PluginConfig,
+    pub attrs: PluginAttributes,
 }
 
 #[function_component]
 pub fn StyleTab(p: &StyleTabProps) -> Html {
-    let opts = p
-        .session
-        .metadata()
-        .get_column_view_type(&p.column_name)
-        .zip(p.session.get_view());
-    if opts.is_none() {
-        return html! {};
-    }
-    let (ty, view) = opts.unwrap();
-    let view = (*view).clone();
+    let plugin = p.renderer.get_active_plugin().expect("No active plugins!");
+    let plugin_column_names = plugin
+        .config_column_names()
+        .map(|arr| {
+            arr.into_serde_ext::<Vec<Option<String>>>()
+                .expect("Could not deserialize config_column_names into Vec<Option<String>>")
+        })
+        .unwrap_or_default();
 
-    clone!(p.renderer, p.presentation, p.column_name);
-    let opt_html = match ty {
-        Type::String => {
-            get_column_config::<_, StringColumnStyleDefaultConfig>(&renderer, &column_name, ty).map(
-                |(config, default_config)| {
-                    let on_change = Callback::from(move |config| {
-                        send_config(
-                            &renderer,
-                            &presentation,
-                            view.clone(),
-                            column_name.clone(),
-                            config,
-                        );
-                    });
-                    html_template! {
-                        <div class="style_contents">
-                            <StringColumnStyle  { config } {default_config} {on_change} />
-                        </div>
-                    }
-                },
-            )
-        }
-        Type::Datetime | Type::Date => {
-            get_column_config::<_, DatetimeColumnStyleDefaultConfig>(&renderer, &column_name, ty)
-                .map(|(config, default_config)| {
-                    let on_change = Callback::from(move |config| {
-                        send_config(
-                            &renderer,
-                            &presentation,
-                            view.clone(),
-                            column_name.clone(),
-                            config,
-                        );
-                    });
+    let view_config = p.session.get_view_config();
 
-                    html_template! {
-                        <div class="style_contents">
-                            <DatetimeColumnStyle
-                                enable_time_config={matches!(ty, Type::Datetime)}
-                                { config }
-                                {default_config}
-                                {on_change}
-                                />
-                        </div>
-                    }
-                })
-        }
-        Type::Integer | Type::Float => {
-            get_column_config::<_, NumberColumnStyleDefaultConfig>(&renderer, &column_name, ty).map(
-                |(config, default_config)| {
-                    let on_change = {
-                        clone!(column_name, view);
-                        Callback::from(move |config| {
-                            send_config(
-                                &renderer,
-                                &presentation,
-                                view.clone(),
-                                column_name.clone(),
-                                config,
-                            );
-                        })
-                    };
-                    html_template! {
-                        <div class="style_contents">
-                            <NumberColumnStyle
-                                column_name={column_name.clone()}
-                                view={view.clone()}
-                                { config }
-                                { default_config }
-                                { on_change } />
-                        </div>
-                    }
-                },
-            )
-        }
-        _ => Err("Booleans aren't styled yet.".into()),
-    };
-
-    let inner = if let Ok(html) = opt_html {
-        html
-    } else {
-        html_template! {
-            <div class="style_contents">
-                <LocalStyle href={ css!("column-style") } />
-                <div id="column-style-container" class="no-style">
-                    <div class="style-contents">{ "No styles available" }</div>
-                </div>
-            </div>
-        }
-    };
+    let components = plugin_column_names
+        .iter()
+        .zip(&view_config.columns)
+        .filter_map(|(ty, name)| {
+            let attr_type = p
+                .session
+                .metadata()
+                .get_column_view_type(&p.column_name)
+                .expect("Couldn't get column type for {column_name}");
+            let zipped = ty.as_deref().zip(name.as_deref());
+            match zipped {
+                Some(("Symbol", name)) if name == p.column_name => {
+                    let attrs = p.attrs.symbol.clone().unwrap();
+                    Some(html! {
+                        <SymbolAttr
+                            { attr_type }
+                            column_name={ p.column_name.clone() }
+                            session={ &p.session }
+                            renderer={ &p.renderer }
+                            custom_events={ &p.custom_events }
+                            { attrs }
+                            config={ p.config.clone() }
+                        />
+                    })
+                }
+                _ => None,
+            }
+        })
+        .map(|html| html! {<div class="tab-section">{html}</div>})
+        .collect::<Html>();
 
     html! {
-        <div id="style-tab">{inner}</div>
+        <div id="style-tab">
+            <div class="tab-section">
+                <ColumnStyle
+                    custom_events={p.custom_events.clone()}
+                    session={p.session.clone()}
+                    renderer={p.renderer.clone()}
+                    ty = {p.ty}
+                    column_name = {p.column_name.clone()}
+                    config ={  p.config.clone() }
+                    attrs = {p.attrs.clone()}
+                />
+            </div>
+            {components}
+        </div>
     }
 }
