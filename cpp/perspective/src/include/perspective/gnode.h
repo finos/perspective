@@ -156,7 +156,7 @@ public:
     const t_data_table* get_table() const;
     t_data_table* get_table();
 
-    std::shared_ptr<t_data_table> get_table_sptr();
+    std::shared_ptr<t_data_table> get_table_sptr() const;
 
     t_data_table* _get_otable(t_uindex port_id);
     t_data_table* _get_itable(t_uindex port_id);
@@ -212,6 +212,8 @@ public:
 
     std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
     std::shared_ptr<t_regex_mapping> get_expression_regex_mapping() const;
+
+    const t_gstate::t_mapping& get_pkey_map() const;
 
 #ifdef PSP_PARALLEL_FOR
     void set_lock(boost::shared_mutex* lock);

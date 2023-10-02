@@ -116,7 +116,8 @@ Table::validate_expressions(
 
         t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
             expression_alias, expression_string, parsed_expression_string,
-            column_ids, gnode_schema, error, expression_vocab, regex_mapping);
+            column_ids, m_gnode->get_table_sptr(), m_gnode->get_pkey_map(),
+            gnode_schema, error, expression_vocab, regex_mapping);
 
         // FIXME: none == bad type? what about clear
         if (expression_dtype == DTYPE_NONE) {

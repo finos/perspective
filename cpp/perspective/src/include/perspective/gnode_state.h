@@ -27,6 +27,7 @@ std::pair<t_tscalar, t_tscalar> get_vec_min_max(
     const std::vector<t_tscalar>& vec);
 
 class PERSPECTIVE_EXPORT t_gstate {
+public:
     /**
      * @brief A mapping of `t_tscalar` primary keys to `t_uindex` row indices.
      */
@@ -34,7 +35,6 @@ class PERSPECTIVE_EXPORT t_gstate {
 
     typedef tsl::hopscotch_set<t_uindex> t_free_items;
 
-public:
     /**
      * @brief Construct a new `t_gstate`, which manages the canonical state of
      * the `t_gnode` and associated `Table`.
@@ -204,6 +204,7 @@ public:
 
     const t_schema& get_input_schema() const;
     const t_schema& get_output_schema() const;
+    const t_mapping& get_pkey_map() const;
 
     std::vector<t_tscalar> get_row_data_pkeys(
         const std::vector<t_tscalar>& pkeys) const;

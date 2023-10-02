@@ -109,6 +109,7 @@ t_computed_expression::t_computed_expression(
 
 void
 t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
+    const t_gstate::t_mapping& pkey_map,
     std::shared_ptr<t_data_table> destination_table, t_expression_vocab& vocab,
     t_regex_mapping& regex_mapping) const {
     // TODO: share symtables across pre/re/compute
@@ -117,9 +118,12 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
     // pi, infinity, etc.
     sym_table.add_constants();
 
+    t_uindex row_idx = 0;
+
     // Create a function store, with is_type_validator set to false as we
     // are calculating values, not type-checking.
-    t_computed_function_store function_store(vocab, regex_mapping, false);
+    t_computed_function_store function_store(
+        vocab, regex_mapping, false, source_table, pkey_map, row_idx);
     function_store.register_computed_functions(sym_table);
 
     exprtk::expression<t_tscalar> expr_definition;
@@ -166,6 +170,7 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
             const std::string& column_id = m_column_ids[cidx].first;
             values[cidx].second.set(columns[column_id]->get_scalar(ridx));
         }
+        row_idx = ridx;
 
         t_tscalar value = expr_definition.value();
 
@@ -228,14 +233,18 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    std::shared_ptr<t_schema> schema, t_expression_vocab& vocab,
-    t_regex_mapping& regex_mapping) {
+    std::shared_ptr<t_data_table> source_table,
+    const t_gstate::t_mapping& pkey_map, std::shared_ptr<t_schema> schema,
+    t_expression_vocab& vocab, t_regex_mapping& regex_mapping) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
+    t_uindex row_idx = 0;
+
     // Create a function store, with is_type_validator set to true as we are
     // just getting the output types.
-    t_computed_function_store function_store(vocab, regex_mapping, true);
+    t_computed_function_store function_store(
+        vocab, regex_mapping, true, source_table, pkey_map, row_idx);
     function_store.register_computed_functions(sym_table);
 
     std::vector<t_tscalar> values;
@@ -291,16 +300,21 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    const t_schema& schema, t_expression_error& error,
-    t_expression_vocab& vocab, t_regex_mapping& regex_mapping) {
+    std::shared_ptr<t_data_table> source_table,
+    const t_gstate::t_mapping& pkey_map, const t_schema& schema,
+    t_expression_error& error, t_expression_vocab& vocab,
+    t_regex_mapping& regex_mapping) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
     std::vector<t_tscalar> values;
 
+    t_uindex row_idx = 0;
+
     // Create a function store, with is_type_validator set to true as we are
     // just validating the output types.
-    t_computed_function_store function_store(vocab, regex_mapping, true);
+    t_computed_function_store function_store(
+        vocab, regex_mapping, true, source_table, pkey_map, row_idx);
     function_store.register_computed_functions(sym_table);
 
     auto num_input_columns = column_ids.size();
@@ -440,7 +454,9 @@ t_validated_expression_map::get_expression_errors() const {
 }
 
 t_computed_function_store::t_computed_function_store(t_expression_vocab& vocab,
-    t_regex_mapping& regex_mapping, bool is_type_validator)
+    t_regex_mapping& regex_mapping, bool is_type_validator,
+    std::shared_ptr<t_data_table> source_table,
+    const t_gstate::t_mapping& pkey_map, t_uindex& row_idx)
     : m_day_of_week_fn(computed_function::day_of_week(vocab, is_type_validator))
     , m_month_of_year_fn(
           computed_function::month_of_year(vocab, is_type_validator))
@@ -459,7 +475,13 @@ t_computed_function_store::t_computed_function_store(t_expression_vocab& vocab,
     , m_replace_fn(
           computed_function::replace(vocab, regex_mapping, is_type_validator))
     , m_replace_all_fn(computed_function::replace_all(
-          vocab, regex_mapping, is_type_validator)) {}
+          vocab, regex_mapping, is_type_validator))
+    , m_add_one_fn(computed_function::add_one())
+    , m_index_fn(computed_function::index(pkey_map, source_table, row_idx))
+    , m_col_fn(computed_function::col(
+          vocab, is_type_validator, source_table, row_idx))
+    , m_vlookup_fn(computed_function::vlookup(
+          vocab, is_type_validator, source_table, row_idx)) {}
 
 void
 t_computed_function_store::register_computed_functions(
@@ -494,6 +516,7 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("month_of_year", m_month_of_year_fn);
     sym_table.add_function("today", computed_function::today);
     sym_table.add_function("now", computed_function::now);
+    sym_table.add_function("add_one", m_add_one_fn);
 
     // String functions
     sym_table.add_function("intern", m_intern_fn);
@@ -522,6 +545,9 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("substring", m_substring_fn);
     sym_table.add_function("replace", m_replace_fn);
     sym_table.add_function("replace_all", m_replace_all_fn);
+    sym_table.add_function("index", m_index_fn);
+    sym_table.add_function("col", m_col_fn);
+    sym_table.add_function("vlookup", m_vlookup_fn);
 
     // And scalar constants
     sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);

@@ -20,6 +20,7 @@
 #include <perspective/data_table.h>
 #include <perspective/rlookup.h>
 #include <perspective/computed_function.h>
+#include <perspective/gnode_state.h>
 #include <date/date.h>
 #include <tsl/hopscotch_set.h>
 
@@ -54,6 +55,7 @@ public:
         t_dtype dtype);
 
     void compute(std::shared_ptr<t_data_table> source_table,
+        const t_gstate::t_mapping& pkey_map,
         std::shared_ptr<t_data_table> destination_table,
         t_expression_vocab& vocab, t_regex_mapping& regex_mapping) const;
 
@@ -98,8 +100,9 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        std::shared_ptr<t_schema> schema, t_expression_vocab& vocab,
-        t_regex_mapping& regex_mapping);
+        std::shared_ptr<t_data_table> source_table,
+        const t_gstate::t_mapping& pkey_map, std::shared_ptr<t_schema> schema,
+        t_expression_vocab& vocab, t_regex_mapping& regex_mapping);
 
     /**
      * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
@@ -125,8 +128,10 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const t_schema& schema, t_expression_error& error,
-        t_expression_vocab& vocab, t_regex_mapping& regex_mapping);
+        std::shared_ptr<t_data_table> source_table,
+        const t_gstate::t_mapping& pkey_map, const t_schema& schema,
+        t_expression_error& error, t_expression_vocab& vocab,
+        t_regex_mapping& regex_mapping);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
@@ -188,7 +193,9 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
     PSP_NON_COPYABLE(t_computed_function_store);
 
     t_computed_function_store(t_expression_vocab& vocab,
-        t_regex_mapping& regex_mapping, bool is_type_validator);
+        t_regex_mapping& regex_mapping, bool is_type_validator,
+        std::shared_ptr<t_data_table> source_table,
+        const t_gstate::t_mapping& pkey_map, t_uindex& row_count);
 
     void register_computed_functions(
         exprtk::symbol_table<t_tscalar>& sym_table);
@@ -216,6 +223,10 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
     computed_function::substring m_substring_fn;
     computed_function::replace m_replace_fn;
     computed_function::replace_all m_replace_all_fn;
+    computed_function::add_one m_add_one_fn;
+    computed_function::index m_index_fn;
+    computed_function::col m_col_fn;
+    computed_function::vlookup m_vlookup_fn;
 };
 
 } // end namespace perspective

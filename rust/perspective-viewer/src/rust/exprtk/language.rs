@@ -395,6 +395,26 @@ thread_local! {
                 insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})",
                 documentation: "Replaces all non-overlapping matches of pattern in string with replacer, or return the original string if no replaces were made.",
             },
+            CompletionItemSuggestion {
+                label: "add_one",
+                insert_text: "add_one(${1:uint64})",
+                documentation: "Adds one to a number",
+            },
+            CompletionItemSuggestion {
+                label: "index",
+                insert_text: "index()",
+                documentation: "Looks up the index value of the current row",
+            },
+            CompletionItemSuggestion {
+                label: "col",
+                insert_text: "col(${1:string})",
+                documentation: "Looks up a column value by name",
+            },
+            CompletionItemSuggestion {
+                label: "vlookup",
+                insert_text: "vlookup(${1:string}, ${2:uint64})",
+                documentation: "Looks up a value in another column by index",
+            },
         ]
     ;
 }

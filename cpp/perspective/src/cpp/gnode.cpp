@@ -638,7 +638,7 @@ t_gnode::get_table() const {
 }
 
 std::shared_ptr<t_data_table>
-t_gnode::get_table_sptr() {
+t_gnode::get_table_sptr() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `get_table_sptr` on an uninited gnode.");
     return m_gstate->get_table();
@@ -872,7 +872,8 @@ t_gnode::_register_context(
 
             if (should_update) {
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -887,7 +888,8 @@ t_gnode::_register_context(
             ctx->reset();
             if (should_update) {
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -902,7 +904,8 @@ t_gnode::_register_context(
             ctx->reset();
             if (should_update) {
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -928,7 +931,8 @@ t_gnode::_register_context(
 
             if (should_update) {
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -1018,7 +1022,8 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -1027,7 +1032,8 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -1036,7 +1042,8 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -1046,7 +1053,8 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
                 t_ctx_grouped_pkey* ctx
                     = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ctx->compute_expressions(m_gstate->get_table(),
-                    expression_vocab, expression_regex_mapping);
+                    m_gstate->get_pkey_map(), expression_vocab,
+                    expression_regex_mapping);
                 ctx->get_expression_tables()->set_flattened(
                     m_gstate->get_pkeyed_table(
                         ctx->get_expression_tables()->m_master->get_schema(),
@@ -1082,28 +1090,28 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
         switch (ctxh.get_type()) {
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed, expression_vocab,
-                    expression_regex_mapping);
+                ctx->compute_expressions(master, m_gstate->get_pkey_map(),
+                    flattened, delta, prev, current, transitions, existed,
+                    expression_vocab, expression_regex_mapping);
             } break;
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed, expression_vocab,
-                    expression_regex_mapping);
+                ctx->compute_expressions(master, m_gstate->get_pkey_map(),
+                    flattened, delta, prev, current, transitions, existed,
+                    expression_vocab, expression_regex_mapping);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed, expression_vocab,
-                    expression_regex_mapping);
+                ctx->compute_expressions(master, m_gstate->get_pkey_map(),
+                    flattened, delta, prev, current, transitions, existed,
+                    expression_vocab, expression_regex_mapping);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 t_ctx_grouped_pkey* ctx
                     = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed, expression_vocab,
-                    expression_regex_mapping);
+                ctx->compute_expressions(master, m_gstate->get_pkey_map(),
+                    flattened, delta, prev, current, transitions, existed,
+                    expression_vocab, expression_regex_mapping);
             } break;
             case UNIT_CONTEXT:
                 break;
@@ -1118,6 +1126,13 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
  *
  * Getters
  */
+
+const t_gstate::t_mapping&
+t_gnode::get_pkey_map() const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    return m_gstate->get_pkey_map();
+}
 
 std::shared_ptr<t_expression_vocab>
 t_gnode::get_expression_vocab() const {
