@@ -154,6 +154,10 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         );
     }
 
+    addViewer(config) {
+        this.workspace.addViewer(config);
+    }
+
     addTable(name, table) {
         this.workspace.addTable(name, table);
     }

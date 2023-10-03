@@ -342,6 +342,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         if (viewer) {
             widget = starting_widgets.find((x) => x.viewer === viewer);
             if (widget) {
+                widget.load(this.tables.get(viewer_config.table));
                 widget.restore({ ...viewer_config, master });
             } else {
                 widget = this._createWidget({

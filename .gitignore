@@ -218,3 +218,5 @@ playwright/.cache/
 
 .pyodide-xbuildenv
 benchmark_venv
+
+venv/

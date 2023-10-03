@@ -76,6 +76,7 @@
     #modal_panel {
         flex: 1 1 auto;
         margin: var(--modal-panel--margin);
+        overflow: hidden;
     }
 
     #modal_panel > .split-panel-divider {
@@ -303,11 +304,9 @@
         margin-top: 1px;
     }
 
-    .expr_editor_column,
-    .sidebar_column {
+    .expr_editor_column {
         z-index: 2;
         width: 100%;
-        min-width: 250px;
     }
 
     #modal_panel .is-width-override {

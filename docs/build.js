@@ -100,11 +100,21 @@ async function run_with_theme(page, is_dark = false) {
 }
 
 async function run() {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    await run_with_theme(page);
-    await run_with_theme(page, true);
-    await browser.close();
+    if (!fs.existsSync("static/features")) {
+        const browser = await puppeteer.launch({ headless: false });
+        const page = await browser.newPage();
+        await run_with_theme(page);
+        await run_with_theme(page, true);
+        await browser.close();
+    }
+
+    // TODO There is a typescript module annoyingly called `blocks`.
+    if (!fs.existsSync("static/blocks")) {
+        fs.mkdirSync("static/blocks");
+    }
+
+    const { dist_examples } = await import("../examples/blocks/index.mjs");
+    await dist_examples(`${__dirname}/static/blocks`);
 }
 
 function template(is_dark) {
@@ -137,7 +147,7 @@ function template(is_dark) {
         </perspective-viewer>
         <script type="module">
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
-            const WORKER = window.perspective.worker();
+            const WORKER = perspective.worker();
             async function on_load() {
                 var el = document.getElementsByTagName('perspective-viewer')[0];
                 const plugin = await el.getPlugin("Heatmap");

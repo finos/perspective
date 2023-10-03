@@ -43,6 +43,7 @@
     },
     "dependencies": {
         "fflate": "^0.7.4",
+        "stoppable": "1.1.0",
         "ws": "^6.1.2"
     },
     "devDependencies": {

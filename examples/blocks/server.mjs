@@ -19,7 +19,7 @@ import { dirname } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-dist_examples(`${__dirname}/dist`);
+await dist_examples(`${__dirname}/dist`);
 
 const template = (body) => `
 <!DOCTYPE html>
