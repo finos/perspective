@@ -10,41 +10,55 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const LOCAL_EXAMPLES = [
-    "editable",
-    "file",
-    "fractal",
-    "market",
-    "raycasting",
-    "evictions",
-    "nypd",
-    "magic",
-    "streaming",
-    "covid",
-    "movies",
-    "superstore",
-    "citibike",
-    "olympics",
-];
+import sh from "@finos/perspective-scripts/sh.mjs";
+// import * as url from "url";
 
-exports.LOCAL_EXAMPLES = LOCAL_EXAMPLES;
+import perspective from "@finos/perspective";
+import {
+    Uint8ArrayReader,
+    ZipReader,
+    TextWriter,
+    TextReader,
+} from "@zip.js/zip.js";
 
-exports.get_examples = function get_examples(
-    root = "https://perspective.finos.org/"
-) {
-    const standalone = [
-        {
-            img: "https://perspective.finos.org/img/jupyterlab.png",
-            url: "http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks",
-            name: "jupyterlab",
-        },
-    ];
+// import * as fs from "node:fs/promises";
+import * as url from "url";
+import * as fs from "node:fs";
 
-    const hashes = LOCAL_EXAMPLES.map((x) => ({
-        img: `${root}blocks/${x}/preview.png`,
-        url: `${root}block?example=${x}`,
-        name: x,
-    }));
+async function main() {
+    const __dirname = url
+        .fileURLToPath(new URL(".", import.meta.url))
+        .slice(0, -1);
 
-    return hashes.concat(standalone);
-};
+    if (fs.existsSync(`${__dirname}/olympics.arrow`)) {
+        return;
+    }
+
+    sh`kaggle datasets download -d heesoo37/120-years-of-olympic-history-athletes-and-results`
+        .cwd(__dirname)
+        .runSync();
+
+    const zip = fs.readFileSync(
+        `${__dirname}/120-years-of-olympic-history-athletes-and-results.zip`
+    );
+
+    const textReader = new TextReader(zip);
+    const zipReader = new ZipReader(textReader);
+    const entries = await zipReader.getEntries();
+    const csv = await entries[0].getData(new TextWriter(), {
+        onprogress: (p, t) => console.log(`(${p}b / ${t}b)`),
+    });
+
+    zipReader.close();
+
+    const table = await perspective.table(csv);
+    const view = await table.view();
+    const arrow = await view.to_arrow();
+    fs.writeFileSync(`${__dirname}/olympics.arrow`, Buffer.from(arrow));
+    fs.unlinkSync(
+        `${__dirname}/120-years-of-olympic-history-athletes-and-results.zip`
+    );
+    await view.delete();
+}
+
+main();

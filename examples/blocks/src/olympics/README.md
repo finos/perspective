@@ -1,8 +1,4 @@
-Demo of [Perspective](https://github.com/finos/perspective) with 8,618 rows of Olympics
-performance data from 4 different years (2 per season).
+Demo of [Perspective](https://github.com/finos/perspective) with ~270,000 rows.
 
-This dataset is bootstrapped off the [Ag-Grid](https://www.ag-grid.com/)
-[demo page](https://raw.githubusercontent.com/ag-grid/ag-grid/master/packages/ag-grid-docs/src/olympicWinnersSmall.json),
-and has no server component itself, showing how easy it is to use Perspective's
-client-side architecture to get a fully-interactive BI experience, on top of
-already-deployed web data artifacts without modification or intermediate servers.
+This dataset from [Kaggle](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results) provides a row for every
+athlete to attend the Olympics since 1896.

@@ -10,24 +10,40 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@mixin icon {
+    background-repeat: no-repeat;
+    background-color: var(--icon--color);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
 :host {
     input[type="checkbox"] {
         appearance: none;
-        height: 20px;
+        height: 14px;
+        width: 14px;
         margin: 0px;
         cursor: pointer;
         outline: none;
+        padding: 0 5px;
 
         &:before {
+            @include icon;
+            width: 14px;
+            height: 14px;
             font-family: var(--button--font-family, inherit);
-            color: var(--inactive--color, #ccc);
-            content: var(--inactive-column-selector--content, none);
-            font-size: var(--column-selector--font-size, 14px);
+            background-color: var(--inactive--color, #ccc);
+            -webkit-mask-image: var(--inactive-column-selector--content, none);
+            mask-image: var(--inactive-column-selector--content, none);
+            // font-size: var(--column-selector--font-size, 14px);
         }
 
         &:checked:before {
-            color: var(--active--color, blue);
-            content: var(--active-column-selector--content, none);
+            //color: var(--active--color, blue);
+            -webkit-mask-image: var(--active-column-selector--content, none);
+            mask-image: var(--active-column-selector--content, none);
         }
     }
 }
