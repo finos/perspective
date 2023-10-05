@@ -194,6 +194,7 @@ python/perspective/bench/stresstest/results
 rust/perspective-viewer/target*
 rust/perspective-viewer/target.vscode
 rust/perspective-viewer/pkg
+rust/*/target
 
 # config and deps
 .perspectiverc

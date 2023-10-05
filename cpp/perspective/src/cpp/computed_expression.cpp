@@ -11,6 +11,8 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 #include <perspective/computed_expression.h>
+#include <lib.rs.h>
+#include <cxx.h>
 
 namespace perspective {
 
@@ -144,6 +146,19 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
     }
 
     expr_definition.register_symbol_table(sym_table);
+
+    try {
+        auto ast = exprtk_rs::parser::parse("1, 2, 3");
+        auto res = ast->debug();
+        std::stringstream ss;
+        ss << "DEBUG RUST: " << res.c_str() << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    } catch (rust::Error e) {
+        std::stringstream ss;
+        ss << "RUST ERROR: " << e.what() << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+    // free_parsed_expr(expr);
 
     if (!t_computed_expression_parser::PARSER->compile(
             m_parsed_expression_string, expr_definition)) {

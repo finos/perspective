@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.18.2)
 project(psp)
 include(CheckCCompilerFlag)
+include(ExternalProject)
 
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 17)
@@ -192,6 +193,20 @@ endif()
 
 # ######################
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
+
+set(MY_CRATE_DIR "${CMAKE_SOURCE_DIR}/../../rust/exprtk-rs")
+
+set(ENV{RUSTFLAGS} "-C relocation-model=pic")
+
+add_custom_target(
+    exprtk-rs ALL
+    COMMAND cargo build --release --target wasm32-unknown-emscripten
+    WORKING_DIRECTORY ${MY_CRATE_DIR}
+    COMMENT "Building exprtk-rs"
+)
+
+include_directories("${MY_CRATE_DIR}/target/wasm32-unknown-emscripten/cxxbridge/exprtk/src")
+include_directories("${MY_CRATE_DIR}/target/wasm32-unknown-emscripten/cxxbridge/rust")
 
 # if(NOT WIN32)
 # set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -554,6 +569,12 @@ if(PSP_WASM_BUILD)
     set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS}")
 
     add_library(psp ${WASM_SOURCE_FILES})
+
+    target_link_libraries(psp
+        debug "${MY_CRATE_DIR}/target/wasm32-unknown-emscripten/debug/libexprtk.a"
+        optimized "${MY_CRATE_DIR}/target/wasm32-unknown-emscripten/release/libexprtk.a")
+    add_dependencies(psp exprtk-rs)
+
     target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
     target_link_libraries(psp arrow re2)

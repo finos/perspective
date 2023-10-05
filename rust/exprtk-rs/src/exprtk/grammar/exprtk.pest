@@ -1,0 +1,20 @@
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+
+alpha = { 'a'..'z' | 'A'..'Z' }
+digit = { '0'..'9' }
+
+ident = { (alpha | digit)+ }
+
+expr = { SOI ~ ident ~ ("," ~ ident)* ~ EOI }
+
+// WHITESPACE = _{ " " | "\t" | NEWLINE }
+
+// ident = { ASCII_ALPHANUMERIC+ }
+
+// string = ${ "\"" ~ inner ~ "\"" }
+// inner  = @{ char* }
+// char   =  {
+// !("\"" | "\\") ~ ANY
+// | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+// | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+// }

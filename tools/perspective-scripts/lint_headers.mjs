@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { glob } from "glob-gitignore";
+import glob from 'fast-glob';
 import { promises as fs } from "fs";
 import * as fs_sync from "fs";
 
@@ -25,6 +25,10 @@ const IGNORE_PATHS = fs_sync
         "cpp/perspective/src/cpp/vendor",
         "cpp/perspective/src/include/perspective/vendor",
         "python/perspective/perspective/core/_version.py",
+        "python/perspective/build/**/*",
+        "**/dist/**/*",
+        "**/node_modules/**/*",
+        "**/build/**/*",
     ]);
 
 const FIX_PATHS = [
@@ -65,6 +69,8 @@ ${c} ┗━━━━━━━━━━━━━━━━━━━━━━━━
 async function check(is_write, pattern, comment) {
     const matches = await glob(pattern, {
         ignore: IGNORE_PATHS,
+        onlyFiles: true,
+        followSymbolicLinks: false,
     });
 
     let exit_code = 0;
