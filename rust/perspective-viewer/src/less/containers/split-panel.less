@@ -11,7 +11,8 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 :host {
-    .split-panel.orient-reverse > .split-panel-child:not(:last-child):not(.is-width-override) {
+    .split-panel.orient-reverse
+        > .split-panel-child:not(:last-child):not(.is-width-override) {
         max-width: 300px;
     }
 
@@ -52,7 +53,7 @@
         .split-panel-divider {
             flex: 0 0 6px;
             transition: background-color 0.2s ease-out;
-            z-index: 2;
+            z-index: var(--settings-panel-z-index);
 
             &:hover {
                 background-color: rgba(0, 0, 0, 0.05);

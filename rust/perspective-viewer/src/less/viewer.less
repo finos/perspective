@@ -10,6 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+:host {
+    --settings-panel-z-index: 10;
+}
+
 :host .sidebar_close_button {
     position: absolute;
     top: 0;
@@ -133,6 +137,7 @@
         padding-left: 8px;
         box-sizing: border-box;
         width: 100%;
+        z-index: var(--settings-panel-z-index);
 
         & > .split-panel-child {
             overflow: hidden;
@@ -302,6 +307,8 @@
         width: 100%;
         background-color: var(--inactive--color, #6e6e6e);
         margin-top: 1px;
+        flex-shrink: 0;
+        flex-grow: 0;
     }
 
     .expr_editor_column {
