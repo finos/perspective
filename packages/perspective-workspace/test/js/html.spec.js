@@ -77,7 +77,7 @@ test.describe("Workspace HTML", () => {
 
             await compareLightDOMContents(
                 page,
-                "workspace-html-light-create-one.txt"
+                "workspace-html-light-create-one.txt",
             );
         });
 
@@ -86,7 +86,7 @@ test.describe("Workspace HTML", () => {
 
             await compareLightDOMContents(
                 page,
-                "workspace-html-light-create-multiple.txt"
+                "workspace-html-light-create-multiple.txt",
             );
         });
 
@@ -95,7 +95,7 @@ test.describe("Workspace HTML", () => {
 
             await compareLightDOMContents(
                 page,
-                "workspace-html-light-create-multiple-with-names.txt"
+                "workspace-html-light-create-multiple-with-names.txt",
             );
         });
     });
@@ -106,7 +106,7 @@ test.describe("Workspace HTML", () => {
 
             await compareShadowDOMContents(
                 page,
-                "workspace-html-shadow-create-one.txt"
+                "workspace-html-shadow-create-one.txt",
             );
         });
 
@@ -115,7 +115,7 @@ test.describe("Workspace HTML", () => {
 
             await compareShadowDOMContents(
                 page,
-                "workspace-html-shadow-create-multiple.txt"
+                "workspace-html-shadow-create-multiple.txt",
             );
         });
 
@@ -124,7 +124,7 @@ test.describe("Workspace HTML", () => {
 
             await compareShadowDOMContents(
                 page,
-                "workspace-html-shadow-create-multiple-with-names.txt"
+                "workspace-html-shadow-create-multiple-with-names.txt",
             );
         });
     });

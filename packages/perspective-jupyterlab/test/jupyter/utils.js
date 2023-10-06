@@ -97,7 +97,7 @@ const test_jupyter = (name, cells, body, args = {}) => {
     test(name, async ({ page }) => {
         await page.goto(
             `http://127.0.0.1:${process.env.__JUPYTERLAB_PORT__}/${url}`,
-            { waitUntil: "domcontentloaded" }
+            { waitUntil: "domcontentloaded" },
         );
         await body({ page });
     });
@@ -110,7 +110,7 @@ module.exports = {
         await module.exports.execute_all_cells(page);
         const viewer = await page.waitForSelector(
             ".jp-OutputArea-output perspective-viewer",
-            { visible: true }
+            { visible: true },
         );
         await viewer.evaluate(async (viewer) => await viewer.flush());
         return viewer;
@@ -129,7 +129,7 @@ module.exports = {
         await new Promise((x) => setTimeout(x, 2000));
 
         await page.waitForSelector(
-            '.jp-Notebook-ExecutionIndicator[data-status="idle"]'
+            '.jp-Notebook-ExecutionIndicator[data-status="idle"]',
         );
 
         // Use our custom keyboard shortcut to run all cells
@@ -148,7 +148,7 @@ module.exports = {
         await new Promise((x) => setTimeout(x, 100));
         // find and click the "new cell" button
         await page.click(
-            '.jp-Button[data-command="notebook:insert-cell-below"]'
+            '.jp-Button[data-command="notebook:insert-cell-below"]',
         );
         await new Promise((x) => setTimeout(x, 100));
         // after clicking new cell, the document will auto
@@ -176,7 +176,7 @@ module.exports = {
         return await Promise.race([
             page
                 .waitForSelector(
-                    'div[data-mime-type="application/vnd.jupyter.stderr"]'
+                    'div[data-mime-type="application/vnd.jupyter.stderr"]',
                 )
                 .then(() => false),
             page

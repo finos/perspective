@@ -35,6 +35,8 @@ test.describe("Area Tests", () => {
 
     run_standard_tests(
         "area",
-        getSvgContentString("perspective-viewer perspective-viewer-d3fc-xyline")
+        getSvgContentString(
+            "perspective-viewer perspective-viewer-d3fc-xyline",
+        ),
     );
 });

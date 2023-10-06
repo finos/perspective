@@ -50,7 +50,7 @@ function barChart(container, settings) {
         .orient("vertical")(data);
 
     const chart = chartSvgFactory(xAxis, yAxis).plotArea(
-        withGridLines(series, settings).orient("horizontal")
+        withGridLines(series, settings).orient("horizontal"),
     );
 
     if (chart.yPaddingInner) {

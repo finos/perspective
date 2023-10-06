@@ -14,7 +14,7 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
     await page.goto(
-        "/@finos/perspective-viewer/test/html/plugin-priority-order.html"
+        "/@finos/perspective-viewer/test/html/plugin-priority-order.html",
     );
     await page.evaluate(async () => {
         while (!window["__TEST_PERSPECTIVE_READY__"]) {

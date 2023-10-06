@@ -26,7 +26,7 @@ export function pointSeriesCanvas(
     color,
     label,
     symbols,
-    scale_factor = 1
+    scale_factor = 1,
 ) {
     let series = seriesCanvasPoint()
         .crossValue((d) => d.x)
@@ -54,7 +54,7 @@ export function pointSeriesCanvas(
                     // A = pi * r^2
                     // r = sqrt(A / pi)
                     const radius = Math.sqrt(
-                        (scale_factor * size(d.size)) / Math.PI
+                        (scale_factor * size(d.size)) / Math.PI,
                     );
 
                     magnitude = radius * LABEL_COSINE;

@@ -259,6 +259,6 @@ if (
 ) {
     window.customElements.define(
         "perspective-viewer-plugin",
-        HTMLPerspectiveViewerPluginElement
+        HTMLPerspectiveViewerPluginElement,
     );
 }

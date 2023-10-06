@@ -21,7 +21,7 @@ export const flattenExtent = (array) => {
             withUndefined(Math.min)(r[0], v[0]),
             withUndefined(Math.max)(r[1], v[1]),
         ],
-        [undefined, undefined]
+        [undefined, undefined],
     );
 };
 

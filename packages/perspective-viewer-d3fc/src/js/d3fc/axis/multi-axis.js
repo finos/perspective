@@ -30,7 +30,7 @@ const multiAxis = (orient, baseAxis, scale) => {
         "ticks",
         "tickArguments",
         "tickValues",
-        "tickPadding"
+        "tickPadding",
     );
     let decorate = () => {};
 
@@ -93,7 +93,7 @@ const multiAxis = (orient, baseAxis, scale) => {
             };
 
             g.attr("transform", (d, i) =>
-                translate(0, sign * getAxisOffset(i))
+                translate(0, sign * getAxisOffset(i)),
             ).each((group, i, nodes) => {
                 const groupElement = select(nodes[i]);
                 const groupScale = scaleFromGroup(scale, group);
@@ -108,7 +108,7 @@ const multiAxis = (orient, baseAxis, scale) => {
 
             // exit
             g.exit().attr("transform", (d, i) =>
-                translate(0, sign * getAxisOffset(i))
+                translate(0, sign * getAxisOffset(i)),
             );
         });
     };

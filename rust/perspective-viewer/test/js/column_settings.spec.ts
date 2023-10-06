@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
 export async function checkTab(
     columnSettingsSidebar: ColumnSettingsSidebar,
     active: boolean,
-    expression: boolean
+    expression: boolean,
 ) {
     await columnSettingsSidebar.container.waitFor({
         state: "visible",
@@ -47,7 +47,7 @@ export async function checkTab(
         } else {
             test.fail(
                 true,
-                "No settings exist for non-expression, inactive columns!"
+                "No settings exist for non-expression, inactive columns!",
             );
         }
     }

@@ -37,22 +37,22 @@ declare global {
     interface Document {
         createElement(
             tagName: "perspective-viewer",
-            options?: ElementCreationOptions
+            options?: ElementCreationOptions,
         ): HTMLPerspectiveViewerElement;
         createElement(
             tagName: "perspective-viewer-plugin",
-            options?: ElementCreationOptions
+            options?: ElementCreationOptions,
         ): HTMLPerspectiveViewerPluginElement;
         querySelector<E extends Element = Element>(selectors: string): E | null;
         querySelector(
-            selectors: "perspective-viewer"
+            selectors: "perspective-viewer",
         ): HTMLPerspectiveViewerElement | null;
     }
 
     interface CustomElementRegistry {
         get(tagName: "perspective-viewer"): typeof HTMLPerspectiveViewerElement;
         get(
-            tagName: "perspective-viewer-plugin"
+            tagName: "perspective-viewer-plugin",
         ): typeof HTMLPerspectiveViewerPluginElement;
     }
 }

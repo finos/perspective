@@ -188,7 +188,7 @@ export interface IPerspectiveViewerElement {
      * ```
      */
     restore(
-        config: PerspectiveViewerConfig | string | ArrayBuffer
+        config: PerspectiveViewerConfig | string | ArrayBuffer,
     ): Promise<void>;
 
     /**
@@ -217,7 +217,7 @@ export interface IPerspectiveViewerElement {
     save(format: "arraybuffer"): Promise<ArrayBuffer>;
     save(format: "string"): Promise<string>;
     save(
-        format?: "json" | "arraybuffer" | "string"
+        format?: "json" | "arraybuffer" | "string",
     ): Promise<PerspectiveViewerConfig | string | ArrayBuffer>;
 
     /**

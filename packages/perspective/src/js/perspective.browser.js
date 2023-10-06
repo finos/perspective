@@ -197,7 +197,7 @@ const WORKER_SINGLETON = /* @__PURE__ */ (function () {
             const config_str = JSON.stringify(config);
             if (__CONFIG__ && config_str !== __CONFIG__) {
                 throw new Error(
-                    `Configuration object for shared_worker() has changed - this is probably a bug in your application.`
+                    `Configuration object for shared_worker() has changed - this is probably a bug in your application.`,
                 );
             }
             __CONFIG__ = config_str;

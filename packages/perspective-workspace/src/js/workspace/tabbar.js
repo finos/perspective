@@ -105,7 +105,7 @@ export class PerspectiveTabBar extends TabBar {
             Array.from(this.contentNode.children).filter(
                 (x) =>
                     x.classList.contains("settings_open") &&
-                    x.classList.contains("p-mod-current")
+                    x.classList.contains("p-mod-current"),
             ).length > 0
         ) {
             this.contentNode.classList.add("inactive-blur");
@@ -137,7 +137,7 @@ export class PerspectiveTabBar extends TabBar {
                         return ElementExt.hitTest(
                             tab,
                             event.clientX,
-                            event.clientY
+                            event.clientY,
                         );
                     });
 
@@ -148,7 +148,7 @@ export class PerspectiveTabBar extends TabBar {
                     const title = this.titles[index];
                     this._workspace._maximize(title.owner);
                     requestAnimationFrame(() =>
-                        title.owner.viewer.toggleConfig()
+                        title.owner.viewer.toggleConfig(),
                     );
 
                     return;

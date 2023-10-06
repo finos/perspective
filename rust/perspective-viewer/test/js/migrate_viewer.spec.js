@@ -288,7 +288,7 @@ test.describe("Migrate Viewer", () => {
         for (const [name, old, current] of TESTS) {
             test(`Migrate '${name}'`, async ({ page }) => {
                 expect(convert(old, { replace_defaults: true })).toEqual(
-                    current
+                    current,
                 );
             });
         }
@@ -317,7 +317,7 @@ test.describe("Migrate Viewer", () => {
 
                 expect(config).toEqual(current);
                 expect(convert(old, { replace_defaults: true })).toEqual(
-                    current
+                    current,
                 );
 
                 const contents = get_contents(page);

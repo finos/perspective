@@ -35,7 +35,7 @@ test.describe("Heatmap Tests", () => {
     run_standard_tests(
         "heatmap",
         getSvgContentString(
-            "perspective-viewer perspective-viewer-d3fc-heatmap"
-        )
+            "perspective-viewer perspective-viewer-d3fc-heatmap",
+        ),
     );
 });

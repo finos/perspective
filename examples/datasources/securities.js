@@ -145,7 +145,7 @@ const getTable = (
         update_size: UPDATE_SIZE,
         table_size: TABLE_SIZE,
         cache_entries: CACHE_ENTRIES,
-    }
+    },
 ) => {
     if (config.cached) {
         return init_cached(config);

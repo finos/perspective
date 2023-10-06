@@ -22,7 +22,7 @@ export const chartCanvasFactory = (xAxis, yAxis) =>
         (x, y) => {
             return x.canvasPlotArea(y).svgPlotArea(fc.seriesSvgPoint());
         },
-        true
+        true,
     );
 
 const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
@@ -99,7 +99,9 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         const node = plotArea.select("svg").node();
         node.setAttribute(
             "viewBox",
-            `0 0 ${plotArea.node().clientWidth} ${plotArea.node().clientHeight}`
+            `0 0 ${plotArea.node().clientWidth} ${
+                plotArea.node().clientHeight
+            }`,
         );
         node.setAttribute("preserveAspectRatio", "none");
 
@@ -192,7 +194,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                     .select("d3fc-canvas.plot-area")
                     .on("draw", function (event, d) {
                         drawMultiCanvasSeries(
-                            d3.select(event.currentTarget).select("canvas")
+                            d3.select(event.currentTarget).select("canvas"),
                         );
                     });
             } else {
@@ -205,7 +207,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                         (d, i, nodes) => {
                             svgPlotArea.yScale(yScales[i]);
                             d3.select(nodes[i]).datum(d).call(svgPlotArea);
-                        }
+                        },
                     );
                 };
 
@@ -213,7 +215,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                     .select("d3fc-svg.plot-area")
                     .on("draw", function (event, d) {
                         drawMultiSvgSeries(
-                            d3.select(event.currentTarget).select("svg")
+                            d3.select(event.currentTarget).select("svg"),
                         );
                     });
             }

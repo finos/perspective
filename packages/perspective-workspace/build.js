@@ -68,7 +68,7 @@ const fs = require("fs");
 function add(builder, path, path2) {
     builder.add(
         path,
-        fs.readFileSync(require.resolve(path2 || path)).toString()
+        fs.readFileSync(require.resolve(path2 || path)).toString(),
     );
 }
 
@@ -101,19 +101,19 @@ async function build_all() {
     add(builder3, "./injected.less", "./src/less/injected.less");
     fs.writeFileSync(
         "build/css/workspace.css",
-        builder3.compile().get("workspace.css")
+        builder3.compile().get("workspace.css"),
     );
 
     fs.writeFileSync(
         "build/css/injected.css",
-        builder3.compile().get("injected.css")
+        builder3.compile().get("injected.css"),
     );
 
     const builder = new BuildCss("./src/themes");
     add(
         builder,
         "fonts.less",
-        "@finos/perspective-viewer/src/themes/fonts.less"
+        "@finos/perspective-viewer/src/themes/fonts.less",
     );
 
     add(builder, "@finos/perspective-viewer/src/themes/pro.less");
@@ -125,24 +125,24 @@ async function build_all() {
     add(
         builder2,
         "fonts.less",
-        "@finos/perspective-viewer/src/themes/fonts.less"
+        "@finos/perspective-viewer/src/themes/fonts.less",
     );
     add(builder2, "@finos/perspective-viewer/src/themes/pro.less");
     add(builder2, "@finos/perspective-viewer/src/themes/variables.less");
     add(
         builder2,
         "pro.less",
-        "@finos/perspective-workspace/src/themes/pro.less"
+        "@finos/perspective-workspace/src/themes/pro.less",
     );
     add(
         builder2,
         "pro-dark-viewer.less",
-        "@finos/perspective-viewer/src/themes/pro-dark.less"
+        "@finos/perspective-viewer/src/themes/pro-dark.less",
     );
     add(builder2, "pro-dark2.scss", "./src/themes/pro-dark.less");
     fs.writeFileSync(
         "dist/css/pro-dark.css",
-        builder2.compile().get("pro-dark2.css")
+        builder2.compile().get("pro-dark2.css"),
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));

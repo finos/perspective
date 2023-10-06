@@ -45,15 +45,15 @@ async function compile_css() {
     const builder = new BuildCss("");
     builder.add(
         "ol/ol.css",
-        fs.readFileSync(require.resolve("ol/ol.css")).toString()
+        fs.readFileSync(require.resolve("ol/ol.css")).toString(),
     );
     builder.add(
         "./plugin.less",
-        fs.readFileSync("./src/less/plugin.less").toString()
+        fs.readFileSync("./src/less/plugin.less").toString(),
     );
     fs.writeFileSync(
         "dist/css/perspective-viewer-openlayers.css",
-        builder.compile().get("plugin.css")
+        builder.compile().get("plugin.css"),
     );
 }
 

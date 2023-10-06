@@ -49,7 +49,7 @@ if (process.platform === "darwin") {
             'wget "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz" \
 >/dev/null 2>&1 && tar xfz boost_1_82_0.tar.gz && cd boost_1_82_0 && ./bootstrap.sh && \
 sudo ./b2 -j8 cxxflags=-fPIC cflags=-fPIC -a --with-program_options --with-filesystem \
---with-thread --with-system architecture=arm+x86 install && cd ..'
+--with-thread --with-system architecture=arm+x86 install && cd ..',
     );
 }
 

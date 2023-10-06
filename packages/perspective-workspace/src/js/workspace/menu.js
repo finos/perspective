@@ -27,7 +27,7 @@ export class MenuRenderer extends Menu.Renderer {
             {
                 className: "lm-Menu-itemMnemonic p-Menu-itemMnemonic",
             },
-            char
+            char,
         );
 
         return [prefix, span, suffix];
@@ -39,7 +39,7 @@ export class MenuRenderer extends Menu.Renderer {
             {
                 className: "lm-Menu-itemLabel p-Menu-itemLabel",
             },
-            content
+            content,
         );
     }
 
@@ -63,7 +63,7 @@ export class MenuRenderer extends Menu.Renderer {
             },
             this.renderLabel(data),
             this.renderShortcut(data),
-            this.renderSubmenu(data)
+            this.renderSubmenu(data),
         );
     }
 }

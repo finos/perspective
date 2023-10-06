@@ -54,7 +54,7 @@
  */
 export function convert(
     old: Record<string, unknown> | ArrayBuffer | string,
-    { warn = true, replace_defaults = false }: PerspectiveConvertOptions = {}
+    { warn = true, replace_defaults = false }: PerspectiveConvertOptions = {},
 ): Record<string, unknown> | ArrayBuffer | string {
     if (typeof old === "object" && !(old instanceof ArrayBuffer)) {
         const copy = JSON.parse(JSON.stringify(old));
@@ -86,7 +86,7 @@ function migrate_workspace(old, options) {
             old.viewers[key].master = false;
             if (options.warn) {
                 console.warn(
-                    `Deprecated perspective missing attribute "master" set to default`
+                    `Deprecated perspective missing attribute "master" set to default`,
                 );
             }
         }
@@ -95,7 +95,7 @@ function migrate_workspace(old, options) {
             old.viewers[key].linked = false;
             if (options.warn) {
                 console.warn(
-                    `Deprecated perspective missing attribute "linked" set to default`
+                    `Deprecated perspective missing attribute "linked" set to default`,
                 );
             }
         }
@@ -127,7 +127,7 @@ function migrate_viewer(old, omit_attributes, options) {
                 ? migrate_attributes_workspace
                 : migrate_attributes_viewer,
         ].filter((x) => !!x),
-        options
+        options,
     );
 }
 
@@ -162,7 +162,7 @@ function migrate_nulls(old, options) {
             old[key] = [];
             if (options.warn) {
                 console.warn(
-                    `Deprecated perspective missing attribute "${key}" set to default"`
+                    `Deprecated perspective missing attribute "${key}" set to default"`,
                 );
             }
         }
@@ -171,7 +171,7 @@ function migrate_nulls(old, options) {
             old.aggregates = {};
             if (options.warn) {
                 console.warn(
-                    `Deprecated perspective missing attribute "aggregates" set to default"`
+                    `Deprecated perspective missing attribute "aggregates" set to default"`,
                 );
             }
         }
@@ -200,7 +200,7 @@ function _migrate_field_aliases(original, aliases) {
                     delete old[pivot];
                     if (options.warn) {
                         console.warn(
-                            `Deprecated perspective attribute "${pivot}" renamed "${original}"`
+                            `Deprecated perspective attribute "${pivot}" renamed "${original}"`,
                         );
                     }
                 }
@@ -256,7 +256,7 @@ function _migrate_expression(regex1, rep, expression, old, options) {
         const replaced = expression.replace(regex1, rep);
         if (options.warn) {
             console.warn(
-                `Deprecated perspective "expression" attribute value "${expression}" updated to "${replaced}"`
+                `Deprecated perspective "expression" attribute value "${expression}" updated to "${replaced}"`,
             );
         }
 
@@ -268,7 +268,7 @@ function _migrate_expression(regex1, rep, expression, old, options) {
                         old[key][idx] = replaced;
                         if (options.warn) {
                             console.warn(
-                                `Deprecated perspective expression in "${key}" attribute "${expression}" replaced with "${replaced}"`
+                                `Deprecated perspective expression in "${key}" attribute "${expression}" replaced with "${replaced}"`,
                             );
                         }
                     }
@@ -281,7 +281,7 @@ function _migrate_expression(regex1, rep, expression, old, options) {
                 filter[0] = replaced;
                 if (options.warn) {
                     console.warn(
-                        `Deprecated perspective expression in "filter" attribute "${expression}" replaced with "${replaced}"`
+                        `Deprecated perspective expression in "filter" attribute "${expression}" replaced with "${replaced}"`,
                     );
                 }
             }
@@ -292,7 +292,7 @@ function _migrate_expression(regex1, rep, expression, old, options) {
                 sort[0] = replaced;
                 if (options.warn) {
                     console.warn(
-                        `Deprecated perspective expression in "sort" attribute "${expression}" replaced with "${replaced}"`
+                        `Deprecated perspective expression in "sort" attribute "${expression}" replaced with "${replaced}"`,
                     );
                 }
             }
@@ -328,7 +328,7 @@ function migrate_expressions(old, options) {
         delete old["computed-columns"];
         if (options.warn) {
             console.warn(
-                `Deprecated perspective attribute "computed-columns" renamed "expressions"`
+                `Deprecated perspective attribute "computed-columns" renamed "expressions"`,
             );
         }
 
@@ -349,7 +349,7 @@ function migrate_expressions(old, options) {
                     b,
                     expression,
                     old,
-                    options
+                    options,
                 );
             }
 
@@ -398,7 +398,7 @@ function migrate_plugins(old, options) {
             console.warn(
                 `Deprecated perspective "plugin" attribute value "${
                     old.plugin
-                }" updated to "${ALIASES[old.plugin]}"`
+                }" updated to "${ALIASES[old.plugin]}"`,
             );
         }
     }
@@ -417,7 +417,7 @@ function migrate_plugin_config(old, options) {
         if (!old.plugin_config.columns) {
             if (options.warn) {
                 console.warn(
-                    `Deprecated perspective attribute "plugin_config" moved to "plugin_config.columns"`
+                    `Deprecated perspective attribute "plugin_config" moved to "plugin_config.columns"`,
                 );
             }
 
@@ -444,7 +444,7 @@ function migrate_plugin_config(old, options) {
 
                     if (options.warn) {
                         console.warn(
-                            `Deprecated perspective attribute "color_mode" renamed "number_bg_mode"`
+                            `Deprecated perspective attribute "color_mode" renamed "number_bg_mode"`,
                         );
                     }
                 }
@@ -479,7 +479,7 @@ function migrate_plugin_config(old, options) {
 
                 if (options.warn) {
                     console.warn(
-                        `Deprecated perspective attribute "number_color_mode" renamed "number_bg_mode"`
+                        `Deprecated perspective attribute "number_color_mode" renamed "number_bg_mode"`,
                     );
                 }
             }
@@ -494,7 +494,7 @@ function migrate_plugin_config(old, options) {
                 delete column["gradient"];
                 if (options.warn) {
                     console.warn(
-                        `Deprecated perspective attribute "gradient" renamed "bg_gradient"`
+                        `Deprecated perspective attribute "gradient" renamed "bg_gradient"`,
                     );
                 }
             }
@@ -509,7 +509,7 @@ function migrate_plugin_config(old, options) {
                 delete column["pos_color"];
                 if (options.warn) {
                     console.warn(
-                        `Deprecated perspective attribute "pos_color" renamed "pos_bg_color"`
+                        `Deprecated perspective attribute "pos_color" renamed "pos_bg_color"`,
                     );
                 }
             }
@@ -524,7 +524,7 @@ function migrate_plugin_config(old, options) {
                 delete column["neg_color"];
                 if (options.warn) {
                     console.warn(
-                        `Deprecated perspective attribute "neg_color" renamed "neg_bg_color"`
+                        `Deprecated perspective attribute "neg_color" renamed "neg_bg_color"`,
                     );
                 }
             }
@@ -556,7 +556,7 @@ function migrate_attributes_viewer(old, options) {
 
             if (options.warn) {
                 console.warn(
-                    `Deprecated perspective attribute "${attr}" removed`
+                    `Deprecated perspective attribute "${attr}" removed`,
                 );
             }
         }
@@ -587,7 +587,7 @@ function migrate_attributes_workspace(old, options) {
 
             if (options.warn) {
                 console.warn(
-                    `Deprecated perspective attribute "${attr}" removed`
+                    `Deprecated perspective attribute "${attr}" removed`,
                 );
             }
         }

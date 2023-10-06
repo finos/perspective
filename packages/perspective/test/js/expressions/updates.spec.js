@@ -58,7 +58,7 @@ const pivot_data = [
             expect(
                 before[
                     "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"
-                ]
+                ],
             ).toEqual([
                 "hello world, here is a long, long, long string with lots of characters",
                 "hello world, here is a long, long, long string with lots of characters",
@@ -81,7 +81,7 @@ const pivot_data = [
             expect(
                 after[
                     "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"
-                ]
+                ],
             ).toEqual([
                 "hello world, here is a long, long, long string with lots of characters",
                 "hello world, here is a long, long, long string with lots of characters",
@@ -145,7 +145,7 @@ const pivot_data = [
                     x: [1.5, 2.5, 3.5, 4.5],
                     y: ["A", "B", "C", "D"],
                 },
-                { index: "y" }
+                { index: "y" },
             );
             const view = await table.view({
                 expressions: [
@@ -166,7 +166,7 @@ const pivot_data = [
             expect(
                 before[
                     "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"
-                ]
+                ],
             ).toEqual([
                 "hello world, here is a long, long, long string with lots of characters",
                 "hello world, here is a long, long, long string with lots of characters",
@@ -182,7 +182,7 @@ const pivot_data = [
             expect(
                 after[
                     "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"
-                ]
+                ],
             ).toEqual([
                 "hello world, here is a long, long, long string with lots of characters",
                 "hello world, here is a long, long, long string with lots of characters",
@@ -299,7 +299,7 @@ const pivot_data = [
                     y: ["A", "B", "C", "D"],
                     z: ["a", "b", "c", "d"],
                 },
-                { index: "y" }
+                { index: "y" },
             );
             const view = await table.view({
                 expressions: [
@@ -440,7 +440,7 @@ const pivot_data = [
                     x: [1, 2, 3, 4],
                     y: ["A", "B", "C", "D"],
                 },
-                { index: "x" }
+                { index: "x" },
             );
             const view = await table.view({
                 expressions: ['lower("y")'],
@@ -738,7 +738,7 @@ const pivot_data = [
                     x: [1, 2, 3, 4],
                     y: [5, 6, 7, 8],
                 },
-                { index: "x" }
+                { index: "x" },
             );
             const view = await table.view({
                 expressions: ['"w" + "y"'],
@@ -766,7 +766,7 @@ const pivot_data = [
                     x: [1, 2, 3, 4],
                     y: [5, 6, 7, 8],
                 },
-                { index: "x" }
+                { index: "x" },
             );
             const view = await table.view({
                 expressions: ['"w" + "y"'],
@@ -934,7 +934,7 @@ const pivot_data = [
                     c: "string",
                     index: "integer",
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             table.update({
@@ -1371,7 +1371,7 @@ const pivot_data = [
                     { int: 3, float: 4.75, string: "c", datetime: new Date() },
                     { int: 4, float: 5.25, string: "d", datetime: new Date() },
                 ],
-                { index: "int" }
+                { index: "int" },
             );
             const view = await table.view({
                 columns: ['"int" + "float"', "int", "float"],
@@ -1400,7 +1400,7 @@ const pivot_data = [
                     x: [1, 2, 3, 4],
                     y: ["A", "B", "C", "D"],
                 },
-                { index: "x" }
+                { index: "x" },
             );
 
             const view = await table.view({

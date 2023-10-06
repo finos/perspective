@@ -60,7 +60,7 @@ function register_element(plugin_name) {
 
 export function register(...plugins) {
     plugins = new Set(
-        plugins.length > 0 ? plugins : charts.map((chart) => chart.plugin.name)
+        plugins.length > 0 ? plugins : charts.map((chart) => chart.plugin.name),
     );
     charts.forEach((chart) => {
         if (plugins.has(chart.plugin.name)) {
@@ -156,8 +156,8 @@ export function register(...plugins) {
 
                         const svgs = Array.from(
                             this.shadowRoot.querySelectorAll(
-                                "svg:not(#dragHandles)"
-                            )
+                                "svg:not(#dragHandles)",
+                            ),
                         );
 
                         for (const svg of svgs.reverse()) {
@@ -172,23 +172,23 @@ export function register(...plugins) {
                             if (!new_svg.hasAttribute("viewBox")) {
                                 new_svg.setAttribute(
                                     "viewBox",
-                                    `0 0 ${img.width} ${img.height}`
+                                    `0 0 ${img.width} ${img.height}`,
                                 );
                             }
 
                             new_svg.setAttribute(
                                 "xmlns",
-                                "http://www.w3.org/2000/svg"
+                                "http://www.w3.org/2000/svg",
                             );
 
                             for (const text of new_svg.querySelectorAll(
-                                "text"
+                                "text",
                             )) {
                                 text.setAttribute("fill", text_color);
                             }
 
                             var xml = new XMLSerializer().serializeToString(
-                                new_svg
+                                new_svg,
                             );
 
                             xml = xml.replace(/[^\x00-\x7F]/g, "");
@@ -200,7 +200,7 @@ export function register(...plugins) {
 
                             try {
                                 img.src = `data:image/svg+xml;base64,${btoa(
-                                    xml
+                                    xml,
                                 )}`;
                                 await done;
                             } catch (e) {
@@ -217,12 +217,12 @@ export function register(...plugins) {
                                 svg.parentNode.offsetLeft,
                                 svg.parentNode.offsetTop,
                                 img.width,
-                                img.height
+                                img.height,
                             );
                         }
 
                         const canvases = Array.from(
-                            this.shadowRoot.querySelectorAll("canvas")
+                            this.shadowRoot.querySelectorAll("canvas"),
                         );
 
                         for (const canvas of canvases.reverse()) {
@@ -231,13 +231,13 @@ export function register(...plugins) {
                                 canvas.parentNode.offsetLeft,
                                 canvas.parentNode.offsetTop,
                                 canvas.width / window.devicePixelRatio,
-                                canvas.height / window.devicePixelRatio
+                                canvas.height / window.devicePixelRatio,
                             );
                         }
 
                         return await new Promise(
                             (x) => canvas.toBlob((blob) => x(blob)),
-                            "image/png"
+                            "image/png",
                         );
                     }
 
@@ -348,27 +348,27 @@ export function register(...plugins) {
                                                   group_by.length
                                           ) {
                                               acc.agg_paths.push(
-                                                  acc.aggs.slice()
+                                                  acc.aggs.slice(),
                                               );
                                               acc.rows.push(col);
                                           } else {
                                               const len =
                                                   col.__ROW_PATH__.filter(
-                                                      (x) => x !== undefined
+                                                      (x) => x !== undefined,
                                                   ).length;
                                               acc.aggs[len] = col;
                                               acc.aggs = acc.aggs.slice(
                                                   0,
-                                                  len + 1
+                                                  len + 1,
                                               );
                                           }
                                           return acc;
                                       },
-                                      { rows: [], aggs: [], agg_paths: [] }
+                                      { rows: [], aggs: [], agg_paths: [] },
                                   )
                                 : {
                                       rows: first_col.map((_, idx) =>
-                                          json.row(idx)
+                                          json.row(idx),
                                       ),
                                   };
 
@@ -409,8 +409,8 @@ export function register(...plugins) {
                                                 {
                                                     bubbles: true,
                                                     composed: true,
-                                                }
-                                            )
+                                                },
+                                            ),
                                         );
                                 }
                                 obj[prop] = value;
@@ -429,7 +429,7 @@ export function register(...plugins) {
                                 ...this._settings,
                                 ...settings,
                             },
-                            handler
+                            handler,
                         );
 
                         // If only a right-axis Y axis remains, reset the alt
@@ -451,7 +451,7 @@ export function register(...plugins) {
                         this._draw();
 
                         await new Promise((resolve) =>
-                            requestAnimationFrame(resolve)
+                            requestAnimationFrame(resolve),
                         );
                     }
 
@@ -471,12 +471,12 @@ export function register(...plugins) {
                             if (this._settings.data.length > 0) {
                                 this._chart(
                                     containerDiv.attr("class", chartClass),
-                                    this._settings
+                                    this._settings,
                                 );
                             } else {
                                 containerDiv.attr(
                                     "class",
-                                    `${chartClass} disabled`
+                                    `${chartClass} disabled`,
                                 );
                             }
                         }
@@ -534,7 +534,7 @@ export function register(...plugins) {
                         }
                         this._settings = { ...new_settings, ...settings };
                     }
-                }
+                },
             );
 
             customElements

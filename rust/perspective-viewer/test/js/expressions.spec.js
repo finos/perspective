@@ -33,7 +33,7 @@ async function type_expression_test(page, expr) {
         () =>
             !!document
                 .querySelector("perspective-viewer")
-                .shadowRoot.querySelector("#add-expression")
+                .shadowRoot.querySelector("#add-expression"),
     );
 
     await shadow_click(page, "perspective-viewer", "#add-expression");
@@ -46,7 +46,7 @@ async function type_expression_test(page, expr) {
         "perspective-viewer",
         "#editor-container",
         "#editor",
-        "#content"
+        "#content",
     );
     const result = await page.evaluate(async () => {
         const elem = document
@@ -84,7 +84,7 @@ test.describe("Expressions", () => {
             () =>
                 !!document
                     .querySelector("perspective-viewer")
-                    .shadowRoot.querySelector("#add-expression")
+                    .shadowRoot.querySelector("#add-expression"),
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
@@ -120,7 +120,7 @@ test.describe("Expressions", () => {
             () =>
                 !!document
                     .querySelector("perspective-viewer")
-                    .shadowRoot.querySelector("#add-expression")
+                    .shadowRoot.querySelector("#add-expression"),
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
@@ -161,7 +161,7 @@ test.describe("Expressions", () => {
     }) => {
         const contents = await type_expression_test(
             page,
-            '"Sales" + "Category";'
+            '"Sales" + "Category";',
         );
 
         await compareContentsToSnapshot(contents, [
@@ -211,7 +211,7 @@ test.describe("Expressions", () => {
             page,
             "perspective-viewer",
             "#editor-container",
-            "button"
+            "button",
         );
 
         const contents = await page.evaluate(async () => {
@@ -239,7 +239,7 @@ test.describe("Expressions", () => {
             page,
             "perspective-viewer",
             "#editor-container",
-            "button"
+            "button",
         );
 
         const contents = await page.evaluate(async () => {

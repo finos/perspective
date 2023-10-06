@@ -28,7 +28,7 @@ const LOCAL_EXAMPLES = [
 exports.LOCAL_EXAMPLES = LOCAL_EXAMPLES;
 
 exports.get_examples = function get_examples(
-    root = "https://perspective.finos.org/"
+    root = "https://perspective.finos.org/",
 ) {
     const standalone = [
         {

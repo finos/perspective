@@ -22,7 +22,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
             ) {
                 const entryPoint = path.join(
                     args.pluginData.resolveDir,
-                    args.path
+                    args.path,
                 );
 
                 return {
@@ -48,7 +48,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
                     import wasm from ${JSON.stringify(args.path)};
                     export default Promise.resolve(wasm);
                 `,
-            })
+            }),
         );
 
         build.onLoad(
@@ -63,7 +63,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
 
                 export default get_wasm();
             `,
-            })
+            }),
         );
 
         build.onLoad({ filter: /.*/, namespace: "wasm" }, async (args) => {

@@ -44,7 +44,7 @@ export class HTMLPerspectiveViewerDatagridToolbarElement extends HTMLElement {
         const plugin = viewer.querySelector("perspective-viewer-datagrid");
         plugin._scroll_lock = this.shadowRoot.querySelector("#scroll_lock");
         plugin._scroll_lock.addEventListener("click", () =>
-            toggle_scroll_lock.call(plugin)
+            toggle_scroll_lock.call(plugin),
         );
 
         plugin._edit_mode = this.shadowRoot.querySelector("#edit_mode");

@@ -166,7 +166,7 @@ window.addEventListener("DOMContentLoaded", async function () {
 
     run.addEventListener(
         "click",
-        make_run_click_callback(perspective.worker(), {})
+        make_run_click_callback(perspective.worker(), {}),
     );
     run.dispatchEvent(new Event("click"));
 });

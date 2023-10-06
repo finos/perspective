@@ -15,7 +15,7 @@ import type { IPerspectiveViewerPlugin } from "@finos/perspective-viewer";
 declare global {
     interface CustomElementRegistry {
         get(
-            tagName: "perspective-viewer-datagrid"
+            tagName: "perspective-viewer-datagrid",
         ): HTMLPerspectiveViewerDatagridPluginElement;
 
         // TODO is this needed?

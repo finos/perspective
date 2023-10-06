@@ -534,7 +534,7 @@ const elem = document.getElementsByTagName("perspective-viewer")[0];
 
 // Bind to the server's worker instead of instantiating a Web Worker.
 const websocket = perspective.websocket(
-    window.location.origin.replace("http", "ws")
+    window.location.origin.replace("http", "ws"),
 );
 
 // Bind the viewer to the preloaded data source.  `table` and `view` objects
@@ -606,7 +606,7 @@ _*index.html*_
         // Create a client that expects a Perspective server
         // to accept connections at the specified URL.
         const websocket = perspective.websocket(
-            "ws://localhost:8888/websocket"
+            "ws://localhost:8888/websocket",
         );
 
         /* `table` is a proxy for the `Table` we created on the server.

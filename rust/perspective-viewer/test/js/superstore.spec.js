@@ -16,7 +16,7 @@ import { run_standard_tests } from "@finos/perspective-test";
 async function get_contents(page) {
     return await page.evaluate(async () => {
         const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-plugin"
+            "perspective-viewer perspective-viewer-plugin",
         );
         return viewer.innerHTML;
     });

@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import glob from 'fast-glob';
+import glob from "fast-glob";
 import { promises as fs } from "fs";
 import * as fs_sync from "fs";
 
@@ -29,6 +29,7 @@ const IGNORE_PATHS = fs_sync
         "**/dist/**/*",
         "**/node_modules/**/*",
         "**/build/**/*",
+        "cmake/arrow/**/*",
     ]);
 
 const FIX_PATHS = [

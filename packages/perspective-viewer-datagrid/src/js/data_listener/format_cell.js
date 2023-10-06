@@ -27,7 +27,7 @@ export function format_cell(
     title,
     val,
     plugins = {},
-    use_table_schema = false
+    use_table_schema = false,
 ) {
     if (val === null) {
         return "-";
@@ -42,15 +42,15 @@ export function format_cell(
     if (is_numeric && plugin?.number_fg_mode === "bar") {
         const a = Math.max(
             0,
-            Math.min(0.95, Math.abs(val / plugin.fg_gradient) * 0.95)
+            Math.min(0.95, Math.abs(val / plugin.fg_gradient) * 0.95),
         );
         const div = this._div_factory.get();
         const anchor = val >= 0 ? "left" : "right";
         div.setAttribute(
             "style",
             `width:${(a * 100).toFixed(
-                2
-            )}%;position:absolute;${anchor}:0;height:80%;top:10%;pointer-events:none;`
+                2,
+            )}%;position:absolute;${anchor}:0;height:80%;top:10%;pointer-events:none;`,
         );
         return div;
     } else if (plugin?.format === "link" && type === "string") {

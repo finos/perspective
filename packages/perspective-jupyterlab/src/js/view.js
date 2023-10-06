@@ -47,7 +47,7 @@ export class PerspectiveView extends DOMWidgetView {
             undefined,
             this,
             this.model.get("server"),
-            this.model.get("client")
+            this.model.get("client"),
         );
 
         this.perspective_client = new PerspectiveJupyterClient(this);
@@ -58,7 +58,7 @@ export class PerspectiveView extends DOMWidgetView {
         // add event handler to synchronize
         this.luminoWidget.viewer.addEventListener(
             "perspective-config-update",
-            this._synchronize_state
+            this._synchronize_state,
         );
 
         // bind toggle_editable to this
@@ -298,7 +298,7 @@ export class PerspectiveView extends DOMWidgetView {
                  * the client for server mode Perspective.
                  */
                 const table = this.perspective_client.open_table(
-                    msg.data["table_name"]
+                    msg.data["table_name"],
                 );
                 this.luminoWidget.load(table);
                 this._restore_from_model();
@@ -317,7 +317,7 @@ export class PerspectiveView extends DOMWidgetView {
                         // Create a client side table
                         let client_table = this.client_worker.table(
                             arrow,
-                            table_options
+                            table_options,
                         );
 
                         this.luminoWidget.load(client_table);
@@ -337,8 +337,8 @@ export class PerspectiveView extends DOMWidgetView {
             } else {
                 throw new Error(
                     `PerspectiveWidget cannot load data from kernel message: ${JSON.stringify(
-                        msg
-                    )}`
+                        msg,
+                    )}`,
                 );
             }
 
@@ -404,12 +404,12 @@ export class PerspectiveView extends DOMWidgetView {
 
         this._client_view.on_update(
             (updated) => this._client_view_update_callback(updated),
-            { mode: "row" }
+            { mode: "row" },
         );
 
         this._kernel_view.on_update(
             (updated) => this._kernel_view_update_callback(updated),
-            { mode: "row" }
+            { mode: "row" },
         );
     }
 
@@ -424,7 +424,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.luminoWidget.delete();
         this.luminoWidget.viewer.removeEventListener(
             "perspective-config-update",
-            this._synchronize_state
+            this._synchronize_state,
         );
     }
 

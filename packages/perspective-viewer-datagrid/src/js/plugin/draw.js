@@ -34,7 +34,7 @@ export async function draw(view) {
         this.regular_table.scrollTop = 0;
         this.regular_table.scrollLeft = 0;
         this.regular_table.dispatchEvent(
-            new CustomEvent("psp-deselect-all", { bubbles: false })
+            new CustomEvent("psp-deselect-all", { bubbles: false }),
         );
         this.regular_table._resetAutoSize();
     } else {
@@ -47,6 +47,6 @@ export async function draw(view) {
     this._toolbar.classList.toggle(
         "aggregated",
         this.model._config.group_by.length > 0 ||
-            this.model._config.split_by.length > 0
+            this.model._config.split_by.length > 0,
     );
 }

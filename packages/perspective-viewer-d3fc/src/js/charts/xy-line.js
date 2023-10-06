@@ -27,7 +27,7 @@ import nearbyTip from "../tooltip/nearbyTip";
 
 function xyLine(container, settings) {
     const data = transposeData(
-        xySplitData(settings, filterDataByGroup(settings))
+        xySplitData(settings, filterDataByGroup(settings)),
     );
 
     const color = seriesColorsFromGroups(settings);

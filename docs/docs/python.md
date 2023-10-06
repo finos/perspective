@@ -416,7 +416,7 @@ _*index.html*_
         // Create a client that expects a Perspective server
         // to accept connections at the specified URL.
         const websocket = perspective.websocket(
-            "ws://localhost:8888/websocket"
+            "ws://localhost:8888/websocket",
         );
 
         // Get a handle to the Table on the server

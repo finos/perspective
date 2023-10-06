@@ -40,8 +40,8 @@ function yScatter(container, settings) {
         .mapping((data, index) => data[index])
         .series(
             data.map((series) =>
-                categoryPointSeries(settings, series.key, color, symbols)
-            )
+                categoryPointSeries(settings, series.key, color, symbols),
+            ),
         );
 
     const paddingStrategy = hardLimitZeroPadding()

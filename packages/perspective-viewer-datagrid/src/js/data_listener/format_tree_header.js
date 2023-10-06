@@ -31,7 +31,7 @@ export function* format_tree_header(paths = [], row_headers, regularTable) {
             row_headers[path.length - 1],
             last,
             plugins,
-            true
+            true,
         );
 
         if (formatted instanceof HTMLElement) {

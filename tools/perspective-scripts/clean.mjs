@@ -27,7 +27,7 @@ if (process.env.PSP_PROJECT === "python") {
         "python/perspective/python_junit.xml",
         "python/perspective/coverage.xml",
         ...glob.sync("python/perspective/**/*.pyc"),
-        ...glob.sync("python/perspective/**/__pycache__")
+        ...glob.sync("python/perspective/**/__pycache__"),
     );
     process.exit(0);
 }
@@ -36,7 +36,7 @@ if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
     clean(
         "cpp/perspective/dist",
         "cpp/perspective/build",
-        "packages/perspective/build"
+        "packages/perspective/build",
     );
 }
 

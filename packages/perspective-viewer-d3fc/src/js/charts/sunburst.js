@@ -60,7 +60,9 @@ function sunburst(container, settings) {
         .select("g.sunburst")
         .attr(
             "transform",
-            `translate(${containerSize.width / 2}, ${containerSize.height / 2})`
+            `translate(${containerSize.width / 2}, ${
+                containerSize.height / 2
+            })`,
         )
         .each(function ({ split, data }) {
             const sunburstElement = select(this);
@@ -78,7 +80,7 @@ function sunburst(container, settings) {
                 .radius(radius)(sunburstElement);
 
             tooltip().settings(settings)(
-                sunburstElement.selectAll("g.segment")
+                sunburstElement.selectAll("g.segment"),
             );
         });
 }

@@ -54,7 +54,7 @@ describe_jupyter(
 
                 expect(num_rows).toEqual(5);
             },
-            { timeout: 120000 }
+            { timeout: 120000 },
         );
 
         test_jupyter(
@@ -82,7 +82,7 @@ describe_jupyter(
                 });
 
                 expect(num_rows).toEqual(10);
-            }
+            },
         );
         test_jupyter(
             "Loads a table",
@@ -108,7 +108,7 @@ describe_jupyter(
                 });
 
                 expect(num_rows).toEqual(5);
-            }
+            },
         );
 
         // Restore
@@ -129,7 +129,7 @@ describe_jupyter(
                 });
 
                 expect(settings).toEqual(false);
-            }
+            },
         );
 
         test_jupyter(
@@ -145,7 +145,7 @@ describe_jupyter(
                 const viewer = await default_body(page);
                 const editable = await getEditable(viewer);
                 expect(editable).toEqual(true);
-            }
+            },
         );
 
         test_jupyter(
@@ -164,12 +164,12 @@ describe_jupyter(
 
                 await add_and_execute_cell(
                     page,
-                    'w.plugin_config = {"editable": True}'
+                    'w.plugin_config = {"editable": True}',
                 );
 
                 editable = await getEditable(viewer);
                 expect(editable).toEqual(true);
-            }
+            },
         );
         test_jupyter(
             "Editable Toggle - from JS",
@@ -188,14 +188,14 @@ describe_jupyter(
                 await viewer.evaluate(async (viewer) => {
                     const edit =
                         viewer.children[1].shadowRoot.querySelector(
-                            "span#edit_mode"
+                            "span#edit_mode",
                         );
                     edit.click();
                 });
 
                 editable = await getEditable(viewer);
                 expect(editable).toEqual(true);
-            }
+            },
         );
 
         test_jupyter(
@@ -257,7 +257,7 @@ w.filter = ["i8", "<", 50]
 w.group_by = ["date"]
 w.split_by = ["bool"]
 w.sort = ["date", "asc"]
-w.theme = "Pro Dark"`
+w.theme = "Pro Dark"`,
                 );
 
                 // grab the config again
@@ -280,7 +280,7 @@ w.theme = "Pro Dark"`
                     theme: "Pro Dark",
                     title: null,
                 });
-            }
+            },
         );
 
         test_jupyter(
@@ -361,10 +361,10 @@ assert w.plugin_config == {}
 assert w.settings == False
 assert w.sort == [["date", "asc"]]
 assert w.theme == "Pro Dark"
-"Passed"`
+"Passed"`,
                 );
                 expect(error_cells_dont_exist).toBe(true);
-            }
+            },
         );
 
         test_jupyter(
@@ -382,7 +382,7 @@ assert w.theme == "Pro Dark"
                     [
                         `assert w.table.view().to_df().to_dict() == {'a': {0: True, 1: False, 2: True}, 'b': {0: 'abc', 1: 'def', 2: 'ghi'}}`,
                         `"Passed"`,
-                    ].join("\n")
+                    ].join("\n"),
                 );
                 expect(error_cells_dont_exist).toBe(true);
 
@@ -400,10 +400,10 @@ assert w.theme == "Pro Dark"
                     [
                         `assert w.table.view().to_df().to_dict() == {'a': {0: False, 1: True, 2: False}, 'b': {0: 'abc', 1: 'def', 2: 'ghi'}}`,
                         `"Passed"`,
-                    ].join("\n")
+                    ].join("\n"),
                 );
                 expect(error_cells_dont_exist).toBe(true);
-            }
+            },
         );
 
         // *************************
@@ -418,12 +418,12 @@ assert w.theme == "Pro Dark"
                 // assert_no_error_in_cell runs add_and_execute_cell internally so only need to check one
                 const error_cells_dont_exist = await assert_no_error_in_cell(
                     page,
-                    "raise Exception('anything')"
+                    "raise Exception('anything')",
                 );
                 expect(error_cells_dont_exist).toBe(false);
-            }
+            },
         );
     },
-    { name: "Simple", root: path.join(__dirname, "..", "..") }
+    { name: "Simple", root: path.join(__dirname, "..", "..") },
 );
 // });

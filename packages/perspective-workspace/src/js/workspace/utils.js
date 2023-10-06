@@ -58,7 +58,7 @@ export function registerElement(templateString, styleString, proto) {
     }
     template.innerHTML =
         `<style id="psp_styles" scope="${template.getAttribute(
-            "id"
+            "id",
         )}">test{}</style>` + template.innerHTML;
 
     let is_locked = 0;

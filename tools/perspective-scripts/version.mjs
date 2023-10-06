@@ -46,7 +46,7 @@ class GithubPRCache {
         console.log(
             `Fetching Github commits ${(this.page - 1) * 100} - ${
                 this.page * 100 - 1
-            }`
+            }`,
         );
         this._next_req = this.octokit.request(
             "GET /repos/{owner}/{repo}/pulls?state=closed&per_page={per_page}&page={page}",
@@ -55,7 +55,7 @@ class GithubPRCache {
                 repo: "perspective",
                 per_page: 100,
                 page: this.page++,
-            }
+            },
         );
         return ret;
     }

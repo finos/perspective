@@ -56,7 +56,7 @@ const common = require("./common.js");
 
                     let result = await view.to_columns();
                     expect(
-                        result[expression].map((x) => (x ? new Date(x) : null))
+                        result[expression].map((x) => (x ? new Date(x) : null)),
                     ).toEqual(result.a.map((x) => common.year_bucket(x)));
 
                     view.delete();

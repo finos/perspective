@@ -145,7 +145,7 @@ export class WebSocketManager extends Server {
                 binary_msg,
                 0,
                 this.chunk_size,
-                binary_msg.byteLength
+                binary_msg.byteLength,
             );
         } else {
             req.ws.send(JSON.stringify(msg));

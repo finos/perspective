@@ -30,7 +30,7 @@ export function editable_style_listener(table, viewer) {
     const edit = isEditable.call(this, viewer);
     table.parentElement.classList.toggle(
         "edit-mode-allowed",
-        isEditable.call(this, viewer, true)
+        isEditable.call(this, viewer, true),
     );
 
     for (const td of table.querySelectorAll("td")) {

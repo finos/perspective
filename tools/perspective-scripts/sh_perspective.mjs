@@ -139,14 +139,14 @@ export const run_with_scope = async function run_recursive(strings, ...args) {
     const workspaces = JSON.parse(stdout.toString());
     const compiled = new Set(
         Object.keys(workspaces.dependencies).filter(
-            (x) => !workspaces.dependencies[x].resolved?.startsWith("file:")
-        )
+            (x) => !workspaces.dependencies[x].resolved?.startsWith("file:"),
+        ),
     );
 
     let uncompiled = Object.keys(workspaces.dependencies).filter(
         (x) =>
             workspaces.dependencies[x].resolved?.startsWith("file:") &&
-            (scope === null || scope.indexOf(x) >= 0)
+            (scope === null || scope.indexOf(x) >= 0),
     );
 
     const is_valid = new Set(uncompiled);
@@ -183,8 +183,8 @@ export const run_with_scope = async function run_recursive(strings, ...args) {
         if (batch.length === 0) {
             throw new Error(
                 `Failed to resolved dependencies for ${new_uncompiled.join(
-                    ","
-                )}`
+                    ",",
+                )}`,
             );
         }
 
@@ -192,7 +192,7 @@ export const run_with_scope = async function run_recursive(strings, ...args) {
         console.log(`-- Running ${cmd} for ${batch.join(",")}`);
         for (const pkgname of batch) {
             const pkg = JSON.parse(
-                fs.readFileSync(_require.resolve(pkgname + "/package.json"))
+                fs.readFileSync(_require.resolve(pkgname + "/package.json")),
             );
 
             if (pkg.scripts?.[cmd]) {

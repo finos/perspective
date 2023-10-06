@@ -13,7 +13,7 @@
 export async function deselect_all_listener(
     regularTable,
     _viewer,
-    selected_rows_map
+    selected_rows_map,
 ) {
     selected_rows_map.delete(regularTable);
     for (const td of regularTable.querySelectorAll("td,th")) {

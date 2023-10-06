@@ -79,7 +79,7 @@ test.describe("Regression tests", () => {
             "0001",
             true,
             "perspective-viewer",
-            "input.num-filter"
+            "input.num-filter",
         );
 
         const value = await page.evaluate(async () => {

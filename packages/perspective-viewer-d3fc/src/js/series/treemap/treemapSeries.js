@@ -52,7 +52,7 @@ export function treemapSeries() {
         if (!settings.treemapRoute) settings.treemapRoute = [];
         const treemap = treemapLayout(
             treemapDiv.node().getBoundingClientRect().width,
-            treemapDiv.node().getBoundingClientRect().height
+            treemapDiv.node().getBoundingClientRect().height,
         );
         treemap(data);
 
@@ -116,8 +116,8 @@ export function treemapSeries() {
                     treemapSvg,
                     rootNode,
                     parentCtrls,
-                    root_settings
-                )
+                    root_settings,
+                ),
             );
 
         returnToLevel(
@@ -129,7 +129,7 @@ export function treemapSeries() {
             treemapSvg,
             rootNode,
             parentCtrls,
-            root_settings
+            root_settings,
         );
     };
 

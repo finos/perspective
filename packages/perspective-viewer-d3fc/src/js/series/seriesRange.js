@@ -49,7 +49,7 @@ const multiInterpolator = (gradientPairs) => {
             (p, i) =>
                 i < gradientPairs.length - 1 &&
                 value <= gradientPairs[i + 1][0] &&
-                value > p[0]
+                value > p[0],
         );
         if (index === -1) {
             if (value <= gradientPairs[0][0]) {

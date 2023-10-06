@@ -71,7 +71,7 @@ function it_old_behavior(name, capture) {
                         y: ["d"],
                         z: [true],
                     },
-                    { port_id }
+                    { port_id },
                 );
             }
 
@@ -144,7 +144,7 @@ function it_old_behavior(name, capture) {
                         y: ["a"],
                         z: [true],
                     },
-                    { port_id }
+                    { port_id },
                 );
             }
 
@@ -176,7 +176,7 @@ function it_old_behavior(name, capture) {
                         y: ["a"],
                         z: [true],
                     },
-                    { port_id }
+                    { port_id },
                 );
             }
 
@@ -262,7 +262,7 @@ function it_old_behavior(name, capture) {
                             y: ["d"],
                             z: [true],
                         },
-                        { port_id }
+                        { port_id },
                     );
                 }
 
@@ -401,7 +401,7 @@ function it_old_behavior(name, capture) {
                             y: ["d"],
                             z: [false],
                         },
-                        { port_id }
+                        { port_id },
                     );
                 }
 
@@ -491,10 +491,10 @@ function it_old_behavior(name, capture) {
                                 y: ["a"],
                                 z: [true],
                             },
-                            { port_id }
+                            { port_id },
                         );
                     }
-                }
+                },
             );
 
             it_old_behavior(
@@ -527,9 +527,9 @@ function it_old_behavior(name, capture) {
                             y: ["a"],
                             z: [true],
                         },
-                        { port_id }
+                        { port_id },
                     );
-                }
+                },
             );
 
             it_old_behavior(
@@ -573,10 +573,10 @@ function it_old_behavior(name, capture) {
                                 y: ["a"],
                                 z: [true],
                             },
-                            { port_id }
+                            { port_id },
                         );
                     }
-                }
+                },
             );
 
             it_old_behavior(
@@ -584,7 +584,7 @@ function it_old_behavior(name, capture) {
                 async function (done) {
                     const table = await perspective.table(data);
                     const update_table = await perspective.table(
-                        await table.schema()
+                        await table.schema(),
                     );
                     const port_ids = [];
 
@@ -627,7 +627,7 @@ function it_old_behavior(name, capture) {
                                 last_port_id++;
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     const update_order = _.shuffle([
@@ -642,10 +642,10 @@ function it_old_behavior(name, capture) {
                                 y: ["a"],
                                 z: [true],
                             },
-                            { port_id }
+                            { port_id },
                         );
                     }
-                }
+                },
             );
         });
 
@@ -698,7 +698,7 @@ function it_old_behavior(name, capture) {
                                 done();
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     const first_port = get_random_int(0, 10);
@@ -715,7 +715,7 @@ function it_old_behavior(name, capture) {
                             y: ["first port"],
                             z: [false],
                         },
-                        { port_id: first_port }
+                        { port_id: first_port },
                     );
 
                     table.update(
@@ -725,9 +725,9 @@ function it_old_behavior(name, capture) {
                             y: ["second port"],
                             z: [true],
                         },
-                        { port_id: second_port }
+                        { port_id: second_port },
                     );
-                }
+                },
             );
         });
 
@@ -765,7 +765,7 @@ function it_old_behavior(name, capture) {
                                 expect(CLIENT_TO_SERVER_UPDATES).toEqual(1);
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     const server_view = await server_table.view();
@@ -786,13 +786,13 @@ function it_old_behavior(name, capture) {
                                 done();
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     // this should go to the server and round trip back to the
                     // client, but stop when it gets to the client again.
                     client_table.update(data, { port_id: client_port });
-                }
+                },
             );
 
             it_old_behavior(
@@ -826,11 +826,11 @@ function it_old_behavior(name, capture) {
                                 // Should not pass forward that update, and break
                                 // the chain.
                                 expect(
-                                    CLIENT_TO_SERVER_UPDATES
+                                    CLIENT_TO_SERVER_UPDATES,
                                 ).toBeLessThanOrEqual(2);
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     const server_view = await server_table.view();
@@ -851,7 +851,7 @@ function it_old_behavior(name, capture) {
                                 done();
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     // this should go to the server and round trip back to the
@@ -863,7 +863,7 @@ function it_old_behavior(name, capture) {
 
                     // this should go to the server
                     client_table.update(data, { port_id: client_port });
-                }
+                },
             );
 
             it_old_behavior(
@@ -909,7 +909,7 @@ function it_old_behavior(name, capture) {
                                 });
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     client_view2.on_update(
@@ -923,10 +923,10 @@ function it_old_behavior(name, capture) {
                                 z: [true, false, true, false],
                             });
                             expect(await client_view.to_columns()).toEqual(
-                                results
+                                results,
                             );
                             expect(await server_view.to_columns()).toEqual(
-                                results
+                                results,
                             );
                             client_view.delete();
                             client_view2.delete();
@@ -936,7 +936,7 @@ function it_old_behavior(name, capture) {
                             server_table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     const server_view = await server_table.view();
@@ -948,7 +948,7 @@ function it_old_behavior(name, capture) {
                                 client_table.update(updated.delta);
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     server_view.on_update(
@@ -957,7 +957,7 @@ function it_old_behavior(name, capture) {
                                 client_table2.update(updated.delta);
                             }
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     // this should go to the server and round trip back to the
@@ -971,9 +971,9 @@ function it_old_behavior(name, capture) {
                                 y: "ccc",
                             },
                         ],
-                        { port_id: client_port }
+                        { port_id: client_port },
                     );
-                }
+                },
             );
         });
     });

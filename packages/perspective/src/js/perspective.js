@@ -73,7 +73,7 @@ export default function (Module) {
                       "totalJSHeapSize",
                       "usedJSHeapSize",
                       "jsHeapSizeLimit",
-                  ])
+                  ]),
               )
             : process.memoryUsage();
         mem.wasmHeap = __MODULE__.HEAP8.length;
@@ -110,7 +110,7 @@ export default function (Module) {
         is_update,
         is_arrow,
         is_csv,
-        port_id
+        port_id,
     ) {
         // C++ constructor cannot take null values - use default values if
         // index or limit are null.
@@ -131,7 +131,7 @@ export default function (Module) {
             is_update,
             is_arrow,
             is_csv,
-            port_id
+            port_id,
         );
 
         const pool = _Table.get_pool();
@@ -196,7 +196,7 @@ export default function (Module) {
                 name,
                 defaults.COLUMN_SEPARATOR_STRING,
                 this.view_config,
-                null
+                null,
             );
         } else if (sides === 0) {
             this._View = __MODULE__.make_view_zero(
@@ -204,7 +204,7 @@ export default function (Module) {
                 name,
                 defaults.COLUMN_SEPARATOR_STRING,
                 this.view_config,
-                null
+                null,
             );
         } else if (sides === 1) {
             this._View = __MODULE__.make_view_one(
@@ -212,7 +212,7 @@ export default function (Module) {
                 name,
                 defaults.COLUMN_SEPARATOR_STRING,
                 this.view_config,
-                null
+                null,
             );
         } else if (sides === 2) {
             this._View = __MODULE__.make_view_two(
@@ -220,7 +220,7 @@ export default function (Module) {
                 name,
                 defaults.COLUMN_SEPARATOR_STRING,
                 this.view_config,
-                null
+                null,
             );
         }
 
@@ -406,7 +406,7 @@ export default function (Module) {
 
     view.prototype._column_names = function (skip = false, depth = 0) {
         return extract_vector_scalar(this._View.column_names(skip, depth)).map(
-            (x) => x.join(defaults.COLUMN_SEPARATOR_STRING)
+            (x) => x.join(defaults.COLUMN_SEPARATOR_STRING),
         );
     };
 
@@ -421,7 +421,7 @@ export default function (Module) {
      */
     view.prototype.column_paths = function () {
         return extract_vector_scalar(this._View.column_paths()).map((x) =>
-            x.join(defaults.COLUMN_SEPARATOR_STRING)
+            x.join(defaults.COLUMN_SEPARATOR_STRING),
         );
     };
 
@@ -429,7 +429,7 @@ export default function (Module) {
         start_row,
         end_row,
         start_col,
-        end_col
+        end_col,
     ) {
         if (this.is_unit_context) {
             return __MODULE__.get_data_slice_unit(
@@ -437,7 +437,7 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
             );
         } else {
             const num_sides = this.sides();
@@ -447,7 +447,7 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
             );
         }
     };
@@ -477,7 +477,7 @@ export default function (Module) {
                 ? options.end_row
                 : viewport.height
                 ? start_row + viewport.height
-                : max_rows
+                : max_rows,
         );
         const start_col =
             options.start_col || (viewport.left ? viewport.left : 0);
@@ -488,7 +488,7 @@ export default function (Module) {
                 : viewport.width
                 ? start_col + viewport.width
                 : max_cols) *
-                (hidden + 1)
+                (hidden + 1),
         );
 
         // Return the calculated values
@@ -627,7 +627,7 @@ export default function (Module) {
             has_row_path,
             nidx,
             columns_length,
-            group_by_length
+            group_by_length,
         );
     };
 
@@ -706,7 +706,7 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
             );
         } else if (sides === 0) {
             return __MODULE__.to_csv_zero(
@@ -714,7 +714,7 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
             );
         } else if (sides === 1) {
             return __MODULE__.to_csv_one(
@@ -722,7 +722,7 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
             );
         } else if (sides === 2) {
             return __MODULE__.to_csv_two(
@@ -730,7 +730,7 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
             );
         }
     };
@@ -804,7 +804,7 @@ export default function (Module) {
                 end_row,
                 start_col,
                 end_col,
-                compression
+                compression,
             );
         } else if (sides === 0) {
             return __MODULE__.to_arrow_zero(
@@ -813,7 +813,7 @@ export default function (Module) {
                 end_row,
                 start_col,
                 end_col,
-                compression
+                compression,
             );
         } else if (sides === 1) {
             return __MODULE__.to_arrow_one(
@@ -822,7 +822,7 @@ export default function (Module) {
                 end_row,
                 start_col,
                 end_col,
-                compression
+                compression,
             );
         } else if (sides === 2) {
             return __MODULE__.to_arrow_two(
@@ -831,7 +831,7 @@ export default function (Module) {
                 end_row,
                 start_col,
                 end_col,
-                compression
+                compression,
             );
         }
     };
@@ -938,7 +938,7 @@ export default function (Module) {
                 this.to_json({
                     start_row: Number.parseInt(row),
                     end_row: Number.parseInt(row) + 1,
-                })
+                }),
             );
             data = [].concat.apply([], results);
         }
@@ -991,7 +991,7 @@ export default function (Module) {
 
         if (["none", "row"].indexOf(mode) === -1) {
             throw new Error(
-                `Invalid update mode "${mode}" - valid modes are "none" and "row".`
+                `Invalid update mode "${mode}" - valid modes are "none" and "row".`,
             );
         }
 
@@ -1060,11 +1060,11 @@ export default function (Module) {
         const total = this.update_callbacks.length;
         filterInPlace(
             this.update_callbacks,
-            (x) => x.orig_callback !== callback
+            (x) => x.orig_callback !== callback,
         );
         console.assert(
             total > this.update_callbacks.length,
-            `"callback" does not match a registered updater`
+            `"callback" does not match a registered updater`,
         );
     };
 
@@ -1099,7 +1099,7 @@ export default function (Module) {
         filterInPlace(this._delete_callbacks, (cb) => cb !== callback);
         console.assert(
             initial_length > this._delete_callbacks.length,
-            `"callback" does not match a registered delete callbacks`
+            `"callback" does not match a registered delete callbacks`,
         );
     };
 
@@ -1339,7 +1339,7 @@ export default function (Module) {
         filterInPlace(this._delete_callbacks, (cb) => cb !== callback);
         console.assert(
             initial_length > this._delete_callbacks.length,
-            `"callback" does not match a registered delete callbacks`
+            `"callback" does not match a registered delete callbacks`,
         );
     };
 
@@ -1456,7 +1456,7 @@ export default function (Module) {
                     } else {
                         return match;
                     }
-                }
+                },
             );
 
             parsed_expression_string = parsed_expression_string.replace(
@@ -1475,14 +1475,14 @@ export default function (Module) {
 
                     running_cidx++;
                     return column_name_map[cname];
-                }
+                },
             );
 
             // Replace single quote string literals and wrap them in a call to
             // intern() which makes sure they don't leak
             parsed_expression_string = parsed_expression_string.replace(
                 /'(.*?[^\\])'/g,
-                (match) => `intern(${match})`
+                (match) => `intern(${match})`,
             );
 
             const replace_interned_param = (match, _, intern_fn, value) => {
@@ -1491,7 +1491,7 @@ export default function (Module) {
                 const intern_idx = match.indexOf(intern_fn);
                 return `${match.substring(
                     0,
-                    intern_idx
+                    intern_idx,
                 )}'${value}'${match.substring(intern_idx + intern_fn.length)}`;
             };
 
@@ -1502,7 +1502,7 @@ export default function (Module) {
             // TODO I concur  -- texodus
             parsed_expression_string = parsed_expression_string.replace(
                 /(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)/g,
-                replace_interned_param
+                replace_interned_param,
             );
 
             // replace and replace_all have multiple string params, only one of
@@ -1511,7 +1511,7 @@ export default function (Module) {
             // replaced.
             parsed_expression_string = parsed_expression_string.replace(
                 /(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)/g,
-                replace_interned_param
+                replace_interned_param,
             );
 
             const validated = [
@@ -1565,7 +1565,7 @@ export default function (Module) {
      */
     table.prototype.validate_expressions = function (
         expressions,
-        override = true
+        override = true,
     ) {
         const validated = {
             expression_schema: {},
@@ -1591,7 +1591,7 @@ export default function (Module) {
 
         const validation_results = __MODULE__.validate_expressions(
             this._Table,
-            vector
+            vector,
         );
         const expression_schema = validation_results.get_expression_schema();
         const expression_errors = validation_results.get_expression_errors();
@@ -1711,20 +1711,20 @@ export default function (Module) {
                 if (!config[defaults.CONFIG_ALIASES[key]]) {
                     if (!WARNED_KEYS.has(key)) {
                         console.warn(
-                            `Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`
+                            `Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`,
                         );
                         WARNED_KEYS.add(key);
                     }
                     config[defaults.CONFIG_ALIASES[key]] = _config[key];
                 } else {
                     throw new Error(
-                        `Duplicate configuration parameter "${key}"`
+                        `Duplicate configuration parameter "${key}"`,
                     );
                 }
             } else if (key === "aggregate") {
                 if (!WARNED_KEYS.has("aggregate")) {
                     console.warn(
-                        `Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`
+                        `Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`,
                     );
                     WARNED_KEYS.add("aggregate");
                 }
@@ -1812,7 +1812,7 @@ export default function (Module) {
             setTimeout(function poll() {
                 let now = performance.now();
                 console.log(
-                    `${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`
+                    `${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`,
                 );
                 _msgs = 0;
                 start = now;
@@ -1871,7 +1871,7 @@ export default function (Module) {
         } else {
             accessor.init(data);
             accessor.names = cols.concat(
-                accessor.names.filter((x) => x === "__INDEX__")
+                accessor.names.filter((x) => x === "__INDEX__"),
             );
             accessor.types = extract_vector(types).slice(0, cols.length);
 
@@ -1893,7 +1893,7 @@ export default function (Module) {
                 if (explicit_index) {
                     // find the type of the index column
                     accessor.types.push(
-                        accessor.types[accessor.names.indexOf(this.index)]
+                        accessor.types[accessor.names.indexOf(this.index)],
                     );
                 } else {
                     // default index is an integer
@@ -1915,7 +1915,7 @@ export default function (Module) {
                 true,
                 is_arrow,
                 is_csv,
-                options.port_id
+                options.port_id,
             ).delete();
             this.initialized = true;
         } catch (e) {
@@ -1936,7 +1936,7 @@ export default function (Module) {
     table.prototype.remove = function (data, options) {
         if (!this.index) {
             console.error(
-                "Cannot call `remove()` on a Table without a user-specified index."
+                "Cannot call `remove()` on a Table without a user-specified index.",
             );
             return;
         }
@@ -1974,7 +1974,7 @@ export default function (Module) {
                 false,
                 is_arrow,
                 false,
-                options.port_id
+                options.port_id,
             ).delete();
             this.initialized = true;
         } catch (e) {
@@ -2117,7 +2117,7 @@ export default function (Module) {
                     false,
                     is_arrow,
                     is_csv,
-                    0
+                    0,
                 );
 
                 // Pass through user-provided values or `null` to the
@@ -2126,7 +2126,7 @@ export default function (Module) {
                     _Table,
                     options.index,
                     options.limit,
-                    overridden_types
+                    overridden_types,
                 );
             } catch (e) {
                 if (_Table) {
@@ -2167,7 +2167,7 @@ export default function (Module) {
             self.addEventListener(
                 "message",
                 (e) => this.process(e.data),
-                false
+                false,
             );
         }
 

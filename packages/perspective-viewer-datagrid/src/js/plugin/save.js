@@ -30,7 +30,7 @@ export function save() {
         for (const col of Object.keys(datagrid[PRIVATE_PLUGIN_SYMBOL] || {})) {
             const config = Object.assign(
                 {},
-                datagrid[PRIVATE_PLUGIN_SYMBOL][col]
+                datagrid[PRIVATE_PLUGIN_SYMBOL][col],
             );
             if (config?.pos_fg_color || config?.pos_bg_color) {
                 config.pos_fg_color = config.pos_fg_color?.[0];

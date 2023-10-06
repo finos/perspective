@@ -52,12 +52,12 @@ async function download_release_assets(releases) {
                     headers: {
                         Accept: "application/octet-stream",
                     },
-                }
+                },
             );
 
             console.log(`Writing ${release.name}`);
             await fs.writeFile(release.name, Buffer.from(resp.data));
-        })
+        }),
     );
 }
 
@@ -83,7 +83,7 @@ if (!process.env.GITHUB_TOKEN) {
 
 if (!process.env.COMMIT) {
     console.warn(
-        "Running a dry run, this WILL NOT publish. Set the env var COMMIT to publish."
+        "Running a dry run, this WILL NOT publish. Set the env var COMMIT to publish.",
     );
 }
 

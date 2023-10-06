@@ -115,7 +115,7 @@ export class Server {
                         const msgs = this._tables[msg.name];
                         const table = this.perspective.table(
                             msg.args[0],
-                            msg.options
+                            msg.options,
                         );
 
                         // When using the Node server, the `table()` constructor
@@ -140,7 +140,7 @@ export class Server {
                                     });
                                 })
                                 .catch((error) =>
-                                    this.process_error(msg, error)
+                                    this.process_error(msg, error),
                                 );
                         } else {
                             this._tables[msg.name] = table;
@@ -202,7 +202,7 @@ export class Server {
                         // returns a Promise, but in the Web Worker version,
                         // view() synchronously returns an instance of a View.
                         const view = this._tables[msg.table_name].view(
-                            msg.config
+                            msg.config,
                         );
 
                         if (view && view.then) {
@@ -277,7 +277,7 @@ export class Server {
                         this.post(result);
                     } catch (e) {
                         console.error(
-                            `Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`
+                            `Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`,
                         );
                         const remove_method = msg.method.substring(3);
                         obj[`remove_${remove_method}`](callback);
@@ -295,8 +295,8 @@ export class Server {
             } else {
                 console.error(
                     `Callback not found for remote call "${JSON.stringify(
-                        msg
-                    )}"`
+                        msg,
+                    )}"`,
                 );
             }
         } catch (error) {
@@ -340,7 +340,7 @@ export class Server {
                 if (result instanceof Promise) {
                     result
                         .then((result) =>
-                            this.process_method_call_response(msg, result)
+                            this.process_method_call_response(msg, result),
                         )
                         .catch((error) => this.process_error(msg, error));
                 } else {
@@ -369,7 +369,7 @@ export class Server {
                     id: msg.id,
                     data: result,
                 },
-                [result]
+                [result],
             );
         } else {
             this.post({

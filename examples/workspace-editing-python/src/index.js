@@ -104,7 +104,7 @@ const setup_handlers = async () => {
     client_view.on_update(
         (updated) => {
             const client_ports = Object.keys(PORTS).map(
-                (viewer) => PORTS[viewer]
+                (viewer) => PORTS[viewer],
             );
 
             if (client_ports.includes(updated.port_id)) {
@@ -115,7 +115,7 @@ const setup_handlers = async () => {
                 });
             }
         },
-        { mode: "row" }
+        { mode: "row" },
     );
 
     // If the server updates, decide whether to apply it to the client table.
@@ -130,7 +130,7 @@ const setup_handlers = async () => {
                 client_table.update(updated.delta);
             }
         },
-        { mode: "row" }
+        { mode: "row" },
     );
 };
 

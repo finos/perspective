@@ -68,19 +68,19 @@ export const extentLinear = function () {
             extent$$1[0] == null
                 ? d3Array.min(include)
                 : d3Array.min(
-                      [extent$$1[0]].concat(toConsumableArray(include))
+                      [extent$$1[0]].concat(toConsumableArray(include)),
                   );
         extent$$1[1] =
             extent$$1[1] == null
                 ? d3Array.max(include)
                 : d3Array.max(
-                      [extent$$1[1]].concat(toConsumableArray(include))
+                      [extent$$1[1]].concat(toConsumableArray(include)),
                   );
 
         if (symmetricalAbout != null) {
             let halfRange = Math.max(
                 Math.abs(extent$$1[1] - symmetricalAbout),
-                Math.abs(extent$$1[0] - symmetricalAbout)
+                Math.abs(extent$$1[0] - symmetricalAbout),
             );
             extent$$1[0] = symmetricalAbout - halfRange;
             extent$$1[1] = symmetricalAbout + halfRange;
@@ -114,7 +114,7 @@ export const extentLinear = function () {
             return paddingStrategy.padUnit;
         }
         paddingStrategy.padUnit(
-            arguments.length <= 0 ? undefined : arguments[0]
+            arguments.length <= 0 ? undefined : arguments[0],
         );
         return instance;
     };

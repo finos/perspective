@@ -20,13 +20,13 @@ import { getOrCreateElement } from "../utils/utils";
 const scrollColorLegend = (settings) =>
     scrollableLegend(
         d3Legend.legendColor().shape("circle").shapeRadius(6),
-        settings
+        settings,
     );
 
 const scrollSymbolLegend = (settings) =>
     scrollableLegend(
         d3Legend.legendSymbol().shapePadding(1).labelOffset(3),
-        settings
+        settings,
     );
 
 export const colorLegend = () => legendComponent(scrollColorLegend);
@@ -61,7 +61,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                     settings.hideKeys = settings.hideKeys || [];
                     if (settings.hideKeys.includes(d)) {
                         settings.hideKeys = settings.hideKeys.filter(
-                            (k) => k !== d
+                            (k) => k !== d,
                         );
                     } else {
                         settings.hideKeys.push(d);
@@ -80,7 +80,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
             const legendSelection = getOrCreateElement(
                 container,
                 "div.legend-container",
-                () => container.append("div")
+                () => container.append("div"),
             );
 
             scrollLegend.decorate((selection) => {
@@ -100,7 +100,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                         .select("circle, path")
                         .style("fill", (d) => (isHidden(d) ? null : color(d)))
                         .style("stroke", (d) =>
-                            isHidden(d) ? null : withoutOpacity(color(d))
+                            isHidden(d) ? null : withoutOpacity(color(d)),
                         );
                 }
             });

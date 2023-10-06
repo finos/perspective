@@ -16,7 +16,7 @@
 export function connectedCallback() {
     if (!this._toolbar) {
         this._toolbar = document.createElement(
-            "perspective-viewer-datagrid-toolbar"
+            "perspective-viewer-datagrid-toolbar",
         );
     }
 

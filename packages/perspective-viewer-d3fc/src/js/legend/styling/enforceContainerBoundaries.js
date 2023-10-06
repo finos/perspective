@@ -44,7 +44,7 @@ export function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
             isElementOverflowing(
                 chartNodeRect,
                 draggedInnerNodeRect,
-                bound.edge
+                bound.edge,
             )
         ) {
             const adjustment =

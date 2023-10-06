@@ -63,7 +63,7 @@ export function get_config() {
     if (!globalThis.__PERSPECTIVE_CONFIG__) {
         globalThis.__PERSPECTIVE_CONFIG__ = mergeDeep(
             DEFAULT_CONFIG,
-            globalThis.__TEMPLATE_CONFIG__ || {}
+            globalThis.__TEMPLATE_CONFIG__ || {},
         );
     }
     return globalThis.__PERSPECTIVE_CONFIG__;

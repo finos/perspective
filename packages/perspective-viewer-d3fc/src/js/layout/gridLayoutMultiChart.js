@@ -26,7 +26,7 @@ export function gridLayoutMultiChart() {
         const innerContainer = getOrCreateElement(
             container,
             "div.inner-container",
-            () => container.append("div").attr("class", "inner-container")
+            () => container.append("div").attr("class", "inner-container"),
         );
 
         const innerRect = innerContainer.node().getBoundingClientRect();
@@ -38,7 +38,7 @@ export function gridLayoutMultiChart() {
 
         const cols = Math.max(
             1,
-            Math.min(data.length, Math.floor(containerWidth / minSize))
+            Math.min(data.length, Math.floor(containerWidth / minSize)),
         );
         const rows = Math.ceil(data.length / cols);
 
@@ -48,8 +48,8 @@ export function gridLayoutMultiChart() {
                 containerHeight,
                 Math.max(
                     containerHeight / rows,
-                    containerWidth / Math.max(cols, 1)
-                )
+                    containerWidth / Math.max(cols, 1),
+                ),
             ),
         };
 
@@ -60,11 +60,11 @@ export function gridLayoutMultiChart() {
         if (data.length > 1) {
             innerContainer.style(
                 "grid-template-columns",
-                `repeat(${cols}, ${100 / cols}%)`
+                `repeat(${cols}, ${100 / cols}%)`,
             );
             innerContainer.style(
                 "grid-template-rows",
-                `repeat(${rows}, ${containerSize.height}px)`
+                `repeat(${rows}, ${containerSize.height}px)`,
             );
         } else {
             innerContainer.style("grid-template-columns", `repeat(1, 100%)`);

@@ -31,7 +31,7 @@ if (!fs.existsSync("./.perspectiverc")) {
     await import("./test_cpp");
 } else {
     console.error(
-        `Invalid project "${process.env.PSP_PROJECT}" selected, running setup`
+        `Invalid project "${process.env.PSP_PROJECT}" selected, running setup`,
     );
     process.env.PSP_BUILD_IMMEDIATELY = 1;
     await import("./setup");

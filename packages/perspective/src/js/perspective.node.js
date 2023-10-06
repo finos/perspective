@@ -164,7 +164,7 @@ function perspective_assets(assets, host_psp) {
                         content,
                         extname === ".arrow" || extname === ".feather"
                             ? undefined
-                            : "utf-8"
+                            : "utf-8",
                     );
                     return;
                 }
@@ -180,7 +180,7 @@ function perspective_assets(assets, host_psp) {
                             paths = [
                                 ...paths,
                                 ...assets.map((x) =>
-                                    path.join(x, "node_modules")
+                                    path.join(x, "node_modules"),
                                 ),
                                 LOCAL_PATH,
                             ];
@@ -198,7 +198,7 @@ function perspective_assets(assets, host_psp) {
                                 content,
                                 extname === ".arrow" || extname === ".feather"
                                     ? undefined
-                                    : "utf-8"
+                                    : "utf-8",
                             );
                             return;
                         }
@@ -233,7 +233,7 @@ class WebSocketServer extends WebSocketManager {
 
         // Serve Perspective files through HTTP
         this._server = stoppable(
-            http.createServer(perspective_assets(assets, host_psp))
+            http.createServer(perspective_assets(assets, host_psp)),
         );
 
         // Serve Worker API through WebSockets
@@ -248,7 +248,7 @@ class WebSocketServer extends WebSocketManager {
         this._server.on("upgrade", (request, socket, head) => {
             console.log("200    *** websocket upgrade ***");
             this._wss.handleUpgrade(request, socket, head, (sock) =>
-                this._wss.emit("connection", sock, request)
+                this._wss.emit("connection", sock, request),
             );
         });
 

@@ -113,7 +113,7 @@ function runTests(context, compare) {
             expect(convert(old, { replace_defaults: true })).toEqual(current);
             await compare(
                 page,
-                `${context}-${name.toLowerCase().replace(" ", "-")}.txt`
+                `${context}-${name.toLowerCase().replace(" ", "-")}.txt`,
             );
         });
     }

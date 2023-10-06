@@ -96,13 +96,13 @@ declare module "@finos/perspective" {
         set_depth(depth?: number): void;
         to_arrow(options?: SerializeConfig): Promise<ArrayBuffer>;
         to_columns(
-            options?: SerializeConfig
+            options?: SerializeConfig,
         ): Promise<Record<string, Array<string | boolean | Date | number>>>;
         to_csv(
-            options?: SerializeConfig & { config: unknown }
+            options?: SerializeConfig & { config: unknown },
         ): Promise<string>;
         to_json(
-            options?: SerializeConfig
+            options?: SerializeConfig,
         ): Promise<Array<Record<string, string | boolean | Date | number>>>;
     };
 
@@ -148,7 +148,7 @@ declare module "@finos/perspective" {
             | Date
             | boolean
             | Array<string | number | Date | boolean>
-        )
+        ),
     ];
     export type Sort = [ColumnName, SortDir];
 
@@ -169,7 +169,7 @@ declare module "@finos/perspective" {
         delete(): Promise<void>;
         on_delete(callback: () => void): void;
         validate_expressions(
-            expressions: Array<string>
+            expressions: Array<string>,
         ): Promise<ValidatedExpressions>;
         schema(): Promise<Schema>;
         size(): Promise<number>;
@@ -219,13 +219,13 @@ declare module "@finos/perspective" {
 
     export function perspective_assets(
         assets: string[],
-        host_psp: boolean
+        host_psp: boolean,
     ): (request: any, response: any) => void;
 
     type perspective = {
         table(
             data_or_schema: TableData | Schema,
-            options?: TableOptions
+            options?: TableOptions,
         ): Promise<Table>;
         worker(): PerspectiveWorker;
         shared_worker(): PerspectiveWorker;

@@ -29,7 +29,7 @@ test.describe("CLI", function () {
     test("Tests something", async ({ page }) => {
         await page.goto(`http://localhost:${port}/`);
         await page.waitForSelector(
-            "perspective-viewer perspective-viewer-datagrid"
+            "perspective-viewer perspective-viewer-datagrid",
         );
 
         const json = await page.evaluate(async function () {

@@ -25,7 +25,7 @@ const NBEXTENSION_PATH = path.resolve(
     "perspective",
     "perspective",
     "nbextension",
-    "static"
+    "static",
 );
 
 const TEST_BUILD = {
@@ -105,7 +105,7 @@ const fs = require("fs");
 function add(builder, path, path2) {
     builder.add(
         path,
-        fs.readFileSync(require.resolve(path2 || path)).toString()
+        fs.readFileSync(require.resolve(path2 || path)).toString(),
     );
 }
 
@@ -123,7 +123,7 @@ async function build_all() {
     add(builder3, "./index.less", "./src/less/index.less");
     fs.writeFileSync(
         "dist/css/perspective-jupyterlab.css",
-        builder3.compile().get("index.css")
+        builder3.compile().get("index.css"),
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));

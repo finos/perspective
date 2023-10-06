@@ -39,7 +39,7 @@ export class DataAccessor {
             return this.data_formats.schema;
         } else {
             throw `Could not determine data format for ${JSON.stringify(
-                data
+                data,
             )}, with JS typeof ${typeof data}`;
         }
     }
@@ -161,7 +161,7 @@ export class DataAccessor {
                 const new_type = get_type_config(data[name]);
                 if (new_type.type) {
                     console.debug(
-                        `Converting "${data[name]}" to "${new_type.type}"`
+                        `Converting "${data[name]}" to "${new_type.type}"`,
                     );
                     overridden_types[name] = data[name];
                     data[name] = new_type.type;

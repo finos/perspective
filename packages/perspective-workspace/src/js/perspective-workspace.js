@@ -149,8 +149,8 @@ class PerspectiveWorkspaceElement extends HTMLElement {
     async flush() {
         await Promise.all(
             Array.from(this.querySelectorAll("perspective-viewer")).map((x) =>
-                x.flush()
-            )
+                x.flush(),
+            ),
         );
     }
 

@@ -53,7 +53,7 @@ test.describe("WebSocketManager", function () {
 
         client_table.view({ columns: ["z"] }).catch((error) => {
             expect(error.message).toBe(
-                "Abort(): Invalid column 'z' found in View columns.\n"
+                "Abort(): Invalid column 'z' found in View columns.\n",
             );
         });
 
@@ -105,7 +105,7 @@ test.describe("WebSocketManager", function () {
 
         client_1_table.view({ columns: ["z"] }).catch((error) => {
             expect(error.message).toBe(
-                "Abort(): Invalid column 'z' found in View columns.\n"
+                "Abort(): Invalid column 'z' found in View columns.\n",
             );
         });
 

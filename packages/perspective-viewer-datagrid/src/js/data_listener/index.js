@@ -46,7 +46,7 @@ export function createDataListener() {
             };
 
             columns = JSON.parse(
-                await this._view.to_columns_string(new_window)
+                await this._view.to_columns_string(new_window),
             );
 
             this._last_window = new_window;
@@ -89,9 +89,9 @@ export function createDataListener() {
                         this,
                         path_parts[this._config.split_by.length],
                         x,
-                        regularTable[PRIVATE_PLUGIN_SYMBOL]
-                    )
-                )
+                        regularTable[PRIVATE_PLUGIN_SYMBOL],
+                    ),
+                ),
             );
             metadata.push(column);
             if (is_settings_open) {
@@ -125,15 +125,15 @@ export function createDataListener() {
                     this,
                     columns.__ROW_PATH__,
                     this._config.group_by,
-                    regularTable
-                )
+                    regularTable,
+                ),
             ),
             column_headers,
             data,
             metadata,
             column_header_merge_depth: Math.max(
                 0,
-                this._config.split_by.length
+                this._config.split_by.length,
             ),
         };
     };

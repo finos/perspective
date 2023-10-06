@@ -565,7 +565,7 @@ const perspective = require("@finos/perspective");
                     idx: [1, 2, 3, 4],
                     x: [1, 2, null, 4],
                 },
-                { index: "idx" }
+                { index: "idx" },
             );
 
             const view = await table.view({
@@ -603,7 +603,7 @@ const perspective = require("@finos/perspective");
                     idx: [1, 2, 3, 4],
                     x: [1, 2, null, 4],
                 },
-                { index: "idx" }
+                { index: "idx" },
             );
 
             const view = await table.view({
@@ -649,15 +649,15 @@ const perspective = require("@finos/perspective");
 
             const result = await view.to_columns();
             expect(result["computed"]).toEqual(
-                Array(4).fill(new Date(2020, 6, 15).getTime())
+                Array(4).fill(new Date(2020, 6, 15).getTime()),
             );
             expect(result["computed2"]).toEqual(
-                Array(4).fill(new Date(1970, 9, 29).getTime())
+                Array(4).fill(new Date(1970, 9, 29).getTime()),
             );
             expect(result["computed3"]).toEqual(
                 Array(4)
                     .fill(true)
-                    .map((_, idx) => new Date(2020, 0, idx + 1).getTime())
+                    .map((_, idx) => new Date(2020, 0, idx + 1).getTime()),
             );
             await view.delete();
             await table.delete();
@@ -781,7 +781,7 @@ const perspective = require("@finos/perspective");
                     new Date(2009, 4, 31),
                     new Date(1980, 11, 20),
                     new Date(2020, 1, 29),
-                ].map((x) => x.getTime())
+                ].map((x) => x.getTime()),
             );
             await view.delete();
             await table.delete();
@@ -946,7 +946,7 @@ const perspective = require("@finos/perspective");
                         12,
                         13,
                         14,
-                        15
+                        15,
                     ).getTime()})`,
                 ],
             });

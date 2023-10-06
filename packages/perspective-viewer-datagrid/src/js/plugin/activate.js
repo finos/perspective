@@ -49,29 +49,29 @@ export async function activate(view) {
             this,
             this.regular_table,
             table,
-            view
+            view,
         );
 
         this.regular_table.addStyleListener(
-            table_cell_style_listener.bind(this.model, this.regular_table)
+            table_cell_style_listener.bind(this.model, this.regular_table),
         );
 
         this.regular_table.addStyleListener(
-            group_header_style_listener.bind(this.model, this.regular_table)
+            group_header_style_listener.bind(this.model, this.regular_table),
         );
 
         this.regular_table.addStyleListener(
-            column_header_style_listener.bind(this.model, this.regular_table)
+            column_header_style_listener.bind(this.model, this.regular_table),
         );
 
         this.regular_table.addEventListener(
             "click",
-            click_listener.bind(this.model, this.regular_table)
+            click_listener.bind(this.model, this.regular_table),
         );
 
         this.regular_table.addEventListener(
             "mousedown",
-            mousedown_listener.bind(this.model, this.regular_table, viewer)
+            mousedown_listener.bind(this.model, this.regular_table, viewer),
         );
 
         // Row selection
@@ -81,8 +81,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_rows_map
-            )
+                selected_rows_map,
+            ),
         );
 
         this.regular_table.addEventListener(
@@ -91,8 +91,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_rows_map
-            )
+                selected_rows_map,
+            ),
         );
 
         this.regular_table.addEventListener(
@@ -101,32 +101,40 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_rows_map
-            )
+                selected_rows_map,
+            ),
         );
 
         // User click
         this.regular_table.addEventListener(
             "click",
-            dispatch_click_listener.bind(this.model, this.regular_table, viewer)
+            dispatch_click_listener.bind(
+                this.model,
+                this.regular_table,
+                viewer,
+            ),
         );
 
         // Editing
         const selected_position_map = new WeakMap();
         this.regular_table.addStyleListener(
-            editable_style_listener.bind(this.model, this.regular_table, viewer)
+            editable_style_listener.bind(
+                this.model,
+                this.regular_table,
+                viewer,
+            ),
         );
         this.regular_table.addStyleListener(
             focus_style_listener.bind(
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
         this.regular_table.addEventListener(
             "click",
-            clickListener.bind(this.model, this.regular_table, viewer)
+            clickListener.bind(this.model, this.regular_table, viewer),
         );
         this.regular_table.addEventListener(
             "focusin",
@@ -134,8 +142,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
         this.regular_table.addEventListener(
             "focusout",
@@ -143,8 +151,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
         this.regular_table.addEventListener(
             "keydown",
@@ -152,8 +160,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
 
         // viewer event listeners
@@ -162,7 +170,7 @@ export async function activate(view) {
             (event) => {
                 style_selected_column(
                     this.regular_table,
-                    event.detail.column_name
+                    event.detail.column_name,
                 );
                 if (!event.detail.open) {
                     this.model._column_settings_selected_column = null;
@@ -171,7 +179,7 @@ export async function activate(view) {
 
                 this.model._column_settings_selected_column =
                     event.detail.column_name;
-            }
+            },
         );
 
         this._initialized = true;
@@ -181,7 +189,7 @@ export async function activate(view) {
             this.regular_table,
             table,
             view,
-            this.model
+            this.model,
         );
     }
 }

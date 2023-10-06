@@ -34,7 +34,7 @@ test.describe("Bar Width", () => {
         });
 
         const config = await page.evaluate(() =>
-            document.querySelector("perspective-viewer")!.save()
+            document.querySelector("perspective-viewer")!.save(),
         );
 
         expect(config).toEqual({
@@ -55,7 +55,7 @@ test.describe("Bar Width", () => {
         await compareSVGContentsToSnapshot(
             page,
             "perspective-viewer-d3fc-ybar",
-            ["bar-width.txt"]
+            ["bar-width.txt"],
         );
     });
 });

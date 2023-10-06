@@ -41,7 +41,7 @@ async function setupTestWorkspace(page) {
 
     await page.evaluate(async () => {
         const viewer = document.body.querySelector(
-            'perspective-viewer[name="one"]'
+            'perspective-viewer[name="one"]',
         );
         const workspace = document.getElementById("workspace");
         workspace.removeChild(viewer);
@@ -57,7 +57,7 @@ test.describe("Workspace DOM", () => {
 
                 await compareLightDOMContents(
                     page,
-                    "workspace-light-remove-one-child.txt"
+                    "workspace-light-remove-one-child.txt",
                 );
             });
         });
@@ -70,7 +70,7 @@ test.describe("Workspace DOM", () => {
 
                 await compareShadowDOMContents(
                     page,
-                    "workspace-dark-remove-one-child.txt"
+                    "workspace-dark-remove-one-child.txt",
                 );
             });
         });

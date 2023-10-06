@@ -253,7 +253,7 @@ const datetime_data_local = [
                     },
                     {
                         index: "c",
-                    }
+                    },
                 );
                 var view = await table.view({
                     group_by: ["a"],

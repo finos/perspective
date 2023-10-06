@@ -86,7 +86,7 @@ function tests(context, compare) {
 
             return compare(
                 page,
-                `sunburst-charts-does-not-loop-${context}.txt`
+                `sunburst-charts-does-not-loop-${context}.txt`,
             );
         });
     });

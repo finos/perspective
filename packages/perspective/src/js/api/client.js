@@ -99,7 +99,7 @@ export class Client {
             this.send({ id: -1, cmd: "init_profile_thread" });
         } else {
             this._worker.messages.push(() =>
-                this.send({ id: -1, cmd: "init_profile_thread" })
+                this.send({ id: -1, cmd: "init_profile_thread" }),
             );
         }
     }

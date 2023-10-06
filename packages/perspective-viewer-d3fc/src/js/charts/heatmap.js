@@ -46,7 +46,7 @@ function heatmapChart(container, settings) {
         .orient("vertical")(data);
 
     const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
-        withGridLines(series, settings).canvas(true)
+        withGridLines(series, settings).canvas(true),
     );
 
     if (chart.xPaddingInner) {

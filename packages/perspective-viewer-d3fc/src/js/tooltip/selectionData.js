@@ -20,7 +20,7 @@ export function toValue(type, value) {
                 ? value
                 : new Date(parseInt(value)).toLocaleString(
                       [],
-                      get_type_config(type).format
+                      get_type_config(type).format,
                   );
         case "integer":
             return parseInt(value, 10);
@@ -79,7 +79,7 @@ export function getDataValues(data, settings) {
                 data.colorValue ||
                     data.mainValue - data.baseValue ||
                     data.mainValue ||
-                    data.mainValues
+                    data.mainValues,
             ),
         },
     ];

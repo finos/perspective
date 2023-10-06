@@ -37,11 +37,11 @@ exports.ResolvePlugin = function ResolvePlugin(options) {
                     const importerCode = `
                             export * from '${args.path.replace(
                                 args.pluginData.moduleName,
-                                moduleTarget
+                                moduleTarget,
                             )}';
                             export { default } from '${args.path.replace(
                                 args.pluginData.moduleName,
-                                moduleTarget
+                                moduleTarget,
                             )}';
                         `;
                     return {

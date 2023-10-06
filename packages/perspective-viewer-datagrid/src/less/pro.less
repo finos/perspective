@@ -54,12 +54,7 @@ perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table {
     }
 
     tbody tr td:first-of-type {
-        clip-path: polygon(
-            var(--regular-table--clip-x, 0) 0,
-            var(--regular-table--clip-x, 0) 200%,
-            200% 200%,
-            200% 0
-        );
+        clip-path: polygon(var(--regular-table--clip-x, 0) 0, var(--regular-table--clip-x, 0) 200%, 200% 200%, 200% 0);
     }
 
     tbody tr:first-child td:first-of-type {

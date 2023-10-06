@@ -260,7 +260,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(result['day_of_week("a")']).toEqual(
-                result.a.map((x) => common.days_of_week[new Date(x).getDay()])
+                result.a.map((x) => common.days_of_week[new Date(x).getDay()]),
             );
             view.delete();
             table.delete();
@@ -288,8 +288,8 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
             expect(result['day_of_week("a")']).toEqual(
                 result.a.map((x) =>
-                    x ? common.days_of_week[new Date(x).getDay()] : null
-                )
+                    x ? common.days_of_week[new Date(x).getDay()] : null,
+                ),
             );
             view.delete();
             table.delete();
@@ -319,8 +319,8 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
             expect(result['month_of_year("a")']).toEqual(
                 result.a.map(
-                    (x) => common.months_of_year[new Date(x).getMonth()]
-                )
+                    (x) => common.months_of_year[new Date(x).getMonth()],
+                ),
             );
             view.delete();
             table.delete();
@@ -350,8 +350,8 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
             expect(result['month_of_year("a")']).toEqual(
                 result.a.map((x) =>
-                    x ? common.months_of_year[new Date(x).getMonth()] : null
-                )
+                    x ? common.months_of_year[new Date(x).getMonth()] : null,
+                ),
             );
             view.delete();
             table.delete();
@@ -492,7 +492,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(result["bucket(\"a\", 's')"]).toEqual(
-                result.a.map((x) => (x ? x : null))
+                result.a.map((x) => (x ? x : null)),
             );
             view.delete();
             table.delete();
@@ -548,7 +548,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(result["bucket(\"a\", 'm')"]).toEqual(
-                result.a.map((x) => (x ? x : null))
+                result.a.map((x) => (x ? x : null)),
             );
             view.delete();
             table.delete();
@@ -604,7 +604,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(result["bucket(\"a\", 'h')"]).toEqual(
-                result.a.map((x) => (x ? x : null))
+                result.a.map((x) => (x ? x : null)),
             );
             view.delete();
             table.delete();
@@ -660,7 +660,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(result["bucket(\"a\", 'D')"]).toEqual(
-                result.a.map((x) => (x ? x : null))
+                result.a.map((x) => (x ? x : null)),
             );
             view.delete();
             table.delete();
@@ -689,8 +689,8 @@ const perspective = require("@finos/perspective");
 
             expect(
                 result["bucket(\"a\", 'W')"].map((x) =>
-                    x ? new Date(x) : null
-                )
+                    x ? new Date(x) : null,
+                ),
             ).toEqual(result.a.map((x) => common.week_bucket(x)));
             view.delete();
             table.delete();
@@ -719,8 +719,8 @@ const perspective = require("@finos/perspective");
 
             expect(
                 result["bucket(\"a\", 'W')"].map((x) =>
-                    x ? new Date(x) : null
-                )
+                    x ? new Date(x) : null,
+                ),
             ).toEqual(result.a.map((x) => (x ? common.week_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -742,7 +742,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result["bucket(\"a\", 'W')"].map((x) => new Date(x))
+                result["bucket(\"a\", 'W')"].map((x) => new Date(x)),
             ).toEqual(result.a.map((x) => common.week_bucket(x)));
             view.delete();
             table.delete();
@@ -771,8 +771,8 @@ const perspective = require("@finos/perspective");
 
             expect(
                 result["bucket(\"a\", 'M')"].map((x) =>
-                    x ? new Date(x) : null
-                )
+                    x ? new Date(x) : null,
+                ),
             ).toEqual(result.a.map((x) => common.month_bucket(x)));
             view.delete();
             table.delete();
@@ -801,8 +801,8 @@ const perspective = require("@finos/perspective");
 
             expect(
                 result["bucket(\"a\", 'M')"].map((x) =>
-                    x ? new Date(x) : null
-                )
+                    x ? new Date(x) : null,
+                ),
             ).toEqual(result.a.map((x) => (x ? common.month_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -838,7 +838,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[col_name].map((x) => (x ? new Date(x) : null))
+                result[col_name].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.month_bucket(x, 3)));
             view.delete();
             table.delete();
@@ -867,8 +867,8 @@ const perspective = require("@finos/perspective");
 
             expect(
                 result["bucket(\"a\", 'Y')"].map((x) =>
-                    x ? new Date(x) : null
-                )
+                    x ? new Date(x) : null,
+                ),
             ).toEqual(result.a.map((x) => common.year_bucket(x)));
             view.delete();
             table.delete();
@@ -897,8 +897,8 @@ const perspective = require("@finos/perspective");
 
             expect(
                 result["bucket(\"a\", 'Y')"].map((x) =>
-                    x ? new Date(x) : null
-                )
+                    x ? new Date(x) : null,
+                ),
             ).toEqual(result.a.map((x) => (x ? common.year_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -934,7 +934,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[col_name].map((x) => (x ? new Date(x) : null))
+                result[col_name].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.year_bucket(x, 7)));
             view.delete();
             table.delete();
@@ -957,7 +957,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(result[`hour_of_day("a")`]).toEqual(
-                result.a.map((x) => new Date(x).getUTCHours())
+                result.a.map((x) => new Date(x).getUTCHours()),
             );
             view.delete();
             table.delete();
@@ -978,7 +978,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(result[`hour_of_day("a")`]).toEqual(
-                result.a.map((x) => (x ? new Date(x).getUTCHours() : null))
+                result.a.map((x) => (x ? new Date(x).getUTCHours() : null)),
             );
             view.delete();
             table.delete();
@@ -1006,8 +1006,8 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
             expect(result[`day_of_week("a")`]).toEqual(
                 result.a.map(
-                    (x) => common.days_of_week[new Date(x).getUTCDay()]
-                )
+                    (x) => common.days_of_week[new Date(x).getUTCDay()],
+                ),
             );
             view.delete();
             table.delete();
@@ -1035,8 +1035,8 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
             expect(result[`day_of_week("a")`]).toEqual(
                 result.a.map((x) =>
-                    x ? common.days_of_week[new Date(x).getUTCDay()] : null
-                )
+                    x ? common.days_of_week[new Date(x).getUTCDay()] : null,
+                ),
             );
             view.delete();
             table.delete();
@@ -1066,8 +1066,8 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
             expect(result[`month_of_year("a")`]).toEqual(
                 result.a.map(
-                    (x) => common.months_of_year[new Date(x).getUTCMonth()]
-                )
+                    (x) => common.months_of_year[new Date(x).getUTCMonth()],
+                ),
             );
             view.delete();
             table.delete();
@@ -1097,8 +1097,8 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
             expect(result[`month_of_year("a")`]).toEqual(
                 result.a.map((x) =>
-                    x ? common.months_of_year[new Date(x).getUTCMonth()] : null
-                )
+                    x ? common.months_of_year[new Date(x).getUTCMonth()] : null,
+                ),
             );
             view.delete();
             table.delete();
@@ -1125,7 +1125,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 's')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 's')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.second_bucket(x)));
             view.delete();
             table.delete();
@@ -1152,9 +1152,9 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 's')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 's')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(
-                result.a.map((x) => (x ? common.second_bucket(x) : null))
+                result.a.map((x) => (x ? common.second_bucket(x) : null)),
             );
             view.delete();
             table.delete();
@@ -1183,9 +1183,9 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[col_name].map((x) => (x ? new Date(x) : null))
+                result[col_name].map((x) => (x ? new Date(x) : null)),
             ).toEqual(
-                result.a.map((x) => (x ? common.second_bucket(x, 20) : null))
+                result.a.map((x) => (x ? common.second_bucket(x, 20) : null)),
             );
             view.delete();
             table.delete();
@@ -1212,7 +1212,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 'm')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'm')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.minute_bucket(x)));
             view.delete();
             table.delete();
@@ -1239,9 +1239,9 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 'm')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'm')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(
-                result.a.map((x) => (x ? common.minute_bucket(x) : null))
+                result.a.map((x) => (x ? common.minute_bucket(x) : null)),
             );
             view.delete();
             table.delete();
@@ -1271,7 +1271,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[col_name].map((x) => (x ? new Date(x) : null))
+                result[col_name].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.minute_bucket(x, 15)));
             view.delete();
             table.delete();
@@ -1298,7 +1298,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 'h')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'h')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.hour_bucket(x)));
             view.delete();
             table.delete();
@@ -1325,7 +1325,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 'h')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'h')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => (x ? common.hour_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -1356,7 +1356,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[col_name].map((x) => (x ? new Date(x) : null))
+                result[col_name].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.hour_bucket(x, 6)));
             view.delete();
             table.delete();
@@ -1383,7 +1383,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 'D')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'D')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.day_bucket(x)));
             view.delete();
             table.delete();
@@ -1410,7 +1410,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 'D')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'D')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => (x ? common.day_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -1437,7 +1437,7 @@ const perspective = require("@finos/perspective");
 
             let result = await view.to_columns();
             expect(
-                result[`bucket("a", 'D')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'D')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => (x ? common.day_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -1465,7 +1465,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[`bucket("a", 'W')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'W')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.week_bucket(x)));
             view.delete();
             table.delete();
@@ -1493,7 +1493,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[`bucket("a", 'W')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'W')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => (x ? common.week_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -1515,7 +1515,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(result[`bucket("a", 'W')`].map((x) => new Date(x))).toEqual(
-                result.a.map((x) => common.week_bucket(x))
+                result.a.map((x) => common.week_bucket(x)),
             );
             view.delete();
             table.delete();
@@ -1543,7 +1543,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[`bucket("a", 'M')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'M')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.month_bucket(x)));
             view.delete();
             table.delete();
@@ -1571,7 +1571,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[`bucket("a", 'M')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'M')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => (x ? common.month_bucket(x) : null)));
             view.delete();
             table.delete();
@@ -1599,7 +1599,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[`bucket("a", 'Y')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'Y')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => common.year_bucket(x)));
             view.delete();
             table.delete();
@@ -1627,7 +1627,7 @@ const perspective = require("@finos/perspective");
             let result = await view.to_columns();
 
             expect(
-                result[`bucket("a", 'Y')`].map((x) => (x ? new Date(x) : null))
+                result[`bucket("a", 'Y')`].map((x) => (x ? new Date(x) : null)),
             ).toEqual(result.a.map((x) => (x ? common.year_bucket(x) : null)));
             view.delete();
             table.delete();

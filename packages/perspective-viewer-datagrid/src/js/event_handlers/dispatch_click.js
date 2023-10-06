@@ -28,6 +28,6 @@ export async function dispatch_click_listener(table, viewer, event) {
                 column_names,
                 config,
             },
-        })
+        }),
     );
 }

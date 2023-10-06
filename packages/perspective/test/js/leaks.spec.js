@@ -16,7 +16,7 @@ const perspective = require("@finos/perspective");
 const fs = require("fs");
 
 const arr = fs.readFileSync(
-    require.resolve("superstore-arrow/superstore.lz4.arrow")
+    require.resolve("superstore-arrow/superstore.lz4.arrow"),
 ).buffer;
 
 /**
@@ -55,7 +55,7 @@ function generate_expressions() {
 
     for (const op of ["+", "-", "*", "/", "^", "%"]) {
         expressions.push(
-            `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`
+            `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`,
         );
     }
 
@@ -105,7 +105,7 @@ test.describe("leaks", function () {
         test("update does not leak", async () => {
             const table = await perspective.table(
                 { x: "integer", y: "string" },
-                { index: "x" }
+                { index: "x" },
             );
             let count = 0;
             const view = await table.view();

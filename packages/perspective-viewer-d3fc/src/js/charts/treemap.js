@@ -25,7 +25,7 @@ function treemap(container, settings) {
     const data = treeData(settings);
     const color = treeColor(
         settings,
-        data.map((d) => d.data)
+        data.map((d) => d.data),
     );
 
     if (color) {
@@ -66,12 +66,12 @@ function treemap(container, settings) {
                 .settings(settings.treemaps[split], settings)
                 .data(data)
                 .container(
-                    d3.select(d3.select(this.parentNode).node().parentNode)
+                    d3.select(d3.select(this.parentNode).node().parentNode),
                 )
                 .color(color)(treemapSvg);
 
             tooltip().settings(settings).centered(true)(
-                treemapSvg.selectAll("g")
+                treemapSvg.selectAll("g"),
             );
         });
 }

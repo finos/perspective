@@ -76,7 +76,7 @@ const path_mod = require("path");
 function add(builder, path) {
     builder.add(
         path,
-        fs.readFileSync(path_mod.join("./src/less", path)).toString()
+        fs.readFileSync(path_mod.join("./src/less", path)).toString(),
     );
 }
 
@@ -88,7 +88,7 @@ async function compile_css() {
     add(builder, "./chart.less");
     fs.writeFileSync(
         "dist/css/perspective-viewer-d3fc.css",
-        builder.compile().get("chart.css")
+        builder.compile().get("chart.css"),
     );
 }
 

@@ -63,7 +63,7 @@ export class PerspectiveDockPanel extends DockPanel {
             return PerspectiveDockPanel.getWidgets(layout.main);
         } else if (layout?.children) {
             return layout.children.flatMap((widget) =>
-                PerspectiveDockPanel.getWidgets(widget)
+                PerspectiveDockPanel.getWidgets(widget),
             );
         } else if (layout?.widgets) {
             return layout.widgets;
@@ -75,11 +75,11 @@ export class PerspectiveDockPanel extends DockPanel {
         if (layout.main) {
             layout.main = PerspectiveDockPanel.mapWidgets(
                 widgetFunc,
-                layout.main
+                layout.main,
             );
         } else if (layout.children) {
             layout.children = layout.children.map((widget) =>
-                PerspectiveDockPanel.mapWidgets(widgetFunc, widget)
+                PerspectiveDockPanel.mapWidgets(widgetFunc, widget),
             );
         } else if (layout.widgets) {
             layout.widgets = layout.widgets.map((widget) => widgetFunc(widget));

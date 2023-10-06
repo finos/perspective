@@ -39,7 +39,7 @@ export function cell_style_datetime(plugin, td, metadata) {
     ) {
         const source = this._plugin_background;
         const foreground = infer_foreground_from_background(
-            rgbaToRgb([r, g, b, 1], source)
+            rgbaToRgb([r, g, b, 1], source),
         );
         td.style.color = foreground;
         td.style.backgroundColor = hex;

@@ -15,7 +15,7 @@ import { splitterLabels } from "./splitterLabels";
 export const axisSplitter = (
     settings,
     sourceData,
-    splitFn = dataSplitFunction
+    splitFn = dataSplitFunction,
 ) => {
     let color;
     let data;

@@ -93,7 +93,7 @@ function getTooltipDiv(container) {
             .attr("class", "tooltip")
             .style("z-index", 3)
             .style("opacity", 0)
-            .html(tooltipTemplate)
+            .html(tooltipTemplate),
     );
 }
 
@@ -141,7 +141,7 @@ function shiftIfOverflowingChartArea(
     containerRect,
     left,
     top,
-    centered = false
+    centered = false,
 ) {
     const tooltipDivRect = tooltipDiv.node().getBoundingClientRect();
 

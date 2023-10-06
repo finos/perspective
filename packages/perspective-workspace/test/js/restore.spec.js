@@ -51,7 +51,7 @@ function tests(context, compare) {
 
         return compare(
             page,
-            `${context}-restore-workspace-with-detail-only.txt`
+            `${context}-restore-workspace-with-detail-only.txt`,
         );
     });
 
@@ -89,7 +89,7 @@ function tests(context, compare) {
 
         return compare(
             page,
-            `${context}-restore-workspace-with-master-and-detail.txt`
+            `${context}-restore-workspace-with-master-and-detail.txt`,
         );
     });
 
@@ -226,7 +226,7 @@ function tests(context, compare) {
 
         return compare(
             page,
-            `${context}-save-workspace-with-settings-panel-open.txt`
+            `${context}-save-workspace-with-settings-panel-open.txt`,
         );
     });
 }

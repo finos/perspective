@@ -80,7 +80,7 @@ test.describe("Removes", () => {
                                 int: [1, 4, 5, 6],
                                 float: [0.5, 2, 2.5, 3],
                             });
-                        }
+                        },
                     );
 
                     await table.delete();
@@ -126,7 +126,7 @@ test.describe("Removes", () => {
                                     float: [0.5, 2, 2.5, 3, 3.5],
                                 });
                             }
-                        }
+                        },
                     );
 
                     await table.delete();
@@ -172,7 +172,7 @@ test.describe("Removes", () => {
                                     float: [0.5, 2, 2.5, 3, 3.5],
                                 });
                             }
-                        }
+                        },
                     );
 
                     await table.delete();
@@ -190,7 +190,7 @@ test.describe("Removes", () => {
 
                     table.update(data);
                     table.remove(
-                        [1, 3, 5].map((x) => (string_pkey ? x.toString() : x))
+                        [1, 3, 5].map((x) => (string_pkey ? x.toString() : x)),
                     );
 
                     await query(
@@ -216,7 +216,7 @@ test.describe("Removes", () => {
                                 int: [9, 8, 7, 6, 4, 2],
                                 float: [4.5, 4, 3.5, 3, 2, 1],
                             });
-                        }
+                        },
                     );
 
                     await table.delete();
@@ -262,7 +262,7 @@ test.describe("Removes", () => {
                                 int: [1, 4, 5, 6, 7, 8, 9],
                                 float: [0.5, 2, 2.5, 3, 3.5, 4, 4.5],
                             });
-                        }
+                        },
                     );
 
                     await table.delete();
@@ -292,21 +292,21 @@ test.describe("Removes", () => {
                         if (string_pkey) {
                             expect(await getter()).toEqual({
                                 str: [null, 1, 2, 3, 4, 5, 6].map((x) =>
-                                    x ? x.toString() : x
+                                    x ? x.toString() : x,
                                 ),
                                 int: [7, 1, 2, 3, 4, 5, 6],
                                 float: [7, 1, 2, 3, 4, 5, 6].map(
-                                    (x) => x * 0.5
+                                    (x) => x * 0.5,
                                 ),
                             });
                         } else {
                             expect(await getter()).toEqual({
                                 str: [7, 1, 2, 3, 4, 5, 6].map((x) =>
-                                    x.toString()
+                                    x.toString(),
                                 ),
                                 int: [null, 1, 2, 3, 4, 5, 6],
                                 float: [7, 1, 2, 3, 4, 5, 6].map(
-                                    (x) => x * 0.5
+                                    (x) => x * 0.5,
                                 ),
                             });
                         }
@@ -316,7 +316,7 @@ test.describe("Removes", () => {
                         if (string_pkey) {
                             expect(await getter()).toEqual({
                                 str: [null, 1, 2, 4, 5, 6].map((x) =>
-                                    x ? x.toString() : x
+                                    x ? x.toString() : x,
                                 ),
                                 int: [7, 1, 2, 4, 5, 6],
                                 float: [7, 1, 2, 4, 5, 6].map((x) => x * 0.5),
@@ -324,7 +324,7 @@ test.describe("Removes", () => {
                         } else {
                             expect(await getter()).toEqual({
                                 str: [7, 1, 2, 4, 5, 6].map((x) =>
-                                    x.toString()
+                                    x.toString(),
                                 ),
                                 int: [null, 1, 2, 4, 5, 6],
                                 float: [7, 1, 2, 4, 5, 6].map((x) => x * 0.5),
@@ -356,8 +356,8 @@ test.describe("Removes", () => {
                         async (getter) => {
                             table.remove(
                                 [1, 2, 3, 4, 5, 6].map((x) =>
-                                    string_pkey ? x.toString() : x
-                                )
+                                    string_pkey ? x.toString() : x,
+                                ),
                             );
 
                             expect(await getter()).toEqual({
@@ -385,7 +385,7 @@ test.describe("Removes", () => {
                                     float: [100.5, 200.5, 300.5],
                                 });
                             }
-                        }
+                        },
                     );
 
                     await table.delete();
@@ -420,7 +420,7 @@ test.describe("Removes", () => {
                             console.log(
                                 "str?",
                                 string_pkey,
-                                await v.to_columns()
+                                await v.to_columns(),
                             );
                             await v.delete();
 
@@ -437,7 +437,7 @@ test.describe("Removes", () => {
                                 int: [string_pkey ? 7 : null],
                                 float: [3.5],
                             });
-                        }
+                        },
                     );
 
                     await table.delete();

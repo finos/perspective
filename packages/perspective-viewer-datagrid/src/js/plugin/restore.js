@@ -33,19 +33,19 @@ export function restore(token) {
 
             if (col_config?.pos_fg_color) {
                 col_config.pos_fg_color = make_color_record(
-                    col_config.pos_fg_color
+                    col_config.pos_fg_color,
                 );
                 col_config.neg_fg_color = make_color_record(
-                    col_config.neg_fg_color
+                    col_config.neg_fg_color,
                 );
             }
 
             if (col_config?.pos_bg_color) {
                 col_config.pos_bg_color = make_color_record(
-                    col_config.pos_bg_color
+                    col_config.pos_bg_color,
                 );
                 col_config.neg_bg_color = make_color_record(
-                    col_config.neg_bg_color
+                    col_config.neg_bg_color,
                 );
             }
 

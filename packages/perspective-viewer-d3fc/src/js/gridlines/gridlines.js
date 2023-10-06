@@ -17,7 +17,7 @@ const mainGridSvg = (settings) => (x) =>
         .style("stroke-width", "1.0")
         .style(
             "stroke",
-            settings ? settings.colorStyles.grid.gridLineColor : "#bbb"
+            settings ? settings.colorStyles.grid.gridLineColor : "#bbb",
         );
 
 const mainGridCanvas = (settings) => (c) => {

@@ -26,7 +26,7 @@ export function colorRangeLegend() {
                 container
                     .append("div")
                     .attr("class", "legend-container legend-color")
-                    .style("z-index", "2")
+                    .style("z-index", "2"),
         );
         const { width, height } = legendSelection
             .node()
@@ -68,19 +68,19 @@ export function colorRangeLegend() {
             .tickFormat((d) => valueformatter(d));
 
         const legendSvg = getOrCreateElement(legendSelection, "svg", () =>
-            legendSelection.append("svg")
+            legendSelection.append("svg"),
         )
             .style("width", width)
             .style("height", height);
         const legendBar = getOrCreateElement(legendSvg, "g", () =>
-            legendSvg.append("g")
+            legendSvg.append("g"),
         )
             .datum(expandedDomain)
             .call(svgBar);
 
         const barWidth = Math.abs(legendBar.node().getBBox().x);
         getOrCreateElement(legendSvg, "#legend-axis", () =>
-            legendSvg.append("g").attr("id", "legend-axis")
+            legendSvg.append("g").attr("id", "legend-axis"),
         )
             .attr("transform", `translate(${barWidth})`)
             .datum(expandedDomain)

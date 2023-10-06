@@ -25,10 +25,10 @@ export function categoryPointSeries(settings, seriesKey, color, symbols) {
     series.decorate((selection) => {
         selection
             .style("stroke", (d) =>
-                withoutOpacity(color(d.colorValue || seriesKey))
+                withoutOpacity(color(d.colorValue || seriesKey)),
             )
             .style("fill", (d) =>
-                withOpacity(color(d.colorValue || seriesKey), opacity)
+                withOpacity(color(d.colorValue || seriesKey), opacity),
             );
     });
 

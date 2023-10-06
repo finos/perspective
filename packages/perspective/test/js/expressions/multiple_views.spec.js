@@ -222,7 +222,7 @@ const expressions_common = require("./common.js");
                         y: "string",
                         z: "boolean",
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({
@@ -267,7 +267,7 @@ const expressions_common = require("./common.js");
                         y: "string",
                         z: "boolean",
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({
@@ -308,7 +308,7 @@ const expressions_common = require("./common.js");
                         y: "string",
                         z: "boolean",
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({
@@ -373,7 +373,7 @@ const expressions_common = require("./common.js");
                         y: "string",
                         z: "boolean",
                     },
-                    { limit: 2 }
+                    { limit: 2 },
                 );
 
                 const v1 = await table.view({
@@ -780,14 +780,14 @@ const expressions_common = require("./common.js");
                         await validate_delta(
                             "column",
                             updated.delta,
-                            [11, 12, 13, 14]
+                            [11, 12, 13, 14],
                         );
                         const result = await v1.to_columns();
                         expect(result["column"]).toEqual([
                             11, 12, 13, 14, 11, 12, 13, 14,
                         ]);
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 let done;
@@ -818,7 +818,7 @@ const expressions_common = require("./common.js");
                         await table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 table.update(expressions_common.data);
@@ -865,7 +865,7 @@ const expressions_common = require("./common.js");
                             20,
                         ]);
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 let done;
@@ -895,7 +895,7 @@ const expressions_common = require("./common.js");
                         await table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 table.update({
@@ -945,7 +945,7 @@ const expressions_common = require("./common.js");
                             null,
                         ]);
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 let done;
@@ -975,7 +975,7 @@ const expressions_common = require("./common.js");
                         await table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 table.update({
@@ -1120,7 +1120,7 @@ const expressions_common = require("./common.js");
                         y: ["a", "b", "c", "d"],
                         z: [now, now, now, now],
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({

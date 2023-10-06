@@ -40,7 +40,7 @@ export class WebSocketClient extends Client {
 
             this._full_binary.set(
                 new Uint8Array(binary_msg),
-                this._total_chunk_length
+                this._total_chunk_length,
             );
             this._total_chunk_length += binary_msg.byteLength;
 

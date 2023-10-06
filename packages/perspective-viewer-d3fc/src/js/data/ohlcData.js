@@ -15,7 +15,7 @@ import { splitIntoMultiSeries } from "./splitIntoMultiSeries";
 
 export function ohlcData(settings, data) {
     return splitIntoMultiSeries(settings, data, { excludeEmpty: true }).map(
-        (data) => seriesToOHLC(settings, data)
+        (data) => seriesToOHLC(settings, data),
     );
 }
 

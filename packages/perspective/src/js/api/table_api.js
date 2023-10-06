@@ -49,11 +49,11 @@ export function table(worker, data, options) {
                             (updated) => {
                                 this.update(updated.delta);
                             },
-                            { mode: "row" }
+                            { mode: "row" },
                         );
                         resolve(this);
                     },
-                    reject
+                    reject,
                 );
             });
         } else {
@@ -67,7 +67,7 @@ export function table(worker, data, options) {
                 () => {
                     resolve(this);
                 },
-                reject
+                reject,
             );
         }
 
@@ -119,12 +119,12 @@ table.prototype.schema = async_queue("schema", "table_method");
 
 table.prototype.validate_expressions = async_queue(
     "validate_expressions",
-    "table_method"
+    "table_method",
 );
 
 table.prototype.is_valid_filter = async_queue(
     "is_valid_filter",
-    "table_method"
+    "table_method",
 );
 
 table.prototype.size = async_queue("size", "table_method");
@@ -148,7 +148,7 @@ table.prototype.remove = async_queue("remove", "table_method");
 table.prototype.remove_delete = unsubscribe(
     "remove_delete",
     "table_method",
-    true
+    true,
 );
 
 table.prototype.update = function (data, options) {
@@ -162,7 +162,7 @@ table.prototype.update = function (data, options) {
             },
             resolve,
             reject,
-            false
+            false,
         );
     });
 };

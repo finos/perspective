@@ -20,7 +20,7 @@ import {
 async function getDatagridContents(page) {
     return await page.evaluate(async () => {
         const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-datagrid regular-table"
+            "perspective-viewer perspective-viewer-datagrid regular-table",
         );
         return viewer.innerHTML || "MISSING";
     });
@@ -56,7 +56,7 @@ test.describe("Datagrid with superstore data set", () => {
 
         compareContentsToSnapshot(
             await getDatagridContents(page),
-            "row-headers-are-printed-correctly"
+            "row-headers-are-printed-correctly",
         );
     });
 });

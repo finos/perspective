@@ -35,5 +35,5 @@ execute(
         const tbl = await table(schema);
         await tbl.update("Hash,Name,Date,Message,Email\n" + log);
         server.host_table("data_source_one", tbl);
-    }
+    },
 );

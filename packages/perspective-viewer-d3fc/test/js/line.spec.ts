@@ -35,6 +35,8 @@ test.describe("Line Tests", () => {
 
     run_standard_tests(
         "yline",
-        getSvgContentString("perspective-viewer perspective-viewer-d3fc-xyline")
+        getSvgContentString(
+            "perspective-viewer perspective-viewer-d3fc-xyline",
+        ),
     );
 });

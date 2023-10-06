@@ -73,7 +73,7 @@ const common = require("./common.js");
             expect(result["a"]).toEqual(Array(4).fill("abc"));
             expect(result["b"]).toEqual(Array(4).fill(123));
             expect(result["c"]).toEqual(
-                Array(4).fill(new Date(2020, 4, 23).getTime())
+                Array(4).fill(new Date(2020, 4, 23).getTime()),
             );
             expect(result["d"]).toEqual(Array(4).fill(true));
             await view.delete();
@@ -92,7 +92,7 @@ const common = require("./common.js");
             });
             const result = await view.to_columns();
             expect(result["a"]).toEqual(
-                result["w"].map((item, idx) => item * result["x"][idx])
+                result["w"].map((item, idx) => item * result["x"][idx]),
             );
             await view.delete();
             await table.delete();
@@ -110,7 +110,9 @@ const common = require("./common.js");
             });
             const result = await view.to_columns();
             expect(result["a"]).toEqual(
-                result["w"].map((item, idx) => Math.max(item, result["x"][idx]))
+                result["w"].map((item, idx) =>
+                    Math.max(item, result["x"][idx]),
+                ),
             );
             await view.delete();
             await table.delete();

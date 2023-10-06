@@ -41,7 +41,7 @@ export function view(worker, table_name, config) {
                 // resolving value to `this`.
                 resolve(this);
             },
-            reject
+            reject,
         );
 
         if (
@@ -112,7 +112,7 @@ view.prototype.on_update = subscribe("on_update", "view_method", true);
 view.prototype.remove_update = unsubscribe(
     "remove_update",
     "view_method",
-    true
+    true,
 );
 
 view.prototype.on_delete = subscribe("on_delete", "view_method", true);
@@ -120,5 +120,5 @@ view.prototype.on_delete = subscribe("on_delete", "view_method", true);
 view.prototype.remove_delete = unsubscribe(
     "remove_delete",
     "view_method",
-    true
+    true,
 );

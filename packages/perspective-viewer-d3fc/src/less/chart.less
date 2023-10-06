@@ -37,14 +37,8 @@
         &.heatmap,
         &.treemap {
             d3fc-group.cartesian-chart {
-                grid-template-columns: minmax(0em, max-content) auto 1fr auto minmax(
-                        0em,
-                        max-content
-                    );
-                grid-template-rows: minmax(0em, max-content) auto 1fr auto minmax(
-                        0em,
-                        max-content
-                    );
+                grid-template-columns: minmax(0em, max-content) auto 1fr auto minmax(0em, max-content);
+                grid-template-rows: minmax(0em, max-content) auto 1fr auto minmax(0em, max-content);
             }
         }
 
@@ -133,10 +127,7 @@
                 }
 
                 & .treerect {
-                    stroke: var(
-                        --d3fc-treedata-axis--lines,
-                        var(--d3fc-axis--lines, white)
-                    );
+                    stroke: var(--d3fc-treedata-axis--lines, var(--d3fc-axis--lines, white));
                     fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
                     &:hover {
                         cursor: pointer;
@@ -334,7 +325,9 @@
             transition: box-shadow 1s;
             &:hover {
                 background-color: var(--d3fc-legend--background, #ffffff);
-                transition: box-shadow 0.2s, background-color 0.2s;
+                transition:
+                    box-shadow 0.2s,
+                    background-color 0.2s;
             }
         }
 

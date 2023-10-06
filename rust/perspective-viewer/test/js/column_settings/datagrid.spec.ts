@@ -56,7 +56,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             await selectedEditBtn.waitFor();
 
             expect(await compareNodes(nthEditBtn, selectedEditBtn, page)).toBe(
-                true
+                true,
             );
 
             await col.editBtn.click();
@@ -83,10 +83,10 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             await selectedEditBtn.waitFor();
             await selectedTitle.waitFor();
             expect(
-                await compareNodes(thirdEditBtn, selectedEditBtn, page)
+                await compareNodes(thirdEditBtn, selectedEditBtn, page),
             ).toBe(true);
             expect(await compareNodes(thirdTitle, selectedTitle, page)).toBe(
-                true
+                true,
             );
 
             await table.element.evaluate((node) => (node.scrollLeft = 1000));
@@ -94,10 +94,10 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             await selectedEditBtn.waitFor();
             await selectedTitle.waitFor();
             expect(
-                await compareNodes(thirdEditBtn, selectedEditBtn, page)
+                await compareNodes(thirdEditBtn, selectedEditBtn, page),
             ).toBe(true);
             expect(await compareNodes(thirdTitle, selectedTitle, page)).toBe(
-                true
+                true,
             );
         });
 
@@ -123,7 +123,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             let tdStyle = await td.evaluate((node) => node.style.cssText);
             let listener = await getEventListener(
                 page,
-                "perspective-column-style-change"
+                "perspective-column-style-change",
             );
             await checkbox.click();
             expect(await listener()).toBe(true);
@@ -154,7 +154,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             });
             let listener = await getEventListener(
                 page,
-                "perspective-column-style-change"
+                "perspective-column-style-change",
             );
             await checkbox.waitFor();
             await checkbox.click({ timeout: 100 });
@@ -188,7 +188,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             let tdStyle = await td.evaluate((node) => node.style.cssText);
             let listener = await getEventListener(
                 page,
-                "perspective-column-style-change"
+                "perspective-column-style-change",
             );
             await checkbox.check();
             expect(await listener()).toBe(true);
@@ -229,7 +229,7 @@ runTests("Datagrid Column Styles", () => {
 runTests("Datagrid Column Styles - Split-by", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(
-            "/tools/perspective-test/src/html/superstore-test.html"
+            "/tools/perspective-test/src/html/superstore-test.html",
         );
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -241,7 +241,7 @@ runTests("Datagrid Column Styles - Split-by", () => {
         page,
     }) => {
         await page.goto(
-            "/tools/perspective-test/src/html/superstore-test.html"
+            "/tools/perspective-test/src/html/superstore-test.html",
         );
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {

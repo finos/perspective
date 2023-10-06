@@ -32,7 +32,7 @@ async function script(page) {
                     }
                 },
                 viewer,
-                args
+                args,
             );
         };
 
@@ -42,7 +42,7 @@ async function script(page) {
         const result = await page.evaluate(
             (viewer, name) => viewer.getAttribute(name),
             viewer,
-            name
+            name,
         );
         if (json) {
             return JSON.parse(result);

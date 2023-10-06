@@ -159,7 +159,7 @@ export const component = (settings) => {
     const getGroupTickLayout = (group) => {
         const width = settings.size.width;
         const maxLength = Math.max(
-            ...group.map((g) => (g.text ? g.text.length : 0))
+            ...group.map((g) => (g.text ? g.text.length : 0)),
         );
 
         if (orient === "horizontal") {

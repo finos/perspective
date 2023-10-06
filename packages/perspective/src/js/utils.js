@@ -30,7 +30,7 @@ export function get_column_type(val) {
         return "date";
     } else {
         console.warn(
-            `Unknown type for value ${val} with JS type ${typeof val}`
+            `Unknown type for value ${val} with JS type ${typeof val}`,
         );
     }
 }

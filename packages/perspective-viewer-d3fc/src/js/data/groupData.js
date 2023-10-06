@@ -16,7 +16,7 @@ import { splitIntoMultiSeries } from "./splitIntoMultiSeries";
 export function groupData(settings, data) {
     const stack = { stack: false };
     const groupedSeries = splitIntoMultiSeries(settings, data, stack).map(
-        (data) => groupPointDataByMainValue(settings, data, stack)
+        (data) => groupPointDataByMainValue(settings, data, stack),
     );
 
     if (settings.mainValues.length > 1) {
@@ -30,7 +30,7 @@ export function groupData(settings, data) {
 export function groupAndStackData(settings, data) {
     const stack = { stack: true };
     return splitIntoMultiSeries(settings, data, stack).map((data) =>
-        groupPointDataByMainValue(settings, data, stack)
+        groupPointDataByMainValue(settings, data, stack),
     );
 }
 

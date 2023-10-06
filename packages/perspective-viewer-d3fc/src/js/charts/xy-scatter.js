@@ -106,9 +106,9 @@ function xyScatter(container, settings) {
                     color,
                     label,
                     symbols,
-                    scale_factor
-                )
-            )
+                    scale_factor,
+                ),
+            ),
         );
 
     const axisDefault = () =>

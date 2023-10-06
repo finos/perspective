@@ -398,7 +398,7 @@ const std = (nums) => {
                     { x: 3, y: "c", z: true },
                     { x: 4, y: "d", z: false },
                 ],
-                { index: "y" }
+                { index: "y" },
             );
             var view = await table.view({
                 group_by: ["z"],
@@ -429,7 +429,7 @@ const std = (nums) => {
                     { x: 3, y: "c", z: true },
                     { x: 4, y: "d", z: false },
                 ],
-                { index: "y" }
+                { index: "y" },
             );
             var view = await table.view({
                 group_by: ["z"],
@@ -482,7 +482,7 @@ const std = (nums) => {
                     y: ["A"],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -531,7 +531,7 @@ const std = (nums) => {
                     y: [100],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -581,7 +581,7 @@ const std = (nums) => {
                     y: [100],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -641,7 +641,7 @@ const std = (nums) => {
                     y: [100],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -704,7 +704,7 @@ const std = (nums) => {
                     y: ["A"],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -755,7 +755,7 @@ const std = (nums) => {
                     z: [1],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -836,7 +836,7 @@ const std = (nums) => {
                     y: [null],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -915,7 +915,7 @@ const std = (nums) => {
                     y: ["A"],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -965,7 +965,7 @@ const std = (nums) => {
                     y: ["A"],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -1034,7 +1034,7 @@ const std = (nums) => {
                     y: ["A"],
                     index: [1],
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             const view = await table.view({
@@ -1263,7 +1263,7 @@ const std = (nums) => {
                     y: [1, 2, 3, 4],
                     z: ["a", "a", "a", "b"],
                 },
-                { index: "y" }
+                { index: "y" },
             );
 
             const view = await table.view({
@@ -1407,7 +1407,7 @@ const std = (nums) => {
                     y: ["a", "a", "b", "b", "c", "c"],
                     z: [1, 2, 3, 4, 5, 6],
                 },
-                { index: "z" }
+                { index: "z" },
             );
 
             const view = await table.view({
@@ -1456,7 +1456,7 @@ const std = (nums) => {
             const result = await view.to_columns();
 
             const expected = [0.33597085443953206, 0.33597085443953206].map(
-                (x) => Math.pow(x, 2)
+                (x) => Math.pow(x, 2),
             );
 
             for (let i = 0; i < result.x.length; i++) {
@@ -1610,7 +1610,7 @@ const std = (nums) => {
                     y: ["a", "a", "b", "b", "c", "c"],
                     z: [1, 2, 3, 4, 5, 6],
                 },
-                { index: "z" }
+                { index: "z" },
             );
 
             const view = await table.view({

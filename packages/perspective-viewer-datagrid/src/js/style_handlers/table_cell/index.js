@@ -54,7 +54,7 @@ export function table_cell_style_listener(regularTable) {
 
             td.classList.toggle(
                 "psp-bool-type",
-                type === "boolean" && metadata.user !== null
+                type === "boolean" && metadata.user !== null,
             );
 
             const is_th = td.tagName === "TH";
@@ -66,7 +66,7 @@ export function table_cell_style_listener(regularTable) {
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle(
                 "psp-color-mode-bar",
-                plugin?.number_fg_mode === "bar" && is_numeric
+                plugin?.number_fg_mode === "bar" && is_numeric,
             );
         }
     }

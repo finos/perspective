@@ -14,7 +14,7 @@ const { WasmPlugin } = require("./wasm.js");
 const { WorkerPlugin } = require("./worker.js");
 
 exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
-    options = {}
+    options = {},
 ) {
     const wasm_plugin = WasmPlugin(!!options.wasm?.inline);
     const worker_plugin = WorkerPlugin({

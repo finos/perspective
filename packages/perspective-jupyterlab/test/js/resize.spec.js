@@ -31,7 +31,7 @@ test.describe("JupyterLab resize", () => {
             // Linux returns ever-so-slightly different auto width
             // column values so we need to strip these.
             for (const elem of document.querySelectorAll(
-                "perspective-viewer *"
+                "perspective-viewer *",
             )) {
                 elem.removeAttribute("style");
             }
@@ -57,7 +57,7 @@ test.describe("JupyterLab resize", () => {
                 .querySelector(".PSPContainer")
                 .setAttribute(
                     "style",
-                    "position:absolute;top:0;left:0;width:300px;height:300px"
+                    "position:absolute;top:0;left:0;width:300px;height:300px",
                 );
 
             await document.querySelector("perspective-viewer").notifyResize();
@@ -69,7 +69,7 @@ test.describe("JupyterLab resize", () => {
             await document.querySelector("perspective-viewer").notifyResize();
 
             for (const elem of document.querySelectorAll(
-                "perspective-viewer *"
+                "perspective-viewer *",
             )) {
                 elem.removeAttribute("style");
             }
@@ -92,7 +92,7 @@ test.describe("JupyterLab resize", () => {
         const contents = await page.evaluate(async () => {
             await window.__WIDGET__.restore({ group_by: ["State"] });
             for (const elem of document.querySelectorAll(
-                "perspective-viewer *"
+                "perspective-viewer *",
             )) {
                 elem.removeAttribute("style");
             }

@@ -24,7 +24,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                 const outfile = `${targetdir}/` + path.basename(args.path);
                 const entryPoint = path.join(
                     args.pluginData.resolveDir,
-                    args.path
+                    args.path,
                 );
 
                 const subbuild = esbuild.build({
@@ -179,7 +179,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                     export default initialize;
                 `,
                 };
-            }
+            },
         );
 
         build.onLoad({ filter: /.*/, namespace: "worker" }, async (args) => {

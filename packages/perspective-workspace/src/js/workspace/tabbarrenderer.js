@@ -32,7 +32,7 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
                 className: "p-TabBar-tabLabel",
                 id: TabBarItems.Label,
             },
-            data.title.label || DEFAULT_TITLE
+            data.title.label || DEFAULT_TITLE,
         );
     }
 
@@ -55,8 +55,8 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
             more.push(
                 h.div(
                     { onclick: data.onClick, class: "bookmarks-button" },
-                    h.div({ class: "bookmarks" })
-                )
+                    h.div({ class: "bookmarks" }),
+                ),
             );
         }
 
@@ -65,7 +65,7 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
             this.renderDragHandle(),
             ...more,
             this.renderLabel(data),
-            this.renderCloseIcon()
+            this.renderCloseIcon(),
         );
     }
 

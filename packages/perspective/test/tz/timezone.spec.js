@@ -61,10 +61,10 @@ const check_datetime = (output, expected) => {
     for (let i = 0; i < output.length; i++) {
         let date = new Date(output[i]["x"]);
         expect(date.toLocaleString()).toEqual(
-            expected[i]["x"].toLocaleString()
+            expected[i]["x"].toLocaleString(),
         );
         expect(date.getTimezoneOffset()).toEqual(
-            expected[i]["x"].getTimezoneOffset()
+            expected[i]["x"].getTimezoneOffset(),
         );
     }
 };
@@ -191,7 +191,7 @@ test.skip("Timezone Tests", () => {
             for (let i = 0; i < data.length; i++) {
                 let date = new Date(data[i]["x"]);
                 expect(date.toLocaleDateString()).toEqual(
-                    date_data_local[i]["x"]
+                    date_data_local[i]["x"],
                 );
             }
         });
@@ -355,7 +355,7 @@ test.skip("Timezone Tests", () => {
             for (let i = 0; i < data.length; i++) {
                 let date = new Date(data[i]["x"]);
                 expect(date.toLocaleString()).toEqual(
-                    " " + datetime_data_local[i]["x"]
+                    " " + datetime_data_local[i]["x"],
                 );
             }
         });

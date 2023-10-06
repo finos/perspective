@@ -95,7 +95,7 @@ export function async_queue(method, cmd) {
                     subscribe: false,
                 };
                 this._worker.post(msg, resolve, reject);
-            }.bind(this)
+            }.bind(this),
         );
     };
 }
