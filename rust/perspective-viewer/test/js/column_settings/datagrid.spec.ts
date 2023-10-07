@@ -15,6 +15,7 @@ import {
     compareNodes,
     getEventListener,
 } from "@finos/perspective-test";
+
 import { expect, test } from "@playwright/test";
 
 let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
@@ -24,7 +25,9 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
         test("Clicking edit button toggles sidebar", async ({ page }) => {
             let view = new PspViewer(page);
             await view.openSettingsPanel();
-            let editBtn = view.dataGrid.regularTable.editBtnRow.first();
+            let editBtn = view.dataGrid.regularTable.editBtnRow
+                .locator("th.psp-menu-enabled span")
+                .first();
             await editBtn.click();
             await view.columnSettingsSidebar.container.waitFor();
             await editBtn.click();
@@ -32,6 +35,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
                 state: "hidden",
             });
         });
+
         test("Toggling a column in the sidebar highlights in the plugin", async ({
             page,
         }) => {
@@ -140,7 +144,6 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             expect(name).toBeTruthy();
             let td = await table.getFirstCellByColumnName(name);
             await td.waitFor();
-            page.evaluate((name) => console.log(name), name);
 
             // text style
             await view.columnSettingsSidebar.openTab("style");
@@ -149,18 +152,15 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
                 .locator("input[type=checkbox]:not(:disabled)")
                 .first();
             let tdStyle = await td.evaluate((node) => {
-                console.log(node.innerHTML, node.style.cssText);
                 return node.style.cssText;
             });
             let listener = await getEventListener(
                 page,
                 "perspective-column-style-change"
             );
-            await checkbox.waitFor();
-            await checkbox.click({ timeout: 100 });
+            await checkbox.click();
             expect(await listener()).toBe(true);
             let newStyle = await td.evaluate((node) => {
-                console.log(node.innerHTML, node.style.cssText);
                 return node.style.cssText;
             });
             expect(tdStyle).not.toBe(newStyle);
@@ -173,7 +173,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             let table = view.dataGrid.regularTable;
 
             let col = await view.getOrCreateColumnByType("string");
-            await col.editBtn.click({ timeout: 100 });
+            await col.editBtn.click();
             let name = await col.name.innerText();
             expect(name).toBeTruthy();
             let td = await table.getFirstCellByColumnName(name);
