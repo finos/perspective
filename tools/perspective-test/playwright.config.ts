@@ -37,6 +37,7 @@ const DEVICE_OPTIONS = {
                 "--font-render-hinting=none",
                 '--proxy-server="direct://"',
                 "--proxy-bypass-list=*",
+                "--js-flags=--expose-gc",
             ],
         },
     },
@@ -162,7 +163,9 @@ export default defineConfig({
     use: {
         viewport: { width: 1280, height: 720 },
         actionTimeout: 0,
-        trace: "on-first-retry",
+        trace: "retain-on-failure",
+        screenshot: "only-on-failure",
+        video: "retain-on-failure",
     },
     globalSetup: RUN_JUPYTERLAB
         ? require.resolve(

@@ -62,6 +62,8 @@ const gists = [
     "olympics",
     "editable",
     "file",
+    "magic",
+    "nypd",
 ];
 
 const lis = [];

@@ -287,9 +287,10 @@ test.describe("Migrate Viewer", () => {
     test.describe("Viewer config migrations", () => {
         for (const [name, old, current] of TESTS) {
             test(`Migrate '${name}'`, async ({ page }) => {
-                expect(convert(old, { replace_defaults: true })).toEqual(
-                    current
-                );
+                const converted = convert(JSON.parse(JSON.stringify(old)), {
+                    replace_defaults: true,
+                });
+                expect(converted).toEqual(current);
             });
         }
     });
@@ -297,8 +298,10 @@ test.describe("Migrate Viewer", () => {
     test.describe("migrate", async () => {
         for (const [name, old, current] of TESTS) {
             // NOTE: these tests were previously skipped.
-            test.skip(`restore '${name}'`, async ({ page }) => {
-                const converted = convert(JSON.parse(JSON.stringify(old)));
+            test(`restore '${name}'`, async ({ page }) => {
+                const converted = convert(JSON.parse(JSON.stringify(old)), {
+                    replace_defaults: true,
+                });
                 const config = await page.evaluate(async (old) => {
                     const viewer = document.querySelector("perspective-viewer");
                     await viewer.getTable();
@@ -320,8 +323,7 @@ test.describe("Migrate Viewer", () => {
                     current
                 );
 
-                const contents = get_contents(page);
-
+                const contents = await get_contents(page);
                 await compareContentsToSnapshot(contents, [
                     `migrate-restore-${name}.txt`,
                 ]);
