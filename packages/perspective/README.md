@@ -360,6 +360,8 @@ serialize.
 serialize.
     - .end_col <code>number</code> - The ending column index from which to
 serialize.
+    - .compression <code>number</code> - The compression codec to use. Can be
+`null` or `"lz4"` (default).
 
 
 * * *

@@ -1,3 +1,20 @@
+# [v2.5.2](https://github.com/finos/perspective/releases/tag/v2.5.2)
+
+_8 October 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.5.1...v2.5.2))
+
+Features
+
+- Move styles to sidebar [#2366](https://github.com/finos/perspective/pull/2366)
+
+Fixes
+
+- fix some viewer bugs [#2371](https://github.com/finos/perspective/pull/2371)
+
+Misc
+
+- Localize NYPD, Magic and Olympics examples [#2375](https://github.com/finos/perspective/pull/2375)
+- Fix tests [#2380](https://github.com/finos/perspective/pull/2380)
+
 # [v2.5.1](https://github.com/finos/perspective/releases/tag/v2.5.1)
 
 _31 August 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.5.0...v2.5.1))
