@@ -70,10 +70,19 @@ perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table {
             200% var(--regular-table--clip-y, 0)
         );
     }
+
+    thead tr:last-child:after {
+        transform: translate(var(--regular-table--transform-x, 0px));
+    }
+
+    tbody tr:not(:first-child):after {
+        transform: translate(var(--regular-table--transform-x, 0px));
+    }
 }
 
 regular-table {
     font-family: inherit;
+    --rt-hover--border-color: #c5c9d080;
 
     div[tabindex] {
         outline: none;
@@ -175,7 +184,6 @@ regular-table {
 
     table {
         position: absolute;
-        overflow: hidden;
         color: #666;
         outline: none;
     }

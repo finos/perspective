@@ -258,6 +258,36 @@ regular-table table {
     }
 }
 
+regular-table table thead tr:last-child:after {
+    width: 10000px;
+    box-sizing: border-box;
+    display: block;
+    height: 23px;
+    content: " ";
+    border-bottom: 1px solid var(--inactive--border-color);
+}
+
+regular-table table tbody tr:after {
+    width: 10000px;
+    box-sizing: border-box;
+    display: block;
+    height: 23px;
+    content: " ";
+    border-top: 1px solid transparent;
+}
+
+regular-table table tbody tr:not(:first-child):after {
+    border-top: 1px solid var(--inactive--border-color);
+}
+
+regular-table table tbody tr:hover:not(:first-child):after {
+    border-top: 1px solid var(--rt-hover--border-color);
+}
+
+regular-table table tbody tr:hover + tr:after {
+    border-top: 1px solid var(--rt-hover--border-color);
+}
+
 @keyframes pulse_pos {
     0% {
         background-color: var(
