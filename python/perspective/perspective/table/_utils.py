@@ -19,6 +19,8 @@ ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
 FUNCTION_LITERAL_REGEX = re.compile(r"(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)")
+MATCH_INTERNED_ARGS_REGEX = re.compile(r"intern\('([^']*)'\)")
+UNINTERNED_FNS_REGEX = re.compile(r"(col|vlookup)\((.*)\)")
 REPLACE_FN_REGEX = re.compile(r"(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)")
 BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
@@ -196,6 +198,9 @@ def _parse_expression_strings(expressions):
             lambda match: "intern({0})".format(match.group(0)),
             parsed,
         )
+
+        # remove _all_ `intern()` calls in these functions.
+        parsed = re.sub(UNINTERNED_FNS_REGEX, lambda match: re.sub(MATCH_INTERNED_ARGS_REGEX, r"'\1'", match.group(0)), parsed)
 
         # remove the `intern()` in bucket and regex functions that take
         # string literal parameters. TODO this logic should be centralized

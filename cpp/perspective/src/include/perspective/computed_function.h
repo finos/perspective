@@ -185,9 +185,6 @@ namespace computed_function {
     // Length of the string
     FUNCTION_HEADER(length)
 
-    // Add one to a column
-    FUNCTION_HEADER(add_one)
-
     struct index : public exprtk::igeneric_function<t_tscalar> {
         index(const t_pkey_mapping& pkey_map,
             std::shared_ptr<t_data_table> source_table, t_uindex& row_idx);

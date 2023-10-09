@@ -476,7 +476,6 @@ t_computed_function_store::t_computed_function_store(t_expression_vocab& vocab,
           computed_function::replace(vocab, regex_mapping, is_type_validator))
     , m_replace_all_fn(computed_function::replace_all(
           vocab, regex_mapping, is_type_validator))
-    , m_add_one_fn(computed_function::add_one())
     , m_index_fn(computed_function::index(pkey_map, source_table, row_idx))
     , m_col_fn(computed_function::col(
           vocab, is_type_validator, source_table, row_idx))
@@ -516,7 +515,6 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("month_of_year", m_month_of_year_fn);
     sym_table.add_function("today", computed_function::today);
     sym_table.add_function("now", computed_function::now);
-    sym_table.add_function("add_one", m_add_one_fn);
 
     // String functions
     sym_table.add_function("intern", m_intern_fn);

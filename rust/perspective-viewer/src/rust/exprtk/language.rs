@@ -396,11 +396,6 @@ thread_local! {
                 documentation: "Replaces all non-overlapping matches of pattern in string with replacer, or return the original string if no replaces were made.",
             },
             CompletionItemSuggestion {
-                label: "add_one",
-                insert_text: "add_one(${1:uint64})",
-                documentation: "Adds one to a number",
-            },
-            CompletionItemSuggestion {
                 label: "index",
                 insert_text: "index()",
                 documentation: "Looks up the index value of the current row",

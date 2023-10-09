@@ -223,7 +223,6 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
     computed_function::substring m_substring_fn;
     computed_function::replace m_replace_fn;
     computed_function::replace_all m_replace_all_fn;
-    computed_function::add_one m_add_one_fn;
     computed_function::index m_index_fn;
     computed_function::col m_col_fn;
     computed_function::vlookup m_vlookup_fn;

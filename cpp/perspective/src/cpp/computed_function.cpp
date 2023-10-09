@@ -48,6 +48,12 @@ namespace computed_function {
         std::string temp_str
             = std::string(temp_string.begin(), temp_string.end());
 
+        if (m_is_type_validator) {
+            // Return the sentinel value which indicates a valid output from
+            // type checking, as the output value is not STATUS_CLEAR
+            return m_sentinel;
+        }
+
         // Intern the string into the vocabulary.
         rval.set(m_expression_vocab.intern(temp_str));
         return rval;
@@ -2182,55 +2188,6 @@ namespace computed_function {
         return rval;
     }
 
-    add_one::add_one()
-        : exprtk::igeneric_function<t_tscalar>("T") {}
-    add_one::~add_one() {}
-
-    t_tscalar
-    add_one::operator()(t_parameter_list params) {
-        t_tscalar rval;
-        rval.clear();
-
-        t_generic_type& gt = params[0];
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar;
-
-        temp_scalar.set(temp());
-        t_dtype dtype = temp_scalar.get_dtype();
-
-        switch (dtype) {
-            case DTYPE_INT8:
-            case DTYPE_INT16:
-            case DTYPE_INT32:
-                rval.set(temp_scalar.to_int32() + 1);
-                break;
-            case DTYPE_INT64:
-                rval.set(temp_scalar.to_int64() + 1);
-                break;
-            case DTYPE_UINT8:
-            case DTYPE_UINT16:
-            case DTYPE_UINT32:
-            case DTYPE_UINT64:
-                rval.set(temp_scalar.to_uint64() + 1);
-                break;
-            case DTYPE_FLOAT32:
-            case DTYPE_FLOAT64:
-                rval.set(temp_scalar.to_double() + 1);
-                break;
-            case DTYPE_NONE:
-                rval.set(0.0);
-            default:
-                rval.m_status = STATUS_CLEAR;
-                return rval;
-        }
-
-        if (!temp_scalar.is_valid()) {
-            return rval;
-        }
-
-        return rval;
-    }
-
     index::index(const t_gstate::t_mapping& pkey_map,
         std::shared_ptr<t_data_table> source_table, t_uindex& row_idx)
         : exprtk::igeneric_function<t_tscalar>("Z")
@@ -2254,7 +2211,7 @@ namespace computed_function {
 
     col::col(t_expression_vocab& expression_vocab, bool is_type_validator,
         std::shared_ptr<t_data_table> source_table, t_uindex& row_idx)
-        : exprtk::igeneric_function<t_tscalar>("T")
+        : exprtk::igeneric_function<t_tscalar>("S")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator)
         , m_source_table(source_table)
@@ -2266,26 +2223,8 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
 
-        t_generic_type& gt = parameters[0];
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar;
-
-        temp_scalar.set(temp());
-        t_dtype dtype = temp_scalar.get_dtype();
-
-        if (dtype != DTYPE_STR) {
-            rval.m_status = STATUS_CLEAR;
-            return rval;
-        }
-
-        if (!temp_scalar.is_valid()) {
-            return rval;
-        }
-
-        std::string temp_str = temp_scalar.to_string();
-
-        // rval.set(m_expression_vocab.intern(temp_str));
-        // return rval;
+        t_string_view _colname(parameters[0]);
+        std::string temp_str = std::string(_colname.begin(), _colname.end());
 
         if (!m_source_table->get_schema().has_column(temp_str)) {
             rval.m_status = STATUS_CLEAR;
@@ -2302,7 +2241,7 @@ namespace computed_function {
     vlookup::vlookup(t_expression_vocab& expression_vocab,
         bool is_type_validator, std::shared_ptr<t_data_table> source_table,
         t_uindex& row_idx)
-        : exprtk::igeneric_function<t_tscalar>("TT")
+        : exprtk::igeneric_function<t_tscalar>("ST")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator)
         , m_source_table(source_table)
@@ -2314,12 +2253,8 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
 
-        t_generic_type& column_gt = parameters[0];
-        t_scalar_view column_gt_view(column_gt);
-        t_tscalar column_name;
-
-        column_name.set(column_gt_view());
-        t_dtype column_name_dtype = column_name.get_dtype();
+        t_string_view _colname(parameters[0]);
+        auto column_name = std::string(_colname.begin(), _colname.end());
 
         t_generic_type& index_gt = parameters[1];
         t_scalar_view index_gt_view(index_gt);
@@ -2327,21 +2262,20 @@ namespace computed_function {
 
         index.set(index_gt_view());
 
-        if (column_name_dtype != DTYPE_STR || !index.is_numeric()) {
+        if (!index.is_numeric()) {
             rval.m_status = STATUS_CLEAR;
             return rval;
         }
 
-        if (!column_name.is_valid() || !index.is_valid()) {
+        if (!index.is_valid()) {
             return rval;
         }
 
-        std::string col_name_str = column_name.to_string();
-        if (!m_source_table->get_schema().has_column(col_name_str)) {
+        if (!m_source_table->get_schema().has_column(column_name)) {
             rval.m_status = STATUS_CLEAR;
             return rval;
         }
-        auto col = m_source_table->get_const_column(col_name_str);
+        auto col = m_source_table->get_const_column(column_name);
 
         if (m_is_type_validator) {
             rval.m_status = STATUS_VALID;
