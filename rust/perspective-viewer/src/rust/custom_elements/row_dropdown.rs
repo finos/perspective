@@ -77,6 +77,7 @@ impl RowDropDownElement {
                     .filter(|val| {
                         !exclude.contains(val) && val.to_lowercase().contains(&lowercase_input)
                     })
+                    .take(10)
                     .collect_vec()
             };
             let classes = modal.custom_element.class_list();

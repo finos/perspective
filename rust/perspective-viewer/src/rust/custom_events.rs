@@ -130,6 +130,7 @@ impl CustomEvents {
             &event_init,
         );
         self.0 .0.elem.dispatch_event(&event.unwrap()).unwrap();
+        self.0 .0.clone().dispatch_config_update();
     }
 }
 

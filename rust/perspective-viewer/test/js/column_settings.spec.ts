@@ -32,14 +32,9 @@ export async function checkTab(
     });
     let titles = await columnSettingsSidebar.tabTitle.all();
     if (active) {
-        if (expression) {
-            expect(titles.length).toBe(2);
-            expect(await titles[0].innerText()).toBe("Attributes");
-            expect(await titles[1].innerText()).toBe("Style");
-        } else {
-            expect(titles.length).toBe(1);
-            expect(await titles[0].innerText()).toBe("Style");
-        }
+        expect(titles.length).toBe(2);
+        expect(await titles[0].innerText()).toBe("Style");
+        expect(await titles[1].innerText()).toBe("Attributes");
     } else {
         if (expression) {
             expect(titles.length).toBe(1);
@@ -112,10 +107,11 @@ test.describe("Plugin Styles", () => {
         await checkTab(sidebar, true, true);
         let tabs = await sidebar.tabTitle.all();
         await tabs[1].click();
-        await sidebar.styleTab.container.waitFor();
-        await tabs[0].click();
         await sidebar.attributesTab.container.waitFor();
+        await tabs[0].click();
+        await sidebar.styleTab.container.waitFor();
     });
+    //NOTE: This test may eventually be deprecated.
     test("Styles don't break on unimplemented plugins", async ({ page }) => {
         let view = new PageView(page);
         let settingsPanel = await view.openSettingsPanel();
@@ -127,7 +123,11 @@ test.describe("Plugin Styles", () => {
         await col.editBtn.click();
         await sidebar.container.waitFor();
         await checkTab(sidebar, true, false);
+        await sidebar.tabTitle.getByText("Style").click();
         await sidebar.styleTab.container.waitFor();
+        await sidebar.styleTab.contents
+            .getByText("No styles available")
+            .waitFor();
     });
     test("View updates don't re-render sidebar", async ({ page }) => {
         await page.evaluate(async () => {

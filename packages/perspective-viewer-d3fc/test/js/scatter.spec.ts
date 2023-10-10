@@ -49,7 +49,7 @@ test.describe("Scatter Tests", () => {
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({
                 plugin: "X/Y Scatter",
-                columns: ["Sales", "Quantity", null, null, "State"],
+                columns: ["Sales", "Quantity", null, null, null, "State"],
             });
         });
 
@@ -67,7 +67,7 @@ test.describe("Scatter Tests", () => {
             await document.querySelector("perspective-viewer")!.restore({
                 plugin: "X/Y Scatter",
                 group_by: ["State"],
-                columns: ["Sales", "Quantity", null, null, "City"],
+                columns: ["Sales", "Quantity", null, null, null, "City"],
                 aggregates: { City: "dominant" },
             });
         });

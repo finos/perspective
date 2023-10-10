@@ -69,28 +69,30 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     let column_type = p.session.metadata().get_column_view_type(&column_name);
     let is_active = column_type.is_some();
 
-    let mut tabs = vec![ColumnSettingsTab::Attributes];
-
-    if !matches!(p.selected_column, ColumnLocator::Expr(None)) && is_active {
-        tabs.push(ColumnSettingsTab::Style);
+    let (config, attrs) = p.get_plugin_config();
+    if config.is_none() || attrs.is_none() {
+        tracing::warn!(
+            "Could not get full plugin config!\nconfig (plugin.save()): {:?}\nplugin_attrs: {:?}",
+            config,
+            attrs
+        );
     }
+    let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
 
     let title = format!("Editing ‘{column_name}’...");
 
-    // this only re-renders when selected_column changes so we should always
-    // re-fetch the config
-    let maybe_config = p.get_plugin_config();
-    if maybe_config.is_none() {
-        tracing::error!("Could not get config and plugin_attributes!");
-    }
-    // this implies that plugin_attrs is now required for plugins to work properly
-    let (config, attrs) = maybe_config.unwrap();
+    let mut tabs = vec![ColumnSettingsTab::Attributes];
 
-    let ty = p
-        .session
-        .metadata()
-        .get_column_view_type(&column_name)
-        .unwrap();
+    if !matches!(p.selected_column, ColumnLocator::Expr(None))
+        && is_active
+        && config.is_some()
+        && attrs.is_some()
+        && maybe_ty.is_some()
+    {
+        tabs.reverse();
+        tabs.push(ColumnSettingsTab::Style);
+        tabs.reverse();
+    }
 
     clone!(
         p.selected_column,
@@ -123,9 +125,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
 
                         { selected_column }
                         { on_close }
-                        { config }
-                        { attrs }
-                        { ty }
+                        { maybe_ty }
                     />
                 }
             }
@@ -136,9 +136,9 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                     { custom_events }
 
                     { column_name }
-                    { ty }
-                    { config }
-                    { attrs }
+                    ty={ maybe_ty.unwrap() }
+                    config={ config.unwrap() }
+                    attrs={ attrs.unwrap() }
                 />
             },
         }

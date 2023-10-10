@@ -73,11 +73,13 @@ test.describe("Column Style Tests", () => {
             // Register a listener for `perspective-config-update` event
             window.__events__ = [];
             viewer.addEventListener("perspective-config-update", (evt) => {
+                console.log(evt.type, evt.detail);
                 window.__events__.push(evt);
             });
             viewer.addEventListener(
                 "perspective-column-style-change",
                 (evt) => {
+                    console.log(evt.type, evt.detail);
                     window.__events__.push(evt);
                 }
             );
