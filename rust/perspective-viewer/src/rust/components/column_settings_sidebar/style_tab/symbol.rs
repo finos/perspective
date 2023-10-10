@@ -67,19 +67,17 @@ impl yew::Component for SymbolAttr {
     fn create(ctx: &yew::Context<Self>) -> Self {
         let p = ctx.props();
         let all_symbol_names = p.attrs.symbols.iter().map(|s| s.name.clone()).collect_vec();
-        let pairs = p
+        let mut pairs = p
             .config
             .columns
             .get(&p.column_name)
             .and_then(|json_val| {
-                tracing::error!("{json_val:?}");
-                let mut symbols = serde_json::from_value::<SymbolConfig>(json_val.clone())
+                serde_json::from_value::<SymbolConfig>(json_val.clone())
                     .ok()
-                    .map(|s| s.symbols)?;
-                symbols.push(KVPair::new(None, all_symbol_names.first().cloned()));
-                Some(symbols)
+                    .map(|s| s.symbols)
             })
             .unwrap_or_default();
+        pairs.push(KVPair::new(None, all_symbol_names.first().cloned()));
         let row_dropdown = Rc::new(RowDropDownElement::new(
             p.session.clone(),
             p.column_name.clone(),

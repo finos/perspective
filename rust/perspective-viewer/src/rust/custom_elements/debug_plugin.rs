@@ -65,6 +65,11 @@ impl PerspectiveDebugPluginElement {
         JsValue::UNDEFINED
     }
 
+    #[wasm_bindgen(getter)]
+    pub fn plugin_attributes(&self) -> JsValue {
+        js_sys::Object::new().into()
+    }
+
     pub fn update(&self, view: JsPerspectiveView) -> ApiFuture<()> {
         self.draw(view)
     }

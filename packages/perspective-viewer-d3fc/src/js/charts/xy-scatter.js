@@ -58,6 +58,9 @@ function interpolate_scale([x1, y1], [x2, y2]) {
  * @param {d3.ScaleOrdinal} symbols
  */
 function overrideSymbols(settings, symbols) {
+    if (!symbols) {
+        return;
+    }
     const symbolCol = settings.realValues[4];
     let domain = symbols.domain();
     let range = symbols.range();

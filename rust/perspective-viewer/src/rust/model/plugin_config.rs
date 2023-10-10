@@ -19,17 +19,15 @@ use crate::config::plugin::{PluginAttributes, PluginConfig};
 use crate::utils::{ApiFuture, JsValueSerdeExt};
 
 pub trait UpdatePluginConfig: HasRenderer + HasCustomEvents + HasSession {
-    /// This function will get the zipped results of calling plugin.save()
-    /// plugin.plugin_attributes(). They are zipped because it is assumed
-    /// this will be used to configure styles and attributes for the plugin,
-    /// which requires both of these things to be present.
-    fn get_plugin_config(&self) -> Option<(PluginConfig, PluginAttributes)> {
+    /// This function will get the results of calling plugin.save()
+    /// plugin.plugin_attributes().
+    fn get_plugin_config(&self) -> (Option<PluginConfig>, Option<PluginAttributes>) {
         let plugin = self.renderer().get_active_plugin().unwrap();
         let config = plugin.save();
         let default_config = JsValue::from(plugin.plugin_attributes());
         let config = jsval_to_type(&config).ok();
-        let default_config = jsval_to_type(&default_config).ok();
-        config.zip(default_config)
+        let attrs = jsval_to_type(&default_config).ok();
+        (config, attrs)
     }
 
     /// This function sends the config to the plugin using its `restore` method.
@@ -38,9 +36,9 @@ pub trait UpdatePluginConfig: HasRenderer + HasCustomEvents + HasSession {
     fn send_plugin_config(&self, column_name: String, column_config: serde_json::Value) {
         let custom_events = self.custom_events();
         let renderer = self.renderer();
-        let current_config = self.get_plugin_config();
+        let (current_config, _) = self.get_plugin_config();
         let elem = renderer.get_active_plugin().unwrap();
-        if let Some((mut current_config, _)) = current_config {
+        if let Some(mut current_config) = current_config {
             current_config.columns.insert(column_name, column_config);
             let js_config = JsValue::from_serde_ext(&current_config).unwrap();
             elem.restore(&js_config);

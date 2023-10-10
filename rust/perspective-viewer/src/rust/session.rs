@@ -284,17 +284,18 @@ impl Session {
             Ok(())
         });
 
-        Ok(csv
+        let res = csv
             .lines()
-            .map(|x| {
-                if x.len() > 1 {
-                    str::replace(&x[1..x.len() - 1], "\"\"", "\"")
+            .map(|val| {
+                if val.starts_with('\"') && val.ends_with('\"') {
+                    (val[1..val.len() - 1]).to_owned()
                 } else {
-                    x.to_owned()
+                    val.to_owned()
                 }
             })
             .skip(2)
-            .collect::<Vec<String>>())
+            .collect::<Vec<String>>();
+        Ok(res)
     }
 
     pub fn set_update_column_defaults(
