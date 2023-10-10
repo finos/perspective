@@ -3180,6 +3180,77 @@ const perspective = require("@finos/perspective");
                 view.delete();
                 table.delete();
             });
+
+            test("Vlookup should access the correct row", async function () {
+                const table = await perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: ["a", "b", "c", "d"],
+                });
+                const view = await table.view({
+                    expressions: ["vlookup('b', 0)"],
+                });
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    a: [1, 2, 3, 4],
+                    b: ["a", "b", "c", "d"],
+                    "vlookup('b', 0)": ["a", "a", "a", "a"],
+                });
+                view.delete();
+                table.delete();
+            });
+
+            test("Col should behave the same as direct column access", async function () {
+                const table = await perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: ["a", "b", "c", "d"],
+                });
+                const view = await table.view({
+                    expressions: ["col('b')"],
+                });
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    a: [1, 2, 3, 4],
+                    b: ["a", "b", "c", "d"],
+                    "col('b')": ["a", "b", "c", "d"],
+                });
+                view.delete();
+                table.delete();
+            });
+
+            test("index() should return the correct row number", async function () {
+                const table = await perspective.table({
+                    a: [1, 2, 3, 4],
+                });
+                const view = await table.view({
+                    expressions: ["index()"],
+                });
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    a: [1, 2, 3, 4],
+                    "index()": [0, 1, 2, 3],
+                });
+                view.delete();
+                table.delete();
+            });
+
+            test("index() should work with custom a index", async function () {
+                const table = await perspective.table(
+                    {
+                        a: [1, 2, 3, 4],
+                    },
+                    { index: "a" }
+                );
+                const view = await table.view({
+                    expressions: ["index()"],
+                });
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    a: [1, 2, 3, 4],
+                    "index()": [1, 2, 3, 4],
+                });
+                view.delete();
+                table.delete();
+            });
         });
     });
 })(perspective);
