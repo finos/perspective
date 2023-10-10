@@ -210,6 +210,9 @@ pub struct SplitPanelProps {
     #[cfg(test)]
     #[prop_or_default]
     pub weak_link: WeakScope<SplitPanel>,
+
+    #[prop_or_default]
+    pub initial_size: Option<i32>,
 }
 
 impl SplitPanelProps {
@@ -267,10 +270,23 @@ impl Component for SplitPanel {
         // cant just use vec![Default::default(); len] as it would
         // use the same underlying NodeRef for each element.
         let refs = Vec::from_iter(std::iter::repeat_with(Default::default).take(len));
+
+        let mut styles = vec![Default::default(); len];
+        if let Some(x) = &ctx.props().initial_size {
+            styles[0] = Some(match ctx.props().orientation {
+                Orientation::Horizontal => {
+                    format!("max-width:{}px;min-width:{}px;width:{}px", x, x, x)
+                }
+                Orientation::Vertical => {
+                    format!("max-height:{}px;min-height:{}px;height:{}px", x, x, x)
+                }
+            });
+        }
+
         Self {
             resize_state: None,
             refs,
-            styles: vec![Default::default(); len],
+            styles,
             on_reset: None,
         }
     }

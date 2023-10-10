@@ -65,8 +65,8 @@ pub struct ColumnSelectorProps {
 derive_model!(DragDrop, Renderer, Session for ColumnSelectorProps);
 
 impl PartialEq for ColumnSelectorProps {
-    fn eq(&self, _rhs: &Self) -> bool {
-        true
+    fn eq(&self, rhs: &Self) -> bool {
+        self.selected_column == rhs.selected_column
     }
 }
 
@@ -266,14 +266,16 @@ impl Component for ColumnSelector {
                 let ondragenter = ondragenter.reform(move |_| Some(idx));
                 let size = if named_count > 0 { 48.0 } else { 28.0 };
                 named_count = named_count.saturating_sub(1);
-                let key = format!("{}", name);
+                let key = name.get_name().unwrap_or("").to_owned();
                 let column_dropdown = self.column_dropdown.clone();
+                let is_editing = matches!(&ctx.props().selected_column, Some(ColumnLocator::Plain(x)) if x == &key);
                 html_nested! {
                     <ScrollPanelItem key={ key } { size }>
                         <ActiveColumn
                             { idx }
                             { name }
                             { is_aggregated }
+                            { is_editing }
                             { column_dropdown }
                             dragdrop={ &ctx.props().dragdrop }
                             session={ &ctx.props().session }
@@ -292,6 +294,7 @@ impl Component for ColumnSelector {
             .chain(columns_iter.inactive())
             .enumerate()
             .map(|(idx, vc)| {
+                let is_editing = matches!(&ctx.props().selected_column, Some(ColumnLocator::Expr(Some(x))) if x.as_str() == vc.name);
                 html_nested! {
                     <ScrollPanelItem
                         key={ vc.name }
@@ -303,6 +306,7 @@ impl Component for ColumnSelector {
                             dragdrop={ &ctx.props().dragdrop }
                             session={ &ctx.props().session }
                             renderer={ &ctx.props().renderer }
+                            { is_editing }
                             onselect={ &onselect }
                             ondragend={ &ondragend }
                             on_open_expr_panel={ &ctx.props().on_open_expr_panel } />
@@ -316,6 +320,7 @@ impl Component for ColumnSelector {
         } else {
             28.0
         };
+
         let add_column = html_nested! {
             <ScrollPanelItem key={ "__add_expression__" } size={ size }>
                 <AddExpressionButton

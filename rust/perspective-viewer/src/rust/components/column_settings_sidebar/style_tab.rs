@@ -23,8 +23,8 @@ use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
 use crate::components::style::LocalStyle;
 use crate::config::{
-    DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig, NumberColumnStyleConfig,
-    NumberColumnStyleDefaultConfig, StringColumnStyleConfig, StringColumnStyleDefaultConfig, Type,
+    DatetimeColumnStyleDefaultConfig, NumberColumnStyleDefaultConfig,
+    StringColumnStyleDefaultConfig, Type,
 };
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
@@ -147,66 +147,13 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
     }
     let (ty, view) = opts.unwrap();
     let view = (*view).clone();
-    let title = format!("{} Styling", ty.to_capitalized());
 
     clone!(p.renderer, p.presentation, p.column_name);
-    let opt_html =
-        match ty {
-            Type::String => get_column_config::<
-                StringColumnStyleConfig,
-                StringColumnStyleDefaultConfig,
-            >(&renderer, &column_name, ty)
-            .map(|(config, default_config)| {
-                let on_change = Callback::from(move |config| {
-                    send_config(
-                        &renderer,
-                        &presentation,
-                        view.clone(),
-                        column_name.clone(),
-                        config,
-                    );
-                });
-                html_template! {
-                    <div class="item_title">{title.clone()}</div>
-                    <div class="style_contents">
-                        <StringColumnStyle  { config } {default_config} {on_change} />
-                    </div>
-                }
-            }),
-            Type::Datetime | Type::Date => get_column_config::<
-                DatetimeColumnStyleConfig,
-                DatetimeColumnStyleDefaultConfig,
-            >(&renderer, &column_name, ty)
-            .map(|(config, default_config)| {
-                let on_change = Callback::from(move |config| {
-                    send_config(
-                        &renderer,
-                        &presentation,
-                        view.clone(),
-                        column_name.clone(),
-                        config,
-                    );
-                });
-                html_template! {
-                    <div class="item_title">{title.clone()}</div>
-                    <div class="style_contents">
-                        <DatetimeColumnStyle
-                            enable_time_config={matches!(ty, Type::Datetime)}
-                            { config }
-                            {default_config}
-                            {on_change}
-                            />
-                    </div>
-                }
-            }),
-            Type::Integer | Type::Float => get_column_config::<
-                NumberColumnStyleConfig,
-                NumberColumnStyleDefaultConfig,
-            >(&renderer, &column_name, ty)
-            .map(|(config, default_config)| {
-                let on_change = {
-                    clone!(column_name, view);
-                    Callback::from(move |config| {
+    let opt_html = match ty {
+        Type::String => {
+            get_column_config::<_, StringColumnStyleDefaultConfig>(&renderer, &column_name, ty).map(
+                |(config, default_config)| {
+                    let on_change = Callback::from(move |config| {
                         send_config(
                             &renderer,
                             &presentation,
@@ -214,24 +161,75 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                             column_name.clone(),
                             config,
                         );
-                    })};
-                html_template! {
-                    <div class="item_title">{title.clone()}</div>
-                    <div class="style_contents">
-                        <NumberColumnStyle column_name={column_name.clone()} view={view.clone()}  { config } {default_config} {on_change} />
-                    </div>
-                }
-            }),
-            _ => Err("Booleans aren't styled yet.".into()),
-        };
+                    });
+                    html_template! {
+                        <div class="style_contents">
+                            <StringColumnStyle  { config } {default_config} {on_change} />
+                        </div>
+                    }
+                },
+            )
+        }
+        Type::Datetime | Type::Date => {
+            get_column_config::<_, DatetimeColumnStyleDefaultConfig>(&renderer, &column_name, ty)
+                .map(|(config, default_config)| {
+                    let on_change = Callback::from(move |config| {
+                        send_config(
+                            &renderer,
+                            &presentation,
+                            view.clone(),
+                            column_name.clone(),
+                            config,
+                        );
+                    });
+
+                    html_template! {
+                        <div class="style_contents">
+                            <DatetimeColumnStyle
+                                enable_time_config={matches!(ty, Type::Datetime)}
+                                { config }
+                                {default_config}
+                                {on_change}
+                                />
+                        </div>
+                    }
+                })
+        }
+        Type::Integer | Type::Float => {
+            get_column_config::<_, NumberColumnStyleDefaultConfig>(&renderer, &column_name, ty).map(
+                |(config, default_config)| {
+                    let on_change = {
+                        clone!(column_name, view);
+                        Callback::from(move |config| {
+                            send_config(
+                                &renderer,
+                                &presentation,
+                                view.clone(),
+                                column_name.clone(),
+                                config,
+                            );
+                        })
+                    };
+                    html_template! {
+                        <div class="style_contents">
+                            <NumberColumnStyle
+                                column_name={column_name.clone()}
+                                view={view.clone()}
+                                { config }
+                                { default_config }
+                                { on_change } />
+                        </div>
+                    }
+                },
+            )
+        }
+        _ => Err("Booleans aren't styled yet.".into()),
+    };
+
     let inner = if let Ok(html) = opt_html {
         html
     } else {
-        // do the tracing logs
-        tracing::warn!("{}", opt_html.unwrap_err());
-        // return the default impl
         html_template! {
-            <div class="item_title">{title}</div>
             <div class="style_contents">
                 <LocalStyle href={ css!("column-style") } />
                 <div id="column-style-container" class="no-style">

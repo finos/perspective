@@ -36,11 +36,13 @@ pub enum ColumnSettingsTab {
     Attributes,
     Style,
 }
+
 impl Display for ColumnSettingsTab {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{self:?}"))
     }
 }
+
 impl Tab for ColumnSettingsTab {}
 
 #[derive(Clone, Properties)]
@@ -51,6 +53,7 @@ pub struct ColumnSettingsProps {
     pub renderer: Renderer,
     pub presentation: Presentation,
 }
+
 impl PartialEq for ColumnSettingsProps {
     fn eq(&self, other: &Self) -> bool {
         self.selected_column == other.selected_column

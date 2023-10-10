@@ -45,6 +45,7 @@ pub struct ActiveColumnProps {
 
     #[prop_or_default]
     pub is_aggregated: bool,
+    pub is_editing: bool,
 }
 
 impl PartialEq for ActiveColumnProps {
@@ -371,6 +372,7 @@ impl Component for ActiveColumn {
                                     name={ name.clone() }
                                     on_open_expr_panel={ &ctx.props().on_open_expr_panel }
                                     { is_expression }
+                                    is_editing={ ctx.props().is_editing }
                                 ></ExprEditButton>
                             </div>
                         </div>

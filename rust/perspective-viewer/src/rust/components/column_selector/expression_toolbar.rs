@@ -19,6 +19,7 @@ pub struct ExprEditButtonProps {
     pub name: String,
     pub is_expression: bool,
     pub on_open_expr_panel: Callback<ColumnLocator>,
+    pub is_editing: bool,
 }
 
 // TODO: Move this logic to ColumnSettingsSidebar
@@ -40,7 +41,14 @@ pub fn ExprEditButton(p: &ExprEditButtonProps) -> Html {
         },
         p.clone(),
     );
+
+    let class = if p.is_editing {
+        "expression-edit-button is-editing"
+    } else {
+        "expression-edit-button"
+    };
+
     html! {
-        <span { onmousedown } class="expression-edit-button"></span>
+        <span { onmousedown } { class }></span>
     }
 }
