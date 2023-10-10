@@ -1,0 +1,80 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+// Handles sub-cell scrolling via CSS transform offset by variables set during
+// rendering.
+perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table {
+    tbody td,
+    thead th:not(.rt-group-corner) {
+        transform: translate(var(--regular-table--transform-x, 0px));
+    }
+
+    tbody {
+        transform: translate(0, var(--regular-table--transform-y, 0px));
+    }
+
+    tbody tr:first-child {
+        td,
+        th {
+            clip-path: polygon(
+                0 var(--regular-table--clip-y, 0),
+                0 200%,
+                200% 200%,
+                200% var(--regular-table--clip-y, 0)
+            );
+        }
+    }
+
+    tbody tr td:first-of-type {
+        clip-path: polygon(
+            var(--regular-table--clip-x, 0) 0,
+            var(--regular-table--clip-x, 0) 200%,
+            200% 200%,
+            200% 0
+        );
+    }
+
+    tbody tr:first-child td:first-of-type {
+        clip-path: polygon(
+            var(--regular-table--clip-x, 0) var(--regular-table--clip-y, 0),
+            var(--regular-table--clip-x, 0) 200%,
+            200% 200%,
+            200% var(--regular-table--clip-y, 0)
+        );
+    }
+
+    thead tr:last-child:after {
+        transform: translate(var(--regular-table--transform-x, 0px));
+    }
+
+    tbody tr:not(:first-child):after {
+        transform: translate(var(--regular-table--transform-x, 0px));
+    }
+
+    tbody tr:hover:first-child:after {
+        clip-path: polygon(
+            0 var(--regular-table--clip-y, 0),
+            0 200%,
+            200% 200%,
+            200% var(--regular-table--clip-y, 0)
+        );
+    }
+
+    thead tr th.rt-group-corner + th:not(.rt-group-corner) {
+        clip-path: polygon(
+            var(--regular-table--clip-x, 0) 0,
+            var(--regular-table--clip-x, 0) 200%,
+            200% 200%,
+            200% 0
+        );
+    }
+}
