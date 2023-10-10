@@ -22,6 +22,7 @@ use super::form::number_input::*;
 use super::modal::*;
 use super::style::LocalStyle;
 use crate::config::*;
+use crate::js::JsPerspectiveView;
 use crate::utils::WeakScope;
 use crate::*;
 
@@ -46,6 +47,7 @@ pub enum NumberColumnStyleMsg {
     NumberForeModeChanged(NumberForegroundMode),
     NumberBackModeChanged(NumberBackgroundMode),
     GradientChanged(Side, String),
+    DefaultGradientChanged(f64),
 }
 
 /// A `ColumnStyle` component is mounted to the window anchored at the screen
@@ -64,6 +66,9 @@ pub struct NumberColumnStyleProps {
 
     #[prop_or_default]
     pub weak_link: WeakScope<NumberColumnStyle>,
+
+    pub view: Option<JsValue>,
+    pub column_name: Option<String>,
 }
 
 impl ModalLink<NumberColumnStyle> for NumberColumnStyleProps {
@@ -92,8 +97,8 @@ pub struct NumberColumnStyle {
     neg_fg_color: String,
     pos_bg_color: String,
     neg_bg_color: String,
-    fg_gradient: f64,
-    bg_gradient: f64,
+    fg_gradient: Option<f64>,
+    bg_gradient: Option<f64>,
 }
 
 impl Component for NumberColumnStyle {
@@ -102,6 +107,23 @@ impl Component for NumberColumnStyle {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
+
+        if let Some(view) = ctx.props().view.clone() && let Some(column_name) = ctx.props().column_name.clone() {
+            ctx.link().send_future(async {
+                let view = view.unchecked_into::<JsPerspectiveView>();
+                let min_max = view._get_min_max(column_name.into()).await.unwrap();
+                let abs_max = min_max.unchecked_into::<js_sys::Array>()
+                    .to_vec()
+                    .iter()
+                    .map(|val| val.as_f64().unwrap())
+                    .fold(0.0, |accum, val| max!(accum, val.abs()));
+
+                let gradient_val = (abs_max * 100.).round() / 100.;
+
+                NumberColumnStyleMsg::DefaultGradientChanged(gradient_val)
+            });
+        }
+
         Self::reset(
             &ctx.props().config.clone().unwrap_or_default(),
             &ctx.props().default_config.clone(),
@@ -147,7 +169,7 @@ impl Component for NumberColumnStyle {
                     self.config.pos_fg_color = Some(self.pos_fg_color.to_owned());
                     self.config.neg_fg_color = Some(self.neg_fg_color.to_owned());
                     if self.fg_mode.needs_gradient() {
-                        self.config.fg_gradient = Some(self.fg_gradient);
+                        self.config.fg_gradient = Some(self.fg_gradient.unwrap_or_default());
                     } else {
                         self.config.fg_gradient = None;
                     }
@@ -172,7 +194,7 @@ impl Component for NumberColumnStyle {
                     self.config.pos_bg_color = Some(self.pos_bg_color.to_owned());
                     self.config.neg_bg_color = Some(self.neg_bg_color.to_owned());
                     if self.bg_mode.needs_gradient() {
-                        self.config.bg_gradient = Some(self.bg_gradient);
+                        self.config.bg_gradient = Some(self.bg_gradient.unwrap_or_default());
                     } else {
                         self.config.bg_gradient = None;
                     }
@@ -214,7 +236,7 @@ impl Component for NumberColumnStyle {
                 self.fg_mode = val;
                 self.config.number_fg_mode = val;
                 if self.fg_mode.needs_gradient() {
-                    self.config.fg_gradient = Some(self.fg_gradient);
+                    self.config.fg_gradient = Some(self.fg_gradient.unwrap_or_default());
                 } else {
                     self.config.fg_gradient = None;
                 }
@@ -226,7 +248,7 @@ impl Component for NumberColumnStyle {
                 self.bg_mode = val;
                 self.config.number_bg_mode = val;
                 if self.bg_mode.needs_gradient() {
-                    self.config.bg_gradient = Some(self.bg_gradient);
+                    self.config.bg_gradient = Some(self.bg_gradient.unwrap_or_default());
                 } else {
                     self.config.bg_gradient = None;
                 }
@@ -237,33 +259,40 @@ impl Component for NumberColumnStyle {
             NumberColumnStyleMsg::GradientChanged(side, gradient) => {
                 match (side, gradient.parse::<f64>()) {
                     (Fg, Ok(x)) => {
-                        self.fg_gradient = x;
+                        self.fg_gradient = Some(x);
                         self.config.fg_gradient = Some(x);
                     }
                     (Fg, Err(_)) if gradient.is_empty() => {
-                        self.fg_gradient = self.default_config.fg_gradient;
+                        self.fg_gradient = Some(self.default_config.fg_gradient);
                         self.config.fg_gradient = Some(self.default_config.fg_gradient);
                     }
                     (Fg, Err(_)) => {
-                        self.fg_gradient = self.default_config.fg_gradient;
+                        self.fg_gradient = Some(self.default_config.fg_gradient);
                         self.config.fg_gradient = None;
                     }
                     (Bg, Ok(x)) => {
-                        self.bg_gradient = x;
+                        self.bg_gradient = Some(x);
                         self.config.bg_gradient = Some(x);
                     }
                     (Bg, Err(_)) if gradient.is_empty() => {
-                        self.bg_gradient = self.default_config.bg_gradient;
+                        self.bg_gradient = Some(self.default_config.bg_gradient);
                         self.config.bg_gradient = Some(self.default_config.bg_gradient);
                     }
                     (Bg, Err(_)) => {
-                        self.bg_gradient = self.default_config.bg_gradient;
+                        self.bg_gradient = Some(self.default_config.bg_gradient);
                         self.config.bg_gradient = None;
                     }
                 };
 
                 self.dispatch_config(ctx);
                 false
+            }
+            NumberColumnStyleMsg::DefaultGradientChanged(gradient) => {
+                self.fg_gradient.get_or_insert(gradient);
+                self.bg_gradient.get_or_insert(gradient);
+                self.default_config.fg_gradient = gradient;
+                self.default_config.bg_gradient = gradient;
+                true
             }
         }
     }
@@ -515,9 +544,9 @@ impl NumberColumnStyle {
 
         props!(NumberInputProps {
             max_value: if side == Fg {
-                self.fg_gradient
+                self.fg_gradient.unwrap_or_default()
             } else {
-                self.bg_gradient
+                self.bg_gradient.unwrap_or_default()
             },
             on_max_value
         })
@@ -542,15 +571,8 @@ impl NumberColumnStyle {
         default_config: &NumberColumnStyleDefaultConfig,
     ) -> Self {
         let mut config = config.clone();
-        let fg_gradient = match config.fg_gradient {
-            Some(x) => x,
-            None => default_config.fg_gradient,
-        };
-
-        let bg_gradient = match config.bg_gradient {
-            Some(x) => x,
-            None => default_config.bg_gradient,
-        };
+        let fg_gradient = config.fg_gradient;
+        let bg_gradient = config.bg_gradient;
 
         let pos_fg_color = config
             .pos_fg_color
