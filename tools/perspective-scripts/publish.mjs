@@ -64,14 +64,21 @@ async function download_release_assets(releases) {
 async function publish_release_assets(releases) {
     if (process.env.COMMIT) {
         for (const release of releases) {
-            if (release.name.endsWith("whl")) {
+            if (
+                (release.name.endsWith("whl") ||
+                    release.name.endsWith("tar.gz")) &&
+                release.name.indexOf("wasm") === -1
+            ) {
                 sh`twine upload ${release.name}`.runSync();
-            } else {
+            } else if (release.name.endsWith(".tgz")) {
                 sh`npm publish ${release.name}`.runSync();
             }
         }
 
-        sh`cargo publish`.cwd("rust/perspective-viewer").runSync();
+        // `node_modules` is considered dirty and we've already checked git status below.
+        sh`cargo publish --allow-dirty`
+            .cwd("rust/perspective-viewer")
+            .runSync();
     } else {
         console.warn(`COMMIT not specified, aborting`);
     }

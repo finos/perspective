@@ -15,74 +15,8 @@
 regular-table {
     padding: 0;
     margin: 12px 0 0 12px;
-
-    // firefox scrollbar styling
-    scrollbar-color: transparent transparent;
-    scrollbar-width: thin;
-    outline: none;
-}
-
-regular-table:hover {
-    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-}
-
-perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table {
-    tbody td,
-    thead th:not(.rt-group-corner) {
-        transform: translate(var(--regular-table--transform-x, 0px));
-    }
-
-    tbody {
-        transform: translate(0, var(--regular-table--transform-y, 0px));
-    }
-
-    tbody tr:first-child {
-        td,
-        th {
-            clip-path: polygon(
-                0 var(--regular-table--clip-y, 0),
-                0 200%,
-                200% 200%,
-                200% var(--regular-table--clip-y, 0)
-            );
-        }
-    }
-
-    thead th.rt-group-corner {
-        background: var(--plugin--background, white);
-        z-index: 1;
-    }
-
-    tbody tr td:first-of-type {
-        clip-path: polygon(
-            var(--regular-table--clip-x, 0) 0,
-            var(--regular-table--clip-x, 0) 200%,
-            200% 200%,
-            200% 0
-        );
-    }
-
-    tbody tr:first-child td:first-of-type {
-        clip-path: polygon(
-            var(--regular-table--clip-x, 0) var(--regular-table--clip-y, 0),
-            var(--regular-table--clip-x, 0) 200%,
-            200% 200%,
-            200% var(--regular-table--clip-y, 0)
-        );
-    }
-
-    thead tr:last-child:after {
-        transform: translate(var(--regular-table--transform-x, 0px));
-    }
-
-    tbody tr:not(:first-child):after {
-        transform: translate(var(--regular-table--transform-x, 0px));
-    }
-}
-
-regular-table {
     font-family: inherit;
-    --rt-hover--border-color: #c5c9d080;
+    --rt-hover--border-color: var(--inactive--color, #c5c9d080);
 
     div[tabindex] {
         outline: none;
@@ -262,24 +196,5 @@ regular-table {
 
     a:visited {
         color: var(--active--color);
-    }
-
-    // webkit (chrome, safari, etc) scrollbar styling
-
-    &::-webkit-scrollbar,
-    &::-webkit-scrollbar-corner {
-        background-color: transparent;
-        height: 12px;
-        width: 12px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-clip: content-box;
-        background: var(--icon--color);
-        border: 5.5px solid var(--plugin--background);
-        max-height: 50%;
-        max-width: 50%;
-        min-width: 10%;
-        min-height: 10%;
     }
 }
