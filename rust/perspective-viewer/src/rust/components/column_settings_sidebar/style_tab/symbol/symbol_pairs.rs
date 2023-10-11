@@ -20,7 +20,7 @@ use crate::components::column_settings_sidebar::style_tab::symbol::row_selector:
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_selector::SymbolSelector;
 use crate::components::style::LocalStyle;
 use crate::config::plugin::Symbol;
-use crate::custom_elements::RowDropDownElement;
+use crate::custom_elements::FilterDropDownElement;
 use crate::{css, html_template};
 
 // TODO: Make this generic
@@ -56,8 +56,9 @@ pub struct PairsListProps {
     pub pairs: Vec<KVPair>,
     pub update_pairs: Callback<Vec<KVPair>>,
     pub id: Option<String>,
-    pub row_dropdown: Rc<RowDropDownElement>,
+    pub row_dropdown: Rc<FilterDropDownElement>,
     pub values: Vec<Symbol>,
+    pub column_name: String,
 }
 
 pub enum PairsListMsg {
@@ -101,6 +102,7 @@ impl yew::Component for PairsList {
                         update_pairs={props.update_pairs.clone()}
                         {focused}
                         set_focused_index={set_focused.clone()}
+                        column_name={props.column_name.clone()}
                     />
                 }
             })
@@ -126,10 +128,11 @@ pub struct PairsListItemProps {
     pub index: usize,
     pub pairs: Vec<KVPair>,
     pub update_pairs: Callback<Vec<KVPair>>,
-    pub row_dropdown: Rc<RowDropDownElement>,
+    pub row_dropdown: Rc<FilterDropDownElement>,
     pub values: Vec<Symbol>,
     pub focused: bool,
     pub set_focused_index: Callback<Option<usize>>,
+    pub column_name: String,
 }
 
 pub enum PairListItemMsg {
@@ -180,29 +183,31 @@ impl yew::Component for PairsListItem {
         let on_value_update = ctx
             .link()
             .callback(|s: Symbol| PairListItemMsg::UpdateValue(Some(s.name)));
+        let remove_style =
+            (ctx.props().index == ctx.props().pairs.len() - 1).then_some("visibility: hidden");
         html! {
             <li class="pairs-list-item">
                 <RowSelector
                     selected_row={props.pair.key.clone()}
                     on_select={on_key_update.clone()}
-                    row_dropdown={props.row_dropdown.clone()}
+                    dropdown={props.row_dropdown.clone()}
                     pairs = {props.pairs.clone()}
                     index={props.index}
                     focused={props.focused}
                     set_focused_index={props.set_focused_index.clone()}
+                    column_name={props.column_name.clone()}
                 />
                 <SymbolSelector
                     callback={on_value_update}
                     values={props.values.clone()}
                     selected_value={props.pair.value.clone()}
                 />
-                if props.index != props.pairs.len() -1 {
-                    <span
-                        class="toggle-mode is_column_active"
-                        onclick={on_remove.clone()}
-                        >
-                    </span>
-                }
+                <span
+                    class="toggle-mode is_column_active"
+                    style={remove_style}
+                    onclick={on_remove.clone()}
+                    >
+                </span>
             </li>
         }
     }
