@@ -19,25 +19,26 @@ use yew::{function_component, html, Html, Properties};
 use super::symbol_pairs::KVPair;
 use crate::clone;
 use crate::components::empty_row::EmptyRow;
-use crate::custom_elements::RowDropDownElement;
+use crate::custom_elements::FilterDropDownElement;
 
 #[derive(Properties, PartialEq)]
 pub struct RowSelectorProps {
     pub selected_row: Option<String>,
     pub on_select: yew::Callback<String>,
-    pub row_dropdown: Rc<RowDropDownElement>,
+    pub dropdown: Rc<FilterDropDownElement>,
     pub pairs: Vec<KVPair>,
     pub index: usize,
     pub focused: bool,
     pub set_focused_index: yew::Callback<Option<usize>>,
+    pub column_name: String,
 }
 
 #[function_component(RowSelector)]
 pub fn row_selector(p: &RowSelectorProps) -> Html {
     let on_select = {
-        clone!(p.row_dropdown, p.index, p.set_focused_index);
+        clone!(p.dropdown, p.index, p.set_focused_index);
         p.on_select.reform(move |key| {
-            row_dropdown.hide().unwrap();
+            dropdown.hide().unwrap();
             set_focused_index.emit(Some(index + 1));
             key
         })
@@ -71,13 +72,14 @@ pub fn row_selector(p: &RowSelectorProps) -> Html {
         html! {
             <div class={err_class}>
                 <EmptyRow
-                    row_dropdown={p.row_dropdown.clone()}
+                    dropdown={p.dropdown.clone()}
                     { exclude }
                     {on_select}
                     focused={p.focused}
                     index={p.index}
                     set_focused_index={p.set_focused_index.clone()}
                     value={p.selected_row.clone().unwrap_or_default()}
+                    column_name={p.column_name.clone()}
                 />
             </div>
         }

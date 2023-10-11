@@ -38,7 +38,6 @@ pub mod viewer;
 pub mod column_settings_sidebar;
 // pub mod empty_row;
 pub mod empty_row;
-pub mod row_dropdown;
 #[cfg(test)]
 mod tests;
 

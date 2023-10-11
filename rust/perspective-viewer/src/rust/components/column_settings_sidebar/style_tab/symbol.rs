@@ -26,7 +26,7 @@ use crate::components::column_settings_sidebar::style_tab::symbol::symbol_pairs:
 use crate::components::style::LocalStyle;
 use crate::config::plugin::{PluginConfig, SymbolAttributes};
 use crate::config::Type;
-use crate::custom_elements::RowDropDownElement;
+use crate::custom_elements::FilterDropDownElement;
 use crate::custom_events::CustomEvents;
 use crate::model::UpdatePluginConfig;
 use crate::renderer::Renderer;
@@ -57,7 +57,7 @@ pub enum SymbolAttrMsg {
 pub struct SymbolAttr {
     pairs: Vec<KVPair>,
     all_symbol_names: Vec<String>,
-    row_dropdown: Rc<RowDropDownElement>,
+    row_dropdown: Rc<FilterDropDownElement>,
 }
 
 impl yew::Component for SymbolAttr {
@@ -78,10 +78,7 @@ impl yew::Component for SymbolAttr {
             })
             .unwrap_or_default();
         pairs.push(KVPair::new(None, all_symbol_names.first().cloned()));
-        let row_dropdown = Rc::new(RowDropDownElement::new(
-            p.session.clone(),
-            p.column_name.clone(),
-        ));
+        let row_dropdown = Rc::new(FilterDropDownElement::new(p.session.clone()));
         Self {
             pairs,
             all_symbol_names,
@@ -128,6 +125,7 @@ impl yew::Component for SymbolAttr {
                 pairs={self.pairs.clone()}
                 row_dropdown={self.row_dropdown.clone()}
                 values={ctx.props().attrs.symbols.clone()}
+                column_name={ctx.props().column_name.clone()}
                 {update_pairs}
             />
         }

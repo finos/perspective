@@ -13,27 +13,32 @@
 use std::collections::HashSet;
 use std::rc::Rc;
 
+use derivative::Derivative;
+use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::style::LocalStyle;
-use crate::css;
-use crate::custom_elements::RowDropDownElement;
+use crate::custom_elements::FilterDropDownElement;
+use crate::{clone, css};
 
 #[derive(Default)]
 pub struct EmptyRow {
     input_ref: NodeRef,
 }
 
-#[derive(Properties)]
+#[derive(Properties, Derivative)]
+#[derivative(Debug)]
 pub struct EmptyRowProps {
-    pub row_dropdown: Rc<RowDropDownElement>,
+    #[derivative(Debug = "ignore")]
+    pub dropdown: Rc<FilterDropDownElement>,
     pub exclude: HashSet<String>,
     pub on_select: Callback<String>,
     pub focused: bool,
     pub index: usize,
     pub set_focused_index: Callback<Option<usize>>,
     pub value: String,
+    pub column_name: String,
 }
 
 impl PartialEq for EmptyRowProps {
@@ -45,7 +50,7 @@ impl PartialEq for EmptyRowProps {
 pub enum EmptyRowMsg {
     KeyDown(u32),
     Blur,
-    Input,
+    Input(String),
     Focus,
 }
 
@@ -57,15 +62,27 @@ impl Component for EmptyRow {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let onblur = ctx.link().callback(|_| Blur);
-        let oninput = ctx.link().callback(|_| Input);
+        let oninput = ctx.link().callback(|e: InputEvent| {
+            let value = e
+                .target()
+                .unwrap()
+                .unchecked_into::<HtmlInputElement>()
+                .value();
+            Input(value)
+        });
         let onkeydown = ctx
             .link()
             .callback(|event: KeyboardEvent| KeyDown(event.key_code()));
 
         if ctx.props().focused {
             // do this on the next render cycle so we know the ref is there
-            ctx.link().callback(|_| Focus).emit(());
+            ctx.link()
+                .send_message_batch(vec![Focus, Input(ctx.props().value.clone())]);
         }
+        let onfocus = {
+            clone!(ctx.props().value);
+            ctx.link().callback(move |_| Input(value.clone()))
+        };
 
         html! {
             <div class="pivot-column column-empty">
@@ -76,6 +93,7 @@ impl Component for EmptyRow {
                     { onblur }
                     { onkeydown }
                     { oninput }
+                    { onfocus }
                     class="column-empty-input"
                 />
             </div>
@@ -90,7 +108,7 @@ impl Component for EmptyRow {
     }
 
     fn destroy(&mut self, ctx: &Context<Self>) {
-        ctx.props().row_dropdown.hide().unwrap();
+        ctx.props().dropdown.hide().unwrap();
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -105,7 +123,7 @@ impl Component for EmptyRow {
                 false
             }
             Blur => {
-                p.row_dropdown.hide().unwrap();
+                p.dropdown.hide().unwrap();
                 if let Some(elem) = self.input_ref.cast::<HtmlInputElement>() {
                     elem.set_value("");
                 }
@@ -114,25 +132,27 @@ impl Component for EmptyRow {
                 false
             }
             KeyDown(40) => {
-                p.row_dropdown.item_down();
+                p.dropdown.item_down();
                 false
             }
             KeyDown(38) => {
-                p.row_dropdown.item_up();
+                p.dropdown.item_up();
                 false
             }
             KeyDown(13) => {
-                p.row_dropdown.item_select();
-                p.row_dropdown.hide().unwrap();
+                p.dropdown.item_select();
+                p.dropdown.hide().unwrap();
                 p.set_focused_index.emit(Some(p.index + 1));
                 true
             }
             KeyDown(_) => false,
-            Input => {
-                if let Some(elem) = self.input_ref.cast::<HtmlInputElement>() {
-                    ctx.props().row_dropdown.autocomplete(
-                        elem,
+            Input(value) => {
+                if let Some(elem) = self.input_ref.cast::<HtmlElement>() {
+                    ctx.props().dropdown.autocomplete(
+                        (ctx.props().index, ctx.props().column_name.clone()),
+                        value,
                         ctx.props().exclude.clone(),
+                        elem,
                         ctx.props().on_select.clone(),
                     );
                 }

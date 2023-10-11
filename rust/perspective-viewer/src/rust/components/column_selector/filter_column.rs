@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::collections::HashSet;
+
 use chrono::{NaiveDate, TimeZone, Utc};
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -273,6 +275,7 @@ impl Component for FilterColumn {
                         } else {
                             input.clone()
                         },
+                        HashSet::new(),
                         target.unchecked_into(),
                         ctx.props().on_keydown.clone(),
                     );

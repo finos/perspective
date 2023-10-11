@@ -12,7 +12,7 @@
 
 import * as d3 from "d3";
 
-const symbols = [
+export const symbols = [
     d3.symbolCircle,
     d3.symbolCross,
     d3.symbolDiamond,
@@ -21,6 +21,15 @@ const symbols = [
     d3.symbolTriangle,
     d3.symbolWye,
 ];
+export const symbolsObj = {
+    circle: d3.symbolCircle,
+    square: d3.symbolSquare,
+    cross: d3.symbolCross,
+    diamond: d3.symbolDiamond,
+    star: d3.symbolStar,
+    triangle: d3.symbolTriangle,
+    wye: d3.symbolWye,
+};
 
 export function fromDomain(domain) {
     return domain.length > 1

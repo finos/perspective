@@ -33,6 +33,7 @@ import withGridLines from "../gridlines/gridlines";
 import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
+import { symbolsObj } from "../series/seriesSymbols";
 
 /**
  * Define a clamped scaling factor based on the container size for bubble plots.
@@ -62,38 +63,29 @@ function overrideSymbols(settings, symbols) {
         return;
     }
     const symbolCol = settings.realValues[4];
+    const columnType = settings.mainValues.find(
+        (val) => val.name === symbolCol
+    )?.type;
     let domain = symbols.domain();
     let range = symbols.range();
+    let len = range.length;
+    for (let i in domain) {
+        range[i] = range[i % len];
+    }
     settings.columns?.[symbolCol]?.symbols?.forEach(({ key, value }) => {
         // TODO: Define custom symbol types based on the values passed in here.
         // https://d3js.org/d3-shape/symbol#custom-symbols
-        let symbolType = d3.symbolCircle;
-        // https://d3js.org/d3-shape/symbol#symbolsFill
-        switch (value) {
-            case "circle":
-                symbolType = d3.symbolCircle;
-                break;
-            case "square":
-                symbolType = d3.symbolSquare;
-                break;
-            case "cross":
-                symbolType = d3.symbolCross;
-                break;
-            case "diamond":
-                symbolType = d3.symbolDiamond;
-                break;
-            case "star":
-                symbolType = d3.symbolStar;
-                break;
-            case "triangle":
-                symbolType = d3.symbolTriangle;
-                break;
-            case "wye":
-                symbolType = d3.symbolWye;
-                break;
-        }
+        let symbolType = symbolsObj[value] ?? d3.symbolCircle;
 
-        let i = domain.findIndex((val) => val === key);
+        let i = domain.findIndex((val) => {
+            switch (columnType) {
+                case "date":
+                case "datetime":
+                    return Date(val) === Date(key);
+                default:
+                    return String(val) === String(key);
+            }
+        });
         if (i === -1) {
             console.error(
                 `Could not find row with value ${key} when overriding symbols!`
@@ -105,8 +97,13 @@ function overrideSymbols(settings, symbols) {
     return symbols;
 }
 
+/**
+ * @param {d3.Selection} container - d3.Selection of the outer div
+ * @param {any} settings - settings as defined in the Update method in plugin.js
+ */
 function xyScatter(container, settings) {
     const symbolCol = settings.realValues[4];
+    // TODO: This is failing to filter correctly when colorLegend() is called as it returns data meant for filterData
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = overrideSymbols(
         settings,
