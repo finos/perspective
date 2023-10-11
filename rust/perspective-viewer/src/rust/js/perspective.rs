@@ -121,6 +121,9 @@ extern "C" {
     #[wasm_bindgen(method, catch, js_name = num_columns)]
     pub async fn _num_columns(this: &JsPerspectiveView) -> ApiResult<JsValue>;
 
+    #[wasm_bindgen(method, catch, js_name = get_min_max)]
+    pub async fn _get_min_max(this: &JsPerspectiveView, colname: js_sys::JsString) -> ApiResult<JsValue>;
+
     pub type JsPerspectiveViewConfig;
 
     pub type JsPerspectiveViewConfigUpdate;

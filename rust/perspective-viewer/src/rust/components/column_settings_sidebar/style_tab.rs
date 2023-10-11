@@ -204,19 +204,21 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                 NumberColumnStyleDefaultConfig,
             >(&renderer, &column_name, ty)
             .map(|(config, default_config)| {
-                let on_change = Callback::from(move |config| {
-                    send_config(
-                        &renderer,
-                        &presentation,
-                        view.clone(),
-                        column_name.clone(),
-                        config,
-                    );
-                });
+                let on_change = {
+                    clone!(column_name, view);
+                    Callback::from(move |config| {
+                        send_config(
+                            &renderer,
+                            &presentation,
+                            view.clone(),
+                            column_name.clone(),
+                            config,
+                        );
+                    })};
                 html_template! {
                     <div class="item_title">{title.clone()}</div>
                     <div class="style_contents">
-                        <NumberColumnStyle  { config } {default_config} {on_change} />
+                        <NumberColumnStyle column_name={column_name.clone()} view={view.clone()}  { config } {default_config} {on_change} />
                     </div>
                 }
             }),
