@@ -1495,17 +1495,6 @@ export default function (Module) {
                 )}'${value}'${match.substring(intern_idx + intern_fn.length)}`;
             };
 
-            parsed_expression_string = parsed_expression_string.replace(
-                /(col|vlookup)\((.*)\)/g,
-                (match, _, args, __) => {
-                    const start = match.indexOf(args);
-                    return `${match.substring(0, start)}${args.replace(
-                        /intern\('([^']*)'\)/g,
-                        "'$1'"
-                    )})`;
-                }
-            );
-
             // Replace intern() for bucket and regex functions that take
             // a string literal parameter and does not work if that param is
             // interned. TODO: this is clumsy and we should have a better

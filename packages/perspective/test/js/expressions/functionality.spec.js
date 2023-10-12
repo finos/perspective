@@ -418,21 +418,22 @@ const perspective = require("@finos/perspective");
             });
 
             test("Switch on multiple columns with resulting expression", async function () {
-                const table = await perspective.table(
-                    expressions_common.int_float_data
-                );
+                const table = await perspective.table({
+                    w: "float",
+                    x: "float",
+                    y: "string",
+                    z: "boolean",
+                });
+                table.update(expressions_common.int_float_data);
+                const expr = `switch { case "w" > 2: (sqrt(144) * "w"); case "y" == 'a': (sqrt(121) * "w"); default: "x"; }`;
                 const view = await table.view({
-                    expressions: [
-                        `switch { case "w" > 2: (sqrt(144) * "w"); case "y" == 'a': (sqrt(121) * "w"); default: "x"; }`,
-                    ],
+                    expressions: [expr],
                 });
 
                 const results = await view.to_columns();
-                expect(
-                    results[
-                        `switch { case "w" > 2: (sqrt(144) * "w"); case "y" == 'a': (sqrt(121) * "w"); default: "x"; }`
-                    ]
-                ).toEqual([16.5, 30, 42, 54]);
+                const schema = await view.schema();
+                expect(schema[expr]).toEqual("float");
+                expect(results[expr]).toEqual([16.5, 30, 42, 54]);
 
                 await view.delete();
                 await table.delete();
@@ -3186,14 +3187,15 @@ const perspective = require("@finos/perspective");
                     a: [1, 2, 3, 4],
                     b: ["a", "b", "c", "d"],
                 });
+                const expr = "vlookup('b', integer(0))";
                 const view = await table.view({
-                    expressions: ["vlookup('b', 0)"],
+                    expressions: [expr],
                 });
                 const result = await view.to_columns();
                 expect(result).toEqual({
                     a: [1, 2, 3, 4],
                     b: ["a", "b", "c", "d"],
-                    "vlookup('b', 0)": ["a", "a", "a", "a"],
+                    [expr]: ["a", "a", "a", "a"],
                 });
                 view.delete();
                 table.delete();
