@@ -24,7 +24,7 @@ export function style_selected_column(regularTable, selectedColumn) {
     );
     const len = group_header_trs.length;
     if (len <= 1) {
-        group_header_trs[0]?.setAttribute("id", "psp-column-edit-buttons");
+        group_header_trs[0]?.removeAttribute("id");
     } else {
         group_header_trs.forEach((tr, i) => {
             let id =

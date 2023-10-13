@@ -223,12 +223,17 @@
                 padding-top: 1px;
                 font-family: var(--button--font-family, inherit);
                 cursor: pointer;
-                opacity: 1;
-                color: #999;
-
-                &:hover {
-                    opacity: 1;
-                    color: var(--active--color, #000);
+                padding: 2px 4px 0 4px;
+                margin-right: 4px;
+                margin-left: auto;
+                border-radius: 3px;
+                &:hover,
+                &.is-editing {
+                    background-color: var(--icon--color);
+                    &:before {
+                        background-color: var(--plugin--background);
+                        border-radius: 3px;
+                    }
                 }
             }
 
@@ -247,17 +252,12 @@
                 margin-left: 0px;
             }
 
-            span.expression-edit-button {
-                padding-right: 8px;
-                margin-left: auto;
-
-                &:before {
-                    @include icon;
-                    height: 14px;
-                    width: 14px;
-                    -webkit-mask-image: var(--column-settings-icon--mask-image);
-                    mask-image: var(--column-settings-icon--mask-image);
-                }
+            span.expression-edit-button:before {
+                @include icon;
+                height: 14px;
+                width: 14px;
+                -webkit-mask-image: var(--column-settings-icon--mask-image);
+                mask-image: var(--column-settings-icon--mask-image);
             }
 
             .column-selector-draggable {

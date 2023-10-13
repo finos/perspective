@@ -210,10 +210,6 @@ regular-table table tbody td {
     border-left-width: 0px;
 }
 
-.psp-bool-type {
-    font-family: var(--button--font-family, "Material Icons");
-}
-
 .boolean-editable {
     cursor: pointer;
 }
@@ -260,6 +256,19 @@ regular-table table {
     }
 }
 
+// This is a design/architecture bug. When the datagrid draws during a sidepanel
+// collapse/uncollapse, the `settings` attribute is set to the _previous_ state
+// as this collapse takes a while and we dont want the new state CSS to apply
+// until the drawing is done. However, this causes the datagrid to draw its
+// _first_ frame as if its in the wrong state, as it detects sidepanel state
+// via HTML attribute checking.
+perspective-viewer:not([settings])
+    regular-table
+    #psp-column-edit-buttons:after {
+    content: none;
+}
+
+// Style the last row of the `<thead>` so that is has a bottom border.
 regular-table table thead tr:last-child:after {
     width: 10000px;
     box-sizing: border-box;
@@ -269,6 +278,7 @@ regular-table table thead tr:last-child:after {
     border-bottom: 1px solid var(--inactive--border-color);
 }
 
+// Extend every row to the right edge of the page with a fake column.
 regular-table table tbody tr:after {
     width: 10000px;
     box-sizing: border-box;

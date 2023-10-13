@@ -33,6 +33,7 @@ pub struct InactiveColumnProps {
     pub dragdrop: DragDrop,
     pub session: Session,
     pub renderer: Renderer,
+    pub is_editing: bool,
     pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
     pub on_open_expr_panel: Callback<ColumnLocator>,
@@ -210,7 +211,8 @@ impl Component for InactiveColumn {
                             <ExprEditButton
                                 name={ ctx.props().name.clone() }
                                 on_open_expr_panel={ &ctx.props().on_open_expr_panel }
-                                is_expression={true}
+                                is_expression={ true }
+                                is_editing={ ctx.props().is_editing }
                             ></ExprEditButton>
                         }
                     </div>

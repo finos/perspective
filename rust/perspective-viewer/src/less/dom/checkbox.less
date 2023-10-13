@@ -24,24 +24,34 @@
         appearance: none;
         height: 14px;
         width: 14px;
-        margin: 0px;
+        padding: 0px;
         cursor: pointer;
         outline: none;
-        padding: 0 5px;
+        margin: 0 5px;
 
         &:before {
             @include icon;
             width: 14px;
             height: 14px;
             font-family: var(--button--font-family, inherit);
-            background-color: var(--inactive--color, #ccc);
+            background-color: var(--icon--color, #ccc);
             -webkit-mask-image: var(--inactive-column-selector--content, none);
             mask-image: var(--inactive-column-selector--content, none);
-            // font-size: var(--column-selector--font-size, 14px);
+        }
+
+        &:hover {
+            border-radius: 2px;
+            outline: 1px solid var(--icon--color);
+        }
+
+        &:checked:hover {
+            background-color: var(--icon--color, #ccc);
+            &:before {
+                background-color: var(--plugin--background, #ccc);
+            }
         }
 
         &:checked:before {
-            //color: var(--active--color, blue);
             -webkit-mask-image: var(--active-column-selector--content, none);
             mask-image: var(--active-column-selector--content, none);
         }

@@ -76,6 +76,9 @@ pub enum PerspectiveViewerMsg {
     ToggleSettingsComplete(SettingsUpdate, Sender<()>),
     PreloadFontsUpdate,
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
+    SettingsPanelSizeUpdate(Option<i32>),
+    ColumnSettingsPanelSizeUpdate(Option<i32>),
+
     /// this is really more like "open the specified column"
     /// since we call ToggleColumnSettings(None, None) to clear the selected
     /// column
@@ -92,6 +95,8 @@ pub struct PerspectiveViewer {
     on_resize: Rc<PubSub<()>>,
     on_dimensions_reset: Rc<PubSub<()>>,
     _subscriptions: [Subscription; 1],
+    settings_panel_width_override: Option<i32>,
+    column_settings_panel_width_override: Option<i32>,
 }
 
 impl Component for PerspectiveViewer {
@@ -104,6 +109,7 @@ impl Component for PerspectiveViewer {
         let callback = ctx
             .link()
             .callback(|()| PerspectiveViewerMsg::PreloadFontsUpdate);
+
         let session_sub = {
             let callback = ctx.link().batch_callback(|(update, x)| {
                 if update {
@@ -127,6 +133,8 @@ impl Component for PerspectiveViewer {
             on_resize: Default::default(),
             on_dimensions_reset: Default::default(),
             _subscriptions: [session_sub],
+            settings_panel_width_override: None,
+            column_settings_panel_width_override: None,
         }
     }
 
@@ -245,6 +253,22 @@ impl Component for PerspectiveViewer {
                 }
                 true
             }
+            PerspectiveViewerMsg::SettingsPanelSizeUpdate(Some(x)) => {
+                self.settings_panel_width_override = Some(x);
+                false
+            }
+            PerspectiveViewerMsg::SettingsPanelSizeUpdate(None) => {
+                self.settings_panel_width_override = None;
+                false
+            }
+            PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(Some(x)) => {
+                self.column_settings_panel_width_override = Some(x);
+                false
+            }
+            PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(None) => {
+                self.column_settings_panel_width_override = None;
+                false
+            }
         }
     }
 
@@ -282,9 +306,11 @@ impl Component for PerspectiveViewer {
         let settings = ctx
             .link()
             .callback(|_| PerspectiveViewerMsg::ToggleSettingsInit(None, None));
+
         let on_close_settings = ctx
             .link()
             .callback(|()| PerspectiveViewerMsg::ToggleSettingsInit(None, None));
+
         let mut class = classes!("settings-closed");
         if ctx.props().is_title() {
             class.push("titled");
@@ -293,9 +319,18 @@ impl Component for PerspectiveViewer {
         let on_open_expr_panel = ctx
             .link()
             .callback(|c| PerspectiveViewerMsg::ToggleColumnSettings(Some(c), None));
+
         let on_reset = ctx
             .link()
             .callback(|all| PerspectiveViewerMsg::Reset(all, None));
+
+        let on_split_panel_resize = ctx
+            .link()
+            .callback(|(x, _)| PerspectiveViewerMsg::SettingsPanelSizeUpdate(Some(x)));
+
+        let on_column_settings_panel_resize = ctx
+            .link()
+            .callback(|(x, _)| PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(Some(x)));
 
         html_template! {
             <StyleProvider>
@@ -304,9 +339,10 @@ impl Component for PerspectiveViewer {
                     <SplitPanel
                         id="app_panel"
                         reverse=true
-                        on_reset={ self.on_dimensions_reset.callback() }
-                        on_resize_finished={ ctx.props().render_callback() }
-                        >
+                        initial_size={ self.settings_panel_width_override }
+                        on_reset={ ctx.link().callback(|_| PerspectiveViewerMsg::SettingsPanelSizeUpdate(None)) }
+                        on_resize={ on_split_panel_resize }
+                        on_resize_finished={ ctx.props().render_callback() }>
                         <div id="settings_panel" class="sidebar_column noselect split-panel orient-vertical">
                             <SidebarCloseButton
                                 id={ "settings_close_button" }
@@ -320,6 +356,7 @@ impl Component for PerspectiveViewer {
                                 dragdrop={ &ctx.props().dragdrop }
                                 renderer={ &ctx.props().renderer }
                                 session={ &ctx.props().session }
+                                selected_column={ self.selected_column.clone() }
                                 on_resize={ &self.on_resize }
                                 on_open_expr_panel={ &on_open_expr_panel }
                                 on_dimensions_reset={ &self.on_dimensions_reset }
@@ -343,14 +380,20 @@ impl Component for PerspectiveViewer {
                                 <slot></slot>
                             </div>
                             if let Some(selected_column) = self.selected_column.clone() {
-                                <SplitPanel id="modal_panel" reverse=true>
+                                <SplitPanel
+                                    id="modal_panel"
+                                    reverse=true
+                                    initial_size={ self.column_settings_panel_width_override }
+                                    on_reset={ ctx.link().callback(|_| PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(None)) }
+                                    on_resize={ on_column_settings_panel_resize }>
+
                                     <ColumnSettingsSidebar
-                                        session = { &ctx.props().session }
-                                        renderer = { &ctx.props().renderer }
-                                        presentation = {&ctx.props().presentation}
-                                        {selected_column}
-                                        on_close = {ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None))}
-                                    />
+                                        session={ &ctx.props().session }
+                                        renderer={ &ctx.props().renderer }
+                                        presentation={ &ctx.props().presentation }
+                                        on_close={ ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None)) }
+                                        { selected_column }>
+                                    </ColumnSettingsSidebar>
                                     <></>
                                 </SplitPanel>
                             }

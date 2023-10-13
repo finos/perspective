@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::collections::HashSet;
-use std::fmt::Display;
 
 use itertools::Itertools;
 
@@ -23,21 +22,20 @@ use crate::*;
 
 /// The possible states of a column (row) in the active columns list, including
 /// the `Option<String>` label type.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ActiveColumnState {
     Column(Label, String),
     Required(Label),
     DragOver(Label),
 }
 
-impl Display for ActiveColumnState {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            Self::Column(Some(label), _) => label,
-            Self::Required(Some(label)) => label,
-            Self::DragOver(Some(label)) => label,
-            _ => "",
-        })
+impl ActiveColumnState {
+
+    pub fn get_name(&self) -> Option<&'_ str> {
+        match self {
+            Self::Column(_, x) => Some(x.as_str()),
+            _ => None,
+        }
     }
 }
 

@@ -19,7 +19,7 @@ const FORMATTER_CONS = {
     float: Intl.NumberFormat,
     boolean: class {
         format(val) {
-            return val ? "check" : "close";
+            return val ? "true" : "false";
         }
     },
 };
