@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as fc from "d3fc";
-import * as d3 from "d3";
 import { axisFactory } from "../axis/axisFactory";
 import { chartCanvasFactory } from "../axis/chartFactory";
 import {
@@ -20,8 +19,7 @@ import {
 } from "../series/pointSeriesCanvas";
 import { pointData } from "../data/pointData";
 import {
-    seriesColorsFromField,
-    seriesColorsFromGroups,
+    seriesColorsFromColumn,
     seriesColorsFromDistinct,
     colorScale,
 } from "../series/seriesColors";
@@ -53,34 +51,32 @@ function interpolate_scale([x1, y1], [x2, y2]) {
 }
 
 function xyScatter(container, settings) {
-    const data = pointData(settings, filterDataByGroup(settings));
-    const symbols = symbolTypeFromGroups(settings);
+    const colorBy = settings.realValues[2];
+    let hasColorBy = !!colorBy;
+    let isColoredByString =
+        settings.mainValues.find((x) => x.name === colorBy)?.type === "string";
+    let hasSplitBy = settings.splitValues.length > 0;
+
     let color = null;
     let legend = null;
 
-    const colorByField = 2;
-    const colorByValue = settings.realValues[colorByField];
-    let hasColorBy = colorByValue !== null && colorByValue !== undefined;
-    let isColoredByString =
-        settings.mainValues.find((x) => x.name === colorByValue)?.type ===
-        "string";
-    let hasSplitBy = settings.splitValues.length > 0;
+    let filteredData = filterDataByGroup(settings);
+    const data = pointData(settings, filteredData);
+    const symbols = symbolTypeFromGroups(settings);
 
-    if (hasColorBy) {
-        if (isColoredByString) {
-            if (hasSplitBy) {
-                color = seriesColorsFromDistinct(settings, data);
-                // TODO: Legend should have cartesian product labels (ColorBy|SplitBy)
-                // For now, just use monocolor legends.
-                legend = symbolLegend().settings(settings).scale(symbols);
-            } else {
-                color = seriesColorsFromField(settings, colorByField);
-                legend = colorLegend().settings(settings).scale(color);
-            }
+    if (hasColorBy && isColoredByString) {
+        if (hasSplitBy) {
+            // TODO: Legend should have cartesian product labels (ColorBy|SplitBy)
+            // For now, just use monocolor legends.
+            color = seriesColorsFromDistinct(settings, data);
+            legend = symbolLegend().settings(settings).scale(symbols);
         } else {
-            color = seriesColorRange(settings, data, "colorValue");
-            legend = colorRangeLegend().scale(color);
+            color = seriesColorsFromColumn(settings, colorBy);
+            legend = colorLegend().settings(settings).scale(color);
         }
+    } else if (hasColorBy) {
+        color = seriesColorRange(settings, data, "colorValue");
+        legend = colorRangeLegend().scale(color);
     } else {
         // always use default color
         color = colorScale().settings(settings).domain([""])();
