@@ -211,7 +211,8 @@ namespace binding {
             std::shared_ptr<t_computed_expression> expression
                 = t_computed_expression_parser::precompute(expression_alias,
                     expression_string, parsed_expression_string, column_ids,
-                    schema, expression_vocab, regex_mapping);
+                    gnode.get_table_sptr(), gnode.get_pkey_map(), schema,
+                    expression_vocab, regex_mapping);
 
             expressions.push_back(expression);
             schema->add_column(expression_alias, expression->get_dtype());

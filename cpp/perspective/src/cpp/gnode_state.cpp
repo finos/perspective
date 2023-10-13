@@ -537,6 +537,11 @@ t_gstate::get_output_schema() const {
     return m_output_schema;
 }
 
+const t_gstate::t_mapping&
+t_gstate::get_pkey_map() const {
+    return m_mapping;
+}
+
 t_dtype
 t_gstate::get_pkey_dtype() const {
     if (m_mapping.empty())

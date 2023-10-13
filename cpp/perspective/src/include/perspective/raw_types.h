@@ -21,6 +21,7 @@
 #include <map>
 #include <set>
 #include <limits>
+#include <tsl/hopscotch_map.h>
 
 namespace perspective {
 
@@ -150,5 +151,9 @@ template <>
 struct t_accumulation_type<bool> {
     using type = std::int64_t;
 };
+
+struct t_tscalar;
+
+typedef tsl::hopscotch_map<t_tscalar, t_uindex> t_pkey_mapping;
 
 } // end namespace perspective

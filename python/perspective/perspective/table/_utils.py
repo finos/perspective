@@ -19,6 +19,7 @@ ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
 FUNCTION_LITERAL_REGEX = re.compile(r"(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)")
+MATCH_INTERNED_ARGS_REGEX = re.compile(r"intern\('([^']*)'\)")
 REPLACE_FN_REGEX = re.compile(r"(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)")
 BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
