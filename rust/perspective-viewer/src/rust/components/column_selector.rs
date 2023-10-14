@@ -89,6 +89,7 @@ pub struct ColumnSelector {
     named_row_count: usize,
     drag_container: DragDropContainer,
     column_dropdown: ColumnDropDownElement,
+    on_reset: Rc<PubSub<()>>,
 }
 
 impl Component for ColumnSelector {
@@ -140,6 +141,7 @@ impl Component for ColumnSelector {
             named_row_count,
             drag_container,
             column_dropdown,
+            on_reset: Default::default(),
         }
     }
 
@@ -266,7 +268,7 @@ impl Component for ColumnSelector {
                 let ondragenter = ondragenter.reform(move |_| Some(idx));
                 let size = if named_count > 0 { 48.0 } else { 28.0 };
                 named_count = named_count.saturating_sub(1);
-                let key = name.get_name().unwrap_or("").to_owned();
+                let key = name.get_name().map(|x| x.to_owned()).unwrap_or_else(|| format!("__auto_{}__", idx));
                 let column_dropdown = self.column_dropdown.clone();
                 let is_editing = matches!(&ctx.props().selected_column, Some(ColumnLocator::Plain(x)) if x == &key);
                 html_nested! {
@@ -347,31 +349,29 @@ impl Component for ColumnSelector {
                     viewport_ref={ &self.drag_container.noderef }
                     drop={ ondrop }
                     on_resize={ &ctx.props().on_resize }
-                    on_dimensions_reset={ &ctx.props().on_dimensions_reset }
+                    on_dimensions_reset={ &self.on_reset }
                     children={ std::iter::once(config_selector).chain(active_columns).collect::<Vec<_>>() }>
                 </ScrollPanel>
             </div>
         };
 
-        if !inactive_children.is_empty() {
-            html_template! {
-                <LocalStyle href={ css!("column-selector") } />
-                <SplitPanel no_wrap={ true } orientation={ Orientation::Vertical }>
-                    { selected_columns }
+        html_template! {
+            <LocalStyle href={ css!("column-selector") } />
+            <SplitPanel
+                no_wrap={ true }
+                on_reset={ self.on_reset.callback() }
+                skip_empty={ true }
+                orientation={ Orientation::Vertical }>
+                { selected_columns }
+                if !inactive_children.is_empty() {
                     <ScrollPanel
                         id="sub-columns"
-                        on_dimensions_reset={ &ctx.props().on_dimensions_reset }
+                        on_resize={ &ctx.props().on_resize }
+                        on_dimensions_reset={ &self.on_reset }
                         children={ inactive_children }>
                     </ScrollPanel>
-                </SplitPanel>
-            }
-        } else {
-            html_template! {
-                <LocalStyle href={ css!("column-selector") } />
-                <div class="split-panel-child">
-                    { selected_columns }
-                </div>
-            }
+                }
+            </SplitPanel>
         }
     }
 }

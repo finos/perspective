@@ -97,7 +97,7 @@ where
         Self {
             css: ":host{{top:0px;left:0px;opacity:0}}".to_owned(),
             rev_vert: Default::default(),
-            _comp: PhantomData::default(),
+            _comp: PhantomData,
         }
     }
 

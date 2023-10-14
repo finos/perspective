@@ -299,9 +299,6 @@ impl Component for PerspectiveViewer {
     }
 
     /// `PerspectiveViewer` has two basic UI modes - "open" and "closed".
-    // TODO these may be expensive to build because they will generate recursively
-    // from `JsPerspectiveConfig` - they may need caching as in the JavaScript
-    // version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx
             .link()

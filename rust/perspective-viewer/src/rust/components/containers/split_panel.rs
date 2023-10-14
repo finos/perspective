@@ -192,9 +192,16 @@ pub struct SplitPanelProps {
     #[prop_or_default]
     pub orientation: Orientation,
 
+    /// Whether to render `<></>` empty templates as empty child panels, or
+    /// omit them entirely.
+    #[prop_or_default]
+    pub skip_empty: bool,
+
+    /// Should the child panels by wrapped in `<div>` elements?
     #[prop_or_default]
     pub no_wrap: bool,
 
+    /// Should the panels be rendered/sized in _reverse_ order?
     #[prop_or_default]
     pub reverse: bool,
 
@@ -350,32 +357,35 @@ impl Component for SplitPanel {
         }
 
         let contents = html_template! {
-            <LocalStyle href={ css!("containers/split-panel") } />
+            <LocalStyle key={ 0 } href={ css!("containers/split-panel") } />
             <SplitPanelChild
+                key={ 1 }
                 style={ self.styles[0].clone() }
                 ref_={ self.refs[0].clone() }>
 
                 { iter.next().unwrap() }
             </SplitPanelChild>
             {
-                for iter.enumerate().map(|(i, x)| {
-                    html_template! {
-                        <SplitPanelDivider
-                            i={ i }
-                            orientation={ ctx.props().orientation }
-                            link={ ctx.link().clone() }>
-                        </SplitPanelDivider>
+                for iter.filter(|x| !ctx.props().skip_empty || x != &html!{}).enumerate().map(|(i, x)| {
+                    html! {
+                        < key={ i + 2 }>
+                            <SplitPanelDivider
+                                { i }
+                                orientation={ ctx.props().orientation }
+                                link={ ctx.link().clone() }>
+                            </SplitPanelDivider>
 
-                        if i == ctx.props().children.len() - 2 {
-                            { x }
-                        } else {
-                            <SplitPanelChild
-                                style={ self.styles[i + 1].clone() }
-                                ref_={ self.refs[i + 1].clone() }>
-
+                            if i == ctx.props().children.len() - 2 {
                                 { x }
-                            </SplitPanelChild>
-                        }
+                            } else {
+                                <SplitPanelChild
+                                    style={ self.styles[i + 1].clone() }
+                                    ref_={ self.refs[i + 1].clone() }>
+
+                                    { x }
+                                </SplitPanelChild>
+                            }
+                        </>
                     }
                 })
             }
