@@ -14,7 +14,7 @@
 body {
     background: #dadada;
     color: #242526;
-    font-family: "Roboto Mono";
+    font-family: "Goudy Bookletter 1911";
     touch-action: none;
 }
 
@@ -48,6 +48,12 @@ body {
     display: inline-flex;
 }
 
+perspective-viewer,
+perspective-workspace {
+    font-family: "Goudy Bookletter 1911" !important;
+    --preload-fonts: "Goudy Bookletter 1911:400" !important;
+}
+
 perspective-viewer td img {
     width: 16px;
     height: 16px;
@@ -71,7 +77,7 @@ img {
 
 select,
 button {
-    font-family: "Roboto Mono";
+    font-family: "Goudy Bookletter 1911";
     font-size: 12px;
     appearance: none;
     background-color: transparent;
