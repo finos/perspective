@@ -356,39 +356,43 @@ impl Component for SplitPanel {
             classes.push("orient-reverse");
         }
 
+        let head = iter.next().unwrap();
+
+        let tail = iter
+            .filter(|x| !ctx.props().skip_empty || x != &html! {<></>})
+            .enumerate()
+            .map(|(i, x)| {
+                html! {
+                    < key={ i + 2 }>
+                        <SplitPanelDivider
+                            { i }
+                            orientation={ ctx.props().orientation }
+                            link={ ctx.link().clone() }>
+                        </SplitPanelDivider>
+
+                        if i == ctx.props().children.len() - 2 {
+                            { x }
+                        } else {
+                            <SplitPanelChild
+                                style={ self.styles[i + 1].clone() }
+                                ref_={ self.refs[i + 1].clone() }>
+
+                                { x }
+                            </SplitPanelChild>
+                        }
+                    </>
+                }
+            });
+
         let contents = html_template! {
             <LocalStyle key={ 0 } href={ css!("containers/split-panel") } />
             <SplitPanelChild
                 key={ 1 }
                 style={ self.styles[0].clone() }
                 ref_={ self.refs[0].clone() }>
-
-                { iter.next().unwrap() }
+                { head }
             </SplitPanelChild>
-            {
-                for iter.filter(|x| !ctx.props().skip_empty || x != &html!{}).enumerate().map(|(i, x)| {
-                    html! {
-                        < key={ i + 2 }>
-                            <SplitPanelDivider
-                                { i }
-                                orientation={ ctx.props().orientation }
-                                link={ ctx.link().clone() }>
-                            </SplitPanelDivider>
-
-                            if i == ctx.props().children.len() - 2 {
-                                { x }
-                            } else {
-                                <SplitPanelChild
-                                    style={ self.styles[i + 1].clone() }
-                                    ref_={ self.refs[i + 1].clone() }>
-
-                                    { x }
-                                </SplitPanelChild>
-                            }
-                        </>
-                    }
-                })
-            }
+            { for tail }
         };
 
         // TODO consider removing this

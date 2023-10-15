@@ -45,7 +45,7 @@ pub fn highlight<'a>(cursor: &mut Cursor<'a>, token: Token<'a>, position: u32) -
                 { token }
             </span>
         },
-        _ => html! { token },
+        _ => token.to_html(),
     };
 
     if is_auto && matches!(token, Token::Symbol(_)) {

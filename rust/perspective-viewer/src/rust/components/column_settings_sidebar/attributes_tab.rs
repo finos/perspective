@@ -34,6 +34,7 @@ derive_model!(Renderer, Session for AttributesTabProps);
 pub fn AttributesTab(p: &AttributesTabProps) -> Html {
     let is_validating = yew::use_state_eq(|| false);
     let on_save = yew::use_callback(
+        p.clone(),
         |v, p| {
             match &p.selected_column {
                 None => save_expr(v, p),
@@ -42,17 +43,19 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
 
             p.on_close.emit(());
         },
-        p.clone(),
+    
     );
 
     let on_validate = yew::use_callback(
+        is_validating.setter(),
         |b, validating| {
             validating.set(b);
         },
-        is_validating.setter(),
+     
     );
 
     let on_delete = yew::use_callback(
+        p.clone(),
         |(), p| {
             if let Some(ref s) = p.selected_column {
                 delete_expr(s, p);
@@ -60,7 +63,7 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
 
             p.on_close.emit(());
         },
-        p.clone(),
+     
     );
 
     html_template! {

@@ -353,7 +353,6 @@ impl Component for PerspectiveViewer {
                                 dragdrop={ &ctx.props().dragdrop }
                                 renderer={ &ctx.props().renderer }
                                 session={ &ctx.props().session }
-                                selected_column={ self.selected_column.clone() }
                                 on_resize={ &self.on_resize }
                                 on_open_expr_panel={ &on_open_expr_panel }
                                 on_dimensions_reset={ &self.on_dimensions_reset }

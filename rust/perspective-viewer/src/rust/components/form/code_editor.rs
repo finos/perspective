@@ -132,23 +132,17 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
     let textarea_ref = use_node_ref().tee::<3>();
     let content_ref = use_node_ref().tee::<3>();
     let lineno_ref = use_node_ref().tee::<2>();
-    let filter_dropdown = use_memo(|_| FunctionDropDownElement::default(), ());
+    let filter_dropdown = use_memo((), |_| FunctionDropDownElement::default());
     let mut cursor = Cursor::new(&props.error);
     let terms = tokenize(&props.expr)
         .into_iter()
         .map(|token| highlight(&mut cursor, token, *caret_position))
         .collect::<Html>();
 
-    let onkeydown = use_callback(on_keydown, props.onsave.clone());
-    let oninput = use_callback(
-        |event, deps| on_input_callback(event, &deps.0, &deps.1),
-        (caret_position.setter(), props.oninput.clone()),
-    );
+    let onkeydown = use_callback(props.onsave.clone(), on_keydown);
+    let oninput = use_callback((caret_position.setter(), props.oninput.clone()),|event, deps| on_input_callback(event, &deps.0, &deps.1));
 
-    let onscroll = use_callback(
-        |_, deps| on_scroll(&deps.0, &deps.1),
-        (scroll_offset.setter(), textarea_ref.2),
-    );
+    let onscroll = use_callback((scroll_offset.setter(), textarea_ref.2),|_, deps| on_scroll(&deps.0, &deps.1));
 
     use_effect({
         clone!(props.expr);
@@ -161,15 +155,9 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         }
     });
 
-    use_effect_with_deps(
-        |deps| scroll_sync(&deps.0, &deps.1, &deps.2),
-        (scroll_offset, content_ref.0, lineno_ref.0),
-    );
+    use_effect_with((scroll_offset, content_ref.0, lineno_ref.0),|deps| scroll_sync(&deps.0, &deps.1, &deps.2));
 
-    use_effect_with_deps(
-        |deps| autocomplete(&deps.0, &deps.1, &deps.2),
-        (filter_dropdown, cursor.auto.clone(), cursor.noderef.clone()),
-    );
+    use_effect_with((filter_dropdown, cursor.auto.clone(), cursor.noderef.clone()),|deps| autocomplete(&deps.0, &deps.1, &deps.2));
 
     let line_numbers = cursor
         .map_rows(|x| html!(<span class="line_number">{ x + 1 }</span>))

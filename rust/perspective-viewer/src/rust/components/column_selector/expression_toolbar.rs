@@ -30,17 +30,14 @@ pub struct ExprEditButtonProps {
 /// when pressed, it opens up the expression editor side-panel.
 #[function_component]
 pub fn ExprEditButton(p: &ExprEditButtonProps) -> Html {
-    let onmousedown = yew::use_callback(
-        |_, p| {
-            let name = if p.is_expression {
-                ColumnLocator::Expr(Some(p.name.clone()))
-            } else {
-                ColumnLocator::Plain(p.name.clone())
-            };
-            p.on_open_expr_panel.emit(name)
-        },
-        p.clone(),
-    );
+    let onmousedown = yew::use_callback(p.clone(), |_, p| {
+        let name = if p.is_expression {
+            ColumnLocator::Expr(Some(p.name.clone()))
+        } else {
+            ColumnLocator::Plain(p.name.clone())
+        };
+        p.on_open_expr_panel.emit(name)
+    });
 
     let class = if p.is_editing {
         "expression-edit-button is-editing"
