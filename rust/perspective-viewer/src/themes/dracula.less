@@ -1,0 +1,101 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+@import url("ref://pro-dark.less");
+
+perspective-viewer,
+perspective-viewer[theme="Dracula"] {
+    --theme-name: "Dracula";
+}
+
+perspective-viewer[theme="Dracula"] {
+    --theme-bg0: #191a22;
+    --theme-bg1: #282a36;
+    --theme-bg2: #44475a;
+
+    --theme-gray: #928374;
+
+    --theme-fg0: #f8f8f2;
+    --theme-fg1: #6272a4;
+    --theme-fg2: #44475a;
+
+    --theme-red: #ff5555;
+    --theme-green: #50fa7b;
+    --theme-yellow: #f1fa8c;
+    --theme-blue: #8be9fd;
+    --theme-purple: #bd93f9;
+    --theme-orange: #ffb86c;
+    --theme-pink: #ff79c6;
+
+    @include perspective-viewer-pro-dark;
+    @include perspective-viewer-dracula--colors;
+    @include perspective-viewer-dracula--animation;
+    @include perspective-viewer-dracula--fonts;
+    @include perspective-viewer-dracula--datagrid;
+    @include perspective-viewer-dracula--d3fc;
+}
+
+perspective-copy-menu[theme="Dracula"],
+perspective-export-menu[theme="Dracula"],
+perspective-dropdown[theme="Dracula"] {
+    @include perspective-modal-pro-dark;
+    @include perspective-viewer-dracula--colors;
+    background-color: var(--theme-bg0);
+}
+
+@mixin perspective-viewer-dracula--colors {
+    color: var(--theme-fg0);
+    background-color: var(--theme-bg0);
+    --icon--color: var(--theme-fg1);
+    --inactive--color: var(--theme-fg2);
+    --inactive--border-color: var(--theme-bg2);
+    --plugin--background: var(--theme-bg1);
+    --status-icon-connected--color: var(--theme-green);
+    --status-icon-initializing--color: var(--theme-yellow);
+    --status-icon-error--color: var(--theme-red);
+}
+
+@mixin perspective-viewer-dracula--datagrid {
+    regular-table {
+        --rt-pos-cell--color: var(--theme-blue);
+        --rt-neg-cell--color: var(--theme-red); 
+    }
+}
+
+@mixin perspective-viewer-dracula--d3fc {
+    --d3fc-axis-ticks--color: var(--theme-fg1);
+    --d3fc-gridline--color: var(--theme-bg2);
+    --d3fc-series: var(--theme-blue);
+    --d3fc-series-1: var(--theme-blue);
+    --d3fc-series-2: var(--theme-red);
+    --d3fc-series-3: var(--theme-green);
+    --d3fc-series-4: var(--theme-yellow);
+    --d3fc-series-5: var(--theme-purple);
+    --d3fc-series-6: var(--theme-pink);
+    --d3fc-series-7: var(--theme-orange);
+
+    --d3fc-negative--gradient: linear-gradient(
+        var(--theme-bg0),
+        var(--theme-red)
+    ) !important;
+
+    --d3fc-positive--gradient: linear-gradient(
+        var(--theme-bg0),
+        var(--theme-blue)
+    ) !important;
+
+    --d3fc-full--gradient: linear-gradient(
+        var(--theme-red),
+        var(--theme-bg0),
+        var(--theme-blue)
+    ) !important;
+}

@@ -64,6 +64,9 @@ fn main() -> Result<(), anyhow::Error> {
         build.add_file("solarized.less");
         build.add_file("solarized-dark.less");
         build.add_file("vaporwave.less");
+        build.add_file("gruvbox.less");
+        build.add_file("gruvbox-dark.less");
+        build.add_file("dracula.less");
         build.add_file("themes.less");
         build.compile()?.write("./target/themes")?;
     }

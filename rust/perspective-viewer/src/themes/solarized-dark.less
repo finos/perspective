@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@import url("ref://pro-dark.less");
 @import url("ref://solarized.less");
 
 perspective-viewer,
@@ -21,7 +22,7 @@ perspective-viewer[theme="Solarized Dark"] {
     @include perspective-viewer-pro-dark--colors;
     @include perspective-viewer-solarized;
     @include perspective-viewer-solarized-dark--colors;
-    @include perspective-viewer-solarized-dark--datagrid;
+    // @include perspective-viewer-solarized-dark--datagrid;
     @include perspective-viewer-solarized-dark--d3fc;
 }
 
@@ -46,31 +47,7 @@ perspective-string-column-style[theme="Solarized Dark"] {
     --plugin--background: #073642;
 }
 
-@mixin perspective-viewer-solarized-dark--datagrid {
-    regular-table {
-
-        table,
-        table tr:hover {
-            color: #93a1a1;
-        }
-    }
-
-    regular-table table tbody tr td,
-    regular-table table tbody tr th {
-        border-top-color: #586e75;
-    }
-
-    regular-table:hover::-webkit-scrollbar-thumb {
-        background-color: var(--inactive--color, #586e75);
-    }
-
-    regular-table table tbody th:empty {
-        background: linear-gradient(to right,
-                transparent 9px,
-                #586e75 10px,
-                transparent 11px);
-    }
-}
+// @mixin perspective-viewer-solarized-dark--datagrid {}
 
 @mixin perspective-viewer-solarized-dark--d3fc {
     --d3fc-treedata--labels: white;
@@ -79,4 +56,11 @@ perspective-string-column-style[theme="Solarized Dark"] {
     --d3fc-axis--lines: #93a1a1;
     --d3fc-gridline--color: #002b36;
     --d3fc-legend--text: #93a1a1;
+
+    --d3fc-full--gradient: linear-gradient(#cb4b16 0%,
+            #073642 50%,
+            #268bd2 100%);
+
+    // --d3fc-positive--gradient: linear-gradient(#073642 0%, #268bd2 100%);
+    --d3fc-negative--gradient: linear-gradient(#cb4b16 0%, #073642 100%);
 }

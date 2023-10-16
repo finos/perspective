@@ -1,0 +1,152 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+@import url("ref://pro.less");
+
+perspective-viewer,
+perspective-viewer[theme="Gruvbox Light"] {
+    --theme-name: "Gruvbox Light";
+}
+
+perspective-viewer[theme="Gruvbox Light"] {
+    // --gruvbox-fg0: #282828;
+    // --gruvbox-fg1: #3c3836;
+    // --gruvbox-fg2: #504945;
+    // --gruvbox-fg3: #665c54;
+    // --gruvbox-fg4: #7c6f64;
+    // --gruvbox-gray: #928374;
+    // --gruvbox-bg0: #fbf1c7;
+    // --gruvbox-bg1: #ebdbb2;
+    // --gruvbox-bg2: #d5c4a1;
+    // --gruvbox-bg3: #bdae93;
+    // --gruvbox-bg4: #a89984;
+
+    // --gruvbox-red: #cc241d;
+    // --gruvbox-green: #98871a;
+    // --gruvbox-yellow: #d79921;
+    // --gruvbox-blue: #458588;
+    // --gruvbox-purple: #b16286;
+    // --gruvbox-aqua: #689d5a;
+    // --gruvbox-orange: #d65d0e;
+
+    // --gruvbox-dark-red: #9d0006;
+    // --gruvbox-dark-green: #79740e;
+    // --gruvbox-dark-yellow: #b57614;
+    // --gruvbox-dark-blue: #076678;
+    // --gruvbox-dark-purple: #8f3f71;
+    // --gruvbox-dark-aqua: #427b58;
+    // --gruvbox-dark-orange: #af3a03;
+
+    // --gruvbox-light-red: #fb4934;
+    // --gruvbox-light-green: #b8bb26;
+    // --gruvbox-light-yellow: #fabd2f;
+    // --gruvbox-light-blue: #83a598;
+    // --gruvbox-light-purple: #d3869b;
+    // --gruvbox-light-aqua: #8ec07c;
+    // --gruvbox-light-orange: #fe8019;
+
+    --theme-fg0: #282828;
+    --theme-fg1: #3c3836;
+    --theme-fg2: #7c6f64;
+
+    --theme-gray: #928374;
+
+    --theme-bg0: #fbf1c7;
+    --theme-bg1: #ebdbb2;
+    --theme-bg2: #a89984;
+
+    --theme-red: #cc241d;
+    --theme-green: #98871a;
+    --theme-yellow: #d79921;
+    --theme-blue: #458588;
+    --theme-purple: #b16286;
+    --theme-aqua: #689d5a;
+    --theme-orange: #d65d0e;
+
+    --theme-alt-red: #9d0006;
+    --theme-alt-green: #79740e;
+    --theme-alt-yellow: #b57614;
+    --theme-alt-blue: #076678;
+    --theme-alt-purple: #8f3f71;
+    --theme-alt-aqua: #427b58;
+    --theme-alt-orange: #af3a03;
+
+    @include perspective-viewer-pro;
+    @include perspective-viewer-gruvbox-light--colors;
+    @include perspective-viewer-gruvbox-light--animation;
+    @include perspective-viewer-gruvbox-light--fonts;
+    @include perspective-viewer-gruvbox-light--datagrid;
+    @include perspective-viewer-gruvbox-light--d3fc;
+}
+
+perspective-copy-menu[theme="Gruvbox Light"],
+perspective-export-menu[theme="Gruvbox Light"],
+perspective-dropdown[theme="Gruvbox Light"] {
+    @include perspective-modal-pro;
+    @include perspective-viewer-gruvbox-light--colors;
+    background-color: var(--theme-bg0);
+}
+
+@mixin perspective-viewer-gruvbox-light--colors {
+    color: var(--theme-fg1);
+    background-color: var(--theme-bg1);
+    --icon--color: var(--theme-fg0);
+    --inactive--color: var(--theme-fg2);
+    --inactive--border-color: var(--theme-bg2);
+    --plugin--background: var(--theme-bg0);
+    --status-icon-connected--color: var(--theme-aqua);
+    --status-icon-initializing--color: var(--theme-yellow);
+    --status-icon-error--color: var(--theme-red);
+}
+
+@mixin perspective-viewer-gruvbox-light--datagrid {
+    regular-table {
+        --rt-pos-cell--color: var(--theme-blue);
+        --rt-neg-cell--color: var(--theme-red); 
+    }
+}
+
+@mixin perspective-viewer-gruvbox-light--d3fc {
+    --d3fc-axis-ticks--color: var(--theme-fg1);
+    --d3fc-gridline--color: var(--theme-bg2);
+    --d3fc-series: var(--theme-blue);
+    --d3fc-series-1: var(--theme-blue);
+    --d3fc-series-2: var(--theme-red);
+    --d3fc-series-3: var(--theme-green);
+    --d3fc-series-4: var(--theme-purple);
+    --d3fc-series-5: var(--theme-aqua);
+    --d3fc-series-6: var(--theme-alt-blue);
+    --d3fc-series-7: var(--theme-alt-red);
+    --d3fc-series-8: var(--theme-alt-green);
+    --d3fc-series-9: var(--theme-alt-purple);
+    --d3fc-series-10: var(--theme-alt-aqua);
+
+    --d3fc-negative--gradient: linear-gradient(
+        var(--theme-bg1),
+        var(--theme-red),
+        var(--theme-alt-red)
+    ) !important;
+
+    --d3fc-positive--gradient: linear-gradient(
+        var(--theme-bg1),
+        var(--theme-blue),
+        var(--theme-alt-blue)
+    ) !important;
+
+    --d3fc-full--gradient: linear-gradient(
+        var(--theme-alt-red),
+        var(--theme-red),
+        var(--theme-bg1),
+        var(--theme-blue),
+        var(--theme-alt-blue)
+    ) !important;
+}
