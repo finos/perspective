@@ -1,0 +1,116 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+@import url("ref://pro-dark.less");
+
+perspective-viewer,
+perspective-viewer[theme="Gruvbox Dark"] {
+    --theme-name: "Gruvbox Dark";
+}
+
+perspective-viewer[theme="Gruvbox Dark"] {
+    --theme-bg0: #282828;
+    --theme-bg1: #3c3836;
+    --theme-bg2: #7c6f64;
+
+    --theme-gray: #928374;
+
+    --theme-fg0: #fbf1c7;
+    --theme-fg1: #ebdbb2;
+    --theme-fg2: #a89984;
+
+    --theme-red: #cc241d;
+    --theme-green: #98871a;
+    --theme-yellow: #d79921;
+    --theme-blue: #458588;
+    --theme-purple: #b16286;
+    --theme-aqua: #689d5a;
+    --theme-orange: #d65d0e;
+
+    --theme-alt-red: #fb4934;
+    --theme-alt-green: #b8bb26;
+    --theme-alt-yellow: #fabd2f;
+    --theme-alt-blue: #83a598;
+    --theme-alt-purple: #d3869b;
+    --theme-alt-aqua: #8ec07c;
+    --theme-alt-orange: #fe8019;
+
+    @include perspective-viewer-pro-dark;
+    @include perspective-viewer-gruvbox-dark--colors;
+    @include perspective-viewer-gruvbox-dark--animation;
+    @include perspective-viewer-gruvbox-dark--fonts;
+    @include perspective-viewer-gruvbox-dark--datagrid;
+    @include perspective-viewer-gruvbox-dark--d3fc;
+}
+
+perspective-copy-menu[theme="Gruvbox Dark"],
+perspective-export-menu[theme="Gruvbox Dark"],
+perspective-dropdown[theme="Gruvbox Dark"] {
+    @include perspective-modal-pro-dark;
+    @include perspective-viewer-gruvbox-dark--colors;
+    background-color: var(--theme-bg0);
+}
+
+@mixin perspective-viewer-gruvbox-dark--colors {
+    color: var(--theme-fg0);
+    background-color: var(--theme-bg0);
+    --icon--color: var(--theme-fg1);
+    --inactive--color: var(--theme-fg2);
+    --inactive--border-color: var(--theme-bg2);
+    --plugin--background: var(--theme-bg1);
+    --status-icon-connected--color: var(--theme-aqua);
+    --status-icon-initializing--color: var(--theme-yellow);
+    --status-icon-error--color: var(--theme-red);
+}
+
+@mixin perspective-viewer-gruvbox-dark--datagrid {
+    regular-table {
+        --rt-pos-cell--color: var(--theme-alt-blue);
+        --rt-neg-cell--color: var(--theme-alt-red); 
+    }
+}
+
+@mixin perspective-viewer-gruvbox-dark--d3fc {
+    --d3fc-axis-ticks--color: var(--theme-fg1);
+    --d3fc-gridline--color: var(--theme-bg2);
+    --d3fc-series: var(--theme-blue);
+    --d3fc-series-1: var(--theme-blue);
+    --d3fc-series-2: var(--theme-red);
+    --d3fc-series-3: var(--theme-green);
+    --d3fc-series-4: var(--theme-purple);
+    --d3fc-series-5: var(--theme-aqua);
+    --d3fc-series-6: var(--theme-alt-blue);
+    --d3fc-series-7: var(--theme-alt-red);
+    --d3fc-series-8: var(--theme-alt-green);
+    --d3fc-series-9: var(--theme-alt-purple);
+    --d3fc-series-10: var(--theme-alt-aqua);
+
+    --d3fc-negative--gradient: linear-gradient(
+        var(--theme-bg0),
+        var(--theme-red),
+        var(--theme-alt-red)
+    ) !important;
+
+    --d3fc-positive--gradient: linear-gradient(
+        var(--theme-bg0),
+        var(--theme-blue),
+        var(--theme-alt-blue)
+    ) !important;
+
+    --d3fc-full--gradient: linear-gradient(
+        var(--theme-alt-red),
+        var(--theme-red),
+        var(--theme-bg0),
+        var(--theme-blue),
+        var(--theme-alt-blue)
+    ) !important;
+}

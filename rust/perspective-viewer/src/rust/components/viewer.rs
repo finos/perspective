@@ -299,9 +299,6 @@ impl Component for PerspectiveViewer {
     }
 
     /// `PerspectiveViewer` has two basic UI modes - "open" and "closed".
-    // TODO these may be expensive to build because they will generate recursively
-    // from `JsPerspectiveConfig` - they may need caching as in the JavaScript
-    // version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx
             .link()
@@ -356,7 +353,6 @@ impl Component for PerspectiveViewer {
                                 dragdrop={ &ctx.props().dragdrop }
                                 renderer={ &ctx.props().renderer }
                                 session={ &ctx.props().session }
-                                selected_column={ self.selected_column.clone() }
                                 on_resize={ &self.on_resize }
                                 on_open_expr_panel={ &on_open_expr_panel }
                                 on_dimensions_reset={ &self.on_dimensions_reset }

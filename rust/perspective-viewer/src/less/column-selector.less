@@ -48,6 +48,13 @@
         flex: 0 100000000 67px;
     }
 
+    // Inactive columns need to account for expression buttons, which won't be
+    // the last child if it has a button
+    #sub-columns .column-selector--spacer:last-child {
+        width: 94px;
+        flex: 0 100000000 94px;
+    }
+
     .show-aggregate .column-selector--spacer {
         width: 0px;
     }

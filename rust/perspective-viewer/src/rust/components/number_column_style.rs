@@ -67,7 +67,10 @@ pub struct NumberColumnStyleProps {
     #[prop_or_default]
     pub weak_link: WeakScope<NumberColumnStyle>,
 
+    #[prop_or_default]
     pub view: Option<JsValue>,
+
+    #[prop_or_default]
     pub column_name: Option<String>,
 }
 

@@ -113,6 +113,7 @@ pub enum ScrollPanelMsg {
     CalculateWindowContent,
     UpdateViewportDimensions,
     ResetAutoWidth,
+    ChildrenChanged,
 }
 
 impl ScrollPanel {
@@ -133,6 +134,53 @@ struct ContentWindow {
     scroll_top: f64,
     start_y: f64,
     visible_range: Range<usize>,
+}
+
+impl ScrollPanel {
+    fn calculate_window_content(&mut self, ctx: &Context<Self>) -> bool {
+        let viewport = self.viewport_elem(ctx);
+        let scroll_top = viewport.scroll_top() as f64;
+        let mut start_node = 0;
+        let mut start_y = 0_f64;
+        let mut offset = 0_f64;
+        let end_node = ctx
+            .props()
+            .children
+            .iter()
+            .enumerate()
+            .find_or_last(|(i, x)| {
+                if offset + x.props.size < scroll_top {
+                    start_node = *i + 1;
+                    start_y = offset + x.props.size;
+                }
+
+                offset += x.props.size;
+                offset > scroll_top + self.viewport_height
+            })
+            .map(|x| x.0)
+            .unwrap_or_default();
+
+        // Why is this `end_node + 2`, I can see you asking yourself? `end_node` is the
+        // index of the last visible child, but [`Range`] is an open interval so we must
+        // increment by 1. The next rendered element is always occluded by the parent
+        // container, it may seem unnecessary to render it, however not doing so causing
+        // scroll glitching in Chrome:
+        // * When the first pixel of the `end_node + 1` child is scrolled into view, the
+        //   container element it is embedded in will expand past the end of the scroll
+        //   container.
+        // * Chrome detects this and helpfully scrolls this new element into view,
+        //   re-triggering the on scroll callback.
+        let visible_range = start_node..min!(ctx.props().children.len(), end_node + 2);
+        let content_window = Some(ContentWindow {
+            scroll_top,
+            start_y,
+            visible_range,
+        });
+
+        let re_render = self.content_window != content_window;
+        self.content_window = content_window;
+        re_render
+    }
 }
 
 impl Component for ScrollPanel {
@@ -177,57 +225,22 @@ impl Component for ScrollPanel {
         match msg {
             ScrollPanelMsg::ResetAutoWidth => {
                 self.viewport_width = 0.0;
-                false
+                self.calculate_window_content(ctx)
             }
             ScrollPanelMsg::UpdateViewportDimensions => {
                 let viewport = self.viewport_elem(ctx);
                 let rect = viewport.get_bounding_client_rect();
+                let viewport_height = rect.height() - 8.0;
+                let viewport_width = max!(self.viewport_width, rect.width() - 6.0);
+                let re_render = self.viewport_height != viewport_height
+                    || self.viewport_width != viewport_width;
+
                 self.viewport_height = rect.height() - 8.0;
                 self.viewport_width = max!(self.viewport_width, rect.width() - 6.0);
-                false
+                re_render
             }
-            ScrollPanelMsg::CalculateWindowContent => {
-                let viewport = self.viewport_elem(ctx);
-                let scroll_top = viewport.scroll_top() as f64;
-                let mut start_node = 0;
-                let mut start_y = 0_f64;
-                let mut offset = 0_f64;
-                let end_node = ctx
-                    .props()
-                    .children
-                    .iter()
-                    .enumerate()
-                    .find_or_last(|(i, x)| {
-                        if offset + x.props.size < scroll_top {
-                            start_node = *i + 1;
-                            start_y = offset + x.props.size;
-                        }
-
-                        offset += x.props.size;
-                        offset > scroll_top + self.viewport_height
-                    })
-                    .map(|x| x.0)
-                    .unwrap_or_default();
-
-                // Why is this `end_node + 2`, I can see you asking yourself? `end_node` is the
-                // index of the last visible child, but [`Range`] is an open interval so we must
-                // increment by 1. The next rendered element is always occluded by the parent
-                // container, it may seem unnecessary to render it, however not doing so causing
-                // scroll glitching in Chrome:
-                // * When the first pixel of the `end_node + 1` child is scrolled into view, the
-                //   container element it is embedded in will expand past the end of the scroll
-                //   container.
-                // * Chrome detects this and helpfuls scrolls this new element into view,
-                //   retriggering the on scroll callback.
-                let visible_range = start_node..min!(ctx.props().children.len(), end_node + 2);
-                self.content_window = Some(ContentWindow {
-                    scroll_top,
-                    start_y,
-                    visible_range,
-                });
-
-                true
-            }
+            ScrollPanelMsg::CalculateWindowContent => self.calculate_window_content(ctx),
+            ScrollPanelMsg::ChildrenChanged => true,
         }
     }
 
@@ -242,6 +255,7 @@ impl Component for ScrollPanel {
         ctx.link().send_message_batch(vec![
             ScrollPanelMsg::UpdateViewportDimensions,
             ScrollPanelMsg::CalculateWindowContent,
+            ScrollPanelMsg::ChildrenChanged,
         ]);
 
         false
@@ -285,6 +299,7 @@ impl Component for ScrollPanel {
                     <div class="scroll-panel-container" style={ window_style }>
                         { for windowed_items.iter().cloned().map(Html::from) }
                         <div
+                            key={ "__scroll-panel-auto-width__" }
                             class="scroll-panel-auto-width"
                             style={ width_style }>
                         </div>
@@ -313,13 +328,10 @@ impl Component for ScrollPanel {
         }
     }
 
-    fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
-        if first_render || self.needs_rerender {
-            self.needs_rerender = false;
-            ctx.link().send_message_batch(vec![
-                ScrollPanelMsg::UpdateViewportDimensions,
-                ScrollPanelMsg::CalculateWindowContent,
-            ]);
-        }
+    fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
+        ctx.link().send_message_batch(vec![
+            ScrollPanelMsg::UpdateViewportDimensions,
+            ScrollPanelMsg::CalculateWindowContent,
+        ]);
     }
 }

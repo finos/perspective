@@ -45,15 +45,14 @@ pub enum Token<'a> {
 
 use Token::*;
 
-#[allow(clippy::use_self)]
-impl<'a> From<Token<'a>> for Html {
-    fn from(x: Token<'a>) -> Self {
+impl<'a> ToHtml for Token<'a> {
+    fn to_html(&self) -> Html {
         html! {
-            if matches!(x, Break(_)) {
+            if matches!(self, Break(_)) {
                 <br/>
             } else {
-                <span class={ x.class_name() }>
-                    { x.content() }
+                <span class={ self.class_name() }>
+                    { self.content() }
                 </span>
             }
         }

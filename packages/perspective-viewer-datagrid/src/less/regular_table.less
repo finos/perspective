@@ -144,7 +144,7 @@ tbody th:empty {
     background-image: linear-gradient(
         to right,
         transparent 9px,
-        #eee 10px,
+        var(--inactive--border-color, #eee) 10px,
         transparent 11px
     );
     background-repeat: no-repeat;
@@ -216,7 +216,7 @@ regular-table table tbody td {
 
 regular-table table {
     user-select: none;
-    color: #161616;
+    color: inherit;
     border-collapse: separate;
 
     th {

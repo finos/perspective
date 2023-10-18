@@ -65,7 +65,7 @@ wasm-bindgen-test = "0.3.13"
 async-lock = "2.5.0"
 
 # Allow async methods to be used in traits
-async-trait = "^0.1.52"
+async-trait = "^0.1.73"
 
 # Encode persistence tokens
 base64 = "0.13.0"
@@ -83,7 +83,7 @@ extend = "1.1.2"
 flate2 = "1.0.20"
 
 # General async tools
-futures = "0.3.12"
+futures = "0.3.28"
 
 # General iterator improvements
 itertools = "0.10.1"
@@ -92,7 +92,7 @@ itertools = "0.10.1"
 js-intern = "0.3.1"
 
 # JavaScript stdlib bindings
-js-sys = "0.3"
+js-sys = "0.3.64"
 
 # Parse ExprTK for syntax highlighting.
 nom = "7.1.1"
@@ -107,26 +107,26 @@ rmp-serde = "1.1.1"
 serde = { version = "1.0", features = ["derive"] }
 
 # Support for "unknown"/dictionary types such as `plugin_config`
-serde_json = { version = "1.0.85", features = ["raw_value"] }
+serde_json = { version = "1.0.107", features = ["raw_value"] }
 
 # Faster struct serialize/deserialize
-serde-wasm-bindgen = "0.4.5"
+serde-wasm-bindgen = "0.6.0"
 
 # Async-aware logging that can be disabled at compile-time.
 tracing = { version = ">=0.1.36", features = ["release_max_level_error"] }
 tracing-subscriber = "0.3.15"
 
 # Browser API bindings
-wasm-bindgen = { version = "=0.2.84", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.87", features = ["serde-serialize"] }
 
 # Browser `Promise` bindings
-wasm-bindgen-futures = "0.4.20"
+wasm-bindgen-futures = "0.4.37"
 
 # Web framework
-yew = { version = "0.20.0", features = ["csr"] }
+yew = { version = "0.21.0", features = ["csr"] }
 
 # Browser stdlib bindings
-web-sys.version = "0.3.59"
+web-sys.version = "0.3.64"
 web-sys.features = [
     "Blob",
     "Clipboard",

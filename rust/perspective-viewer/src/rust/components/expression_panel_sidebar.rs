@@ -60,44 +60,32 @@ derive_model!(Renderer, Session for ExprEditorPanelProps);
 #[function_component]
 pub fn ExprEditorPanel(p: &ExprEditorPanelProps) -> Html {
     let is_validating = yew::use_state_eq(|| false);
-    let on_save = yew::use_callback(
-        |v, p| {
-            match &p.editor_state {
-                ExpressionPanelState::NewExpr => save_expr(v, p),
-                ExpressionPanelState::UpdateExpr(alias) => update_expr(alias, &v, p),
-                _ => {}
-            }
+    let on_save = yew::use_callback(p.clone(), |v, p| {
+        match &p.editor_state {
+            ExpressionPanelState::NewExpr => save_expr(v, p),
+            ExpressionPanelState::UpdateExpr(alias) => update_expr(alias, &v, p),
+            _ => {}
+        }
 
-            p.on_close.emit(());
-        },
-        p.clone(),
-    );
+        p.on_close.emit(());
+    });
 
-    let on_validate = yew::use_callback(
-        |b, validating| {
-            validating.set(b);
-        },
-        is_validating.setter(),
-    );
+    let on_validate = yew::use_callback(is_validating.setter(), |b, validating| {
+        validating.set(b);
+    });
 
-    let on_delete = yew::use_callback(
-        |(), p| {
-            if let ExpressionPanelState::UpdateExpr(ref s) = p.editor_state {
-                delete_expr(s, p);
-            }
+    let on_delete = yew::use_callback(p.clone(), |(), p| {
+        if let ExpressionPanelState::UpdateExpr(ref s) = p.editor_state {
+            delete_expr(s, p);
+        }
 
-            p.on_close.emit(());
-        },
-        p.clone(),
-    );
+        p.on_close.emit(());
+    });
 
-    let alias = yew::use_memo(
-        |s| match s {
-            ExpressionPanelState::UpdateExpr(s) => Some(s.clone()),
-            _ => None,
-        },
-        p.editor_state.clone(),
-    );
+    let alias = yew::use_memo(p.editor_state.clone(), |s| match s {
+        ExpressionPanelState::UpdateExpr(s) => Some(s.clone()),
+        _ => None,
+    });
 
     html! {
         <div

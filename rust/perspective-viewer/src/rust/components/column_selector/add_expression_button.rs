@@ -33,19 +33,13 @@ pub struct AddExpressionButtonProps {
 #[function_component]
 pub fn AddExpressionButton(p: &AddExpressionButtonProps) -> Html {
     let is_mouseover = yew::use_state_eq(|| false);
-    let onmouseover = yew::use_callback(
-        |event: MouseEvent, mo| {
-            mo.set(event.button() == 0);
-        },
-        is_mouseover.setter(),
-    );
+    let onmouseover = yew::use_callback(is_mouseover.setter(), |event: MouseEvent, mo| {
+        mo.set(event.button() == 0);
+    });
 
-    let onmouseout = yew::use_callback(
-        |_event, mo| {
-            mo.set(false);
-        },
-        is_mouseover.setter(),
-    );
+    let onmouseout = yew::use_callback(is_mouseover.setter(), |_event, mo| {
+        mo.set(false);
+    });
 
     let onmousedown = p.on_open_expr_panel.reform(|_| ColumnLocator::Expr(None));
     let class = if *is_mouseover || matches!(p.selected_column, Some(ColumnLocator::Expr(None))) {

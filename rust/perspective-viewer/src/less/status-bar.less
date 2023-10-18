@@ -24,6 +24,10 @@
     #main_column #status_bar.titled {
         padding-right: 36px;
 
+        input::placeholder {
+            color: var(--inactive--color);
+        }
+
         #menu-bar {
             opacity: 1;
         }
@@ -175,15 +179,18 @@
             }
 
             &.connected:before {
-                color: rgb(51, 159, 77);
+                color: var(--status-icon-connected--color, rgb(51, 159, 77));
             }
 
             &.initializing:before {
-                color: rgb(223, 198, 57);
+                color: var(
+                    --status-icon-initializing--color,
+                    rgb(223, 198, 57)
+                );
             }
 
             &.error:before {
-                color: rgb(252, 64, 52);
+                color: var(--status-icon-error--color, rgb(252, 64, 52));
             }
         }
 
