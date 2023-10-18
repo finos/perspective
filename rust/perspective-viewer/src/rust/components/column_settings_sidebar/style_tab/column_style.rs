@@ -13,24 +13,23 @@
 use serde::de::DeserializeOwned;
 use yew::{function_component, html, Callback, Html, Properties};
 
+use crate::components::column_settings_sidebar::style_tab::symbol::SymbolAttr;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
 use crate::components::style::LocalStyle;
-use crate::config::plugin::{PluginAttributes, PluginConfig};
-use crate::config::{
-    DatetimeColumnStyleDefaultConfig, NumberColumnStyleDefaultConfig,
-    StringColumnStyleDefaultConfig, Type,
-};
+use crate::config::plugin::*;
+use crate::config::*;
 use crate::custom_events::CustomEvents;
 use crate::model::*;
 use crate::renderer::Renderer;
 use crate::session::Session;
+use crate::utils::*;
 use crate::{clone, css, derive_model, html_template};
 
 /// This function retrieves the plugin's config using its `save` method.
 /// It also introduces the `default_config` field for the plugin.
-/// If this field does not exist, the plugin is considered to be unstylable.
+/// If this field does not exist, the plugin is considered to be un-style-able.
 fn get_column_style<T, U>(
     mut config: PluginConfig,
     attrs: PluginAttributes,
@@ -78,38 +77,47 @@ pub struct ColumnStyleProps {
 derive_model!(CustomEvents, Session, Renderer for ColumnStyleProps);
 #[function_component]
 pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
-    let title = format!("{} Styling", p.ty.to_capitalized());
-
-    clone!(p);
-    let opt_html = match p.ty {
+    let props = p.clone();
+    let title = format!("{} Styling", props.ty.to_capitalized());
+    let opt_html = match props.ty {
         Type::String => get_column_style::<_, StringColumnStyleDefaultConfig>(
-            p.config.clone(),
-            p.attrs.clone(),
-            &p.column_name,
-            p.ty,
+            props.config.clone(),
+            props.attrs.clone(),
+            &props.column_name,
+            props.ty,
         )
         .map(|(config, default_config)| {
             let on_change = Callback::from(move |config| {
-                p.send_plugin_config(p.column_name.clone(), serde_json::to_value(config).unwrap())
+                props.send_plugin_config(
+                    props.column_name.clone(),
+                    serde_json::to_value(config).unwrap(),
+                )
             });
+
             html_template! {
-                <div class="item_title">{title.clone()}</div>
+                <div class="item_title">{ title.clone() }</div>
                 <div class="style_contents">
-                    <StringColumnStyle  { config } {default_config} {on_change} />
+                    <StringColumnStyle
+                        { config }
+                        { default_config }
+                        { on_change }/>
                 </div>
             }
         }),
 
         Type::Datetime | Type::Date => get_column_style::<_, DatetimeColumnStyleDefaultConfig>(
-            p.config.clone(),
-            p.attrs.clone(),
-            &p.column_name,
-            p.ty,
+            props.config.clone(),
+            props.attrs.clone(),
+            &props.column_name,
+            props.ty,
         )
         .map(|(config, default_config)| {
-            let enable_time_config = matches!(p.ty, Type::Datetime);
+            let enable_time_config = matches!(props.ty, Type::Datetime);
             let on_change = Callback::from(move |config| {
-                p.send_plugin_config(p.column_name.clone(), serde_json::to_value(config).unwrap())
+                props.send_plugin_config(
+                    props.column_name.clone(),
+                    serde_json::to_value(config).unwrap(),
+                )
             });
             html_template! {
                 <div class="item_title">{title.clone()}</div>
@@ -125,46 +133,94 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         }),
 
         Type::Integer | Type::Float => get_column_style::<_, NumberColumnStyleDefaultConfig>(
-            p.config.clone(),
-            p.attrs.clone(),
-            &p.column_name,
-            p.ty,
+            props.config.clone(),
+            props.attrs.clone(),
+            &props.column_name,
+            props.ty,
         )
         .map(|(config, default_config)| {
             let on_change = {
-                clone!(p);
+                clone!(props);
                 Callback::from(move |config| {
-                    p.send_plugin_config(
-                        p.column_name.clone(),
+                    props.send_plugin_config(
+                        props.column_name.clone(),
                         serde_json::to_value(config).unwrap(),
                     )
                 })
             };
+
             html_template! {
-                <div class="item_title">{title.clone()}</div>
+                <div class="item_title">{ title.clone() }</div>
                 <div class="style_contents">
                     <NumberColumnStyle
-                        session = {p.session.clone()}
-                        column_name={p.column_name.clone()}
+                        session={ props.session.clone() }
+                        column_name={ props.column_name.clone() }
                         { config }
-                        {default_config}
-                        {on_change}
-                        />
+                        { default_config }
+                        { on_change }/>
                 </div>
             }
         }),
         _ => Err("Booleans aren't styled yet.".into()),
     };
-    if let Ok(html) = opt_html {
-        html
-    } else {
-        // do the tracing logs
-        tracing::warn!("{}", opt_html.unwrap_err());
-        // return the default impl
-        html_template! {
-            <div class="item_title">{title}</div>
+
+    let props = p;
+    let plugin = props
+        .renderer
+        .get_active_plugin()
+        .expect("No active plugins!");
+
+    let plugin_column_names = plugin
+        .config_column_names()
+        .map(|arr| {
+            arr.into_serde_ext::<Vec<Option<String>>>()
+                .expect("Could not deserialize config_column_names into Vec<Option<String>>")
+        })
+        .unwrap_or_default();
+
+    let view_config = props.session.get_view_config();
+    let mut is_symbol = false;
+    let components = plugin_column_names
+        .iter()
+        .zip(&view_config.columns)
+        .filter_map(|(ty, name)| {
+            let attr_type = props
+                .session
+                .metadata()
+                .get_column_view_type(&props.column_name)
+                .expect("Couldn't get column type for {column_name}");
+
+            let zipped = ty.as_deref().zip(name.as_deref());
+            match zipped {
+                Some(("Symbol", name)) if name == props.column_name => {
+                    let attrs = props.attrs.symbol.clone().unwrap();
+                    is_symbol = true;
+                    Some(html! {
+                        <SymbolAttr
+                            { attr_type }
+                            { attrs }
+                            column_name={ props.column_name.clone() }
+                            session={ &props.session }
+                            renderer={ &props.renderer }
+                            custom_events={ &props.custom_events }
+                            config={ props.config.clone() }/>
+                    })
+                }
+                _ => None,
+            }
+        })
+        .collect::<Html>();
+
+    let is_ok = opt_html.is_ok();
+    html_template! {
+        <LocalStyle href={ css!("column-style") } />
+        if is_ok {
+            { opt_html.unwrap() }
+        }
+
+        { components }
+        if !is_ok && !is_symbol {
             <div class="style_contents">
-                <LocalStyle href={ css!("column-style") } />
                 <div id="column-style-container" class="no-style">
                     <div class="style-contents">{ "No styles available" }</div>
                 </div>

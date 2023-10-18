@@ -25,11 +25,13 @@
 
         select {
             position: absolute;
-            width: 100%;
+            left: 0px;
+            right: 4px;
+            top: 0px;
+            bottom: 0px;
             cursor: pointer;
         }
     }
-
 
     select {
         border-radius: 0;
@@ -41,14 +43,12 @@
         appearance: none;
         color: inherit;
         padding: 0px 12px 0px 0px;
-        font-size: 12px;
+        font-size: 10px;
         font-family: inherit;
         background-color: var(--select--background-color, transparent);
         background-image: url("../../svg/dropdown-selector.svg");
         background-position: right 2px center;
         background-repeat: no-repeat;
-        // background: var(--select--background,
-        //         url(../../svg/dropdown-selector.svg) no-repeat right 2px center);
 
         option {
             background: var(--select--background-color, transparent);

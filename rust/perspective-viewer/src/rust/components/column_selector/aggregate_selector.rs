@@ -94,7 +94,7 @@ impl Component for AggregateSelector {
             <LocalStyle href={ css!("aggregate-selector") } />
             <div class="aggregate-selector-wrapper">
                 <Select<Aggregate>
-                    class={ "aggregate-selector" }
+                    wrapper_class={ "aggregate-selector" }
                     values={ values }
                     label="weighted mean"
                     selected={ selected_agg }

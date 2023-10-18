@@ -33,8 +33,14 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        gap: 4px;
         width: 100%;
-        margin-bottom: 12px;
+        margin-bottom: 4px;
+
+        &:last-child .is_column_active {
+            opacity: 0.3;
+            cursor: default;
+            pointer-events: none;
+        }
     }
 }

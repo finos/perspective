@@ -20,7 +20,7 @@
 }
 
 :host {
-    input[type="checkbox"] {
+    input[type="checkbox"].alternate {
         appearance: none;
         height: 14px;
         width: 14px;
@@ -55,5 +55,46 @@
             -webkit-mask-image: var(--active-column-selector--content, none);
             mask-image: var(--active-column-selector--content, none);
         }
+    }
+
+    input[type="checkbox"] {
+        float: left;
+        appearance: none;
+        height: 14px;
+        width: 14px;
+        padding: 0px;
+        cursor: pointer;
+        outline: none;
+        margin: 0 5px;
+
+        &:checked:before {
+            -webkit-mask-image: var(--column-checkbox-on--mask-image);
+            mask-image: var(--column-checkbox-on--mask-image);
+        }
+
+        &[disabled]:before {
+            opacity: 0.2s;
+        }
+
+        &:before {
+            @include icon;
+            height: 13px;
+            width: 13px;
+            -webkit-mask-image: var(--column-checkbox-off--mask-image);
+            mask-image: var(--column-checkbox-off--mask-image);
+        }
+
+        &:hover {
+            background-color: transparent;
+        }
+
+        &:hover:before {
+            -webkit-mask-image: var(--column-checkbox-hover--mask-image);
+            mask-image: var(--column-checkbox-hover--mask-image);
+        }
+    }
+
+    input[type="checkbox"]:not(:disabled) {
+        cursor: pointer;
     }
 }

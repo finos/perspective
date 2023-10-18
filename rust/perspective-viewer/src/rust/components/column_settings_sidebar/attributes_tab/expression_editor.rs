@@ -38,6 +38,7 @@ pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
         match &p.selected_column {
             ColumnLocator::Expr(Some(alias)) => update_expr(alias, &v, p),
             ColumnLocator::Expr(None) => save_expr(v, p),
+
             // TODO: We should be able to create a new expression from the currently selected
             // column if it is not already an expression column.
             _ => panic!("Tried to save a non-expression column as expression!"),

@@ -39,8 +39,8 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
         <div id="attributes-tab">
             if let Some(ty) = p.maybe_ty {
                 <div id="attributes-type" class="tab-section">
-                    <div class="item_title">{"Type"}</div>
-                    <div id="attributes-type-name" class="text">{ty}</div>
+                    <div class="item_title">{ "Type" }</div>
+                    <div id="attributes-type-name" class="text">{ ty }</div>
                 </div>
             }
             <div class="tab-section">

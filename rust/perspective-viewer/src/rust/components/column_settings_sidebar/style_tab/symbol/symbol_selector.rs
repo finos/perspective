@@ -18,6 +18,7 @@ use crate::config::plugin::Symbol;
 
 #[derive(Properties, PartialEq)]
 pub struct SymbolSelectorProps {
+    pub index: usize,
     pub selected_value: Option<String>,
     pub values: Vec<Symbol>,
     pub callback: Callback<Symbol>,
@@ -42,10 +43,15 @@ pub fn symbol_selector(p: &SymbolSelectorProps) -> Html {
                 .unwrap_or_default()
         })
         .cloned()
-        .unwrap_or_else(|| p.values.first().cloned().unwrap());
+        .unwrap_or_else(|| p.values.get(p.index % values.len()).cloned().unwrap());
 
     html! {
         // TODO: This probably should be a modal with a preview of the SVG symbol
-        <Select<Symbol> {values} {selected} on_select={p.callback.clone()}/>
+        <Select<Symbol>
+            wrapper_class="symbol-selector-wrapper"
+            class="symbol-selector"
+            { values }
+            { selected }
+            on_select={ p.callback.clone() }/>
     }
 }

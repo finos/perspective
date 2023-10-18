@@ -12,6 +12,7 @@
 
 :host {
     #attributes-symbols {
+        position: relative;
         svg {
             width: 15px;
             height: auto;
@@ -21,35 +22,52 @@
         }
 
         .toggle-mode.is_column_active {
+            margin: 0;
             padding: 0;
         }
 
         .row-selector {
             flex: 1;
-            min-width: 50%;
+            min-width: 0px;
             .column-selector-column-border {
-                min-height: 28px;
+                min-height: 24px;
             }
+
             input.column-empty-input {
-                padding: 0;
+                padding: 0 4px;
                 margin: 0;
                 width: 100%;
             }
+
             .row-selector-errored input {
                 border-color: var(--error--color);
             }
         }
-        .symbol-selector {
-            flex: 1;
-            .selected {
-                width: 100%;
-                .symbol-option {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    width: 100%;
-                }
-            }
+
+        .pairs-list-item .dropdown-width-container {
+            flex: 0 1 75px;
+        }
+
+        &:before {
+            font-size: 9px;
+            left: 0px;
+            padding: var(--column_type--padding, 0px 0px 0px 0px);
+            position: absolute;
+            margin-top: -15px;
+            content: attr(data-label);
+        }
+
+        &.pairs-list[data-label] {
+            margin-top: 24px;
+        }
+
+        .column_name {
+            padding: 0;
+            margin: 0 8px;
+        }
+
+        .symbol-selector-wrapper {
+            width: 75px;
         }
     }
 }

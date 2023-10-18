@@ -452,6 +452,7 @@ impl Component for FilterColumn {
                 html! {
                     <input
                         type="checkbox"
+                        class="alternate"
                         ref={ noderef.clone() }
                         checked={ self.input == "true" }
                         oninput={ input }/>

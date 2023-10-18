@@ -28,9 +28,8 @@ const DEVICE_OPTIONS = {
     "Desktop Chrome": {
         launchOptions: {
             args: [
-                "--js-flags=--expose-gc",
-                "--disable-accelerated-2d-canvas",
-                "--disable-gpu",
+                // "--disable-accelerated-2d-canvas",
+                // "--disable-gpu",
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",

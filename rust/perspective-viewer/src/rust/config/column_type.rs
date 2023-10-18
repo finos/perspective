@@ -13,6 +13,7 @@
 use std::fmt::Display;
 
 use serde::Deserialize;
+use yew::{html, ToHtml};
 
 #[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug)]
 pub enum Type {
@@ -33,6 +34,14 @@ pub enum Type {
 
     #[serde(rename = "boolean")]
     Bool,
+}
+
+impl ToHtml for Type {
+    fn to_html(&self) -> yew::Html {
+        html! {
+            <span class="type-name">{ self.to_string() }</span>
+        }
+    }
 }
 
 impl Display for Type {

@@ -12,6 +12,18 @@
 
 import * as d3 from "d3";
 
+const sqrt3 = Math.sqrt(3);
+
+const nabla = {
+    draw: function (context, size) {
+        const y = Math.sqrt(size / (sqrt3 * 3));
+        context.moveTo(0, y * 2);
+        context.lineTo(-sqrt3 * y, -y);
+        context.lineTo(sqrt3 * y, -y);
+        context.closePath();
+    },
+};
+
 export const symbols = [
     d3.symbolCircle,
     d3.symbolCross,
@@ -29,6 +41,7 @@ export const symbolsObj = {
     star: d3.symbolStar,
     triangle: d3.symbolTriangle,
     wye: d3.symbolWye,
+    nabla,
 };
 
 export function fromDomain(domain) {
