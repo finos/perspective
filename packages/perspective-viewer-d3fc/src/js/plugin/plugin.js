@@ -16,6 +16,7 @@ import { initialiseStyles } from "../series/colorStyles";
 import style from "../../../dist/css/perspective-viewer-d3fc.css";
 
 import * as d3 from "d3";
+import { symbolsObj } from "../series/seriesSymbols";
 
 const DEFAULT_PLUGIN_SETTINGS = {
     initial: {
@@ -134,6 +135,32 @@ export function register(...plugins) {
 
                     set max_columns(x) {
                         chart.plugin.max_columns = x;
+                    }
+
+                    get plugin_attributes() {
+                        let symbols = Object.entries(symbolsObj).map(
+                            ([name, ty]) => {
+                                let container = document.createElement("div");
+                                d3.select(container)
+                                    .append("svg")
+                                    .attr("viewbox", "0, 0, 15, 15") //eyeballed this, it's probably wrong
+                                    .append("path")
+                                    .attr("transform", "translate(7.5, 7.5)")
+                                    .attr("d", d3.symbol(ty)());
+                                let html = d3.select(container).html();
+                                container.remove();
+
+                                return {
+                                    name,
+                                    html,
+                                };
+                            }
+                        );
+                        return {
+                            symbol: {
+                                symbols,
+                            },
+                        };
                     }
 
                     async render() {
@@ -395,6 +422,7 @@ export function register(...plugins) {
                             filter,
                             data: mapped,
                             agg_paths: filtered.agg_paths,
+                            ...this.config.plugin_config,
                         };
 
                         this._chart = chart;

@@ -10,47 +10,37 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-:host {
-    // Wrapper prevents the width of the selector options from increasing the width of
-    // the container it is embedded in.
-    .aggregate-selector-wrapper {
-        height: 19px;
+.pairs-list {
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
         display: flex;
-        padding-left: 23px;
-        width: 85px;
-        min-width: 85px;
-        max-width: 85px;
-        flex: 0 0 85px;
+        flex-direction: column;
+    }
 
-        label {
-            font-size: 10px;
-            white-space: nowrap;
-            height: 21px;
-            display: flex;
-            align-items: center;
-            margin-right: 3px;
-        }
+    .pairs-list-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: solid 1px var(--inactive--border-color);
+        margin-bottom: 12px;
+    }
 
-        .aggregate-selector {
-            font-size: 10px;
-            border-bottom-width: 0px;
-            margin-top: 0px;
-            height: 19px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 12px;
-            border: 1px solid transparent;
+    .pairs-list-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+        width: 100%;
+        margin-bottom: 4px;
 
-            &:hover {
-                border: 1px solid var(--icon--color);
-                border-radius: 2px;
-                transition: none;
-            }
-        }
-
-        .dropdown-width-container:after {
-            content: none !important;
+        &:last-child .is_column_active {
+            opacity: 0.3;
+            cursor: default;
+            pointer-events: none;
         }
     }
 }

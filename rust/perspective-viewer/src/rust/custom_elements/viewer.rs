@@ -160,6 +160,7 @@ impl PerspectiveViewerElement {
         let session = Session::default();
         let renderer = Renderer::new(&elem);
         let presentation = Presentation::new(&elem);
+        let events = CustomEvents::new(&elem, &session, &renderer, &presentation);
 
         // Create Yew App
         let props = yew::props!(PerspectiveViewerProps {
@@ -168,6 +169,7 @@ impl PerspectiveViewerElement {
             renderer: renderer.clone(),
             presentation: presentation.clone(),
             dragdrop: DragDrop::default(),
+            custom_events: events.clone(),
             weak_link: WeakScope::default(),
         });
 
@@ -182,7 +184,6 @@ impl PerspectiveViewerElement {
             }
         });
 
-        let _events = CustomEvents::new(&elem, &session, &renderer, &presentation);
         let resize_handle = ResizeObserverHandle::new(&elem, &renderer, &root);
         Self {
             elem,
@@ -191,7 +192,7 @@ impl PerspectiveViewerElement {
             renderer,
             presentation,
             resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
-            _events,
+            _events: events,
             _subscriptions: Rc::new(update_sub),
         }
     }

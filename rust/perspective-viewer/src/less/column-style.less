@@ -31,10 +31,24 @@
             background-color: #8b868045;
         }
 
+        .dropdown-width-container {
+            height: 24px;
+            border: 1px solid transparent;
+            border-radius: 2px;
+            padding: 0 8px;
+            border-radius: 2px;
+            border: 1px solid transparent;
+            &:hover {
+                border-color: var(--inactive--color, #666);
+            }
+        }
+
         select {
-            height: auto;
-            padding-bottom: 2px;
-            border-bottom: 1px solid var(--input--border-color, #ccc);
+            font-size: 10px;
+            height: 24px;
+            // padding-bottom: 2px;
+            // border-bottom: 1px solid var(--input--border-color, #ccc);
+            padding: 0 8px;
         }
 
         label {
@@ -73,39 +87,6 @@
 
         .indent {
             margin-left: 24px;
-        }
-
-        input[type="checkbox"],
-        & > div > div > span:first-child {
-            width: 24px;
-            margin: 0;
-        }
-
-        input[type="checkbox"] {
-            float: left;
-            appearance: none;
-
-            &:checked:before {
-                -webkit-mask-image: var(--column-checkbox-on--mask-image);
-                mask-image: var(--column-checkbox-on--mask-image);
-            }
-
-            &[disabled]:before {
-                opacity: 0.2s;
-            }
-
-            &:before {
-                @include icon;
-                height: 13px;
-                width: 13px;
-                -webkit-mask-image: var(--column-checkbox-off--mask-image);
-                mask-image: var(--column-checkbox-off--mask-image);
-            }
-
-            &:hover:before {
-                -webkit-mask-image: var(--column-checkbox-hover--mask-image);
-                mask-image: var(--column-checkbox-hover--mask-image);
-            }
         }
 
         input[type="radio"] {
@@ -203,10 +184,6 @@
 
         input.parameter[disabled] {
             opacity: 0.5;
-        }
-
-        input[type="checkbox"]:not(:disabled) {
-            cursor: pointer;
         }
 
         button#datetime_format {

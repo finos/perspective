@@ -30,6 +30,7 @@ pub struct CodeEditorProps {
     pub expr: Rc<String>,
     pub oninput: Callback<Rc<String>>,
     pub onsave: Callback<()>,
+    pub disabled: bool,
 
     #[prop_or_default]
     pub error: Option<PerspectiveValidationError>,
@@ -163,10 +164,13 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         .map_rows(|x| html!(<span class="line_number">{ x + 1 }</span>))
         .collect::<Html>();
 
+    clone!(props.disabled);
+
     html_template! {
         <LocalStyle href={ css!("form/code-editor") } />
         <div id="editor">
             <textarea
+                { disabled }
                 id="textarea_editable"
                 ref={ textarea_ref.1 }
                 spellcheck="false"

@@ -10,47 +10,48 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-:host {
-    // Wrapper prevents the width of the selector options from increasing the width of
-    // the container it is embedded in.
-    .aggregate-selector-wrapper {
-        height: 19px;
-        display: flex;
-        padding-left: 23px;
-        width: 85px;
-        min-width: 85px;
-        max-width: 85px;
-        flex: 0 0 85px;
+use itertools::Itertools;
+use yew::{function_component, html, Callback, Html, Properties};
 
-        label {
-            font-size: 10px;
-            white-space: nowrap;
-            height: 21px;
-            display: flex;
-            align-items: center;
-            margin-right: 3px;
-        }
+use crate::components::containers::select::{Select, SelectItem};
+use crate::config::plugin::Symbol;
 
-        .aggregate-selector {
-            font-size: 10px;
-            border-bottom-width: 0px;
-            margin-top: 0px;
-            height: 19px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 12px;
-            border: 1px solid transparent;
+#[derive(Properties, PartialEq)]
+pub struct SymbolSelectorProps {
+    pub index: usize,
+    pub selected_value: Option<String>,
+    pub values: Vec<Symbol>,
+    pub callback: Callback<Symbol>,
+}
 
-            &:hover {
-                border: 1px solid var(--icon--color);
-                border-radius: 2px;
-                transition: none;
-            }
-        }
+#[function_component(SymbolSelector)]
+pub fn symbol_selector(p: &SymbolSelectorProps) -> Html {
+    let values = p
+        .values
+        .clone()
+        .into_iter()
+        .map(SelectItem::Option)
+        .collect_vec();
 
-        .dropdown-width-container:after {
-            content: none !important;
-        }
+    let selected = p
+        .values
+        .iter()
+        .find(|sym| {
+            p.selected_value
+                .as_ref()
+                .map(|selected| sym.name == *selected)
+                .unwrap_or_default()
+        })
+        .cloned()
+        .unwrap_or_else(|| p.values.get(p.index % values.len()).cloned().unwrap());
+
+    html! {
+        // TODO: This probably should be a modal with a preview of the SVG symbol
+        <Select<Symbol>
+            wrapper_class="symbol-selector-wrapper"
+            class="symbol-selector"
+            { values }
+            { selected }
+            on_select={ p.callback.clone() }/>
     }
 }

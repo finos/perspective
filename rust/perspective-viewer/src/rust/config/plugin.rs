@@ -10,47 +10,58 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-:host {
-    // Wrapper prevents the width of the selector options from increasing the width of
-    // the container it is embedded in.
-    .aggregate-selector-wrapper {
-        height: 19px;
-        display: flex;
-        padding-left: 23px;
-        width: 85px;
-        min-width: 85px;
-        max-width: 85px;
-        flex: 0 0 85px;
+use std::collections::HashMap;
+use std::fmt::Debug;
 
-        label {
-            font-size: 10px;
-            white-space: nowrap;
-            height: 21px;
-            display: flex;
-            align-items: center;
-            margin-right: 3px;
-        }
+use serde::{Deserialize, Serialize};
 
-        .aggregate-selector {
-            font-size: 10px;
-            border-bottom-width: 0px;
-            margin-top: 0px;
-            height: 19px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 12px;
-            border: 1px solid transparent;
-
-            &:hover {
-                border: 1px solid var(--icon--color);
-                border-radius: 2px;
-                transition: none;
-            }
-        }
-
-        .dropdown-width-container:after {
-            content: none !important;
-        }
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct Symbol {
+    /// the name of the symbol
+    pub name: String,
+    /// unescaped HTML string
+    pub html: String,
+}
+impl std::fmt::Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.name)
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct SymbolAttributes {
+    /// a vec of SVGs to render
+    pub symbols: Vec<Symbol>,
+}
+
+/// The default style configurations per type, as retrived by
+/// plugin.plugin_attributes
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct DefaultStyleAttributes {
+    pub string: serde_json::Value,
+    pub datetime: serde_json::Value,
+    pub date: serde_json::Value,
+    pub integer: serde_json::Value,
+    pub float: serde_json::Value,
+    pub bool: serde_json::Value,
+}
+
+/// The data needed to populate a column's settings. These are typically default
+/// values, a listing of possible values, or other basic configuration settings
+/// for the plugin. This is the result of calling plugin.plugin_attributes
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct PluginAttributes {
+    pub symbol: Option<SymbolAttributes>,
+    pub style: Option<DefaultStyleAttributes>,
+    // color: ColorAttributes,
+    // axis: AxisAttributes,
+    //...
+}
+
+/// The configuration which is created as the result of calling plugin.save
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct PluginConfig {
+    /// Refers to the currently active columns. Maps name to configuration.
+    #[serde(default)]
+    pub columns: HashMap<String, serde_json::Value>,
 }

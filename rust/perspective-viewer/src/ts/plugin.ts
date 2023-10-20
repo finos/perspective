@@ -217,6 +217,10 @@ export class HTMLPerspectiveViewerPluginElement
         return 0;
     }
 
+    get plugin_attributes(): any {
+        return {};
+    }
+
     async update(view: perspective.View): Promise<void> {
         return this.draw(view);
     }

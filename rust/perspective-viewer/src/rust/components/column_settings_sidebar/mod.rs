@@ -9,48 +9,8 @@
 // ┃ This file is part of the Perspective library, distributed under the terms ┃
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+mod attributes_tab;
+mod sidebar;
+mod style_tab;
 
-:host {
-    // Wrapper prevents the width of the selector options from increasing the width of
-    // the container it is embedded in.
-    .aggregate-selector-wrapper {
-        height: 19px;
-        display: flex;
-        padding-left: 23px;
-        width: 85px;
-        min-width: 85px;
-        max-width: 85px;
-        flex: 0 0 85px;
-
-        label {
-            font-size: 10px;
-            white-space: nowrap;
-            height: 21px;
-            display: flex;
-            align-items: center;
-            margin-right: 3px;
-        }
-
-        .aggregate-selector {
-            font-size: 10px;
-            border-bottom-width: 0px;
-            margin-top: 0px;
-            height: 19px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 12px;
-            border: 1px solid transparent;
-
-            &:hover {
-                border: 1px solid var(--icon--color);
-                border-radius: 2px;
-                transition: none;
-            }
-        }
-
-        .dropdown-width-container:after {
-            content: none !important;
-        }
-    }
-}
+pub use sidebar::*;

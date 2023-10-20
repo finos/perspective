@@ -71,7 +71,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                 });
 
             scrollLegend.labels((options) => {
-                const parts = options.domain[options.i].split("|");
+                const parts = String(options.domain[options.i]).split("|");
                 return settings.mainValues.length <= 1 && parts.length > 1
                     ? parts.slice(0, parts.length - 1).join("|")
                     : options.domain[options.i];

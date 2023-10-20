@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::cell::RefCell;
+use std::collections::HashSet;
 use std::rc::Rc;
 
 use wasm_bindgen::prelude::*;
@@ -33,6 +34,12 @@ pub struct FilterDropDownElement {
     column: Rc<RefCell<Option<(usize, String)>>>,
     values: Rc<RefCell<Option<Vec<String>>>>,
     target: Rc<RefCell<Option<HtmlElement>>>,
+}
+
+impl PartialEq for FilterDropDownElement {
+    fn eq(&self, other: &Self) -> bool {
+        self.column == other.column && self.values == other.values && self.target == other.target
+    }
 }
 
 impl ImplicitClone for FilterDropDownElement {}
@@ -70,13 +77,14 @@ impl FilterDropDownElement {
         &self,
         column: (usize, String),
         input: String,
+        exclude: HashSet<String>,
         target: HtmlElement,
         callback: Callback<String>,
     ) {
         let current_column = self.column.borrow().clone();
         match current_column {
             Some(filter_col) if filter_col == column => {
-                let values = filter_values(&input, &self.values);
+                let values = filter_values(&input, &self.values, &exclude);
                 if values.len() == 1 && values[0] == input {
                     self.hide().unwrap();
                 } else {
@@ -96,7 +104,7 @@ impl FilterDropDownElement {
                     async move {
                         let all_values = session.get_column_values(column.1).await?;
                         *values.borrow_mut() = Some(all_values);
-                        let filter_values = filter_values(&input, &values);
+                        let filter_values = filter_values(&input, &values, &exclude);
                         if filter_values.len() == 1 && filter_values[0] == input {
                             modal.hide()
                         } else {
@@ -134,12 +142,16 @@ impl FilterDropDownElement {
     pub fn connected_callback(&self) {}
 }
 
-fn filter_values(input: &str, values: &Rc<RefCell<Option<Vec<String>>>>) -> Vec<String> {
+fn filter_values(
+    input: &str,
+    values: &Rc<RefCell<Option<Vec<String>>>>,
+    exclude: &HashSet<String>,
+) -> Vec<String> {
     let input = input.to_lowercase();
     if let Some(values) = &*values.borrow() {
         values
             .iter()
-            .filter(|x| x.to_lowercase().contains(&input))
+            .filter(|x| x.to_lowercase().contains(&input) && !exclude.contains(x.as_str()))
             .take(10)
             .cloned()
             .collect::<Vec<String>>()

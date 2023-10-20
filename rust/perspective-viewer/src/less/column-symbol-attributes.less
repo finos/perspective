@@ -11,46 +11,63 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 :host {
-    // Wrapper prevents the width of the selector options from increasing the width of
-    // the container it is embedded in.
-    .aggregate-selector-wrapper {
-        height: 19px;
-        display: flex;
-        padding-left: 23px;
-        width: 85px;
-        min-width: 85px;
-        max-width: 85px;
-        flex: 0 0 85px;
-
-        label {
-            font-size: 10px;
-            white-space: nowrap;
-            height: 21px;
-            display: flex;
-            align-items: center;
-            margin-right: 3px;
+    #attributes-symbols {
+        position: relative;
+        svg {
+            width: 15px;
+            height: auto;
+            color: var(--icon--color);
+            fill: var(--icon--color);
+            background: none;
         }
 
-        .aggregate-selector {
-            font-size: 10px;
-            border-bottom-width: 0px;
-            margin-top: 0px;
-            height: 19px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 12px;
-            border: 1px solid transparent;
+        .toggle-mode.is_column_active {
+            margin: 0;
+            padding: 0;
+        }
 
-            &:hover {
-                border: 1px solid var(--icon--color);
-                border-radius: 2px;
-                transition: none;
+        .row-selector {
+            flex: 1;
+            min-width: 0px;
+            .column-selector-column-border {
+                min-height: 24px;
+            }
+
+            input.column-empty-input {
+                padding: 0 4px;
+                margin: 0;
+                width: 100%;
+            }
+
+            .row-selector-errored input {
+                border-color: var(--error--color);
             }
         }
 
-        .dropdown-width-container:after {
-            content: none !important;
+        .pairs-list-item .dropdown-width-container {
+            flex: 0 1 75px;
+        }
+
+        &:before {
+            font-size: 9px;
+            left: 0px;
+            padding: var(--column_type--padding, 0px 0px 0px 0px);
+            position: absolute;
+            margin-top: -15px;
+            content: attr(data-label);
+        }
+
+        &.pairs-list[data-label] {
+            margin-top: 24px;
+        }
+
+        .column_name {
+            padding: 0;
+            margin: 0 8px;
+        }
+
+        .symbol-selector-wrapper {
+            width: 75px;
         }
     }
 }

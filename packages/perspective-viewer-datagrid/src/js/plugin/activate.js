@@ -160,7 +160,6 @@ export async function activate(view) {
         viewer.addEventListener(
             "perspective-toggle-column-settings",
             (event) => {
-                // NOTE: This is a hack. We'll need to implement a `deactivate` function on the API to properly remove this eventlistener.
                 if (this.isConnected) {
                     style_selected_column(
                         this.regular_table,

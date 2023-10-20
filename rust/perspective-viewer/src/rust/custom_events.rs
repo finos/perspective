@@ -16,6 +16,7 @@ use std::rc::Rc;
 
 use wasm_bindgen::prelude::*;
 use web_sys::*;
+use yew::html::ImplicitClone;
 
 use crate::config::*;
 use crate::js::JsPerspectiveViewerPlugin;
@@ -31,7 +32,14 @@ use crate::*;
 /// on `CustomElements`, but when it is `drop()` the Custom Element will no
 /// longer dispatch events such as `"perspective-config-change"`.
 #[derive(Clone)]
-pub struct CustomEvents(Rc<(CustomEventsDataRc, [Subscription; 6])>);
+pub struct CustomEvents(Rc<(CustomEventsDataRc, [Subscription; 5])>);
+
+impl ImplicitClone for CustomEvents {}
+impl PartialEq for CustomEvents {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
+}
 
 #[derive(Clone)]
 struct CustomEventsDataRc(Rc<CustomEventsData>);
@@ -90,14 +98,6 @@ impl CustomEvents {
             }
         });
 
-        let column_settings_updated = presentation.column_settings_updated.add_listener({
-            clone!(data);
-            move |config: JsValue| {
-                data.dispatch_column_style_changed(&config);
-                data.clone().dispatch_config_update();
-            }
-        });
-
         let plugin_sub = renderer.plugin_changed.add_listener({
             clone!(data);
             move |plugin| {
@@ -117,10 +117,20 @@ impl CustomEvents {
             theme_sub,
             settings_sub,
             column_settings_sub,
-            column_settings_updated,
             plugin_sub,
             view_sub,
         ])))
+    }
+
+    pub fn dispatch_column_style_changed(&self, config: &JsValue) {
+        let mut event_init = web_sys::CustomEventInit::new();
+        event_init.detail(config);
+        let event = web_sys::CustomEvent::new_with_event_init_dict(
+            "perspective-column-style-change",
+            &event_init,
+        );
+        self.0 .0.elem.dispatch_event(&event.unwrap()).unwrap();
+        self.0 .0.clone().dispatch_config_update();
     }
 }
 
@@ -136,16 +146,6 @@ impl CustomEventsDataRc {
         self.elem
             .toggle_attribute_with_force("settings", open)
             .unwrap();
-        self.elem.dispatch_event(&event.unwrap()).unwrap();
-    }
-
-    fn dispatch_column_style_changed(&self, config: &JsValue) {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(config);
-        let event = web_sys::CustomEvent::new_with_event_init_dict(
-            "perspective-column-style-change",
-            &event_init,
-        );
         self.elem.dispatch_event(&event.unwrap()).unwrap();
     }
 

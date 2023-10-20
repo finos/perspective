@@ -113,11 +113,11 @@ pub trait CopyExportModel:
             }
             ExportMethod::Html => {
                 let html_task = self.html_as_jsvalue();
-                ApiFuture::new(async move { html_task.await })
+                ApiFuture::new(html_task)
             }
             ExportMethod::Png => {
                 let png_task = self.png_as_jsvalue();
-                ApiFuture::new(async move { png_task.await })
+                ApiFuture::new(png_task)
             }
             ExportMethod::JsonConfig => {
                 let config_task = self.get_viewer_config();

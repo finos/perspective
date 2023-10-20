@@ -16,7 +16,7 @@ import { axisFactory } from "../axis/axisFactory";
 import { chartCanvasFactory } from "../axis/chartFactory";
 import {
     pointSeriesCanvas,
-    symbolTypeFromGroups,
+    symbolTypeFromColumn,
 } from "../series/pointSeriesCanvas";
 import { pointData } from "../data/pointData";
 import {
@@ -33,6 +33,7 @@ import withGridLines from "../gridlines/gridlines";
 import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
+import { symbolsObj } from "../series/seriesSymbols";
 
 /**
  * Define a clamped scaling factor based on the container size for bubble plots.
@@ -52,9 +53,63 @@ function interpolate_scale([x1, y1], [x2, y2]) {
     };
 }
 
+/**
+ * Overrides specific symbols based on plugin settings. This modifies in-place _and_ returns the value.
+ * @param {any} settings
+ * @param {d3.ScaleOrdinal} symbols
+ */
+function overrideSymbols(settings, symbols) {
+    if (!symbols) {
+        return;
+    }
+    const symbolCol = settings.realValues[4];
+    const columnType = settings.mainValues.find(
+        (val) => val.name === symbolCol
+    )?.type;
+    let domain = symbols.domain();
+    let range = symbols.range();
+    let len = range.length;
+    for (let i in domain) {
+        range[i] = range[i % len];
+    }
+    settings.columns?.[symbolCol]?.symbols?.forEach(({ key, value }) => {
+        // TODO: Define custom symbol types based on the values passed in here.
+        // https://d3js.org/d3-shape/symbol#custom-symbols
+        let symbolType = symbolsObj[value] ?? d3.symbolCircle;
+
+        let i = domain.findIndex((val) => {
+            switch (columnType) {
+                case "date":
+                case "datetime":
+                    return Date(val) === Date(key);
+                default:
+                    return String(val) === String(key);
+            }
+        });
+        if (i === -1) {
+            console.error(
+                `Could not find row with value ${key} when overriding symbols!`
+            );
+        }
+        range[i] = symbolType;
+    });
+    symbols.range(range);
+    return symbols;
+}
+
+/**
+ * @param {d3.Selection} container - d3.Selection of the outer div
+ * @param {any} settings - settings as defined in the Update method in plugin.js
+ */
 function xyScatter(container, settings) {
+    const symbolCol = settings.realValues[4];
+    // TODO: This is failing to filter correctly when colorLegend() is called as it returns data meant for filterData
     const data = pointData(settings, filterDataByGroup(settings));
-    const symbols = symbolTypeFromGroups(settings);
+    const symbols = overrideSymbols(
+        settings,
+        symbolTypeFromColumn(settings, symbolCol)
+    );
+
     let color = null;
     let legend = null;
 
@@ -64,13 +119,13 @@ function xyScatter(container, settings) {
     let isColoredByString =
         settings.mainValues.find((x) => x.name === colorByValue)?.type ===
         "string";
-    let hasSplitBy = settings.splitValues.length > 0;
+    let hasSymbol = !!symbolCol;
 
     if (hasColorBy) {
         if (isColoredByString) {
-            if (hasSplitBy) {
+            if (hasSymbol) {
                 color = seriesColorsFromDistinct(settings, data);
-                // TODO: Legend should have cartesian product labels (ColorBy|SplitBy)
+                // TODO: Legend should have cartesian product labels (ColorBy|Symbol)
                 // For now, just use monocolor legends.
                 legend = symbolLegend().settings(settings).scale(symbols);
             } else {
@@ -91,7 +146,7 @@ function xyScatter(container, settings) {
         ? seriesLinearRange(settings, data, "size").range([10, 10000])
         : null;
 
-    const label = settings.realValues[4];
+    const label = settings.realValues[5];
 
     const scale_factor = interpolate_scale([600, 0.1], [1600, 1])(container);
     const series = fc
@@ -101,7 +156,7 @@ function xyScatter(container, settings) {
             data.map((series) =>
                 pointSeriesCanvas(
                     settings,
-                    series.key,
+                    symbolCol,
                     size,
                     color,
                     label,
@@ -170,7 +225,15 @@ xyScatter.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis", "Color", "Size", "Label", "Tooltip"],
+        names: [
+            "X Axis",
+            "Y Axis",
+            "Color",
+            "Size",
+            "Symbol",
+            "Label",
+            "Tooltip",
+        ],
     },
     selectMode: "toggle",
 };

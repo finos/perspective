@@ -19,9 +19,20 @@ import { toValue } from "../tooltip/selectionData";
 const LABEL_PADDING = 8;
 const LABEL_COSINE = 1;
 
+/**
+ *
+ * @param {any} settings
+ * @param {string} seriesKey
+ * @param {d3.ScaleLinear} size
+ * @param {d3.ScaleOrdinal} color
+ * @param {string} label
+ * @param {d3.ScaleOrdinal} symbols
+ * @param {number?} scale_factor
+ * @returns  {d3fc.seriesCanvasPoint}
+ */
 export function pointSeriesCanvas(
     settings,
-    seriesKey,
+    symbolKey,
     size,
     color,
     label,
@@ -32,20 +43,21 @@ export function pointSeriesCanvas(
         .crossValue((d) => d.x)
         .mainValue((d) => d.y);
 
+    if (symbols) {
+        series.type((data) => symbols(data.row[symbolKey]));
+    }
+
     if (size) {
         series.size((d) => Math.round(scale_factor * size(d.size)));
     }
-    if (symbols) {
-        series.type(symbols(seriesKey));
-    }
 
-    series.decorate((context, d) => {
-        const colorValue = color(d.colorValue);
+    series.decorate((context, data, _index) => {
+        const colorValue = color(data.colorValue);
 
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
         if (label) {
             const { type } = settings.mainValues.find((x) => x.name === label);
-            const value = toValue(type, d.row[label]);
+            const value = toValue(type, data.row[label]);
             if (value !== null) {
                 context.fillStyle = settings.textStyles.color;
                 context.font = settings.textStyles.font;
@@ -54,7 +66,7 @@ export function pointSeriesCanvas(
                     // A = pi * r^2
                     // r = sqrt(A / pi)
                     const radius = Math.sqrt(
-                        (scale_factor * size(d.size)) / Math.PI
+                        (scale_factor * size(data.size)) / Math.PI
                     );
 
                     magnitude = radius * LABEL_COSINE;
@@ -70,6 +82,19 @@ export function pointSeriesCanvas(
     });
 
     return series;
+}
+
+export function symbolTypeFromColumn(settings, column) {
+    // TODO: This doesn't scale. We should be doing this with a perspective view, but that's async and this isn't.
+    let rows = settings.data
+        .map((obj) => obj[column])
+        .reduce((arr, col) => {
+            if (!arr.includes(col)) {
+                arr.push(col);
+            }
+            return arr;
+        }, []);
+    return fromDomain(rows);
 }
 
 export function symbolTypeFromGroups(settings) {

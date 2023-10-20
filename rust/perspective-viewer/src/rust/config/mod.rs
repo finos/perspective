@@ -18,6 +18,7 @@ mod column_type;
 mod datetime_column_style;
 mod filters;
 mod number_column_style;
+pub mod plugin;
 mod sort;
 mod string_column_style;
 mod view_config;

@@ -17,7 +17,6 @@
         min-width: 0px;
         border: 1px solid var(--inactive--color);
         background-color: var(--plugin--background);
-        margin: 8px;
         border-radius: 3px;
         overflow: hidden;
 
@@ -31,6 +30,13 @@
             text-overflow: ellipsis;
             font-size: 12px;
             color: var(--error--color);
+        }
+        &.disabled {
+            #textarea_editable,
+            #line_numbers,
+            #editor {
+                background-color: var(--inactive--border-color);
+            }
         }
     }
 

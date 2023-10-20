@@ -10,25 +10,22 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-mod attributes_tab;
-mod style_tab;
-
 use std::fmt::Display;
 
 use yew::{function_component, html, Callback, Html, Properties};
 
-use super::containers::tablist::Tab;
-use super::viewer::ColumnLocator;
 use crate::components::column_settings_sidebar::attributes_tab::AttributesTab;
 use crate::components::column_settings_sidebar::style_tab::StyleTab;
 use crate::components::containers::sidebar::Sidebar;
-use crate::components::containers::tablist::TabList;
+use crate::components::containers::tablist::{Tab, TabList};
 use crate::components::expression_editor::get_new_column_name;
 use crate::components::style::LocalStyle;
-use crate::presentation::Presentation;
+use crate::components::viewer::ColumnLocator;
+use crate::custom_events::CustomEvents;
+use crate::model::*;
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::{clone, css, html_template};
+use crate::{clone, css, derive_model, html_template};
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub enum ColumnSettingsTab {
@@ -51,8 +48,10 @@ pub struct ColumnSettingsProps {
     pub on_close: Callback<()>,
     pub session: Session,
     pub renderer: Renderer,
-    pub presentation: Presentation,
+    pub custom_events: CustomEvents,
 }
+
+derive_model!(CustomEvents, Session, Renderer for ColumnSettingsProps);
 
 impl PartialEq for ColumnSettingsProps {
     fn eq(&self, other: &Self) -> bool {
@@ -70,26 +69,40 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     let column_type = p.session.metadata().get_column_view_type(&column_name);
     let is_active = column_type.is_some();
 
-    let mut tabs = vec![];
-
-    // Eventually the Attributes tab will have more properties than
-    // just the expression editor. Once that happens, stop hiding it.
-    if matches!(p.selected_column, ColumnLocator::Expr(_)) {
-        tabs.push(ColumnSettingsTab::Attributes);
+    let (config, attrs) = p.get_plugin_config();
+    if config.is_none() || attrs.is_none() {
+        tracing::warn!(
+            "Could not get full plugin config!\nconfig (plugin.save()): {:?}\nplugin_attrs: {:?}",
+            config,
+            attrs
+        );
     }
-    if !matches!(p.selected_column, ColumnLocator::Expr(None)) && is_active {
-        tabs.push(ColumnSettingsTab::Style);
-    }
+    let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
 
     let title = format!("Editing ‘{column_name}’...");
+
+    let mut tabs = vec![ColumnSettingsTab::Attributes];
+
+    if !matches!(p.selected_column, ColumnLocator::Expr(None))
+        && is_active
+        && config.is_some()
+        && attrs.is_some()
+        && maybe_ty.is_some()
+    {
+        tabs.reverse();
+        tabs.push(ColumnSettingsTab::Style);
+        tabs.reverse();
+    }
 
     clone!(
         p.selected_column,
         p.on_close,
         p.session,
         p.renderer,
-        p.presentation,
-        column_name
+        p.custom_events,
+        column_name,
+        config,
+        attrs
     );
     let match_fn = Callback::from(move |tab| {
         clone!(
@@ -97,30 +110,35 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
             on_close,
             session,
             renderer,
-            presentation,
-            column_name
+            custom_events,
+            column_name,
+            config,
+            attrs
         );
         match tab {
             ColumnSettingsTab::Attributes => {
-                let selected_column = match selected_column {
-                    ColumnLocator::Expr(s) => s,
-                    _ => panic!("Tried to open Attributes tab for non-expression column!"),
-                };
                 html! {
                     <AttributesTab
-                        { selected_column }
-                        { on_close }
                         { session }
                         { renderer }
+                        { custom_events }
+
+                        { selected_column }
+                        { on_close }
+                        { maybe_ty }
                     />
                 }
             }
             ColumnSettingsTab::Style => html! {
                 <StyleTab
-                    { column_name }
                     { session }
                     { renderer }
-                    { presentation }
+                    { custom_events }
+
+                    { column_name }
+                    ty={ maybe_ty.unwrap() }
+                    config={ config.unwrap() }
+                    attrs={ attrs.unwrap() }
                 />
             },
         }
