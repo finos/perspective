@@ -94,11 +94,8 @@ impl NumberColumnStyleProps {
                 let min_max = view.get_min_max(&column_name).await.unwrap();
                 let abs_max = max!(min_max.0.abs(), min_max.1.abs());
                 let gradient = (abs_max * 100.).round() / 100.;
-                tracing::info!("gradient = {gradient}");
                 NumberColumnStyleMsg::DefaultGradientChanged(gradient)
             });
-        } else {
-            tracing::warn!("Could not calculate min_max!");
         }
     }
 }

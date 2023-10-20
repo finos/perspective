@@ -86,11 +86,7 @@ function overrideSymbols(settings, symbols) {
                     return String(val) === String(key);
             }
         });
-        if (i === -1) {
-            console.error(
-                `Could not find row with value ${key} when overriding symbols!`
-            );
-        }
+
         range[i] = symbolType;
     });
     symbols.range(range);

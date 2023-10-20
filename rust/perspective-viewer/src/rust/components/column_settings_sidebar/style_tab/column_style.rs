@@ -71,18 +71,18 @@ pub struct ColumnStyleProps {
 
     pub ty: Type,
     pub column_name: String,
-    pub config: PluginConfig,
-    pub attrs: PluginAttributes,
 }
 derive_model!(CustomEvents, Session, Renderer for ColumnStyleProps);
 #[function_component]
 pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
     let props = p.clone();
+    let (config, attrs) = props.get_plugin_config();
+    let (config, attrs) = (config.unwrap(), attrs.unwrap());
     let title = format!("{} Styling", props.ty.to_capitalized());
     let opt_html = match props.ty {
         Type::String => get_column_style::<_, StringColumnStyleDefaultConfig>(
-            props.config.clone(),
-            props.attrs.clone(),
+            config.clone(),
+            attrs.clone(),
             &props.column_name,
             props.ty,
         )
@@ -106,8 +106,8 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         }),
 
         Type::Datetime | Type::Date => get_column_style::<_, DatetimeColumnStyleDefaultConfig>(
-            props.config.clone(),
-            props.attrs.clone(),
+            config.clone(),
+            attrs.clone(),
             &props.column_name,
             props.ty,
         )
@@ -133,8 +133,8 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         }),
 
         Type::Integer | Type::Float => get_column_style::<_, NumberColumnStyleDefaultConfig>(
-            props.config.clone(),
-            props.attrs.clone(),
+            config.clone(),
+            attrs.clone(),
             &props.column_name,
             props.ty,
         )
@@ -192,18 +192,16 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
 
             let zipped = ty.as_deref().zip(name.as_deref());
             match zipped {
-                Some(("Symbol", name)) if name == props.column_name => {
-                    let attrs = props.attrs.symbol.clone().unwrap();
+                Some(("Symbol", name)) if name == props.column_name && p.ty == Type::String => {
                     is_symbol = true;
                     Some(html! {
                         <SymbolAttr
                             { attr_type }
-                            { attrs }
                             column_name={ props.column_name.clone() }
                             session={ &props.session }
                             renderer={ &props.renderer }
                             custom_events={ &props.custom_events }
-                            config={ props.config.clone() }/>
+                        />
                     })
                 }
                 _ => None,
