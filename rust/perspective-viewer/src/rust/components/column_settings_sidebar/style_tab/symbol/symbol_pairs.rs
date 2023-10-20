@@ -13,9 +13,9 @@
 use std::rc::Rc;
 
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
 use yew::{html, Callback, Html, Properties};
 
+use super::types::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::row_selector::RowSelector;
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_selector::SymbolSelector;
 use crate::components::style::LocalStyle;
@@ -23,38 +23,11 @@ use crate::config::plugin::Symbol;
 use crate::custom_elements::FilterDropDownElement;
 use crate::{css, html_template};
 
-// TODO: Make this generic
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default)]
-pub struct KVPair {
-    pub key: Option<String>,
-    pub value: Option<String>,
-}
-
-impl KVPair {
-    pub fn new(key: Option<String>, value: Option<String>) -> Self {
-        Self { key, value }
-    }
-
-    pub fn update_key(&self, key: Option<String>) -> Self {
-        Self {
-            key,
-            value: self.value.clone(),
-        }
-    }
-
-    pub fn update_value(&self, value: Option<String>) -> Self {
-        Self {
-            key: self.key.clone(),
-            value,
-        }
-    }
-}
-
 #[derive(Properties, PartialEq)]
 pub struct PairsListProps {
     pub title: String,
-    pub pairs: Vec<KVPair>,
-    pub update_pairs: Callback<Vec<KVPair>>,
+    pub pairs: Vec<SymbolKVPair>,
+    pub update_pairs: Callback<Vec<SymbolKVPair>>,
     pub id: Option<String>,
     pub row_dropdown: Rc<FilterDropDownElement>,
     pub values: Vec<Symbol>,
@@ -124,10 +97,10 @@ impl yew::Component for PairsList {
 
 #[derive(Properties, PartialEq)]
 pub struct PairsListItemProps {
-    pub pair: KVPair,
+    pub pair: SymbolKVPair,
     pub index: usize,
-    pub pairs: Vec<KVPair>,
-    pub update_pairs: Callback<Vec<KVPair>>,
+    pub pairs: Vec<SymbolKVPair>,
+    pub update_pairs: Callback<Vec<SymbolKVPair>>,
     pub row_dropdown: Rc<FilterDropDownElement>,
     pub values: Vec<Symbol>,
     pub focused: bool,
@@ -138,7 +111,7 @@ pub struct PairsListItemProps {
 pub enum PairListItemMsg {
     Remove,
     UpdateKey(Option<String>),
-    UpdateValue(Option<String>),
+    UpdateValue(String),
 }
 
 pub struct PairsListItem {}
@@ -182,7 +155,10 @@ impl yew::Component for PairsListItem {
         let on_key_update = ctx.link().callback(|s| PairListItemMsg::UpdateKey(Some(s)));
         let on_value_update = ctx
             .link()
-            .callback(|s: Symbol| PairListItemMsg::UpdateValue(Some(s.name)));
+            .callback(|s: Symbol| PairListItemMsg::UpdateValue(s.name));
+
+        let remove_style =
+            (ctx.props().index == ctx.props().pairs.len() - 1).then_some("visibility: hidden");
 
         html! {
             <li class="pairs-list-item">
@@ -202,6 +178,7 @@ impl yew::Component for PairsListItem {
                     selected_value={ props.pair.value.clone() }/>
                 <span
                     class="toggle-mode is_column_active"
+                    style={ remove_style }
                     onclick={ on_remove.clone() }>
                 </span>
             </li>

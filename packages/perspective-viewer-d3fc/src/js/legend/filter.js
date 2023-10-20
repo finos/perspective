@@ -14,30 +14,36 @@ import { groupFromKey } from "../series/seriesKey";
 
 export function filterData(settings, data) {
     const useData = data || settings.data;
-    if (settings.hideKeys && settings.hideKeys.length > 0) {
-        return useData.map((col) => {
-            const clone = { ...col };
-            settings.hideKeys.forEach((k) => {
-                delete clone[k];
-            });
-            return clone;
-        });
-    }
-    return useData;
+    const len = settings.hideKeys?.length ?? 0;
+    return len > 0
+        ? useData.map((col) => {
+              const clone = { ...col };
+              settings.hideKeys.forEach((k) => {
+                  delete clone[k];
+              });
+              return clone;
+          })
+        : useData;
 }
 
 export function filterDataByGroup(settings, data) {
-    const useData = data || settings.data;
-    if (settings.hideKeys && settings.hideKeys.length > 0) {
-        return useData.map((col) => {
-            const clone = {};
-            Object.keys(col).map((key) => {
-                if (!settings.hideKeys.includes(groupFromKey(key))) {
-                    clone[key] = col[key];
-                }
-            });
-            return clone;
-        });
-    }
-    return useData;
+    const newData = data || settings.data;
+    const hideKeysLen = settings.hideKeys?.length ?? 0;
+    const splitValsLen = settings.splitValues.length;
+    return hideKeysLen > 0
+        ? splitValsLen === 0
+            ? newData.filter((row) => {
+                  return Object.values(row).reduce(
+                      (res, val) => res && !settings.hideKeys.includes(val),
+                      true
+                  );
+              })
+            : newData.map((row) => {
+                  const entries = Object.entries(row).filter(
+                      ([key, _val]) =>
+                          !settings.hideKeys.includes(groupFromKey(key))
+                  );
+                  return Object.fromEntries(entries);
+              })
+        : newData;
 }

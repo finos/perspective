@@ -12,6 +12,10 @@
 
 @import (reference) url(./column-selector.less);
 :host {
+    #column_settings_sidebar {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     #column_settings_icon:before {
         @include icon;
         height: 14px;

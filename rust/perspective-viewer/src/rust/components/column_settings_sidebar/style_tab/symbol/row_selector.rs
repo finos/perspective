@@ -16,7 +16,7 @@ use std::rc::Rc;
 use itertools::Itertools;
 use yew::{function_component, html, Html, Properties};
 
-use super::symbol_pairs::KVPair;
+use super::types::SymbolKVPair;
 use crate::clone;
 use crate::components::empty_row::EmptyRow;
 use crate::custom_elements::FilterDropDownElement;
@@ -26,7 +26,7 @@ pub struct RowSelectorProps {
     pub selected_row: Option<String>,
     pub on_select: yew::Callback<String>,
     pub dropdown: Rc<FilterDropDownElement>,
-    pub pairs: Vec<KVPair>,
+    pub pairs: Vec<SymbolKVPair>,
     pub index: usize,
     pub focused: bool,
     pub set_focused_index: yew::Callback<Option<usize>>,
@@ -67,7 +67,7 @@ pub fn row_selector(p: &RowSelectorProps) -> Html {
         }
         let exclude: HashSet<_> = pairs
             .into_iter()
-            .filter_map(|KVPair { key, .. }| key)
+            .filter_map(|SymbolKVPair { key, .. }| key)
             .collect();
         html! {
             <div class={err_class}>

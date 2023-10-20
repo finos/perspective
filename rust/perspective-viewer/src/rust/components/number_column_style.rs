@@ -86,7 +86,19 @@ impl PartialEq for NumberColumnStyleProps {
     }
 }
 
-impl NumberColumnStyleProps {}
+impl NumberColumnStyleProps {
+    fn set_default_gradient(&self, ctx: &Context<NumberColumnStyle>) {
+        if let Some(session) = self.session.clone() && let Some(column_name) = self.column_name.clone() {
+            ctx.link().send_future(async move {
+                let view = session.get_view().unwrap();
+                let min_max = view.get_min_max(&column_name).await.unwrap();
+                let abs_max = max!(min_max.0.abs(), min_max.1.abs());
+                let gradient = (abs_max * 100.).round() / 100.;
+                NumberColumnStyleMsg::DefaultGradientChanged(gradient)
+            });
+        }
+    }
+}
 
 /// The `ColumnStyle` component stores its UI state privately in its own struct,
 /// rather than its props (which has two version of this data itself, the
@@ -111,15 +123,7 @@ impl Component for NumberColumnStyle {
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
 
-        if let Some(session) = ctx.props().session.clone() && let Some(column_name) = ctx.props().column_name.clone() {
-            ctx.link().send_future(async move {
-                let view = session.get_view().unwrap();
-                let min_max = view.get_min_max(&column_name).await.unwrap();
-                let abs_max = max!(min_max.0.abs(), min_max.1.abs());
-                let gradient_val = (abs_max * 100.).round() / 100.;
-                NumberColumnStyleMsg::DefaultGradientChanged(gradient_val)
-            });
-        }
+        ctx.props().set_default_gradient(ctx);
 
         Self::reset(
             &ctx.props().config.clone().unwrap_or_default(),
@@ -132,6 +136,7 @@ impl Component for NumberColumnStyle {
             &ctx.props().config.clone().unwrap_or_default(),
             &ctx.props().default_config.clone(),
         );
+        ctx.props().set_default_gradient(ctx);
         std::mem::swap(self, &mut new);
         true
     }
@@ -166,7 +171,8 @@ impl Component for NumberColumnStyle {
                     self.config.pos_fg_color = Some(self.pos_fg_color.to_owned());
                     self.config.neg_fg_color = Some(self.neg_fg_color.to_owned());
                     if self.fg_mode.needs_gradient() {
-                        self.config.fg_gradient = Some(self.fg_gradient.unwrap_or_default());
+                        self.config.fg_gradient =
+                            Some(self.fg_gradient.expect_throw("no gradient!"));
                     } else {
                         self.config.fg_gradient = None;
                     }
@@ -191,7 +197,8 @@ impl Component for NumberColumnStyle {
                     self.config.pos_bg_color = Some(self.pos_bg_color.to_owned());
                     self.config.neg_bg_color = Some(self.neg_bg_color.to_owned());
                     if self.bg_mode.needs_gradient() {
-                        self.config.bg_gradient = Some(self.bg_gradient.unwrap_or_default());
+                        self.config.bg_gradient =
+                            Some(self.bg_gradient.expect_throw("No gradient!"));
                     } else {
                         self.config.bg_gradient = None;
                     }
@@ -233,7 +240,7 @@ impl Component for NumberColumnStyle {
                 self.fg_mode = val;
                 self.config.number_fg_mode = val;
                 if self.fg_mode.needs_gradient() {
-                    self.config.fg_gradient = Some(self.fg_gradient.unwrap_or_default());
+                    self.config.fg_gradient = Some(self.fg_gradient.expect_throw("no gradient!"));
                 } else {
                     self.config.fg_gradient = None;
                 }
@@ -245,7 +252,7 @@ impl Component for NumberColumnStyle {
                 self.bg_mode = val;
                 self.config.number_bg_mode = val;
                 if self.bg_mode.needs_gradient() {
-                    self.config.bg_gradient = Some(self.bg_gradient.unwrap_or_default());
+                    self.config.bg_gradient = Some(self.bg_gradient.expect_throw("no gradient!"));
                 } else {
                     self.config.bg_gradient = None;
                 }

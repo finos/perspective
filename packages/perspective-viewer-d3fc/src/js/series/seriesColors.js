@@ -12,6 +12,7 @@
 
 import * as d3 from "d3";
 import { groupFromKey } from "./seriesKey";
+import { getValuesByColumn } from "../data/utils";
 
 export function seriesColors(settings) {
     const col =
@@ -20,38 +21,23 @@ export function seriesColors(settings) {
     return colorScale().settings(settings).domain(domain)();
 }
 
-// TODO: We're iterating over all the data here to get the unique values for each colorBy field.
-// This is the only way to do it since we don't know the range of these values ahead of time.
-// This should be WASM-side code.
-export function seriesColorsFromField(settings, field) {
-    const data = settings.data;
-    const key = settings.realValues[field];
-    // alt:
-    // const domain = [...new Set(data.map((obj) => obj[key]))].sort();
-    const domain = data
-        .reduce((accum, obj) => {
-            const val = obj[key];
-            return accum.includes(val) ? accum : [...accum, val];
-        }, [])
-        .sort();
+export function seriesColorsFromColumn(settings, column) {
+    const data = getValuesByColumn(settings, column);
+    const domain = [...new Set(data)].sort();
     return colorScale().settings(settings).domain(domain)();
 }
 
 export function seriesColorsFromDistinct(settings, data) {
-    let domain = Array.from(new Set(data));
+    let domain = [...new Set(data)];
     return colorScale().settings(settings).domain(domain)();
 }
 
 export function seriesColorsFromGroups(settings) {
     const col = settings.data[0] ?? {};
-    // alt:
-    // const domain = [...new Set(Object.keys(col).filter(k => k !== "__ROW_PATH__").map(k => groupFromKey(k)))];
-    const domain = Object.keys(col).reduce((accum, key) => {
-        if (key === "__ROW_PATH__") return accum;
-        const group = groupFromKey(key);
-        return accum.includes(group) ? accum : [...accum, group];
-    }, []);
-
+    const inner = Object.keys(col)
+        .filter((k) => k !== "__ROW_PATH__")
+        .map((k) => groupFromKey(k));
+    const domain = [...new Set(inner)];
     return colorScale().settings(settings).domain(domain)();
 }
 

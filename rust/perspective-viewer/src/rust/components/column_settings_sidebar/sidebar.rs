@@ -100,9 +100,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
         p.session,
         p.renderer,
         p.custom_events,
-        column_name,
-        config,
-        attrs
+        column_name
     );
     let match_fn = Callback::from(move |tab| {
         clone!(
@@ -111,9 +109,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
             session,
             renderer,
             custom_events,
-            column_name,
-            config,
-            attrs
+            column_name
         );
         match tab {
             ColumnSettingsTab::Attributes => {
@@ -137,8 +133,6 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
 
                     { column_name }
                     ty={ maybe_ty.unwrap() }
-                    config={ config.unwrap() }
-                    attrs={ attrs.unwrap() }
                 />
             },
         }

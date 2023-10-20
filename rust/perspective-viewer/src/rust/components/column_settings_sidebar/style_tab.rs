@@ -30,8 +30,6 @@ pub struct StyleTabProps {
 
     pub ty: Type,
     pub column_name: String,
-    pub config: PluginConfig,
-    pub attrs: PluginAttributes,
 }
 
 #[function_component]
@@ -45,8 +43,7 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                     renderer={ p.renderer.clone() }
                     ty={ p.ty }
                     column_name={ p.column_name.clone() }
-                    config={ p.config.clone() }
-                    attrs={ p.attrs.clone() }/>
+                    />
             </div>
         </div>
     }

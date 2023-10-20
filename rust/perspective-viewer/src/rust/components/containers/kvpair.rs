@@ -10,19 +10,38 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! `containers` are generic container-like components for collections of other
-//! `Component` types.
+use serde::{Deserialize, Serialize};
 
-pub mod dragdrop_list;
-pub mod dropdown_menu;
-pub mod kvpair;
-pub mod radio_list;
-pub mod radio_list_item;
-pub mod scroll_panel;
-pub mod select;
-pub mod sidebar;
-pub mod split_panel;
-pub mod tablist;
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default)]
+pub struct KVPair<K, V>
+where
+    K: Clone,
+    V: Clone,
+{
+    pub key: K,
+    pub value: V,
+}
 
-#[cfg(test)]
-mod tests;
+impl<K, V> KVPair<K, V>
+where
+    K: Clone,
+    V: Clone,
+{
+    pub fn new(key: K, value: V) -> Self {
+        Self { key, value }
+    }
+
+    pub fn update_key(&self, key: K) -> Self {
+        Self {
+            key,
+            value: self.value.clone(),
+        }
+    }
+
+    pub fn update_value(&self, value: V) -> Self {
+        Self {
+            key: self.key.clone(),
+            value,
+        }
+    }
+}
