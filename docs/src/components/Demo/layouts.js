@@ -71,7 +71,7 @@ export const LAYOUTS = {
         plugin: "X/Y Scatter",
         group_by: ["name"],
         split_by: [],
-        columns: ["bid", "ask", "chg", "vol", "name"],
+        columns: ["bid", "ask", "chg", "vol", null, "name"],
         aggregates: { bid: "avg", ask: "avg", vol: "avg", name: "dominant" },
         sort: [],
     },

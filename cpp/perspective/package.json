@@ -3,7 +3,7 @@
     "private": true,
     "author": "The Perspective Authors",
     "license": "Apache-2.0",
-    "version": "2.5.2",
+    "version": "2.6.0",
     "main": "./dist/esm/perspective.cpp.js",
     "files": [
         "dist/esm/**/*",

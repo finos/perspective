@@ -1,3 +1,20 @@
+# [v2.6.0](https://github.com/finos/perspective/releases/tag/v2.6.0)
+
+_20 October 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.5.2...v2.6.0))
+
+Features
+
+- X/Y scatter multi-chart [#2395](https://github.com/finos/perspective/pull/2395)
+- Symbols column in `X/Y Scatter` plot [#2394](https://github.com/finos/perspective/pull/2394)
+- New themes `Gruvbox` and `Dracula` + UI performance improvements [#2393](https://github.com/finos/perspective/pull/2393)
+- Add `index()`, `col()`, and `vlookup()` to ExprTk [#2374](https://github.com/finos/perspective/pull/2374)
+- Datagrid rows restyle [#2383](https://github.com/finos/perspective/pull/2383)
+
+Fixes
+
+- Column selector style updates [#2385](https://github.com/finos/perspective/pull/2385)
+- fix gradient values [#2384](https://github.com/finos/perspective/pull/2384)
+
 # [v2.5.2](https://github.com/finos/perspective/releases/tag/v2.5.2)
 
 _8 October 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.5.1...v2.5.2))
@@ -12,8 +29,8 @@ Fixes
 
 Misc
 
-- Localize NYPD, Magic and Olympics examples [#2375](https://github.com/finos/perspective/pull/2375)
 - Fix tests [#2380](https://github.com/finos/perspective/pull/2380)
+- Localize NYPD, Magic and Olympics examples [#2375](https://github.com/finos/perspective/pull/2375)
 
 # [v2.5.1](https://github.com/finos/perspective/releases/tag/v2.5.1)
 

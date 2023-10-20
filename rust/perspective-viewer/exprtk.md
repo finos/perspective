@@ -603,3 +603,27 @@ Replaces all non-overlapping matches of pattern in string with replacer, or retu
 replace(${1:string}, ${2:pattern}, ${3:replacer})
 ```
 
+#### `index`
+
+Looks up the index value of the current row
+
+```
+index()
+```
+
+#### `col`
+
+Looks up a column value by name
+
+```
+col(${1:string})
+```
+
+#### `vlookup`
+
+Looks up a value in another column by index
+
+```
+vlookup(${1:string}, ${2:uint64})
+```
+
