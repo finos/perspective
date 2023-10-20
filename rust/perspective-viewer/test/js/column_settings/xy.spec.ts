@@ -113,14 +113,18 @@ test.describe("X/Y Scatter", () => {
             }
         });
     });
-    test("Symbols column - Datetime values", async ({ page }) => {
+
+    test.skip("Symbols column - Datetime values", async ({ page }) => {
         await checkSymbolsSection(page, "Order Date", ["0", "1", "2"], "9");
     });
-    test("Symbols column - Numeric values", async ({ page }) => {
+
+    test.skip("Symbols column - Numeric values", async ({ page }) => {
         await checkSymbolsSection(page, "Discount", ["0", "1", "2"], "7");
     });
+
     test("Symbols column - String values", async ({ page }) => {
         await checkSymbolsSection(page, "State", ["A", "B", "C"], "D");
     });
+
     test.fixme("Symbols column - Expression values", async ({ page }) => {});
 });

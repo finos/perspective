@@ -15,6 +15,7 @@ import { withOpacity, withoutOpacity } from "./seriesColors";
 import { groupFromKey } from "./seriesKey";
 import { fromDomain } from "./seriesSymbols";
 import { toValue } from "../tooltip/selectionData";
+import { getValuesByColumn } from "../data/utils";
 
 const LABEL_PADDING = 8;
 const LABEL_COSINE = 1;
@@ -51,10 +52,9 @@ export function pointSeriesCanvas(
         series.size((d) => Math.round(scale_factor * size(d.size)));
     }
 
-    series.decorate((context, data, _index) => {
+    series.decorate((context, data) => {
         const colorValue = color(data.colorValue);
-
-        const opacity = settings.colorStyles && settings.colorStyles.opacity;
+        const opacity = settings.colorStyles?.opacity;
         if (label) {
             const { type } = settings.mainValues.find((x) => x.name === label);
             const value = toValue(type, data.row[label]);
@@ -85,15 +85,7 @@ export function pointSeriesCanvas(
 }
 
 export function symbolTypeFromColumn(settings, column) {
-    // TODO: This doesn't scale. We should be doing this with a perspective view, but that's async and this isn't.
-    let rows = settings.data
-        .map((obj) => obj[column])
-        .reduce((arr, col) => {
-            if (!arr.includes(col)) {
-                arr.push(col);
-            }
-            return arr;
-        }, []);
+    let rows = [...new Set(getValuesByColumn(settings, column))];
     return fromDomain(rows);
 }
 
