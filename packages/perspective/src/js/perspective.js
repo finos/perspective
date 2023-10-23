@@ -1434,7 +1434,7 @@ export default function (Module) {
             // First, look for a column alias, which is a // style comment
             // on the first line of the expression.
             let expression_alias;
-            if (expression.name && expression.name !== "") {
+            if (expression.name !== null || expression.name !== undefined) {
                 expression_alias = expression.name;
             } else {
                 let alias_match = expression.match(/^\/\/(?<alias>.+?)\n/);
