@@ -11,11 +11,12 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use wasm_bindgen::JsValue;
-use yew::{function_component, html, Callback, Html, Properties};
+use web_sys::HtmlInputElement;
+use yew::{function_component, html, Callback, Html, NodeRef, Properties};
 
 use crate::components::expression_editor::ExpressionEditor;
 use crate::components::viewer::ColumnLocator;
-use crate::config::ViewConfigUpdate;
+use crate::config::{Expression, ViewConfigUpdate};
 use crate::derive_model;
 use crate::model::UpdateAndRender;
 use crate::renderer::Renderer;
@@ -34,10 +35,10 @@ derive_model!(Renderer, Session for ExprEditorAttrProps);
 #[function_component(ExprEditorAttr)]
 pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
     let is_validating = yew::use_state_eq(|| false);
-    let on_save = yew::use_callback(p.clone(), |v, p| {
+    let on_save = yew::use_callback(p.clone(), |(v, noderef), p| {
         match &p.selected_column {
-            ColumnLocator::Expr(Some(alias)) => update_expr(alias, &v, p),
-            ColumnLocator::Expr(None) => save_expr(v, p),
+            ColumnLocator::Expr(Some(alias)) => update_expr(alias, noderef, &v, p),
+            ColumnLocator::Expr(None) => save_expr(v, noderef, p),
 
             // TODO: We should be able to create a new expression from the currently selected
             // column if it is not already an expression column.
@@ -59,39 +60,55 @@ pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
 
     html! {
         <div id ="attributes-expr">
-            <div class="item_title">{"Expression Editor"}</div>
             <ExpressionEditor
                 { on_save }
                 { on_validate }
                 { on_delete }
                 session = { &p.session }
-                alias = { p.selected_column.name().cloned() }
+                old_alias = { p.selected_column.name().cloned() }
                 disabled = {!matches!(p.selected_column, ColumnLocator::Expr(_))}
             />
         </div>
     }
 }
 
-fn update_expr(name: &str, new_expression: &JsValue, props: &ExprEditorAttrProps) {
-    let n = name.to_string();
-    let exp = new_expression.clone();
+fn update_expr(
+    old_name: &str,
+    alias_ref: NodeRef,
+    new_expr_val: &JsValue,
+    props: &ExprEditorAttrProps,
+) {
+    let old_name = old_name.to_string();
     let sesh = props.session.clone();
     let props = props.clone();
+    let new_name = alias_ref.cast::<HtmlInputElement>().unwrap().value();
+    let new_expr_val = new_expr_val.as_string().unwrap();
+    let new_expr = Expression {
+        name: new_name,
+        expr: new_expr_val,
+    };
     ApiFuture::spawn(async move {
-        let update = sesh.create_replace_expression_update(&n, &exp).await;
+        let update = sesh
+            .create_replace_expression_update(&old_name, &new_expr)
+            .await;
         props.update_and_render(update).await?;
         Ok(())
     });
 }
 
-fn save_expr(expression: JsValue, props: &ExprEditorAttrProps) {
+fn save_expr(expression: JsValue, alias_ref: NodeRef, props: &ExprEditorAttrProps) {
     let task = {
-        let expression = expression.as_string().unwrap();
-        let mut expressions = props.session.get_view_config().expressions.clone();
-        expressions.retain(|x| x != &expression);
-        expressions.push(expression);
+        let expression_val = expression.as_string().unwrap();
+        let name = alias_ref.cast::<HtmlInputElement>().unwrap().value();
+        let expr = Expression {
+            name,
+            expr: expression_val,
+        };
+        let mut serde_exprs = props.session.get_view_config().expressions.clone();
+        serde_exprs.retain(|serde_expr| serde_expr.name() != expr.name);
+        serde_exprs.push(expr.into());
         props.update_and_render(ViewConfigUpdate {
-            expressions: Some(expressions),
+            expressions: Some(serde_exprs),
             ..Default::default()
         })
     };
@@ -101,15 +118,15 @@ fn save_expr(expression: JsValue, props: &ExprEditorAttrProps) {
 
 fn delete_expr(expr_name: &str, props: &ExprEditorAttrProps) {
     let session = &props.session;
-    let expression = session
-        .metadata()
-        .get_expression_by_alias(expr_name)
-        .unwrap();
+    // let expression = session
+    //     .metadata()
+    //     .get_expression_by_alias(expr_name)
+    //     .unwrap();
 
-    let mut expressions = session.get_view_config().expressions.clone();
-    expressions.retain(|x| x != &expression);
+    let mut serde_exprs = session.get_view_config().expressions.clone();
+    serde_exprs.retain(|serde_expr| serde_expr.name() != expr_name);
     let config = ViewConfigUpdate {
-        expressions: Some(expressions),
+        expressions: Some(serde_exprs),
         ..ViewConfigUpdate::default()
     };
 

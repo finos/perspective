@@ -54,14 +54,18 @@ export class AttributesTab {
 
 export class ExpressionEditor {
     container: Locator;
+    nameInput: Locator;
     content: Locator;
+    textarea: Locator;
     saveBtn: Locator;
     resetBtn: Locator;
     deleteBtn: Locator;
 
     constructor(parent: Locator) {
         this.container = parent.locator("#editor-container");
+        this.nameInput = parent.locator("#editor-alias-container input");
         this.content = this.container.locator("#content");
+        this.textarea = this.container.locator("textarea");
         this.saveBtn = this.container.locator(
             "#psp-expression-editor-button-save"
         );

@@ -23,4 +23,28 @@
         -webkit-mask-image: var(--column-settings-icon--mask-image);
         mask-image: var(--column-settings-icon--mask-image);
     }
+
+    // NOTE: These should probably make their way to global form styling eventually.
+    .errored {
+        outline-color: var(--error--color);
+    }
+    .item_title {
+        font-size: 9px;
+    }
+    input {
+        &[type="text"] {
+            outline: 1px solid;
+            outline-color: var(--inactive--color);
+            background-color: var(--plugin--background);
+            border: none;
+            border-radius: 2px;
+            margin-bottom: 0.5em;
+            font-family: "Roboto Mono", monospace;
+            font-size: 12px;
+            min-height: 24px;
+            &:disabled {
+                background-color: var(--inactive--color);
+            }
+        }
+    }
 }

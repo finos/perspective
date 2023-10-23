@@ -385,8 +385,8 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::New(DragTarget::GroupBy, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
-                view_config.group_by.push(col.clone());
-                view_config.expressions.push(col);
+                view_config.group_by.push(col.name.clone());
+                view_config.expressions.push(col.into());
                 let update = ViewConfigUpdate {
                     group_by: Some(view_config.group_by),
                     expressions: Some(view_config.expressions),
@@ -399,8 +399,8 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::New(DragTarget::SplitBy, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
-                view_config.split_by.push(col.clone());
-                view_config.expressions.push(col);
+                view_config.split_by.push(col.name.clone());
+                view_config.expressions.push(col.into());
                 let update = ViewConfigUpdate {
                     split_by: Some(view_config.split_by),
                     expressions: Some(view_config.expressions),
@@ -414,11 +414,11 @@ impl Component for ConfigSelector {
             ConfigSelectorMsg::New(DragTarget::Filter, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.filter.push(Filter(
-                    col.clone(),
+                    col.name.clone(),
                     FilterOp::EQ,
                     FilterTerm::Scalar(Scalar::Null),
                 ));
-                view_config.expressions.push(col);
+                view_config.expressions.push(col.into());
                 let update = ViewConfigUpdate {
                     filter: Some(view_config.filter),
                     expressions: Some(view_config.expressions),
@@ -431,8 +431,8 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::New(DragTarget::Sort, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
-                view_config.sort.push(Sort(col.clone(), SortDir::Asc));
-                view_config.expressions.push(col);
+                view_config.sort.push(Sort(col.name.clone(), SortDir::Asc));
+                view_config.expressions.push(col.into());
                 let update = ViewConfigUpdate {
                     sort: Some(view_config.sort),
                     expressions: Some(view_config.expressions),

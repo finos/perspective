@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use crate::config::*;
 
 impl ViewConfig {
+    // TODO: Split this up into expr and alias fns
     /// Create an update for this `ViewConfig` that replaces an expression
     /// column with a new one, e.g. when a user edits an expression.  This may
     /// changed either the expression alias, the expression itself, or both; as
@@ -24,12 +25,10 @@ impl ViewConfig {
     /// fill in `old_expression` and `new_alias`.
     pub(super) fn create_replace_expression_update(
         &self,
-        old_alias: &str,
-        old_expression: &str,
-        new_alias: &str,
-        new_expression: &str,
+        old_expr: &Expression,
+        new_expr: &Expression,
     ) -> ViewConfigUpdate {
-        let expression = new_expression;
+        let expression = new_expr;
         let Self {
             columns,
             expressions,
@@ -43,11 +42,11 @@ impl ViewConfig {
 
         let expressions = expressions
             .into_iter()
-            .map(|x| {
-                if x == old_expression {
-                    expression.to_owned()
+            .map(|serde_expr| {
+                if old_expr == &serde_expr {
+                    expression.to_owned().into()
                 } else {
-                    x
+                    serde_expr
                 }
             })
             .collect::<Vec<_>>();
@@ -55,8 +54,8 @@ impl ViewConfig {
         let aggregates = aggregates
             .into_iter()
             .map(|x| {
-                if x.0 == old_expression {
-                    (expression.to_owned(), x.1)
+                if x.0 == old_expr.name {
+                    (expression.name.to_owned(), x.1)
                 } else {
                     x
                 }
@@ -66,7 +65,7 @@ impl ViewConfig {
         let columns = columns
             .into_iter()
             .map(|x| match x {
-                Some(x) if x == old_alias => Some(new_alias.to_owned()),
+                Some(x) if x == old_expr.name => Some(new_expr.name.to_owned()),
                 x => x,
             })
             .collect::<Vec<_>>();
@@ -74,8 +73,8 @@ impl ViewConfig {
         let group_by = group_by
             .into_iter()
             .map(|x| {
-                if x == old_alias {
-                    new_alias.to_owned()
+                if x == old_expr.name {
+                    new_expr.name.to_owned()
                 } else {
                     x
                 }
@@ -85,8 +84,8 @@ impl ViewConfig {
         let split_by = split_by
             .into_iter()
             .map(|x| {
-                if x == old_alias {
-                    new_alias.to_owned()
+                if x == old_expr.name {
+                    new_expr.name.to_owned()
                 } else {
                     x
                 }
@@ -96,8 +95,8 @@ impl ViewConfig {
         let sort = sort
             .into_iter()
             .map(|x| {
-                if x.0 == old_alias {
-                    Sort(new_alias.to_owned(), x.1)
+                if x.0 == old_expr.name {
+                    Sort(new_expr.name.to_owned(), x.1)
                 } else {
                     x
                 }
@@ -108,8 +107,8 @@ impl ViewConfig {
         let filter = filter
             .into_iter()
             .map(|x| {
-                if x.0 == old_alias {
-                    Filter(new_alias.to_owned(), x.1, x.2)
+                if x.0 == old_expr.name {
+                    Filter(new_expr.name.to_owned(), x.1, x.2)
                 } else {
                     x
                 }

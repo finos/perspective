@@ -1415,13 +1415,13 @@ export default function (Module) {
      *  which will be used in the engine to look up column values.
      *
      * @private
-     * @param {Array<String>} expressions
+     * @param {Array<{name: string, expr: string}> | Array<string>} expressions
      */
     function parse_expression_strings(expressions) {
         let validated_expressions = [];
         const expression_idx_map = {};
 
-        for (let expression_string of expressions) {
+        for (let expression of expressions) {
             // Map of column names to column IDs, so that we generate
             // column IDs correctly without collision.
             let column_name_map = {};
@@ -1434,19 +1434,24 @@ export default function (Module) {
             // First, look for a column alias, which is a // style comment
             // on the first line of the expression.
             let expression_alias;
-            let alias_match = expression_string.match(/^\/\/(?<alias>.+?)\n/);
+            if (expression.name !== null || expression.name !== undefined) {
+                expression_alias = expression.name;
+            } else {
+                let alias_match = expression.match(/^\/\/(?<alias>.+?)\n/);
 
-            if (alias_match?.groups?.alias) {
-                expression_alias = alias_match.groups.alias.trim();
-            }
+                if (alias_match?.groups?.alias) {
+                    expression_alias = alias_match.groups.alias.trim();
+                }
 
-            // If an alias does not exist, the alias is the expression itself.
-            if (!expression_alias || expression_alias.length == 0) {
-                expression_alias = expression_string;
+                // If an alias does not exist, the alias is the expression itself.
+                if (!expression_alias || expression_alias.length == 0) {
+                    expression_alias = expression;
+                }
             }
 
             // Replace `true` and `false` reserved words with symbols
-            let parsed_expression_string = expression_string.replace(
+            let expr_val = expression.expr ?? expression;
+            let parsed_expression_string = expr_val.replace(
                 /([a-zA-Z_]+[a-zA-Z0-9_]*)/g,
                 (match) => {
                     if (match == "true") {
@@ -1516,7 +1521,7 @@ export default function (Module) {
 
             const validated = [
                 expression_alias,
-                expression_string,
+                expr_val,
                 parsed_expression_string,
                 column_id_map,
             ];
@@ -1544,7 +1549,7 @@ export default function (Module) {
      * passed in is not in `expressions`, it is guaranteed to be in `errors`.
      *
      * @async
-     * @param {Array<String>} expressions An array of string expressions to
+     * @param {Array<{name: string, expr: string}>} expressions An array of expressions to
      * be validated.
      *
      * @returns {Promise<Object>}

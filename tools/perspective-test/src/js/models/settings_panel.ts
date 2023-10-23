@@ -54,13 +54,22 @@ export class SettingsPanel {
         await exprEditor.container.waitFor({
             state: "visible",
         });
-        expect(await exprEditor.content.isVisible()).toBe(true);
-        // brute force clear the expression editor
-        for (let i = 0; i < 30; i++) {
-            await exprEditor.content.press("Backspace", { delay: 10 });
-        }
-        await exprEditor.content.type(`//${name}\n${expr}`, { delay: 100 });
-        await exprEditor.content.blur();
+        await exprEditor.nameInput.waitFor({
+            state: "visible",
+        });
+        expect(await exprEditor.textarea.isVisible()).toBe(true);
+        expect(await exprEditor.nameInput.isVisible()).toBe(true);
+
+        await exprEditor.nameInput.focus();
+        await exprEditor.nameInput.clear();
+        await exprEditor.nameInput.type(name, { delay: 100 });
+        await exprEditor.nameInput.blur();
+
+        await exprEditor.textarea.focus();
+        await exprEditor.textarea.clear();
+        await exprEditor.textarea.type(expr, { delay: 100 });
+        await exprEditor.textarea.blur();
+
         let saveBtn = this.pageView.page.locator(
             "#psp-expression-editor-button-save"
         );

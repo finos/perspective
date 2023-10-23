@@ -16,6 +16,7 @@
 mod aggregates;
 mod column_type;
 mod datetime_column_style;
+mod expression;
 mod filters;
 mod number_column_style;
 pub mod plugin;
@@ -27,6 +28,7 @@ mod viewer_config;
 pub use aggregates::*;
 pub use column_type::*;
 pub use datetime_column_style::*;
+pub use expression::*;
 pub use filters::*;
 pub use number_column_style::*;
 pub use sort::*;

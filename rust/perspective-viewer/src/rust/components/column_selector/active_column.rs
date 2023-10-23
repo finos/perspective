@@ -207,12 +207,12 @@ impl Component for ActiveColumn {
             New(InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 if ctx.props().idx >= view_config.columns.len() {
-                    view_config.columns.push(Some(col.clone()));
+                    view_config.columns.push(Some(col.name.clone()));
                 } else {
-                    view_config.columns[ctx.props().idx] = Some(col.clone());
+                    view_config.columns[ctx.props().idx] = Some(col.name.clone());
                 }
 
-                view_config.expressions.push(col);
+                view_config.expressions.push(col.into());
                 let update = ViewConfigUpdate {
                     columns: Some(view_config.columns),
                     expressions: Some(view_config.expressions),
