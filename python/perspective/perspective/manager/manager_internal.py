@@ -163,7 +163,7 @@ class _PerspectiveManagerInternal(object):
                 self._process_method_call(msg, post_callback, client_id)
             else:
                 logging.error("Unknown client message " + str(msg))
-        except (PerspectiveError, PerspectiveCppError) as error:
+        except Exception as error:
             # Log errors and return them to the client
             error_string = str(error)
             error_message = self._make_error_message(msg["id"], error_string)
