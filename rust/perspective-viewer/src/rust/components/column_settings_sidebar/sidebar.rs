@@ -81,7 +81,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
 
     let title = format!("Editing ‘{column_name}’...");
 
-    let mut tabs = vec![ColumnSettingsTab::Attributes];
+    let mut tabs = vec![];
 
     if !matches!(p.selected_column, ColumnLocator::Expr(None))
         && is_active
@@ -89,9 +89,10 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
         && attrs.is_some()
         && maybe_ty.is_some()
     {
-        tabs.reverse();
         tabs.push(ColumnSettingsTab::Style);
-        tabs.reverse();
+    }
+    if matches!(p.selected_column, ColumnLocator::Expr(_)) {
+        tabs.push(ColumnSettingsTab::Attributes);
     }
 
     clone!(
@@ -121,7 +122,6 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
 
                         { selected_column }
                         { on_close }
-                        { maybe_ty }
                     />
                 }
             }
