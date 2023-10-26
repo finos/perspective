@@ -19,6 +19,7 @@ pub mod kvpair;
 pub mod radio_list;
 pub mod radio_list_item;
 pub mod scroll_panel;
+pub mod scroll_panel_item;
 pub mod select;
 pub mod sidebar;
 pub mod split_panel;

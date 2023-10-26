@@ -21,30 +21,10 @@ use web_sys::Element;
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
 
+use super::scroll_panel_item::ScrollPanelItem;
 use crate::components::style::LocalStyle;
 use crate::utils::*;
 use crate::*;
-
-#[derive(PartialEq, Properties)]
-pub struct ScrollPanelItemProps {
-    pub size: f64,
-    pub children: Children,
-}
-
-pub struct ScrollPanelItem {}
-
-impl Component for ScrollPanelItem {
-    type Message = ();
-    type Properties = ScrollPanelItemProps;
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self {}
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        ctx.props().children.iter().collect()
-    }
-}
 
 pub struct ScrollPanel {
     viewport_ref: NodeRef,
@@ -96,7 +76,7 @@ impl ScrollPanelProps {
     fn total_height(&self) -> f64 {
         self.children
             .iter()
-            .map(|x| x.props.size)
+            .map(|x| x.props.get_size())
             .reduce(|x, y| x + y)
             .unwrap_or_default()
     }
@@ -149,12 +129,12 @@ impl ScrollPanel {
             .iter()
             .enumerate()
             .find_or_last(|(i, x)| {
-                if offset + x.props.size < scroll_top {
+                if offset + x.props.get_size() < scroll_top {
                     start_node = *i + 1;
-                    start_y = offset + x.props.size;
+                    start_y = offset + x.props.get_size();
                 }
 
-                offset += x.props.size;
+                offset += x.props.get_size();
                 offset > scroll_top + self.viewport_height
             })
             .map(|x| x.0)
