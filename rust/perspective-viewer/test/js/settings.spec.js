@@ -98,7 +98,10 @@ test.describe("Settings", () => {
                     new Promise((_, reject) => reject("Intentional Load Error"))
                 );
                 try {
-                    await viewer.restore({ settings: true, plugin: "Debug" });
+                    await viewer.restore({
+                        settings: true,
+                        plugin: "Debug",
+                    });
                 } catch (e) {
                     // We need to catch this error else the `evaluate()` fails.
                     // We need to await the call because we want it to fail
@@ -115,10 +118,13 @@ test.describe("Settings", () => {
                 //   "RuntimeError::unreachable",
             ]);
 
-            expect(logs).toEqual([
-                "Invalid config, resetting to default {group_by: Array(0), split_by: Array(0), columns: Array(0), filter: Array(0), sort: Array(0)} `restore()` called before `load()`",
-                "Caught error: `restore()` called before `load()`",
-            ]);
+            expect(logs.length).toBe(2);
+            expect(logs[0]).toMatch(
+                /Invalid config, resetting to default \{[^}]+\} `restore\(\)` called before `load\(\)`/
+            );
+            expect(logs[1]).toEqual(
+                "Caught error: `restore()` called before `load()`"
+            );
         });
     });
 });

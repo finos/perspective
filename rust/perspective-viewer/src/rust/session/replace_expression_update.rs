@@ -15,7 +15,6 @@ use std::collections::HashMap;
 use crate::config::*;
 
 impl ViewConfig {
-    // TODO: Split this up into expr and alias fns
     /// Create an update for this `ViewConfig` that replaces an expression
     /// column with a new one, e.g. when a user edits an expression.  This may
     /// changed either the expression alias, the expression itself, or both; as
@@ -37,7 +36,6 @@ impl ViewConfig {
             sort,
             filter,
             aggregates,
-            ..
         } = self.clone();
 
         let expressions = expressions

@@ -60,6 +60,7 @@ const TESTS = [
         {
             viewers: {
                 One: {
+                    version: "1.0.0",
                     table: "superstore",
                     title: "One",
                     plugin: "Y Area",
@@ -69,7 +70,12 @@ const TESTS = [
                     columns: ["Sales"],
                     filter: [["Category", "==", "Office Supplies"]],
                     sort: [],
-                    expressions: ["bucket(\"Order Date\", 'M')"],
+                    expressions: [
+                        {
+                            name: "bucket(\"Order Date\", 'M')",
+                            expr: "bucket(\"Order Date\", 'M')",
+                        },
+                    ],
                     aggregates: {},
                     master: false,
                     linked: false,

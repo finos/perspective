@@ -44,6 +44,7 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
     fn get_viewer_config(&self) -> Pin<Box<dyn Future<Output = ApiResult<ViewerConfig>>>> {
         clone!(self.renderer(), self.session(), self.presentation());
         Box::pin(async move {
+            let version = ViewerConfig::API_VERSION.to_string();
             let view_config = session.get_view_config().clone();
             let js_plugin = renderer.get_active_plugin()?;
             let settings = presentation.is_settings_open();
@@ -52,6 +53,7 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
             let theme = presentation.get_selected_theme_name().await;
             let title = presentation.get_title();
             Ok(ViewerConfig {
+                version,
                 plugin,
                 title,
                 plugin_config,
