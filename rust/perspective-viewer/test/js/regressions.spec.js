@@ -61,6 +61,64 @@ test.describe("Regression tests", () => {
         ]);
     });
 
+    test("in filter generates correct array-encoded config", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.restore({
+                group_by: ["State"],
+                columns: ["Sales"],
+                settings: true,
+                filter: [["State", "in", []]],
+            });
+
+            const filter = viewer.shadowRoot.querySelector(
+                ".pivot-column input[type=text]"
+            );
+            filter.value = "C";
+            const event = new Event("input", {
+                bubbles: true,
+                cancelable: true,
+            });
+
+            filter.dispatchEvent(event);
+        });
+
+        const elem = await page.waitForSelector("perspective-dropdown");
+        await page.evaluate((elem) => {
+            let node = elem.shadowRoot.querySelector("span:first-of-type");
+            var clickEvent = document.createEvent("MouseEvents");
+            clickEvent.initEvent("mousedown", true, true);
+            node.dispatchEvent(clickEvent);
+        }, elem);
+
+        const config = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            return await viewer.save();
+        });
+
+        expect(config).toEqual({
+            aggregates: {},
+            columns: ["Sales"],
+            expressions: [],
+            filter: [["State", "in", ["California"]]],
+            group_by: ["State"],
+            plugin: "Debug",
+            plugin_config: {},
+            settings: true,
+            sort: [],
+            split_by: [],
+            theme: "Pro Light",
+            title: null,
+        });
+
+        const contents = await get_contents(page);
+        await compareContentsToSnapshot(contents, [
+            "regressions-in-filter-generates-correct-config.txt",
+        ]);
+    });
+
     test("Numeric filter input does not trigger render on trailing zeroes", async ({
         page,
     }) => {

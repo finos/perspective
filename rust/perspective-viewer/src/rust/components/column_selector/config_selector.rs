@@ -306,7 +306,13 @@ impl Component for ConfigSelector {
                     let mut tokens = current.split(',').collect::<Vec<_>>();
                     tokens.pop();
                     tokens.push(&input);
-                    filter[index].2 = FilterTerm::Scalar(Scalar::String(tokens.join(",")));
+                    filter[index].2 = FilterTerm::Array(
+                        tokens
+                            .iter()
+                            .map(|x| Scalar::String(x.trim().to_owned()))
+                            .collect(),
+                    );
+
                     let filter = Some(filter);
                     ViewConfigUpdate {
                         filter,
