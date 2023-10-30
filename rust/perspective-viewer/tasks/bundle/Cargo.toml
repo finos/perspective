@@ -21,6 +21,6 @@ path = "main.rs"
 bench = false
 
 [dependencies]
-flate2 = "1.0.20"
-wasm-bindgen-cli-support = "0.2.84"
-wasm-opt = "0.112.0"
+flate2 = "1.0.28"
+wasm-bindgen-cli-support = "0.2.87"
+wasm-opt = "0.116.0"

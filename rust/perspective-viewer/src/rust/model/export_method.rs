@@ -15,7 +15,6 @@ use std::rc::Rc;
 use yew::prelude::*;
 
 use crate::js::*;
-use crate::*;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ExportMethod {
@@ -90,7 +89,7 @@ impl From<ExportFile> for Html {
             None
         };
 
-        html_template! {
+        html! {
             <code class={ class }>
                 { x.name }
                 { x.method.as_filename() }

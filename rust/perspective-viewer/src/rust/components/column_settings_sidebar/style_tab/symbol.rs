@@ -18,7 +18,6 @@ mod types;
 use std::rc::Rc;
 
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
 use yew::{html, Html, Properties};
 
 use self::types::{SymbolConfig, SymbolKVPair};
