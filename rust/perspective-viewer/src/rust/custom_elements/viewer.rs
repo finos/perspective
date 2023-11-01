@@ -33,78 +33,6 @@ use crate::session::Session;
 use crate::utils::*;
 use crate::*;
 
-struct ResizeObserverHandle {
-    elem: HtmlElement,
-    observer: ResizeObserver,
-    _callback: Closure<dyn FnMut(js_sys::Array)>,
-}
-
-impl ResizeObserverHandle {
-    fn new(elem: &HtmlElement, renderer: &Renderer, root: &AppHandle<PerspectiveViewer>) -> Self {
-        let on_resize = root.callback(|()| PerspectiveViewerMsg::Resize);
-        let mut state = ResizeObserverState {
-            elem: elem.clone(),
-            renderer: renderer.clone(),
-            width: elem.offset_width(),
-            height: elem.offset_height(),
-            on_resize,
-        };
-
-        let _callback = (move |xs| state.on_resize(&xs)).into_closure_mut();
-        let func = _callback.as_ref().unchecked_ref::<js_sys::Function>();
-        let observer = ResizeObserver::new(func);
-        observer.observe(elem);
-        Self {
-            elem: elem.clone(),
-            _callback,
-            observer,
-        }
-    }
-}
-
-impl Drop for ResizeObserverHandle {
-    fn drop(&mut self) {
-        self.observer.unobserve(&self.elem);
-    }
-}
-
-struct ResizeObserverState {
-    elem: HtmlElement,
-    renderer: Renderer,
-    width: i32,
-    height: i32,
-    on_resize: Callback<()>,
-}
-
-impl ResizeObserverState {
-    fn on_resize(&mut self, entries: &js_sys::Array) {
-        let is_visible = self
-            .elem
-            .offset_parent()
-            .map(|x| !x.is_null())
-            .unwrap_or(false);
-
-        for y in entries.iter() {
-            let entry: ResizeObserverEntry = y.unchecked_into();
-            let content = entry.content_rect();
-            let content_width = content.width().floor() as i32;
-            let content_height = content.height().floor() as i32;
-            let resized = self.width != content_width || self.height != content_height;
-            if resized && is_visible {
-                clone!(self.on_resize, self.renderer);
-                ApiFuture::spawn(async move {
-                    renderer.resize().await?;
-                    on_resize.emit(());
-                    Ok(())
-                });
-            }
-
-            self.width = content_width;
-            self.height = content_height;
-        }
-    }
-}
-
 /// A `customElements` class which encapsulates both the `<perspective-viewer>`
 /// public API, as well as the Rust component state.
 ///
@@ -131,6 +59,7 @@ pub struct PerspectiveViewerElement {
     elem: HtmlElement,
     root: Rc<RefCell<Option<AppHandle<PerspectiveViewer>>>>,
     resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
+    intersection_handle: Rc<RefCell<Option<IntersectionObserverHandle>>>,
     session: Session,
     renderer: Renderer,
     presentation: Presentation,
@@ -192,6 +121,7 @@ impl PerspectiveViewerElement {
             renderer,
             presentation,
             resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
+            intersection_handle: Rc::new(RefCell::new(None)),
             _events: events,
             _subscriptions: Rc::new(update_sub),
         }
@@ -485,13 +415,12 @@ impl PerspectiveViewerElement {
         ApiFuture::new(async move { renderer.resize().await })
     }
 
-    /// Sets the auto-size behavior of this component.  When `true`, this
+    /// Sets the auto-size behavior of this component. When `true`, this
     /// `<perspective-viewer>` will register a `ResizeObserver` on itself and
     /// call `resize()` whenever its own dimensions change.
     ///
     /// # Arguments
-    /// - `autosize` Whether to register a `ResizeObserver` on this element or
-    ///   not.
+    /// - `autosize` Whether to enable `auto-size` behavior or not.
     #[wasm_bindgen(js_name = "setAutoSize")]
     pub fn set_auto_size(&mut self, autosize: bool) {
         if autosize {
@@ -503,6 +432,26 @@ impl PerspectiveViewerElement {
             *self.resize_handle.borrow_mut() = handle;
         } else {
             *self.resize_handle.borrow_mut() = None;
+        }
+    }
+
+    /// Sets the auto-pause behavior of this component. When `true`, this
+    /// `<perspective-viewer>` will register an `IntersectionObserver` on
+    /// itself and call `pause()` whenever its viewport visibility changes.
+    ///
+    /// # Arguments
+    /// - `autopause` Whether to enable `auto-pause` behavior or not.
+    #[wasm_bindgen(js_name = "setAutoPause")]
+    pub fn set_auto_pause(&mut self, autopause: bool) {
+        if autopause {
+            let handle = Some(IntersectionObserverHandle::new(
+                &self.elem,
+                &self.session,
+                &self.renderer,
+            ));
+            *self.intersection_handle.borrow_mut() = handle;
+        } else {
+            *self.intersection_handle.borrow_mut() = None;
         }
     }
 

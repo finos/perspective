@@ -70,7 +70,9 @@ mod copy_export;
 mod export_app;
 mod export_method;
 mod get_viewer_config;
+mod intersection_observer;
 mod plugin_config;
+mod resize_observer;
 mod structural;
 mod update_and_render;
 
@@ -78,6 +80,8 @@ pub use self::columns_iter_set::*;
 pub use self::copy_export::*;
 pub use self::export_method::*;
 pub use self::get_viewer_config::*;
+pub use self::intersection_observer::*;
 pub use self::plugin_config::*;
+pub use self::resize_observer::*;
 pub use self::structural::*;
 pub use self::update_and_render::*;

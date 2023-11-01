@@ -16,6 +16,7 @@
 
 mod clipboard;
 pub mod clipboard_item;
+mod intersection_observer;
 mod mimetype;
 pub mod perspective;
 pub mod plugin;
@@ -26,6 +27,7 @@ mod testing;
 mod tests;
 
 pub use self::clipboard::*;
+pub use self::intersection_observer::*;
 pub use self::mimetype::*;
 pub use self::perspective::*;
 pub use self::plugin::*;

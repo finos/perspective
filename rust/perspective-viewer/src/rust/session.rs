@@ -67,6 +67,7 @@ pub struct SessionData {
     view_sub: Option<ViewSubscription>,
     stats: Option<ViewStats>,
     is_clean: bool,
+    is_paused: bool,
 }
 
 impl Deref for Session {
@@ -142,6 +143,20 @@ impl Session {
         self.borrow_mut().table = Some(table);
         self.table_loaded.emit_all(());
         Ok(JsValue::UNDEFINED)
+    }
+
+    pub fn set_pause(&self, pause: bool) -> bool {
+        self.borrow_mut().is_clean = false;
+        if pause == self.borrow().is_paused {
+            false
+        } else if pause {
+            self.borrow_mut().view_sub = None;
+            self.borrow_mut().is_paused = true;
+            true
+        } else {
+            self.borrow_mut().is_paused = false;
+            true
+        }
     }
 
     pub async fn await_table(&self) -> ApiResult<()> {
@@ -477,7 +492,7 @@ impl<'a> ValidSession<'a> {
     /// the original `&Session`.
     pub async fn create_view(&self) -> Result<&'a Session, ApiError> {
         let js_config = self.0.borrow().config.as_jsvalue()?;
-        if !self.0.reset_clean() {
+        if !self.0.reset_clean() && !self.0.borrow().is_paused {
             let table = self
                 .0
                 .borrow()
