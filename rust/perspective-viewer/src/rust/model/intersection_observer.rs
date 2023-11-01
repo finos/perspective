@@ -69,7 +69,6 @@ impl IntersectionObserverState {
     async fn set_pause(self, intersect: bool) -> ApiResult<()> {
         if intersect {
             if self.session.set_pause(false) {
-                tracing::error!("Shellac-ed");
                 self.update_and_render(ViewConfigUpdate::default()).await?;
             }
         } else {

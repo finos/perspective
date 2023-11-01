@@ -221,3 +221,4 @@ benchmark_venv
 
 venv/
 testenv
+.cache

@@ -1,3 +1,16 @@
+# [v2.6.1](https://github.com/finos/perspective/releases/tag/v2.6.1)
+
+_1 November 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.6.0...v2.6.1))
+
+Features
+
+- Add `setAutoPause()` method [#2411](https://github.com/finos/perspective/pull/2411)
+
+Fixes
+
+- Fix scroll panel height calculation bug [#2404](https://github.com/finos/perspective/pull/2404)
+- Fix `in` and `not in` filter UI bug [#2403](https://github.com/finos/perspective/pull/2403)
+
 # [v2.6.0](https://github.com/finos/perspective/releases/tag/v2.6.0)
 
 _20 October 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.5.2...v2.6.0))
