@@ -110,6 +110,23 @@ export interface IPerspectiveViewerElement {
     setAutoSize(autosize): void;
 
     /**
+     * Determines the auto-pause behavior.  When `true` (default `false`), this
+     * element will enter paused state (deleting it's `View` and ignoring
+     * render calls) whenever it is not visible in the browser's viewport,
+     * utilizing an `IntersectionObserver`.
+     *
+     * @category Util
+     * @param autopause Whether to re-render when this element's dimensions
+     * change.
+     * @example <caption>Disable auto-size</caption>
+     *
+     * ```javascript
+     * await viewer.setAutoPause(true);
+     * ```
+     */
+    setAutoPause(autopause): void;
+
+    /**
      * Returns the `perspective.Table()` which was supplied to `load()`
      *
      * @category Data
