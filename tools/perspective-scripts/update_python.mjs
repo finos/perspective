@@ -28,22 +28,27 @@ const VERSIONS = [
 
 for (const version of VERSIONS) {
     sh`
-        pip3 install "python/perspective[dev]" 
+        pip3 install "python/perspective[dev]"
         --dry-run
         --report=report.json
-        --python-version=${version} 
-        --only-binary=:all: 
-        --platform=manylinux_2_12_x86_64 
-        --platform=manylinux_2_17_x86_64 
-        --ignore-installed 
+        --python-version=${version}
+        --only-binary=:all:
+        --platform=manylinux_2_12_x86_64
+        --platform=manylinux_2_17_x86_64
+        --ignore-installed
         --target=.
     `.runSync();
 
     const data = JSON.parse(fs.readFileSync("report.json"));
     let output = "";
+    const sortedInstalls = data.install.toSorted((a, b) => {
+        if (a.metadata.name < b.metadata.name) return -1;
+        if (a.metadata.name > b.metadata.name) return 1;
+        return 0;
+    });
     for (const {
         metadata: { version, name },
-    } of data.install) {
+    } of sortedInstalls) {
         output += `${name}==${version}\n`;
     }
 

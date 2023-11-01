@@ -104,6 +104,12 @@ To install the Jupyterlab/Jupyter Notebook plugins from your local working
 directory, simply install `python/perspective` with `pip` as you might normally
 do.
 
+```bash
+(cd packages/perspective-jupyterlab && yarn run build)
+pip install -e python/perspective
+jupyter labextension develop python/perspective
+```
+
 Afterwards, you should see it listed as a "local extension" when you run
 `jupyter labextension list` and as a normal extension when you run
 `jupyter nbextension list`.

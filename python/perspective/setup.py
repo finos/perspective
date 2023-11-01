@@ -56,6 +56,7 @@ SKIP_JS_FILES = os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK")
 ########################
 # Get requirement info #
 requires = [
+    "Jinja2>=2.0,<4",
     "ipywidgets>=7.5.1,<9",
     "numpy>=1.21.6,<2",
     "pandas>=0.22.0,<3",

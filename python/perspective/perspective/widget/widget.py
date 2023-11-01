@@ -10,7 +10,10 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import base64
+import jinja2
 import json
+import os
 from datetime import date, datetime
 from functools import partial
 
@@ -515,3 +518,39 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             return _PerspectiveWidgetMessage(-2, "table", msg_data)
         else:
             raise PerspectiveError("Widget does not have any data loaded - use the `load()` method to provide it with data.")
+
+    def _repr_mimebundle_(self, **kwargs):
+        super_bundle = super(DOMWidget, self)._repr_mimebundle_(**kwargs)
+        if not _jupyter_html_export_enabled():
+            return super_bundle
+        # Serialize viewer attrs + view data to be rendered in the template
+        viewer_attrs = self.save()
+        data = self.table.view().to_arrow()
+        b64_data = base64.encodebytes(data)
+
+        jinja_env = jinja2.Environment(
+            loader=jinja2.PackageLoader("perspective"),
+            autoescape=jinja2.select_autoescape(),
+        )
+        template = jinja_env.get_template("exported_widget.html.jinja")
+
+        return super(DOMWidget, self)._repr_mimebundle_(**kwargs) | {
+            "text/html": template.render(
+                psp_version=__version__,
+                viewer_id=self.model_id,
+                viewer_attrs=viewer_attrs,
+                b64_data=b64_data.decode("utf-8"),
+            )
+        }
+
+
+def _jupyter_html_export_enabled():
+    return os.environ.get("PSP_JUPYTER_HTML_EXPORT", None) == "1"
+
+
+def set_jupyter_html_export(val):
+    """Enables HTML export for Jupyter widgets, when set to True.
+    HTML export can also be enabled by setting the environment variable
+    `PSP_JUPYTER_HTML_EXPORT` to the string `1`.
+    """
+    os.environ["PSP_JUPYTER_HTML_EXPORT"] = "1" if val else "0"

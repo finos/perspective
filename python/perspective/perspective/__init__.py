@@ -17,3 +17,7 @@ from .client import *
 from .handlers import *
 from .nbextension import _jupyter_nbextension_paths
 from .widget import *
+
+
+def _jupyter_labextension_paths():
+    return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]
