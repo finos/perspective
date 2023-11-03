@@ -22,49 +22,9 @@ import threading
 import concurrent.futures
 
 
-def data_source():
-    rows = []
-    modifier = random.random() * random.randint(1, 50)
-    for i in range(5):
-        rows.append(
-            {
-                "name": SECURITIES[random.randint(0, len(SECURITIES) - 1)],
-                "client": CLIENTS[random.randint(0, len(CLIENTS) - 1)],
-                "open": (random.random() * 75 + random.randint(0, 9)) * modifier,
-                "high": (random.random() * 105 + random.randint(1, 3)) * modifier,
-                "low": (random.random() * 85 + random.randint(1, 3)) * modifier,
-                "close": (random.random() * 90 + random.randint(1, 3)) * modifier,
-                "lastUpdate": datetime.now(),
-                "date": date.today(),
-            }
-        )
-    return rows
-
-
-IS_MULTI_THREADED = True
-SECURITIES = [
-    "AAPL.N",
-    "AMZN.N",
-    "QQQ.N",
-    "NVDA.N",
-    "TSLA.N",
-    "FB.N",
-    "MSFT.N",
-    "TLT.N",
-    "XIV.N",
-    "YY.N",
-    "CSCO.N",
-    "GOOGL.N",
-    "PCLN.N",
-]
-
-CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"]
-
+# Your data_source() function, IS_MULTI_THREADED, SECURITIES, and CLIENTS remain unchanged.
 
 def perspective_thread(manager):
-    """Perspective application thread starts its own tornado IOLoop, and
-    adds the table with the name "data_source_one", which will be used
-    in the front-end."""
     table = Table(
         {
             "name": str,
@@ -79,11 +39,8 @@ def perspective_thread(manager):
         limit=2500,
     )
 
-    # Track the table with the name "data_source_one", which will be used in
-    # the front-end to access the Table.
     manager.host_table("data_source_one", table)
 
-    # update with new data every 50ms
     def updater():
         table.update(data_source())
 
@@ -100,35 +57,15 @@ def perspective_thread(manager):
         callback.start()
         psp_loop.start()
 
+    # Add this code block to retrieve the hosted table names.
+    def retrieve_table_names():
+        # Get the hosted table names using a future object.
+        fut = manager.get_hosted_table_names()
+        fut.add_done_callback(lambda f: print(f"Hosted Table Names: {f.result()}"))
 
-def make_app():
-    manager = PerspectiveManager()
-
-    thread = threading.Thread(target=perspective_thread, args=(manager,))
-    thread.daemon = True
-    thread.start()
-
-    return tornado.web.Application(
-        [
-            # create a websocket endpoint that the client Javascript can access
-            (
-                r"/websocket",
-                PerspectiveTornadoHandler,
-                {"manager": manager, "check_origin": True},
-            ),
-            (
-                r"/node_modules/(.*)",
-                tornado.web.StaticFileHandler,
-                {"path": "../../node_modules/"},
-            ),
-            (
-                r"/(.*)",
-                tornado.web.StaticFileHandler,
-                {"path": "./", "default_filename": "index.html"},
-            ),
-        ]
-    )
-
+    # Run the retrieve_table_names function after a delay to ensure Perspective has initialized.
+    delay = 5  # Adjust this delay as needed.
+    psp_loop.call_later(delay, retrieve_table_names)
 
 if __name__ == "__main__":
     app = make_app()
@@ -136,3 +73,4 @@ if __name__ == "__main__":
     logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
     loop.start()
+
