@@ -25,6 +25,9 @@ import concurrent.futures
 # Your data_source() function, IS_MULTI_THREADED, SECURITIES, and CLIENTS remain unchanged.
 
 def perspective_thread(manager):
+        """Perspective application thread starts its own tornado IOLoop, and
+    adds the table with the name "data_source_one", which will be used
+    in the front-end."""
     table = Table(
         {
             "name": str,
@@ -36,11 +39,13 @@ def perspective_thread(manager):
             "lastUpdate": datetime,
             "date": date,
         },
+        
         limit=2500,
     )
-
+    # Track the table with the name "data_source_one", which will be used in
+    # the front-end to access the Table.
     manager.host_table("data_source_one", table)
-
+    # update with new data every 50ms
     def updater():
         table.update(data_source())
 
@@ -57,7 +62,7 @@ def perspective_thread(manager):
         callback.start()
         psp_loop.start()
 
-    # Add this code block to retrieve the hosted table names.
+    # Added this code block to retrieve the hosted table names.
     def retrieve_table_names():
         # Get the hosted table names using a future object.
         fut = manager.get_hosted_table_names()
