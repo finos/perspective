@@ -31,6 +31,9 @@ prune bench
 # Don't ship scripts
 prune scripts
 
+# Don't ship test artifacts
+prune ci-requirements
+
 # Patterns to exclude from any directory
 global-exclude *~
 global-exclude *.pyc

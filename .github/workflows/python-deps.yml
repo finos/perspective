@@ -1,0 +1,91 @@
+name: Regenerate Python Dependencies
+
+on:
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
+permissions:
+    contents: write
+
+jobs:
+    generate:
+        strategy:
+            matrix:
+                python-version:
+                    - "3.7"
+                    - "3.8"
+                    - "3.9"
+                    - "3.10"
+                    - "3.11"
+                node-version: [18.x]
+            fail-fast: false
+
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "yarn"
+                  cache-dependency-path: yarn.lock
+
+            - name: Install js dependencies
+              run: yarn
+              env:
+                  PSP_SKIP_EMSDK_INSTALL: 1
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+                  cache: "pip"
+
+            - name: Install python dependencies
+              run: yarn _requires_python
+              env:
+                  PSP_GENERATE_FROZEN_REQUIREMENTS: "1"
+
+            - name: Push changes to well-known branch name
+              run: |
+                  git config --global user.email "3105306+timkpaine@users.noreply.github.com"
+                  git config --global user.name "Tim Paine (Automated)"
+                  git checkout -b tkp/update-frozen-python-${{ matrix.python-version }}-dependencies
+                  git add python/perspective/ci-requirements/
+                  git commit -m "Update frozen python dependencies for ${{ matrix.python-version }}"
+                  git push origin tkp/update-frozen-python-${{ matrix.python-version }}-dependencies -f --no-verify
+
+    prepare:
+        needs: [generate]
+        runs-on: ubuntu-20.04
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Collect changes and meld them into a single branch
+              run: |
+                  git config --global user.email "3105306+timkpaine@users.noreply.github.com"
+                  git config --global user.name "Tim Paine (Automated)"
+                  git checkout -b tkp/update-frozen-python-dependencies
+                  git fetch --all
+
+                  git merge origin/tkp/update-frozen-python-3.7-dependencies --squash --no-edit
+                  git merge origin/tkp/update-frozen-python-3.8-dependencies --squash --no-edit
+                  git merge origin/tkp/update-frozen-python-3.9-dependencies --squash --no-edit
+                  git merge origin/tkp/update-frozen-python-3.10-dependencies --squash --no-edit
+                  git merge origin/tkp/update-frozen-python-3.11-dependencies --squash --no-edit
+                  git commit -m "Update frozen python dependencies"
+
+                  git push origin tkp/update-frozen-python-dependencies -f --no-verify
+
+                  git push origin --delete tkp/update-frozen-python-3.7-dependencies
+                  git push origin --delete tkp/update-frozen-python-3.8-dependencies
+                  git push origin --delete tkp/update-frozen-python-3.9-dependencies
+                  git push origin --delete tkp/update-frozen-python-3.10-dependencies
+                  git push origin --delete tkp/update-frozen-python-3.11-dependencies

@@ -132,6 +132,9 @@ website/i18n/*
 !website/i18n/en.json
 website/static/css/material-dark.css
 website/static/css/pro-dark.css
+docs/static/features
+docs/.docusaurus
+docs/static/blocks
 
 # test artifacts
 .ipynb_checkpoints
@@ -143,6 +146,10 @@ coverage
 screenshots/
 junit.xml
 results.debug.json
+test-results/
+playwright-report/
+playwright/.cache/
+.cache
 
 # CPP Compile
 /src/include/boost
@@ -204,21 +211,10 @@ vcpkg
 # jupyterlab test artifacts
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
-docs/static/features
-results.debug.json
 
-tools/perspective-build/lib
-docs/.docusaurus
-packages/perspective-esbuild-plugin/lib
-docs/static/blocks
-.vscode/c_cpp_properties.json
-test-results/
-playwright-report/
-playwright/.cache/
-
+# Build envs / virtualenvs / other local
 .pyodide-xbuildenv
 benchmark_venv
-
 venv/
+.venvs/
 testenv
-.cache

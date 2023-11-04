@@ -253,13 +253,54 @@ export const copy_files_to_python_folder = (link_files) => {
     }
 };
 
-export function py_requirements() {
-    const version = sh`python3 --version`
+function get_python_version_for_requirements() {
+    return sh`python3 --version`
         .execSync()
         .replace("Python ", "")
         .replace(".", "")
         .replace(/\..*?$/m, "");
-    return `python/perspective/requirements-${version}.txt`;
+}
+
+export function py_requirements() {
+    return `python/perspective/ci-requirements/requirements-${get_python_version_for_requirements()}.txt`;
+}
+
+export function generate_py_requirements(python) {
+    const version = get_python_version_for_requirements();
+    if (!fs.existsSync(".venvs")) {
+        fs.mkdirSync(".venvs");
+    }
+
+    if (fs.existsSync(`.venvs/${version}`)) {
+        rimraf.sync(`.venvs/${version}`);
+    }
+    sh`${python} -m venv .venvs/${version}`.runSync();
+    sh`. .venvs/${version}/bin/activate`;
+    process.env.PATH = `.venvs/${version}/bin:${process.env.PATH}`;
+    install_py_requirements_dynamic(`.venvs/${version}/bin/python`);
+    sh`.venvs/${version}/bin/python -m pip freeze > python/perspective/ci-requirements/requirements-${version}.txt`.runSync();
+}
+
+export function install_py_requirements_dynamic(python) {
+    const requires_script = `import distutils.core; setup = distutils.core.run_setup('python/perspective/setup.py'); print(' '.join(['"' + requirement + '"' for requirement in setup.extras_require['dev']]))`;
+
+    // copy build/config files into python folder
+    copy_files_to_python_folder();
+
+    // install build meta deps, this is a necessary evil to keep the setup.py clean
+    sh`${python} -m pip install  jupyter_packaging==0.12.3`.runSync();
+    const requirements = sh`${python} -c ${requires_script}`.execSync();
+    if (requirements.trim().length > 0) {
+        console.log(`Installing: ${requirements}`);
+        sh`${python} -m pip install -U ${sh(requirements)}`.log().runSync();
+    } else {
+        console.log("Nothing to install");
+    }
+}
+
+export function install_py_requirements_frozen(python) {
+    sh`${python} -m pip install -r ${py_requirements()}`.runSync();
+    sh`${python} -m pip install -U jupyter_packaging==0.12.3`.runSync();
 }
 
 /**
@@ -342,8 +383,8 @@ sh.docker = function docker(...args) {
         ${env_vars} \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
-        --cpus="${CPUS}.0" 
-        ${IMAGE} 
+        --cpus="${CPUS}.0"
+        ${IMAGE}
         bash -c ${sh(...args).toString()}`;
 };
 

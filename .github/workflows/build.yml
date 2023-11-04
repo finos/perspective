@@ -309,6 +309,8 @@ jobs:
             # Python
             - name: Install python dependencies
               run: yarn _requires_python
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             ################
             # Linux
@@ -508,6 +510,8 @@ jobs:
             # Python
             - name: Install python dependencies
               run: yarn _requires_python
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -641,6 +645,8 @@ jobs:
             # Python
             - name: Install python dependencies
               run: yarn _requires_python
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             ################
             # Rust
@@ -1029,6 +1035,8 @@ jobs:
             - name: Install python dependencies
               run: yarn _requires_python
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             ################
             # Linux
@@ -1323,6 +1331,8 @@ jobs:
             # Python
             - name: Install python dependencies
               run: yarn _requires_python
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             # Download artifact
             - uses: actions/download-artifact@v3
@@ -1491,6 +1501,8 @@ jobs:
             # Python
             - name: Install python dependencies
               run: yarn _requires_python
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1636,6 +1648,8 @@ jobs:
             # Python
             - name: Install python dependencies
               run: yarn _requires_python
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1751,6 +1765,8 @@ jobs:
             # Python
             - name: Install python dependencies
               run: yarn _requires_python
+              env:
+                  PSP_FROZEN_REQUIREMENTS: "1"
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
