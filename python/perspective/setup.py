@@ -66,7 +66,7 @@ requires = [
 
 requires_aiohttp = ["aiohttp>=3,<4"]
 
-requires_jupyter = ["jupyterlab>=3.2,<4"]
+requires_jupyter = ["jupyterlab>=4,<5"]
 
 requires_starlette = ["fastapi>=0.70,<1", "starlette>=0.20,<1"]
 
