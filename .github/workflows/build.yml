@@ -843,7 +843,6 @@ jobs:
                     - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
                 python-version:
-                    - 3.7
                     - 3.8
                     - 3.9
                     - "3.10"
@@ -881,10 +880,7 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # Exclude Python 3.7, 3.8, 3.10, 3.11 builds
-                    - is-full-run: false
-                      python-version: 3.7
-
+                    # Exclude Python 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.8
 
@@ -1372,7 +1368,6 @@ jobs:
                     - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
                 python-version:
-                    - 3.7
                     - 3.8
                     - 3.9
                     - "3.10"
@@ -1394,15 +1389,7 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # GitHub Actions are broken on OSX, don't test 3.7 wheels
-                    # https://github.com/actions/setup-python/issues/682
-                    - python-version: 3.7
-                      os: macos-11
-
-                    # Exclude Python 3.7, 3.8, 3.10, 3.11 builds
-                    - is-full-run: false
-                      python-version: 3.7
-
+                    # Exclude Python 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.8
 
@@ -1880,10 +1867,6 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-python-dist-ubuntu-20.04-3.7
-
-            - uses: actions/download-artifact@v3
-              with:
                   name: perspective-python-dist-ubuntu-20.04-3.8
 
             - uses: actions/download-artifact@v3
@@ -1900,10 +1883,6 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-python-dist-macos-11-3.7
-
-            - uses: actions/download-artifact@v3
-              with:
                   name: perspective-python-dist-macos-11-3.8
 
             - uses: actions/download-artifact@v3
@@ -1917,10 +1896,6 @@ jobs:
             - uses: actions/download-artifact@v3
               with:
                   name: perspective-python-dist-macos-11-3.11
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-python-dist-windows-2022-3.7
 
             - uses: actions/download-artifact@v3
               with:

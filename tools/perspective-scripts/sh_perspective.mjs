@@ -282,10 +282,8 @@ export function python_version(manylinux) {
             return `/opt/python/cp39-cp39/bin/python`;
         } else if (getarg("--python38")) {
             return `/opt/python/cp38-cp38/bin/python`;
-        } else if (getarg("--python37")) {
-            return `/opt/python/cp37-cp37m/bin/python`;
         } else {
-            return `/opt/python/cp37-cp37m/bin/python`;
+            return `/opt/python/cp39-cp39/bin/python`;
         }
     } else {
         if (process.env.PYTHON_VERSION) {
@@ -298,8 +296,6 @@ export function python_version(manylinux) {
             return "python3.9";
         } else if (getarg("--python38")) {
             return "python3.8";
-        } else if (getarg("--python37")) {
-            return "python3.7";
         } else {
             return "python3";
         }
@@ -342,8 +338,8 @@ sh.docker = function docker(...args) {
         ${env_vars} \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
-        --cpus="${CPUS}.0" 
-        ${IMAGE} 
+        --cpus="${CPUS}.0"
+        ${IMAGE}
         bash -c ${sh(...args).toString()}`;
 };
 

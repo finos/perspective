@@ -32,7 +32,7 @@ try:
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
-    raise Exception("Requires Python 3.7 or later")
+    raise Exception("Requires Python 3.8 or later")
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -43,7 +43,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
 if sys.version_info.major < 3:
-    raise Exception("Requires Python 3.7 or later")
+    raise Exception("Requires Python 3.8 or later")
 
 # Check for `cmake`
 if which("cmake") is None and which("cmake.exe") is None:
@@ -306,11 +306,11 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Framework :: Jupyter :: JupyterLab",
         "Framework :: Jupyter :: JupyterLab :: 3",
         "Framework :: Jupyter :: JupyterLab :: Extensions",
@@ -322,7 +322,7 @@ setup(
     data_files=get_data_files(data_files_spec),
     include_package_data=True,
     zip_safe=False,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=requires,
     extras_require={
         "aiohttp": requires_aiohttp,
