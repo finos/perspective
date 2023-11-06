@@ -22,10 +22,6 @@ pub struct ExprEditButtonProps {
     pub is_editing: bool,
 }
 
-// TODO: Move this logic to ColumnSettingsSidebar
-// Button should just pass the name to the on_open callback, and the sidebar
-// should render it. generally, rendering logic should live on the closest
-// component
 /// A button that goes into a column-list for a custom expression
 /// when pressed, it opens up the expression editor side-panel.
 #[function_component]

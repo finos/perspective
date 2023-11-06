@@ -25,7 +25,8 @@ test.beforeEach(async ({ page }) => {
 export async function checkTab(
     columnSettingsSidebar: ColumnSettingsSidebar,
     active: boolean,
-    expression: boolean
+    expression: boolean,
+    hasStyles: boolean = true
 ) {
     await columnSettingsSidebar.container.waitFor({
         state: "visible",
@@ -33,8 +34,12 @@ export async function checkTab(
     let titles = await columnSettingsSidebar.tabTitle.all();
     if (active) {
         if (expression) {
-            expect(await titles[0].innerText()).toBe("Style");
-            expect(await titles[1].innerText()).toBe("Attributes");
+            if (hasStyles) {
+                expect(await titles[0].innerText()).toBe("Style");
+                expect(await titles[1].innerText()).toBe("Attributes");
+            } else {
+                expect(await titles[0].innerText()).toBe("Attributes");
+            }
         } else {
             expect(await titles[0].innerText()).toBe("Style");
         }
@@ -67,12 +72,12 @@ test.describe("Plugin Styles", () => {
 
         firstCol.editBtn.waitFor();
         await firstCol.editBtn.click();
-        await checkTab(view.columnSettingsSidebar, true, false);
+        await checkTab(view.columnSettingsSidebar, true, false, false);
 
         await activeColumns.scrollToBottom();
         exprCol.editBtn.waitFor();
         await exprCol.editBtn.click();
-        await checkTab(view.columnSettingsSidebar, true, true);
+        await checkTab(view.columnSettingsSidebar, true, true, false);
     });
     test("Inactive column edit buttons open sidebar", async ({ page }) => {
         let view = new PageView(page);
@@ -100,37 +105,19 @@ test.describe("Plugin Styles", () => {
         let activeColumns = settingsPanel.activeColumns;
         let inactiveColumns = settingsPanel.inactiveColumns;
 
-        await settingsPanel.createNewExpression("expr", "true");
+        await settingsPanel.createNewExpression("expr", "'string'");
         await activeColumns.activateColumn("expr");
         let col = activeColumns.getColumnByName("expr");
         await inactiveColumns.container.waitFor({ state: "hidden" });
         await activeColumns.scrollToBottom();
         await col.editBtn.click();
         await sidebar.container.waitFor({ state: "visible" });
-        await checkTab(sidebar, true, true);
+        await checkTab(sidebar, true, true, true);
         let tabs = await sidebar.tabTitle.all();
         await tabs[1].click();
         await sidebar.attributesTab.container.waitFor();
         await tabs[0].click();
         await sidebar.styleTab.container.waitFor();
-    });
-    //NOTE: This test may eventually be deprecated.
-    test("Styles don't break on unimplemented plugins", async ({ page }) => {
-        let view = new PageView(page);
-        let settingsPanel = await view.openSettingsPanel();
-        let sidebar = view.columnSettingsSidebar;
-        let activeColumns = settingsPanel.activeColumns;
-
-        await settingsPanel.selectPlugin("Sunburst");
-        let col = await activeColumns.getFirstVisibleColumn();
-        await col.editBtn.click();
-        await sidebar.container.waitFor();
-        await checkTab(sidebar, true, false);
-        await sidebar.tabTitle.getByText("Style").click();
-        await sidebar.styleTab.container.waitFor();
-        await sidebar.styleTab.contents
-            .getByText("No styles available")
-            .waitFor();
     });
     test("View updates don't re-render sidebar", async ({ page }) => {
         await page.evaluate(async () => {

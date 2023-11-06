@@ -399,6 +399,7 @@ impl Component for PerspectiveViewer {
                                         custom_events={ &ctx.props().custom_events }
                                         { selected_column }
                                         on_close={ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None))}
+                                        width_override={self.column_settings_panel_width_override}
                                     />
                                     <></>
                                 </SplitPanel>

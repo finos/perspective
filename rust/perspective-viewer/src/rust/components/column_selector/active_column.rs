@@ -329,6 +329,15 @@ impl Component for ActiveColumn {
                     class.push("required");
                 };
 
+                // TODO: This doesn't scale well. Need a better attrs API.
+                // Thankfully this will be removed when we unify expression and table columns.
+                let show_edit_btn = match &*ctx.props().renderer.get_active_plugin().unwrap().name()
+                {
+                    "Datagrid" => col_type != Type::Bool,
+                    "X/Y Scatter" => col_type == Type::String && label.as_deref() == Some("Symbol"),
+                    _ => false,
+                } || is_expression;
+
                 html! {
                     <div
                         class={ outer_classes }
@@ -368,12 +377,14 @@ impl Component for ActiveColumn {
                                     <span class="column-selector--spacer"></span>
                                 }
 
-                                <ExprEditButton
-                                    name={ name.clone() }
-                                    on_open_expr_panel={ &ctx.props().on_open_expr_panel }
-                                    { is_expression }
-                                    is_editing={ ctx.props().is_editing }
-                                ></ExprEditButton>
+                                if show_edit_btn {
+                                    <ExprEditButton
+                                        name={ name.clone() }
+                                        on_open_expr_panel={ &ctx.props().on_open_expr_panel }
+                                        { is_expression }
+                                        is_editing={ ctx.props().is_editing }
+                                    ></ExprEditButton>
+                                }
                             </div>
                         </div>
                     </div>

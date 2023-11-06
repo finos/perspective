@@ -27,7 +27,7 @@ use crate::config::plugin::{PluginConfig, Symbol};
 use crate::config::Type;
 use crate::custom_elements::FilterDropDownElement;
 use crate::custom_events::CustomEvents;
-use crate::model::UpdatePluginConfig;
+use crate::model::{GetPluginConfig, UpdatePluginConfig};
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::{css, derive_model, html_template};
@@ -49,7 +49,7 @@ pub struct SymbolAttrProps {
 derive_model!(CustomEvents, Session, Renderer for SymbolAttrProps);
 impl SymbolAttrProps {
     pub fn get_config(&self) -> (PluginConfig, Vec<Symbol>) {
-        let (config, attrs) = self.get_plugin_config();
+        let (config, attrs) = (self.get_plugin_config(), self.get_plugin_attrs());
         (
             config.unwrap(),
             attrs.and_then(|a| a.symbol.map(|s| s.symbols)).unwrap(),

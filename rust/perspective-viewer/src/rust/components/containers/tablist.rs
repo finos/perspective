@@ -13,7 +13,7 @@
 use yew::{classes, html, Callback, Component, Html, Properties};
 
 use crate::components::style::LocalStyle;
-use crate::{css, html_template};
+use crate::{clone, css, html_template};
 
 pub trait Tab: PartialEq + std::fmt::Display + Clone + Default + 'static {}
 impl Tab for String {}
@@ -23,6 +23,8 @@ impl Tab for &'static str {}
 pub struct TabListProps<T: Tab> {
     pub tabs: Vec<T>,
     pub match_fn: Callback<T, Html>,
+    pub on_tab_change: Callback<usize>,
+    pub selected_tab: Option<usize>,
 }
 
 pub enum TabListMsg {
@@ -54,8 +56,8 @@ impl<T: Tab> Component for TabList<T> {
         }
     }
 
-    fn changed(&mut self, _ctx: &yew::Context<Self>, _old_props: &Self::Properties) -> bool {
-        self.selected_idx = 0;
+    fn changed(&mut self, ctx: &yew::Context<Self>, _old_props: &Self::Properties) -> bool {
+        self.selected_idx = ctx.props().selected_tab.unwrap_or_default();
         true
     }
 
@@ -70,7 +72,12 @@ impl<T: Tab> Component for TabList<T> {
                     Some("tab"),
                     (idx == self.selected_idx).then_some("selected")
                 ]);
-                let onclick = ctx.link().callback(move |_| TabListMsg::SetSelected(idx));
+
+                clone!(ctx.props().on_tab_change);
+                let onclick = ctx.link().callback(move |_| {
+                    on_tab_change.emit(idx);
+                    TabListMsg::SetSelected(idx)
+                });
                 html! {
                     <span {class} {onclick}>
                         <div class="tab-title">{tab.to_string()}</div>
