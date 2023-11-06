@@ -5,7 +5,10 @@
     "unpkg": "./dist/cdn/perspective-viewer-d3fc.js",
     "jsdelivr": "./dist/cdn/perspective-viewer-d3fc.js",
     "exports": {
-        ".": "./dist/esm/perspective-viewer-d3fc.js",
+        ".": {
+            "types": "./dist/esm/index.d.ts",
+            "default": "./dist/esm/perspective-viewer-d3fc.js"
+        },
         "./src/*": "./src/*",
         "./dist/*": "./dist/*",
         "./cdn/": "./dist/cdn/",
@@ -31,7 +34,8 @@
     "scripts": {
         "prebuild": "mkdirp dist/esm",
         "build": "node ./build.js",
-        "clean": "rimraf dist"
+        "clean": "rimraf dist",
+        "check-types": "tsc"
     },
     "publishConfig": {
         "access": "public"
@@ -54,6 +58,7 @@
         "gradient-parser": "1.0.2"
     },
     "devDependencies": {
+        "@types/d3": "^7.0.0",
         "@finos/perspective-esbuild-plugin": "^2.7.1",
         "@finos/perspective-test": "^2.7.1",
         "@prospective.co/procss": "^0.1.15"

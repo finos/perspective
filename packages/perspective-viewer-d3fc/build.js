@@ -14,20 +14,22 @@ const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
+const util = require("node:util");
+const exec = util.promisify(require("node:child_process").exec);
 
 const BUILD = [
     {
         entryPoints: [
-            "src/js/index/area.js",
-            "src/js/index/bar.js",
-            "src/js/index/candlestick.js",
-            "src/js/index/column.js",
-            "src/js/index/heatmap.js",
-            "src/js/index/line.js",
-            "src/js/index/ohlc.js",
-            "src/js/index/sunburst.js",
-            "src/js/index/xy-scatter.js",
-            "src/js/index/y-scatter.js",
+            "src/ts/index/area.ts",
+            "src/ts/index/bar.ts",
+            "src/ts/index/candlestick.ts",
+            "src/ts/index/column.ts",
+            "src/ts/index/heatmap.ts",
+            "src/ts/index/line.ts",
+            "src/ts/index/ohlc.ts",
+            "src/ts/index/sunburst.ts",
+            "src/ts/index/xy-scatter.ts",
+            "src/ts/index/y-scatter.ts",
         ],
         define: {
             global: "window",
@@ -42,7 +44,7 @@ const BUILD = [
         outdir: "dist/esm",
     },
     {
-        entryPoints: ["src/js/index.js"],
+        entryPoints: ["src/ts/index.ts"],
         define: {
             global: "window",
         },
@@ -55,7 +57,7 @@ const BUILD = [
         outfile: "dist/esm/perspective-viewer-d3fc.js",
     },
     {
-        entryPoints: ["src/js/index.js"],
+        entryPoints: ["src/ts/index.ts"],
         define: {
             global: "window",
         },
@@ -93,6 +95,10 @@ async function compile_css() {
 }
 
 async function build_all() {
+    // esbuild can handle typescript files, and strips out types from the output,
+    // but it is unable to check types, so we must run tsc as a separate step.
+    await exec("tsc");
+
     await compile_css();
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }

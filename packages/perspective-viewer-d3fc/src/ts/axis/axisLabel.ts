@@ -1,0 +1,57 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+import { rebindAll } from "d3fc";
+import { axisType } from "./axisType";
+import { labelFunction as noLabel } from "./noAxis";
+import { labelFunction as timeLabel } from "./timeAxis";
+import { labelFunction as linearLabel } from "./linearAxis";
+import { labelFunction as ordinalLabel } from "./ordinalAxis";
+import { GetSetReturn, Settings } from "../types";
+
+const labelFunctions = {
+    none: noLabel,
+    ordinal: ordinalLabel,
+    time: timeLabel,
+    linear: linearLabel,
+};
+
+export interface LabelFunction {
+    // NOTE: this "i" is not used...
+    (d, i?: any): string;
+    valueName: <T extends string | undefined = undefined>(
+        ...args: T[]
+    ) => GetSetReturn<T, string, LabelFunction>;
+}
+
+export const labelFunction = (settings: Settings): LabelFunction => {
+    const base = axisType(settings);
+    let valueName = "__ROW_PATH__";
+
+    const label: any = (d, _i) => {
+        return labelFunctions[base()](valueName)(d);
+    };
+
+    rebindAll(label, base);
+
+    label.valueName = <T extends string | undefined = undefined>(
+        ...args: T[]
+    ): GetSetReturn<T, string, LabelFunction> => {
+        if (!args.length) {
+            return valueName as GetSetReturn<T, string, LabelFunction>;
+        }
+        valueName = args[0];
+        return label;
+    };
+
+    return label;
+};
