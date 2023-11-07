@@ -145,7 +145,10 @@ def validate_expressions(expressions):
 
     if isinstance(expressions, list):
         for expr in expressions:
-            if not isinstance(expr, str):
+            if isinstance(expr, dict):
+                if not (expr.get("name") and expr.get("expr")):
+                    raise PerspectiveError("Cannot parse dict expression: {}".format(str(expr)))
+            elif not isinstance(expr, str):
                 raise PerspectiveError("Cannot parse non-string expression: {}".format(str(type(expr))))
         return expressions
     else:
@@ -158,3 +161,9 @@ def validate_plugin_config(plugin_config):
 
 def validate_title(title):
     return title
+
+
+def validate_version(version):
+    # basic semver of form \d+\.\d+\.\d+(\+.+)?
+    spl = version.split(".", 2)
+    return len(spl) == 3 and spl[0].isdigit() and spl[1].isdigit() and (spl[2].split("+")[0]).isdigit()

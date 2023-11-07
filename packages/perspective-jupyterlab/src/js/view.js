@@ -102,7 +102,8 @@ export class PerspectiveView extends DOMWidgetView {
                 typeof new_value === "string" &&
                 name !== "plugin" &&
                 name !== "theme" &&
-                name !== "title"
+                name !== "title" &&
+                name !== "version"
             ) {
                 new_value = JSON.parse(new_value);
             }
@@ -270,6 +271,7 @@ export class PerspectiveView extends DOMWidgetView {
             theme: this.model.get("theme"),
             settings: this.model.get("settings"),
             title: this.model.get("title"),
+            version: this.model.get("version"),
         });
     }
 
@@ -504,6 +506,12 @@ export class PerspectiveView extends DOMWidgetView {
     title_changed() {
         this.luminoWidget.restore({
             title: this.model.get("title"),
+        });
+    }
+
+    version_changed() {
+        this.luminoWidget.restore({
+            version: this.model.get("version"),
         });
     }
 }

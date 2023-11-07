@@ -336,8 +336,9 @@ w.theme = "Pro Dark"`
                     title: null,
                 });
 
-                await viewer.evaluate(async (viewer) => {
+                await viewer.evaluate(async (viewer, version) => {
                     viewer.restore({
+                        version,
                         columns: ["ui8"],
                         filter: [["i8", "<", "50"]],
                         group_by: ["date"],
@@ -350,7 +351,7 @@ w.theme = "Pro Dark"`
                     });
 
                     return "";
-                });
+                }, utils.VIEWER_API_VERSION);
 
                 const error_cells_dont_exist = await assert_no_error_in_cell(
                     page,

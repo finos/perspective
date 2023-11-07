@@ -98,6 +98,18 @@ To install a specific version of Emscripten (e.g. `2.0.6`):
 
 ---
 
+## `perspective-python`
+
+To build the Python library, first configure your project to build Python via
+`yarn setup`. Then, install the requirements corresponding to your version of
+python, e.g.
+
+```bash
+pip install -r python/perspective/requirements-311.txt
+```
+
+`perspective-python` supports Python 3.8 and upwards.
+
 ### `perspective-jupyterlab`
 
 To install the Jupyterlab/Jupyter Notebook plugins from your local working
@@ -108,16 +120,17 @@ Afterwards, you should see it listed as a "local extension" when you run
 `jupyter labextension list` and as a normal extension when you run
 `jupyter nbextension list`.
 
-## `perspective-python`
-
-To build the Python library, first configure your project to build Python via
-`yarn setup`, then run:
+As an example, your setup process might look like this:
 
 ```bash
+python -m venv ./venv
+pip install -r python/perspective/requirements-311.txt
+yarn setup # choose python
 yarn build
+yarn setup # choose javascript > jupyterlab
+yarn build
+yarn jlab_link # run this whenever you need to update a local perspective package
 ```
-
-`perspective-python` supports Python 3.8 and upwards.
 
 ---
 

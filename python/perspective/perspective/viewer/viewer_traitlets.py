@@ -22,6 +22,7 @@ from .validate import (
     validate_expressions,
     validate_plugin_config,
     validate_title,
+    validate_version,
 )
 
 
@@ -39,6 +40,9 @@ class PerspectiveTraitlets(HasTraits):
         PerspectiveWidget(group_by=["a", "b", "c"], split_by=["b"])
     """
 
+    # `perspective-viewer` API version. Must be kept in sync with the viewer.
+    API_VERSION = "1.0.0"
+
     # `perspective-viewer` options
     plugin = Unicode("Datagrid").tag(sync=True)
     columns = List(default_value=[]).tag(sync=True)
@@ -54,6 +58,7 @@ class PerspectiveTraitlets(HasTraits):
     server = Bool(False).tag(sync=True)
     client = Bool(False).tag(sync=True)
     title = Unicode(None, allow_none=True).tag(sync=True)
+    version = Unicode(API_VERSION).tag(sync=True)
 
     @validate("plugin")
     def _validate_plugin(self, proposal):
@@ -94,3 +99,7 @@ class PerspectiveTraitlets(HasTraits):
     @validate("title")
     def _validate_title(self, proposal):
         return validate_title(proposal.value)
+
+    @validate("version")
+    def _validate_version(self, proposal):
+        return validate_version(proposal.value)
