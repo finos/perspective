@@ -22,6 +22,8 @@
         "microtime": "^3.0.0"
     },
     "dependencies": {
+        "perspective-2-6-0": "npm:@finos/perspective@2.6.0",
+        "perspective-2-5-0": "npm:@finos/perspective@2.5.0",
         "perspective-2-4-0": "npm:@finos/perspective@2.4.0",
         "perspective-2-3-0": "npm:@finos/perspective@2.3.0",
         "perspective-2-2-0": "npm:@finos/perspective@2.2.0",

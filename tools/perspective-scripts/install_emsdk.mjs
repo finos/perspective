@@ -48,6 +48,7 @@ function emsdk(...args) {
 
 function toolchain_install() {
     console.log(`-- Installing Emscripten ${emscripten}`);
+    sh`git pull`.cwd(".emsdk").runSync();
     emsdk("install", emscripten);
     emsdk("activate", emscripten);
     console.log(`-- Emscripten ${emscripten} installed`);

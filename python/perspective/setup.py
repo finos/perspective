@@ -57,7 +57,6 @@ SKIP_JS_FILES = os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK")
 # Get requirement info #
 requires = [
     "ipywidgets>=7.5.1,<9",
-    "future>=0.16.0,<1",
     "numpy>=1.21.6,<2",
     "pandas>=0.22.0,<3",
     "python-dateutil>=2.8.0,<3",
