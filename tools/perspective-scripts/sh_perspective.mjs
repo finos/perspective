@@ -259,7 +259,7 @@ export function py_requirements() {
         .replace("Python ", "")
         .replace(".", "")
         .replace(/\..*?$/m, "");
-    return `python/perspective/requirements-${version}.txt`;
+    return `python/perspective/requirements/requirements-${version}.txt`;
 }
 
 /**
