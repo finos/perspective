@@ -8,9 +8,6 @@ auto-save-list
 tramp
 .\#*
 
-# npm lock file
-package-lock.json
-
 # Intellij/WebStorm IDE
 *.iml
 /.idea
@@ -114,6 +111,7 @@ tools/perspective-build/lib
 packages/perspective-esbuild-plugin/lib
 python/perspective/perspective/nbextension/static
 python/perspective/perspective/labextension
+boost_*.tar.gz
 
 # editor, IDE, OS
 .DS_Store

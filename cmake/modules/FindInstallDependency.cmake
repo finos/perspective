@@ -34,14 +34,14 @@ function(psp_build_dep name cmake_file)
             ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
 
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src/cpp/src/)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/cpp/src/)
     elseif(${name} STREQUAL exprtk)
         # no cmakelists - just include the header
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src)
     elseif(${name} STREQUAL re2)
         # Overwrite re2's CMakeLists with our custom CMakeLists.
         configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/CMakeLists.txt ${CMAKE_BINARY_DIR}/${name}-src/ COPYONLY)
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src)
 
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
@@ -51,15 +51,15 @@ function(psp_build_dep name cmake_file)
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src/build/cmake
             ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src/lib)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/lib)
     else()
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
 
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/${name}/include)
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/extras/${name}/include)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/include)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src)
     endif()
 
     if(NOT PSP_WASM_BUILD AND (MACOS OR NOT MANYLINUX))
