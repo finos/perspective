@@ -20,7 +20,7 @@ from ._state import _PerspectiveStateManager
 from ._utils import (
     _dtype_to_pythontype,
     _dtype_to_str,
-    _parse_expression_strings,
+    _parse_expression_inputs,
     _str_to_pythontype,
 )
 from .libpsppy import (
@@ -196,7 +196,7 @@ class Table(object):
         `error_message`, `line`, and `column`.
 
         Args:
-            expressions (:obj:`list`): A list of string expressions to validate
+            expressions (:obj:`list`): A list of string expressions or {name: string, expr: string} objects to validate
                 and create a schema from.
 
         Keyword Args:
@@ -208,7 +208,7 @@ class Table(object):
         if len(expressions) == 0:
             return validated
 
-        expressions = _parse_expression_strings(expressions)
+        expressions = _parse_expression_inputs(expressions)
         validation_results = validate_expressions(self._table, expressions)
         expression_schema = validation_results.get_expression_schema()
         expression_errors = validation_results.get_expression_errors()
@@ -444,7 +444,7 @@ class Table(object):
         config = {}
 
         if expressions is not None:
-            config["expressions"] = _parse_expression_strings(expressions)
+            config["expressions"] = _parse_expression_inputs(expressions)
 
         if columns is None:
             config["columns"] = self.columns()

@@ -13,6 +13,7 @@
 use std::rc::Rc;
 
 use wasm_bindgen::prelude::*;
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 use super::containers::split_panel::*;
@@ -29,15 +30,16 @@ pub enum ExpressionEditorMsg {
     SetExpr(Rc<String>),
     ValidateComplete(Option<PerspectiveValidationError>),
     SaveExpr,
+    AliasChanged(InputEvent),
 }
 
 #[derive(Properties, PartialEq)]
 pub struct ExpressionEditorProps {
     pub session: Session,
-    pub on_save: Callback<JsValue>,
+    pub on_save: Callback<(JsValue, NodeRef)>,
     pub on_validate: Callback<bool>,
     pub on_delete: Option<Callback<()>>,
-    pub alias: Option<String>,
+    pub old_alias: Option<String>,
     pub disabled: bool,
 }
 
@@ -54,16 +56,11 @@ pub fn get_new_column_name(session: &Session) -> String {
 
 impl ExpressionEditorProps {
     fn initial_expr(&self) -> Rc<String> {
-        let txt = if let Some(ref alias) = self.alias {
-            self.session
-                .metadata()
-                .get_expression_by_alias(alias)
-                .unwrap_or_default()
-        } else {
-            format!("// {}\n", get_new_column_name(&self.session))
-        };
-
-        txt.into()
+        self.old_alias
+            .as_ref()
+            .and_then(|alias| self.session.metadata().get_expression_by_alias(alias))
+            .unwrap_or_default()
+            .into()
     }
 }
 
@@ -73,6 +70,8 @@ pub struct ExpressionEditor {
     edit_enabled: bool,
     expr: Rc<String>,
     error: Option<PerspectiveValidationError>,
+    alias_ref: NodeRef,
+    alias: Option<String>,
 }
 
 impl Component for ExpressionEditor {
@@ -80,11 +79,18 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
+        let alias = ctx
+            .props()
+            .old_alias
+            .clone()
+            .or_else(|| Some(get_new_column_name(&ctx.props().session)));
         Self {
             save_enabled: false,
             edit_enabled: false,
             error: None,
             expr: ctx.props().initial_expr(),
+            alias_ref: NodeRef::default(),
+            alias,
         }
     }
 
@@ -95,9 +101,12 @@ impl Component for ExpressionEditor {
                 clone!(ctx.props().session);
                 ctx.props().on_validate.emit(true);
                 ctx.link().send_future(async move {
-                    match session.validate_expr(JsValue::from(&*val)).await {
+                    match session.validate_expr(&val).await {
                         Ok(x) => ExpressionEditorMsg::ValidateComplete(x),
-                        Err(_err) => ExpressionEditorMsg::ValidateComplete(None),
+                        Err(err) => {
+                            web_sys::console::error_1(&err);
+                            ExpressionEditorMsg::ValidateComplete(None)
+                        }
                     }
                 });
 
@@ -107,7 +116,7 @@ impl Component for ExpressionEditor {
                 self.error = err;
                 if self.error.is_none() {
                     let is_edited = maybe!({
-                        let alias = ctx.props().alias.as_ref()?;
+                        let alias = ctx.props().old_alias.as_ref()?;
                         let session = &ctx.props().session;
                         let old = session.metadata().get_expression_by_alias(alias)?;
                         let is_edited = *self.expr != old;
@@ -118,7 +127,7 @@ impl Component for ExpressionEditor {
                     });
 
                     self.edit_enabled = is_edited.unwrap_or_default();
-                    self.save_enabled = is_edited.unwrap_or(true);
+                    self.save_enabled = is_edited.unwrap_or(true) && self.alias.is_some();
                 } else {
                     self.save_enabled = false;
                 }
@@ -130,7 +139,7 @@ impl Component for ExpressionEditor {
                 self.edit_enabled = false;
                 self.save_enabled = false;
                 maybe!({
-                    let alias = ctx.props().alias.as_ref()?;
+                    let alias = ctx.props().old_alias.as_ref()?;
                     let session = &ctx.props().session;
                     let old = session.metadata().get_expression_by_alias(alias)?;
                     self.expr = old.into();
@@ -143,7 +152,9 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
                     let expr = self.expr.to_owned();
-                    ctx.props().on_save.emit(JsValue::from(&*expr));
+                    ctx.props()
+                        .on_save
+                        .emit((JsValue::from(&*expr), self.alias_ref.clone()));
                 }
 
                 false
@@ -155,6 +166,12 @@ impl Component for ExpressionEditor {
 
                 false
             }
+            ExpressionEditorMsg::AliasChanged(event) => {
+                let value = event.target_unchecked_into::<HtmlInputElement>().value();
+                self.alias = (!value.is_empty()).then_some(value);
+                self.save_enabled = self.error.is_none() && self.alias.is_some();
+                true
+            }
         }
     }
 
@@ -165,8 +182,12 @@ impl Component for ExpressionEditor {
 
         let oninput = ctx.link().callback(ExpressionEditorMsg::SetExpr);
         let onsave = ctx.link().callback(|()| ExpressionEditorMsg::SaveExpr);
+
+        let on_alias_change = ctx.link().callback(ExpressionEditorMsg::AliasChanged);
+        let alias_class = self.alias.is_none().then_some("errored");
+
         let is_closable = maybe! {
-            let alias = ctx.props().alias.as_ref()?;
+            let alias = ctx.props().old_alias.as_ref()?;
             Some(!ctx.props().session.is_column_expression_in_use(alias))
         }
         .unwrap_or_default();
@@ -176,47 +197,63 @@ impl Component for ExpressionEditor {
         html_template! {
             <LocalStyle href={ css!("expression-editor") } />
             <SplitPanel orientation={ Orientation::Vertical }>
-                <div id="editor-container" class={disabled_class}>
-                    <CodeEditor
-                        {disabled}
-                        expr={ &self.expr }
-                        error={ self.error.clone().map(|x| x.into()) }
-                        { oninput }
-                        { onsave } />
+                <div id="expression-editor">
+                    <div style="display: flex; flex-direction: column;" id ="editor-alias-container">
+                        <label class="item_title">{ "Expression Name" }</label>
+                        <input
+                            ref={self.alias_ref.clone()}
+                            oninput={on_alias_change}
+                            type="text"
+                            value={self.alias.clone()}
+                            class={alias_class}
+                            disabled={disabled}
+                            />
+                    </div>
+                    <div>
+                        <div class="item_title">{ "Expression" }</div>
+                        <div id="editor-container" class={disabled_class}>
+                            <CodeEditor
+                                {disabled}
+                                expr={ &self.expr }
+                                error={ self.error.clone().map(|x| x.into()) }
+                                { oninput }
+                                { onsave } />
 
-                    <div id="psp-expression-editor-actions">
-                        if let Some(err) = &self.error {
-                            <div class="error">
-                                { &err.error_message }
+                            <div id="psp-expression-editor-actions">
+                                if let Some(err) = &self.error {
+                                    <div class="error">
+                                        { &err.error_message }
+                                    </div>
+                                }
+
+                                if is_closable {
+                                    <button
+                                        id="psp-expression-editor-button-delete"
+                                        class="psp-expression-editor__button"
+                                        onmousedown={ delete }>
+                                        { "Delete" }
+                                    </button>
+                                }
+
+                                if ctx.props().old_alias.is_some() {
+                                    <button
+                                        id="psp-expression-editor-button-reset"
+                                        class="psp-expression-editor__button"
+                                        onmousedown={ reset }
+                                        disabled={ !self.edit_enabled }>
+                                        { "Reset" }
+                                    </button>
+                                }
+
+                                <button
+                                    id="psp-expression-editor-button-save"
+                                    class="psp-expression-editor__button"
+                                    onmousedown={ save }
+                                    disabled={ !self.save_enabled }>
+                                    { "Save" }
+                                </button>
                             </div>
-                        }
-
-                        if is_closable {
-                            <button
-                                id="psp-expression-editor-button-delete"
-                                class="psp-expression-editor__button"
-                                onmousedown={ delete }>
-                                { "Delete" }
-                            </button>
-                        }
-
-                        if ctx.props().alias.is_some() {
-                            <button
-                                id="psp-expression-editor-button-reset"
-                                class="psp-expression-editor__button"
-                                onmousedown={ reset }
-                                disabled={ !self.edit_enabled }>
-                                { "Reset" }
-                            </button>
-                        }
-
-                        <button
-                            id="psp-expression-editor-button-save"
-                            class="psp-expression-editor__button"
-                            onmousedown={ save }
-                            disabled={ !self.save_enabled }>
-                            { "Save" }
-                        </button>
+                        </div>
                     </div>
                 </div>
                 <></>
@@ -225,9 +262,14 @@ impl Component for ExpressionEditor {
     }
 
     fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
-        if ctx.props().alias != old_props.alias {
+        if ctx.props().old_alias != old_props.old_alias {
             self.expr = ctx.props().initial_expr();
         }
+        self.alias = ctx
+            .props()
+            .old_alias
+            .clone()
+            .or_else(|| Some(get_new_column_name(&ctx.props().session)));
         true
     }
 }

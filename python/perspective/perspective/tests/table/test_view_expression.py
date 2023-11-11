@@ -25,6 +25,38 @@ def randstr(length, input=ascii_letters):
 
 
 class TestViewExpression(object):
+    def test_expression_conversion(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        test_expressions_str = [
+            '// x\n"a"',
+            '// y\n"b" * 0.5',
+            "// c\n'abcdefg'",
+            "// d\ntrue and false",
+            '// e\nfloat("a") > 2 ? null : 1',
+            "// f\ntoday()",
+            "// g\nnow()",
+            "// h\nlength(123)",
+        ]
+        test_expressions_dict = [
+            {"name": "x", "expr": '"a"'},
+            {"name": "y", "expr": '"b" * 0.5'},
+            {"name": "c", "expr": "'abcdefg'"},
+            {"name": "d", "expr": "true and false"},
+            {"name": "e", "expr": 'float("a") > 2 ? null : 1'},
+            {"name": "f", "expr": "today()"},
+            {"name": "g", "expr": "now()"},
+            {"name": "h", "expr": "length(123)"},
+        ]
+        str_validated = table.validate_expressions(test_expressions_str)
+        dict_validated = table.validate_expressions(test_expressions_dict)
+        assert str_validated["errors"] == dict_validated["errors"]
+        assert str_validated["expression_schema"] == dict_validated["expression_schema"]
+        assert str_validated["expression_alias"].keys() == dict_validated["expression_alias"].keys()
+        for dict_key, dict_val in dict_validated["expression_alias"].items():
+            str_alias = str_validated["expression_alias"]
+            matched_val = "// {}\n{}".format(dict_key, dict_val)
+            assert str_alias[dict_key] == matched_val
+
     def test_table_validate_expressions_empty(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         validate = table.validate_expressions([])

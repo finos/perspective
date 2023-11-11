@@ -16,6 +16,7 @@ use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::style::LocalStyle;
+use crate::config::Expression;
 use crate::css;
 use crate::custom_elements::ColumnDropDownElement;
 
@@ -28,7 +29,7 @@ pub struct EmptyColumn {
 pub enum InPlaceColumn {
     Column(String),
     // ExpressionAlias(String),
-    Expression(String),
+    Expression(Expression),
 }
 
 #[derive(Properties)]

@@ -21,6 +21,7 @@ use wasm_bindgen_test::*;
 use {crate::*, js_sys::Array};
 
 use super::aggregates::*;
+use super::expression::*;
 use super::filters::*;
 use super::sort::*;
 use crate::js::perspective::JsPerspectiveViewConfig;
@@ -45,7 +46,7 @@ pub struct ViewConfig {
     pub sort: Vec<Sort>,
 
     #[serde(default)]
-    pub expressions: Vec<String>,
+    pub expressions: Vec<ExprSerde>,
 
     #[serde(default)]
     pub aggregates: HashMap<String, Aggregate>,
@@ -123,7 +124,7 @@ pub struct ViewConfigUpdate {
     pub sort: Option<Vec<Sort>>,
 
     #[serde(default)]
-    pub expressions: Option<Vec<String>>,
+    pub expressions: Option<Vec<ExprSerde>>,
 
     #[serde(default)]
     pub aggregates: Option<HashMap<String, Aggregate>>,
@@ -176,14 +177,11 @@ mod tests {
 
         let x = json!({ "filter": [filter] });
         let rec: ViewConfig = x.into_serde_ext().unwrap();
-        assert_eq!(
-            rec.filter,
-            vec![Filter(
-                "Test".to_owned(),
-                FilterOp::Contains,
-                FilterTerm::Scalar(Scalar::String("aaa".to_owned()))
-            )]
-        );
+        assert_eq!(rec.filter, vec![Filter(
+            "Test".to_owned(),
+            FilterOp::Contains,
+            FilterTerm::Scalar(Scalar::String("aaa".to_owned()))
+        )]);
     }
 
     #[wasm_bindgen_test]
@@ -194,14 +192,11 @@ mod tests {
 
         let x = json!({ "filter": [filter] });
         let rec: ViewConfig = x.into_serde_ext().unwrap();
-        assert_eq!(
-            rec.filter,
-            vec![Filter(
-                "Test".to_owned(),
-                FilterOp::LT,
-                FilterTerm::Scalar(Scalar::Float(4_f64))
-            )]
-        );
+        assert_eq!(rec.filter, vec![Filter(
+            "Test".to_owned(),
+            FilterOp::LT,
+            FilterTerm::Scalar(Scalar::Float(4_f64))
+        )]);
     }
 
     #[wasm_bindgen_test]
@@ -230,13 +225,10 @@ mod tests {
 
         let x = json!({"sort": [sort1, sort2]});
         let rec: ViewConfig = x.into_serde_ext().unwrap();
-        assert_eq!(
-            rec.sort,
-            vec![
-                Sort("Test1".to_owned(), SortDir::Asc),
-                Sort("Test2".to_owned(), SortDir::Desc)
-            ]
-        );
+        assert_eq!(rec.sort, vec![
+            Sort("Test1".to_owned(), SortDir::Asc),
+            Sort("Test2".to_owned(), SortDir::Desc)
+        ]);
     }
 
     #[wasm_bindgen_test]

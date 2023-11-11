@@ -20,6 +20,7 @@ use yew::{props, Callback};
 
 use crate::components::column_dropdown::*;
 use crate::components::column_selector::InPlaceColumn;
+use crate::config::Expression;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
 use crate::utils::ApiFuture;
@@ -72,13 +73,13 @@ impl ColumnDropDownElement {
         clone!(self.modal, self.session);
         ApiFuture::spawn(async move {
             if !exclude.contains(&input) {
-                let is_expr = session
-                    .validate_expr(JsValue::from_str(&input))
-                    .await?
-                    .is_none();
+                let is_expr = session.validate_expr(&input).await?.is_none();
 
                 if is_expr {
-                    values.push(InPlaceColumn::Expression(input));
+                    values.push(InPlaceColumn::Expression(Expression {
+                        name: input.clone(),
+                        expr: input,
+                    }));
                 }
             }
 

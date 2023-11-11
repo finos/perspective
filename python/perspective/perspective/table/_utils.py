@@ -10,6 +10,7 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+from operator import itemgetter
 import re
 from datetime import date, datetime
 from functools import partial
@@ -142,7 +143,7 @@ def _replace_interned_param(match_obj):
     return "{}'{}'{}".format(full[0:intern_idx], value, full[intern_idx + len(intern_fn) :])
 
 
-def _parse_expression_strings(expressions):
+def _parse_expression_inputs(expressions):
     """Given a list of string expressions, parse out column names and string
     literals using regex and return a list of lists that contain three items
     in each inner list:
@@ -156,23 +157,23 @@ def _parse_expression_strings(expressions):
     alias_map = {}
 
     for expression in expressions:
-        if '""' in expression:
+        if type(expression) is dict:
+            expr_raw, alias = itemgetter("expr", "name")(expression)
+            parsed = expr_raw
+        else:
+            expr_raw = expression
+            parsed = expr_raw
+            alias_match = re.match(ALIAS_REGEX, expr_raw)
+            if alias_match:
+                alias = alias_match.group(1).strip()
+            else:
+                alias = expr_raw
+
+        if '""' in expr_raw:
             raise ValueError("Cannot reference empty column in expression!")
 
         column_id_map = {}
         column_name_map = {}
-
-        alias_match = re.match(ALIAS_REGEX, expression)
-
-        # initialize `parsed` here so we keep `expression` unedited as the
-        # user typed it into Perspective
-        parsed = expression
-
-        if alias_match:
-            alias = alias_match.group(1).strip()
-        else:
-            # Expression itself is the alias
-            alias = expression
 
         # we need to be able to modify the running_cidx inside of every call to
         # replacer_fn - must pass by reference unfortunately
@@ -204,7 +205,7 @@ def _parse_expression_strings(expressions):
         parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
         parsed = re.sub(REPLACE_FN_REGEX, _replace_interned_param, parsed)
 
-        validated = [alias, expression, parsed, column_id_map]
+        validated = [alias, expr_raw, parsed, column_id_map]
 
         if alias_map.get(alias) is not None:
             idx = alias_map[alias]

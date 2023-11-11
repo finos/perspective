@@ -37,7 +37,7 @@ use crate::dragdrop::*;
 use crate::js::perspective::*;
 use crate::js::plugin::*;
 use crate::utils::*;
-use crate::*;
+use crate::{JsValueSerdeExt, *};
 
 /// The `Session` struct is the principal interface to the Perspective engine,
 /// the `Table` and `View` objects for this viewer, and all associated state
@@ -195,30 +195,33 @@ impl Session {
     /// An async task which replaces a `column` aliased expression with another.
     pub async fn create_replace_expression_update(
         &self,
-        column: &str,
-        expression: &JsValue,
+        old_expr_name: &str,
+        new_expr: &Expression,
     ) -> ViewConfigUpdate {
-        let old_expression = self.metadata().get_expression_by_alias(column).unwrap();
-        let new_name = self
-            .get_validated_expression_name(expression)
-            .await
+        let old_expr_val = self
+            .metadata()
+            .get_expression_by_alias(old_expr_name)
             .unwrap();
 
-        let expression = expression.as_string().unwrap();
-        self.get_view_config().create_replace_expression_update(
-            column,
-            &old_expression,
-            &new_name,
-            &expression,
-        )
+        let old_expr = Expression {
+            name: old_expr_name.into(),
+            expr: old_expr_val,
+        };
+
+        self.get_view_config()
+            .create_replace_expression_update(&old_expr, new_expr)
     }
 
     /// Validate an expression strin and marshall the results.
     pub async fn validate_expr(
         &self,
-        expr: JsValue,
+        expr: &str,
     ) -> Result<Option<PerspectiveValidationError>, JsValue> {
-        let arr = std::iter::once(expr).collect::<js_sys::Array>();
+        let arr = std::iter::once(JsValue::from_serde_ext(&Expression {
+            name: "_".into(),
+            expr: expr.to_owned(),
+        })?)
+        .collect::<js_sys::Array>();
         let table = self.borrow().table.as_ref().unwrap().clone();
         let errors = table.validate_expressions(arr).await?.errors();
         let error_keys = js_sys::Object::keys(&errors);
@@ -361,13 +364,14 @@ impl Session {
         Ok(ValidSession(self))
     }
 
-    async fn get_validated_expression_name(&self, expr: &JsValue) -> ApiResult<String> {
-        let arr = std::iter::once(expr).collect::<js_sys::Array>();
-        let table = self.borrow().table.as_ref().unwrap().clone();
-        let schema = table.validate_expressions(arr).await?.expression_schema();
-        let schema_keys = js_sys::Object::keys(&schema);
-        schema_keys.get(0).as_string().into_apierror()
-    }
+    // async fn get_validated_expression_name(&self, expr: &JsValue) ->
+    // ApiResult<String> {     let arr =
+    // std::iter::once(expr).collect::<js_sys::Array>();     let table =
+    // self.borrow().table.as_ref().unwrap().clone();     let schema =
+    // table.validate_expressions(arr).await?.expression_schema();
+    //     let schema_keys = js_sys::Object::keys(&schema);
+    //     schema_keys.get(0).as_string().into_apierror()
+    // }
 
     async fn flat_as_jsvalue(&self, flat: bool) -> ApiResult<View> {
         if flat {
@@ -414,7 +418,7 @@ impl Session {
         let arr = config
             .expressions
             .iter()
-            .map(JsValue::from)
+            .filter_map(|expr| serde_wasm_bindgen::to_value(expr).ok())
             .collect::<js_sys::Array>();
 
         let valid_recs = table.validate_expressions(arr).await?;

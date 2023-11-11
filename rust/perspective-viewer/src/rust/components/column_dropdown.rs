@@ -136,7 +136,7 @@ impl Component for ColumnDropDown {
                                         <span>{ col }</span>
                                     },
                                     InPlaceColumn::Expression(col) =>  html! {
-                                        <span id="add-expression">{ col }</span>
+                                        <span id="add-expression">{ col.name.clone() }</span>
                                     },
                                 };
 

@@ -3253,6 +3253,46 @@ const perspective = require("@finos/perspective");
                 view.delete();
                 table.delete();
             });
+
+            test("Validation works with both input formats", async function () {
+                const table = await perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [1, 2, 3, 4],
+                });
+                const str_exprs = [
+                    '// x\n"a"',
+                    '// y\n"b" * 0.5',
+                    "// c\n'abcdefg'",
+                    "// d\ntrue and false",
+                    '// e\nfloat("a") > 2 ? null : 1',
+                    "// f\ntoday()",
+                    "// g\nnow()",
+                    "// h\nlength(123)",
+                ];
+                const dict_exprs = [
+                    { name: "x", expr: '"a"' },
+                    { name: "y", expr: '"b" * 0.5' },
+                    { name: "c", expr: "'abcdefg'" },
+                    { name: "d", expr: "true and false" },
+                    { name: "e", expr: 'float("a") > 2 ? null : 1' },
+                    { name: "f", expr: "today()" },
+                    { name: "g", expr: "now()" },
+                    { name: "h", expr: "length(123)" },
+                ];
+                let vstrs = await table.validate_expressions(str_exprs);
+                let vdicts = await table.validate_expressions(dict_exprs);
+
+                expect(vstrs.errors).toEqual(vdicts.errors);
+                expect(vstrs.expression_schema).toEqual(
+                    vdicts.expression_schema
+                );
+
+                for (let [key, val] of Object.entries(vstrs.expression_alias)) {
+                    let dict_val = vdicts.expression_alias[key];
+                    let parsed_val = `// ${key}\n${dict_val}`;
+                    expect(val).toEqual(parsed_val);
+                }
+            });
         });
     });
 })(perspective);

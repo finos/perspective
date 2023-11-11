@@ -32,9 +32,12 @@ export async function checkTab(
     });
     let titles = await columnSettingsSidebar.tabTitle.all();
     if (active) {
-        expect(titles.length).toBe(2);
-        expect(await titles[0].innerText()).toBe("Style");
-        expect(await titles[1].innerText()).toBe("Attributes");
+        if (expression) {
+            expect(await titles[0].innerText()).toBe("Style");
+            expect(await titles[1].innerText()).toBe("Attributes");
+        } else {
+            expect(await titles[0].innerText()).toBe("Style");
+        }
     } else {
         if (expression) {
             expect(titles.length).toBe(1);

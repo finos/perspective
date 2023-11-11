@@ -138,7 +138,7 @@ declare module "@finos/perspective" {
     };
 
     export type ColumnName = string | null;
-    export type Expression = string;
+    export type Expression = { name: string; expr: string };
     export type Filter = [
         ColumnName,
         FilterOp,
@@ -169,7 +169,7 @@ declare module "@finos/perspective" {
         delete(): Promise<void>;
         on_delete(callback: () => void): void;
         validate_expressions(
-            expressions: Array<string>
+            expressions: Array<Expression>
         ): Promise<ValidatedExpressions>;
         schema(): Promise<Schema>;
         size(): Promise<number>;

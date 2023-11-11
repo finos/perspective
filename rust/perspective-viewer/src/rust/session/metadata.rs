@@ -139,7 +139,7 @@ impl SessionMetadata {
     /// # Arguments
     /// - `alias` An alias name for an expression column in this `Session`.
     pub fn get_expression_by_alias(&self, alias: &str) -> Option<String> {
-        maybe!(self.as_ref()?.expr_meta.as_ref()?.alias.get(alias)).cloned()
+        self.as_ref()?.expr_meta.as_ref()?.alias.get(alias).cloned()
     }
 
     /// Returns the edited expression `String` (e.g. the not-yet-saved, edited
