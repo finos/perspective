@@ -24,52 +24,33 @@ const http = require("http");
 const WebSocket = require("ws");
 const process = require("process");
 const path = require("path");
-const { Decompress } = require("fflate");
 
 const load_perspective = require("../../dist/pkg/node/perspective.cpp.js");
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 const buffer = require("../../dist/pkg/node/perspective.cpp.wasm").default;
 
-function deflate(buffer) {
-    let parts = [];
-    let length = 0;
-    const decompressor = new Decompress((chunk) => {
-        if (chunk) {
-            length += chunk.byteLength;
-            parts.push(chunk);
-        }
-    });
-
-    decompressor.push(buffer, true);
-    let offset = 0;
-    const buffer2 = new Uint8Array(length);
-    for (const part of parts) {
-        buffer2.set(part, offset);
-        offset += part.byteLength;
-    }
-
-    return buffer2.buffer;
-}
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
-        let done;
-        this._loaded_promise = new Promise((x) => {
-            done = x;
-        });
-        buffer
-            .then((buffer) => {
-                return load_perspective({
-                    wasmBinary: deflate(buffer),
-                    wasmJSMethod: "native-wasm",
-                });
-            })
-            .then((core) => {
-                core.init();
-                this.perspective = perspective(core);
-                super.init(msg);
-                done();
+        this._loaded_promise = (async () => {
+            let wasmBinary = await buffer;
+            try {
+                const mod = await WebAssembly.instantiate(wasmBinary);
+                const exports = mod.instance.exports;
+                const size = exports.size();
+                const offset = exports.offset();
+                const array = new Uint8Array(exports.memory.buffer);
+                wasmBinary = array.slice(offset, offset + size);
+            } catch {}
+            const core = await load_perspective({
+                wasmBinary,
+                wasmJSMethod: "native-wasm",
             });
+
+            core.init();
+            this.perspective = perspective(core);
+            super.init(msg);
+        })();
     }
 
     post(msg) {

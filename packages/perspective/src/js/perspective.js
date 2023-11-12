@@ -2195,20 +2195,24 @@ export default function (Module) {
          * @param {ArrayBuffer} buffer an ArrayBuffer or Buffer containing the
          * Perspective WASM code
          */
-        init(msg) {
-            if (typeof WebAssembly === "undefined") {
-                throw new Error("WebAssembly not supported");
-            } else {
-                __MODULE__({
-                    wasmBinary: msg.buffer,
-                    wasmJSMethod: "native-wasm",
-                    locateFile: (x) => x,
-                }).then((mod) => {
-                    __MODULE__ = mod;
-                    __MODULE__.init();
-                    super.init(msg);
-                });
-            }
+        async init(msg) {
+            let wasmBinary = msg.buffer;
+            try {
+                const mod = await WebAssembly.instantiate(wasmBinary);
+                const exports = mod.instance.exports;
+                const size = exports.size();
+                const offset = exports.offset();
+                const array = new Uint8Array(exports.memory.buffer);
+                wasmBinary = array.slice(offset, offset + size);
+            } catch {}
+            __MODULE__ = await __MODULE__({
+                wasmBinary,
+                wasmJSMethod: "native-wasm",
+                locateFile: (x) => x,
+            });
+
+            __MODULE__.init();
+            super.init(msg);
         }
     }
 

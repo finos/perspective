@@ -13,14 +13,19 @@
 const { execSync } = require("child_process");
 const os = require("os");
 const path = require("path");
-const fflate = require("fflate");
-const fs = require("fs");
 
 const stdio = "inherit";
-const env = process.PSP_DEBUG ? "debug" : "release";
+const env = process.env.PSP_DEBUG ? "debug" : "release";
 const cwd = path.join(process.cwd(), "dist", env);
 
 delete process.env.NODE;
+
+function bootstrap(file) {
+    execSync(`cargo run -p perspective-bootstrap -- ${file}`, {
+        cwd: path.join(process.cwd(), "..", "..", "rust", "perspective-viewer"),
+        stdio,
+    });
+}
 
 try {
     execSync(`mkdirp ${cwd}`, { stdio });
@@ -29,20 +34,18 @@ try {
         cwd,
         stdio,
     });
+
     execSync(`emmake make -j${process.env.PSP_NUM_CPUS || os.cpus().length}`, {
         cwd,
         stdio,
     });
+
     execSync(`cpy web/**/* ../web`, { cwd, stdio });
     execSync(`cpy node/**/* ../node`, { cwd, stdio });
-
-    const wasm = fs.readFileSync("dist/web/perspective.cpp.wasm");
-    const compressed = fflate.compressSync(wasm);
-    fs.writeFileSync("dist/web/perspective.cpp.wasm", compressed);
-
-    const wasm2 = fs.readFileSync("dist/node/perspective.cpp.wasm");
-    const compressed2 = fflate.compressSync(wasm2);
-    fs.writeFileSync("dist/node/perspective.cpp.wasm", compressed2);
+    if (!process.env.PSP_DEBUG) {
+        bootstrap(`../../cpp/perspective/dist/web/perspective.cpp.wasm`);
+        bootstrap(`../../cpp/perspective/dist/node/perspective.cpp.wasm`);
+    }
 } catch (e) {
     console.error(e);
     process.exit(1);

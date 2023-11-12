@@ -177,6 +177,8 @@ export const run_with_scope = async function run_recursive(strings, ...args) {
                 } else {
                     new_uncompiled.push(pkgname);
                 }
+            } else {
+                batch.push(pkgname);
             }
         }
 

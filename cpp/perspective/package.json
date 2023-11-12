@@ -12,8 +12,5 @@
     "scripts": {
         "build": "node ../../tools/perspective-scripts/run_emsdk.mjs node ./build.js",
         "clean": "rimraf dist"
-    },
-    "devDependencies": {
-        "fflate": "^0.7.4"
     }
 }
