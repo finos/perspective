@@ -10,28 +10,18 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as fc from "d3fc";
 import { select } from "d3";
-import { axisFactory } from "../axis/axisFactory";
-import { chartCanvasFactory } from "../axis/chartFactory";
-import {
-    pointSeriesCanvas,
-    symbolTypeFromColumn,
-} from "../series/pointSeriesCanvas";
+import { symbolTypeFromColumn } from "../series/pointSeriesCanvas";
 import { pointData } from "../data/pointData";
 import {
     seriesColorsFromColumn,
     seriesColorsFromDistinct,
     colorScale,
 } from "../series/seriesColors";
-import { seriesLinearRange, seriesColorRange } from "../series/seriesRange";
-import { symbolLegend, colorLegend, colorGroupLegend } from "../legend/legend";
+import { seriesColorRange } from "../series/seriesRange";
+import { symbolLegend, colorLegend } from "../legend/legend";
 import { colorRangeLegend } from "../legend/colorRangeLegend";
 import { filterDataByGroup } from "../legend/filter";
-import withGridLines from "../gridlines/gridlines";
-import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
-import zoomableChart from "../zoom/zoomableChart";
-import nearbyTip from "../tooltip/nearbyTip";
 import { symbolsObj } from "../series/seriesSymbols";
 import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
 import xyScatterSeries from "../series/xy-scatter/xyScatterSeries";
@@ -55,7 +45,8 @@ function overrideSymbols(settings, symbols) {
     for (let i in domain) {
         range[i] = range[i % len];
     }
-    settings.columns?.[symbolCol]?.symbols?.forEach(({ key, value }) => {
+    let maybeSymbols = settings.columns?.[symbolCol]?.symbols;
+    Object.entries(maybeSymbols ?? {}).forEach(([key, value]) => {
         // TODO: Define custom symbol types based on the values passed in here.
         // https://d3js.org/d3-shape/symbol#custom-symbols
         let symbolType = symbolsObj[value] ?? d3.symbolCircle;
