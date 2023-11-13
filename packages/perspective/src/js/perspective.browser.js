@@ -14,18 +14,12 @@ import * as defaults from "./config/constants.js";
 import { get_config, get_type_config as _get_type_config } from "./config";
 import { Client } from "./api/client.js";
 import { WebSocketClient } from "./websocket/client";
-
 import { override_config } from "./config/index.js";
-import { Decompress } from "fflate";
 
 import wasm_worker from "../../src/js/perspective.worker.js";
 import wasm from "../../dist/pkg/web/perspective.cpp.wasm";
 
 let IS_INLINE = false;
-
-function is_gzip(buffer) {
-    return new Uint32Array(buffer.slice(0, 4))[0] == 559903;
-}
 
 /**
  * Singleton WASM file download cache.
@@ -41,59 +35,22 @@ const _override = /* @__PURE__ */ (function () {
 
                 async wasm() {
                     let _wasm = await wasm;
-
-                    let parts = [];
-                    let length = 0;
-                    const decompressor = new Decompress((chunk) => {
-                        if (chunk) {
-                            length += chunk.byteLength;
-                            parts.push(chunk);
-                        }
-                    });
-
                     if (_wasm instanceof ArrayBuffer && !_wasm.buffer) {
                         _wasm = new Uint8Array(_wasm);
                     }
 
                     if (_wasm.buffer && _wasm.buffer instanceof ArrayBuffer) {
                         IS_INLINE = true;
-                        if (is_gzip(_wasm.buffer)) {
-                            decompressor.push(_wasm, true);
-                        } else {
-                            length = _wasm.byteLength;
-                            parts = [_wasm];
-                        }
+                        length = _wasm.byteLength;
+                        this._wasm = _wasm;
                     } else if (_wasm instanceof ArrayBuffer) {
                         length = _wasm.byteLength;
-                        parts = [new Uint8Array(_wasm)];
+                        this._wasm = new Uint8Array(_wasm);
                     } else {
                         const resp = await fetch(_wasm);
-                        const reader = resp.body.getReader();
-                        let state = 0;
-                        while (true) {
-                            const { value, done } = await reader.read();
-                            if (done) break;
-                            if (
-                                (state === 0 && is_gzip(value.buffer)) ||
-                                state === 1
-                            ) {
-                                state = 1;
-                                decompressor.push(value, done);
-                            } else {
-                                state = 2;
-                                length += value.byteLength;
-                                parts.push(value);
-                            }
-                        }
+                        this._wasm = await resp.arrayBuffer();
                     }
 
-                    let offset = 0;
-                    const buffer = new Uint8Array(length);
-                    for (const part of parts) {
-                        buffer.set(part, offset);
-                        offset += part.byteLength;
-                    }
-                    this._wasm = buffer.buffer;
                     return this._wasm;
                 }
             })();
