@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 #pragma once
-
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #if defined(PSP_ENABLE_WASM) || defined(PSP_ENABLE_PYTHON)
 
 #include <perspective/base.h>

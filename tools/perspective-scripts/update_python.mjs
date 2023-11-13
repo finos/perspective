@@ -10,64 +10,50 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import pkg from "../../package.json" assert { type: "json" };
-import path from "path";
-import os from "os";
-import fs from "fs";
-import * as dotenv from "dotenv";
+/// Use this script to update the `requirements-*.txt` files in the
+/// `python/perspective` directory. This only needs to be done when the actual
+/// dependencies _or_ supported Python versions change - to update these deps
+/// otherwise is to invite the wrath of the CI gods.
+
 import sh from "./sh.mjs";
-import * as url from "url";
+import * as fs from "fs";
 
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
+const VERSIONS = [
+    // "3.7",
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+];
 
-// console.log(pkg);
-const emscripten = pkg.emscripten;
+for (const version of VERSIONS) {
+    sh`
+        pip3 install "python/perspective[dev]" 
+        --dry-run
+        --report=report.json
+        --python-version=${version} 
+        --only-binary=:all: 
+        --platform=manylinux_2_12_x86_64 
+        --platform=manylinux_2_17_x86_64 
+        --ignore-installed 
+        --target=.
+    `.runSync();
 
-dotenv.config({
-    path: "./.perspectiverc",
-});
-
-function base() {
-    return sh.path`${__dirname}/../../.emsdk`;
-}
-
-function emsdk_checkout() {
-    function git(args) {
-        sh`git ${args}`.runSync();
+    const data = JSON.parse(fs.readFileSync("report.json"));
+    let output = "";
+    for (const {
+        metadata: { version, name },
+    } of data.install) {
+        output += `${name}==${version}\n`;
     }
 
-    git(["clone", "https://github.com/emscripten-core/emsdk.git", base()]);
+    fs.writeFileSync(
+        `python/perspective/requirements/requirements-${version.replace(
+            ".",
+            ""
+        )}.txt`,
+        output
+    );
 }
 
-function emsdk(...args) {
-    const basedir = base();
-    const suffix = os.type() == "Windows_NT" ? ".bat" : "";
-    const emsdk = path.join(basedir, "emsdk" + suffix);
-    sh`${emsdk} ${args}`.runSync();
-}
-
-function toolchain_install() {
-    console.log(`-- Installing Emscripten ${emscripten}`);
-    sh`git pull`.cwd(".emsdk").runSync();
-    emsdk("install", emscripten);
-    emsdk("activate", emscripten);
-    console.log(`-- Emscripten ${emscripten} installed`);
-}
-
-function repo_check() {
-    return fs.existsSync(path.join(base(), "emsdk_env.sh"));
-}
-
-if (!process.env.PSP_SKIP_EMSDK_INSTALL) {
-    // if a stale toolchain is still activated in the shell, these vars break
-    // emsdk install in a confusing way.  ensure they are unset
-    for (let ev of ["EMSDK", "EMSDK_NODE", "EMSDK_PYTHON", "SSL_CERT_FILE"]) {
-        delete process.env[ev];
-    }
-
-    if (!repo_check()) {
-        emsdk_checkout();
-    }
-
-    toolchain_install();
-}
+fs.rmSync("report.json");

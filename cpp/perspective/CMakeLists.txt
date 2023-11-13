@@ -539,10 +539,11 @@ set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     --source-map-base \"\" \
     --memory-init-file 0 \
     --no-entry \
-    -s NO_EXIT_RUNTIME=1 \
     -s NO_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s MODULARIZE=1 \
+    -s STANDALONE_WASM=1 \
+    -s WASM_BIGINT=1 \
     -s EXPORT_NAME=\"load_perspective\" \
     -s MAXIMUM_MEMORY=4gb \
     -s ERROR_ON_UNDEFINED_SYMBOLS=1 \

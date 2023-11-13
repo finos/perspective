@@ -334,6 +334,23 @@ papaparse@^5.2.0:
     fflate "^0.7.4"
     ws "^6.1.2"
 
+"perspective-2-5-0@npm:@finos/perspective@2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@finos/perspective/-/perspective-2.5.0.tgz#590cbedac0768b0ce82e3276f3b602de8a908058"
+  integrity sha512-4YUs0oLvvGG4HQzqLJQCkRic+FW4h623etmcjBSuqcC3tLT+OMFxNZ8Z3NjS6uvdFu6vPTO7fAA0RnTdZKhXKg==
+  dependencies:
+    fflate "^0.7.4"
+    ws "^6.1.2"
+
+"perspective-2-6-0@npm:@finos/perspective@2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@finos/perspective/-/perspective-2.6.0.tgz#dc4e6f0ddebbad475dc0c33b14e5aaff7875cdda"
+  integrity sha512-3YIBv4h1wQl8FBuabWLIV6H5aS1ufDC4/xjsrp3bIL5y5dgYwV5Uqr3gFj6cpmbWn0jNaFb6pEVm3Scn2QyDNw==
+  dependencies:
+    fflate "^0.7.4"
+    stoppable "1.1.0"
+    ws "^6.1.2"
+
 rc4@~0.1.5:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/rc4/-/rc4-0.1.5.tgz#08c6e04a0168f6eb621c22ab6cb1151bd9f4a64d"
@@ -343,6 +360,11 @@ regenerator-runtime@^0.14.0:
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.14.0.tgz#5e19d68eb12d486f797e15a3c6a918f7cec5eb45"
   integrity sha512-srw17NI0TUWHuGa5CFGGmhfNIeja30WMBfbslPNhf6JrqQlLN5gcrvig1oqPxiVaXb0oW0XRKtH6Nngs5lKCIA==
+
+stoppable@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/stoppable/-/stoppable-1.1.0.tgz#32da568e83ea488b08e4d7ea2c3bcc9d75015d5b"
+  integrity sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==
 
 text-encoding-utf-8@^1.0.2:
   version "1.0.2"
