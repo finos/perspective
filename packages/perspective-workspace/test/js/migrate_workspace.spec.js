@@ -13,6 +13,7 @@
 const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
 import { test, expect } from "@playwright/test";
 import {
+    API_VERSION,
     compareLightDOMContents,
     compareShadowDOMContents,
 } from "@finos/perspective-test";
@@ -60,7 +61,7 @@ const TESTS = [
         {
             viewers: {
                 One: {
-                    version: "1.0.0",
+                    version: API_VERSION,
                     table: "superstore",
                     title: "One",
                     plugin: "Y Area",

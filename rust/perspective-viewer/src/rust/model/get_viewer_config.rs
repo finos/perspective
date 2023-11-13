@@ -44,7 +44,7 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
     fn get_viewer_config(&self) -> Pin<Box<dyn Future<Output = ApiResult<ViewerConfig>>>> {
         clone!(self.renderer(), self.session(), self.presentation());
         Box::pin(async move {
-            let version = ViewerConfig::API_VERSION.to_string();
+            let version = config::API_VERSION.to_string();
             let view_config = session.get_view_config().clone();
             let js_plugin = renderer.get_active_plugin()?;
             let settings = presentation.is_settings_open();

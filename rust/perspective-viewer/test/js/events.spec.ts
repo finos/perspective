@@ -13,7 +13,7 @@
 import { test, expect } from "@playwright/test";
 import {
     compareContentsToSnapshot,
-    VIEWER_API_VERSION,
+    API_VERSION,
 } from "@finos/perspective-test";
 
 async function get_contents(page) {
@@ -70,7 +70,7 @@ test.describe("Events", () => {
         });
 
         expect(config).toEqual({
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             aggregates: {},
             split_by: [],
             columns: ["Profit", "Sales"],

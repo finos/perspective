@@ -36,8 +36,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     around creating views, loading data, and updating data.
     """
 
-    API_VERSION = PerspectiveTraitlets.API_VERSION
-
     # Keep track of attributes that can be set via Enum, and their
     # validation methods.
     ENUM_VALIDATORS = {
