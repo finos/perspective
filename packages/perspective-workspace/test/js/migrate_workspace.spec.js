@@ -60,6 +60,7 @@ const TESTS = [
         {
             viewers: {
                 One: {
+                    version: "1.0.0",
                     table: "superstore",
                     title: "One",
                     plugin: "Y Area",

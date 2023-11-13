@@ -12,6 +12,8 @@
 
 import { expect, Locator, Page } from "@playwright/test";
 
+export const VIEWER_API_VERSION = "1.0.0";
+
 /**
  * Clean a `<svg>` for serialization/comparison.
  * @param selector

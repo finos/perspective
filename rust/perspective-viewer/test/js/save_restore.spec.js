@@ -11,7 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@playwright/test";
-import { compareContentsToSnapshot } from "@finos/perspective-test";
+import {
+    compareContentsToSnapshot,
+    VIEWER_API_VERSION,
+} from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -51,6 +54,7 @@ test.describe("Save/Restore", async () => {
         });
 
         expect(config).toEqual({
+            version: VIEWER_API_VERSION,
             aggregates: {},
             split_by: [],
             columns: ["Profit", "Sales"],
@@ -85,6 +89,7 @@ test.describe("Save/Restore", async () => {
         });
 
         expect(config).toEqual({
+            version: VIEWER_API_VERSION,
             aggregates: {},
             split_by: [],
             columns: ["Profit", "Sales"],
@@ -106,6 +111,7 @@ test.describe("Save/Restore", async () => {
         });
 
         expect(config2).toEqual({
+            version: VIEWER_API_VERSION,
             aggregates: {},
             split_by: [],
             columns: [
@@ -147,6 +153,7 @@ test.describe("Save/Restore", async () => {
         }, config);
 
         expect(config3).toEqual({
+            version: VIEWER_API_VERSION,
             aggregates: {},
             split_by: [],
             columns: ["Profit", "Sales"],

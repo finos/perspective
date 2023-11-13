@@ -49,6 +49,7 @@ impl FromStr for ViewerConfigEncoding {
 #[derive(Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct ViewerConfig {
+    pub version: String,
     pub plugin: String,
     pub plugin_config: Value,
     pub settings: bool,
@@ -63,6 +64,7 @@ pub struct ViewerConfig {
 // struct fields, so make a tuple alternative for serialization in binary.
 type ViewerConfigBinarySerialFormat<'a> = (
     &'a String,
+    &'a String,
     &'a Value,
     bool,
     &'a Option<String>,
@@ -71,6 +73,7 @@ type ViewerConfigBinarySerialFormat<'a> = (
 );
 
 type ViewerConfigBinaryDeserialFormat = (
+    VersionUpdate,
     PluginUpdate,
     Option<Value>,
     SettingsUpdate,
@@ -80,8 +83,12 @@ type ViewerConfigBinaryDeserialFormat = (
 );
 
 impl ViewerConfig {
+    // Loose semver-style versioning. See migrate.ts for parsing details.
+    pub const API_VERSION: &'static str = "1.0.0";
+
     fn token(&self) -> ViewerConfigBinarySerialFormat<'_> {
         (
+            &self.version,
             &self.plugin,
             &self.plugin_config,
             self.settings,
@@ -126,6 +133,9 @@ impl ViewerConfig {
 // #[serde(deny_unknown_fields)]
 pub struct ViewerConfigUpdate {
     #[serde(default)]
+    pub version: VersionUpdate,
+
+    #[serde(default)]
     pub plugin: PluginUpdate,
 
     #[serde(default)]
@@ -146,9 +156,10 @@ pub struct ViewerConfigUpdate {
 
 impl ViewerConfigUpdate {
     fn from_token(
-        (plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
+        (version, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
     ) -> ViewerConfigUpdate {
         ViewerConfigUpdate {
+            version,
             plugin,
             plugin_config,
             settings,
@@ -182,6 +193,11 @@ impl ViewerConfigUpdate {
             Ok(update.into_serde_ext()?)
         }
     }
+
+    pub fn migrate(&self) -> ApiResult<Self> {
+        // TODO: Call the migrate script from js
+        Ok(self.clone())
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -196,6 +212,7 @@ pub type PluginUpdate = OptionalUpdate<String>;
 pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
+pub type VersionUpdate = OptionalUpdate<String>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {
