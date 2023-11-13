@@ -10,7 +10,16 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+import { Workspace } from "@finos/perspective-workspace/dist/esm/perspective-workspace.js";
+import perspective from "@finos/perspective/dist/esm/perspective.js";
+import { DockPanel, Widget } from "@lumino/widgets";
+
+import "@finos/perspective-viewer/dist/esm/perspective-viewer.js";
+import "@finos/perspective-viewer-datagrid/dist/esm/perspective-viewer-datagrid.js";
+import "@finos/perspective-viewer-d3fc/dist/esm/perspective-viewer-d3fc.js";
+import "@finos/perspective-viewer/dist/css/themes.css";
+import "@lumino/default-theme/style/index.css";
+import "./index.css";
 
 let DATA_URL = "nypdccrb.arrow";
 
@@ -20,34 +29,6 @@ let LAYOUTS = localStorage.getItem("layouts")
 
 const worker = perspective.worker();
 
-const theme_style_node = document.createElement("style");
-document.head.appendChild(theme_style_node);
-let DARK_THEME;
-let LIGHT_THEME;
-
-function toggle_theme() {
-    if (theme_style_node.dataset.theme === "Pro Light") {
-        theme_style_node.textContent = DARK_THEME;
-        document.body.classList.add("dark");
-        window.theme.textContent = "Light Theme";
-        for (const view of document.querySelectorAll("perspective-viewer")) {
-            view.setAttribute("theme", "Pro Dark");
-            view.restyleElement();
-        }
-
-        theme_style_node.dataset.theme = "Pro Dark";
-    } else {
-        theme_style_node.textContent = LIGHT_THEME;
-        document.body.classList.remove("dark");
-        window.theme.textContent = "Dark Theme";
-        for (const view of document.querySelectorAll("perspective-viewer")) {
-            view.setAttribute("theme", "Pro Light");
-            view.restyleElement();
-        }
-        theme_style_node.dataset.theme = "Pro Light";
-    }
-}
-
 async function fetch_progress(url) {
     window.message.textContent = "Downloading...";
     const response = await fetch(url);
@@ -56,15 +37,18 @@ async function fetch_progress(url) {
     return ab;
 }
 
+class ContentWidget extends Widget {
+    constructor(name) {
+        super();
+        const img = document.createElement("img");
+        img.src = "https://placekitten.com/800/800";
+        this.node.appendChild(img);
+        this.title.label = name;
+        this.title.closable = true;
+    }
+}
+
 window.addEventListener("load", async () => {
-    DARK_THEME = await fetch(
-        "/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css"
-    ).then((x) => x.text());
-
-    LIGHT_THEME = await fetch(
-        "/node_modules/@finos/perspective-workspace/dist/css/pro.css"
-    ).then((x) => x.text());
-
     document.body.innerHTML = `
         <style>
         </style>
@@ -75,28 +59,30 @@ window.addEventListener("load", async () => {
             <input id="name_input" style="display: none"></input>
             <button id="save" style="display: none">Save</button>
             <button id="cancel" style="display: none">Cancel</button>
-            <button id="theme" style="float: right">Light Theme</button>
             <button id="copy" style="float: right">Debug to Clipboard</button>
             <button id="reset" style="float: right">Reset LocalStorage</button>
             <a href="https://github.com/texodus/nypd-ccrb">NYCLU/CCRB Data</a>
             <a href="https://github.com/finos/perspective">Built With Perspective</a>
         </div>
-        <perspective-workspace id='workspace'></perspective-workspace>
+        <div id='content'></div>
     `.trim();
 
-    toggle_theme();
+    let panel = new DockPanel();
+    DockPanel.attach(panel, window.content);
 
-    window.workspace.addEventListener(
-        "workspace-new-view",
-        ({ detail: { widget } }) => {
-            widget.viewer.setAttribute("theme", theme_style_node.dataset.theme);
-        }
-    );
+    // let a = new ContentWidget("a");
+    // let b = new ContentWidget("b");
+    // let c = new ContentWidget("c");
+    // let d = new ContentWidget("d");
+    // panel.addWidget(a);
+    // panel.addWidget(b, { ref: a, mode: "tab-before" });
+    // panel.addWidget(c, { ref: b, mode: "tab-before" });
+    // panel.addWidget(d, { ref: c, mode: "tab-before" });
+    let workspace = new Workspace(panel);
 
-    window.workspace.addTable(
+    workspace.addTable(
         "ccrb",
-        (async () => worker.table(await fetch_progress(DATA_URL)))()
-        // worker.table(await fetch_progress(DATA_URL))
+        await worker.table(await fetch_progress(DATA_URL))
     );
 
     if (LAYOUTS == undefined) {
@@ -105,31 +91,30 @@ window.addEventListener("load", async () => {
 
     const layout_names = Object.keys(LAYOUTS);
     let selected_layout = LAYOUTS[layout_names[0]];
-    await window.workspace.restore(selected_layout);
+    // TODO: clean up layout.json
+    await workspace.restore(selected_layout);
 
     function set_layout_options() {
         const layout_names = Object.keys(LAYOUTS);
         window.layouts.innerHTML = "";
         for (const layout of layout_names) {
-            console.log("LAYOUT: ", layout);
             window.layouts.innerHTML += `<option${
                 layout === selected_layout ? " selected='true'" : ""
             }>${layout}</option>`;
         }
     }
 
-    console.log("Doing?");
     set_layout_options();
-    console.log("Done?");
     window.name_input.value = layout_names[0];
     window.layouts.addEventListener("change", async () => {
         if (window.layouts.value.trim().length === 0) {
             return;
         }
-        window.workspace.innerHTML = "";
-        await window.workspace.restore(LAYOUTS[window.layouts.value]);
+        await workspace.restore(LAYOUTS[window.layouts.value]);
         window.name_input.value = window.layouts.value;
     });
+
+    window.addEventListener("resize", () => panel.fit());
 
     window.save_as.addEventListener("click", async () => {
         window.save_as.style.display = "none";
@@ -160,7 +145,7 @@ window.addEventListener("load", async () => {
     });
 
     window.save.addEventListener("click", async () => {
-        const token = await window.workspace.save();
+        const token = await workspace.save();
         const new_name = window.name_input.value;
         LAYOUTS[new_name] = token;
         set_layout_options();
@@ -180,6 +165,4 @@ window.addEventListener("load", async () => {
             window.copy.innerText = "Debug to Clipboard";
         }, 1000);
     });
-
-    window.theme.addEventListener("click", toggle_theme);
 });

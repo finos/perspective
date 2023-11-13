@@ -10,8 +10,18 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 import { manaStyleListener } from "./mana_cost_utils.js";
+
+import { Workspace } from "@finos/perspective-workspace";
+import perspective from "@finos/perspective/dist/esm/perspective.js";
+import { DockPanel } from "@lumino/widgets";
+
+import "@finos/perspective-viewer/dist/esm/perspective-viewer.js";
+import "@finos/perspective-viewer-datagrid/dist/esm/perspective-viewer-datagrid.js";
+import "@finos/perspective-viewer-d3fc/dist/esm/perspective-viewer-d3fc.js";
+import "@finos/perspective-viewer/dist/css/themes.css";
+import "@lumino/default-theme/style/index.css";
+import "./index.css";
 
 import "./upload_dialog.js";
 
@@ -56,8 +66,8 @@ class MagicApp extends HTMLElement {
     async on_load_deck({ detail: { name, filter } }) {
         this._dialog.parentElement.removeChild(this._dialog);
         this._dialog = undefined;
-        if (!workspace.tables.has(name)) {
-            workspace.addTable(name, await this.create_deck(filter));
+        if (!this.workspace.tables.has(name)) {
+            this.workspace.addTable(name, await this.create_deck(filter));
         }
 
         const layout = structuredClone(await LAYOUT);
@@ -65,7 +75,7 @@ class MagicApp extends HTMLElement {
         layout.viewers.viewer1.table = name;
         layout.viewers.viewer2.table = name;
         layout.viewers.viewer3.table = name;
-        workspace.restore(layout);
+        this.workspace.restore(layout);
     }
 
     async on_new_view(event) {
@@ -94,22 +104,27 @@ class MagicApp extends HTMLElement {
             <div id="app">
                 <div id="header">
                     <a href="https://perspective.finos.org">
-                        <img 
-                            height="12" 
+                        <img
+                            height="12"
                             src="https://raw.githubusercontent.com/finos/perspective/master/docs/static/svg/perspective-logo-light.svg" />
                     </a>
                     <label>Magic: the Gathering Deck Demo</label>
                     <button>Load Deck</button>
                     <span id="message"></span>
                 </div>
-                <perspective-workspace theme="Pro Light" id="workspace"></perspective-workspace>
+                <div id="content"></div>
             </div>
         `;
 
-        const workspace = this.querySelector("perspective-workspace");
-        workspace.addEventListener("workspace-new-view", this.on_new_view);
-        workspace.addTable("all_cards", this.get_all_cards());
-        workspace.addViewer({ table: "all_cards" });
+        let panel = new DockPanel();
+        DockPanel.attach(panel, this.querySelector("#content"));
+        this.workspace = new Workspace(panel);
+        this.workspace.addTable("all_cards", this.get_all_cards());
+        // this.workspace.addEventListener("workspace-new-view", this.on_new_view);
+        this.workspace.addViewer({ table: "all_cards", title: "all_cards" });
+        window.addEventListener("resize", () => {
+            panel.fit();
+        });
         this.querySelector("button").addEventListener(
             "click",
             this.on_open_dialog.bind(this)

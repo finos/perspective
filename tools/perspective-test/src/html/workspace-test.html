@@ -1,7 +1,7 @@
 <!--
-   
+
    Copyright (c) 2017, the Perspective Authors.
-   
+
    This file is part of the Perspective library, distributed under the terms of
    the Apache License 2.0.  The full license can be found in the LICENSE file.
 
@@ -17,7 +17,6 @@
         <script type="module" src="/load-workspace-arrow.js"></script>
 
         <link rel="stylesheet" href="/@finos/perspective-viewer/dist/css/pro.css" />
-        <link rel="stylesheet" href="/@finos/perspective-workspace/dist/css/pro.css" />
         <link rel="stylesheet" href="/@fontsource/roboto-mono/400.css" />
         <style>
             body {
@@ -33,7 +32,18 @@
                 overflow: hidden;
             }
 
-            #container {
+            #workspace {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+            }
+            perspective-viewer {
+                width: 100%;
+                height: 100%;
+            }
+            .lm-DockPanel {
                 width: 100%;
                 height: 100%;
             }
@@ -46,6 +56,6 @@
     </head>
 
     <body>
-        <perspective-workspace id="workspace"></perspective-workspace>
+        <div id="workspace"></div>
     </body>
 </html>

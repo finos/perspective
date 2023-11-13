@@ -11,21 +11,22 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import perspective from "/perspective.js";
+import { Workspace } from "/perspective-workspace.js";
 
 async function load() {
     let resp = await fetch("/superstore-arrow/superstore.lz4.arrow");
     let arrow = await resp.arrayBuffer();
     const worker = perspective.worker();
     const table = await worker.table(arrow);
-    let workspace = document.getElementById("workspace");
+    let workspace = new Workspace();
+    workspace.panel.constructor.attach(workspace.panel, window.workspace);
+    window.worker = worker;
+    window.workspace = workspace;
     window.__TABLE__ = table;
-    if (workspace) {
-        workspace.addTable("superstore", table);
-    } else {
-        window.__TABLE__ = table;
-    }
+    workspace.addTable("superstore", table);
 }
 
-await load();
-
-window.__TEST_PERSPECTIVE_READY__ = true;
+window.addEventListener("load", async () => {
+    await load();
+    window.__TEST_PERSPECTIVE_READY__ = true;
+});

@@ -10,76 +10,28 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@border-color: 1px solid #eaeaea;
+// Gets the updated data from the NYCLU and prepare it for Perspective.
 
-.workspace-master-widget {
-    --config-button-icon--content: var(
-        --open-settings-button--content,
-        "\1F527"
-    ) !important;
-}
+import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
+import { build } from "esbuild";
 
-.workspace-master-widget[settings] {
-    --config-button-icon--content: var(
-        --close-settings-button--content,
-        "\1F527"
-    ) !important;
-}
+import * as url from "url";
+import * as path from "node:path";
 
-.workspace-detail-widget.widget-maximize {
-    --config-button-icon--content: var(
-        --open-settings-button--content,
-        "\1F527"
-    ) !important;
-}
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
-.workspace-detail-widget.widget-maximize[settings] {
-    --config-button-icon--content: var(
-        --close-settings-button--content,
-        "\1F527"
-    ) !important;
-}
-
-.p-DockPanel-widget {
-    border: @border-color;
-    border-width: 0px !important;
-    min-width: 300px;
-    min-height: 200px;
-}
-
-.workspace-detail-widget {
-    --config-button-icon--content: "" !important;
-}
-
-.context-menu > perspective-viewer.context-focus {
-    opacity: 1;
-    filter: none;
-}
-
-.context-menu > perspective-viewer {
-    filter: saturate(0);
-
-    & > * {
-        pointer-events: none;
-    }
-}
-
-perspective-viewer {
-    flex: 1;
-    position: relative;
-    display: block;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    overflow: visible !important;
-}
-
-.lm-mod-override-cursor {
-    cursor: grabbing !important;
-}
-
-.lm-mod-override-cursor perspective-viewer > * {
-    pointer-events: none;
-}
+await build({
+    entryPoints: [path.join(__dirname, "citibike.js")],
+    outdir: __dirname,
+    bundle: true,
+    format: "esm",
+    plugins: [PerspectiveEsbuildPlugin()],
+    loader: {
+        ".css": "css",
+        ".png": "file",
+    },
+    // this build is done in a copied build folder, so nothing in-tree is overwritten.
+    // TODO: this build step should be moved out of running the blocks server.
+    allowOverwrite: true,
+    sourcemap: "linked",
+});

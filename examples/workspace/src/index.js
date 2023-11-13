@@ -11,11 +11,14 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import perspective from "@finos/perspective";
-import "@finos/perspective-workspace";
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
+import { WorkspaceManager } from "@finos/perspective-workspace";
+import { DockPanel } from "@lumino/widgets";
+
+import "@lumino/default-theme/style/index.css";
 import "./index.less";
 
 const datasource = async () => {
@@ -66,14 +69,16 @@ const DEFAULT_LAYOUT = {
     },
 };
 
-window.workspace.tables.set("superstore", datasource());
-const savedLayout = localStorage.getItem("layout");
-window.workspace.restore(
-    savedLayout ? JSON.parse(savedLayout) : DEFAULT_LAYOUT
-);
-window.workspace.addEventListener("workspace-layout-update", async () => {
-    localStorage.setItem(
-        "layout",
-        JSON.stringify(await window.workspace.save())
-    );
-});
+async function main() {
+    let panel = new DockPanel();
+    DockPanel.attach(panel, window.content);
+    let workspace = new WorkspaceManager(panel);
+    workspace.addTable("superstore", await datasource());
+    const savedLayout = localStorage.getItem("layout");
+    workspace.restore(savedLayout ? JSON.parse(savedLayout) : DEFAULT_LAYOUT);
+    panel.node.addEventListener("workspace-layout-update", async () => {
+        localStorage.setItem("layout", JSON.stringify(await workspace.save()));
+    });
+}
+
+main();

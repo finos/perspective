@@ -16,14 +16,6 @@ perspective-viewer[theme="Pro Dark"] {
             #20de8b);
 }
 
-perspective-workspace {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
 #buttons>* {
     padding: 6px;
     margin: 5px;
@@ -70,4 +62,25 @@ a {
 
 button, select {
     border-radius: 5px;
+}
+
+#content {
+    position: absolute;
+    top: 36px;
+    bottom: 36px;
+    left: 0px;
+    right: 0px;
+}
+
+.lm-DockPanel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin-left: 6.5px;
+}
+
+perspective-viewer {
+    height: 100%;
 }

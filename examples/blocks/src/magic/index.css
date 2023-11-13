@@ -114,3 +114,24 @@ button:hover {
     color: #666;
     box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
 }
+
+#content {
+    position: absolute;
+    top: 36px;
+    bottom: 36px;
+    left: 0px;
+    right: 0px;
+}
+
+.lm-DockPanel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin-left: 6.5px;
+}
+
+perspective-viewer {
+    height: 100%;
+}

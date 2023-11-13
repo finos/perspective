@@ -1,16 +1,15 @@
 {
     "Raw": {
-        "sizes": [1],
         "detail": {
             "main": {
                 "type": "tab-area",
-                "widgets": ["PERSPECTIVE_GENERATED_ID_3"],
+                "widgets": ["raw"],
                 "currentIndex": 0
             }
         },
         "mode": "globalFilters",
         "viewers": {
-            "PERSPECTIVE_GENERATED_ID_3": {
+            "raw": {
                 "plugin": "Datagrid",
                 "plugin_config": {
                     "columns": {},
@@ -62,24 +61,20 @@
                 "sort": [],
                 "expressions": {},
                 "aggregates": {},
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             }
         }
     },
     "Incidents per Month": {
-        "sizes": [1],
         "detail": {
             "main": {
                 "type": "tab-area",
-                "widgets": ["PERSPECTIVE_GENERATED_ID_3"],
+                "widgets": ["incidents"],
                 "currentIndex": 0
             }
         },
-        "mode": "globalFilters",
         "viewers": {
-            "PERSPECTIVE_GENERATED_ID_3": {
+            "incidents": {
                 "plugin": "Y Line",
                 "plugin_config": {},
                 "settings": false,
@@ -93,14 +88,11 @@
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
                 },
                 "aggregates": { "ComplaintID": "distinct count" },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             }
         }
     },
     "Incidents per Month by FADO": {
-        "sizes": [1],
         "detail": {
             "main": {
                 "type": "split-area",
@@ -108,21 +100,20 @@
                 "children": [
                     {
                         "type": "tab-area",
-                        "widgets": ["PERSPECTIVE_GENERATED_ID_0"],
+                        "widgets": ["incidents_line"],
                         "currentIndex": 0
                     },
                     {
                         "type": "tab-area",
-                        "widgets": ["PERSPECTIVE_GENERATED_ID_2"],
+                        "widgets": ["incidents_area"],
                         "currentIndex": 0
                     }
                 ],
                 "sizes": [0.5, 0.5]
             }
         },
-        "mode": "globalFilters",
         "viewers": {
-            "PERSPECTIVE_GENERATED_ID_0": {
+            "incidents_line": {
                 "plugin": "Y Line",
                 "plugin_config": { "zoom": { "k": 1, "x": 0, "y": 0 } },
                 "settings": false,
@@ -136,11 +127,9 @@
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
                 },
                 "aggregates": { "AllegationID": "distinct count" },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             },
-            "PERSPECTIVE_GENERATED_ID_2": {
+            "incidents_area": {
                 "plugin": "Y Area",
                 "plugin_config": {},
                 "settings": false,
@@ -154,14 +143,11 @@
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
                 },
                 "aggregates": { "AllegationID": "distinct count" },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             }
         }
     },
     "Total Complaints vs Officer Count by Command and FADO": {
-        "sizes": [1],
         "detail": {
             "main": {
                 "type": "split-area",
@@ -169,21 +155,20 @@
                 "children": [
                     {
                         "type": "tab-area",
-                        "widgets": ["PERSPECTIVE_GENERATED_ID_4"],
+                        "widgets": ["active"],
                         "currentIndex": 0
                     },
                     {
                         "type": "tab-area",
-                        "widgets": ["PERSPECTIVE_GENERATED_ID_7"],
+                        "widgets": ["inactive"],
                         "currentIndex": 0
                     }
                 ],
                 "sizes": [0.5, 0.5]
             }
         },
-        "mode": "globalFilters",
         "viewers": {
-            "PERSPECTIVE_GENERATED_ID_4": {
+            "active": {
                 "plugin": "X/Y Scatter",
                 "plugin_config": {},
                 "settings": false,
@@ -198,11 +183,9 @@
                     "ShieldNo": "distinct count",
                     "ComplaintID": "distinct count"
                 },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             },
-            "PERSPECTIVE_GENERATED_ID_7": {
+            "inactive": {
                 "plugin": "X/Y Scatter",
                 "plugin_config": { "zoom": { "k": 1, "x": 0, "y": 0 } },
                 "settings": false,
@@ -217,46 +200,20 @@
                     "ShieldNo": "distinct count",
                     "ComplaintID": "distinct count"
                 },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             }
         }
     },
     "Incidents by Allegation, time series": {
-        "sizes": [0.3654752553024352, 0.6345247446975648],
         "detail": {
             "main": {
                 "type": "tab-area",
-                "widgets": ["PERSPECTIVE_GENERATED_ID_13"],
+                "widgets": ["incidents"],
                 "currentIndex": 0
             }
         },
-        "mode": "globalFilters",
-        "master": { "widgets": ["PERSPECTIVE_GENERATED_ID_11"], "sizes": [1] },
         "viewers": {
-            "PERSPECTIVE_GENERATED_ID_11": {
-                "plugin": "Datagrid",
-                "plugin_config": {
-                    "columns": {},
-                    "editable": false,
-                    "scroll_lock": false
-                },
-                "settings": false,
-                "title": "Filter",
-                "group_by": ["FADOType", "Allegation"],
-                "split_by": [],
-                "columns": ["ComplaintID"],
-                "filter": [],
-                "sort": [["ComplaintID", "desc"]],
-                "expressions": {},
-                "aggregates": { "ComplaintID": "distinct count" },
-                "master": true,
-                "table": "ccrb",
-                "linked": false,
-                "selectable": ""
-            },
-            "PERSPECTIVE_GENERATED_ID_13": {
+            "incidents": {
                 "plugin": "Y Line",
                 "plugin_config": {},
                 "settings": false,
@@ -270,24 +227,20 @@
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
                 },
                 "aggregates": { "ComplaintID": "distinct count" },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             }
         }
     },
     "Allegation reporting change, 1995-2000": {
-        "sizes": [1],
         "detail": {
             "main": {
                 "type": "tab-area",
-                "widgets": ["PERSPECTIVE_GENERATED_ID_10"],
+                "widgets": ["allegations"],
                 "currentIndex": 0
             }
         },
-        "mode": "globalFilters",
         "viewers": {
-            "PERSPECTIVE_GENERATED_ID_10": {
+            "allegations": {
                 "plugin": "Heatmap",
                 "plugin_config": {
                     "zoom": {
@@ -297,7 +250,7 @@
                     }
                 },
                 "settings": false,
-                "title": "Incidents",
+                "title": "Allegations",
                 "group_by": ["bucket(\"IncidentDate\", '3M')"],
                 "split_by": ["Allegation"],
                 "columns": ["AllegationID"],
@@ -310,14 +263,11 @@
                     "IncidentDate": "median",
                     "AllegationID": "distinct count"
                 },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             }
         }
     },
     "Day-of-Week Incident Heatmap": {
-        "sizes": [0.3686174391201885, 0.6313825608798115],
         "detail": {
             "main": {
                 "type": "split-area",
@@ -325,43 +275,20 @@
                 "children": [
                     {
                         "type": "tab-area",
-                        "widgets": ["PERSPECTIVE_GENERATED_ID_13"],
+                        "widgets": ["year_vs_month"],
                         "currentIndex": 0
                     },
                     {
                         "type": "tab-area",
-                        "widgets": ["PERSPECTIVE_GENERATED_ID_15"],
+                        "widgets": ["month_vs_weekday"],
                         "currentIndex": 0
                     }
                 ],
                 "sizes": [0.5, 0.5]
             }
         },
-        "mode": "globalFilters",
-        "master": { "widgets": ["PERSPECTIVE_GENERATED_ID_11"], "sizes": [1] },
         "viewers": {
-            "PERSPECTIVE_GENERATED_ID_11": {
-                "plugin": "Datagrid",
-                "plugin_config": {
-                    "columns": {},
-                    "editable": false,
-                    "scroll_lock": false
-                },
-                "settings": false,
-                "title": "Filter",
-                "group_by": ["FADOType", "Allegation"],
-                "split_by": [],
-                "columns": ["ComplaintID"],
-                "filter": [],
-                "sort": [["ComplaintID", "desc"]],
-                "expressions": {},
-                "aggregates": { "ComplaintID": "distinct count" },
-                "master": true,
-                "table": "ccrb",
-                "linked": false,
-                "selectable": ""
-            },
-            "PERSPECTIVE_GENERATED_ID_13": {
+            "year_vs_month": {
                 "plugin": "Heatmap",
                 "plugin_config": {},
                 "settings": false,
@@ -376,11 +303,9 @@
                     "month_of_year(\"IncidentDate\")": "month_of_year(\"IncidentDate\")"
                 },
                 "aggregates": { "ComplaintID": "distinct count" },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             },
-            "PERSPECTIVE_GENERATED_ID_15": {
+            "month_vs_weekday": {
                 "plugin": "Heatmap",
                 "plugin_config": {},
                 "settings": false,
@@ -396,9 +321,7 @@
                     "day_of_week(\"IncidentDate\")": "day_of_week(\"IncidentDate\")"
                 },
                 "aggregates": { "ComplaintID": "distinct count" },
-                "master": false,
-                "table": "ccrb",
-                "linked": false
+                "table": "ccrb"
             }
         }
     }

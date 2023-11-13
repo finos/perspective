@@ -16,6 +16,16 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
     plugin_config?: any;
+    /**
+     * The table that this viewer uses for data.
+     * Either make a special WorkspaceViewerConfig for the Widget or use this
+     */
+    table?: string;
+
+    /**
+     * The title of this viewer
+     */
+    title?: string;
 };
 
 export type RenderStats = {

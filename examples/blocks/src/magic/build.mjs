@@ -11,10 +11,13 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import perspective from "@finos/perspective";
+import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
+import { build } from "esbuild";
 
 import * as fs from "fs";
 import * as https from "https";
 import * as url from "url";
+import * as path from "node:path";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
@@ -81,6 +84,20 @@ function download_json(url) {
 }
 
 async function main() {
+    await build({
+        entryPoints: [path.join(__dirname, "index.js")],
+        outdir: __dirname,
+        bundle: true,
+        format: "esm",
+        plugins: [PerspectiveEsbuildPlugin()],
+        loader: {
+            ".css": "css",
+            ".png": "file",
+        },
+        // this build is done in a copied build folder, so nothing in-tree is overwritten.
+        allowOverwrite: true,
+        sourcemap: "linked",
+    });
     if (fs.existsSync(`${__dirname}/all_identifiers.arrow`)) {
         return;
     }

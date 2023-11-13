@@ -107,5 +107,9 @@
         "fix": "node tools/perspective-scripts/fix.mjs",
         "version": "node tools/perspective-scripts/version.mjs",
         "jlab_link": "pip3 install ./python/perspective --no-build-isolation"
+    },
+    "dependencies": {
+        "@lumino/default-theme": "^2.1.4",
+        "@lumino/widgets": "^2.3.1"
     }
 }

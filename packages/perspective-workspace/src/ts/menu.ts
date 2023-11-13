@@ -11,80 +11,61 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { h } from "@lumino/virtualdom/src";
-import { TabBar } from "@lumino/widgets/src/tabbar";
+import { Menu } from "@lumino/widgets/src/menu";
 
-export const TabBarItems = {
-    Config: "config",
-    Label: "label",
-};
+/// The underlying renderer for the workspace context menu.
+/// TODO: TSify this!
+export class MenuRenderer extends Menu.Renderer {
+    formatLabel(data) {
+        let { label, mnemonic } = data.item;
+        if (mnemonic < 0 || mnemonic >= label.length) {
+            return label;
+        }
 
-export const DEFAULT_TITLE = "untitled";
+        let prefix = label.slice(0, mnemonic);
+        let suffix = label.slice(mnemonic + 1);
+        let char = label[mnemonic];
+        let span = h.span(
+            {
+                className: "lm-Menu-itemMnemonic p-Menu-itemMnemonic",
+            },
+            char
+        );
 
-export class PerspectiveTabBarRenderer extends TabBar.Renderer {
-    constructor(maximized) {
-        super();
-        this.maximized = maximized;
+        return [prefix, span, suffix];
     }
 
     renderLabel(data) {
-        return h.span(
+        let content = this.formatLabel(data);
+        return h.div(
             {
-                className: "p-TabBar-tabLabel",
-                id: TabBarItems.Label,
+                className: "lm-Menu-itemLabel p-Menu-itemLabel",
             },
-            data.title.label || DEFAULT_TITLE
+            content
         );
     }
 
-    renderOther(data, title) {
-        return h.span({}, title.label || "untitled");
+    renderSubmenu(data) {
+        return h.div({
+            className: "lm-Menu-itemSubmenuIcon" + " p-Menu-itemSubmenuIcon",
+        });
     }
 
-    renderInert() {
-        return h.div();
-    }
-
-    renderTab(data) {
-        const title = data.title.caption;
-        const key = this.createTabKey(data);
-        const style = this.createTabStyle(data);
-        let className = this.createTabClass(data);
-        const dataset = this.createTabDataset(data);
-        const more = [];
-        if (data.onClick) {
-            more.push(
-                h.div(
-                    { onclick: data.onClick, class: "bookmarks-button" },
-                    h.div({ class: "bookmarks" })
-                )
-            );
-        }
-
+    renderItem(data) {
+        let className = this.createItemClass(data);
+        let dataset = this.createItemDataset(data);
+        let aria = this.createItemARIA(data);
         return h.li(
-            { key, className, title, style, dataset },
-            this.renderDragHandle(),
-            ...more,
+            {
+                className,
+                dataset,
+                tabindex: "0",
+                onfocus: data.onfocus,
+                ...aria,
+            },
             this.renderLabel(data),
-            this.renderCloseIcon()
+            this.renderShortcut(data),
+            this.renderSubmenu(data)
         );
-    }
-
-    renderDragHandle() {
-        return h.div({
-            className: "drag-handle",
-        });
-    }
-
-    // renderConfigIcon() {
-    //     return h.div({
-    //         className: "p-TabBar-tabConfigIcon",
-    //         id: TabBarItems.Config,
-    //     });
-    // }
-
-    renderCloseIcon() {
-        return h.div({
-            className: "lm-TabBar-tabCloseIcon" + " p-TabBar-tabCloseIcon",
-        });
     }
 }

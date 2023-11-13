@@ -11,17 +11,23 @@
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
  */
 
-#grid {
-    display: flex;
-    max-width: 600px;
-    max-height: 1200px;
-    margin: auto;
-    flex-direction: column;
+#content {
+    position: absolute;
+    top: 36px;
+    bottom: 36px;
+    left: 0px;
+    right: 0px;
 }
 
-#grid perspective-viewer {
-    height: 600px;
-    width: 600px;
-    flex: 1;
-    display: block;
+.lm-DockPanel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin-left: 6.5px;
+}
+
+perspective-viewer {
+    height: 100%;
 }

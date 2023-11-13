@@ -10,7 +10,18 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+import perspective from "@finos/perspective/dist/esm/perspective.js";
+import { Workspace } from "@finos/perspective-workspace/dist/esm/perspective-workspace.js";
+import { DockPanel } from "@lumino/widgets";
+
+import "@finos/perspective-viewer/dist/esm/perspective-viewer.js";
+import "@finos/perspective-viewer-datagrid/dist/esm/perspective-viewer-datagrid.js";
+import "@finos/perspective-viewer-openlayers/dist/cdn/perspective-viewer-openlayers.js";
+import "@finos/perspective-viewer-d3fc/dist/esm/perspective-viewer-d3fc.js";
+import "@finos/perspective-viewer/dist/css/themes.css";
+import "@finos/perspective-viewer/dist/css/pro.css"; // TODO: which CSS??
+import "@lumino/default-theme/style/index.css";
+import "./index.css";
 
 // Quick wrapper function for making a GET call.
 function get(url) {
@@ -74,12 +85,17 @@ async function main() {
         table.update(feed);
     }
 
-    // Start a recurring asyn call to `get_feed` and update the `table` with the response.
+    // Start a recurring async call to `get_feed` and update the `table` with the response.
     get_feed("station_status", table.update);
-
-    window.workspace.tables.set("citibike", Promise.resolve(table));
+    const panel = new DockPanel();
+    DockPanel.attach(panel, window.content);
+    let workspace = new Workspace(panel);
+    workspace.addTable("citibike", table);
     const layout = await get_layout();
-    window.workspace.restore(layout);
+    workspace.restore(layout);
+    window.addEventListener("resize", () => {
+        panel.fit();
+    });
 }
 
 main();

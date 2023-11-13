@@ -147,26 +147,12 @@ export async function compareSVGContentsToSnapshot(
 
 export function getWorkspaceLightDOMContents(page: Page): Promise<string> {
     return page.evaluate(
-        async () => document.querySelector("perspective-workspace")!.outerHTML
+        async () => document.querySelector("#workspace")!.outerHTML
     );
-}
-
-export function getWorkspaceShadowDOMContents(page: Page): Promise<string> {
-    return page.evaluate(async () => {
-        return document
-            .querySelector("perspective-workspace")!
-            .shadowRoot!.querySelector("#container")!.innerHTML;
-    });
 }
 
 export async function compareLightDOMContents(page, snapshotFileName) {
     const contents = await getWorkspaceLightDOMContents(page);
-
-    await compareContentsToSnapshot(contents, [snapshotFileName]);
-}
-
-export async function compareShadowDOMContents(page, snapshotFileName) {
-    const contents = await getWorkspaceShadowDOMContents(page);
 
     await compareContentsToSnapshot(contents, [snapshotFileName]);
 }
