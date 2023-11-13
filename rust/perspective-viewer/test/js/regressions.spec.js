@@ -12,7 +12,7 @@
 
 import { test, expect } from "@playwright/test";
 import {
-    VIEWER_API_VERSION,
+    API_VERSION,
     compareContentsToSnapshot,
     shadow_type,
 } from "@finos/perspective-test";
@@ -100,7 +100,7 @@ test.describe("Regression tests", () => {
         });
 
         expect(config).toEqual({
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             aggregates: {},
             columns: ["Sales"],
             expressions: [],

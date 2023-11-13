@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import migrate_0_0_0 from "./migrate/0-0-0";
-import migrate_1_0_0 from "./migrate/1-0-0";
+import migrate_2_6_1 from "./migrate/2-6-1";
 
 /**
  * A migration utility for `@finos/perspective-viewer` and
@@ -172,7 +172,7 @@ function migrate_viewer(old, omit_attributes, options) {
     options.omit_attributes = omit_attributes;
     return chain(
         old,
-        [migrate_0_0_0, migrate_1_0_0, semver_to_string],
+        [migrate_0_0_0, migrate_2_6_1, semver_to_string],
         options
     );
 }

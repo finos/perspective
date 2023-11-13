@@ -12,17 +12,18 @@
 
 import { cmp_semver, parse_semver } from "../migrate";
 /**
- * Migrates to 1.0.0
+ * Migrates to 2.6.1
  * @param old
  * @param options
  * @returns
  */
-export default function migrate_1_0_0(old, options) {
-    if (cmp_semver(old.version, "1.0.0")) {
+export default function migrate_2_6_1(old, options) {
+    if (cmp_semver(old.version, "2.6.1")) {
         return;
     } else if (options.warn) {
-        console.warn("Migrating to 1.0.0");
+        console.warn("Migrating to 2.6.1");
     }
+    old.version = parse_semver("2.6.1");
 
     // Migrate X/Y Scatter plugin
     if (old.plugin === "X/Y Scatter") {
@@ -68,6 +69,5 @@ export default function migrate_1_0_0(old, options) {
         }
     }
 
-    old.version = parse_semver("1.0.0");
     return old;
 }

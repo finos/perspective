@@ -9,9 +9,9 @@
 // ┃ This file is part of the Perspective library, distributed under the terms ┃
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
 use std::io::{Read, Write};
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
@@ -82,10 +82,17 @@ type ViewerConfigBinaryDeserialFormat = (
     ViewConfigUpdate,
 );
 
-impl ViewerConfig {
-    // Loose semver-style versioning. See migrate.ts for parsing details.
-    pub const API_VERSION: &'static str = "1.0.0";
+pub static API_VERSION: LazyLock<&'static str> = LazyLock::new(|| {
+    #[derive(Deserialize)]
+    struct Package {
+        version: &'static str,
+    }
+    let pkg: &'static str = include_str!("../../../package.json");
+    let pkg: Package = serde_json::from_str(pkg).unwrap();
+    pkg.version
+});
 
+impl ViewerConfig {
     fn token(&self) -> ViewerConfigBinarySerialFormat<'_> {
         (
             &self.version,

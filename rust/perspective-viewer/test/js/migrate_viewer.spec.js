@@ -13,7 +13,7 @@
 import { test, expect } from "@playwright/test";
 import {
     compareContentsToSnapshot,
-    VIEWER_API_VERSION,
+    API_VERSION,
 } from "@finos/perspective-test";
 
 const { convert } = require("../../dist/cjs/migrate.js");
@@ -49,7 +49,7 @@ const TESTS = [
             plugin_config: {},
         },
         {
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             plugin: "Y Area",
             plugin_config: {},
             group_by: ["bucket(\"Order Date\", 'M')"],
@@ -83,7 +83,7 @@ const TESTS = [
             plugin_config: { Sales: { color_mode: "gradient", gradient: 10 } },
         },
         {
-            version: "1.0.0",
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -122,7 +122,7 @@ const TESTS = [
             aggregates: {},
         },
         {
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -169,7 +169,7 @@ const TESTS = [
             aggregates: {},
         },
         {
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -196,7 +196,7 @@ const TESTS = [
     [
         "New API, reflexive (new API is unmodified)",
         {
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -239,7 +239,7 @@ const TESTS = [
             title: null,
         },
         {
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -301,7 +301,7 @@ const TESTS = [
             aggregates: {},
         },
         {
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             plugin: "X/Y Scatter",
             plugin_config: {
                 columns: {

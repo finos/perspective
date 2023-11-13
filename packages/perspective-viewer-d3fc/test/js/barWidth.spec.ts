@@ -12,7 +12,7 @@
 
 import { test, expect } from "@playwright/test";
 import {
-    VIEWER_API_VERSION,
+    API_VERSION,
     compareSVGContentsToSnapshot,
 } from "@finos/perspective-test";
 
@@ -41,7 +41,7 @@ test.describe("Bar Width", () => {
         );
 
         expect(config).toEqual({
-            version: VIEWER_API_VERSION,
+            version: API_VERSION,
             plugin: "Y Bar",
             columns: ["Profit"],
             group_by: ["Order Date"],
