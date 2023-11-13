@@ -56,7 +56,7 @@ export function write_cell(table, model, active_cell) {
                 return false;
             }
         } else if (type === "boolean") {
-            text = text === "check" ? false : text === "close" ? true : null;
+            text = text === "true" ? false : text === "false" ? true : null;
         }
 
         const msg = {
