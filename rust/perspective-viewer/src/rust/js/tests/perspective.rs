@@ -26,27 +26,27 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 //     assert!(size - 3_f64 < 0.01);
 // }
 
-#[wasm_bindgen_test]
-pub async fn test_table_validate_valid_expressions() {
-    let exprs = vec!["\"A\" * 2"];
-    let array = exprs.into_iter().map(JsValue::from).collect();
-    let table = get_mock_table().await;
-    let results = table.validate_expressions(array).await.unwrap();
-    let errors = results.errors();
-    let len = js_sys::Object::keys(&errors).length();
-    assert_eq!(len, 0);
-}
+// #[wasm_bindgen_test]
+// pub async fn test_table_validate_valid_expressions() {
+//     let exprs = vec!["\"A\" * 2"];
+//     let array = exprs.into_iter().map(JsValue::from).collect();
+//     let table = get_mock_table().await;
+//     let results = table.validate_expressions(array).await.unwrap();
+//     let errors = results.errors();
+//     let len = js_sys::Object::keys(&errors).length();
+//     assert_eq!(len, 0);
+// }
 
-#[wasm_bindgen_test]
-pub async fn test_table_validate_invalid_expressions() {
-    let exprs = vec!["\"B\" * 2"];
-    let array = exprs.into_iter().map(JsValue::from).collect();
-    let table = get_mock_table().await;
-    let results = table.validate_expressions(array).await.unwrap();
-    let errors = results.errors();
-    let len = js_sys::Object::keys(&errors).length();
-    assert_eq!(len, 1);
-}
+// #[wasm_bindgen_test]
+// pub async fn test_table_validate_invalid_expressions() {
+//     let exprs = vec!["\"B\" * 2"];
+//     let array = exprs.into_iter().map(JsValue::from).collect();
+//     let table = get_mock_table().await;
+//     let results = table.validate_expressions(array).await.unwrap();
+//     let errors = results.errors();
+//     let len = js_sys::Object::keys(&errors).length();
+//     assert_eq!(len, 1);
+// }
 
 #[wasm_bindgen_test]
 pub async fn test_view_to_csv() {

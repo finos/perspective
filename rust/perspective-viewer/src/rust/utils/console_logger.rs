@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::fmt::{Debug, Write};
-use std::sync::OnceLock;
 
 use tracing::field::{Field, Visit};
 use tracing::Subscriber;
@@ -195,6 +194,7 @@ impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for WasmLogger {
 /// we stub this library out entirely to save bytes.
 #[cfg(debug_assertions)]
 pub fn set_global_logging() {
+    use std::sync::OnceLock;
     static INIT_LOGGING: OnceLock<()> = OnceLock::new();
     INIT_LOGGING.get_or_init(|| {
         use tracing_subscriber::layer::SubscriberExt;

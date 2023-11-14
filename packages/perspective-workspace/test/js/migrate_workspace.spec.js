@@ -69,7 +69,10 @@ const TESTS = [
                     columns: ["Sales"],
                     filter: [["Category", "==", "Office Supplies"]],
                     sort: [],
-                    expressions: ["bucket(\"Order Date\", 'M')"],
+                    expressions: {
+                        "bucket(\"Order Date\", 'M')":
+                            "bucket(\"Order Date\", 'M')",
+                    },
                     aggregates: {},
                     master: false,
                     linked: false,

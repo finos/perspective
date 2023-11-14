@@ -31,6 +31,7 @@
             font-size: 12px;
             color: var(--error--color);
         }
+
         &.disabled {
             #textarea_editable,
             #line_numbers,
@@ -40,16 +41,43 @@
         }
     }
 
+    #attributes-expr .split-panel-child {
+        flex-direction: column;
+    }
+
+    #expression-editor {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #editor-alias-container {
+        flex: 0 0 auto;
+        margin-bottom: 2px;
+    }
+
+    .item_title {
+        margin-bottom: 3px;
+    }
+
+    input#expression-name {
+        padding-left: 8px;
+        color: inherit;
+
+        &:placeholder-shown {
+            background-color: transparent;
+        }
+    }
+
     .split-panel.orient-vertical
         > .split-panel-child:not(.is-width-override)
         #editor-container {
         height: 300px;
     }
 
-    .split-panel.orient-horizontal
-        > .split-panel-child:not(.is-width-override)
+    .split-panel.orient-vertical
+        > .split-panel-child.is-width-override
         #editor-container {
-        width: 400px;
+        height: calc(100% - 20px);
     }
 
     #horizontal-resize {

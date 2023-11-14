@@ -56,7 +56,7 @@ test.describe("Plugin Priority Order", () => {
                 "Discount",
                 "Profit",
             ],
-            expressions: [],
+            expressions: {},
             filter: [],
             group_by: [],
             plugin: "HighPriority",

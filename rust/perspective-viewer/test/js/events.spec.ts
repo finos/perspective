@@ -70,7 +70,7 @@ test.describe("Events", () => {
             aggregates: {},
             split_by: [],
             columns: ["Profit", "Sales"],
-            expressions: [],
+            expressions: {},
             filter: [],
             plugin: "Debug",
             plugin_config: {},

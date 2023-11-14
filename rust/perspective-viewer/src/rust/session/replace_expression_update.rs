@@ -41,21 +41,21 @@ impl ViewConfig {
         } = self.clone();
 
         let expressions = expressions
-            .into_iter()
+            .iter()
             .map(|serde_expr| {
-                if old_expr == &serde_expr {
-                    expression.to_owned().into()
+                if old_expr.name == serde_expr.name {
+                    expression.to_owned()
                 } else {
                     serde_expr
                 }
             })
-            .collect::<Vec<_>>();
+            .collect::<Expressions>();
 
         let aggregates = aggregates
             .into_iter()
             .map(|x| {
                 if x.0 == old_expr.name {
-                    (expression.name.to_owned(), x.1)
+                    (expression.name.as_ref().to_owned(), x.1)
                 } else {
                     x
                 }
@@ -65,7 +65,7 @@ impl ViewConfig {
         let columns = columns
             .into_iter()
             .map(|x| match x {
-                Some(x) if x == old_expr.name => Some(new_expr.name.to_owned()),
+                Some(x) if x == old_expr.name => Some(new_expr.name.as_ref().to_owned()),
                 x => x,
             })
             .collect::<Vec<_>>();
@@ -74,7 +74,7 @@ impl ViewConfig {
             .into_iter()
             .map(|x| {
                 if x == old_expr.name {
-                    new_expr.name.to_owned()
+                    new_expr.name.as_ref().to_owned()
                 } else {
                     x
                 }
@@ -85,7 +85,7 @@ impl ViewConfig {
             .into_iter()
             .map(|x| {
                 if x == old_expr.name {
-                    new_expr.name.to_owned()
+                    new_expr.name.as_ref().to_owned()
                 } else {
                     x
                 }
@@ -96,7 +96,7 @@ impl ViewConfig {
             .into_iter()
             .map(|x| {
                 if x.0 == old_expr.name {
-                    Sort(new_expr.name.to_owned(), x.1)
+                    Sort(new_expr.name.as_ref().to_owned(), x.1)
                 } else {
                     x
                 }
@@ -108,7 +108,7 @@ impl ViewConfig {
             .into_iter()
             .map(|x| {
                 if x.0 == old_expr.name {
-                    Filter(new_expr.name.to_owned(), x.1, x.2)
+                    Filter(new_expr.name.as_ref().to_owned(), x.1, x.2)
                 } else {
                     x
                 }

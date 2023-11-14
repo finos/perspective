@@ -18,7 +18,7 @@ mod view;
 mod view_subscription;
 
 use std::cell::{Ref, RefCell};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::iter::IntoIterator;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -196,7 +196,7 @@ impl Session {
     pub async fn create_replace_expression_update(
         &self,
         old_expr_name: &str,
-        new_expr: &Expression,
+        new_expr: &Expression<'static>,
     ) -> ViewConfigUpdate {
         let old_expr_val = self
             .metadata()
@@ -205,7 +205,7 @@ impl Session {
 
         let old_expr = Expression {
             name: old_expr_name.into(),
-            expr: old_expr_val,
+            expression: old_expr_val.into(),
         };
 
         self.get_view_config()
@@ -217,11 +217,7 @@ impl Session {
         &self,
         expr: &str,
     ) -> Result<Option<PerspectiveValidationError>, JsValue> {
-        let arr = std::iter::once(JsValue::from_serde_ext(&Expression {
-            name: "_".into(),
-            expr: expr.to_owned(),
-        })?)
-        .collect::<js_sys::Array>();
+        let arr = json!({"_": expr});
         let table = self.borrow().table.as_ref().unwrap().clone();
         let errors = table.validate_expressions(arr).await?.errors();
         let error_keys = js_sys::Object::keys(&errors);
@@ -415,11 +411,14 @@ impl Session {
             .ok_or("`restore()` called before `load()`")?
             .clone();
 
-        let arr = config
-            .expressions
-            .iter()
-            .filter_map(|expr| serde_wasm_bindgen::to_value(expr).ok())
-            .collect::<js_sys::Array>();
+        let arr = JsValue::from_serde_ext(
+            &config
+                .expressions
+                .iter()
+                .map(|expr| (expr.name.to_string(), expr.expression.to_string()))
+                .collect::<HashMap<_, _>>(),
+        )?
+        .unchecked_into::<js_sys::Object>();
 
         let valid_recs = table.validate_expressions(arr).await?;
         let expression_names = self.metadata_mut().update_expressions(&valid_recs)?;

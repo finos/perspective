@@ -3259,6 +3259,7 @@ const perspective = require("@finos/perspective");
                     a: [1, 2, 3, 4],
                     b: [1, 2, 3, 4],
                 });
+
                 const str_exprs = [
                     '// x\n"a"',
                     '// y\n"b" * 0.5',
@@ -3269,19 +3270,20 @@ const perspective = require("@finos/perspective");
                     "// g\nnow()",
                     "// h\nlength(123)",
                 ];
-                const dict_exprs = [
-                    { name: "x", expr: '"a"' },
-                    { name: "y", expr: '"b" * 0.5' },
-                    { name: "c", expr: "'abcdefg'" },
-                    { name: "d", expr: "true and false" },
-                    { name: "e", expr: 'float("a") > 2 ? null : 1' },
-                    { name: "f", expr: "today()" },
-                    { name: "g", expr: "now()" },
-                    { name: "h", expr: "length(123)" },
-                ];
+
+                const dict_exprs = {
+                    x: '"a"',
+                    y: '"b" * 0.5',
+                    c: "'abcdefg'",
+                    d: "true and false",
+                    e: 'float("a") > 2 ? null : 1',
+                    f: "today()",
+                    g: "now()",
+                    h: "length(123)",
+                };
+
                 let vstrs = await table.validate_expressions(str_exprs);
                 let vdicts = await table.validate_expressions(dict_exprs);
-
                 expect(vstrs.errors).toEqual(vdicts.errors);
                 expect(vstrs.expression_schema).toEqual(
                     vdicts.expression_schema
