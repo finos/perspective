@@ -18,14 +18,6 @@
         text-overflow: ellipsis;
     }
 
-    #column_settings_icon:before {
-        @include icon;
-        height: 14px;
-        width: 14px;
-        -webkit-mask-image: var(--column-settings-icon--mask-image);
-        mask-image: var(--column-settings-icon--mask-image);
-    }
-
     // NOTE: These should probably make their way to global form styling eventually.
     .errored {
         outline-color: var(--error--color);
@@ -53,6 +45,40 @@
         &[type="search"] {
             min-height: 24px;
             border-radius: 2px;
+        }
+    }
+
+    .sidebar_header_contents {
+        display: flex;
+        margin: 8px;
+        align-items: center;
+        border-radius: 3px;
+
+        &.editable {
+            &:hover {
+                outline: 1px solid;
+                outline-color: var(--inactive--color);
+                cursor: text;
+            }
+        }
+        &.focused {
+            outline: 1px solid;
+            outline-color: var(--inactive--color);
+            background: var(--plugin--background);
+        }
+        .sidebar_header_title {
+            margin: 0;
+            flex: 1;
+            padding: 0;
+            background: none;
+            outline: none;
+            color: unset;
+
+            &:disabled {
+                background: none;
+                outline: none;
+                color: unset;
+            }
         }
     }
 }

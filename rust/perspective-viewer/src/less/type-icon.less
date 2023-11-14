@@ -1,0 +1,55 @@
+// Column type icons
+:host .type-icon {
+    height: 13px;
+    width: 13px;
+    // position: absolute;
+    // left: 15px;
+    // top: 4.5px;
+    // @include icon;
+    background-repeat: no-repeat;
+    background-color: var(--icon--color);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    margin: 0 5px;
+
+    &.none {
+        content: none;
+    }
+
+    &.integer {
+        -webkit-mask-image: var(--column-type-integer--mask-image);
+        mask-image: var(--column-type-integer--mask-image);
+    }
+
+    &.float {
+        -webkit-mask-image: var(--column-type-float--mask-image);
+        mask-image: var(--column-type-float--mask-image);
+    }
+
+    &.string {
+        -webkit-mask-image: var(--column-type-string--mask-image);
+        mask-image: var(--column-type-string--mask-image);
+    }
+
+    &.boolean {
+        -webkit-mask-image: var(--column-type-boolean--mask-image);
+        mask-image: var(--column-type-boolean--mask-image);
+    }
+
+    &.date {
+        -webkit-mask-image: var(--column-type-date--mask-image);
+        mask-image: var(--column-type-date--mask-image);
+    }
+
+    &.datetime {
+        -webkit-mask-image: var(--column-type-datetime--mask-image);
+        mask-image: var(--column-type-datetime--mask-image);
+    }
+
+    &.expression {
+        -webkit-mask-image: var(--add-expression-icon--mask-image);
+        mask-image: var(--add-expression-icon--mask-image);
+    }
+}

@@ -33,6 +33,7 @@ pub mod status_bar;
 pub mod status_bar_counter;
 pub mod string_column_style;
 pub mod style;
+pub mod type_icon;
 pub mod viewer;
 
 pub mod column_settings_sidebar;
