@@ -67,6 +67,7 @@
 
 mod columns_iter_set;
 mod copy_export;
+mod edit_expression;
 mod export_app;
 mod export_method;
 mod get_viewer_config;
@@ -79,6 +80,7 @@ mod update_and_render;
 
 pub use self::columns_iter_set::*;
 pub use self::copy_export::*;
+pub use self::edit_expression::*;
 pub use self::export_method::*;
 pub use self::get_viewer_config::*;
 pub use self::intersection_observer::*;

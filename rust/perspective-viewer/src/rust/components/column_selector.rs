@@ -42,6 +42,7 @@ use crate::components::containers::scroll_panel_item::ScrollPanelItem;
 use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
@@ -52,6 +53,7 @@ pub struct ColumnSelectorProps {
     pub session: Session,
     pub renderer: Renderer,
     pub dragdrop: DragDrop,
+    pub presentation: Presentation,
 
     pub on_open_expr_panel: Callback<ColumnLocator>,
 
@@ -280,6 +282,7 @@ impl Component for ColumnSelector {
                             dragdrop={ &ctx.props().dragdrop }
                             session={ &ctx.props().session }
                             renderer={ &ctx.props().renderer }
+                            presentation = { &ctx.props().presentation }
                             ondragenter={ ondragenter }
                             ondragend={ &ondragend }
                             onselect={ &onselect }/>
@@ -305,6 +308,7 @@ impl Component for ColumnSelector {
                             dragdrop={ &ctx.props().dragdrop }
                             session={ &ctx.props().session }
                             renderer={ &ctx.props().renderer }
+                            presentation={ &ctx.props().presentation }
                             { is_editing }
                             onselect={ &onselect }
                             ondragend={ &ondragend }

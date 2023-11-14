@@ -10,83 +10,50 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import (reference) url(./column-selector.less);
+use itertools::Itertools;
 
-:host {
-    #column_settings_sidebar {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+use super::{HasPresentation, HasRenderer, HasSession, UpdateAndRender};
+use crate::config::{Expression, ViewConfigUpdate};
+use crate::utils::ApiFuture;
 
-    // NOTE: These should probably make their way to global form styling eventually.
-    .errored {
-        outline-color: var(--error--color);
-    }
+pub trait CreateColumn: HasSession + HasPresentation + HasRenderer + UpdateAndRender {
+    fn clone_column(&self, name: &str, in_place: bool, open_settings: bool) -> ApiFuture<()> {
+        // 1. Create a new expression.
+        let expr_name = self.session().metadata().make_new_column_name(Some(name));
+        let expr = Expression::new(Some(&expr_name), &format!("\"{name}\""));
+        let view_config = self.session().get_view_config();
+        let mut serde_exprs = view_config.expressions.clone();
+        serde_exprs.retain(|name, _expr| name != &expr_name);
+        serde_exprs.insert(&expr);
 
-    .item_title {
-        font-size: 9px;
-    }
-
-    input {
-        &[type="text"],
-        &[type="search"] {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
-            background-color: var(--plugin--background);
-            border: none;
-            margin-bottom: 0.5em;
-            font-family: inherit;
-            font-size: 12px;
-            &:disabled {
-                background-color: var(--inactive--color);
-            }
+        // 2. Replace this column in the view configuration.
+        let mut cols = view_config.columns.clone();
+        if in_place {
+            let (idx, _val) = cols
+                .iter()
+                .find_position(|c| c.as_ref().map(|s| s == name).unwrap_or_default())
+                .unwrap_or_else(|| {
+                    web_sys::console::error_1(
+                        &format!("Couldn't find {name} in view config!").into(),
+                    );
+                    panic!();
+                });
+            cols[idx] = Some(expr_name.clone());
         }
 
-        &[type="search"] {
-            min-height: 24px;
-            border-radius: 2px;
-        }
-    }
-
-    .sidebar_header_contents {
-        display: flex;
-        margin: 8px;
-        align-items: center;
-        border-radius: 3px;
-        outline-width: 1px;
-        outline-color: var(--inactive--color);
-
-        &.editable {
-            &:hover {
-                outline-style: solid;
-                cursor: text;
-            }
-        }
-        &::focus {
-            outline-style: solid;
-            background: var(--plugin--background);
-        }
-        &.edited {
-            outline-style: dashed;
-        }
-        &.invalid {
-            outline-color: var(--error--color);
+        // 3. Ensure that the new column is opened
+        if open_settings {
+            self.presentation()
+                .set_open_column_settings(Some(expr_name));
         }
 
-        .sidebar_header_title {
-            line-height: normal;
-            margin: 0;
-            flex: 1;
-            padding-left: 5px;
-            background: none;
-            outline: none;
-            color: unset;
-
-            &:disabled {
-                background: none;
-                outline: none;
-                color: unset;
-            }
-        }
+        // 4. Update
+        drop(view_config);
+        self.update_and_render(ViewConfigUpdate {
+            expressions: Some(serde_exprs),
+            columns: Some(cols),
+            ..Default::default()
+        })
     }
 }
+impl<T: HasPresentation + HasSession + HasRenderer> CreateColumn for T {}

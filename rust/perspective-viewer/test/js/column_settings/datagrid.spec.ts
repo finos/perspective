@@ -183,13 +183,13 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             let table = view.dataGrid.regularTable;
 
             let col = await view.getOrCreateColumnByType("calendar");
-            await col.editBtn.click();
             let name = await col.name.innerText();
             expect(name).toBeTruthy();
             let td = await table.getFirstCellByColumnName(name);
             await td.waitFor();
 
             // text style
+            view.assureColumnSettingsOpen(col);
             await view.columnSettingsSidebar.openTab("style");
             let contents = view.columnSettingsSidebar.styleTab.contents;
             let checkbox = contents
@@ -219,13 +219,13 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             let table = view.dataGrid.regularTable;
 
             let col = await view.getOrCreateColumnByType("string");
-            await col.editBtn.click();
             let name = await col.name.innerText();
             expect(name).toBeTruthy();
             let td = await table.getFirstCellByColumnName(name);
             await td.waitFor();
 
             // bg color
+            await view.assureColumnSettingsOpen(col);
             await view.columnSettingsSidebar.openTab("style");
             let contents = view.columnSettingsSidebar.styleTab.contents;
             let checkbox = contents.locator("input[type=checkbox]").last();
@@ -254,7 +254,10 @@ runTests("Datagrid Column Styles", () => {
         });
     });
 
-    test("Edit highlights go away when view re-draws", async ({ page }) => {
+    // Keeping the column sidebar open makes this unncessary.
+    test.skip("Edit highlights go away when view re-draws", async ({
+        page,
+    }) => {
         let viewer = new PspViewer(page);
         await viewer.openSettingsPanel();
         let btn = await viewer.dataGrid.regularTable.getEditBtnByName("Row ID");

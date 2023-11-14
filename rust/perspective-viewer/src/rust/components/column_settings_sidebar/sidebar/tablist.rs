@@ -10,83 +10,68 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import (reference) url(./column-selector.less);
+use std::rc::Rc;
 
-:host {
-    #column_settings_sidebar {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+use yew::{function_component, html, Callback, Html, Properties};
 
-    // NOTE: These should probably make their way to global form styling eventually.
-    .errored {
-        outline-color: var(--error--color);
-    }
+use crate::components::column_settings_sidebar::attributes_tab::{
+    AttributesTab, AttributesTabProps,
+};
+use crate::components::column_settings_sidebar::style_tab::{StyleTab, StyleTabProps};
+use crate::components::containers::tablist::TabList;
+use crate::custom_events::CustomEvents;
+use crate::presentation::Presentation;
+use crate::renderer::Renderer;
+use crate::session::Session;
 
-    .item_title {
-        font-size: 9px;
-    }
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
+pub enum ColumnSettingsTab {
+    #[default]
+    Attributes,
+    Style,
+}
 
-    input {
-        &[type="text"],
-        &[type="search"] {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
-            background-color: var(--plugin--background);
-            border: none;
-            margin-bottom: 0.5em;
-            font-family: inherit;
-            font-size: 12px;
-            &:disabled {
-                background-color: var(--inactive--color);
+#[derive(Properties, PartialEq, Clone)]
+pub struct ColumnSettingsTablistProps {
+    pub renderer: Renderer,
+    pub presentation: Presentation,
+    pub session: Session,
+    pub custom_events: CustomEvents,
+
+    pub attrs_tab: AttributesTabProps,
+    pub style_tab: StyleTabProps,
+
+    pub on_tab_change: Callback<(usize, ColumnSettingsTab)>,
+    pub selected_tab: (usize, ColumnSettingsTab),
+    pub tabs: Rc<Vec<ColumnSettingsTab>>,
+}
+
+#[function_component(ColumnSettingsTablist)]
+pub fn column_settings_tablist(p: &ColumnSettingsTablistProps) -> Html {
+    let match_fn = yew::use_callback(p.clone(), move |tab, p| match tab {
+        ColumnSettingsTab::Attributes => {
+            html! {
+                <AttributesTab ..p.attrs_tab.clone() />
             }
-        }
+        },
+        ColumnSettingsTab::Style => html! {
+            <StyleTab ..p.style_tab.clone() />
+        },
+    });
 
-        &[type="search"] {
-            min-height: 24px;
-            border-radius: 2px;
-        }
-    }
+    let selected_tab = if p.selected_tab.0 >= p.tabs.len() {
+        0
+    } else {
+        p.selected_tab.0
+    };
 
-    .sidebar_header_contents {
-        display: flex;
-        margin: 8px;
-        align-items: center;
-        border-radius: 3px;
-        outline-width: 1px;
-        outline-color: var(--inactive--color);
-
-        &.editable {
-            &:hover {
-                outline-style: solid;
-                cursor: text;
-            }
-        }
-        &::focus {
-            outline-style: solid;
-            background: var(--plugin--background);
-        }
-        &.edited {
-            outline-style: dashed;
-        }
-        &.invalid {
-            outline-color: var(--error--color);
-        }
-
-        .sidebar_header_title {
-            line-height: normal;
-            margin: 0;
-            flex: 1;
-            padding-left: 5px;
-            background: none;
-            outline: none;
-            color: unset;
-
-            &:disabled {
-                background: none;
-                outline: none;
-                color: unset;
-            }
-        }
+    html! {
+        <TabList<ColumnSettingsTab>
+            // TODO: This clone could be avoided with traits
+            tabs={(*p.tabs).clone()}
+            {match_fn}
+            on_tab_change={p.on_tab_change.clone()}
+            {selected_tab}
+        />
     }
 }

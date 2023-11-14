@@ -44,7 +44,7 @@ impl ViewConfig {
                 if &old_expr.name == serde_name {
                     expression.to_owned()
                 } else {
-                    Expression::new(serde_name, serde_expr)
+                    Expression::new(Some(serde_name.into()), serde_expr.into())
                 }
             })
             .collect::<Expressions>();

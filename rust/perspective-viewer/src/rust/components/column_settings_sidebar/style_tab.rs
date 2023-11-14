@@ -29,6 +29,8 @@ pub struct StyleTabProps {
     pub custom_events: CustomEvents,
     pub session: Session,
     pub renderer: Renderer,
+
+    pub ty: Option<Type>,
     pub column_name: String,
 }
 
@@ -41,28 +43,26 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
         .unwrap();
 
     let view_config = props.session.get_view_config();
-    let (col_idx, _) =
-        view_config
-            .columns
-            .iter()
-            .enumerate()
-            .find(|(_, opt)| {
-                opt.as_ref()
-                    .map(|s| s == &props.column_name)
-                    .unwrap_or_default()
-            })
-            .unwrap();
+    let (col_idx, _) = view_config
+        .columns
+        .iter()
+        .enumerate()
+        .find(|(_, opt)| {
+            opt.as_ref()
+                .map(|s| s == &props.column_name)
+                .unwrap_or_default()
+        })
+        .unwrap();
 
     // This mimics the behavior where plugins can take a single value
     // per column grouping, and any overflow falls into the final heading
-    let col_grp =
-        plugin_column_names
-            .iter()
-            .chain(std::iter::repeat(plugin_column_names.last().unwrap()))
-            .nth(col_idx)
-            .unwrap()
-            .to_owned()
-            .unwrap();
+    let col_grp = plugin_column_names
+        .iter()
+        .chain(std::iter::repeat(plugin_column_names.last().unwrap()))
+        .nth(col_idx)
+        .unwrap()
+        .to_owned()
+        .unwrap();
 
     // TODO: We need a better way to determine which styling components to show.
     // This will come with future changes to the plugin API.

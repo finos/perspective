@@ -14,6 +14,8 @@ use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::containers::dragdrop_list::*;
+use crate::components::type_icon::TypeIcon;
+use crate::config::Type;
 use crate::dragdrop::*;
 
 pub struct PivotColumn {}
@@ -66,7 +68,8 @@ impl Component for PivotColumn {
                 ondragstart={ dragstart }
                 ondragend={ dragend }>
                 <div class="pivot-column-border">
-                    <span class="column_name string">
+                    <TypeIcon ty={Type::String} />
+                    <span class="column_name">
                         { ctx.props().column.clone() }
                     </span>
                 </div>

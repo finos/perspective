@@ -76,10 +76,10 @@ impl ColumnDropDownElement {
                 let is_expr = session.validate_expr(&input).await?.is_none();
 
                 if is_expr {
-                    values.push(InPlaceColumn::Expression(Expression {
-                        name: input.clone().into(),
-                        expression: input.into(),
-                    }));
+                    values.push(InPlaceColumn::Expression(Expression::new(
+                        None,
+                        input.into(),
+                    )));
                 }
             }
 

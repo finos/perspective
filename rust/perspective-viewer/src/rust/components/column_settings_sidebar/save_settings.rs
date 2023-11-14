@@ -10,83 +10,54 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import (reference) url(./column-selector.less);
+use yew::{function_component, html, Callback, Html, Properties};
 
-:host {
-    #column_settings_sidebar {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+#[derive(Properties, PartialEq, Clone)]
+pub struct SaveSettingsProps {
+    pub save_enabled: bool,
+    pub reset_enabled: bool,
+    pub on_reset: Callback<()>,
+    pub on_save: Callback<()>,
+    pub on_delete: Callback<()>,
+    pub show_danger_zone: bool,
+    pub disable_delete: bool,
+}
 
-    // NOTE: These should probably make their way to global form styling eventually.
-    .errored {
-        outline-color: var(--error--color);
-    }
-
-    .item_title {
-        font-size: 9px;
-    }
-
-    input {
-        &[type="text"],
-        &[type="search"] {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
-            background-color: var(--plugin--background);
-            border: none;
-            margin-bottom: 0.5em;
-            font-family: inherit;
-            font-size: 12px;
-            &:disabled {
-                background-color: var(--inactive--color);
+#[function_component(SaveSettings)]
+pub fn save_settings(p: &SaveSettingsProps) -> Html {
+    let reset = p.on_reset.reform(|_| ());
+    let save = p.on_save.reform(|_| ());
+    let delete = p.on_delete.reform(|_| ());
+    html! {
+        <div id="save-settings-wrapper">
+            if p.show_danger_zone {
+                <div id="danger-zone">
+                    <button
+                        id="psp-expression-editor-button-delete"
+                        class="psp-expression-editor__button"
+                        onmousedown={ delete }
+                        disabled={p.disable_delete}>
+                        { "Delete Column" }
+                    </button>
+                </div>
             }
-        }
+            <div id="save-settings">
+                <button
+                    id="psp-expression-editor-button-reset"
+                    class="psp-expression-editor__button"
+                    onmousedown={ reset }
+                    disabled={ !p.reset_enabled }>
+                    { "Reset" }
+                </button>
 
-        &[type="search"] {
-            min-height: 24px;
-            border-radius: 2px;
-        }
-    }
-
-    .sidebar_header_contents {
-        display: flex;
-        margin: 8px;
-        align-items: center;
-        border-radius: 3px;
-        outline-width: 1px;
-        outline-color: var(--inactive--color);
-
-        &.editable {
-            &:hover {
-                outline-style: solid;
-                cursor: text;
-            }
-        }
-        &::focus {
-            outline-style: solid;
-            background: var(--plugin--background);
-        }
-        &.edited {
-            outline-style: dashed;
-        }
-        &.invalid {
-            outline-color: var(--error--color);
-        }
-
-        .sidebar_header_title {
-            line-height: normal;
-            margin: 0;
-            flex: 1;
-            padding-left: 5px;
-            background: none;
-            outline: none;
-            color: unset;
-
-            &:disabled {
-                background: none;
-                outline: none;
-                color: unset;
-            }
-        }
+                <button
+                    id="psp-expression-editor-button-save"
+                    class="psp-expression-editor__button"
+                    onmousedown={ save }
+                    disabled={ !p.save_enabled }>
+                    { "Save" }
+                </button>
+            </div>
+        </div>
     }
 }

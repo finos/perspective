@@ -12,8 +12,12 @@
 
 import { Locator, Page, expect } from "@playwright/test";
 import { ColumnSettingsSidebar } from "./column_settings";
-import { ColumnType, SettingsPanel } from "./settings_panel";
+import { ColumnSelector, ColumnType, SettingsPanel } from "./settings_panel";
 import { DataGridPlugin } from "./plugins";
+import {
+    IPerspectiveViewerElement,
+    PerspectiveViewerConfig,
+} from "@finos/perspective-viewer";
 
 /**
  * This class is the primary interface between Playwright tests and the items on the Perspective Viewer.
@@ -46,9 +50,17 @@ export class PageView {
     }
 
     async save() {
-        return await this.container.evaluate(async (elem) => {
-            return await (elem as any).save();
+        return this.container.evaluate(async (viewer) => {
+            let el = viewer as unknown as IPerspectiveViewerElement;
+            return await el.save();
         });
+    }
+
+    async restore(config: PerspectiveViewerConfig) {
+        return this.container.evaluate(async (viewer, config) => {
+            let el = viewer as unknown as IPerspectiveViewerElement;
+            return await el.restore(config);
+        }, config);
     }
 
     async openSettingsPanel() {
@@ -88,10 +100,35 @@ export class PageView {
                 case "calendar":
                     expr = "now()";
             }
-            await this.settingsPanel.createNewExpression("expr", expr);
+            await this.settingsPanel.createNewExpression("expr", expr, true);
             await settingsPanel.activeColumns.activateColumn("expr");
+            col = settingsPanel.activeColumns.getColumnByName("expr");
         }
         await expect(col.container).toBeVisible();
         return col;
+    }
+
+    async assureColumnSettingsOpen(column: ColumnSelector) {
+        let isEditing = await column.editBtn.evaluate((btn) =>
+            btn.className.includes("is-editing")
+        );
+        if (!isEditing) {
+            await this.container.evaluate((_) =>
+                console.log("COLUMN SETTINGS CLOSED")
+            );
+            await column.editBtn.click({ force: true });
+        }
+        expect(this.container).toBeVisible({ timeout: 1000 });
+    }
+    async assureColumnSettingsClosed() {
+        if (await this.columnSettingsSidebar.container.isVisible()) {
+            await this.columnSettingsSidebar.closeBtn.click();
+        }
+    }
+
+    async getActiveElement() {
+        return await this.container.evaluate((viewer) => {
+            return viewer.shadowRoot?.activeElement;
+        });
     }
 }

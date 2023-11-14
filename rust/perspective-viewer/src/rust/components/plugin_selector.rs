@@ -17,6 +17,7 @@ use super::style::LocalStyle;
 use crate::config::*;
 use crate::js::*;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
@@ -26,13 +27,14 @@ use crate::*;
 pub struct PluginSelectorProps {
     pub renderer: Renderer,
     pub session: Session,
+    pub presentation: Presentation,
 
     #[cfg(test)]
     #[prop_or_default]
     pub weak_link: WeakScope<PluginSelector>,
 }
 
-derive_model!(Renderer, Session for PluginSelectorProps);
+derive_model!(Renderer, Session, Presentation for PluginSelectorProps);
 
 #[derive(Debug)]
 pub enum PluginSelectorMsg {
@@ -85,6 +87,7 @@ impl Component for PluginSelector {
                     .session
                     .set_update_column_defaults(&mut update, &ctx.props().renderer.metadata());
 
+                ctx.props().presentation.set_open_column_settings(None);
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 self.is_open = false;
                 false
