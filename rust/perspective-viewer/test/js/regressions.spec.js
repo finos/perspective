@@ -101,7 +101,7 @@ test.describe("Regression tests", () => {
         expect(config).toEqual({
             aggregates: {},
             columns: ["Sales"],
-            expressions: [],
+            expressions: {},
             filter: [["State", "in", ["California"]]],
             group_by: ["State"],
             plugin: "Debug",

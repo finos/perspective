@@ -21,7 +21,7 @@ use wasm_bindgen_test::*;
 use {crate::*, js_sys::Array};
 
 use super::aggregates::*;
-use super::expression::*;
+use super::expressions::*;
 use super::filters::*;
 use super::sort::*;
 use crate::js::perspective::JsPerspectiveViewConfig;
@@ -46,7 +46,7 @@ pub struct ViewConfig {
     pub sort: Vec<Sort>,
 
     #[serde(default)]
-    pub expressions: Vec<ExprSerde>,
+    pub expressions: Expressions,
 
     #[serde(default)]
     pub aggregates: HashMap<String, Aggregate>,
@@ -124,7 +124,7 @@ pub struct ViewConfigUpdate {
     pub sort: Option<Vec<Sort>>,
 
     #[serde(default)]
-    pub expressions: Option<Vec<ExprSerde>>,
+    pub expressions: Option<Expressions>,
 
     #[serde(default)]
     pub aggregates: Option<HashMap<String, Aggregate>>,

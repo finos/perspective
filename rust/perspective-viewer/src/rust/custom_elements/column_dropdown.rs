@@ -77,8 +77,8 @@ impl ColumnDropDownElement {
 
                 if is_expr {
                     values.push(InPlaceColumn::Expression(Expression {
-                        name: input.clone(),
-                        expr: input,
+                        name: input.clone().into(),
+                        expression: input.into(),
                     }));
                 }
             }

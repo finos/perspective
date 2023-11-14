@@ -141,9 +141,14 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         .collect::<Html>();
 
     let onkeydown = use_callback(props.onsave.clone(), on_keydown);
-    let oninput = use_callback((caret_position.setter(), props.oninput.clone()),|event, deps| on_input_callback(event, &deps.0, &deps.1));
+    let oninput = use_callback(
+        (caret_position.setter(), props.oninput.clone()),
+        |event, deps| on_input_callback(event, &deps.0, &deps.1),
+    );
 
-    let onscroll = use_callback((scroll_offset.setter(), textarea_ref.2),|_, deps| on_scroll(&deps.0, &deps.1));
+    let onscroll = use_callback((scroll_offset.setter(), textarea_ref.2), |_, deps| {
+        on_scroll(&deps.0, &deps.1)
+    });
 
     use_effect({
         clone!(props.expr);
@@ -156,9 +161,14 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         }
     });
 
-    use_effect_with((scroll_offset, content_ref.0, lineno_ref.0),|deps| scroll_sync(&deps.0, &deps.1, &deps.2));
+    use_effect_with((scroll_offset, content_ref.0, lineno_ref.0), |deps| {
+        scroll_sync(&deps.0, &deps.1, &deps.2)
+    });
 
-    use_effect_with((filter_dropdown, cursor.auto.clone(), cursor.noderef.clone()),|deps| autocomplete(&deps.0, &deps.1, &deps.2));
+    use_effect_with(
+        (filter_dropdown, cursor.auto.clone(), cursor.noderef.clone()),
+        |deps| autocomplete(&deps.0, &deps.1, &deps.2),
+    );
 
     let line_numbers = cursor
         .map_rows(|x| html!(<span class="line_number">{ x + 1 }</span>))

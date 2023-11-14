@@ -28,11 +28,14 @@
     .errored {
         outline-color: var(--error--color);
     }
+
     .item_title {
         font-size: 9px;
     }
+
     input {
-        &[type="text"] {
+        &[type="text"],
+        &[type="search"] {
             outline: 1px solid;
             outline-color: var(--inactive--color);
             background-color: var(--plugin--background);

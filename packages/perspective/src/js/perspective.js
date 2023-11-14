@@ -1415,13 +1415,22 @@ export default function (Module) {
      *  which will be used in the engine to look up column values.
      *
      * @private
-     * @param {Array<{name: string, expr: string}> | Array<string>} expressions
+     * @param {Object | Array<string>} expressions
      */
     function parse_expression_strings(expressions) {
         let validated_expressions = [];
         const expression_idx_map = {};
 
-        for (let expression of expressions) {
+        const is_new_format = !Array.isArray(expressions);
+
+        for (let expression of is_new_format
+            ? Object.keys(expressions)
+            : expressions) {
+            const name = expression;
+            if (is_new_format) {
+                expression = expressions[expression];
+            }
+
             // Map of column names to column IDs, so that we generate
             // column IDs correctly without collision.
             let column_name_map = {};
@@ -1434,8 +1443,8 @@ export default function (Module) {
             // First, look for a column alias, which is a // style comment
             // on the first line of the expression.
             let expression_alias;
-            if (expression.name && expression.name !== "") {
-                expression_alias = expression.name;
+            if (is_new_format) {
+                expression_alias = name;
             } else {
                 let alias_match = expression.match(/^\/\/(?<alias>.+?)\n/);
 
@@ -1450,8 +1459,7 @@ export default function (Module) {
             }
 
             // Replace `true` and `false` reserved words with symbols
-            let expr_val = expression.expr ?? expression;
-            let parsed_expression_string = expr_val.replace(
+            let parsed_expression_string = expression.replace(
                 /([a-zA-Z_]+[a-zA-Z0-9_]*)/g,
                 (match) => {
                     if (match == "true") {
@@ -1521,7 +1529,7 @@ export default function (Module) {
 
             const validated = [
                 expression_alias,
-                expr_val,
+                expression,
                 parsed_expression_string,
                 column_id_map,
             ];
@@ -1549,7 +1557,7 @@ export default function (Module) {
      * passed in is not in `expressions`, it is guaranteed to be in `errors`.
      *
      * @async
-     * @param {Array<{name: string, expr: string}>} expressions An array of expressions to
+     * @param {Object} expressions A dictionary of name/expressions to
      * be validated.
      *
      * @returns {Promise<Object>}
@@ -1578,7 +1586,10 @@ export default function (Module) {
             errors: {},
         };
 
-        if (!expressions || expressions.length === 0) return validated;
+        if (!expressions || Object.keys(expressions).length === 0) {
+            return validated;
+        }
+
         expressions = parse_expression_strings(expressions);
 
         // Transform Array into a C++ vector that can be passed through
@@ -1753,11 +1764,11 @@ export default function (Module) {
         config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
-        config.expressions = config.expressions || [];
+        config.expressions = config.expressions || {};
 
         const table_schema = this.schema();
 
-        if (config.expressions.length > 0) {
+        if (config.expressions !== undefined) {
             config.expressions = parse_expression_strings(config.expressions);
         }
 
@@ -1765,7 +1776,7 @@ export default function (Module) {
             // If columns are not provided, use all columns
             config.columns = this.columns();
 
-            if (config.expressions.length > 0) {
+            if (config.expressions != undefined) {
                 for (const expr of config.expressions) {
                     config.columns.push(expr[0]);
                 }

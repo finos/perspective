@@ -357,6 +357,23 @@ function migrate_expressions(old, options) {
         }
     }
 
+    if (Array.isArray(old["expressions"])) {
+        const expressions = {};
+        for (let expression of old["expressions"]) {
+            let alias = expression;
+            if (expression.trim().startsWith("//")) {
+                const parts = expression.split("\n");
+                alias = parts.shift();
+                alias = alias.slice(2).trim();
+                expression = alias.join("\n").trim();
+            }
+
+            expressions[alias] = expression;
+        }
+
+        old["expressions"] = expressions;
+    }
+
     return old;
 }
 

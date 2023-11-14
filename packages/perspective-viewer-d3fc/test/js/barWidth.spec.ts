@@ -47,7 +47,7 @@ test.describe("Bar Width", () => {
             sort: [],
             plugin_config: {},
             settings: false,
-            expressions: [],
+            expressions: {},
             theme: "Pro Light",
             title: null,
         });

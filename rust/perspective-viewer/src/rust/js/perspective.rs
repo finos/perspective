@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use itertools::Itertools;
-use js_sys::Array;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -76,7 +75,7 @@ extern "C" {
     pub async fn _size(this: &JsPerspectiveTable) -> ApiResult<JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = validate_expressions)]
-    pub async fn _validate_expressions(this: &JsPerspectiveTable, exprs: Array) -> ApiResult<JsValue>;
+    pub async fn _validate_expressions(this: &JsPerspectiveTable, exprs: js_sys::Object) -> ApiResult<JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = view)]
     pub async fn _view(
@@ -168,7 +167,7 @@ impl JsPerspectiveTable {
 
     async_typed!(_make_port, make_port(&self) -> f64);
 
-    async_typed!(_validate_expressions, validate_expressions(&self, exprs: Array) -> JsPerspectiveValidatedExpressions);
+    async_typed!(_validate_expressions, validate_expressions(&self, exprs: js_sys::Object) -> JsPerspectiveValidatedExpressions);
 
     async_typed!(_schema, schema(&self) -> JsPerspectiveTableSchema);
 

@@ -29,7 +29,7 @@ pub struct EmptyColumn {
 pub enum InPlaceColumn {
     Column(String),
     // ExpressionAlias(String),
-    Expression(Expression),
+    Expression(Expression<'static>),
 }
 
 #[derive(Properties)]
