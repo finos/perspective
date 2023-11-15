@@ -24,6 +24,7 @@ use crate::utils::ApiFuture;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ExprEditorAttrProps {
+    pub column_name: String,
     pub selected_column: ColumnLocator,
     pub on_close: Callback<()>,
     pub session: Session,
@@ -34,13 +35,12 @@ derive_model!(Renderer, Session for ExprEditorAttrProps);
 #[function_component(ExprEditorAttr)]
 pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
     let is_validating = yew::use_state_eq(|| false);
-    let on_save = yew::use_callback(p.clone(), |(v, name), p| {
-        match &p.selected_column {
-            ColumnLocator::Expr(Some(alias)) => update_expr(alias, name, &v, p),
-            ColumnLocator::Expr(None) => save_expr(v, name, p),
-
-            // TODO: We should be able to create a new expression from the currently selected
-            // column if it is not already an expression column.
+    let on_save = yew::use_callback(p.clone(), |(v, alias): (_, Option<String>), p| {
+        // alias will be None on new exprs
+        let alias = alias.unwrap_or(p.column_name.clone());
+        match p.selected_column.clone() {
+            ColumnLocator::Expr(Some(_)) => update_expr(alias, &v, p),
+            ColumnLocator::Expr(None) => save_expr(v, alias, p),
             _ => panic!("Tried to save a non-expression column as expression!"),
         }
     });
@@ -64,31 +64,26 @@ pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
                 { on_save }
                 { on_validate }
                 { on_delete }
-                session={ &p.session }
-                old_alias={ p.selected_column.name().cloned() }
-                disabled={ !matches!(p.selected_column, ColumnLocator::Expr(_)) }/>
+                session = { &p.session }
+                alias = { p.selected_column.name().cloned() }
+                disabled = {!matches!(p.selected_column, ColumnLocator::Expr(_))}
+            />
         </div>
     }
 }
 
-fn update_expr(
-    old_name: &str,
-    new_name: String,
-    new_expr_val: &JsValue,
-    props: &ExprEditorAttrProps,
-) {
-    let old_name = old_name.to_string();
+fn update_expr(alias: String, new_expr_val: &JsValue, props: &ExprEditorAttrProps) {
     let session = props.session.clone();
     let props = props.clone();
     let new_expr_val = new_expr_val.as_string().unwrap();
     let new_expr = Expression {
-        name: new_name.into(),
+        name: alias.clone().into(),
         expression: new_expr_val.into(),
     };
 
     ApiFuture::spawn(async move {
         let update = session
-            .create_replace_expression_update(&old_name, &new_expr)
+            .create_replace_expression_update(&alias, &new_expr)
             .await;
         props.update_and_render(update).await?;
         Ok(())

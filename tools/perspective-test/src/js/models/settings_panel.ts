@@ -49,21 +49,22 @@ export class SettingsPanel {
     async createNewExpression(name: string, expr: string) {
         await this.activeColumns.scrollToBottom();
         await this.addExpressionButton.click();
-        let exprEditor =
-            this.pageView.columnSettingsSidebar.attributesTab.expressionEditor;
+        let sidebar = this.pageView.columnSettingsSidebar;
+        let exprEditor = sidebar.attributesTab.expressionEditor;
         await exprEditor.container.waitFor({
             state: "visible",
         });
-        await exprEditor.nameInput.waitFor({
+        await sidebar.nameInput.waitFor({
             state: "visible",
         });
         expect(await exprEditor.textarea.isVisible()).toBe(true);
-        expect(await exprEditor.nameInput.isVisible()).toBe(true);
+        expect(await sidebar.nameInput.isVisible()).toBe(true);
 
-        await exprEditor.nameInput.focus();
-        await exprEditor.nameInput.clear();
-        await exprEditor.nameInput.type(name, { delay: 100 });
-        await exprEditor.nameInput.blur();
+        await sidebar.nameInput.focus();
+        await sidebar.nameInput.clear();
+        await sidebar.nameInput.type(name, { delay: 100 });
+        await sidebar.nameInput.press("Enter");
+        await sidebar.nameInput.blur();
 
         await exprEditor.textarea.focus();
         await exprEditor.textarea.clear();

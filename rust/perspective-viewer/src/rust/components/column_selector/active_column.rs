@@ -19,7 +19,7 @@ use super::aggregate_selector::*;
 use super::expression_toolbar::*;
 use super::InPlaceColumn;
 use crate::components::column_selector::{EmptyColumn, InvalidColumn};
-use crate::components::type_icon::TypeIcon;
+use crate::components::type_icon::{TypeIcon, TypeIconType};
 use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::custom_elements::ColumnDropDownElement;
@@ -372,6 +372,12 @@ impl Component for ActiveColumn {
                     _ => false,
                 } || is_expression;
 
+                let icon_type = if is_expression {
+                    TypeIconType::Expr
+                } else {
+                    TypeIconType::Type(col_type)
+                };
+
                 html! {
                     <div
                         class={ outer_classes }
@@ -394,6 +400,8 @@ impl Component for ActiveColumn {
 
                             <div class="column-selector-column-border">
 
+                                <TypeIcon ty={icon_type} />
+
                                 if ctx.props().is_aggregated {
                                     <AggregateSelector
                                         column={ name.clone() }
@@ -403,7 +411,6 @@ impl Component for ActiveColumn {
                                     </AggregateSelector>
                                 }
 
-                                <TypeIcon ty={col_type} />
                                 <span class={"column_name"}>
                                     { name.clone() }
                                 </span>

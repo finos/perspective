@@ -14,6 +14,7 @@ use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::containers::dragdrop_list::*;
+use crate::components::type_icon::TypeIcon;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::model::*;
@@ -107,8 +108,9 @@ impl Component for SortColumn {
                 ondragstart={ dragstart }
                 ondragend={ dragend }>
                 <div class="pivot-column-border">
+                    <TypeIcon ty={Type::String} />
                     <span
-                        class="column_name string">
+                        class="column_name">
                         { ctx.props().sort.0.to_owned() }
                     </span>
                     <span

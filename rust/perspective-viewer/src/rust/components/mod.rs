@@ -38,6 +38,7 @@ pub mod viewer;
 
 pub mod column_settings_sidebar;
 // pub mod empty_row;
+pub mod editable_header;
 pub mod empty_row;
 #[cfg(test)]
 mod tests;

@@ -212,7 +212,28 @@ impl Session {
             .create_replace_expression_update(&old_expr, new_expr)
     }
 
-    /// Validate an expression string and marshall the results.
+    pub async fn create_rename_expression_update(
+        &self,
+        old_expr_name: String,
+        new_expr_name: String,
+    ) -> ViewConfigUpdate {
+        let old_expr_val = self
+            .metadata()
+            .get_expression_by_alias(&old_expr_name)
+            .expect_throw(&format!("Unable to get expr with name {old_expr_name}"));
+        let old_expr = Expression {
+            name: old_expr_name.into(),
+            expression: old_expr_val.clone().into(),
+        };
+        let new_expr = Expression {
+            name: new_expr_name.into(),
+            expression: old_expr_val.into(),
+        };
+        self.get_view_config()
+            .create_replace_expression_update(&old_expr, &new_expr)
+    }
+
+    /// Validate an expression strin and marshall the results.
     pub async fn validate_expr(
         &self,
         expr: &str,

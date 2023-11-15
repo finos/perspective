@@ -23,7 +23,7 @@ impl Tab for &'static str {}
 pub struct TabListProps<T: Tab> {
     pub tabs: Vec<T>,
     pub match_fn: Callback<T, Html>,
-    pub on_tab_change: Callback<usize>,
+    pub on_tab_change: Callback<(usize, T)>,
     pub selected_tab: Option<usize>,
 }
 
@@ -73,11 +73,13 @@ impl<T: Tab> Component for TabList<T> {
                     (idx == self.selected_idx).then_some("selected")
                 ]);
 
-                clone!(ctx.props().on_tab_change);
-                let onclick = ctx.link().callback(move |_| {
-                    on_tab_change.emit(idx);
-                    TabListMsg::SetSelected(idx)
-                });
+                let onclick = {
+                    clone!(ctx.props().on_tab_change, tab);
+                    ctx.link().callback(move |_| {
+                        on_tab_change.emit((idx, tab.clone()));
+                        TabListMsg::SetSelected(idx)
+                    })
+                };
                 html! {
                     <span {class} {onclick}>
                         <div class="tab-title">{tab.to_string()}</div>

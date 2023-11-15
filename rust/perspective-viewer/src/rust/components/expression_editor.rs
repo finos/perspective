@@ -13,7 +13,6 @@
 use std::rc::Rc;
 
 use wasm_bindgen::prelude::*;
-use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 use super::containers::split_panel::*;
@@ -30,16 +29,15 @@ pub enum ExpressionEditorMsg {
     SetExpr(Rc<String>),
     ValidateComplete(Option<PerspectiveValidationError>),
     SaveExpr,
-    AliasChanged(InputEvent),
 }
 
 #[derive(Properties, PartialEq)]
 pub struct ExpressionEditorProps {
     pub session: Session,
-    pub on_save: Callback<(JsValue, String)>,
+    pub on_save: Callback<(JsValue, Option<String>)>,
     pub on_validate: Callback<bool>,
     pub on_delete: Option<Callback<()>>,
-    pub old_alias: Option<String>,
+    pub alias: Option<String>,
     pub disabled: bool,
 }
 
@@ -56,7 +54,7 @@ pub fn get_new_column_name(session: &Session) -> String {
 
 impl ExpressionEditorProps {
     fn initial_expr(&self) -> Rc<String> {
-        self.old_alias
+        self.alias
             .as_ref()
             .and_then(|alias| self.session.metadata().get_expression_by_alias(alias))
             .unwrap_or_default()
@@ -70,7 +68,6 @@ pub struct ExpressionEditor {
     edit_enabled: bool,
     expr: Rc<String>,
     error: Option<PerspectiveValidationError>,
-    alias_ref: NodeRef,
     alias: Option<String>,
 }
 
@@ -79,20 +76,12 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let mut alias = ctx.props().old_alias.clone();
-        if alias.is_none() {
-            alias = Some(get_new_column_name(&ctx.props().session));
-        } else if let Some(alias2) = &alias && alias2 == &*ctx.props().initial_expr() {
-            alias = None;
-        }
-
         Self {
             save_enabled: false,
             edit_enabled: false,
             error: None,
             expr: ctx.props().initial_expr(),
-            alias_ref: NodeRef::default(),
-            alias,
+            alias: ctx.props().alias.clone(),
         }
     }
 
@@ -118,7 +107,7 @@ impl Component for ExpressionEditor {
                 self.error = err;
                 if self.error.is_none() {
                     let is_edited = maybe!({
-                        let alias = ctx.props().old_alias.as_ref()?;
+                        let alias = ctx.props().alias.as_ref()?;
                         let session = &ctx.props().session;
                         let old = session.metadata().get_expression_by_alias(alias)?;
                         let is_edited = *self.expr != old;
@@ -141,7 +130,7 @@ impl Component for ExpressionEditor {
                 self.edit_enabled = false;
                 self.save_enabled = false;
                 maybe!({
-                    let alias = ctx.props().old_alias.as_ref()?;
+                    let alias = ctx.props().alias.as_ref()?;
                     let session = &ctx.props().session;
                     let old = session.metadata().get_expression_by_alias(alias)?;
                     self.expr = old.into();
@@ -154,8 +143,9 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
                     let expr = self.expr.to_owned();
-                    let alias = self.alias.clone().unwrap_or((*expr).clone());
-                    ctx.props().on_save.emit((JsValue::from(&*expr), alias));
+                    ctx.props()
+                        .on_save
+                        .emit((JsValue::from(&*expr), self.alias.clone()));
                 }
 
                 false
@@ -167,14 +157,6 @@ impl Component for ExpressionEditor {
 
                 false
             },
-            ExpressionEditorMsg::AliasChanged(event) => {
-                let value = event.target_unchecked_into::<HtmlInputElement>().value();
-                self.alias = (!value.is_empty()).then_some(value);
-                self.save_enabled =
-                    self.error.is_none() && !(self.alias.is_none() && self.expr.is_empty());
-
-                true
-            },
         }
     }
 
@@ -184,10 +166,8 @@ impl Component for ExpressionEditor {
         let save = ctx.link().callback(|_| ExpressionEditorMsg::SaveExpr);
         let oninput = ctx.link().callback(ExpressionEditorMsg::SetExpr);
         let onsave = ctx.link().callback(|()| ExpressionEditorMsg::SaveExpr);
-        let on_alias_change = ctx.link().callback(ExpressionEditorMsg::AliasChanged);
-        let alias_class = self.alias.is_none().then_some("errored");
         let is_closable = maybe! {
-            let alias = ctx.props().old_alias.as_ref()?;
+            let alias = ctx.props().alias.as_ref()?;
             Some(!ctx.props().session.is_column_expression_in_use(alias))
         }
         .unwrap_or_default();
@@ -195,39 +175,10 @@ impl Component for ExpressionEditor {
         let disabled_class = ctx.props().disabled.then_some("disabled");
         clone!(ctx.props().disabled);
 
-        let alias = if let Some(alias) = &self.alias && alias != &*self.expr {
-            Some(alias.to_owned())
-        } else {
-            None
-        };
-
-        let placeholder = if alias.is_none() {
-            let name = match self.expr.char_indices().nth(25) {
-                None => self.expr.to_string(),
-                Some((idx, _)) => self.expr[..idx].to_owned(),
-            };
-
-            Some(name)
-        } else {
-            None
-        };
-
         html_template! {
             <LocalStyle href={ css!("expression-editor") } />
             <SplitPanel orientation={ Orientation::Vertical }>
                 <>
-                    <div style="display: flex; flex-direction: column;" id ="editor-alias-container">
-                        <label class="item_title">{ "Name" }</label>
-                        <input
-                            id="expression-name"
-                            type="search"
-                            ref={ self.alias_ref.clone() }
-                            oninput={ on_alias_change }
-                            { placeholder }
-                            { disabled }
-                            value={ alias }
-                            class={ alias_class }/>
-                    </div>
                     <div>
                         <label class="item_title">{ "Expression" }</label>
                         <div id="editor-container" class={ disabled_class }>
@@ -254,7 +205,7 @@ impl Component for ExpressionEditor {
                                     </button>
                                 }
 
-                                if ctx.props().old_alias.is_some() {
+                                if ctx.props().alias.is_some() {
                                     <button
                                         id="psp-expression-editor-button-reset"
                                         class="psp-expression-editor__button"
@@ -281,14 +232,10 @@ impl Component for ExpressionEditor {
     }
 
     fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
-        if ctx.props().old_alias != old_props.old_alias {
+        if ctx.props().alias != old_props.alias {
             self.expr = ctx.props().initial_expr();
         }
-        self.alias = ctx
-            .props()
-            .old_alias
-            .clone()
-            .or_else(|| Some(get_new_column_name(&ctx.props().session)));
+        self.alias = ctx.props().alias.clone();
         true
     }
 }

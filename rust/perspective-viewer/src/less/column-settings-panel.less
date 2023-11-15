@@ -53,19 +53,27 @@
         margin: 8px;
         align-items: center;
         border-radius: 3px;
+        outline-width: 1px;
+        outline-color: var(--inactive--color);
 
         &.editable {
             &:hover {
-                outline: 1px solid;
-                outline-color: var(--inactive--color);
+                outline-style: solid;
                 cursor: text;
             }
         }
         &.focused {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
+            outline-style: solid;
             background: var(--plugin--background);
         }
+        &.edited {
+            outline-style: dashed;
+        }
+        &.errored {
+            outline-style: solid;
+            outline-color: var(--error--color);
+        }
+
         .sidebar_header_title {
             margin: 0;
             flex: 1;

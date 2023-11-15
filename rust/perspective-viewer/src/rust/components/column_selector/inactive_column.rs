@@ -15,6 +15,7 @@ use web_sys::*;
 use yew::prelude::*;
 
 use super::expression_toolbar::*;
+use crate::components::type_icon::{TypeIcon, TypeIconType};
 use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::dragdrop::*;
@@ -183,6 +184,12 @@ impl Component for InactiveColumn {
             class.push("dragdrop-hover");
         }
 
+        let icon_type = if is_expression {
+            TypeIconType::Expr
+        } else {
+            TypeIconType::Type(col_type)
+        };
+
         html! {
             <div
                 class={ class }
@@ -202,8 +209,9 @@ impl Component for InactiveColumn {
                     { ondragend }>
 
                     <div class="column-selector-column-border">
-                        <span class={ format!("column_name {}", col_type) }>
-                            { &ctx.props().name }
+                        <TypeIcon ty={icon_type} />
+                        <span class={"column_name"}>
+                            { ctx.props().name.clone() }
                         </span>
                         <span class="column-selector--spacer"></span>
 

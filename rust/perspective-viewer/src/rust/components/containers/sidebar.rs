@@ -25,11 +25,10 @@ pub struct SidebarProps {
 
     /// When this callback is called, the sidebar will close
     pub on_close: Callback<()>,
-    pub title: String,
     pub id_prefix: String,
-    pub icon: Option<String>,
     pub width_override: Option<i32>,
     pub selected_tab: Option<usize>,
+    pub header_contents: Html,
 }
 
 /// Sidebars are designed to live in a [SplitPanel]
@@ -62,15 +61,10 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
         <div class="sidebar_column" id={ format!("{id}_sidebar") } ref={ noderef }>
             <SidebarCloseButton
                 id={ format!("{id}_close_button") }
-                on_close_sidebar={ &p.on_close }/>
-            <div class="sidebar_header" id={ format!("{id}_header") }>
-                if let Some(id) = p.icon.clone() {
-                    <span { id }></span>
-                }
-
-                <span class="sidebar_header_title" id={ format!("{id}_header_title") }>
-                    { p.title.clone() }
-                </span>
+                on_close_sidebar={ &p.on_close }
+                />
+            <div class="sidebar_header">
+                {p.header_contents.clone()}
             </div>
             <div class="sidebar_border" id={ format!("{id}_border") }></div>
             <div class="sidebar_content" id={ format!("{id}_content") }>

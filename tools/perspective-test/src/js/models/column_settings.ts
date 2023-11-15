@@ -20,6 +20,7 @@ export class ColumnSettingsSidebar {
     styleTab: StyleTab;
     closeBtn: Locator;
     tabTitle: Locator;
+    nameInput: Locator;
 
     constructor(view: PageView) {
         this.view = view;
@@ -31,6 +32,7 @@ export class ColumnSettingsSidebar {
         this.tabTitle = view.container.locator(
             ".tab:not(.tab-padding) .tab-title"
         );
+        this.nameInput = view.container.locator("input.sidebar_header_title");
     }
 
     async openTab(name: string) {
@@ -54,7 +56,6 @@ export class AttributesTab {
 
 export class ExpressionEditor {
     container: Locator;
-    nameInput: Locator;
     content: Locator;
     textarea: Locator;
     saveBtn: Locator;
@@ -63,7 +64,6 @@ export class ExpressionEditor {
 
     constructor(parent: Locator) {
         this.container = parent.locator("#editor-container");
-        this.nameInput = parent.locator("#editor-alias-container input");
         this.content = this.container.locator("#content");
         this.textarea = this.container.locator("textarea");
         this.saveBtn = this.container.locator(
