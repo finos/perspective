@@ -18,7 +18,7 @@ mod view;
 mod view_subscription;
 
 use std::cell::{Ref, RefCell};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::iter::IntoIterator;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -411,14 +411,7 @@ impl Session {
             .ok_or("`restore()` called before `load()`")?
             .clone();
 
-        let arr = JsValue::from_serde_ext(
-            &config
-                .expressions
-                .iter()
-                .map(|expr| (expr.name.to_string(), expr.expression.to_string()))
-                .collect::<HashMap<_, _>>(),
-        )?
-        .unchecked_into::<js_sys::Object>();
+        let arr = JsValue::from_serde_ext(&config.expressions)?.unchecked_into::<js_sys::Object>();
 
         let valid_recs = table.validate_expressions(arr).await?;
         let expression_names = self.metadata_mut().update_expressions(&valid_recs)?;

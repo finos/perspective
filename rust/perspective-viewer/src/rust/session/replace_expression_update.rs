@@ -42,11 +42,11 @@ impl ViewConfig {
 
         let expressions = expressions
             .iter()
-            .map(|serde_expr| {
-                if old_expr.name == serde_expr.name {
+            .map(|(serde_name, serde_expr)| {
+                if &old_expr.name == serde_name {
                     expression.to_owned()
                 } else {
-                    serde_expr
+                    Expression::new(serde_name, serde_expr)
                 }
             })
             .collect::<Expressions>();
