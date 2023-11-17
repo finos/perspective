@@ -126,8 +126,7 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
                         { enable_time_config }
                         { config }
                         { default_config }
-                        { on_change }
-                        />
+                        { on_change }/>
                 </div>
             }
         }),
@@ -200,10 +199,9 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
                             column_name={ props.column_name.clone() }
                             session={ &props.session }
                             renderer={ &props.renderer }
-                            custom_events={ &props.custom_events }
-                        />
+                            custom_events={ &props.custom_events }/>
                     })
-                }
+                },
                 _ => None,
             }
         })

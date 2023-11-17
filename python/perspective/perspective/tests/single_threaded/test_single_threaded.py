@@ -31,12 +31,12 @@ class TestThreadPoolOne:
 
         v = t.view(
             columns=["symbol", "value", "value3"],
-            expressions=["""//value3\n"value" + "value2\""""],
+            expressions={"value3": """"value" + "value2\""""},
         )
 
         v_agg = t.view(
             columns=["symbol", "value", "value3"],
-            expressions=["""//value3\n"value" + "value2\""""],
+            expressions={"value3": """"value" + "value2\""""},
             group_by=["symbol"],
             aggregates={"symbol": "first", "value": "sum", "value2": "sum"},
         )

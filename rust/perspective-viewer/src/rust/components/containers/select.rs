@@ -81,10 +81,10 @@ fn find_nth<T>(mut count: i32, items: &[SelectItem<T>]) -> Option<&T> {
         match item {
             SelectItem::Option(_) if count > 0 => {
                 count -= 1;
-            }
+            },
             SelectItem::OptGroup(_, items) if count >= items.len() as i32 => {
                 count -= items.len() as i32;
-            }
+            },
             SelectItem::OptGroup(_, items) => return items.get(count as usize),
             SelectItem::Option(x) => return Some(x),
         }
@@ -154,7 +154,7 @@ where
                 id={ ctx.props().id }
                 class={ class }
                 ref={ &self.select_ref }
-                onchange={callback}>
+                onchange={ callback }>
                 {
                     for ctx.props().values.iter().map(|value| match value {
                         SelectItem::Option(value) => {

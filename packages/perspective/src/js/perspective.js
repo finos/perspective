@@ -376,7 +376,7 @@ export default function (Module) {
      * @example
      * // Create a view with expressions
      * const view = table.view({
-     *      expressions: ['"x" + "y" - 100']
+     *      expressions: {'"x" + "y" - 100': '"x" + "y" - 100'}
      * });
      *
      * await view.expression_schema(); // {'"x" + "y" - 100': "float"}
@@ -1420,8 +1420,12 @@ export default function (Module) {
     function parse_expression_strings(expressions) {
         let validated_expressions = [];
         const expression_idx_map = {};
-
         const is_new_format = !Array.isArray(expressions);
+        if (!is_new_format) {
+            console.warn(
+                "Legacy `expressions` format: " + JSON.stringify(expressions)
+            );
+        }
 
         for (let expression of is_new_format
             ? Object.keys(expressions)

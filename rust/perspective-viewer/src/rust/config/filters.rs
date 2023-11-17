@@ -142,7 +142,7 @@ impl Display for FilterTerm {
         match self {
             Self::Scalar(x) => {
                 write!(fmt, "{}", x)?;
-            }
+            },
             Self::Array(xs) => write!(
                 fmt,
                 "{}",

@@ -10,6 +10,19 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+# * Always insert a newline after a dedent, unless the next line is also a
+#   dedent.
+# * Always insert a newline before a comment, unless the comment line is also
+#   an indent.
+# * Always insert a newline before and after top-level `use` declarations,
+#   which should be at the top of the file after the header.
+# * Prefer no newlines otherwise.
+#
+# [html!]
+# * Always remove spacing after `<`, before `>` and `/>`, and around `=`
+#   literals.
+# * Always insert spaces around content within `{}` blocks.
+
 unstable_features = true
 wrap_comments = true
 use_field_init_shorthand = true
@@ -18,3 +31,11 @@ format_macro_bodies = true
 format_macro_matchers = true
 format_strings = true
 overflow_delimited_expr = true
+normalize_comments = true
+normalize_doc_attributes = true
+reorder_impl_items = true
+group_imports = "StdExternalCrate"
+imports_granularity = "Module"
+newline_style = "Unix"
+condense_wildcard_suffixes = true
+match_block_trailing_comma = true

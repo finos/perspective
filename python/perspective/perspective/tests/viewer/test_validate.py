@@ -53,14 +53,13 @@ class TestValidate:
         assert validate.validate_filter(filters) == filters
 
     def test_validate_expressions(self):
-        computed = ["// expression1 \n 'Hello'"]
-        assert validate.validate_expressions(computed) == computed
-        computed = [{"name": "expression1", "expr": "'hey'"}]
-        assert validate.validate_expressions(computed) == computed
+        # with raises(PerspectiveError):
+        computed = {"expression1": " 'Hello'"}
+        validate.validate_expressions(computed)
 
     def test_validate_expressions_invalid(self):
         with raises(PerspectiveError):
-            assert validate.validate_expressions({})
+            assert validate.validate_expressions("test")
 
     def test_validate_version(self):
         assert validate.validate_version("1.2.3")

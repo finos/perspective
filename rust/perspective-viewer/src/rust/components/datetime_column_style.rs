@@ -130,12 +130,12 @@ impl DatetimeColumnStyle {
                         <ColorSelector ..color_props />
                     </div>
                 }
-            }
+            },
             _ => {
                 html! {
                     <span class="row">{ title }</span>
                 }
-            }
+            },
         }
     }
 }
@@ -169,12 +169,12 @@ impl Component for DatetimeColumnStyle {
             DatetimeColumnStyleMsg::Reset(config) => {
                 self.config = config;
                 true
-            }
+            },
             DatetimeColumnStyleMsg::TimezoneEnabled => {
                 self.config.time_zone = None;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeColumnStyleMsg::TimezoneChanged(val) => {
                 if *USER_TIMEZONE != val {
                     self.config.time_zone = Some(val);
@@ -184,7 +184,7 @@ impl Component for DatetimeColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeColumnStyleMsg::ColorModeEnabled(enabled) => {
                 if enabled {
                     self.config.datetime_color_mode = Some(DatetimeColorMode::default());
@@ -195,28 +195,28 @@ impl Component for DatetimeColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeColumnStyleMsg::ColorModeChanged(mode) => {
                 self.config.datetime_color_mode = Some(mode);
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeColumnStyleMsg::ColorChanged(color) => {
                 self.config.color = Some(color);
                 self.dispatch_config(ctx);
                 true
-            }
+            },
 
             DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(simple) => {
                 self.config._format = DatetimeFormatType::Simple(simple);
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged(custom) => {
                 self.config._format = DatetimeFormatType::Custom(custom);
                 self.dispatch_config(ctx);
                 true
-            }
+            },
         }
     }
 

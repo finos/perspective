@@ -125,19 +125,19 @@ impl Component for StatusBar {
             StatusBarMsg::SetIsUpdating(is_updating) => {
                 self.is_updating = max!(0, self.is_updating + if is_updating { 1 } else { -1 });
                 true
-            }
+            },
             StatusBarMsg::TableStatsChanged => true,
             StatusBarMsg::Reset(all) => {
                 ctx.props().on_reset.emit(all);
                 false
-            }
+            },
             StatusBarMsg::SetThemeConfig((themes, index)) => {
                 let new_theme = index.and_then(|x| themes.get(x)).cloned();
                 let should_render = new_theme != self.theme || self.themes != themes;
                 self.theme = new_theme;
                 self.themes = themes;
                 should_render
-            }
+            },
             StatusBarMsg::SetTheme(theme_name) => {
                 clone!(
                     ctx.props().renderer,
@@ -151,25 +151,25 @@ impl Component for StatusBar {
                 });
 
                 false
-            }
+            },
             StatusBarMsg::Export => {
                 let target = self.export_ref.cast::<HtmlElement>().unwrap();
                 self.export_dropdown
                     .get_or_insert_with(|| ExportDropDownMenuElement::new_from_model(ctx.props()))
                     .open(target);
                 false
-            }
+            },
             StatusBarMsg::Copy => {
                 let target = self.copy_ref.cast::<HtmlElement>().unwrap();
                 self.copy_dropdown
                     .get_or_insert_with(|| CopyDropDownMenuElement::new_from_model(ctx.props()))
                     .open(target);
                 false
-            }
+            },
             StatusBarMsg::SetTitle(title) => {
                 ctx.props().presentation.set_title(title);
                 false
-            }
+            },
         }
     }
 
@@ -215,7 +215,7 @@ impl Component for StatusBar {
                         </span>
                     }
                 }
-            }
+            },
         };
 
         let oninput = ctx.link().callback({

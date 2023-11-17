@@ -91,12 +91,12 @@ impl StringColumnStyle {
                         <ColorSelector ..color_props />
                     </div>
                 }
-            }
+            },
             _ => {
                 html! {
                     <span class="row">{ title }</span>
                 }
-            }
+            },
         }
     }
 }
@@ -129,7 +129,7 @@ impl Component for StringColumnStyle {
             StringColumnStyleMsg::Reset(config) => {
                 self.config = config;
                 true
-            }
+            },
             StringColumnStyleMsg::FormatEnabled(val) => {
                 self.config.format = if val {
                     Some(FormatMode::default())
@@ -139,12 +139,12 @@ impl Component for StringColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             StringColumnStyleMsg::FormatChanged(val) => {
                 self.config.format = Some(val);
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             StringColumnStyleMsg::ColorModeEnabled(enabled) => {
                 if enabled {
                     self.config.string_color_mode = Some(StringColorMode::default());
@@ -155,17 +155,17 @@ impl Component for StringColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             StringColumnStyleMsg::ColorModeChanged(mode) => {
                 self.config.string_color_mode = Some(mode);
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             StringColumnStyleMsg::ColorChanged(color) => {
                 self.config.color = Some(color);
                 self.dispatch_config(ctx);
                 true
-            }
+            },
         }
     }
 

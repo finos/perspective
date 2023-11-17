@@ -42,7 +42,7 @@ const generator = function (length = 100, has_zero = true) {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    expressions: ['("a" - "b") + "b"'],
+                    expressions: { '("a" - "b") + "b"': '("a" - "b") + "b"' },
                 });
                 const result = await view.to_columns();
                 const expected = array_equals(
@@ -58,7 +58,9 @@ const generator = function (length = 100, has_zero = true) {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    expressions: ['("a" + "b") - "a" - "b"'],
+                    expressions: {
+                        '("a" + "b") - "a" - "b"': '("a" + "b") - "a" - "b"',
+                    },
                 });
                 const result = await view.to_columns();
                 const expected = array_equals(
@@ -77,7 +79,10 @@ const generator = function (length = 100, has_zero = true) {
                     const table = await perspective.table(data);
 
                     const view = await table.view({
-                        expressions: ['("a" + "b") - ("a" + "b")'],
+                        expressions: {
+                            '("a" + "b") - ("a" + "b")':
+                                '("a" + "b") - ("a" + "b")',
+                        },
                     });
                     const result = await view.to_columns();
                     const expected = array_equals(
@@ -94,7 +99,7 @@ const generator = function (length = 100, has_zero = true) {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    expressions: ['"a" - "a"'],
+                    expressions: { '"a" - "a"': '"a" - "a"' },
                 });
                 const result = await view.to_columns();
                 const expected = array_equals(
@@ -110,7 +115,7 @@ const generator = function (length = 100, has_zero = true) {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    expressions: ['"a" / "a"'],
+                    expressions: { '"a" / "a"': '"a" / "a"' },
                 });
                 const result = await view.to_columns();
                 const expected = array_equals(
@@ -126,7 +131,9 @@ const generator = function (length = 100, has_zero = true) {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    expressions: ['("a" + "a") - "a" - "a"'],
+                    expressions: {
+                        '("a" + "a") - "a" - "a"': '("a" + "a") - "a" - "a"',
+                    },
                 });
                 const result = await view.to_columns();
                 const expected = array_equals(
@@ -145,7 +152,9 @@ const generator = function (length = 100, has_zero = true) {
                     const table = await perspective.table(data);
 
                     const view = await table.view({
-                        expressions: ['sqrt(pow("a", 2))'],
+                        expressions: {
+                            'sqrt(pow("a", 2))': 'sqrt(pow("a", 2))',
+                        },
                     });
                     const result = await view.to_columns();
                     const expected = array_equals(
@@ -165,7 +174,7 @@ const generator = function (length = 100, has_zero = true) {
             //         const table = await perspective.table(data);
 
             //         const view = await table.view({
-            //             expressions: ['pow("a", 2)', '"a" * "a"'],
+            //             expressions: ['pow("a", 2)', '"a" * "a"'].reduce((x, y) => Object.assign(x, {[y]: y}), {}),
             //         });
             //         const result = await view.to_columns();
             //         const expected = array_equals(
@@ -185,7 +194,9 @@ const generator = function (length = 100, has_zero = true) {
                     const table = await perspective.table(data);
 
                     const view = await table.view({
-                        expressions: ['percent_of("a", "a")'],
+                        expressions: {
+                            'percent_of("a", "a")': 'percent_of("a", "a")',
+                        },
                     });
                     const result = await view.to_columns();
                     const expected = array_equals(
@@ -205,7 +216,7 @@ const generator = function (length = 100, has_zero = true) {
                     const table = await perspective.table(data);
 
                     const view = await table.view({
-                        expressions: ['abs("a")'],
+                        expressions: { 'abs("a")': 'abs("a")' },
                     });
                     const result = await view.to_columns();
                     const expected = array_equals(
@@ -227,7 +238,7 @@ const generator = function (length = 100, has_zero = true) {
                     const table = await perspective.table(data);
 
                     const view = await table.view({
-                        expressions: ['"a" == "a"'],
+                        expressions: { '"a" == "a"': '"a" == "a"' },
                     });
 
                     const result = await view.to_columns();
@@ -248,7 +259,7 @@ const generator = function (length = 100, has_zero = true) {
                     const table = await perspective.table(data);
 
                     const view = await table.view({
-                        expressions: ['"a" > "a"'],
+                        expressions: { '"a" > "a"': '"a" > "a"' },
                     });
 
                     const result = await view.to_columns();
@@ -269,7 +280,7 @@ const generator = function (length = 100, has_zero = true) {
                     const table = await perspective.table(data);
 
                     const view = await table.view({
-                        expressions: ['"a" < "a"'],
+                        expressions: { '"a" < "a"': '"a" < "a"' },
                     });
 
                     const result = await view.to_columns();
@@ -298,7 +309,7 @@ const generator = function (length = 100, has_zero = true) {
                     table.update(data);
 
                     const view = await table.view({
-                        expressions: ['"c" == "c"'],
+                        expressions: { '"c" == "c"': '"c" == "c"' },
                     });
 
                     const result = await view.to_columns();
@@ -327,7 +338,7 @@ const generator = function (length = 100, has_zero = true) {
                     table.update(data);
 
                     const view = await table.view({
-                        expressions: ['"d" == "d"'],
+                        expressions: { '"d" == "d"': '"d" == "d"' },
                     });
 
                     const result = await view.to_columns();
@@ -356,7 +367,7 @@ const generator = function (length = 100, has_zero = true) {
                     table.update(data);
 
                     const view = await table.view({
-                        expressions: ['"d" == "d"'],
+                        expressions: { '"d" == "d"': '"d" == "d"' },
                     });
 
                     const result = await view.to_columns();

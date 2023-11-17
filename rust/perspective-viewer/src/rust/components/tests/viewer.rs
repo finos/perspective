@@ -44,7 +44,7 @@ async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Se
             dragdrop={ dragdrop }
             renderer={ renderer }
             session={ session.clone() }
-            custom_events={events}
+            custom_events={ events }
             presentation={ theme }>
         </PerspectiveViewer>
     };

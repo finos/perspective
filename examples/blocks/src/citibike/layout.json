@@ -34,7 +34,7 @@
             "columns": ["lon", "lat", "num_bikes_available", null, null],
             "filter": [["lon", "!=", 0.0]],
             "sort": [["num_bikes_available", "asc"]],
-            "expressions": [],
+            "expressions": {},
             "aggregates": {}
         },
         "PERSPECTIVE_GENERATED_ID_1": {
@@ -65,9 +65,9 @@
             "columns": ["Available (%)", "name"],
             "filter": [],
             "sort": [["last_reported", "desc"]],
-            "expressions": [
-                "// Available (%)\n\"num_bikes_available\" / \"capacity\""
-            ],
+            "expressions": {
+                "Available (%)": "\"num_bikes_available\" / \"capacity\""
+            },
             "aggregates": {}
         }
     }

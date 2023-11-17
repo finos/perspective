@@ -96,37 +96,37 @@ impl Component for DatetimeStyleCustom {
                 self.config.year = year;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::Month(month) => {
                 self.config.month = month;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::Day(day) => {
                 self.config.day = day;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::Weekday(weekday) => {
                 self.config.weekday = weekday;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::Hour(hour) => {
                 self.config.hour = hour;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::Minute(minute) => {
                 self.config.minute = minute;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::Second(second) => {
                 self.config.second = second;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::FractionalSeconds(fractional) => {
                 let fractional = match fractional.parse::<u32>() {
                     Ok(x) => x,
@@ -137,12 +137,12 @@ impl Component for DatetimeStyleCustom {
                 self.config.fractional_seconds = fractional;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleCustomMsg::Hour12(hour12) => {
                 self.config.hour12 = hour12;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
         }
     }
 

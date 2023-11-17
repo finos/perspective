@@ -40,10 +40,10 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" + 10`],
+                    expressions: { column: `"x" + 10` },
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 let result = await v1.to_columns();
@@ -73,11 +73,11 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
+                    expressions: { column: `upper(concat("y", 'bcd'))` },
                 });
 
                 let result = await v1.to_columns();
@@ -118,12 +118,12 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     filter: [["column", ">", 5]],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
+                    expressions: { column: `upper(concat("y", 'bcd'))` },
                     filter: [["column", "contains", "A"]],
                 });
 
@@ -174,12 +174,12 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     sort: [["column", "desc"]],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
+                    expressions: { column: `upper(concat("y", 'bcd'))` },
                     sort: [["column", "asc"]],
                 });
 
@@ -226,10 +226,10 @@ const expressions_common = require("./common.js");
                 );
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 let result = await v1.to_columns();
@@ -271,11 +271,11 @@ const expressions_common = require("./common.js");
                 );
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     filter: [["column", "==", 8]],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                     filter: [["column", "==", "Z"]],
                 });
 
@@ -312,11 +312,11 @@ const expressions_common = require("./common.js");
                 );
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     sort: [["column", "desc"]],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                     sort: [["column", "desc"]],
                 });
 
@@ -377,10 +377,10 @@ const expressions_common = require("./common.js");
                 );
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 let result = await v1.to_columns();
@@ -411,10 +411,10 @@ const expressions_common = require("./common.js");
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" + 10`],
+                    expressions: { column: `"x" + 10` },
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 let result = await v1.to_columns();
@@ -451,11 +451,11 @@ const expressions_common = require("./common.js");
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
+                    expressions: { column: `upper(concat("y", 'bcd'))` },
                 });
 
                 let result = await v1.to_columns();
@@ -497,12 +497,12 @@ const expressions_common = require("./common.js");
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     filter: [["column", ">", 5]],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
+                    expressions: { column: `upper(concat("y", 'bcd'))` },
                     filter: [["column", "contains", "A"]],
                 });
 
@@ -538,12 +538,12 @@ const expressions_common = require("./common.js");
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     sort: [["column", "desc"]],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
+                    expressions: { column: `upper(concat("y", 'bcd'))` },
                     sort: [["column", "asc"]],
                 });
 
@@ -585,10 +585,10 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 let result = await v1.to_columns();
@@ -626,11 +626,11 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     filter: [["column", "==", 8]],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                     filter: [["column", "==", "B"]],
                 });
 
@@ -664,11 +664,11 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     sort: [["column", "desc"]],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                     sort: [["column", "desc"]],
                 });
 
@@ -726,10 +726,10 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 let result = await v1.to_columns();
@@ -762,11 +762,11 @@ const expressions_common = require("./common.js");
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" + 10`],
+                    expressions: { column: `"x" + 10` },
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 const result = await v1.to_columns();
@@ -833,11 +833,11 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                 });
 
                 const result = await v1.to_columns();
@@ -912,11 +912,11 @@ const expressions_common = require("./common.js");
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`],
+                    expressions: { column: `"x" * 2` },
                     sort: [["column", "desc"]],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`],
+                    expressions: { column: `upper("y")` },
                     sort: [["column", "desc"]],
                 });
 
@@ -998,17 +998,17 @@ const expressions_common = require("./common.js");
 
                 const v1 = await table.view({
                     columns: ["column", "column2"],
-                    expressions: [
-                        `// column \n"x" + 10`,
-                        `// column2 \n concat('a', 'b', 'c')`,
-                    ],
+                    expressions: {
+                        [`column`]: `"x" + 10`,
+                        [`column2`]: `concat('a', 'b', 'c')`,
+                    },
                 });
                 const v2 = await table.view({
                     columns: ["column2", "column"],
-                    expressions: [
-                        `// column \n upper("y")`,
-                        `// column2 \n bucket("z", 'Y')`,
-                    ],
+                    expressions: {
+                        [`column`]: `upper("y")`,
+                        [`column2`]: `bucket("z", 'Y')`,
+                    },
                 });
 
                 expect(await v1.expression_schema()).toEqual({
@@ -1056,17 +1056,17 @@ const expressions_common = require("./common.js");
 
                 const v1 = await table.view({
                     columns: ["column", "column2"],
-                    expressions: [
-                        `// column \n"x" + 10`,
-                        `// column2 \n concat('a', 'b', 'c')`,
-                    ],
+                    expressions: {
+                        [`column`]: `"x" + 10`,
+                        [`column2`]: `concat('a', 'b', 'c')`,
+                    },
                 });
                 const v2 = await table.view({
                     columns: ["column2", "column"],
-                    expressions: [
-                        `// column \n upper("y")`,
-                        `// column2 \n bucket("z", 'Y')`,
-                    ],
+                    expressions: {
+                        [`column`]: `upper("y")`,
+                        [`column2`]: `bucket("z", 'Y')`,
+                    },
                 });
 
                 expect(await v1.expression_schema()).toEqual({
@@ -1125,17 +1125,17 @@ const expressions_common = require("./common.js");
 
                 const v1 = await table.view({
                     columns: ["column", "column2"],
-                    expressions: [
-                        `// column \n"x" + 10`,
-                        `// column2 \n concat('a', 'b', 'c')`,
-                    ],
+                    expressions: {
+                        [`column`]: `"x" + 10`,
+                        [`column2`]: `concat('a', 'b', 'c')`,
+                    },
                 });
                 const v2 = await table.view({
                     columns: ["column2", "column"],
-                    expressions: [
-                        `// column \n upper("y")`,
-                        `// column2 \n bucket("z", 'Y')`,
-                    ],
+                    expressions: {
+                        [`column`]: `upper("y")`,
+                        [`column2`]: `bucket("z", 'Y')`,
+                    },
                 });
 
                 expect(await v1.expression_schema()).toEqual({
@@ -1188,17 +1188,17 @@ const expressions_common = require("./common.js");
 
             const v1 = await table.view({
                 columns: ["column", "column2"],
-                expressions: [
-                    `// column \n"x" + 10`,
-                    `// column2 \n concat('a', 'b', 'c')`,
-                ],
+                expressions: {
+                    [`column`]: `"x" + 10`,
+                    [`column2`]: `concat('a', 'b', 'c')`,
+                },
             });
             const v2 = await table.view({
                 columns: ["column2", "column"],
-                expressions: [
-                    `// column \n upper("y")`,
-                    `// column2 \n bucket("z", 'Y')`,
-                ],
+                expressions: {
+                    [`column`]: `upper("y")`,
+                    [`column2`]: `bucket("z", 'Y')`,
+                },
             });
 
             expect(await v1.expression_schema()).toEqual({
@@ -1228,10 +1228,10 @@ const expressions_common = require("./common.js");
             const table = await perspective.table(expressions_common.data);
 
             const v1 = await table.view({
-                expressions: [`// column \n"x" + 10`],
+                expressions: { column: `"x" + 10` },
             });
             const v2 = await table.view({
-                expressions: [`// column \n upper("y")`],
+                expressions: { column: `upper("y")` },
             });
 
             let result = await v1.to_columns();
@@ -1265,11 +1265,11 @@ const expressions_common = require("./common.js");
             const table = await perspective.table(expressions_common.data);
 
             const v1 = await table.view({
-                expressions: [`// column \n"x" + 10`],
+                expressions: { column: `"x" + 10` },
                 filter: [["column", "==", 12]],
             });
             const v2 = await table.view({
-                expressions: [`// column \n upper("y")`],
+                expressions: { column: `upper("y")` },
                 filter: [["column", "==", "D"]],
             });
 
@@ -1290,12 +1290,12 @@ const expressions_common = require("./common.js");
             const v1 = await table.view({
                 group_by: ["y"],
                 split_by: ["x"],
-                expressions: [`// column \n"x" + 10`],
+                expressions: { column: `"x" + 10` },
             });
             const v2 = await table.view({
                 group_by: ["x"],
                 split_by: ["y"],
-                expressions: [`// column \n upper("y")`],
+                expressions: { column: `upper("y")` },
                 aggregates: {
                     column: "last",
                 },
@@ -1328,7 +1328,7 @@ const expressions_common = require("./common.js");
 
             const v1 = await table.view({
                 group_by: ["x"],
-                expressions: [`// column \n"z" + 10`],
+                expressions: { column: `"z" + 10` },
                 aggregates: {
                     column: "avg",
                 },
@@ -1336,7 +1336,7 @@ const expressions_common = require("./common.js");
 
             const v2 = await table.view({
                 group_by: ["x"],
-                expressions: [`// column \n upper("y")`],
+                expressions: { column: `upper("y")` },
                 aggregates: {
                     column: "last",
                 },
@@ -1344,7 +1344,7 @@ const expressions_common = require("./common.js");
 
             const v3 = await table.view({
                 group_by: ["x"],
-                expressions: [`// column \n 2 * "z"`],
+                expressions: { column: `2 * "z"` },
                 aggregates: {
                     column: ["weighted mean", "z"],
                 },
@@ -1374,7 +1374,7 @@ const expressions_common = require("./common.js");
             const v1 = await table.view({
                 group_by: ["x"],
                 split_by: ["y"],
-                expressions: [`// column \n"z" + 10`],
+                expressions: { column: `"z" + 10` },
                 aggregates: {
                     column: "avg",
                 },
@@ -1383,7 +1383,7 @@ const expressions_common = require("./common.js");
             const v2 = await table.view({
                 group_by: ["x"],
                 split_by: ["y"],
-                expressions: [`// column \n upper("y")`],
+                expressions: { column: `upper("y")` },
                 aggregates: {
                     column: "last",
                 },
@@ -1392,7 +1392,7 @@ const expressions_common = require("./common.js");
             const v3 = await table.view({
                 group_by: ["x"],
                 split_by: ["y"],
-                expressions: [`// column \n 2 * "z"`],
+                expressions: { column: `2 * "z"` },
                 aggregates: {
                     column: ["weighted mean", "z"],
                 },

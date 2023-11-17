@@ -29,10 +29,10 @@ export const LAYOUTS = {
         columns: ["chg (-)", "chg", "chg (+)"],
         filter: [],
         sort: [["chg", "desc"]],
-        expressions: [
-            '//chg (-)\nif("chg"<0){"chg"}else{0}',
-            '//chg (+)\nif("chg">0){"chg"}else{0}',
-        ],
+        expressions: {
+            "chg (-)": 'if("chg"<0){"chg"}else{0}',
+            "chg (+)": 'if("chg">0){"chg"}else{0}',
+        },
         aggregates: { "chg (+)": "avg", chg: "avg", "chg (-)": "avg" },
     },
     datagrid: {
@@ -91,7 +91,10 @@ export const LAYOUTS = {
         title: "Spread Heatmap",
         columns: ["name"],
         plugin: "Heatmap",
-        expressions: [`bucket("bid",2)`, `bucket("ask",2)`],
+        expressions: {
+            'bucket("bid",2)': 'bucket("bid",2)',
+            'bucket("ask",2)': `bucket("ask",2)`,
+        },
         group_by: [`bucket("bid",2)`],
         split_by: [`bucket("ask",2)`],
         sort: [],

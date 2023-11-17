@@ -103,13 +103,13 @@ impl FilterColumnProps {
                 } else {
                     None
                 }
-            }
+            },
             (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x) | Scalar::DateTime(x))) => {
                 posix_to_utc_str(*x).ok()
-            }
+            },
             (Type::Bool, FilterTerm::Scalar(Scalar::Bool(x))) => {
                 Some((if *x { "true" } else { "false" }).to_owned())
-            }
+            },
             (Type::Bool, _) => Some("true".to_owned()),
             (_, x) => Some(format!("{}", x)),
         }
@@ -135,7 +135,7 @@ impl FilterColumnProps {
             ],
             Some(Type::Bool) => {
                 vec![FilterOp::EQ, FilterOp::IsNull, FilterOp::IsNotNull]
-            }
+            },
             Some(_) => vec![
                 FilterOp::EQ,
                 FilterOp::NE,
@@ -189,7 +189,7 @@ impl FilterColumnProps {
                     } else {
                         None
                     }
-                }
+                },
                 Some(Type::Float) => {
                     if val.is_empty() {
                         None
@@ -198,7 +198,7 @@ impl FilterColumnProps {
                     } else {
                         None
                     }
-                }
+                },
                 Some(Type::Date) => match NaiveDate::parse_from_str(&val, "%Y-%m-%d") {
                     Ok(ref posix) => posix
                         .and_hms_opt(0, 0, 0)
@@ -283,42 +283,42 @@ impl Component for FilterColumn {
 
                 ctx.props().update_filter_input(input);
                 false
-            }
+            },
             FilterColumnMsg::FilterKeyDown(40) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.item_down();
                     ctx.props().filter_dropdown.item_select();
                 }
                 false
-            }
+            },
             FilterColumnMsg::FilterKeyDown(38) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.item_up();
                     ctx.props().filter_dropdown.item_select();
                 }
                 false
-            }
+            },
             FilterColumnMsg::Close => {
                 ctx.props().filter_dropdown.hide().unwrap();
                 false
-            }
+            },
             FilterColumnMsg::FilterKeyDown(13) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.item_select();
                     ctx.props().filter_dropdown.hide().unwrap();
                 }
                 false
-            }
+            },
             FilterColumnMsg::FilterKeyDown(_) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.reautocomplete();
                 }
                 false
-            }
+            },
             FilterColumnMsg::FilterOpSelect(op) => {
                 ctx.props().update_filter_op(op);
                 true
-            }
+            },
         }
     }
 
@@ -457,10 +457,10 @@ impl Component for FilterColumn {
                         checked={ self.input == "true" }
                         oninput={ input }/>
                 }
-            }
+            },
             None => {
                 html! {}
-            }
+            },
         };
 
         let filter_ops = ctx

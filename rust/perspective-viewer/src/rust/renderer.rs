@@ -320,7 +320,7 @@ impl Renderer {
             Err(cont) => {
                 tracing::warn!("Presize took longer than {}ms", PRESIZE_TIMEOUT);
                 cont.await.unwrap()
-            }
+            },
         }
     }
 

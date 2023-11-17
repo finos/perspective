@@ -90,10 +90,10 @@ window.addEventListener("DOMContentLoaded", async function () {
         columns: ["(-)chg", "chg", "(+)chg"],
         filter: [],
         sort: [["chg", "desc"]],
-        expressions: [
-            '//(-)chg\nif("chg"<0){"chg"}else{0}',
-            '//(+)chg\nif("chg">0){"chg"}else{0}',
-        ],
+        expressions: {
+            "(-)chg": 'if("chg"<0){"chg"}else{0}',
+            "(+)chg": 'if("chg">0){"chg"}else{0}',
+        },
         aggregates: { "(-)chg": "avg", chg: "avg", "(+)chg": "avg" },
     });
 

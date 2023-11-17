@@ -118,7 +118,7 @@ impl Component for ExportDropDownMenu {
 
                 self.invalid = self.title.is_empty();
                 true
-            }
+            },
         }
     }
 

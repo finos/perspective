@@ -187,7 +187,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ["1 + 2", "// abc \n3 + 4"],
+                expressions: { "1 + 2": "1 + 2", abc: "3 + 4" },
             });
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
@@ -202,7 +202,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ["// 4 + 5 \n3 + 4"],
+                expressions: { "4 + 5": "3 + 4" },
             });
         });
 
@@ -229,7 +229,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ["3 + 4"],
+                expressions: { "3 + 4": "3 + 4" },
             });
         });
 
@@ -259,7 +259,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ["3 + 4", "1 + 2"],
+                expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
             await elem.reset(true);
         });
@@ -284,7 +284,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ["3 + 4", "1 + 2"],
+                expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
             await elem.reset(false);
         });
@@ -307,7 +307,7 @@ test.describe("Expressions", () => {
             await elem.toggleConfig(true);
             await elem.restore({
                 columns: ["1 + 2"],
-                expressions: ["3 + 4", "1 + 2"],
+                expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
             await elem.reset(true);
         });
@@ -333,7 +333,7 @@ test.describe("Expressions", () => {
             await elem.toggleConfig(true);
             await elem.restore({
                 columns: ["1 + 2"],
-                expressions: ["3 + 4", "1 + 2"],
+                expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
             await elem.reset(false);
         });
@@ -359,7 +359,7 @@ test.describe("Expressions", () => {
                 group_by: ["3 + 4"],
                 sort: [["1 + 2", "asc"]],
                 filter: [["1 + 2", "==", 3]],
-                expressions: ["3 + 4", "1 + 2"],
+                expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
             await elem.reset(true);
         });
@@ -384,7 +384,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ["3 + 4", "1 + 2"],
+                expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
             await elem.restore({
                 columns: ["State"],
@@ -432,7 +432,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ["3 + 4", "1 + 2"],
+                expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
             await elem.restore({
                 columns: ["3 + 4"],
@@ -454,7 +454,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ['"Sales" + 100'],
+                expressions: { '"Sales" + 100': '"Sales" + 100' },
                 aggregates: { '"Sales" + 100': "avg" },
                 group_by: ["State"],
                 columns: ['"Sales" + 100'],
@@ -476,7 +476,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ['"Sales" + 100'],
+                expressions: { '"Sales" + 100': '"Sales" + 100' },
                 sort: [['"Sales" + 100', "asc"]],
                 columns: ["Row ID"],
             });
@@ -497,7 +497,7 @@ test.describe("Expressions", () => {
             const elem = document.querySelector("perspective-viewer");
             await elem.toggleConfig(true);
             await elem.restore({
-                expressions: ['"Sales" + 100'],
+                expressions: { '"Sales" + 100': '"Sales" + 100' },
                 filter: [['"Sales" + 100', ">", 150]],
                 columns: ["Row ID", '"Sales" + 100'],
             });

@@ -31,7 +31,7 @@ type BlurHandlerType = Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>;
 /// positioned next to any existing on-page elements, accounting for viewport,
 /// scroll position, etc.
 ///
-///`#[derive(Clone)]` generates the trait bound `T: Clone`, which is not
+/// `#[derive(Clone)]` generates the trait bound `T: Clone`, which is not
 /// required because `Scope<T>` implements Clone without this bound;  thus
 /// `Clone` must be implemented by the `derivative` crate's
 /// [custom bounds](https://mcarton.github.io/rust-derivative/latest/Debug.html#custom-bound)
@@ -114,7 +114,7 @@ fn calc_relative_position(
             } else {
                 ModalAnchor::BottomLeftTopLeft
             }
-        }
+        },
         (true, false, false, _) => ModalAnchor::BottomLeftTopLeft,
         (false, true, true, _) => ModalAnchor::TopRightTopLeft,
         (false, true, false, _) => {
@@ -123,7 +123,7 @@ fn calc_relative_position(
             } else {
                 ModalAnchor::TopLeftBottomLeft
             }
-        }
+        },
         _ => ModalAnchor::TopLeftBottomLeft,
     }
 }
@@ -185,10 +185,10 @@ where
             ModalAnchor::BottomRightTopLeft => (top - rect_height, left - rect_width + 1.0),
             ModalAnchor::BottomRightBottomLeft => {
                 (top - rect_height + height, left - rect_width + 1.0)
-            }
+            },
             ModalAnchor::BottomRightTopRight => {
                 (top - rect_height + 1.0, left + width - rect_width)
-            }
+            },
             ModalAnchor::BottomLeftTopLeft => (top - rect_height + 1.0, left),
             ModalAnchor::TopRightTopLeft => (top, left - rect_width + 1.0),
             ModalAnchor::TopRightBottomRight => (top + height - 1.0, left + width - rect_width),

@@ -54,6 +54,7 @@ pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
             ColumnLocator::Expr(Some(ref s)) => delete_expr(s, p),
             _ => panic!("Tried to delete an invalid column!"),
         }
+
         p.on_close.emit(());
     });
 
@@ -63,10 +64,9 @@ pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
                 { on_save }
                 { on_validate }
                 { on_delete }
-                session = { &p.session }
-                old_alias = { p.selected_column.name().cloned() }
-                disabled = {!matches!(p.selected_column, ColumnLocator::Expr(_))}
-            />
+                session={ &p.session }
+                old_alias={ p.selected_column.name().cloned() }
+                disabled={ !matches!(p.selected_column, ColumnLocator::Expr(_)) }/>
         </div>
     }
 }

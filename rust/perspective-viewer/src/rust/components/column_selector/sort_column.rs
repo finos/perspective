@@ -76,7 +76,7 @@ impl Component for SortColumn {
                 };
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 false
-            }
+            },
         }
     }
 

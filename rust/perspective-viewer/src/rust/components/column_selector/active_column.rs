@@ -105,10 +105,10 @@ impl ActiveColumnProps {
                     columns.clear();
                     columns.push(Some(name));
                 }
-            }
+            },
             ColumnSelectMode::Select => {
                 columns.retain(|x| x.as_ref() != Some(&name));
-            }
+            },
         }
         self.apply_columns(columns);
     }
@@ -179,15 +179,15 @@ impl Component for ActiveColumn {
                 ctx.props().deactivate_column(column, shift_key);
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             MouseEnter(is_render) => {
                 self.mouseover = is_render;
                 is_render
-            }
+            },
             MouseLeave(is_render) => {
                 self.mouseover = false;
                 is_render
-            }
+            },
             New(InPlaceColumn::Column(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 if ctx.props().idx >= view_config.columns.len() {
@@ -203,7 +203,7 @@ impl Component for ActiveColumn {
 
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 true
-            }
+            },
             New(InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 if ctx.props().idx >= view_config.columns.len() {
@@ -221,7 +221,7 @@ impl Component for ActiveColumn {
 
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 true
-            }
+            },
         }
     }
 
@@ -246,7 +246,7 @@ impl Component for ActiveColumn {
                     label.clone(),
                     Some(ctx.props().dragdrop.get_drag_column().unwrap()),
                 )
-            }
+            },
             ActiveColumnState::Column(label, name) => (label.clone(), Some(name.to_owned())),
             ActiveColumnState::Required(label) => (label.clone(), None),
         };
@@ -287,7 +287,7 @@ impl Component for ActiveColumn {
                         <EmptyColumn { column_dropdown }  { exclude } { on_select } />
                     </div>
                 }
-            }
+            },
             ((label, Some(name)), Some(col_type)) => {
                 let remove_column = if self.is_required {
                     None
@@ -389,7 +389,7 @@ impl Component for ActiveColumn {
                         </div>
                     </div>
                 }
-            }
+            },
             _ => {
                 // Expression columns are the only UI element which requires the
                 // `View` (for its expression type), we may need to stub these
@@ -402,7 +402,7 @@ impl Component for ActiveColumn {
                         <div class={ classes }></div>
                     </div>
                 }
-            }
+            },
         }
     }
 }

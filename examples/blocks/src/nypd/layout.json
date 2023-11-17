@@ -60,7 +60,7 @@
                 ],
                 "filter": [],
                 "sort": [],
-                "expressions": [],
+                "expressions": {},
                 "aggregates": {},
                 "master": false,
                 "table": "ccrb",
@@ -89,7 +89,9 @@
                 "columns": ["ComplaintID"],
                 "filter": [["IncidentDate", ">", 473385600000]],
                 "sort": [],
-                "expressions": ["bucket(\"IncidentDate\", 'M')"],
+                "expressions": {
+                    "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
+                },
                 "aggregates": { "ComplaintID": "distinct count" },
                 "master": false,
                 "table": "ccrb",
@@ -130,7 +132,9 @@
                 "columns": ["AllegationID"],
                 "filter": [["IncidentDate", ">", 473385600000]],
                 "sort": [["AllegationID", "col asc"]],
-                "expressions": ["bucket(\"IncidentDate\", 'M')"],
+                "expressions": {
+                    "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
+                },
                 "aggregates": { "AllegationID": "distinct count" },
                 "master": false,
                 "table": "ccrb",
@@ -146,7 +150,9 @@
                 "columns": ["AllegationID"],
                 "filter": [["IncidentDate", ">", 473385600000]],
                 "sort": [["AllegationID", "col asc"]],
-                "expressions": ["bucket(\"IncidentDate\", 'M')"],
+                "expressions": {
+                    "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
+                },
                 "aggregates": { "AllegationID": "distinct count" },
                 "master": false,
                 "table": "ccrb",
@@ -187,7 +193,7 @@
                 "columns": ["ShieldNo", "ComplaintID", null, null, null, null],
                 "filter": [["Status", "==", "Active"]],
                 "sort": [],
-                "expressions": [],
+                "expressions": {},
                 "aggregates": {
                     "ShieldNo": "distinct count",
                     "ComplaintID": "distinct count"
@@ -206,7 +212,7 @@
                 "columns": ["ShieldNo", "ComplaintID", null, null, null, null],
                 "filter": [["Status", "==", "Retired"]],
                 "sort": [],
-                "expressions": [],
+                "expressions": {},
                 "aggregates": {
                     "ShieldNo": "distinct count",
                     "ComplaintID": "distinct count"
@@ -243,7 +249,7 @@
                 "columns": ["ComplaintID"],
                 "filter": [],
                 "sort": [["ComplaintID", "desc"]],
-                "expressions": [],
+                "expressions": {},
                 "aggregates": { "ComplaintID": "distinct count" },
                 "master": true,
                 "table": "ccrb",
@@ -260,7 +266,9 @@
                 "columns": ["ComplaintID"],
                 "filter": [["IncidentDate", ">", 473385600000]],
                 "sort": [],
-                "expressions": ["bucket(\"IncidentDate\", 'M')"],
+                "expressions": {
+                    "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
+                },
                 "aggregates": { "ComplaintID": "distinct count" },
                 "master": false,
                 "table": "ccrb",
@@ -295,7 +303,9 @@
                 "columns": ["AllegationID"],
                 "filter": [["IncidentDate", ">", 473385600000]],
                 "sort": [["IncidentDate", "col asc"]],
-                "expressions": ["bucket(\"IncidentDate\", '3M')"],
+                "expressions": {
+                    "bucket(\"IncidentDate\", '3M')": "bucket(\"IncidentDate\", '3M')"
+                },
                 "aggregates": {
                     "IncidentDate": "median",
                     "AllegationID": "distinct count"
@@ -344,7 +354,7 @@
                 "columns": ["ComplaintID"],
                 "filter": [],
                 "sort": [["ComplaintID", "desc"]],
-                "expressions": [],
+                "expressions": {},
                 "aggregates": { "ComplaintID": "distinct count" },
                 "master": true,
                 "table": "ccrb",
@@ -361,10 +371,10 @@
                 "columns": ["ComplaintID"],
                 "filter": [["IncidentDate", ">", 473385600000]],
                 "sort": [],
-                "expressions": [
-                    "bucket(\"IncidentDate\", 'Y')",
-                    "month_of_year(\"IncidentDate\")"
-                ],
+                "expressions": {
+                    "bucket(\"IncidentDate\", 'Y')": "bucket(\"IncidentDate\", 'Y')",
+                    "month_of_year(\"IncidentDate\")": "month_of_year(\"IncidentDate\")"
+                },
                 "aggregates": { "ComplaintID": "distinct count" },
                 "master": false,
                 "table": "ccrb",
@@ -380,11 +390,11 @@
                 "columns": ["ComplaintID"],
                 "filter": [["IncidentDate", ">", 473385600000]],
                 "sort": [],
-                "expressions": [
-                    "bucket(\"IncidentDate\", 'Y')",
-                    "month_of_year(\"IncidentDate\")",
-                    "day_of_week(\"IncidentDate\")"
-                ],
+                "expressions": {
+                    "bucket(\"IncidentDate\", 'Y')": "bucket(\"IncidentDate\", 'Y')",
+                    "month_of_year(\"IncidentDate\")": "month_of_year(\"IncidentDate\")",
+                    "day_of_week(\"IncidentDate\")": "day_of_week(\"IncidentDate\")"
+                },
                 "aggregates": { "ComplaintID": "distinct count" },
                 "master": false,
                 "table": "ccrb",

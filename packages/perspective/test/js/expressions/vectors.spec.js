@@ -25,7 +25,7 @@ const common = require("./common.js");
         test("Create vector and return value", async () => {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: [`// a\nvar vec[3] := {1, "w", 2}; vec[1]`],
+                expressions: { a: `var vec[3] := {1, "w", 2}; vec[1]` },
             });
             expect(await view.expression_schema()).toEqual({
                 a: "float",
@@ -39,7 +39,7 @@ const common = require("./common.js");
         test("Return from empty vector should be 0", async () => {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: [`// a\nvar vec[3]; vec[1]`],
+                expressions: { a: `var vec[3]; vec[1]` },
             });
             expect(await view.expression_schema()).toEqual({
                 a: "float",
@@ -53,12 +53,12 @@ const common = require("./common.js");
         test("Dynamic return types from vector", async () => {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: [
-                    `// a\nvar vec[3] := {'abc', 123, today()}; vec[0]`,
-                    `// b\nvar vec[3] := {'abc', 123, today()}; vec[1]`,
-                    `// c\nvar vec[3] := {'abc', 123, date(2020, 5, 23)}; vec[2]`,
-                    `// d\nvar vec[3] := {'abc', 123, is_null(null)}; vec[2]`,
-                ],
+                expressions: {
+                    [`a`]: `var vec[3] := {'abc', 123, today()}; vec[0]`,
+                    [`b`]: `var vec[3] := {'abc', 123, today()}; vec[1]`,
+                    [`c`]: `var vec[3] := {'abc', 123, date(2020, 5, 23)}; vec[2]`,
+                    [`d`]: `var vec[3] := {'abc', 123, is_null(null)}; vec[2]`,
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -83,9 +83,9 @@ const common = require("./common.js");
         test("Use vector items as inputs", async () => {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: [
-                    `// a\nvar vec[2] := {"w", "x"}; vec[0] * vec[1]`,
-                ],
+                expressions: {
+                    [`a`]: `var vec[2] := {"w", "x"}; vec[0] * vec[1]`,
+                },
             });
             expect(await view.expression_schema()).toEqual({
                 a: "float",
@@ -101,9 +101,9 @@ const common = require("./common.js");
         test("Custom function takes vector item input", async () => {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: [
-                    `// a\nvar vec[2] := {"w", "x"}; max(vec[0], vec[1])`,
-                ],
+                expressions: {
+                    [`a`]: `var vec[2] := {"w", "x"}; max(vec[0], vec[1])`,
+                },
             });
             expect(await view.expression_schema()).toEqual({
                 a: "float",

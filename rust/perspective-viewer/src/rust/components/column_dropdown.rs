@@ -66,30 +66,30 @@ impl Component for ColumnDropDown {
             ColumnDropDownMsg::SetCallback(callback) => {
                 self.on_select = Some(callback);
                 false
-            }
+            },
             ColumnDropDownMsg::SetValues(values, width) => {
                 self.values = Some(values);
                 self.selected = 0;
                 self.width = width;
                 true
-            }
+            },
             ColumnDropDownMsg::ItemSelect => {
                 if let Some(ref values) = self.values {
                     match values.get(self.selected) {
                         None => {
                             console::error_1(&"Selected out-of-bounds".into());
                             false
-                        }
+                        },
                         Some(x) => {
                             self.on_select.as_ref().unwrap().emit(x.clone());
                             false
-                        }
+                        },
                     }
                 } else {
                     console::error_1(&"No Values".into());
                     false
                 }
-            }
+            },
             ColumnDropDownMsg::ItemDown => {
                 self.selected += 1;
                 if let Some(ref values) = self.values {
@@ -99,7 +99,7 @@ impl Component for ColumnDropDown {
                 };
 
                 true
-            }
+            },
             ColumnDropDownMsg::ItemUp => {
                 if let Some(ref values) = self.values {
                     if self.selected < 1 {
@@ -109,7 +109,7 @@ impl Component for ColumnDropDown {
 
                 self.selected -= 1;
                 true
-            }
+            },
         }
     }
 

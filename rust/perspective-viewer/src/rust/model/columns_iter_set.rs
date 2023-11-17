@@ -30,7 +30,6 @@ pub enum ActiveColumnState {
 }
 
 impl ActiveColumnState {
-
     pub fn get_name(&self) -> Option<&'_ str> {
         match self {
             Self::Column(_, x) => Some(x.as_str()),
@@ -124,7 +123,7 @@ impl<'a> ColumnsIteratorSet<'a> {
                             } else {
                                 Some(to_column.unwrap_or(&None))
                             }
-                        }
+                        },
                         x => Some(x),
                     });
 
@@ -151,7 +150,7 @@ impl<'a> ColumnsIteratorSet<'a> {
                             } else {
                                 Some(&None)
                             }
-                        }
+                        },
                         x => Some(x),
                     });
 
@@ -166,7 +165,7 @@ impl<'a> ColumnsIteratorSet<'a> {
                         before_cols.chain(std::iter::once(None)).chain(after_cols),
                     ))
                 }
-            }
+            },
             _ => {
                 let iter = self.config.columns.iter().map(Some);
                 self.to_active_column_state(if has_blank_tail {
@@ -174,7 +173,7 @@ impl<'a> ColumnsIteratorSet<'a> {
                 } else {
                     Box::new(iter.chain(std::iter::once(Some(&None))))
                 })
-            }
+            },
         }
     }
 

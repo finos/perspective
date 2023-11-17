@@ -45,7 +45,7 @@ const pivot_data = [
                     "10 + 20",
                     "lower('ABC')",
                     "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             const before = await view.to_columns();
             expect(before["10 + 20"]).toEqual([30, 30, 30, 30]);
@@ -106,7 +106,7 @@ const pivot_data = [
                 expressions: [
                     'if ("x" > 4) 10; else 100',
                     `"y" == 'A' ? true : false`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([
@@ -152,7 +152,7 @@ const pivot_data = [
                     "10 + 20",
                     "lower('ABC')",
                     "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const before = await view.to_columns();
@@ -200,12 +200,12 @@ const pivot_data = [
                 y: ["A", "B", "C", "D"],
             });
             const view = await table.view({
-                expressions: [
-                    "123",
-                    '//c0\n10 + "x"',
-                    '//c1\nlower("y")',
-                    `//c2\nconcat("y", ' ', 'abcd')`,
-                ],
+                expressions: {
+                    123: "123",
+                    c0: '10 + "x"',
+                    c1: 'lower("y")',
+                    c2: `concat("y", ' ', 'abcd')`,
+                },
             });
 
             const before = await view.to_columns();
@@ -305,7 +305,7 @@ const pivot_data = [
                 expressions: [
                     'if ("x" > 4) 10; else 100',
                     `"z" == 'a' ? true : false`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([
@@ -343,7 +343,7 @@ const pivot_data = [
                 y: ["A", "B", "C", "D"],
             });
             const view = await table.view({
-                expressions: ['lower("y")'],
+                expressions: { 'lower("y")': 'lower("y")' },
             });
 
             const before = await view.to_columns();
@@ -369,7 +369,7 @@ const pivot_data = [
                 y: ["A", "B", "C", "D"],
             });
             const view = await table.view({
-                expressions: ['lower("y")'],
+                expressions: { 'lower("y")': 'lower("y")' },
             });
 
             const before = await view.to_columns();
@@ -412,7 +412,9 @@ const pivot_data = [
                 z: [2, 4, 6, 8],
             });
             const view = await table.view({
-                expressions: ['"x" + ("y" + 5.5) / "z"'],
+                expressions: {
+                    '"x" + ("y" + 5.5) / "z"': '"x" + ("y" + 5.5) / "z"',
+                },
             });
 
             const before = await view.to_columns();
@@ -443,7 +445,7 @@ const pivot_data = [
                 { index: "x" }
             );
             const view = await table.view({
-                expressions: ['lower("y")'],
+                expressions: { 'lower("y")': 'lower("y")' },
             });
 
             const before = await view.to_columns();
@@ -463,7 +465,7 @@ const pivot_data = [
                 z: ["a", "b", "c", "d"],
             });
             const view = await table.view({
-                expressions: ['upper("z")'],
+                expressions: { 'upper("z")': 'upper("z")' },
             });
             const before = await view.to_columns();
             expect(before['upper("z")']).toEqual(["A", "B", "C", "D"]);
@@ -489,7 +491,7 @@ const pivot_data = [
             });
             const view = await table.view({
                 group_by: ['lower("y")'],
-                expressions: ['lower("y")'],
+                expressions: { 'lower("y")': 'lower("y")' },
             });
 
             const before = await view.to_columns();
@@ -516,7 +518,7 @@ const pivot_data = [
         test("Dependent column appends should notify expression columns, arity 2", async function () {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const before = await view.to_columns();
             expect(before['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -536,7 +538,10 @@ const pivot_data = [
                 index: "x",
             });
             const view = await table.view({
-                expressions: ['"w" + "x"', 'upper("y")'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    'upper("y")': 'upper("y")',
+                },
             });
             let before = await view.to_columns();
             expect(before['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -558,11 +563,11 @@ const pivot_data = [
         test("Dependent column appends should notify expression columns on different views, arity 2", async function () {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"w" - "x"'],
+                expressions: { '"w" - "x"': '"w" - "x"' },
             });
 
             const before = await view.to_columns();
@@ -586,11 +591,14 @@ const pivot_data = [
         test("Dependent column appends should notify equivalent expression columns on different views, arity 2", async function () {
             const table = await perspective.table(common.int_float_data);
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"w" + "x"', '"w" - "x"'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    '"w" - "x"': '"w" - "x"',
+                },
             });
 
             const before = await view.to_columns();
@@ -620,11 +628,11 @@ const pivot_data = [
                 index: "x",
             });
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"w" - "x"'],
+                expressions: { '"w" - "x"': '"w" - "x"' },
             });
 
             const before = await view.to_columns();
@@ -648,11 +656,14 @@ const pivot_data = [
                 index: "x",
             });
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"w" + "x"', '"w" - "x"'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    '"w" - "x"': '"w" - "x"',
+                },
             });
 
             const before = await view.to_columns();
@@ -678,11 +689,11 @@ const pivot_data = [
                 index: "x",
             });
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"w" - "x"'],
+                expressions: { '"w" - "x"': '"w" - "x"' },
             });
 
             const before = await view.to_columns();
@@ -706,11 +717,14 @@ const pivot_data = [
                 index: "x",
             });
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"w" + "x"', '"w" - "x"'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    '"w" - "x"': '"w" - "x"',
+                },
             });
 
             const before = await view.to_columns();
@@ -740,19 +754,17 @@ const pivot_data = [
                 },
                 { index: "x" }
             );
+
             const view = await table.view({
-                expressions: ['"w" + "y"'],
+                expressions: { '"w" + "y"': '"w" + "y"' },
             });
+
             let before = await view.to_columns();
             expect(before['"w" + "y"']).toEqual([6.5, 8.5, 10.5, 12.5]);
-
             table.update({ x: [2, 4], w: [null, 12.5] });
-
             const after = await view.to_columns();
             expect(after['"w" + "y"']).toEqual([6.5, null, 10.5, 20.5]);
-
             table.update({ x: [2, 3], w: [20.5, null] });
-
             const after2 = await view.to_columns();
             expect(after2['"w" + "y"']).toEqual([6.5, 26.5, null, 20.5]);
             view.delete();
@@ -769,7 +781,7 @@ const pivot_data = [
                 { index: "x" }
             );
             const view = await table.view({
-                expressions: ['"w" + "y"'],
+                expressions: { '"w" + "y"': '"w" + "y"' },
             });
             let before = await view.to_columns();
             expect(before['"w" + "y"']).toEqual([6.5, 8.5, 10.5, 12.5]);
@@ -797,7 +809,7 @@ const pivot_data = [
             const table = await perspective.table(meta, { index: "y" });
             const view = await table.view({
                 columns: ["y", '"w" / "x"'],
-                expressions: ['"w" / "x"'],
+                expressions: { '"w" / "x"': '"w" / "x"' },
             });
 
             table.update(common.int_float_data);
@@ -827,7 +839,7 @@ const pivot_data = [
                 y: "integer",
             });
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
             table.update(data);
@@ -850,7 +862,7 @@ const pivot_data = [
         test("Partial update without a new value shouldn't change computed output", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
             const json = await view.to_json();
@@ -871,7 +883,7 @@ const pivot_data = [
         test("partial update on single computed source column", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
             table.update([{ __INDEX__: 0, x: 10 }]);
@@ -889,7 +901,7 @@ const pivot_data = [
         test("partial update on non-contiguous computed source columns", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
             table.update([
                 { __INDEX__: 0, x: 1, y: 10 },
@@ -909,7 +921,7 @@ const pivot_data = [
         test("partial update on non-contiguous computed source columns, indexed table", async function () {
             const table = await perspective.table(data, { index: "x" });
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
             table.update([
                 { x: 1, y: 10 },
@@ -945,7 +957,7 @@ const pivot_data = [
             });
 
             const view = await table.view({
-                expressions: ['// computed\n"a" + "b"'],
+                expressions: { computed: '"a" + "b"' },
             });
 
             let result = await view.to_columns();
@@ -982,7 +994,7 @@ const pivot_data = [
         test("multiple partial update on single computed source column", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
             table.update([
@@ -1012,10 +1024,10 @@ const pivot_data = [
         test("multiple expression columns with updates on source columns", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
             const view2 = await table.view({
-                expressions: ['"x" + "y"'],
+                expressions: { '"x" + "y"': '"x" + "y"' },
             });
 
             table.update([
@@ -1047,15 +1059,15 @@ const pivot_data = [
             const table = await perspective.table(data, { index: "x" });
 
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"x" + "y"'],
+                expressions: { '"x" + "y"': '"x" + "y"' },
             });
 
             const view3 = await table.view({
-                expressions: ['"x" - "y"'],
+                expressions: { '"x" - "y"': '"x" - "y"' },
             });
 
             table.update({ x: [1, 2, 3, 4], y: [1, 2, 3, 4] });
@@ -1092,15 +1104,15 @@ const pivot_data = [
             const table = await perspective.table(data);
 
             const view = await table.view({
-                expressions: ['"x" * "y"'],
+                expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"x" + "y"'],
+                expressions: { '"x" + "y"': '"x" + "y"' },
             });
 
             const view3 = await table.view({
-                expressions: ['"x" - "y"'],
+                expressions: { '"x" - "y"': '"x" - "y"' },
             });
 
             table.update({ x: [1, 2, 3, 4], y: [1, 2, 3, 4] });
@@ -1143,7 +1155,7 @@ const pivot_data = [
                     '"int" + "float"': "sum",
                 },
                 group_by: ['"int" + "float"'],
-                expressions: ['"int" + "float"'],
+                expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
             table.update({ int: [4], __INDEX__: [0] });
@@ -1168,7 +1180,7 @@ const pivot_data = [
             const view = await table.view({
                 columns: ['"int" - "float"', "int"],
                 group_by: ['"int" - "float"'],
-                expressions: ['"int" - "float"'],
+                expressions: { '"int" - "float"': '"int" - "float"' },
             });
 
             table.update([{ int: 4, __INDEX__: 0 }]);
@@ -1220,7 +1232,7 @@ const pivot_data = [
             const view = await table.view({
                 columns: ['"int" * "float"', "int"],
                 group_by: ['"int" * "float"'],
-                expressions: ['"int" * "float"'],
+                expressions: { '"int" * "float"': '"int" * "float"' },
             });
 
             table.update([{ int: 4, __INDEX__: 0 }]);
@@ -1272,7 +1284,7 @@ const pivot_data = [
             const view = await table.view({
                 columns: ['"int" / "float"', "int"],
                 group_by: ['"int" / "float"'],
-                expressions: ['"int" / "float"'],
+                expressions: { '"int" / "float"': '"int" / "float"' },
             });
 
             table.update([{ int: 4, __INDEX__: 0 }]);
@@ -1324,7 +1336,7 @@ const pivot_data = [
             const table = await perspective.table(pivot_data, { index: "int" });
             const view = await table.view({
                 columns: ['"int" + "float"', "int", "float"],
-                expressions: ['"int" + "float"'],
+                expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
             table.update([{ int: 2, float: 3.5 }]);
@@ -1346,7 +1358,7 @@ const pivot_data = [
 
             const view = await table.view({
                 columns: ['"int" + "float"', "int", "float"],
-                expressions: ['"int" + "float"'],
+                expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
             table.update([{ int: 2, float: null }]);
@@ -1375,7 +1387,7 @@ const pivot_data = [
             );
             const view = await table.view({
                 columns: ['"int" + "float"', "int", "float"],
-                expressions: ['"int" + "float"'],
+                expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
             table.update([{ int: 2, float: undefined }]);
@@ -1404,7 +1416,7 @@ const pivot_data = [
             );
 
             const view = await table.view({
-                expressions: ['lower("y")'],
+                expressions: { 'lower("y")': 'lower("y")' },
             });
 
             const before = await view.to_columns();

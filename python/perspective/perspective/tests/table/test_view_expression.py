@@ -74,44 +74,41 @@ class TestViewExpression(object):
 
     def test_view_validate_expressions_alias_map_errors(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        expressions = [
-            '// x\n"a"',
-            '// y\n"b" * 0.5',
-            "// c\n'abcdefg'",
-            "// d\ntrue and false",
-            '// e\nfloat("a") > 2 ? null : 1',
-            "// f\ntoday()",
-            "// g\nnow()",
-            "// h\nlength(123)",
-        ]
+        expressions = {
+            "x": '"a"',
+            "y": '"b" * 0.5',
+            "c": "'abcdefg'",
+            "d": "true and false",
+            "e": 'float("a") > 2 ? null : 1',
+            "f": "today()",
+            "g": "now()",
+            "h": "length(123)",
+        }
 
         validated = table.validate_expressions(expressions)
-
         aliases = ["x", "y", "c", "d", "e", "f", "g", "h"]
 
         # Errored should also be in aliases
-        for idx, alias in enumerate(aliases):
-            assert validated["expression_alias"][alias] == expressions[idx]
+        for alias in aliases:
+            assert validated["expression_alias"][alias] == expressions[alias]
 
     def test_view_validate_expressions_alias_map(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        expressions = [
-            '// x\n"a"',
-            '// y\n"b" * 0.5',
-            "// c\n'abcdefg'",
-            "// d\ntrue and false",
-            '// e\nfloat("a") > 2 ? null : 1',
-            "// f\ntoday()",
-            "// g\nnow()",
-            "// h\nlength('abcd')",
-        ]
+        expressions = {
+            "x": '"a"',
+            "y": '"b" * 0.5',
+            "c": "'abcdefg'",
+            "d": "true and false",
+            "e": 'float("a") > 2 ? null : 1',
+            "f": "today()",
+            "g": "now()",
+            "h": "length('abcd')",
+        }
 
         validated = table.validate_expressions(expressions)
-
         aliases = ["x", "y", "c", "d", "e", "f", "g", "h"]
-
-        for idx, alias in enumerate(aliases):
-            assert validated["expression_alias"][alias] == expressions[idx]
+        for alias in aliases:
+            assert validated["expression_alias"][alias] == expressions[alias]
 
     def test_view_expression_schema_all_types(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
@@ -190,7 +187,7 @@ class TestViewExpression(object):
 
     def test_view_expression_create(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(expressions=['// computed \n "a" + "b"'])
+        view = table.view(expressions={"computed": ' "a" + "b"'})
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -201,7 +198,7 @@ class TestViewExpression(object):
     def test_view_expression_string_per_page(self):
         table = Table({"a": [i for i in range(100)]})
         big_strings = [randstr(6400) for _ in range(4)]
-        view = table.view(expressions=["//computed{}\nvar x := '{}'; lower(x)".format(i, big_strings[i]) for i in range(4)])
+        view = table.view(expressions={"computed{}".format(i): "var x := '{}'; lower(x)".format(big_strings[i]) for i in range(4)})
 
         result = view.to_columns()
         schema = view.expression_schema()
@@ -221,7 +218,7 @@ class TestViewExpression(object):
             "".join(["d" for _ in range(640)]),
         ]
 
-        view = table.view(expressions=["//computed\nvar a := '{}'; var b := '{}'; var c := '{}'; var d := '{}'; concat(a, b, c, d)".format(*big_strings)])
+        view = table.view(expressions={"computed": "var a := '{}'; var b := '{}'; var c := '{}'; var d := '{}'; concat(a, b, c, d)".format(*big_strings)})
 
         result = view.to_columns()
         schema = view.expression_schema()
@@ -279,17 +276,15 @@ class TestViewExpression(object):
         strings = [randstr(50) for _ in range(8)]
 
         view = table.view(
-            expressions=[
-                "// computed \n var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[:4]),
-                "// computed2 \n var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[4:]),
-            ]
+            expressions={
+                "computed": " var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[:4]),
+                "computed2": " var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[4:]),
+            }
         )
 
         result = view.to_columns()
         schema = view.expression_schema()
-
         assert schema == {"computed": str, "computed2": str}
-
         assert result["computed"] == ["".join(strings[:4]) for _ in range(4)]
         assert result["computed2"] == ["".join(strings[4:]) for _ in range(4)]
 
@@ -298,43 +293,40 @@ class TestViewExpression(object):
             """Create a random expression with a few local string vars that
             are too long to be stored in-place."""
             expression_name = randstr(10)
-            expression = ["// {}\n".format(expression_name)]
+            expression = ""
             num_vars = randint(1, 26)
             output_var_name = ""
             output_str = ""
-
             for i in range(num_vars):
                 name = ascii_letters[i]
                 string_literal = randstr(randint(15, 100))
-                expression.append("var {} := '{}';\n".format(name, string_literal))
-
+                expression += "var {} := '{}';\n".format(name, string_literal)
                 if i == num_vars - 1:
                     output_var_name = name
                     output_str = string_literal
 
-            expression.append(output_var_name)
-            return {"expression_name": expression_name, "expression": "".join(expression), "output": output_str}
+            expression += output_var_name
+            return {"expression_name": expression_name, "expression": expression, "output": output_str}
 
         table = Table({"a": [1, 2, 3, 4]})
 
         for _ in range(5):
             exprs = [make_expression() for _ in range(5)]
             output_map = {expr["expression_name"]: expr["output"] for expr in exprs}
-            view = table.view(expressions=[expr["expression"] for expr in exprs])
+            view = table.view(expressions={expr["expression_name"]: expr["expression"] for expr in exprs})
             expression_schema = view.expression_schema()
             result = view.to_columns()
-
             for expr in output_map.keys():
                 assert expression_schema[expr] == str
                 assert result[expr] == [output_map[expr] for _ in range(4)]
 
     def test_view_expression_string_literal_compare(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        validated = table.validate_expressions(["// computed \n 'a' == 'a'"])
+        validated = table.validate_expressions({"computed": " 'a' == 'a'"})
 
         assert validated["expression_schema"] == {"computed": "boolean"}
 
-        view = table.view(expressions=["// computed \n 'a' == 'a'"])
+        view = table.view(expressions={"computed": " 'a' == 'a'"})
 
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
@@ -346,11 +338,11 @@ class TestViewExpression(object):
 
     def test_view_expression_string_literal_compare_null(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        validated = table.validate_expressions(["// computed \n 'a' == null"])
+        validated = table.validate_expressions({"computed": " 'a' == null"})
 
         assert validated["expression_schema"] == {"computed": "float"}
 
-        view = table.view(expressions=["// computed \n 'a' == null"])
+        view = table.view(expressions={"computed": " 'a' == null"})
 
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
@@ -362,12 +354,9 @@ class TestViewExpression(object):
 
     def test_view_expression_string_literal_compare_column(self):
         table = Table({"a": ["a", "a", "b", "c"]})
-        validated = table.validate_expressions(["// computed \n \"a\" == 'a'"])
-
+        validated = table.validate_expressions({"computed": " \"a\" == 'a'"})
         assert validated["expression_schema"] == {"computed": "boolean"}
-
-        view = table.view(expressions=["// computed \n \"a\" == 'a'"])
-
+        view = table.view(expressions={"computed": " \"a\" == 'a'"})
         assert view.to_columns() == {
             "a": ["a", "a", "b", "c"],
             "computed": [True, True, False, False],
@@ -377,12 +366,9 @@ class TestViewExpression(object):
 
     def test_view_expression_string_literal_compare_column_null(self):
         table = Table({"a": ["a", None, "b", "c", None]})
-        validated = table.validate_expressions(["// computed \n \"a\" == 'a'"])
-
+        validated = table.validate_expressions({"computed": " \"a\" == 'a'"})
         assert validated["expression_schema"] == {"computed": "boolean"}
-
-        view = table.view(expressions=["// computed \n \"a\" == 'a'"])
-
+        view = table.view(expressions={"computed": " \"a\" == 'a'"})
         assert view.to_columns() == {
             "a": ["a", None, "b", "c", None],
             "computed": [True, False, False, False, False],
@@ -392,35 +378,27 @@ class TestViewExpression(object):
 
     def test_view_expression_string_literal_compare_column_null_long(self):
         table = Table({"a": ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrstuvwxyz", "aabcdefghijklmnopqrstuvwxyz", None]})
-        validated = table.validate_expressions(["// computed \n \"a\" == 'abcdefghijklmnopqrstuvwxyz'"])
-
+        validated = table.validate_expressions({"computed": " \"a\" == 'abcdefghijklmnopqrstuvwxyz'"})
         assert validated["expression_schema"] == {"computed": "boolean"}
-
-        view = table.view(expressions=["// computed \n \"a\" == 'abcdefghijklmnopqrstuvwxyz'"])
+        view = table.view(expressions={"computed": "\"a\" == 'abcdefghijklmnopqrstuvwxyz'"})
         result = view.to_columns()
         assert result["computed"] == [True, False, True, False, False]
-
         assert view.expression_schema() == {"computed": bool}
 
     def test_view_expression_string_literal_compare_column_null_long_var(self):
         table = Table({"a": ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrstuvwxyz", "aabcdefghijklmnopqrstuvwxyz", None]})
-        validated = table.validate_expressions(["// computed \n var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"])
-
+        validated = table.validate_expressions({"computed": " var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"})
         assert validated["expression_schema"] == {"computed": "boolean"}
-
-        view = table.view(expressions=["// computed \n var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"])
+        view = table.view(expressions={"computed": "var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"})
         result = view.to_columns()
         assert result["computed"] == [True, False, True, False, False]
         assert view.expression_schema() == {"computed": bool}
 
     def test_view_expression_string_literal_compare_if(self):
         table = Table({"a": ["a", "a", "b", "c"]})
-        validated = table.validate_expressions(["// computed \n if(\"a\" == 'a', 1, 2)"])
-
+        validated = table.validate_expressions({"computed": " if(\"a\" == 'a', 1, 2)"})
         assert validated["expression_schema"] == {"computed": "float"}
-
-        view = table.view(expressions=["// computed \n if(\"a\" == 'a', 1, 2)"])
-
+        view = table.view(expressions={"computed": "if(\"a\" == 'a', 1, 2)"})
         assert view.to_columns() == {
             "a": ["a", "a", "b", "c"],
             "computed": [1, 1, 2, 2],
@@ -471,8 +449,7 @@ class TestViewExpression(object):
             return [{"a": random()} for _ in range(50)]
 
         table = Table(data())
-        view = table.view(group_by=["c0"], expressions=['//c0\n"a" * 2'])
-
+        view = table.view(group_by=["c0"], expressions={"c0": '"a" * 2'})
         for _ in range(5):
             table.update(data())
 
@@ -484,8 +461,7 @@ class TestViewExpression(object):
             return [{"a": random()} for _ in range(50)]
 
         table = Table(data())
-        view = table.view(group_by=["c0"], split_by=["c1"], expressions=['//c0\n"a" * 2', "//c1\n'new string'"])
-
+        view = table.view(group_by=["c0"], split_by=["c1"], expressions={"c0": '"a" * 2', "c1": "'new string'"})
         for i in range(5):
             table.update(data())
 
@@ -500,20 +476,23 @@ class TestViewExpression(object):
             "b": [5, 6, 7, 8],
             '"a" + "b"': [6, 8, 10, 12],
         }
+
         assert view.expression_schema() == {'"a" + "b"': float}
 
     def test_view_expression_should_not_overwrite_real(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with raises(PerspectiveCppError) as ex:
-            table.view(expressions=['// a \n upper("a")'])
+            table.view(expressions={"a": 'upper("a")'})
+
         assert str(ex.value) == "View creation failed: cannot create expression column 'a' that overwrites a column that already exists.\n"
 
-    def test_view_expression_should_resolve_to_last_alias(self):
+    def test_legacy_view_duplicate_expression_should_resolve_to_last_alias(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             columns=["abc"],
-            expressions=['// abc \n "a" + "b"', '// abc \n "a" - "b"'],
+            expressions=['//abc\n"a" + "b"', '//abc\n"a" - "b"'],
         )
+
         assert view.to_columns() == {"abc": [-4, -4, -4, -4]}
 
     def test_view_expression_multiple_alias(
@@ -521,13 +500,14 @@ class TestViewExpression(object):
     ):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-                '// computed2 \n "a" + "b"',
-                '// computed3 \n "a" + "b"',
-                '// computed4 \n "a" + "b"',
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+                "computed2": '"a" + "b"',
+                "computed3": '"a" + "b"',
+                "computed4": '"a" + "b"',
+            }
         )
+
         assert view.schema() == {
             "a": int,
             "b": int,
@@ -548,13 +528,9 @@ class TestViewExpression(object):
         self,
     ):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-
-        view = table.view(expressions=['// computed \n "a" + "b"'])
-
-        view2 = table.view(expressions=['// computed \n "a" * "b"'])
-
+        view = table.view(expressions={"computed": ' "a" + "b"'})
+        view2 = table.view(expressions={"computed": ' "a" * "b"'})
         assert view.expression_schema() == {"computed": float}
-
         assert view2.expression_schema() == {
             "computed": float,
         }
@@ -566,13 +542,9 @@ class TestViewExpression(object):
         self,
     ):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-
-        view = table.view(group_by=["computed"], aggregates={"computed": ["weighted mean", "b"]}, expressions=['// computed \n "a" + "b"'])
-
-        view2 = table.view(group_by=["computed"], aggregates={"computed": "last"}, expressions=["// computed \nconcat('abc', ' ', 'def')"])
-
+        view = table.view(group_by=["computed"], aggregates={"computed": ["weighted mean", "b"]}, expressions={"computed": ' "a" + "b"'})
+        view2 = table.view(group_by=["computed"], aggregates={"computed": "last"}, expressions={"computed": "concat('abc', ' ', 'def')"})
         assert view.expression_schema() == {"computed": float}
-
         assert view2.expression_schema() == {
             "computed": str,
         }
@@ -600,20 +572,20 @@ class TestViewExpression(object):
         )
 
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-                "// computed2 \n bucket(\"c\", 'M')",
-                "// computed3 \n concat('a', 'b', 'c')",
-                "// computed4 \n 'new string'",
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+                "computed2": "bucket(\"c\", 'M')",
+                "computed3": "concat('a', 'b', 'c')",
+                "computed4": "'new string'",
+            }
         )
 
         view2 = table.view(
-            expressions=[
-                '// computed \n upper("f")',
-                '// computed2 \n 20 + ("b" * "a")',
-                "// computed4 \n bucket(\"c\", 'm')",
-            ]
+            expressions={
+                "computed": 'upper("f")',
+                "computed2": '20 + ("b" * "a")',
+                "computed4": "bucket(\"c\", 'm')",
+            }
         )
 
         assert view.expression_schema() == {
@@ -646,7 +618,7 @@ class TestViewExpression(object):
 
     def test_view_expression_create_no_columns(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(columns=[], expressions=['// computed \n "a" + "b"'])
+        view = table.view(columns=[], expressions={"computed": ' "a" + "b"'})
         assert view.to_columns() == {}
         assert view.schema() == {}
 
@@ -655,7 +627,7 @@ class TestViewExpression(object):
 
     def test_view_expression_create_columns(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(columns=["computed"], expressions=['// computed \n "a" + "b"'])
+        view = table.view(columns=["computed"], expressions={"computed": ' "a" + "b"'})
         assert view.to_columns() == {"computed": [6, 8, 10, 12]}
         assert view.schema() == {"computed": float}
         # computed column should still exist
@@ -663,7 +635,7 @@ class TestViewExpression(object):
 
     def test_view_expression_create_clear(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(expressions=['// computed \n "a" + "b"'])
+        view = table.view(expressions={"computed": ' "a" + "b"'})
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -675,7 +647,7 @@ class TestViewExpression(object):
 
     def test_view_expression_create_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(expressions=['// computed \n "a" + "b"'])
+        view = table.view(expressions={"computed": ' "a" + "b"'})
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -691,7 +663,7 @@ class TestViewExpression(object):
 
     def test_view_expression_multiple_dependents_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(expressions=['// computed \n "a" + "b"', '// final \n ("a" + "b") ^ 2'])
+        view = table.view(expressions={"computed": '"a" + "b"', "final": '("a" + "b") ^ 2'})
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -714,19 +686,15 @@ class TestViewExpression(object):
 
     def test_view_expression_multiple_views_should_not_conflate(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+            }
         )
 
-        view2 = table.view(expressions=['// computed2 \n "a" - "b"'])
-
+        view2 = table.view(expressions={"computed2": ' "a" - "b"'})
         assert view.schema() == {"a": int, "b": int, "computed": float}
-
         assert view2.schema() == {"a": int, "b": int, "computed2": float}
-
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -743,17 +711,14 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+            }
         )
 
-        view2 = table.view(expressions=['// computed2 \n "a" - "b"'])
-
+        view2 = table.view(expressions={"computed2": ' "a" - "b"'})
         assert view.schema() == {"a": int, "b": int, "computed": float}
-
         assert view2.schema() == {"a": int, "b": int, "computed2": float}
-
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -778,19 +743,15 @@ class TestViewExpression(object):
 
     def test_view_expression_multiple_views_should_all_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+            }
         )
 
-        view2 = table.view(expressions=['// computed2 \n "a" - "b"'])
-
+        view2 = table.view(expressions={"computed2": ' "a" - "b"'})
         assert view.schema() == {"a": int, "b": int, "computed": float}
-
         assert view2.schema() == {"a": int, "b": int, "computed2": float}
-
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -804,7 +765,6 @@ class TestViewExpression(object):
         }
 
         table.replace({"a": [10, 20, 30, 40], "b": [50, 60, 70, 80]})
-
         assert view.to_columns() == {
             "a": [10, 20, 30, 40],
             "b": [50, 60, 70, 80],
@@ -819,14 +779,13 @@ class TestViewExpression(object):
 
     def test_view_expression_delete_and_create(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+            }
         )
-        assert view.schema() == {"a": int, "b": int, "computed": float}
 
+        assert view.schema() == {"a": int, "b": int, "computed": float}
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -834,11 +793,8 @@ class TestViewExpression(object):
         }
 
         view.delete()
-
-        view2 = table.view(expressions=['// computed \n "a" - "b"'])
-
+        view2 = table.view(expressions={"computed": ' "a" - "b"'})
         assert view2.schema() == {"a": int, "b": int, "computed": float}
-
         assert view2.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -847,29 +803,20 @@ class TestViewExpression(object):
 
     def test_view_expression_delete_and_create_with_updates(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-
-        view = table.view(expressions=['// computed \n "a" + "b"', "upper(concat('abc', 'def'))"])
-
+        view = table.view(expressions={"computed": ' "a" + "b"', "upper(concat('abc', 'def'))": "upper(concat('abc', 'def'))"})
         assert view.schema() == {"a": int, "b": int, "computed": float, "upper(concat('abc', 'def'))": str}
-
         table.update({"a": [5, 6], "b": [9, 10]})
-
         assert view.to_columns() == {"a": [1, 2, 3, 4, 5, 6], "b": [5, 6, 7, 8, 9, 10], "computed": [6, 8, 10, 12, 14, 16], "upper(concat('abc', 'def'))": ["ABCDEF" for _ in range(6)]}
-
         view.delete()
-
         view2 = table.view(
-            expressions=[
-                '// computed2 \n "a" - "b"',
-            ]
+            expressions={
+                "computed2": '"a" - "b"',
+            }
         )
 
         assert view2.schema() == {"a": int, "b": int, "computed2": float}
-
         table.update({"a": [5, 6], "b": [9, 10]})
-
         table.update({"a": [5, 6], "b": [9, 10]})
-
         assert view2.to_columns() == {
             "a": [1, 2, 3, 4, 5, 6, 5, 6, 5, 6],
             "b": [5, 6, 7, 8, 9, 10, 9, 10, 9, 10],
@@ -880,9 +827,9 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+            }
         )
 
         assert view.schema() == {"a": int, "b": int, "computed": float}
@@ -904,9 +851,9 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            expressions=[
-                '// computed \n "a" + "b"',
-            ]
+            expressions={
+                "computed": '"a" + "b"',
+            }
         )
 
         assert view.schema() == {"a": int, "b": int, "computed": float}
@@ -938,9 +885,9 @@ class TestViewExpression(object):
         )
 
         table.view(
-            expressions=[
-                '// inverted \n 1 / "val"',
-            ],
+            expressions={
+                "inverted": '1 / "val"',
+            },
             columns=["inverted"],
         )
         table.update(
@@ -957,9 +904,9 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             columns=["computed", "b"],
-            expressions=[
-                '// computed \n "a" + "b"',
-            ],
+            expressions={
+                "computed": '"a" + "b"',
+            },
         )
         assert view.to_columns() == {
             "b": [5, 6, 7, 8],
@@ -970,9 +917,9 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             group_by=["computed"],
-            expressions=[
-                '// computed \n "a" + "b"',
-            ],
+            expressions={
+                "computed": '"a" + "b"',
+            },
         )
         assert view.to_columns() == {
             "__ROW_PATH__": [[], [6], [8], [10], [12]],
@@ -986,9 +933,9 @@ class TestViewExpression(object):
 
         view = table.view(
             group_by=["computed"],
-            expressions=[
-                '// computed \n "a" + "b"',
-            ],
+            expressions={
+                "computed": '"a" + "b"',
+            },
         )
 
         assert view.to_columns() == {
@@ -1012,9 +959,9 @@ class TestViewExpression(object):
 
         view = table.view(
             group_by=["computed"],
-            expressions=[
-                '// computed \n "a" + "b"',
-            ],
+            expressions={
+                "computed": '"a" + "b"',
+            },
         )
 
         assert view.to_columns() == {
@@ -1037,9 +984,9 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             split_by=["computed"],
-            expressions=[
-                '// computed \n "a" + "b"',
-            ],
+            expressions={
+                "computed": '"a" + "b"',
+            },
         )
         assert view.to_columns() == {
             "6|a": [1, None, None, None],
@@ -1060,9 +1007,9 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             split_by=["computed"],
-            expressions=[
-                '// computed \n "a" + "b"',
-            ],
+            expressions={
+                "computed": '"a" + "b"',
+            },
         )
         assert view.to_columns() == {
             "6|a": [1, None, None, None],
@@ -1081,8 +1028,7 @@ class TestViewExpression(object):
 
     def test_view_expression_with_sort(self):
         table = Table({"a": ["a", "ab", "abc", "abcd"]})
-        view = table.view(sort=[["computed", "desc"]], expressions=['// computed \n length("a")'])
-
+        view = table.view(sort=[["computed", "desc"]], expressions={"computed": 'length("a")'})
         assert view.to_columns() == {
             "a": ["abcd", "abc", "ab", "a"],
             "computed": [4, 3, 2, 1],
@@ -1090,13 +1036,12 @@ class TestViewExpression(object):
 
     def test_view_expression_with_filter(self):
         table = Table({"a": ["a", "ab", "abc", "abcd"]})
-        view = table.view(filter=[["computed", ">=", 3]], expressions=['// computed \n length("a")'])
-
+        view = table.view(filter=[["computed", ">=", 3]], expressions={"computed": 'length("a")'})
         assert view.to_columns() == {"a": ["abc", "abcd"], "computed": [3, 4]}
 
     def test_view_day_of_week_date(self):
         table = Table({"a": [date(2020, 3, i) for i in range(9, 14)]})
-        view = table.view(expressions=['// bucket \n day_of_week("a")'])
+        view = table.view(expressions={"bucket": 'day_of_week("a")'})
         assert view.schema() == {"a": date, "bucket": str}
         assert view.to_columns() == {
             "a": [datetime(2020, 3, i) for i in range(9, 14)],
@@ -1111,7 +1056,7 @@ class TestViewExpression(object):
 
     def test_view_day_of_week_datetime(self):
         table = Table({"a": [datetime(2020, 3, i, 12, 30) for i in range(9, 14)]})
-        view = table.view(expressions=['// bucket \n day_of_week("a")'])
+        view = table.view(expressions={"bucket": 'day_of_week("a")'})
         assert view.schema() == {"a": datetime, "bucket": str}
         assert view.to_columns() == {
             "a": [datetime(2020, 3, i, 12, 30) for i in range(9, 14)],
@@ -1126,7 +1071,7 @@ class TestViewExpression(object):
 
     def test_view_month_of_year_date(self):
         table = Table({"a": [date(2020, i, 15) for i in range(1, 13)]})
-        view = table.view(expressions=['// bucket \n month_of_year("a")'])
+        view = table.view(expressions={"bucket": 'month_of_year("a")'})
         assert view.schema() == {"a": date, "bucket": str}
         assert view.to_columns() == {
             "a": [datetime(2020, i, 15) for i in range(1, 13)],
@@ -1152,7 +1097,7 @@ class TestViewExpression(object):
                 "a": [datetime(2020, i, 15) for i in range(1, 13)],
             }
         )
-        view = table.view(expressions=['// bucket \n month_of_year("a")'])
+        view = table.view(expressions={"bucket": 'month_of_year("a")'})
         assert view.schema() == {"a": datetime, "bucket": str}
         assert view.to_columns() == {
             "a": [datetime(2020, i, 15) for i in range(1, 13)],
@@ -1184,7 +1129,7 @@ class TestViewExpression(object):
                 ],
             }
         )
-        view = table.view(expressions=["// bucket \n bucket(\"a\", 'D')"])
+        view = table.view(expressions={"bucket": "bucket(\"a\", 'D')"})
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
             "a": [
@@ -1212,7 +1157,7 @@ class TestViewExpression(object):
                 ],
             }
         )
-        view = table.view(expressions=["// bucket \n bucket(\"a\", 'D')"])
+        view = table.view(expressions={"bucket": "bucket(\"a\", 'D')"})
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
             "a": [
@@ -1240,7 +1185,7 @@ class TestViewExpression(object):
                 ],
             }
         )
-        view = table.view(expressions=["// bucket \n bucket(\"a\", 'D')"])
+        view = table.view(expressions={"bucket": "bucket(\"a\", 'D')"})
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {
             "a": [
@@ -1268,7 +1213,7 @@ class TestViewExpression(object):
                 ],
             }
         )
-        view = table.view(expressions=["// bucket \n bucket(\"a\", 'M')"])
+        view = table.view(expressions={"bucket": "bucket(\"a\", 'M')"})
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
             "a": [
@@ -1296,7 +1241,7 @@ class TestViewExpression(object):
                 ],
             }
         )
-        view = table.view(expressions=["// bucket \n bucket(\"a\", 'M')"])
+        view = table.view(expressions={"bucket": "bucket(\"a\", 'M')"})
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
             "a": [
@@ -1324,7 +1269,7 @@ class TestViewExpression(object):
                 ],
             }
         )
-        view = table.view(expressions=["// bucket \n bucket(\"a\", 'M')"])
+        view = table.view(expressions={"bucket": "bucket(\"a\", 'M')"})
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {
             "a": [
@@ -1347,7 +1292,7 @@ class TestViewExpression(object):
                 "a": [datetime(2020, 1, 1), None, None, datetime(2020, 3, 15)],
             }
         )
-        view = table.view(expressions=["// bucket \n bucket(\"a\", 'M')"])
+        view = table.view(expressions={"bucket": "bucket(\"a\", 'M')"})
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {
             "a": [datetime(2020, 1, 1), None, None, datetime(2020, 3, 15)],
@@ -1358,14 +1303,14 @@ class TestViewExpression(object):
         table = Table({"x": int, "y": date, "z": float})
 
         view = table.view(
-            expressions=[
-                "// computed\n integer(2147483648)",
-                "// computed2\n integer(-2147483649)",
-                "// computed3 \n integer(123.456)",
-                '// computed4 \n integer("x")',
-                '// computed5 \n integer("y")',
-                '// computed6 \n integer("z")',
-            ]
+            expressions={
+                "computed": "integer(2147483648)",
+                "computed2": "integer(-2147483649)",
+                "computed3": "integer(123.456)",
+                "computed4": 'integer("x")',
+                "computed5": 'integer("y")',
+                "computed6": 'integer("z")',
+            }
         )
 
         table.update({"x": [12136582], "y": [date(2020, 6, 30)], "z": [1.23456]})
@@ -1392,15 +1337,15 @@ class TestViewExpression(object):
         table = Table({"w": datetime, "x": int, "y": date, "z": float})
 
         view = table.view(
-            expressions=[
-                "// computed\n float(2147483648)",
-                "// computed2\n float(-2147483649)",
-                "// computed3 \n float(123.456789123)",
-                '// computed4 \n float("x")',
-                '// computed5 \n float("y")',
-                '// computed6 \n float("z")',
-                '// computed7 \n float("w")',
-            ]
+            expressions={
+                "computed": "float(2147483648)",
+                "computed2": "float(-2147483649)",
+                "computed3": "float(123.456789123)",
+                "computed4": 'float("x")',
+                "computed5": 'float("y")',
+                "computed6": 'float("z")',
+                "computed7": 'float("w")',
+            }
         )
 
         dt = datetime(2018, 8, 12, 15, 32, 55)
@@ -1432,13 +1377,9 @@ class TestViewExpression(object):
 
     def test_view_date_expression(self):
         table = Table({"x": [1]})
-
-        view = table.view(expressions=["// computed\n date(2020, 5, 30)", "// computed2\n date(1997, 8, 31)"])
-
+        view = table.view(expressions={"computed": " date(2020, 5, 30)", "computed2": "date(1997, 8, 31)"})
         assert view.expression_schema() == {"computed": date, "computed2": date}
-
         result = view.to_dict()
-
         assert result["computed"] == [datetime(2020, 5, 30)]
         assert result["computed2"] == [datetime(1997, 8, 31)]
 
@@ -1448,39 +1389,30 @@ class TestViewExpression(object):
         dt = datetime(2015, 11, 29, 23, 59, 59)
         seconds_timestamp = mktime(dt.timetuple()) + dt.microsecond / 1000000.0
         ms_timestamp = int(seconds_timestamp * 1000)
-
-        view = table.view(expressions=["// computed\n datetime({})".format(ms_timestamp)])
-
+        view = table.view(expressions={"computed": "datetime({})".format(ms_timestamp)})
         assert view.expression_schema() == {"computed": datetime}
-
         result = view.to_dict()
-
         assert result["computed"] == [datetime(2015, 11, 29, 23, 59, 59)]
 
     def test_view_datetime_expression_roundtrip(self):
         table = Table({"x": [datetime(2015, 11, 29, 23, 59, 59)]})
-
-        view = table.view(expressions=['// computed\n datetime(float("x"))'])
-
+        view = table.view(expressions={"computed": 'datetime(float("x"))'})
         assert view.expression_schema() == {"computed": datetime}
-
         result = view.to_dict()
-
         assert result["computed"] == [datetime(2015, 11, 29, 23, 59, 59)]
 
     def test_view_string_expression(self):
         table = Table({"a": date, "b": datetime, "c": int, "d": float, "e": str, "f": bool})
-
         view = table.view(
-            expressions=[
-                '// computed\n string("a")',
-                '// computed2\n string("b")',
-                '// computed3\n string("c")',
-                '// computed4\n string("d")',
-                '// computed5\n string("e")',
-                '// computed6\n string("f")',
-                "// computed7\n string(1234.5678)",
-            ]
+            expressions={
+                "computed": 'string("a")',
+                "computed2": 'string("b")',
+                "computed3": 'string("c")',
+                "computed4": 'string("d")',
+                "computed5": 'string("e")',
+                "computed6": 'string("f")',
+                "computed7": "string(1234.5678)",
+            }
         )
 
         table.update(
@@ -1495,9 +1427,7 @@ class TestViewExpression(object):
         )
 
         assert view.expression_schema() == {"computed": str, "computed2": str, "computed3": str, "computed4": str, "computed5": str, "computed6": str, "computed7": str}
-
         result = view.to_dict()
-
         assert result["computed"] == ["2020-05-30", "2021-07-13"]
         assert result["computed2"] == ["2015-11-29 23:59:59.000", "2016-11-29 23:59:59.000"]
         assert result["computed3"] == ["12345678", "1293879852"]
@@ -1516,12 +1446,12 @@ class TestViewExpression(object):
         endings = ["com", "net", "co.uk", "ie", "me", "io", "co"]
         data = ["{}@{}.{}".format(randstr(30, ascii_letters + "0123456789" + "._-"), randstr(10), choices(endings, k=1)[0]) for _ in range(100)]
         table = Table({"a": data})
-        expressions = [
-            "// address\nsearch(\"a\", '^([a-zA-Z0-9._-]+)@')",
-            "// domain\nsearch(\"a\", '@([a-zA-Z.]+)$')",
-            "//is_email?\nmatch_all(\"a\", '^([a-zA-Z0-9._-]+)@([a-zA-Z.]+)$')",
-            "//has_at?\nmatch(\"a\", '@')",
-        ]
+        expressions = {
+            "address": "search(\"a\", '^([a-zA-Z0-9._-]+)@')",
+            "domain": "search(\"a\", '@([a-zA-Z.]+)$')",
+            "is_email?": "match_all(\"a\", '^([a-zA-Z0-9._-]+)@([a-zA-Z.]+)$')",
+            "has_at?": "match(\"a\", '@')",
+        }
 
         view = table.view(expressions=expressions)
         schema = view.expression_schema()
@@ -1550,8 +1480,8 @@ class TestViewExpression(object):
 
         table = Table({"a": data})
         view = table.view(
-            expressions=[
-                """// parsed\n
+            expressions={
+                "parsed": """
         var parts[4];
         parts[0] := search("a", '^([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}');
         parts[1] := search("a", '^[0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}');
@@ -1559,8 +1489,8 @@ class TestViewExpression(object):
         parts[3] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})');
         concat(parts[0], parts[1], parts[2], parts[3])
         """,
-                "//is_number?\nmatch_all(\"a\", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}')",
-            ]
+                "is_number?": "match_all(\"a\", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}')",
+            }
         )
         schema = view.expression_schema()
         assert schema == {"parsed": str, "is_number?": bool}
@@ -1592,7 +1522,7 @@ class TestViewExpression(object):
             }
         )
 
-        view = table.view(expressions=["//c1\nsearch(\"a\", '(\ndef)')", "//c2\nsearch(\"b\", '(\tworld)')", "//c3\nmatch(\"a\", '\\n')", "//c4\nmatch(\"b\", '\\n')"])
+        view = table.view(expressions={"c1": "search(\"a\", '(\ndef)')", "c2": "search(\"b\", '(\tworld)')", "c3": "match(\"a\", '\\n')", "c4": "match(\"b\", '\\n')"})
 
         assert view.expression_schema() == {"c1": str, "c2": str, "c3": bool, "c4": bool}
 
@@ -1606,15 +1536,15 @@ class TestViewExpression(object):
         data = ["abc, def", "efg", "", None, "aaaaaaaaaaaaa"]
         table = Table({"x": data})
         view = table.view(
-            expressions=[
-                "//a\nsubstring('abcdef', 0)",
-                "//abc\nsubstring('abcdef', 3)",
-                '//b\nsubstring("x", 0)',
-                '//c\nsubstring("x", 5, 1)',
-                '//d\nsubstring("x", 100)',
-                '//e\nsubstring("x", 0, 10000)',
-                '//f\nsubstring("x", 5, 0)',
-            ]
+            expressions={
+                "a": "substring('abcdef', 0)",
+                "abc": "substring('abcdef', 3)",
+                "b": 'substring("x", 0)',
+                "c": 'substring("x", 5, 1)',
+                "d": 'substring("x", 100)',
+                "e": 'substring("x", 0, 10000)',
+                "f": 'substring("x", 5, 0)',
+            }
         )
         results = view.to_columns()
 
@@ -1632,9 +1562,9 @@ class TestViewExpression(object):
         endings = ["com", "net", "co.uk", "ie", "me", "io", "co"]
         data = ["{}@{}.{}".format(randstr(30, ascii_letters + "0123456789" + "._-"), randstr(10), choices(endings, k=1)[0]) for _ in range(100)]
         table = Table({"a": data})
-        expressions = [
-            '// address\nvar vec[2]; indexof("a", \'^([a-zA-Z0-9._-]+)@\', vec) ? substring("a", vec[0], vec[1] - vec[0] + 1) : null',
-            """// ending
+        expressions = {
+            "address": 'var vec[2]; indexof("a", \'^([a-zA-Z0-9._-]+)@\', vec) ? substring("a", vec[0], vec[1] - vec[0] + 1) : null',
+            "ending": """
             var domain := search(\"a\", '@([a-zA-Z.]+)$');
             var len := length(domain);
             if (len > 0 and is_not_null(domain)) {
@@ -1642,7 +1572,7 @@ class TestViewExpression(object):
             } else {
                 'not found';
             }""",
-        ]
+        }
 
         view = table.view(expressions=expressions)
         schema = view.expression_schema()

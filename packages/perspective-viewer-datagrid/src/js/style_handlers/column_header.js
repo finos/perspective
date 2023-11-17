@@ -39,8 +39,9 @@ export function style_selected_column(regularTable, selectedColumn) {
 
     const settings_open =
         regularTable.parentElement.parentElement.hasAttribute("settings");
-    if (settings_open) {
-        // if settings_open, you will never have less than 2 trs but possibly more e.g. with group-by.
+    if (settings_open && len >= 2) {
+        // if settings_open, you will never have less than 2 trs unless the
+        // table is empty, but possibly more e.g. with group-by.
         // edit and title are guaranteed to be the last two rows
         let titles = Array.from(group_header_trs[len - 2].children);
         let editBtns = Array.from(group_header_trs[len - 1].children);

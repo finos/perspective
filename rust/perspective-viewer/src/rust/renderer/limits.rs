@@ -52,7 +52,7 @@ pub async fn get_row_and_col_limits(
             });
 
             Ok((num_cols, num_rows, max_cols, max_rows))
-        }
+        },
     }
 }
 

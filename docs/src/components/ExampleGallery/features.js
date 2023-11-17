@@ -295,10 +295,10 @@ exports.default = [
                     },
                 },
             },
-            expressions: [
-                `//Profit (-)\nif("Profit"<0){"Profit"}else{0}`,
-                `//Profit (+)\nif("Profit">0){"Profit"}else{0}`,
-            ],
+            expressions: {
+                [`Profit (-)`]: `if("Profit"<0){"Profit"}else{0}`,
+                [`Profit (+)`]: `if("Profit">0){"Profit"}else{0}`,
+            },
         },
     },
 
@@ -381,7 +381,7 @@ exports.default = [
             group_by: ["State"],
             split_by: ["Profit (-/+)"],
             columns: ["Profit"],
-            expressions: [`//Profit (-/+)\nif("Profit"<0){1}else{0}`],
+            expressions: { "Profit (-/+)": `if("Profit"<0){1}else{0}` },
             sort: [["Profit", "desc"]],
         },
         viewport: { width: 600, height: 450 },
@@ -502,7 +502,9 @@ exports.default = [
         config: {
             plugin: "Y Line",
             group_by: ["bucket(\"Order Date\", 'M')"],
-            expressions: ["bucket(\"Order Date\", 'M')"],
+            expressions: {
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+            },
             columns: ["Sales"],
         },
     },
@@ -514,10 +516,10 @@ exports.default = [
             plugin: "Y Line",
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ["bucket(\"Order Date\", 'Y')"],
-            expressions: [
-                "bucket(\"Order Date\", 'M')",
-                "bucket(\"Order Date\", 'Y')",
-            ],
+            expressions: {
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+                "bucket(\"Order Date\", 'Y')": "bucket(\"Order Date\", 'Y')",
+            },
             columns: ["Sales"],
         },
     },
@@ -529,7 +531,9 @@ exports.default = [
             plugin: "Y Line",
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ["Region"],
-            expressions: ["bucket(\"Order Date\", 'M')"],
+            expressions: {
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+            },
             columns: ["Sales"],
         },
     },
@@ -605,7 +609,9 @@ exports.default = [
         config: {
             plugin: "Y Area",
             group_by: ["bucket(\"Order Date\", 'M')"],
-            expressions: ["bucket(\"Order Date\", 'M')"],
+            expressions: {
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+            },
             columns: ["Sales"],
         },
     },
@@ -617,10 +623,10 @@ exports.default = [
             plugin: "Y Area",
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ["bucket(\"Order Date\", 'Y')"],
-            expressions: [
-                "bucket(\"Order Date\", 'M')",
-                "bucket(\"Order Date\", 'Y')",
-            ],
+            expressions: {
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+                "bucket(\"Order Date\", 'Y')": "bucket(\"Order Date\", 'Y')",
+            },
             columns: ["Sales"],
         },
     },
@@ -632,7 +638,9 @@ exports.default = [
             plugin: "Y Area",
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ["Region"],
-            expressions: ["bucket(\"Order Date\", 'M')"],
+            expressions: {
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+            },
             columns: ["Sales"],
         },
     },
@@ -1052,7 +1060,9 @@ exports.default = [
         config: {
             columns: ["Discount"],
             plugin: "Heatmap",
-            expressions: ["bucket(\"Order Date\", 'M')"],
+            expressions: {
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+            },
             aggregates: {
                 "Order Date": "dominant",
                 Sales: "avg",
@@ -1070,10 +1080,10 @@ exports.default = [
         config: {
             plugin: "Heatmap",
             columns: ["Profit"],
-            expressions: [
-                'bucket("Profit", 100)',
-                "bucket(\"Order Date\", 'M')",
-            ],
+            expressions: {
+                'bucket("Profit", 100)': 'bucket("Profit", 100)',
+                "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
+            },
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ['bucket("Profit", 100)'],
             plugin_config: {},

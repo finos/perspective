@@ -85,7 +85,7 @@ impl Component for RenderWarning {
                     renderer.disable_active_plugin_render_warning();
                     renderer.update(&session).await
                 });
-            }
+            },
         };
         true
     }

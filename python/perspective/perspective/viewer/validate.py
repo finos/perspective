@@ -139,11 +139,10 @@ def validate_expressions(expressions):
     if expressions is None:
         return []
 
-    if isinstance(expressions, str):
-        # wrap in a list and return
-        return [expressions]
-
     if isinstance(expressions, list):
+        import logging
+
+        logging.warn("Legacy `expressions` format: {}".format(expressions))
         for expr in expressions:
             if isinstance(expr, dict):
                 if not (expr.get("name") and expr.get("expr")):

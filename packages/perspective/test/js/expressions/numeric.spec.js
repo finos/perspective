@@ -151,7 +151,7 @@ function validate_binary_operations(output, expressions, operator) {
                         });
 
                         const view = await table.view({
-                            expressions: ['"a"'],
+                            expressions: { '"a"': '"a"' },
                         });
 
                         table.update({
@@ -177,7 +177,7 @@ function validate_binary_operations(output, expressions, operator) {
                                 a: "sum",
                                 b: "sum",
                             },
-                            expressions: ['"a"'],
+                            expressions: { '"a"': '"a"' },
                         });
 
                         table.update({
@@ -564,7 +564,10 @@ function validate_binary_operations(output, expressions, operator) {
                         d: "float",
                     });
                     const view = await table.view({
-                        expressions: ['"a" == "b"', '"a" != "b"'],
+                        expressions: {
+                            '"a" == "b"': '"a" == "b"',
+                            '"a" != "b"': '"a" != "b"',
+                        },
                     });
                     table.update({
                         a: [1, 2, 3, 4],
@@ -602,7 +605,7 @@ function validate_binary_operations(output, expressions, operator) {
                             '"a" != "c"',
                             '"b" == "d"',
                             '"b" != "d"',
-                        ],
+                        ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                     });
                     table.update({
                         a: [1, 2, 3, 4],
@@ -647,7 +650,10 @@ function validate_binary_operations(output, expressions, operator) {
                     });
 
                     const view = await table.view({
-                        expressions: ['"a" / "b"', '"c" / "b"'],
+                        expressions: {
+                            '"a" / "b"': '"a" / "b"',
+                            '"c" / "b"': '"c" / "b"',
+                        },
                     });
 
                     const result = await view.to_columns();
@@ -675,7 +681,10 @@ function validate_binary_operations(output, expressions, operator) {
                     });
 
                     const view = await table.view({
-                        expressions: ['"a" % "b"', '"c" % "b"'],
+                        expressions: {
+                            '"a" % "b"': '"a" % "b"',
+                            '"c" % "b"': '"c" % "b"',
+                        },
                     });
 
                     const result = await view.to_columns();
@@ -803,7 +812,9 @@ function validate_binary_operations(output, expressions, operator) {
 
                 // works for floats only
                 const view = await table.view({
-                    expressions: ['inrange(9, "b", 20)'],
+                    expressions: {
+                        'inrange(9, "b", 20)': 'inrange(9, "b", 20)',
+                    },
                 });
 
                 table.update({
@@ -829,7 +840,10 @@ function validate_binary_operations(output, expressions, operator) {
                 });
 
                 const view = await table.view({
-                    expressions: ['iclamp(10, "a", 20)', 'iclamp(10, "b", 20)'],
+                    expressions: {
+                        'iclamp(10, "a", 20)': 'iclamp(10, "a", 20)',
+                        'iclamp(10, "b", 20)': 'iclamp(10, "b", 20)',
+                    },
                 });
 
                 table.update({
@@ -853,7 +867,10 @@ function validate_binary_operations(output, expressions, operator) {
                 });
 
                 const view = await table.view({
-                    expressions: ['pow("a", 1)', 'pow("b", 3)'],
+                    expressions: {
+                        'pow("a", 1)': 'pow("a", 1)',
+                        'pow("b", 3)': 'pow("b", 3)',
+                    },
                 });
 
                 table.update({
@@ -877,7 +894,10 @@ function validate_binary_operations(output, expressions, operator) {
                 });
 
                 const view = await table.view({
-                    expressions: ['logn("a", 5)', 'logn("b", 3)'],
+                    expressions: {
+                        'logn("a", 5)': 'logn("a", 5)',
+                        'logn("b", 3)': 'logn("b", 3)',
+                    },
                 });
 
                 table.update({
@@ -906,7 +926,10 @@ function validate_binary_operations(output, expressions, operator) {
                 });
 
                 const view = await table.view({
-                    expressions: ['root("a", 5)', 'root("b", 3)'],
+                    expressions: {
+                        'root("a", 5)': 'root("a", 5)',
+                        'root("b", 3)': 'root("b", 3)',
+                    },
                 });
 
                 table.update({
@@ -943,7 +966,7 @@ function validate_binary_operations(output, expressions, operator) {
                     expressions: [
                         'avg("a", 10, 20, 30, 40, "a")',
                         'avg("b", 3, 4, 5, "b")',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -972,7 +995,7 @@ function validate_binary_operations(output, expressions, operator) {
                     expressions: [
                         'sum("a", 10, 20, 30, 40, "a")',
                         'sum("b", 3, 4, 5, "b")',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -998,7 +1021,10 @@ function validate_binary_operations(output, expressions, operator) {
                 });
 
                 const view = await table.view({
-                    expressions: ['trunc("a")', 'trunc("b")'],
+                    expressions: {
+                        'trunc("a")': 'trunc("a")',
+                        'trunc("b")': 'trunc("b")',
+                    },
                 });
 
                 table.update({
@@ -1020,7 +1046,10 @@ function validate_binary_operations(output, expressions, operator) {
                 });
 
                 const view = await table.view({
-                    expressions: ['deg2rad("a")', 'deg2rad("b")'],
+                    expressions: {
+                        'deg2rad("a")': 'deg2rad("a")',
+                        'deg2rad("b")': 'deg2rad("b")',
+                    },
                 });
 
                 table.update({
@@ -1048,7 +1077,10 @@ function validate_binary_operations(output, expressions, operator) {
                 });
 
                 const view = await table.view({
-                    expressions: ['rad2deg("a")', 'rad2deg("b")'],
+                    expressions: {
+                        'rad2deg("a")': 'rad2deg("a")',
+                        'rad2deg("b")': 'rad2deg("b")',
+                    },
                 });
 
                 table.update({
@@ -1081,7 +1113,7 @@ function validate_binary_operations(output, expressions, operator) {
                         'is_null("b")',
                         'if(is_null("a")) 100; else 0;',
                         'if(is_null("b")) 100; else 0;',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -1124,7 +1156,7 @@ function validate_binary_operations(output, expressions, operator) {
                         'is_not_null("b")',
                         'if(is_not_null("a")) 100; else 0;',
                         'if(is_not_null("b")) 100; else 0;',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -1166,7 +1198,7 @@ function validate_binary_operations(output, expressions, operator) {
                         'percent_of("a", 500)',
                         'percent_of("a", "b")',
                         "percent_of(1, 3)",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -1203,7 +1235,7 @@ function validate_binary_operations(output, expressions, operator) {
                         'bucket("a", 5)',
                         'bucket("b", 2.5)',
                         `bucket("b", 10)`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -1234,7 +1266,7 @@ function validate_binary_operations(output, expressions, operator) {
                 }
                 table.update({ x: data });
                 const view = await table.view({
-                    expressions: ["random()"],
+                    expressions: { "random()": "random()" },
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({ "random()": "float" });
@@ -1262,7 +1294,7 @@ function validate_binary_operations(output, expressions, operator) {
                         "1 and 1",
                         "1 and 100",
                         "true and false",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const result = await view.to_columns();
                 expect(result['"u" and "u"']).toEqual([
@@ -1303,7 +1335,7 @@ function validate_binary_operations(output, expressions, operator) {
                         'mand("u" and "u", "u" and "z", "z" and "z")',
                         "mand(true, true, true, true)",
                         "mand(is_null(null), is_not_null(null))",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const result = await view.to_columns();
 
@@ -1364,15 +1396,15 @@ function validate_binary_operations(output, expressions, operator) {
                     f: [true, true, true, true],
                 });
                 const view = await table.view({
-                    expressions: [
-                        '"a" or "b"',
-                        '"c" or "d"',
-                        '"e" or "f"',
-                        "0 or 1",
-                        "true or false",
-                        "false or false",
-                        '// filtered\n"a" > 0.5 or "d" < 0.5',
-                    ],
+                    expressions: {
+                        '"a" or "b"': '"a" or "b"',
+                        '"c" or "d"': '"c" or "d"',
+                        '"e" or "f"': '"e" or "f"',
+                        "0 or 1": "0 or 1",
+                        "true or false": "true or false",
+                        "false or false": "false or false",
+                        filtered: '"a" > 0.5 or "d" < 0.5',
+                    },
                 });
                 const result = await view.to_columns();
                 expect(result['"a" or "b"']).toEqual([
@@ -1408,7 +1440,7 @@ function validate_binary_operations(output, expressions, operator) {
                         'mor("u" and "u", "u" and "z", "z" and "z")',
                         "mor(false, false, false)",
                         "mor(false, true, false)",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const result = await view.to_columns();
                 expect(
@@ -1476,7 +1508,7 @@ function validate_binary_operations(output, expressions, operator) {
                         "1 nand 1",
                         "1 nand 100",
                         "true nand true",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const result = await view.to_columns();
                 expect(result['"u" nand "u"']).toEqual([
@@ -1536,7 +1568,7 @@ function validate_binary_operations(output, expressions, operator) {
                         '"e" nor "f"',
                         "0 nor 1",
                         "false nor false",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const result = await view.to_columns();
                 expect(result['"a" nor "b"']).toEqual([
@@ -1584,7 +1616,7 @@ function validate_binary_operations(output, expressions, operator) {
                         '"e" xor "f"',
                         "0 xor 1",
                         "false xor false",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const result = await view.to_columns();
                 expect(result['"a" xor "b"']).toEqual([

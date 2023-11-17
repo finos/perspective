@@ -283,10 +283,10 @@ impl Component for SplitPanel {
             styles[0] = Some(match ctx.props().orientation {
                 Orientation::Horizontal => {
                     format!("max-width:{}px;min-width:{}px;width:{}px", x, x, x)
-                }
+                },
                 Orientation::Vertical => {
                     format!("max-height:{}px;min-height:{}px;height:{}px", x, x, x)
-                }
+                },
             });
         }
 
@@ -303,20 +303,20 @@ impl Component for SplitPanel {
             SplitPanelMsg::Reset(index) => {
                 self.styles[index] = None;
                 self.on_reset = ctx.props().on_reset.clone();
-            }
+            },
             SplitPanelMsg::StartResizing(index, client_offset, pointer_id, pointer_elem) => {
                 let elem = self.refs[index].cast::<HtmlElement>().unwrap();
                 let state =
                     ResizingState::new(index, client_offset, ctx, &elem, pointer_id, pointer_elem);
 
                 self.resize_state = state.ok();
-            }
+            },
             SplitPanelMsg::StopResizing => {
                 self.resize_state = None;
                 if let Some(cb) = &ctx.props().on_resize_finished {
                     cb.emit(());
                 }
-            }
+            },
             SplitPanelMsg::MoveResizing(client_offset) => {
                 if let Some(state) = self.resize_state.as_ref() {
                     if let Some(ref cb) = ctx.props().on_resize {
@@ -325,7 +325,7 @@ impl Component for SplitPanel {
 
                     self.styles[state.index] = state.get_style(client_offset);
                 }
-            }
+            },
         };
         true
     }

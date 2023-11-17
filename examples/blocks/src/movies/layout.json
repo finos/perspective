@@ -42,7 +42,7 @@
             "columns": ["US Gross"],
             "filter": [],
             "sort": [["US Gross", "desc"]],
-            "expressions": [],
+            "expressions": {},
             "aggregates": {},
             "master": true,
             "name": null,
@@ -60,10 +60,10 @@
             "columns": ["US Gross"],
             "filter": [["bucket(\"IMDB Rating\", 0.25)", "is not null", null]],
             "sort": [],
-            "expressions": [
-                "bucket(\"IMDB Rating\", 0.25)",
-                "bucket(\"Rotten Tomatoes Rating\", 2.5)"
-            ],
+            "expressions": {
+                "bucket(\"IMDB Rating\", 0.25)": "bucket(\"IMDB Rating\", 0.25)",
+                "bucket(\"Rotten Tomatoes Rating\", 2.5)": "bucket(\"Rotten Tomatoes Rating\", 2.5)"
+            },
             "aggregates": {
                 "bucket(\"Rotten Tomatoes Rating\", 2.5)": "avg"
             },
@@ -94,7 +94,9 @@
             ],
             "filter": [],
             "sort": [],
-            "expressions": ["bucket(\"Release Date\", 'Y')"],
+            "expressions": {
+                "bucket(\"Release Date\", 'Y')": "bucket(\"Release Date\", 'Y')"
+            },
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"
             },
@@ -118,7 +120,9 @@
             "columns": ["US Gross"],
             "filter": [],
             "sort": [],
-            "expressions": ["bucket(\"Release Date\", 'Y')"],
+            "expressions": {
+                "bucket(\"Release Date\", 'Y')": "bucket(\"Release Date\", 'Y')"
+            },
             "aggregates": {},
             "master": false,
             "name": "US Gross by Genre",

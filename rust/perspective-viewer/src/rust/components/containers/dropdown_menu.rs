@@ -74,7 +74,7 @@ where
                                 { x.clone().into() }
                             </span>
                         }
-                    }
+                    },
                     DropDownMenuItem::OptGroup(name, xs) => {
                         html_template! {
                             <span class="dropdown-group-label">{ name }</span>
@@ -94,7 +94,7 @@ where
                                 }
                             </div>
                         }
-                    }
+                    },
                 })
                 .collect::<Html>()
         } else {

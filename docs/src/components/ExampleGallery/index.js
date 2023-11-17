@@ -91,7 +91,7 @@ function OverlayDemo(props) {
                     convert({
                         plugin: "Datagrid",
                         group_by: [],
-                        expressions: [],
+                        expressions: {},
                         split_by: [],
                         sort: [],
                         aggregates: {},

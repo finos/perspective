@@ -30,15 +30,15 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [
-                    '// computed\n string("a")',
-                    '// computed2\n string("b")',
-                    '// computed3\n string("c")',
-                    '// computed4\n string("d")',
-                    '// computed5\n string("e")',
-                    '// computed6\n string("f")',
-                    "// computed7\n string(1234.5678)",
-                ],
+                expressions: {
+                    computed: ' string("a")',
+                    computed2: ' string("b")',
+                    computed3: ' string("c")',
+                    computed4: ' string("d")',
+                    computed5: ' string("e")',
+                    computed6: ' string("f")',
+                    computed7: " string(1234.5678)",
+                },
             });
 
             table.update({
@@ -92,11 +92,11 @@ const perspective = require("@finos/perspective");
                     computed2: "last",
                     computed3: "last",
                 },
-                expressions: [
-                    "// computed\n string('abcdefg')",
-                    "// computed2\n string(1234)",
-                    "// computed3\n string(1234.5678)",
-                ],
+                expressions: {
+                    computed: " string('abcdefg')",
+                    computed2: " string(1234)",
+                    computed3: " string(1234.5678)",
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -120,22 +120,22 @@ const perspective = require("@finos/perspective");
         test("Should create integers from scalars", async () => {
             const table = await perspective.table({ x: [1] });
             const view = await table.view({
-                expressions: [
-                    `//computed\ninteger(999999.999)`,
-                    `//computed2\ninteger(2147483648)`,
-                    `//computed3\ninteger(-2147483649)`,
-                    `//computed4\ninteger(123456789)`,
-                    `//computed5\ninteger(0.00001)`,
-                    `//computed6\ninteger(1.9999999999)`,
-                    `//computed7\ninteger(2147483647)`,
-                    `//computed8\ninteger(-2147483647)`,
-                    `//computed9\ninteger('957187281')`,
-                    `//computed10\ninteger('1928.2817')`,
-                    `//computed11\ninteger('1234abcd')`,
-                    `//computed12\ninteger('abcdefg1234')`,
-                    `//computed13\ninteger('2147483648')`,
-                    `//computed14\ninteger('-2147483649')`,
-                ],
+                expressions: {
+                    [`computed`]: `integer(999999.999)`,
+                    [`computed2`]: `integer(2147483648)`,
+                    [`computed3`]: `integer(-2147483649)`,
+                    [`computed4`]: `integer(123456789)`,
+                    [`computed5`]: `integer(0.00001)`,
+                    [`computed6`]: `integer(1.9999999999)`,
+                    [`computed7`]: `integer(2147483647)`,
+                    [`computed8`]: `integer(-2147483647)`,
+                    [`computed9`]: `integer('957187281')`,
+                    [`computed10`]: `integer('1928.2817')`,
+                    [`computed11`]: `integer('1234abcd')`,
+                    [`computed12`]: `integer('abcdefg1234')`,
+                    [`computed13`]: `integer('2147483648')`,
+                    [`computed14`]: `integer('-2147483649')`,
+                },
             });
 
             const result = await view.to_columns();
@@ -166,7 +166,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "integer" });
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`],
+                expressions: { computed: `integer("x")` },
             });
 
             table.update({
@@ -191,7 +191,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "float" });
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`],
+                expressions: { computed: `integer("x")` },
             });
 
             table.update({
@@ -223,7 +223,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "date" });
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`],
+                expressions: { computed: `integer("x")` },
             });
 
             const value = new Date(2020, 5, 30);
@@ -256,7 +256,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "datetime" });
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`],
+                expressions: { computed: `integer("x")` },
             });
 
             // first will not overflow, second will
@@ -288,7 +288,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`],
+                expressions: { computed: `integer("x")` },
             });
 
             const result = await view.to_columns();
@@ -303,26 +303,26 @@ const perspective = require("@finos/perspective");
         test("Should create float from scalars", async () => {
             const table = await perspective.table({ x: [1] });
             const view = await table.view({
-                expressions: [
-                    `//computed\n float(999999.999)`,
-                    `//computed2\n float(2147483648)`,
-                    `//computed3\n float(-2147483649)`,
-                    `//computed4\n float(123456789)`,
-                    `//computed5\n float(0.00001)`,
-                    `//computed6\n float(1.9999999992)`,
-                    `//computed7\n float(2147483647.1234567)`,
-                    `//computed8\n float(-2147483647)`,
-                    `//computed9\n float('957187281.00000001')`,
-                    `//computed10\n float('1928.2817')`,
-                    `//computed11\n float('abcdefg')`,
-                    `//computed12\n float('abcdefg1234.123125')`,
-                    `//computed13\n float('2147483648.1234566')`,
-                    `//computed14\n float('-2147483649')`,
-                    `//computed15\n float('inf')`,
-                    `//computed16\n float('-inf')`,
-                    `//computed17\n float(inf)`,
-                    `//computed18\n float(-inf)`,
-                ],
+                expressions: {
+                    [`computed`]: `float(999999.999)`,
+                    [`computed2`]: `float(2147483648)`,
+                    [`computed3`]: `float(-2147483649)`,
+                    [`computed4`]: `float(123456789)`,
+                    [`computed5`]: `float(0.00001)`,
+                    [`computed6`]: `float(1.9999999992)`,
+                    [`computed7`]: `float(2147483647.1234567)`,
+                    [`computed8`]: `float(-2147483647)`,
+                    [`computed9`]: `float('957187281.00000001')`,
+                    [`computed10`]: `float('1928.2817')`,
+                    [`computed11`]: `float('abcdefg')`,
+                    [`computed12`]: `float('abcdefg1234.123125')`,
+                    [`computed13`]: `float('2147483648.1234566')`,
+                    [`computed14`]: `float('-2147483649')`,
+                    [`computed15`]: `float('inf')`,
+                    [`computed16`]: `float('-inf')`,
+                    [`computed17`]: `float(inf)`,
+                    [`computed18`]: `float(-inf)`,
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -374,7 +374,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "integer" });
 
             const view = await table.view({
-                expressions: [`//computed\nfloat("x")`],
+                expressions: { computed: `float("x")` },
             });
 
             table.update({
@@ -399,7 +399,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "float" });
 
             const view = await table.view({
-                expressions: [`//computed\n float("x")`],
+                expressions: { computed: ` float("x")` },
             });
 
             table.update({
@@ -431,7 +431,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "date" });
 
             const view = await table.view({
-                expressions: [`//computed\nfloat("x")`],
+                expressions: { computed: `float("x")` },
             });
 
             const value = new Date(2020, 5, 30);
@@ -464,7 +464,7 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table({ x: "datetime" });
 
             const view = await table.view({
-                expressions: [`//computed\nfloat("x")`],
+                expressions: { computed: `float("x")` },
             });
 
             table.update({
@@ -495,7 +495,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed\n float("x")`],
+                expressions: { computed: ` float("x")` },
             });
 
             const result = await view.to_columns();
@@ -521,7 +521,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['boolean("x")'],
+                expressions: { 'boolean("x")': 'boolean("x")' },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -543,7 +543,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['boolean("x")'],
+                expressions: { 'boolean("x")': 'boolean("x")' },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -569,7 +569,7 @@ const perspective = require("@finos/perspective");
             );
 
             const view = await table.view({
-                expressions: ['boolean("x")'],
+                expressions: { 'boolean("x")': 'boolean("x")' },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -607,7 +607,7 @@ const perspective = require("@finos/perspective");
             );
 
             const view = await table.view({
-                expressions: ['boolean("x")'],
+                expressions: { 'boolean("x")': 'boolean("x")' },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -640,11 +640,11 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [
-                    `//computed \n date(2020, 7, 15)`,
-                    `//computed2 \n date(1970, 10, 29)`,
-                    `//computed3\n date(2020, 1, "x")`,
-                ],
+                expressions: {
+                    [`computed`]: `date(2020, 7, 15)`,
+                    [`computed2`]: `date(1970, 10, 29)`,
+                    [`computed3`]: `date(2020, 1, "x")`,
+                },
             });
 
             const result = await view.to_columns();
@@ -674,7 +674,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed \n date("y", "m", "d")`],
+                expressions: { computed: ` date("y", "m", "d")` },
             });
 
             table.update({
@@ -711,7 +711,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed \n date("y", "m", "d")`],
+                expressions: { computed: ` date("y", "m", "d")` },
             });
 
             table.update({
@@ -749,7 +749,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed \n date("y", "m", "d")`],
+                expressions: { computed: ` date("y", "m", "d")` },
             });
 
             const result = await view.to_columns();
@@ -769,9 +769,9 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [
-                    `//computed \n var year := floor("x" / 10000); var month := floor("x" % 10000 / 100); var day := floor("x" % 100); date(year, month, day)`,
-                ],
+                expressions: {
+                    [`computed`]: `var year := floor("x" / 10000); var month := floor("x" % 10000 / 100); var day := floor("x" % 100); date(year, month, day)`,
+                },
             });
 
             const result = await view.to_columns();
@@ -794,11 +794,11 @@ const perspective = require("@finos/perspective");
                 d: [1, 10, 32, 10],
             });
 
-            const validated = await table.validate_expressions([
-                `//computed \n date()`,
-                `//computed2 \n date('abc', 'def', '123')`,
-                `//computed3\ndate("y", "m", "d")`,
-            ]);
+            const validated = await table.validate_expressions({
+                [`computed`]: `date()`,
+                [`computed2`]: `date('abc', 'def', '123')`,
+                [`computed3`]: `date("y", "m", "d")`,
+            });
 
             expect(validated.expression_schema).toEqual({
                 computed3: "date",
@@ -806,10 +806,10 @@ const perspective = require("@finos/perspective");
 
             expect(validated.errors).toEqual({
                 computed: {
-                    column: 7,
+                    column: 6,
                     error_message:
                         "Zero parameter call to generic function: date not allowed",
-                    line: 1,
+                    line: 0,
                 },
                 computed2: {
                     column: 0,
@@ -833,10 +833,10 @@ const perspective = require("@finos/perspective");
             const b = new Date(2005, 6, 31, 11, 59, 32).getTime();
 
             const view = await table.view({
-                expressions: [
-                    `//computed \n datetime(${a})`,
-                    `//computed2 \n datetime(${b})`,
-                ],
+                expressions: {
+                    [`computed`]: `datetime(${a})`,
+                    [`computed2`]: `datetime(${b})`,
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -857,7 +857,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed \n datetime(float("x"))`],
+                expressions: { computed: ` datetime(float("x"))` },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -878,7 +878,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed \n datetime("x")`],
+                expressions: { computed: ` datetime("x")` },
             });
 
             const data = [
@@ -909,7 +909,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`//computed \n datetime("x")`],
+                expressions: { computed: ` datetime("x")` },
             });
 
             const data = [
@@ -937,10 +937,10 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [
-                    `//computed1 \n datetime(-1)`,
-                    `//computed2 \n datetime(0)`,
-                    `//computed3 \n datetime(${new Date(
+                expressions: {
+                    [`computed1`]: `datetime(-1)`,
+                    [`computed2`]: `datetime(0)`,
+                    computed3: `datetime(${new Date(
                         2002,
                         11,
                         12,
@@ -948,7 +948,7 @@ const perspective = require("@finos/perspective");
                         14,
                         15
                     ).getTime()})`,
-                ],
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -973,22 +973,22 @@ const perspective = require("@finos/perspective");
                 x: [1],
             });
 
-            const validated = await table.validate_expressions([
-                `//computed1 \n datetime()`,
-                `//computed2 \n datetime('abcd')`,
-                `//computed3 \n datetime(today())`,
-                `//computed4 \n datetime(now())`,
-                `//computed5 \n datetime(123456, 7)`,
-            ]);
+            const validated = await table.validate_expressions({
+                [`computed1`]: `datetime()`,
+                [`computed2`]: `datetime('abcd')`,
+                [`computed3`]: `datetime(today())`,
+                [`computed4`]: `datetime(now())`,
+                [`computed5`]: `datetime(123456, 7)`,
+            });
 
             expect(validated.expression_schema).toEqual({});
 
             expect(validated.errors).toEqual({
                 computed1: {
-                    column: 11,
+                    column: 10,
                     error_message:
                         "Zero parameter call to generic function: datetime not allowed",
-                    line: 1,
+                    line: 0,
                 },
                 computed2: {
                     error_message:
@@ -1011,8 +1011,8 @@ const perspective = require("@finos/perspective");
                 computed5: {
                     error_message:
                         "Failed parameter type check for function 'datetime', Expected 'T' call set: 'TT'",
-                    column: 20,
-                    line: 1,
+                    column: 19,
+                    line: 0,
                 },
             });
 

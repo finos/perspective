@@ -444,9 +444,9 @@ class TestPerspectiveManager(object):
             expected={
                 "id": 1,
                 "data": {
-                    "expression_schema": {"abc": "float"},
+                    "expression_schema": {'"a" + "a"': "float"},
                     "errors": {},
-                    "expression_alias": {"abc": '// abc \n "a" + "a"'},
+                    "expression_alias": {'"a" + "a"': '"a" + "a"'},
                 },
             },
         )
@@ -456,7 +456,7 @@ class TestPerspectiveManager(object):
             "name": "table1",
             "cmd": "table_method",
             "method": "validate_expressions",
-            "args": [['// abc \n "a" + "a"']],
+            "args": [['"a" + "a"']],
         }
         manager = PerspectiveManager()
         table = Table(data)

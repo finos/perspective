@@ -14,7 +14,6 @@ import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.j
 
 function generate_mandelbrot(params) {
     return `
-// color
 var height := ${params.height};
 var width := ${params.width};
 var xmin := ${params.xmin};
@@ -57,11 +56,11 @@ function generate_layout(params) {
         group_by: [`floor("index" / ${params.height})`],
         split_by: [`"index" % ${params.height}`],
         columns: ["color"],
-        expressions: [
-            generate_mandelbrot(params).trim(),
-            `floor("index" / ${params.height})`,
-            `"index" % ${params.height}`,
-        ],
+        expressions: {
+            color: generate_mandelbrot(params).trim(),
+            [`floor("index" / ${params.height})`]: `floor("index" / ${params.height})`,
+            [`"index" % ${params.height}`]: `"index" % ${params.height}`,
+        },
     };
 }
 

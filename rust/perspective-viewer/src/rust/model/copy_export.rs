@@ -90,35 +90,35 @@ pub trait CopyExportModel:
             ExportMethod::Csv => {
                 let session = self.session().clone();
                 ApiFuture::new(async move { session.csv_as_jsvalue(false).await?.as_blob() })
-            }
+            },
             ExportMethod::CsvAll => {
                 let session = self.session().clone();
                 ApiFuture::new(async move { session.csv_as_jsvalue(true).await?.as_blob() })
-            }
+            },
             ExportMethod::Json => {
                 let session = self.session().clone();
                 ApiFuture::new(async move { session.json_as_jsvalue(false).await?.as_blob() })
-            }
+            },
             ExportMethod::JsonAll => {
                 let session = self.session().clone();
                 ApiFuture::new(async move { session.json_as_jsvalue(true).await?.as_blob() })
-            }
+            },
             ExportMethod::Arrow => {
                 let session = self.session().clone();
                 ApiFuture::new(async move { session.arrow_as_jsvalue(false).await?.as_blob() })
-            }
+            },
             ExportMethod::ArrowAll => {
                 let session = self.session().clone();
                 ApiFuture::new(async move { session.arrow_as_jsvalue(true).await?.as_blob() })
-            }
+            },
             ExportMethod::Html => {
                 let html_task = self.html_as_jsvalue();
                 ApiFuture::new(html_task)
-            }
+            },
             ExportMethod::Png => {
                 let png_task = self.png_as_jsvalue();
                 ApiFuture::new(png_task)
-            }
+            },
             ExportMethod::JsonConfig => {
                 let config_task = self.get_viewer_config();
                 ApiFuture::new(async move {
@@ -128,7 +128,7 @@ pub trait CopyExportModel:
                         .dyn_into::<js_sys::JsString>()?
                         .as_blob()
                 })
-            }
+            },
         }
     }
 }

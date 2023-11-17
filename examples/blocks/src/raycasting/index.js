@@ -160,11 +160,11 @@ function generate_layout() {
         group_by: [`floor("index" / ${HEIGHT}) - ${HEIGHT} / 2`],
         split_by: [`"index" % ${HEIGHT} - ${HEIGHT} / 2`],
         columns: ["color"],
-        expressions: [
-            generate_mandelbrot().trim(),
-            `floor("index" / ${HEIGHT}) - ${HEIGHT} / 2`,
-            `"index" % ${HEIGHT} - ${HEIGHT} / 2`,
-        ],
+        expressions: {
+            color: generate_mandelbrot().trim(),
+            [`floor("index" / ${HEIGHT}) - ${HEIGHT} / 2`]: `floor("index" / ${HEIGHT}) - ${HEIGHT} / 2`,
+            [`"index" % ${HEIGHT} - ${HEIGHT} / 2`]: `"index" % ${HEIGHT} - ${HEIGHT} / 2`,
+        },
     };
 }
 

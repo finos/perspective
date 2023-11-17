@@ -123,6 +123,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                 custom_events,
                 column_name
             );
+
             match tab {
                 ColumnSettingsTab::Attributes => {
                     html! {
@@ -130,28 +131,23 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                             { session }
                             { renderer }
                             { custom_events }
-
                             { selected_column }
-                            { on_close }
-                        />
+                            { on_close }/>
                     }
-                }
+                },
                 ColumnSettingsTab::Style => html! {
                     <StyleTab
                         { session }
                         { renderer }
                         { custom_events }
-
                         { column_name }
-                        ty={ maybe_ty.unwrap() }
-                    />
+                        ty={ maybe_ty.unwrap() }/>
                 },
             }
         })
     };
 
     let selected_tab = use_state(|| None);
-
     let on_tab_change = {
         clone!(selected_tab);
         use_callback((), move |idx, _| {
@@ -160,21 +156,19 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     };
 
     html_template! {
-        <LocalStyle href={css!("column-settings-panel")} />
+        <LocalStyle href={ css!("column-settings-panel") } />
         <Sidebar
-            title={column_name}
-            on_close={p.on_close.clone()}
+            title={ column_name }
+            on_close={ p.on_close.clone() }
             id_prefix="column_settings"
-            icon={"column_settings_icon"}
-            width_override={p.width_override}
-            selected_tab={*selected_tab}
-        >
+            icon={ "column_settings_icon" }
+            width_override={ p.width_override }
+            selected_tab={ *selected_tab }>
             <TabList<ColumnSettingsTab>
-                {tabs}
-                {match_fn}
-                {on_tab_change}
-                selected_tab={*selected_tab}
-            />
+                { tabs }
+                { match_fn }
+                { on_tab_change }
+                selected_tab={ *selected_tab }/>
         </Sidebar>
 
     }

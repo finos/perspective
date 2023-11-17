@@ -46,10 +46,13 @@ for (const version of VERSIONS) {
         if (a.metadata.name > b.metadata.name) return 1;
         return 0;
     });
+
     for (const {
         metadata: { version, name },
     } of sortedInstalls) {
-        output += `${name}==${version}\n`;
+        if (name !== "perspective-python") {
+            output += `${name}==${version}\n`;
+        }
     }
 
     fs.writeFileSync(

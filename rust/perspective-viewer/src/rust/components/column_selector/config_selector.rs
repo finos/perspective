@@ -209,11 +209,11 @@ impl Component for ConfigSelector {
                     ctx.props().ondragenter.emit(());
                 }
                 should_render
-            }
+            },
             ConfigSelectorMsg::DragLeave(action) => {
                 ctx.props().dragdrop.notify_drag_leave(action);
                 true
-            }
+            },
             ConfigSelectorMsg::Close(index, DragTarget::Sort) => {
                 let mut sort = ctx.props().session.get_view_config().sort.clone();
                 sort.remove(index);
@@ -226,7 +226,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(config));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::Close(index, DragTarget::GroupBy) => {
                 let mut group_by = ctx.props().session.get_view_config().group_by.clone();
                 group_by.remove(index);
@@ -238,7 +238,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(config));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::Close(index, DragTarget::SplitBy) => {
                 let mut split_by = ctx.props().session.get_view_config().split_by.clone();
                 split_by.remove(index);
@@ -250,7 +250,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(config));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::Close(index, DragTarget::Filter) => {
                 self.filter_dropdown.hide().unwrap();
                 let mut filter = ctx.props().session.get_view_config().filter.clone();
@@ -263,7 +263,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(config));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::Close(..) => false,
             ConfigSelectorMsg::Drop(column, action, effect, index)
                 if action != DragTarget::Active =>
@@ -278,12 +278,12 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::Drop(_, _, DragEffect::Move(action), _)
                 if action != DragTarget::Active =>
             {
                 true
-            }
+            },
             ConfigSelectorMsg::Drop(..) => false,
             ConfigSelectorMsg::TransposePivots => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
@@ -298,7 +298,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::SetFilterValue(index, input) => {
                 let mut filter = ctx.props().session.get_view_config().filter.clone();
                 let update = if matches!(filter[index].1, FilterOp::In | FilterOp::NotIn) {
@@ -329,7 +329,7 @@ impl Component for ConfigSelector {
 
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::GroupBy, InPlaceColumn::Column(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.group_by.push(col);
@@ -341,7 +341,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::SplitBy, InPlaceColumn::Column(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.split_by.push(col);
@@ -353,7 +353,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::Filter, InPlaceColumn::Column(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.filter.push(Filter(
@@ -370,7 +370,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::Sort, InPlaceColumn::Column(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.sort.push(Sort(col, SortDir::Asc));
@@ -382,7 +382,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::GroupBy, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.group_by.push(col.name.as_ref().to_owned());
@@ -396,7 +396,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::SplitBy, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.split_by.push(col.name.as_ref().to_owned());
@@ -410,7 +410,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::Filter, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config.filter.push(Filter(
@@ -428,7 +428,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::Sort, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 view_config
@@ -444,7 +444,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             ConfigSelectorMsg::New(DragTarget::Active, _) => false,
         }
     }
@@ -544,7 +544,7 @@ impl Component for ConfigSelector {
                     allow_duplicates=true
                     parent={ ctx.link().clone() }
                     column_dropdown={ column_dropdown.clone() }
-                    exclude={config.sort.iter().map(|x| x.0.clone()).collect::<HashSet<_>>() }
+                    exclude={ config.sort.iter().map(|x| x.0.clone()).collect::<HashSet<_>>() }
                     dragdrop={ &ctx.props().dragdrop }
                     is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::Sort).map(|(index, name)| {
                         (index, Sort(name, SortDir::Asc))

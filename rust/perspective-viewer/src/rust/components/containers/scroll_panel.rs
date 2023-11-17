@@ -206,7 +206,7 @@ impl Component for ScrollPanel {
             ScrollPanelMsg::ResetAutoWidth => {
                 self.viewport_width = 0.0;
                 self.calculate_window_content(ctx)
-            }
+            },
             ScrollPanelMsg::UpdateViewportDimensions => {
                 let viewport = self.viewport_elem(ctx);
                 let rect = viewport.get_bounding_client_rect();
@@ -218,7 +218,7 @@ impl Component for ScrollPanel {
                 self.viewport_height = rect.height() - 8.0;
                 self.viewport_width = max!(self.viewport_width, rect.width() - 6.0);
                 re_render
-            }
+            },
             ScrollPanelMsg::CalculateWindowContent => self.calculate_window_content(ctx),
             ScrollPanelMsg::ChildrenChanged => true,
         }
