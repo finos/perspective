@@ -269,9 +269,15 @@ impl Component for ColumnSelector {
                 let ondragenter = ondragenter.reform(move |_| Some(idx));
                 let size_hint = if named_count > 0 { 50.0 } else { 28.0 };
                 named_count = named_count.saturating_sub(1);
-                let key = name.get_name().map(|x| x.to_owned()).unwrap_or_else(|| format!("__auto_{}__", idx));
+                let key = name
+                    .get_name()
+                    .map(|x| x.to_owned())
+                    .unwrap_or_else(|| format!("__auto_{}__", idx));
                 let column_dropdown = self.column_dropdown.clone();
-                let is_editing = matches!(&ctx.props().selected_column, Some(ColumnLocator::Plain(x)) if x == &key);
+                let is_editing = matches!(
+                    &ctx.props().selected_column,
+                    Some(ColumnLocator::Plain(x)) | Some(ColumnLocator::Expr(Some(x))) if x == &key
+                );
                 html_nested! {
                     <ScrollPanelItem key={ key } { size_hint }>
                         <ActiveColumn

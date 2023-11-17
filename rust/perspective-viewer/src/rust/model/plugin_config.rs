@@ -18,25 +18,31 @@ use crate::clone;
 use crate::config::plugin::{PluginAttributes, PluginConfig};
 use crate::utils::{ApiFuture, JsValueSerdeExt};
 
-pub trait UpdatePluginConfig: HasRenderer + HasCustomEvents + HasSession {
+pub trait GetPluginConfig: HasRenderer {
     /// This function will get the results of calling plugin.save()
-    /// plugin.plugin_attributes().
-    fn get_plugin_config(&self) -> (Option<PluginConfig>, Option<PluginAttributes>) {
+    fn get_plugin_config(&self) -> Option<PluginConfig> {
         let plugin = self.renderer().get_active_plugin().unwrap();
         let config = plugin.save();
-        let default_config = JsValue::from(plugin.plugin_attributes());
-        let config = jsval_to_type(&config).ok();
-        let attrs = jsval_to_type(&default_config).ok();
-        (config, attrs)
+        jsval_to_type(&config).ok()
     }
+    /// This function will get the results of calling plugin.plugin_attrs.
+    /// Plugin attrs should not change during the lifetime of the plugin.
+    fn get_plugin_attrs(&self) -> Option<PluginAttributes> {
+        let plugin = self.renderer().get_active_plugin().unwrap();
+        let default_config = JsValue::from(plugin.plugin_attributes());
+        jsval_to_type(&default_config).ok()
+    }
+}
+impl<T: HasRenderer> GetPluginConfig for T {}
 
+pub trait UpdatePluginConfig: HasRenderer + HasCustomEvents + HasSession + GetPluginConfig {
     /// This function sends the config to the plugin using its `restore` method.
     /// It will also send a config update event in case we need to listen for it
     /// outside of the viewer
     fn send_plugin_config(&self, column_name: String, column_config: serde_json::Value) {
         let custom_events = self.custom_events();
         let renderer = self.renderer();
-        let (current_config, _) = self.get_plugin_config();
+        let current_config = self.get_plugin_config();
         let elem = renderer.get_active_plugin().unwrap();
         if let Some(mut current_config) = current_config {
             current_config.columns.insert(column_name, column_config);

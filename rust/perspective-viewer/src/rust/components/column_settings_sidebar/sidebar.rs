@@ -12,7 +12,7 @@
 
 use std::fmt::Display;
 
-use yew::{function_component, html, Callback, Html, Properties};
+use yew::{function_component, html, use_callback, use_state, Callback, Html, Properties};
 
 use crate::components::column_settings_sidebar::attributes_tab::AttributesTab;
 use crate::components::column_settings_sidebar::style_tab::StyleTab;
@@ -21,6 +21,7 @@ use crate::components::containers::tablist::{Tab, TabList};
 use crate::components::expression_editor::get_new_column_name;
 use crate::components::style::LocalStyle;
 use crate::components::viewer::ColumnLocator;
+use crate::config::Type;
 use crate::custom_events::CustomEvents;
 use crate::model::*;
 use crate::renderer::Renderer;
@@ -49,6 +50,7 @@ pub struct ColumnSettingsProps {
     pub session: Session,
     pub renderer: Renderer,
     pub custom_events: CustomEvents,
+    pub width_override: Option<i32>,
 }
 
 derive_model!(CustomEvents, Session, Renderer for ColumnSettingsProps);
@@ -69,7 +71,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     let column_type = p.session.metadata().get_column_view_type(&column_name);
     let is_active = column_type.is_some();
 
-    let (config, attrs) = p.get_plugin_config();
+    let (config, attrs) = (p.get_plugin_config(), p.get_plugin_attrs());
     if config.is_none() || attrs.is_none() {
         tracing::warn!(
             "Could not get full plugin config!\nconfig (plugin.save()): {:?}\nplugin_attrs: {:?}",
@@ -79,14 +81,22 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     }
     let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
 
-    let title = format!("Editing ‘{column_name}’...");
-
     let mut tabs = vec![];
 
+    // TODO: This is a hack and needs to be replaced.
+    let plugin = p.renderer.get_active_plugin().unwrap();
+    let show_styles = maybe_ty
+        .map(|ty| match &*plugin.name() {
+            "Datagrid" => ty != Type::Bool,
+            "X/Y Scatter" => ty == Type::String,
+            _ => false,
+        })
+        .unwrap_or_default();
+
     if !matches!(p.selected_column, ColumnLocator::Expr(None))
+        && show_styles
         && is_active
         && config.is_some()
-        && attrs.is_some()
         && maybe_ty.is_some()
     {
         tabs.push(ColumnSettingsTab::Style);
@@ -95,58 +105,76 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
         tabs.push(ColumnSettingsTab::Attributes);
     }
 
-    clone!(
-        p.selected_column,
-        p.on_close,
-        p.session,
-        p.renderer,
-        p.custom_events,
-        column_name
-    );
-    let match_fn = Callback::from(move |tab| {
+    let match_fn = {
         clone!(
-            selected_column,
-            on_close,
-            session,
-            renderer,
-            custom_events,
+            p.selected_column,
+            p.on_close,
+            p.session,
+            p.renderer,
+            p.custom_events,
             column_name
         );
-        match tab {
-            ColumnSettingsTab::Attributes => {
-                html! {
-                    <AttributesTab
+        Callback::from(move |tab| {
+            clone!(
+                selected_column,
+                on_close,
+                session,
+                renderer,
+                custom_events,
+                column_name
+            );
+            match tab {
+                ColumnSettingsTab::Attributes => {
+                    html! {
+                        <AttributesTab
+                            { session }
+                            { renderer }
+                            { custom_events }
+
+                            { selected_column }
+                            { on_close }
+                        />
+                    }
+                }
+                ColumnSettingsTab::Style => html! {
+                    <StyleTab
                         { session }
                         { renderer }
                         { custom_events }
 
-                        { selected_column }
-                        { on_close }
+                        { column_name }
+                        ty={ maybe_ty.unwrap() }
                     />
-                }
+                },
             }
-            ColumnSettingsTab::Style => html! {
-                <StyleTab
-                    { session }
-                    { renderer }
-                    { custom_events }
+        })
+    };
 
-                    { column_name }
-                    ty={ maybe_ty.unwrap() }
-                />
-            },
-        }
-    });
+    let selected_tab = use_state(|| None);
+
+    let on_tab_change = {
+        clone!(selected_tab);
+        use_callback((), move |idx, _| {
+            selected_tab.set(Some(idx));
+        })
+    };
 
     html_template! {
         <LocalStyle href={css!("column-settings-panel")} />
         <Sidebar
-            {title}
+            title={column_name}
             on_close={p.on_close.clone()}
             id_prefix="column_settings"
             icon={"column_settings_icon"}
+            width_override={p.width_override}
+            selected_tab={*selected_tab}
         >
-            <TabList<ColumnSettingsTab> {tabs} {match_fn} />
+            <TabList<ColumnSettingsTab>
+                {tabs}
+                {match_fn}
+                {on_tab_change}
+                selected_tab={*selected_tab}
+            />
         </Sidebar>
 
     }

@@ -76,7 +76,7 @@ derive_model!(CustomEvents, Session, Renderer for ColumnStyleProps);
 #[function_component]
 pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
     let props = p.clone();
-    let (config, attrs) = props.get_plugin_config();
+    let (config, attrs) = (props.get_plugin_config(), props.get_plugin_attrs());
     let (config, attrs) = (config.unwrap(), attrs.unwrap());
     let title = format!("{} Styling", props.ty.to_capitalized());
     let opt_html = match props.ty {
