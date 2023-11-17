@@ -471,7 +471,7 @@ class TestPerspectiveManager(object):
             "table_name": "table1",
             "view_name": "view1",
             "cmd": "view",
-            "config": {"expressions": ['// abc \n "a" + "a"']},
+            "config": {"expressions": {"abc": '"a" + "a"'}},
         }
         message = {
             "id": 2,

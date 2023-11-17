@@ -10,7 +10,6 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from operator import itemgetter
 import re
 from datetime import date, datetime
 from functools import partial
@@ -156,11 +155,54 @@ def _parse_expression_inputs(expressions):
     validated_expressions = []
     alias_map = {}
 
-    for expression in expressions:
-        if type(expression) is dict:
-            expr_raw, alias = itemgetter("expr", "name")(expression)
-            parsed = expr_raw
-        else:
+    if isinstance(expressions, dict):
+        for alias in expressions.keys():
+            expression = expressions[alias]
+
+            column_id_map = {}
+            column_name_map = {}
+
+            # we need to be able to modify the running_cidx inside of every call to
+            # replacer_fn - must pass by reference unfortunately
+            running_cidx = [0]
+
+            replacer_fn = partial(
+                _replace_expression_column_name,
+                column_name_map,
+                column_id_map,
+                running_cidx,
+            )
+
+            parsed = expression
+            parsed = re.sub(
+                BOOLEAN_LITERAL_REGEX,
+                lambda match: "True" if match.group(0) == "true" else ("False" if match.group(0) == "false" else match.group(0)),
+                parsed,
+            )
+
+            parsed = re.sub(EXPRESSION_COLUMN_NAME_REGEX, replacer_fn, parsed)
+            parsed = re.sub(
+                STRING_LITERAL_REGEX,
+                lambda match: "intern({0})".format(match.group(0)),
+                parsed,
+            )
+
+            # remove the `intern()` in bucket and regex functions that take
+            # string literal parameters. TODO this logic should be centralized
+            # in C++ instead of being duplicated.
+            parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
+            parsed = re.sub(REPLACE_FN_REGEX, _replace_interned_param, parsed)
+
+            validated = [alias, expression, parsed, column_id_map]
+
+            if alias_map.get(alias) is not None:
+                idx = alias_map[alias]
+                validated_expressions[idx] = validated
+            else:
+                validated_expressions.append(validated)
+                alias_map[alias] = len(validated_expressions) - 1
+    if isinstance(expressions, list):
+        for expression in expressions:
             expr_raw = expression
             parsed = expr_raw
             alias_match = re.match(ALIAS_REGEX, expr_raw)
@@ -169,49 +211,49 @@ def _parse_expression_inputs(expressions):
             else:
                 alias = expr_raw
 
-        if '""' in expr_raw:
-            raise ValueError("Cannot reference empty column in expression!")
+            if '""' in expr_raw:
+                raise ValueError("Cannot reference empty column in expression!")
 
-        column_id_map = {}
-        column_name_map = {}
+            column_id_map = {}
+            column_name_map = {}
 
-        # we need to be able to modify the running_cidx inside of every call to
-        # replacer_fn - must pass by reference unfortunately
-        running_cidx = [0]
+            # we need to be able to modify the running_cidx inside of every call to
+            # replacer_fn - must pass by reference unfortunately
+            running_cidx = [0]
 
-        replacer_fn = partial(
-            _replace_expression_column_name,
-            column_name_map,
-            column_id_map,
-            running_cidx,
-        )
+            replacer_fn = partial(
+                _replace_expression_column_name,
+                column_name_map,
+                column_id_map,
+                running_cidx,
+            )
 
-        parsed = re.sub(
-            BOOLEAN_LITERAL_REGEX,
-            lambda match: "True" if match.group(0) == "true" else ("False" if match.group(0) == "false" else match.group(0)),
-            parsed,
-        )
+            parsed = re.sub(
+                BOOLEAN_LITERAL_REGEX,
+                lambda match: "True" if match.group(0) == "true" else ("False" if match.group(0) == "false" else match.group(0)),
+                parsed,
+            )
 
-        parsed = re.sub(EXPRESSION_COLUMN_NAME_REGEX, replacer_fn, parsed)
-        parsed = re.sub(
-            STRING_LITERAL_REGEX,
-            lambda match: "intern({0})".format(match.group(0)),
-            parsed,
-        )
+            parsed = re.sub(EXPRESSION_COLUMN_NAME_REGEX, replacer_fn, parsed)
+            parsed = re.sub(
+                STRING_LITERAL_REGEX,
+                lambda match: "intern({0})".format(match.group(0)),
+                parsed,
+            )
 
-        # remove the `intern()` in bucket and regex functions that take
-        # string literal parameters. TODO this logic should be centralized
-        # in C++ instead of being duplicated.
-        parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
-        parsed = re.sub(REPLACE_FN_REGEX, _replace_interned_param, parsed)
+            # remove the `intern()` in bucket and regex functions that take
+            # string literal parameters. TODO this logic should be centralized
+            # in C++ instead of being duplicated.
+            parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
+            parsed = re.sub(REPLACE_FN_REGEX, _replace_interned_param, parsed)
 
-        validated = [alias, expr_raw, parsed, column_id_map]
+            validated = [alias, expr_raw, parsed, column_id_map]
 
-        if alias_map.get(alias) is not None:
-            idx = alias_map[alias]
-            validated_expressions[idx] = validated
-        else:
-            validated_expressions.append(validated)
-            alias_map[alias] = len(validated_expressions) - 1
+            if alias_map.get(alias) is not None:
+                idx = alias_map[alias]
+                validated_expressions[idx] = validated
+            else:
+                validated_expressions.append(validated)
+                alias_map[alias] = len(validated_expressions) - 1
 
     return validated_expressions

@@ -2208,14 +2208,12 @@ export default function (Module) {
          */
         async init(msg) {
             let wasmBinary = msg.buffer;
-            try {
-                const mod = await WebAssembly.instantiate(wasmBinary);
-                const exports = mod.instance.exports;
-                const size = exports.size();
-                const offset = exports.offset();
-                const array = new Uint8Array(exports.memory.buffer);
-                wasmBinary = array.slice(offset, offset + size);
-            } catch {}
+            const mod = await WebAssembly.instantiate(wasmBinary);
+            const exports = mod.instance.exports;
+            const size = exports.size();
+            const offset = exports.offset();
+            const array = new Uint8Array(exports.memory.buffer);
+            wasmBinary = array.slice(offset, offset + size);
             __MODULE__ = await __MODULE__({
                 wasmBinary,
                 wasmJSMethod: "native-wasm",

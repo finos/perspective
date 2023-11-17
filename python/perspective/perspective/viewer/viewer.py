@@ -135,7 +135,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.aggregates = validate_aggregates(aggregates) or {}
         self.sort = validate_sort(sort) or []
         self.filter = validate_filter(filter) or []
-        self.expressions = validate_expressions(expressions) or []
+        self.expressions = validate_expressions(expressions) or {}
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.settings = settings
         self.theme = theme
@@ -270,7 +270,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.split_by = []
         self.filter = []
         self.sort = []
-        self.expressions = []
+        self.expressions = {}
         self.aggregates = {}
         self.columns = []
         self.plugin = "Datagrid"

@@ -37,16 +37,18 @@ class TestViewExpression(object):
             "// g\nnow()",
             "// h\nlength(123)",
         ]
-        test_expressions_dict = [
-            {"name": "x", "expr": '"a"'},
-            {"name": "y", "expr": '"b" * 0.5'},
-            {"name": "c", "expr": "'abcdefg'"},
-            {"name": "d", "expr": "true and false"},
-            {"name": "e", "expr": 'float("a") > 2 ? null : 1'},
-            {"name": "f", "expr": "today()"},
-            {"name": "g", "expr": "now()"},
-            {"name": "h", "expr": "length(123)"},
-        ]
+
+        test_expressions_dict = {
+            "x": '"a"',
+            "y": '"b" * 0.5',
+            "c": "'abcdefg'",
+            "d": "true and false",
+            "e": 'float("a") > 2 ? null : 1',
+            "f": "today()",
+            "g": "now()",
+            "h": "length(123)",
+        }
+
         str_validated = table.validate_expressions(test_expressions_str)
         dict_validated = table.validate_expressions(test_expressions_dict)
         assert str_validated["errors"] == dict_validated["errors"]
