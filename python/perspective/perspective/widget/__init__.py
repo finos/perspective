@@ -10,6 +10,7 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from .widget import PerspectiveWidget
+from .widget import PerspectiveWidget, set_jupyter_html_export
 
-__all__ = ["PerspectiveWidget"]
+
+__all__ = ["PerspectiveWidget", "set_jupyter_html_export"]
