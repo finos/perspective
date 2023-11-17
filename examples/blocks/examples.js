@@ -21,6 +21,7 @@ const LOCAL_EXAMPLES = [
     "magic",
     "streaming",
     "covid",
+    "webcam",
     "movies",
     "superstore",
     "citibike",

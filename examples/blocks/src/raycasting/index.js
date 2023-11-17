@@ -98,16 +98,13 @@ for (var j := 1; j <= radialSegments; j += 1) {
                         if (t >= 0) {
                             var t2 := 1 - u - v;
                             var d1[3] := v0 * t2 + v1 * u + v2 * v;
-                            var d2[3] := d1 - camera;
-                            var dist := norm3(d2);
+                            var dist := norm3(d1 - camera);
                             if (dist < depth) {
                                 depth := dist;
 
                                 // Lighting
-                                var ww[3] := v0 - v1;
-                                var zz[3] := v2 - v1;
                                 var n[3];
-                                cross_product3(ww, zz, n);
+                                cross_product3(v0 - v1, v2 - v1, n);
                                 color := acos(dot_product3(light, n) / (light_norm * norm3(n)))
                             }
                         }
