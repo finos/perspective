@@ -1,0 +1,23 @@
+{
+    "plugin": "Map Scatter",
+    "plugin_config": {},
+    "settings": true,
+    "theme": "Pro Dark",
+    "group_by": ["bucket lon", "bucket lat"],
+    "split_by": ["neighborhood"],
+    "columns": ["lon", "lat", null, null, null],
+    "filter": [["lon", "is not null", null]],
+    "sort": [],
+    "expressions": [
+        "// lon\nvar x[2];\nindexof(\"shape\", ' .+?( )', x);\nvar y := substring(\"shape\", 7, x[1] - 7);\nfloat(y)",
+        "// lat\nvar x[2];\nindexof(\"shape\", ' .+?( )', x);\nvar y := substring(\"shape\", x[0], length(\"shape\") - x[1]);\nfloat(y)",
+        "// bucket lon\nvar x[2];\nindexof(\"shape\", ' .+?( )', x);\nvar y := substring(\"shape\", 7, x[1] - 7);\nbucket(float(y), 0.0025) + 0.00125",
+        "// bucket lat\nvar x[2];\nindexof(\"shape\", ' .+?( )', x);\nvar y := substring(\"shape\", x[0], length(\"shape\") - x[1]);\nbucket(float(y), 0.0025) + 0.00125"
+    ],
+    "aggregates": {
+        "lon": "avg",
+        "lat": "avg",
+        "bucket lon": "avg",
+        "bucket lat": "avg"
+    }
+}

@@ -1,0 +1,89 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+
+        <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro-dark.css" />
+        <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-workspace/dist/css/pro-dark.css" />
+
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@2.6.1/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-workspace@2.6.1/dist/cdn/perspective-workspace.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@2.6.1/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@2.6.1/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective@2.6.1/dist/cdn/perspective.js"></script>
+
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            perspective-viewer {
+                --d3fc-positive--gradient: linear-gradient(#94d0ff, #8795e8, #966bff, #ad8cff, #c774e8, #c774a9, #ff6ad5, #ff6a8b, #ff8b8b, #ffa58b, #ffde8b, #cdde8b, #8bde8b, #20de8b) !important;
+
+                --d3fc-negative--gradient: linear-gradient(#94d0ff, #8795e8, #966bff, #ad8cff, #c774e8, #c774a9, #ff6ad5, #ff6a8b, #ff8b8b, #ffa58b, #ffde8b, #cdde8b, #8bde8b, #20de8b) !important;
+
+                --d3fc-full--gradient: linear-gradient(#94d0ff, #8795e8, #966bff, #ad8cff, #c774e8, #c774a9, #ff6ad5, #ff6a8b, #ff8b8b, #ffa58b, #ffde8b, #cdde8b, #8bde8b, #20de8b) !important;
+            }
+        </style>
+    </head>
+    <body>
+        <perspective-workspace id="workspace">
+            <perspective-viewer table="movies"></perspective-viewer>
+        </perspective-workspace>
+
+        <script type="module">
+            import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.6.1/dist/cdn/perspective.js";
+
+            const SCHEMA = {
+                Title: "string",
+                "US Gross": "float",
+                "Worldwide Gross": "float",
+                "US DVD Sales": "float",
+                "Production Budget": "float",
+                "Release Date": "date",
+                "MPAA Rating": "string",
+                "Running Time min": "integer",
+                Distributor: "string",
+                Source: "string",
+                "Major Genre": "string",
+                "Creative Type": "string",
+                Director: "string",
+                "Rotten Tomatoes Rating": "integer",
+                "IMDB Rating": "float",
+                "IMDB Votes": "integer",
+            };
+
+            const MOVIES_URL = "https://vega.github.io/editor/data/movies.json";
+
+            const datasource = async () => {
+                const request = fetch(MOVIES_URL);
+                const worker = perspective.worker();
+                const response = await request;
+                const json = await response.json();
+                for (const row of json) {
+                    row["Release Date"] = row["Release Date"] ? new Date(row["Release Date"]) || null : null;
+                }
+                const table = await worker.table(SCHEMA);
+                table.update(json);
+                return table;
+            };
+
+            window.addEventListener("load", async () => {
+                let req = await fetch("layout.json");
+                let layout = await req.json();
+
+                window.workspace.tables.set("movies", datasource());
+
+                window.workspace.restore(layout);
+            });
+        </script>
+    </body>
+</html>
