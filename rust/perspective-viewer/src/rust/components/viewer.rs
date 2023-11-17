@@ -351,10 +351,12 @@ impl Component for PerspectiveViewer {
                         on_resize={ on_split_panel_resize }
                         on_resize_finished={ ctx.props().render_callback() }>
                         <div id="settings_panel" class="sidebar_column noselect split-panel orient-vertical">
-                            <SidebarCloseButton
-                                id={ "settings_close_button" }
-                                on_close_sidebar={ &on_close_settings }>
-                            </SidebarCloseButton>
+                            if self.selected_column.is_none() {
+                                <SidebarCloseButton
+                                    id={ "settings_close_button" }
+                                    on_close_sidebar={ &on_close_settings }>
+                                </SidebarCloseButton>
+                            }
                             <PluginSelector
                                 session={ &ctx.props().session }
                                 renderer={ &ctx.props().renderer }>

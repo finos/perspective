@@ -27,7 +27,6 @@ pub struct EditableHeaderProps {
 pub enum ValueState {
     #[default]
     Unedited,
-    Focused,
     Edited,
     Errored,
 }
@@ -37,6 +36,7 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
     let noderef = yew::use_node_ref();
     let value_state = yew::use_state_eq(|| ValueState::Unedited);
     let new_value = yew::use_state_eq(|| p.value.clone());
+    let focused = yew::use_state_eq(|| false);
 
     {
         clone!(value_state, new_value);
@@ -48,40 +48,59 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
         });
     }
 
-    let onclick = yew::use_callback(noderef.clone(), |_, noderef| {
-        noderef.cast::<HtmlInputElement>().unwrap().focus().unwrap();
-    });
-    let onfocus = yew::use_callback(value_state.clone(), |_, value_state| {
-        value_state.set(ValueState::Focused);
-    });
-    let onblur = yew::use_callback(
-        (value_state.clone(), new_value.clone(), p.value.clone()),
-        move |e: FocusEvent, (value_state, new_value, value)| {
-            let target_value = e.target_unchecked_into::<HtmlInputElement>().value();
+    let set_value_state = yew::use_callback(
+        (value_state.clone(), p.value.clone()),
+        move |target_value: String, (value_state, p_value)| {
             if target_value.is_empty() {
                 value_state.set(ValueState::Errored);
-            } else if target_value != *value {
+            } else if &target_value != p_value {
                 value_state.set(ValueState::Edited);
             } else {
                 value_state.set(ValueState::Unedited);
             }
-            new_value.set(target_value);
-
-            // Alternative implementation: Autosave on blur.
-            // Autosave feels really bad bc we close the sidebar on save rn.
         },
     );
 
-    let onkeydown = yew::use_callback(
-        (p.on_value_update.clone(), value_state.clone()),
-        move |e: KeyboardEvent, (on_value_update, value_state)| match &*e.key() {
-            "Enter" | "Tab" => {
-                if !matches!(**value_state, ValueState::Errored) {
-                    on_value_update.emit(e.target_unchecked_into::<HtmlInputElement>().value());
-                    value_state.set(ValueState::Unedited)
-                }
+    let on_value_update = {
+        clone!(value_state);
+        p.on_value_update.reform(move |target_value: String| {
+            value_state.set(ValueState::Unedited);
+            target_value
+        })
+    };
+
+    let onclick = yew::use_callback(noderef.clone(), |_, noderef| {
+        noderef.cast::<HtmlInputElement>().unwrap().focus().unwrap();
+    });
+    let onfocus = yew::use_callback(focused.clone(), |_, focused| {
+        focused.set(true);
+    });
+    // TODO: Autosave on blur?
+    let onblur = yew::use_callback(
+        (set_value_state.clone(), focused.clone(), new_value.clone()),
+        move |e: FocusEvent, (set_value_state, focused, new_value)| {
+            let value = e.target_unchecked_into::<HtmlInputElement>().value();
+            set_value_state.emit(value.clone());
+            new_value.set(value.trim().to_owned());
+            focused.set(false);
+        },
+    );
+    let onkeyup = yew::use_callback(
+        (
+            on_value_update.clone(),
+            set_value_state.clone(),
+            new_value.clone(),
+        ),
+        move |e: KeyboardEvent, (on_value_update, set_value_state, new_value)| {
+            let target = e.target_unchecked_into::<HtmlInputElement>();
+            let mut target_value = target.value();
+            set_value_state.emit(target_value.clone());
+
+            if let "Enter" = &*e.key() && !target_value.is_empty() {
+                target_value = target_value.trim().to_owned();
+                on_value_update.emit(target_value.clone());
             }
-            _ => {}
+            new_value.set(target_value.clone());
         },
     );
 
@@ -91,9 +110,11 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
     }
     match *value_state {
         ValueState::Unedited => {}
-        ValueState::Focused => classes.push("focused"),
         ValueState::Edited => classes.push("edited"),
         ValueState::Errored => classes.push("errored"),
+    }
+    if *focused {
+        classes.push("focused");
     }
 
     html! {
@@ -110,7 +131,7 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
                 class="sidebar_header_title"
                 disabled={!p.editable}
                 {onblur}
-                {onkeydown}
+                {onkeyup}
                 {onfocus}
                 value={(*new_value).clone()}
             />

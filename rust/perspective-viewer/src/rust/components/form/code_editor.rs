@@ -105,8 +105,10 @@ fn set_initial_state(
     contentref: &NodeRef,
     connect_state: &Rc<RefCell<bool>>,
     expr: &Rc<String>,
-) {
-    let elem = textarearef.cast::<web_sys::HtmlTextAreaElement>().unwrap();
+) -> ApiResult<()> {
+    let elem = textarearef
+        .cast::<web_sys::HtmlTextAreaElement>()
+        .ok_or("Unable to get textarea!")?;
     let is_connected = elem.is_connected();
     let was_connected = connect_state.replace(is_connected);
     if elem.value() != **expr {
@@ -114,14 +116,14 @@ fn set_initial_state(
     }
 
     if is_connected && !was_connected {
-        js_log_maybe! {
-            elem.set_caret_position(expr.len())?;
-        }
-
-        let content = contentref.cast::<HtmlElement>().unwrap();
+        elem.set_caret_position(expr.len())?;
+        let content = contentref
+            .cast::<HtmlElement>()
+            .ok_or("Unable to get content!")?;
         content.set_scroll_top(elem.scroll_top());
         content.set_scroll_left(elem.scroll_left());
     }
+    Ok(())
 }
 
 /// A syntax-highlighted text editor component.
@@ -155,7 +157,9 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         move || {
             ApiFuture::spawn(async move {
                 request_animation_frame().await;
-                set_initial_state(&textarea_ref.0, &content_ref.2, &is_connected, &expr);
+                // This can fail to get noderefs when switching between a new expression and an
+                // active column. Ignore it for now.
+                let _ = set_initial_state(&textarea_ref.0, &content_ref.2, &is_connected, &expr);
                 Ok(())
             })
         }
