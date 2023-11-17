@@ -14,6 +14,7 @@ from pytest import raises
 from perspective.core import PerspectiveError
 from perspective.core import Plugin
 import perspective.viewer.validate as validate
+from perspective.core._version import __version__
 
 
 class TestValidate:
@@ -53,8 +54,16 @@ class TestValidate:
 
     def test_validate_expressions(self):
         computed = ["// expression1 \n 'Hello'"]
-        assert validate.validate_expressions(["// expression1 \n 'Hello'"]) == computed
+        assert validate.validate_expressions(computed) == computed
+        computed = [{"name": "expression1", "expr": "'hey'"}]
+        assert validate.validate_expressions(computed) == computed
 
     def test_validate_expressions_invalid(self):
         with raises(PerspectiveError):
             assert validate.validate_expressions({})
+
+    def test_validate_version(self):
+        assert validate.validate_version("1.2.3")
+        assert validate.validate_version("0.0.0+1.2.3")
+        assert not validate.validate_version("abc")
+        assert validate.validate_version(__version__)

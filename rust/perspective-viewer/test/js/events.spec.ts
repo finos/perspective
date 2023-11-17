@@ -11,7 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@playwright/test";
-import { compareContentsToSnapshot } from "@finos/perspective-test";
+import {
+    compareContentsToSnapshot,
+    API_VERSION,
+} from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -67,6 +70,7 @@ test.describe("Events", () => {
         });
 
         expect(config).toEqual({
+            version: API_VERSION,
             aggregates: {},
             split_by: [],
             columns: ["Profit", "Sales"],

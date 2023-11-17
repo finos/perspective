@@ -34,6 +34,7 @@ export const CONFIG_ALIASES = {
 };
 
 export const CONFIG_VALID_KEYS = [
+    "version",
     "viewport",
     "group_by",
     "split_by",

@@ -11,6 +11,11 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { expect, Locator, Page } from "@playwright/test";
+import * as fs from "fs";
+
+export const API_VERSION = JSON.parse(
+    fs.readFileSync(__dirname + "/../../package.json").toString()
+)["version"];
 
 /**
  * Clean a `<svg>` for serialization/comparison.

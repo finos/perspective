@@ -11,6 +11,8 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from traitlets import HasTraits, Unicode, List, Bool, Dict, validate
+from ..core._version import __version__
+
 from .validate import (
     validate_plugin,
     validate_columns,
@@ -22,6 +24,7 @@ from .validate import (
     validate_expressions,
     validate_plugin_config,
     validate_title,
+    validate_version,
 )
 
 
@@ -54,6 +57,7 @@ class PerspectiveTraitlets(HasTraits):
     server = Bool(False).tag(sync=True)
     client = Bool(False).tag(sync=True)
     title = Unicode(None, allow_none=True).tag(sync=True)
+    version = Unicode(__version__).tag(sync=True)
 
     @validate("plugin")
     def _validate_plugin(self, proposal):
@@ -94,3 +98,7 @@ class PerspectiveTraitlets(HasTraits):
     @validate("title")
     def _validate_title(self, proposal):
         return validate_title(proposal.value)
+
+    @validate("version")
+    def _validate_version(self, proposal):
+        return validate_version(proposal.value)

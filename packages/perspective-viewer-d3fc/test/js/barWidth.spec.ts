@@ -11,7 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@playwright/test";
-import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
+import {
+    API_VERSION,
+    compareSVGContentsToSnapshot,
+} from "@finos/perspective-test";
 
 test.describe("Bar Width", () => {
     test("correctly render when a bar chart has non equidistant times on a datetime axis", async ({
@@ -38,6 +41,7 @@ test.describe("Bar Width", () => {
         );
 
         expect(config).toEqual({
+            version: API_VERSION,
             plugin: "Y Bar",
             columns: ["Profit"],
             group_by: ["Order Date"],

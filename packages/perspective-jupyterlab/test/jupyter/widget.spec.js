@@ -215,6 +215,7 @@ describe_jupyter(
 
                 // Check default config
                 expect(config).toEqual({
+                    version: utils.API_VERSION,
                     aggregates: {},
                     columns: [
                         "ui8",
@@ -267,6 +268,7 @@ w.theme = "Pro Dark"`
 
                 // and check it
                 expect(config).toEqual({
+                    version: utils.API_VERSION,
                     aggregates: {},
                     columns: ["ui8"],
                     expressions: [],
@@ -300,6 +302,7 @@ w.theme = "Pro Dark"`
 
                 // Check default config
                 expect(config).toEqual({
+                    version: utils.API_VERSION,
                     aggregates: {},
                     columns: [
                         "ui8",
@@ -333,8 +336,9 @@ w.theme = "Pro Dark"`
                     title: null,
                 });
 
-                await viewer.evaluate(async (viewer) => {
+                await viewer.evaluate(async (viewer, version) => {
                     viewer.restore({
+                        version,
                         columns: ["ui8"],
                         filter: [["i8", "<", "50"]],
                         group_by: ["date"],
@@ -347,7 +351,7 @@ w.theme = "Pro Dark"`
                     });
 
                     return "";
-                });
+                }, utils.API_VERSION);
 
                 const error_cells_dont_exist = await assert_no_error_in_cell(
                     page,

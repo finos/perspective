@@ -11,7 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@playwright/test";
-import { compareContentsToSnapshot } from "@finos/perspective-test";
+import {
+    compareContentsToSnapshot,
+    API_VERSION,
+} from "@finos/perspective-test";
 
 const { convert } = require("../../dist/cjs/migrate.js");
 
@@ -46,6 +49,7 @@ const TESTS = [
             plugin_config: {},
         },
         {
+            version: API_VERSION,
             plugin: "Y Area",
             plugin_config: {},
             group_by: ["bucket(\"Order Date\", 'M')"],
@@ -76,6 +80,7 @@ const TESTS = [
             plugin_config: { Sales: { color_mode: "gradient", gradient: 10 } },
         },
         {
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -114,6 +119,7 @@ const TESTS = [
             aggregates: {},
         },
         {
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -160,6 +166,7 @@ const TESTS = [
             aggregates: {},
         },
         {
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -186,6 +193,7 @@ const TESTS = [
     [
         "New API, reflexive (new API is unmodified)",
         {
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -225,8 +233,10 @@ const TESTS = [
             group_by: [],
             expressions: {},
             split_by: [],
+            title: null,
         },
         {
+            version: API_VERSION,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -269,6 +279,49 @@ const TESTS = [
             title: null,
         },
     ],
+    [
+        "From 0.0.0",
+        {
+            plugin: "X/Y Scatter",
+            plugin_config: {
+                columns: {
+                    Region: { symbols: [{ key: "Central", value: "circle" }] },
+                },
+            },
+            title: null,
+            group_by: [],
+            split_by: [],
+            columns: ["'hello'", "expr"],
+            filter: [],
+            sort: [],
+            expressions: ["// expr\n1+1", "'hello'"],
+            aggregates: {},
+        },
+        {
+            version: API_VERSION,
+            plugin: "X/Y Scatter",
+            plugin_config: {
+                columns: {
+                    Region: {
+                        symbols: {
+                            Central: "circle",
+                        },
+                    },
+                },
+            },
+            title: null,
+            group_by: [],
+            split_by: [],
+            columns: ["'hello'", "expr"],
+            filter: [],
+            sort: [],
+            expressions: {
+                expr: "1+1",
+                "'hello'": "'hello'",
+            },
+            aggregates: {},
+        },
+    ],
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -289,9 +342,12 @@ test.describe("Migrate Viewer", () => {
     test.describe("Viewer config migrations", () => {
         for (const [name, old, current] of TESTS) {
             test(`Migrate '${name}'`, async ({ page }) => {
-                const converted = convert(JSON.parse(JSON.stringify(old)), {
-                    replace_defaults: true,
-                });
+                const converted = convert(
+                    JSON.parse(JSON.stringify(old), { warn: true }),
+                    {
+                        replace_defaults: true,
+                    }
+                );
                 expect(converted).toEqual(current);
             });
         }

@@ -9,9 +9,9 @@
 // ┃ This file is part of the Perspective library, distributed under the terms ┃
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
 use std::io::{Read, Write};
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
@@ -49,6 +49,7 @@ impl FromStr for ViewerConfigEncoding {
 #[derive(Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct ViewerConfig {
+    pub version: String,
     pub plugin: String,
     pub plugin_config: Value,
     pub settings: bool,
@@ -63,6 +64,7 @@ pub struct ViewerConfig {
 // struct fields, so make a tuple alternative for serialization in binary.
 type ViewerConfigBinarySerialFormat<'a> = (
     &'a String,
+    &'a String,
     &'a Value,
     bool,
     &'a Option<String>,
@@ -71,6 +73,7 @@ type ViewerConfigBinarySerialFormat<'a> = (
 );
 
 type ViewerConfigBinaryDeserialFormat = (
+    VersionUpdate,
     PluginUpdate,
     Option<Value>,
     SettingsUpdate,
@@ -79,9 +82,20 @@ type ViewerConfigBinaryDeserialFormat = (
     ViewConfigUpdate,
 );
 
+pub static API_VERSION: LazyLock<&'static str> = LazyLock::new(|| {
+    #[derive(Deserialize)]
+    struct Package {
+        version: &'static str,
+    }
+    let pkg: &'static str = include_str!("../../../package.json");
+    let pkg: Package = serde_json::from_str(pkg).unwrap();
+    pkg.version
+});
+
 impl ViewerConfig {
     fn token(&self) -> ViewerConfigBinarySerialFormat<'_> {
         (
+            &self.version,
             &self.plugin,
             &self.plugin_config,
             self.settings,
@@ -126,6 +140,9 @@ impl ViewerConfig {
 // #[serde(deny_unknown_fields)]
 pub struct ViewerConfigUpdate {
     #[serde(default)]
+    pub version: VersionUpdate,
+
+    #[serde(default)]
     pub plugin: PluginUpdate,
 
     #[serde(default)]
@@ -146,9 +163,10 @@ pub struct ViewerConfigUpdate {
 
 impl ViewerConfigUpdate {
     fn from_token(
-        (plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
+        (version, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
     ) -> ViewerConfigUpdate {
         ViewerConfigUpdate {
+            version,
             plugin,
             plugin_config,
             settings,
@@ -182,6 +200,11 @@ impl ViewerConfigUpdate {
             Ok(update.into_serde_ext()?)
         }
     }
+
+    pub fn migrate(&self) -> ApiResult<Self> {
+        // TODO: Call the migrate script from js
+        Ok(self.clone())
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -196,6 +219,7 @@ pub type PluginUpdate = OptionalUpdate<String>;
 pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
+pub type VersionUpdate = OptionalUpdate<String>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {

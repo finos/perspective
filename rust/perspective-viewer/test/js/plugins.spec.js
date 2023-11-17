@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@playwright/test";
+import { API_VERSION } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
     await page.goto(
@@ -34,6 +35,7 @@ test.describe("Plugin Priority Order", () => {
         });
 
         const expected = {
+            version: API_VERSION,
             aggregates: {},
             columns: [
                 "Row ID",

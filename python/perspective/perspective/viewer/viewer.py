@@ -59,6 +59,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "theme",
         "settings",
         "title",
+        "version",
     )
 
     def __init__(

@@ -243,6 +243,8 @@ impl PerspectiveViewerElement {
         global::document().blur_active_element();
         clone!(self.session, self.renderer, self.root, self.presentation);
         ApiFuture::new(async move {
+            let decoded_update = ViewerConfigUpdate::decode(&update)?;
+
             let ViewerConfigUpdate {
                 plugin,
                 plugin_config,
@@ -250,7 +252,8 @@ impl PerspectiveViewerElement {
                 theme: theme_name,
                 title,
                 mut view_config,
-            } = ViewerConfigUpdate::decode(&update)?;
+                ..//version
+            } = decoded_update;
 
             if !session.has_table() {
                 if let OptionalUpdate::Update(x) = settings {
