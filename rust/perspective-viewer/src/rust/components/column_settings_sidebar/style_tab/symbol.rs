@@ -79,7 +79,12 @@ impl yew::Component for SymbolAttr {
             .and_then(|json_val| {
                 serde_json::from_value::<SymbolConfig>(json_val.clone())
                     .ok()
-                    .map(|s| s.symbols.into_iter().map(|s| s.into()).collect_vec())
+                    .map(|s| {
+                        s.symbols
+                            .into_iter()
+                            .map(|s| SymbolKVPair::new(Some(s.0), s.1))
+                            .collect_vec()
+                    })
             })
             .unwrap_or_default();
 
@@ -101,7 +106,7 @@ impl yew::Component for SymbolAttr {
                 let serialized = new_pairs
                     .clone()
                     .into_iter()
-                    .filter_map(|pair| pair.try_into().ok())
+                    .filter_map(|pair| Some((pair.key?, pair.value)))
                     .collect();
 
                 p.send_plugin_config(
