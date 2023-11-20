@@ -8,11 +8,11 @@
         "columns": ["if(\"side\"=='buy'){-1}else{1}"],
         "filter": [],
         "sort": [],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "bucket(\"price\", 0.5)",
-            "if(\"side\"=='buy'){-1}else{1}"
-        ],
+        "expressions": {
+            "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+            "bucket(\"price\", 0.5)": "bucket(\"price\", 0.5)",
+            "if(\"side\"=='buy'){-1}else{1}": "if(\"side\"=='buy'){-1}else{1}"
+        },
         "aggregates": {}
     },
     {
@@ -24,11 +24,11 @@
         "columns": ["if(\"side\"=='buy'){-1}else{1}"],
         "filter": [["status", "==", "closed"]],
         "sort": [],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "bucket(\"price\", 0.25)",
-            "if(\"side\"=='buy'){-1}else{1}"
-        ],
+        "expressions": {
+            "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+            "bucket(\"price\", 0.25)": "bucket(\"price\", 0.25)",
+            "if(\"side\"=='buy'){-1}else{1}": "if(\"side\"=='buy'){-1}else{1}"
+        },
         "aggregates": {}
     },
     {
@@ -45,11 +45,11 @@
                 "col desc"
             ]
         ],
-        "expressions": [
-            "if(\"status\"=='closed'){1}else if(\"status\"=='expired'){2}else{0}",
-            "if(\"status\"!='open'){\"status\"}else{\"side\"}",
-            "bucket(\"timestamp\", 's')"
-        ],
+        "expressions": {
+            "if(\"status\"=='closed'){1}else if(\"status\"=='expired'){2}else{0}": "if(\"status\"=='closed'){1}else if(\"status\"=='expired'){2}else{0}",
+            "if(\"status\"!='open'){\"status\"}else{\"side\"}": "if(\"status\"!='open'){\"status\"}else{\"side\"}",
+            "bucket(\"timestamp\", 's')": "bucket(\"timestamp\", 's')"
+        },
         "aggregates": { "price": "avg", "timestamp": "dominant" }
     },
     {
@@ -57,8 +57,12 @@
         "plugin_config": {},
         "title": "Closed Orders",
         "group_by": [],
-        "split_by": ["if(\"status\"!='open'){\"status\"}else{\"side\"}"],
-        "columns": ["timestamp", "price"],
+        "split_by": [],
+        "columns": [
+            "timestamp",
+            "price",
+            "if(\"status\"!='open'){\"status\"}else{\"side\"}"
+        ],
         "filter": [],
         "sort": [
             [
@@ -66,10 +70,10 @@
                 "desc"
             ]
         ],
-        "expressions": [
-            "if(\"status\"!='open'){\"status\"}else{\"side\"}",
-            "if(\"status\"=='closed'){1}else if(\"status\"=='expired'){2}else{0}"
-        ],
+        "expressions": {
+            "if(\"status\"!='open'){\"status\"}else{\"side\"}": "if(\"status\"!='open'){\"status\"}else{\"side\"}",
+            "if(\"status\"=='closed'){1}else if(\"status\"=='expired'){2}else{0}": "if(\"status\"=='closed'){1}else if(\"status\"=='expired'){2}else{0}"
+        },
         "aggregates": {}
     },
     {
@@ -81,7 +85,9 @@
         "columns": ["price"],
         "filter": [["status", "==", "closed"]],
         "sort": [],
-        "expressions": ["bucket(\"timestamp\", 's')"],
+        "expressions": {
+            "bucket(\"timestamp\", 's')": "bucket(\"timestamp\", 's')"
+        },
         "aggregates": { "price": "avg" }
     },
     {
@@ -93,11 +99,11 @@
         "columns": ["if(\"side\"=='buy'){1}else{-1}"],
         "filter": [],
         "sort": [],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "if(\"side\"=='buy'){1}else{-1}",
-            "if(\"side\"=='sell'){-1}else{integer(null)}"
-        ],
+        "expressions": {
+            "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+            "if(\"side\"=='buy'){1}else{-1}": "if(\"side\"=='buy'){1}else{-1}",
+            "if(\"side\"=='sell'){-1}else{integer(null)}": "if(\"side\"=='sell'){-1}else{integer(null)}"
+        },
         "aggregates": { "bucket(\"timestamp\", 'm')": "dominant" }
     },
     {
@@ -134,11 +140,11 @@
         ],
         "filter": [],
         "sort": [["timestamp", "desc"]],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "bucket(\"price\", 1)",
-            "// Diff from market open\n\"price\" - 20"
-        ],
+        "expressions": {
+            "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+            "bucket(\"price\", 1)": "bucket(\"price\", 1)",
+            "Diff from market open": "\"price\" - 20"
+        },
         "aggregates": {}
     },
     {
@@ -159,10 +165,10 @@
         "columns": ["if(\"side\"=='buy'){-1}else{1}"],
         "filter": [["status", "==", "open"]],
         "sort": [["bucket(\"price\", 0.5)", "desc"]],
-        "expressions": [
-            "if(\"side\"=='buy'){-1}else{1}",
-            "bucket(\"price\", 0.5)"
-        ],
+        "expressions": {
+            "if(\"side\"=='buy'){-1}else{1}": "if(\"side\"=='buy'){-1}else{1}",
+            "bucket(\"price\", 0.5)": "bucket(\"price\", 0.5)"
+        },
         "aggregates": {}
     },
     {
@@ -174,10 +180,10 @@
         "columns": ["if(\"side\"=='buy'){-1}else{1}"],
         "filter": [["status", "==", "open"]],
         "sort": [["bucket(\"price\", 0.5)", "desc"]],
-        "expressions": [
-            "if(\"side\"=='buy'){-1}else{1}",
-            "bucket(\"price\", 0.5)"
-        ],
+        "expressions": {
+            "if(\"side\"=='buy'){-1}else{1}": "if(\"side\"=='buy'){-1}else{1}",
+            "bucket(\"price\", 0.5)": "bucket(\"price\", 0.5)"
+        },
         "aggregates": {}
     },
     {
@@ -189,11 +195,11 @@
         "columns": ["price", null, "price 2", "price 3"],
         "filter": [["status", "==", "closed"]],
         "sort": [],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "// price 2\n\"price\"",
-            "// price 3\n\"price\""
-        ],
+        "expressions": {
+            "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+            "price 2": "\"price\"",
+            "price 3": "\"price\""
+        },
         "aggregates": {
             "price": "avg",
             "price 2": "high",
@@ -209,11 +215,11 @@
         "columns": ["price", null, null, null],
         "filter": [["status", "==", "closed"]],
         "sort": [],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "// price 2\n\"price\"",
-            "// price 3\n\"price\""
-        ],
+        "expressions": {
+            "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+            "price 2": "\"price\"",
+            "price 3": "\"price\""
+        },
         "aggregates": {
             "price": "avg",
             "price 2": "high",
@@ -233,14 +239,14 @@
         ],
         "filter": [],
         "sort": [["bucket(\"price\", 0.5)", "desc"]],
-        "expressions": [
-            "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}",
-            "bucket(\"timestamp\", 's')",
-            "bucket(\"price\", 0.5)",
-            "if(\"status\"=='open'){\"price\"}else{float(null)}",
-            "if(\"status\"=='closed'){1}else{0}",
-            "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}"
-        ],
+        "expressions": {
+            "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}": "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}",
+            "bucket(\"timestamp\", 's')": "bucket(\"timestamp\", 's')",
+            "bucket(\"price\", 0.5)": "bucket(\"price\", 0.5)",
+            "if(\"status\"=='open'){\"price\"}else{float(null)}": "if(\"status\"=='open'){\"price\"}else{float(null)}",
+            "if(\"status\"=='closed'){1}else{0}": "if(\"status\"=='closed'){1}else{0}",
+            "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}": "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}"
+        },
         "aggregates": {}
     },
     {
@@ -256,14 +262,14 @@
         ],
         "filter": [],
         "sort": [],
-        "expressions": [
-            "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}",
-            "bucket(\"timestamp\", 's')",
-            "bucket(\"price\", 0.5)",
-            "if(\"status\"=='open'){\"price\"}else{float(null)}",
-            "if(\"status\"=='closed'){1}else{0}",
-            "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}"
-        ],
+        "expressions": {
+            "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}": "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}",
+            "bucket(\"timestamp\", 's')": "bucket(\"timestamp\", 's')",
+            "bucket(\"price\", 0.5)": "bucket(\"price\", 0.5)",
+            "if(\"status\"=='open'){\"price\"}else{float(null)}": "if(\"status\"=='open'){\"price\"}else{float(null)}",
+            "if(\"status\"=='closed'){1}else{0}": "if(\"status\"=='closed'){1}else{0}",
+            "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}": "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}"
+        },
         "aggregates": {}
     },
     {
@@ -278,15 +284,15 @@
             ["bucket(\"price\", 0.5)", "desc"],
             ["status", "col asc"]
         ],
-        "expressions": [
-            "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}",
-            "bucket(\"timestamp\", 's')",
-            "bucket(\"price\", 0.5)",
-            "if(\"status\"=='open'){\"price\"}else{float(null)}",
-            "if(\"status\"=='closed'){1}else{0}",
-            "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}",
-            "if(\"status\"=='closed'){'closed'}else{\"side\"}"
-        ],
+        "expressions": {
+            "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}": "if(\"status\"=='open' and \"side\"=='buy'){1}else{float(null)}",
+            "bucket(\"timestamp\", 's')": "bucket(\"timestamp\", 's')",
+            "bucket(\"price\", 0.5)": "bucket(\"price\", 0.5)",
+            "if(\"status\"=='open'){\"price\"}else{float(null)}": "if(\"status\"=='open'){\"price\"}else{float(null)}",
+            "if(\"status\"=='closed'){1}else{0}": "if(\"status\"=='closed'){1}else{0}",
+            "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}": "if(\"status\"=='open' and \"side\"=='sell'){1}else{float(null)}",
+            "if(\"status\"=='closed'){'closed'}else{\"side\"}": "if(\"status\"=='closed'){'closed'}else{\"side\"}"
+        },
         "aggregates": {}
     }
 ]

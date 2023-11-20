@@ -65,9 +65,9 @@
                 "text"
             ],
             "sort": [],
-            "expressions": [
-                "// Scryfall Image\nvar x := substring(\"scryfallId\", 0, 1);\nvar y := substring(\"scryfallId\", 1, 1);\nvar z := \"scryfallId\";\nconcat('https://c1.scryfall.com/file/scryfall-cards/normal/front/', x, '/', y, '/', z, '.jpg?1562404626')\n"
-            ],
+            "expressions": {
+                "Scryfall Image": "var x := substring(\"scryfallId\", 0, 1);\nvar y := substring(\"scryfallId\", 1, 1);\nvar z := \"scryfallId\";\nconcat('https://c1.scryfall.com/file/scryfall-cards/normal/front/', x, '/', y, '/', z, '.jpg?1562404626')\n"
+            },
             "aggregates": {
                 "manaCost": "last",
                 "colorIdentity": "last",
@@ -102,7 +102,7 @@
             "columns": ["name"],
             "filter": [["convertedManaCost", "is not null", null]],
             "sort": [],
-            "expressions": [],
+            "expressions": {},
             "aggregates": {
                 "name": "distinct count"
             },
@@ -124,7 +124,9 @@
                 ["convertedManaCost", "is not null", null]
             ],
             "sort": [],
-            "expressions": ["bucket(\"edhrecRank\",1000)"],
+            "expressions": {
+                "bucket(\"edhrecRank\",1000)": "bucket(\"edhrecRank\",1000)"
+            },
             "aggregates": {
                 "name": "distinct count"
             },

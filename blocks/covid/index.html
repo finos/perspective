@@ -12,20 +12,18 @@
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
 
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective@2.6.1/dist/cdn/perspective.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@2.6.1/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@2.6.1/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@2.6.1/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective@2.7.0/dist/cdn/perspective.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@2.7.0/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@2.7.0/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@2.7.0/dist/cdn/perspective-viewer-d3fc.js"></script>
 
         <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/themes.css" />
 
         <script type="module">
-            import {worker} from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.6.1/dist/cdn/perspective.js";
+            import { worker } from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.7.0/dist/cdn/perspective.js";
 
             const WORKER = worker();
-            const REQ = fetch(
-                "https://api.covidtracking.com/v1/states/daily.csv"
-            );
+            const REQ = fetch("https://api.covidtracking.com/v1/states/daily.csv");
 
             const LAYOUT = {
                 plugin: "Y Area",
@@ -43,21 +41,19 @@
                 columns: ["deathIncrease"],
                 filter: [],
                 sort: [["deathIncrease", "col desc"]],
-                expressions: [
-                    `// Parsed "date" bucket by week
-var year := integer(floor("date" / 10000));
-var month := integer(floor("date" / 100)) - year * 100;
-var day := integer("date" % 100);
-bucket(date(year, month, day), \'W\')`,
-                ],
+                expressions: {
+                    [`Parsed "date" bucket by week`]: `var year := integer(floor("date" / 10000));
+            var month := integer(floor("date" / 100)) - year * 100;
+            var day := integer("date" % 100);
+            bucket(date(year, month, day), \'W\')`,
+                },
                 aggregates: {},
             };
 
             async function load() {
                 const resp = await REQ;
                 const csv = await resp.text();
-                const el =
-                    document.getElementsByTagName("perspective-viewer")[0];
+                const el = document.getElementsByTagName("perspective-viewer")[0];
                 const table = WORKER.table(csv);
                 el.load(table);
                 el.restore(LAYOUT);

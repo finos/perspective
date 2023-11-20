@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/cdn/perspective_bg.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/@finos/perspective@2.7.0/dist/cdn/perspective.js" as="script" type="application/javascript" crossorigin="anonymous" />
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.cpp.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.worker.js" as="fetch" type="application/javascript" crossorigin="anonymous" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@2.7.0/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@2.7.0/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@2.7.0/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="webcam.js"></script>
+        <link rel="stylesheet" href="index.css" />
+        <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/themes.css" />
+        <style>
+            perspective-workspace {
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+            }
+            video,
+            canvas {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <video id="video" width="80" height="60" autoplay muted></video>
+        <canvas id="canvas" width="80" height="60"></canvas>
+        <div id="app">
+            <div id="header">
+                <a href="https://perspective.finos.org">
+                    <img height="12" src="https://raw.githubusercontent.com/finos/perspective/master/docs/static/svg/perspective-logo-dark.svg" />
+                </a>
+                <label>Webcam Demo</label>
+                <select></select>
+            </div>
+            <perspective-viewer></perspective-viewer>
+        </div>
+    </body>
+</html>
