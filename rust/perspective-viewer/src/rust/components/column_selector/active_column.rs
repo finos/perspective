@@ -70,10 +70,16 @@ impl ActiveColumnProps {
         }
     }
 
-    fn get_type(&self) -> Option<Type> {
+    fn get_table_type(&self) -> Option<Type> {
         self.get_name()
             .as_ref()
             .and_then(|x| self.session.metadata().get_column_table_type(x))
+    }
+
+    fn get_view_type(&self) -> Option<Type> {
+        self.get_name()
+            .as_ref()
+            .and_then(|x| self.session.metadata().get_column_view_type(x))
     }
 }
 
@@ -155,7 +161,6 @@ use ActiveColumnMsg::*;
 #[derive(Default)]
 pub struct ActiveColumn {
     add_expression_ref: NodeRef,
-    column_type: Option<Type>,
     is_required: bool,
     mouseover: bool,
 }
@@ -165,17 +170,14 @@ impl Component for ActiveColumn {
     type Properties = ActiveColumnProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let column_type = ctx.props().get_type();
         let is_required = ctx.props().get_is_required();
         Self {
-            column_type,
             is_required,
             ..Default::default()
         }
     }
 
     fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
-        self.column_type = ctx.props().get_type();
         self.is_required = ctx.props().get_is_required();
         true
     }
@@ -281,7 +283,7 @@ impl Component for ActiveColumn {
             }
         });
 
-        let col_type = self.column_type;
+        let col_type = ctx.props().get_table_type();
         match (name, col_type) {
             ((label, ColumnState::Empty), _) => {
                 classes.push("empty-named");
@@ -367,7 +369,13 @@ impl Component for ActiveColumn {
                 let show_edit_btn = match &*ctx.props().renderer.get_active_plugin().unwrap().name()
                 {
                     "Datagrid" => col_type != Type::Bool,
-                    "X/Y Scatter" => col_type == Type::String && label.as_deref() == Some("Symbol"),
+                    "X/Y Scatter" => {
+                        ctx.props()
+                            .get_view_type()
+                            .map(|ty| ty == Type::String)
+                            .unwrap_or_default()
+                            && label.as_deref() == Some("Symbol")
+                    },
                     _ => false,
                 } || is_expression;
 

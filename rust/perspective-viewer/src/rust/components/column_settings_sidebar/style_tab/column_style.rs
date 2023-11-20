@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use serde::de::DeserializeOwned;
-use wasm_bindgen::UnwrapThrowExt;
 use yew::{function_component, html, Callback, Html, Properties};
 
 use crate::components::datetime_column_style::DatetimeColumnStyle;
@@ -161,9 +160,22 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         }),
         _ => Err("Booleans aren't styled yet.".into()),
     };
+    let contents = opt_html.unwrap_or_else(|e| {
+        tracing::error!(
+            "Unable to create a style for this component! This is a developer error. Please open \
+             an issue at github.com/finos/perspective.\nError: {e}"
+        );
 
+        html! {
+            <div class="style_contents">
+                <div id="column-style-container" class="no-style">
+                    <div class="style-contents">{ "No styles available" }</div>
+                </div>
+            </div>
+        }
+    });
     html_template! {
         <LocalStyle href={ css!("column-style") } />
-        {opt_html.expect_throw("Could not generate HTML to style this column!")}
+        {contents}
     }
 }

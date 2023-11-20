@@ -30,8 +30,8 @@ pub struct StyleTabProps {
     pub session: Session,
     pub renderer: Renderer,
 
-    pub table_ty: Type,
-    pub view_ty: Type,
+    pub maybe_table_ty: Option<Type>,
+    pub maybe_view_ty: Option<Type>,
     pub column_name: String,
 }
 
@@ -87,7 +87,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 custom_events={ props.custom_events.clone() }
                 session={ props.session.clone() }
                 renderer={ props.renderer.clone() }
-                view_ty={ props.view_ty }
+                view_ty={ props.maybe_view_ty.expect_throw("Could not unwrap view type!") }
                 column_name={ props.column_name.clone() }/>
         }),
         _ => None,

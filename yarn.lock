@@ -4008,10 +4008,10 @@
   resolved "https://registry.npmjs.org/@prospective.co/procss/-/procss-0.1.13.tgz"
   integrity sha512-cgkhvnge5WM5Ih6f+a/TivPhvs3I2HZYnBlK9zZxrG+QasTSYTSFZ6T+xcBgwjeZeviRb1HV3sW1CCLjlXBOwA==
 
-"@prospective.co/procss@^0.1.14":
-  version "0.1.14"
-  resolved "https://registry.yarnpkg.com/@prospective.co/procss/-/procss-0.1.14.tgz#93a82c7d0d65aa6a12e75c742142e443657736e8"
-  integrity sha512-Q+6eag8vk0prnAAQ/UD8YKxmydH3iO4O+Kc1YIw+BrhqHQSOm24bqj0iJOedp3KOpZ0zEj/7zzysCYPI45hZDA==
+"@prospective.co/procss@^0.1.15":
+  version "0.1.15"
+  resolved "https://registry.yarnpkg.com/@prospective.co/procss/-/procss-0.1.15.tgz#d6c7eb7adf9c567713555c6d626be2a9f76f8a83"
+  integrity sha512-wTjE7IqzU+WmR0Qkyn9i/Mgr0EFHEzmOY8xifXrTIVdeEp8W9XikKE/y+ozWVPgEBM+A+WpF90/8G4u03yfsyQ==
 
 "@rjsf/core@^3.1.0":
   version "3.2.1"

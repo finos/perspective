@@ -12,7 +12,6 @@
 
 use std::fmt::Display;
 
-use wasm_bindgen::UnwrapThrowExt;
 use yew::{function_component, html, use_callback, use_state, Callback, Html, Properties};
 
 use crate::components::column_settings_sidebar::attributes_tab::AttributesTab;
@@ -83,9 +82,6 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     // view_ty != table_ty when aggregate is applied, i.e. on group-by
     let maybe_view_ty = p.session.metadata().get_column_view_type(&column_name);
     let maybe_table_ty = p.session.metadata().get_column_table_type(&column_name);
-    let (view_ty, table_ty) = maybe_view_ty
-        .zip(maybe_table_ty)
-        .expect_throw("Unable to get view and table types!");
 
     let mut tabs = vec![];
 
@@ -94,8 +90,10 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     // plugin API. Leaving it for now.
     let plugin = p.renderer.get_active_plugin().unwrap();
     let show_styles = match &*plugin.name() {
-        "Datagrid" => view_ty != Type::Bool,
-        "X/Y Scatter" => table_ty == Type::String,
+        "Datagrid" => maybe_view_ty.map(|ty| ty != Type::Bool).unwrap_or_default(),
+        "X/Y Scatter" => maybe_table_ty
+            .map(|ty| ty == Type::String)
+            .unwrap_or_default(),
         _ => false,
     };
 
@@ -148,8 +146,8 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                         { renderer }
                         { custom_events }
                         { column_name }
-                        { view_ty }
-                        { table_ty }
+                        { maybe_view_ty }
+                        { maybe_table_ty }
                         />
                 },
             }
