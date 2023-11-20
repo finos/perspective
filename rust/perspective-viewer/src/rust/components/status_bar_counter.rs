@@ -73,7 +73,7 @@ impl Component for StatusBarRowsCounter {
                 html_template! {
                     <span>{ format!("{} ({}) x {} ({})", vrows, nrows, vcols, ncols) }</span>
                 }
-            }
+            },
 
             Some(
                 ViewStats {
@@ -95,7 +95,7 @@ impl Component for StatusBarRowsCounter {
                 html_template! {
                     <span>{ format!("{} ({}) x {}", vrows, nrows, vcols) }</span>
                 }
-            }
+            },
 
             Some(ViewStats {
                 num_table_cells: Some((_, tc)),
@@ -108,7 +108,7 @@ impl Component for StatusBarRowsCounter {
                 html_template! {
                     <span>{ format!("{} x {} ({})", vrows, vcols, ncols) }</span>
                 }
-            }
+            },
 
             Some(ViewStats {
                 num_table_cells: Some((tr, tc)),
@@ -121,7 +121,7 @@ impl Component for StatusBarRowsCounter {
                         { format!("{} x {}", nrows, ncols) }
                     </span>
                 }
-            }
+            },
             Some(ViewStats {
                 num_table_cells: None,
                 ..

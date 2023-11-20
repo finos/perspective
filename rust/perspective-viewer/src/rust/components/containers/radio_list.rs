@@ -133,7 +133,7 @@ where
                     self.selected = x.clone();
                     ctx.props().on_change.emit(x);
                 }
-            }
+            },
         };
         false
     }

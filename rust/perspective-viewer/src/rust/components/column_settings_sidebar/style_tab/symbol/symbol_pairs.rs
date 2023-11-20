@@ -131,21 +131,21 @@ impl yew::Component for PairsListItem {
                 new_pairs.remove(p.index);
                 p.update_pairs.emit(new_pairs);
                 true
-            }
+            },
             PairListItemMsg::UpdateKey(key) => {
                 let next = p.pair.update_key(key);
                 let mut new_pairs = p.pairs.clone();
                 new_pairs[p.index] = next;
                 p.update_pairs.emit(new_pairs);
                 true
-            }
+            },
             PairListItemMsg::UpdateValue(val) => {
                 let next = p.pair.update_value(val);
                 let mut new_pairs = p.pairs.clone();
                 new_pairs[p.index] = next;
                 p.update_pairs.emit(new_pairs);
                 true
-            }
+            },
         }
     }
 

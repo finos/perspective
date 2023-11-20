@@ -195,7 +195,7 @@ async function view_suite() {
     });
 
     // await benchmark({
-    //     name: `.view({expressions: ["Sales" + "Profit"]})`,
+    //     name: `.view({expressions: ["Sales" + "Profit"].reduce((x, y) => Object.assign(x, {[y]: y}), {})})`,
     //     before_all,
     //     after_all,
     //     after,
@@ -209,13 +209,13 @@ async function view_suite() {
     //             return await table.view({
     //                 columns,
     //                 group_by: ["Product Name"],
-    //                 expressions: [`"Sales" + "Profit"`],
+    //                 expressions: [`"Sales" + "Profit"`].reduce((x, y) => Object.assign(x, {[y]: y}), {}),
     //             });
     //         } else {
     //             return await table.view({
     //                 columns,
     //                 row_pivots: ["Product Name"],
-    //                 expressions: [`"Sales" + "Profit"`],
+    //                 expressions: [`"Sales" + "Profit"`].reduce((x, y) => Object.assign(x, {[y]: y}), {}),
     //             });
     //         }
     //     },

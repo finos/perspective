@@ -696,11 +696,11 @@ await elem.restore({ settings: true });
 // Create an expression
 await elem.restore({
     columns: ['"Sales" + 100'],
-    expressions: ['"Sales" + 100'],
+    expressions: { "New Column": '"Sales" + 100' },
 });
 
 // ERROR if the column does not exist in the schema or expressions
-// await elem.restore({columns: ["\"Sales\" + 100"], expressions: []});
+// await elem.restore({columns: ["\"Sales\" + 100"], expressions: {}});
 
 // Add a filter
 await elem.restore({ filter: [["Sales", "<", 100]] });

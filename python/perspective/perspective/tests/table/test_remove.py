@@ -57,9 +57,9 @@ class TestRemove(object):
         view = table.view(
             group_by=["business_line"],
             columns=["delta$", "alias"],
-            expressions=[
-                '// alias\n"delta$"',
-            ],
+            expressions={
+                "alias": '"delta$"',
+            },
         )
 
         records = view.to_records()
@@ -86,9 +86,9 @@ class TestRemove(object):
         view = table.view(
             group_by=["business_line"],
             columns=["delta$", "alias"],
-            expressions=[
-                '// alias\n"delta$"',
-            ],
+            expressions={
+                "alias": '"delta$"',
+            },
         )
 
         table.remove(["A"])

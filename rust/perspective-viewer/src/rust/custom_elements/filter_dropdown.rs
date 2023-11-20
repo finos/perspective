@@ -93,7 +93,7 @@ impl FilterDropDownElement {
                         FilterDropDownMsg::SetValues(values),
                     ]);
                 }
-            }
+            },
             _ => {
                 // TODO is this a race condition? `column` and `values` are out-of-sync
                 // across an `await` point.
@@ -117,7 +117,7 @@ impl FilterDropDownElement {
                         }
                     }
                 });
-            }
+            },
         }
     }
 

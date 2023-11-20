@@ -83,22 +83,22 @@ impl Component for DatetimeStyleSimple {
                 self.config.date_style = SimpleDatetimeFormat::Short;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleSimpleMsg::TimeEnabled => {
                 self.config.time_style = SimpleDatetimeFormat::Medium;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleSimpleMsg::DateStyleChanged(format) => {
                 self.config.date_style = format;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             DatetimeStyleSimpleMsg::TimeStyleChanged(format) => {
                 self.config.time_style = format;
                 self.dispatch_config(ctx);
                 true
-            }
+            },
         }
     }
 

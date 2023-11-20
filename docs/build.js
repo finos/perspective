@@ -60,7 +60,7 @@ async function run_with_theme(page, is_dark = false) {
                 {
                     plugin: "Datagrid",
                     group_by: [],
-                    expressions: [],
+                    expressions: {},
                     split_by: [],
                     sort: [],
                     aggregates: {},

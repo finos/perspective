@@ -59,7 +59,7 @@ impl ViewConfig {
             Some(update) => {
                 *field = update;
                 true
-            }
+            },
         }
     }
 

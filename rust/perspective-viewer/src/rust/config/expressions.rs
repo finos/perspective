@@ -33,30 +33,28 @@ impl std::ops::Deref for Expressions {
         &self.0
     }
 }
+
 impl std::ops::DerefMut for Expressions {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
+fn upgrade_legacy_format(expressions: &[String]) -> HashMap<String, String> {
+    tracing::warn!("Legacy `expressions` format: {:?}", expressions);
+    expressions.iter().map(|s| {
+        if let Some((name, expression)) = s.split_once('\n') && !expression.is_empty() && name.starts_with("//") {
+            (name.split_at(2).1.trim().to_owned(), expression.to_owned())
+        } else {
+            (s.to_owned(), s.to_owned())
+        }
+    }).collect::<HashMap<_, _>>()
+}
+
 impl From<ExpressionsDeserde> for Expressions {
     fn from(value: ExpressionsDeserde) -> Self {
-        let change = |expressions: &[String]| {
-            expressions.iter().map(|s| {
-            if let Some((name, expression)) = s.split_once('\n') && !expression.is_empty() && name.starts_with("//") {
-                (name.split_at(2).1.trim().to_owned(), expression.to_owned())
-            } else {
-                // name = first 25 chars of the expr
-                let name = match s.char_indices().nth(25) {
-                    None => s.to_owned(),
-                    Some((idx, _)) => s[..idx].to_owned(),
-                };
-                (name, s.to_owned())
-            }
-        }).collect::<HashMap<_, _>>()
-        };
         match value {
-            ExpressionsDeserde::Array(arr) => Self(change(&arr)),
+            ExpressionsDeserde::Array(arr) => Self(upgrade_legacy_format(&arr)),
             ExpressionsDeserde::Map(map) => Self(map),
         }
     }
@@ -67,6 +65,7 @@ pub struct Expression<'a> {
     pub name: Cow<'a, str>,
     pub expression: Cow<'a, str>,
 }
+
 impl<'a> Expression<'a> {
     pub fn new(name: &'a str, expression: &'a str) -> Self {
         Self {

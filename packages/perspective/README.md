@@ -176,7 +176,7 @@ columns in the underlying [table](#module_perspective..table).
 ```js
 // Create a view with expressions
 const view = table.view({
-     expressions: ['"x" + "y" - 100']
+     expressions: {'"x" + "y" - 100': '"x" + "y" - 100'}
 });
 
 await view.expression_schema(); // {'"x" + "y" - 100': "float"}

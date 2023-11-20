@@ -88,11 +88,11 @@ impl Component for PluginSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 self.is_open = false;
                 false
-            }
+            },
             OpenMenu => {
                 self.is_open = !self.is_open;
                 true
-            }
+            },
         }
     }
 
@@ -162,7 +162,7 @@ fn PluginSelect(props: &PluginSelectProps) -> Html {
     html! {
         <div
             class="plugin-select-item"
-            data-plugin={name.0 }
+            data-plugin={ name.0 }
             onclick={ props.on_click.reform(move |_| name.1.clone()) }>
 
             <span class="plugin-select-item-name">

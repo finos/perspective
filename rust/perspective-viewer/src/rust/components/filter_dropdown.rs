@@ -63,29 +63,29 @@ impl Component for FilterDropDown {
             FilterDropDownMsg::SetCallback(callback) => {
                 self.on_select = Some(callback);
                 false
-            }
+            },
             FilterDropDownMsg::SetValues(values) => {
                 self.values = Some(values);
                 self.selected = 0;
                 true
-            }
+            },
             FilterDropDownMsg::ItemSelect => {
                 if let Some(ref values) = self.values {
                     match values.get(self.selected) {
                         None => {
                             console::error_1(&"Selected out-of-bounds".into());
                             false
-                        }
+                        },
                         Some(x) => {
                             self.on_select.as_ref().unwrap().emit(x.clone());
                             false
-                        }
+                        },
                     }
                 } else {
                     console::error_1(&"No Values".into());
                     false
                 }
-            }
+            },
             FilterDropDownMsg::ItemDown => {
                 self.selected += 1;
                 if let Some(ref values) = self.values {
@@ -95,7 +95,7 @@ impl Component for FilterDropDown {
                 };
 
                 true
-            }
+            },
             FilterDropDownMsg::ItemUp => {
                 if let Some(ref values) = self.values {
                     if self.selected < 1 {
@@ -105,7 +105,7 @@ impl Component for FilterDropDown {
 
                 self.selected -= 1;
                 true
-            }
+            },
         }
     }
 

@@ -147,7 +147,7 @@ impl Component for NumberColumnStyle {
                 let mut new = Self::reset(&config, &default_config);
                 std::mem::swap(self, &mut new);
                 true
-            }
+            },
             NumberColumnStyleMsg::FixedChanged(fixed) => {
                 let fixed = match fixed.parse::<u32>() {
                     Ok(x) if x != self.default_config.fixed => Some(x),
@@ -159,7 +159,7 @@ impl Component for NumberColumnStyle {
                 self.config.fixed = fixed.map(|x| std::cmp::min(15, x));
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             NumberColumnStyleMsg::ForeEnabledChanged(val) => {
                 if val {
                     let color_mode = match self.fg_mode {
@@ -185,7 +185,7 @@ impl Component for NumberColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             NumberColumnStyleMsg::BackEnabledChanged(val) => {
                 if val {
                     let color_mode = match self.bg_mode {
@@ -211,7 +211,7 @@ impl Component for NumberColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             NumberColumnStyleMsg::PosColorChanged(side, val) => {
                 if side == Fg {
                     self.pos_fg_color = val;
@@ -223,7 +223,7 @@ impl Component for NumberColumnStyle {
 
                 self.dispatch_config(ctx);
                 false
-            }
+            },
             NumberColumnStyleMsg::NegColorChanged(side, val) => {
                 if side == Fg {
                     self.neg_fg_color = val;
@@ -235,7 +235,7 @@ impl Component for NumberColumnStyle {
 
                 self.dispatch_config(ctx);
                 false
-            }
+            },
             NumberColumnStyleMsg::NumberForeModeChanged(val) => {
                 self.fg_mode = val;
                 self.config.number_fg_mode = val;
@@ -247,7 +247,7 @@ impl Component for NumberColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             NumberColumnStyleMsg::NumberBackModeChanged(val) => {
                 self.bg_mode = val;
                 self.config.number_bg_mode = val;
@@ -259,45 +259,45 @@ impl Component for NumberColumnStyle {
 
                 self.dispatch_config(ctx);
                 true
-            }
+            },
             NumberColumnStyleMsg::GradientChanged(side, gradient) => {
                 match (side, gradient.parse::<f64>()) {
                     (Fg, Ok(x)) => {
                         self.fg_gradient = Some(x);
                         self.config.fg_gradient = Some(x);
-                    }
+                    },
                     (Fg, Err(_)) if gradient.is_empty() => {
                         self.fg_gradient = Some(self.default_config.fg_gradient);
                         self.config.fg_gradient = Some(self.default_config.fg_gradient);
-                    }
+                    },
                     (Fg, Err(_)) => {
                         self.fg_gradient = Some(self.default_config.fg_gradient);
                         self.config.fg_gradient = None;
-                    }
+                    },
                     (Bg, Ok(x)) => {
                         self.bg_gradient = Some(x);
                         self.config.bg_gradient = Some(x);
-                    }
+                    },
                     (Bg, Err(_)) if gradient.is_empty() => {
                         self.bg_gradient = Some(self.default_config.bg_gradient);
                         self.config.bg_gradient = Some(self.default_config.bg_gradient);
-                    }
+                    },
                     (Bg, Err(_)) => {
                         self.bg_gradient = Some(self.default_config.bg_gradient);
                         self.config.bg_gradient = None;
-                    }
+                    },
                 };
 
                 self.dispatch_config(ctx);
                 false
-            }
+            },
             NumberColumnStyleMsg::DefaultGradientChanged(gradient) => {
                 self.fg_gradient.get_or_insert(gradient);
                 self.bg_gradient.get_or_insert(gradient);
                 self.default_config.fg_gradient = gradient;
                 self.default_config.bg_gradient = gradient;
                 true
-            }
+            },
         }
     }
 
@@ -494,8 +494,8 @@ impl NumberColumnStyle {
             {
                 config.pos_fg_color = None;
                 config.neg_fg_color = None;
-            }
-            _ => {}
+            },
+            _ => {},
         };
 
         match &self.config {
@@ -508,8 +508,8 @@ impl NumberColumnStyle {
             {
                 config.pos_bg_color = None;
                 config.neg_bg_color = None;
-            }
-            _ => {}
+            },
+            _ => {},
         };
 
         ctx.props().on_change.emit(config);
@@ -563,7 +563,7 @@ impl NumberColumnStyle {
             None if self.default_config.fixed > 0 => {
                 let n = self.default_config.fixed as usize - 1;
                 format!("0.{}1", "0".repeat(n))
-            }
+            },
             Some(_) | None => "1".to_owned(),
         };
 
@@ -608,7 +608,7 @@ impl NumberColumnStyle {
                 config.pos_fg_color = Some(pos_fg_color.to_owned());
                 config.neg_fg_color = Some(neg_fg_color.to_owned());
                 x
-            }
+            },
         };
 
         let bg_mode = match config.number_bg_mode {
@@ -617,7 +617,7 @@ impl NumberColumnStyle {
                 config.pos_bg_color = Some(pos_bg_color.to_owned());
                 config.neg_bg_color = Some(neg_bg_color.to_owned());
                 x
-            }
+            },
         };
 
         Self {

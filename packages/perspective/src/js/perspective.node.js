@@ -34,14 +34,12 @@ const SYNC_SERVER = new (class extends Server {
     init(msg) {
         this._loaded_promise = (async () => {
             let wasmBinary = await buffer;
-            try {
-                const mod = await WebAssembly.instantiate(wasmBinary);
-                const exports = mod.instance.exports;
-                const size = exports.size();
-                const offset = exports.offset();
-                const array = new Uint8Array(exports.memory.buffer);
-                wasmBinary = array.slice(offset, offset + size);
-            } catch {}
+            const mod = await WebAssembly.instantiate(wasmBinary);
+            const exports = mod.instance.exports;
+            const size = exports.size();
+            const offset = exports.offset();
+            const array = new Uint8Array(exports.memory.buffer);
+            wasmBinary = array.slice(offset, offset + size);
             const core = await load_perspective({
                 wasmBinary,
                 wasmJSMethod: "native-wasm",

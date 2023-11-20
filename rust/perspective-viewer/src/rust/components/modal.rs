@@ -113,7 +113,7 @@ where
                 self.css = format!(":host{{top:{}px;left:{}px{}}}", top, left, opacity);
                 self.rev_vert.0.set(rev_vert);
                 true
-            }
+            },
             ModalMsg::SubMsg(msg) => {
                 if let Some(child) = &ctx.props().child {
                     if let Some(link) = child.props.weak_link().borrow().as_ref() {
@@ -122,7 +122,7 @@ where
                 }
 
                 false
-            }
+            },
         }
     }
 

@@ -88,7 +88,7 @@ impl MovingWindowRenderTimer {
                 } else {
                     *timings = Some(Default::default());
                 }
-            }
+            },
             RenderTimerType::Constant(_) => (),
         };
 
@@ -99,10 +99,10 @@ impl MovingWindowRenderTimer {
         match val {
             None => {
                 *self.0.borrow_mut() = RenderTimerType::default();
-            }
+            },
             Some(val) => {
                 *self.0.borrow_mut() = RenderTimerType::Constant(val);
-            }
+            },
         }
     }
 
@@ -122,7 +122,7 @@ impl MovingWindowRenderTimer {
                 } else {
                     0_i32
                 }
-            }
+            },
         }
     }
 }

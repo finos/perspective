@@ -2097,13 +2097,13 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         with raises(PerspectiveCppError) as ex:
-            tbl.view(columns=["abc", "x"], expressions=["// abc \n 1 + 2"])
+            tbl.view(columns=["abc", "x"], expressions={"abc": "1 + 2"})
         assert str(ex.value) == "Invalid column 'x' found in View columns.\n"
 
     def test_should_not_throw_valid_expression(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        view = tbl.view(columns=["abc"], expressions=["// abc \n 'hello!'"])
+        view = tbl.view(columns=["abc"], expressions={"abc": "'hello!'"})
 
         assert view.schema() == {"abc": str}
 
@@ -2117,7 +2117,7 @@ class TestView(object):
             filter=[["abc", "==", "A"]],
             group_by=["abc"],
             split_by=["abc"],
-            expressions=["// abc \n 'hello!'"],
+            expressions={"abc": "'hello!'"},
         )
 
         assert view.schema() == {"abc": str}

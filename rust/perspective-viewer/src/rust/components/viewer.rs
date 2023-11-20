@@ -155,7 +155,7 @@ impl Component for PerspectiveViewer {
             PerspectiveViewerMsg::Resize => {
                 self.on_resize.emit_all(());
                 false
-            }
+            },
             PerspectiveViewerMsg::Reset(all, sender) => {
                 self.selected_column = None;
                 clone!(
@@ -177,7 +177,7 @@ impl Component for PerspectiveViewer {
                 });
 
                 needs_update
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsInit(Some(SettingsUpdate::Missing), None) => false,
             PerspectiveViewerMsg::ToggleSettingsInit(
                 Some(SettingsUpdate::Missing),
@@ -185,22 +185,22 @@ impl Component for PerspectiveViewer {
             ) => {
                 resolve.send(Ok(JsValue::UNDEFINED)).unwrap();
                 false
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsInit(Some(SettingsUpdate::SetDefault), resolve) => {
                 self.init_toggle_settings_task(ctx, Some(false), resolve);
                 false
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsInit(
                 Some(SettingsUpdate::Update(force)),
                 resolve,
             ) => {
                 self.init_toggle_settings_task(ctx, Some(force), resolve);
                 false
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsInit(None, resolve) => {
                 self.init_toggle_settings_task(ctx, None, resolve);
                 false
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsComplete(SettingsUpdate::SetDefault, resolve)
                 if self.settings_open =>
             {
@@ -208,7 +208,7 @@ impl Component for PerspectiveViewer {
                 self.settings_open = false;
                 self.on_rendered = Some(resolve);
                 true
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsComplete(
                 SettingsUpdate::Update(force),
                 resolve,
@@ -217,19 +217,19 @@ impl Component for PerspectiveViewer {
                 self.settings_open = force;
                 self.on_rendered = Some(resolve);
                 true
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsComplete(_, resolve)
                 if matches!(self.fonts.get_status(), FontLoaderStatus::Finished) =>
             {
                 self.selected_column = None;
                 resolve.send(()).expect("Orphan render");
                 false
-            }
+            },
             PerspectiveViewerMsg::ToggleSettingsComplete(_, resolve) => {
                 self.selected_column = None;
                 self.on_rendered = Some(resolve);
                 true
-            }
+            },
             PerspectiveViewerMsg::RenderLimits(dimensions) => {
                 if self.dimensions != dimensions {
                     self.dimensions = dimensions;
@@ -237,7 +237,7 @@ impl Component for PerspectiveViewer {
                 } else {
                     false
                 }
-            }
+            },
             PerspectiveViewerMsg::ToggleColumnSettings(selected_column, sender) => {
                 let (open, column_name) = if self.selected_column == selected_column {
                     self.selected_column = None;
@@ -262,23 +262,23 @@ impl Component for PerspectiveViewer {
                     sender.send(()).unwrap();
                 }
                 true
-            }
+            },
             PerspectiveViewerMsg::SettingsPanelSizeUpdate(Some(x)) => {
                 self.settings_panel_width_override = Some(x);
                 false
-            }
+            },
             PerspectiveViewerMsg::SettingsPanelSizeUpdate(None) => {
                 self.settings_panel_width_override = None;
                 false
-            }
+            },
             PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(Some(x)) => {
                 self.column_settings_panel_width_override = Some(x);
                 false
-            }
+            },
             PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(None) => {
                 self.column_settings_panel_width_override = None;
                 false
-            }
+            },
         }
     }
 
@@ -398,9 +398,8 @@ impl Component for PerspectiveViewer {
                                         renderer={ &ctx.props().renderer }
                                         custom_events={ &ctx.props().custom_events }
                                         { selected_column }
-                                        on_close={ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None))}
-                                        width_override={self.column_settings_panel_width_override}
-                                    />
+                                        on_close={ ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None)) }
+                                        width_override={ self.column_settings_panel_width_override }/>
                                     <></>
                                 </SplitPanel>
                             }
@@ -466,7 +465,7 @@ impl PerspectiveViewer {
                 if let Some(sender) = sender {
                     sender.send(Ok(JsValue::UNDEFINED)).unwrap();
                 }
-            }
+            },
             Some(_) | None => {
                 let force = !is_open;
                 let callback = ctx.link().callback(move |resolve| {
@@ -490,7 +489,7 @@ impl PerspectiveViewer {
 
                     result
                 });
-            }
+            },
         };
     }
 }

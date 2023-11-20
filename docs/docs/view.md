@@ -480,7 +480,7 @@ A custom name can be added to an expression by making the first line a comment:
 
 ```javascript
 const view = await table.view({
-    expressions: ['"a" + "b"'],
+    expressions: { '"a" + "b"': '"a" + "b"' },
 });
 ```
 
@@ -503,7 +503,9 @@ view = table.view(expressions=['"a" + "b"'])
 const elem = document.querySelector("perspective-viewer");
 await elem.restore({
     columns: ["new expression"],
-    expressions: ['//new expression\n"Sales" + "Profit" * 50 / sqrt("Sales")'],
+    expressions: {
+        "new expression": '"Sales" + "Profit" * 50 / sqrt("Sales")',
+    },
 });
 ```
 
@@ -514,7 +516,7 @@ await elem.restore({
 widget = PerspectiveWidget()
 widget.restore(
   columns=["new_expression"],
-  expressions=["//new expression\n\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]
+  expressions={"new expression": "\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"}
 )
 ```
 
@@ -522,7 +524,7 @@ widget.restore(
 </Tabs>
 
 <div>
-<perspective-viewer columns='["new expression"]' expressions='["//new expression\n\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]'>
+<perspective-viewer columns='["new expression"]' expressions='{"new expression": "\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"}'>
 </perspective-viewer>
 </div>
 

@@ -65,7 +65,7 @@ impl Component for AggregateSelector {
             AggregateSelectorMsg::SetAggregate(aggregate) => {
                 self.set_aggregate(ctx, aggregate);
                 false
-            }
+            },
         }
     }
 

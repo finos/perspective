@@ -70,14 +70,14 @@ fn opt(outpath: &Path) {
             .one_caller_inline_max_size(15)
             .run(outpath, outpath)
             .unwrap();
-
-        Command::new("cargo")
-            .args(["run"])
-            .args(["-p", "perspective-bootstrap"])
-            .args(["--"])
-            .args(["dist/pkg/perspective_bg.wasm"])
-            .execute();
     }
+
+    Command::new("cargo")
+        .args(["run"])
+        .args(["-p", "perspective-bootstrap"])
+        .args(["--"])
+        .args(["dist/pkg/perspective_bg.wasm"])
+        .execute();
 }
 
 fn main() {

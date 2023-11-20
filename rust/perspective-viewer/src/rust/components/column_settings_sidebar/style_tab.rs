@@ -41,8 +41,7 @@ pub fn StyleTab(p: &StyleTabProps) -> Html {
                     session={ p.session.clone() }
                     renderer={ p.renderer.clone() }
                     ty={ p.ty }
-                    column_name={ p.column_name.clone() }
-                    />
+                    column_name={ p.column_name.clone() }/>
             </div>
         </div>
     }

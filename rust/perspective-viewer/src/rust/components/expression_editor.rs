@@ -108,12 +108,12 @@ impl Component for ExpressionEditor {
                         Err(err) => {
                             web_sys::console::error_1(&err);
                             ExpressionEditorMsg::ValidateComplete(None)
-                        }
+                        },
                     }
                 });
 
                 true
-            }
+            },
             ExpressionEditorMsg::ValidateComplete(err) => {
                 self.error = err;
                 if self.error.is_none() {
@@ -136,7 +136,7 @@ impl Component for ExpressionEditor {
 
                 ctx.props().on_validate.emit(false);
                 true
-            }
+            },
             ExpressionEditorMsg::Reset => {
                 self.edit_enabled = false;
                 self.save_enabled = false;
@@ -150,7 +150,7 @@ impl Component for ExpressionEditor {
                 .unwrap_or_default();
 
                 true
-            }
+            },
             ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
                     let expr = self.expr.to_owned();
@@ -159,14 +159,14 @@ impl Component for ExpressionEditor {
                 }
 
                 false
-            }
+            },
             ExpressionEditorMsg::Delete => {
                 if let Some(on_delete) = &ctx.props().on_delete {
                     on_delete.emit(());
                 }
 
                 false
-            }
+            },
             ExpressionEditorMsg::AliasChanged(event) => {
                 let value = event.target_unchecked_into::<HtmlInputElement>().value();
                 self.alias = (!value.is_empty()).then_some(value);
@@ -174,7 +174,7 @@ impl Component for ExpressionEditor {
                     self.error.is_none() && !(self.alias.is_none() && self.expr.is_empty());
 
                 true
-            }
+            },
         }
     }
 
@@ -230,13 +230,13 @@ impl Component for ExpressionEditor {
                     </div>
                     <div>
                         <label class="item_title">{ "Expression" }</label>
-                        <div id="editor-container" class={disabled_class}>
+                        <div id="editor-container" class={ disabled_class }>
                             <CodeEditor
                                 expr={ &self.expr }
                                 error={ self.error.clone().map(|x| x.into()) }
                                 { disabled }
                                 { oninput }
-                                { onsave } />
+                                { onsave }/>
 
                             <div id="psp-expression-editor-actions">
                                 if let Some(err) = &self.error {

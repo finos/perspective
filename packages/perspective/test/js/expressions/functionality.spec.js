@@ -62,7 +62,10 @@ const perspective = require("@finos/perspective");
                     expressions_common.int_float_data
                 );
                 const view = await table.view({
-                    expressions: ["if (\"w\" == 1.5) 5; else 'abc'"],
+                    expressions: {
+                        "if (\"w\" == 1.5) 5; else 'abc'":
+                            "if (\"w\" == 1.5) 5; else 'abc'",
+                    },
                 });
                 const results = await view.to_columns();
 
@@ -87,7 +90,7 @@ const perspective = require("@finos/perspective");
                     expressions: [
                         'if ("w" > 2, 5, 10);',
                         'if ("w" == 1.5, 5, 10)',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -107,7 +110,7 @@ const perspective = require("@finos/perspective");
                     expressions: [
                         "if (\"y\" == 'a', 5, 10);",
                         "if (\"y\" != 'a', 5, 10)",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -129,7 +132,7 @@ const perspective = require("@finos/perspective");
                     expressions: [
                         'if ("z" == true, 5, 10);',
                         'if ("z" != true, 5, 10)',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -153,7 +156,7 @@ const perspective = require("@finos/perspective");
                     expressions: [
                         'if ("a" == "b", 5, 10);',
                         'if ("a" < "b", 5, 10)',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -193,7 +196,7 @@ const perspective = require("@finos/perspective");
                     expressions: [
                         'if ("a" >= "b", 5, 10);',
                         'if ("a" < "b", 5, 10)',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 table.update({
@@ -227,7 +230,10 @@ const perspective = require("@finos/perspective");
                     expressions_common.int_float_data
                 );
                 const view = await table.view({
-                    expressions: ['"w" > 2 ? 5 : 10;', '"w" == 1.5 ? 5 : 10'],
+                    expressions: {
+                        '"w" > 2 ? 5 : 10;': '"w" > 2 ? 5 : 10;',
+                        '"w" == 1.5 ? 5 : 10': '"w" == 1.5 ? 5 : 10',
+                    },
                 });
 
                 const results = await view.to_columns();
@@ -245,7 +251,7 @@ const perspective = require("@finos/perspective");
                     expressions: [
                         "\"y\" == 'a' ? 5 : 10;",
                         "\"y\" != 'a' ? 5 : 10",
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -265,7 +271,7 @@ const perspective = require("@finos/perspective");
                     expressions: [
                         '"z" == true ? 5 : 10;',
                         '"z" != true ? 5 : 10',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -282,7 +288,10 @@ const perspective = require("@finos/perspective");
                 });
 
                 const view = await table.view({
-                    expressions: ['"a" == "b" ? 5 : 10;', '"a" < "b" ? 5 : 10'],
+                    expressions: {
+                        '"a" == "b" ? 5 : 10;': '"a" == "b" ? 5 : 10;',
+                        '"a" < "b" ? 5 : 10': '"a" < "b" ? 5 : 10',
+                    },
                 });
 
                 table.update({
@@ -315,7 +324,10 @@ const perspective = require("@finos/perspective");
                 });
 
                 const view = await table.view({
-                    expressions: ['"a" >= "b" ? 5 : 10;', '"a" < "b" ? 5 : 10'],
+                    expressions: {
+                        '"a" >= "b" ? 5 : 10;': '"a" >= "b" ? 5 : 10;',
+                        '"a" < "b" ? 5 : 10': '"a" < "b" ? 5 : 10',
+                    },
                 });
 
                 table.update({
@@ -349,7 +361,7 @@ const perspective = require("@finos/perspective");
                         'if ("w" > 2) 5; else 10',
                         'if ("w" > 2) 5; else 10;',
                         'if ("w" > 2) { \n5; } else { \n10;}',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -375,7 +387,7 @@ const perspective = require("@finos/perspective");
                         'if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10',
                         'if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10;',
                         'if ("w" == 3.5) { \n15; } else if ("w" > 2) { \n5; } else { \n10;}',
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -403,7 +415,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `switch { case "w" > 2: sqrt(144); case "y" == 'a': sqrt(121); default: 0; }`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -427,7 +439,7 @@ const perspective = require("@finos/perspective");
                 table.update(expressions_common.int_float_data);
                 const expr = `switch { case "w" > 2: (sqrt(144) * "w"); case "y" == 'a': (sqrt(121) * "w"); default: "x"; }`;
                 const view = await table.view({
-                    expressions: [expr],
+                    expressions: { [expr]: expr },
                 });
 
                 const results = await view.to_columns();
@@ -450,7 +462,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; }; x`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -473,7 +485,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `var x := 2; var y := 0; while (y < 3) { x := x * x; y += 1; }; x`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -492,14 +504,14 @@ const perspective = require("@finos/perspective");
                     expressions_common.int_float_data
                 );
 
-                const schema = await table.validate_expressions([
-                    `//expr\nvar x := 2; var y := 0; while (y < 3) { x := x * x; y += 1; } x`,
-                ]);
+                const schema = await table.validate_expressions({
+                    [`expr`]: `var x := 2; var y := 0; while (y < 3) { x := x * x; y += 1; } x`,
+                });
 
                 expect(schema.expression_schema["expr"]).toBeUndefined();
                 expect(schema.errors["expr"]).toEqual({
                     column: 62,
-                    line: 1,
+                    line: 0,
                     error_message: "Invalid expression encountered",
                 });
 
@@ -513,7 +525,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; }; x`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -534,7 +546,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; }; x`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -551,12 +563,12 @@ const perspective = require("@finos/perspective");
 
         test.describe("For loop", function () {
             test("For loop", async () => {
-                const expr = `// expression\nvar x := 0; for (var i := 0; i < 3; i += 1) { x += 1; }; x`;
+                const expr = `var x := 0; for (var i := 0; i < 3; i += 1) { x += 1; }; x`;
                 const table = await perspective.table(
                     expressions_common.int_float_data
                 );
                 const view = await table.view({
-                    expressions: [expr],
+                    expressions: { expression: expr },
                 });
 
                 const results = await view.to_columns();
@@ -573,7 +585,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `for (var x := 0; x < 10; x += 1) { var y := x + 1; y}`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -594,7 +606,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `for (var x := 0; x < 10; x += 1) { var y := "w" + 1; y}`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -634,7 +646,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `var x := 1; var y := 1; repeat x := x + (y * 2) until (x > 10)`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -655,7 +667,7 @@ const perspective = require("@finos/perspective");
                 const view = await table.view({
                     expressions: [
                         `var x := 1; repeat x := x + ("x" * 2) until (x > 10)`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
                 const results = await view.to_columns();
@@ -677,7 +689,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ["1", "100.0000001"],
+                expressions: { 1: "1", [`100.0000001`]: "100.0000001" },
             });
 
             const results = await view.to_columns();
@@ -698,7 +710,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     "'hello'",
                     "'very long string that is very long and has many characters'",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -732,7 +744,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     "'hello'",
                     "'very long string that is very long and has many characters'",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -762,7 +774,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     "'hello'",
                     "'another very long string with many characters'",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results2 = await view2.to_columns();
@@ -782,7 +794,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     `var x := 10; var y := -100.00005; var z := x + y; abs(z)`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -829,7 +841,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     `var x := 'long literal string here'; var y := 'long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`,
                     `var x := 'hello'; var y := upper(x); lower(y);`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -858,7 +870,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -882,7 +894,10 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: [`var x := 'abc'; var y := '123'; concat(x, y)`],
+                expressions: {
+                    "var x := 'abc'; var y := '123'; concat(x, y)":
+                        "var x := 'abc'; var y := '123'; concat(x, y)",
+                },
             });
 
             const results = await view.to_columns();
@@ -901,7 +916,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -926,7 +941,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
                     "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results2 = await view2.to_columns();
@@ -953,7 +968,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     `var x := today(); var y := today(); x == y ? 1 : 0;`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -971,7 +986,7 @@ const perspective = require("@finos/perspective");
             );
             const now = new Date().getTime();
             const view = await table.view({
-                expressions: ["now()"],
+                expressions: { "now()": "now()" },
             });
 
             const results = await view.to_columns();
@@ -992,7 +1007,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     `var x := true; var y := false; x and y ? 1 : 0`,
                     `var x := true; var y := false; x or y`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -1015,7 +1030,10 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: [`var x := "w"; var y := 1.5; x > 2.5 ? x : y`],
+                expressions: {
+                    'var x := "w"; var y := 1.5; x > 2.5 ? x : y':
+                        'var x := "w"; var y := 1.5; x > 2.5 ? x : y',
+                },
             });
 
             const results = await view.to_columns();
@@ -1035,7 +1053,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     `var x := 'w'; var y := 1.5; x := y; x`,
                     `var x := 'w'; var y := 1.5; y := x; y`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -1061,7 +1079,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     `var x := 100; var y := 200.5; x := y; x`,
                     `var x := 10; var y := pow(x, 3); y := x; y`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -1083,7 +1101,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     `var x := 'long literal string here'; var y := lower('ANOTHER VERY LONG STRING HERE'); x := y`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -1109,7 +1127,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     `var x := today(); var y := today(); var z := "a"; (x > z) and (y > z) ? 1 : 0`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const tomorrow = new Date();
@@ -1142,7 +1160,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     `var x := now(); var y := now(); var z := "a"; (x > z) and (y > z) ? 1 : 0`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const tomorrow = new Date();
@@ -1179,7 +1197,7 @@ const perspective = require("@finos/perspective");
                 expressions: [
                     `var x := "w"; var y := x; x := "y"; x;`,
                     `var x := "z"; var y := x; x := "w"; x;`,
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
 
             const results = await view.to_columns();
@@ -1204,7 +1222,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -1217,7 +1235,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 expressions: [
                     "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             const schema = await view.expression_schema();
             expect(schema).toEqual({
@@ -1261,7 +1279,9 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ["1 + 2 + 3 + 4 + 5 + 6"],
+                expressions: {
+                    "1 + 2 + 3 + 4 + 5 + 6": "1 + 2 + 3 + 4 + 5 + 6",
+                },
             });
             const result = await view.to_columns();
             expect(result["1 + 2 + 3 + 4 + 5 + 6"]).toEqual([21, 21, 21, 21]);
@@ -1275,7 +1295,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 group_by: ["'abc'"], // checks that the strings are interned
-                expressions: ["'abc'"],
+                expressions: { "'abc'": "'abc'" },
             });
             const result = await view.to_columns();
             expect(result["__ROW_PATH__"]).toEqual([[], ["abc"]]);
@@ -1294,7 +1314,7 @@ const perspective = require("@finos/perspective");
                     "0 or 1",
                     "true and true",
                     "false or true",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             expect(await view.schema()).toEqual({
                 w: "float",
@@ -1325,7 +1345,7 @@ const perspective = require("@finos/perspective");
                     "0 or 1",
                     "true and true",
                     "false or true",
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             expect(await view.schema()).toEqual({
                 w: "float",
@@ -1352,7 +1372,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 columns: ['("w" + "x") ^ 2'],
-                expressions: ['("w" + "x") ^ 2'],
+                expressions: { '("w" + "x") ^ 2': '("w" + "x") ^ 2' },
             });
             const result = await view.to_columns();
             expect(result['("w" + "x") ^ 2']).toEqual(
@@ -1374,7 +1394,7 @@ const perspective = require("@finos/perspective");
                     '"x" and false',
                     '"x" or true',
                     '"x" or false',
-                ],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             expect(await view.schema()).toEqual({
                 w: "float",
@@ -1412,7 +1432,7 @@ const perspective = require("@finos/perspective");
                 z: "boolean",
             });
             const view = await table.view({
-                expressions: ['("w" + "x") * 10'],
+                expressions: { '("w" + "x") * 10': '("w" + "x") * 10' },
             });
 
             const result = await view.to_columns();
@@ -1445,7 +1465,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['// new column\n"w" + "x"'],
+                expressions: { "new column": '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -1458,14 +1478,14 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['// new column\n"w" + "x"'],
+                expressions: { "new column": '"w" + "x"' },
             });
 
             const result = await view.to_columns();
             expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
 
             const view2 = await table.view({
-                expressions: ['// new column\n"w" - "x"'],
+                expressions: { "new column": '"w" - "x"' },
             });
 
             const result2 = await view2.to_columns();
@@ -1481,9 +1501,10 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: [
-                    '// new column with lots of different strings and names and lots of good characters\n"w" + "x"',
-                ],
+                expressions: {
+                    "new column with lots of different strings and names and lots of good characters":
+                        '"w" + "x"',
+                },
             });
             const result = await view.to_columns();
             expect(
@@ -1500,9 +1521,9 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: [
-                    '// alias\nvar x := "w" + "x"\n// a comment\n# another comment\n/* another comment here */\n',
-                ],
+                expressions: {
+                    alias: 'var x := "w" + "x"\n// a comment\n# another comment\n/* another comment here */\n',
+                },
             });
             const result = await view.to_columns();
             expect(result["alias"]).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -1516,13 +1537,13 @@ const perspective = require("@finos/perspective");
             );
 
             const view = await table.view({
-                expressions: [
-                    '// new column\n"w" + "x"',
-                    '// new column 1\n"w" - "x"',
-                    "// new column\n100 * 10",
-                    '// new column 1\n"w" + "x"',
-                    '// new column\n"w" - "x"',
-                ],
+                expressions: {
+                    "new column": '"w" + "x"',
+                    "new column 1": '"w" - "x"',
+                    "new column": "100 * 10",
+                    "new column 1": '"w" + "x"',
+                    "new column": '"w" - "x"',
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -1545,13 +1566,13 @@ const perspective = require("@finos/perspective");
             );
 
             const view = await table.view({
-                expressions: [
-                    '// new column\n"w" + "x"',
-                    '// new column 1\n"w" - "x"',
-                    "// new column\n100",
-                    "// new column\nupper('abc')",
-                    '// new column 1\n"w" + "x"',
-                ],
+                expressions: {
+                    "new column": '"w" + "x"',
+                    "new column 1": '"w" - "x"',
+                    "new column": "100",
+                    "new column": "upper('abc')",
+                    "new column 1": '"w" + "x"',
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -1573,14 +1594,14 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['// new column\n"w" + "x"'],
+                expressions: { "new column": '"w" + "x"' },
             });
 
             let result = await view.to_columns();
             expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
 
             const view2 = await table.view({
-                expressions: ["// new column\n100 * 10"],
+                expressions: { "new column": "100 * 10" },
             });
 
             expect(await view.expression_schema()).toEqual(
@@ -1593,7 +1614,7 @@ const perspective = require("@finos/perspective");
             expect(result2["new column"]).toEqual([1000, 1000, 1000, 1000]);
 
             const view3 = await table.view({
-                expressions: ["// new column\n100 * 100"],
+                expressions: { "new column": "100 * 100" },
                 group_by: ["y"],
             });
 
@@ -1620,7 +1641,7 @@ const perspective = require("@finos/perspective");
 
             table
                 .view({
-                    expressions: ["// w\nupper('abc')"],
+                    expressions: { w: "upper('abc')" },
                 })
                 .catch((e) => {
                     expect(e.message).toMatch(
@@ -1638,14 +1659,14 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['// new column\n"w" + "x"'],
+                expressions: { "new column": '"w" + "x"' },
             });
 
             let result = await view.to_columns();
             expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
 
             const view2 = await table.view({
-                expressions: ["// new column\n upper('abc')"],
+                expressions: { "new column": " upper('abc')" },
             });
 
             const result2 = await view2.to_columns();
@@ -1662,7 +1683,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -1691,7 +1712,12 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w"', '"x"', '"y"', '"z"'],
+                expressions: {
+                    '"w"': '"w"',
+                    '"x"': '"x"',
+                    '"y"': '"y"',
+                    '"z"': '"z"',
+                },
             });
             expect(await view.expression_schema()).toEqual({
                 '"w"': "float",
@@ -1751,7 +1777,10 @@ const perspective = require("@finos/perspective");
             );
 
             const view = await table.view({
-                expressions: ['"w" + "x"', 'upper("y")'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    'upper("y")': 'upper("y")',
+                },
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -1771,10 +1800,17 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"', '"w" - "x"', '"w" * "x"'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    '"w" - "x"': '"w" - "x"',
+                    '"w" * "x"': '"w" * "x"',
+                },
             });
             const view2 = await table.view({
-                expressions: ['"w" / "x"', '"x" * "w"'],
+                expressions: {
+                    '"w" / "x"': '"w" / "x"',
+                    '"x" * "w"': '"x" * "w"',
+                },
             });
 
             const schema = await view.schema();
@@ -1831,10 +1867,10 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const view2 = await table.view({
-                expressions: ['"w" - "x"'],
+                expressions: { '"w" - "x"': '"w" - "x"' },
             });
 
             const schema = await view.schema();
@@ -1890,11 +1926,14 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const view2 = await table.view({
-                expressions: ['"w" + "x"', '"w" - "x"'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    '"w" - "x"': '"w" - "x"',
+                },
             });
 
             const schema = await view.schema();
@@ -1953,7 +1992,7 @@ const perspective = require("@finos/perspective");
             );
 
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             expect(await view.schema()).toEqual({
@@ -1965,7 +2004,10 @@ const perspective = require("@finos/perspective");
             });
 
             const view2 = await table.view({
-                expressions: ['"w" + "x"', '"w" - "x"'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    '"w" - "x"': '"w" - "x"',
+                },
             });
 
             expect(await view2.schema()).toEqual({
@@ -1978,7 +2020,11 @@ const perspective = require("@finos/perspective");
             });
 
             const view3 = await table.view({
-                expressions: ['"w" + "x"', '"w" - "x"', '("w" - "x") + "x"'],
+                expressions: {
+                    '"w" + "x"': '"w" + "x"',
+                    '"w" - "x"': '"w" - "x"',
+                    '("w" - "x") + "x"': '("w" - "x") + "x"',
+                },
             });
 
             expect(await view3.schema()).toEqual({
@@ -2005,7 +2051,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const result = await view.to_columns();
@@ -2013,7 +2059,7 @@ const perspective = require("@finos/perspective");
             view.delete();
 
             const view2 = await table.view({
-                expressions: ['"w" - "x"'],
+                expressions: { '"w" - "x"': '"w" - "x"' },
             });
 
             const result2 = await view2.to_columns();
@@ -2028,7 +2074,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const result = await view.to_columns();
@@ -2054,12 +2100,24 @@ const perspective = require("@finos/perspective");
             const table = await perspective.table(
                 expressions_common.int_float_data
             );
-            const view = await table.view({ expressions: [expressions[0]] });
+            const view = await table.view({
+                expressions: [expressions[0]].reduce(
+                    (x, y) => Object.assign(x, { [y]: y }),
+                    {}
+                ),
+            });
             const view2 = await table.view({
-                expressions: [expressions[0], expressions[1]],
+                expressions: [expressions[0], expressions[1]].reduce(
+                    (x, y) => Object.assign(x, { [y]: y }),
+                    {}
+                ),
             });
             const view3 = await table.view({
-                expressions: [expressions[0], expressions[1], expressions[2]],
+                expressions: [
+                    expressions[0],
+                    expressions[1],
+                    expressions[2],
+                ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
             });
             const view4 = await table.view({ expressions: expressions });
 
@@ -2118,10 +2176,10 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const view2 = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
 
             const schema = await view.schema();
@@ -2194,7 +2252,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -2218,7 +2276,7 @@ const perspective = require("@finos/perspective");
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -2238,7 +2296,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 columns: ['"w" + "x"'],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
@@ -2252,7 +2310,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 columns: ["x"],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             expect(await view.schema()).toEqual({
                 x: "integer",
@@ -2273,7 +2331,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 group_by: ["w"],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2294,7 +2352,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 group_by: ['"w" + "x"'],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2317,7 +2375,7 @@ const perspective = require("@finos/perspective");
             // default order
             let view = await table.view({
                 group_by: ["y"],
-                expressions: ['// column\n"w" + "x"'],
+                expressions: { column: '"w" + "x"' },
             });
 
             let paths = await view.column_paths();
@@ -2343,7 +2401,7 @@ const perspective = require("@finos/perspective");
                 output.unshift("__ROW_PATH__");
                 view = await table.view({
                     group_by: ["y"],
-                    expressions: ['// column\n"w" + "x"'],
+                    expressions: { column: '"w" + "x"' },
                     columns: expected,
                 });
                 paths = await view.column_paths();
@@ -2356,7 +2414,7 @@ const perspective = require("@finos/perspective");
                 output.unshift("__ROW_PATH__");
                 view = await table.view({
                     group_by: ["column"],
-                    expressions: ['// column\n"w" + "x"'],
+                    expressions: { column: '"w" + "x"' },
                     columns: expected,
                 });
                 paths = await view.column_paths();
@@ -2373,7 +2431,7 @@ const perspective = require("@finos/perspective");
             );
             const config = {
                 group_by: ["y"],
-                expressions: ["1234"],
+                expressions: { 1234: "1234" },
                 aggregates: {
                     x: "sum",
                     y: "count",
@@ -2427,7 +2485,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 split_by: ['"w" + "x"'],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2463,7 +2521,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 group_by: ['"w" + "x"'],
                 split_by: ['"w" + "x"'],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2505,7 +2563,7 @@ const perspective = require("@finos/perspective");
                     '"x" + "z"': "median",
                     x: "median",
                 },
-                expressions: ['"x" + "z"'],
+                expressions: { '"x" + "z"': '"x" + "z"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2531,7 +2589,7 @@ const perspective = require("@finos/perspective");
                 aggregates: {
                     '"x" + "z"': ["weighted mean", "y"],
                 },
-                expressions: ['"x" + "z"'],
+                expressions: { '"x" + "z"': '"x" + "z"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2554,7 +2612,7 @@ const perspective = require("@finos/perspective");
                     '"x"': "median",
                     x: "median",
                 },
-                expressions: ['"x"'],
+                expressions: { '"x"': '"x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2578,7 +2636,7 @@ const perspective = require("@finos/perspective");
                 aggregates: {
                     'upper("x")': "distinct count",
                 },
-                expressions: ['upper("x")'],
+                expressions: { 'upper("x")': 'upper("x")' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2604,7 +2662,7 @@ const perspective = require("@finos/perspective");
                 aggregates: {
                     "bucket(\"x\", 'M')": "distinct count",
                 },
-                expressions: [`bucket("x", 'M')`],
+                expressions: { "bucket(\"x\", 'M')": "bucket(\"x\", 'M')" },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2628,7 +2686,7 @@ const perspective = require("@finos/perspective");
                     x: ["weighted mean", '"x" + "z"'],
                     '"x" + "z"': ["weighted mean", "y"],
                 },
-                expressions: ['"x" + "z"'],
+                expressions: { '"x" + "z"': '"x" + "z"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2648,7 +2706,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 filter: [['"w" + "x"', ">", 6.5]],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2668,7 +2726,7 @@ const perspective = require("@finos/perspective");
             );
             const view = await table.view({
                 sort: [['"w" + "x"', "desc"]],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2689,7 +2747,7 @@ const perspective = require("@finos/perspective");
             const view = await table.view({
                 columns: ["w"],
                 sort: [['"w" + "x"', "desc"]],
-                expressions: ['"w" + "x"'],
+                expressions: { '"w" + "x"': '"w" + "x"' },
             });
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -2737,13 +2795,13 @@ const perspective = require("@finos/perspective");
                     c: ["a", "b", "c", "d"],
                     d: [1.5, 2.5, 3.5, 4.5],
                 });
-                const expressions = [
-                    "// abc\n 123 + 345", //valid
-                    "// a\n sqrt(144)", // invalid
-                    "// b\n upper('abc')", // invalid
-                    "// c\n concat('a', 'b')", // invalid
-                    "// d\n today()", // invalid
-                ];
+                const expressions = {
+                    abc: " 123 + 345", //valid
+                    a: " sqrt(144)", // invalid
+                    b: " upper('abc')", // invalid
+                    c: " concat('a', 'b')", // invalid
+                    d: " today()", // invalid
+                };
                 const results = await table.validate_expressions(expressions);
                 expect(results.expression_schema).toEqual({
                     abc: "float",
@@ -2760,16 +2818,16 @@ const perspective = require("@finos/perspective");
                 });
 
                 const view = await table.view({
-                    expressions: [
-                        "// abc\n 123 + 345",
-                        "//def \n lower('ABC')",
-                    ],
+                    expressions: {
+                        abc: " 123 + 345",
+                        def: " lower('ABC')",
+                    },
                 });
 
-                const results = await table.validate_expressions([
-                    "// abc\n upper('abc')",
-                    "// def\n 1 + 2",
-                ]);
+                const results = await table.validate_expressions({
+                    abc: " upper('abc')",
+                    def: " 1 + 2",
+                });
                 expect(results.expression_schema).toEqual({
                     abc: "string",
                     def: "float",
@@ -2786,19 +2844,19 @@ const perspective = require("@finos/perspective");
                     c: ["a", "b", "c", "d"],
                     d: [1.5, 2.5, 3.5, 4.5],
                 });
-                const expressions = [
-                    '// abc \n"a" + "d"', // valid
-                    '// def\n"c" + "b"', // invalid
-                    '"c"', // valid
-                    "// new column \nbucket(\"b\", 'M')", // valid
-                    "bucket(\"b\", 'abcde')", // invalid
-                    'concat("c", "a")', // invalid
-                    "// more columns\nconcat(\"c\", ' ', \"c\", 'abc')", // valid
-                    'upper("c")', // valid
-                    'lower("a")', // invalid,
-                    'min("a", "c")', // invalid,
-                    'max(100, "a")', // valid
-                ];
+                const expressions = {
+                    abc: '"a" + "d"', // valid
+                    def: '"c" + "b"', // invalid
+                    '"c"': '"c"', // valid
+                    "new column": "bucket(\"b\", 'M')", // valid
+                    "bucket(\"b\", 'abcde')": "bucket(\"b\", 'abcde')", // invalid
+                    'concat("c", "a")': 'concat("c", "a")', // invalid
+                    "more columns": "concat(\"c\", ' ', \"c\", 'abc')", // valid
+                    'upper("c")': 'upper("c")', // valid
+                    'lower("a")': 'lower("a")', // invalid,
+                    'min("a", "c")': 'min("a", "c")', // invalid,
+                    'max(100, "a")': 'max(100, "a")', // valid
+                };
                 const results = await table.validate_expressions(expressions);
                 expect(results.expression_schema).toEqual({
                     abc: "float",
@@ -2809,24 +2867,10 @@ const perspective = require("@finos/perspective");
                     "more columns": "string",
                 });
 
-                let i = 0;
-                for (const alias of [
-                    "abc",
-                    "def",
-                    expressions[2],
-                    "new column",
-                    expressions[4],
-                    expressions[5],
-                    "more columns",
-                    expressions[7],
-                    expressions[8],
-                    expressions[9],
-                    expressions[10],
-                ]) {
+                for (const alias of Object.keys(expressions)) {
                     expect(results.expression_alias[alias]).toEqual(
-                        expressions[i]
+                        expressions[alias]
                     );
-                    i++;
                 }
                 table.delete();
             });
@@ -2939,7 +2983,7 @@ const perspective = require("@finos/perspective");
                         'upper("c")',
                         `bucket("b", 'M')`,
                         `bucket("b", 's')`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const schema = await view.schema();
                 expect(schema).toEqual({
@@ -2975,7 +3019,7 @@ const perspective = require("@finos/perspective");
                         'upper("c")',
                         `bucket("b", 'M')`,
                         `bucket("b", 's')`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -3013,7 +3057,7 @@ const perspective = require("@finos/perspective");
                         `bucket("b",'s')`,
                         `bucket("b",       'M')`,
                         `bucket("b",       's')`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -3051,7 +3095,7 @@ const perspective = require("@finos/perspective");
                         'upper("c")',
                         `bucket("b", 'M')`,
                         `bucket("b", 's')`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -3090,7 +3134,7 @@ const perspective = require("@finos/perspective");
                         'upper("c")',
                         `bucket("b", 'M')`,
                         `bucket("b", 's')`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -3125,7 +3169,7 @@ const perspective = require("@finos/perspective");
                         'upper("c")',
                         `bucket("b", 'M')`,
                         `bucket("b", 's')`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -3165,7 +3209,7 @@ const perspective = require("@finos/perspective");
                         'upper("c")',
                         `bucket("b", 'M')`,
                         `bucket("b", 's')`,
-                    ],
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -3189,7 +3233,10 @@ const perspective = require("@finos/perspective");
                 });
                 const expr = "vlookup('b', integer(0))";
                 const view = await table.view({
-                    expressions: [expr],
+                    expressions: [expr].reduce(
+                        (x, y) => Object.assign(x, { [y]: y }),
+                        {}
+                    ),
                 });
                 const result = await view.to_columns();
                 expect(result).toEqual({
@@ -3207,7 +3254,7 @@ const perspective = require("@finos/perspective");
                     b: ["a", "b", "c", "d"],
                 });
                 const view = await table.view({
-                    expressions: ["col('b')"],
+                    expressions: { "col('b')": "col('b')" },
                 });
                 const result = await view.to_columns();
                 expect(result).toEqual({
@@ -3224,7 +3271,7 @@ const perspective = require("@finos/perspective");
                     a: [1, 2, 3, 4],
                 });
                 const view = await table.view({
-                    expressions: ["index()"],
+                    expressions: { "index()": "index()" },
                 });
                 const result = await view.to_columns();
                 expect(result).toEqual({
@@ -3243,7 +3290,7 @@ const perspective = require("@finos/perspective");
                     { index: "a" }
                 );
                 const view = await table.view({
-                    expressions: ["index()"],
+                    expressions: { "index()": "index()" },
                 });
                 const result = await view.to_columns();
                 expect(result).toEqual({
@@ -3260,16 +3307,16 @@ const perspective = require("@finos/perspective");
                     b: [1, 2, 3, 4],
                 });
 
-                const str_exprs = [
-                    '// x\n"a"',
-                    '// y\n"b" * 0.5',
-                    "// c\n'abcdefg'",
-                    "// d\ntrue and false",
-                    '// e\nfloat("a") > 2 ? null : 1',
-                    "// f\ntoday()",
-                    "// g\nnow()",
-                    "// h\nlength(123)",
-                ];
+                const str_exprs = {
+                    x: '"a"',
+                    y: '"b" * 0.5',
+                    c: "'abcdefg'",
+                    d: "true and false",
+                    e: 'float("a") > 2 ? null : 1',
+                    f: "today()",
+                    g: "now()",
+                    h: "length(123)",
+                };
 
                 const dict_exprs = {
                     x: '"a"',
@@ -3291,8 +3338,8 @@ const perspective = require("@finos/perspective");
 
                 for (let [key, val] of Object.entries(vstrs.expression_alias)) {
                     let dict_val = vdicts.expression_alias[key];
-                    let parsed_val = `// ${key}\n${dict_val}`;
-                    expect(val).toEqual(parsed_val);
+                    // let parsed_val = `${dict_val}`;
+                    expect(val).toEqual(dict_val);
                 }
             });
         });

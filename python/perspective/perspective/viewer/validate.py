@@ -139,16 +139,20 @@ def validate_expressions(expressions):
     if expressions is None:
         return []
 
-    if isinstance(expressions, str):
-        # wrap in a list and return
-        return [expressions]
-
     if isinstance(expressions, list):
+        import logging
+
+        logging.warn("Legacy `expressions` format: {}".format(expressions))
         for expr in expressions:
             if isinstance(expr, dict):
                 if not (expr.get("name") and expr.get("expr")):
                     raise PerspectiveError("Cannot parse dict expression: {}".format(str(expr)))
             elif not isinstance(expr, str):
+                raise PerspectiveError("Cannot parse non-string expression: {}".format(str(type(expr))))
+        return expressions
+    elif isinstance(expressions, dict):
+        for expr in expressions.values():
+            if not isinstance(expr, str):
                 raise PerspectiveError("Cannot parse non-string expression: {}".format(str(type(expr))))
         return expressions
     else:

@@ -127,15 +127,15 @@ impl Component for InactiveColumn {
                     .activate_column(ctx.props().name.to_owned(), shift_key);
                 ctx.props().onselect.emit(());
                 false
-            }
+            },
             MouseEnter(is_render) => {
                 self.mouseover = is_render;
                 is_render
-            }
+            },
             MouseLeave(is_render) => {
                 self.mouseover = false;
                 is_render
-            }
+            },
         }
     }
 

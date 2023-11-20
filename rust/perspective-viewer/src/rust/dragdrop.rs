@@ -226,14 +226,14 @@ impl DragDrop {
         let should_render = match &*drag_state {
             DragState::DragOverInProgress(_, drag_to) => {
                 drag_to.target != target || drag_to.index != index
-            }
+            },
             _ => true,
         };
 
         *drag_state = match &*drag_state {
             DragState::DragOverInProgress(drag_from, _) | DragState::DragInProgress(drag_from) => {
                 DragState::DragOverInProgress(drag_from.clone(), DragOver { target, index })
-            }
+            },
             _ => DragState::NoDrag,
         };
 
@@ -320,7 +320,7 @@ pub fn dragleave_helper(callback: impl Fn() + 'static, drag_ref: NodeRef) -> Cal
                         if !current_target.contains(Some(related)) {
                             callback();
                         }
-                    }
+                    },
                     None => {
                         // Safari (OSX and iOS) don't set `relatedTarget`, so we need to
                         // read a memoized value from the `"dragenter"` event.
@@ -330,7 +330,7 @@ pub fn dragleave_helper(callback: impl Fn() + 'static, drag_ref: NodeRef) -> Cal
                         } else {
                             callback();
                         }
-                    }
+                    },
                 };
             })
         }

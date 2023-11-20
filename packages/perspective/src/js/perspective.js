@@ -376,7 +376,7 @@ export default function (Module) {
      * @example
      * // Create a view with expressions
      * const view = table.view({
-     *      expressions: ['"x" + "y" - 100']
+     *      expressions: {'"x" + "y" - 100': '"x" + "y" - 100'}
      * });
      *
      * await view.expression_schema(); // {'"x" + "y" - 100': "float"}
@@ -1420,8 +1420,12 @@ export default function (Module) {
     function parse_expression_strings(expressions) {
         let validated_expressions = [];
         const expression_idx_map = {};
-
         const is_new_format = !Array.isArray(expressions);
+        if (!is_new_format) {
+            console.warn(
+                "Legacy `expressions` format: " + JSON.stringify(expressions)
+            );
+        }
 
         for (let expression of is_new_format
             ? Object.keys(expressions)
@@ -2208,14 +2212,12 @@ export default function (Module) {
          */
         async init(msg) {
             let wasmBinary = msg.buffer;
-            try {
-                const mod = await WebAssembly.instantiate(wasmBinary);
-                const exports = mod.instance.exports;
-                const size = exports.size();
-                const offset = exports.offset();
-                const array = new Uint8Array(exports.memory.buffer);
-                wasmBinary = array.slice(offset, offset + size);
-            } catch {}
+            const mod = await WebAssembly.instantiate(wasmBinary);
+            const exports = mod.instance.exports;
+            const size = exports.size();
+            const offset = exports.offset();
+            const array = new Uint8Array(exports.memory.buffer);
+            wasmBinary = array.slice(offset, offset + size);
             __MODULE__ = await __MODULE__({
                 wasmBinary,
                 wasmJSMethod: "native-wasm",

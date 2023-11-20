@@ -121,7 +121,7 @@ impl Component for EmptyRow {
                 }
 
                 false
-            }
+            },
             Blur => {
                 p.dropdown.hide().unwrap();
                 if let Some(elem) = self.input_ref.cast::<HtmlInputElement>() {
@@ -130,21 +130,21 @@ impl Component for EmptyRow {
                 p.set_focused_index.emit(Some(p.index + 1));
 
                 false
-            }
+            },
             KeyDown(40) => {
                 p.dropdown.item_down();
                 false
-            }
+            },
             KeyDown(38) => {
                 p.dropdown.item_up();
                 false
-            }
+            },
             KeyDown(13) => {
                 p.dropdown.item_select();
                 p.dropdown.hide().unwrap();
                 p.set_focused_index.emit(Some(p.index + 1));
                 true
-            }
+            },
             KeyDown(_) => false,
             Input(value) => {
                 if let Some(elem) = self.input_ref.cast::<HtmlElement>() {
@@ -158,7 +158,7 @@ impl Component for EmptyRow {
                 }
 
                 false
-            }
+            },
         }
     }
 

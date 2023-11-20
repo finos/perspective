@@ -99,20 +99,20 @@ impl Component for EmptyColumn {
                 }
 
                 false
-            }
+            },
             KeyDown(40) => {
                 ctx.props().column_dropdown.item_down();
                 false
-            }
+            },
             KeyDown(38) => {
                 ctx.props().column_dropdown.item_up();
                 false
-            }
+            },
             KeyDown(13) => {
                 ctx.props().column_dropdown.item_select();
                 ctx.props().column_dropdown.hide().unwrap();
                 false
-            }
+            },
             KeyDown(_) => false,
             Input => {
                 if let Some(elem) = self.input_ref.cast::<HtmlInputElement>() {
@@ -124,7 +124,7 @@ impl Component for EmptyColumn {
                 }
 
                 false
-            }
+            },
         }
     }
 

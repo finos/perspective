@@ -114,7 +114,7 @@ impl ViewerConfig {
                 encoder.write_all(&bytes)?;
                 let encoded = encoder.finish()?;
                 Ok(JsValue::from(base64::encode(encoded)))
-            }
+            },
             Some(ViewerConfigEncoding::ArrayBuffer) => {
                 let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
                 let bytes = rmp_serde::to_vec(&self.token())?;
@@ -127,10 +127,10 @@ impl ViewerConfig {
                     .buffer()
                     .slice_with_end(start, start + len)
                     .unchecked_into())
-            }
+            },
             Some(ViewerConfigEncoding::JSONString) => {
                 Ok(JsValue::from(serde_json::to_string(self)?))
-            }
+            },
             None | Some(ViewerConfigEncoding::Json) => Ok(JsValue::from_serde_ext(self)?),
         }
     }

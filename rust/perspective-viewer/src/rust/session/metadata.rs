@@ -262,7 +262,7 @@ impl SessionMetadata {
                             Aggregate::MultiAggregate(MultiAggregate::WeightedMean, name)
                         });
                     Box::new(aggregates.chain(num_cols))
-                }
+                },
                 _ => aggregates,
             })
         })

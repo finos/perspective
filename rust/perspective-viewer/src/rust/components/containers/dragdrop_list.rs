@@ -160,7 +160,7 @@ where
                 } else {
                     false
                 }
-            }
+            },
         }
     }
 

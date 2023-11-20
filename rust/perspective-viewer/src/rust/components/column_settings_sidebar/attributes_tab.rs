@@ -40,8 +40,7 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
                     {on_close}
                     {selected_column}
                     {session}
-                    {renderer}
-                />
+                    {renderer}/>
             </div>
         </div>
     }

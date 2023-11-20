@@ -216,7 +216,7 @@ impl PerspectiveViewerElement {
                 None => {
                     session.table_loaded.listen_once().await?;
                     Ok(session.get_table().ok_or("No table set")?)
-                }
+                },
             }
         })
     }
@@ -276,7 +276,7 @@ impl PerspectiveViewerElement {
                     } else {
                         false
                     }
-                }
+                },
                 OptionalUpdate::Update(x) => {
                     let current_name = presentation.get_selected_theme_name().await;
                     if current_name.is_some() && current_name.as_ref().unwrap() != &x {
@@ -285,7 +285,7 @@ impl PerspectiveViewerElement {
                     } else {
                         false
                     }
-                }
+                },
                 _ => false,
             };
 

@@ -30,6 +30,7 @@ const arr = fs.readFileSync(
 async function leak_test(test, num_iterations = 10000) {
     // warmup
     await test();
+    await test();
 
     // TODO Playwright uses the same host instance so this may have grown by
     // the time the suite runs. Could fix with a nod eagent (and test in other
@@ -51,27 +52,34 @@ async function leak_test(test, num_iterations = 10000) {
  * generate expressions that use all columns and scalar values.
  */
 function generate_expressions() {
-    const expressions = ["concat('abcd', \"c\", 'efg')"];
+    const expressions = {
+        "concat('abcd', \"c\", 'efg')": "concat('abcd', \"c\", 'efg')",
+    };
 
     for (const op of ["+", "-", "*", "/", "^", "%"]) {
-        expressions.push(
+        expressions[
             `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`
-        );
+        ] = `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`;
     }
 
     for (const fn of ["sqrt", "log10", "deg2rad"]) {
-        expressions.push(`${fn}("b")`);
+        expressions[`${fn}("b")`] = `${fn}("b")`;
     }
 
     for (const fn of ["upper", "lower", "length"]) {
-        expressions.push(`${fn}("c")`);
+        expressions[`${fn}("c")`] = `${fn}("c")`;
     }
 
     for (const unit of ["m", "D"]) {
-        expressions.push(`bucket("d", '${unit}')`);
+        expressions[`bucket("d", '${unit}')`] = `bucket("d", '${unit}')`;
     }
 
-    return expressions;
+    const rand =
+        Object.keys(expressions)[
+            Math.floor(Math.random() * Object.keys(expressions).length)
+        ];
+
+    return { [rand]: expressions[rand] };
 }
 
 test.describe("leaks", function () {
@@ -150,14 +158,12 @@ test.describe("leaks", function () {
 
             await leak_test(async () => {
                 const view = await table.view({
-                    expressions: [
-                        expressions[
-                            Math.floor(Math.random() * expressions.length)
-                        ],
-                    ],
+                    expressions,
                 });
                 const expression_schema = await view.expression_schema();
-                expect(Object.keys(expression_schema).length).toEqual(1);
+                expect(Object.keys(expression_schema).length).toEqual(
+                    Object.keys(expressions).length
+                );
                 await view.delete();
             });
 
@@ -170,25 +176,23 @@ test.describe("leaks", function () {
          * and view creation.
          */
         test.skip("0 sided regex does not leak", async () => {
-            const expressions = [
-                "match(\"a\", '.{1}')",
-                "match_all(\"a\", '[a-z]{1}')",
-                "search(\"a\", '.')",
-            ];
+            const expressions = {
+                "match(\"a\", '.{1}')": "match(\"a\", '.{1}')",
+                "match_all(\"a\", '[a-z]{1}')": "match_all(\"a\", '[a-z]{1}')",
+                "search(\"a\", '.')": "search(\"a\", '.')",
+            };
 
             await leak_test(async () => {
                 const table = await perspective.table({
                     a: "abcdefghijklmnopqrstuvwxyz".split(""),
                 });
                 const view = await table.view({
-                    expressions: [
-                        expressions[
-                            Math.floor(Math.random() * expressions.length)
-                        ],
-                    ],
+                    expressions,
                 });
                 const expression_schema = await view.expression_schema();
-                expect(Object.keys(expression_schema).length).toEqual(1);
+                expect(Object.keys(expression_schema).length).toEqual(
+                    Object.keys(expressions).length
+                );
                 await view.delete();
                 await table.delete();
             });
@@ -199,21 +203,21 @@ test.describe("leaks", function () {
                 a: "abcdefghijklmnopqrstuvwxyz".split(""),
             });
 
-            const expressions = [
-                "var x := 'abcdefghijklmnopqrstuvwxyz'; concat(\"a\", x, 'abc')",
-                "var x := 'abcdefghijklmnopqrstuvwxyz'; var y := 'defhijklmnopqrst'; concat(\"a\", x, 'abc', y)",
-            ];
+            const expressions = {
+                "var x := 'abcdefghijklmnopqrstuvwxyz'; concat(\"a\", x, 'abc')":
+                    "var x := 'abcdefghijklmnopqrstuvwxyz'; concat(\"a\", x, 'abc')",
+                "var x := 'abcdefghijklmnopqrstuvwxyz'; var y := 'defhijklmnopqrst'; concat(\"a\", x, 'abc', y)":
+                    "var x := 'abcdefghijklmnopqrstuvwxyz'; var y := 'defhijklmnopqrst'; concat(\"a\", x, 'abc', y)",
+            };
 
             await leak_test(async () => {
                 const view = await table.view({
-                    expressions: [
-                        expressions[
-                            Math.floor(Math.random() * expressions.length)
-                        ],
-                    ],
+                    expressions,
                 });
                 const expression_schema = await view.expression_schema();
-                expect(Object.keys(expression_schema).length).toEqual(1);
+                expect(Object.keys(expression_schema).length).toEqual(
+                    Object.keys(expressions).length
+                );
                 await view.delete();
             });
 
@@ -236,14 +240,12 @@ test.describe("leaks", function () {
                     group_by: [
                         columns[Math.floor(Math.random() * columns.length)],
                     ],
-                    expressions: [
-                        expressions[
-                            Math.floor(Math.random() * expressions.length)
-                        ],
-                    ],
+                    expressions,
                 });
                 const expression_schema = await view.expression_schema();
-                expect(Object.keys(expression_schema).length).toEqual(1);
+                expect(Object.keys(expression_schema).length).toEqual(
+                    Object.keys(expressions).length
+                );
                 await view.delete();
             }, 3000);
 
@@ -260,7 +262,6 @@ test.describe("leaks", function () {
 
             const columns = ["a", "b", "c", "d"];
             const expressions = generate_expressions();
-
             await leak_test(async () => {
                 const view = await table.view({
                     group_by: [
@@ -269,14 +270,12 @@ test.describe("leaks", function () {
                     split_by: [
                         columns[Math.floor(Math.random() * columns.length)],
                     ],
-                    expressions: [
-                        expressions[
-                            Math.floor(Math.random() * expressions.length)
-                        ],
-                    ],
+                    expressions,
                 });
                 const expression_schema = await view.expression_schema();
-                expect(Object.keys(expression_schema).length).toEqual(1);
+                expect(Object.keys(expression_schema).length).toEqual(
+                    Object.keys(expressions).length
+                );
                 await view.delete();
             }, 3000);
 

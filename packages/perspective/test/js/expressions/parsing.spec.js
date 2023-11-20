@@ -41,7 +41,10 @@ const common = require("./common.js");
                     });
 
                     const view = await table.view({
-                        expressions: [expression],
+                        expressions: [expression].reduce(
+                            (x, y) => Object.assign(x, { [y]: y }),
+                            {}
+                        ),
                     });
 
                     table.update({

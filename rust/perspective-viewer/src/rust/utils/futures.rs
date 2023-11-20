@@ -169,11 +169,11 @@ pub impl Result<JsValue, ApiError> {
                     } else {
                         Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
                     }
-                }
+                },
                 _ => match f.as_string() {
                     Some(x) if x == CANCELLED_MSG => {
                         Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
-                    }
+                    },
                     Some(_) => Err(x),
                     _ => {
                         if js_sys::Reflect::get(&f, js_intern::js_intern!("message"))
@@ -186,7 +186,7 @@ pub impl Result<JsValue, ApiError> {
                         } else {
                             Err(x)
                         }
-                    }
+                    },
                 },
             }
         })

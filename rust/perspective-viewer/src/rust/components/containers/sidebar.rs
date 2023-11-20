@@ -22,6 +22,7 @@ use crate::clone;
 pub struct SidebarProps {
     /// The component's children.
     pub children: Children,
+
     /// When this callback is called, the sidebar will close
     pub on_close: Callback<()>,
     pub title: String,
@@ -55,27 +56,27 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
             }
         }
     });
-    let width_style = format!("min-width: 200px; width: {}px", *auto_width);
 
+    let width_style = format!("min-width: 200px; width: {}px", *auto_width);
     html! {
-        <div class="sidebar_column" id={format!("{id}_sidebar")} ref={noderef}>
+        <div class="sidebar_column" id={ format!("{id}_sidebar") } ref={ noderef }>
             <SidebarCloseButton
                 id={ format!("{id}_close_button") }
-                on_close_sidebar={ &p.on_close }
-                />
-            <div class="sidebar_header" id={format!("{id}_header")}>
+                on_close_sidebar={ &p.on_close }/>
+            <div class="sidebar_header" id={ format!("{id}_header") }>
                 if let Some(id) = p.icon.clone() {
-                    <span {id}></span>
+                    <span { id }></span>
                 }
-                <span class="sidebar_header_title" id={format!("{id}_header_title")}>
-                    {p.title.clone()}
+
+                <span class="sidebar_header_title" id={ format!("{id}_header_title") }>
+                    { p.title.clone() }
                 </span>
             </div>
-            <div class="sidebar_border" id={format!("{id}_border")}></div>
-            <div class="sidebar_content" id={format!("{id}_content")}>
-                {p.children.iter().collect::<Html>()}
+            <div class="sidebar_border" id={ format!("{id}_border") }></div>
+            <div class="sidebar_content" id={ format!("{id}_content") }>
+                { p.children.iter().collect::<Html>() }
             </div>
-            <div class="sidebar-auto-width" style={width_style}></div>
+            <div class="sidebar-auto-width" style={ width_style }></div>
         </div>
     }
 }

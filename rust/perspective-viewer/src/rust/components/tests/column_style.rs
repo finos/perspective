@@ -71,7 +71,7 @@ pub async fn test_fixed_msg_overrides_default() {
     test_html! {
         <div ref={ panel_div.clone() }>
             <NumberColumnStyle
-                default_config={default_config}
+                default_config={ default_config }
                 weak_link={ link.clone() }>
             </NumberColumnStyle>
         </div>
@@ -261,8 +261,8 @@ pub async fn test_pos_color_and_mode_changed_override_defaults() {
 
     test_html! {
         <NumberColumnStyle
-            default_config={default_config}
-            on_change={on_change}
+            default_config={ default_config }
+            on_change={ on_change }
             weak_link={ link.clone() }>
         </NumberColumnStyle>
     };

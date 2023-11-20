@@ -191,7 +191,7 @@ impl Display for Aggregate {
             Self::SingleAggregate(x) => write!(fmt, "{}", x)?,
             Self::MultiAggregate(MultiAggregate::WeightedMean, x) => {
                 write!(fmt, "weighted mean by {}", x)?
-            }
+            },
         };
         Ok(())
     }
@@ -272,7 +272,7 @@ impl Type {
         match self {
             Self::Bool | Self::Date | Self::Datetime | Self::String => {
                 Aggregate::SingleAggregate(SingleAggregate::Count)
-            }
+            },
             Self::Integer | Self::Float => Aggregate::SingleAggregate(SingleAggregate::Sum),
         }
     }

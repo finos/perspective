@@ -131,7 +131,7 @@ impl yew::Component for SymbolAttr {
 
                 self.pairs = new_pairs;
                 true
-            }
+            },
         }
     }
 

@@ -48,8 +48,12 @@ function it_old_behavior(name, capture) {
                         x: [1, 2, 3, 4],
                         y: ["A", "B", "C", "D"],
                     });
+
                     const view = await table.view({
-                        expressions: ['lower("y")', '-"x"'],
+                        expressions: {
+                            'lower("y")': 'lower("y")',
+                            '-"x"': '-"x"',
+                        },
                     });
 
                     view.on_update(
@@ -92,7 +96,7 @@ function it_old_behavior(name, capture) {
                         y: "string",
                     });
                     const view = await table.view({
-                        expressions: ['upper("y")'],
+                        expressions: { 'upper("y")': 'upper("y")' },
                     });
 
                     view.on_update(
@@ -133,7 +137,7 @@ function it_old_behavior(name, capture) {
                         { index: "x" }
                     );
                     const view = await table.view({
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     view.on_update(
@@ -172,7 +176,7 @@ function it_old_behavior(name, capture) {
                         y: ["A", "B", "C", "D"],
                     });
                     const view = await table.view({
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     view.on_update(
@@ -214,7 +218,7 @@ function it_old_behavior(name, capture) {
                     });
                     const view = await table.view({
                         group_by: ['lower("y")'],
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     view.on_update(
@@ -249,7 +253,7 @@ function it_old_behavior(name, capture) {
                     });
                     const view = await table.view({
                         group_by: ['lower("y")'],
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                         sort: [['lower("y")', "desc"]],
                         columns: ["x"],
                     });
@@ -288,7 +292,7 @@ function it_old_behavior(name, capture) {
                         },
                         group_by: ['lower("y")'],
                         split_by: ["y"],
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     view.on_update(
@@ -381,7 +385,7 @@ function it_old_behavior(name, capture) {
                         y: ["A", "B", "C", "D"],
                     });
                     const view = await table.view({
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     const pre_update = await view.to_columns();
@@ -430,7 +434,7 @@ function it_old_behavior(name, capture) {
                         { index: "x" }
                     );
                     const view = await table.view({
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     const pre_update = await view.to_columns();
@@ -483,11 +487,11 @@ function it_old_behavior(name, capture) {
                     );
 
                     const view = await table.view({
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     const view2 = await table.view({
-                        expressions: ['-"x"'],
+                        expressions: { '-"x"': '-"x"' },
                     });
 
                     view.on_update(
@@ -550,7 +554,7 @@ function it_old_behavior(name, capture) {
                     const view = await table.view();
 
                     const view2 = await table.view({
-                        expressions: ['lower("y")'],
+                        expressions: { 'lower("y")': 'lower("y")' },
                     });
 
                     expect(await view2.to_columns()).toEqual({

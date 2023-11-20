@@ -89,7 +89,7 @@ quotes_.
 <div>
 <perspective-viewer
   columns='["Sales", "Profit", "Expected Sales"]'
-  expressions='["// Expected Sales\n(\"Sales\" * 10) + \"Profit\""]'
+  expressions='{"Expected Sales": "(\"Sales\" * 10) + \"Profit\""}'
 ></perspective-viewer>
 </div>
 
@@ -110,7 +110,7 @@ if ("Profit" > 0) {
 <div>
 <perspective-viewer
   columns='["Profit","Profitable"]'
-  expressions='["//Profitable\nif (\"Profit\" > 0) { &apos;Stonks&apos; } else { &apos;Not Stonks&apos; }"]'
+  expressions='{"Profitable": "if (\"Profit\" > 0) { &apos;Stonks&apos; } else { &apos;Not Stonks&apos; }"}'
 ></perspective-viewer>
 </div>
 
@@ -153,7 +153,7 @@ half
 <div>
 <perspective-viewer
   columns='["Sales", "My Column Name"]'
-  expressions='["// My Column Name\nvar incrementedBy200 := \"Sales\" + 200;\nvar half := incrementedBy200 / 2;\nhalf"]'
+  expressions='{"My Column Name": "var incrementedBy200 := \"Sales\" + 200;\nvar half := incrementedBy200 / 2;\nhalf"}'
 ></perspective-viewer>
 </div>
 <br/>
@@ -171,7 +171,7 @@ percentDisplay
 <div>
 <perspective-viewer
   columns='["Complex Expression", "Customer Name", "Sales", "Profit"]'
-  expressions='["// Complex Expression\nvar upperCustomer := upper(\"Customer Name\");\nvar separator := concat(upperCustomer, &apos; | &apos;);\nvar profitRatio := floor(percent_of(\"Profit\", \"Sales\")); // Remove trailing decimal.\nvar combined := concat(separator, string(profitRatio));\nvar percentDisplay := concat(combined, &apos;%&apos;);\npercentDisplay"]'
+  expressions='{"Complex Expression": "var upperCustomer := upper(\"Customer Name\");\nvar separator := concat(upperCustomer, &apos; | &apos;);\nvar profitRatio := floor(percent_of(\"Profit\", \"Sales\")); // Remove trailing decimal.\nvar combined := concat(separator, string(profitRatio));\nvar percentDisplay := concat(combined, &apos;%&apos;);\npercentDisplay"}'
 ></perspective-viewer>
 </div>
 <br/>
@@ -197,6 +197,6 @@ finalPrice + additionalModifier
 <div>
 <perspective-viewer
   columns='["Conditional"]'
-  expressions='["// Conditional\nvar priceAdjustmentDate := date(2016, 6, 18);\nvar finalPrice := \"Sales\" - \"Discount\";\nvar additionalModifier := 0;\n\nif(\"Order Date\" > priceAdjustmentDate) {\n  finalPrice -= 5;\n  additionalModifier -= 2;\n}\nelse\n  finalPrice += 5;\n\nfinalPrice + additionalModifier"]'
+  expressions='{"Conditional": "var priceAdjustmentDate := date(2016, 6, 18);\nvar finalPrice := \"Sales\" - \"Discount\";\nvar additionalModifier := 0;\n\nif(\"Order Date\" > priceAdjustmentDate) {\n  finalPrice -= 5;\n  additionalModifier -= 2;\n}\nelse\n  finalPrice += 5;\n\nfinalPrice + additionalModifier"}'
 ></perspective-viewer>
 </div>

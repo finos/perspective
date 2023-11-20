@@ -52,7 +52,7 @@ impl<T: Tab> Component for TabList<T> {
             TabListMsg::SetSelected(idx) => {
                 self.selected_idx = idx;
                 true
-            }
+            },
         }
     }
 

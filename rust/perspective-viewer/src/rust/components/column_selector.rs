@@ -160,7 +160,7 @@ impl Component for ColumnSelector {
 
                 self.named_row_count = named.unwrap_or_default();
                 true
-            }
+            },
             HoverActiveIndex(Some(to_index)) => {
                 let min_cols = ctx.props().renderer.metadata().min;
                 let config = ctx.props().session.get_view_config();
@@ -193,11 +193,11 @@ impl Component for ColumnSelector {
                         .dragdrop
                         .notify_drag_enter(DragTarget::Active, to_index)
                 }
-            }
+            },
             HoverActiveIndex(_) => {
                 ctx.props().dragdrop.notify_drag_leave(DragTarget::Active);
                 true
-            }
+            },
             Drop((column, DragTarget::Active, effect, index)) => {
                 let update = ctx.props().session.create_drag_drop_update(
                     column,
@@ -209,7 +209,7 @@ impl Component for ColumnSelector {
 
                 ApiFuture::spawn(ctx.props().update_and_render(update));
                 true
-            }
+            },
             Drop((_, _, DragEffect::Move(DragTarget::Active), _)) => true,
             Drop((..)) => true,
         }

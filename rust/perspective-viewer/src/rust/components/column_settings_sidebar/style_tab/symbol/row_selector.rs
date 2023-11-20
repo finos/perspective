@@ -65,22 +65,23 @@ pub fn row_selector(p: &RowSelectorProps) -> Html {
                 pairs.remove(i);
             }
         }
+
         let exclude: HashSet<_> = pairs
             .into_iter()
             .filter_map(|SymbolKVPair { key, .. }| key)
             .collect();
+
         html! {
-            <div class={err_class}>
+            <div class={ err_class }>
                 <EmptyRow
-                    dropdown={p.dropdown.clone()}
+                    dropdown={ p.dropdown.clone() }
                     { exclude }
-                    {on_select}
-                    focused={p.focused}
-                    index={p.index}
-                    set_focused_index={p.set_focused_index.clone()}
-                    value={p.selected_row.clone().unwrap_or_default()}
-                    column_name={p.column_name.clone()}
-                />
+                    { on_select }
+                    focused={ p.focused }
+                    index={ p.index }
+                    set_focused_index={ p.set_focused_index.clone() }
+                    value={ p.selected_row.clone().unwrap_or_default() }
+                    column_name={ p.column_name.clone() }/>
             </div>
         }
     } else {

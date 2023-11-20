@@ -28,11 +28,11 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [
-                    '"a" == "b"',
-                    '"a" != "b"',
-                    '"a" == "b" ? 100 : 0',
-                ],
+                expressions: {
+                    '"a" == "b"': '"a" == "b"',
+                    '"a" != "b"': '"a" != "b"',
+                    '"a" == "b" ? 100 : 0': '"a" == "b" ? 100 : 0',
+                },
             });
 
             table.update({
@@ -81,11 +81,11 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [
-                    '"a" > "b"',
-                    '"a" >= "b"',
-                    '"a" >= "b" ? 100 : 0',
-                ],
+                expressions: {
+                    '"a" > "b"': '"a" > "b"',
+                    '"a" >= "b"': '"a" >= "b"',
+                    '"a" >= "b" ? 100 : 0': '"a" >= "b" ? 100 : 0',
+                },
             });
 
             table.update({
@@ -134,11 +134,11 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [
-                    '"a" < "b"',
-                    '"a" <= "b"',
-                    '"a" <= "b" ? 100 : 0',
-                ],
+                expressions: {
+                    '"a" < "b"': '"a" < "b"',
+                    '"a" <= "b"': '"a" <= "b"',
+                    '"a" <= "b" ? 100 : 0': '"a" <= "b" ? 100 : 0',
+                },
             });
 
             table.update({
@@ -188,7 +188,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['today() == "a"'],
+                expressions: { 'today() == "a"': 'today() == "a"' },
             });
 
             table.update({
@@ -207,7 +207,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['hour_of_day("a")'],
+                expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
             table.update({
@@ -226,7 +226,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['hour_of_day("a")'],
+                expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
             table.update({
@@ -245,7 +245,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['day_of_week("a")'],
+                expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
             table.update({
@@ -272,7 +272,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['day_of_week("a")'],
+                expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
             table.update({
@@ -301,7 +301,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['month_of_year("a")'],
+                expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
             table.update({
@@ -332,7 +332,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ['month_of_year("a")'],
+                expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
             table.update({
@@ -363,7 +363,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 's')"],
+                expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
             table.update({
@@ -389,18 +389,18 @@ const perspective = require("@finos/perspective");
                 x: [1],
             });
 
-            const validated = await table.validate_expressions([
-                `//bucket0\nbucket("x", '2W')`,
-                `//bucket1\nbucket("x", '3W')`,
-                `//bucket2\nbucket("x", '4W')`,
-                `//bucket3\nbucket("x", '5W')`,
-                `//bucket4\nbucket("x", '2D')`,
-                `//bucket5\nbucket("x", '3D')`,
-                `//bucket6\nbucket("x", '7D')`,
-                `//bucket7\nbucket("x", '10D')`,
-                `//bucket8\nbucket("x", '15D')`,
-                `//bucket9\nbucket("x", '30D')`,
-            ]);
+            const validated = await table.validate_expressions({
+                [`bucket0`]: `bucket("x", '2W')`,
+                [`bucket1`]: `bucket("x", '3W')`,
+                [`bucket2`]: `bucket("x", '4W')`,
+                [`bucket3`]: `bucket("x", '5W')`,
+                [`bucket4`]: `bucket("x", '2D')`,
+                [`bucket5`]: `bucket("x", '3D')`,
+                [`bucket6`]: `bucket("x", '7D')`,
+                [`bucket7`]: `bucket("x", '10D')`,
+                [`bucket8`]: `bucket("x", '15D')`,
+                [`bucket9`]: `bucket("x", '30D')`,
+            });
 
             expect(validated.expression_schema).toEqual({});
 
@@ -475,7 +475,7 @@ const perspective = require("@finos/perspective");
                 a: "date",
             });
             const view = await table.view({
-                expressions: ["bucket(\"a\", 's')"],
+                expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
             table.update({
@@ -504,7 +504,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'm')"],
+                expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
             table.update({
@@ -531,7 +531,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'm')"],
+                expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
             table.update({
@@ -560,7 +560,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'h')"],
+                expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
             table.update({
@@ -587,7 +587,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'h')"],
+                expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
             table.update({
@@ -616,7 +616,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'D')"],
+                expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
             table.update({
@@ -643,7 +643,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'D')"],
+                expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
             table.update({
@@ -672,7 +672,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'W')"],
+                expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
             table.update({
@@ -702,7 +702,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'W')"],
+                expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
             table.update({
@@ -732,7 +732,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'W')"],
+                expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
             table.update({
@@ -754,7 +754,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'M')"],
+                expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
             table.update({
@@ -784,7 +784,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'M')"],
+                expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
             table.update({
@@ -816,7 +816,7 @@ const perspective = require("@finos/perspective");
             const col_name = "bucket(\"a\", '3M')";
 
             const view = await table.view({
-                expressions: [col_name],
+                expressions: { [col_name]: col_name },
             });
 
             table.update({
@@ -850,7 +850,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'Y')"],
+                expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
             table.update({
@@ -880,7 +880,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: ["bucket(\"a\", 'Y')"],
+                expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
             table.update({
@@ -912,7 +912,7 @@ const perspective = require("@finos/perspective");
             const col_name = "bucket(\"a\", '7Y')";
 
             const view = await table.view({
-                expressions: [col_name],
+                expressions: { [col_name]: col_name },
             });
 
             table.update({
@@ -948,7 +948,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`hour_of_day("a")`],
+                expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
             table.update({
@@ -969,7 +969,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`hour_of_day("a")`],
+                expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
             table.update({
@@ -990,7 +990,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`day_of_week("a")`],
+                expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
             table.update({
@@ -1019,7 +1019,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`day_of_week("a")`],
+                expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
             table.update({
@@ -1048,7 +1048,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`month_of_year("a")`],
+                expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
             table.update({
@@ -1079,7 +1079,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`month_of_year("a")`],
+                expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
             table.update({
@@ -1110,7 +1110,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 's')`],
+                expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
             table.update({
@@ -1137,7 +1137,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 's')`],
+                expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
             table.update({
@@ -1168,7 +1168,7 @@ const perspective = require("@finos/perspective");
             const col_name = `bucket("a", '20s')`;
 
             const view = await table.view({
-                expressions: [col_name],
+                expressions: { [col_name]: col_name },
             });
 
             table.update({
@@ -1197,7 +1197,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'm')`],
+                expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
             table.update({
@@ -1224,7 +1224,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'm')`],
+                expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
             table.update({
@@ -1255,7 +1255,7 @@ const perspective = require("@finos/perspective");
             const col_name = `bucket("a", '15m')`;
 
             const view = await table.view({
-                expressions: [col_name],
+                expressions: { [col_name]: col_name },
             });
 
             table.update({
@@ -1283,7 +1283,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'h')`],
+                expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
             table.update({
@@ -1310,7 +1310,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'h')`],
+                expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
             table.update({
@@ -1339,7 +1339,7 @@ const perspective = require("@finos/perspective");
             const col_name = `bucket("a", '6h')`;
 
             const view = await table.view({
-                expressions: [col_name],
+                expressions: { [col_name]: col_name },
             });
 
             table.update({
@@ -1368,7 +1368,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'D')`],
+                expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
             table.update({
@@ -1395,7 +1395,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'D')`],
+                expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
             table.update({
@@ -1422,7 +1422,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'D')`],
+                expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
             table.update({
@@ -1449,7 +1449,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'W')`],
+                expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
             table.update({
@@ -1477,7 +1477,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'W')`],
+                expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
             table.update({
@@ -1505,7 +1505,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'W')`],
+                expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
             table.update({
@@ -1527,7 +1527,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'M')`],
+                expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
             table.update({
@@ -1555,7 +1555,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'M')`],
+                expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
             table.update({
@@ -1583,7 +1583,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'Y')`],
+                expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
             table.update({
@@ -1611,7 +1611,7 @@ const perspective = require("@finos/perspective");
             });
 
             const view = await table.view({
-                expressions: [`bucket("a", 'Y')`],
+                expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
             table.update({
