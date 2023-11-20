@@ -80,12 +80,13 @@ async function build_all() {
     execSync(`cargo bundle ${IS_DEBUG ? "" : "--release"}`, INHERIT);
 
     // JavaScript
+    const { default: cpy } = await cpy_mod;
+    await cpy("package.json", "src/ts");
     execSync("npx tsc --project tsconfig.json", INHERIT);
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 
     // legacy compat
-    const { default: cpy } = await cpy_mod;
     await cpy("target/themes/*", "dist/css");
     await cpy("dist/pkg/*", "dist/esm");
 }

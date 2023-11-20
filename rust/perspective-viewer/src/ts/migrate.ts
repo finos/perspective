@@ -172,9 +172,20 @@ function migrate_viewer(old, omit_attributes, options) {
     options.omit_attributes = omit_attributes;
     return chain(
         old,
-        [migrate_0_0_0, migrate_2_6_1, semver_to_string],
+        [migrate_0_0_0, migrate_2_6_1, assure_latest, semver_to_string],
         options
     );
+}
+
+import { version as PKG_VERSION } from "./package.json" assert { type: "json" };
+
+function assure_latest(old) {
+    if (cmp_semver(old.version, PKG_VERSION)) {
+        throw new Error("Migrated version is newer than package version!");
+    } else {
+        old.version = parse_semver(PKG_VERSION);
+        return old;
+    }
 }
 
 function semver_to_string(old) {

@@ -19,12 +19,12 @@ import { cmp_semver, parse_semver } from "../migrate";
  * @returns
  */
 export default function migrate_2_6_1(old, options) {
-    if (cmp_semver(old.version, "2.7.0")) {
-        return;
+    if (cmp_semver(old.version, "2.6.1")) {
+        return old;
     } else if (options.warn) {
         console.warn("Migrating from 2.6.1");
     }
-    old.version = parse_semver("2.7.0");
+    old.version = parse_semver("2.6.1");
 
     // Migrate X/Y Scatter plugin
     if (old.plugin === "X/Y Scatter") {
