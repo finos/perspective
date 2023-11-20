@@ -12,6 +12,7 @@
 
 use std::fmt::Display;
 
+use wasm_bindgen::UnwrapThrowExt;
 use yew::{function_component, html, use_callback, use_state, Callback, Html, Properties};
 
 use crate::components::column_settings_sidebar::attributes_tab::AttributesTab;
@@ -79,25 +80,30 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
             attrs
         );
     }
-    let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
+    // view_ty != table_ty when aggregate is applied, i.e. on group-by
+    let maybe_view_ty = p.session.metadata().get_column_view_type(&column_name);
+    let maybe_table_ty = p.session.metadata().get_column_table_type(&column_name);
+    let (view_ty, table_ty) = maybe_view_ty
+        .zip(maybe_table_ty)
+        .expect_throw("Unable to get view and table types!");
 
     let mut tabs = vec![];
 
-    // TODO: This is a hack and needs to be replaced.
+    // TODO: This needs to be replaced. Replacing it requires more information
+    // about the capabilities of the plugin, which requires updating the internal
+    // plugin API. Leaving it for now.
     let plugin = p.renderer.get_active_plugin().unwrap();
-    let show_styles = maybe_ty
-        .map(|ty| match &*plugin.name() {
-            "Datagrid" => ty != Type::Bool,
-            "X/Y Scatter" => ty == Type::String,
-            _ => false,
-        })
-        .unwrap_or_default();
+    let show_styles = match &*plugin.name() {
+        "Datagrid" => view_ty != Type::Bool,
+        "X/Y Scatter" => table_ty == Type::String,
+        _ => false,
+    };
 
     if !matches!(p.selected_column, ColumnLocator::Expr(None))
         && show_styles
         && is_active
         && config.is_some()
-        && maybe_ty.is_some()
+        && maybe_view_ty.is_some()
     {
         tabs.push(ColumnSettingsTab::Style);
     }
@@ -132,7 +138,8 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                             { renderer }
                             { custom_events }
                             { selected_column }
-                            { on_close }/>
+                            { on_close }
+                            />
                     }
                 },
                 ColumnSettingsTab::Style => html! {
@@ -141,7 +148,9 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                         { renderer }
                         { custom_events }
                         { column_name }
-                        ty={ maybe_ty.unwrap() }/>
+                        { view_ty }
+                        { table_ty }
+                        />
                 },
             }
         })

@@ -11,9 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use serde::de::DeserializeOwned;
+use wasm_bindgen::UnwrapThrowExt;
 use yew::{function_component, html, Callback, Html, Properties};
 
-use crate::components::column_settings_sidebar::style_tab::symbol::SymbolAttr;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
@@ -24,7 +24,6 @@ use crate::custom_events::CustomEvents;
 use crate::model::*;
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::utils::*;
 use crate::{clone, css, derive_model, html_template};
 
 /// This function retrieves the plugin's config using its `save` method.
@@ -69,7 +68,7 @@ pub struct ColumnStyleProps {
     pub session: Session,
     pub renderer: Renderer,
 
-    pub ty: Type,
+    pub view_ty: Type,
     pub column_name: String,
 }
 derive_model!(CustomEvents, Session, Renderer for ColumnStyleProps);
@@ -78,13 +77,13 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
     let props = p.clone();
     let (config, attrs) = (props.get_plugin_config(), props.get_plugin_attrs());
     let (config, attrs) = (config.unwrap(), attrs.unwrap());
-    let title = format!("{} Styling", props.ty.to_capitalized());
-    let opt_html = match props.ty {
+    let title = format!("{} Styling", props.view_ty.to_capitalized());
+    let opt_html = match props.view_ty {
         Type::String => get_column_style::<_, StringColumnStyleDefaultConfig>(
             config.clone(),
             attrs.clone(),
             &props.column_name,
-            props.ty,
+            props.view_ty,
         )
         .map(|(config, default_config)| {
             let on_change = Callback::from(move |config| {
@@ -109,10 +108,10 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
             config.clone(),
             attrs.clone(),
             &props.column_name,
-            props.ty,
+            props.view_ty,
         )
         .map(|(config, default_config)| {
-            let enable_time_config = matches!(props.ty, Type::Datetime);
+            let enable_time_config = matches!(props.view_ty, Type::Datetime);
             let on_change = Callback::from(move |config| {
                 props.send_plugin_config(
                     props.column_name.clone(),
@@ -135,7 +134,7 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
             config.clone(),
             attrs.clone(),
             &props.column_name,
-            props.ty,
+            props.view_ty,
         )
         .map(|(config, default_config)| {
             let on_change = {
@@ -163,64 +162,8 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         _ => Err("Booleans aren't styled yet.".into()),
     };
 
-    let props = p;
-    let plugin = props
-        .renderer
-        .get_active_plugin()
-        .expect("No active plugins!");
-
-    let plugin_column_names = plugin
-        .config_column_names()
-        .map(|arr| {
-            arr.into_serde_ext::<Vec<Option<String>>>()
-                .expect("Could not deserialize config_column_names into Vec<Option<String>>")
-        })
-        .unwrap_or_default();
-
-    let view_config = props.session.get_view_config();
-    let mut is_symbol = false;
-    let components = plugin_column_names
-        .iter()
-        .zip(&view_config.columns)
-        .filter_map(|(ty, name)| {
-            let attr_type = props
-                .session
-                .metadata()
-                .get_column_view_type(&props.column_name)
-                .expect("Couldn't get column type for {column_name}");
-
-            let zipped = ty.as_deref().zip(name.as_deref());
-            match zipped {
-                Some(("Symbol", name)) if name == props.column_name && p.ty == Type::String => {
-                    is_symbol = true;
-                    Some(html! {
-                        <SymbolAttr
-                            { attr_type }
-                            column_name={ props.column_name.clone() }
-                            session={ &props.session }
-                            renderer={ &props.renderer }
-                            custom_events={ &props.custom_events }/>
-                    })
-                },
-                _ => None,
-            }
-        })
-        .collect::<Html>();
-
-    let is_ok = opt_html.is_ok();
     html_template! {
         <LocalStyle href={ css!("column-style") } />
-        if is_ok {
-            { opt_html.unwrap() }
-        }
-
-        { components }
-        if !is_ok && !is_symbol {
-            <div class="style_contents">
-                <div id="column-style-container" class="no-style">
-                    <div class="style-contents">{ "No styles available" }</div>
-                </div>
-            </div>
-        }
+        {opt_html.expect_throw("Could not generate HTML to style this column!")}
     }
 }
