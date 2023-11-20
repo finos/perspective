@@ -221,6 +221,22 @@ impl PerspectiveViewerElement {
         })
     }
 
+    /// Get render statistics. Some fields of the returned stats object are
+    /// relative to the last time `getRenderStats()` was called, ergo calling
+    /// this method resets these fields.
+    #[wasm_bindgen(js_name = "getRenderStats")]
+    pub fn get_render_stats(&self) -> ApiResult<JsValue> {
+        Ok(JsValue::from_serde_ext(
+            &self.renderer.render_timer().get_stats(),
+        )?)
+    }
+
+    /// Flush any pending modifications to this `<perspective-viewer>`.  Since
+    /// `<perspective-viewer>`'s API is almost entirely `async`, it may take
+    /// some milliseconds before any method call such as `restore()` affects
+    /// the rendered element.  If you want to make sure any invoked method which
+    /// affects the rendered has had its results rendered, call and await
+    /// `flush()`
     pub fn flush(&self) -> ApiFuture<()> {
         clone!(self.renderer, self.session);
         ApiFuture::new(async move {

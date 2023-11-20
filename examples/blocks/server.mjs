@@ -64,6 +64,7 @@ const gists = [
     "file",
     "magic",
     "nypd",
+    "webcam",
 ];
 
 const lis = [];

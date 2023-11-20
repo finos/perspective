@@ -12,136 +12,102 @@
 
 import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-const WIDTH = 200;
-const HEIGHT = 200;
+const RESOLUTION = 100;
 
-const vertices = [
-    [-100, -100, -100],
-    [-100, -100, 100],
-    [-100, 100, 100],
+const EXPRESSION = `
+// Scene constants
+var resolution := ${RESOLUTION};
+var fov := 30 * (pi / 180);
+var camera[3] := {0, 0, -600};
+var light[3] := {0.5, 1, 0};
 
-    [100, 100, -100],
-    [-100, -100, -100],
-    [-100, 100, -100],
+// Torus constants
+var radius := 1;
+var tube := 0.4;
+var radialSegments := 12;
+var tubularSegments := 16;
+var rotation := 40 * (pi / 180);
 
-    [100, -100, 100],
-    [-100, -100, -100],
-    [100, -100, -100],
+// Mesh
+var arc := pi * 2;
+var vs[663];
+for (var j := 0; j <= radialSegments; j += 1) {
+    for (var i := 0; i <= tubularSegments; i += 1) {
 
-    [100, 100, -100],
-    [100, -100, -100],
-    [-100, -100, -100],
+        // Vertex
+        var u := (i / tubularSegments) * arc;
+        var v := (j / radialSegments) * pi * 2;
+        var i0 := j * 3 * (tubularSegments + 1) + (i * 3);
+        vs[i0] := (radius + tube * cos(v)) * cos(u) * 100;
+        vs[i0 + 1] := (radius + tube * cos(v)) * sin(u) * 100;
+        vs[i0 + 2] := tube * sin(v) * 100;
 
-    [-100, -100, -100],
-    [-100, 100, 100],
-    [-100, 100, -100],
-
-    [100, -100, 100],
-    [-100, -100, 100],
-    [-100, -100, -100],
-
-    [-100, 100, 100],
-    [-100, -100, 100],
-    [100, -100, 100],
-
-    [100, 100, 100],
-    [100, -100, -100],
-    [100, 100, -100],
-
-    [100, -100, -100],
-    [100, 100, 100],
-    [100, -100, 100],
-
-    [100, 100, 100],
-    [100, 100, -100],
-    [-100, 100, -100],
-
-    [100, 100, 100],
-    [-100, 100, -100],
-    [-100, 100, 100],
-
-    [100, 100, 100],
-    [-100, 100, 100],
-    [100, -100, 100],
-];
-
-const colors = [3, 1, 2, 1, 3, 2, 6, 4, 4, 5, 5, 6];
-
-function generate_scene() {
-    let vertices2 = [];
-    let colors2 = [];
-    for (let i = 0; i < 50; i++) {
-        const x_offset = Math.random() * 2000 - 1000;
-        const y_offset = Math.random() * 2000 - 1000;
-        const z_offset = Math.random() * 2000;
-        for (const v in vertices) {
-            const vertex = structuredClone(vertices[v]);
-            vertex[0] += x_offset;
-            vertex[1] += y_offset;
-            vertex[2] += z_offset;
-            vertices2.push(vertex);
-            if (v % 3 === 0) {
-                colors2.push(colors[(v / 3) % colors.length]);
-            }
-        }
+        // Rotate
+        var b := vs[i0 + 1];
+        var bcos := cos(rotation);
+        var bsin := sin(rotation);
+        vs[i0 + 1] := vs[i0 + 1] * bcos - vs[i0 + 2] * bsin;
+        vs[i0 + 2] := b * bsin + vs[i0 + 2] * bcos;
+        b := vs[i0];
+        vs[i0] := vs[i0] * bcos - vs[i0 + 2] * bsin;
+        vs[i0 + 2] := b * bsin + vs[i0 + 2] * bcos;
     }
-
-    return [vertices2, colors2];
 }
 
-function generate_mandelbrot() {
-    const [vertices2, colors2] = generate_scene();
-
-    return `
-// color
-var d[3] := {floor("index" / ${HEIGHT}) - ${HEIGHT} / 2, "index" % ${HEIGHT} - ${HEIGHT} / 2, 50};
-var p[3] := {0, 0, -500};
-
-var vs[9 * ${vertices2.flat().length / 9}] := {${vertices2.flat().join(", ")}};
-var cs[${colors2.flat().length}] := {${colors2.flat().join(", ")}};
+// Render scene
+var scale := resolution / (tan(fov / 2) * 400);
+var x := (floor(index() / resolution) - resolution / 2) / scale;
+var y := (index() % resolution - resolution / 2) / scale;
+var d[3] := {x, y, 200};
 var color := 0;
-var depth := 1000000;
+var depth := inf;
+var light_norm := norm3(light);
+for (var j := 1; j <= radialSegments; j += 1) {
+    for (var i := 1; i <= tubularSegments; i += 1) {
 
-for (var i := 0; i < ${vertices2.flat().length / 9}; i += 1) {
-    var v0[3] := {vs[i * 9], vs[i * 9 + 1], vs[i * 9 + 2]};
-    var v1[3] := {vs[i * 9 + 3], vs[i * 9 + 4], vs[i * 9 + 5]};
-    var v2[3] := {vs[i * 9 + 6], vs[i * 9 + 7], vs[i * 9 + 8]};
+        // Index
+        var aa := (tubularSegments + 1) * j + i - 1;
+        var b := (tubularSegments + 1) * (j - 1) + i - 1;
+        var c := (tubularSegments + 1) * (j - 1) + i;
+        var dd := (tubularSegments + 1) * j + i;
+        var face[6] := {aa, b, dd, b, c, dd};
+        for (var ii:= 0; ii < 2; ii += 1) {
+            var i0 := face[ii * 3];
+            var i1 := face[ii * 3 + 1];
+            var i2 := face[ii * 3 + 2];
+            var v0[3] := {vs[i0 * 3], vs[i0 * 3 + 1], vs[i0 * 3 + 2]};
+            var v1[3] := {vs[i1 * 3], vs[i1 * 3 + 1], vs[i1 * 3 + 2]};
+            var v2[3] := {vs[i2 * 3], vs[i2 * 3 + 1], vs[i2 * 3 + 2]};
 
-    var e1[3];
-    diff3(v1, v0, e1);
-    var e2[3];
-    diff3(v2, v0, e2);
+            // Render triangle
+            var e1[3] := v1 - v0;
+            var e2[3] := v2 - v0;
+            var h[3];
+            cross_product3(d, e2, h);
+            var a := dot_product3(e1, h);
+            if (a != 0) {
+                var f := 1 / a;
+                var s[3] := camera - v0;
+                var u := f * dot_product3(s, h);
+                if (u > 0 and u < 1) {
+                    var q[3];
+                    cross_product3(s, e1, q);
+                    var v := f * dot_product3(d, q);
+                    if (v > 0 and u + v < 1) {
+                        var t := f * dot_product3(e2, q);
+                        if (t >= 0) {
+                            var t2 := 1 - u - v;
+                            var d1[3] := v0 * t2 + v1 * u + v2 * v;
+                            var dist := norm3(d1 - camera);
+                            if (dist < depth) {
+                                depth := dist;
 
-    var h[3];
-    cross_product3(d, e2, h);
-    var a := dot_product3(e1, h);
-
-    if (a < -0.000001 or a > 0.000001) {
-        var f := 1 / a;
-        var s[3];
-        diff3(p, v0, s);
-        var u := f * dot_product3(s, h);
-
-        if (u > 0 and u < 1) {
-            var q[3];
-            cross_product3(s, e1, q);
-            var v := f * dot_product3(d, q);
-            if (v > 0 and u + v < 1) {
-                var t := f * dot_product3(e2, q);
-                if (t > -0.0000001) {
-                    var t2 := 1 - u - v;
-                    var d1[3] := {
-                        t2 * v0[0] + u * v1[0] + v * v2[0],
-                        t2 * v0[1] + u * v1[1] + v * v2[1],
-                        t2 * v0[2] + u * v1[2] + v * v2[2]
-                    };
-
-                    var d2[3];
-                    diff3(d1, p, d2);
-                    var dist := norm3(d2);
-                    if (dist < depth) {
-                        depth := dist;
-                        color := cs[i];
+                                // Lighting
+                                var n[3];
+                                cross_product3(v0 - v1, v2 - v1, n);
+                                color := acos(dot_product3(light, n) / (light_norm * norm3(n)))
+                            }
+                        }
                     }
                 }
             }
@@ -149,47 +115,30 @@ for (var i := 0; i < ${vertices2.flat().length / 9}; i += 1) {
     }
 };
 
-color
-`;
-}
+color;
+`.trim();
 
-function generate_layout() {
-    return {
-        plugin: "Heatmap",
-        settings: true,
-        group_by: [`floor("index" / ${HEIGHT}) - ${HEIGHT} / 2`],
-        split_by: [`"index" % ${HEIGHT} - ${HEIGHT} / 2`],
-        columns: ["color"],
-        expressions: {
-            color: generate_mandelbrot().trim(),
-            [`floor("index" / ${HEIGHT}) - ${HEIGHT} / 2`]: `floor("index" / ${HEIGHT}) - ${HEIGHT} / 2`,
-            [`"index" % ${HEIGHT} - ${HEIGHT} / 2`]: `"index" % ${HEIGHT} - ${HEIGHT} / 2`,
-        },
-    };
-}
-
-async function generate_data(table) {
-    let json = new Array(WIDTH * HEIGHT);
-    for (let x = 0; x < WIDTH; ++x) {
-        for (let y = 0; y < HEIGHT; ++y) {
-            const index = x * HEIGHT + y;
-            json[index] = {
-                index,
-            };
-        }
-    }
-
-    await table.replace(json);
-}
+const LAYOUT = {
+    title: "Raycasting",
+    plugin: "Heatmap",
+    group_by: [`x`],
+    split_by: [`y`],
+    columns: ["color"],
+    expressions: {
+        color: EXPRESSION,
+        x: `floor(index() / ${RESOLUTION}) - ${RESOLUTION} / 2`,
+        y: `index() % ${RESOLUTION} - ${RESOLUTION} / 2`,
+    },
+    settings: true,
+    theme: "Pro Dark",
+};
 
 window.addEventListener("DOMContentLoaded", async function () {
     const heatmap_plugin = await window.viewer.getPlugin("Heatmap");
     heatmap_plugin.max_cells = 100000;
     const worker = perspective.worker();
-    const table = await worker.table({
-        index: "integer",
-    });
-    generate_data(table);
-    window.viewer.load(Promise.resolve(table));
-    await window.viewer.restore(generate_layout());
+    const index = new Array(Math.pow(RESOLUTION, 2)).fill(0);
+    const table = worker.table({ index });
+    window.viewer.load(table);
+    await window.viewer.restore(LAYOUT);
 });

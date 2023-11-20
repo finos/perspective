@@ -21,6 +21,7 @@ const LOCAL_EXAMPLES = [
     "magic",
     "streaming",
     "covid",
+    "webcam",
     "movies",
     "superstore",
     "citibike",
@@ -34,15 +35,16 @@ exports.get_examples = function get_examples(
 ) {
     const standalone = [
         {
-            img: "https://perspective.finos.org/img/jupyterlab.png",
+            img: "https://perspective.finos.org/img/jupyterlab.png?",
             url: "http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks",
             name: "jupyterlab",
         },
     ];
 
     const hashes = LOCAL_EXAMPLES.map((x) => ({
-        img: `${root}blocks/${x}/preview.png`,
+        img: `${root}blocks/${x}/preview.png?`,
         url: `${root}block?example=${x}`,
+
         name: x,
     }));
 

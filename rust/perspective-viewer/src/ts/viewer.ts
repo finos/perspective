@@ -18,6 +18,37 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin_config?: any;
 };
 
+export type RenderStats = {
+    /**
+     * The most recent N render times (default 5)
+     */
+    render_times: Array<number>;
+
+    /**
+     * Number of plugin renders since the last time `getRenderStats()` was
+     * called.
+     */
+    total_render_count: number;
+
+    /**
+     * Time since last `getRenderStats()` call (in milliseconds).
+     */
+    total_time: number;
+
+    /**
+     * Estimated max framerate (in frames per second) of _just_ plugin draw
+     * calls (e.g. how many frames could be drawn if there was no engine wait
+     * time).
+     */
+    virtual_fps: number;
+
+    /**
+     * Actual framerate (in frames per second) since last `getRenderStats()`
+     * call.
+     */
+    actual_fps: number;
+};
+
 /**
  * The Custom Elements implementation for `<perspective-viewer>`, as well at its
  * API.  `PerspectiveViewerElement` should not be constructed directly (like its
@@ -372,6 +403,20 @@ export interface IPerspectiveViewerElement {
      * ```
      */
     getEditPort(): number;
+
+    /**
+     * Get render statistics since the last time `getRenderStats()` was called.
+     *
+     * @category Util
+     * @returns A `RenderStats` statistics struct.
+     * @example
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * const stats = viewer.getRenderStats();
+     * console.log(stats.virtual_fps);
+     * ```
+     */
+    getRenderStats(): RenderStats;
 
     /**
      * Determines the render throttling behavior. Can be an integer, for

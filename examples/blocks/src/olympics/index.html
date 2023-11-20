@@ -63,6 +63,7 @@
                             columns: ["Height", "Weight", null, "City", null, "Sport", null],
                             filter: [["Height", "==", null]],
                             sort: [["Name", "desc"]],
+                            expressions: {},
                             aggregates: {
                                 Name: "distinct count",
                                 Weight: "avg",
@@ -82,6 +83,7 @@
                                 ["Age", "is not null", null],
                             ],
                             sort: [["Name", "col asc"]],
+                            expressions: {},
                             aggregates: {
                                 Age: "avg",
                             },

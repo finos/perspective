@@ -20,22 +20,22 @@ perspective-viewer {
     bottom: 0;
 }
 
-perspective-viewer[theme="Pro Light"],
 perspective-viewer[theme="Pro Dark"] {
     --d3fc-positive--gradient: linear-gradient(
-        #94d0ff,
-        #8795e8,
-        #966bff,
-        #ad8cff,
-        #c774e8,
-        #c774a9,
-        #ff6ad5,
-        #ff6a8b,
-        #ff8b8b,
-        #ffa58b,
-        #ffde8b,
-        #cdde8b,
-        #8bde8b,
-        #20de8b
+        #242526,
+        #071952 1%,
+        #088395,
+        #35a29f,
+        #f2f7a1
+    );
+}
+
+perspective-viewer[theme="Pro Light"] {
+    --d3fc-positive--gradient: linear-gradient(
+        #ffffff,
+        #071952 1%,
+        #088395,
+        #35a29f,
+        #f2f7a1
     );
 }

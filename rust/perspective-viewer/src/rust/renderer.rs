@@ -233,7 +233,7 @@ impl Renderer {
         let timer = self.render_timer();
         draw_mutex
             .debounce(async {
-                set_timeout(timer.get_avg()).await?;
+                set_timeout(timer.get_throttle()).await?;
                 let jsplugin = self.get_active_plugin()?;
                 jsplugin.resize().await?;
                 Ok(())
@@ -263,7 +263,7 @@ impl Renderer {
         let timer = self.render_timer();
         let task = async move {
             if is_update {
-                set_timeout(timer.get_avg()).await?;
+                set_timeout(timer.get_throttle()).await?;
             }
 
             if let Some(view) = session.await?.get_view() {
@@ -367,7 +367,7 @@ impl Renderer {
         self.draw_lock.clone()
     }
 
-    fn render_timer(&self) -> MovingWindowRenderTimer {
+    pub fn render_timer(&self) -> MovingWindowRenderTimer {
         self.0.borrow().timer.clone()
     }
 
