@@ -1,7 +1,7 @@
 {
     "name": "esbuild-remote",
     "private": true,
-    "version": "2.6.1",
+    "version": "2.7.0",
     "description": "An example of 2 Perspectives, one client and one server, streaming via Apache Arrow.",
     "scripts": {
         "start": "node build.js && node server/index.mjs"
@@ -9,15 +9,15 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^2.6.1",
-        "@finos/perspective-viewer": "^2.6.1",
-        "@finos/perspective-viewer-d3fc": "^2.6.1",
-        "@finos/perspective-viewer-datagrid": "^2.6.1",
+        "@finos/perspective": "^2.7.0",
+        "@finos/perspective-viewer": "^2.7.0",
+        "@finos/perspective-viewer-d3fc": "^2.7.0",
+        "@finos/perspective-viewer-datagrid": "^2.7.0",
         "express": "^4.17.1",
         "express-ws": "^5.0.2"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "^2.6.1",
+        "@finos/perspective-esbuild-plugin": "^2.7.0",
         "esbuild": "^0.14.54"
     }
 }

@@ -671,7 +671,7 @@ passed in is not in `expressions`, it is guaranteed to be in `errors`.
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Params**
 
-- expressions <code>Array.&lt;String&gt;</code> - An array of string expressions to
+- expressions <code>Object</code> - A dictionary of name/expressions to
 be validated.
 
 **Example**  

@@ -1,5 +1,34 @@
 [
     {
+        "plugin": "Datagrid",
+        "plugin_config": {
+            "columns": {
+                "color": {
+                    "fixed": 0,
+                    "bg_gradient": 251.04,
+                    "neg_bg_color": "#ffa38f",
+                    "number_bg_mode": "gradient",
+                    "number_fg_mode": "disabled",
+                    "pos_bg_color": "#346ead"
+                }
+            },
+            "editable": false,
+            "scroll_lock": false
+        },
+        "title": "Spreadsheet Cam",
+        "group_by": ["y"],
+        "split_by": ["x"],
+        "columns": ["color"],
+        "filter": [],
+        "sort": [],
+        "expressions": {
+            "New Column 1": "bucket(\"color\", 5)",
+            "y": "floor(\"index\" / 80)",
+            "x": "-\"index\" % 80"
+        },
+        "aggregates": {}
+    },
+    {
         "plugin": "Heatmap",
         "title": "Heatmap Cam",
         "group_by": ["x"],
@@ -27,34 +56,6 @@
         "expressions": {
             "y": "bucket(-floor(\"index\" / 80), 3)",
             "x": "bucket(-\"index\" % 80, 3)"
-        },
-        "aggregates": {}
-    },
-    {
-        "plugin": "Datagrid",
-        "plugin_config": {
-            "columns": {
-                "color": {
-                    "bg_gradient": 251.04,
-                    "neg_bg_color": "#ffa38f",
-                    "number_bg_mode": "gradient",
-                    "number_fg_mode": "disabled",
-                    "pos_bg_color": "#346ead"
-                }
-            },
-            "editable": false,
-            "scroll_lock": false
-        },
-        "title": "Spreadsheet Cam",
-        "group_by": ["y"],
-        "split_by": ["x"],
-        "columns": ["color"],
-        "filter": [],
-        "sort": [],
-        "expressions": {
-            "New Column 1": "bucket(\"color\", 5)",
-            "y": "floor(\"index\" / 80)",
-            "x": "-\"index\" % 80"
         },
         "aggregates": {}
     },

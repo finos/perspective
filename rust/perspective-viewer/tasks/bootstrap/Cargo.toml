@@ -13,7 +13,7 @@
 [package]
 name = "perspective-bootstrap"
 description = "A CLI utility to create self-extracting wasm binaries"
-version = "2.6.1"
+version = "2.7.0"
 edition = "2021"
 
 [[bin]]

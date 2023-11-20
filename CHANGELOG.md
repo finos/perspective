@@ -1,3 +1,32 @@
+# [v2.7.0](https://github.com/finos/perspective/releases/tag/v2.7.0)
+
+_20 November 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.6.1...v2.7.0))
+
+**Breaking**
+
+- X/Y Scatter Symbol Serialization as Dictionary [#2429](https://github.com/finos/perspective/pull/2429)
+- Expressions API Updates [#2399](https://github.com/finos/perspective/pull/2399)
+
+Features
+
+- API Versioning + Migration [#2430](https://github.com/finos/perspective/pull/2430)
+- `PerspectiveWidget` HTML export support in Jupyter [#2418](https://github.com/finos/perspective/pull/2418)
+- Self-extracting WebAssembly binaries [#2428](https://github.com/finos/perspective/pull/2428)
+
+Fixes
+
+- Update `expressions` format default [#2438](https://github.com/finos/perspective/pull/2438)
+- Serialize Expressions to Objects [#2436](https://github.com/finos/perspective/pull/2436)
+- Column Settings Panel UI Tweaks [#2421](https://github.com/finos/perspective/pull/2421)
+- Add support for StringDtype (fixes #1237) [#2319](https://github.com/finos/perspective/pull/2319)
+
+Misc
+
+- Update examples [#2433](https://github.com/finos/perspective/pull/2433)
+- Fix expression alias UX/API [#2431](https://github.com/finos/perspective/pull/2431)
+- Add CI requirements update script [#2422](https://github.com/finos/perspective/pull/2422)
+- Upgrade `pyodide` compatibility to v0.24.1 [#2402](https://github.com/finos/perspective/pull/2402)
+
 # [v2.6.1](https://github.com/finos/perspective/releases/tag/v2.6.1)
 
 _1 November 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.6.0...v2.6.1))

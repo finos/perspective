@@ -68,7 +68,12 @@ window.addEventListener("DOMContentLoaded", async function () {
     const select = document.querySelector("select");
     const viewer = document.querySelector("perspective-viewer");
     viewer.load(table);
-    viewer.restore({ settings, ...layouts[0] });
+    await viewer.restore({ settings, ...layouts[0] });
+    const regular_table = document.querySelector("regular-table");
+    regular_table.scrollTop =
+        regular_table.scrollHeight / 2 - regular_table.clientHeight / 2;
+    regular_table.scrollLeft =
+        regular_table.scrollWidth / 2 - regular_table.clientWidth / 2;
     for (const layout of layouts) {
         const option = document.createElement("option");
         option.value = layout.title;
