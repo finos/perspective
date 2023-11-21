@@ -12,6 +12,5 @@
         "skipLibCheck": true,
         "resolveJsonModule": true
     },
-    "files": ["src/ts/perspective-viewer.ts"],
-    "include": ["src/ts/package.json"]
+    "files": ["src/ts/perspective-viewer.ts"]
 }
