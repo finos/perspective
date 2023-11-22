@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("@finos/perspective-test");
 const path = require("path");
 const { host } = require("../../src/js/index.js");
 

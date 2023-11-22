@@ -13,7 +13,7 @@
 const _ = require("lodash");
 const arrows = require("./test_arrows.js");
 
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("@finos/perspective-test");
 const perspective = require("@finos/perspective");
 
 function it_old_behavior(name, capture) {

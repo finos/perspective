@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "@finos/perspective-test";
 import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
 
 test.describe("Events test", () => {

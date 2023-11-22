@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { test } = require("@playwright/test");
+const { test } = require("@finos/perspective-test");
 import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {

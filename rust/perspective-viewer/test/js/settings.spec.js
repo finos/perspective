@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "@finos/perspective-test";
 import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 const path = require("path");
@@ -75,15 +75,9 @@ test.describe("Settings", () => {
     test.describe("Regressions", () => {
         test("load and restore with settings called at the same time does not throw", async ({
             page,
+            consoleLogs,
         }) => {
-            const logs = [],
-                errors = [];
-            page.on("console", async (msg) => {
-                if (msg.type() === "error") {
-                    logs.push(msg.text());
-                }
-            });
-
+            const errors = [];
             page.on("pageerror", async (msg) => {
                 errors.push(`${msg.name}::${msg.message}`);
             });
@@ -118,12 +112,13 @@ test.describe("Settings", () => {
                 //   "RuntimeError::unreachable",
             ]);
 
-            expect(logs.length).toBe(2);
-            expect(logs[0]).toMatch(
+            consoleLogs.expectedLogs.push(
+                "error",
                 /Invalid config, resetting to default \{[^}]+\} `restore\(\)` called before `load\(\)`/
             );
-            expect(logs[1]).toEqual(
-                "Caught error: `restore()` called before `load()`"
+            consoleLogs.expectedLogs.push(
+                "error",
+                /Caught error: `restore\(\)` called before `load\(\)`/
             );
         });
     });
