@@ -239,8 +239,6 @@ if(PSP_WASM_BUILD)
             -g0 \
             -flto \
             ")
-
-        # TODO: -flto
     endif()
 
     set(ASYNC_MODE_FLAGS "")
