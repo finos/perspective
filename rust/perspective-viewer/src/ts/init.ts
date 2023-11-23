@@ -50,7 +50,7 @@ async function load_wasm() {
     const array = new Uint8Array(exports.memory.buffer);
     const uncompressed_wasm = array.slice(offset, offset + size);
     await wasm_module.default(uncompressed_wasm);
-    wasm_module.init();
+    wasm_module.defineWebComponents();
     return wasm_module;
 }
 

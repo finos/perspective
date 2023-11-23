@@ -42,6 +42,19 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Regression tests", () => {
+    test("copy and export custom elements are registered", async ({ page }) => {
+        const export_exists = await page.evaluate(async () => {
+            return !!window.customElements.get("perspective-export-menu");
+        });
+
+        const copy_exists = await page.evaluate(async () => {
+            return !!window.customElements.get("perspective-copy-menu");
+        });
+
+        expect(export_exists).toBeTruthy();
+        expect(copy_exists).toBeTruthy();
+    });
+
     test("not_in filter works correctly", async ({ page }) => {
         await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer");
