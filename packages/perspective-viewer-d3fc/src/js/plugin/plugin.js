@@ -533,7 +533,8 @@ export function register(...plugins) {
                         if (settings) {
                             delete settings["colorStyles"];
                             delete settings["textStyles"];
-                            await this.draw(...args);
+                            initialiseStyles(this._container, this._settings);
+                            this.resize(...args);
                         }
                     }
 
