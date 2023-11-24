@@ -115,11 +115,14 @@ async function build_all() {
         "fonts.less",
         "@finos/perspective-viewer/src/themes/fonts.less"
     );
-
-    add(builder, "@finos/perspective-viewer/src/themes/pro.less");
-    add(builder, "pro.scss", "./src/themes/pro.less");
-    add(builder, "pro2.scss", "./src/themes/pro.less");
-    fs.writeFileSync("dist/css/pro.css", builder.compile().get("pro2.css"));
+    add(
+        builder,
+        "icons.less",
+        "@finos/perspective-viewer/src/themes/icons.less"
+    );
+    add(builder, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
+    add(builder, "output.scss", "./src/themes/pro.less");
+    fs.writeFileSync("dist/css/pro.css", builder.compile().get("output.css"));
 
     const builder2 = new BuildCss("./src/themes");
     add(
@@ -127,22 +130,19 @@ async function build_all() {
         "fonts.less",
         "@finos/perspective-viewer/src/themes/fonts.less"
     );
-    add(builder2, "@finos/perspective-viewer/src/themes/pro.less");
+    add(
+        builder2,
+        "icons.less",
+        "@finos/perspective-viewer/src/themes/icons.less"
+    );
+    add(builder2, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
+    add(builder2, "@finos/perspective-viewer/src/themes/pro-dark.less");
+    add(builder2, "pro-workspace.less", "./src/themes/pro.less");
     add(builder2, "@finos/perspective-viewer/src/themes/variables.less");
-    add(
-        builder2,
-        "pro.less",
-        "@finos/perspective-workspace/src/themes/pro.less"
-    );
-    add(
-        builder2,
-        "pro-dark-viewer.less",
-        "@finos/perspective-viewer/src/themes/pro-dark.less"
-    );
-    add(builder2, "pro-dark2.scss", "./src/themes/pro-dark.less");
+    add(builder2, "output.scss", "./src/themes/pro-dark.less");
     fs.writeFileSync(
         "dist/css/pro-dark.css",
-        builder2.compile().get("pro-dark2.css")
+        builder2.compile().get("output.css")
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
