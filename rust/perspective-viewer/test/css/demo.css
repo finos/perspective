@@ -17,4 +17,6 @@ perspective-viewer {
     left: 0;
     right: 0;
     bottom: 0;
+    font-family: "Roboto Mono" !important;
+    --preload-fonts: "Roboto Mono:400";
 }

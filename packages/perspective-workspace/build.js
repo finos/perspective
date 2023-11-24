@@ -112,11 +112,6 @@ async function build_all() {
     const builder = new BuildCss("./src/themes");
     add(
         builder,
-        "fonts.less",
-        "@finos/perspective-viewer/src/themes/fonts.less"
-    );
-    add(
-        builder,
         "icons.less",
         "@finos/perspective-viewer/src/themes/icons.less"
     );
@@ -125,11 +120,6 @@ async function build_all() {
     fs.writeFileSync("dist/css/pro.css", builder.compile().get("output.css"));
 
     const builder2 = new BuildCss("./src/themes");
-    add(
-        builder2,
-        "fonts.less",
-        "@finos/perspective-viewer/src/themes/fonts.less"
-    );
     add(
         builder2,
         "icons.less",

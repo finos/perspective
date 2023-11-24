@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "fonts.less";
 @import "icons.less";
 
 // Register theme for auto-detection
@@ -45,7 +44,7 @@ perspective-string-column-style[theme="Pro Light"] {
 
 
 @mixin perspective-modal-pro {
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
     background-color: white;
     border: 1px solid var(--inactive--color);
     border-radius: 0 0 2px 2px;
@@ -99,9 +98,8 @@ perspective-string-column-style[theme="Pro Light"] {
 }
 
 @mixin perspective-viewer-pro--fonts {
-    font-family: "Roboto Mono";
-    --preload-fonts: "Roboto Mono:400";
-    --interface-monospace--font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+    --interface-monospace--font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
 }
 
 @mixin perspective-viewer-pro--d3fc {

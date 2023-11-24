@@ -80,7 +80,8 @@ perspective-viewer[theme="Pro Dark"] {
 span,
 input,
 button {
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     font-size: 12px;
     background: none;
     margin: 0px;
@@ -103,7 +104,8 @@ input {
 }
 
 input[type="number"] {
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
 }
 
 input:focus {
