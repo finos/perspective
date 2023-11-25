@@ -18,7 +18,8 @@ tbody,
 table thead {
     border: 0;
     font-size: 12px;
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     margin: 0;
     padding: 0;
     vertical-align: middle;

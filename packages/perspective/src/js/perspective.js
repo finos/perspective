@@ -1421,12 +1421,6 @@ export default function (Module) {
         let validated_expressions = [];
         const expression_idx_map = {};
         const is_new_format = !Array.isArray(expressions);
-        if (!is_new_format) {
-            console.warn(
-                "Legacy `expressions` format: " + JSON.stringify(expressions)
-            );
-        }
-
         for (let expression of is_new_format
             ? Object.keys(expressions)
             : expressions) {
@@ -1773,6 +1767,13 @@ export default function (Module) {
         const table_schema = this.schema();
 
         if (config.expressions !== undefined) {
+            if (Array.isArray(config.expressions)) {
+                console.warn(
+                    "Legacy `expressions` format: " +
+                        JSON.stringify(config.expressions)
+                );
+            }
+
             config.expressions = parse_expression_strings(config.expressions);
         }
 

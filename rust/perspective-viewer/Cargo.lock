@@ -1464,12 +1464,13 @@ dependencies = [
 
 [[package]]
 name = "procss"
-version = "0.1.13"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78d332afbc09ce740774a53f4146243535d9b74cc3b547a284868d9638c75776"
+checksum = "869bd8dc9dcf5c50db4369571f27a2ac3b38ecf265a9e0c3003397c2462bee4c"
 dependencies = [
  "anyhow",
  "base64 0.13.1",
+ "console_error_panic_hook",
  "js-sys",
  "mockall",
  "nom",

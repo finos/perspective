@@ -10,9 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// @import "@finos/perspective-viewer/dist/css/pro.css";
-// @import "@finos/perspective-viewer/src/themes/variables.less";
-@import url("ref://@finos/perspective-viewer/src/themes/pro.less");
+@import url("ref://pro.less");
 
 perspective-workspace,
 perspective-workspace[theme="Pro Light"],
@@ -58,11 +56,10 @@ perspective-viewer[theme="Pro Light"].workspace-master-widget {
 }
 
 @mixin perspective-workspace-pro-base {
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
     --open-settings-button--content: "expand_more";
     --close-settings-button--content: "expand_less";
     --close-button--content: "\2715";
-    --settings--font-family: "Material Icons";
     --master-divider--background-color: #243136;
     --menu-maximize--content: "fullscreen";
     --menu-minimize--content: "fullscreen_exit";
@@ -87,7 +84,7 @@ perspective-viewer[theme="Pro Light"].workspace-master-widget {
 }
 
 .p-Menu {
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
     font-weight: 300;
     color: #161616;
 }

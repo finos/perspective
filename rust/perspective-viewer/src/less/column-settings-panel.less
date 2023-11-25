@@ -11,11 +11,13 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 @import (reference) url(./column-selector.less);
+
 :host {
     #column_settings_sidebar {
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
     #column_settings_icon:before {
         @include icon;
         height: 14px;
@@ -42,9 +44,10 @@
             border: none;
             border-radius: 2px;
             margin-bottom: 0.5em;
-            font-family: "Roboto Mono", monospace;
+            font-family: inherit;
             font-size: 12px;
             min-height: 24px;
+
             &:disabled {
                 background-color: var(--inactive--color);
             }

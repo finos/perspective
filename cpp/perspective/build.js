@@ -42,10 +42,8 @@ try {
 
     execSync(`cpy web/**/* ../web`, { cwd, stdio });
     execSync(`cpy node/**/* ../node`, { cwd, stdio });
-    if (!process.env.PSP_DEBUG) {
-        bootstrap(`../../cpp/perspective/dist/web/perspective.cpp.wasm`);
-        bootstrap(`../../cpp/perspective/dist/node/perspective.cpp.wasm`);
-    }
+    bootstrap(`../../cpp/perspective/dist/web/perspective.cpp.wasm`);
+    bootstrap(`../../cpp/perspective/dist/node/perspective.cpp.wasm`);
 } catch (e) {
     console.error(e);
     process.exit(1);

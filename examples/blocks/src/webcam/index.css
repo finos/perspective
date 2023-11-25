@@ -14,7 +14,8 @@
 body {
     background: #242526;
     color: white;
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     touch-action: none;
 }
 
@@ -63,8 +64,10 @@ img {
     margin-left: 14px;
 }
 
-select, button {
-    font-family: "Roboto Mono";
+select,
+button {
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     font-size: 12px;
     appearance: none;
     background-color: transparent;
@@ -78,11 +81,12 @@ select, button {
     outline: none;
     user-select: none;
     height: 32px;
-    margin-top:  8px;
+    margin-top: 8px;
     margin-bottom: 8px;
 }
 
-select:hover, button:hover {
+select:hover,
+button:hover {
     color: #242526;
     background-color: #f4f5f6;
     border-color: #f4f5f6;

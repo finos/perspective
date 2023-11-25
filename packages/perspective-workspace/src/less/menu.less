@@ -84,11 +84,6 @@
     border-top: 1px solid #dddddd;
 }
 
-.p-Menu-itemIcon::before,
-.p-Menu-itemSubmenuIcon::before {
-    font-family: "Material Icons";
-}
-
 .p-MenuBar-menu {
     transform: translateY(-1px);
 }
@@ -113,12 +108,14 @@
 
 .p-Menu-itemIcon:before {
     content: attr(content);
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
 }
 
 [data-type="submenu"] .lm-Menu-itemSubmenuIcon:before {
     content: ">";
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     height: 18px;
 }
 

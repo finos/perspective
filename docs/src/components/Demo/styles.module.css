@@ -55,7 +55,8 @@
 .timecontrols span {
     text-align: end;
     width: 80px;
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     opacity: 0.5;
     font-size: 12px;
 }

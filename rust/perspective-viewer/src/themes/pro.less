@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "fonts.less";
+@import "icons.less";
 
 // Register theme for auto-detection
 perspective-viewer,
@@ -33,23 +33,10 @@ perspective-string-column-style[theme="Pro Light"] {
     background-color: white;
 }
 
-perspective-viewer,
-perspective-copy-menu,
-perspective-export-menu,
-perspective-dropdown,
-perspective-date-column-style,
-perspective-datetime-column-style,
-perspective-number-column-style,
-perspective-string-column-style {
-    @include perspective-viewer-pro--icons;
-    @include perspective-viewer-pro--colors;
-}
-
 @mixin perspective-viewer-pro {
     @include perspective-viewer-pro--dimensions;
     @include perspective-viewer-pro--colors;
     @include perspective-viewer-pro--fonts;
-    @include perspective-viewer-pro--intl;
     @include perspective-viewer-pro--d3fc;
     @include perspective-viewer-pro--datagrid;
     @include perspective-viewer-pro--openlayers;
@@ -57,7 +44,7 @@ perspective-string-column-style {
 
 
 @mixin perspective-modal-pro {
-    font-family: "Roboto Mono";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
     background-color: white;
     border: 1px solid var(--inactive--color);
     border-radius: 0 0 2px 2px;
@@ -111,58 +98,8 @@ perspective-string-column-style {
 }
 
 @mixin perspective-viewer-pro--fonts {
-    font-family: "Roboto Mono";
-    --preload-fonts: "Roboto Mono:400";
-    --interface-monospace--font-family: "Roboto Mono";
-}
-
-@mixin perspective-viewer-pro--icons {
-    --column-type-integer--mask-image: url("../svg/number-type.svg");
-    --column-type-float--mask-image: var(--column-type-integer--mask-image);
-    --column-type-string--mask-image: url("../svg/string-type.svg");
-    --column-type-date--mask-image: url("../svg/date-type.svg");
-    --column-type-boolean--mask-image: url("../svg/boolean-type.svg");
-    --column-type-datetime--mask-image:  var(--column-type-date--mask-image);
-    --column-drag-handle--mask-image: url("../svg/drag-handle.svg");
-    --column-radio-on--mask-image: url("../svg/radio-on.svg");
-    --column-radio-hover--mask-image:  url("../svg/radio-hover.svg");
-    --column-radio-off--mask-image:  url("../svg/radio-off.svg");
-    --column-checkbox-on--mask-image: url("../svg/checkbox-on.svg");
-    --column-checkbox-hover--mask-image:  url("../svg/checkbox-hover.svg");
-    --column-checkbox-off--mask-image:  url("../svg/checkbox-off.svg");
-    --column-settings-icon--mask-image: url("../svg/column-settings-icon.svg");
-    --sort-asc-icon--mask-image: url("../svg/sort-asc-icon.svg");
-    --sort-desc-icon--mask-image: url("../svg/sort-desc-icon.svg");
-    --sort-col-asc-icon--mask-image: url("../svg/sort-col-asc-icon.svg");
-    --sort-col-desc-icon--mask-image: url("../svg/sort-col-desc-icon.svg");
-    --sort-abs-asc-icon--mask-image: url("../svg/sort-abs-asc-icon.svg");
-    --sort-abs-desc-icon--mask-image: url("../svg/sort-abs-desc-icon.svg");
-    --sort-abs-col-asc-icon--mask-image: url("../svg/sort-abs-col-asc-icon.svg");
-    --sort-abs-col-desc-icon--mask-image: url("../svg/sort-abs-col-desc-icon.svg");
-    --sort-none-icon--mask-image: url("../svg/sort-none-icon.svg");
-    --add-expression-icon--mask-image: url("../svg/expression.svg");
-}
-
-@mixin perspective-viewer-pro--intl {
-    // Query overlay labels
-    --group_by--content: "Group By";
-    --split_by--content: "Split By";
-
-    // Icons
-    --inactive-column-selector--content:  url("../svg/checkbox-unchecked-icon.svg");
-    --active-column-selector--content:  url("../svg/checkbox-checked-icon.svg");
-    --overflow-hint-icon--content: "!";
-    --reset-button-icon--content: "refresh";
-    --save-button-icon--content: "save";
-    --transpose-button--content: "Swap";
-    --config-button-icon--content: "configure";
-
-    // "New Column" icon
-    --column-add--content: "add";
-    --column-menu--content: "menu";
-
-    // close "New Column" icon
-    --column-close--content: "close";
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+    --interface-monospace--font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
 }
 
 @mixin perspective-viewer-pro--d3fc {
@@ -230,15 +167,5 @@ perspective-string-column-style {
 @mixin perspective-viewer-pro--datagrid {
     --rt-pos-cell--color: #338dcd;
     --rt-neg-cell--color: #ff471e;
-
-    // `regular-table` icons
-    --column-style-open-button--content: "style";
-    --column-style-close-button--content: ">\00a0 style";
-    --tree-label-collapse--content: "-";
-    --tree-label-expand--content: "+";
-    --toolbar-scroll-lock--content:  url("../svg/free-scroll-icon.svg");
-    --toolbar-scroll-lock-active--content:  url("../svg/align-scroll-icon.svg");
-    --toolbar-edit-mode--content: url("../svg/read-only-icon.svg");
-    --toolbar-edit-mode-active--content:  url("../svg/editable-icon.svg");
 }
 
