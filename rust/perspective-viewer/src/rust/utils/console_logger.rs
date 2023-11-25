@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::fmt::{Debug, Write};
+use std::sync::OnceLock;
 
 use tracing::field::{Field, Visit};
 use tracing::Subscriber;
@@ -65,6 +66,16 @@ impl tracing::Level {
         }
     }
 
+    fn web_logger_1(&self) -> fn(&JsValue) {
+        match *self {
+            tracing::Level::TRACE => web_sys::console::trace_1,
+            tracing::Level::DEBUG => web_sys::console::debug_1,
+            tracing::Level::INFO => web_sys::console::info_1,
+            tracing::Level::WARN => web_sys::console::warn_1,
+            tracing::Level::ERROR => web_sys::console::error_1,
+        }
+    }
+
     /// Return a pretty color theme for a `tracing::Level`.
     fn web_log_color(&self) -> &'static str {
         match *self {
@@ -77,6 +88,12 @@ impl tracing::Level {
     }
 }
 
+static IS_CHROME: OnceLock<bool> = OnceLock::new();
+
+fn detect_chrome() -> bool {
+    web_sys::window().unwrap().get("chrome").is_some()
+}
+
 #[extend::ext]
 impl<'a> tracing::Metadata<'a> {
     /// Log a message in the style of `WasmLogger`.
@@ -87,12 +104,16 @@ impl<'a> tracing::Metadata<'a> {
             .and_then(|file| self.line().map(|ln| format!("{}:{}", &file[11..], ln)))
             .unwrap_or_default();
 
-        level.web_logger_4()(
-            &format!("%c {} %c {}%c {} ", level, origin, msg).into(),
-            &level.web_log_color().into(),
-            &"color: gray; font-style: italic".into(),
-            &"color: inherit".into(),
-        );
+        if *IS_CHROME.get_or_init(detect_chrome) {
+            level.web_logger_4()(
+                &format!("%c {} %c {}%c {} ", level, origin, msg).into(),
+                &level.web_log_color().into(),
+                &"color: gray; font-style: italic".into(),
+                &"color: inherit".into(),
+            );
+        } else {
+            level.web_logger_1()(&format!("{} {}", origin, msg).into());
+        }
     }
 }
 
@@ -194,7 +215,6 @@ impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for WasmLogger {
 /// we stub this library out entirely to save bytes.
 #[cfg(debug_assertions)]
 pub fn set_global_logging() {
-    use std::sync::OnceLock;
     static INIT_LOGGING: OnceLock<()> = OnceLock::new();
     INIT_LOGGING.get_or_init(|| {
         use tracing_subscriber::layer::SubscriberExt;
