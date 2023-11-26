@@ -20,6 +20,23 @@ perspective-viewer[theme="Dracula"] {
 }
 
 perspective-viewer[theme="Dracula"] {
+    @include perspective-viewer-pro-dark;
+    @include perspective-viewer-dracula--colors;
+    @include perspective-viewer-dracula--animation;
+    @include perspective-viewer-dracula--fonts;
+    @include perspective-viewer-dracula--datagrid;
+    @include perspective-viewer-dracula--d3fc;
+}
+
+perspective-copy-menu[theme="Dracula"],
+perspective-export-menu[theme="Dracula"],
+perspective-dropdown[theme="Dracula"] {
+    @include perspective-modal-pro-dark;
+    @include perspective-viewer-dracula--colors;
+    background-color: var(--theme-bg0);
+}
+
+@mixin perspective-viewer-dracula--colors {
     --theme-bg0: #191a22;
     --theme-bg1: #282a36;
     --theme-bg2: #44475a;
@@ -38,23 +55,6 @@ perspective-viewer[theme="Dracula"] {
     --theme-orange: #ffb86c;
     --theme-pink: #ff79c6;
 
-    @include perspective-viewer-pro-dark;
-    @include perspective-viewer-dracula--colors;
-    @include perspective-viewer-dracula--animation;
-    @include perspective-viewer-dracula--fonts;
-    @include perspective-viewer-dracula--datagrid;
-    @include perspective-viewer-dracula--d3fc;
-}
-
-perspective-copy-menu[theme="Dracula"],
-perspective-export-menu[theme="Dracula"],
-perspective-dropdown[theme="Dracula"] {
-    @include perspective-modal-pro-dark;
-    @include perspective-viewer-dracula--colors;
-    background-color: var(--theme-bg0);
-}
-
-@mixin perspective-viewer-dracula--colors {
     color: var(--theme-fg0);
     background-color: var(--theme-bg0);
     --icon--color: var(--theme-fg1);
