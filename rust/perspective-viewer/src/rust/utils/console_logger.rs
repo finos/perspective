@@ -206,14 +206,6 @@ impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for WasmLogger {
 /// `tracing::Subscriber`, so it should not be called when `perspective` is used
 /// as a library from a larger app; in this case the app itself should configure
 /// `tracing` explicitly.
-///
-/// Why is this stubbed out for `--release` builds, you may ask? While `tracing`
-/// has support for [compile-time log ellision](https://docs.rs/tracing/latest/tracing/level_filters/index.html)
-/// (which is enabled), even at `"max_level_off"` there is a 80k binary
-/// payload generated from `set_global_logging()` in wasm. As this module does
-/// not currently use even `"error"` level logging in `--release` builds,
-/// we stub this library out entirely to save bytes.
-#[cfg(debug_assertions)]
 pub fn set_global_logging() {
     static INIT_LOGGING: OnceLock<()> = OnceLock::new();
     INIT_LOGGING.get_or_init(|| {
@@ -230,6 +222,3 @@ pub fn set_global_logging() {
         tracing::subscriber::set_global_default(subscriber).unwrap();
     });
 }
-
-#[cfg(not(debug_assertions))]
-pub fn set_global_logging() {}
