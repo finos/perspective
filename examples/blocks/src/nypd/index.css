@@ -46,15 +46,6 @@ body {
     height: 36px;
 }
 
-#workspace {
-    height: auto;
-    position: absolute;
-    top: 36px;
-    right: 0;
-    bottom: 0;
-    left: 0;
-}
-
 a {
     text-transform: uppercase;
     font-size: 10px;

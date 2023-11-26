@@ -1,5 +1,4 @@
 {
-    "sizes": [1],
     "detail": {
         "main": {
             "type": "split-area",
@@ -31,7 +30,6 @@
             "sizes": [0.5, 0.5]
         }
     },
-    "mode": "globalFilters",
     "viewers": {
         "viewer1": {
             "plugin": "Datagrid",

@@ -7,7 +7,6 @@
                 "currentIndex": 0
             }
         },
-        "mode": "globalFilters",
         "viewers": {
             "raw": {
                 "plugin": "Datagrid",

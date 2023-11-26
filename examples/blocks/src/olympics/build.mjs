@@ -11,24 +11,35 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import sh from "@finos/perspective-scripts/sh.mjs";
-// import * as url from "url";
 
 import perspective from "@finos/perspective";
-import {
-    Uint8ArrayReader,
-    ZipReader,
-    TextWriter,
-    TextReader,
-} from "@zip.js/zip.js";
+import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
+import { ZipReader, TextWriter, TextReader } from "@zip.js/zip.js";
+import { build } from "esbuild";
 
-// import * as fs from "node:fs/promises";
 import * as url from "url";
 import * as fs from "node:fs";
+import * as path from "node:path";
 
 async function main() {
     const __dirname = url
         .fileURLToPath(new URL(".", import.meta.url))
         .slice(0, -1);
+
+    await build({
+        entryPoints: [path.join(__dirname, "index.js")],
+        outdir: __dirname,
+        bundle: true,
+        format: "esm",
+        plugins: [PerspectiveEsbuildPlugin()],
+        loader: {
+            ".css": "css",
+            ".png": "file",
+        },
+        // this build is done in a copied build folder, so nothing in-tree is overwritten.
+        allowOverwrite: true,
+        sourcemap: "linked",
+    });
 
     if (fs.existsSync(`${__dirname}/olympics.arrow`)) {
         return;

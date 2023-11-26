@@ -208,29 +208,3 @@ export class HTMLCopyDropDownMenuElement extends HTMLElement {
         }
     }
 }
-
-function transplantElement(rsObject, jsObject, name) {
-    const proto = rsObject.prototype;
-    const names = Object.getOwnPropertyNames(proto);
-    for (const key of names) {
-        Object.defineProperty(jsObject.prototype, key, {
-            value: async function (...args) {
-                await this.__load_wasm();
-                return await this._instance[key].call(this._instance, ...args);
-            },
-        });
-    }
-    customElements.define(name, jsObject);
-}
-
-transplantElement(
-    ExportDropDownMenuElement,
-    HTMLExportDropDownMenuElement,
-    "perspective-export-menu"
-);
-
-transplantElement(
-    CopyDropDownMenuElement,
-    HTMLCopyDropDownMenuElement,
-    "perspective-copy-menu"
-);

@@ -23,9 +23,6 @@ export const createCommands = (workspace: Workspace): CommandRegistry => {
     const commands = new CommandRegistry();
 
     /// Opens a submenu to copy the viewers contents
-    /// TODO: this probably should open the viewer in SDM
-    ///         and then open up the export menu of that instead
-    ///         then we would not need to export the whole modal.
     commands.addCommand("workspace:export", {
         execute: async (args: { viewer: string }) => {
             workspace.openExportViewer(args.viewer);
@@ -36,9 +33,6 @@ export const createCommands = (workspace: Workspace): CommandRegistry => {
     });
 
     /// Opens a submenu to copy the viewers contents
-    /// TODO: this probably should open the viewer in SDM
-    ///         and then open up the export menu of that instead
-    ///         then we would not need to export the whole modal.
     commands.addCommand("workspace:copy", {
         execute: (args: { viewer: string }) => {
             workspace.openCopyViewer(args.viewer);
@@ -57,13 +51,10 @@ export const createCommands = (workspace: Workspace): CommandRegistry => {
             );
         },
         // iconClass: "menu-new-tables",
-        // TODO: why this error, its JSON.
         label: (args: { table: string }) => args.table,
     });
 
     /// Create a new view, duplicating the configuration of another.
-    /// TODO: is there a way to only get the
-    //          widgets config instead of the Widget object?
     commands.addCommand("workspace:newview", {
         execute: async (args: { tocopy: string; ref: string }) => {
             workspace.duplicateViewer(args.tocopy, {
@@ -72,12 +63,9 @@ export const createCommands = (workspace: Workspace): CommandRegistry => {
             });
         },
         // iconClass: "menu-new-tables",
-        // TODO: are these extra args even seen in the UI???
         // isVisible: (args: { target_widget: PerspectiveViewer }) =>
         //     args.target_widget.title.label !== "",
         label: (args: { name: string }) => args.name,
-        // label: (args: { target_widget: PerspectiveViewer }) =>
-        //     args.target_widget.title.label || "untitled",
     });
 
     commands.addCommand("workspace:reset", {

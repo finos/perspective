@@ -10,19 +10,30 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
-// import { build } from "@finos/perspective-esbuild-plugin";
+import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
 import { build } from "esbuild";
 
-build({
-    entryPoints: ["src/ts/index.ts"],
-    format: "esm",
-    bundle: true,
-    minify: !process.env.PSP_DEBUG,
-    sourcemap: "linked",
-    plugins: [
-        // All imports in this project are external.
-        NodeModulesExternal(),
-    ],
-    outfile: "dist/esm/perspective-workspace.js",
-}).catch(() => process.exit(1));
+import * as url from "url";
+import * as path from "node:path";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+
+async function main() {
+    await build({
+        entryPoints: [path.join(__dirname, "index.js")],
+        outdir: __dirname,
+        bundle: true,
+        format: "esm",
+        plugins: [PerspectiveEsbuildPlugin()],
+        loader: {
+            ".css": "css",
+            ".png": "file",
+            ".arrow": "file",
+        },
+        // this build is done in a copied build folder, so nothing in-tree is overwritten.
+        allowOverwrite: true,
+        sourcemap: "linked",
+    });
+}
+
+main();

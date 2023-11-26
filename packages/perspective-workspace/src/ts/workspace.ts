@@ -73,7 +73,10 @@ export class Workspace {
      */
     private _viewers: Map<string, PerspectiveViewer>;
 
-    // TODO: merge this with viewers?
+    /**
+     * A map of functions that remove event listeners from the underlying
+     * PerspectiveViewer widgets.
+     */
     private _destructors: Map<string, () => void>;
 
     /**
@@ -83,13 +86,6 @@ export class Workspace {
 
     private _indicator: HTMLElement;
     private _commands: CommandRegistry;
-
-    /**
-     * A cached layout of the DockPanel.
-     * TODO: should this be the WorkspaceLayout instead?
-     *       Which is needed more?
-     */
-    private _layout: DockLayout.ILayoutConfig;
 
     /**
      * A strictly monotonically increasing counter for keeping track of viewers.
@@ -107,6 +103,9 @@ export class Workspace {
      * If a panel is given it will be used to add widgets to. Otherwise one will be constructed
      * by this manager, and it can be attached to the DOM by using Widget.attach
      * @param panel the panel to manipulate and add/remove widgets to.
+     *              If the panel is not provided, one will be created but not
+     *              attached to the DOM. Attach it yourself using
+     *              `Widget.attach(myWorkspace.panel)`.
      */
     constructor(panel?: DockPanel) {
         this._panel = panel ?? new DockPanel();
@@ -115,7 +114,6 @@ export class Workspace {
         //       Or at least somehow chained to it?
         this._indicator = document.createElement("perspective-indicator");
         document.body.appendChild(this._indicator);
-        this._layout = this._panel.saveLayout();
         this._commands = createCommands(this);
         this._tables = new Map();
         this._viewers = new Map();
@@ -130,7 +128,6 @@ export class Workspace {
      * @param table The table being registered
      */
     public addTable(name: string, table: Table) {
-        // TODO: should we check if this is already set?
         this._tables.set(name, table);
     }
 
@@ -179,13 +176,13 @@ export class Workspace {
     public async save(): Promise<WorkspaceLayoutConfig> {
         // ensure layout is fresh...
         // TODO: we probably need to ditch caching the layout.
-        this._layout = this.panel.saveLayout();
-        const detail = Private.mapLayout((w) => w.id, this._layout);
-        const widgets = Private.getWidgets(this._layout);
+        const layout = this.panel.saveLayout();
+        const detail = Private.mapLayout((w) => w.id, layout);
+        const widgets = Private.getWidgets(layout);
         const viewers = {};
         for (const widget of widgets) {
             // TODO: allow non PerspectiveViewer to be saved() somehow...
-            //       Needed for better Jupyter compatibility.
+            //       Needed for better Jupyter integration.
             const w = widget as PerspectiveViewer;
             const id = w.id;
             viewers[id] = await w.save();
@@ -206,10 +203,7 @@ export class Workspace {
         let widgets = this.panel.widgets();
         for (const old of widgets) {
             if (old instanceof PerspectiveViewer) {
-                // TODO does this need to be awaited??
-                // TODO: if a tab was already closed, this will cause an exception.
-                //       cause Viewers can only be delete()d once.
-                await old.close();
+                old.close();
             }
             if (old instanceof Widget) {
                 old.dispose();
@@ -280,7 +274,6 @@ export class Workspace {
     }
 
     /**
-     * TODO: This feels like it can be public, but I am not sure.
      * @param id The ID of the viewer to get
      * @throws if the viewer is not in the workspace.
      */
@@ -368,8 +361,7 @@ export class Workspace {
     //       That just seems pedantic.
     private attachEventListeners(viewer: PerspectiveViewer): () => void {
         const settings = (event) => {
-            // TODO!
-            console.log("TODO");
+            // TODO! What do we want to do here
             // if (!event.detail && manager.panel.mode === "single-document") {
             //     manager._unmaximize();
             // }
@@ -391,7 +383,6 @@ export class Workspace {
         viewer.viewer.addEventListener("perspective-plugin-update", onModified);
         viewer.title.changed.connect(updated);
         return () => {
-            console.log("Destructin'");
             viewer.viewer.removeEventListener("contextmenu", contextMenu);
             viewer.viewer.removeEventListener(
                 "perspective-toggle-settings",
@@ -438,6 +429,7 @@ export class Workspace {
         widget: PerspectiveViewer,
         tabbar: TabBar<Widget> | undefined
     ): [Menu, () => void] {
+        const layout = this.panel.saveLayout();
         const renderer = new MenuRenderer();
         const commands = this._commands;
 
@@ -446,8 +438,6 @@ export class Workspace {
             renderer,
         });
 
-        // TODO: we should be able to create a context menu when !widget.
-        //       cases include right-clicking on tab bar, right-clicking on empty workspace.
         contextMenu.addItem({
             type: "submenu",
             command: "workspace:newmenu",
@@ -460,7 +450,7 @@ export class Workspace {
                     });
                 }
 
-                const widgets = Private.getWidgets(this._layout);
+                const widgets = Private.getWidgets(layout);
 
                 if (widgets.length > 0) {
                     submenu.addItem({ type: "separator" });
@@ -547,18 +537,19 @@ export class Workspace {
 
     private _onLayoutModified() {
         if (this.panel.mode !== "single-document") {
-            this._layout = this.panel.saveLayout();
-            if (this._layout) {
-                const tables = {};
-                this.tables.forEach((value, key) => {
-                    tables[key] = value;
-                });
-                this.panel.node.dispatchEvent(
-                    new CustomEvent("workspace-layout-update", {
-                        detail: { tables, layout: this._layout },
-                    })
-                );
-            }
+            this.save().then((layout) => {
+                if (layout) {
+                    const tables = {};
+                    this.tables.forEach((value, key) => {
+                        tables[key] = value;
+                    });
+                    this.panel.node.dispatchEvent(
+                        new CustomEvent("workspace-layout-update", {
+                            detail: { tables, layout: layout },
+                        })
+                    );
+                }
+            });
         }
     }
 }
@@ -600,7 +591,6 @@ namespace Private {
     /// using a depth-first search strategy.
     /// The given Layout should only contain PerspectiveViewer widgets,
     /// otherwise the behavior of this function is undefined.
-    /// TODO: how to play nice with non-PerspectiveViewer widgets in layout?
     export function mapLayout(
         f: (w: PerspectiveViewer) => string,
         layout: DockLayout.ILayoutConfig

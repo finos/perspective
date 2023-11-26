@@ -13,7 +13,7 @@
 import { WASM_MODULE } from "./init";
 import { PerspectiveViewerElement } from "../../dist/pkg/perspective.js";
 
-// This can be done automatically by enabling the `define_web_components_async`
+// This can be done automatically by enabling the `defin_web_components_async`
 // feature, but due to async loading, `<perspective-viewer>` methods will not be
 // available synchronously - this can be mitigated with
 // `customElements.whenDefined()`, but this is a breaking change.
@@ -32,18 +32,15 @@ class HTMLPerspectiveViewerElement extends HTMLElement {
     }
 }
 
-function transplantElement(rsObject, jsObject, name) {
-    const proto = rsObject.prototype;
-    const names = Object.getOwnPropertyNames(proto);
-    for (const key of names) {
-        Object.defineProperty(jsObject.prototype, key, {
-            value: async function (...args) {
-                await this.__load_wasm();
-                return await this._instance[key].call(this._instance, ...args);
-            },
-        });
-    }
-    customElements.define(name, jsObject);
+const proto = PerspectiveViewerElement.prototype;
+const names = Object.getOwnPropertyNames(proto);
+for (const key of names) {
+    Object.defineProperty(HTMLPerspectiveViewerElement.prototype, key, {
+        value: async function (...args) {
+            await this.__load_wasm();
+            return await this._instance[key].call(this._instance, ...args);
+        },
+    });
 }
 
 for (const key of ["registerPlugin", "getExprTKCommands"]) {
@@ -55,8 +52,4 @@ for (const key of ["registerPlugin", "getExprTKCommands"]) {
     });
 }
 
-transplantElement(
-    PerspectiveViewerElement,
-    HTMLPerspectiveViewerElement,
-    "perspective-viewer"
-);
+customElements.define("perspective-viewer", HTMLPerspectiveViewerElement);

@@ -14,7 +14,7 @@ import { h } from "@lumino/virtualdom/src";
 import { Menu } from "@lumino/widgets/src/menu";
 
 /// The underlying renderer for the workspace context menu.
-/// TODO: TSify this!
+/// TODO: This is ported JS, no types
 export class MenuRenderer extends Menu.Renderer {
     formatLabel(data) {
         let { label, mnemonic } = data.item;

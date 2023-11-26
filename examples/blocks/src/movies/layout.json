@@ -1,56 +1,13 @@
 {
-    "sizes": [0.34555410083131466, 0.6544458991686853],
     "detail": {
         "main": {
             "type": "tab-area",
-            "widgets": [
-                "PERSPECTIVE_GENERATED_ID_0",
-                "PERSPECTIVE_GENERATED_ID_1",
-                "PERSPECTIVE_GENERATED_ID_3"
-            ],
+            "widgets": ["tomato_vs_imdb", "metrics_by_year", "gross_by_genre"],
             "currentIndex": 0
         }
     },
-    "mode": "globalFilters",
-    "master": {
-        "widgets": ["PERSPECTIVE_GENERATED_ID_2"],
-        "sizes": [1]
-    },
     "viewers": {
-        "PERSPECTIVE_GENERATED_ID_2": {
-            "plugin": "Datagrid",
-            "plugin_config": {
-                "columns": {
-                    "IMDB Rating": {
-                        "gradient": 8.1,
-                        "neg_color": "#FF9485",
-                        "number_color_mode": "gradient",
-                        "pos_color": "#b87ff0"
-                    },
-                    "US Gross": {
-                        "fg_gradient": 19729862602,
-                        "number_fg_mode": "bar"
-                    }
-                },
-                "editable": false,
-                "scroll_lock": true
-            },
-            "settings": false,
-            "theme": "Pro Dark",
-            "group_by": ["Distributor"],
-            "split_by": [],
-            "columns": ["US Gross"],
-            "filter": [],
-            "sort": [["US Gross", "desc"]],
-            "expressions": {},
-            "aggregates": {},
-            "master": true,
-            "name": null,
-            "table": "movies",
-            "linked": false,
-            "selectable": "true"
-        },
-        "PERSPECTIVE_GENERATED_ID_0": {
+        "tomato_vs_imdb": {
             "plugin": "Heatmap",
             "plugin_config": {},
             "settings": false,
@@ -67,12 +24,10 @@
             "aggregates": {
                 "bucket(\"Rotten Tomatoes Rating\", 2.5)": "avg"
             },
-            "master": false,
-            "name": null,
             "table": "movies",
-            "linked": false
+            "title": "Rotten Tomatoes vs IMDB"
         },
-        "PERSPECTIVE_GENERATED_ID_1": {
+        "metrics_by_year": {
             "plugin": "Y Line",
             "plugin_config": {
                 "legend": {
@@ -100,12 +55,10 @@
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"
             },
-            "master": false,
-            "name": "Ratings vs Sales",
-            "table": "movies",
-            "linked": false
+            "title": "Ratings vs Sales",
+            "table": "movies"
         },
-        "PERSPECTIVE_GENERATED_ID_3": {
+        "gross_by_genre": {
             "plugin": "Y Area",
             "plugin_config": {
                 "legend": {
@@ -124,10 +77,8 @@
                 "bucket(\"Release Date\", 'Y')": "bucket(\"Release Date\", 'Y')"
             },
             "aggregates": {},
-            "master": false,
-            "name": "US Gross by Genre",
-            "table": "movies",
-            "linked": false
+            "title": "US Gross by Genre",
+            "table": "movies"
         }
     }
 }

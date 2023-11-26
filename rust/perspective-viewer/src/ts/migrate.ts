@@ -48,11 +48,11 @@ import migrate_2_6_1 from "./migrate/2-6-1";
  * const {convert} = require("@finos/perspective-viewer/dist/cjs/migrate.js");
  * ```
  * @param old the layout to convert, in `<perspective-viewer>` or
- * `<perspective-workspace>` format.
+ * `perspective-workspace` format.
  * @param options a `PerspectiveConvertOptions` object specifying the convert
  * options for this call.
  * @returns a layout for either `<perspective-viewer>` or
- * `<perspective-workspace>`, updated to the perspective version of this
+ * `perspective-workspace`, updated to the perspective version of this
  * script's package.
  */
 export function convert(

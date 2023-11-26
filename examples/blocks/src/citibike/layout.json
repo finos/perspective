@@ -1,5 +1,4 @@
 {
-    "sizes": [1],
     "detail": {
         "main": {
             "type": "split-area",
@@ -19,7 +18,6 @@
             "sizes": [0.8, 0.2]
         }
     },
-    "mode": "globalFilters",
     "viewers": {
         "PERSPECTIVE_GENERATED_ID_0": {
             "plugin": "Map Scatter",

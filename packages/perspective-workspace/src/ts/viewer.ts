@@ -63,7 +63,7 @@ export class PerspectiveViewer extends Widget {
             parent.removeChild(parent.lastChild);
         }
         parent.appendChild(viewer);
-        // TODO: why was this here.
+        // TODO: support top-level context menu.
         // viewer.addEventListener(
         //     "contextmenu",
         //     (e) => e.stopPropagation(),
@@ -117,7 +117,6 @@ export class PerspectiveViewer extends Widget {
         }
     }
 
-    // TODO: did not make this a setter so I can reject
     load(table: Table): Promise<void> {
         if (this.viewer) {
             return this.viewer.load(table);
