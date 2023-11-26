@@ -81,8 +81,10 @@ export const createCommands = (workspace: Workspace): CommandRegistry => {
     });
 
     commands.addCommand("workspace:reset", {
-        execute: (args: { viewer: string }) =>
-            workspace.resetViewer(args.viewer),
+        execute: async (args: { viewer: string }) => {
+            let viewer = workspace.getViewer(args.viewer);
+            await viewer.reset();
+        },
         // iconClass: "menu-reset",
         label: "Reset",
         mnemonic: 0,
@@ -103,8 +105,9 @@ export const createCommands = (workspace: Workspace): CommandRegistry => {
     });
 
     commands.addCommand("workspace:close", {
-        execute: (args: { viewer: string }) => {
-            workspace.closeViewer(args.viewer);
+        execute: async (args: { viewer: string }) => {
+            const viewer = workspace.getViewer(args.viewer);
+            await viewer.close();
         },
         // iconClass: "menu-close",
         label: () => "Close",

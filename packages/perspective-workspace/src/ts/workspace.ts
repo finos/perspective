@@ -170,21 +170,6 @@ export class Workspace {
     }
 
     /**
-     * Closes the viewer and removes it from the workspace.
-     * @param viewerId
-     */
-    public async closeViewer(viewerId: string) {
-        let v = this.getViewer(viewerId);
-        let d = this._destructors.get(viewerId);
-        if (d) {
-            d();
-            this._destructors.delete(viewerId);
-        }
-        this._viewers.delete(viewerId);
-        v.close();
-    }
-
-    /**
      * Save the layout of the workspace into a serializable object.
      * @returns a Layout configuration that describes the Perspective
      *          Viewer widgets within the DockPanel managed by this object.
@@ -307,6 +292,26 @@ export class Workspace {
     }
 
     /**
+     * Clean up usage of the given viewer within this workspace.
+     * NOTE: This should only be called by a PerspectiveViewer when it is closing.
+     * if the viewer referenced by `id` is not closed, this will throw.
+     * @param id The ID of the viewer that has been closed already.
+     * @throws if the viewer is not in the workspace or if it is not already closed.
+     */
+    public onViewerClosed(id: string) {
+        const viewer = this.getViewer(id);
+        if (!viewer.closed) {
+            throw new Error("Viewer is not closed.");
+        }
+        this._viewers.delete(id);
+        let d = this._destructors.get(id);
+        if (d) {
+            d();
+            this._destructors.delete(id);
+        }
+    }
+
+    /**
      * The tables registered to this workspace.
      */
     public get tables(): Map<string, Table> {
@@ -336,8 +341,8 @@ export class Workspace {
         }
 
         let table = this.tables.get(config.table)!;
-        let id = `viewer_${this._counter++}`;
-        let viewer = new PerspectiveViewer(config, id);
+        let id = `psp_viewer_${this._counter++}`;
+        let viewer = new PerspectiveViewer(config, id, this);
         await viewer.load(table);
         await viewer.restore(config);
         let destructor = this.attachEventListeners(viewer);

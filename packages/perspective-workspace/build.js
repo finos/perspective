@@ -15,25 +15,15 @@ import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.
 import { build } from "esbuild";
 
 // TODO: hook this into Perspective debug infra.
-// build({
-//     entryPoints: ["src/ts/index.ts"],
-//     format: "esm",
-//     bundle: true,
-//     minify: false,
-//     sourcemap: "linked",
-//     plugins: [
-//         // All imports in this project are external.
-//         NodeModulesExternal(),
-//     ],
-//     outfile: "dist/esm/perspective-workspace.js",
-// }).catch(() => process.exit(1));
-
-// TODO: hook this into Perspective debug infra.
 build({
     entryPoints: ["src/ts/index.ts"],
     format: "esm",
     bundle: true,
     minify: false,
     sourcemap: "linked",
+    plugins: [
+        // All imports in this project are external.
+        NodeModulesExternal(),
+    ],
     outfile: "dist/esm/perspective-workspace.js",
 }).catch(() => process.exit(1));

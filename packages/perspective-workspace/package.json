@@ -38,6 +38,10 @@
         "esbuild": "0.19.5"
     },
     "peerDependencies": {
+        "@lumino/algorithm": "^2",
+        "@lumino/commands": "^2",
+        "@lumino/messaging": "^2",
+        "@lumino/virtualdom": "^2",
         "@lumino/widgets": "^2"
     }
 }

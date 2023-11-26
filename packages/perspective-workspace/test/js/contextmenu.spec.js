@@ -25,6 +25,15 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("context menu opens", async ({ page }) => {
-    await page.goto("/tools/perspective-test/src/html/workspace-test.html");
-    await page.evaluate();
+    let viewerId = await page.evaluate(async () => {
+        const workspace = window.workspace;
+        return await workspace.addViewer({
+            table: "superstore",
+            title: "testing",
+        });
+    });
+    debugger;
+    let viewer = await page.waitForSelector("#" + viewerId);
+    viewer.click({ button: "right" });
+    debugger;
 });

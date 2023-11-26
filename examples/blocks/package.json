@@ -16,6 +16,8 @@
         "@finos/perspective-viewer-datagrid": "^2.7.0",
         "@finos/perspective-viewer-openlayers": "^2.7.0",
         "@finos/perspective-workspace": "^2.7.0",
+        "@lumino/default-theme": "^2.1.4",
+        "@lumino/widgets": "^2.3.1",
         "superstore-arrow": "3.0.0"
     },
     "devDependencies": {

@@ -95,41 +95,6 @@ test("Workspace getViewer", async ({ page }) => {
     expect(viewer.title).toBe("view1");
 });
 
-test("Workspace closeViewer", async ({ page }) => {
-    debugger;
-    const [id1, id2] = await page.evaluate(async () => {
-        const workspace /*: Workspace*/ = window.workspace;
-        const id1 = await workspace.addViewer({
-            table: "superstore",
-            title: "view1",
-        });
-        const id2 = await workspace.addViewer({
-            table: "superstore",
-            title: "view2",
-        });
-        console.log("[id1, id2]", [id1, id2]);
-        return [id1, id2];
-    });
-
-    const layout1 = await page.evaluate(async () => {
-        const workspace /*: Workspace*/ = window.workspace;
-        return await workspace.save();
-    });
-
-    const layout2 = await page.evaluate(
-        async ([id1, id2]) => {
-            const workspace /*: Workspace*/ = window.workspace;
-            debugger;
-            await workspace.closeViewer(id1);
-            await workspace.closeViewer(id2);
-            return await workspace.save();
-        },
-        [id1, id2]
-    );
-    expect(layout1.detail.main.widgets).toStrictEqual(["viewer_0", "viewer_1"]);
-    expect(layout2).toStrictEqual({ detail: null, viewers: {} });
-});
-
 test("Workspace save", async ({ page }) => {});
 
 test("Workspace restore", async ({ page }) => {});

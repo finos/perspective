@@ -18,6 +18,7 @@ import type {
 
 import { Widget } from "@lumino/widgets";
 import { Message } from "@lumino/messaging";
+import { Workspace } from "./workspace";
 
 /**
  * A Lumino Widget containing a <perspective-viewer>.
@@ -28,8 +29,10 @@ export class PerspectiveViewer extends Widget {
      */
     private _viewer: HTMLPerspectiveViewerElement;
     private _tableName: string;
+    private _closed: boolean;
+    private _owner: Workspace;
 
-    constructor(config: PerspectiveViewerConfig, id: string) {
+    constructor(config: PerspectiveViewerConfig, id: string, owner: Workspace) {
         super();
         if (!config.title) {
             throw new Error("Title must be provided.");
@@ -46,6 +49,8 @@ export class PerspectiveViewer extends Widget {
         this.title.label = config.title;
         this.title.closable = true;
         this.id = id;
+        this._closed = false;
+        this._owner = owner;
     }
 
     private static createNode(
@@ -130,10 +135,11 @@ export class PerspectiveViewer extends Widget {
     }
 
     close(): Promise<void> {
-        console.log("Closing...");
+        this._closed = true;
         if (this.viewer) {
             this.viewer?.parentElement?.removeChild(this.viewer);
             let p = this.viewer.delete();
+            this._owner.onViewerClosed(this.id);
             super.close();
             return p;
         } else {
@@ -165,5 +171,9 @@ export class PerspectiveViewer extends Widget {
 
     get name(): string {
         return this.title.label;
+    }
+
+    get closed(): boolean {
+        return this._closed;
     }
 }

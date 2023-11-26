@@ -19,7 +19,8 @@ async function load() {
     const worker = perspective.worker();
     const table = await worker.table(arrow);
     let workspace = new Workspace();
-    workspace.panel.constructor.attach(workspace.panel, window.workspace);
+    // TODO: hack! So we can avoid importing Lumino (to avoid a bundle step).
+    workspace.panel.constructor.attach(workspace.panel, document.body);
     window.worker = worker;
     window.workspace = workspace;
     window.__TABLE__ = table;
