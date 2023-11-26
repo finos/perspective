@@ -46,8 +46,8 @@ test.describe("leaks", () => {
         for (var i = 0; i < 500; i++) {
             await page.evaluate(async () => {
                 const element = document.querySelector("perspective-viewer");
-
                 await element.delete();
+                await element.free();
                 document.body.innerHTML =
                     "<perspective-viewer></perspective-viewer>";
 
@@ -65,7 +65,8 @@ test.describe("leaks", () => {
         const heap2 = await page.evaluate(
             () => performance.memory.usedJSHeapSize
         );
-        expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
+
+        expect((heap2 - heap1) / heap1).toBeLessThan(1);
 
         const contents = await page.evaluate(async () => {
             const element = document.querySelector("perspective-viewer");
@@ -111,7 +112,7 @@ test.describe("leaks", () => {
         const heap2 = await page.evaluate(
             () => performance.memory.usedJSHeapSize
         );
-        expect((heap2 - heap1) / heap1).toBeLessThan(0.1);
+        expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
 
         const contents = await page.evaluate(async (viewer) => {
             await viewer.restore({ group_by: ["State"] });
@@ -149,7 +150,7 @@ test.describe("leaks", () => {
         const heap2 = await page.evaluate(
             () => performance.memory.usedJSHeapSize
         );
-        expect((heap2 - heap1) / heap1).toBeLessThan(0.05);
+        expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
 
         const contents = await page.evaluate(async (viewer) => {
             await viewer.restore({

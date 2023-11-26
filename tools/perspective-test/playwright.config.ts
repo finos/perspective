@@ -37,6 +37,7 @@ const DEVICE_OPTIONS = {
                 '--proxy-server="direct://"',
                 "--proxy-bypass-list=*",
                 "--js-flags=--expose-gc",
+                "--enable-precise-memory-info",
             ],
         },
     },
