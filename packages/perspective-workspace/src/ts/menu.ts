@@ -10,13 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { h } from "@lumino/virtualdom/src";
+import { h, VirtualElement } from "@lumino/virtualdom/src";
 import { Menu } from "@lumino/widgets/src/menu";
 
 /// The underlying renderer for the workspace context menu.
-/// TODO: This is ported JS, no types
 export class MenuRenderer extends Menu.Renderer {
-    formatLabel(data) {
+    formatLabel(data: Menu.IRenderData) {
         let { label, mnemonic } = data.item;
         if (mnemonic < 0 || mnemonic >= label.length) {
             return label;
@@ -35,23 +34,23 @@ export class MenuRenderer extends Menu.Renderer {
         return [prefix, span, suffix];
     }
 
-    renderLabel(data) {
+    renderLabel(data: Menu.IRenderData) {
         let content = this.formatLabel(data);
         return h.div(
             {
-                className: "lm-Menu-itemLabel p-Menu-itemLabel",
+                className: "lm-Menu-itemLabel",
             },
             content
         );
     }
 
-    renderSubmenu(data) {
+    renderSubmenu(_data: Menu.IRenderData) {
         return h.div({
-            className: "lm-Menu-itemSubmenuIcon" + " p-Menu-itemSubmenuIcon",
+            className: "lm-Menu-itemSubmenuIcon",
         });
     }
 
-    renderItem(data) {
+    renderItem(data: Menu.IRenderData): VirtualElement {
         let className = this.createItemClass(data);
         let dataset = this.createItemDataset(data);
         let aria = this.createItemARIA(data);

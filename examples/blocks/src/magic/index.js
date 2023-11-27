@@ -79,7 +79,7 @@ class MagicApp extends HTMLElement {
     }
 
     async on_new_view(event) {
-        const grid = await event.detail.widget.viewer.getPlugin("Datagrid");
+        const grid = await event.detail.viewer.viewer.getPlugin("Datagrid");
         grid.regular_table.addStyleListener(
             manaStyleListener.bind(grid.regular_table, await SYMBOLS)
         );
@@ -120,7 +120,7 @@ class MagicApp extends HTMLElement {
         DockPanel.attach(panel, this.querySelector("#content"));
         this.workspace = new Workspace(panel);
         this.workspace.addTable("all_cards", this.get_all_cards());
-        // this.workspace.addEventListener("workspace-new-view", this.on_new_view);
+        panel.node.addEventListener("workspace-new-view", this.on_new_view);
         this.workspace.addViewer({ table: "all_cards", title: "all_cards" });
         window.addEventListener("resize", () => {
             panel.fit();

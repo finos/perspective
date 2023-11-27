@@ -341,6 +341,10 @@ export class Workspace {
         let destructor = this.attachEventListeners(viewer);
         this._viewers.set(id, viewer);
         this._destructors.set(id, destructor);
+        const event = new CustomEvent("workspace-new-view", {
+            detail: { config, viewer },
+        });
+        this.panel.node.dispatchEvent(event);
         return viewer;
     }
 
