@@ -79,7 +79,6 @@ const DEFAULT_ASSETS = [
     "@finos/perspective-test",
     "@finos/perspective/dist/cdn",
     "@finos/perspective-workspace/dist/esm",
-    // "@finos/perspective-workspace/dist/css",
     "@finos/perspective-viewer/dist/cdn",
     "@finos/perspective-viewer/dist/css",
     "@finos/perspective-viewer-openlayers/dist/cdn",

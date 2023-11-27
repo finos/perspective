@@ -98,7 +98,3 @@ test("Workspace getViewer", async ({ page }) => {
 test("Workspace save", async ({ page }) => {});
 
 test("Workspace restore", async ({ page }) => {});
-
-// TODO:
-// test that closing a viewer via the close button in the UI changes the
-// `viewers` field in the workspace to have not that viewer!!

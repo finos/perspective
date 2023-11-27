@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
-// import { build } from "@finos/perspective-esbuild-plugin";
 import { build } from "esbuild";
 
 build({

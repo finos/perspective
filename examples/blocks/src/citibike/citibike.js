@@ -19,7 +19,6 @@ import "@finos/perspective-viewer-datagrid/dist/esm/perspective-viewer-datagrid.
 import "@finos/perspective-viewer-openlayers/dist/cdn/perspective-viewer-openlayers.js";
 import "@finos/perspective-viewer-d3fc/dist/esm/perspective-viewer-d3fc.js";
 import "@finos/perspective-viewer/dist/css/themes.css";
-import "@finos/perspective-viewer/dist/css/pro.css"; // TODO: which CSS??
 import "@lumino/default-theme/style/index.css";
 import "./index.css";
 

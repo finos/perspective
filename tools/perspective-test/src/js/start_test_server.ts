@@ -13,7 +13,6 @@
 import { WebSocketServer } from "@finos/perspective";
 import path from "path";
 
-console.log("WORKING WITH: ", path.join(__dirname, "../../../.."));
 const _server = new WebSocketServer({
     assets: [
         path.join(__dirname, "../../../.."),

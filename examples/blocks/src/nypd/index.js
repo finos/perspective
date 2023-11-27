@@ -12,7 +12,7 @@
 
 import { Workspace } from "@finos/perspective-workspace/dist/esm/perspective-workspace.js";
 import perspective from "@finos/perspective/dist/esm/perspective.js";
-import { DockPanel, Widget } from "@lumino/widgets";
+import { DockPanel } from "@lumino/widgets";
 
 import "@finos/perspective-viewer/dist/esm/perspective-viewer.js";
 import "@finos/perspective-viewer-datagrid/dist/esm/perspective-viewer-datagrid.js";
@@ -37,17 +37,6 @@ async function fetch_progress(url) {
     return ab;
 }
 
-class ContentWidget extends Widget {
-    constructor(name) {
-        super();
-        const img = document.createElement("img");
-        img.src = "https://placekitten.com/800/800";
-        this.node.appendChild(img);
-        this.title.label = name;
-        this.title.closable = true;
-    }
-}
-
 window.addEventListener("load", async () => {
     document.body.innerHTML = `
         <style>
@@ -69,15 +58,6 @@ window.addEventListener("load", async () => {
 
     let panel = new DockPanel();
     DockPanel.attach(panel, window.content);
-
-    // let a = new ContentWidget("a");
-    // let b = new ContentWidget("b");
-    // let c = new ContentWidget("c");
-    // let d = new ContentWidget("d");
-    // panel.addWidget(a);
-    // panel.addWidget(b, { ref: a, mode: "tab-before" });
-    // panel.addWidget(c, { ref: b, mode: "tab-before" });
-    // panel.addWidget(d, { ref: c, mode: "tab-before" });
     let workspace = new Workspace(panel);
 
     workspace.addTable(
@@ -91,7 +71,6 @@ window.addEventListener("load", async () => {
 
     const layout_names = Object.keys(LAYOUTS);
     let selected_layout = LAYOUTS[layout_names[0]];
-    // TODO: clean up layout.json
     await workspace.restore(selected_layout);
 
     function set_layout_options() {
