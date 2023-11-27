@@ -13,7 +13,6 @@
 import { test } from "@playwright/test";
 import {
     compareContentsToSnapshot,
-    compareLightDOMContents,
     run_standard_tests,
 } from "@finos/perspective-test";
 
