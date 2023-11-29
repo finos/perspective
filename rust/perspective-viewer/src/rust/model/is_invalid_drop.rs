@@ -10,62 +10,27 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-:host {
-    --invalid-column-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' preserveAspectRatio='none' viewBox='0 0 100 24'><path d='M100 0 L0 24 ' stroke='black' stroke-width='1'/><path d='M0 0 L100 24 ' stroke='black' stroke-width='1'/></svg>");
-    .column-empty {
-        width: 100%;
-    }
+use super::{HasRenderer, HasSession};
 
-    #top_panel .column-invalid.pivot-column,
-    .column-invalid.pivot-column {
-        .column-invalid-input {
-            mask-image: var(--invalid-column-pattern);
-            -webkit-mask-image: var(--invalid-column-pattern);
-            background-color: var(--icon--color);
-            mask-size: cover;
-            -webkit-mask-size: cover;
-            width: 100%;
-            height: 22px;
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-size: 100% 100%, auto;
-        }
+pub trait IsInvalidDrop: HasRenderer + HasSession {
+    fn is_invalid_columns_column(&self, from_column: &String, to_index: usize) -> bool {
+        let config = self.session().get_view_config();
+        let from_index = config
+            .columns
+            .iter()
+            .position(|x| x.as_ref() == Some(from_column));
 
-        position: relative;
-        box-sizing: border-box;
-        width: calc(100% - 7px);
-        background-color: #8b868045;
-        border: 1px solid var(--icon--color);
-        border-radius: 2px;
-        margin-right: 6px;
-        margin-bottom: 4px;
-        min-height: 22px;
-        width: calc(100% - 7px);
-        outline: none;
-    }
-
-    .column-empty-input {
-        position: relative;
-        display: flex;
-        align-items: stretch;
-        cursor: auto;
-
-        background-color: #8b868045;
-        border: 1px solid transparent;
-        border-radius: 2px;
-        padding-bottom: 0px;
-        margin-bottom: 4px;
-        min-height: 24px;
-        width: calc(100% - 7px);
-        outline: none;
-        padding-left: 10px;
-        font-size: 12px;
-        font-family: inherit;
-    }
-
-    .column-empty-input:focus {
-        color: var(--plugin--background);
-        background-color: var(--icon--color);
-        border: 1px solid var(--icon--color);
+        let min_cols = self.renderer().metadata().min;
+        let is_to_empty = !config
+            .columns
+            .get(to_index)
+            .map(|x| x.is_some())
+            .unwrap_or_default();
+        min_cols
+            .and_then(|x| from_index.map(|from_index| from_index < x))
+            .unwrap_or_default()
+            && is_to_empty
     }
 }
+
+impl<T: HasRenderer + HasSession> IsInvalidDrop for T {}

@@ -18,7 +18,7 @@ use web_sys::*;
 use yew::html::Scope;
 use yew::prelude::*;
 
-use crate::components::column_selector::{EmptyColumn, InPlaceColumn};
+use crate::components::column_selector::{EmptyColumn, InPlaceColumn, InvalidColumn};
 use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
 
@@ -199,6 +199,8 @@ where
         });
 
         let invalid_drag: bool;
+        let mut valid_duplicate_drag = false;
+
         let columns_html = {
             let mut columns = ctx
                 .props()
@@ -222,6 +224,7 @@ where
                     .iter()
                     .position(|x| x.1 .1.as_ref().unwrap().props.get_item() == *column);
 
+                valid_duplicate_drag = is_duplicate.is_some() && !ctx.props().allow_duplicates;
                 if let Some(duplicate) = is_duplicate {
                     if !is_append && (!ctx.props().allow_duplicates || is_self_move) {
                         columns.remove(duplicate);
@@ -304,11 +307,13 @@ where
                     <div class="psp-text-field">
                         <ul class="psp-text-field__input" for={ ctx.props().name }>
                             { columns_html }
-                            if ctx.props().is_dragover.is_none() || invalid_drag {
+                            if ctx.props().is_dragover.is_none() | (!invalid_drag && valid_duplicate_drag) {
                                 <EmptyColumn
                                     { column_dropdown }
                                     { exclude }
                                     { on_select } />
+                            } else if invalid_drag {
+                                <InvalidColumn />
                             }
                         </ul>
                         <label class="pivot-selector-label" for={ ctx.props().name }></label>

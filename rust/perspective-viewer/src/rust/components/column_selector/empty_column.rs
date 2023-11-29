@@ -28,7 +28,6 @@ pub struct EmptyColumn {
 #[derive(Clone, Debug)]
 pub enum InPlaceColumn {
     Column(String),
-    // ExpressionAlias(String),
     Expression(Expression<'static>),
 }
 

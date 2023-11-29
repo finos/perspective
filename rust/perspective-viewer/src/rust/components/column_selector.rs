@@ -18,6 +18,7 @@ mod empty_column;
 mod expression_toolbar;
 mod filter_column;
 mod inactive_column;
+mod invalid_column;
 mod pivot_column;
 mod sort_column;
 
@@ -25,6 +26,7 @@ use std::iter::*;
 use std::rc::Rc;
 
 pub use empty_column::*;
+pub use invalid_column::*;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -161,41 +163,26 @@ impl Component for ColumnSelector {
                 self.named_row_count = named.unwrap_or_default();
                 true
             },
-            HoverActiveIndex(Some(to_index)) => {
-                let min_cols = ctx.props().renderer.metadata().min;
-                let config = ctx.props().session.get_view_config();
-                let is_to_empty = !config
-                    .columns
-                    .get(to_index)
-                    .map(|x| x.is_some())
-                    .unwrap_or_default();
-
-                let from_index = ctx
-                    .props()
-                    .dragdrop
-                    .get_drag_column()
-                    .and_then(|x| config.columns.iter().position(|z| z.as_ref() == Some(&x)));
-
-                if min_cols
-                    .and_then(|x| from_index.map(|from_index| from_index < x))
-                    .unwrap_or_default()
-                    && is_to_empty
-                    || from_index
-                        .map(|from_index| {
-                            from_index == config.columns.len() - 1 && to_index > from_index
-                        })
-                        .unwrap_or_default()
-                {
-                    ctx.props().dragdrop.notify_drag_leave(DragTarget::Active);
-                    true
-                } else {
-                    ctx.props()
-                        .dragdrop
-                        .notify_drag_enter(DragTarget::Active, to_index)
-                }
-            },
+            HoverActiveIndex(Some(to_index)) => ctx
+                .props()
+                .dragdrop
+                .notify_drag_enter(DragTarget::Active, to_index),
             HoverActiveIndex(_) => {
                 ctx.props().dragdrop.notify_drag_leave(DragTarget::Active);
+                true
+            },
+            Drop((column, DragTarget::Active, DragEffect::Move(DragTarget::Active), index)) => {
+                if !ctx.props().is_invalid_columns_column(&column, index) {
+                    let update = ctx.props().session.create_drag_drop_update(
+                        column,
+                        index,
+                        DragTarget::Active,
+                        DragEffect::Move(DragTarget::Active),
+                        &ctx.props().renderer.metadata(),
+                    );
+
+                    ApiFuture::spawn(ctx.props().update_and_render(update));
+                }
                 true
             },
             Drop((column, DragTarget::Active, effect, index)) => {
@@ -273,26 +260,29 @@ impl Component for ColumnSelector {
                     .get_name()
                     .map(|x| x.to_owned())
                     .unwrap_or_else(|| format!("__auto_{}__", idx));
+
                 let column_dropdown = self.column_dropdown.clone();
                 let is_editing = matches!(
                     &ctx.props().selected_column,
                     Some(ColumnLocator::Plain(x)) | Some(ColumnLocator::Expr(Some(x))) if x == &key
                 );
+
+                let on_open_expr_panel = &ctx.props().on_open_expr_panel;
                 html_nested! {
                     <ScrollPanelItem key={ key } { size_hint }>
                         <ActiveColumn
+                            { column_dropdown }
                             { idx }
-                            { name }
                             { is_aggregated }
                             { is_editing }
-                            { column_dropdown }
+                            { name }
+                            { on_open_expr_panel }
                             dragdrop={ &ctx.props().dragdrop }
                             session={ &ctx.props().session }
                             renderer={ &ctx.props().renderer }
                             ondragenter={ ondragenter }
                             ondragend={ &ondragend }
-                            onselect={ &onselect }
-                            on_open_expr_panel={ &ctx.props().on_open_expr_panel } />
+                            onselect={ &onselect }/>
                     </ScrollPanelItem>
                 }
             })
