@@ -153,11 +153,13 @@ impl Component for ExpressionEditor {
         let save = ctx.link().callback(|_| ExpressionEditorMsg::SaveExpr);
         let oninput = ctx.link().callback(ExpressionEditorMsg::SetExpr);
         let onsave = ctx.link().callback(|()| ExpressionEditorMsg::SaveExpr);
-        let is_closable = maybe! {
-            let alias = ctx.props().alias.as_ref()?;
-            Some(!ctx.props().session.is_column_expression_in_use(alias))
-        }
-        .unwrap_or_default();
+        let delete_hidden = ctx
+            .props()
+            .alias
+            .as_ref()
+            .map(|alias| ctx.props().session.is_column_expression_in_use(alias))
+            .unwrap_or_default()
+            || ctx.props().alias.is_none();
 
         let disabled_class = ctx.props().disabled.then_some("disabled");
         clone!(ctx.props().disabled);
@@ -176,39 +178,37 @@ impl Component for ExpressionEditor {
                                 { oninput }
                                 { onsave }/>
 
-                            <div id="psp-expression-editor-actions">
-                                if let Some(err) = &self.error {
-                                    <div class="error">
-                                        { &err.error_message }
-                                    </div>
-                                }
+                            <div id="psp-expression-editor-meta">
+                                <div class="error">
+                                    {&self.error.clone().map(|e| e.error_message).unwrap_or_default()}
+                                </div>
 
-                                if is_closable {
+                                <div id="psp-expression-editor-actions">
                                     <button
                                         id="psp-expression-editor-button-delete"
                                         class="psp-expression-editor__button"
+                                        style = {delete_hidden.then_some("visibility: hidden")}
                                         onmousedown={ delete }>
                                         { "Delete" }
                                     </button>
-                                }
 
-                                if ctx.props().alias.is_some() {
                                     <button
                                         id="psp-expression-editor-button-reset"
                                         class="psp-expression-editor__button"
+                                        style = {ctx.props().alias.is_none().then_some("visibility: hidden")}
                                         onmousedown={ reset }
                                         disabled={ !self.edit_enabled }>
                                         { "Reset" }
                                     </button>
-                                }
 
-                                <button
-                                    id="psp-expression-editor-button-save"
-                                    class="psp-expression-editor__button"
-                                    onmousedown={ save }
-                                    disabled={ !self.save_enabled }>
-                                    { "Save" }
-                                </button>
+                                    <button
+                                        id="psp-expression-editor-button-save"
+                                        class="psp-expression-editor__button"
+                                        onmousedown={ save }
+                                        disabled={ !self.save_enabled }>
+                                        { "Save" }
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

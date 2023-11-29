@@ -41,15 +41,16 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
     // this gets the last calculated width and ensures that
     // the auto-width element is at least that big.
     // this ensures the panel grows but does not shrink.
-    use_effect_with((p.children.clone(), p.selected_tab), {
-        clone!(noderef, auto_width, p.width_override);
-        move |_| {
-            if width_override.is_none() {
+    use_effect_with(p.clone(), {
+        clone!(noderef, auto_width);
+        move |p| {
+            if p.width_override.is_none() {
                 let updated_width = noderef
                     .cast::<Element>()
                     .map(|el| el.get_bounding_client_rect().width())
                     .unwrap_or_default();
-                auto_width.set((*auto_width).max(updated_width));
+                let new_auto_width = (*auto_width).max(updated_width);
+                auto_width.set(new_auto_width);
             } else {
                 auto_width.set(0f64);
             }
