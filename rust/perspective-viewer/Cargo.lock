@@ -1272,7 +1272,7 @@ checksum = "9b2a4787296e9989611394c33f193f676704af1686e70b8f8033ab5ba9a35a94"
 
 [[package]]
 name = "perspective"
-version = "2.7.0"
+version = "2.7.1"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -1305,7 +1305,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-bootstrap"
-version = "2.7.0"
+version = "2.7.1"
 dependencies = [
  "clap",
  "flate2",
@@ -1314,14 +1314,14 @@ dependencies = [
 
 [[package]]
 name = "perspective-bootstrap-runtime"
-version = "2.7.0"
+version = "2.7.1"
 dependencies = [
  "flate2",
 ]
 
 [[package]]
 name = "perspective-bundle"
-version = "2.7.0"
+version = "2.7.1"
 dependencies = [
  "wasm-bindgen-cli-support",
  "wasm-opt",

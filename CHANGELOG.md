@@ -1,3 +1,21 @@
+# [v2.7.1](https://github.com/finos/perspective/releases/tag/v2.7.1)
+
+_29 November 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.7.0...v2.7.1))
+
+Features
+
+- Drag/drop UX for invalid positions [#2456](https://github.com/finos/perspective/pull/2456)
+
+Fixes
+
+- Fix `perspective-click` event for `"Treemap"` plugin [#2452](https://github.com/finos/perspective/pull/2452)
+- Fix 2.7.0 Migration [#2444](https://github.com/finos/perspective/pull/2444)
+- Better CSS build [#2451](https://github.com/finos/perspective/pull/2451)
+
+Misc
+
+- Fix Blocks build script execution [#2454](https://github.com/finos/perspective/pull/2454)
+
 # [v2.7.0](https://github.com/finos/perspective/releases/tag/v2.7.0)
 
 _20 November 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.6.1...v2.7.0))
