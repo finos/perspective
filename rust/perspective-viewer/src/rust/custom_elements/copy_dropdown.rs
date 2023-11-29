@@ -58,6 +58,9 @@ impl CopyDropDownMenuElement {
         borrowed.as_apierror()?.hide()
     }
 
+    /// Internal Only.
+    ///
+    /// Set this custom element model's raw pointer.
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
     pub fn unsafe_set_model(&self, ptr: *const PerspectiveViewerElement) {
         let model = unsafe { ptr.as_ref().unwrap() };

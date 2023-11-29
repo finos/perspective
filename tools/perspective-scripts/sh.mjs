@@ -254,9 +254,9 @@ class Command extends Function {
  * @returns {string} A command with the missing argument's flags removed.
  * @example
  * console.assert(
- *     bash`run -t${1} -u"${undefined}" task`,
- *    `run -t1 task`
- * );s
+ *     sh`run -t${1} -u"${undefined}" task`,
+ *     sh`run -t1 task`
+ * );
  */
 const sh = new Proxy(Command, {
     apply(...args) {

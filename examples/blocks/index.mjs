@@ -14,6 +14,7 @@ import * as fs from "fs";
 import { get_examples, LOCAL_EXAMPLES } from "./examples.js";
 import sh from "@finos/perspective-scripts/sh.mjs";
 import * as url from "url";
+import * as path from "node:path";
 
 const version = JSON.parse(fs.readFileSync("./package.json")).version;
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
@@ -69,15 +70,16 @@ export async function dist_examples(
                         `${outpath}/${name}/${filename}`,
                         filecontents
                     );
-
-                    if (filename.endsWith("build.mjs")) {
-                        console.log("Building " + name);
-                        const script = `${outpath}/${name}/build.mjs`;
-                        sh`node ${script}`.runSync();
-                    }
                 } else if (filename !== ".git") {
                     sh`cp ${__dirname}/src/${name}/${filename} ${outpath}/${name}/${filename}`.runSync();
                 }
+            }
+
+            // build
+            if (fs.existsSync(path.join(outpath, name, "build.mjs"))) {
+                console.log("Building " + name);
+                const script = `${outpath}/${name}/build.mjs`;
+                sh`node ${script}`.runSync();
             }
         }
     }
