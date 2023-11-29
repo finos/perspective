@@ -41,7 +41,7 @@
         "lodash": "^4.17.4"
     },
     "devDependencies": {
-        "@prospective.co/procss": "^0.1.14",
+        "@prospective.co/procss": "^0.1.15",
         "@finos/perspective-esbuild-plugin": "^2.7.0",
         "@finos/perspective-test": "^2.7.0"
     }

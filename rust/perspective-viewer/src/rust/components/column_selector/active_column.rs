@@ -18,7 +18,7 @@ use yew::prelude::*;
 use super::aggregate_selector::*;
 use super::expression_toolbar::*;
 use super::InPlaceColumn;
-use crate::components::column_selector::EmptyColumn;
+use crate::components::column_selector::{EmptyColumn, InvalidColumn};
 use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::custom_elements::ColumnDropDownElement;
@@ -29,6 +29,12 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::ApiFuture;
 use crate::*;
+
+enum ColumnState {
+    Empty,
+    Invalid,
+    Named(String),
+}
 
 #[derive(Properties, Clone)]
 pub struct ActiveColumnProps {
@@ -56,10 +62,11 @@ impl PartialEq for ActiveColumnProps {
 
 impl ActiveColumnProps {
     fn get_name(&self) -> Option<String> {
-        match &self.name {
-            ActiveColumnState::DragOver(_) => Some(self.dragdrop.get_drag_column().unwrap()),
-            ActiveColumnState::Column(_, name) => Some(name.to_owned()),
-            ActiveColumnState::Required(_) => None,
+        match &self.name.state {
+            ActiveColumnStateData::DragOver => Some(self.dragdrop.get_drag_column().unwrap()),
+            ActiveColumnStateData::Column(name) => Some(name.to_owned()),
+            ActiveColumnStateData::Required => None,
+            ActiveColumnStateData::Invalid => None,
         }
     }
 
@@ -237,18 +244,31 @@ impl Component for ActiveColumn {
         }
 
         let name = match &ctx.props().name {
-            ActiveColumnState::DragOver(label) => {
+            ActiveColumnState {
+                label,
+                state: ActiveColumnStateData::DragOver,
+            } => {
                 classes.push("dragover");
                 outer_classes.push("dragover-container");
                 classes.push("empty-named");
 
                 (
                     label.clone(),
-                    Some(ctx.props().dragdrop.get_drag_column().unwrap()),
+                    ColumnState::Named(ctx.props().dragdrop.get_drag_column().unwrap()),
                 )
             },
-            ActiveColumnState::Column(label, name) => (label.clone(), Some(name.to_owned())),
-            ActiveColumnState::Required(label) => (label.clone(), None),
+            ActiveColumnState {
+                label,
+                state: ActiveColumnStateData::Column(name),
+            } => (label.clone(), ColumnState::Named(name.to_owned())),
+            ActiveColumnState {
+                label,
+                state: ActiveColumnStateData::Required,
+            } => (label.clone(), ColumnState::Empty),
+            ActiveColumnState {
+                label,
+                state: ActiveColumnStateData::Invalid,
+            } => (label.clone(), ColumnState::Invalid),
         };
 
         let ondragenter = ctx.props().ondragenter.reform(move |event: DragEvent| {
@@ -263,7 +283,7 @@ impl Component for ActiveColumn {
 
         let col_type = self.column_type;
         match (name, col_type) {
-            ((label, None), _) => {
+            ((label, ColumnState::Empty), _) => {
                 classes.push("empty-named");
                 let column_dropdown = ctx.props().column_dropdown.clone();
                 let on_select = ctx.link().callback(ActiveColumnMsg::New);
@@ -284,11 +304,24 @@ impl Component for ActiveColumn {
                         data-index={ ctx.props().idx.to_string() }
                         ondragenter={ ondragenter.clone() }>
 
-                        <EmptyColumn { column_dropdown }  { exclude } { on_select } />
+                        <EmptyColumn { column_dropdown } { exclude } { on_select }/>
                     </div>
                 }
             },
-            ((label, Some(name)), Some(col_type)) => {
+            ((label, ColumnState::Invalid), _) => {
+                classes.push("empty-named");
+                html! {
+                    <div
+                        class={ outer_classes }
+                        data-label={ label }
+                        data-index={ ctx.props().idx.to_string() }
+                        ondragenter={ ondragenter.clone() }>
+
+                        <InvalidColumn />
+                    </div>
+                }
+            },
+            ((label, ColumnState::Named(name)), Some(col_type)) => {
                 let remove_column = if self.is_required {
                     None
                 } else {

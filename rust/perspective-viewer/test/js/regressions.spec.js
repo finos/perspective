@@ -109,6 +109,7 @@ test.describe("Regression tests", () => {
 
         const config = await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer");
+            await viewer.flush();
             return await viewer.save();
         });
 

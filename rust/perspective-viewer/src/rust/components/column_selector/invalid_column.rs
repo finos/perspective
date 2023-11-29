@@ -10,62 +10,28 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-:host {
-    --invalid-column-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' preserveAspectRatio='none' viewBox='0 0 100 24'><path d='M100 0 L0 24 ' stroke='black' stroke-width='1'/><path d='M0 0 L100 24 ' stroke='black' stroke-width='1'/></svg>");
-    .column-empty {
-        width: 100%;
+use yew::prelude::*;
+
+use crate::components::style::LocalStyle;
+use crate::css;
+
+#[derive(Default)]
+pub struct InvalidColumn {}
+
+impl Component for InvalidColumn {
+    type Message = ();
+    type Properties = ();
+
+    fn create(_ctx: &Context<Self>) -> Self {
+        Self::default()
     }
 
-    #top_panel .column-invalid.pivot-column,
-    .column-invalid.pivot-column {
-        .column-invalid-input {
-            mask-image: var(--invalid-column-pattern);
-            -webkit-mask-image: var(--invalid-column-pattern);
-            background-color: var(--icon--color);
-            mask-size: cover;
-            -webkit-mask-size: cover;
-            width: 100%;
-            height: 22px;
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-size: 100% 100%, auto;
+    fn view(&self, _ctx: &Context<Self>) -> Html {
+        html! {
+            <div class="pivot-column column-empty column-invalid">
+                <LocalStyle href={ css!("empty-column") } />
+                <div class="column-invalid-input"></div>
+            </div>
         }
-
-        position: relative;
-        box-sizing: border-box;
-        width: calc(100% - 7px);
-        background-color: #8b868045;
-        border: 1px solid var(--icon--color);
-        border-radius: 2px;
-        margin-right: 6px;
-        margin-bottom: 4px;
-        min-height: 22px;
-        width: calc(100% - 7px);
-        outline: none;
-    }
-
-    .column-empty-input {
-        position: relative;
-        display: flex;
-        align-items: stretch;
-        cursor: auto;
-
-        background-color: #8b868045;
-        border: 1px solid transparent;
-        border-radius: 2px;
-        padding-bottom: 0px;
-        margin-bottom: 4px;
-        min-height: 24px;
-        width: calc(100% - 7px);
-        outline: none;
-        padding-left: 10px;
-        font-size: 12px;
-        font-family: inherit;
-    }
-
-    .column-empty-input:focus {
-        color: var(--plugin--background);
-        background-color: var(--icon--color);
-        border: 1px solid var(--icon--color);
     }
 }

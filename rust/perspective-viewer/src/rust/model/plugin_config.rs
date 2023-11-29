@@ -33,6 +33,7 @@ pub trait GetPluginConfig: HasRenderer {
         jsval_to_type(&default_config).ok()
     }
 }
+
 impl<T: HasRenderer> GetPluginConfig for T {}
 
 pub trait UpdatePluginConfig: HasRenderer + HasCustomEvents + HasSession + GetPluginConfig {

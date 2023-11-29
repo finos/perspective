@@ -38,17 +38,19 @@ pub enum DragEffect {
     Move(DragTarget),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct DragFrom {
     column: String,
     effect: DragEffect,
 }
 
+#[derive(Debug)]
 struct DragOver {
     target: DragTarget,
     index: usize,
 }
 
+#[derive(Debug)]
 enum DragState {
     NoDrag,
     DragInProgress(DragFrom),
@@ -178,8 +180,8 @@ impl DragDrop {
             _ => None,
         };
 
+        *self.drag_state.borrow_mut() = DragState::NoDrag;
         if let Some(action) = action {
-            *self.drag_state.borrow_mut() = DragState::NoDrag;
             self.drop_received.emit_all(action);
         }
     }
@@ -317,7 +319,11 @@ pub fn dragleave_helper(callback: impl Fn() + 'static, drag_ref: NodeRef) -> Cal
                 let current_target = drag_ref.cast::<HtmlElement>().unwrap();
                 match related_target {
                     Some(ref related) => {
-                        if !current_target.contains(Some(related)) {
+                        // Due to virtual dom these events sometimes fire after
+                        // the node is removed ...
+                        if !current_target.contains(Some(related))
+                            && related.parent_element().is_some()
+                        {
                             callback();
                         }
                     },
