@@ -49,6 +49,13 @@ impl ColumnLocator {
             ColumnLocator::Expr(s) => s.as_ref(),
         }
     }
+
+    pub fn name_or_default(&self, session: &Session) -> String {
+        match self {
+            ColumnLocator::Plain(s) | ColumnLocator::Expr(Some(s)) => s.clone(),
+            ColumnLocator::Expr(None) => session.metadata().make_new_column_name(None),
+        }
+    }
 }
 
 #[derive(Properties)]

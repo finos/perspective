@@ -34,23 +34,12 @@ pub enum ExpressionEditorMsg {
 #[derive(Properties, PartialEq)]
 pub struct ExpressionEditorProps {
     pub session: Session,
-    pub on_save: Callback<(JsValue, Option<String>)>,
+    pub on_save: Callback<JsValue>,
     pub on_validate: Callback<bool>,
     pub on_delete: Option<Callback<()>>,
     pub on_input: Callback<Rc<String>>,
     pub alias: Option<String>,
     pub disabled: bool,
-}
-
-pub fn get_new_column_name(session: &Session) -> String {
-    let mut i = 0;
-    loop {
-        i += 1;
-        let name = format!("New Column {i}");
-        if session.metadata().get_column_table_type(&name).is_none() {
-            return name;
-        }
-    }
 }
 
 impl ExpressionEditorProps {
@@ -69,7 +58,6 @@ pub struct ExpressionEditor {
     edit_enabled: bool,
     expr: Rc<String>,
     error: Option<PerspectiveValidationError>,
-    alias: Option<String>,
 }
 
 impl Component for ExpressionEditor {
@@ -82,7 +70,6 @@ impl Component for ExpressionEditor {
             edit_enabled: false,
             error: None,
             expr: ctx.props().initial_expr(),
-            alias: ctx.props().alias.clone(),
         }
     }
 
@@ -145,9 +132,7 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
                     let expr = self.expr.to_owned();
-                    ctx.props()
-                        .on_save
-                        .emit((JsValue::from(&*expr), self.alias.clone()));
+                    ctx.props().on_save.emit(JsValue::from(&*expr));
                 }
 
                 false
@@ -237,7 +222,6 @@ impl Component for ExpressionEditor {
         if ctx.props().alias != old_props.alias {
             self.expr = ctx.props().initial_expr();
         }
-        self.alias = ctx.props().alias.clone();
         true
     }
 }

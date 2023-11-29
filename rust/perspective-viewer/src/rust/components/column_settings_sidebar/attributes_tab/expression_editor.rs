@@ -26,7 +26,7 @@ use crate::utils::ApiFuture;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ExprEditorAttrProps {
-    pub column_name: String,
+    pub header_value: Option<String>,
     pub selected_column: ColumnLocator,
     pub on_close: Callback<()>,
     pub session: Session,
@@ -38,14 +38,10 @@ derive_model!(Renderer, Session for ExprEditorAttrProps);
 #[function_component(ExprEditorAttr)]
 pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
     let is_validating = yew::use_state_eq(|| false);
-    let on_save = yew::use_callback(p.clone(), |(v, alias): (_, Option<String>), p| {
-        // alias will be None on new exprs
-        let alias = alias.unwrap_or(p.column_name.clone());
-        match p.selected_column.clone() {
-            ColumnLocator::Expr(Some(_)) => update_expr(alias, &v, p),
-            ColumnLocator::Expr(None) => save_expr(v, alias, p),
-            _ => panic!("Tried to save a non-expression column as expression!"),
-        }
+    let on_save = yew::use_callback(p.clone(), |v, p| match p.selected_column.clone() {
+        ColumnLocator::Expr(Some(old_name)) => update_expr(old_name, &v, p),
+        ColumnLocator::Expr(None) => save_expr(v, p),
+        _ => panic!("Tried to save a non-expression column as expression!"),
     });
 
     let on_validate = yew::use_callback(is_validating.setter(), |b, validating| {
@@ -80,10 +76,7 @@ fn update_expr(alias: String, new_expr_val: &JsValue, props: &ExprEditorAttrProp
     let session = props.session.clone();
     let props = props.clone();
     let new_expr_val = new_expr_val.as_string().unwrap();
-    let new_expr = Expression {
-        name: alias.clone().into(),
-        expression: new_expr_val.into(),
-    };
+    let new_expr = Expression::new(Some(alias.clone().into()), new_expr_val.into());
 
     ApiFuture::spawn(async move {
         let update = session
@@ -94,13 +87,13 @@ fn update_expr(alias: String, new_expr_val: &JsValue, props: &ExprEditorAttrProp
     });
 }
 
-fn save_expr(expression: JsValue, new_name: String, props: &ExprEditorAttrProps) {
+fn save_expr(expression: JsValue, props: &ExprEditorAttrProps) {
     let task = {
         let expression_val = expression.as_string().unwrap();
-        let expr = Expression {
-            name: new_name.into(),
-            expression: expression_val.into(),
-        };
+        let expr = Expression::new(
+            props.header_value.clone().map(|n| n.into()),
+            expression_val.into(),
+        );
 
         let mut serde_exprs = props.session.get_view_config().expressions.clone();
         serde_exprs.insert(&expr);

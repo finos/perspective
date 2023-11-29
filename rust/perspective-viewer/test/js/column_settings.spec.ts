@@ -138,4 +138,16 @@ test.describe("Plugin Styles", () => {
         await page.locator("tbody tr").nth(1).waitFor();
         await expect(view.columnSettingsSidebar.container).toBeVisible();
     });
+    test("Empty expression names default to expresson content", async ({
+        page,
+    }) => {
+        let view = new PageView(page);
+        let settings = await view.openSettingsPanel();
+        await settings.createNewExpression("", "'a'");
+        let selectorA = await settings.inactiveColumns.getColumnByName("'a'");
+        await settings.editExpression(selectorA, "'b'");
+        await settings.renameExpression(selectorA, "");
+        let selectorB = await settings.inactiveColumns.getColumnByName("'b'");
+        expect(selectorB.container).toBeVisible({ timeout: 1000 });
+    });
 });

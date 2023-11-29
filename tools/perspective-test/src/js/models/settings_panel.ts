@@ -79,6 +79,41 @@ export class SettingsPanel {
         await this.inactiveColumns.getColumnByName(name);
     }
     /**
+     * Renames an inactive expression column.
+     * @param name
+     * @param expr
+     */
+    async renameExpression(column: ColumnSelector, name: string) {
+        await column.editBtn.click();
+        let sidebar = this.pageView.columnSettingsSidebar;
+        await sidebar.nameInput.waitFor({
+            state: "visible",
+        });
+        expect(await sidebar.nameInput.isVisible()).toBe(true);
+
+        await sidebar.nameInput.focus();
+        await sidebar.nameInput.clear();
+        await sidebar.nameInput.type(name, { delay: 100 });
+        await sidebar.nameInput.press("Enter");
+    }
+
+    async editExpression(column: ColumnSelector, newExpression: string) {
+        await column.editBtn.click();
+        let sidebar = this.pageView.columnSettingsSidebar;
+        await sidebar.openTab("Attributes");
+        let exprEditor = sidebar.attributesTab.expressionEditor;
+        expect(await exprEditor.textarea.isVisible()).toBe(true);
+        await exprEditor.textarea.focus();
+        await exprEditor.textarea.clear();
+        await exprEditor.textarea.type(newExpression, { delay: 100 });
+        await exprEditor.textarea.blur();
+        let saveBtn = this.pageView.page.locator(
+            "#psp-expression-editor-button-save"
+        );
+        expect(await saveBtn.isDisabled()).toBe(false);
+        await saveBtn.click();
+    }
+    /**
      * Shorthand for setViewParamter("groupby", name)
      */
     async groupby(name: string) {

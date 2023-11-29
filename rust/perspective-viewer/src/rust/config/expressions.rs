@@ -67,10 +67,11 @@ pub struct Expression<'a> {
 }
 
 impl<'a> Expression<'a> {
-    pub fn new(name: &'a str, expression: &'a str) -> Self {
+    /// If name is None, the expression is used as the name.
+    pub fn new(name: Option<Cow<'a, str>>, expression: Cow<'a, str>) -> Self {
         Self {
-            name: name.into(),
-            expression: expression.into(),
+            name: name.unwrap_or_else(|| expression.clone()),
+            expression,
         }
     }
 }

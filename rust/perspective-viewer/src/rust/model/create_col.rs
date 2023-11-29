@@ -20,10 +20,7 @@ pub trait CreateColumn: HasSession + HasPresentation + HasRenderer + UpdateAndRe
     fn clone_column(&self, name: &str, in_place: bool, open_settings: bool) -> ApiFuture<()> {
         // 1. Create a new expression.
         let expr_name = self.session().metadata().make_new_column_name(Some(name));
-        let expr = Expression {
-            name: expr_name.clone().into(),
-            expression: format!("\"{name}\"").into(),
-        };
+        let expr = Expression::new(Some(&expr_name), &format!("\"{name}\""));
         let view_config = self.session().get_view_config();
         let mut serde_exprs = view_config.expressions.clone();
         serde_exprs.retain(|name, _expr| name != &expr_name);

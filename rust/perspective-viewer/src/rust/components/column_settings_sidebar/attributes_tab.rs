@@ -25,7 +25,7 @@ use crate::session::Session;
 
 #[derive(PartialEq, Clone, Properties)]
 pub struct AttributesTabProps {
-    pub column_name: String,
+    pub header_value: Option<String>,
     pub selected_column: ColumnLocator,
     pub on_close: Callback<()>,
     pub session: Session,
@@ -41,7 +41,7 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
             <div class="tab-section">
                 <ExprEditorAttr
                     on_close={p.on_close.clone()}
-                    column_name={p.column_name.clone()}
+                    header_value={p.header_value.clone()}
                     selected_column={p.selected_column.clone()}
                     session={p.session.clone()}
                     renderer={p.renderer.clone()}

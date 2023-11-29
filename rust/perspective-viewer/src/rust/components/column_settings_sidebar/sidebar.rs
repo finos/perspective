@@ -66,45 +66,39 @@ impl PartialEq for ColumnSettingsProps {
 
 #[function_component]
 pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
-    let get_column_name = {
-        clone!(p);
-        move || match p.selected_column.clone() {
-            ColumnLocator::Expr(Some(name)) | ColumnLocator::Plain(name) => name,
-            ColumnLocator::Expr(None) => p.session.metadata().make_new_column_name(None),
-        }
-    };
-    let column_name = yew::use_state_eq(get_column_name.clone());
+    let column_name = p.selected_column.name_or_default(&p.session);
+    let header_value = yew::use_state_eq(|| Some(column_name.clone()));
     {
-        clone!(column_name);
-        yew::use_effect_with(p.selected_column.clone(), move |_| {
-            column_name.set(get_column_name());
+        // on p.selected_column change...
+        clone!(header_value, p.session);
+        yew::use_effect_with(p.selected_column.clone(), move |selected_column| {
+            header_value.set(Some(selected_column.name_or_default(&session)));
         });
     }
-    let on_change_column_name = yew::use_callback(column_name.clone(), |s, column_name| {
+    let on_change_column_name = yew::use_callback(header_value.clone(), |s, column_name| {
         column_name.set(s);
     });
 
-    let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
-
-    let expr_contents = yew::use_state(|| {
-        Rc::new(
-            p.session
-                .metadata()
-                .get_expression_by_alias(&column_name)
-                .unwrap_or_default(),
-        )
-    });
+    let expr_contents = {
+        let expr_contents = p
+            .session
+            .metadata()
+            .get_expression_by_alias(&column_name)
+            .unwrap_or_default();
+        yew::use_state(move || Rc::new(expr_contents))
+    };
     let on_expr_input = yew::use_callback(expr_contents.clone(), |val, expr_contents| {
         expr_contents.set(val)
     });
 
+    let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
     let header_contents = html! {
         <ColumnSettingsHeader
             {maybe_ty}
-            column_name={(*column_name).clone()}
+            header_value={(*header_value).clone()}
             on_change={on_change_column_name.clone()}
             selected_column={p.selected_column.clone()}
-            default_value={(*expr_contents).clone()}
+            placeholder={(*expr_contents).clone()}
             session={p.session.clone()}
             renderer={p.renderer.clone()}
         />
@@ -148,7 +142,8 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                 last_clicked_tab={*last_clicked_tab}
                 selected_tab={*selected_tab}
                 {maybe_ty}
-                column_name={(*column_name).clone()}
+                header_value={(*header_value).clone()}
+                {column_name}
             />
 
         </Sidebar>
@@ -170,6 +165,7 @@ pub struct ColumnSettingsTablistProps {
     selected_tab: usize,
     last_clicked_tab: Option<ColumnSettingsTab>,
     maybe_ty: Option<Type>,
+    header_value: Option<String>,
     column_name: String,
 }
 derive_model!(Renderer, Session, CustomEvents for ColumnSettingsTablistProps);
@@ -220,7 +216,7 @@ pub fn column_settings_tablist(p: &ColumnSettingsTablistProps) -> Html {
 
                     selected_column={ p.selected_column.clone() }
                     on_close={ p.on_close.clone() }
-                    column_name={p.column_name.clone()}
+                    header_value={p.header_value.clone()}
                     on_input={p.on_expr_input.clone()}
                 />
             }
@@ -256,32 +252,32 @@ pub fn column_settings_tablist(p: &ColumnSettingsTablistProps) -> Html {
 #[derive(PartialEq, Properties, Clone)]
 pub struct ColumnSettingsHeaderProps {
     maybe_ty: Option<Type>,
-    column_name: String,
-    on_change: Callback<String>,
+    header_value: Option<String>,
+    on_change: Callback<Option<String>>,
     selected_column: ColumnLocator,
     session: Session,
     renderer: Renderer,
-    default_value: Rc<String>,
+    placeholder: Rc<String>,
 }
 derive_model!(Session, Renderer for ColumnSettingsHeaderProps);
 
 #[function_component(ColumnSettingsHeader)]
 pub fn column_settings_header(p: &ColumnSettingsHeaderProps) -> Html {
-    let header_value_update = yew::use_callback(p.clone(), move |new_name: String, p| {
-        if !matches!(p.selected_column, ColumnLocator::Expr(None)) {
+    let on_submit = yew::use_callback(p.clone(), move |new_name: Option<String>, p| {
+        if let ColumnLocator::Expr(Some(column_name)) | ColumnLocator::Plain(column_name) =
+            p.selected_column.clone()
+        {
             // rename expr
             clone!(p, new_name);
             ApiFuture::spawn(async move {
                 let update = p
                     .session
-                    .create_rename_expression_update(p.column_name.clone(), new_name.clone())
+                    .create_rename_expression_update(column_name, new_name.clone())
                     .await;
                 p.update_and_render(update).await?;
                 Ok(())
             })
-        };
-        // update currente expr name
-        p.on_change.emit(new_name);
+        }
     });
 
     let is_expr = matches!(p.selected_column, ColumnLocator::Expr(_));
@@ -295,10 +291,11 @@ pub fn column_settings_header(p: &ColumnSettingsHeaderProps) -> Html {
     html! {
         <EditableHeader
             icon={Some(header_icon)}
-            on_value_update={header_value_update}
+            on_change={p.on_change.clone()}
+            {on_submit}
             editable={is_expr}
-            value={p.column_name.clone()}
-            default_value={p.default_value.clone()}
+            value={p.header_value.clone()}
+            placeholder={p.placeholder.clone()}
         />
     }
 }
