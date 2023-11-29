@@ -42,15 +42,17 @@
             outline-color: var(--inactive--color);
             background-color: var(--plugin--background);
             border: none;
-            border-radius: 2px;
             margin-bottom: 0.5em;
             font-family: inherit;
             font-size: 12px;
-            min-height: 24px;
-
             &:disabled {
                 background-color: var(--inactive--color);
             }
+        }
+
+        &[type="search"] {
+            min-height: 24px;
+            border-radius: 2px;
         }
     }
 }

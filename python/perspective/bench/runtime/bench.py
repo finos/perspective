@@ -38,6 +38,71 @@ ARROW_PATH = os.path.join(
     "benchmark-python.arrow",
 )
 
+BASELINE = {
+    "name": [
+        "arrow",
+        "csv",
+        "one",
+        "one_1_pivot",
+        "one_2_pivot",
+        "to_arrow",
+        "to_arrow_r1",
+        "to_arrow_r1_c1",
+        "to_arrow_r2",
+        "to_arrow_r2_c2",
+        "to_columns",
+        "to_columns_r1",
+        "to_columns_r1_c1",
+        "to_columns_r2",
+        "to_columns_r2_c2",
+        "to_csv",
+        "to_csv_r1",
+        "to_csv_r1_c1",
+        "to_csv_r2",
+        "to_csv_r2_c2",
+        "to_records",
+        "to_records_r1",
+        "to_records_r1_c1",
+        "to_records_r2",
+        "to_records_r2_c2",
+        "two",
+        "two_1x1_pivot",
+        "two_2x2_pivot",
+        "zero",
+    ],
+    "time": [
+        0.007100801400002865,
+        0.2905632236999963,
+        0.31363245369999504,
+        0.5827624402000027,
+        0.5723526209999988,
+        0.3929776023999921,
+        0.00021701669998037688,
+        0.005837792799991348,
+        0.0012358780999875308,
+        0.06712399980000328,
+        1.5685727534000022,
+        0.00040022939999744266,
+        0.007451989500009404,
+        0.0027319223000063174,
+        0.08117095989999826,
+        0.5763108057000068,
+        0.0003611342000112927,
+        0.008143171199992593,
+        0.0019054690000075425,
+        0.07623720379999668,
+        2.040859387900002,
+        0.00047493509999867455,
+        0.008475803500004986,
+        0.0036788466000075458,
+        0.09640174390000311,
+        1.1455542396000056,
+        1.9211396786000023,
+        1.9244194315999947,
+        0.10238117819999956,
+    ],
+}
+
 
 class VirtualEnvHandler(object):
     """Creates and manages a virtualenv for benchmarking, which allows for
@@ -248,6 +313,7 @@ class Runner(object):
 
         result = timeit(func, number=Runner.ITERATIONS) / Runner.ITERATIONS
         overall_result["__TIME__"] = result
+        overall_result["baseline"] = BASELINE["time"][BASELINE["name"].index(overall_result["name"])]
         return overall_result
 
     def print_result(self, result):

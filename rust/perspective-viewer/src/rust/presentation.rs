@@ -237,7 +237,7 @@ fn fill_sheet_theme_names(
 
     if let Ok(rules) = sheet.css_rules() {
         for rule in iter_index!(&rules) {
-            fill_rule_theme_names(themes, &rule, elem)?;
+            fill_rule_theme_names(themes, &rule, elem).unwrap_or_default();
         }
     }
 

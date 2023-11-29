@@ -20,6 +20,23 @@ perspective-viewer[theme="Gruvbox Dark"] {
 }
 
 perspective-viewer[theme="Gruvbox Dark"] {
+    @include perspective-viewer-pro-dark;
+    @include perspective-viewer-gruvbox-dark--colors;
+    @include perspective-viewer-gruvbox-dark--animation;
+    @include perspective-viewer-gruvbox-dark--fonts;
+    @include perspective-viewer-gruvbox-dark--datagrid;
+    @include perspective-viewer-gruvbox-dark--d3fc;
+}
+
+perspective-copy-menu[theme="Gruvbox Dark"],
+perspective-export-menu[theme="Gruvbox Dark"],
+perspective-dropdown[theme="Gruvbox Dark"] {
+    @include perspective-modal-pro-dark;
+    @include perspective-viewer-gruvbox-dark--colors;
+    background-color: var(--theme-bg0);
+}
+
+@mixin perspective-viewer-gruvbox-dark--colors {
     --theme-bg0: #282828;
     --theme-bg1: #3c3836;
     --theme-bg2: #7c6f64;
@@ -46,23 +63,6 @@ perspective-viewer[theme="Gruvbox Dark"] {
     --theme-alt-aqua: #8ec07c;
     --theme-alt-orange: #fe8019;
 
-    @include perspective-viewer-pro-dark;
-    @include perspective-viewer-gruvbox-dark--colors;
-    @include perspective-viewer-gruvbox-dark--animation;
-    @include perspective-viewer-gruvbox-dark--fonts;
-    @include perspective-viewer-gruvbox-dark--datagrid;
-    @include perspective-viewer-gruvbox-dark--d3fc;
-}
-
-perspective-copy-menu[theme="Gruvbox Dark"],
-perspective-export-menu[theme="Gruvbox Dark"],
-perspective-dropdown[theme="Gruvbox Dark"] {
-    @include perspective-modal-pro-dark;
-    @include perspective-viewer-gruvbox-dark--colors;
-    background-color: var(--theme-bg0);
-}
-
-@mixin perspective-viewer-gruvbox-dark--colors {
     color: var(--theme-fg0);
     background-color: var(--theme-bg0);
     --icon--color: var(--theme-fg1);

@@ -35,6 +35,8 @@ export function getGroupValues(data, settings) {
     if (data.crossValue.length === 0) return [];
     const groupValues = (data.crossValue.split
         ? data.crossValue.split("|")
+        : Array.isArray(data.crossValue)
+        ? data.crossValue
         : [data.crossValue]) || [data.key];
     return groupValues.map((cross, i) => ({
         name: settings.crossValues[i].name,

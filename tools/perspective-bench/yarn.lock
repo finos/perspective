@@ -351,6 +351,14 @@ papaparse@^5.2.0:
     stoppable "1.1.0"
     ws "^6.1.2"
 
+"perspective-2-7-0@npm:@finos/perspective@2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@finos/perspective/-/perspective-2.7.0.tgz#8a99a070cd679bce721c96cf5d188d1ff7c60395"
+  integrity sha512-/9UHAnH1iW8ANnfplDLGMS60dx3R8UWRoL0dKTx9A3jNbeP2l+5wd0twsal00FqR/wgUomd3+tbbkzOIMsNclA==
+  dependencies:
+    stoppable "1.1.0"
+    ws "^6.1.2"
+
 rc4@~0.1.5:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/rc4/-/rc4-0.1.5.tgz#08c6e04a0168f6eb621c22ab6cb1151bd9f4a64d"

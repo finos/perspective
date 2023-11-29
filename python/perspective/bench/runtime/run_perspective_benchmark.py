@@ -19,6 +19,9 @@ if __name__ == "__main__":
     """Benchmark the `perspective-python` runtime locally."""
     VERSIONS = [
         "master",
+        "2.7.0",
+        "2.6.0",
+        "2.5.0",
         "2.4.0",
         "2.3.2",
         "2.3.1",
