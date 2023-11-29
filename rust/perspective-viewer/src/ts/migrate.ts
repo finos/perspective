@@ -10,8 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import Semver from "./migrate/semver";
 import migrate_0_0_0 from "./migrate/0-0-0";
 import migrate_2_6_1 from "./migrate/2-6-1";
+import { version as PKG_VERSION } from "@finos/perspective/package.json" assert { type: "json" };
 
 /**
  * A migration utility for `@finos/perspective-viewer` and
@@ -57,74 +59,31 @@ import migrate_2_6_1 from "./migrate/2-6-1";
  */
 export function convert(
     old: Record<string, unknown> | ArrayBuffer | string,
-    { warn = true, replace_defaults = false }: PerspectiveConvertOptions = {}
+    {
+        warn = true,
+        verbose = false,
+        replace_defaults = false,
+    }: PerspectiveConvertOptions = {}
 ): Record<string, unknown> | ArrayBuffer | string {
     if (typeof old === "object" && !(old instanceof ArrayBuffer)) {
         const copy = JSON.parse(JSON.stringify(old));
         if ("viewers" in copy && "detail" in copy) {
             return migrate_workspace(copy, { warn, replace_defaults });
         } else {
-            return migrate_viewer(copy, false, { warn, replace_defaults });
+            return migrate_viewer(copy, false, {
+                warn: verbose ? true : warn,
+                verbose,
+                replace_defaults,
+            });
         }
     } else {
         return old;
     }
 }
 
-function* null_iter() {
-    while (true) yield null;
-}
-export type Semver = {
-    major: number;
-    minor: number;
-    patch: number;
-    build?: {
-        major: number;
-        minor: number;
-        patch: number;
-    };
-};
-// This gets what the semver crate calls major, minor, patch, and build values, but does not capture release.
-export function parse_semver(ver: string): Semver {
-    let regex = /(\d+)\.(\d+)\.(\d+)(\+.+)?/;
-    let [_ver, major, minor, patch, build_str] = ver.match(regex);
-    let [_build, build_major, build_minor, build_patch] =
-        build_str?.match(regex) ?? null_iter();
-    let build =
-        build_major && build_minor && build_patch
-            ? {
-                  major: Number(build_major),
-                  minor: Number(build_minor),
-                  patch: Number(build_patch),
-              }
-            : null;
-    return {
-        major: Number(major),
-        minor: Number(minor),
-        patch: Number(patch),
-        build,
-    };
-}
-
-/**
- * Checks if left > right
- * @param left
- * @param right_str
- * @returns
- */
-export function cmp_semver(left: Semver, right_str: string) {
-    let right = parse_semver(right_str);
-    return (
-        left.major > right.major ||
-        (left.major === right.major && left.minor > right.minor) ||
-        (left.major === right.major &&
-            left.minor === right.minor &&
-            left.patch > right.patch)
-    );
-}
-
 type PerspectiveConvertOptions = {
     warn?: boolean;
+    verbose?: boolean;
     replace_defaults?: boolean;
 };
 
@@ -166,20 +125,39 @@ function migrate_workspace(old, options) {
  * @returns
  */
 function migrate_viewer(old, omit_attributes, options) {
-    old.version = old.version
-        ? parse_semver(old.version)
-        : parse_semver("0.0.0");
+    old.version = old.version ? new Semver(old.version) : new Semver("0.0.0");
     options.omit_attributes = omit_attributes;
-    return chain(
+    // This array details the "next version" in line. It begins with 2.6.1
+    // and continues until the latest migration. Then, the current package
+    // version is appended to the end, in case the latest migration
+    // is older than the latest release. Each migration will shift the array.
+    // Note that because we will be working with the latest version on master,
+    // and those versions will need to update from themselves to themselves,
+    // migration scripts must be idempotent.
+    options.version_chain = ["2.6.1" /*, "2.7.0", etc. */];
+    options.version_chain.push(PKG_VERSION);
+    let res = chain(
         old,
-        [migrate_0_0_0, migrate_2_6_1, semver_to_string],
+        [migrate_0_0_0, migrate_2_6_1, assure_latest, semver_to_string],
         options
     );
+    if (options.verbose) {
+        console.log("Final result -> ", res);
+    }
+    return res;
+}
+
+function assure_latest(old: { version: Semver }) {
+    if (old.version.gt(PKG_VERSION)) {
+        throw new Error("Migrated version is newer than package version!");
+    } else {
+        old.version = new Semver(PKG_VERSION);
+        return old;
+    }
 }
 
 function semver_to_string(old) {
     // intentionally ignores build
-    console.warn(old.version);
     old.version = `${old.version.major}.${old.version.minor}.${old.version.patch}`;
     return old;
 }

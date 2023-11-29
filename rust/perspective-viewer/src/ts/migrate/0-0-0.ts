@@ -10,7 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { chain, parse_semver } from "../migrate";
+import { chain } from "../migrate";
+import Semver from "./semver";
 
 /**
  * Migrates all viewer configs older than version 1.0.0.
@@ -20,14 +21,15 @@ import { chain, parse_semver } from "../migrate";
  * @returns The migrated viewer.
  */
 export default function migrate_0_0_0(old, options) {
-    if (old.version?.major > 0) {
+    const next_version = options.version_chain.shift();
+    if (old.version?.ge(next_version)) {
         return old;
     } else {
         if (options.warn) {
-            console.warn("Migrating pre-1.0.0 config");
+            console.warn(`Migrating Legacy -> ${next_version}`);
         }
     }
-    return chain(
+    let res = chain(
         old,
         [
             migrate_group_by,
@@ -43,12 +45,17 @@ export default function migrate_0_0_0(old, options) {
                 ? migrate_attributes_workspace
                 : migrate_attributes_viewer,
             (old) => {
-                old.version = parse_semver("0.0.0");
+                old.version = new Semver("0.0.0");
                 return old;
             },
         ].filter((x) => !!x),
         options
     );
+
+    if (options.verbose) {
+        console.log(res);
+    }
+    return res;
 }
 
 /**
@@ -297,7 +304,11 @@ function migrate_plugins(old, options) {
         Sunburst: "Sunburst",
     };
 
-    if ("plugin" in old && old.plugin !== ALIASES[old.plugin]) {
+    if (
+        "plugin" in old &&
+        old.plugin in ALIASES &&
+        old.plugin !== ALIASES[old.plugin]
+    ) {
         old.plugin = ALIASES[old.plugin];
         if (options.warn) {
             console.warn(

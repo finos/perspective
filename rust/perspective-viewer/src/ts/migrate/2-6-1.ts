@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { cmp_semver, parse_semver } from "../migrate";
+import Semver from "./semver";
 
 /**
  * Migrates from 2.6.1
@@ -19,12 +19,13 @@ import { cmp_semver, parse_semver } from "../migrate";
  * @returns
  */
 export default function migrate_2_6_1(old, options) {
-    if (cmp_semver(old.version, "2.7.0")) {
-        return;
+    let next_version = options.version_chain.shift();
+    if (old.version?.ge(next_version)) {
+        return old;
     } else if (options.warn) {
-        console.warn("Migrating from 2.6.1");
+        console.warn(`Migrating 2.6.1 -> ${next_version}`);
     }
-    old.version = parse_semver("2.7.0");
+    old.version = new Semver(next_version);
 
     // Migrate X/Y Scatter plugin
     if (old.plugin === "X/Y Scatter") {
@@ -72,5 +73,8 @@ export default function migrate_2_6_1(old, options) {
     }
     old.expressions = new_exprs;
 
+    if (options.verbose) {
+        console.log(old);
+    }
     return old;
 }

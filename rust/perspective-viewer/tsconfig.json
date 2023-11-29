@@ -9,7 +9,8 @@
         "rootDir": "src/ts",
         "allowSyntheticDefaultImports": true,
         "moduleResolution": "node",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "resolveJsonModule": true
     },
-    "files": ["src/ts/perspective-viewer.ts"],
+    "files": ["src/ts/perspective-viewer.ts"]
 }
