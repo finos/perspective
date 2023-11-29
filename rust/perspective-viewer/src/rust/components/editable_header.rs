@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::rc::Rc;
+
 use web_sys::{FocusEvent, HtmlInputElement, KeyboardEvent};
 use yew::{classes, function_component, html, Callback, Html, Properties, TargetCast};
 
@@ -21,6 +23,7 @@ pub struct EditableHeaderProps {
     pub on_value_update: Callback<String>,
     pub editable: bool,
     pub value: String,
+    pub default_value: Rc<String>,
 }
 
 #[derive(Default, Debug, PartialEq, Copy, Clone)]
@@ -28,7 +31,7 @@ pub enum ValueState {
     #[default]
     Unedited,
     Edited,
-    Errored,
+    Empty,
 }
 
 #[function_component(EditableHeader)]
@@ -52,7 +55,7 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
         (value_state.clone(), p.value.clone()),
         move |target_value: String, (value_state, p_value)| {
             if target_value.is_empty() {
-                value_state.set(ValueState::Errored);
+                value_state.set(ValueState::Empty);
             } else if &target_value != p_value {
                 value_state.set(ValueState::Edited);
             } else {
@@ -109,13 +112,22 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
         classes.push("editable");
     }
     match *value_state {
-        ValueState::Unedited => {}
+        ValueState::Unedited => {},
         ValueState::Edited => classes.push("edited"),
-        ValueState::Errored => classes.push("errored"),
+        ValueState::Empty => classes.push("empty"),
     }
     if *focused {
         classes.push("focused");
     }
+    let split = p
+        .default_value
+        .split_once('\n')
+        .map(|(a, _)| a)
+        .unwrap_or(&p.default_value);
+    let placeholder = match split.char_indices().nth(25) {
+        None => split.to_string(),
+        Some((idx, _)) => split[..idx].to_owned(),
+    };
 
     html! {
         <div
@@ -127,13 +139,14 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
             }
             <input
                 ref={noderef}
-                type="text"
+                type="search"
                 class="sidebar_header_title"
                 disabled={!p.editable}
                 {onblur}
                 {onkeyup}
                 {onfocus}
                 value={(*new_value).clone()}
+                {placeholder}
             />
         </div>
     }

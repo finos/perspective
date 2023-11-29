@@ -37,6 +37,7 @@ pub struct ExpressionEditorProps {
     pub on_save: Callback<(JsValue, Option<String>)>,
     pub on_validate: Callback<bool>,
     pub on_delete: Option<Callback<()>>,
+    pub on_input: Callback<Rc<String>>,
     pub alias: Option<String>,
     pub disabled: bool,
 }
@@ -88,6 +89,7 @@ impl Component for ExpressionEditor {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             ExpressionEditorMsg::SetExpr(val) => {
+                ctx.props().on_input.emit(val.clone());
                 self.expr = val.clone();
                 clone!(ctx.props().session);
                 ctx.props().on_validate.emit(true);

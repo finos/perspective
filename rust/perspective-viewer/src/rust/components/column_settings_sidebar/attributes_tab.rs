@@ -12,6 +12,8 @@
 
 mod expression_editor;
 
+use std::rc::Rc;
+
 use expression_editor::ExprEditorAttr;
 use yew::{function_component, html, Callback, Html, Properties};
 
@@ -29,6 +31,7 @@ pub struct AttributesTabProps {
     pub session: Session,
     pub renderer: Renderer,
     pub custom_events: CustomEvents,
+    pub on_input: Callback<Rc<String>>,
 }
 
 #[function_component]
@@ -42,6 +45,7 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
                     selected_column={p.selected_column.clone()}
                     session={p.session.clone()}
                     renderer={p.renderer.clone()}
+                    on_input={p.on_input.clone()}
                 />
             </div>
         </div>

@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::fmt::Display;
+use std::rc::Rc;
 
 use yew::{function_component, html, Callback, Html, Properties};
 
@@ -85,12 +86,25 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
 
     let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
 
+    let expr_contents = yew::use_state(|| {
+        Rc::new(
+            p.session
+                .metadata()
+                .get_expression_by_alias(&column_name)
+                .unwrap_or_default(),
+        )
+    });
+    let on_expr_input = yew::use_callback(expr_contents.clone(), |val, expr_contents| {
+        expr_contents.set(val)
+    });
+
     let header_contents = html! {
         <ColumnSettingsHeader
             {maybe_ty}
             column_name={(*column_name).clone()}
             on_change={on_change_column_name.clone()}
             selected_column={p.selected_column.clone()}
+            default_value={(*expr_contents).clone()}
             session={p.session.clone()}
             renderer={p.renderer.clone()}
         />
@@ -128,6 +142,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
 
                 on_close={p.on_close.clone()}
                 selected_column={p.selected_column.clone()}
+                {on_expr_input}
 
                 on_tab_change={on_tab_change.clone()}
                 last_clicked_tab={*last_clicked_tab}
@@ -149,6 +164,7 @@ pub struct ColumnSettingsTablistProps {
 
     on_close: Callback<()>,
     selected_column: ColumnLocator,
+    on_expr_input: Callback<Rc<String>>,
 
     on_tab_change: Callback<(usize, ColumnSettingsTab)>,
     selected_tab: usize,
@@ -205,6 +221,7 @@ pub fn column_settings_tablist(p: &ColumnSettingsTablistProps) -> Html {
                     selected_column={ p.selected_column.clone() }
                     on_close={ p.on_close.clone() }
                     column_name={p.column_name.clone()}
+                    on_input={p.on_expr_input.clone()}
                 />
             }
         },
@@ -244,6 +261,7 @@ pub struct ColumnSettingsHeaderProps {
     selected_column: ColumnLocator,
     session: Session,
     renderer: Renderer,
+    default_value: Rc<String>,
 }
 derive_model!(Session, Renderer for ColumnSettingsHeaderProps);
 
@@ -273,12 +291,14 @@ pub fn column_settings_header(p: &ColumnSettingsHeaderProps) -> Html {
         p.maybe_ty.map(|t| t.into()).unwrap_or(TypeIconType::Expr)
     };
     let header_icon = html! {<TypeIcon ty={icon_type} />};
+
     html! {
         <EditableHeader
             icon={Some(header_icon)}
             on_value_update={header_value_update}
             editable={is_expr}
             value={p.column_name.clone()}
+            default_value={p.default_value.clone()}
         />
     }
 }

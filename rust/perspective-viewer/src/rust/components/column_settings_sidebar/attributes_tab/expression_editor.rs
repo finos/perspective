@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::rc::Rc;
+
 use wasm_bindgen::JsValue;
 use yew::{function_component, html, Callback, Html, Properties};
 
@@ -29,6 +31,7 @@ pub struct ExprEditorAttrProps {
     pub on_close: Callback<()>,
     pub session: Session,
     pub renderer: Renderer,
+    pub on_input: Callback<Rc<String>>,
 }
 derive_model!(Renderer, Session for ExprEditorAttrProps);
 
@@ -64,6 +67,7 @@ pub fn expression_editor_attr(p: &ExprEditorAttrProps) -> Html {
                 { on_save }
                 { on_validate }
                 { on_delete }
+                on_input={ p.on_input.clone() }
                 session = { &p.session }
                 alias = { p.selected_column.name().cloned() }
                 disabled = {!matches!(p.selected_column, ColumnLocator::Expr(_))}
