@@ -20,7 +20,7 @@ import {
 let PYTHON = sh(python_version());
 
 if (process.env.PSP_OLD_SHITTY_INSTALL_METHOD) {
-    const requires_script = `import distutils.core; setup = distutils.core.run_setup('python/perspective/setup.py'); print(' '.join(['"' + requirement + '"' for requirement in setup.extras_require['dev']]))`;
+    const requires_script = `import setuptools._distutils.core; setup = setuptools._distutils.core.run_setup('python/perspective/setup.py'); print(' '.join(['"' + requirement + '"' for requirement in setup.extras_require['dev']]))`;
 
     // copy build/config files into python folder
     copy_files_to_python_folder();

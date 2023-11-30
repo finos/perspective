@@ -12,10 +12,10 @@
 
 [build-system]
 requires = [
-    "setuptools",
-    "wheel",
-    "numpy>=1.13.1,<2",
     "jupyter-packaging==0.12.3",
+    "numpy>=1.13.1,<2",
+    "setuptools==68.2.2",
+    "wheel",
 ]
 build-backend = "jupyter_packaging.build_api"
 

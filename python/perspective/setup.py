@@ -20,7 +20,7 @@ import subprocess
 import sys
 import sysconfig
 from codecs import open
-from distutils.version import LooseVersion
+from setuptools._distutils.version import LooseVersion
 from jupyter_packaging import get_data_files, wrap_installers, get_version
 
 from setuptools import Extension, find_packages, setup
@@ -56,8 +56,8 @@ SKIP_JS_FILES = os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK")
 ########################
 # Get requirement info #
 requires = [
-    "Jinja2>=2.0,<4",
     "ipywidgets>=7.5.1,<9",
+    "Jinja2>=2.0,<4",
     "numpy>=1.21.6,<2",
     "pandas>=0.22.0,<3",
     "python-dateutil>=2.8.0,<3",
@@ -160,7 +160,7 @@ class PSPBuild(build_ext):
         env = os.environ.copy()
 
         if platform.system() == "Windows":
-            import distutils.msvccompiler as dm
+            import setuptools._distutils.msvccompiler as dm
 
             # https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_with_Visual_Studio_2015_.28x86.2C_x64.2C_ARM.29
             msvc = {
