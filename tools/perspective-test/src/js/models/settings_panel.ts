@@ -46,7 +46,11 @@ export class SettingsPanel {
      * Creates and saves a new expression column.
      * @param expr
      */
-    async createNewExpression(name: string, expr: string) {
+    async createNewExpression(
+        name: string,
+        expr: string,
+        successAssertion: boolean = true
+    ) {
         await this.activeColumns.scrollToBottom();
         await this.addExpressionButton.click();
         let sidebar = this.pageView.columnSettingsSidebar;
@@ -74,9 +78,13 @@ export class SettingsPanel {
         let saveBtn = this.pageView.page.locator(
             "#psp-expression-editor-button-save"
         );
-        expect(await saveBtn.isDisabled()).toBe(false);
-        await saveBtn.click();
-        await this.inactiveColumns.getColumnByName(name);
+        if (successAssertion) {
+            expect(await saveBtn.isDisabled()).toBe(false);
+            await saveBtn.click();
+            await this.inactiveColumns.getColumnByName(name);
+        } else {
+            expect(await saveBtn.isDisabled()).toBe(true);
+        }
     }
     /**
      * Renames an inactive expression column.
@@ -316,7 +324,7 @@ export class InactiveColumns {
     }
 
     async getColumnByName(name: string) {
-        await this.container.waitFor({ state: "visible" });
+        await this.container.waitFor({ state: "visible", timeout: 1000 });
         let locator = this.columnSelector.filter({ hasText: name });
         return new ColumnSelector(locator, true);
     }

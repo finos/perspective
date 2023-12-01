@@ -82,11 +82,18 @@ export class PageView {
                 case "calendar":
                     expr = "now()";
             }
-            await this.settingsPanel.createNewExpression("expr", expr);
+            await this.settingsPanel.createNewExpression("expr", expr, true);
             await settingsPanel.activeColumns.activateColumn("expr");
             col = settingsPanel.activeColumns.getColumnByName("expr");
         }
         await expect(col.container).toBeVisible();
         return col;
+    }
+
+    async restore(settings: any) {
+        this.container.evaluate(async (viewer, settings) => {
+            viewer!.toggleConfig(true);
+            await viewer!.restore(settings);
+        }, settings);
     }
 }

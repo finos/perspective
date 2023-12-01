@@ -150,4 +150,30 @@ test.describe("Plugin Styles", () => {
         let selectorB = await settings.inactiveColumns.getColumnByName("'b'");
         expect(selectorB.container).toBeVisible({ timeout: 1000 });
     });
+    test("Column settings should not shrink", async ({ page }) => {
+        let view = new PageView(page);
+
+        const MAX_WIDTH = 300;
+        let checkWidth = async () => {
+            let width = await view.columnSettingsSidebar.container.evaluate(
+                (sidebar) => sidebar.getBoundingClientRect().width
+            );
+            expect(width).toEqual(MAX_WIDTH);
+        };
+
+        let settings = await view.openSettingsPanel();
+        await settings.activeColumns.scrollToBottom();
+        await settings.addExpressionButton.click();
+        let editor = view.columnSettingsSidebar.attributesTab.expressionEditor;
+        await editor.textarea.focus();
+        await editor.textarea.clear();
+        // NOTE: We should find another way to test this as the trick used here is probably not a desired feature.
+        // This creates an error which then expands the sidebar to max width.
+        await editor.textarea.type(
+            "'0000000000000000000000000000000000000000000000000000000000"
+        );
+        await checkWidth();
+        await editor.textarea.clear();
+        await checkWidth();
+    });
 });
