@@ -27,6 +27,9 @@ export const test = base.extend<{
     consoleLogs: [
         async ({ page }, use) => {
             const logs: Logs = {};
+
+            page.setDefaultTimeout(5000);
+
             page.on("console", (msg) => {
                 let type = msg.type();
                 let text = msg.text();
