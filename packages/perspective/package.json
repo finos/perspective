@@ -36,7 +36,7 @@
         "build": "node build.js",
         "docs": "npm-run-all docs:jsdoc docs:deploy",
         "docs:jsdoc": "jsdoc2md src/js/perspective.js -p list --separators --no-gfm > README.md",
-        "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective.md",
+        "docs:deploy": "mkdir -p ../../docs/docs/obj && (echo \"---\nid: perspective\ntitle: perspective API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective.md",
         "test:run": "jest --color --ci --rootDir=. --config=../../tools/perspective-test/jest.config.js",
         "test": "npm-run-all test:run",
         "clean": "rimraf dist"

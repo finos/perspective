@@ -101,7 +101,7 @@ async function run_with_theme(page, is_dark = false) {
 
 async function run() {
     if (!fs.existsSync("static/features")) {
-        const browser = await puppeteer.launch({ headless: false });
+        const browser = await puppeteer.launch({ headless: true });
         const page = await browser.newPage();
         await run_with_theme(page);
         await run_with_theme(page, true);
