@@ -28,7 +28,10 @@ export default function migrate_2_6_1(old, options) {
     old.version = new Semver(next_version);
 
     // Migrate X/Y Scatter plugin
-    if (old.plugin === "X/Y Scatter") {
+    if (
+        old.plugin === "X/Y Scatter" &&
+        typeof old.plugin_config?.columns === "object"
+    ) {
         for (const i in old.plugin_config.columns) {
             const entries = Object.entries(old.plugin_config.columns[i]);
             const mapped_entries = entries.map(([grp_name, grp_val]) => {
