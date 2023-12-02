@@ -18,7 +18,7 @@ import EXAMPLES from "./features.js";
 import styles from "./styles.module.css";
 import BrowserOnly from "@docusaurus/BrowserOnly";
 
-const { convert } = require("@finos/perspective-viewer/src/ts/migrate");
+const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate");
 
 export default function ExampleGallery(props) {
     const { colorMode } = useColorMode();
@@ -80,12 +80,6 @@ function OverlayDemo(props) {
     const perspectiveRef = useCallback(
         (viewer) => {
             if (viewer !== null) {
-                // console.log(
-                //     convert({
-                //         ...EXAMPLES.default[props.index].config,
-                //         settings: true,
-                //     })
-                // );
                 viewer.load(SUPERSTORE_TABLE);
                 viewer.restore(
                     convert({
