@@ -22,7 +22,7 @@ import styles from "./index.module.css";
 
 function HomepageHeader() {
     const { siteConfig } = useDocusaurusContext();
-    console.log(siteConfig);
+
     // const { colorMode, setColorMode } = useColorMode();
     return (
         <header className={clsx("hero", styles.heroBanner)}>

@@ -13,8 +13,12 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const cp = require("child_process");
+const path = require("node:path");
+const mkdirp = require("mkdirp");
 const EXAMPLES = require("./src/components/ExampleGallery/features.js").default;
 const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
+
+const { WebSocketServer } = require("@finos/perspective");
 
 const DEFAULT_VIEWPORT = {
     width: 400,
@@ -101,11 +105,18 @@ async function run_with_theme(page, is_dark = false) {
 
 async function run() {
     if (!fs.existsSync("static/features")) {
-        const browser = await puppeteer.launch({ headless: false });
+        mkdirp(path.join(__dirname, "static/features"));
+        const server = new WebSocketServer({
+            assets: [path.join(__dirname, "..")],
+        });
+
+        const browser = await puppeteer.launch({ headless: true });
         const page = await browser.newPage();
         await run_with_theme(page);
         await run_with_theme(page, true);
+        await page.close();
         await browser.close();
+        await server.close();
     }
 
     // TODO There is a typescript module annoyingly called `blocks`.

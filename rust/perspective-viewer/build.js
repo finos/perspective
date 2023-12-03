@@ -30,7 +30,7 @@ const BUILD = [
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
-        plugins: [NodeModulesExternal()],
+        plugins: [NodeModulesExternal("@finos/perspective/")],
         external: ["*.wasm", "*.worker.js"],
         outdir: "dist/esm",
     },

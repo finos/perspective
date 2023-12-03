@@ -120,7 +120,7 @@ Perspective adds many of its own functions in addition to `ExprTK`'s standard
 ones, including common functions for `datetime` and `string` types such as
 `substring()`, `bucket()`, `day_of_week()`, etc. A full list of available
 functions is available in the
-[Expression Columns API](obj/perspective-viewer-exprtk).
+[Expression Columns API](../obj/perspective-viewer-exprtk).
 
 ## Examples
 
