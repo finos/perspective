@@ -76,6 +76,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         settings=True,
         theme=None,
         title=None,
+        # ignored, here for restore compatibility
+        version=None,
     ):
         """Initialize an instance of `PerspectiveViewer` with the given viewer
         configuration.  Do not pass a `Table` or data into the constructor -
@@ -107,6 +109,9 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             settings(:obj:`bool`): Whether the perspective query settings
                 panel should be open.
             theme (:obj:`str`): The color theme to use.
+            version (:obj:`str`): The version this configuration is restored from.
+                This should only be used when restoring a configuration,
+                and should not be set manually.
 
         Examples:
             >>> viewer = PerspectiveViewer(
