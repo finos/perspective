@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -20,6 +21,7 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 
+use crate::config::{ColumnConfig, ColumnConfigUpdate};
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -51,6 +53,7 @@ pub struct PresentationHandle {
     name: RefCell<Option<String>>,
     is_settings_open: RefCell<bool>,
     is_workspace: RefCell<Option<bool>>,
+    column_config: RefCell<HashMap<String, ColumnConfig>>,
     pub settings_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub column_settings_updated: PubSub<JsValue>,
@@ -72,6 +75,7 @@ impl Presentation {
             settings_open_changed: Default::default(),
             column_settings_open_changed: Default::default(),
             column_settings_updated: Default::default(),
+            column_config: Default::default(),
             is_settings_open: Default::default(),
             is_workspace: Default::default(),
             theme_config_updated: PubSub::default(),
@@ -193,6 +197,26 @@ impl Presentation {
 
         self.theme_config_updated.emit_all((themes, index));
         Ok(())
+    }
+
+    /// Returns an owned copy of the curent column configuration map.
+    pub fn all_column_configs(&self) -> HashMap<String, ColumnConfig> {
+        self.column_config.borrow().clone()
+    }
+
+    /// Gets a clone of the ColumnConfig for the given column name.
+    pub fn get_column_config(&self, column_name: &str) -> Option<ColumnConfig> {
+        self.column_config.borrow().get(column_name).cloned()
+    }
+
+    pub fn update_column_config(&self, column_name: String, value: ColumnConfigUpdate) {
+        let mut config = self.column_config.borrow_mut();
+        if let Some(current_config) = config.remove(&column_name) {
+            let new_value = current_config.update(value);
+            config.insert(column_name, new_value);
+        } else {
+            config.insert(column_name, value.0);
+        }
     }
 }
 

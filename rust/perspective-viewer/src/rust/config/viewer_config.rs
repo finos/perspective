@@ -9,6 +9,8 @@
 // ┃ This file is part of the Perspective library, distributed under the terms ┃
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::str::FromStr;
 use std::sync::LazyLock;
@@ -21,6 +23,7 @@ use serde_json::Value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
+use super::column_config::ColumnConfig;
 use super::view_config::*;
 use crate::utils::*;
 
@@ -52,6 +55,7 @@ pub struct ViewerConfig {
     pub version: String,
     pub plugin: String,
     pub plugin_config: Value,
+    pub column_config: HashMap<String, ColumnConfig>,
     pub settings: bool,
     pub theme: Option<String>,
     pub title: Option<String>,

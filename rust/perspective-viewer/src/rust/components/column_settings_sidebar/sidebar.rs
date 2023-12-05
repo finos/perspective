@@ -24,6 +24,7 @@ use crate::components::viewer::ColumnLocator;
 use crate::config::Type;
 use crate::custom_events::CustomEvents;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::{clone, css, derive_model, html_template};
@@ -49,6 +50,7 @@ pub struct ColumnSettingsProps {
     pub on_close: Callback<()>,
     pub session: Session,
     pub renderer: Renderer,
+    pub presentation: Presentation,
     pub custom_events: CustomEvents,
     pub width_override: Option<i32>,
 }
@@ -116,6 +118,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
             p.session,
             p.renderer,
             p.custom_events,
+            p.presentation,
             column_name
         );
         Callback::from(move |tab| {
@@ -125,7 +128,8 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                 session,
                 renderer,
                 custom_events,
-                column_name
+                column_name,
+                presentation
             );
 
             match tab {
@@ -145,6 +149,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                         { session }
                         { renderer }
                         { custom_events }
+                        { presentation }
                         { column_name }
                         { maybe_view_ty }
                         { maybe_table_ty }

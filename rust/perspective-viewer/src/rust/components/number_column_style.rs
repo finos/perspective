@@ -39,7 +39,7 @@ pub enum NumberColumnStyleMsg {
         Box<NumberColumnStyleConfig>,
         Box<NumberColumnStyleDefaultConfig>,
     ),
-    FixedChanged(String),
+    // FixedChanged(String),
     ForeEnabledChanged(bool),
     BackEnabledChanged(bool),
     PosColorChanged(Side, String),
@@ -148,18 +148,18 @@ impl Component for NumberColumnStyle {
                 std::mem::swap(self, &mut new);
                 true
             },
-            NumberColumnStyleMsg::FixedChanged(fixed) => {
-                let fixed = match fixed.parse::<u32>() {
-                    Ok(x) if x != self.default_config.fixed => Some(x),
-                    Ok(_) => None,
-                    Err(_) if fixed.is_empty() => Some(0),
-                    Err(_) => None,
-                };
+            // NumberColumnStyleMsg::FixedChanged(fixed) => {
+            //     let fixed = match fixed.parse::<u32>() {
+            //         Ok(x) if x != self.default_config.fixed => Some(x),
+            //         Ok(_) => None,
+            //         Err(_) if fixed.is_empty() => Some(0),
+            //         Err(_) => None,
+            //     };
 
-                self.config.fixed = fixed.map(|x| std::cmp::min(15, x));
-                self.dispatch_config(ctx);
-                true
-            },
+            //     self.config.fixed = fixed.map(|x| std::cmp::min(15, x));
+            //     self.dispatch_config(ctx);
+            //     true
+            // },
             NumberColumnStyleMsg::ForeEnabledChanged(val) => {
                 if val {
                     let color_mode = match self.fg_mode {
@@ -301,21 +301,21 @@ impl Component for NumberColumnStyle {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         // Fixed precision control oninput callback
-        let fixed_oninput = ctx.link().callback(|event: InputEvent| {
-            NumberColumnStyleMsg::FixedChanged(
-                event
-                    .target()
-                    .unwrap()
-                    .unchecked_into::<web_sys::HtmlInputElement>()
-                    .value(),
-            )
-        });
+        // let fixed_oninput = ctx.link().callback(|event: InputEvent| {
+        //     NumberColumnStyleMsg::FixedChanged(
+        //         event
+        //             .target()
+        //             .unwrap()
+        //             .unchecked_into::<web_sys::HtmlInputElement>()
+        //             .value(),
+        //     )
+        // });
 
-        let fixed_value = self
-            .config
-            .fixed
-            .unwrap_or(self.default_config.fixed)
-            .to_string();
+        // let fixed_value = self
+        //     .config
+        //     .fixed
+        //     .unwrap_or(self.default_config.fixed)
+        //     .to_string();
 
         // Color enabled/disabled oninput callback
         let fg_enabled_oninput = ctx.link().callback(move |event: InputEvent| {
@@ -403,22 +403,22 @@ impl Component for NumberColumnStyle {
         html_template! {
             <LocalStyle href={ css!("column-style") } />
             <div id="column-style-container" class="number-column-style-container">
-                <div class="column-style-label">
-                    <label id="fixed-examples" class="indent">{
-                        self.make_fixed_text(ctx)
-                    }</label>
-                </div>
-                <div class="row section">
-                    <input type="checkbox" checked=true disabled=true/>
-                    <input
-                        id="fixed-param"
-                        class="parameter"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={ fixed_value }
-                        oninput={ fixed_oninput }/>
-                </div>
+                // <div class="column-style-label">
+                //     <label id="fixed-examples" class="indent">{
+                //         self.make_fixed_text(ctx)
+                //     }</label>
+                // </div>
+                // <div class="row section">
+                //     <input type="checkbox" checked=true disabled=true/>
+                //     <input
+                //         id="fixed-param"
+                //         class="parameter"
+                //         type="number"
+                //         min="0"
+                //         step="1"
+                //         value={ fixed_value }
+                //         oninput={ fixed_oninput }/>
+                // </div>
                 <div class="column-style-label">
                     <label class="indent">{ "Foreground" }</label>
                 </div>
@@ -555,18 +555,18 @@ impl NumberColumnStyle {
     }
 
     /// Human readable precision hint, e.g. "Prec 0.001" for `{fixed: 3}`.
-    fn make_fixed_text(&self, _ctx: &Context<Self>) -> String {
-        let fixed = match self.config.fixed {
-            Some(x) if x > 0 => format!("0.{}1", "0".repeat(x as usize - 1)),
-            None if self.default_config.fixed > 0 => {
-                let n = self.default_config.fixed as usize - 1;
-                format!("0.{}1", "0".repeat(n))
-            },
-            Some(_) | None => "1".to_owned(),
-        };
+    // fn make_fixed_text(&self, _ctx: &Context<Self>) -> String {
+    //     let fixed = match self.config.fixed {
+    //         Some(x) if x > 0 => format!("0.{}1", "0".repeat(x as usize - 1)),
+    //         None if self.default_config.fixed > 0 => {
+    //             let n = self.default_config.fixed as usize - 1;
+    //             format!("0.{}1", "0".repeat(n))
+    //         },
+    //         Some(_) | None => "1".to_owned(),
+    //     };
 
-        format!("Prec {}", fixed)
-    }
+    //     format!("Prec {}", fixed)
+    // }
 
     fn reset(
         config: &NumberColumnStyleConfig,

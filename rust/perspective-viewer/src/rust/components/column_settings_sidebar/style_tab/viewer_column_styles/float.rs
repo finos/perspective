@@ -10,30 +10,30 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! A collection of (de-)serializable structs which capture the application
-//! state, suitable for persistence, history, etc. features.
+use yew::{function_component, html, Html, Properties};
 
-mod aggregates;
-mod column_config;
-mod column_type;
-mod datetime_column_style;
-mod expressions;
-mod filters;
-mod number_column_style;
-pub mod plugin;
-mod sort;
-mod string_column_style;
-mod view_config;
-mod viewer_config;
+use crate::components::column_settings_sidebar::style_tab::controls::PrecisionControl;
+use crate::config::Type;
+use crate::html_template;
+use crate::presentation::Presentation;
+use crate::renderer::Renderer;
+use crate::session::Session;
 
-pub use aggregates::*;
-pub use column_config::*;
-pub use column_type::*;
-pub use datetime_column_style::*;
-pub use expressions::*;
-pub use filters::*;
-pub use number_column_style::*;
-pub use sort::*;
-pub use string_column_style::*;
-pub use view_config::*;
-pub use viewer_config::*;
+#[derive(Properties, PartialEq)]
+pub struct FloatStylesProps {
+    pub presentation: Presentation,
+    pub session: Session,
+    pub renderer: Renderer,
+    pub column_name: String,
+}
+
+#[function_component(FloatStyles)]
+pub fn float_styles(p: &FloatStylesProps) -> Html {
+    html_template! {
+        <div class="item_title">{"Float Styling (Global)"}</div>
+        <PrecisionControl
+            presentation={p.presentation.clone()}
+            column_name={p.column_name.clone()}
+            view_type={Type::Float} />
+    }
+}

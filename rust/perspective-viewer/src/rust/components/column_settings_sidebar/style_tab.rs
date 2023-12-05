@@ -11,17 +11,20 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 mod column_style;
+pub mod controls;
 pub mod stub;
 mod symbol;
+pub mod viewer_column_styles;
 
 use wasm_bindgen::UnwrapThrowExt;
 use yew::{function_component, html, Html, Properties};
 
 use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
-use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
+use crate::components::column_settings_sidebar::style_tab::viewer_column_styles::ViewerColumnStyles;
 use crate::config::Type;
 use crate::custom_events::CustomEvents;
+use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::JsValueSerdeExt;
@@ -31,6 +34,7 @@ pub struct StyleTabProps {
     pub custom_events: CustomEvents,
     pub session: Session,
     pub renderer: Renderer,
+    pub presentation: Presentation,
 
     pub maybe_table_ty: Option<Type>,
     pub maybe_view_ty: Option<Type>,
@@ -76,7 +80,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
 
     // TODO: We need a better way to determine which styling components to show.
     // This will come with future changes to the plugin API.
-    let components = match col_grp.as_str() {
+    let plugin_styles = match col_grp.as_str() {
         "Symbol" => Some(html! {
             <SymbolStyle
                 column_name={ props.column_name.clone() }
@@ -97,14 +101,20 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
         _ => None,
     };
 
-    let components = components.unwrap_or(
-        html! {<Stub message="No plugin styles available" error="Could not get plugin styles" />},
-    );
-
+    // TODO: These should probably be in collapsable sections or in separate
+    // locations.
     html! {
         <div id="style-tab">
             <div id="column-style-container" class="tab-section">
-                {components}
+                {plugin_styles}
+                <hr style="margin: 2em 0; border-style: dashed; border-color: var(--inactive--border-color)" />
+                <ViewerColumnStyles
+                    session={props.session.clone()}
+                    renderer={props.renderer.clone()}
+                    presentation={props.presentation.clone()}
+                    maybe_view_ty={props.maybe_view_ty}
+                    column_name={props.column_name.clone()}
+                />
             </div>
         </div>
     }
