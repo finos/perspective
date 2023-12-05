@@ -5,6 +5,7 @@ include(CheckCCompilerFlag)
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # CMAKE POLICIES
 # option() should use new cmake behavior wrt variable clobbering
@@ -300,7 +301,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
     else()
         psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-        include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
         if(WIN32)
             add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
@@ -660,3 +660,32 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_compile_definitions(psp PRIVATE _WIN32=1)
     endif()
 endif()
+
+set(WORKSPACE_ROOT "${CMAKE_SOURCE_DIR}/../..")
+
+if(PSP_WASM_BUILD)
+    set(CLANGD_ADD_FLAGS "Add:
+        [
+            -target,
+            wasm32-unknown-emscripten,
+            --sysroot=${WORKSPACE_ROOT}/.emsdk/upstream/emscripten/cache/sysroot,
+        ]")
+else()
+    set(CLANGD_ADD_FLAGS "")
+endif()
+
+# Configure the .clangd file from the template
+configure_file(
+    ${CMAKE_SOURCE_DIR}/.clangd.in
+    ${CMAKE_BINARY_DIR}/.clangd
+    @ONLY
+)
+
+# On MacOS this includes the entire /opt/homebrew/include directory which
+# will mask local includes and cause mysterious compile errors in libre2 and
+# others which will occasionally resolve includes to homebrew and local headers
+# in the same file. Keeping this at the end of the file helps mitigate that issue.
+if((PSP_CPP_BUILD OR PSP_PYTHON_BUILD) AND Boost_FOUND)
+    include_directories(AFTER SYSTEM ${Boost_INCLUDE_DIRS})
+endif()
+# DO NOT WRITE BELOW THIS LINE, ADD NEW INCLUDES ABOVE

@@ -1,0 +1,2 @@
+Checks: "-*,modernize-*,performance-*,readability-*,clang-analyzer-*,bugprone-*,portability-*,-modernize-use-trailing-return-type,-readability-identifier-length"
+# WarningsAsErrors: "*"

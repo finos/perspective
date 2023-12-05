@@ -225,6 +225,15 @@ class PSPBuild(build_ext):
             env=env,
             stderr=subprocess.STDOUT,
         )
+
+        # Symlink build_temp to a sibling directory called `last_build` so that we can
+        # use it for C++/Python IntelliSense in VSCode.
+        if os.name != "nt":
+            last_build = os.path.join(os.path.dirname(self.build_temp), "last_build")
+            if os.path.exists(last_build):
+                os.unlink(last_build)
+            os.symlink(os.path.join("..", self.build_temp), last_build)
+
         print()  # Add an empty line for cleaner output
 
 

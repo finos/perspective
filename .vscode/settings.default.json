@@ -11,5 +11,6 @@
     "rust-analyzer.check.command": "clippy",
     "playwright.env": {
         "TZ": "UTC"
-    }
+    },
+    "clangd.arguments": ["--enable-config"]
 }
