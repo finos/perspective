@@ -13,6 +13,7 @@
 use serde::de::DeserializeOwned;
 use yew::{function_component, html, Callback, Html, Properties};
 
+use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
@@ -161,17 +162,11 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         _ => Err("Booleans aren't styled yet.".into()),
     };
     let contents = opt_html.unwrap_or_else(|e| {
-        tracing::error!(
-            "Unable to create a style for this component! This is a developer error. Please open \
-             an issue at github.com/finos/perspective.\nError: {e}"
-        );
-
         html! {
-            <div class="style_contents">
-                <div id="column-style-container" class="no-style">
-                    <div class="style-contents">{ "No styles available" }</div>
-                </div>
-            </div>
+            <Stub
+                message="No styles available"
+                error={e}
+            />
         }
     });
     html_template! {

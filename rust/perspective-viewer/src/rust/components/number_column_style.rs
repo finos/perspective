@@ -171,8 +171,7 @@ impl Component for NumberColumnStyle {
                     self.config.pos_fg_color = Some(self.pos_fg_color.to_owned());
                     self.config.neg_fg_color = Some(self.neg_fg_color.to_owned());
                     if self.fg_mode.needs_gradient() {
-                        self.config.fg_gradient =
-                            Some(self.fg_gradient.expect_throw("no gradient!"));
+                        self.config.fg_gradient = Some(self.fg_gradient.unwrap());
                     } else {
                         self.config.fg_gradient = None;
                     }
@@ -197,8 +196,7 @@ impl Component for NumberColumnStyle {
                     self.config.pos_bg_color = Some(self.pos_bg_color.to_owned());
                     self.config.neg_bg_color = Some(self.neg_bg_color.to_owned());
                     if self.bg_mode.needs_gradient() {
-                        self.config.bg_gradient =
-                            Some(self.bg_gradient.expect_throw("No gradient!"));
+                        self.config.bg_gradient = Some(self.bg_gradient.unwrap());
                     } else {
                         self.config.bg_gradient = None;
                     }
@@ -240,7 +238,7 @@ impl Component for NumberColumnStyle {
                 self.fg_mode = val;
                 self.config.number_fg_mode = val;
                 if self.fg_mode.needs_gradient() {
-                    self.config.fg_gradient = Some(self.fg_gradient.expect_throw("no gradient!"));
+                    self.config.fg_gradient = Some(self.fg_gradient.unwrap());
                 } else {
                     self.config.fg_gradient = None;
                 }
@@ -252,7 +250,7 @@ impl Component for NumberColumnStyle {
                 self.bg_mode = val;
                 self.config.number_bg_mode = val;
                 if self.bg_mode.needs_gradient() {
-                    self.config.bg_gradient = Some(self.bg_gradient.expect_throw("no gradient!"));
+                    self.config.bg_gradient = Some(self.bg_gradient.unwrap());
                 } else {
                     self.config.bg_gradient = None;
                 }

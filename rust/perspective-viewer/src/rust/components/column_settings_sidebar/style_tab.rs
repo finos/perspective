@@ -11,12 +11,14 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 mod column_style;
+pub mod stub;
 mod symbol;
 
 use wasm_bindgen::UnwrapThrowExt;
 use yew::{function_component, html, Html, Properties};
 
 use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
+use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
 use crate::config::Type;
 use crate::custom_events::CustomEvents;
@@ -45,7 +47,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
     let plugin_column_names = plugin
         .config_column_names()
         .and_then(|arr| arr.into_serde_ext::<Vec<Option<String>>>().ok())
-        .expect_throw("Could not deserialize config_column_names into Vec<Option<String>>");
+        .unwrap();
 
     let view_config = props.session.get_view_config();
     let (col_idx, _) = view_config
@@ -70,7 +72,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
         .nth(col_idx)
         .unwrap()
         .to_owned()
-        .expect_throw(&format!("Could not get column group for index {col_idx:?}"));
+        .unwrap();
 
     // TODO: We need a better way to determine which styling components to show.
     // This will come with future changes to the plugin API.
@@ -82,16 +84,22 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 renderer={ &props.renderer }
                 custom_events={ &props.custom_events }/>
         }),
-        "Columns" => Some(html! {
-            <ColumnStyle
-                custom_events={ props.custom_events.clone() }
-                session={ props.session.clone() }
-                renderer={ props.renderer.clone() }
-                view_ty={ props.maybe_view_ty.expect_throw("Could not unwrap view type!") }
-                column_name={ props.column_name.clone() }/>
+        "Columns" => props.maybe_view_ty.map(|view_ty| {
+            html! {
+                <ColumnStyle
+                    custom_events={ props.custom_events.clone() }
+                    session={ props.session.clone() }
+                    renderer={ props.renderer.clone() }
+                    {view_ty}
+                    column_name={ props.column_name.clone() }/>
+            }
         }),
         _ => None,
     };
+
+    let components = components.unwrap_or(
+        html! {<Stub message="No plugin styles available" error="Could not get plugin styles" />},
+    );
 
     html! {
         <div id="style-tab">

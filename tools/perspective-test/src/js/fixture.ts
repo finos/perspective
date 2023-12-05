@@ -37,6 +37,7 @@ export const test = base.extend<{
             });
             let expectedLogsConstructor: any = {
                 warning: [[/Legacy `expressions` format/, { expected: false }]],
+                error: [[/RENDERED STUB/, { expected: false }]],
             };
 
             // this is crazy
