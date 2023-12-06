@@ -60,39 +60,6 @@ pub async fn test_initial_fixed() {
 }
 
 #[wasm_bindgen_test]
-pub async fn test_fixed_msg_overrides_default() {
-    let link: WeakScope<NumberColumnStyle> = WeakScope::default();
-    let panel_div = NodeRef::default();
-    let default_config = NumberColumnStyleDefaultConfig {
-        fixed: 4,
-        ..NumberColumnStyleDefaultConfig::default()
-    };
-
-    test_html! {
-        <div ref={ panel_div.clone() }>
-            <NumberColumnStyle
-                default_config={ default_config }
-                weak_link={ link.clone() }>
-            </NumberColumnStyle>
-        </div>
-    };
-
-    assert_eq!(
-        cs_query(&panel_div, "#fixed-examples").inner_text(),
-        "Prec 0.0001"
-    );
-
-    let column_style = link.borrow().clone().unwrap();
-    column_style.send_message(NumberColumnStyleMsg::FixedChanged("2".to_owned()));
-    request_animation_frame().await;
-
-    assert_eq!(
-        cs_query(&panel_div, "#fixed-examples").inner_text(),
-        "Prec 0.01"
-    );
-}
-
-#[wasm_bindgen_test]
 pub async fn test_fixed_is_0() {
     let panel_div = NodeRef::default();
     let config = NumberColumnStyleConfig {

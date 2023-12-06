@@ -58,6 +58,15 @@ pub struct PluginAttributes {
     //...
 }
 
+// TODO: Delete this!
+// Plugin configurations will need to be defined by the plugin, so any attempt
+// at formalizing them in Rust types is hopeless and restrictive.
+// Although we will need to ensure certain reserved parameters (e.g. columns),
+// serde will not deserialize any extra values, as this would require the
+// struct's size to be unknown at compile time.
+// Instead, we should use the JSON values directly.
+// See plugin_config::send_plugin_config for an example of how to work with JSON
+// blobs.
 /// The configuration which is created as the result of calling plugin.save
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PluginConfig {

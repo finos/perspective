@@ -74,7 +74,7 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
     let is_active = column_type.is_some();
 
     let (config, attrs) = (p.get_plugin_config(), p.get_plugin_attrs());
-    if config.is_none() || attrs.is_none() {
+    if config.is_err() || attrs.is_err() {
         tracing::warn!(
             "Could not get full plugin config!\nconfig (plugin.save()): {:?}\nplugin_attrs: {:?}",
             config,
@@ -96,13 +96,14 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
         "X/Y Scatter" => maybe_table_ty
             .map(|ty| ty == Type::String)
             .unwrap_or_default(),
+        "Debug" => true,
         _ => false,
     };
 
     if !matches!(p.selected_column, ColumnLocator::Expr(None))
         && show_styles
         && is_active
-        && config.is_some()
+        && config.is_ok()
         && maybe_view_ty.is_some()
     {
         tabs.push(ColumnSettingsTab::Style);

@@ -21,7 +21,7 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 
-use crate::config::{ColumnConfig, ColumnConfigUpdate};
+use crate::config::{ColumnConfig, ColumnConfigUpdate, ColumnConfigValueUpdate};
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -209,14 +209,36 @@ impl Presentation {
         self.column_config.borrow().get(column_name).cloned()
     }
 
-    pub fn update_column_config(&self, column_name: String, value: ColumnConfigUpdate) {
+    /// Updates the entire column config struct.
+    pub fn update_column_configs(&self, update: ColumnConfigUpdate) {
+        match update {
+            crate::config::OptionalUpdate::SetDefault => {
+                let mut config = self.column_config.borrow_mut();
+                *config = HashMap::default()
+            },
+            crate::config::OptionalUpdate::Missing => {},
+            crate::config::OptionalUpdate::Update(update) => {
+                for (col_name, value) in update.into_iter() {
+                    self.update_column_config_value(col_name, ColumnConfigValueUpdate(value));
+                }
+            },
+        }
+    }
+
+    /// Updates a single column configuration value.
+    pub fn update_column_config_value(
+        &self,
+        column_name: String,
+        value: ColumnConfigValueUpdate,
+    ) -> ColumnConfig {
         let mut config = self.column_config.borrow_mut();
         if let Some(current_config) = config.remove(&column_name) {
             let new_value = current_config.update(value);
-            config.insert(column_name, new_value);
+            config.insert(column_name.clone(), new_value);
         } else {
-            config.insert(column_name, value.0);
+            config.insert(column_name.clone(), value.0);
         }
+        config.get(&column_name).cloned().unwrap()
     }
 }
 

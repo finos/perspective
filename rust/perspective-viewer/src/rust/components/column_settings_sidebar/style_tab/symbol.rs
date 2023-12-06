@@ -15,6 +15,7 @@ mod symbol_pairs;
 mod symbol_selector;
 mod types;
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use itertools::Itertools;
@@ -26,10 +27,12 @@ use crate::components::style::LocalStyle;
 use crate::config::plugin::{PluginConfig, Symbol};
 use crate::custom_elements::FilterDropDownElement;
 use crate::custom_events::CustomEvents;
-use crate::model::{GetPluginConfig, UpdatePluginConfig};
+use crate::model::{GetPluginConfig, GetViewerConfigModel, UpdatePluginConfig};
+use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::{css, derive_model, html_template};
+use crate::utils::ApiFuture;
+use crate::{clone, css, derive_model, html_template};
 
 pub fn next_default_symbol(values: &Vec<Symbol>, pairs_len: usize) -> String {
     values
@@ -43,14 +46,18 @@ pub struct SymbolAttrProps {
     pub session: Session,
     pub renderer: Renderer,
     pub custom_events: CustomEvents,
+    pub presentation: Presentation,
 }
-derive_model!(CustomEvents, Session, Renderer for SymbolAttrProps);
+derive_model!(CustomEvents, Session, Renderer, Presentation for SymbolAttrProps);
 impl SymbolAttrProps {
     pub fn get_config(&self) -> (PluginConfig, Vec<Symbol>) {
         let (config, attrs) = (self.get_plugin_config(), self.get_plugin_attrs());
         (
             config.unwrap(),
-            attrs.and_then(|a| a.symbol.map(|s| s.symbols)).unwrap(),
+            attrs
+                .ok()
+                .and_then(|a| a.symbol.map(|s| s.symbols))
+                .unwrap(),
         )
     }
 }
@@ -105,15 +112,11 @@ impl yew::Component for SymbolStyle {
                     .clone()
                     .into_iter()
                     .filter_map(|pair| Some((pair.key?, pair.value)))
-                    .collect();
-
-                p.send_plugin_config(
-                    p.column_name.clone(),
-                    serde_json::to_value(SymbolConfig {
-                        symbols: serialized,
-                    })
-                    .unwrap(),
-                );
+                    .collect::<HashMap<_, _>>();
+                let serialized = serde_json::to_value(SymbolConfig {
+                    symbols: serialized,
+                })
+                .unwrap();
 
                 if new_pairs
                     .last()
@@ -128,6 +131,16 @@ impl yew::Component for SymbolStyle {
                 }
 
                 self.pairs = new_pairs;
+
+                clone!(p);
+                ApiFuture::spawn(async move {
+                    p.send_plugin_config(
+                        p.column_name.clone(),
+                        Some(serialized),
+                        p.get_viewer_config().await?,
+                    )?
+                    .await
+                });
                 true
             },
         }

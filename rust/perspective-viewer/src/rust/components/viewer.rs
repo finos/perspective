@@ -64,7 +64,7 @@ pub struct PerspectiveViewerProps {
     pub weak_link: WeakScope<PerspectiveViewer>,
 }
 
-derive_model!(Renderer, Session for PerspectiveViewerProps);
+derive_model!(Renderer, Session, Presentation for PerspectiveViewerProps);
 
 impl PartialEq for PerspectiveViewerProps {
     fn eq(&self, _rhs: &Self) -> bool {
@@ -161,12 +161,15 @@ impl Component for PerspectiveViewer {
                 clone!(
                     ctx.props().renderer,
                     ctx.props().session,
-                    ctx.props().presentation
+                    ctx.props().presentation,
+                    viewer_config_getter = ctx.props().cloned()
                 );
 
                 ApiFuture::spawn(async move {
                     session.reset(all);
-                    renderer.reset().await;
+                    renderer
+                        .reset(&viewer_config_getter.get_viewer_config().await?)
+                        .await;
                     presentation.reset_available_themes(None).await;
                     let result = renderer.draw(session.validate().await?.create_view()).await;
                     if let Some(sender) = sender {

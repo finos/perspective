@@ -68,6 +68,7 @@ pub struct ViewerConfig {
 // struct fields, so make a tuple alternative for serialization in binary.
 type ViewerConfigBinarySerialFormat<'a> = (
     &'a String,
+    &'a HashMap<String, ColumnConfig>,
     &'a String,
     &'a Value,
     bool,
@@ -78,6 +79,7 @@ type ViewerConfigBinarySerialFormat<'a> = (
 
 type ViewerConfigBinaryDeserialFormat = (
     VersionUpdate,
+    ColumnConfigUpdate,
     PluginUpdate,
     Option<Value>,
     SettingsUpdate,
@@ -100,6 +102,7 @@ impl ViewerConfig {
     fn token(&self) -> ViewerConfigBinarySerialFormat<'_> {
         (
             &self.version,
+            &self.column_config,
             &self.plugin,
             &self.plugin_config,
             self.settings,
@@ -161,16 +164,20 @@ pub struct ViewerConfigUpdate {
     #[serde(default)]
     pub plugin_config: Option<Value>,
 
+    #[serde(default)]
+    pub column_config: ColumnConfigUpdate,
+
     #[serde(flatten)]
     pub view_config: ViewConfigUpdate,
 }
 
 impl ViewerConfigUpdate {
     fn from_token(
-        (version, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
+        (version, column_config, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
     ) -> ViewerConfigUpdate {
         ViewerConfigUpdate {
             version,
+            column_config,
             plugin,
             plugin_config,
             settings,
@@ -224,6 +231,7 @@ pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
 pub type VersionUpdate = OptionalUpdate<String>;
+pub type ColumnConfigUpdate = OptionalUpdate<HashMap<String, ColumnConfig>>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {

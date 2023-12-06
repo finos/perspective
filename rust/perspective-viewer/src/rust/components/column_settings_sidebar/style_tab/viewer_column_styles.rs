@@ -19,6 +19,7 @@ use yew::{function_component, html, Html, Properties};
 
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::config::Type;
+use crate::custom_events::CustomEvents;
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
@@ -28,6 +29,7 @@ pub struct ViewerColumnStyleProps {
     pub renderer: Renderer,
     pub session: Session,
     pub presentation: Presentation,
+    pub custom_events: CustomEvents,
 
     pub maybe_view_ty: Option<Type>,
     pub column_name: String,
@@ -43,6 +45,7 @@ pub fn viewer_column_styles(p: &ViewerColumnStyleProps) -> Html {
                     presentation={p.presentation.clone()}
                     renderer={p.renderer.clone()}
                     session={p.session.clone()}
+                    custom_events={p.custom_events.clone()}
                 />
             },
             Type::Float => html! {
@@ -51,6 +54,7 @@ pub fn viewer_column_styles(p: &ViewerColumnStyleProps) -> Html {
                     presentation={p.presentation.clone()}
                     renderer={p.renderer.clone()}
                     session={p.session.clone()}
+                    custom_events={p.custom_events.clone()}
                 />
             },
             _ => html! {},

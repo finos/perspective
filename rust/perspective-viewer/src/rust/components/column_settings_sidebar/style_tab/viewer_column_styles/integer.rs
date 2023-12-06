@@ -14,6 +14,7 @@ use yew::{function_component, html, Html, Properties};
 
 use crate::components::column_settings_sidebar::style_tab::controls::PrecisionControl;
 use crate::config::Type;
+use crate::custom_events::CustomEvents;
 use crate::html_template;
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
@@ -24,6 +25,7 @@ pub struct IntegerStylesProps {
     pub presentation: Presentation,
     pub session: Session,
     pub renderer: Renderer,
+    pub custom_events: CustomEvents,
     pub column_name: String,
 }
 
@@ -33,6 +35,10 @@ pub fn integer_styles(p: &IntegerStylesProps) -> Html {
         <div class="item_title">{"Integer Styling (Global)"}</div>
         <PrecisionControl
             presentation={p.presentation.clone()}
+            session={p.session.clone()}
+            renderer={p.renderer.clone()}
+            custom_events={p.custom_events.clone()}
+
             column_name={p.column_name.clone()}
             view_type={Type::Integer} />
     }

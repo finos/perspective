@@ -22,8 +22,10 @@ use crate::config::plugin::*;
 use crate::config::*;
 use crate::custom_events::CustomEvents;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
+use crate::utils::ApiFuture;
 use crate::{clone, css, derive_model, html_template};
 
 /// This function retrieves the plugin's config using its `save` method.
@@ -67,11 +69,25 @@ pub struct ColumnStyleProps {
     pub custom_events: CustomEvents,
     pub session: Session,
     pub renderer: Renderer,
+    pub presentation: Presentation,
 
     pub view_ty: Type,
     pub column_name: String,
 }
-derive_model!(CustomEvents, Session, Renderer for ColumnStyleProps);
+derive_model!(CustomEvents, Session, Renderer, Presentation for ColumnStyleProps);
+
+fn send_plugin_config(props: ColumnStyleProps, config: serde_json::Value) {
+    ApiFuture::spawn(async move {
+        props
+            .send_plugin_config(
+                props.column_name.clone(),
+                Some(config),
+                props.get_viewer_config().await?,
+            )?
+            .await
+    })
+}
+
 #[function_component]
 pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
     let props = p.clone();
@@ -86,12 +102,12 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
             props.view_ty,
         )
         .map(|(config, default_config)| {
-            let on_change = Callback::from(move |config| {
-                props.send_plugin_config(
-                    props.column_name.clone(),
-                    serde_json::to_value(config).unwrap(),
-                )
-            });
+            let on_change = {
+                clone!(props);
+                Callback::from(move |config| {
+                    send_plugin_config(props.clone(), serde_json::to_value(config).unwrap())
+                })
+            };
 
             html_template! {
                 <div class="item_title">{ title.clone() }</div>
@@ -112,12 +128,12 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         )
         .map(|(config, default_config)| {
             let enable_time_config = matches!(props.view_ty, Type::Datetime);
-            let on_change = Callback::from(move |config| {
-                props.send_plugin_config(
-                    props.column_name.clone(),
-                    serde_json::to_value(config).unwrap(),
-                )
-            });
+            let on_change = {
+                clone!(props);
+                Callback::from(move |config| {
+                    send_plugin_config(props.clone(), serde_json::to_value(config).unwrap())
+                })
+            };
             html_template! {
                 <div class="item_title">{title.clone()}</div>
                 <div class="style_contents">
@@ -140,10 +156,7 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
             let on_change = {
                 clone!(props);
                 Callback::from(move |config| {
-                    props.send_plugin_config(
-                        props.column_name.clone(),
-                        serde_json::to_value(config).unwrap(),
-                    )
+                    send_plugin_config(props.clone(), serde_json::to_value(config).unwrap())
                 })
             };
 

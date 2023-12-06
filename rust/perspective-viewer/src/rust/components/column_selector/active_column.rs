@@ -376,6 +376,7 @@ impl Component for ActiveColumn {
                             .unwrap_or_default()
                             && label.as_deref() == Some("Symbol")
                     },
+                    "Debug" => true,
                     _ => false,
                 } || is_expression;
 

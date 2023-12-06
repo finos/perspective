@@ -50,8 +50,8 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
 
     let plugin_column_names = plugin
         .config_column_names()
-        .and_then(|arr| arr.into_serde_ext::<Vec<Option<String>>>().ok())
-        .unwrap();
+        .and_then(|arr| arr.into_serde_ext::<Vec<String>>().ok())
+        .unwrap_or(vec![String::new()]);
 
     let view_config = props.session.get_view_config();
     let (col_idx, _) = view_config
@@ -75,8 +75,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
         .chain(std::iter::repeat(plugin_column_names.last().unwrap()))
         .nth(col_idx)
         .unwrap()
-        .to_owned()
-        .unwrap();
+        .to_owned();
 
     // TODO: We need a better way to determine which styling components to show.
     // This will come with future changes to the plugin API.
@@ -86,14 +85,16 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 column_name={ props.column_name.clone() }
                 session={ &props.session }
                 renderer={ &props.renderer }
-                custom_events={ &props.custom_events }/>
+                custom_events={ &props.custom_events }
+                presentation = {&props.presentation}/>
         }),
         "Columns" => props.maybe_view_ty.map(|view_ty| {
             html! {
                 <ColumnStyle
-                    custom_events={ props.custom_events.clone() }
-                    session={ props.session.clone() }
-                    renderer={ props.renderer.clone() }
+                    custom_events={ &props.custom_events }
+                    session={ &props.session }
+                    renderer={ &props.renderer }
+                    presentation ={&props.presentation}
                     {view_ty}
                     column_name={ props.column_name.clone() }/>
             }
@@ -106,12 +107,16 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
     html! {
         <div id="style-tab">
             <div id="column-style-container" class="tab-section">
-                {plugin_styles}
-                <hr style="margin: 2em 0; border-style: dashed; border-color: var(--inactive--border-color)" />
+                if let Some(plugin_styles) = plugin_styles {
+                    {plugin_styles}
+                    <hr style="margin: 2em 0; border-style: dashed; border-color: var(--inactive--border-color)" />
+                }
                 <ViewerColumnStyles
                     session={props.session.clone()}
                     renderer={props.renderer.clone()}
                     presentation={props.presentation.clone()}
+                    custom_events={props.custom_events.clone()}
+
                     maybe_view_ty={props.maybe_view_ty}
                     column_name={props.column_name.clone()}
                 />

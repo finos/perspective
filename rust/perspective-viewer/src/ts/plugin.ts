@@ -164,8 +164,11 @@ export interface IPerspectiveViewerPlugin {
 
     /**
      * Restore this plugin to a state previously returned by `save()`.
+     * This function may be passed the viewer_config, which may contain
+     * viewer-specific configuration information. The plugin can determine
+     * what to do with this information.
      */
-    restore(config: any): Promise<void>;
+    restore(config: any, viewer_config?: any): Promise<void>;
 
     /**
      * Free any resources acquired by this plugin and prepare to be deleted.
@@ -249,6 +252,10 @@ export class HTMLPerspectiveViewerPluginElement
     }
 
     async restore(): Promise<void> {
+        // Not Implemented
+    }
+
+    async recv_viewer_config(): Promise<void> {
         // Not Implemented
     }
 

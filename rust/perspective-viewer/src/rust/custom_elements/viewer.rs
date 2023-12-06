@@ -9,6 +9,7 @@
 // ┃ This file is part of the Perspective library, distributed under the terms ┃
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+#![allow(non_snake_case)]
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -257,7 +258,13 @@ impl PerspectiveViewerElement {
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
         global::document().blur_active_element();
-        clone!(self.session, self.renderer, self.root, self.presentation);
+        clone!(
+            self.session,
+            self.renderer,
+            self.root,
+            self.presentation,
+            viewer_config_getter = self.cloned()
+        );
         ApiFuture::new(async move {
             let decoded_update = ViewerConfigUpdate::decode(&update)?;
 
@@ -267,6 +274,7 @@ impl PerspectiveViewerElement {
                 settings,
                 theme: theme_name,
                 title,
+                column_config,
                 mut view_config,
                 ..//version
             } = decoded_update;
@@ -282,6 +290,8 @@ impl PerspectiveViewerElement {
             } else if matches!(title, OptionalUpdate::SetDefault) {
                 presentation.set_title(None);
             }
+
+            presentation.update_column_configs(column_config);
 
             let needs_restyle = match theme_name {
                 OptionalUpdate::SetDefault => {
@@ -322,10 +332,11 @@ impl PerspectiveViewerElement {
 
                 let internal_task = async {
                     let plugin = renderer.get_active_plugin()?;
-                    if let Some(plugin_config) = &plugin_config {
-                        let js_config = JsValue::from_serde_ext(plugin_config)?;
-                        plugin.restore(&js_config);
-                    }
+                    plugin.restore(
+                        &JsValue::from_serde_ext(&plugin_config.unwrap_or(serde_json::json!({})))
+                            .unwrap(),
+                        &viewer_config_getter.get_viewer_config().await?,
+                    );
 
                     session.validate().await?.create_view().await
                 }

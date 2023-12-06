@@ -319,7 +319,30 @@ const TESTS = [
                 expr: "1+1",
                 "'hello'": "'hello'",
             },
-            aggregates: {},
+        },
+    ],
+    [
+        "From 2.7.1",
+        {
+            plugin: "Datagrid",
+            columns: ["Row ID"],
+            plugin_config: {
+                columns: {
+                    "Row ID": {
+                        fixed: 3,
+                    },
+                },
+            },
+        },
+        {
+            ...DEFAULT_CONFIG,
+            plugin: "Datagrid",
+            plugin_config: {
+                editable: false,
+                scroll_lock: false,
+            },
+            columns: ["Row ID"],
+            column_config: { "Row ID": { precision: 3 } },
         },
     ],
 ];

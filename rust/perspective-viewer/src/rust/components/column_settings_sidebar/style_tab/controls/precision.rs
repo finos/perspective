@@ -13,15 +13,27 @@
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::{function_component, html, use_callback, use_state, Html, Properties, TargetCast};
 
-use crate::config::{ColumnConfig, ColumnConfigUpdate, FloatColumnConfig, IntColumnConfig, Type};
+use crate::config::{
+    ColumnConfig, ColumnConfigValueUpdate, FloatColumnConfig, IntColumnConfig, Type,
+};
+use crate::custom_events::CustomEvents;
+use crate::model::{GetViewerConfigModel, UpdatePluginConfig};
 use crate::presentation::Presentation;
+use crate::renderer::Renderer;
+use crate::session::Session;
+use crate::utils::ApiFuture;
+use crate::{clone, derive_model};
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PrecisionControlProps {
+    pub renderer: Renderer,
+    pub session: Session,
+    pub custom_events: CustomEvents,
     pub presentation: Presentation,
     pub column_name: String,
     pub view_type: Type,
 }
+derive_model!(Renderer, CustomEvents, Session, Presentation for PrecisionControlProps);
 
 fn make_label(value: u32) -> String {
     if value > 0 {
@@ -83,8 +95,16 @@ pub fn precision_control(p: &PrecisionControlProps) -> Html {
             };
 
             if let Some(config) = config {
-                p.presentation
-                    .update_column_config(p.column_name.clone(), ColumnConfigUpdate(config));
+                clone!(p);
+                ApiFuture::spawn(async move {
+                    p.presentation.update_column_config_value(
+                        p.column_name.clone(),
+                        ColumnConfigValueUpdate(config.clone()),
+                    );
+                    let viewer_config = p.get_viewer_config().await?;
+                    p.send_plugin_config(p.column_name.clone(), None, viewer_config)?
+                        .await
+                })
             }
         },
     );

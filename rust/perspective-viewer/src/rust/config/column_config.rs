@@ -29,7 +29,7 @@ pub enum ColumnConfig {
 impl ColumnConfig {
     // If types match, update the values.
     // Otherwise, just use the updated value.
-    pub fn update(self, other: ColumnConfigUpdate) -> Self {
+    pub fn update(self, other: ColumnConfigValueUpdate) -> Self {
         match (self, other.0) {
             (Self::Float(this), Self::Float(other)) => Self::Float(this.update(other)),
             (Self::Int(this), Self::Int(other)) => Self::Int(this.update(other)),
@@ -41,7 +41,7 @@ impl ColumnConfig {
         }
     }
 }
-pub struct ColumnConfigUpdate(pub ColumnConfig);
+pub struct ColumnConfigValueUpdate(pub ColumnConfig);
 
 pub trait UpdateColumnConfig {
     fn update(self, other: Self) -> Self;
