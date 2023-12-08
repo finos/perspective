@@ -24,6 +24,7 @@ const VERSIONS = [
     "3.9",
     "3.10",
     "3.11",
+    "3.12",
 ];
 
 for (const version of VERSIONS) {

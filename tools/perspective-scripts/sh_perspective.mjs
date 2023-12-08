@@ -276,6 +276,8 @@ export function python_version(manylinux) {
             return `/opt/python/cp${v}-cp${v}${
                 v === "37" || v === "36" ? "m" : ""
             }/bin/python`;
+        } else if (getarg("--python312")) {
+            return `/opt/python/cp312-cp312/bin/python`;
         } else if (getarg("--python311")) {
             return `/opt/python/cp311-cp311/bin/python`;
         } else if (getarg("--python310")) {
@@ -292,6 +294,8 @@ export function python_version(manylinux) {
     } else {
         if (process.env.PYTHON_VERSION) {
             return `python${process.env.PYTHON_VERSION}`;
+        } else if (getarg("--python312")) {
+            return "python3.12";
         } else if (getarg("--python311")) {
             return "python3.11";
         } else if (getarg("--python310")) {
@@ -344,8 +348,8 @@ sh.docker = function docker(...args) {
         ${env_vars} \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
-        --cpus="${CPUS}.0" 
-        ${IMAGE} 
+        --cpus="${CPUS}.0"
+        ${IMAGE}
         bash -c ${sh(...args).toString()}`;
 };
 

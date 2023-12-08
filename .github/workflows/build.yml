@@ -848,6 +848,7 @@ jobs:
                     - 3.9
                     - "3.10"
                     - 3.11
+                    - 3.12
                 container:
                     - none # Not manylinux, we will use this space to build the WASM assets
                     - 2014
@@ -881,7 +882,7 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # Exclude Python 3.7, 3.8, 3.10, 3.11 builds
+                    # Exclude Python 3.7, 3.8, 3.10, 3.11, 3.12 builds
                     - is-full-run: false
                       python-version: 3.7
 
@@ -893,6 +894,9 @@ jobs:
 
                     - is-full-run: false
                       python-version: 3.11
+
+                    - is-full-run: false
+                      python-version: 3.12
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -1388,6 +1392,7 @@ jobs:
                     - 3.9
                     - "3.10"
                     - 3.11
+                    - 3.12
                 node-version: [18.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
@@ -1410,7 +1415,7 @@ jobs:
                     - python-version: 3.7
                       os: macos-11
 
-                    # Exclude Python 3.7, 3.8, 3.10, 3.11 builds
+                    # Exclude Python 3.7, 3.8, 3.10, 3.11, 3.12 builds
                     - is-full-run: false
                       python-version: 3.7
 
@@ -1422,6 +1427,9 @@ jobs:
 
                     - is-full-run: false
                       python-version: 3.11
+
+                    - is-full-run: false
+                      python-version: 3.12
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
 
@@ -1523,11 +1531,11 @@ jobs:
             # would need an arm machine to test
             - name: Install wheel (OSX)
               run: python -m pip install -U --no-dependencies *x86*.whl --target python/perspective
-              if: ${{ runner.os == 'macOS' && matrix.python-version != '3.11' }}
+              if: ${{ runner.os == 'macOS' && matrix.python-version != '3.11' && matrix.python-version != '3.12' }}
 
             - name: Install wheel (OSX 3.11+)
               run: python -m pip install -U --no-dependencies *universal*.whl --target python/perspective
-              if: ${{ runner.os == 'macOS' && matrix.python-version == '3.11' }}
+              if: ${{ runner.os == 'macOS' && (matrix.python-version == '3.11' || matrix.python-version == '3.12') }}
 
             - name: Install wheel (windows)
               run: python -m pip install -U --no-dependencies (Get-ChildItem .\*.whl | Select-Object -Expand FullName) --target python/perspective
@@ -1911,6 +1919,10 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
+                  name: perspective-python-dist-ubuntu-20.04-3.12
+
+            - uses: actions/download-artifact@v3
+              with:
                   name: perspective-python-dist-macos-11-3.7
 
             - uses: actions/download-artifact@v3
@@ -1931,6 +1943,10 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
+                  name: perspective-python-dist-macos-11-3.12
+
+            - uses: actions/download-artifact@v3
+              with:
                   name: perspective-python-dist-windows-2022-3.7
 
             - uses: actions/download-artifact@v3
@@ -1948,6 +1964,10 @@ jobs:
             - uses: actions/download-artifact@v3
               with:
                   name: perspective-python-dist-windows-2022-3.11
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-windows-2022-3.12
 
             - uses: actions/download-artifact@v3
               with:
