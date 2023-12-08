@@ -25,7 +25,7 @@ cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0094 NEW)
 
 if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
-    set(PSP_CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/")
+    set(PSP_CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake")
 endif()
 
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
@@ -65,6 +65,9 @@ endfunction()
 # ######################
 find_package(Color)
 find_package(InstallDependency)
+
+# Protobuf setup
+add_subdirectory(../../protos "${CMAKE_BINARY_DIR}/protos-build")
 
 # OPTIONS
 option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
