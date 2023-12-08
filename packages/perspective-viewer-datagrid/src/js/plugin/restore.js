@@ -15,12 +15,16 @@ import { toggle_edit_mode, toggle_scroll_lock } from "../model/toolbar.js";
 import { PRIVATE_PLUGIN_SYMBOL } from "../model";
 import { make_color_record } from "../color_utils.js";
 
+export const VIEWER_TO_PLUGIN_MAP = {
+    precision: "fixed",
+};
+
 /**
  * Restore this plugin's state from a previously saved `token`.
  *
  * @param {*} token A token returned from `save()`.
  */
-export function restore(token) {
+export function restore(token, viewer_config) {
     token = JSON.parse(JSON.stringify(token));
     const overrides = {};
     if (token.columns) {
@@ -67,7 +71,37 @@ export function restore(token) {
         toggle_scroll_lock.call(this, token.scroll_lock);
     }
 
+    let column_config = Object.entries(viewer_config?.column_config).map(
+        ([col_name, val]) => [col_name, Object.entries(val)]
+    );
+    let mapped_columns = Object.fromEntries(
+        column_config.map(([col_name, vals]) => {
+            return [
+                col_name,
+                Object.fromEntries(
+                    vals.map(([k, v]) => {
+                        let mapped_val = VIEWER_TO_PLUGIN_MAP[k];
+                        return mapped_val ? [mapped_val, v] : [k, v];
+                    })
+                ),
+            ];
+        })
+    );
+
+    let token_columns = token.columns ?? {};
+    let all_column_names = Object.keys(mapped_columns).concat(
+        Object.keys(token_columns)
+    );
+    let merged_columns = Object.fromEntries(
+        all_column_names.map((col_name) => {
+            return [
+                col_name,
+                { ...token_columns[col_name], ...mapped_columns[col_name] },
+            ];
+        })
+    );
+
     const datagrid = this.regular_table;
     restore_column_size_overrides.call(this, overrides, true);
-    datagrid[PRIVATE_PLUGIN_SYMBOL] = token.columns;
+    datagrid[PRIVATE_PLUGIN_SYMBOL] = merged_columns;
 }

@@ -12,6 +12,9 @@
 
 import { PRIVATE_PLUGIN_SYMBOL } from "../model";
 import { save_column_size_overrides } from "../model/column_overrides.js";
+import { VIEWER_TO_PLUGIN_MAP } from "./restore.js";
+
+export const EXCLUDED_KEYS = Object.values(VIEWER_TO_PLUGIN_MAP);
 
 /**
  * Serialize the state of this plugin to a token.
@@ -55,6 +58,21 @@ export function save() {
 
             token.columns[col].column_size_override =
                 column_size_overrides[col];
+        }
+
+        for (let col_name in token?.columns ?? {}) {
+            let col_props = token.columns[col_name];
+            for (let prop_name in col_props ?? {}) {
+                if (EXCLUDED_KEYS.includes(prop_name)) {
+                    delete col_props[prop_name];
+                }
+            }
+            if (col_props && Object.keys(col_props).length === 0) {
+                delete token.columns[col_name];
+            }
+        }
+        if (token.columns && Object.keys(token.columns).length === 0) {
+            delete token.columns;
         }
 
         return JSON.parse(JSON.stringify(token));

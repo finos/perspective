@@ -102,8 +102,8 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         return save.call(this);
     }
 
-    restore(token) {
-        return restore.call(this, token);
+    restore(token, viewer_config) {
+        return restore.call(this, token, viewer_config);
     }
 
     async restyle(view) {
