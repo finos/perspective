@@ -12,6 +12,8 @@ function(psp_build_dep name cmake_file)
     else()
         configure_file(${cmake_file} ${CMAKE_BINARY_DIR}/${name}-download/CMakeLists.txt)
         set(_cwd ${CMAKE_BINARY_DIR}/${name}-download)
+        
+        message(STATUS "Configuring ${name} in ${_cwd}")
 
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
             RESULT_VARIABLE result

@@ -66,9 +66,6 @@ endfunction()
 find_package(Color)
 find_package(InstallDependency)
 
-# Protobuf setup
-add_subdirectory(../../protos "${CMAKE_BINARY_DIR}/protos-build")
-
 # OPTIONS
 option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
 option(PSP_WASM_BUILD "Build the WebAssembly Project" ON)
@@ -393,6 +390,9 @@ psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
 
 # Build exprtk for expression parsing
 psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
+
+# Protobuf setup
+add_subdirectory(${PSP_CMAKE_MODULE_PATH}/../protos "${CMAKE_BINARY_DIR}/protos-build")
 
 # ####################
 set(CMAKE_C_FLAGS_DEBUG "")
