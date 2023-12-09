@@ -36,6 +36,10 @@ members = ["tasks/bundle", "tasks/bootstrap-runtime", "tasks/bootstrap"]
 crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
+[features]
+define_custom_elements_async = []
+default = []
+
 [profile.dev]
 panic = "abort"
 opt-level = "s"
