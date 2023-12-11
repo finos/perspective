@@ -25,6 +25,12 @@ libraries if you want to achieve optimal initial load-time performance.
 To use Perspective from a Node.js server, simply install via NPM.
 
 ```bash
+$ npm add @finos/perspective
+
+```
+Or via Yarn.
+
+```bash
 $ yarn add @finos/perspective
 ```
 
@@ -34,6 +40,12 @@ For using Perspective as a dependency in a `webpack` (or other bundler) app,
 Perspective's WebAssembly data engine is available via NPM in the same package,
 `@finos/perspective`. For the `@finos/perspective-viewer` UI, a few additional
 packages are required:
+
+```bash
+$ npm add @finos/perspective @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
+```
+
+Or via Yarn.
 
 ```bash
 $ yarn add @finos/perspective @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
