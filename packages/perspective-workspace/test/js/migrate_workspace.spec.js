@@ -10,10 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
-import { test, expect } from "@finos/perspective-test";
+import { test, expect, convert } from "@finos/perspective-test";
 import {
-    API_VERSION,
+    DEFAULT_CONFIG,
     compareLightDOMContents,
     compareShadowDOMContents,
 } from "@finos/perspective-test";
@@ -61,7 +60,7 @@ const TESTS = [
         {
             viewers: {
                 One: {
-                    version: API_VERSION,
+                    ...DEFAULT_CONFIG,
                     table: "superstore",
                     title: "One",
                     plugin: "Y Area",

@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
+import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
 import {
     API_VERSION,
     compareSVGContentsToSnapshot,
@@ -41,19 +41,13 @@ test.describe("Bar Width", () => {
         );
 
         expect(config).toEqual({
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Y Bar",
             columns: ["Profit"],
             group_by: ["Order Date"],
             split_by: ["Profit"],
-            aggregates: {},
-            filter: [],
-            sort: [],
-            plugin_config: {},
             settings: false,
-            expressions: {},
             theme: "Pro Light",
-            title: null,
         });
 
         await compareSVGContentsToSnapshot(

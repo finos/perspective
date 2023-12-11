@@ -22,7 +22,7 @@ import Semver from "./semver";
  */
 export default function migrate_0_0_0(old, options) {
     const next_version = options.version_chain.shift();
-    if (old.version?.ge(next_version)) {
+    if (old.version?.gt(next_version)) {
         return old;
     } else {
         if (options.warn) {

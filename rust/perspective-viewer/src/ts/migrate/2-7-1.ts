@@ -12,72 +12,40 @@
 
 import Semver from "./semver";
 
-/**
- * Migrates from 2.6.1
- * @param old
- * @param options
- * @returns
- */
-export default function migrate_2_6_1(old, options) {
+export function get_or_create_column_config(old, column) {
+    let viewer_column_config = (old.column_config = old.column_config ?? {});
+    return (viewer_column_config[column] = viewer_column_config[column] ?? {});
+}
+
+export default function migrate_2_7_1(old, options) {
     let next_version = options.version_chain.shift();
     if (old.version?.gt(next_version)) {
         return old;
     } else if (options.warn) {
-        console.warn(`Migrating 2.6.1 -> ${next_version}`);
+        console.warn(`Migrating 2.7.1 -> ${next_version}`);
     }
     old.version = new Semver(next_version);
 
-    // Migrate X/Y Scatter plugin
-    if (
-        old.plugin === "X/Y Scatter" &&
-        typeof old.plugin_config?.columns === "object"
-    ) {
-        for (const i in old.plugin_config.columns) {
-            const entries = Object.entries(old.plugin_config.columns[i]);
-            const mapped_entries = entries.map(([grp_name, grp_val]) => {
-                if (grp_name === "symbols" && Array.isArray(grp_val)) {
-                    if (options.warn) {
-                        console.warn(
-                            `Replacing depcrecated X/Y Scatter Plot symbol config ${grp_val}`
-                        );
-                    }
-                    const obj = {};
-                    for (const i in grp_val) {
-                        const item = grp_val[i];
-                        obj[item.key] = item.value;
-                    }
-                    grp_val = obj;
+    // Migrate plugin_config[column].fixed to column_config[column].precision
+    if (old.plugin === "Datagrid") {
+        let columns = old.plugin_config?.columns ?? {};
+        for (let column in columns) {
+            let fixed = columns[column].fixed;
+            if (fixed !== undefined) {
+                let column_config = get_or_create_column_config(old, column);
+                if (Object.keys(column_config).length === 0) {
+                    column_config.precision = fixed;
+                    delete columns[column].fixed;
                 }
-                return [grp_name, grp_val];
-            });
-            old.plugin_config.columns[i] = Object.fromEntries(mapped_entries);
+            }
+            if (Object.keys(columns[column]).length == 0) {
+                delete columns[column];
+            }
+        }
+        if (Object.keys(old.plugin_config?.columns).length == 0) {
+            delete old.plugin_config?.columns;
         }
     }
 
-    // check for string expressions, replace with objects
-    let new_exprs = {};
-    for (let i in old.expressions) {
-        if (typeof old.expressions[i] === "string") {
-            if (options.warn) {
-                console.warn(
-                    "Replacing deprecated string expression with object"
-                );
-            }
-            let old_expr = old.expressions[i];
-            let [whole_expr, name, expr] = old_expr.match(
-                /\/\/\s*([^\n]+)\n(.*)/
-            ) ?? [old_expr, null, null];
-            if (name && expr) {
-                new_exprs[name] = expr;
-            } else {
-                new_exprs[whole_expr] = whole_expr;
-            }
-        }
-    }
-    old.expressions = new_exprs;
-
-    if (options.verbose) {
-        console.log(old);
-    }
     return old;
 }

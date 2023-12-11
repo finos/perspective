@@ -15,8 +15,10 @@ import {
     compareContentsToSnapshot,
     API_VERSION,
 } from "@finos/perspective-test";
-
-const { convert } = require("../../dist/cjs/migrate.js");
+import {
+    convert,
+    DEFAULT_CONFIG,
+} from "@finos/perspective-viewer/dist/cjs/migrate.js";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -49,19 +51,15 @@ const TESTS = [
             plugin_config: {},
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Y Area",
-            plugin_config: {},
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ["Ship Mode"],
             columns: ["Sales"],
             filter: [["Category", "==", "Office Supplies"]],
-            sort: [],
             expressions: {
                 "bucket(\"Order Date\", 'M')": "bucket(\"Order Date\", 'M')",
             },
-            aggregates: {},
-            title: null,
         },
     ],
     [
@@ -80,7 +78,7 @@ const TESTS = [
             plugin_config: { Sales: { color_mode: "gradient", gradient: 10 } },
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -89,14 +87,7 @@ const TESTS = [
                 editable: false,
                 scroll_lock: true,
             },
-            group_by: [],
-            split_by: [],
             columns: ["Sales"],
-            filter: [],
-            sort: [],
-            expressions: {},
-            aggregates: {},
-            title: null,
         },
     ],
     [
@@ -119,7 +110,7 @@ const TESTS = [
             aggregates: {},
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -131,14 +122,7 @@ const TESTS = [
                 editable: false,
                 scroll_lock: true,
             },
-            group_by: [],
-            split_by: [],
             columns: ["Sales"],
-            filter: [],
-            sort: [],
-            expressions: {},
-            aggregates: {},
-            title: null,
         },
     ],
     [
@@ -166,7 +150,7 @@ const TESTS = [
             aggregates: {},
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -180,14 +164,7 @@ const TESTS = [
                 editable: false,
                 scroll_lock: true,
             },
-            group_by: [],
-            split_by: [],
             columns: ["Sales"],
-            filter: [],
-            sort: [],
-            expressions: {},
-            aggregates: {},
-            title: null,
         },
     ],
     [
@@ -236,7 +213,7 @@ const TESTS = [
             title: null,
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
@@ -271,12 +248,6 @@ const TESTS = [
                 "Order Date",
             ],
             sort: [["Sub-Category", "desc"]],
-            aggregates: {},
-            filter: [],
-            group_by: [],
-            expressions: {},
-            split_by: [],
-            title: null,
         },
     ],
     [
@@ -298,7 +269,7 @@ const TESTS = [
             aggregates: {},
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "X/Y Scatter",
             plugin_config: {
                 columns: {
@@ -309,12 +280,7 @@ const TESTS = [
                     },
                 },
             },
-            title: null,
-            group_by: [],
-            split_by: [],
             columns: ["'hello'", "expr"],
-            filter: [],
-            sort: [],
             expressions: {
                 expr: "1+1",
                 "'hello'": "'hello'",
@@ -337,10 +303,6 @@ const TESTS = [
         {
             ...DEFAULT_CONFIG,
             plugin: "Datagrid",
-            plugin_config: {
-                editable: false,
-                scroll_lock: false,
-            },
             columns: ["Row ID"],
             column_config: { "Row ID": { precision: 3 } },
         },

@@ -13,6 +13,7 @@
 import Semver from "./migrate/semver";
 import migrate_0_0_0 from "./migrate/0-0-0";
 import migrate_2_6_1 from "./migrate/2-6-1";
+import migrate_2_7_1 from "./migrate/2-7-1";
 import { version as PKG_VERSION } from "@finos/perspective/package.json" assert { type: "json" };
 
 /**
@@ -125,6 +126,7 @@ function migrate_workspace(old, options) {
  * @returns
  */
 function migrate_viewer(old, omit_attributes, options) {
+    console.log("Converting viewer:", old);
     old.version = old.version ? new Semver(old.version) : new Semver("0.0.0");
     options.omit_attributes = omit_attributes;
     // This array details the "next version" in line. It begins with 2.6.1
@@ -134,17 +136,48 @@ function migrate_viewer(old, omit_attributes, options) {
     // Note that because we will be working with the latest version on master,
     // and those versions will need to update from themselves to themselves,
     // migration scripts must be idempotent.
-    options.version_chain = ["2.6.1" /*, "2.7.0", etc. */];
+    options.version_chain = ["2.6.1", "2.7.1"];
     options.version_chain.push(PKG_VERSION);
     let res = chain(
         old,
-        [migrate_0_0_0, migrate_2_6_1, assure_latest, semver_to_string],
+        [
+            migrate_0_0_0,
+            migrate_2_6_1,
+            migrate_2_7_1,
+            options.replace_defaults ? assure_defaults : (old) => old,
+            assure_latest,
+            semver_to_string,
+        ],
         options
     );
     if (options.verbose) {
         console.log("Final result -> ", res);
     }
     return res;
+}
+
+// util functions -----
+
+export const DEFAULT_CONFIG = {
+    version: PKG_VERSION,
+    title: null,
+    plugin: null,
+    plugin_config: {},
+    column_config: {},
+    columns: [],
+    group_by: [],
+    split_by: [],
+    filter: [],
+    sort: [],
+    expressions: {},
+    aggregates: {},
+};
+
+function assure_defaults(old) {
+    return {
+        ...DEFAULT_CONFIG,
+        ...old,
+    };
 }
 
 function assure_latest(old: { version: Semver }) {
