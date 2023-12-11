@@ -161,6 +161,7 @@ function migrate_viewer(old, omit_attributes, options) {
 export const DEFAULT_CONFIG = {
     version: PKG_VERSION,
     title: null,
+    settings: false,
     plugin: null,
     plugin_config: {},
     column_config: {},

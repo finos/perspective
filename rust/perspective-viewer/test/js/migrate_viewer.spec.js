@@ -10,15 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
 import {
+    test,
+    expect,
     compareContentsToSnapshot,
     API_VERSION,
-} from "@finos/perspective-test";
-import {
-    convert,
     DEFAULT_CONFIG,
-} from "@finos/perspective-viewer/dist/cjs/migrate.js";
+    convert,
+} from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -298,6 +297,8 @@ const TESTS = [
                         fixed: 3,
                     },
                 },
+                editable: false,
+                scroll_lock: false,
             },
         },
         {

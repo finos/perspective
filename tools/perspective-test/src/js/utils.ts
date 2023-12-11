@@ -13,6 +13,14 @@
 import { expect, Locator, Page } from "@playwright/test";
 import * as fs from "fs";
 
+// TODO: This should probably be a separate package so we can include it here and re-export it in the viewer.
+// Including it from @perspective-viewer fails because it requires HTMLElement definitions (browser only)
+// and requires import attributes (more trouble than it's worth)
+import * as migrate from "../../../../rust/perspective-viewer/dist/cjs/migrate";
+
+export const DEFAULT_CONFIG = migrate.DEFAULT_CONFIG;
+export const convert = migrate.convert;
+
 export const API_VERSION = JSON.parse(
     fs.readFileSync(__dirname + "/../../package.json").toString()
 )["version"];

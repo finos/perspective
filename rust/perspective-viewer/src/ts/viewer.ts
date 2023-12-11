@@ -16,6 +16,7 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
     plugin_config?: any;
+    column_config?: Record<string, Record<string, any>>;
 };
 
 export type RenderStats = {

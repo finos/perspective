@@ -10,11 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
-import {
-    compareContentsToSnapshot,
-    API_VERSION,
-} from "@finos/perspective-test";
+import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
+import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -70,19 +67,13 @@ test.describe("Events", () => {
         });
 
         expect(config).toEqual({
-            version: API_VERSION,
-            aggregates: {},
-            split_by: [],
+            ...DEFAULT_CONFIG,
             columns: ["Profit", "Sales"],
-            expressions: {},
-            filter: [],
             plugin: "Debug",
             plugin_config: {},
             group_by: ["State"],
             settings: true,
-            sort: [],
             theme: "Pro Light",
-            title: null,
         });
 
         const contents = await get_contents(page);

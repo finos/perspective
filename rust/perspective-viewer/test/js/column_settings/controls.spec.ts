@@ -10,57 +10,59 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
+import { test, expect, PageView } from "@finos/perspective-test";
+import { PrecisionControl } from "@finos/perspective-test/src/js/models/style_controls";
 
 test.beforeEach(async ({ page }) => {
-    await page.goto(
-        "/@finos/perspective-viewer/test/html/plugin-priority-order.html"
-    );
+    await page.goto("/rust/perspective-viewer/test/html/superstore.html");
     await page.evaluate(async () => {
         while (!window["__TEST_PERSPECTIVE_READY__"]) {
             await new Promise((x) => setTimeout(x, 10));
         }
     });
+
+    await page.evaluate(async () => {
+        await document.querySelector("perspective-viewer")!.restore({
+            plugin: "Debug",
+        });
+    });
 });
 
-test.describe("Plugin Priority Order", () => {
-    test("Elements are loaded in priority Order", async ({ page }) => {
-        let saved = await page.evaluate(async () => {
-            const viewer = document.querySelector("perspective-viewer");
-            window.__TABLE__ = await viewer.getTable();
-            await viewer.reset();
+test.describe("Style Controls", () => {
+    test.describe("Precision", () => {
+        test("Manual edit", async ({ page }) => {
+            let view = new PageView(page);
+            await view.restore({ columns: ["Row ID"] });
+            let settingsPanel = await view.openSettingsPanel();
+            let col = settingsPanel.activeColumns.getColumnByName("Row ID");
+            await col.editBtn.click();
 
-            return await viewer.save();
+            let control = new PrecisionControl(page);
+
+            await control.input.fill("3");
+            expect(await control.label.innerText()).toBe("Precision: 0.001");
+
+            let config = await view.save();
+            expect(config.column_config).toStrictEqual({
+                "Row ID": {
+                    precision: 3,
+                },
+            });
         });
+        test("Restore", async ({ page }) => {
+            let view = new PageView(page);
+            await view.restore({
+                columns: ["Row ID"],
+                column_config: { "Row ID": { precision: 3 } },
+            });
 
-        const expected = {
-            ...DEFAULT_CONFIG,
-            columns: [
-                "Row ID",
-                "Order ID",
-                "Order Date",
-                "Ship Date",
-                "Ship Mode",
-                "Customer ID",
-                "Segment",
-                "Country",
-                "City",
-                "State",
-                "Postal Code",
-                "Region",
-                "Product ID",
-                "Category",
-                "Sub-Category",
-                "Sales",
-                "Quantity",
-                "Discount",
-                "Profit",
-            ],
-            settings: false,
-            plugin: "HighPriority",
-            theme: "Pro Light",
-        };
+            let settingsPanel = await view.openSettingsPanel();
+            let col = settingsPanel.activeColumns.getColumnByName("Row ID");
+            await col.editBtn.click();
 
-        expect(saved).toEqual(expected);
+            let control = new PrecisionControl(page);
+            expect(await control.label.innerText()).toBe("Precision: 0.001");
+            expect(await control.input.inputValue()).toBe("3");
+        });
     });
 });

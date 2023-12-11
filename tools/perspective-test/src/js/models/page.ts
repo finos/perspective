@@ -14,6 +14,10 @@ import { Locator, Page, expect } from "@playwright/test";
 import { ColumnSettingsSidebar } from "./column_settings";
 import { ColumnType, SettingsPanel } from "./settings_panel";
 import { DataGridPlugin } from "./plugins";
+import {
+    IPerspectiveViewerElement,
+    PerspectiveViewerConfig,
+} from "@finos/perspective-viewer";
 
 /**
  * This class is the primary interface between Playwright tests and the items on the Perspective Viewer.
@@ -43,6 +47,20 @@ export class PageView {
         this.settingsPanel = new SettingsPanel(this);
 
         this.dataGrid = new DataGridPlugin.DataGrid(page);
+    }
+
+    async save() {
+        return this.container.evaluate(async (viewer) => {
+            let el = viewer as unknown as IPerspectiveViewerElement;
+            return await el.save();
+        });
+    }
+
+    async restore(config: PerspectiveViewerConfig) {
+        return this.container.evaluate(async (viewer, config) => {
+            let el = viewer as unknown as IPerspectiveViewerElement;
+            return await el.restore(config);
+        }, config);
     }
 
     async openSettingsPanel() {

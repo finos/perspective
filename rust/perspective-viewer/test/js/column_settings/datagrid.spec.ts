@@ -14,6 +14,8 @@ import {
     PageView as PspViewer,
     compareNodes,
     getEventListener,
+    PrecisionControl,
+    DEFAULT_CONFIG,
 } from "@finos/perspective-test";
 
 import { expect, test } from "@finos/perspective-test";
@@ -195,6 +197,50 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             let newStyle = await td.evaluate((node) => node.style.cssText);
             expect(tdStyle).not.toBe(newStyle);
         });
+
+        test.describe("Viewer controls integration", () => {
+            test.describe("Precision", () => {
+                test("Manual edit", async ({ page }) => {
+                    let view = new PspViewer(page);
+                    await view.restore({ columns: ["Row ID"] });
+                    let settingsPanel = await view.openSettingsPanel();
+                    let col =
+                        settingsPanel.activeColumns.getColumnByName("Row ID");
+                    await col.editBtn.click();
+                    let control = new PrecisionControl(page);
+                    await control.input.fill("3");
+                    let firstRow =
+                        await view.dataGrid.regularTable.getFirstCellByColumnName(
+                            "Row ID"
+                        );
+                    expect(await firstRow.innerText()).toMatch(/\d+\.000/);
+                    let config = await view.save();
+                    expect(config.plugin_config.columns).toBeUndefined();
+                    expect(config.column_config).toStrictEqual({
+                        "Row ID": {
+                            precision: 3,
+                        },
+                    });
+                });
+                test("Restore", async ({ page }) => {
+                    let view = new PspViewer(page);
+                    await view.restore({
+                        columns: ["Row ID"],
+                        column_config: { "Row ID": { precision: 3 } },
+                    });
+
+                    let settingsPanel = await view.openSettingsPanel();
+                    let col =
+                        settingsPanel.activeColumns.getColumnByName("Row ID");
+                    await col.editBtn.click();
+                    let firstRow =
+                        await view.dataGrid.regularTable.getFirstCellByColumnName(
+                            "Row ID"
+                        );
+                    expect(await firstRow.innerText()).toMatch(/\d+\.000/);
+                });
+            });
+        });
     });
 };
 
@@ -224,8 +270,6 @@ runTests("Datagrid Column Styles", () => {
 });
 
 // Data grid table header rows look different when a split-by is present.
-
-// TODO: These tests are failing due to bunk selectors.
 runTests("Datagrid Column Styles - Split-by", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(
