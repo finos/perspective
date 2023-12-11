@@ -90,7 +90,7 @@ export function resizableComponent() {
         }
 
         const containerRect: DOMRect = containerNode.getBoundingClientRect();
-        const handles: d3.Selection<SVGAElement, unknown, undefined, unknown> =
+        const handles: d3.Selection<SVGElement, unknown, undefined, unknown> =
             container
                 .append("svg")
                 .attr("id", handlesContainerId)

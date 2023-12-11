@@ -11,8 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { labelFunction } from "../axis/axisLabel";
-import { DataRow, Settings } from "../types";
+import { DataRowsWithKey, Settings } from "../types";
 import { splitIntoMultiSeries } from "./splitIntoMultiSeries";
+import { DataRow } from "@finos/perspective";
 
 type MappedSeries = {
     crossValue: any;
@@ -29,14 +30,26 @@ interface MappedSeriesArray extends Array<MappedSeries> {
     key: string;
 }
 
-export interface DataRowsWithKey extends Array<DataRow> {
-    key?: string;
-}
-
 export function ohlcData(settings: Settings, data: DataRowsWithKey) {
     return splitIntoMultiSeries(settings, data, { excludeEmpty: true }).map(
         (data) => seriesToOHLC(settings, data)
     );
+}
+
+function getOHLCValue(realValue: string, col: DataRow): number | undefined {
+    if (!!realValue) {
+        let value = col[realValue];
+
+        if (typeof value === "string") {
+            return parseFloat(value);
+        }
+
+        if (typeof value !== "number") {
+            return undefined;
+        }
+    }
+
+    return undefined;
 }
 
 function seriesToOHLC(
@@ -47,12 +60,9 @@ function seriesToOHLC(
     const getNextOpen = (i) =>
         data[i < data.length - 1 ? i + 1 : i][settings.realValues[0]];
     const mappedSeries: any = data.map((col, i) => {
-        const openValue = !!settings.realValues[0]
-            ? col[settings.realValues[0]]
-            : undefined;
-        const closeValue = !!settings.realValues[1]
-            ? col[settings.realValues[1]]
-            : getNextOpen(i);
+        const openValue = getOHLCValue(settings.realValues[0], col);
+        const closeValue = getOHLCValue(settings.realValues[1], col);
+
         return {
             crossValue: labelfn(col, i),
             mainValues: settings.mainValues.map((v) => col[v.name]),

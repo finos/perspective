@@ -11,7 +11,8 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { groupFromKey } from "../series/seriesKey";
-import { DataRow, Settings } from "../types";
+import { DataRow } from "@finos/perspective";
+import { DataRowsWithKey, Settings } from "../types";
 
 export function filterData(
     settings: Settings,
@@ -30,7 +31,7 @@ export function filterData(
         : useData;
 }
 
-export function filterDataByGroup(settings: Settings) {
+export function filterDataByGroup(settings: Settings): DataRowsWithKey {
     const newData = settings.data;
     const hideKeysLen = settings.hideKeys?.length ?? 0;
     const splitValsLen = settings.splitValues.length;

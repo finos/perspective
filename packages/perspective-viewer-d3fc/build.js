@@ -15,7 +15,7 @@ const {
 } = require("@finos/perspective-esbuild-plugin/external");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 const util = require("node:util");
-const exec = util.promisify(require("node:child_process").exec);
+const execSync = util.promisify(require("node:child_process").execSync);
 
 const BUILD = [
     {
@@ -97,7 +97,16 @@ async function compile_css() {
 async function build_all() {
     // esbuild can handle typescript files, and strips out types from the output,
     // but it is unable to check types, so we must run tsc as a separate step.
-    await exec("tsc");
+    try {
+        await execSync("tsc", { stdio: "inherit" });
+    } catch (error) {
+        console.error(error);
+        // tsc errors tend to get buried when running multiple package builds. If
+        // the perspective-viewer-d3fc build fails, then plugins will not be present
+        // when running tests, leading to a large number of tests failing, but without
+        // a great indication of why.
+        process.exit(1);
+    }
 
     await compile_css();
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));

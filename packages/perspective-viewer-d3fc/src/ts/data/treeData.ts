@@ -12,7 +12,16 @@
 
 import * as d3 from "d3";
 import { toValue } from "../tooltip/selectionData";
-import { Settings, TreeData } from "../types";
+import { Settings } from "../types";
+import { RowPath } from "@finos/perspective";
+
+export type TreeData = {
+    name: string;
+    children: unknown;
+    size?: number;
+    color?: number;
+    tooltip?: unknown[];
+};
 
 export function treeData(settings: Settings) {
     const sets = {};
@@ -20,7 +29,10 @@ export function treeData(settings: Settings) {
         x === null ? null : settings.mainValues.find((y) => y.name === x)
     );
     settings.data.forEach((d, j) => {
-        const groups = d.__ROW_PATH__;
+        const groups = Array.isArray(d.__ROW_PATH__)
+            ? (d.__ROW_PATH__ as RowPath)
+            : [];
+
         const splits = getSplitNames(d);
         splits.forEach((split) => {
             let currentLevel;

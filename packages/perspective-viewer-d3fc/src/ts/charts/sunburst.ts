@@ -74,7 +74,7 @@ function sunburst(container, settings: Settings) {
             data: SunburstData;
         }) {
             const sunburstElement = d3.select(this);
-            const svgNode: SVGAElement = this.parentNode;
+            const svgNode: SVGElement = this.parentNode;
             const { width, height } = svgNode.getBoundingClientRect();
 
             const radius =

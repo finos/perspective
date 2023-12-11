@@ -23,66 +23,63 @@ import withGridLines from "../gridlines/gridlines";
 
 import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
-import { Chart, Settings } from "../types";
+import { Settings } from "../types";
 
-export default ((): Chart => {
-    function barChart(container, settings: Settings) {
-        const data = groupAndStackData(settings, filterData(settings));
-        const color = seriesColors(settings);
+function barChart(container, settings: Settings) {
+    const data = groupAndStackData(settings, filterData(settings));
+    const color = seriesColors(settings);
 
-        const legend = colorLegend().settings(settings).scale(color);
+    const legend = colorLegend().settings(settings).scale(color);
 
-        const bars = barSeries(settings, color).orient("horizontal");
-        const series = fc
-            .seriesSvgMulti()
-            .mapping((data, index) => data[index])
-            .series(data.map(() => bars));
+    const bars = barSeries(settings, color).orient("horizontal");
+    const series = fc
+        .seriesSvgMulti()
+        .mapping((data, index) => data[index])
+        .series(data.map(() => bars));
 
-        const xAxis = axisFactory(settings)
-            .settingName("mainValues")
-            .valueName("mainValue")
-            .memoValue(settings.axisMemo[0])
-            .excludeType(AXIS_TYPES.ordinal)
-            .include([0])
-            .paddingStrategy(hardLimitZeroPadding())(data);
-        const yAxis = axisFactory(settings)
-            .excludeType(AXIS_TYPES.linear)
-            .settingName("crossValues")
-            .valueName("crossValue")
-            .orient("vertical")(data);
+    const xAxis = axisFactory(settings)
+        .settingName("mainValues")
+        .valueName("mainValue")
+        .memoValue(settings.axisMemo[0])
+        .excludeType(AXIS_TYPES.ordinal)
+        .include([0])
+        .paddingStrategy(hardLimitZeroPadding())(data);
+    const yAxis = axisFactory(settings)
+        .excludeType(AXIS_TYPES.linear)
+        .settingName("crossValues")
+        .valueName("crossValue")
+        .orient("vertical")(data);
 
-        const chart = chartSvgFactory(xAxis, yAxis).plotArea(
-            withGridLines(series, settings).orient("horizontal")
-        );
+    const chart = chartSvgFactory(xAxis, yAxis).plotArea(
+        withGridLines(series, settings).orient("horizontal")
+    );
 
-        if (chart.yPaddingInner) {
-            chart.yPaddingInner(0.5);
-            chart.yPaddingOuter(0.25);
-            bars.align("left");
-        }
-        chart.xNice && chart.xNice();
-
-        const zoomChart = zoomableChart()
-            .chart(chart)
-            .settings(settings)
-            .yScale(yAxis.scale);
-
-        // render
-        container.datum(data).call(zoomChart);
-        container.call(legend);
+    if (chart.yPaddingInner) {
+        chart.yPaddingInner(0.5);
+        chart.yPaddingOuter(0.25);
+        bars.align("left");
     }
+    chart.xNice && chart.xNice();
 
-    barChart.plugin = {
-        name: "X Bar",
-        category: "X Chart",
-        max_cells: 1000,
-        max_columns: 50,
-        render_warning: true,
-        initial: {
-            names: ["X Axis"],
-        },
-    };
-    return barChart;
-})();
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .yScale(yAxis.scale);
 
-// export default myBarChart;
+    // render
+    container.datum(data).call(zoomChart);
+    container.call(legend);
+}
+
+barChart.plugin = {
+    name: "X Bar",
+    category: "X Chart",
+    max_cells: 1000,
+    max_columns: 50,
+    render_warning: true,
+    initial: {
+        names: ["X Axis"],
+    },
+};
+
+export default barChart;

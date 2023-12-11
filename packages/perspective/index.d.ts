@@ -82,6 +82,13 @@ declare module "@finos/perspective" {
         end_col?: number;
     }
 
+    // RowPath is the __ROW_PATH__ column on a Data Row. It is kept as a separate
+    // type for now because if it was added to DataRow, the resulting type for properties
+    // would be a union of string | boolean | Date | number | (string | number)[], which is
+    // not specific enough.
+    export type RowPath = (string | number)[];
+    export type DataRow = Record<string, string | boolean | Date | number>;
+
     /**** View ****/
     export type View = {
         delete(): Promise<void>;
@@ -101,9 +108,7 @@ declare module "@finos/perspective" {
         to_csv(
             options?: SerializeConfig & { config: unknown }
         ): Promise<string>;
-        to_json(
-            options?: SerializeConfig
-        ): Promise<Array<Record<string, string | boolean | Date | number>>>;
+        to_json(options?: SerializeConfig): Promise<Array<DataRow>>;
     };
 
     /**** Table ****/

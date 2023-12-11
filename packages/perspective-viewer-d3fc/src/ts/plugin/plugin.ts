@@ -58,19 +58,18 @@ function getD3FCStyles(): string {
     return d3fcStyles.join("");
 }
 
-async function register_element(plugin_name) {
-    const perspectiveViewerClass: typeof HTMLPerspectiveViewerElement =
-        customElements.get("perspective-viewer");
+async function register_element(plugin_name: string) {
+    const perspectiveViewerClass = customElements.get("perspective-viewer");
 
     await perspectiveViewerClass.registerPlugin(plugin_name);
 }
 
-// Is this register function only called by the index.ts file?
-// There are no arguments passed into it there, so maybe the ""...plugins"
-// args can be removed.
-export function register(_name?: string) {
-    // I...really can't tell if the name should or shouldn't be passed in.... I mean, it's not used...
-    let plugins = new Set(charts.map((chart) => chart.plugin.name));
+export function register(...plugin_names: string[]) {
+    const plugins = new Set(
+        plugin_names.length > 0
+            ? plugin_names
+            : charts.map((chart) => chart.plugin.name)
+    );
     charts.forEach((chart) => {
         if (plugins.has(chart.plugin.name)) {
             const name = chart.plugin.name
@@ -205,13 +204,14 @@ export function register(_name?: string) {
 
                         for (const svg of svgs.reverse()) {
                             var img = document.createElement("img");
-                            // document.body.appendChild(img);
-                            img.width = (
-                                svg.parentNode as HTMLElement
-                            ).offsetWidth;
-                            img.height = (
-                                svg.parentNode as HTMLElement
-                            ).offsetHeight;
+
+                            const defaultOffset = 0;
+                            img.width = svg.parentElement
+                                ? svg.parentElement.offsetWidth
+                                : defaultOffset;
+                            img.height = svg.parentElement
+                                ? svg.parentElement.offsetHeight
+                                : defaultOffset;
 
                             // Pretty sure this is a chrome bug - `drawImage()` call
                             // without this scales incorrectly.

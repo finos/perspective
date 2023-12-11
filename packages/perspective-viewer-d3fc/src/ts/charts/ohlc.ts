@@ -12,25 +12,20 @@
 
 import { seriesCanvasOhlc } from "d3fc";
 import ohlcCandle from "./ohlcCandle";
-import { Chart } from "../types";
 
-const ohlc = ((): Chart => {
-    const ohlc: any = ohlcCandle(seriesCanvasOhlc);
-    ohlc.plugin = {
-        name: "OHLC",
-        category: "Y Chart",
-        max_cells: 3500,
-        max_columns: 50,
-        render_warning: true,
-        initial: {
-            type: "number",
-            count: 1,
-            names: ["Open", "Close", "High", "Low", "Tooltip"],
-        },
-        selectMode: "toggle",
-    };
-
-    return ohlc;
-})();
+const ohlc = ohlcCandle(seriesCanvasOhlc);
+ohlc.plugin = {
+    name: "OHLC",
+    category: "Y Chart",
+    max_cells: 3500,
+    max_columns: 50,
+    render_warning: true,
+    initial: {
+        type: "number",
+        count: 1,
+        names: ["Open", "Close", "High", "Low", "Tooltip"],
+    },
+    selectMode: "toggle",
+};
 
 export default ohlc;

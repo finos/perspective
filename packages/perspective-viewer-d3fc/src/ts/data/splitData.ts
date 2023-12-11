@@ -11,12 +11,13 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { labelFunction } from "../axis/axisLabel";
-import { DataRow, Settings } from "../types";
+import { Settings } from "../types";
+import { DataRow } from "@finos/perspective";
 
 export type SplitData = {
     key: string;
     crossValue: string;
-    mainValue: number;
+    mainValue: string | number | boolean | Date;
     row: DataRow;
 };
 

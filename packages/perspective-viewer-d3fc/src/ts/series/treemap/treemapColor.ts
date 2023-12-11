@@ -12,7 +12,8 @@
 
 import { seriesColorRange } from "../seriesRange";
 import { seriesColorsFromDistinct } from "../seriesColors";
-import { Settings, TreeData } from "../../types";
+import { Settings } from "../../types";
+import { TreeData } from "../../data/treeData";
 
 export function treeColor(
     settings: Settings,

@@ -23,9 +23,9 @@ import nearbyTip from "../tooltip/nearbyTip";
 import { ohlcCandleSeries } from "../series/ohlcCandleSeries";
 import { colorScale, setOpacity } from "../series/seriesColors";
 import { colorLegend } from "../legend/legend";
-import { Settings } from "../types";
+import { Chart, Settings } from "../types";
 
-function ohlcCandle(seriesCanvas) {
+function ohlcCandle(seriesCanvas): Chart {
     return function (container, settings: Settings) {
         const srcData = ohlcData(settings, filterDataByGroup(settings));
 

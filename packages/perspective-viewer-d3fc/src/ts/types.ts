@@ -10,7 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { IPerspectiveViewerElement } from "@finos/perspective-viewer";
+import { IPerspectiveViewerPlugin } from "@finos/perspective-viewer";
+import { DataRow, Type } from "@finos/perspective";
 
 export interface Element {
     msMatchesSelector(selectors: string): boolean;
@@ -18,7 +19,7 @@ export interface Element {
 
 export interface Chart {
     (container: any, settings: any): void;
-    plugin: {
+    plugin?: {
         name: string;
         category: string;
         max_cells: number;
@@ -68,15 +69,15 @@ export type ColorStyles = {
     [key: `series-${number}`]: string;
 };
 
-export type DataRow = Record<string, any>; // might want to specify __ROW_PATH__
-
 export type TextStyles = Record<string, string>; // Should this be optional?
 
-export type DataRows = DataRow[];
+export type DataRowsWithKey = DataRow[] & {
+    key?: string;
+};
 
 export type MainValue = {
     name: string;
-    type: string; // integer, float, string, date, datetime, boolean
+    type: Type;
 };
 
 // NOTE: Should these props be optional?
@@ -182,18 +183,14 @@ export type HTMLSelection<E extends d3.BaseType = HTMLElement> = d3.Selection<
     unknown
 >;
 
-export interface ChartElement extends IPerspectiveViewerElement {
+export interface ChartElement extends IPerspectiveViewerPlugin {
     _chart: Chart | null;
     _settings: Settings | null;
     render_warning: boolean;
     _initialized: boolean;
     _container: HTMLElement;
 
-    get name(): string;
     get category(): string;
-    get select_mode(): string;
-    get min_config_columns(): number;
-    get config_column_names(): string[];
 
     get max_cells(): number;
     set max_cells(value: number);
@@ -214,12 +211,3 @@ export interface ChartElement extends IPerspectiveViewerElement {
 
     getContainer(): HTMLElement;
 }
-
-// TODO: What type should this actually be?
-export type TreeData = {
-    name: string;
-    children: unknown;
-    size?: number;
-    color?: number;
-    tooltip?: unknown[];
-};

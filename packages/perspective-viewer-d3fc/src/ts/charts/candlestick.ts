@@ -12,25 +12,21 @@
 
 import { seriesCanvasCandlestick } from "d3fc";
 import ohlcCandle from "./ohlcCandle";
-import { Chart } from "../types";
 
-const candlestick = ((): Chart => {
-    let candlestick: any = ohlcCandle(seriesCanvasCandlestick);
-    candlestick.plugin = {
-        name: "Candlestick",
-        category: "Y Chart",
-        max_cells: 4000,
-        max_columns: 50,
-        render_warning: true,
-        initial: {
-            type: "number",
-            count: 1,
-            names: ["Open", "Close", "High", "Low", "Tooltip"],
-        },
-        selectMode: "toggle",
-    };
+let candlestick = ohlcCandle(seriesCanvasCandlestick);
 
-    return candlestick;
-})();
+candlestick.plugin = {
+    name: "Candlestick",
+    category: "Y Chart",
+    max_cells: 4000,
+    max_columns: 50,
+    render_warning: true,
+    initial: {
+        type: "number",
+        count: 1,
+        names: ["Open", "Close", "High", "Low", "Tooltip"],
+    },
+    selectMode: "toggle",
+};
 
 export default candlestick;
