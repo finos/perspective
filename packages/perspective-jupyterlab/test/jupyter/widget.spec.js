@@ -410,6 +410,20 @@ assert w.theme == "Pro Dark"
             }
         );
 
+        test_jupyter("Restores from saved config", [], async ({ page }) => {
+            await execute_all_cells(page);
+            let errored = await assert_no_error_in_cell(
+                page,
+                `
+                table = perspective.Table(arrow_data)
+                w = perspective.PerspectiveWidget(table)
+                config = w.save()
+                perpsective.PerspectiveWidget(df, **config)
+                `
+            );
+            expect(errored).toBe(false);
+        });
+
         // *************************
         // UTILS
         // *************************
