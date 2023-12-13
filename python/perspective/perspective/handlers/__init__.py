@@ -11,8 +11,20 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from .common import PerspectiveHandlerBase
-from .aiohttp import PerspectiveAIOHTTPHandler
-from .starlette import PerspectiveStarletteHandler
-from .tornado import PerspectiveTornadoHandler
 
-__all__ = ["PerspectiveHandlerBase", "PerspectiveAIOHTTPHandler", "PerspectiveStarletteHandler", "PerspectiveTornadoHandler"]
+try:
+    from .aiohttp import PerspectiveAIOHTTPHandler
+except ImportError:
+    ...
+
+try:
+    from .starlette import PerspectiveStarletteHandler
+except ImportError:
+    ...
+
+try:
+    from .tornado import PerspectiveTornadoHandler
+except ImportError:
+    ...
+
+__all__ = ["PerspectiveHandlerBase", "PerspectiveAIOHTTPHandler", "PerspectiveStarletteHandler", "PerspectiveTornadoHandler" ]
