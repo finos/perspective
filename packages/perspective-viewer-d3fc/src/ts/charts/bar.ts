@@ -23,9 +23,9 @@ import withGridLines from "../gridlines/gridlines";
 
 import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
-import { Settings } from "../types";
+import { HTMLSelection, Settings } from "../types";
 
-function barChart(container, settings: Settings) {
+function barChart(container: HTMLSelection, settings: Settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const color = seriesColors(settings);
 

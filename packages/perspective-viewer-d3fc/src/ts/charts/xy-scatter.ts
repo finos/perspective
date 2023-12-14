@@ -25,7 +25,7 @@ import { filterDataByGroup } from "../legend/filter";
 import { symbolsObj } from "../series/seriesSymbols";
 import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
 import xyScatterSeries from "../series/xy-scatter/xyScatterSeries";
-import { D3Scale, Settings } from "../types";
+import { D3Scale, HTMLSelection, Settings } from "../types";
 
 /**
  * Overrides specific symbols based on plugin settings. This modifies in-place _and_ returns the value.
@@ -69,7 +69,7 @@ function overrideSymbols(settings, symbols): D3Scale {
     return symbols;
 }
 
-function xyScatter(container, settings: Settings) {
+function xyScatter(container: HTMLSelection, settings: Settings) {
     const colorBy = settings.realValues[2];
     let hasColorBy = !!colorBy;
     let isColoredByString =

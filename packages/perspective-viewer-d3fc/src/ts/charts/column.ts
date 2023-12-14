@@ -28,9 +28,9 @@ import { filterData } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
-import { Settings } from "../types";
+import { HTMLSelection, Settings } from "../types";
 
-function columnChart(container, settings: Settings) {
+function columnChart(container: HTMLSelection, settings: Settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const color = seriesColors(settings);
 

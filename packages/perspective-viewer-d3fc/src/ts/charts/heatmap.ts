@@ -21,9 +21,9 @@ import withGridLines from "../gridlines/gridlines";
 import { colorRangeLegend } from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import { Settings } from "../types";
+import { HTMLSelection, Settings } from "../types";
 
-function heatmapChart(container, settings: Settings) {
+function heatmapChart(container: HTMLSelection, settings: Settings) {
     const data = heatmapData(settings, filterData(settings));
 
     const color = seriesColorRange(settings, data, "colorValue");

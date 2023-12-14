@@ -23,10 +23,10 @@ import nearbyTip from "../tooltip/nearbyTip";
 import { ohlcCandleSeries } from "../series/ohlcCandleSeries";
 import { colorScale, setOpacity } from "../series/seriesColors";
 import { colorLegend } from "../legend/legend";
-import { Chart, Settings } from "../types";
+import { Chart, HTMLSelection, Settings } from "../types";
 
 function ohlcCandle(seriesCanvas): Chart {
-    return function (container, settings: Settings) {
+    return function (container: HTMLSelection, settings: Settings) {
         const srcData = ohlcData(settings, filterDataByGroup(settings));
 
         const bollinger = fc

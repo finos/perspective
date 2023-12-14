@@ -18,9 +18,9 @@ import { tooltip } from "../tooltip/tooltip";
 import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
 import { colorRangeLegend } from "../legend/colorRangeLegend";
 import { colorLegend } from "../legend/legend";
-import { Settings } from "../types";
+import { HTMLSelection, Settings } from "../types";
 
-function treemap(container, settings: Settings) {
+function treemap(container: HTMLSelection, settings: Settings) {
     if (!settings.treemaps) settings.treemaps = {};
 
     const data = treeData(settings);

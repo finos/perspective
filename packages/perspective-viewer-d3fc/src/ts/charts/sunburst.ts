@@ -21,9 +21,9 @@ import { tooltip } from "../tooltip/tooltip";
 import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
 import { colorRangeLegend } from "../legend/colorRangeLegend";
 import { colorLegend } from "../legend/legend";
-import { Settings } from "../types";
+import { HTMLSelection, Settings } from "../types";
 
-function sunburst(container, settings: Settings) {
+function sunburst(container: HTMLSelection, settings: Settings) {
     const data = treeData(settings);
     const color = treeColor(settings, data);
     const sunburstGrid = gridLayoutMultiChart().elementsPrefix("sunburst");

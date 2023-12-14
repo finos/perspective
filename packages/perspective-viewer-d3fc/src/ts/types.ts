@@ -18,7 +18,7 @@ export interface Element {
 }
 
 export interface Chart {
-    (container: any, settings: any): void;
+    (container: HTMLSelection, settings: Settings): void;
     plugin?: {
         name: string;
         category: string;

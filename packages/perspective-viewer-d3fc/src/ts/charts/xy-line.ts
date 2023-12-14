@@ -24,9 +24,9 @@ import withGridLines from "../gridlines/gridlines";
 import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import { Settings } from "../types";
+import { HTMLSelection, Settings } from "../types";
 
-function xyLine(container, settings: Settings) {
+function xyLine(container: HTMLSelection, settings: Settings) {
     const data = transposeData(
         xySplitData(settings, filterDataByGroup(settings))
     );
