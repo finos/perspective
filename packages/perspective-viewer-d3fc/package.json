@@ -6,7 +6,7 @@
     "jsdelivr": "./dist/cdn/perspective-viewer-d3fc.js",
     "exports": {
         ".": {
-            "types": "./dist/esm/index.d.ts",
+            "types": "./dist/esm/types/index.d.ts",
             "default": "./dist/esm/perspective-viewer-d3fc.js"
         },
         "./src/*": "./src/*",
@@ -30,7 +30,7 @@
         "src/**/*",
         "index.d.ts"
     ],
-    "types": "dist/esm/index.d.ts",
+    "types": "dist/esm/types/index.d.ts",
     "scripts": {
         "prebuild": "mkdirp dist/esm",
         "build": "node ./build.js",

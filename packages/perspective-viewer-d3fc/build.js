@@ -95,6 +95,11 @@ async function compile_css() {
 }
 
 async function build_all() {
+    // NOTE: compile_css and other build step must be run before tsc, because
+    // (for now) nothing runs after the tsc step.
+    await compile_css();
+    await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
+
     // esbuild can handle typescript files, and strips out types from the output,
     // but it is unable to check types, so we must run tsc as a separate step.
     try {
@@ -107,9 +112,6 @@ async function build_all() {
         // a great indication of why.
         process.exit(1);
     }
-
-    await compile_css();
-    await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 
 build_all();

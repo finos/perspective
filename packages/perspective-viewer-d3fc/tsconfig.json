@@ -5,7 +5,7 @@
     "declaration": true,
     "diagnostics": true,
     "emitDeclarationOnly": true,
-    "outDir": "dist/esm",
+    "outDir": "dist/esm/types",
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
