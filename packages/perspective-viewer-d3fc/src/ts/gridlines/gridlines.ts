@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as fc from "d3fc";
-import { GetSetReturn } from "../types";
+import { D3Scale, Orientation } from "../types";
 
 const mainGridSvg = (settings) => (x) =>
     x
@@ -34,12 +34,21 @@ const crossGridCanvas = (settings) => (c) => {
 
 export interface WithGridLines {
     (...args): any;
-    orient: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, WithGridLines>;
-    canvas: <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, boolean, WithGridLines>;
+
+    orient(): Orientation;
+    orient(nextOrient: Orientation): WithGridLines;
+
+    canvas(): boolean;
+    canvas(nextCanvas: boolean): WithGridLines;
+
+    xScale(): D3Scale;
+    xScale(xScale: D3Scale): WithGridLines;
+
+    yScale(): D3Scale;
+    yScale(yScale: D3Scale): WithGridLines;
+
+    context(): any;
+    context(context: any): WithGridLines;
 }
 
 export default (series, settings): WithGridLines => {
@@ -54,7 +63,7 @@ export default (series, settings): WithGridLines => {
     let mainGrid = mainGridSvg(settings);
     let crossGrid = crossGridSvg;
 
-    const _withGridLines: any = function (...args) {
+    const _withGridLines: Partial<WithGridLines> = function (...args) {
         if (canvas) {
             seriesMulti = fc.seriesCanvasMulti().context(context);
             annotationGridline = fc.annotationCanvasGridline();
@@ -74,7 +83,7 @@ export default (series, settings): WithGridLines => {
         return multi.series([gridlines, series])(...args);
     };
 
-    _withGridLines.orient = (...args) => {
+    _withGridLines.orient = (...args: Orientation[]): any => {
         if (!args.length) {
             return orient;
         }
@@ -82,17 +91,15 @@ export default (series, settings): WithGridLines => {
         return _withGridLines;
     };
 
-    _withGridLines.canvas = <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, boolean, WithGridLines> => {
+    _withGridLines.canvas = (...args: boolean[]): any => {
         if (!args.length) {
-            return canvas as GetSetReturn<T, boolean, WithGridLines>;
+            return canvas;
         }
         canvas = args[0];
         return _withGridLines;
     };
 
-    _withGridLines.xScale = (...args) => {
+    _withGridLines.xScale = (...args): any => {
         if (!args.length) {
             return xScale;
         }
@@ -100,7 +107,7 @@ export default (series, settings): WithGridLines => {
         return _withGridLines;
     };
 
-    _withGridLines.yScale = (...args) => {
+    _withGridLines.yScale = (...args): any => {
         if (!args.length) {
             return yScale;
         }
@@ -108,7 +115,7 @@ export default (series, settings): WithGridLines => {
         return _withGridLines;
     };
 
-    _withGridLines.context = (...args) => {
+    _withGridLines.context = (...args): any => {
         if (!args.length) {
             return context;
         }
@@ -116,5 +123,5 @@ export default (series, settings): WithGridLines => {
         return _withGridLines;
     };
 
-    return _withGridLines;
+    return _withGridLines as WithGridLines;
 };

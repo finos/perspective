@@ -13,7 +13,7 @@
 import * as d3 from "d3";
 import { groupFromKey } from "./seriesKey";
 import { getValuesByColumn } from "../data/utils";
-import { GetSetReturn, Settings } from "../types";
+import { Settings } from "../types";
 
 export function seriesColors(
     settings: Settings
@@ -60,18 +60,18 @@ type ColorScaleMapFunc = (d: any) => string;
 
 interface ColorScale {
     (): d3.ScaleOrdinal<string, unknown> | null;
-    settings: <T extends Settings | undefined = undefined>(
-        nextSettings?: T
-    ) => GetSetReturn<T, Settings, ColorScale>;
-    domain: <T extends any[] | undefined = undefined>(
-        nextDomain?: T
-    ) => GetSetReturn<T, any[], ColorScale>;
-    defaultColors: <T extends string[] | undefined = undefined>(
-        nextDefaultColors?: T
-    ) => GetSetReturn<T, string[], ColorScale>;
-    mapFunction: <T extends ColorScaleMapFunc | undefined = undefined>(
-        nextMapFunction?: T
-    ) => GetSetReturn<T, ColorScaleMapFunc, ColorScale>;
+
+    settings(): Settings;
+    settings(nextSettings: Settings): ColorScale;
+
+    domain(): any[];
+    domain(nextDomain: any[]): ColorScale;
+
+    defaultColors(): string[];
+    defaultColors(nextDefaultColors: string[]): ColorScale;
+
+    mapFunction(): ColorScaleMapFunc;
+    mapFunction(nextMapFunction: ColorScaleMapFunc): ColorScale;
 }
 
 export function colorScale(): ColorScale {
@@ -81,7 +81,7 @@ export function colorScale(): ColorScale {
     let mapFunction = (d) =>
         withOpacity(d, settings.colorStyles && settings.colorStyles.opacity);
 
-    const colors: any = (): d3.ScaleOrdinal<string, unknown> | null => {
+    const colors: ColorScale = (): d3.ScaleOrdinal<string, unknown> | null => {
         const styles = settings.colorStyles;
         const defaults = defaultColors || [styles.series];
         if (defaults || domain.length > 1) {
@@ -91,52 +91,40 @@ export function colorScale(): ColorScale {
         return null;
     };
 
-    colors.domain = <T extends any[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, any[], ColorScale> => {
+    colors.domain = (...args: any[][]): any => {
         if (args.length === 0) {
-            return domain as GetSetReturn<T, any[], ColorScale>;
+            return domain;
         }
         domain = args[0];
         return colors;
     };
 
-    colors.defaultColors = <T extends string[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string[], ColorScale> => {
+    colors.defaultColors = (...args: string[][]): any => {
         if (!args.length) {
-            return defaultColors as GetSetReturn<T, string[], ColorScale>;
+            return defaultColors;
         }
         defaultColors = args[0];
         return colors;
     };
 
-    colors.mapFunction = <T extends ColorScaleMapFunc | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ColorScaleMapFunc, ColorScale> => {
+    colors.mapFunction = (...args: ColorScaleMapFunc[]): any => {
         if (!args.length) {
-            return mapFunction as GetSetReturn<
-                T,
-                ColorScaleMapFunc,
-                ColorScale
-            >;
+            return mapFunction;
         }
         mapFunction = args[0];
         return colors;
     };
 
-    colors.settings = <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Settings, ColorScale> => {
+    colors.settings = (...args: Settings[]): any => {
         if (!args.length) {
-            return settings as GetSetReturn<T, Settings, ColorScale>;
+            return settings;
         }
         settings = args[0];
 
         return colors;
     };
 
-    return colors;
+    return colors as ColorScale;
 }
 
 export function withoutOpacity(color) {

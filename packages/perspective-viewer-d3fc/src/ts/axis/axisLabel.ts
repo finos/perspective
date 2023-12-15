@@ -16,7 +16,7 @@ import { labelFunction as noLabel } from "./noAxis";
 import { labelFunction as timeLabel } from "./timeAxis";
 import { labelFunction as linearLabel } from "./linearAxis";
 import { labelFunction as ordinalLabel } from "./ordinalAxis";
-import { GetSetReturn, Settings } from "../types";
+import { Settings } from "../types";
 
 const labelFunctions = {
     none: noLabel,
@@ -28,30 +28,28 @@ const labelFunctions = {
 export interface LabelFunction {
     // NOTE: this "i" is not used...
     (d, i?: any): string;
-    valueName: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, LabelFunction>;
+    valueName(): string;
+    valueName(nextValueName: string): this;
 }
 
 export const labelFunction = (settings: Settings): LabelFunction => {
     const base = axisType(settings);
     let valueName = "__ROW_PATH__";
 
-    const label: any = (d, _i) => {
+    const label: Partial<LabelFunction> = (d, _i) => {
         return labelFunctions[base()](valueName)(d);
     };
 
     rebindAll(label, base);
 
-    label.valueName = <T extends string | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string, LabelFunction> => {
+    label.valueName = (...args: string[]): any => {
         if (!args.length) {
-            return valueName as GetSetReturn<T, string, LabelFunction>;
+            return valueName;
         }
+
         valueName = args[0];
         return label;
     };
 
-    return label;
+    return label as LabelFunction;
 };

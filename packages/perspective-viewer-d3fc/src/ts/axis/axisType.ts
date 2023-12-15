@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { GetSetReturn, Settings, SettingNameValues } from "../types";
+import { Settings, SettingNameValues } from "../types";
 
 export const AXIS_TYPES = {
     none: "none",
@@ -23,15 +23,15 @@ export type AxisTypeValues = typeof AXIS_TYPES[keyof typeof AXIS_TYPES];
 
 export interface AxisType {
     (): AxisTypeValues;
-    settingName: <T extends SettingNameValues | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, SettingNameValues, AxisType>;
-    settingValue: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, AxisType>;
-    excludeType: <T extends AxisTypeValues | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, AxisTypeValues, AxisType>;
+
+    settingName(): SettingNameValues;
+    settingName(nextSettingName: SettingNameValues): this;
+
+    settingValue(): string;
+    settingValue(nextSettingValue: string): this;
+
+    excludeType(): AxisTypeValues;
+    excludeType(nextExcludeType: AxisTypeValues): this;
 }
 
 export const axisType = (settings: Settings): AxisType => {
@@ -39,7 +39,7 @@ export const axisType = (settings: Settings): AxisType => {
     let settingValue = null;
     let excludeType = null;
 
-    const getType: any = (): AxisTypeValues | boolean => {
+    const getType: Partial<AxisType> = (): AxisTypeValues | boolean => {
         const checkTypes = (types) => {
             const list = settingValue
                 ? settings[settingName].filter((s) => settingValue == s.name)
@@ -74,35 +74,30 @@ export const axisType = (settings: Settings): AxisType => {
         return AXIS_TYPES.ordinal;
     };
 
-    getType.settingName = <T extends SettingNameValues | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, SettingNameValues, AxisType> => {
+    getType.settingName = (...args: SettingNameValues[]): any => {
         if (!args.length) {
-            return settingName as GetSetReturn<T, SettingNameValues, AxisType>;
+            return settingName;
         }
         settingName = args[0];
         return getType;
     };
 
-    getType.settingValue = <T extends string | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string, AxisType> => {
+    getType.settingValue = (...args: (string | undefined)[]): any => {
         if (!args.length) {
-            return settingValue as GetSetReturn<T, string, AxisType>;
+            return settingValue;
         }
+
         settingValue = args[0];
         return getType;
     };
 
-    getType.excludeType = <T extends AxisTypeValues | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, AxisTypeValues, AxisType> => {
+    getType.excludeType = (...args: AxisTypeValues[]): any => {
         if (!args.length) {
-            return excludeType as GetSetReturn<T, AxisTypeValues, AxisType>;
+            return excludeType;
         }
         excludeType = args[0];
         return getType;
     };
 
-    return getType;
+    return getType as AxisType;
 };

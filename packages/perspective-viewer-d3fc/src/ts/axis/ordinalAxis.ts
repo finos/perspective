@@ -24,7 +24,7 @@ import { getChartContainer } from "../plugin/root";
 import {
     Component,
     ComponentData,
-    GetSetReturn,
+    Domain,
     Orientation,
     SettingNameValues,
     Settings,
@@ -38,22 +38,22 @@ export const scale = () => minBandwidth(d3.scaleBand()).padding(0.5);
 
 interface OrdinalAxisDomain {
     (data: any): any;
-    valueName: <T extends ValueName | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, ValueName, OrdinalAxisDomain>;
-    valueNames: <T extends ValueName[] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, ValueName[], OrdinalAxisDomain>;
-    orient: <T extends Orientation | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Orientation, OrdinalAxisDomain>;
+
+    valueName(): ValueName;
+    valueName(nextValueName: ValueName): this;
+
+    valueNames(): ValueName[];
+    valueNames(nextValueNames: ValueName[]): this;
+
+    orient(): Orientation;
+    orient(nextOrient: Orientation): this;
 }
 
 export const domain = (): OrdinalAxisDomain => {
     let valueNames = ["crossValue"];
     let orient = "horizontal";
 
-    const _domain: any = (data) => {
+    const _domain: Partial<Domain> = (data) => {
         const flattenedData = flattenArray(data);
         return transformDomain([
             ...Array.from(new Set(flattenedData.map((d) => d[valueNames[0]]))),
@@ -62,44 +62,31 @@ export const domain = (): OrdinalAxisDomain => {
 
     const transformDomain = (d) => (orient == "vertical" ? d.reverse() : d);
 
-    _domain.valueName = <T extends ValueName | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName, OrdinalAxisDomain> => {
+    _domain.valueName = (...args: ValueName[]): any => {
         if (!args.length) {
-            return valueNames[0] as GetSetReturn<
-                T,
-                ValueName,
-                OrdinalAxisDomain
-            >;
+            return valueNames[0];
         }
         valueNames = [args[0]];
         return _domain;
     };
-    _domain.valueNames = <T extends ValueName[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName[], OrdinalAxisDomain> => {
+
+    _domain.valueNames = (...args: ValueName[][]): any => {
         if (!args.length) {
-            return valueNames as GetSetReturn<
-                T,
-                ValueName[],
-                OrdinalAxisDomain
-            >;
+            return valueNames;
         }
         valueNames = args[0];
         return _domain;
     };
 
-    _domain.orient = <T extends Orientation | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Orientation, OrdinalAxisDomain> => {
+    _domain.orient = (...args: Orientation[]): any => {
         if (!args.length) {
-            return orient as GetSetReturn<T, Orientation, OrdinalAxisDomain>;
+            return orient;
         }
         orient = args[0];
         return _domain;
     };
 
-    return _domain;
+    return _domain as Domain;
 };
 
 export const labelFunction =
@@ -331,33 +318,25 @@ export const component = (settings: Settings): Component => {
         });
     };
 
-    getComponent.orient = <T extends Orientation | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Orientation, Component> => {
+    getComponent.orient = (...args: Orientation[]): any => {
         if (!args.length) {
-            return orient as GetSetReturn<T, Orientation, Component>;
+            return orient;
         }
         orient = args[0];
         return getComponent;
     };
 
-    getComponent.settingName = <
-        T extends SettingNameValues | undefined = undefined
-    >(
-        ...args: T[]
-    ): GetSetReturn<T, SettingNameValues, Component> => {
+    getComponent.settingName = (...args: SettingNameValues[]): any => {
         if (!args.length) {
-            return settingName as GetSetReturn<T, SettingNameValues, Component>;
+            return settingName;
         }
         settingName = args[0];
         return getComponent;
     };
 
-    getComponent.domain = <T extends string[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string[], Component> => {
+    getComponent.domain = (...args: string[][]): any => {
         if (!args.length) {
-            return domain as GetSetReturn<T, string[], Component>;
+            return domain;
         }
         domain = args[0];
         return getComponent;

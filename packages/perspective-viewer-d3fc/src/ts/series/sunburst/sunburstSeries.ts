@@ -13,7 +13,7 @@
 import { drawArc, arcVisible } from "./sunburstArc";
 import { labelVisible, labelTransform, cropLabel } from "./sunburstLabel";
 import { clickHandler } from "./sunburstClick";
-import { D3Scale, GetSetReturn, Settings } from "../../types";
+import { D3Scale, Settings } from "../../types";
 
 export interface SunburstData extends d3.HierarchyNode<any> {
     children: this[];
@@ -39,25 +39,20 @@ export interface SunburstData extends d3.HierarchyNode<any> {
 export interface SunburstSeries {
     (sunburstElement: any): void;
 
-    settings: <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Settings, SunburstSeries>;
+    settings(): Settings;
+    settings(settings: Settings): SunburstSeries;
 
-    split: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, SunburstSeries>;
+    split(): string;
+    split(split: string): SunburstSeries;
 
-    data: <T extends SunburstData | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, SunburstData, SunburstSeries>;
+    data(): SunburstData;
+    data(data: SunburstData): SunburstSeries;
 
-    color: <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, D3Scale, SunburstSeries>;
+    color(): D3Scale;
+    color(color: D3Scale): SunburstSeries;
 
-    radius: <T extends number | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, number, SunburstSeries>;
+    radius(): number;
+    radius(radius: number): SunburstSeries;
 }
 
 export function sunburstSeries(): SunburstSeries {
@@ -67,7 +62,7 @@ export function sunburstSeries(): SunburstSeries {
     let color: D3Scale | null = null;
     let radius = null;
 
-    const _sunburstSeries: any = (sunburstElement) => {
+    const _sunburstSeries: Partial<SunburstSeries> = (sunburstElement) => {
         const segment = sunburstElement
             .selectAll("g.segment")
             .data(data.descendants().slice(1));
@@ -136,55 +131,45 @@ export function sunburstSeries(): SunburstSeries {
             .on("click", (d) => onClick(d, false));
     };
 
-    _sunburstSeries.settings = <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Settings, SunburstSeries> => {
+    _sunburstSeries.settings = (...args: Settings[]): any => {
         if (!args.length) {
-            return settings as GetSetReturn<T, Settings, SunburstSeries>;
+            return settings;
         }
         settings = args[0];
         return _sunburstSeries;
     };
 
-    _sunburstSeries.split = <T extends string | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string, SunburstSeries> => {
+    _sunburstSeries.split = (...args: string[]): any => {
         if (!args.length) {
-            return split as GetSetReturn<T, string, SunburstSeries>;
+            return split;
         }
         split = args[0];
         return _sunburstSeries;
     };
 
-    _sunburstSeries.data = <T extends SunburstData | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, SunburstData, SunburstSeries> => {
+    _sunburstSeries.data = (...args: SunburstData[]): any => {
         if (!args.length) {
-            return data as GetSetReturn<T, SunburstData, SunburstSeries>;
+            return data;
         }
         data = args[0];
         return _sunburstSeries;
     };
 
-    _sunburstSeries.color = <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, D3Scale, SunburstSeries> => {
+    _sunburstSeries.color = (...args: D3Scale[]): any => {
         if (!args.length) {
-            return color as GetSetReturn<T, D3Scale, SunburstSeries>;
+            return color;
         }
         color = args[0];
         return _sunburstSeries;
     };
 
-    _sunburstSeries.radius = <T extends number | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, number, SunburstSeries> => {
+    _sunburstSeries.radius = (...args: number[]): any => {
         if (!args.length) {
-            return radius as GetSetReturn<T, number, SunburstSeries>;
+            return radius;
         }
         radius = args[0];
         return _sunburstSeries;
     };
 
-    return _sunburstSeries;
+    return _sunburstSeries as SunburstSeries;
 }

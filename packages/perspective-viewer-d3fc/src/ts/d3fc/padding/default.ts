@@ -10,13 +10,13 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { GetSetReturn, Pad, PadUnit, PaddingStrategy } from "../../types";
+import { Pad, PadUnit, PaddingStrategy } from "../../types";
 
 export const defaultPadding = (): PaddingStrategy => {
     let pad = [0, 0];
     let padUnit: PadUnit = "percent" as const;
 
-    const padding: any = (extent) => {
+    const padding: Partial<PaddingStrategy> = (extent) => {
         switch (padUnit) {
             case "domain": {
                 extent[0] -= pad[0];
@@ -35,11 +35,9 @@ export const defaultPadding = (): PaddingStrategy => {
         return extent;
     };
 
-    padding.pad = function <T extends Pad | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Pad, PaddingStrategy> {
-        if (args.length === 0) {
-            return pad as GetSetReturn<T, Pad, PaddingStrategy>;
+    padding.pad = function (...args: Pad[]): any {
+        if (!args.length) {
+            return pad;
         }
 
         pad = args[0];
@@ -47,11 +45,9 @@ export const defaultPadding = (): PaddingStrategy => {
         return padding;
     };
 
-    padding.padUnit = function <T extends PadUnit | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, PadUnit, PaddingStrategy> {
+    padding.padUnit = function (...args: PadUnit[]): any {
         if (!args.length) {
-            return padUnit as GetSetReturn<T, PadUnit, PaddingStrategy>;
+            return padUnit;
         }
 
         padUnit = args[0];
@@ -59,5 +55,5 @@ export const defaultPadding = (): PaddingStrategy => {
         return padding;
     };
 
-    return padding;
+    return padding as PaddingStrategy;
 };

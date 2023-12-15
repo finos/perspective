@@ -16,7 +16,7 @@ import { withOpacity } from "../series/seriesColors.js";
 import { findBestFromData } from "../data/findBest";
 import { raiseEvent } from "./selectionEvent";
 import { SplitData } from "../data/splitData";
-import { D3Scale, GetSetReturn, Settings } from "../types";
+import { D3Scale, Settings } from "../types";
 
 export type AltDataWithScale = {
     data: SplitData[][];
@@ -30,39 +30,39 @@ export interface SizeArg {
 
 interface NearbyTip {
     (selection: any): void;
-    scaleFactor: <T extends number | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, number, NearbyTip>;
-    settings: <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Settings, NearbyTip>;
-    xScale: <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, D3Scale, NearbyTip>;
-    yScale: <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, D3Scale, NearbyTip>;
-    color: <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, D3Scale, NearbyTip>;
-    size: <T extends SizeArg | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, SizeArg, NearbyTip>;
-    canvas: <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, boolean, NearbyTip>;
-    data: <T extends { [key: string]: any }[][] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, { [key: string]: any }[][], NearbyTip>;
-    xValueName: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, NearbyTip>;
-    yValueName: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, NearbyTip>;
-    altDataWithScale: <T extends AltDataWithScale | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, AltDataWithScale, NearbyTip>;
+
+    scaleFactor(): number;
+    scaleFactor(scaleFactor: number): NearbyTip;
+
+    settings(): Settings;
+    settings(settings: Settings): NearbyTip;
+
+    xScale(): D3Scale;
+    xScale(xScale: D3Scale): NearbyTip;
+
+    yScale(): D3Scale;
+    yScale(yScale: D3Scale): NearbyTip;
+
+    color(): D3Scale;
+    color(color: D3Scale): NearbyTip;
+
+    size(): SizeArg;
+    size(size: SizeArg): NearbyTip;
+
+    canvas(): boolean;
+    canvas(canvas: boolean): NearbyTip;
+
+    data(): Record<string, any>[][];
+    data(data: Record<string, any>[][]): NearbyTip;
+
+    xValueName(): string;
+    xValueName(xValueName: string): NearbyTip;
+
+    yValueName(): string;
+    yValueName(yValueName: string): NearbyTip;
+
+    altDataWithScale(): AltDataWithScale;
+    altDataWithScale(altDataWithScale: AltDataWithScale): NearbyTip;
 }
 
 export default (): NearbyTip => {
@@ -79,7 +79,7 @@ export default (): NearbyTip => {
     let altDataWithScale = null;
     let scale_factor = 1;
 
-    const nearbyTip: any = (selection) => {
+    const nearbyTip: Partial<NearbyTip> = (selection) => {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
         if (xScale || yScale) {
             let tooltipData = null;
@@ -173,121 +173,93 @@ export default (): NearbyTip => {
         return { data: best1, scale: yScale };
     };
 
-    nearbyTip.scaleFactor = <T extends number | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, number, NearbyTip> => {
+    nearbyTip.scaleFactor = (...args: number[]): any => {
         if (!args.length) {
-            return scale_factor as GetSetReturn<T, number, NearbyTip>;
+            return scale_factor;
         }
         scale_factor = args[0];
         return nearbyTip;
     };
-    nearbyTip.xScale = <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, D3Scale, NearbyTip> => {
+    nearbyTip.xScale = (...args: D3Scale[]): any => {
         if (!args.length) {
-            return xScale as GetSetReturn<T, D3Scale, NearbyTip>;
+            return xScale;
         }
         xScale = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.yScale = <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, D3Scale, NearbyTip> => {
+    nearbyTip.yScale = (...args: D3Scale[]): any => {
         if (!args.length) {
-            return yScale as GetSetReturn<T, D3Scale, NearbyTip>;
+            return yScale;
         }
         yScale = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.color = <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, D3Scale, NearbyTip> => {
+    nearbyTip.color = (...args: D3Scale[]): any => {
         if (!args.length) {
-            return color as GetSetReturn<T, D3Scale, NearbyTip>;
+            return color;
         }
         color = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.size = <T extends SizeArg | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, SizeArg, NearbyTip> => {
+    nearbyTip.size = (...args: SizeArg[]): any => {
         if (!args.length) {
-            return size as GetSetReturn<T, SizeArg, NearbyTip>;
+            return size;
         }
         size = args[0] ? args[0].copy().range([40, 4000]) : null;
         return nearbyTip;
     };
 
-    nearbyTip.canvas = <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, boolean, NearbyTip> => {
+    nearbyTip.canvas = (...args: boolean[]): any => {
         if (!args.length) {
-            return canvas as GetSetReturn<T, boolean, NearbyTip>;
+            return canvas;
         }
         canvas = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.data = <
-        T extends Record<string, any>[][] | undefined = undefined
-    >(
-        ...args: T[]
-    ): GetSetReturn<T, Record<string, any>[][], NearbyTip> => {
+    nearbyTip.data = (...args: Record<string, any>[][][]): any => {
         if (!args.length) {
-            return data as GetSetReturn<T, Record<string, any>[][], NearbyTip>;
+            return data;
         }
         data = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.xValueName = <T extends string | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string, NearbyTip> => {
+    nearbyTip.xValueName = (...args: string[]): any => {
         if (!args.length) {
-            return xValueName as GetSetReturn<T, string, NearbyTip>;
+            return xValueName;
         }
         xValueName = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.yValueName = <T extends string | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string, NearbyTip> => {
+    nearbyTip.yValueName = (...args: string[]): any => {
         if (!args.length) {
-            return yValueName as GetSetReturn<T, string, NearbyTip>;
+            return yValueName;
         }
         yValueName = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.altDataWithScale = <T extends any[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, any[], NearbyTip> => {
+    nearbyTip.altDataWithScale = (...args: AltDataWithScale[]): any => {
         if (!args.length) {
-            return altDataWithScale as GetSetReturn<T, any[], NearbyTip>;
+            return altDataWithScale;
         }
         altDataWithScale = args[0];
         return nearbyTip;
     };
 
-    nearbyTip.settings = <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Settings, NearbyTip> => {
+    nearbyTip.settings = (...args: Settings[]): any => {
         if (!args.length) {
-            return base.settings() as unknown as GetSetReturn<
-                T,
-                Settings,
-                NearbyTip
-            >;
+            return base.settings();
         }
         base.settings(args[0]);
         return nearbyTip;
     };
 
     fc.rebindAll(nearbyTip, base);
-    return nearbyTip;
+    return nearbyTip as NearbyTip;
 };

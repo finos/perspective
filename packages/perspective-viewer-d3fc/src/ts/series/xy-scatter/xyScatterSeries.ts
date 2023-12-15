@@ -20,7 +20,7 @@ import { hardLimitZeroPadding } from "../../d3fc/padding/hardLimitZero";
 import zoomableChart from "../../zoom/zoomableChart";
 import nearbyTip from "../../tooltip/nearbyTip";
 import { symbolsObj } from "../seriesSymbols";
-import { D3Scale, GetSetReturn, Settings } from "../../types";
+import { D3Scale, Settings } from "../../types";
 
 /**
  * Define a clamped scaling factor based on the container size for bubble plots.
@@ -42,18 +42,18 @@ function interpolate_scale([x1, y1], [x2, y2]) {
 
 export interface XYScatterSeries {
     (container: any): void;
-    settings: <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Settings, XYScatterSeries>;
-    data: <T extends { [key: string]: any }[][] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, { [key: string]: any }[][], XYScatterSeries>;
-    color: <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, D3Scale, XYScatterSeries>;
-    symbols: <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, D3Scale, XYScatterSeries>;
+
+    settings(): Settings;
+    settings(settings: Settings): XYScatterSeries;
+
+    data(): Record<string, any>[][];
+    data(data: Record<string, any>[][]): XYScatterSeries;
+
+    color(): D3Scale;
+    color(color: D3Scale): XYScatterSeries;
+
+    symbols(): D3Scale;
+    symbols(symbols: D3Scale): XYScatterSeries;
 }
 
 /**
@@ -66,7 +66,7 @@ export default function xyScatterSeries(): XYScatterSeries {
     let color = null;
     let symbols = null;
 
-    const _xyScatterSeries: any = (container) => {
+    const _xyScatterSeries: Partial<XYScatterSeries> = (container) => {
         const colorBy = settings.realValues[2];
         let hasColorBy = !!colorBy;
         const symbolCol = settings.realValues[4];
@@ -154,42 +154,34 @@ export default function xyScatterSeries(): XYScatterSeries {
         container.call(toolTip);
     };
 
-    _xyScatterSeries.settings = <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Settings, XYScatterSeries> => {
+    _xyScatterSeries.settings = (...args: Settings[]): any => {
         if (!args.length) {
-            return settings as GetSetReturn<T, Settings, XYScatterSeries>;
+            return settings;
         }
         settings = args[0];
         return _xyScatterSeries;
     };
-    _xyScatterSeries.data = <T extends any[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, any[], XYScatterSeries> => {
+    _xyScatterSeries.data = (...args: any[][]): any => {
         if (!args.length) {
-            return data as GetSetReturn<T, any[], XYScatterSeries>;
+            return data;
         }
         data = args[0];
         return _xyScatterSeries;
     };
-    _xyScatterSeries.color = <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, D3Scale, XYScatterSeries> => {
+    _xyScatterSeries.color = (...args: D3Scale[]): any => {
         if (!args.length) {
-            return color as GetSetReturn<T, D3Scale, XYScatterSeries>;
+            return color;
         }
         color = args[0];
         return _xyScatterSeries;
     };
-    _xyScatterSeries.symbols = <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, D3Scale, XYScatterSeries> => {
+    _xyScatterSeries.symbols = (...args: D3Scale[]): any => {
         if (!args.length) {
-            return symbols as GetSetReturn<T, D3Scale, XYScatterSeries>;
+            return symbols;
         }
         symbols = args[0];
         return _xyScatterSeries;
     };
 
-    return _xyScatterSeries;
+    return _xyScatterSeries as XYScatterSeries;
 }

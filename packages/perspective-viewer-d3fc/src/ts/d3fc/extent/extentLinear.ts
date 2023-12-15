@@ -12,22 +12,28 @@
 
 import * as d3Array from "d3-array";
 import { defaultPadding } from "../padding/default";
-import { GetSetReturn, Pad, PadUnit, PaddingStrategy } from "../../types";
+import { Pad, PadUnit, PaddingStrategy } from "../../types";
 
 export type SymmetricalAbout = number | null;
 
 export interface ExtentLinear {
     (data: any[]): PaddingStrategy;
     accessors: (nextAccessors?: any[]) => any;
-    pad: <T extends Pad | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Pad, ExtentLinear>;
-    padUnit: <T extends PadUnit | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, PadUnit, ExtentLinear>;
-    include: (nextInclude?: number[]) => any;
-    symmetricalAbout: (nextSymmetricalAbout?: number | null) => any;
-    paddingStrategy: (nextPaddingStrategy?: any) => any;
+
+    pad(): Pad;
+    pad(nextPad: Pad): ExtentLinear;
+
+    padUnit(): PadUnit;
+    padUnit(nextPadUnit: PadUnit): ExtentLinear;
+
+    include(): number[];
+    include(nextInclude?: number[]): ExtentLinear;
+
+    symmetricalAbout(): number | null;
+    symmetricalAbout(nextSymmetricalAbout?: number | null): ExtentLinear;
+
+    paddingStrategy(): PaddingStrategy;
+    paddingStrategy(nextPaddingStrategy?: any): ExtentLinear;
 }
 
 export const extentLinear = function (): ExtentLinear {
@@ -40,7 +46,9 @@ export const extentLinear = function (): ExtentLinear {
     let include: number[] = [];
     let paddingStrategy = defaultPadding();
 
-    const instance: any = function instance(data): PaddingStrategy {
+    const instance: Partial<ExtentLinear> = function instance(
+        data
+    ): PaddingStrategy {
         let values = new Array(data.length);
         let _iteratorNormalCompletion = true;
         let _didIteratorError = false;
@@ -116,11 +124,9 @@ export const extentLinear = function (): ExtentLinear {
 
     //This function points directly at the paddingStrategy child object's
     //properties for backwards-compatibility. DEPRECATED.
-    instance.pad = function <T extends Pad | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Pad, ExtentLinear> {
-        if (!arguments.length) {
-            return paddingStrategy.pad as GetSetReturn<T, Pad, ExtentLinear>;
+    instance.pad = function (...args: Pad[]): any {
+        if (!args.length) {
+            return paddingStrategy.pad;
         }
 
         paddingStrategy.pad(args[0]);
@@ -130,15 +136,9 @@ export const extentLinear = function (): ExtentLinear {
 
     //This function points directly at the paddingStrategy child object's
     //properties for backwards-compatibility. DEPRECATED.
-    instance.padUnit = function <T extends PadUnit | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, PadUnit, ExtentLinear> {
-        if (!arguments.length) {
-            return paddingStrategy.padUnit as GetSetReturn<
-                T,
-                PadUnit,
-                ExtentLinear
-            >;
+    instance.padUnit = function (...args: PadUnit[]): any {
+        if (!args.length) {
+            return paddingStrategy.padUnit;
         }
 
         paddingStrategy.padUnit(args[0]);
@@ -146,53 +146,37 @@ export const extentLinear = function (): ExtentLinear {
         return instance;
     };
 
-    instance.include = function <T extends number[] | undefined = undefined>(
-        nextInclude?: T
-    ): GetSetReturn<T, number[], ExtentLinear> {
-        if (!arguments.length) {
-            return include as GetSetReturn<T, number[], ExtentLinear>;
+    instance.include = function (...args: number[][]): any {
+        if (!args.length) {
+            return include;
         }
 
-        include = nextInclude;
+        include = args[0];
 
         return instance;
     };
 
-    instance.symmetricalAbout = function <
-        T extends SymmetricalAbout | undefined = undefined
-    >(
-        nextSymmetricalAbout?: SymmetricalAbout
-    ): GetSetReturn<T, SymmetricalAbout, ExtentLinear> {
-        if (!arguments.length) {
-            return symmetricalAbout as GetSetReturn<
-                T,
-                SymmetricalAbout,
-                ExtentLinear
-            >;
+    instance.symmetricalAbout = function (...args: SymmetricalAbout[]): any {
+        if (!args.length) {
+            return symmetricalAbout;
         }
 
-        symmetricalAbout = nextSymmetricalAbout;
+        symmetricalAbout = args[0];
 
         return instance;
     };
 
-    instance.paddingStrategy = function <
-        T extends PaddingStrategy | undefined = undefined
-    >(nextPaddingStrategy?: T): GetSetReturn<T, PaddingStrategy, ExtentLinear> {
-        if (!arguments.length) {
-            return paddingStrategy as GetSetReturn<
-                T,
-                PaddingStrategy,
-                ExtentLinear
-            >;
+    instance.paddingStrategy = function (...args: PaddingStrategy[]): any {
+        if (!args.length) {
+            return paddingStrategy;
         }
 
-        paddingStrategy = nextPaddingStrategy;
+        paddingStrategy = args[0];
 
         return instance;
     };
 
-    return instance;
+    return instance as ExtentLinear;
 };
 
 let toConsumableArray = function (arr) {

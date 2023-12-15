@@ -16,7 +16,7 @@ import scrollableLegend from "./scrollableLegend";
 import { withoutOpacity } from "../series/seriesColors";
 import { getChartElement } from "../plugin/root";
 import { getOrCreateElement } from "../utils/utils";
-import { D3Scale, GetSetReturn } from "../types";
+import { D3Scale } from "../types";
 
 export type LegendComponentSettings = {
     hideKeys?: any[];
@@ -52,15 +52,15 @@ function symbolScale(fromScale) {
 
 interface LegendComponent {
     (container): void;
-    settings: <T extends LegendComponentSettings | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, LegendComponentSettings, LegendComponent>;
-    scale: <T extends D3Scale | null | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, D3Scale | null, LegendComponent>;
-    color: <T extends d3.ScaleOrdinal<string, unknown> | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, d3.ScaleOrdinal<string, unknown>, LegendComponent>;
+
+    settings(): LegendComponentSettings;
+    settings(nextSettings: LegendComponentSettings): LegendComponent;
+
+    scale(): D3Scale | null;
+    scale(nextScale: D3Scale | null): LegendComponent;
+
+    color(): d3.ScaleOrdinal<string, unknown>;
+    color(nextColor: d3.ScaleOrdinal<string, unknown>): LegendComponent;
 }
 
 function legendComponent(
@@ -71,7 +71,7 @@ function legendComponent(
     let scale = null; // type?
     let color: D3Scale | null = null;
 
-    const legend: any = (container) => {
+    const legend: Partial<LegendComponent> = (container) => {
         if (scale && scale.range().length > 1) {
             const scrollLegend = scrollLegendComponent(settings);
             scrollLegend
@@ -136,42 +136,30 @@ function legendComponent(
         }
     };
 
-    legend.settings = <
-        T extends LegendComponentSettings | undefined = undefined
-    >(
-        ...args: T[]
-    ): GetSetReturn<T, LegendComponentSettings, LegendComponent> => {
+    legend.settings = (...args: LegendComponentSettings[]): any => {
         if (args.length === 0) {
-            return settings as GetSetReturn<
-                T,
-                LegendComponentSettings,
-                LegendComponent
-            >;
+            return settings;
         }
         settings = args[0];
 
         return legend;
     };
 
-    legend.scale = <T extends D3Scale | null | undefined = undefined>(
-        ...args
-    ): GetSetReturn<T, D3Scale | null, LegendComponent> => {
+    legend.scale = (...args: (D3Scale | null)[]): any => {
         if (!args.length) {
-            return scale as GetSetReturn<T, D3Scale | null, LegendComponent>;
+            return scale;
         }
         scale = scaleModifier ? scaleModifier(args[0]) : args[0];
         return legend;
     };
 
-    legend.color = <T extends D3Scale | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, D3Scale, LegendComponent> => {
+    legend.color = (...args: D3Scale[]): any => {
         if (!args.length) {
-            return color as GetSetReturn<T, D3Scale, LegendComponent>;
+            return color;
         }
         color = args[0];
         return legend;
     };
 
-    return legend;
+    return legend as LegendComponent;
 }

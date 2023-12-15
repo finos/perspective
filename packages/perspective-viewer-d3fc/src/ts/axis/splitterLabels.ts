@@ -13,7 +13,7 @@
 import * as fc from "d3fc";
 import { getChartElement } from "../plugin/root";
 import { withoutOpacity } from "../series/seriesColors.js";
-import { GetSetReturn, HTMLSelection, Settings } from "../types";
+import { HTMLSelection, Settings } from "../types";
 
 export type SplitterLabel = {
     index: number;
@@ -22,15 +22,15 @@ export type SplitterLabel = {
 
 export interface SplitterLabels {
     (selection: any): void;
-    labels: <T extends SplitterLabel[] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, any[], SplitterLabels>;
-    color: <T extends d3.ScaleOrdinal<string, unknown> | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, d3.ScaleOrdinal<string, unknown>, SplitterLabels>;
-    alt: <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, boolean, SplitterLabels>;
+
+    labels(): SplitterLabel[];
+    labels(labels: SplitterLabel[]): SplitterLabels;
+
+    color(): d3.ScaleOrdinal<string, unknown>;
+    color(nextColor: d3.ScaleOrdinal<string, unknown>): SplitterLabels;
+
+    alt(): boolean;
+    alt(nextAlt: boolean): SplitterLabels;
 }
 
 // Render a set of labels with the little left/right arrows for moving
@@ -40,7 +40,7 @@ export const splitterLabels = (settings: Settings): SplitterLabels => {
     let alt = false;
     let color;
 
-    const _render: any = (selection: HTMLSelection) => {
+    const _render: Partial<SplitterLabels> = (selection: HTMLSelection) => {
         selection.text("");
 
         const labelDataJoin = fc
@@ -83,20 +83,16 @@ export const splitterLabels = (settings: Settings): SplitterLabels => {
         chartElement._draw();
     };
 
-    _render.labels = <T extends SplitterLabel[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, SplitterLabel[], SplitterLabels> => {
+    _render.labels = (...args: SplitterLabel[][]): any => {
         if (!args.length) {
-            return labels as GetSetReturn<T, SplitterLabel[], SplitterLabels>;
+            return labels;
         }
         labels = args[0];
         return _render;
     };
-    _render.alt = <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, boolean, SplitterLabels> => {
+    _render.alt = (...args: boolean[]): any => {
         if (!args.length) {
-            return alt as GetSetReturn<T, boolean, SplitterLabels>;
+            return alt;
         }
         alt = args[0];
         return _render;
@@ -109,5 +105,6 @@ export const splitterLabels = (settings: Settings): SplitterLabels => {
         color = args[0];
         return _render;
     };
-    return _render;
+
+    return _render as SplitterLabels;
 };

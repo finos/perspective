@@ -21,30 +21,30 @@ import {
     exclude,
 } from "d3fc";
 import store from "./store";
-import { GetSetReturn, Orient } from "../../types";
+import { Orient } from "../../types";
 
 export interface MultiAxis {
     (selection: any): void;
-    tickSize: <T extends number | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, number, MultiAxis>;
-    tickSizeInner: <T extends number | number[] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, number | number[], MultiAxis>;
-    tickSizeOuter: <T extends number | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, number, MultiAxis>;
-    decorate: <T extends any | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, any, MultiAxis>;
-    groups: <T extends any | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, any, MultiAxis>;
+
+    tickSize(): number;
+    tickSize(nextTickSize: number): MultiAxis;
+
+    tickSizeInner(): number | number[];
+    tickSizeInner(nextTickSize: number | number[]): MultiAxis;
+
+    tickSizeOuter(): number;
+    tickSizeOuter(nextTickSize: number): MultiAxis;
+
+    decorate(): any;
+    decorate(nextDecorator: any): MultiAxis;
+
+    groups(): any;
+    groups(nextGroups: any): MultiAxis;
 }
 
 const multiAxis = (orient: Orient, baseAxis, scale): MultiAxis => {
     let tickSizeOuter = 6;
-    let tickSizeInner = 6;
+    let tickSizeInner: number | number[] = 6;
     let axisStore = store(
         "tickFormat",
         "ticks",
@@ -67,7 +67,7 @@ const multiAxis = (orient: Orient, baseAxis, scale): MultiAxis => {
 
     const isVertical = () => orient === "left" || orient === "right";
 
-    const multiAxis: any = (selection) => {
+    const multiAxis: Partial<MultiAxis> = (selection) => {
         if (!groups) {
             axisStore(baseAxis(scale).decorate(decorate))(selection);
             return;
@@ -153,7 +153,7 @@ const multiAxis = (orient: Orient, baseAxis, scale): MultiAxis => {
         return customScale;
     };
 
-    multiAxis.tickSize = (...args) => {
+    multiAxis.tickSize = (...args): any => {
         if (!args.length) {
             return tickSizeInner;
         }
@@ -161,27 +161,23 @@ const multiAxis = (orient: Orient, baseAxis, scale): MultiAxis => {
         return multiAxis;
     };
 
-    multiAxis.tickSizeInner = <T extends number | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, number, MultiAxis> => {
+    multiAxis.tickSizeInner = (...args: (number | number[])[]): any => {
         if (!args.length) {
-            return tickSizeInner as GetSetReturn<T, number, MultiAxis>;
+            return tickSizeInner;
         }
         tickSizeInner = Array.isArray(args[0]) ? args[0] : Number(args[0]);
         return multiAxis;
     };
 
-    multiAxis.tickSizeOuter = <T extends number | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, number, MultiAxis> => {
+    multiAxis.tickSizeOuter = (...args: number[]): any => {
         if (!args.length) {
-            return tickSizeOuter as GetSetReturn<T, number, MultiAxis>;
+            return tickSizeOuter;
         }
         tickSizeOuter = Number(args[0]);
         return multiAxis;
     };
 
-    multiAxis.decorate = (...args) => {
+    multiAxis.decorate = (...args): any => {
         if (!args.length) {
             return decorate;
         }
@@ -199,7 +195,7 @@ const multiAxis = (orient: Orient, baseAxis, scale): MultiAxis => {
 
     rebindAll(multiAxis, axisStore);
 
-    return multiAxis;
+    return multiAxis as MultiAxis;
 };
 
 export const multiAxisTop = (scale) => multiAxis("top", axisOrdinalTop, scale);

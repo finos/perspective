@@ -16,19 +16,19 @@ import { getOrCreateElement, isElementOverflowing } from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
 import { generateHtml } from "./generateHTML";
 import { selectionEvent } from "./selectionEvent";
-import { GetSetReturn, Settings } from "../types";
+import { Settings } from "../types";
 
 export interface ToolTip {
     (selection: any): void; // double check the return value is void.
-    alwaysShow: <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, boolean, ToolTip>;
-    centered: <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, boolean, ToolTip>;
-    settings: <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Settings, ToolTip>;
+
+    alwaysShow(): boolean;
+    alwaysShow(alwaysShow: boolean): ToolTip;
+
+    centered(): boolean;
+    centered(centered: boolean): ToolTip;
+
+    settings(): Settings;
+    settings(settings: Settings): ToolTip;
 }
 
 export const tooltip = (): ToolTip => {
@@ -73,31 +73,25 @@ export const tooltip = (): ToolTip => {
         }
     };
 
-    _tooltip.alwaysShow = <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, boolean, ToolTip> => {
+    _tooltip.alwaysShow = (...args: boolean[]): any => {
         if (!args.length) {
-            return alwaysShow as GetSetReturn<T, boolean, ToolTip>;
+            return alwaysShow;
         }
         alwaysShow = args[0];
         return _tooltip;
     };
 
-    _tooltip.centered = <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, boolean, ToolTip> => {
+    _tooltip.centered = (...args: boolean[]): any => {
         if (!args.length) {
-            return centered as GetSetReturn<T, boolean, ToolTip>;
+            return centered;
         }
         centered = args[0];
         return _tooltip;
     };
 
-    _tooltip.settings = <T extends Settings | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Settings, ToolTip> => {
+    _tooltip.settings = (...args: Settings[]): any => {
         if (!args.length) {
-            return settings as GetSetReturn<T, Settings, ToolTip>;
+            return settings;
         }
         settings = args[0];
         return _tooltip;

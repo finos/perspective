@@ -37,20 +37,14 @@ export interface Chart {
 export type PadUnit = "percent" | "domain";
 export type Pad = [number, number];
 
-export type GetSetReturn<T, Arg, Func> = T extends undefined
-    ? Arg
-    : T extends Arg
-    ? Func
-    : never;
-
 export interface PaddingStrategy {
     (extent: any): any;
-    pad: <T extends Pad | undefined = undefined>(
-        nextPad?: T
-    ) => GetSetReturn<T, Pad, PaddingStrategy>;
-    padUnit: <T extends PadUnit | undefined = undefined>(
-        nextPadUnit?: T
-    ) => GetSetReturn<T, PadUnit, PaddingStrategy>;
+
+    pad(): Pad;
+    pad(nextPad: Pad): this;
+
+    padUnit(): PadUnit;
+    padUnit(nextPadUnit: PadUnit): this;
 }
 
 export type Axis = [number, number];
@@ -86,8 +80,13 @@ export type TreemapValue = {
     treemapRoute?: any[]; // string[]?
 };
 
-// Are these a particular type of settings?
-// Question: Is there a better type def for this?
+export type ColumnSettingsConfig = {
+    symbols: Record<string, string>;
+};
+export type ColumnSettings<
+    T extends Record<string, any> = ColumnSettingsConfig
+> = Record<string, T>;
+
 export type Settings = {
     hideKeys?: any[];
     agg_paths?: any; // any[]?
@@ -103,10 +102,11 @@ export type Settings = {
     splitValues: any[];
     textStyles: TextStyles;
     sunburstLevel?: any;
+    columns?: ColumnSettings;
     treemaps?: Record<string, TreemapValue>;
 };
 
-export type Orientation = "vertical" | "horizontal";
+export type Orientation = "vertical" | "horizontal" | "both";
 export type Orient = "left" | "right" | "top" | "bottom";
 
 export type SettingNameValues = "crossValues" | "mainValues" | "splitValues";
@@ -119,21 +119,21 @@ export type ValueName =
 
 export interface Domain {
     (data: any[]): any;
-    valueName: <T extends ValueName | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, ValueName, Domain>;
-    valueNames: <T extends ValueName[] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, ValueName[], Domain>;
-    orient?: <T extends Orientation | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Orientation, Domain>;
-    pad: <T extends Pad | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Pad, Domain>;
-    padUnit: <T extends PadUnit | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, PadUnit, Domain>;
+
+    valueName(): ValueName;
+    valueName(nextValueName: ValueName): this;
+
+    valueNames(): ValueName[];
+    valueNames(nextValueNames: ValueName[]): this;
+
+    orient(): Orientation;
+    orient(nextOrient: Orientation): this;
+
+    pad(): Pad;
+    pad(nextPad: Pad): this;
+
+    padUnit(): PadUnit;
+    padUnit(nextPadUnit: PadUnit): this;
 }
 
 export type DomainTuple = [number, number];
@@ -150,17 +150,14 @@ export interface ComponentData {
 export interface Component {
     (): ComponentData;
 
-    domain: <T extends Domain | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Domain, Component>;
+    domain(): Domain;
+    domain(nextDomain: Domain): this;
 
-    orient: <T extends Orientation | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Orientation, Component>;
+    orient(): Orientation;
+    orient(nextOrient: Orientation): this;
 
-    settingName: <T extends SettingNameValues | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, SettingNameValues, Component>;
+    settingName(): SettingNameValues;
+    settingName(nextSettingName: SettingNameValues): this;
 }
 
 export interface ScaleSequential extends d3.ScaleSequential<string> {

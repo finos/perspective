@@ -10,21 +10,22 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { GetSetReturn, Settings } from "../types";
+import { Settings } from "../types";
 import { splitterLabels } from "./splitterLabels";
 
 export interface AxisSplitter {
     (selection: any): void;
-    color: <T extends d3.ScaleOrdinal<string, unknown> | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, d3.ScaleOrdinal<string, unknown>, AxisSplitter>;
+
+    color(): d3.ScaleOrdinal<string, unknown>;
+    color(nextColor: d3.ScaleOrdinal<string, unknown>): AxisSplitter;
+
     haveSplit: () => boolean;
-    data: <T extends any[] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, any[], AxisSplitter>;
-    altData: <T extends any[] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, any[], AxisSplitter>;
+
+    data(): any[];
+    data(nextData: any[]): AxisSplitter;
+
+    altData(): any[];
+    altData(nextData: any[]): AxisSplitter;
 }
 
 export const axisSplitter = (
@@ -74,17 +75,9 @@ export const axisSplitter = (
             .call(labeller().labels(altLabels).alt(true));
     };
 
-    splitter.color = <
-        T extends d3.ScaleOrdinal<string, unknown> | undefined = undefined
-    >(
-        ...args: T[]
-    ): GetSetReturn<T, d3.ScaleOrdinal<string, unknown>, AxisSplitter> => {
+    splitter.color = (...args: d3.ScaleOrdinal<string, unknown>[]): any => {
         if (!args.length) {
-            return color as GetSetReturn<
-                T,
-                d3.ScaleOrdinal<string, unknown>,
-                AxisSplitter
-            >;
+            return color;
         }
         color = args[0];
         return splitter;
@@ -92,20 +85,17 @@ export const axisSplitter = (
 
     splitter.haveSplit = (): boolean => haveSplit;
 
-    splitter.data = <T extends any[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, any[], AxisSplitter> => {
+    splitter.data = (...args: any[][]): any => {
         if (!args.length) {
-            return data as GetSetReturn<T, any[], AxisSplitter>;
+            return data;
         }
         data = args[0];
         return splitter;
     };
-    splitter.altData = <T extends any[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, any[], AxisSplitter> => {
+
+    splitter.altData = (...args: any[][]): any => {
         if (!args.length) {
-            return altData as GetSetReturn<T, any[], AxisSplitter>;
+            return altData;
         }
         altData = args[0];
         return splitter;

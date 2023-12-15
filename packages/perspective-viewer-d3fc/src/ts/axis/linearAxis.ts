@@ -20,7 +20,6 @@ import {
     Component,
     ComponentData,
     Domain,
-    GetSetReturn,
     PaddingStrategy,
     Settings,
     ValueName,
@@ -66,20 +65,17 @@ export const domain = (): Domain => {
         }
     };
 
-    _domain.valueName = <T extends ValueName | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName, Domain> => {
+    _domain.valueName = (...args: ValueName[]): any => {
         if (!args.length) {
-            return valueNames[0] as GetSetReturn<T, ValueName, Domain>;
+            return valueNames[0];
         }
         valueNames = [args[0]];
         return _domain;
     };
-    _domain.valueNames = <T extends ValueName[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName[], Domain> => {
+
+    _domain.valueNames = (...args: ValueName[][]): any => {
         if (!args.length) {
-            return valueNames as GetSetReturn<T, ValueName[], Domain>;
+            return valueNames;
         }
         valueNames = args[0];
         return _domain;

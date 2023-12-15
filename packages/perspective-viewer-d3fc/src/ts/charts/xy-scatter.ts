@@ -32,7 +32,7 @@ import { D3Scale, HTMLSelection, Settings } from "../types";
  * @param {any} settings
  * @param {d3.ScaleOrdinal} symbols
  */
-function overrideSymbols(settings, symbols): D3Scale {
+function overrideSymbols(settings: Settings, symbols): D3Scale {
     if (!symbols) {
         return;
     }

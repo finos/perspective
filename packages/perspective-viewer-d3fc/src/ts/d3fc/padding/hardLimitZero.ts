@@ -10,14 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { GetSetReturn, Pad, PadUnit, PaddingStrategy } from "../../types";
+import { Pad, PadUnit, PaddingStrategy } from "../../types";
 import { defaultPadding } from "./default";
 import * as fc from "d3fc";
 
 export const hardLimitZeroPadding = (): PaddingStrategy => {
     const _defaultPadding = defaultPadding();
 
-    const padding: any = (extent) => {
+    const padding: Partial<PaddingStrategy> = (extent) => {
         let pad = _defaultPadding.pad();
         let padUnit = _defaultPadding.padUnit();
 
@@ -46,19 +46,15 @@ export const hardLimitZeroPadding = (): PaddingStrategy => {
         return extent;
     };
 
-    padding.pad = function <T extends Pad | undefined = undefined>(
-        nextPad?: T
-    ): T extends undefined ? Pad : T extends Pad ? PaddingStrategy : never {
-        return padding;
+    padding.pad = function (..._args: Pad[]): any {
+        return _defaultPadding.pad();
     };
 
-    padding.padUnit = function <T extends PadUnit | undefined = undefined>(
-        nextPadUnit?: T
-    ): GetSetReturn<T, PadUnit, PaddingStrategy> {
-        return padding;
+    padding.padUnit = function (..._args: PadUnit[]): any {
+        return _defaultPadding.padUnit();
     };
 
     fc.rebindAll(padding, _defaultPadding);
 
-    return padding;
+    return padding as PaddingStrategy;
 };

@@ -13,7 +13,7 @@
 import * as d3 from "d3";
 import * as fc from "d3fc";
 import { flattenArray } from "./flatten";
-import { Domain, GetSetReturn, ValueName } from "../types";
+import { Domain, ValueName } from "../types";
 
 export const scale = () => d3.scaleTime();
 
@@ -22,7 +22,7 @@ export const domain = (): Domain => {
 
     let valueNames = ["crossValue"];
 
-    const _domain: any = (data) => {
+    const _domain: Partial<Domain> = (data) => {
         base.accessors(valueNames.map((v) => (d) => new Date(d[v])));
 
         return getDataExtent(flattenArray(data));
@@ -51,26 +51,23 @@ export const domain = (): Domain => {
         return base.padUnit("domain").pad([dataWidth / 2, dataWidth / 2])(data);
     };
 
-    _domain.valueName = <T extends ValueName | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName, Domain> => {
+    _domain.valueName = (...args: ValueName[]): any => {
         if (!args.length) {
-            return valueNames[0] as GetSetReturn<T, ValueName, Domain>;
+            return valueNames[0];
         }
         valueNames = [args[0]];
         return _domain;
     };
-    _domain.valueNames = <T extends ValueName[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName[], Domain> => {
+
+    _domain.valueNames = (...args: ValueName[][]): any => {
         if (!args.length) {
-            return valueNames as GetSetReturn<T, ValueName[], Domain>;
+            return valueNames;
         }
         valueNames = args[0];
         return _domain;
     };
 
-    return _domain;
+    return _domain as Domain;
 };
 
 export const labelFunction = (valueName) => (d) => new Date(d[valueName][0]);

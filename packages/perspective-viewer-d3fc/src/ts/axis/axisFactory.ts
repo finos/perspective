@@ -22,7 +22,6 @@ import {
     D3Scale,
     Domain,
     DomainTuple,
-    GetSetReturn,
     Orientation,
     SettingNameValues,
     Settings,
@@ -50,30 +49,29 @@ export interface AxisFactoryContent {
 
 interface AxisFactory {
     (data: any[]): any;
-    memoValue: <T extends Axis | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Axis, AxisFactory>;
-    excludeType: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, AxisFactory>;
-    orient: <T extends Orientation | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, Orientation, AxisFactory>;
-    settingName: <T extends SettingNameValues | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, SettingNameValues, AxisFactory>;
-    settingValue: <T extends string | null | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string | null, AxisFactory>;
-    valueName: <T extends ValueName | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, ValueName, AxisFactory>;
-    valueNames: <T extends ValueName[] | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, ValueName[], AxisFactory>;
-    modifyDomain: <T extends ModifyDomainFunc | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, ModifyDomainFunc, AxisFactory>;
+    memoValue(): Axis;
+    memoValue(a: Axis): AxisFactory;
+
+    excludeType(): () => AxisTypeValues;
+    excludeType(nextExcludeType?: AxisTypeValues): this;
+
+    orient(): () => Orientation;
+    orient(nextOrient?: Orientation): this;
+
+    settingName(): () => SettingNameValues;
+    settingName(nextSettingName?: SettingNameValues): this;
+
+    settingValue(): () => string | null;
+    settingValue(nextSettingValue?: string | null): this;
+
+    valueName(): () => ValueName;
+    valueName(nextValueName?: ValueName): this;
+
+    valueNames(): () => ValueName[];
+    valueNames(nextValueNames?: ValueName[]): this;
+
+    modifyDomain(): () => ModifyDomainFunc;
+    modifyDomain(nextModifyDomain?: ModifyDomainFunc): this;
 
     // optional params, no idea yet if these are right or not.
     include?: (nextInclude?: number[]) => any;
@@ -102,7 +100,7 @@ export const axisFactory = (settings: Settings): AxisFactory => {
     const optionalParams = ["include", "paddingStrategy", "pad"];
     const optional = {};
 
-    const _factory: any = (data): AxisFactoryContent => {
+    const _factory: Partial<AxisFactory> = (data): AxisFactoryContent => {
         const useType = axisType(settings)
             .excludeType(excludeType)
             .settingName(settingName)
@@ -167,95 +165,75 @@ export const axisFactory = (settings: Settings): AxisFactory => {
         decorate: () => {},
     });
 
-    _factory.memoValue = <T extends Axis | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Axis, AxisFactory> => {
+    _factory.memoValue = (...args: Axis[]): any => {
         if (!args.length) {
-            return memoValue as GetSetReturn<T, Axis, AxisFactory>;
+            return memoValue;
         }
+
         memoValue = args[0];
         return _factory;
     };
 
-    _factory.excludeType = <T extends AxisTypeValues | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string, AxisFactory> => {
+    _factory.excludeType = (...args: AxisTypeValues[]): any => {
         if (!args.length) {
-            return excludeType as GetSetReturn<T, string, AxisFactory>;
+            return excludeType;
         }
+
         excludeType = args[0];
         return _factory;
     };
 
-    _factory.orient = <T extends Orientation | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, Orientation, AxisFactory> => {
+    _factory.orient = (...args: Orientation[]): any => {
         if (!args.length) {
-            return orient as GetSetReturn<T, Orientation, AxisFactory>;
+            return orient;
         }
+
         orient = args[0];
         return _factory;
     };
 
-    _factory.settingName = <
-        T extends SettingNameValues | undefined = undefined
-    >(
-        ...args: T[]
-    ): GetSetReturn<T, SettingNameValues, AxisFactory> => {
+    _factory.settingName = (...args: SettingNameValues[]): any => {
         if (!args.length) {
-            return settingName as GetSetReturn<
-                T,
-                SettingNameValues,
-                AxisFactory
-            >;
+            return settingName;
         }
+
         settingName = args[0];
         return _factory;
     };
 
-    _factory.settingValue = <T extends string | null | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string | null, AxisFactory> => {
+    _factory.settingValue = (...args: (string | null)[]): any => {
         if (!args.length) {
-            return settingValue as GetSetReturn<T, string | null, AxisFactory>;
+            return settingValue;
         }
+
         settingValue = args[0];
         return _factory;
     };
 
-    _factory.valueName = <T extends ValueName | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName, AxisFactory> => {
+    _factory.valueName = (...args: ValueName[]): any => {
         if (!args.length) {
-            return valueNames[0] as GetSetReturn<T, ValueName, AxisFactory>;
+            return valueNames[0];
         }
+
         valueNames = [args[0]];
         return _factory;
     };
 
-    _factory.valueNames = <T extends ValueName[] | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, ValueName[], AxisFactory> => {
+    _factory.valueNames = (...args: ValueName[][]): any => {
         if (!args.length) {
-            return valueNames as GetSetReturn<T, ValueName[], AxisFactory>;
+            return valueNames;
         }
+
         valueNames = args[0];
         return _factory;
     };
 
-    _factory.modifyDomain = <
-        T extends ModifyDomainFunc | undefined = undefined
-    >(
-        ...args: T[]
-    ): GetSetReturn<T, ModifyDomainFunc, AxisFactory> => {
-        if (!args.length) {
-            return modifyDomain as GetSetReturn<
-                T,
-                ModifyDomainFunc,
-                AxisFactory
-            >;
+    _factory.modifyDomain = (nextModifyDomain?: ModifyDomainFunc) => {
+        if (!nextModifyDomain) {
+            return modifyDomain;
         }
-        modifyDomain = args[0];
+
+        modifyDomain = nextModifyDomain;
         return _factory;
     };
 
@@ -269,5 +247,5 @@ export const axisFactory = (settings: Settings): AxisFactory => {
         };
     });
 
-    return _factory;
+    return _factory as AxisFactory;
 };

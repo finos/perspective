@@ -10,23 +10,19 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { GetSetReturn } from "../types";
 import { getOrCreateElement } from "../utils/utils";
 
 export interface GridLayoutMultiChart {
     (container: any): any;
 
-    elementsPrefix: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, GridLayoutMultiChart>;
+    elementsPrefix(): string;
+    elementsPrefix(nextPrefix: string): GridLayoutMultiChart;
 
-    padding: <T extends string | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, string, GridLayoutMultiChart>;
+    padding(): string;
+    padding(nextPadding: string): GridLayoutMultiChart;
 
-    svg: <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ) => GetSetReturn<T, boolean, GridLayoutMultiChart>;
+    svg(): boolean;
+    svg(nextSvg: boolean): GridLayoutMultiChart;
 
     chartContainer: () => any;
     chartEnter: () => any;
@@ -47,7 +43,9 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
     let svg = true;
     let padding = null;
 
-    const _gridLayoutMultiChart: any = (container) => {
+    const _gridLayoutMultiChart: Partial<GridLayoutMultiChart> = (
+        container
+    ) => {
         const outerContainer = getOrCreateElement(
             container,
             "div.outer-container",
@@ -139,36 +137,24 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
         }
     };
 
-    _gridLayoutMultiChart.padding = <T extends string | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, string, GridLayoutMultiChart> => {
+    _gridLayoutMultiChart.padding = (...args: string[]): any => {
         if (!args.length) {
-            return padding as GetSetReturn<T, string, GridLayoutMultiChart>;
+            return padding;
         }
         padding = args[0];
         return _gridLayoutMultiChart;
     };
-    _gridLayoutMultiChart.svg = <T extends boolean | undefined = undefined>(
-        ...args: T[]
-    ): GetSetReturn<T, boolean, GridLayoutMultiChart> => {
+    _gridLayoutMultiChart.svg = (...args: boolean[]): any => {
         if (!args.length) {
-            return svg as GetSetReturn<T, boolean, GridLayoutMultiChart>;
+            return svg;
         }
         svg = args[0];
         return _gridLayoutMultiChart;
     };
 
-    _gridLayoutMultiChart.elementsPrefix = <
-        T extends string | undefined = undefined
-    >(
-        ...args: T[]
-    ): GetSetReturn<T, string, GridLayoutMultiChart> => {
+    _gridLayoutMultiChart.elementsPrefix = (...args: string[]): any => {
         if (!args.length) {
-            return elementsPrefix as GetSetReturn<
-                T,
-                string,
-                GridLayoutMultiChart
-            >;
+            return elementsPrefix;
         }
         elementsPrefix = args[0];
         return _gridLayoutMultiChart;
@@ -184,5 +170,5 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
 
     _gridLayoutMultiChart.containerSize = () => containerSize;
 
-    return _gridLayoutMultiChart;
+    return _gridLayoutMultiChart as GridLayoutMultiChart;
 }
