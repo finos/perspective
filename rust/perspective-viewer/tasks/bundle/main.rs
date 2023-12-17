@@ -36,6 +36,7 @@ fn build(pkg: Option<&str>) {
 
     cmd.env("RUSTFLAGS", "--cfg=web_sys_unstable_apis")
         .args(["build"])
+        .args(["--features", "tracing/release_max_level_error"])
         .args(["--target", "wasm32-unknown-unknown"])
         .args(["-Z", "build-std=std,panic_abort"])
         .args(["-Z", "build-std-features=panic_immediate_abort"])
