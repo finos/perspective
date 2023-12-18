@@ -534,9 +534,16 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         )
         template = jinja_env.get_template("exported_widget.html.jinja")
 
+        def psp_cdn(module, path=None):
+            if path is None:
+                path = f"cdn/{module}.js"
+            # perspective developer affordance: works with your local `yarn start blocks`
+            # return f"http://localhost:8080/node_modules/@finos/{module}/dist/{path}"
+            return f"https://cdn.jsdelivr.net/npm/@finos/{module}@{__version__}/dist/{path}"
+
         return super(DOMWidget, self)._repr_mimebundle_(**kwargs) | {
             "text/html": template.render(
-                psp_version=__version__,
+                psp_cdn=psp_cdn,
                 viewer_id=self.model_id,
                 viewer_attrs=viewer_attrs,
                 b64_data=b64_data.decode("utf-8"),

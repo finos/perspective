@@ -12,7 +12,8 @@
 
 // Handles sub-cell scrolling via CSS transform offset by variables set during
 // rendering.
-perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table {
+perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table,
+:host(:not(.sub-cell-scroll-disabled)) regular-table table {
     tbody td,
     thead th:not(.rt-group-corner) {
         transform: translate(var(--regular-table--transform-x, 0px));

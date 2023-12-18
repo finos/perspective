@@ -18,10 +18,14 @@ import {
 
 async function getDatagridContents(page) {
     return await page.evaluate(async () => {
-        const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-datagrid regular-table"
+        const datagrid = document.querySelector(
+            "perspective-viewer perspective-viewer-datagrid"
         );
-        return viewer.innerHTML || "MISSING";
+        if (!datagrid) {
+            return "MISSING DATAGRID";
+        }
+        const regularTable = datagrid.shadowRoot.querySelector("regular-table");
+        return regularTable?.innerHTML || "MISSING";
     });
 }
 

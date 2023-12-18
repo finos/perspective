@@ -15,6 +15,7 @@
 export const focus_style_listener = (table, _viewer, selected_position_map) => {
     const tds = table.querySelectorAll("td");
     const selected_position = selected_position_map.get(table);
+    const host = table.getRootNode();
     if (selected_position) {
         for (const td of tds) {
             const meta = table.getMeta(td);
@@ -22,7 +23,7 @@ export const focus_style_listener = (table, _viewer, selected_position_map) => {
                 meta.x === selected_position.x &&
                 meta.y === selected_position.y
             ) {
-                if (document.activeElement !== td) {
+                if (host.activeElement !== td) {
                     td.focus({ preventScroll: true });
                 }
                 return true;
@@ -30,9 +31,9 @@ export const focus_style_listener = (table, _viewer, selected_position_map) => {
         }
         if (
             document.activeElement !== document.body &&
-            table.contains(document.activeElement)
+            table.contains(host.activeElement)
         ) {
-            document.activeElement.blur();
+            host.activeElement.blur();
         }
     }
 };

@@ -21,7 +21,7 @@ import { format_tree_header } from "./format_tree_header.js";
  *
  * @returns A data listener for the plugin.
  */
-export function createDataListener() {
+export function createDataListener(viewer) {
     let last_meta;
     let last_column_paths;
     let last_ids;
@@ -71,8 +71,7 @@ export function createDataListener() {
             column_headers = [],
             column_paths = [];
 
-        const is_settings_open =
-            regularTable.parentElement.parentElement.hasAttribute("settings");
+        const is_settings_open = viewer.hasAttribute("settings");
 
         // for (const path of this._column_paths.slice(x0, x1)) {
         for (

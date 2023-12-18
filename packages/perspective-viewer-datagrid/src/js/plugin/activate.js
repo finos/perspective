@@ -44,7 +44,11 @@ export async function activate(view) {
     let table = await viewer.getTable(true);
     if (!this._initialized) {
         this.innerHTML = "";
-        this.appendChild(this.regular_table);
+        if (this.shadowRoot) {
+            this.shadowRoot.appendChild(this.regular_table);
+        } else {
+            this.appendChild(this.regular_table);
+        }
         this.model = await createModel.call(
             this,
             this.regular_table,
@@ -53,7 +57,11 @@ export async function activate(view) {
         );
 
         this.regular_table.addStyleListener(
-            table_cell_style_listener.bind(this.model, this.regular_table)
+            table_cell_style_listener.bind(
+                this.model,
+                this.regular_table,
+                viewer
+            )
         );
 
         this.regular_table.addStyleListener(
@@ -61,7 +69,11 @@ export async function activate(view) {
         );
 
         this.regular_table.addStyleListener(
-            column_header_style_listener.bind(this.model, this.regular_table)
+            column_header_style_listener.bind(
+                this.model,
+                this.regular_table,
+                viewer
+            )
         );
 
         this.regular_table.addEventListener(
@@ -114,7 +126,12 @@ export async function activate(view) {
         // Editing
         const selected_position_map = new WeakMap();
         this.regular_table.addStyleListener(
-            editable_style_listener.bind(this.model, this.regular_table, viewer)
+            editable_style_listener.bind(
+                this.model,
+                this.regular_table,
+                viewer,
+                this
+            )
         );
         this.regular_table.addStyleListener(
             focus_style_listener.bind(
@@ -164,6 +181,7 @@ export async function activate(view) {
                     style_selected_column.call(
                         this.model,
                         this.regular_table,
+                        viewer,
                         event.detail.column_name
                     );
                     if (!event.detail.open) {

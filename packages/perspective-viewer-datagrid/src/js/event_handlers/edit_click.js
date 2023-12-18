@@ -29,7 +29,7 @@ function lock(body) {
 
 function getPos() {
     if (this.isContentEditable) {
-        let _range = document.getSelection().getRangeAt(0);
+        let _range = this.getRootNode().getSelection().getRangeAt(0);
         let range = _range.cloneRange();
         range.selectNodeContents(this);
         range.setEnd(_range.endContainer, _range.endOffset);
@@ -127,10 +127,10 @@ export function keydownListener(table, viewer, selected_position_map, event) {
     if (!is_editable.call(this, viewer)) {
         return;
     }
-    const target = document.activeElement;
+    const target = table.getRootNode().activeElement;
     event.target.classList.remove("psp-error");
-    switch (event.keyCode) {
-        case 13:
+    switch (event.key) {
+        case "Enter":
             event.preventDefault();
             if (event.shiftKey) {
                 moveSelection.call(
@@ -152,7 +152,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                 );
             }
             break;
-        case 37:
+        case "ArrowLeft":
             if (getPos.call(target) == 0) {
                 event.preventDefault();
                 moveSelection.call(
@@ -165,7 +165,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                 );
             }
             break;
-        case 38:
+        case "ArrowUp":
             event.preventDefault();
             moveSelection.call(
                 this,
@@ -176,7 +176,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                 -1
             );
             break;
-        case 39:
+        case "ArrowRight":
             if (getPos.call(target) == target.textContent.length) {
                 event.preventDefault();
                 moveSelection.call(
@@ -189,7 +189,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                 );
             }
             break;
-        case 40:
+        case "ArrowDown":
             event.preventDefault();
             moveSelection.call(
                 this,

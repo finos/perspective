@@ -10,13 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-export async function sortHandler(regularTable, event, target) {
+export async function sortHandler(regularTable, viewer, event, target) {
     const meta = regularTable.getMeta(target);
     const column_name = meta.column_header[this._config.split_by.length];
     const sort_method = event.shiftKey ? append_sort : override_sort;
     const sort = sort_method.call(this, column_name);
     this._preserve_focus_state = true;
-    const viewer = regularTable.parentElement.parentElement;
     await viewer.restore({ sort });
 }
 

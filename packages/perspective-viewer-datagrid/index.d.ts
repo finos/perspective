@@ -28,4 +28,8 @@ interface HTMLPerspectiveViewerDatagridPluginElement
 
 export declare class HTMLPerspectiveViewerDatagridPluginElement
     extends HTMLElement
-    implements IPerspectiveViewerPlugin {}
+    implements IPerspectiveViewerPlugin
+{
+    // Controls whether datagrid renders its children into a shadow DOM tree
+    public static renderTarget: "shadow" | "light";
+}

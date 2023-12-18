@@ -21,14 +21,14 @@ function isEditable(viewer, allowed = false) {
     return has_pivots && !selectable && editable;
 }
 
-export function editable_style_listener(table, viewer) {
+export function editable_style_listener(table, viewer, datagrid) {
     // Independently check "editable" and `isEditable()`, so we can skip
     // the styler entirely if editing was disabled at the time of element
     // creation, but toggle in when e.g. pivots or selectable will
     // affect editability.
     const plugins = table[PRIVATE_PLUGIN_SYMBOL] || {};
     const edit = isEditable.call(this, viewer);
-    table.parentElement.classList.toggle(
+    datagrid.classList.toggle(
         "edit-mode-allowed",
         isEditable.call(this, viewer, true)
     );

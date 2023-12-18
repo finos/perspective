@@ -22,7 +22,7 @@ async function get_contents(page) {
     return await page.evaluate(async () => {
         const plugin = document.querySelector("perspective-viewer").children[0];
         if (plugin.tagName === "PERSPECTIVE-VIEWER-DATAGRID") {
-            return plugin?.innerHTML || "MISSING";
+            return plugin?.shadowRoot.innerHTML || "MISSING";
         } else {
             return (
                 plugin?.shadowRoot?.querySelector("#container")?.innerHTML ||

@@ -90,7 +90,7 @@ const describe_jupyter = (body, { name, root } = {}) => {
  * @param {*} cells
  * @param {*} body
  */
-const test_jupyter = (name, cells, body, args = {}) => {
+const test_jupyter = (name, cells, body) => {
     const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
     generate_notebook(notebook_name, cells);
     const url = `doc/tree/${notebook_name}`;
