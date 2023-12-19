@@ -237,8 +237,8 @@ describe_jupyter(
                     filter: [],
                     group_by: [],
                     plugin: "Datagrid",
+                    column_config: {},
                     plugin_config: {
-                        columns: {},
                         editable: false,
                         scroll_lock: false,
                     },
@@ -275,6 +275,7 @@ w.theme = "Pro Dark"`
                     filter: [["i8", "<", 50]],
                     group_by: ["date"],
                     plugin: "X Bar",
+                    column_config: {},
                     plugin_config: {},
                     settings: true,
                     sort: [["date", "asc"]],
@@ -324,8 +325,8 @@ w.theme = "Pro Dark"`
                     filter: [],
                     group_by: [],
                     plugin: "Datagrid",
+                    column_config: {},
                     plugin_config: {
-                        columns: {},
                         editable: false,
                         scroll_lock: false,
                     },

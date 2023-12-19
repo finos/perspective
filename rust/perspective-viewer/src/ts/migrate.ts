@@ -15,6 +15,7 @@ import migrate_0_0_0 from "./migrate/0-0-0";
 import migrate_2_6_1 from "./migrate/2-6-1";
 import migrate_2_7_1 from "./migrate/2-7-1";
 import { version as PKG_VERSION } from "@finos/perspective/package.json" assert { type: "json" };
+import { PerspectiveViewerConfig } from "./viewer";
 
 /**
  * A migration utility for `@finos/perspective-viewer` and
@@ -158,10 +159,10 @@ function migrate_viewer(old, omit_attributes, options) {
 
 // util functions -----
 
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG: PerspectiveViewerConfig = {
     version: PKG_VERSION,
     title: null,
-    settings: false,
+    settings: undefined,
     plugin: null,
     plugin_config: {},
     column_config: {},

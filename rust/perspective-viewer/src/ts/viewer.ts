@@ -13,8 +13,10 @@
 import type * as perspective from "@finos/perspective";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
-    plugin?: string;
+    version?: string;
+    title?: string;
     settings?: boolean;
+    plugin?: string;
     plugin_config?: any;
     column_config?: Record<string, Record<string, any>>;
 };

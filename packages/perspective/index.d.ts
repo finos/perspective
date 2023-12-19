@@ -138,7 +138,7 @@ declare module "@finos/perspective" {
     };
 
     export type ColumnName = string | null;
-    export type Expression = { name: string; expr: string };
+    export type Expressions = Record<string, string>;
     export type Filter = [
         ColumnName,
         FilterOp,
@@ -159,7 +159,7 @@ declare module "@finos/perspective" {
         aggregates?: { [column_name: string]: Aggregate };
         sort?: Array<Sort>;
         filter?: Array<Filter>;
-        expressions?: Array<Expression>;
+        expressions?: Expressions;
     };
 
     export type Table = {
@@ -169,7 +169,7 @@ declare module "@finos/perspective" {
         delete(): Promise<void>;
         on_delete(callback: () => void): void;
         validate_expressions(
-            expressions: Array<Expression>
+            expressions: Expressions
         ): Promise<ValidatedExpressions>;
         schema(): Promise<Schema>;
         size(): Promise<number>;

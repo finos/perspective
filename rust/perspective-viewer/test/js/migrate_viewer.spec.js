@@ -304,6 +304,10 @@ const TESTS = [
         {
             ...DEFAULT_CONFIG,
             plugin: "Datagrid",
+            plugin_config: {
+                editable: false,
+                scroll_lock: false,
+            },
             columns: ["Row ID"],
             column_config: { "Row ID": { precision: 3 } },
         },
