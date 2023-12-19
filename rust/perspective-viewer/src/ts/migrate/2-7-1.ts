@@ -33,16 +33,22 @@ export default function migrate_2_7_1(old, options) {
             let fixed = columns[column].fixed;
             if (fixed !== undefined) {
                 let column_config = get_or_create_column_config(old, column);
-                if (Object.keys(column_config).length === 0) {
+                if (Object.keys(column_config ?? {}).length === 0) {
                     column_config.precision = fixed;
                     delete columns[column].fixed;
                 }
             }
-            if (Object.keys(columns[column]).length == 0) {
+            if (
+                columns[column] &&
+                Object.keys(columns[column] ?? {}).length == 0
+            ) {
                 delete columns[column];
             }
         }
-        if (Object.keys(old.plugin_config?.columns).length == 0) {
+        if (
+            old.plugin_config?.columns &&
+            Object.keys(old.plugin_config?.columns ?? {}).length == 0
+        ) {
             delete old.plugin_config?.columns;
         }
     }
