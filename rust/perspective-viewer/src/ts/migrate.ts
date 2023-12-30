@@ -13,7 +13,9 @@
 import Semver from "./migrate/semver";
 import migrate_0_0_0 from "./migrate/0-0-0";
 import migrate_2_6_1 from "./migrate/2-6-1";
-import { version as PKG_VERSION } from "@finos/perspective/package.json" assert { type: "json" };
+import packageJSON from "@finos/perspective/package.json" assert { type: "json" };
+
+const PKG_VERSION = packageJSON.version;
 
 /**
  * A migration utility for `@finos/perspective-viewer` and
