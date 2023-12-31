@@ -13,3 +13,4 @@
 export * from "./utils";
 export * from "./simple_viewer_tests";
 export * from "./models/page";
+export * from "./fixture";

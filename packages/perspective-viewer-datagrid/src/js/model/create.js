@@ -58,7 +58,9 @@ export async function createModel(regular, table, view, extend = {}) {
     // Extract the entire expression string as typed by the user, so we can
     // feed it into `validate_expressions` and get back the data types for
     // each column without it being affected by a pivot.
-    const expressions = config.expressions.map((expr) => expr[1]);
+    const expressions = Object.fromEntries(
+        config.expressions.map((expr) => [expr[0], expr[1]])
+    );
     const [
         table_schema,
         validated_expressions,

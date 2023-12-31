@@ -10,33 +10,25 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test } from "@finos/perspective-test";
-import { run_standard_tests } from "@finos/perspective-test";
+use yew::{function_component, html, Html, Properties};
 
-async function get_contents(page) {
-    return await page.evaluate(async () => {
-        const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-plugin"
-        );
-        return viewer.innerHTML;
-    });
+#[derive(Properties, PartialEq)]
+pub struct StubProps {
+    pub error: Option<String>,
+    pub message: String,
 }
 
-test.describe("Superstore", () => {
-    test.beforeEach(async function init({ page }) {
-        await page.goto("/@finos/perspective-viewer/test/html/superstore.html");
-        await page.evaluate(async () => {
-            while (!window["__TEST_PERSPECTIVE_READY__"]) {
-                await new Promise((x) => setTimeout(x, 10));
-            }
-        });
+#[function_component(Stub)]
+pub fn stub(p: &StubProps) -> Html {
+    if let Some(error) = p.error.clone() {
+        tracing::error!("RENDERED STUB: {error}");
+    }
 
-        await page.evaluate(async () => {
-            await document.querySelector("perspective-viewer").restore({
-                plugin: "Debug",
-            });
-        });
-    });
-
-    run_standard_tests("superstore", get_contents);
-});
+    html! {
+        <div class="style_contents">
+            <div id="column-style-container" class="no-style">
+                <div class="style-contents">{p.message.clone()}</div>
+            </div>
+        </div>
+    }
+}

@@ -12,7 +12,7 @@
 
 const common = require("./common.js");
 
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("@finos/perspective-test");
 const perspective = require("@finos/perspective");
 
 /**

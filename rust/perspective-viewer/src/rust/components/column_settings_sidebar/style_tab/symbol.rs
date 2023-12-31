@@ -24,7 +24,6 @@ use self::types::{SymbolConfig, SymbolKVPair};
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_pairs::PairsList;
 use crate::components::style::LocalStyle;
 use crate::config::plugin::{PluginConfig, Symbol};
-use crate::config::Type;
 use crate::custom_elements::FilterDropDownElement;
 use crate::custom_events::CustomEvents;
 use crate::model::{GetPluginConfig, UpdatePluginConfig};
@@ -40,7 +39,6 @@ pub fn next_default_symbol(values: &Vec<Symbol>, pairs_len: usize) -> String {
 }
 #[derive(Properties, PartialEq, Clone)]
 pub struct SymbolAttrProps {
-    pub attr_type: Type,
     pub column_name: String,
     pub session: Session,
     pub renderer: Renderer,
@@ -61,12 +59,12 @@ pub enum SymbolAttrMsg {
     UpdatePairs(Vec<SymbolKVPair>),
 }
 
-pub struct SymbolAttr {
+pub struct SymbolStyle {
     pairs: Vec<SymbolKVPair>,
     row_dropdown: Rc<FilterDropDownElement>,
 }
 
-impl yew::Component for SymbolAttr {
+impl yew::Component for SymbolStyle {
     type Message = SymbolAttrMsg;
     type Properties = SymbolAttrProps;
 

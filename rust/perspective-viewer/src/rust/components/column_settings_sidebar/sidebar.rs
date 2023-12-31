@@ -79,25 +79,29 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
             attrs
         );
     }
-    let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
+    // view_ty != table_ty when aggregate is applied, i.e. on group-by
+    let maybe_view_ty = p.session.metadata().get_column_view_type(&column_name);
+    let maybe_table_ty = p.session.metadata().get_column_table_type(&column_name);
 
     let mut tabs = vec![];
 
-    // TODO: This is a hack and needs to be replaced.
+    // TODO: This needs to be replaced. Replacing it requires more information
+    // about the capabilities of the plugin, which requires updating the internal
+    // plugin API. Leaving it for now.
     let plugin = p.renderer.get_active_plugin().unwrap();
-    let show_styles = maybe_ty
-        .map(|ty| match &*plugin.name() {
-            "Datagrid" => ty != Type::Bool,
-            "X/Y Scatter" => ty == Type::String,
-            _ => false,
-        })
-        .unwrap_or_default();
+    let show_styles = match &*plugin.name() {
+        "Datagrid" => maybe_view_ty.map(|ty| ty != Type::Bool).unwrap_or_default(),
+        "X/Y Scatter" => maybe_table_ty
+            .map(|ty| ty == Type::String)
+            .unwrap_or_default(),
+        _ => false,
+    };
 
     if !matches!(p.selected_column, ColumnLocator::Expr(None))
         && show_styles
         && is_active
         && config.is_some()
-        && maybe_ty.is_some()
+        && maybe_view_ty.is_some()
     {
         tabs.push(ColumnSettingsTab::Style);
     }
@@ -132,7 +136,8 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                             { renderer }
                             { custom_events }
                             { selected_column }
-                            { on_close }/>
+                            { on_close }
+                            />
                     }
                 },
                 ColumnSettingsTab::Style => html! {
@@ -141,7 +146,9 @@ pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
                         { renderer }
                         { custom_events }
                         { column_name }
-                        ty={ maybe_ty.unwrap() }/>
+                        { maybe_view_ty }
+                        { maybe_table_ty }
+                        />
                 },
             }
         })

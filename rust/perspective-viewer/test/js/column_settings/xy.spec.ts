@@ -17,7 +17,8 @@ import {
 } from "@finos/perspective-test";
 import { SymbolPair } from "@finos/perspective-test/src/js/models/column_settings";
 
-import { Page, expect, test } from "@playwright/test";
+import { expect, test } from "@finos/perspective-test";
+import { Page } from "@playwright/test";
 
 const symbols = [
     "circle",

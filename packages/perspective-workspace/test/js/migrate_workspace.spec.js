@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
-import { test, expect } from "@playwright/test";
+import { test, expect } from "@finos/perspective-test";
 import {
     API_VERSION,
     compareLightDOMContents,

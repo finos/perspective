@@ -16,7 +16,7 @@ import {
     getEventListener,
 } from "@finos/perspective-test";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@finos/perspective-test";
 
 let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
     return test.describe(title, () => {
