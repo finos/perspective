@@ -333,8 +333,8 @@ jobs:
               env:
                   PSP_USE_CCACHE: 1
 
-            - name: Docs Build
-              run: yarn docs
+            # - name: Docs Build
+            #   run: yarn docs
 
             #################################
             # Compress and upload Artifacts #
