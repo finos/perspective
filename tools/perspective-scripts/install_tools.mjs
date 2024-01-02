@@ -16,7 +16,8 @@ import * as url from "url";
 export function install_boost(version = "1_82_0") {
     const version_dash = version.replace(/\./g, "_");
     const version_dot = version.replace(/_/g, ".");
-    const URL = `https://boostorg.jfrog.io/artifactory/main/release/${version_dot}/source/boost_${version_dash}.tar.gz`;
+    const URL = `https://archives.boost.io/release/${version_dot}/source/boost_${version_dash}.tar.gz`;
+    // const URL = `https://boostorg.jfrog.io/artifactory/main/release/${version_dot}/source/boost_${version_dash}.tar.gz`;
     const flags = [
         "-j8",
         "cxxflags=-fPIC",
