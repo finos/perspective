@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use derivative::Derivative;
 pub use tablist::*;
-use yew::{function_component, html, Callback, Html, Properties};
+use yew::{function_component, html, Callback, Component, Html, Properties};
 
 use super::attributes_tab::AttributesTabProps;
 use super::style_tab::StyleTabProps;
@@ -44,8 +44,6 @@ impl Display for ColumnSettingsTab {
 #[derive(Clone, Properties, Derivative)]
 #[derivative(Debug)]
 pub struct ColumnSettingsProps {
-    pub selected_column: ColumnLocator,
-    pub on_close: Callback<()>,
     #[derivative(Debug = "ignore")]
     pub session: Session,
     #[derivative(Debug = "ignore")]
@@ -54,6 +52,9 @@ pub struct ColumnSettingsProps {
     pub presentation: Presentation,
     #[derivative(Debug = "ignore")]
     pub custom_events: CustomEvents,
+
+    pub selected_column: ColumnLocator,
+    pub on_close: Callback<()>,
     pub width_override: Option<i32>,
     pub is_active: bool,
 }
@@ -66,301 +67,286 @@ impl PartialEq for ColumnSettingsProps {
     }
 }
 
-#[function_component]
-pub fn ColumnSettingsSidebar(p: &ColumnSettingsProps) -> Html {
-    // --- setup ---
-    let column_name = p.selected_column.name_or_default(&p.session);
-    let initial_expr_value = p
-        .session
-        .metadata()
-        .get_expression_by_alias(&column_name)
-        .unwrap_or_default();
-    let initial_header_value = (initial_expr_value != column_name).then_some(column_name.clone());
-    let maybe_ty = p.session.metadata().get_column_view_type(&column_name);
+#[derive(Debug)]
+pub enum ColumnSettingsMsg {
+    SetExprValue(Rc<String>),
+    SetExprValid(bool),
+    SetHeaderValue(Option<String>),
+    SetHeaderValid(bool),
+    SetSelectedTab((usize, ColumnSettingsTab)),
+    OnSaveAttributes(()),
+    OnResetAttributes(()),
+    OnDelete(()),
+}
 
-    let (config, attrs) = (p.get_plugin_config(), p.get_plugin_attrs());
-    if config.is_none() || attrs.is_none() {
-        tracing::warn!(
-            "Could not get full plugin config!\nconfig (plugin.save()): {:?}\nplugin_attrs: {:?}",
-            config,
-            attrs
-        );
+#[derive(Default, Debug)]
+pub struct ColumnSettingsSidebar {
+    initial_expr_value: Rc<String>,
+    expr_value: Rc<String>,
+    expr_valid: bool,
+    initial_header_value: Option<String>,
+    header_value: Option<String>,
+    header_valid: bool,
+    selected_tab: (usize, ColumnSettingsTab),
+    save_enabled: bool,
+    save_count: u8,
+    reset_enabled: bool,
+    reset_count: u8,
+    column_name: String,
+    maybe_ty: Option<Type>,
+    tabs: Rc<Vec<ColumnSettingsTab>>,
+}
+
+impl ColumnSettingsSidebar {
+    fn save_enabled_effect(&mut self) {
+        let changed = self.expr_value != self.initial_expr_value
+            || self.header_value != self.initial_header_value;
+        let valid = self.expr_valid && self.header_valid;
+        self.save_enabled = changed && valid;
     }
+}
 
-    let plugin = p.renderer.get_active_plugin().unwrap().name();
-    let tabs = yew::use_memo(
-        (maybe_ty, p.selected_column.clone(), plugin),
-        |(maybe_ty, selected_column, plugin)| {
+impl Component for ColumnSettingsSidebar {
+    type Message = ColumnSettingsMsg;
+    type Properties = ColumnSettingsProps;
+
+    fn create(ctx: &yew::prelude::Context<Self>) -> Self {
+        tracing::error!("Create! {:?}", ctx.props());
+        let column_name = ctx
+            .props()
+            .selected_column
+            .name_or_default(&ctx.props().session);
+        let initial_expr_value = ctx
+            .props()
+            .session
+            .metadata()
+            .get_expression_by_alias(&column_name)
+            .unwrap_or_default();
+        let initial_expr_value = Rc::new(initial_expr_value);
+        let initial_header_value =
+            (*initial_expr_value != column_name).then_some(column_name.clone());
+        let maybe_ty = ctx
+            .props()
+            .session
+            .metadata()
+            .get_column_view_type(&column_name);
+
+        // NOTE: This is going to be refactored soon.
+        let tabs = {
             let mut tabs = vec![];
-            // TODO: This is a hack and needs to be replaced.
+            let plugin = ctx.props().renderer.get_active_plugin().unwrap().name();
+            let (config, attrs) = (
+                ctx.props().get_plugin_config(),
+                ctx.props().get_plugin_attrs(),
+            );
+            if config.is_none() || attrs.is_none() {
+                tracing::warn!(
+                    "Could not get full plugin config!\nconfig (plugin.save()): \
+                     {:?}\nplugin_attrs: {:?}",
+                    config,
+                    attrs
+                );
+            }
             let show_styles = maybe_ty
-                .map(|ty| match &**plugin {
+                .map(|ty| match &*plugin {
                     "Datagrid" => ty != Type::Bool,
                     "X/Y Scatter" => ty == Type::String,
                     _ => false,
                 })
                 .unwrap_or_default();
 
-            if !matches!(selected_column, ColumnLocator::Expr(None))
+            if !matches!(ctx.props().selected_column, ColumnLocator::Expr(None))
                 && show_styles
                 && config.is_some()
             {
                 tabs.push(ColumnSettingsTab::Style);
             }
 
-            if matches!(selected_column, ColumnLocator::Expr(_)) {
+            if ctx.props().selected_column.is_expr() {
                 tabs.push(ColumnSettingsTab::Attributes);
             }
-            tabs
-        },
-    );
+            Rc::new(tabs)
+        };
 
-    // --- state ---
-    let expr_value = yew::use_state(|| Rc::new(initial_expr_value.clone()));
-    let expr_valid = yew::use_state(|| true);
-    let header_value = yew::use_state_eq(|| initial_header_value.clone());
-    let header_valid = yew::use_state_eq(|| true);
-    let selected_tab = yew::use_state_eq(|| (0, *tabs.first().unwrap()));
-    let save_enabled = yew::use_state_eq(|| false);
-    let save_count = yew::use_state_eq(|| 0);
-    let reset_enabled = yew::use_state_eq(|| false);
-    let reset_count = yew::use_state_eq(|| 0);
-
-    // --- callbacks, effects ---
-    let set_expr_value = yew::use_callback(
-        expr_value.setter(),
-        |new_value: String, expr_value_setter| {
-            expr_value_setter.set(Rc::new(new_value));
-        },
-    );
-
-    // reset values on column change
-    yew::use_effect_with(
-        (initial_header_value.clone(), header_value.setter()),
-        |(initial_header_value, header_value_setter)| {
-            header_value_setter.set(initial_header_value.clone());
-        },
-    );
-    yew::use_effect_with(
-        (initial_expr_value.clone(), set_expr_value.clone()),
-        |(initial_expr_value, set_expr_value)| {
-            set_expr_value.emit(initial_expr_value.clone());
-        },
-    );
-
-    // update reset and save on state changes
-    yew::use_effect_with(
-        (
-            expr_value.clone(),
-            initial_expr_value.clone(),
-            header_value.clone(),
-            initial_header_value.clone(),
-            reset_enabled.setter(),
-        ),
-        |(expr_value, initial_expr_value, header_value, initial_header_value, reset_enabled)| {
-            let expr_value = &***expr_value;
-            let header_value = &**header_value;
-            let expr_changed = initial_expr_value != expr_value;
-            let header_changed = header_value != initial_header_value;
-            reset_enabled.set(expr_changed || header_changed);
-        },
-    );
-
-    yew::use_effect_with(
-        (
-            expr_value.clone(),
-            initial_expr_value.clone(),
-            header_value.clone(),
-            initial_header_value.clone(),
-            save_enabled.setter(),
-            header_valid.clone(),
-            expr_valid.clone(),
-        ),
-        |(
-            expr_value,
+        Self {
+            column_name,
+            expr_value: initial_expr_value.clone(),
             initial_expr_value,
-            header_value,
+            header_value: initial_header_value.clone(),
             initial_header_value,
-            save_enabled,
-            header_valid,
-            expr_valid,
-        )| {
-            let changed =
-                &***expr_value != initial_expr_value || &**header_value != initial_header_value;
-            let valid = **header_valid && **expr_valid;
-            save_enabled.set(changed && valid);
-        },
-    );
+            maybe_ty,
+            tabs,
+            header_valid: true,
+            ..Default::default()
+        }
+    }
 
-    let on_change_header_value = yew::use_callback(
-        (header_value.clone(), header_valid.clone()),
-        |(value, valid), (header_value, header_valid)| {
-            header_value.set(value);
-            header_valid.set(valid);
-        },
-    );
+    fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
+        tracing::error!("Changed! {old_props:?} -> {:?}", ctx.props());
+        if ctx.props() != old_props {
+            *self = Self::create(ctx);
+            true
+        } else {
+            false
+        }
+    }
 
-    let on_reset = yew::use_callback(
-        (
-            header_value.clone(),
-            initial_header_value.clone(),
-            set_expr_value.clone(),
-            initial_expr_value.clone(),
-            save_enabled.setter(),
-            reset_enabled.setter(),
-            reset_count.clone(),
-        ),
-        |(),
-         (
-            header_value,
-            initial_header_value,
-            set_expr_value,
-            initial_expr_value,
-            save_enabled,
-            reset_enabled,
-            reset_count,
-        )| {
-            header_value.set(initial_header_value.clone());
-            set_expr_value.emit(initial_expr_value.clone());
-            save_enabled.set(false);
-            reset_enabled.set(false);
-            reset_count.set(**reset_count + 1);
-        },
-    );
+    fn update(&mut self, ctx: &yew::prelude::Context<Self>, msg: Self::Message) -> bool {
+        tracing::error!("Updated! {msg:?}");
+        match msg {
+            // is there a better pattern for this?
+            ColumnSettingsMsg::SetExprValue(val) => {
+                if self.expr_value != val {
+                    self.expr_value = val;
+                    self.reset_enabled = true;
+                    true
+                } else {
+                    false
+                }
+            },
+            ColumnSettingsMsg::SetExprValid(val) => {
+                self.expr_valid = val;
+                self.save_enabled_effect();
+                true
+            },
+            ColumnSettingsMsg::SetHeaderValue(val) => {
+                if self.header_value != val {
+                    self.header_value = val;
+                    self.reset_enabled = true;
+                    true
+                } else {
+                    false
+                }
+            },
+            ColumnSettingsMsg::SetHeaderValid(val) => {
+                self.header_valid = val;
+                self.save_enabled_effect();
+                true
+            },
+            ColumnSettingsMsg::SetSelectedTab(val) => {
+                let rerender = self.selected_tab != val;
+                self.selected_tab = val;
+                rerender
+            },
+            ColumnSettingsMsg::OnResetAttributes(()) => {
+                self.header_value = self.initial_header_value.clone();
+                self.expr_value = self.initial_expr_value.clone();
+                self.save_enabled = false;
+                self.reset_enabled = false;
+                self.reset_count += 1;
+                true
+            },
+            ColumnSettingsMsg::OnSaveAttributes(()) => {
+                let new_expr = Expression::new(
+                    self.header_value.clone().map(|s| s.into()),
+                    (*(self.expr_value)).clone().into(),
+                );
+                match &ctx.props().selected_column {
+                    ColumnLocator::Plain(_) => {
+                        tracing::error!("Tried to save non-expression column!")
+                    },
+                    ColumnLocator::Expr(name) => match name {
+                        Some(old_name) => ctx.props().update_expr(old_name.clone(), new_expr),
+                        None => ctx.props().save_expr(new_expr),
+                    },
+                }
 
-    let on_tab_change = yew::use_callback(selected_tab.clone(), move |(i, tab), selected_tab| {
-        selected_tab.set((i, tab));
-    });
+                self.save_enabled = false;
+                self.reset_enabled = false;
+                self.save_count += 1;
+                true
+            },
+            ColumnSettingsMsg::OnDelete(()) => {
+                if ctx.props().selected_column.is_saved_expr() {
+                    ctx.props().delete_expr(&self.column_name);
+                }
+                ctx.props().on_close.emit(());
+                true
+            },
+        }
+    }
 
-    let on_save = yew::use_callback(
-        (
-            p.get_expression_updater(),
-            p.selected_column.clone(),
-            header_value.clone(),
-            expr_value.clone(),
-            save_enabled.setter(),
-            reset_enabled.setter(),
-            save_count.clone(),
-        ),
-        |(),
-         (
-            expr_updater,
-            selected_column,
-            header_value,
-            expr_value,
-            save_enabled,
-            reset_enabled,
-            save_count,
-        )| {
-            save_enabled.set(false);
-            reset_enabled.set(false);
-            let expr_value = (***expr_value).clone();
-            let expr_name = (**header_value).clone().map(|s| s.into());
-            let new_expr = Expression::new(expr_name, expr_value.into());
-            match selected_column {
-                ColumnLocator::Plain(_) => {
-                    tracing::error!("Tried to save non-expression column!")
-                },
-                ColumnLocator::Expr(name) => match name {
-                    Some(old_name) => expr_updater.update_expr(old_name.clone(), new_expr),
-                    None => expr_updater.save_expr(new_expr),
-                },
-            }
-            save_count.set(**save_count + 1);
-        },
-    );
-
-    let on_delete = yew::use_callback(
-        (
-            p.get_expression_updater(),
-            column_name.clone(),
-            p.on_close.clone(),
-        ),
-        |_event, (expr_updater, column_name, on_close)| {
-            expr_updater.delete_expr(column_name);
-            on_close.emit(());
-        },
-    );
-
-    // --- header ---
-    let is_expr = matches!(p.selected_column, ColumnLocator::Expr(_));
-    let editable = is_expr && matches!(selected_tab.1, ColumnSettingsTab::Attributes);
-    let header_icon = html! {
-        <TypeIcon ty={maybe_ty.map(|ty| ty.into()).unwrap_or(TypeIconType::Expr)} />
-    };
-    let header_contents = html! {
-        <EditableHeader
-            icon={Some(header_icon)}
-            on_change={on_change_header_value.clone()}
-            {editable}
-            initial_value={initial_header_value.clone()}
-            placeholder={(*expr_value).clone()}
-            session={p.session.clone()}
-            reset_count={*reset_count}
-        />
-    };
-
-    // --- render ---
-    let expr_editor = ExpressionEditorProps {
-        session: p.session.clone(),
-        on_input: yew::use_callback(expr_value.setter(), |val, setter| setter.set(val)),
-        on_save: on_save.clone(),
-        on_validate: yew::use_callback(expr_valid.setter(), |val, setter| setter.set(val)),
-        alias: p.selected_column.name().cloned(),
-        disabled: !matches!(p.selected_column, ColumnLocator::Expr(_)),
-        reset_count: *reset_count,
-    };
-
-    let save_section = SaveSettingsProps {
-        save_enabled: (*save_enabled),
-        reset_enabled: (*reset_enabled),
-        on_reset,
-        on_save,
-        on_delete,
-        show_danger_zone: matches!(p.selected_column, ColumnLocator::Expr(Some(_))),
-        disable_delete: p.is_active,
-    };
-
-    let attrs_tab = AttributesTabProps {
-        expr_editor,
-        save_section,
-    };
-
-    let style_tab = StyleTabProps {
-        custom_events: p.custom_events.clone(),
-        session: p.session.clone(),
-        renderer: p.renderer.clone(),
-        ty: maybe_ty,
-        column_name,
-    };
-
-    html_template! {
-        <LocalStyle href={ css!("column-settings-panel") }/>
-        <Sidebar
-            on_close={p.on_close.clone()}
-            id_prefix="column_settings"
-            width_override={p.width_override}
-            selected_tab={selected_tab.0}
-            {header_contents}
-        >
-            <ColumnSettingsTablist
-                renderer={p.renderer.clone()}
-                presentation={p.presentation.clone()}
-                session={p.session.clone()}
-                custom_events={p.custom_events.clone()}
-
-                on_tab_change={on_tab_change.clone()}
-                selected_tab={*selected_tab}
-                {tabs}
-
-                {attrs_tab}
-                {style_tab}
+    fn view(&self, ctx: &yew::prelude::Context<Self>) -> Html {
+        tracing::error!("Render!");
+        let editable = ctx.props().selected_column.is_expr()
+            && matches!(self.selected_tab.1, ColumnSettingsTab::Attributes);
+        let header_icon = html! {
+            <TypeIcon ty={self.maybe_ty.map(|ty| ty.into()).unwrap_or(TypeIconType::Expr)} />
+        };
+        let on_change = ctx.link().batch_callback(|(value, valid)| {
+            vec![
+                ColumnSettingsMsg::SetHeaderValue(value),
+                ColumnSettingsMsg::SetHeaderValid(valid),
+            ]
+        });
+        let header_contents = html! {
+            <EditableHeader
+                icon={Some(header_icon)}
+                {on_change}
+                {editable}
+                initial_value={self.initial_header_value.clone()}
+                placeholder={self.expr_value.clone()}
+                session={ctx.props().session.clone()}
+                reset_count={self.reset_count}
             />
-        </Sidebar>
+        };
 
-                { for children.into_iter() }
+        let expr_editor = ExpressionEditorProps {
+            session: ctx.props().session.clone(),
+            on_input: ctx.link().callback(ColumnSettingsMsg::SetExprValue),
+            on_save: ctx.link().callback(ColumnSettingsMsg::OnSaveAttributes),
+            on_validate: ctx.link().callback(ColumnSettingsMsg::SetExprValid),
+            alias: ctx.props().selected_column.name().cloned(),
+            disabled: !ctx.props().selected_column.is_expr(),
+            reset_count: self.reset_count,
+        };
 
-            </TabList<ColumnSettingsTab>>
-        </Sidebar>
+        let save_section = SaveSettingsProps {
+            save_enabled: self.save_enabled,
+            reset_enabled: self.reset_enabled,
+            on_reset: ctx.link().callback(ColumnSettingsMsg::OnResetAttributes),
+            on_save: ctx.link().callback(ColumnSettingsMsg::OnSaveAttributes),
+            on_delete: ctx.link().callback(ColumnSettingsMsg::OnDelete),
+            show_danger_zone: ctx.props().selected_column.is_saved_expr(),
+            disable_delete: ctx.props().is_active,
+        };
+
+        let attrs_tab = AttributesTabProps {
+            expr_editor,
+            save_section,
+        };
+
+        let style_tab = StyleTabProps {
+            custom_events: ctx.props().custom_events.clone(),
+            session: ctx.props().session.clone(),
+            renderer: ctx.props().renderer.clone(),
+            ty: self.maybe_ty,
+            column_name: self.column_name.clone(),
+        };
+
+        html_template! {
+            <LocalStyle href={ css!("column-settings-panel") } />
+            <Sidebar
+                on_close={ctx.props().on_close.clone()}
+                id_prefix="column_settings"
+                width_override={ctx.props().width_override}
+                selected_tab={self.selected_tab.0}
+                {header_contents}
+            >
+                <ColumnSettingsTablist
+                    renderer={ctx.props().renderer.clone()}
+                    presentation={ctx.props().presentation.clone()}
+                    session={ctx.props().session.clone()}
+                    custom_events={ctx.props().custom_events.clone()}
+
+                    on_tab_change={ctx.link().callback(ColumnSettingsMsg::SetSelectedTab)}
+                    selected_tab={self.selected_tab}
+                    tabs={self.tabs.clone()}
+
+                    {attrs_tab}
+                    {style_tab}
+                />
+            </Sidebar>
+        }
     }
 }

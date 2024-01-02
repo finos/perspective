@@ -65,6 +65,18 @@ impl ColumnLocator {
             ColumnLocator::Expr(None) => false,
         }
     }
+
+    #[inline(always)]
+    pub fn is_saved_expr(&self) -> bool {
+        matches!(self, ColumnLocator::Expr(Some(_)))
+    }
+
+    /// Returns true if the column is an expression.
+    /// Use `is_saved_expr` if you want to exclude new expressions.
+    #[inline(always)]
+    pub fn is_expr(&self) -> bool {
+        matches!(self, ColumnLocator::Expr(_))
+    }
 }
 
 #[derive(Properties)]
