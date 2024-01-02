@@ -39,6 +39,12 @@ export function style_selected_column(regularTable, selectedColumn) {
 
     const settings_open =
         regularTable.parentElement.parentElement.hasAttribute("settings");
+
+    regularTable.parentElement.classList.toggle(
+        "psp-menu-open",
+        !!selectedColumn
+    );
+
     if (settings_open && len >= 2) {
         // if settings_open, you will never have less than 2 trs unless the
         // table is empty, but possibly more e.g. with group-by.
@@ -52,12 +58,25 @@ export function style_selected_column(regularTable, selectedColumn) {
                     th.classList.toggle("psp-menu-open", false);
                 });
             });
-            let zipped = titles.map((title, i) => [title, editBtns[i]]);
-            zipped.forEach(([title, editBtn]) => {
+
+            for (let i = 0; i < titles.length; i++) {
+                const title = titles[i];
+                const editBtn = editBtns[i];
+
                 let open = title.innerText === selectedColumn;
                 title.classList.toggle("psp-menu-open", open);
                 editBtn.classList.toggle("psp-menu-open", open);
-            });
+                if (this._config.columns.length > 1) {
+                    for (const r of regularTable.querySelectorAll("td")) {
+                        const meta = regularTable.getMeta(r);
+                        const open =
+                            meta.column_header[
+                                meta.column_header.length - 2
+                            ] === selectedColumn;
+                        r.classList.toggle("psp-menu-open", open);
+                    }
+                }
+            }
         }
     }
 }

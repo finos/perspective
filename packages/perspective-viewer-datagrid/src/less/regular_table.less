@@ -42,13 +42,14 @@ perspective-viewer[settings] {
     }
 
     .psp-menu-enabled:hover,
-    tr:not(.rt-autosize) .psp-menu-open {
+    tr:not(.rt-autosize) th.psp-menu-open {
         color: var(--plugin--background);
         background-color: var(--icon--color);
+        border-bottom-color: var(--icon--color);
         cursor: pointer;
     }
 
-    tr:not(.rt-autosize) .psp-menu-open {
+    tr:not(.rt-autosize) th.psp-menu-open {
         &:before {
             @include icon;
             height: 8px;
@@ -59,6 +60,26 @@ perspective-viewer[settings] {
             background-color: var(--plugin--background);
         }
     }
+
+    td.psp-menu-open {
+        box-shadow: inset -2px 0px 0px var(--icon--color),
+            inset 2px 0px 0px var(--icon--color);
+    }
+
+    tr:first-child td.psp-menu-open {
+        border-top-color: var(--icon--color) !important;
+    }
+
+    tr:last-child td.psp-menu-open {
+        box-shadow: inset -2px 0px 0px var(--icon--color),
+            inset 2px 0px 0px var(--icon--color),
+            inset 0px -2px 0px var(--icon--color);
+    }
+}
+
+perspective-viewer regular-table table thead tr:last-child th {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--inactive--border-color, #8b868045);
 }
 
 .psp-sort-enabled:hover {
@@ -175,11 +196,6 @@ tbody th:empty {
 .psp-tree-label:hover:before {
     color: var(--active--color);
     text-shadow: 0px 0px 5px var(--active--color);
-}
-
-regular-table thead tr:last-child th {
-    border-bottom-width: 1px;
-    border-bottom-color: var(--inactive--border-color, #8b868045);
 }
 
 .psp-tree-leaf {
