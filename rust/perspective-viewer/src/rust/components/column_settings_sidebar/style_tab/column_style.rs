@@ -67,23 +67,27 @@ pub struct ColumnStyleProps {
     pub custom_events: CustomEvents,
     pub session: Session,
     pub renderer: Renderer,
-
-    pub view_ty: Type,
     pub column_name: String,
 }
 derive_model!(CustomEvents, Session, Renderer for ColumnStyleProps);
 #[function_component]
-pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
-    let props = p.clone();
+pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
+    let props = props.clone();
     let (config, attrs) = (props.get_plugin_config(), props.get_plugin_attrs());
     let (config, attrs) = (config.unwrap(), attrs.unwrap());
-    let title = format!("{} Styling", props.view_ty.to_capitalized());
-    let opt_html = match props.view_ty {
+    let view_type = props
+        .session
+        .metadata()
+        .get_column_view_type(&props.column_name)
+        .unwrap();
+
+    let title = format!("{} Styling", view_type.to_capitalized());
+    let opt_html = match view_type {
         Type::String => get_column_style::<_, StringColumnStyleDefaultConfig>(
             config.clone(),
             attrs.clone(),
             &props.column_name,
-            props.view_ty,
+            view_type,
         )
         .map(|(config, default_config)| {
             let on_change = Callback::from(move |config| {
@@ -103,21 +107,21 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
                 </div>
             }
         }),
-
         Type::Datetime | Type::Date => get_column_style::<_, DatetimeColumnStyleDefaultConfig>(
             config.clone(),
             attrs.clone(),
             &props.column_name,
-            props.view_ty,
+            view_type,
         )
         .map(|(config, default_config)| {
-            let enable_time_config = matches!(props.view_ty, Type::Datetime);
+            let enable_time_config = matches!(view_type, Type::Datetime);
             let on_change = Callback::from(move |config| {
                 props.send_plugin_config(
                     props.column_name.clone(),
                     serde_json::to_value(config).unwrap(),
                 )
             });
+
             html_template! {
                 <div class="item_title">{title.clone()}</div>
                 <div class="style_contents">
@@ -129,12 +133,11 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
                 </div>
             }
         }),
-
         Type::Integer | Type::Float => get_column_style::<_, NumberColumnStyleDefaultConfig>(
             config.clone(),
             attrs.clone(),
             &props.column_name,
-            props.view_ty,
+            view_type,
         )
         .map(|(config, default_config)| {
             let on_change = {
@@ -161,14 +164,15 @@ pub fn ColumnStyle(p: &ColumnStyleProps) -> Html {
         }),
         _ => Err("Booleans aren't styled yet.".into()),
     };
+
     let contents = opt_html.unwrap_or_else(|e| {
         html! {
             <Stub
                 message="No styles available"
-                error={e}
-            />
+                error={ e }/>
         }
     });
+
     html_template! {
         <LocalStyle href={ css!("column-style") } />
         {contents}

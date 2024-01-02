@@ -16,7 +16,7 @@ use std::rc::Rc;
 use itertools::Itertools;
 use yew::{function_component, html, Html, Properties};
 
-use super::types::SymbolKVPair;
+use super::symbol_config::SymbolKVPair;
 use crate::clone;
 use crate::components::empty_row::EmptyRow;
 use crate::custom_elements::FilterDropDownElement;
@@ -34,10 +34,10 @@ pub struct RowSelectorProps {
 }
 
 #[function_component(RowSelector)]
-pub fn row_selector(p: &RowSelectorProps) -> Html {
+pub fn row_selector(props: &RowSelectorProps) -> Html {
     let on_select = {
-        clone!(p.dropdown, p.index, p.set_focused_index);
-        p.on_select.reform(move |key| {
+        clone!(props.dropdown, props.index, props.set_focused_index);
+        props.on_select.reform(move |key| {
             dropdown.hide().unwrap();
             set_focused_index.emit(Some(index + 1));
             key
@@ -45,17 +45,17 @@ pub fn row_selector(p: &RowSelectorProps) -> Html {
     };
 
     let ondblclick = {
-        clone!(p.set_focused_index, p.index);
+        clone!(props.set_focused_index, props.index);
         yew::Callback::from(move |_| {
             set_focused_index.emit(Some(index));
         })
     };
 
-    let err_class = (p.index != p.pairs.len() - 1).then_some("row-selector-errored");
+    let err_class = (props.index != props.pairs.len() - 1).then_some("row-selector-errored");
 
-    let inner = if p.selected_row.is_none() || p.focused {
-        let mut pairs = p.pairs.clone();
-        if let Some(ref rowval) = p.selected_row {
+    let inner = if props.selected_row.is_none() || props.focused {
+        let mut pairs = props.pairs.clone();
+        if let Some(ref rowval) = props.selected_row {
             if let Some((i, _)) = pairs.iter().find_position(|pair| {
                 pair.key
                     .as_ref()
@@ -74,22 +74,22 @@ pub fn row_selector(p: &RowSelectorProps) -> Html {
         html! {
             <div class={ err_class }>
                 <EmptyRow
-                    dropdown={ p.dropdown.clone() }
+                    dropdown={ props.dropdown.clone() }
                     { exclude }
                     { on_select }
-                    focused={ p.focused }
-                    index={ p.index }
-                    set_focused_index={ p.set_focused_index.clone() }
-                    value={ p.selected_row.clone().unwrap_or_default() }
-                    column_name={ p.column_name.clone() }/>
+                    focused={ props.focused }
+                    index={ props.index }
+                    set_focused_index={ props.set_focused_index.clone() }
+                    value={ props.selected_row.clone().unwrap_or_default() }
+                    column_name={ props.column_name.clone() }/>
             </div>
         }
     } else {
         html! {
             <div class="row-selector column-selector-column">
                 <div class="column-selector-column-border">
-                    <span class="column_name none" {ondblclick}>
-                        {p.selected_row.clone().unwrap()}
+                    <span class="column_name none" { ondblclick }>
+                        { props.selected_row.clone().unwrap() }
                     </span>
                 </div>
             </div>
@@ -98,7 +98,7 @@ pub fn row_selector(p: &RowSelectorProps) -> Html {
 
     html! {
         <div class="row-selector">
-            {inner}
+            { inner }
         </div>
     }
 }

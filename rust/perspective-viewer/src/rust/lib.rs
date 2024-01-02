@@ -12,10 +12,12 @@
 
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
+#![feature(async_fn_in_trait)]
 #![feature(const_type_name)]
 #![feature(lazy_cell)]
-#![feature(macro_metavar_expr)]
 #![feature(let_chains)]
+#![feature(macro_metavar_expr)]
+#![feature(return_position_impl_trait_in_trait)]
 #![feature(stmt_expr_attributes)]
 #![warn(
     clippy::all,
@@ -36,14 +38,13 @@ mod renderer;
 mod session;
 pub mod utils;
 
-use utils::JsValueSerdeExt;
 use wasm_bindgen::prelude::*;
 
 use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
 use crate::custom_elements::debug_plugin::PerspectiveDebugPluginElement;
 use crate::custom_elements::export_dropdown::ExportDropDownMenuElement;
 use crate::custom_elements::viewer::PerspectiveViewerElement;
-use crate::utils::{define_web_component, ApiResult};
+use crate::utils::{define_web_component, ApiResult, JsValueSerdeExt};
 
 /// Register a plugin globally.
 #[wasm_bindgen(js_name = "registerPlugin")]

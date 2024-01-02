@@ -153,7 +153,7 @@ impl Component for PerspectiveViewer {
         match msg {
             PerspectiveViewerMsg::PreloadFontsUpdate => true,
             PerspectiveViewerMsg::Resize => {
-                self.on_resize.emit_all(());
+                self.on_resize.emit(());
                 false
             },
             PerspectiveViewerMsg::Reset(all, sender) => {
@@ -256,7 +256,7 @@ impl Component for PerspectiveViewer {
                 ctx.props()
                     .presentation
                     .column_settings_open_changed
-                    .emit_all((open, column_name));
+                    .emit((open, column_name));
 
                 if let Some(sender) = sender {
                     sender.send(()).unwrap();

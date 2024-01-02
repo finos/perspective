@@ -23,7 +23,7 @@ pub mod scroll_panel_item;
 pub mod select;
 pub mod sidebar;
 pub mod split_panel;
-pub mod tablist;
+pub mod tab_list;
 
 #[cfg(test)]
 mod tests;

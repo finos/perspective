@@ -36,7 +36,6 @@ pub enum StringColumnStyleMsg {
 #[derive(Properties)]
 pub struct StringColumnStyleProps {
     pub config: Option<StringColumnStyleConfig>,
-
     pub default_config: StringColumnStyleDefaultConfig,
 
     #[prop_or_default]
@@ -88,7 +87,7 @@ impl StringColumnStyle {
                 html_template! {
                     <span class="row">{ title }</span>
                     <div class="row inner_section">
-                        <ColorSelector ..color_props />
+                        <ColorSelector ..color_props/>
                     </div>
                 }
             },
@@ -190,7 +189,6 @@ impl Component for StringColumnStyle {
 
         let selected_color_mode = self.config.string_color_mode.unwrap_or_default();
         let color_mode_changed = ctx.link().callback(StringColumnStyleMsg::ColorModeChanged);
-
         let series_controls = self.color_select_row(ctx, &StringColorMode::Series, "Series");
         let foreground_controls =
             self.color_select_row(ctx, &StringColorMode::Foreground, "Foreground");
@@ -199,7 +197,7 @@ impl Component for StringColumnStyle {
             self.color_select_row(ctx, &StringColorMode::Background, "Background");
 
         html_template! {
-            <LocalStyle href={ css!("column-style") } />
+            <LocalStyle href={ css!("column-style") }/>
             <div id="column-style-container" class="string-column-style-container">
                 <div class="column-style-label">
                     <label class="indent">{ "Format" }</label>
@@ -208,13 +206,13 @@ impl Component for StringColumnStyle {
                     <input
                         type="checkbox"
                         oninput={ format_enabled_oninput }
-                        checked={ self.config.format.is_some() } />
+                        checked={ self.config.format.is_some() }/>
 
                     <RadioList<FormatMode>
                         class="indent"
                         disabled={ self.config.format.is_none() }
                         selected={ format_mode_selected }
-                        on_change={ format_mode_changed } >
+                        on_change={ format_mode_changed }>
 
                         <RadioListItem<FormatMode>
                             value={ FormatMode::Bold }>
@@ -237,14 +235,14 @@ impl Component for StringColumnStyle {
                     <input
                         type="checkbox"
                         oninput={ color_enabled_oninput }
-                        checked={ self.config.string_color_mode.is_some() } />
+                        checked={ self.config.string_color_mode.is_some() }/>
 
                     <RadioList<StringColorMode>
                         class="indent"
                         name="color-radio-list"
                         disabled={ self.config.string_color_mode.is_none() }
                         selected={ selected_color_mode }
-                        on_change={ color_mode_changed } >
+                        on_change={ color_mode_changed }>
 
                         <RadioListItem<StringColorMode>
                             value={ StringColorMode::Foreground }>

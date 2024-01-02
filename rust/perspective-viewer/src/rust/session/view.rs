@@ -13,8 +13,8 @@
 use std::ops::Deref;
 use std::rc::Rc;
 
-use async_trait::async_trait;
 use derivative::Derivative;
+use futures::Future;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -88,7 +88,6 @@ where
 /// `JsPerspectiveView` and `JsPerspectiveTable`.
 struct PerspectiveOwnedSession<T: AsyncDelete + JsCast + 'static>(T);
 
-#[async_trait(?Send)]
 impl<T: AsyncDelete + JsCast + 'static> Drop for PerspectiveOwnedSession<T> {
     fn drop(&mut self) {
         let obj = self
@@ -105,12 +104,10 @@ impl<T: AsyncDelete + JsCast + 'static> Drop for PerspectiveOwnedSession<T> {
     }
 }
 
-#[async_trait(?Send)]
 pub trait AsyncDelete {
-    async fn delete(self) -> ApiResult<JsValue>;
+    fn delete(self) -> impl Future<Output = ApiResult<JsValue>>;
 }
 
-#[async_trait(?Send)]
 impl AsyncDelete for JsPerspectiveView {
     async fn delete(self) -> ApiResult<JsValue> {
         self.delete().await?;
@@ -118,7 +115,6 @@ impl AsyncDelete for JsPerspectiveView {
     }
 }
 
-#[async_trait(?Send)]
 impl AsyncDelete for JsPerspectiveTable {
     async fn delete(self) -> ApiResult<JsValue> {
         self.delete().await?;

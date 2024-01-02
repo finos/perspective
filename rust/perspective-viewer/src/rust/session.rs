@@ -107,7 +107,7 @@ impl Session {
     /// Reset this `Session`'s `View` state, but preserve the `Table`.
     ///
     /// # Arguments
-    /// - `keep_expressions` Whether to reset the `expressions` property.
+    /// - `reset_expressions` Whether to reset the `expressions` property.
     pub fn reset(&self, reset_expressions: bool) {
         self.borrow_mut().is_clean = false;
         self.borrow_mut().view_sub = None;
@@ -141,7 +141,7 @@ impl Session {
         self.borrow_mut().view_sub = None;
         self.borrow_mut().metadata = metadata;
         self.borrow_mut().table = Some(table);
-        self.table_loaded.emit_all(());
+        self.table_loaded.emit(());
         Ok(JsValue::UNDEFINED)
     }
 
@@ -330,7 +330,7 @@ impl Session {
         if self.borrow_mut().config.apply_update(config_update) {
             self.borrow_mut().view_sub = None;
             self.0.borrow_mut().is_clean = false;
-            self.view_config_changed.emit_all(());
+            self.view_config_changed.emit(());
         }
     }
 
@@ -387,7 +387,7 @@ impl Session {
 
     fn update_stats(&self, stats: ViewStats) {
         self.borrow_mut().stats = Some(stats);
-        self.stats_changed.emit_all(());
+        self.stats_changed.emit(());
     }
 
     async fn validate_view_config(&self) -> ApiResult<()> {
@@ -524,6 +524,6 @@ impl<'a> Drop for ValidSession<'a> {
     /// `ValidSession` is a guard for listeners of the `view_created` pubsub
     /// event.
     fn drop(&mut self) {
-        self.0.view_created.emit_all(());
+        self.0.view_created.emit(());
     }
 }

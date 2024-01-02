@@ -88,7 +88,7 @@ impl Presentation {
 
     pub fn set_title(&self, title: Option<String>) {
         *self.name.borrow_mut() = title.clone();
-        self.title_changed.emit_all(title);
+        self.title_changed.emit(title);
     }
 
     pub fn get_is_workspace(&self) -> bool {
@@ -120,7 +120,7 @@ impl Presentation {
         if *self.is_settings_open.borrow() != open_state {
             *self.is_settings_open.borrow_mut() = open_state;
             self.set_settings_attribute(open_state);
-            self.settings_open_changed.emit_all(open_state);
+            self.settings_open_changed.emit(open_state);
         }
 
         Ok(open_state)
@@ -191,7 +191,7 @@ impl Presentation {
             None
         };
 
-        self.theme_config_updated.emit_all((themes, index));
+        self.theme_config_updated.emit((themes, index));
         Ok(())
     }
 }

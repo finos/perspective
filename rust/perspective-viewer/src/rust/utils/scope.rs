@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use async_trait::async_trait;
 use extend::ext;
 use futures::channel::oneshot::*;
 use yew::html::Scope;
@@ -36,14 +35,13 @@ where
 }
 
 #[ext]
-#[async_trait(?Send)]
-pub impl<T> Callback<Sender<T>>
+pub(crate) impl<T> Callback<Sender<T>>
 where
     T: 'static,
 {
     /// This is "safe" because `emit()` is not called synchronously.  Normally
     /// we want this to minimize the async by doing as much work synchronous
-    /// as possible (see `seng_message_async()` e.g.), but this method calls
+    /// as possible (see `send_message_async()` e.g.), but this method calls
     /// `Yew` which _never_ wants to be called synchronously.
     ///
     /// TODO Need test coverage for this - error behavior is that presize/render
@@ -54,10 +52,4 @@ where
         self.emit(sender);
         Ok(receiver.await?)
     }
-
-    // fn emit_async(&self) -> super::ApiFuture<T> {
-    //     let (sender, receiver) = channel::<T>();
-    //     self.emit(sender);
-    //     super::ApiFuture::new(async move { Ok(receiver.await?) })
-    // }
 }
