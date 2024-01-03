@@ -147,4 +147,17 @@ test.describe("Attributes Tab", () => {
         let config = await view.save();
         expect(config?.expressions).toStrictEqual({});
     });
+    test("Rename empty header as expression value", async ({ page }) => {
+        let view = new PageView(page);
+        let settingsPanel = await view.openSettingsPanel();
+        await settingsPanel.createNewExpression("", "1234");
+        await view.columnSettingsSidebar.nameInput.type("1234");
+        await expect(
+            view.columnSettingsSidebar.nameInputWrapper
+        ).not.toHaveClass("invalid");
+        // NOTE: Currently when you rename a column as the contents of its placeholder,
+        // it gets serialized with the expression name. This confuses the components and it deserializes
+        // as if it had an empty header.
+        // Changing this behavior may require changing the way we serialize expressions.
+    });
 });

@@ -121,7 +121,6 @@ impl Component for ColumnSettingsSidebar {
     type Properties = ColumnSettingsProps;
 
     fn create(ctx: &yew::prelude::Context<Self>) -> Self {
-        tracing::error!("Create! {:?}", ctx.props());
         let column_name = ctx
             .props()
             .selected_column
@@ -192,7 +191,6 @@ impl Component for ColumnSettingsSidebar {
     }
 
     fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
-        tracing::error!("Changed! {old_props:?} -> {:?}", ctx.props());
         if ctx.props() != old_props {
             let selected_tab = self.selected_tab;
             *self = Self::create(ctx);
@@ -210,7 +208,6 @@ impl Component for ColumnSettingsSidebar {
     }
 
     fn update(&mut self, ctx: &yew::prelude::Context<Self>, msg: Self::Message) -> bool {
-        tracing::error!("Updated! {msg:?}");
         match msg {
             ColumnSettingsMsg::SetExprValue(val) => {
                 if self.expr_value != val {
@@ -287,8 +284,6 @@ impl Component for ColumnSettingsSidebar {
     }
 
     fn view(&self, ctx: &yew::prelude::Context<Self>) -> Html {
-        tracing::error!("Render!");
-
         let header_props = EditableHeaderProps {
             icon_type: self
                 .maybe_ty

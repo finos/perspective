@@ -15,11 +15,11 @@ use std::rc::Rc;
 use derivative::Derivative;
 use itertools::Itertools;
 use web_sys::{FocusEvent, HtmlInputElement, KeyboardEvent};
-use yew::{classes, function_component, html, Callback, Html, Properties, TargetCast};
+use yew::{classes, html, Callback, Component, Html, NodeRef, Properties, TargetCast};
 
 use super::type_icon::TypeIconType;
-use crate::clone;
 use crate::components::type_icon::TypeIcon;
+use crate::maybe;
 use crate::session::Session;
 
 #[derive(PartialEq, Properties, Derivative, Clone)]
@@ -35,6 +35,19 @@ pub struct EditableHeaderProps {
     #[derivative(Debug = "ignore")]
     pub session: Session,
 }
+impl EditableHeaderProps {
+    fn split_placeholder(&self) -> String {
+        let split = self
+            .placeholder
+            .split_once('\n')
+            .map(|(a, _)| a)
+            .unwrap_or(&*self.placeholder);
+        match split.char_indices().nth(25) {
+            None => split.to_string(),
+            Some((idx, _)) => split[..idx].to_owned(),
+        }
+    }
+}
 
 #[derive(Default, Debug, PartialEq, Copy, Clone)]
 pub enum ValueState {
@@ -43,132 +56,132 @@ pub enum ValueState {
     Edited,
 }
 
-#[function_component(EditableHeader)]
-pub fn editable_header(p: &EditableHeaderProps) -> Html {
-    let noderef = yew::use_node_ref();
-    let value_state = yew::use_state_eq(|| ValueState::Unedited);
-    let valid = yew::use_state_eq(|| true);
-    let new_value = yew::use_state_eq(|| p.initial_value.clone());
+pub enum EditableHeaderMsg {
+    SetNewValue(String),
+    OnClick(()),
+}
 
-    {
-        clone!(new_value, p.initial_value);
-        yew::use_effect_with(p.reset_count, move |_| new_value.set(initial_value.clone()));
+#[derive(Default, Debug)]
+pub struct EditableHeader {
+    noderef: NodeRef,
+    edited: bool,
+    valid: bool,
+    value: Option<String>,
+    placeholder: String,
+}
+impl Component for EditableHeader {
+    type Message = EditableHeaderMsg;
+    type Properties = EditableHeaderProps;
+
+    fn create(ctx: &yew::prelude::Context<Self>) -> Self {
+        Self {
+            value: ctx.props().initial_value.clone(),
+            placeholder: ctx.props().split_placeholder(),
+            valid: true,
+            ..Self::default()
+        }
     }
-    {
-        clone!(value_state.setter());
-        yew::use_effect_with(p.initial_value.clone(), move |_| {
-            setter.set(ValueState::Unedited);
-        })
+
+    fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
+        if ctx.props().reset_count != old_props.reset_count {
+            self.value = ctx.props().initial_value.clone();
+        }
+        if ctx.props().initial_value != old_props.initial_value {
+            self.edited = false;
+            self.value = ctx.props().initial_value.clone();
+        }
+        if !ctx.props().editable {
+            self.edited = false;
+        }
+        self.placeholder = ctx.props().split_placeholder();
+        ctx.props() != old_props
     }
 
-    let set_new_value = yew::use_callback(
-        (
-            new_value.clone(),
-            p.on_change.clone(),
-            p.initial_value.clone(),
-            value_state.clone(),
-            valid.clone(),
-            p.session.clone(),
-        ),
-        |s: String, (new_value, on_change, initial_value, value_state, valid, session)| {
-            let maybe_s = (!s.is_empty()).then_some(s);
-            if maybe_s == *initial_value {
-                value_state.set(ValueState::Unedited);
-            } else {
-                value_state.set(ValueState::Edited);
-            }
+    fn update(&mut self, ctx: &yew::prelude::Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            EditableHeaderMsg::SetNewValue(new_value) => {
+                let maybe_value = (!new_value.is_empty()).then_some(new_value.clone());
+                self.edited = ctx.props().initial_value != maybe_value;
 
-            let title_is_valid = initial_value == &maybe_s
-                || maybe_s
-                    .as_ref()
-                    .and_then(|s| {
-                        let metadata = session.metadata();
-                        let expressions = metadata.get_expression_columns();
-                        let found = metadata
-                            .get_table_columns()?
-                            .iter()
-                            .chain(expressions)
-                            .contains(s);
-                        Some(!found)
-                    })
-                    .unwrap_or(true);
+                self.valid = maybe!({
+                    if maybe_value
+                        .as_ref()
+                        .map(|v| v == &self.placeholder)
+                        .unwrap_or(true)
+                    {
+                        return Some(true);
+                    }
+                    if !self.edited {
+                        return Some(true);
+                    }
+                    let metadata = ctx.props().session.metadata();
+                    let expressions = metadata.get_expression_columns();
+                    let found = metadata
+                        .get_table_columns()?
+                        .iter()
+                        .chain(expressions)
+                        .contains(&new_value);
+                    Some(!found)
+                })
+                .unwrap_or(true);
 
-            valid.set(title_is_valid);
-            new_value.set(maybe_s.clone());
-            on_change.emit((maybe_s, title_is_valid));
-        },
-    );
+                self.value = maybe_value.clone();
+                ctx.props().on_change.emit((maybe_value, self.valid));
 
-    {
-        clone!(value_state, new_value);
-        yew::use_effect_with(
-            (p.editable, p.initial_value.clone()),
-            move |(editable, value)| {
-                if !editable {
-                    value_state.set(ValueState::Unedited);
-                }
-                new_value.set(value.to_owned());
+                tracing::error!("EditableHeader: SetNewValue! {:?}", self);
+
+                true
             },
-        );
+            EditableHeaderMsg::OnClick(()) => {
+                self.noderef
+                    .cast::<HtmlInputElement>()
+                    .unwrap()
+                    .focus()
+                    .unwrap();
+                false
+            },
+        }
     }
 
-    let onclick = yew::use_callback(noderef.clone(), |_, noderef| {
-        noderef.cast::<HtmlInputElement>().unwrap().focus().unwrap();
-    });
-    let onblur = yew::use_callback(
-        set_new_value.clone(),
-        move |e: FocusEvent, set_new_value| {
+    fn view(&self, ctx: &yew::prelude::Context<Self>) -> Html {
+        let mut classes = classes!("sidebar_header_contents");
+        if ctx.props().editable {
+            classes.push("editable");
+        }
+        if !self.valid {
+            classes.push("invalid");
+        }
+        if self.edited {
+            classes.push("edited");
+        }
+
+        let onkeyup = ctx.link().callback(|e: KeyboardEvent| {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
-            set_new_value.emit(value);
-        },
-    );
-    let onkeyup = yew::use_callback(
-        set_new_value.clone(),
-        move |e: KeyboardEvent, set_new_value| {
+            EditableHeaderMsg::SetNewValue(value)
+        });
+        let onblur = ctx.link().callback(|e: FocusEvent| {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
-            set_new_value.emit(value);
-        },
-    );
-
-    let mut classes = classes!("sidebar_header_contents");
-    if p.editable {
-        classes.push("editable");
-    }
-    if !*valid {
-        classes.push("invalid");
-    }
-    match *value_state {
-        ValueState::Unedited => {},
-        ValueState::Edited => classes.push("edited"),
-    }
-    let split = p
-        .placeholder
-        .split_once('\n')
-        .map(|(a, _)| a)
-        .unwrap_or(&p.placeholder);
-    let placeholder = match split.char_indices().nth(25) {
-        None => split.to_string(),
-        Some((idx, _)) => split[..idx].to_owned(),
-    };
-
-    html! {
-        <div
-            class={classes}
-            {onclick}
-        >
-            if let Some(icon) = p.icon_type {
-                <TypeIcon ty={icon}/>
-            }
-            <input
-                ref={noderef}
-                type="search"
-                class="sidebar_header_title"
-                disabled={!p.editable}
-                {onblur}
-                {onkeyup}
-                value={(*new_value).clone()}
-                {placeholder}
-            />
-        </div>
+            EditableHeaderMsg::SetNewValue(value)
+        });
+        html! {
+            <div
+                class={classes}
+                onclick={ctx.link().callback(|_| EditableHeaderMsg::OnClick(()))}
+            >
+                if let Some(icon) = ctx.props().icon_type {
+                    <TypeIcon ty={icon}/>
+                }
+                <input
+                    ref={self.noderef.clone()}
+                    type="search"
+                    class="sidebar_header_title"
+                    disabled={!ctx.props().editable}
+                    {onblur}
+                    {onkeyup}
+                    value={self.value.clone()}
+                    placeholder={self.placeholder.clone()}
+                />
+            </div>
+        }
     }
 }
