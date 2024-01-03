@@ -17,6 +17,7 @@ use yew::{
 };
 
 use crate::clone;
+use crate::components::editable_header::{EditableHeader, EditableHeaderProps};
 
 #[derive(PartialEq, Clone, Properties)]
 pub struct SidebarProps {
@@ -28,7 +29,7 @@ pub struct SidebarProps {
     pub id_prefix: String,
     pub width_override: Option<i32>,
     pub selected_tab: Option<usize>,
-    pub header_contents: Html,
+    pub header_props: EditableHeaderProps,
 }
 
 /// Sidebars are designed to live in a [SplitPanel]
@@ -65,7 +66,7 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
                 on_close_sidebar={ &p.on_close }
                 />
             <div class="sidebar_header">
-                {p.header_contents.clone()}
+                <EditableHeader ..p.header_props.clone()/>
             </div>
             <div class="sidebar_border" id={ format!("{id}_border") }></div>
             <div class="sidebar_content" id={ format!("{id}_content") }>

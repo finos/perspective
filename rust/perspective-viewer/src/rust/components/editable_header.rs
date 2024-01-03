@@ -17,13 +17,15 @@ use itertools::Itertools;
 use web_sys::{FocusEvent, HtmlInputElement, KeyboardEvent};
 use yew::{classes, function_component, html, Callback, Html, Properties, TargetCast};
 
+use super::type_icon::TypeIconType;
 use crate::clone;
+use crate::components::type_icon::TypeIcon;
 use crate::session::Session;
 
-#[derive(PartialEq, Properties, Derivative)]
+#[derive(PartialEq, Properties, Derivative, Clone)]
 #[derivative(Debug)]
 pub struct EditableHeaderProps {
-    pub icon: Option<Html>,
+    pub icon_type: Option<TypeIconType>,
     pub on_change: Callback<(Option<String>, bool)>,
     pub editable: bool,
     pub initial_value: Option<String>,
@@ -154,8 +156,8 @@ pub fn editable_header(p: &EditableHeaderProps) -> Html {
             class={classes}
             {onclick}
         >
-            if let Some(icon) = p.icon.clone() {
-                {icon}
+            if let Some(icon) = p.icon_type {
+                <TypeIcon ty={icon}/>
             }
             <input
                 ref={noderef}

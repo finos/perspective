@@ -152,7 +152,7 @@ impl Presentation {
         if *(self.open_column_settings.borrow()) != settings {
             *(self.open_column_settings.borrow_mut()) = settings.to_owned();
             self.column_settings_open_changed
-                .emit_all((true, settings.name()));
+                .emit((true, settings.name()));
         }
     }
 

@@ -10,22 +10,24 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-mod tablist;
 use std::fmt::Display;
 use std::rc::Rc;
 
 use derivative::Derivative;
-pub use tablist::*;
-use yew::{function_component, html, Callback, Component, Html, Properties};
+use itertools::Itertools;
+use yew::{html, Callback, Component, Html, Properties};
 
 use super::attributes_tab::AttributesTabProps;
 use super::style_tab::StyleTabProps;
+use crate::components::column_settings_sidebar::attributes_tab::AttributesTab;
 use crate::components::column_settings_sidebar::save_settings::SaveSettingsProps;
+use crate::components::column_settings_sidebar::style_tab::StyleTab;
 use crate::components::containers::sidebar::Sidebar;
-use crate::components::editable_header::EditableHeader;
+use crate::components::containers::tab_list::{Tab, TabList};
+use crate::components::editable_header::EditableHeaderProps;
 use crate::components::expression_editor::ExpressionEditorProps;
 use crate::components::style::LocalStyle;
-use crate::components::type_icon::{TypeIcon, TypeIconType};
+use crate::components::type_icon::TypeIconType;
 use crate::components::viewer::ColumnLocator;
 use crate::config::{Expression, Type};
 use crate::custom_events::CustomEvents;
@@ -35,6 +37,13 @@ use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::{css, derive_model, html_template};
 
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
+pub enum ColumnSettingsTab {
+    #[default]
+    Attributes,
+    Style,
+}
+impl Tab for ColumnSettingsTab {}
 impl Display for ColumnSettingsTab {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{self:?}"))
@@ -87,14 +96,15 @@ pub struct ColumnSettingsSidebar {
     initial_header_value: Option<String>,
     header_value: Option<String>,
     header_valid: bool,
-    selected_tab: (usize, ColumnSettingsTab),
+    selected_tab: ColumnSettingsTab,
+    selected_tab_idx: usize,
     save_enabled: bool,
     save_count: u8,
     reset_enabled: bool,
     reset_count: u8,
     column_name: String,
     maybe_ty: Option<Type>,
-    tabs: Rc<Vec<ColumnSettingsTab>>,
+    tabs: Vec<ColumnSettingsTab>,
 }
 
 impl ColumnSettingsSidebar {
@@ -165,7 +175,7 @@ impl Component for ColumnSettingsSidebar {
             if ctx.props().selected_column.is_expr() {
                 tabs.push(ColumnSettingsTab::Attributes);
             }
-            Rc::new(tabs)
+            tabs
         };
 
         Self {
@@ -184,7 +194,15 @@ impl Component for ColumnSettingsSidebar {
     fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
         tracing::error!("Changed! {old_props:?} -> {:?}", ctx.props());
         if ctx.props() != old_props {
+            let selected_tab = self.selected_tab;
             *self = Self::create(ctx);
+            self.selected_tab = selected_tab;
+            self.selected_tab_idx = self
+                .tabs
+                .iter()
+                .find_position(|tab| **tab == selected_tab)
+                .map(|(idx, _val)| idx)
+                .unwrap_or_default();
             true
         } else {
             false
@@ -194,7 +212,6 @@ impl Component for ColumnSettingsSidebar {
     fn update(&mut self, ctx: &yew::prelude::Context<Self>, msg: Self::Message) -> bool {
         tracing::error!("Updated! {msg:?}");
         match msg {
-            // is there a better pattern for this?
             ColumnSettingsMsg::SetExprValue(val) => {
                 if self.expr_value != val {
                     self.expr_value = val;
@@ -223,9 +240,10 @@ impl Component for ColumnSettingsSidebar {
                 self.save_enabled_effect();
                 true
             },
-            ColumnSettingsMsg::SetSelectedTab(val) => {
-                let rerender = self.selected_tab != val;
+            ColumnSettingsMsg::SetSelectedTab((idx, val)) => {
+                let rerender = self.selected_tab != val || self.selected_tab_idx != idx;
                 self.selected_tab = val;
+                self.selected_tab_idx = idx;
                 rerender
             },
             ColumnSettingsMsg::OnResetAttributes(()) => {
@@ -251,6 +269,8 @@ impl Component for ColumnSettingsSidebar {
                     },
                 }
 
+                self.initial_expr_value = self.expr_value.clone();
+                self.initial_header_value = self.header_value.clone();
                 self.save_enabled = false;
                 self.reset_enabled = false;
                 self.save_count += 1;
@@ -268,27 +288,24 @@ impl Component for ColumnSettingsSidebar {
 
     fn view(&self, ctx: &yew::prelude::Context<Self>) -> Html {
         tracing::error!("Render!");
-        let editable = ctx.props().selected_column.is_expr()
-            && matches!(self.selected_tab.1, ColumnSettingsTab::Attributes);
-        let header_icon = html! {
-            <TypeIcon ty={self.maybe_ty.map(|ty| ty.into()).unwrap_or(TypeIconType::Expr)} />
-        };
-        let on_change = ctx.link().batch_callback(|(value, valid)| {
-            vec![
-                ColumnSettingsMsg::SetHeaderValue(value),
-                ColumnSettingsMsg::SetHeaderValid(valid),
-            ]
-        });
-        let header_contents = html! {
-            <EditableHeader
-                icon={Some(header_icon)}
-                {on_change}
-                {editable}
-                initial_value={self.initial_header_value.clone()}
-                placeholder={self.expr_value.clone()}
-                session={ctx.props().session.clone()}
-                reset_count={self.reset_count}
-            />
+
+        let header_props = EditableHeaderProps {
+            icon_type: self
+                .maybe_ty
+                .map(|ty| ty.into())
+                .or(Some(TypeIconType::Expr)),
+            on_change: ctx.link().batch_callback(|(value, valid)| {
+                vec![
+                    ColumnSettingsMsg::SetHeaderValue(value),
+                    ColumnSettingsMsg::SetHeaderValid(valid),
+                ]
+            }),
+            editable: ctx.props().selected_column.is_expr()
+                && matches!(self.selected_tab, ColumnSettingsTab::Attributes),
+            initial_value: self.initial_header_value.clone(),
+            placeholder: self.expr_value.clone(),
+            session: ctx.props().session.clone(),
+            reset_count: self.reset_count,
         };
 
         let expr_editor = ExpressionEditorProps {
@@ -324,28 +341,26 @@ impl Component for ColumnSettingsSidebar {
             column_name: self.column_name.clone(),
         };
 
+        let tab_children = self.tabs.iter().map(|tab| match tab {
+            ColumnSettingsTab::Attributes => html! {<AttributesTab ..attrs_tab.clone()/>},
+            ColumnSettingsTab::Style => html! {<StyleTab ..style_tab.clone()/>},
+        });
+
         html_template! {
             <LocalStyle href={ css!("column-settings-panel") } />
             <Sidebar
                 on_close={ctx.props().on_close.clone()}
                 id_prefix="column_settings"
                 width_override={ctx.props().width_override}
-                selected_tab={self.selected_tab.0}
-                {header_contents}
+                selected_tab={self.selected_tab_idx}
+                {header_props}
             >
-                <ColumnSettingsTablist
-                    renderer={ctx.props().renderer.clone()}
-                    presentation={ctx.props().presentation.clone()}
-                    session={ctx.props().session.clone()}
-                    custom_events={ctx.props().custom_events.clone()}
-
-                    on_tab_change={ctx.link().callback(ColumnSettingsMsg::SetSelectedTab)}
-                    selected_tab={self.selected_tab}
+                <TabList<ColumnSettingsTab>
                     tabs={self.tabs.clone()}
-
-                    {attrs_tab}
-                    {style_tab}
-                />
+                    on_tab_change={ctx.link().callback(ColumnSettingsMsg::SetSelectedTab)}
+                    selected_tab={self.selected_tab_idx}>
+                    {for tab_children}
+                </TabList<ColumnSettingsTab>>
             </Sidebar>
         }
     }

@@ -22,6 +22,7 @@ export class ColumnSettingsSidebar {
     tabTitle: Locator;
     nameInputWrapper: Locator;
     nameInput: Locator;
+    selectedTab: Locator;
 
     constructor(view: PageView) {
         this.view = view;
@@ -37,6 +38,7 @@ export class ColumnSettingsSidebar {
             ".sidebar_header_contents"
         );
         this.nameInput = view.container.locator("input.sidebar_header_title");
+        this.selectedTab = view.container.locator(".tab.selected");
     }
 
     async openTab(name: string) {

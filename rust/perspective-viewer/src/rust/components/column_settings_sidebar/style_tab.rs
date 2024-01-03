@@ -19,6 +19,7 @@ use yew::{function_component, html, Html, Properties};
 use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
+use crate::config::Type;
 use crate::custom_events::CustomEvents;
 use crate::renderer::Renderer;
 use crate::session::Session;

@@ -23,9 +23,11 @@ impl Tab for &'static str {}
 
 #[derive(Properties, Debug, PartialEq)]
 pub struct TabListProps<T: Tab> {
+    // all possible tabs
     pub tabs: Vec<T>,
-    pub on_tab_change: Callback<usize>,
+    pub on_tab_change: Callback<(usize, T)>,
     pub selected_tab: Option<usize>,
+    // the curently instantiated tabs
     pub children: Children,
 }
 
@@ -52,7 +54,9 @@ impl<T: Tab> Component for TabList<T> {
     fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
             TabListMsg::SetSelected(idx) => {
-                ctx.props().on_tab_change.emit(idx);
+                ctx.props()
+                    .on_tab_change
+                    .emit((idx, ctx.props().tabs[idx].clone()));
                 self.selected_idx = idx;
                 true
             },

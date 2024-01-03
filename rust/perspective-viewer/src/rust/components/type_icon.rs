@@ -17,7 +17,7 @@ use crate::components::style::LocalStyle;
 use crate::config::Type;
 use crate::{css, html_template};
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum TypeIconType {
     Type(Type),
     Expr,

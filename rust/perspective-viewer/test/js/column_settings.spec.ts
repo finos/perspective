@@ -164,4 +164,29 @@ test.describe("Plugin Styles", () => {
         await editor.textarea.clear();
         await checkWidth();
     });
+    test("Selected tab stays selected when manipulating column", async ({page}) => {
+        const view = new PageView(page);
+        view.restore({
+            expressions: {
+                "expr": "1234"
+            },
+            columns: [ 
+                "Row ID"
+             ],
+             settings: true
+        });
+
+        const col = await view.settingsPanel.inactiveColumns.getColumnByName("expr");
+        await col.editBtn.click();
+        await view.columnSettingsSidebar.openTab("Attributes");
+        await checkTab(view.columnSettingsSidebar, false, true);
+        const selectedTab = async () => {return await view.columnSettingsSidebar.selectedTab.innerText()};
+        expect(await selectedTab()).toBe("Attributes");
+        await col.activeBtn.click();
+        await checkTab(view.columnSettingsSidebar, true, true, true);
+        expect(await selectedTab()).toBe("Attributes");
+        await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.type("'new expr value'");
+        await view.columnSettingsSidebar.attributesTab.saveBtn.click();
+        expect(await selectedTab()).toBe("Attributes");
+    })
 });
