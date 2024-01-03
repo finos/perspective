@@ -13,6 +13,7 @@
 import { FormatterCache } from "./formatter_cache";
 
 const FORMAT_CACHE = new FormatterCache();
+const MAX_BAR_WIDTH_PCT = 1;
 
 /**
  * Format a single cell's text content as the content of a `<td>` or `<th>`.
@@ -42,16 +43,20 @@ export function format_cell(
     if (is_numeric && plugin?.number_fg_mode === "bar") {
         const a = Math.max(
             0,
-            Math.min(0.95, Math.abs(val / plugin.fg_gradient) * 0.95)
+            Math.min(
+                MAX_BAR_WIDTH_PCT,
+                Math.abs(val / plugin.fg_gradient) * MAX_BAR_WIDTH_PCT
+            )
         );
+
         const div = this._div_factory.get();
         const anchor = val >= 0 ? "left" : "right";
+        const pct = (a * 100).toFixed(2);
         div.setAttribute(
             "style",
-            `width:${(a * 100).toFixed(
-                2
-            )}%;position:absolute;${anchor}:0;height:80%;top:10%;pointer-events:none;`
+            `width:calc(${pct}% - 4px);position:absolute;${anchor}:2px;height:80%;top:10%;pointer-events:none;`
         );
+
         return div;
     } else if (plugin?.format === "link" && type === "string") {
         const anchor = document.createElement("a");

@@ -161,7 +161,8 @@ export async function activate(view) {
             "perspective-toggle-column-settings",
             (event) => {
                 if (this.isConnected) {
-                    style_selected_column(
+                    style_selected_column.call(
+                        this.model,
                         this.regular_table,
                         event.detail.column_name
                     );

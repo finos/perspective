@@ -40,12 +40,21 @@ pub trait UpdatePluginConfig: HasRenderer + HasCustomEvents + HasSession + GetPl
     /// This function sends the config to the plugin using its `restore` method.
     /// It will also send a config update event in case we need to listen for it
     /// outside of the viewer
-    fn send_plugin_config(&self, column_name: String, column_config: serde_json::Value) {
+    fn send_plugin_config(&self, column_name: String, mut column_config: serde_json::Value) {
         let custom_events = self.custom_events();
         let renderer = self.renderer();
-        let current_config = self.get_plugin_config();
         let elem = renderer.get_active_plugin().unwrap();
-        if let Some(mut current_config) = current_config {
+        if let Some(mut current_config) = self.get_plugin_config() {
+            if let Some(config) = current_config.columns.get(&column_name) {
+                let obj = config.as_object().unwrap();
+                if let Some(val) = obj.get("column_size_override") {
+                    column_config
+                        .as_object_mut()
+                        .unwrap()
+                        .insert("column_size_override".to_string(), val.clone());
+                }
+            }
+
             current_config.columns.insert(column_name, column_config);
             let js_config = JsValue::from_serde_ext(&current_config).unwrap();
             elem.restore(&js_config);

@@ -11,16 +11,16 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 mod row_selector;
+mod symbol_config;
 mod symbol_pairs;
 mod symbol_selector;
-mod types;
 
 use std::rc::Rc;
 
 use itertools::Itertools;
 use yew::{html, Html, Properties};
 
-use self::types::{SymbolConfig, SymbolKVPair};
+use self::symbol_config::{SymbolConfig, SymbolKVPair};
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_pairs::PairsList;
 use crate::components::style::LocalStyle;
 use crate::config::plugin::{PluginConfig, Symbol};
@@ -37,6 +37,7 @@ pub fn next_default_symbol(values: &Vec<Symbol>, pairs_len: usize) -> String {
         .map(|s| s.name.clone())
         .unwrap()
 }
+
 #[derive(Properties, PartialEq, Clone)]
 pub struct SymbolAttrProps {
     pub column_name: String,
@@ -44,7 +45,9 @@ pub struct SymbolAttrProps {
     pub renderer: Renderer,
     pub custom_events: CustomEvents,
 }
+
 derive_model!(CustomEvents, Session, Renderer for SymbolAttrProps);
+
 impl SymbolAttrProps {
     pub fn get_config(&self) -> (PluginConfig, Vec<Symbol>) {
         let (config, attrs) = (self.get_plugin_config(), self.get_plugin_attrs());
@@ -69,28 +72,25 @@ impl yew::Component for SymbolStyle {
     type Properties = SymbolAttrProps;
 
     fn create(ctx: &yew::Context<Self>) -> Self {
-        let p = ctx.props();
         let (config, symbols) = ctx.props().get_config();
-        let mut pairs = config
-            .columns
-            .get(&p.column_name)
-            .and_then(|json_val| {
-                serde_json::from_value::<SymbolConfig>(json_val.clone())
-                    .ok()
-                    .map(|s| {
-                        s.symbols
-                            .into_iter()
-                            .map(|s| SymbolKVPair::new(Some(s.0), s.1))
-                            .collect_vec()
-                    })
-            })
-            .unwrap_or_default();
+        let mut pairs = crate::maybe! {
+            let json_val = config.columns.get(&ctx.props().column_name)?;
+            let pairs = serde_json::from_value::<SymbolConfig>(json_val.clone())
+                .ok()?
+                .symbols
+                .into_iter()
+                .map(|s| SymbolKVPair::new(Some(s.0), s.1))
+                .collect_vec();
+
+            Some(pairs)
+        }
+        .unwrap_or_default();
 
         pairs.push(SymbolKVPair::new(
             None,
             next_default_symbol(&symbols, pairs.len()),
         ));
-        let row_dropdown = Rc::new(FilterDropDownElement::new(p.session.clone()));
+        let row_dropdown = Rc::new(FilterDropDownElement::new(ctx.props().session.clone()));
         Self {
             pairs,
             row_dropdown,
@@ -98,33 +98,26 @@ impl yew::Component for SymbolStyle {
     }
 
     fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let p = ctx.props();
         match msg {
             SymbolAttrMsg::UpdatePairs(mut new_pairs) => {
-                let serialized = new_pairs
+                let symbols = new_pairs
                     .clone()
                     .into_iter()
                     .filter_map(|pair| Some((pair.key?, pair.value)))
                     .collect();
 
-                p.send_plugin_config(
-                    p.column_name.clone(),
-                    serde_json::to_value(SymbolConfig {
-                        symbols: serialized,
-                    })
-                    .unwrap(),
-                );
-
-                if new_pairs
+                let column_name = ctx.props().column_name.clone();
+                let config = serde_json::to_value(SymbolConfig { symbols }).unwrap();
+                ctx.props().send_plugin_config(column_name, config);
+                let has_last_key = new_pairs
                     .last()
                     .map(|pair| pair.key.is_some())
-                    .unwrap_or_default()
-                {
-                    let (_, symbols) = p.get_config();
-                    new_pairs.push(SymbolKVPair::new(
-                        None,
-                        next_default_symbol(&symbols, new_pairs.len()),
-                    ))
+                    .unwrap_or_default();
+
+                if has_last_key {
+                    let (_, symbols) = ctx.props().get_config();
+                    let val = next_default_symbol(&symbols, new_pairs.len());
+                    new_pairs.push(SymbolKVPair::new(None, val))
                 }
 
                 self.pairs = new_pairs;
@@ -143,8 +136,8 @@ impl yew::Component for SymbolStyle {
                 id="attributes-symbols"
                 pairs={ self.pairs.clone() }
                 row_dropdown={ self.row_dropdown.clone() }
-                { values }
                 column_name={ ctx.props().column_name.clone() }
+                { values }
                 { update_pairs }/>
         }
     }

@@ -15,7 +15,7 @@ use std::rc::Rc;
 use itertools::Itertools;
 use yew::{html, Callback, Html, Properties};
 
-use super::types::SymbolKVPair;
+use super::symbol_config::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::row_selector::RowSelector;
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_selector::SymbolSelector;
 use crate::components::style::LocalStyle;
@@ -54,6 +54,7 @@ impl yew::Component for PairsList {
         match msg {
             PairsListMsg::SetNextFocus(i) => self.next_focus = i,
         }
+
         true
     }
 
@@ -74,9 +75,9 @@ impl yew::Component for PairsList {
                         row_dropdown={ props.row_dropdown.clone() }
                         values={ props.values.clone() }
                         update_pairs={ props.update_pairs.clone() }
-                        { focused }
                         set_focused_index={ set_focused.clone() }
-                        column_name={ props.column_name.clone() }/>
+                        column_name={ props.column_name.clone() }
+                        { focused }/>
                 }
             })
             .collect_vec();

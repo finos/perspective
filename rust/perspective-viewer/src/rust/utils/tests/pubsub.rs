@@ -29,7 +29,7 @@ pub async fn test_pub_sub() {
     };
 
     let sub = pubsub.add_listener(callback);
-    pubsub.emit_all(1);
+    pubsub.emit(1);
     assert_eq!(*called.borrow(), Some(1));
     drop(sub);
 }
@@ -57,7 +57,7 @@ pub async fn test_pub_sub_multiple() {
     let sub1 = pubsub.add_listener(callback1);
     let sub2 = pubsub.add_listener(callback2);
 
-    pubsub.emit_all(1);
+    pubsub.emit(1);
     assert_eq!(*called1.borrow(), Some(1));
     assert_eq!(*called2.borrow(), Some(1));
 
@@ -87,7 +87,7 @@ pub async fn test_pub_sub_multiple_drop_first() {
     let _ = pubsub.add_listener(callback1);
     let sub = pubsub.add_listener(callback2);
 
-    pubsub.emit_all(1);
+    pubsub.emit(1);
     assert_eq!(*called1.borrow(), None);
     assert_eq!(*called2.borrow(), Some(1));
 

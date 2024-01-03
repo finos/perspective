@@ -81,11 +81,13 @@ export class ExpressionEditor {
 export class StyleTab {
     container: Locator;
     contents: Locator;
+    precision_input: Locator;
     symbolsEditor: SymbolsEditor;
 
     constructor(parent: Locator) {
         this.container = parent.locator("#style-tab");
         this.contents = parent.locator(".style_contents");
+        this.precision_input = parent.locator("#fixed-param");
         this.symbolsEditor = new SymbolsEditor(this.container);
     }
 }

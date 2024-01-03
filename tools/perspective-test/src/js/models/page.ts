@@ -45,6 +45,12 @@ export class PageView {
         this.dataGrid = new DataGridPlugin.DataGrid(page);
     }
 
+    async save() {
+        return await this.container.evaluate(async (elem) => {
+            return await (elem as any).save();
+        });
+    }
+
     async openSettingsPanel() {
         if (await this.settingsPanel.container.isVisible()) {
             return this.settingsPanel;

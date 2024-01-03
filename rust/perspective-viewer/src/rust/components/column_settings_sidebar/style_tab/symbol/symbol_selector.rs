@@ -46,12 +46,11 @@ pub fn symbol_selector(p: &SymbolSelectorProps) -> Html {
         .unwrap_or_else(|| p.values.get(p.index % values.len()).cloned().unwrap());
 
     html! {
-        // TODO: This probably should be a modal with a preview of the SVG symbol
         <Select<Symbol>
             wrapper_class="symbol-selector-wrapper"
             class="symbol-selector"
+            on_select={ p.callback.clone() }
             { values }
-            { selected }
-            on_select={ p.callback.clone() }/>
+            { selected }/>
     }
 }

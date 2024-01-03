@@ -37,10 +37,10 @@ pub fn AttributesTab(p: &AttributesTabProps) -> Html {
         <div id="attributes-tab">
             <div class="tab-section">
                 <ExprEditorAttr
-                    {on_close}
-                    {selected_column}
-                    {session}
-                    {renderer}/>
+                    { on_close }
+                    { selected_column }
+                    { session }
+                    { renderer }/>
             </div>
         </div>
     }

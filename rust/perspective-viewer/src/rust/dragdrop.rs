@@ -182,7 +182,7 @@ impl DragDrop {
 
         *self.drag_state.borrow_mut() = DragState::NoDrag;
         if let Some(action) = action {
-            self.drop_received.emit_all(action);
+            self.drop_received.emit(action);
         }
     }
 

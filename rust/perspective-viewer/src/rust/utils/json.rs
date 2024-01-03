@@ -87,7 +87,7 @@ macro_rules! json_internal {
 
     // Unexpected token after most recent element.
     (@array [$($elems:expr),*] $unexpected:tt $($rest:tt)*) => {
-        json_unexpected!($unexpected)
+        $crate::json_unexpected!($unexpected)
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ macro_rules! json_internal {
 
     // Current entry followed by unexpected token.
     (@object $object:ident [$($key:tt)+] ($value:expr) $unexpected:tt $($rest:tt)*) => {
-        json_unexpected!($unexpected);
+        $crate::json_unexpected!($unexpected);
     };
 
     // Insert the last entry without trailing comma.
@@ -172,13 +172,13 @@ macro_rules! json_internal {
     // Misplaced colon. Trigger a reasonable error message.
     (@object $object:ident () (: $($rest:tt)*) ($colon:tt $($copy:tt)*)) => {
         // Takes no arguments so "no rules expected the token `:`".
-        json_unexpected!($colon);
+        $crate::json_unexpected!($colon);
     };
 
     // Found a comma inside a key. Trigger a reasonable error message.
     (@object $object:ident ($($key:tt)*) (, $($rest:tt)*) ($comma:tt $($copy:tt)*)) => {
         // Takes no arguments so "no rules expected the token `,`".
-        json_unexpected!($comma);
+        $crate::json_unexpected!($comma);
     };
 
     // Key is fully parenthesized. This avoids clippy double_parens false
@@ -206,11 +206,11 @@ macro_rules! json_internal {
     };
 
     (true) => {
-        wasm_bindgen::JsValue::from(true)
+        ::wasm_bindgen::JsValue::from(true)
     };
 
     (false) => {
-        wasm_bindgen::JsValue::from(false)
+        ::wasm_bindgen::JsValue::from(false)
     };
 
     ([]) => {
@@ -234,7 +234,7 @@ macro_rules! json_internal {
     // Any Serialize type: numbers, strings, struct literals, variables etc.
     // Must be below every other rule.
     ($other:expr) => {
-        wasm_bindgen::JsValue::from($other)
+        ::wasm_bindgen::JsValue::from($other)
     };
 }
 

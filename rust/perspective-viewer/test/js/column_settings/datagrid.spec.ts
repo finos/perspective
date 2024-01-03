@@ -18,6 +18,48 @@ import {
 
 import { expect, test } from "@finos/perspective-test";
 
+test.describe("Regressions", function () {
+    test.beforeEach(async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+    });
+
+    test("Interacting with column settings does not override column width", async function ({
+        page,
+    }) {
+        const view = new PspViewer(page);
+        await view.openSettingsPanel();
+        const resize_handle = view.dataGrid.regularTable.columnTitleRow
+            .locator("th .rt-column-resize")
+            .first();
+
+        const pos = await resize_handle.boundingBox();
+        await page.mouse.move(pos!.x + 2, pos!.y + 5);
+        await page.mouse.down();
+        await page.mouse.move(pos!.x + 100, pos!.y + 5);
+        await page.mouse.up();
+
+        const editBtn = view.dataGrid.regularTable.editBtnRow
+            .locator("th.psp-menu-enabled span")
+            .first();
+
+        await editBtn.click();
+        await view.columnSettingsSidebar.container.waitFor();
+        await view.columnSettingsSidebar.styleTab.precision_input.fill("4");
+        const token = await view.save();
+        test.expect(token.plugin_config.columns).toEqual({
+            "Row ID": {
+                column_size_override: 150,
+                fixed: 4,
+            },
+        });
+    });
+});
+
 let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
     return test.describe(title, () => {
         beforeEachAndLocalTests.call(this);
@@ -66,6 +108,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             await col.editBtn.click();
             await selectedEditBtn.waitFor({ state: "hidden" });
         });
+
         test("Scrolling the table horizontally keeps the correct column highlighted", async ({
             page,
         }) => {
@@ -134,6 +177,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             let newStyle = await td.evaluate((node) => node.style.cssText);
             expect(tdStyle).not.toBe(newStyle);
         });
+
         test("Calendar styling", async ({ page }) => {
             let view = new PspViewer(page);
             let table = view.dataGrid.regularTable;
@@ -165,9 +209,11 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             });
             expect(tdStyle).not.toBe(newStyle);
         });
+
         test.skip("Boolean styling", async ({ page }) => {
             // Boolean styling is not implemented.
         });
+
         test("String styling", async ({ page }) => {
             let view = new PspViewer(page);
             let table = view.dataGrid.regularTable;
@@ -217,6 +263,7 @@ runTests("Datagrid Column Styles", () => {
         await viewer.columnSettingsSidebar.container.waitFor({
             state: "detached",
         });
+
         await viewer.dataGrid.regularTable.openColumnEditBtn
             .first()
             .waitFor({ state: "detached" });
@@ -231,18 +278,21 @@ runTests("Datagrid Column Styles - Split-by", () => {
         await page.goto(
             "/tools/perspective-test/src/html/superstore-test.html"
         );
+
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {
                 await new Promise((x) => setTimeout(x, 10));
             }
         });
     });
+
     test("Datagrid Column Styles - Only edit buttons get styled", async ({
         page,
     }) => {
         await page.goto(
             "/tools/perspective-test/src/html/superstore-test.html"
         );
+
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {
                 await new Promise((x) => setTimeout(x, 10));

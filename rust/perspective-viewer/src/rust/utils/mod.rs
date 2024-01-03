@@ -36,18 +36,15 @@ mod weak_scope;
 mod tests;
 
 pub use browser::*;
-pub use clone::*;
 pub use closure::*;
 pub use console_logger::*;
 pub use custom_element::*;
 pub use datetime::*;
 pub use debounce::*;
 pub use errors::*;
-pub use json::*;
 pub use pubsub::*;
 pub use scope::*;
 pub use tee::*;
-pub use wasm_abi::*;
 pub use weak_scope::*;
 
 pub use self::futures::*;

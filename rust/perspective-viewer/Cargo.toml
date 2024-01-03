@@ -64,9 +64,6 @@ wasm-bindgen-test = "0.3.13"
 # Provides async `Mutex` for locked sections such as `render`
 async-lock = "2.5.0"
 
-# Allow async methods to be used in traits
-async-trait = "^0.1.73"
-
 # Encode persistence tokens
 base64 = "0.13.0"
 
