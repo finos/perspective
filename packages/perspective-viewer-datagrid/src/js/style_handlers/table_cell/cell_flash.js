@@ -14,10 +14,16 @@ export function style_cell_flash(
     metadata,
     td,
     [, , , , , pos_s, pos_e],
-    [, , , , , neg_s, neg_e]
+    [, , , , , neg_s, neg_e],
+    is_settings_open
 ) {
     const id = this._ids?.[metadata.dy]?.join("|");
-    const metadata_path = metadata.column_header.join("|");
+    const metadata_path = (
+        is_settings_open
+            ? metadata.column_header.slice(0, -1)
+            : metadata.column_header
+    ).join("|");
+
     if (
         this.last_reverse_columns?.has(metadata_path) &&
         this.last_reverse_ids?.has(id)

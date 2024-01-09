@@ -28,6 +28,8 @@ function get_psp_type(metadata) {
 
 export function table_cell_style_listener(regularTable) {
     const plugins = regularTable[PRIVATE_PLUGIN_SYMBOL] || {};
+    const is_settings_open =
+        regularTable.parentElement.parentElement.hasAttribute("settings");
 
     for (const tr of regularTable.children[0].children[1].children) {
         for (const td of tr.children) {
@@ -40,7 +42,13 @@ export function table_cell_style_listener(regularTable) {
             const is_numeric = type === "integer" || type === "float";
 
             if (is_numeric) {
-                cell_style_numeric.call(this, plugin, td, metadata);
+                cell_style_numeric.call(
+                    this,
+                    plugin,
+                    td,
+                    metadata,
+                    is_settings_open
+                );
             } else if (type === "boolean") {
                 cell_style_boolean.call(this, plugin, td, metadata);
             } else if (type === "string") {
