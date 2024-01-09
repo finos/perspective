@@ -615,7 +615,7 @@ viewer.load(table);
 `perspective.websocket` expects a Websocket URL where it will send instructions.
 When `open_table` is called, the name to a hosted Table is passed through, and a
 request is sent through the socket to fetch the Table. No actual `Table`
-instance is passed inbetween the runtimes; all instructions are proxied through
+instance is passed between the runtimes; all instructions are proxied through
 websockets.
 
 This provides for great flexibility — while `Perspective.js` is full of
