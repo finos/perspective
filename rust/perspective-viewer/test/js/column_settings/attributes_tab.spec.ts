@@ -159,5 +159,9 @@ test.describe("Attributes Tab", () => {
         // it gets serialized with the expression name. This confuses the components and it deserializes
         // as if it had an empty header.
         // Changing this behavior may require changing the way we serialize expressions.
+        // For this to work, an expression should have a unique ID. API might look like this:
+        // `const settings = {expressions: {"SOME_ID": {name: "foobar", expr: "123"}, "ANOTHER_ID": {expr: "'i have no name'"}}};`
+        // We could then change the ColumnLocator struct to look like this:
+        // `enum ColumnLocator {TableColumn(String), ExprColumn(Option<String>), NewExpr()}`
     });
 });

@@ -12,6 +12,7 @@
 
 import { Locator, expect } from "@playwright/test";
 import { PageView } from "./page";
+import { Type } from "@finos/perspective";
 
 export class ColumnSettingsSidebar {
     view: PageView;
@@ -23,6 +24,7 @@ export class ColumnSettingsSidebar {
     nameInputWrapper: Locator;
     nameInput: Locator;
     selectedTab: Locator;
+    typeIcon: Locator;
 
     constructor(view: PageView) {
         this.view = view;
@@ -39,6 +41,7 @@ export class ColumnSettingsSidebar {
         );
         this.nameInput = view.container.locator("input.sidebar_header_title");
         this.selectedTab = view.container.locator(".tab.selected");
+        this.typeIcon = this.container.locator(".type-icon");
     }
 
     async openTab(name: string) {
@@ -47,6 +50,36 @@ export class ColumnSettingsSidebar {
         await this.container
             .locator(".tab.selected", { hasText: name })
             .waitFor({ timeout: 1000 });
+    }
+
+    async getTabs(): Promise<string[]> {
+        return await this.tabTitle.allInnerTexts();
+    }
+
+    async getSelectedTab(): Promise<string> {
+        return await this.selectedTab.innerText();
+    }
+
+    async getType(): Promise<Type | "expression"> {
+        const classList = await this.typeIcon.evaluate((icon) =>
+            Array.from(icon.classList)
+        );
+        for (const ty of [
+            "string",
+            "boolean",
+            "float",
+            "integer",
+            "date",
+            "datetime",
+        ]) {
+            if (classList.includes(ty)) {
+                return <Type>ty;
+            }
+        }
+        if (classList.includes("expression")) {
+            return "expression";
+        }
+        throw new Error("Unable to get a matching type for the column!");
     }
 }
 

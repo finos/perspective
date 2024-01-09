@@ -325,7 +325,7 @@ export class InactiveColumns {
     constructor(view: PageView) {
         this.view = view;
         this.container = view.container.locator("#sub-columns");
-        this.columnSelector = view.container.locator(".column-selector-column");
+        this.columnSelector = this.container.locator(".column-selector-column");
     }
 
     async getColumnByName(name: string) {
