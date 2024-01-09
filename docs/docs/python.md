@@ -472,7 +472,7 @@ Building on top of the API provided by `perspective.Table`, the
 of Perspective within the Jupyter environment. It supports the same API
 semantics of `<perspective-viewer>`, along with the additional data types
 supported by `perspective.Table`. `PerspectiveWidget` takes keyword arguments
-for the managed `View`; additioanl arguments `index` and `limit` will be passed
+for the managed `View`; additional arguments `index` and `limit` will be passed
 to the `Table`. For convenience are the
 [`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py),
 [`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py),
