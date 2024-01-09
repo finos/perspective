@@ -31,7 +31,7 @@ When submitting Pull Request (PR), please respect the following coding
 guidelines:
 
 -   Complete your
-    [FINOS CLA](https://finosfoundation.atlassian.net/wiki/spaces/FINOS/pages/75530375/Contribution+Compliance+Requirements#ContributionComplianceRequirements-ContributorLicenseAgreement)
+    [FINOS CLA](https://community.finos.org/docs/governance/software-projects/easycla/)
     _before_ opening a PR.
 -   Please make sure PRs include:
 
