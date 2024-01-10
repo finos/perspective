@@ -106,12 +106,14 @@ impl ActiveColumnProps {
             .as_ref()
             .map_or(0, |x| x.len());
 
-        let open_name = self
-            .presentation
-            .get_open_column_settings()
-            .locator
-            .and_then(|l| l.name().map(|n| n.to_owned()));
-        if let Some(s) = open_name && s == name {
+        // FIXME: This should be moved to a more central location.
+        // Whenever the view config updates, we should check whether or not to
+        // open/close the column settings.
+        let open_locator = self.presentation.get_open_column_settings().locator;
+        let close_column_settings = open_locator
+            .map(|locator| !locator.is_expr() && locator.name().unwrap() == &name)
+            .unwrap_or_default();
+        if close_column_settings {
             self.presentation.set_open_column_settings(None);
         }
 
