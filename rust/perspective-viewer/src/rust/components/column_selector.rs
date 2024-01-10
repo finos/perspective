@@ -151,29 +151,6 @@ impl Component for ColumnSelector {
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        if matches!(msg, Drop(_)) {
-            tracing::error!("{msg:?}");
-        }
-        // determine if we can render styles for this column in this position
-        // TODO: this is an adhoc fix: we want to close the column settings sidebar
-        // whenever the plugin cannot render styles for the column in that position.
-        // This requires changes to the plugin API, which do not fit in this PR,
-        // but are forthcoming.
-        if let Drop((col_name, DragTarget::GroupBy | DragTarget::SplitBy, ..)) = &msg {
-            let view_config = ctx.props().session.get_view_config();
-            let found = view_config
-                .columns
-                .iter()
-                .any(|col| col.as_ref().map(|c| c == col_name).unwrap_or_default());
-            let is_expr = ctx
-                .props()
-                .session
-                .metadata()
-                .is_column_expression(col_name);
-            if !found && !is_expr {
-                ctx.props().presentation.set_open_column_settings(None);
-            }
-        }
         match msg {
             Drag(DragEffect::Move(DragTarget::Active)) => false,
             Drag(_) | DragEnd | TableLoaded => true,

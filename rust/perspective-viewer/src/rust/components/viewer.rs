@@ -66,6 +66,20 @@ impl ColumnLocator {
         }
     }
 
+    /// Determines if the column is one of view's query parameters, i.e.
+    /// GroupBy, SplitBy, OrderBy, or Where
+    pub fn is_in_query(&self, session: &Session) -> bool {
+        if matches!(self, Self::Expr(None)) {
+            return false;
+        }
+        let name = self.name().unwrap();
+        let view_config = session.get_view_config();
+        view_config.group_by.contains(name)
+            || view_config.split_by.contains(name)
+            || view_config.filter.iter().any(|filter| &filter.0 == name)
+            || view_config.sort.iter().any(|sort| &sort.0 == name)
+    }
+
     #[inline(always)]
     pub fn is_saved_expr(&self) -> bool {
         matches!(self, ColumnLocator::Expr(Some(_)))
@@ -150,14 +164,26 @@ impl Component for PerspectiveViewer {
             .callback(|()| PerspectiveViewerMsg::PreloadFontsUpdate);
 
         let session_sub = {
-            clone!(ctx.props().presentation);
-            let callback = ctx.link().batch_callback(move |(update, x)| {
+            clone!(ctx.props().presentation, ctx.props().session);
+            let callback = ctx.link().batch_callback(move |(update, render_limits)| {
                 if update {
-                    vec![PerspectiveViewerMsg::RenderLimits(Some(x))]
+                    vec![PerspectiveViewerMsg::RenderLimits(Some(render_limits))]
                 } else {
-                    let locator = presentation.get_open_column_settings().locator;
+                    let mut locator = presentation.get_open_column_settings().locator;
+                    if let Some(name) = locator.as_ref().and_then(|l| l.name()) {
+                        let view_config = session.get_view_config();
+                        let is_active = view_config
+                            .columns
+                            .iter()
+                            .any(|col| col.as_ref().map(|c| name == c).unwrap_or_default());
+                        let is_expr = session.metadata().is_column_expression(name);
+                        if !is_active && !is_expr {
+                            locator = None;
+                        }
+                    }
+
                     vec![
-                        PerspectiveViewerMsg::RenderLimits(Some(x)),
+                        PerspectiveViewerMsg::RenderLimits(Some(render_limits)),
                         PerspectiveViewerMsg::OpenColumnSettings {
                             locator,
                             sender: None,
