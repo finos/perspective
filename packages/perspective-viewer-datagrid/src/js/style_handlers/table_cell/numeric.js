@@ -16,7 +16,7 @@ import {
     infer_foreground_from_background,
 } from "../../color_utils.js";
 
-export function cell_style_numeric(plugin, td, metadata) {
+export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
     const is_positive = metadata.user > 0;
     const is_negative = metadata.user < 0;
 
@@ -67,7 +67,8 @@ export function cell_style_numeric(plugin, td, metadata) {
                 metadata,
                 td,
                 pos_bg_color,
-                neg_bg_color
+                neg_bg_color,
+                is_settings_open
             );
             td.style.backgroundColor = "";
         } else if (

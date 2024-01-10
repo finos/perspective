@@ -137,6 +137,73 @@ test.describe("Column Style Tests", () => {
         expect(count).toEqual(2);
     });
 
+    test("Pulse styling works", async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.restore({
+                plugin: "Datagrid",
+                columns: ["Row ID", "Sales"],
+                plugin_config: {
+                    columns: {
+                        Sales: { number_bg_mode: "pulse" },
+                    },
+                },
+            });
+
+            const table = await viewer.getTable();
+            await table.update([{ "Row ID": 1, Sales: 2 }]);
+            await viewer.notifyResize();
+            await table.update([{ "Row ID": 1, Sales: 3 }]);
+        });
+
+        const contents = await page.locator(`perspective-viewer`).innerHTML();
+        await compareContentsToSnapshot(contents, [
+            "number_column_style_pulse.txt",
+        ]);
+    });
+
+    test("Pulse styling works when settings panel is open", async ({
+        page,
+    }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.restore({
+                plugin: "Datagrid",
+                columns: ["Row ID", "Sales"],
+                settings: true,
+                plugin_config: {
+                    columns: {
+                        Sales: { number_bg_mode: "pulse" },
+                    },
+                },
+            });
+
+            const table = await viewer.getTable();
+            await table.update([{ "Row ID": 1, Sales: 2 }]);
+            await viewer.notifyResize();
+            await table.update([{ "Row ID": 1, Sales: 3 }]);
+        });
+
+        const contents = await page.locator(`perspective-viewer`).innerHTML();
+        await compareContentsToSnapshot(contents, [
+            "number_column_style_pulse_with_settings.txt",
+        ]);
+    });
+
     test("Column style menu opens for numeric columns", async ({ page }) => {
         await page.goto("/tools/perspective-test/src/html/basic-test.html");
         await page.evaluate(async () => {
@@ -152,7 +219,6 @@ test.describe("Column Style Tests", () => {
         });
 
         const contents = await test_column(page, "", "number");
-
         await compareContentsToSnapshot(contents, ["number_column_style.txt"]);
     });
 

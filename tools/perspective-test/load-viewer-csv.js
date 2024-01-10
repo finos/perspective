@@ -17,7 +17,7 @@ async function load() {
     let csv = await resp.text();
     const viewer = document.querySelector("perspective-viewer");
     const worker = perspective.worker();
-    const table = worker.table(csv);
+    const table = worker.table(csv, { index: "Row ID" });
     await viewer.load(table);
     window.__TEST_WORKER__ = worker;
 }
