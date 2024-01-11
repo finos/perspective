@@ -80,7 +80,9 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 custom_events={ props.custom_events.clone() }
                 session={ props.session.clone() }
                 renderer={ props.renderer.clone() }
-                column_name={ props.column_name.clone() }/>
+                column_name={ props.column_name.clone() }
+                // This is here so the column styles update on session change.
+                view_type={ props.ty.unwrap() }/>
         }),
         _ => None,
     };

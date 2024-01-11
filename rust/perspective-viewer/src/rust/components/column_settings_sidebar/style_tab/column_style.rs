@@ -68,6 +68,7 @@ pub struct ColumnStyleProps {
     pub session: Session,
     pub renderer: Renderer,
     pub column_name: String,
+    pub view_type: Type,
 }
 derive_model!(CustomEvents, Session, Renderer for ColumnStyleProps);
 #[function_component]
@@ -75,11 +76,7 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
     let props = props.clone();
     let (config, attrs) = (props.get_plugin_config(), props.get_plugin_attrs());
     let (config, attrs) = (config.unwrap(), attrs.unwrap());
-    let view_type = props
-        .session
-        .metadata()
-        .get_column_view_type(&props.column_name)
-        .unwrap();
+    let view_type = props.view_type;
 
     let title = format!("{} Styling", view_type.to_capitalized());
     let opt_html = match view_type {

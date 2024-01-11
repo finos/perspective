@@ -35,6 +35,7 @@ use crate::model::*;
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
+use crate::utils::{AddListener, Subscription};
 use crate::{css, derive_model, html_template};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -86,9 +87,11 @@ pub enum ColumnSettingsMsg {
     OnSaveAttributes(()),
     OnResetAttributes(()),
     OnDelete(()),
+    SessionUpdated(()),
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Derivative)]
+#[derivative(Debug)]
 pub struct ColumnSettingsSidebar {
     initial_expr_value: Rc<String>,
     expr_value: Rc<String>,
@@ -105,6 +108,8 @@ pub struct ColumnSettingsSidebar {
     column_name: String,
     maybe_ty: Option<Type>,
     tabs: Vec<ColumnSettingsTab>,
+    #[derivative(Debug = "ignore")]
+    session_sub: Option<Subscription>,
 }
 
 impl ColumnSettingsSidebar {
@@ -114,13 +119,8 @@ impl ColumnSettingsSidebar {
         let valid = self.expr_valid && self.header_valid;
         self.save_enabled = changed && valid;
     }
-}
 
-impl Component for ColumnSettingsSidebar {
-    type Message = ColumnSettingsMsg;
-    type Properties = ColumnSettingsProps;
-
-    fn create(ctx: &yew::prelude::Context<Self>) -> Self {
+    fn initialize(ctx: &yew::prelude::Context<Self>) -> Self {
         let column_name = ctx
             .props()
             .selected_column
@@ -189,11 +189,30 @@ impl Component for ColumnSettingsSidebar {
             ..Default::default()
         }
     }
+}
+
+impl Component for ColumnSettingsSidebar {
+    type Message = ColumnSettingsMsg;
+    type Properties = ColumnSettingsProps;
+
+    fn create(ctx: &yew::prelude::Context<Self>) -> Self {
+        let mut this = Self::initialize(ctx);
+        let session_cb = ctx
+            .link()
+            .callback(|_| ColumnSettingsMsg::SessionUpdated(()));
+        let session_sub = ctx
+            .props()
+            .renderer
+            .session_changed
+            .add_listener(session_cb);
+        this.session_sub = Some(session_sub);
+        this
+    }
 
     fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
         if ctx.props() != old_props {
             let selected_tab = self.selected_tab;
-            *self = Self::create(ctx);
+            *self = Self::initialize(ctx);
             self.selected_tab = selected_tab;
             self.selected_tab_idx = self
                 .tabs
@@ -278,6 +297,10 @@ impl Component for ColumnSettingsSidebar {
                     ctx.props().delete_expr(&self.column_name);
                 }
                 ctx.props().on_close.emit(());
+                true
+            },
+            ColumnSettingsMsg::SessionUpdated(()) => {
+                *self = Self::initialize(ctx);
                 true
             },
         }

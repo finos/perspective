@@ -13,6 +13,7 @@
 use std::rc::Rc;
 
 use futures::channel::oneshot::*;
+use itertools::Itertools;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
@@ -164,7 +165,11 @@ impl Component for PerspectiveViewer {
             .callback(|()| PerspectiveViewerMsg::PreloadFontsUpdate);
 
         let session_sub = {
-            clone!(ctx.props().presentation, ctx.props().session);
+            clone!(
+                ctx.props().presentation,
+                ctx.props().session,
+                ctx.props().renderer
+            );
             let callback = ctx.link().batch_callback(move |(update, render_limits)| {
                 if update {
                     vec![PerspectiveViewerMsg::RenderLimits(Some(render_limits))]
@@ -172,13 +177,27 @@ impl Component for PerspectiveViewer {
                     let mut locator = presentation.get_open_column_settings().locator;
                     if let Some(name) = locator.as_ref().and_then(|l| l.name()) {
                         let view_config = session.get_view_config();
-                        let is_active = view_config
-                            .columns
-                            .iter()
-                            .any(|col| col.as_ref().map(|c| name == c).unwrap_or_default());
+                        let maybe_pos = view_config.columns.iter().find_position(|col| {
+                            col.as_ref().map(|c| name == c).unwrap_or_default()
+                        });
                         let is_expr = session.metadata().is_column_expression(name);
-                        if !is_active && !is_expr {
+                        if maybe_pos.is_none() && !is_expr {
                             locator = None;
+                        } else if let Some((idx, _)) = maybe_pos {
+                            // Close the symbol editor if the type doesn't match.
+                            // NOTE: to be replaced with plugin.can_render(ty, col_name)
+                            let plugin = renderer.get_active_plugin().unwrap();
+                            let config_names: Option<Vec<String>> = plugin
+                                .config_column_names()
+                                .and_then(|x| x.into_serde_ext().ok())
+                                .unwrap();
+                            if let Some(group) = config_names.as_ref().and_then(|v| v.get(idx))
+                                && &**group == "Symbol" 
+                                && plugin.name() == "X/Y Scatter"
+                                && session.metadata().get_column_view_type(name) != Some(Type::String)
+                            {
+                                locator = None;
+                            }
                         }
                     }
 

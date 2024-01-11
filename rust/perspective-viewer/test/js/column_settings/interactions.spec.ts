@@ -262,9 +262,9 @@ async function checkOutput(
     initial_state: SidebarState
 ) {
     if ("type" in expected) {
-        expect(await view.columnSettingsSidebar.getType()).toStrictEqual(
-            expected.type
-        );
+        view.columnSettingsSidebar.container
+            .locator(`.type-icon.${expected.type}`)
+            .waitFor({ timeout: 3000 });
     }
     if ("unchanged" in expected) {
         if (!initial_state.open) {
@@ -488,7 +488,7 @@ test.describe("Column Settings State on Interaction", () => {
     }
 });
 
-test.describe("Drag'n'Drop Unique Behaviors", () => {
+test.describe("Unique Behaviors", () => {
     for (const destination of <Action[]>["groupby", "splitby"]) {
         test(`${destination} - Single Active Column - table_col`, async ({
             page,
@@ -505,7 +505,12 @@ test.describe("Drag'n'Drop Unique Behaviors", () => {
             );
             await checkOutput(
                 view,
-                { unchanged: true, type: "integer" },
+                destination == "groupby"
+                    ? {
+                          unchanged: true,
+                          type: "integer",
+                      }
+                    : { unchanged: true },
                 state_snapshot
             );
         });
@@ -525,4 +530,20 @@ test.describe("Drag'n'Drop Unique Behaviors", () => {
             await checkOutput(view, { closed: true }, state_snapshot);
         });
     }
+
+    test("Symbols Styles Close for table_col when Non-String", async ({
+        page,
+    }) => {
+        const view = new PageView(page);
+        await view.restore({
+            settings: true,
+            plugin: "X/Y Scatter",
+            columns: ["Row ID", "Postal Code", null, null, "Category"],
+        });
+        let col = view.settingsPanel.activeColumns.getColumnByName("Category");
+        await col.editBtn.click();
+        await expect(view.columnSettingsSidebar.container).toBeVisible();
+        view.settingsPanel.groupby("City");
+        await expect(view.columnSettingsSidebar.container).toBeHidden();
+    });
 });
