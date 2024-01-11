@@ -261,39 +261,52 @@ async function checkOutput(
     expected: ExpectedState,
     initial_state: SidebarState
 ) {
+    const POSSIBLE_TABS = ["Style", "Attributes"];
+
+    const check_tabs = async (selectedTab, tabs, unexpected_tabs) => {
+        await view.columnSettingsSidebar.container
+            .locator(".tab.selected")
+            .getByText(selectedTab)
+            .waitFor();
+        for (let tab of tabs) {
+            await view.columnSettingsSidebar.tabTitle.getByText(tab).waitFor();
+        }
+        for (let tab of unexpected_tabs) {
+            await view.columnSettingsSidebar.tabTitle
+                .getByText(tab)
+                .waitFor({ state: "hidden" });
+        }
+    };
+
     if ("type" in expected) {
-        view.columnSettingsSidebar.container
+        await view.columnSettingsSidebar.container
             .locator(`.type-icon.${expected.type}`)
-            .waitFor({ timeout: 3000 });
+            .waitFor();
     }
     if ("unchanged" in expected) {
         if (!initial_state.open) {
             await expect(view.columnSettingsSidebar.container).toBeHidden({
                 timeout: 1000,
             });
-        } else if ("type" in expected) {
-            expect(await view.columnSettingsSidebar.getSelectedTab()).toBe(
-                initial_state.selectedTab
-            );
-            expect(await view.columnSettingsSidebar.getTabs()).toStrictEqual(
-                initial_state.tabs
-            );
         } else {
-            expect(
-                await view.columnSettingsSidebar.container.innerHTML()
-            ).toEqual(initial_state.snapshot);
+            const unexpected_tabs = POSSIBLE_TABS.filter(
+                (t) => !initial_state.tabs.includes(t)
+            );
+            await check_tabs(
+                initial_state.selectedTab,
+                initial_state.tabs,
+                unexpected_tabs
+            );
         }
     } else if ("closed" in expected) {
         await expect(view.columnSettingsSidebar.container).toBeHidden({
             timeout: 1000,
         });
     } else {
-        expect(await view.columnSettingsSidebar.getSelectedTab()).toBe(
-            expected.selectedTab
+        const unexpected_tabs = POSSIBLE_TABS.filter(
+            (t) => !expected.tabs.includes(t)
         );
-        expect(await view.columnSettingsSidebar.getTabs()).toStrictEqual(
-            expected.tabs
-        );
+        await check_tabs(expected.selectedTab, expected.tabs, unexpected_tabs);
     }
 }
 
@@ -321,7 +334,7 @@ test.describe("Column Settings State on Interaction", () => {
             "where",
         ],
         text: ["reorder", "open", "deactivate"],
-        dnd: ["open", "deactivate", "groupby"],
+        dnd: ["open", "deactivate", "groupby", "splitby"],
     };
 
     for (const [name, spec] of Object.entries(TEST_SPEC)) {

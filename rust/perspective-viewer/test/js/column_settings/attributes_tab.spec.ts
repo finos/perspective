@@ -139,7 +139,6 @@ test.describe("Attributes Tab", () => {
         await expr.activeBtn.click();
 
         expr = await view.settingsPanel.inactiveColumns.getColumnByName("expr");
-        await expr.editBtn.click();
         await expect(attributesTab.deleteBtn).toBeEnabled();
         await attributesTab.deleteBtn.click();
         await expect(attributesTab.container).toBeHidden();
