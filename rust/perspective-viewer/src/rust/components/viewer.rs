@@ -36,61 +36,52 @@ use crate::session::*;
 use crate::utils::*;
 use crate::*;
 
-/// A ColumnLocator is a combination of the column's type and its name.
-/// It's used to locate columns for the column_settings_sidebar.
+/// Locates a view column.
+/// Table columns are those defined on the table, but their types will reflect
+/// the view type, not the table type.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColumnLocator {
-    Plain(String),
-    Expr(Option<String>),
+    Table(String),
+    Expression(String),
+    NewExpression,
 }
 impl ColumnLocator {
     pub fn name(&self) -> Option<&String> {
         match self {
-            ColumnLocator::Plain(s) => Some(s),
-            ColumnLocator::Expr(s) => s.as_ref(),
+            Self::Table(s) | Self::Expression(s) => Some(s),
+            Self::NewExpression => None,
         }
     }
 
     pub fn name_or_default(&self, session: &Session) -> String {
         match self {
-            ColumnLocator::Plain(s) | ColumnLocator::Expr(Some(s)) => s.clone(),
-            ColumnLocator::Expr(None) => session.metadata().make_new_column_name(None),
+            Self::Table(s) | Self::Expression(s) => s.clone(),
+            Self::NewExpression => session.metadata().make_new_column_name(None),
         }
     }
 
     pub fn is_active(&self, session: &Session) -> bool {
-        match self {
-            ColumnLocator::Plain(name) | ColumnLocator::Expr(Some(name)) => {
-                session.is_column_active(name)
-            },
-            ColumnLocator::Expr(None) => false,
-        }
-    }
-
-    /// Determines if the column is one of view's query parameters, i.e.
-    /// GroupBy, SplitBy, OrderBy, or Where
-    pub fn is_in_query(&self, session: &Session) -> bool {
-        if matches!(self, Self::Expr(None)) {
-            return false;
-        }
-        let name = self.name().unwrap();
-        let view_config = session.get_view_config();
-        view_config.group_by.contains(name)
-            || view_config.split_by.contains(name)
-            || view_config.filter.iter().any(|filter| &filter.0 == name)
-            || view_config.sort.iter().any(|sort| &sort.0 == name)
+        self.name()
+            .map(|name| session.is_column_active(name))
+            .unwrap_or_default()
     }
 
     #[inline(always)]
     pub fn is_saved_expr(&self) -> bool {
-        matches!(self, ColumnLocator::Expr(Some(_)))
+        matches!(self, ColumnLocator::Expression(_))
     }
 
-    /// Returns true if the column is an expression.
-    /// Use `is_saved_expr` if you want to exclude new expressions.
     #[inline(always)]
     pub fn is_expr(&self) -> bool {
-        matches!(self, ColumnLocator::Expr(_))
+        matches!(
+            self,
+            ColumnLocator::Expression(_) | ColumnLocator::NewExpression
+        )
+    }
+
+    #[inline(always)]
+    pub fn is_new_expr(&self) -> bool {
+        matches!(self, ColumnLocator::NewExpression)
     }
 
     pub fn view_type(&self, session: &Session) -> Option<Type> {
@@ -343,10 +334,7 @@ impl Component for PerspectiveViewer {
 
                     locator
                         .clone()
-                        .map(|c| match c {
-                            ColumnLocator::Plain(s) => (true, Some(s)),
-                            ColumnLocator::Expr(maybe_s) => (true, maybe_s),
-                        })
+                        .map(|c| (true, c.name().cloned()))
                         .unwrap_or_default()
                 };
 

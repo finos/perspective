@@ -160,10 +160,7 @@ impl ColumnSettingsSidebar {
                 })
                 .unwrap_or_default();
 
-            if !matches!(ctx.props().selected_column, ColumnLocator::Expr(None))
-                && show_styles
-                && config.is_some()
-            {
+            if !ctx.props().selected_column.is_new_expr() && show_styles && config.is_some() {
                 tabs.push(ColumnSettingsTab::Style);
             }
 
@@ -277,13 +274,13 @@ impl Component for ColumnSettingsSidebar {
                     (*(self.expr_value)).clone().into(),
                 );
                 match &ctx.props().selected_column {
-                    ColumnLocator::Plain(_) => {
+                    ColumnLocator::Table(_) => {
                         tracing::error!("Tried to save non-expression column!")
                     },
-                    ColumnLocator::Expr(name) => match name {
-                        Some(old_name) => ctx.props().update_expr(old_name.clone(), new_expr),
-                        None => ctx.props().save_expr(new_expr),
+                    ColumnLocator::Expression(name) => {
+                        ctx.props().update_expr(name.clone(), new_expr)
                     },
+                    ColumnLocator::NewExpression => ctx.props().save_expr(new_expr),
                 }
 
                 self.initial_expr_value = self.expr_value.clone();
