@@ -78,6 +78,10 @@ views.forEach(async (plugin) => {
             }
 
             delete() {}
+
+            can_render_column_styles(_type, _group) {
+                return false;
+            }
         }
     );
 

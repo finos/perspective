@@ -19,6 +19,7 @@ import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 import * as d3 from "d3";
 import { symbolsObj } from "../series/seriesSymbols";
 import { Chart, Settings } from "../types";
+import { Type } from "@finos/perspective";
 
 const DEFAULT_PLUGIN_SETTINGS = {
     initial: {
@@ -176,6 +177,14 @@ export function register(...plugin_names: string[]) {
                                 symbols,
                             },
                         };
+                    }
+
+                    can_render_column_styles(type: Type, group: string) {
+                        return (
+                            chart.plugin.name === "X/Y Scatter" &&
+                            type === "string" &&
+                            group === "Symbol"
+                        );
                     }
 
                     async render() {
