@@ -94,6 +94,22 @@ export interface IPerspectiveViewerPlugin {
     get priority(): number | undefined;
 
     /**
+     * Given a column's grouping (determined by indexing it in `plugin.config_column_names`)
+     * and its view type, determines whether or not to render column styles in the settings sidebar.
+     */
+    can_render_column_styles(
+        view_type: perspective.Type,
+        group: string
+    ): boolean;
+
+    /**
+     * TODO
+     * Determines which column configuration controls are populated in the viewer.
+     * Corresponds to the data the plugin will receieve on save.
+     */
+    column_style_config(view_type: perspective.Type, group: string): any;
+
+    /**
      * Render this plugin using the provided `View`.  While there is no
      * provision to cancel a render in progress per se, calling a method on
      * a `View` which has been deleted will throw an exception.
@@ -217,8 +233,13 @@ export class HTMLPerspectiveViewerPluginElement
         return 0;
     }
 
-    get plugin_attributes(): any {
-        return {};
+    can_render_column_styles(): boolean {
+        return false;
+    }
+
+    column_style_config(): any {
+        {
+        }
     }
 
     async update(view: perspective.View): Promise<void> {

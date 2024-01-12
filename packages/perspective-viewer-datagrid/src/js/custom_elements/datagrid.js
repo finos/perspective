@@ -74,6 +74,10 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         };
     }
 
+    can_render_column_styles(type, _group) {
+        return type !== "boolean";
+    }
+
     async draw(view) {
         return await draw.call(this, view);
     }

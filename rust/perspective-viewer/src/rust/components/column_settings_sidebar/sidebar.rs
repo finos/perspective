@@ -140,10 +140,8 @@ impl ColumnSettingsSidebar {
             .metadata()
             .get_column_view_type(&column_name);
 
-        // NOTE: This is going to be refactored soon.
         let tabs = {
             let mut tabs = vec![];
-            let plugin = ctx.props().renderer.get_active_plugin().unwrap().name();
             let (config, attrs) = (
                 ctx.props().get_plugin_config(),
                 ctx.props().get_plugin_attrs(),
@@ -156,15 +154,14 @@ impl ColumnSettingsSidebar {
                     attrs
                 );
             }
-            let show_styles = maybe_ty
-                .map(|ty| match &*plugin {
-                    "Datagrid" => ty != Type::Bool,
-                    "X/Y Scatter" => ty == Type::String,
-                    _ => false,
-                })
-                .unwrap_or_default();
+            let is_new_expr = ctx.props().selected_column.is_new_expr();
+            let show_styles = !is_new_expr
+                && ctx
+                    .props()
+                    .can_render_column_styles(&column_name)
+                    .unwrap_or_default();
 
-            if !ctx.props().selected_column.is_new_expr() && show_styles && config.is_some() {
+            if !is_new_expr && show_styles && config.is_some() {
                 tabs.push(ColumnSettingsTab::Style);
             }
 
