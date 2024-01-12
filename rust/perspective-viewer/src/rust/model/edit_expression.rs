@@ -48,7 +48,7 @@ pub trait EditExpression: HasPresentation + HasRenderer + HasSession + UpdateAnd
                 .await;
             this.presentation
                 .set_open_column_settings(Some(OpenColumnSettings {
-                    locator: Some(ColumnLocator::Expr(Some(new_expr.name.to_string()))),
+                    locator: Some(ColumnLocator::Expression(new_expr.name.to_string())),
                     tab: Some(ColumnSettingsTab::Attributes),
                 }));
             this.update_and_render(update).await?;
@@ -63,7 +63,7 @@ pub trait EditExpression: HasPresentation + HasRenderer + HasSession + UpdateAnd
             serde_exprs.insert(&expr);
             self.presentation()
                 .set_open_column_settings(Some(OpenColumnSettings {
-                    locator: Some(ColumnLocator::Expr(Some(expr.name.clone().into()))),
+                    locator: Some(ColumnLocator::Expression(expr.name.clone().into())),
                     tab: Some(ColumnSettingsTab::Attributes),
                 }));
             self.update_and_render(ViewConfigUpdate {

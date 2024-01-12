@@ -266,8 +266,8 @@ impl Component for ColumnSelector {
                 let column_dropdown = self.column_dropdown.clone();
                 let is_editing = matches!(
                     &ctx.props().selected_column,
-                    Some(ColumnLocator::Plain(x)) | Some(ColumnLocator::Expr(Some(x))) if x == &key
-                );
+                    Some(ColumnLocator::Table(x)) | Some(ColumnLocator::Expression(x))
+                if x == &key );
 
                 let on_open_expr_panel = &ctx.props().on_open_expr_panel;
                 html_nested! {
@@ -296,7 +296,8 @@ impl Component for ColumnSelector {
             .chain(columns_iter.inactive())
             .enumerate()
             .map(|(idx, vc)| {
-                let is_editing = matches!(&ctx.props().selected_column, Some(ColumnLocator::Expr(Some(x))) if x.as_str() == vc.name);
+                let selected_column = ctx.props().selected_column.as_ref();
+                let is_editing = matches!(selected_column, Some(ColumnLocator::Expression(x)) if x.as_str() == vc.name);
                 html_nested! {
                     <ScrollPanelItem
                         key={ vc.name }

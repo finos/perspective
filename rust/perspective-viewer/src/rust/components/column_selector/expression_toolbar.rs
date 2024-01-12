@@ -28,9 +28,9 @@ pub struct ExprEditButtonProps {
 pub fn ExprEditButton(p: &ExprEditButtonProps) -> Html {
     let onmousedown = yew::use_callback(p.clone(), |_, p| {
         let name = if p.is_expression {
-            ColumnLocator::Expr(Some(p.name.clone()))
+            ColumnLocator::Expression(p.name.clone())
         } else {
-            ColumnLocator::Plain(p.name.clone())
+            ColumnLocator::Table(p.name.clone())
         };
         p.on_open_expr_panel.emit(name)
     });
