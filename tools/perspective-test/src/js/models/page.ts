@@ -102,7 +102,7 @@ export class PageView {
             }
             await this.settingsPanel.createNewExpression("expr", expr, true);
             await settingsPanel.activeColumns.activateColumn("expr");
-            col = settingsPanel.activeColumns.getColumnByName("expr");
+            col = await settingsPanel.activeColumns.getColumnByName("expr");
         }
         await expect(col.container).toBeVisible();
         return col;

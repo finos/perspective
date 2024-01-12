@@ -41,8 +41,11 @@ pub fn AddExpressionButton(p: &AddExpressionButtonProps) -> Html {
         mo.set(false);
     });
 
-    let onmousedown = p.on_open_expr_panel.reform(|_| ColumnLocator::Expr(None));
-    let class = if *is_mouseover || matches!(p.selected_column, Some(ColumnLocator::Expr(None))) {
+    let onmousedown = p
+        .on_open_expr_panel
+        .reform(|_| ColumnLocator::NewExpression);
+    let class = if *is_mouseover || matches!(p.selected_column, Some(ColumnLocator::NewExpression))
+    {
         classes!("dragdrop-hover")
     } else {
         classes!()

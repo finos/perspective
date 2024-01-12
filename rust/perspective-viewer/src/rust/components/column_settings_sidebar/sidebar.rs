@@ -136,10 +136,8 @@ impl ColumnSettingsSidebar {
             (*initial_expr_value != column_name).then_some(column_name.clone());
         let maybe_ty = ctx.props().selected_column.view_type(ctx.props().session());
 
-        // NOTE: This is going to be refactored soon.
         let tabs = {
             let mut tabs = vec![];
-            let plugin = ctx.props().renderer.get_active_plugin().unwrap().name();
             let (config, attrs) = (
                 ctx.props().get_plugin_config(),
                 ctx.props().get_plugin_attrs(),
@@ -152,18 +150,14 @@ impl ColumnSettingsSidebar {
                     attrs
                 );
             }
-            let show_styles = maybe_ty
-                .map(|ty| match &*plugin {
-                    "Datagrid" => ty != Type::Bool,
-                    "X/Y Scatter" => ty == Type::String,
-                    _ => false,
-                })
-                .unwrap_or_default();
+            let is_new_expr = ctx.props().selected_column.is_new_expr();
+            let show_styles = !is_new_expr
+                && ctx
+                    .props()
+                    .can_render_column_styles(&column_name)
+                    .unwrap_or_default();
 
-            if !matches!(ctx.props().selected_column, ColumnLocator::Expr(None))
-                && show_styles
-                && config.is_some()
-            {
+            if !is_new_expr && show_styles && config.is_some() {
                 tabs.push(ColumnSettingsTab::Style);
             }
 
@@ -277,13 +271,13 @@ impl Component for ColumnSettingsSidebar {
                     (*(self.expr_value)).clone().into(),
                 );
                 match &ctx.props().selected_column {
-                    ColumnLocator::Plain(_) => {
+                    ColumnLocator::Table(_) => {
                         tracing::error!("Tried to save non-expression column!")
                     },
-                    ColumnLocator::Expr(name) => match name {
-                        Some(old_name) => ctx.props().update_expr(old_name.clone(), new_expr),
-                        None => ctx.props().save_expr(new_expr),
+                    ColumnLocator::Expression(name) => {
+                        ctx.props().update_expr(name.clone(), new_expr)
                     },
+                    ColumnLocator::NewExpression => ctx.props().save_expr(new_expr),
                 }
 
                 self.initial_expr_value = self.expr_value.clone();

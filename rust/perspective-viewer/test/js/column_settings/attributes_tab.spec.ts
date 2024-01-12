@@ -32,7 +32,9 @@ test.describe("Attributes Tab", () => {
             expressions: { expr: "12345" },
             columns: ["expr"],
         });
-        let expr = view.settingsPanel.activeColumns.getColumnByName("expr");
+        let expr = await view.settingsPanel.activeColumns.getColumnByName(
+            "expr"
+        );
         await expr.editBtn.click();
 
         let input = view.columnSettingsSidebar.nameInput;
@@ -77,7 +79,9 @@ test.describe("Attributes Tab", () => {
             columns: ["expr", "Row ID"],
             settings: true,
         });
-        let expr = view.settingsPanel.activeColumns.getColumnByName("expr");
+        let expr = await view.settingsPanel.activeColumns.getColumnByName(
+            "expr"
+        );
         await expr.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
         let input = view.columnSettingsSidebar.nameInput;
@@ -97,7 +101,9 @@ test.describe("Attributes Tab", () => {
             columns: ["expr", "Row ID"],
             settings: true,
         });
-        let expr = view.settingsPanel.activeColumns.getColumnByName("expr");
+        let expr = await view.settingsPanel.activeColumns.getColumnByName(
+            "expr"
+        );
         await expr.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
 
@@ -130,7 +136,9 @@ test.describe("Attributes Tab", () => {
             columns: ["expr", "Row ID"],
             settings: true,
         });
-        let expr = view.settingsPanel.activeColumns.getColumnByName("expr");
+        let expr = await view.settingsPanel.activeColumns.getColumnByName(
+            "expr"
+        );
         await expr.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
         let attributesTab = view.columnSettingsSidebar.attributesTab;
