@@ -74,7 +74,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 renderer={ &props.renderer }
                 custom_events={ &props.custom_events }/>
         }),
-        "Columns" => Some(html! {
+        "Colunas" => Some(html! {
             <ColumnStyle
                 custom_events={ props.custom_events.clone() }
                 session={ props.session.clone() }

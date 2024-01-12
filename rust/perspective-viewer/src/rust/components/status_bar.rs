@@ -261,7 +261,7 @@ impl Component for StatusBar {
                         <slot name="plugin-settings"></slot>
                     </div>
                     <span id="reset" class="button" onmousedown={ reset }>
-                        <span>{ "Reset" }</span>
+                        <span>{ "Restaurar" }</span>
                     </span>
                     <span
                         ref={ &self.export_ref }
@@ -269,7 +269,7 @@ impl Component for StatusBar {
                         class="button"
                         onmousedown={ export }>
 
-                        <span>{ "Export" }</span>
+                        <span>{ "Exportar" }</span>
                     </span>
                     <span
                         ref={ &self.copy_ref }
@@ -277,7 +277,7 @@ impl Component for StatusBar {
                         class="button"
                         onmousedown={ copy }>
 
-                        <span>{ "Copy" }</span>
+                        <span>{ "Copiar" }</span>
                     </span>
                 </div>
 

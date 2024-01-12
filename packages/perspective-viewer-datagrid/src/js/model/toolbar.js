@@ -20,9 +20,9 @@ export function toggle_edit_mode(force = undefined) {
     if (this._edit_mode !== undefined) {
         this._edit_mode.classList.toggle("editable", force);
         if (force) {
-            this._edit_mode.children[0].textContent = "Editable";
+            this._edit_mode.children[0].textContent = "Editável";
         } else {
-            this._edit_mode.children[0].textContent = "Read Only";
+            this._edit_mode.children[0].textContent = "Apenas leitura";
         }
     }
 }
@@ -37,9 +37,9 @@ export function toggle_scroll_lock(force = undefined) {
     if (this._scroll_lock !== undefined) {
         this._scroll_lock.classList.toggle("lock-scroll", force);
         if (!force) {
-            this._scroll_lock.children[0].textContent = "Free Scroll";
+            this._scroll_lock.children[0].textContent = "Rolagem livre";
         } else {
-            this._scroll_lock.children[0].textContent = "Align Scroll";
+            this._scroll_lock.children[0].textContent = "Alinhar rolagem";
         }
     }
 }

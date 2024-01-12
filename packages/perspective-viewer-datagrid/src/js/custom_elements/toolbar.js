@@ -34,9 +34,9 @@ export class HTMLPerspectiveViewerDatagridToolbarElement extends HTMLElement {
             </style>
             <div id="toolbar">
                 <span id="scroll_lock" class="button">
-                    <span>Free Scroll</span>
+                    <span>Rolagem livre</span>
                 </span>
-                <span id="edit_mode" class="button"><span>Read Only</span></span>
+                <span id="edit_mode" class="button"><span>Apenas leitura</span></span>
             </div>
         `;
 
