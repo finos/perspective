@@ -62,7 +62,7 @@ pub struct NumberColumnStyleProps {
     pub default_config: NumberColumnStyleDefaultConfig,
 
     #[prop_or_default]
-    pub on_change: Callback<NumberColumnStyleConfig>,
+    pub on_change: Callback<Option<ColumnStyleValue>>,
 
     #[prop_or_default]
     pub weak_link: WeakScope<NumberColumnStyle>,
@@ -564,7 +564,10 @@ impl NumberColumnStyle {
             _ => {},
         };
 
-        ctx.props().on_change.emit(config);
+        // todo: diff with default
+        ctx.props()
+            .on_change
+            .emit(Some(ColumnStyleValue::NumberColumnStyle(config)));
     }
 
     fn color_props(&self, side: Side, is_gradient: bool, ctx: &Context<Self>) -> ColorRangeProps {

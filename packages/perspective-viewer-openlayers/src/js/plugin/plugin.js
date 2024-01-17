@@ -49,10 +49,6 @@ views.forEach(async (plugin) => {
                 return "OpenStreetMap";
             }
 
-            get plugin_attributes() {
-                return {};
-            }
-
             async restyle(view) {
                 mapView.restyle(this.shadowRoot.children[1]);
             }
@@ -78,10 +74,6 @@ views.forEach(async (plugin) => {
             }
 
             delete() {}
-
-            can_render_column_styles(_type, _group) {
-                return false;
-            }
         }
     );
 

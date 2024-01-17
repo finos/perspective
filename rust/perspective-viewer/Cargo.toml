@@ -87,6 +87,9 @@ flate2 = "1.0.20"
 # General async tools
 futures = "0.3.28"
 
+# Ordered hashmaps to match JSON deserialization
+indexmap = { version = "2.1.0", features = ["serde"] }
+
 # General iterator improvements
 itertools = "0.10.1"
 

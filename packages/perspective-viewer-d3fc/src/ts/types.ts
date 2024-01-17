@@ -32,6 +32,9 @@ export interface Chart {
         };
         selectMode?: string;
     };
+    can_render_column_styles?: (type: Type, group?: string) => boolean;
+    // TODO: Generate the type for the column style schema.
+    column_style_controls?: (type: Type, group?: string) => unknown;
 }
 
 export type PadUnit = "percent" | "domain";
@@ -194,15 +197,6 @@ export interface ChartElement extends IPerspectiveViewerPlugin {
 
     get max_columns(): number;
     set max_columns(value: number);
-
-    get plugin_attributes(): {
-        symbol: {
-            symbols: {
-                name: string;
-                html: string;
-            }[];
-        };
-    };
 
     _draw(): void;
 

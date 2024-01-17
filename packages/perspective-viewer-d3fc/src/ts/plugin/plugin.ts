@@ -153,37 +153,19 @@ export function register(...plugin_names: string[]) {
                         chart.plugin.max_columns = x;
                     }
 
-                    get plugin_attributes() {
-                        let symbols = Object.entries(symbolsObj).map(
-                            ([name, ty]) => {
-                                let container = document.createElement("div");
-                                d3.select(container)
-                                    .append("svg")
-                                    .attr("viewbox", "0, 0, 15, 15") //eyeballed this, it's probably wrong
-                                    .append("path")
-                                    .attr("transform", "translate(7.5, 7.5)")
-                                    .attr("d", d3.symbol(ty)());
-                                let html = d3.select(container).html();
-                                container.remove();
-
-                                return {
-                                    name,
-                                    html,
-                                };
-                            }
+                    can_render_column_styles(type: Type, group: string) {
+                        return chart.can_render_column_styles?.call(
+                            this,
+                            type,
+                            group
                         );
-                        return {
-                            symbol: {
-                                symbols,
-                            },
-                        };
                     }
 
-                    can_render_column_styles(type: Type, group: string) {
-                        return (
-                            chart.plugin.name === "X/Y Scatter" &&
-                            type === "string" &&
-                            group === "Symbol"
+                    column_style_controls(type: Type, group: string) {
+                        return chart.column_style_controls?.call(
+                            this,
+                            type,
+                            group
                         );
                     }
 
