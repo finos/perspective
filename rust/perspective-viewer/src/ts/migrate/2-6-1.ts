@@ -55,26 +55,28 @@ export default function migrate_2_6_1(old, options) {
     }
 
     // check for string expressions, replace with objects
-    let new_exprs = {};
-    for (let i in old.expressions) {
-        if (typeof old.expressions[i] === "string") {
-            if (options.warn) {
-                console.warn(
-                    "Replacing deprecated string expression with object"
-                );
-            }
-            let old_expr = old.expressions[i];
-            let [whole_expr, name, expr] = old_expr.match(
-                /\/\/\s*([^\n]+)\n(.*)/
-            ) ?? [old_expr, null, null];
-            if (name && expr) {
-                new_exprs[name] = expr;
-            } else {
-                new_exprs[whole_expr] = whole_expr;
+    if (Array.isArray(old.expressions)) {
+        let new_exprs = {};
+        for (let i in old.expressions) {
+            if (typeof old.expressions[i] === "string") {
+                if (options.warn) {
+                    console.warn(
+                        "Replacing deprecated string expression with object"
+                    );
+                }
+                let old_expr = old.expressions[i];
+                let [whole_expr, name, expr] = old_expr.match(
+                    /\/\/\s*([^\n]+)\n(.*)/
+                ) ?? [old_expr, null, null];
+                if (name && expr) {
+                    new_exprs[name] = expr;
+                } else {
+                    new_exprs[whole_expr] = whole_expr;
+                }
             }
         }
+        old.expressions = new_exprs;
     }
-    old.expressions = new_exprs;
 
     if (options.verbose) {
         console.log(old);

@@ -72,6 +72,10 @@ const BROWSER_PACKAGES = [
         packageName: "perspective-cli",
         testDir: "packages/perspective-cli/test/js",
     },
+    {
+        packageName: "docs",
+        testDir: "docs/test/js",
+    },
 ];
 
 const NODE_PACKAGES = [

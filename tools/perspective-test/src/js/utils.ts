@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { expect, Locator, Page } from "@playwright/test";
-import * as fs from "fs";
+import * as fs from "node:fs";
 
 export const API_VERSION = JSON.parse(
     fs.readFileSync(__dirname + "/../../package.json").toString()
@@ -24,10 +24,11 @@ export const API_VERSION = JSON.parse(
  * @returns
  */
 export const getSvgContentString = (selector: string) => async (page: Page) => {
-    const content = await page.evaluate(async (s) => {
-        let el = document.querySelector(s);
+    const content = await page.evaluate(async (selector) => {
+        let el = document.querySelector(selector) as Element;
+        console.log(selector, el);
 
-        function removeAttrs(node) {
+        function removeAttrs(node: Element) {
             const svgAttrsToRemove = [
                 "r",
                 "d",
@@ -44,6 +45,7 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 "transform",
                 "viewBox",
                 "visibility",
+                "style",
             ];
 
             if (node.nodeType === Node.ELEMENT_NODE) {
@@ -53,28 +55,27 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
             }
         }
 
-        function walkNode(node) {
+        function walkNode(node: Node) {
             const walker = document.createTreeWalker(node, NodeFilter.SHOW_ALL);
 
-            walk(walker, walker.currentNode);
+            walk(walker, walker.currentNode as Element);
         }
 
-        function walk(walker, node) {
+        function walk(walker: TreeWalker, node: Element) {
             if (!node) return;
 
             if (node.shadowRoot) {
                 walkNode(node.shadowRoot);
             }
 
+            removeAttrs(node);
             switch (node.nodeName) {
                 case "style":
                     node.textContent = "";
                     break;
                 case "svg":
-                    removeAttrs(node);
-
-                    node.remove("viewBox");
-                    node.remove("height");
+                    node.removeAttribute("viewBox");
+                    node.removeAttribute("height");
                     break;
                 case "g":
                 case "path":
@@ -82,34 +83,37 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 case "circle":
                 case "rect":
                 case "text":
-                    removeAttrs(node);
                     if (
                         ["label", "segment"].some((c) =>
                             node.classList.contains(c)
                         )
                     ) {
-                        node.textContent = node.textContent.slice(0, 2);
+                        node.textContent = node.textContent?.slice(0, 2) as
+                            | string
+                            | null;
                     }
                     break;
                 default:
                     break;
             }
 
-            walk(walker, walker.nextNode());
+            walk(walker, walker.nextNode() as Element);
         }
 
         if (el?.shadowRoot) {
             el = el.shadowRoot as unknown as Element;
         }
 
-        const svgs = el?.querySelectorAll("svg") || [];
         let htmlString = "";
-        for (const svg of svgs) {
-            const clonedSVG = svg.cloneNode(true) as SVGElement;
+        for (const child of el.children) {
+            if (child.tagName === "STYLE") {
+                continue;
+            }
+            const clonedChild = child.cloneNode(true) as Element;
 
-            walkNode(clonedSVG);
+            walkNode(clonedChild);
 
-            htmlString += clonedSVG.outerHTML;
+            htmlString += clonedChild.outerHTML;
         }
 
         return htmlString;

@@ -49,6 +49,11 @@ async function run_with_theme(page, is_dark = false) {
     await page.goto("http://localhost:8080/");
     await page.setContent(template(is_dark));
     await page.setViewport(DEFAULT_VIEWPORT);
+    await page.evaluate(async () => {
+        while (!window.__TEST_PERSPECTIVE_READY__) {
+            await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+    });
     await page.evaluate(async function () {
         const viewer = document.querySelector("perspective-viewer");
         await viewer.flush();
@@ -73,13 +78,13 @@ async function run_with_theme(page, is_dark = false) {
             )
         );
         console.log(JSON.stringify(new_config));
+
         await page.evaluate(async (config) => {
             const viewer = document.querySelector("perspective-viewer");
             await viewer.reset();
             await viewer.restore(config);
         }, new_config);
 
-        await page.waitForSelector("perspective-viewer:not([updating])");
         const screenshot = await page.screenshot({
             captureBeyondViewport: false,
             fullPage: true,
@@ -104,10 +109,17 @@ async function run_with_theme(page, is_dark = false) {
 }
 
 async function run() {
-    if (!fs.existsSync("static/features")) {
+    if (
+        !fs.existsSync("static/features") ||
+        fs.readdirSync("static/features").length === 0
+    ) {
+        console.log("Generating feature screenshots!");
         mkdirp(path.join(__dirname, "static/features"));
         const server = new WebSocketServer({
-            assets: [path.join(__dirname, "..")],
+            assets: [
+                path.join(__dirname, ".."),
+                path.join(__dirname, "../node_modules"),
+            ],
         });
 
         const browser = await puppeteer.launch({ headless: true });
@@ -129,54 +141,11 @@ async function run() {
 }
 
 function template(is_dark) {
-    return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
-        <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/css/pro${
-            is_dark ? "-dark" : ""
-        }.css">
-        <style>
-            perspective-viewer {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
-            perspective-viewer[theme="Pro Light"] {
-                --plugin--background:#f2f4f6
-            }
-        </style>
-    </head>
-    <body>
-        <perspective-viewer editable>
-        </perspective-viewer>
-        <script type="module">
-            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
-            const WORKER = perspective.worker();
-            async function on_load() {
-                var el = document.getElementsByTagName('perspective-viewer')[0];
-                const plugin = await el.getPlugin("Heatmap");
-                plugin.render_warning = false;
-                const table = WORKER.table(this.response);
-                el.load(table);
-                el.toggleConfig();
-            }
-            window.addEventListener('DOMContentLoaded', function () {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', '/node_modules/superstore-arrow/superstore.lz4.arrow', true);
-                xhr.responseType = "arraybuffer"
-                xhr.onload = on_load.bind(xhr);
-                xhr.send(null);
-            });
-        </script>
-    </body>
-    </html>`.trim();
+    return fs
+        .readFileSync(path.join(__dirname, "template.html"))
+        .toString()
+        .replace("/css/pro.css", is_dark ? "/css/pro-dark.css" : "/css/pro.css")
+        .trim();
 }
 
 run();
