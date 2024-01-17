@@ -7,8 +7,8 @@ Production, or as an embedded JupyterLab Widget for Research.
 
 For Application Developers, virtualized `<perspective-viewer>` will only
 consume the data necessary to render the current screen, enabling _ludicrous size_
-datasets with nearly instant load. Or - stream the entire dataset to the
-WebAssembly runtime via efficiently via Apache Arrow, and give your server a
+datasets with nearly instant load. Or - efficiently stream the entire dataset to the
+WebAssembly runtime via Apache Arrow, and give your server a
 break!
 
 For Researchers and Data Scientists, `PerspectiveWidget` is available as a
