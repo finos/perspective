@@ -14,7 +14,10 @@ import "./polyfills/index";
 import charts from "../charts/charts";
 import { initialiseStyles } from "../series/colorStyles";
 import style from "../../../dist/css/perspective-viewer-d3fc.css";
-import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
+import {
+    PerspectiveColumnConfig,
+    HTMLPerspectiveViewerElement,
+} from "@finos/perspective-viewer";
 
 import * as d3 from "d3";
 import { symbolsObj } from "../series/seriesSymbols";
@@ -44,6 +47,7 @@ const EXCLUDED_SETTINGS = [
     "agg_paths",
     "treemaps",
     "axisMemo",
+    "column_config",
 ];
 
 function getD3FCStyles(): string {
@@ -153,37 +157,19 @@ export function register(...plugin_names: string[]) {
                         chart.plugin.max_columns = x;
                     }
 
-                    get plugin_attributes() {
-                        let symbols = Object.entries(symbolsObj).map(
-                            ([name, ty]) => {
-                                let container = document.createElement("div");
-                                d3.select(container)
-                                    .append("svg")
-                                    .attr("viewbox", "0, 0, 15, 15") //eyeballed this, it's probably wrong
-                                    .append("path")
-                                    .attr("transform", "translate(7.5, 7.5)")
-                                    .attr("d", d3.symbol(ty)());
-                                let html = d3.select(container).html();
-                                container.remove();
-
-                                return {
-                                    name,
-                                    html,
-                                };
-                            }
+                    can_render_column_styles(type: Type, group: string) {
+                        return chart.can_render_column_styles?.call(
+                            this,
+                            type,
+                            group
                         );
-                        return {
-                            symbol: {
-                                symbols,
-                            },
-                        };
                     }
 
-                    can_render_column_styles(type: Type, group: string) {
-                        return (
-                            chart.plugin.name === "X/Y Scatter" &&
-                            type === "string" &&
-                            group === "Symbol"
+                    column_style_controls(type: Type, group: string) {
+                        return chart.column_style_controls?.call(
+                            this,
+                            type,
+                            group
                         );
                     }
 
@@ -588,14 +574,21 @@ export function register(...plugin_names: string[]) {
                         return settings;
                     }
 
-                    restore(settings: Settings) {
-                        const new_settings = {};
+                    restore(
+                        settings: Settings,
+                        column_config: PerspectiveColumnConfig
+                    ) {
+                        const new_settings: Partial<Settings> = {};
                         for (const name of EXCLUDED_SETTINGS) {
                             if (this._settings?.[name] !== undefined) {
                                 new_settings[name] = this._settings?.[name];
                             }
                         }
-                        this._settings = { ...new_settings, ...settings };
+                        this._settings = {
+                            ...new_settings,
+                            ...settings,
+                            column_config,
+                        };
                     }
                 }
             );

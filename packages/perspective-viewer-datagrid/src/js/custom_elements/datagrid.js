@@ -14,7 +14,7 @@ import { activate } from "../plugin/activate.js";
 import { restore } from "../plugin/restore.js";
 import { save } from "../plugin/save";
 import { draw } from "../plugin/draw";
-import getDefaultConfig from "../default_config.js";
+import column_style_controls from "../plugin/column_style_controls.js";
 import datagridStyles from "../../../dist/css/perspective-viewer-datagrid.css";
 
 /**
@@ -87,15 +87,12 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         return 1;
     }
 
-    /** opt-in to column styling */
-    get plugin_attributes() {
-        return {
-            style: getDefaultConfig.call(this),
-        };
-    }
-
     can_render_column_styles(type, _group) {
         return type !== "boolean";
+    }
+
+    column_style_controls(type, group) {
+        return column_style_controls.call(this, type, group);
     }
 
     async draw(view) {
@@ -126,8 +123,8 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         return save.call(this);
     }
 
-    restore(token) {
-        return restore.call(this, token);
+    restore(token, column_config) {
+        return restore.call(this, token, column_config);
     }
 
     async restyle(view) {

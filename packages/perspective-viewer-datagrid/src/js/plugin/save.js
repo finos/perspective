@@ -20,31 +20,11 @@ import { save_column_size_overrides } from "../model/column_overrides.js";
  */
 export function save() {
     if (this.regular_table) {
-        const datagrid = this.regular_table;
         const token = {
             columns: {},
             scroll_lock: !!this._is_scroll_lock,
             editable: !!this._is_edit_mode,
         };
-
-        for (const col of Object.keys(datagrid[PRIVATE_PLUGIN_SYMBOL] || {})) {
-            const config = Object.assign(
-                {},
-                datagrid[PRIVATE_PLUGIN_SYMBOL][col]
-            );
-            if (config?.pos_fg_color || config?.pos_bg_color) {
-                config.pos_fg_color = config.pos_fg_color?.[0];
-                config.neg_fg_color = config.neg_fg_color?.[0];
-                config.pos_bg_color = config.pos_bg_color?.[0];
-                config.neg_bg_color = config.neg_bg_color?.[0];
-            }
-
-            if (config?.color) {
-                config.color = config.color[0];
-            }
-
-            token.columns[col] = config;
-        }
 
         const column_size_overrides = save_column_size_overrides.call(this);
 

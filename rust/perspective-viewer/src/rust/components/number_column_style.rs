@@ -26,7 +26,7 @@ use crate::session::Session;
 use crate::utils::WeakScope;
 use crate::*;
 
-#[derive(PartialEq, Eq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Side {
     Fg,
     Bg,
@@ -34,6 +34,7 @@ pub enum Side {
 
 use Side::*;
 
+#[derive(Debug)]
 pub enum NumberColumnStyleMsg {
     Reset(
         Box<NumberColumnStyleConfig>,
@@ -62,7 +63,7 @@ pub struct NumberColumnStyleProps {
     pub default_config: NumberColumnStyleDefaultConfig,
 
     #[prop_or_default]
-    pub on_change: Callback<NumberColumnStyleConfig>,
+    pub on_change: Callback<ColumnConfigValueUpdate>,
 
     #[prop_or_default]
     pub weak_link: WeakScope<NumberColumnStyle>,
@@ -564,7 +565,11 @@ impl NumberColumnStyle {
             _ => {},
         };
 
-        ctx.props().on_change.emit(config);
+        let update = Some(config).filter(|config| config != &NumberColumnStyleConfig::default());
+
+        ctx.props()
+            .on_change
+            .emit(ColumnConfigValueUpdate::DatagridNumberStyle(update));
     }
 
     fn color_props(&self, side: Side, is_gradient: bool, ctx: &Context<Self>) -> ColorRangeProps {

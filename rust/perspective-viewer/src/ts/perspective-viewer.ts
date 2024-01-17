@@ -35,6 +35,10 @@ export { IPerspectiveViewerPlugin } from "./plugin";
 export { HTMLPerspectiveViewerPluginElement } from "./plugin";
 export { IPerspectiveViewerElement } from "./viewer";
 export { PerspectiveViewerConfig } from "./viewer";
+export {
+    PerspectiveColumnConfig,
+    PerspectiveColumnConfigValue,
+} from "./column_config";
 
 export * from "./extensions";
 export * from "./migrate";

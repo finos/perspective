@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
+import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
 import {
     compareContentsToSnapshot,
     API_VERSION,
@@ -54,19 +54,11 @@ test.describe("Save/Restore", async () => {
         });
 
         expect(config).toEqual({
-            version: API_VERSION,
-            aggregates: {},
-            split_by: [],
+            ...DEFAULT_CONFIG,
             columns: ["Profit", "Sales"],
-            expressions: {},
-            filter: [],
             plugin: "Debug",
-            plugin_config: {},
             group_by: ["State"],
             settings: true,
-            sort: [],
-            theme: "Pro Light",
-            title: null,
         });
 
         const contents = await get_contents(page);
@@ -89,19 +81,11 @@ test.describe("Save/Restore", async () => {
         });
 
         expect(config).toEqual({
-            version: API_VERSION,
-            aggregates: {},
-            split_by: [],
+            ...DEFAULT_CONFIG,
             columns: ["Profit", "Sales"],
-            expressions: {},
-            filter: [],
             plugin: "Debug",
-            plugin_config: {},
             group_by: ["State"],
             settings: true,
-            sort: [],
-            theme: "Pro Light",
-            title: null,
         });
 
         const config2 = await page.evaluate(async () => {
@@ -111,9 +95,7 @@ test.describe("Save/Restore", async () => {
         });
 
         expect(config2).toEqual({
-            version: API_VERSION,
-            aggregates: {},
-            split_by: [],
+            ...DEFAULT_CONFIG,
             columns: [
                 "Row ID",
                 "Order ID",
@@ -135,15 +117,9 @@ test.describe("Save/Restore", async () => {
                 "Discount",
                 "Profit",
             ],
-            expressions: {},
-            filter: [],
             plugin: "Debug",
-            plugin_config: {},
-            group_by: [],
             settings: true,
-            sort: [],
             theme: "Pro Light",
-            title: null,
         });
 
         const config3 = await page.evaluate(async (config) => {
@@ -153,19 +129,12 @@ test.describe("Save/Restore", async () => {
         }, config);
 
         expect(config3).toEqual({
-            version: API_VERSION,
-            aggregates: {},
-            split_by: [],
+            ...DEFAULT_CONFIG,
             columns: ["Profit", "Sales"],
-            expressions: {},
-            filter: [],
             plugin: "Debug",
-            plugin_config: {},
             group_by: ["State"],
             settings: true,
-            sort: [],
             theme: "Pro Light",
-            title: null,
         });
 
         const contents = await get_contents(page);

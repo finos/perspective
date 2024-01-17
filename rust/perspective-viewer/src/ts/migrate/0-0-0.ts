@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { chain } from "../migrate";
+import { Options, chain } from "../migrate";
 import Semver from "./semver";
 
 /**
@@ -20,9 +20,9 @@ import Semver from "./semver";
  * @param options
  * @returns The migrated viewer.
  */
-export default function migrate_0_0_0(old, options) {
+export default function migrate_0_0_0(old: any, options: Options) {
     const next_version = options.version_chain.shift();
-    if (old.version?.ge(next_version)) {
+    if (old.version?.gt(next_version)) {
         return old;
     } else {
         if (options.warn) {
@@ -36,7 +36,7 @@ export default function migrate_0_0_0(old, options) {
             migrate_split_by,
             migrate_filters,
             migrate_expressions,
-            options.replace_defaults ? migrate_nulls : false,
+            options.replace_defaults ? migrate_nulls : (x) => x,
             migrate_plugins,
             migrate_plugin_config,
             migrate_title,
@@ -48,7 +48,7 @@ export default function migrate_0_0_0(old, options) {
                 old.version = new Semver("0.0.0");
                 return old;
             },
-        ].filter((x) => !!x),
+        ],
         options
     );
 
