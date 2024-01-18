@@ -12,9 +12,11 @@
 
 mod column_style;
 pub mod numeric_precision;
+pub mod radio;
 pub mod stub;
 mod symbol;
 
+use wasm_bindgen::JsValue;
 use yew::{function_component, html, Html, Properties};
 
 use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
@@ -23,12 +25,12 @@ use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
 use crate::config::{ControlName, ControlOptions, Type};
 use crate::custom_events::CustomEvents;
-use crate::derive_model;
-use crate::model::PluginColumnStyles;
+use crate::model::{PluginColumnStyles, UpdatePluginConfig};
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::JsValueSerdeExt;
+use crate::{derive_model, json};
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct StyleTabProps {
@@ -45,9 +47,15 @@ derive_model!(Session, Renderer, Presentation, CustomEvents for StyleTabProps);
 #[function_component]
 pub fn StyleTab(props: &StyleTabProps) -> Html {
     // TODO: on_update will send the config back to the plugin
-    let on_update = yew::use_callback((), move |_, _| {
-        tracing::error!("on_update!");
-    });
+    let on_update = yew::use_callback(
+        props.clone(),
+        move |(control, value): (&'static str, JsValue), _| {
+            json!({
+                "control": control,
+                "value": value
+            });
+        },
+    );
     let control_opts = props.get_column_style_control_options(&props.column_name);
     let components = match control_opts {
         Ok(opts) => opts
@@ -60,8 +68,9 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                     html! {}
                 },
                 (ControlName::NumericPrecision, Some(ControlOptions::NumericPrecision(opts))) => {
+                    let on_update = on_update.reform(|value| {("numeric-precision", value)});
                     html! {
-                        <NumericPrecision label={opt.label} {opts} on_update={on_update.clone()} />
+                        <NumericPrecision label={opt.label} {opts} {on_update} />
                     }
                 },
                 (ControlName::Radio, Some(ControlOptions::Vec(opts))) => {

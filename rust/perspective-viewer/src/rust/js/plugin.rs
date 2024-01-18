@@ -14,6 +14,7 @@ use serde::*;
 use wasm_bindgen::prelude::*;
 
 use super::perspective::JsPerspectiveView;
+use crate::config::ViewerConfig;
 use crate::utils::*;
 
 /// Perspective FFI
@@ -68,8 +69,8 @@ extern "C" {
     #[wasm_bindgen(method)]
     pub fn save(this: &JsPerspectiveViewerPlugin) -> JsValue;
 
-    #[wasm_bindgen(method)]
-    pub fn restore(this: &JsPerspectiveViewerPlugin, token: &JsValue);
+    #[wasm_bindgen(method, js_name=restore)]
+    pub fn _restore(this: &JsPerspectiveViewerPlugin, token: &JsValue, viewer_config: &JsValue);
 
     #[wasm_bindgen(method)]
     pub fn delete(this: &JsPerspectiveViewerPlugin);
@@ -104,6 +105,13 @@ extern "C" {
     #[wasm_bindgen(method, catch)]
     pub async fn resize(this: &JsPerspectiveViewerPlugin) -> ApiResult<JsValue>;
 
+}
+
+impl JsPerspectiveViewerPlugin {
+    pub fn restore(&self, plugin_config: &JsValue, viewer_config: &ViewerConfig) {
+        let viewer_config = JsValue::from_serde_ext(&viewer_config).unwrap();
+        self._restore(plugin_config, &viewer_config)
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq)]

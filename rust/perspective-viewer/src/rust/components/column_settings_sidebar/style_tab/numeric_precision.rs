@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use serde::Serialize;
 use wasm_bindgen::JsValue;
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::{
@@ -40,7 +41,7 @@ pub struct PrecisionControlProps {
     // pub view_type: Type,
     pub label: Option<String>,
     pub opts: NumericPrecisionOpts,
-    pub on_update: Callback<u32>,
+    pub on_update: Callback<JsValue>,
 }
 // derive_model!(Renderer, CustomEvents, Session, Presentation for
 // PrecisionControlProps);
@@ -78,12 +79,13 @@ pub fn numeric_precision(props: &PrecisionControlProps) -> Html {
 
     let oninput = props.on_update.reform(|event: InputEvent| {
         let raw_value = event.target_unchecked_into::<HtmlInputElement>().value();
-        raw_value
+        let value = raw_value
             .split_once('.')
             .map(|(int, _)| int.parse::<u32>())
             .unwrap_or(raw_value.parse::<u32>())
             .unwrap_or_default()
-            .min(15)
+            .min(15);
+        serde_wasm_bindgen::to_value(&value).unwrap()
     });
 
     // let oninput = use_callback(

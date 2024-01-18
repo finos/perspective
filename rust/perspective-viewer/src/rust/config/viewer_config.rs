@@ -9,6 +9,8 @@
 // ┃ This file is part of the Perspective library, distributed under the terms ┃
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::str::FromStr;
 use std::sync::LazyLock;
@@ -21,6 +23,7 @@ use serde_json::Value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
+use super::column_config::ColumnConfig;
 use super::view_config::*;
 use crate::utils::*;
 
@@ -52,6 +55,7 @@ pub struct ViewerConfig {
     pub version: String,
     pub plugin: String,
     pub plugin_config: Value,
+    pub column_config: HashMap<String, ColumnConfig>,
     pub settings: bool,
     pub theme: Option<String>,
     pub title: Option<String>,
@@ -64,6 +68,7 @@ pub struct ViewerConfig {
 // struct fields, so make a tuple alternative for serialization in binary.
 type ViewerConfigBinarySerialFormat<'a> = (
     &'a String,
+    &'a HashMap<String, ColumnConfig>,
     &'a String,
     &'a Value,
     bool,
@@ -74,6 +79,7 @@ type ViewerConfigBinarySerialFormat<'a> = (
 
 type ViewerConfigBinaryDeserialFormat = (
     VersionUpdate,
+    ColumnConfigUpdate,
     PluginUpdate,
     Option<Value>,
     SettingsUpdate,
@@ -96,6 +102,7 @@ impl ViewerConfig {
     fn token(&self) -> ViewerConfigBinarySerialFormat<'_> {
         (
             &self.version,
+            &self.column_config,
             &self.plugin,
             &self.plugin_config,
             self.settings,
@@ -157,16 +164,20 @@ pub struct ViewerConfigUpdate {
     #[serde(default)]
     pub plugin_config: Option<Value>,
 
+    #[serde(default)]
+    pub column_config: ColumnConfigUpdate,
+
     #[serde(flatten)]
     pub view_config: ViewConfigUpdate,
 }
 
 impl ViewerConfigUpdate {
     fn from_token(
-        (version, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
+        (version, column_config, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
     ) -> ViewerConfigUpdate {
         ViewerConfigUpdate {
             version,
+            column_config,
             plugin,
             plugin_config,
             settings,
@@ -220,6 +231,7 @@ pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
 pub type VersionUpdate = OptionalUpdate<String>;
+pub type ColumnConfigUpdate = OptionalUpdate<HashMap<String, ColumnConfig>>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {

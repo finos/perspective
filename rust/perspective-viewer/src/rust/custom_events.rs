@@ -132,6 +132,17 @@ impl CustomEvents {
         self.0 .0.elem.dispatch_event(&event.unwrap()).unwrap();
         self.0 .0.clone().dispatch_config_update();
     }
+
+    pub fn dispatch_viewer_column_style_changed(&self, config: &JsValue) {
+        let mut event_init = web_sys::CustomEventInit::new();
+        event_init.detail(config);
+        let event = web_sys::CustomEvent::new_with_event_init_dict(
+            "perspective-viewer-column-style-change",
+            &event_init,
+        );
+        self.0 .0.elem.dispatch_event(&event.unwrap()).unwrap();
+        self.0 .0.clone().dispatch_config_update();
+    }
 }
 
 impl CustomEventsDataRc {

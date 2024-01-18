@@ -16,21 +16,22 @@ use wasm_bindgen::JsValue;
 use super::{HasCustomEvents, HasRenderer, HasSession};
 use crate::clone;
 use crate::config::plugin::{PluginAttributes, PluginConfig};
-use crate::utils::{ApiFuture, JsValueSerdeExt};
+use crate::config::ViewerConfig;
+use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt};
 
 pub trait GetPluginConfig: HasRenderer {
     /// This function will get the results of calling plugin.save()
-    fn get_plugin_config(&self) -> Option<PluginConfig> {
-        let plugin = self.renderer().get_active_plugin().unwrap();
+    fn get_plugin_config(&self) -> ApiResult<PluginConfig> {
+        let plugin = self.renderer().get_active_plugin()?;
         let config = plugin.save();
-        jsval_to_type(&config).ok()
+        jsval_to_type(&config)
     }
     /// This function will get the results of calling plugin.plugin_attrs.
     /// Plugin attrs should not change during the lifetime of the plugin.
-    fn get_plugin_attrs(&self) -> Option<PluginAttributes> {
-        let plugin = self.renderer().get_active_plugin().unwrap();
+    fn get_plugin_attrs(&self) -> ApiResult<PluginAttributes> {
+        let plugin = self.renderer().get_active_plugin()?;
         let default_config = JsValue::from(plugin.plugin_attributes());
-        jsval_to_type(&default_config).ok()
+        jsval_to_type(&default_config)
     }
 }
 
@@ -38,44 +39,60 @@ impl<T: HasRenderer> GetPluginConfig for T {}
 
 pub trait UpdatePluginConfig: HasRenderer + HasCustomEvents + HasSession + GetPluginConfig {
     /// This function sends the config to the plugin using its `restore` method.
+    /// It will return an ApiFuture which calls renderer.update().
     /// It will also send a config update event in case we need to listen for it
     /// outside of the viewer
-    fn send_plugin_config(&self, column_name: String, mut column_config: serde_json::Value) {
-        let custom_events = self.custom_events();
-        let renderer = self.renderer();
-        let elem = renderer.get_active_plugin().unwrap();
-        if let Some(mut current_config) = self.get_plugin_config() {
-            if let Some(config) = current_config.columns.get(&column_name) {
-                let obj = config.as_object().unwrap();
-                if let Some(val) = obj.get("column_size_override") {
-                    column_config
+    fn send_plugin_config(
+        &self,
+        column_name: String,
+        column_config: Option<serde_json::Value>,
+        viewer_config: ViewerConfig,
+    ) -> ApiResult<ApiFuture<()>> {
+        let plugin = self.renderer().get_active_plugin()?;
+        let plugin_config = plugin.save();
+        let plugin_config = column_config
+            .and_then(|column_config| {
+                (|| -> ApiResult<JsValue> {
+                    let mut plugin_config: serde_json::Map<String, serde_json::Value> =
+                        plugin_config.clone().into_serde_ext()?;
+                    let columns = if let Some(columns) = plugin_config.get_mut("columns") {
+                        columns
+                    } else {
+                        plugin_config.insert("columns".to_string(), serde_json::json!({}));
+                        plugin_config.get_mut("columns").unwrap()
+                    };
+                    columns
                         .as_object_mut()
-                        .unwrap()
-                        .insert("column_size_override".to_string(), val.clone());
-                }
-            }
+                        .ok_or("Non-object columns property!")?
+                        .insert(column_name, column_config);
 
-            current_config.columns.insert(column_name, column_config);
-            let js_config = JsValue::from_serde_ext(&current_config).unwrap();
-            elem.restore(&js_config);
-            let session = self.session().clone();
-            clone!(renderer);
-            ApiFuture::spawn(async move { renderer.update(&session).await });
-            custom_events.dispatch_column_style_changed(&js_config)
-        } else {
-            tracing::warn!("Could not restore and restyle plugin!");
-        }
+                    let plugin_config = serde_json::to_value(plugin_config)?;
+                    Ok(JsValue::from_serde_ext(&plugin_config)?)
+                })()
+                .ok()
+            })
+            .unwrap_or(plugin_config);
+
+        let plugin_elem = self.renderer().get_active_plugin()?;
+        plugin_elem.restore(&plugin_config, &viewer_config);
+        self.custom_events()
+            .dispatch_column_style_changed(&plugin_config);
+
+        clone!(self.renderer(), self.session());
+        Ok(ApiFuture::new(
+            async move { renderer.update(&session).await },
+        ))
     }
 }
 
 /// This function will convert a JsValue to a rust-native type. It uses
 /// serde_json to do this, so use it with caution!
-fn jsval_to_type<T: DeserializeOwned>(val: &JsValue) -> Result<T, serde_json::Error> {
+fn jsval_to_type<T: DeserializeOwned>(val: &JsValue) -> ApiResult<T> {
     let stringval = js_sys::JSON::stringify(val)
         .ok()
         .and_then(|s| s.as_string())
         .unwrap_or_default();
-    serde_json::from_str(&stringval)
+    Ok(serde_json::from_str(&stringval)?)
 }
 
 impl<T: HasRenderer + HasCustomEvents + HasSession> UpdatePluginConfig for T {}

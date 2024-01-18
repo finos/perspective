@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -20,8 +21,7 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 
-use crate::components::column_settings_sidebar::ColumnSettingsTab;
-use crate::components::viewer::ColumnLocator;
+use crate::config::{ColumnConfig, ColumnConfigUpdate, ColumnConfigValueUpdate};
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -68,6 +68,7 @@ pub struct PresentationHandle {
     is_settings_open: RefCell<bool>,
     open_column_settings: RefCell<OpenColumnSettings>,
     is_workspace: RefCell<Option<bool>>,
+    column_config: RefCell<HashMap<String, ColumnConfig>>,
     pub settings_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub column_settings_updated: PubSub<JsValue>,
@@ -89,6 +90,7 @@ impl Presentation {
             settings_open_changed: Default::default(),
             column_settings_open_changed: Default::default(),
             column_settings_updated: Default::default(),
+            column_config: Default::default(),
             is_settings_open: Default::default(),
             is_workspace: Default::default(),
             open_column_settings: Default::default(),
@@ -228,6 +230,48 @@ impl Presentation {
 
         self.theme_config_updated.emit((themes, index));
         Ok(())
+    }
+
+    /// Returns an owned copy of the curent column configuration map.
+    pub fn all_column_configs(&self) -> HashMap<String, ColumnConfig> {
+        self.column_config.borrow().clone()
+    }
+
+    /// Gets a clone of the ColumnConfig for the given column name.
+    pub fn get_column_config(&self, column_name: &str) -> Option<ColumnConfig> {
+        self.column_config.borrow().get(column_name).cloned()
+    }
+
+    /// Updates the entire column config struct.
+    pub fn update_column_configs(&self, update: ColumnConfigUpdate) {
+        match update {
+            crate::config::OptionalUpdate::SetDefault => {
+                let mut config = self.column_config.borrow_mut();
+                *config = HashMap::default()
+            },
+            crate::config::OptionalUpdate::Missing => {},
+            crate::config::OptionalUpdate::Update(update) => {
+                for (col_name, value) in update.into_iter() {
+                    self.update_column_config_value(col_name, ColumnConfigValueUpdate(value));
+                }
+            },
+        }
+    }
+
+    /// Updates a single column configuration value.
+    pub fn update_column_config_value(
+        &self,
+        column_name: String,
+        value: ColumnConfigValueUpdate,
+    ) -> ColumnConfig {
+        let mut config = self.column_config.borrow_mut();
+        if let Some(current_config) = config.remove(&column_name) {
+            let new_value = current_config.update(value);
+            config.insert(column_name.clone(), new_value);
+        } else {
+            config.insert(column_name.clone(), value.0);
+        }
+        config.get(&column_name).cloned().unwrap()
     }
 }
 

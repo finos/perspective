@@ -116,10 +116,10 @@ impl Renderer {
         }))
     }
 
-    pub async fn reset(&self) {
+    pub async fn reset(&self, viewer_config: &ViewerConfig) {
         self.0.borrow_mut().plugins_idx = None;
         if let Ok(plugin) = self.get_active_plugin() {
-            plugin.restore(&json!({}));
+            plugin.restore(&json!({}), viewer_config);
         }
     }
 

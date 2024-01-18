@@ -14,25 +14,28 @@
 //! state, suitable for persistence, history, etc. features.
 
 mod aggregates;
+mod column_config;
 mod column_styles;
 mod column_type;
 mod datetime_column_style;
 mod expressions;
 mod filters;
 mod number_column_style;
-pub mod plugin;
+mod plugin;
 mod sort;
 mod string_column_style;
 mod view_config;
 mod viewer_config;
 
 pub use aggregates::*;
+pub use column_config::*;
 pub use column_styles::*;
 pub use column_type::*;
 pub use datetime_column_style::*;
 pub use expressions::*;
 pub use filters::*;
 pub use number_column_style::*;
+pub use plugin::*;
 pub use sort::*;
 pub use string_column_style::*;
 pub use view_config::*;
