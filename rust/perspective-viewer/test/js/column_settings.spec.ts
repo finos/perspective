@@ -108,7 +108,7 @@ test.describe("Plugin Styles", () => {
 
         await settingsPanel.createNewExpression("expr", "'string'");
         await activeColumns.activateColumn("expr");
-        let col = activeColumns.getColumnByName("expr");
+        let col = await activeColumns.getColumnByName("expr");
         await inactiveColumns.container.waitFor({ state: "hidden" });
         await activeColumns.scrollToBottom();
         await view.assureColumnSettingsOpen(col);

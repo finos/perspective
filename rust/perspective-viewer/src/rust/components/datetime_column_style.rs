@@ -153,14 +153,17 @@ impl Component for DatetimeColumnStyle {
     }
 
     // Always re-render when config changes.
-    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, old: &Self::Properties) -> bool {
+        let mut rerender = false;
         let mut new_config = ctx.props().config.clone().unwrap_or_default();
         if self.config != new_config {
             std::mem::swap(&mut self.config, &mut new_config);
-            true
-        } else {
-            false
+            rerender = true;
         }
+        if old.enable_time_config != ctx.props().enable_time_config {
+            rerender = true;
+        }
+        rerender
     }
 
     // TODO could be more conservative here with re-rendering

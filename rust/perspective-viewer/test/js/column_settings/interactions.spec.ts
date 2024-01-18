@@ -233,7 +233,7 @@ async function open(
     }, viewer_settings);
 
     let selector = active
-        ? view.settingsPanel.activeColumns.getColumnByName(
+        ? await view.settingsPanel.activeColumns.getColumnByName(
               expr ? expr_name : view_columns[0]
           )
         : expr
@@ -553,10 +553,40 @@ test.describe("Unique Behaviors", () => {
             plugin: "X/Y Scatter",
             columns: ["Row ID", "Postal Code", null, null, "Category"],
         });
-        let col = view.settingsPanel.activeColumns.getColumnByName("Category");
+        let col = await view.settingsPanel.activeColumns.getColumnByName(
+            "Category"
+        );
         await col.editBtn.click();
         await expect(view.columnSettingsSidebar.container).toBeVisible();
         view.settingsPanel.groupby("City");
         await expect(view.columnSettingsSidebar.container).toBeHidden();
+    });
+
+    test("Datagrid - switching between date and datetime should rerender", async ({
+        page,
+    }) => {
+        const view = new PageView(page);
+        await view.restore({
+            settings: true,
+            plugin: "Datagrid",
+            columns: ["date", "datetime"],
+            expressions: { date: "date(0,0,0)", datetime: "now()" },
+        });
+        const date = await view.settingsPanel.activeColumns.getColumnByName(
+            "date",
+            true
+        );
+        await date.editBtn.click();
+        await view.columnSettingsSidebar.openTab("style");
+        const dateSnapshot =
+            await view.columnSettingsSidebar.styleTab.container.innerHTML();
+        const datetime = await view.settingsPanel.activeColumns.getColumnByName(
+            "datetime",
+            true
+        );
+        await datetime.editBtn.click();
+        const datetimeSnapshot =
+            await view.columnSettingsSidebar.styleTab.container.innerHTML();
+        expect(datetimeSnapshot).not.toEqual(dateSnapshot);
     });
 });
