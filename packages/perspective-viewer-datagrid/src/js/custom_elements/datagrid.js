@@ -15,6 +15,7 @@ import { restore } from "../plugin/restore.js";
 import { connectedCallback } from "../plugin/connected";
 import { save } from "../plugin/save";
 import { draw } from "../plugin/draw";
+import column_style_controls from "../plugin/column_style_controls.js";
 import getDefaultConfig from "../default_config.js";
 
 /**
@@ -68,6 +69,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     /** opt-in to column styling */
+    // TODO: Remove me
     get plugin_attributes() {
         return {
             style: getDefaultConfig.call(this),
@@ -76,6 +78,10 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
 
     can_render_column_styles(type, _group) {
         return type !== "boolean";
+    }
+
+    column_style_controls(type, group) {
+        return column_style_controls.call(this, type, group);
     }
 
     async draw(view) {

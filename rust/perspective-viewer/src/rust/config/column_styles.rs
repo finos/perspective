@@ -11,16 +11,15 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use serde::{Deserialize, Serialize};
-use yew::html;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ColumnStyleOpts {
     pub label: Option<String>,
     pub control: ControlName,
     pub options: Option<ControlOptions>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "kebab-case")]
 pub enum ControlName {
     NumericPrecision,
@@ -30,83 +29,65 @@ pub enum ControlName {
     DatetimeStringFormat,
     KeyValuePair,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum ControlOptions {
     Color(ColorOpts),
+    NumericPrecision(NumericPrecisionOpts),
     Vec(Vec<String>),
     KvPair(KvPairOpts),
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ColorPickerOpts {
-    label: Option<String>,
-    value: String, // TODO: deserialize into a CSS color
+    pub label: Option<String>,
+    pub value: String, // TODO: deserialize into a CSS color
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ColorMode {
-    label: Option<String>,
-    colors: Vec<ColorPickerOpts>,
-    max: Option<ColorMaxValue>,
+    pub label: Option<String>,
+    pub colors: Vec<ColorPickerOpts>,
+    pub max: Option<ColorMaxValue>,
     #[serde(default)]
-    gradient: bool,
+    pub gradient: bool,
+    // If no default is specified, the control is disabled by default.
+    #[serde(default)]
+    pub default: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "kebab-case")]
 pub enum ColorMaxValue {
     Column,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ColorOpts {
-    modes: Vec<ColorMode>,
+    pub modes: Vec<ColorMode>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "kebab-case")]
 enum KvPairKeyStringValue {
     Row,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
 enum KvPairKeys {
     Value(KvPairKeyStringValue),
     Vec(Vec<String>),
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct KvPairOpts {
-    keys: KvPairKeys,
-    values: Vec<String>,
+    pub keys: KvPairKeys,
+    pub values: Vec<String>,
 }
 
-impl ColumnStyleOpts {
-    // /// Interprets the control option, returning an instance of the associated
-    // /// yew component.
-    // pub fn into_component(self) -> yew::Html {
-    //     match (self.control, self.options) {
-    //         (ControlName::NumericPrecision, ControlOptions::Empty(..)) => {
-    //             html! {<NumericPrecisionControl label={self.label} />}
-    //         },
-    //         (ControlName::DatetimeStringFormat, ControlOptions::Empty(..)) => {
-    //             html! {<DatetimeStringFormatControl label={self.label} />}
-    //         },
-    //         (ControlName::Color, ControlOptions::Color(options)) => {
-    //             html! {<ColorControl {options} label={self.label} />}
-    //         },
-    //         (ControlName::Radio, ControlOptions::Vec(options)) => {
-    //             html! {<RadioControl {options} label={self.label} />}
-    //         },
-    //         (ControlName::Dropdown, ControlOptions::Vec(options)) => {
-    //             html! {<DropdownControl {options} label={self.label} />}
-    //         },
-    //         _ => {
-    //             html! {<Stub />}
-    //         },
-    //     }
-    // }
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct NumericPrecisionOpts {
+    pub default: u32,
 }
 
 #[test]
@@ -122,6 +103,7 @@ fn color_from_json() {
                             "colors": [{"label": "+", "value": "blue"}, {"label": "-", "value": "red"}],
                             "gradient": true,
                             "max": "column",
+                            "default": true,
                         },
                         {
                             "label": "2",
@@ -151,6 +133,7 @@ fn color_from_json() {
                     ],
                     max: Some(ColorMaxValue::Column),
                     gradient: true,
+                    default: true,
                 },
                 ColorMode {
                     label: Some("2".into()),
@@ -160,6 +143,7 @@ fn color_from_json() {
                     }],
                     max: None,
                     gradient: false,
+                    default: false,
                 }
             ]
         }))
@@ -239,6 +223,7 @@ fn test_deserialize_from_json() {
                         ],
                         max: Some(ColorMaxValue::Column),
                         gradient: true,
+                        default: false,
                     },
                     ColorMode {
                         label: Some("2".into()),
@@ -248,6 +233,7 @@ fn test_deserialize_from_json() {
                         }],
                         max: None,
                         gradient: false,
+                        default: false,
                     },
                 ],
             })),

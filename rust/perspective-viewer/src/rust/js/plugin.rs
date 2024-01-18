@@ -63,6 +63,9 @@ extern "C" {
     pub fn can_render_column_styles(this: &JsPerspectiveViewerPlugin, view_type: &str, group: Option<&str>) -> bool;
 
     #[wasm_bindgen(method)]
+    pub fn column_style_controls(this: &JsPerspectiveViewerPlugin, view_type: &str, group: Option<&str>) -> JsValue;
+
+    #[wasm_bindgen(method)]
     pub fn save(this: &JsPerspectiveViewerPlugin) -> JsValue;
 
     #[wasm_bindgen(method)]

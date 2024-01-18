@@ -11,8 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use itertools::Itertools;
+use wasm_bindgen::JsCast;
 
 use super::{HasRenderer, HasSession};
+use crate::config::ColumnStyleOpts;
 use crate::derive_model;
 use crate::renderer::Renderer;
 use crate::session::Session;
@@ -71,6 +73,44 @@ pub trait PluginColumnStyles: HasSession + HasRenderer {
             .ok_or("Invalid column")?;
 
         Ok(plugin.can_render_column_styles(&view_type.to_string(), group))
+    }
+
+    /// Queries the plugins for the available plugin components.
+    fn get_column_style_control_options(
+        &self,
+        column_name: &str,
+    ) -> ApiResult<Vec<ColumnStyleOpts>> {
+        let plugin = self.renderer().get_active_plugin()?;
+        let names: Vec<String> = plugin
+            .config_column_names()
+            .and_then(|jsarr| serde_wasm_bindgen::from_value(jsarr.into()).ok())
+            .unwrap_or_default();
+
+        let group = self
+            .session()
+            .get_view_config()
+            .columns
+            .iter()
+            .find_position(|maybe_s| maybe_s.as_deref() == Some(column_name))
+            .and_then(|(idx, _)| names.get(idx))
+            .map(|s| s.as_str());
+
+        let view_type = self
+            .session()
+            .metadata()
+            .get_column_view_type(column_name)
+            .ok_or("Invalid column")?;
+
+        let controls = plugin.column_style_controls(&view_type.to_string(), group);
+        web_sys::console::log_1(&controls);
+        let arr = controls.dyn_into::<js_sys::Array>()?;
+        let vec = arr.to_vec();
+        let mut res = vec![];
+        for jsval in vec {
+            web_sys::console::log_2(&"Deserializing value:".into(), &jsval);
+            res.push(serde_wasm_bindgen::from_value(jsval)?);
+        }
+        Ok(res)
     }
 }
 

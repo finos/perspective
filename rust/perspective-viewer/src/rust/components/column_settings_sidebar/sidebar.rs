@@ -349,6 +349,7 @@ impl Component for ColumnSettingsSidebar {
             custom_events: ctx.props().custom_events.clone(),
             session: ctx.props().session.clone(),
             renderer: ctx.props().renderer.clone(),
+            presentation: ctx.props().presentation.clone(),
             ty: self.maybe_ty,
             column_name: self.column_name.clone(),
         };
