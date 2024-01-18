@@ -33,8 +33,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         flex: 0 1 auto;
-        padding-left: 23px;
-        padding-right: 5px;
+        padding-left: 5px;
         display: inline-block;
         align-items: center;
 
@@ -70,52 +69,6 @@
 
     #sub-columns .column_name:only-child {
         padding-right: 12px;
-    }
-}
-
-// Column type icons
-:host {
-    .column_name:before {
-        height: 13px;
-        width: 13px;
-        position: absolute;
-        left: 15px;
-        top: 4.5px;
-        @include icon;
-    }
-
-    .none:before {
-        content: none;
-    }
-
-    .integer:before {
-        -webkit-mask-image: var(--column-type-integer--mask-image);
-        mask-image: var(--column-type-integer--mask-image);
-    }
-
-    .float:before {
-        -webkit-mask-image: var(--column-type-float--mask-image);
-        mask-image: var(--column-type-float--mask-image);
-    }
-
-    .string:before {
-        -webkit-mask-image: var(--column-type-string--mask-image);
-        mask-image: var(--column-type-string--mask-image);
-    }
-
-    .boolean:before {
-        -webkit-mask-image: var(--column-type-boolean--mask-image);
-        mask-image: var(--column-type-boolean--mask-image);
-    }
-
-    .date:before {
-        -webkit-mask-image: var(--column-type-date--mask-image);
-        mask-image: var(--column-type-date--mask-image);
-    }
-
-    .datetime:before {
-        -webkit-mask-image: var(--column-type-datetime--mask-image);
-        mask-image: var(--column-type-datetime--mask-image);
     }
 }
 

@@ -21,6 +21,7 @@ use yew::prelude::*;
 
 use crate::components::plugin_selector::*;
 use crate::js::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
@@ -117,11 +118,13 @@ pub async fn test_plugin_selected() {
             *result.borrow_mut() = Some(val);
         }
     });
+    let presentation = Presentation::new(&elem);
 
     test_html! {
         <PluginSelector
             renderer={ renderer.clone() }
             session={ session.clone() }
+            presentation={presentation.clone()}
             weak_link={ link.clone() }>
 
         </PluginSelector>

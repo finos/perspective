@@ -15,11 +15,13 @@ use web_sys::*;
 use yew::prelude::*;
 
 use super::expression_toolbar::*;
+use crate::components::type_icon::TypeIcon;
 use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::ApiFuture;
@@ -33,6 +35,7 @@ pub struct InactiveColumnProps {
     pub dragdrop: DragDrop,
     pub session: Session,
     pub renderer: Renderer,
+    pub presentation: Presentation,
     pub is_editing: bool,
     pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
@@ -202,8 +205,9 @@ impl Component for InactiveColumn {
                     { ondragend }>
 
                     <div class="column-selector-column-border">
-                        <span class={ format!("column_name {}", col_type) }>
-                            { &ctx.props().name }
+                        <TypeIcon ty={col_type} />
+                        <span class={"column_name"}>
+                            { ctx.props().name.clone() }
                         </span>
                         <span class="column-selector--spacer"></span>
 

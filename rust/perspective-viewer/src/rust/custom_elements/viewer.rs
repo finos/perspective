@@ -599,7 +599,33 @@ impl PerspectiveViewerElement {
         ApiFuture::new(async move {
             let locator = session.metadata().get_column_locator(Some(column_name));
             let task = root.borrow().as_apierror()?.send_message_async(|sender| {
-                PerspectiveViewerMsg::ToggleColumnSettings(locator, Some(sender))
+                PerspectiveViewerMsg::OpenColumnSettings {
+                    locator,
+                    sender: Some(sender),
+                    toggle: true,
+                }
+            });
+            task.await.map_err(|_| ApiError::from("Cancelled"))
+        })
+    }
+
+    /// Force open the settings for a particular column. Pass `null` to close
+    /// the column settings panel. See `toggleColumnSettings` for more.
+    #[wasm_bindgen(js_name = "openColumnSettings")]
+    pub fn open_column_settings(
+        &self,
+        column_name: Option<String>,
+        toggle: Option<bool>,
+    ) -> ApiFuture<()> {
+        clone!(self.session, self.root);
+        ApiFuture::new(async move {
+            let locator = session.metadata().get_column_locator(column_name);
+            let task = root.borrow().as_apierror()?.send_message_async(|sender| {
+                PerspectiveViewerMsg::OpenColumnSettings {
+                    locator,
+                    sender: Some(sender),
+                    toggle: toggle.unwrap_or_default(),
+                }
             });
             task.await.map_err(|_| ApiError::from("Cancelled"))
         })

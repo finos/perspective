@@ -10,83 +10,48 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import (reference) url(./column-selector.less);
+use yew::html::IntoPropValue;
+use yew::{classes, function_component, html, Properties};
 
-:host {
-    #column_settings_sidebar {
-        overflow: hidden;
-        text-overflow: ellipsis;
+use crate::components::style::LocalStyle;
+use crate::config::Type;
+use crate::{css, html_template};
+
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub enum TypeIconType {
+    Type(Type),
+    Expr,
+}
+impl From<Type> for TypeIconType {
+    fn from(value: Type) -> Self {
+        Self::Type(value)
     }
-
-    // NOTE: These should probably make their way to global form styling eventually.
-    .errored {
-        outline-color: var(--error--color);
+}
+impl IntoPropValue<TypeIconType> for Type {
+    fn into_prop_value(self) -> TypeIconType {
+        TypeIconType::Type(self)
     }
-
-    .item_title {
-        font-size: 9px;
-    }
-
-    input {
-        &[type="text"],
-        &[type="search"] {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
-            background-color: var(--plugin--background);
-            border: none;
-            margin-bottom: 0.5em;
-            font-family: inherit;
-            font-size: 12px;
-            &:disabled {
-                background-color: var(--inactive--color);
-            }
-        }
-
-        &[type="search"] {
-            min-height: 24px;
-            border-radius: 2px;
+}
+impl std::fmt::Display for TypeIconType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TypeIconType::Type(t) => f.write_fmt(format_args!("{t}")),
+            TypeIconType::Expr => f.write_str("expression"),
         }
     }
+}
 
-    .sidebar_header_contents {
-        display: flex;
-        margin: 8px;
-        align-items: center;
-        border-radius: 3px;
-        outline-width: 1px;
-        outline-color: var(--inactive--color);
+#[derive(PartialEq, Properties, Debug)]
+pub struct TypeIconProps {
+    pub ty: TypeIconType,
+}
 
-        &.editable {
-            &:hover {
-                outline-style: solid;
-                cursor: text;
-            }
-        }
-        &::focus {
-            outline-style: solid;
-            background: var(--plugin--background);
-        }
-        &.edited {
-            outline-style: dashed;
-        }
-        &.invalid {
-            outline-color: var(--error--color);
-        }
-
-        .sidebar_header_title {
-            line-height: normal;
-            margin: 0;
-            flex: 1;
-            padding-left: 5px;
-            background: none;
-            outline: none;
-            color: unset;
-
-            &:disabled {
-                background: none;
-                outline: none;
-                color: unset;
-            }
-        }
+#[function_component(TypeIcon)]
+pub fn type_icon(p: &TypeIconProps) -> yew::Html {
+    html_template! {
+        <LocalStyle href={css!("type-icon")} />
+        <span
+            class={classes!(p.ty.to_string(), "type-icon")}
+        ></span>
     }
 }

@@ -42,28 +42,34 @@ export class SettingsPanel {
         this.orderbyInput = viewer.locator("#sort input");
         this.whereInput = viewer.locator("#filter input");
     }
+
     /**
      * Creates and saves a new expression column.
      * @param expr
      */
-    async createNewExpression(name: string, expr: string) {
+    async createNewExpression(
+        name: string,
+        expr: string,
+        successAssertion: boolean = true
+    ) {
         await this.activeColumns.scrollToBottom();
         await this.addExpressionButton.click();
-        let exprEditor =
-            this.pageView.columnSettingsSidebar.attributesTab.expressionEditor;
+        let sidebar = this.pageView.columnSettingsSidebar;
+        let exprEditor = sidebar.attributesTab.expressionEditor;
         await exprEditor.container.waitFor({
             state: "visible",
         });
-        await exprEditor.nameInput.waitFor({
+        await sidebar.nameInput.waitFor({
             state: "visible",
         });
         expect(await exprEditor.textarea.isVisible()).toBe(true);
-        expect(await exprEditor.nameInput.isVisible()).toBe(true);
+        expect(await sidebar.nameInput.isVisible()).toBe(true);
 
-        await exprEditor.nameInput.focus();
-        await exprEditor.nameInput.clear();
-        await exprEditor.nameInput.type(name, { delay: 100 });
-        await exprEditor.nameInput.blur();
+        await sidebar.nameInput.focus();
+        await sidebar.nameInput.clear();
+        await sidebar.nameInput.type(name, { delay: 100 });
+        await sidebar.nameInput.press("Enter");
+        await sidebar.nameInput.blur();
 
         await exprEditor.textarea.focus();
         await exprEditor.textarea.clear();
@@ -73,9 +79,50 @@ export class SettingsPanel {
         let saveBtn = this.pageView.page.locator(
             "#psp-expression-editor-button-save"
         );
+        if (successAssertion) {
+            expect(await saveBtn.isDisabled()).toBe(false);
+            await saveBtn.click();
+            await this.inactiveColumns.getColumnByName(name);
+        } else {
+            expect(await saveBtn.isDisabled()).toBe(true);
+        }
+    }
+    /**
+     * Renames an inactive expression column.
+     * @param name
+     * @param expr
+     */
+    async renameExpression(column: ColumnSelector, name: string) {
+        await this.pageView.assureColumnSettingsOpen(column);
+        let sidebar = this.pageView.columnSettingsSidebar;
+        await sidebar.nameInput.waitFor({
+            state: "visible",
+        });
+        expect(await sidebar.nameInput.isVisible()).toBe(true);
+
+        await sidebar.nameInput.focus();
+        await sidebar.nameInput.clear();
+        await sidebar.nameInput.type(name, { delay: 100 });
+
+        await expect(sidebar.attributesTab.saveBtn).toBeEnabled();
+        await sidebar.attributesTab.saveBtn.click();
+    }
+
+    async editExpression(column: ColumnSelector, newExpression: string) {
+        await this.pageView.assureColumnSettingsOpen(column);
+        let sidebar = this.pageView.columnSettingsSidebar;
+        await sidebar.openTab("Attributes");
+        let exprEditor = sidebar.attributesTab.expressionEditor;
+        expect(await exprEditor.textarea.isVisible()).toBe(true);
+        await exprEditor.textarea.focus();
+        await exprEditor.textarea.clear();
+        await exprEditor.textarea.type(newExpression, { delay: 100 });
+        await exprEditor.textarea.blur();
+        let saveBtn = this.pageView.page.locator(
+            "#psp-expression-editor-button-save"
+        );
         expect(await saveBtn.isDisabled()).toBe(false);
         await saveBtn.click();
-        await this.inactiveColumns.getColumnByName(name);
     }
     /**
      * Shorthand for setViewParamter("groupby", name)
@@ -143,6 +190,7 @@ export class SettingsPanel {
 
 export class ColumnSelector {
     active: boolean;
+    activeBtn: Locator;
     name: Locator;
     container: Locator;
     editBtn: Locator;
@@ -154,6 +202,7 @@ export class ColumnSelector {
         this.name = container.locator("div .column_name");
         this.aggSelector = container.locator("select");
         this.editBtn = container.locator("div .expression-edit-button");
+        this.activeBtn = container.locator(".is_column_active");
     }
 }
 
@@ -276,11 +325,11 @@ export class InactiveColumns {
     constructor(view: PageView) {
         this.view = view;
         this.container = view.container.locator("#sub-columns");
-        this.columnSelector = view.container.locator(".column-selector-column");
+        this.columnSelector = this.container.locator(".column-selector-column");
     }
 
     async getColumnByName(name: string) {
-        await this.container.waitFor({ state: "visible" });
+        await this.container.waitFor({ state: "visible", timeout: 1000 });
         let locator = this.columnSelector.filter({ hasText: name });
         return new ColumnSelector(locator, true);
     }

@@ -95,6 +95,7 @@ test.describe("Plugin Styles", () => {
         await exprCol.editBtn.waitFor();
         await rowId.editBtn.waitFor({ state: "detached", timeout: 1000 });
 
+        await view.assureColumnSettingsClosed();
         await exprCol.editBtn.click();
         await checkTab(view.columnSettingsSidebar, false, true);
     });
@@ -110,8 +111,7 @@ test.describe("Plugin Styles", () => {
         let col = activeColumns.getColumnByName("expr");
         await inactiveColumns.container.waitFor({ state: "hidden" });
         await activeColumns.scrollToBottom();
-        await col.editBtn.click();
-        await sidebar.container.waitFor({ state: "visible" });
+        await view.assureColumnSettingsOpen(col);
         await checkTab(sidebar, true, true, true);
         let tabs = await sidebar.tabTitle.all();
         await tabs[1].click();
@@ -137,5 +137,62 @@ test.describe("Plugin Styles", () => {
         });
         await page.locator("tbody tr").nth(1).waitFor();
         await expect(view.columnSettingsSidebar.container).toBeVisible();
+    });
+    test("Column settings should not shrink", async ({ page }) => {
+        let view = new PageView(page);
+
+        const MAX_WIDTH = 300;
+        let checkWidth = async () => {
+            let width = await view.columnSettingsSidebar.container.evaluate(
+                (sidebar) => sidebar.getBoundingClientRect().width
+            );
+            expect(width).toEqual(MAX_WIDTH);
+        };
+
+        let settings = await view.openSettingsPanel();
+        await settings.activeColumns.scrollToBottom();
+        await settings.addExpressionButton.click();
+        let editor = view.columnSettingsSidebar.attributesTab.expressionEditor;
+        await editor.textarea.focus();
+        await editor.textarea.clear();
+        // NOTE: We should find another way to test this as the trick used here is probably not a desired feature.
+        // This creates an error which then expands the sidebar to max width.
+        await editor.textarea.type(
+            "'0000000000000000000000000000000000000000000000000000000000"
+        );
+        await checkWidth();
+        await editor.textarea.clear();
+        await checkWidth();
+    });
+    test("Selected tab stays selected when manipulating column", async ({
+        page,
+    }) => {
+        const view = new PageView(page);
+        view.restore({
+            expressions: {
+                expr: "1234",
+            },
+            columns: ["Row ID"],
+            settings: true,
+        });
+
+        const col = await view.settingsPanel.inactiveColumns.getColumnByName(
+            "expr"
+        );
+        await col.editBtn.click();
+        await view.columnSettingsSidebar.openTab("Attributes");
+        await checkTab(view.columnSettingsSidebar, false, true);
+        const selectedTab = async () => {
+            return await view.columnSettingsSidebar.selectedTab.innerText();
+        };
+        expect(await selectedTab()).toBe("Attributes");
+        await col.activeBtn.click();
+        await checkTab(view.columnSettingsSidebar, true, true, true);
+        expect(await selectedTab()).toBe("Attributes");
+        await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.type(
+            "'new expr value'"
+        );
+        await view.columnSettingsSidebar.attributesTab.saveBtn.click();
+        expect(await selectedTab()).toBe("Attributes");
     });
 });

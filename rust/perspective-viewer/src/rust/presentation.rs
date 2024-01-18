@@ -20,6 +20,8 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 
+use crate::components::column_settings_sidebar::ColumnSettingsTab;
+use crate::components::viewer::ColumnLocator;
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -45,11 +47,26 @@ impl Deref for Presentation {
 
 impl ImplicitClone for Presentation {}
 
+#[derive(Clone, Default, Debug, PartialEq)]
+pub struct OpenColumnSettings {
+    pub locator: Option<ColumnLocator>,
+    pub tab: Option<ColumnSettingsTab>,
+}
+impl OpenColumnSettings {
+    pub fn name(&self) -> Option<String> {
+        self.locator
+            .as_ref()
+            .and_then(|l| l.name())
+            .map(|s| s.to_owned())
+    }
+}
+
 pub struct PresentationHandle {
     viewer_elem: HtmlElement,
     theme_data: Mutex<ThemeData>,
     name: RefCell<Option<String>>,
     is_settings_open: RefCell<bool>,
+    open_column_settings: RefCell<OpenColumnSettings>,
     is_workspace: RefCell<Option<bool>>,
     pub settings_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
@@ -74,6 +91,7 @@ impl Presentation {
             column_settings_updated: Default::default(),
             is_settings_open: Default::default(),
             is_workspace: Default::default(),
+            open_column_settings: Default::default(),
             theme_config_updated: PubSub::default(),
             title_changed: PubSub::default(),
         }));
@@ -124,6 +142,23 @@ impl Presentation {
         }
 
         Ok(open_state)
+    }
+
+    /// Sets the currently opened column settings. Emits an internal event on
+    /// change. Passing None is a shorthand for setting all fields to
+    /// None.
+    pub fn set_open_column_settings(&self, settings: Option<OpenColumnSettings>) {
+        let settings = settings.unwrap_or_default();
+        if *(self.open_column_settings.borrow()) != settings {
+            *(self.open_column_settings.borrow_mut()) = settings.to_owned();
+            self.column_settings_open_changed
+                .emit((true, settings.name()));
+        }
+    }
+
+    /// Gets a clone of the current OpenColumnSettings.
+    pub fn get_open_column_settings(&self) -> OpenColumnSettings {
+        self.open_column_settings.borrow().deref().clone()
     }
 
     async fn init(self) -> ApiResult<()> {

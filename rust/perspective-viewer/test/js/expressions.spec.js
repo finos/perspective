@@ -12,6 +12,7 @@
 
 import { test, expect } from "@finos/perspective-test";
 import {
+    PageView,
     compareContentsToSnapshot,
     shadow_click,
     shadow_type,
@@ -26,37 +27,10 @@ async function openSidebarAndScrollToBottom() {
     elem.shadowRoot.querySelector("#active-columns").scrollTop = 500;
 }
 
-async function type_expression_test(page, expr) {
-    await page.evaluate(openSidebarAndScrollToBottom);
-
-    await page.waitForFunction(
-        () =>
-            !!document
-                .querySelector("perspective-viewer")
-                .shadowRoot.querySelector("#add-expression")
-    );
-
-    await shadow_click(page, "perspective-viewer", "#add-expression");
-
-    await page.waitForSelector("#editor-container");
-
-    await shadow_type(
-        page,
-        expr,
-        "perspective-viewer",
-        "#editor-container",
-        "#editor",
-        "#content"
-    );
-    const result = await page.evaluate(async () => {
-        const elem = document
-            .querySelector("perspective-viewer")
-            .shadowRoot.querySelector("#editor-container");
-        return elem.querySelector("button").getAttribute("disabled");
-    });
-
-    //await page.evaluate(() => document.activeElement.blur());
-    return result;
+async function checkSaveDisabled(page, expr) {
+    let view = new PageView(page);
+    let settingsPanel = await view.openSettingsPanel();
+    await settingsPanel.createNewExpression("", expr, false);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -150,33 +124,19 @@ test.describe("Expressions", () => {
     test("An expression with unknown symbols should disable the save button", async ({
         page,
     }) => {
-        const contents = await type_expression_test(page, "abc");
-        await compareContentsToSnapshot(contents, [
-            "an-expression-with-unknown-symbols-should-disable-the-save-button.txt",
-        ]);
+        await checkSaveDisabled(page, "abc");
     });
 
     test("A type-invalid expression should disable the save button", async ({
         page,
     }) => {
-        const contents = await type_expression_test(
-            page,
-            '"Sales" + "Category";'
-        );
-
-        await compareContentsToSnapshot(contents, [
-            "a-type-invalid-expression-should-disable-the-save-button.txt",
-        ]);
+        await checkSaveDisabled(page, '"Sales" + "Category";');
     });
 
     test("An expression with invalid input columns should disable the save button", async ({
         page,
     }) => {
-        const contents = await type_expression_test(page, '"aaaa" + "Sales";');
-
-        await compareContentsToSnapshot(contents, [
-            "an-expression-with-invalid-input-columns-should-disable-the-save-button.txt",
-        ]);
+        await checkSaveDisabled(page, '"aaaa" + "Sales";');
     });
 
     test("Should show both aliased and non-aliased expressions in columns", async ({
@@ -197,22 +157,14 @@ test.describe("Expressions", () => {
         ]);
     });
 
-    test("Should overwrite a duplicate expression alias", async ({ page }) => {
-        await page.evaluate(async () => {
-            const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
-                expressions: { "4 + 5": "3 + 4" },
-            });
-        });
+    // No longer relevant as we cannot save a duplicate identifier
+    test.skip("Should overwrite a duplicate expression alias", async ({
+        page,
+    }) => {
+        let view = new PageView(page);
+        view.restore({ expressions: { "4 + 5": "3 + 4" } });
 
-        await type_expression_test(page, "4 + 5");
-        await shadow_click(
-            page,
-            "perspective-viewer",
-            "#editor-container",
-            "button"
-        );
+        await view.settingsPanel.createNewExpression("", "4 + 5", true);
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
@@ -224,23 +176,11 @@ test.describe("Expressions", () => {
         ]);
     });
 
-    test("Should overwrite a duplicate expression", async ({ page }) => {
-        await page.evaluate(async () => {
-            const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
-                expressions: { "3 + 4": "3 + 4" },
-            });
-        });
-
-        await type_expression_test(page, "3 + 4");
-
-        await shadow_click(
-            page,
-            "perspective-viewer",
-            "#editor-container",
-            "button"
-        );
+    // No longer relevant as we cannot save a duplicate identifier
+    test.skip("Should overwrite a duplicate expression", async ({ page }) => {
+        let view = new PageView(page);
+        view.restore({ expressions: { "3 + 4": "3 + 4" } });
+        await view.settingsPanel.createNewExpression("", "3 + 4", true);
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");

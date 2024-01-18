@@ -10,83 +10,58 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import (reference) url(./column-selector.less);
+:host .type-icon {
+    height: 13px;
+    width: 13px;
+    // position: absolute;
+    // left: 15px;
+    // top: 4.5px;
+    // @include icon;
+    background-repeat: no-repeat;
+    background-color: var(--icon--color);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    margin-left: 5px;
+    flex-shrink: 0;
 
-:host {
-    #column_settings_sidebar {
-        overflow: hidden;
-        text-overflow: ellipsis;
+    &.none {
+        content: none;
     }
 
-    // NOTE: These should probably make their way to global form styling eventually.
-    .errored {
-        outline-color: var(--error--color);
+    &.integer {
+        -webkit-mask-image: var(--column-type-integer--mask-image);
+        mask-image: var(--column-type-integer--mask-image);
     }
 
-    .item_title {
-        font-size: 9px;
+    &.float {
+        -webkit-mask-image: var(--column-type-float--mask-image);
+        mask-image: var(--column-type-float--mask-image);
     }
 
-    input {
-        &[type="text"],
-        &[type="search"] {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
-            background-color: var(--plugin--background);
-            border: none;
-            margin-bottom: 0.5em;
-            font-family: inherit;
-            font-size: 12px;
-            &:disabled {
-                background-color: var(--inactive--color);
-            }
-        }
-
-        &[type="search"] {
-            min-height: 24px;
-            border-radius: 2px;
-        }
+    &.string {
+        -webkit-mask-image: var(--column-type-string--mask-image);
+        mask-image: var(--column-type-string--mask-image);
     }
 
-    .sidebar_header_contents {
-        display: flex;
-        margin: 8px;
-        align-items: center;
-        border-radius: 3px;
-        outline-width: 1px;
-        outline-color: var(--inactive--color);
+    &.boolean {
+        -webkit-mask-image: var(--column-type-boolean--mask-image);
+        mask-image: var(--column-type-boolean--mask-image);
+    }
 
-        &.editable {
-            &:hover {
-                outline-style: solid;
-                cursor: text;
-            }
-        }
-        &::focus {
-            outline-style: solid;
-            background: var(--plugin--background);
-        }
-        &.edited {
-            outline-style: dashed;
-        }
-        &.invalid {
-            outline-color: var(--error--color);
-        }
+    &.date {
+        -webkit-mask-image: var(--column-type-date--mask-image);
+        mask-image: var(--column-type-date--mask-image);
+    }
 
-        .sidebar_header_title {
-            line-height: normal;
-            margin: 0;
-            flex: 1;
-            padding-left: 5px;
-            background: none;
-            outline: none;
-            color: unset;
+    &.datetime {
+        -webkit-mask-image: var(--column-type-datetime--mask-image);
+        mask-image: var(--column-type-datetime--mask-image);
+    }
 
-            &:disabled {
-                background: none;
-                outline: none;
-                color: unset;
-            }
-        }
+    &.expression {
+        -webkit-mask-image: var(--add-expression-icon--mask-image);
+        mask-image: var(--add-expression-icon--mask-image);
     }
 }

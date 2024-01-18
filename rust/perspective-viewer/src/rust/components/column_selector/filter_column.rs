@@ -20,6 +20,7 @@ use yew::prelude::*;
 use crate::components::containers::dragdrop_list::*;
 use crate::components::containers::select::*;
 use crate::components::style::LocalStyle;
+use crate::components::type_icon::TypeIcon;
 use crate::config::*;
 use crate::custom_elements::*;
 use crate::dragdrop::*;
@@ -479,7 +480,8 @@ impl Component for FilterColumn {
 
                 <LocalStyle href={ css!("filter-item") } />
                 <div class="pivot-column-border">
-                    <span class="column_name string">
+                    <TypeIcon ty={Type::String} />
+                    <span class="column_name">
                         { filter.0.to_owned() }
                     </span>
                     <FilterOpSelector

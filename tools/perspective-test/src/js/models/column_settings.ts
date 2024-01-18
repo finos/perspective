@@ -10,8 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { Locator } from "@playwright/test";
+import { Locator, expect } from "@playwright/test";
 import { PageView } from "./page";
+import { Type } from "@finos/perspective";
 
 export class ColumnSettingsSidebar {
     view: PageView;
@@ -20,6 +21,10 @@ export class ColumnSettingsSidebar {
     styleTab: StyleTab;
     closeBtn: Locator;
     tabTitle: Locator;
+    nameInputWrapper: Locator;
+    nameInput: Locator;
+    selectedTab: Locator;
+    typeIcon: Locator;
 
     constructor(view: PageView) {
         this.view = view;
@@ -31,50 +36,84 @@ export class ColumnSettingsSidebar {
         this.tabTitle = view.container.locator(
             ".tab:not(.tab-padding) .tab-title"
         );
+        this.nameInputWrapper = view.container.locator(
+            ".sidebar_header_contents"
+        );
+        this.nameInput = view.container.locator("input.sidebar_header_title");
+        this.selectedTab = view.container.locator(".tab.selected");
+        this.typeIcon = this.container.locator(".type-icon");
     }
 
     async openTab(name: string) {
         let locator = this.tabTitle.filter({ hasText: name });
-        await locator.click();
+        await locator.click({ timeout: 1000 });
         await this.container
             .locator(".tab.selected", { hasText: name })
             .waitFor({ timeout: 1000 });
+    }
+
+    async getTabs(): Promise<string[]> {
+        return await this.tabTitle.allInnerTexts();
+    }
+
+    async getSelectedTab(): Promise<string> {
+        return await this.selectedTab.innerText();
+    }
+
+    async getType(): Promise<Type | "expression"> {
+        const classList = await this.typeIcon.evaluate((icon) =>
+            Array.from(icon.classList)
+        );
+        for (const ty of [
+            "string",
+            "boolean",
+            "float",
+            "integer",
+            "date",
+            "datetime",
+        ]) {
+            if (classList.includes(ty)) {
+                return <Type>ty;
+            }
+        }
+        if (classList.includes("expression")) {
+            return "expression";
+        }
+        throw new Error("Unable to get a matching type for the column!");
     }
 }
 
 export class AttributesTab {
     container: Locator;
     expressionEditor: ExpressionEditor;
-
-    constructor(parent: Locator) {
-        this.container = parent.locator("#attributes-tab");
-        this.expressionEditor = new ExpressionEditor(this.container);
-    }
-}
-
-export class ExpressionEditor {
-    container: Locator;
-    nameInput: Locator;
-    content: Locator;
-    textarea: Locator;
     saveBtn: Locator;
     resetBtn: Locator;
     deleteBtn: Locator;
 
     constructor(parent: Locator) {
-        this.container = parent.locator("#editor-container");
-        this.nameInput = parent.locator("#editor-alias-container input");
-        this.content = this.container.locator("#content");
-        this.textarea = this.container.locator("textarea");
+        this.container = parent.locator("#attributes-tab");
+        this.expressionEditor = new ExpressionEditor(this.container);
         this.saveBtn = this.container.locator(
             "#psp-expression-editor-button-save"
         );
         this.resetBtn = this.container.locator(
             "#psp-expression-editor-button-reset"
         );
-        this.saveBtn = this.container.locator(
+        this.deleteBtn = this.container.locator(
             "#psp-expression-editor-button-delete"
         );
+    }
+}
+
+export class ExpressionEditor {
+    container: Locator;
+    content: Locator;
+    textarea: Locator;
+
+    constructor(parent: Locator) {
+        this.container = parent.locator("#editor-container");
+        this.content = this.container.locator("#content");
+        this.textarea = this.container.locator("textarea");
     }
 }
 

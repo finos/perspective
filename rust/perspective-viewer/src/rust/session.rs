@@ -180,6 +180,15 @@ impl Session {
         self.borrow().config.is_column_expression_in_use(name)
     }
 
+    pub fn is_column_active(&self, name: &str) -> bool {
+        self.borrow().config.columns.iter().any(|maybe_col| {
+            maybe_col
+                .as_ref()
+                .map(|col| col == name)
+                .unwrap_or_default()
+        })
+    }
+
     pub fn create_drag_drop_update(
         &self,
         column: String,
@@ -203,16 +212,28 @@ impl Session {
             .get_expression_by_alias(old_expr_name)
             .unwrap();
 
-        let old_expr = Expression {
-            name: old_expr_name.into(),
-            expression: old_expr_val.into(),
-        };
+        let old_expr = Expression::new(Some(old_expr_name.into()), old_expr_val.into());
 
         self.get_view_config()
             .create_replace_expression_update(&old_expr, new_expr)
     }
 
-    /// Validate an expression string and marshall the results.
+    pub async fn create_rename_expression_update(
+        &self,
+        old_expr_name: String,
+        new_expr_name: Option<String>,
+    ) -> ViewConfigUpdate {
+        let old_expr_val = self
+            .metadata()
+            .get_expression_by_alias(&old_expr_name)
+            .expect_throw(&format!("Unable to get expr with name {old_expr_name}"));
+        let old_expr = Expression::new(Some(old_expr_name.into()), old_expr_val.clone().into());
+        let new_expr = Expression::new(new_expr_name.map(|n| n.into()), old_expr_val.into());
+        self.get_view_config()
+            .create_replace_expression_update(&old_expr, &new_expr)
+    }
+
+    /// Validate an expression strin and marshall the results.
     pub async fn validate_expr(
         &self,
         expr: &str,

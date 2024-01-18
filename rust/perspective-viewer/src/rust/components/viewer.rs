@@ -13,6 +13,7 @@
 use std::rc::Rc;
 
 use futures::channel::oneshot::*;
+use itertools::Itertools;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
@@ -48,6 +49,48 @@ impl ColumnLocator {
             ColumnLocator::Plain(s) => Some(s),
             ColumnLocator::Expr(s) => s.as_ref(),
         }
+    }
+
+    pub fn name_or_default(&self, session: &Session) -> String {
+        match self {
+            ColumnLocator::Plain(s) | ColumnLocator::Expr(Some(s)) => s.clone(),
+            ColumnLocator::Expr(None) => session.metadata().make_new_column_name(None),
+        }
+    }
+
+    pub fn is_active(&self, session: &Session) -> bool {
+        match self {
+            ColumnLocator::Plain(name) | ColumnLocator::Expr(Some(name)) => {
+                session.is_column_active(name)
+            },
+            ColumnLocator::Expr(None) => false,
+        }
+    }
+
+    /// Determines if the column is one of view's query parameters, i.e.
+    /// GroupBy, SplitBy, OrderBy, or Where
+    pub fn is_in_query(&self, session: &Session) -> bool {
+        if matches!(self, Self::Expr(None)) {
+            return false;
+        }
+        let name = self.name().unwrap();
+        let view_config = session.get_view_config();
+        view_config.group_by.contains(name)
+            || view_config.split_by.contains(name)
+            || view_config.filter.iter().any(|filter| &filter.0 == name)
+            || view_config.sort.iter().any(|sort| &sort.0 == name)
+    }
+
+    #[inline(always)]
+    pub fn is_saved_expr(&self) -> bool {
+        matches!(self, ColumnLocator::Expr(Some(_)))
+    }
+
+    /// Returns true if the column is an expression.
+    /// Use `is_saved_expr` if you want to exclude new expressions.
+    #[inline(always)]
+    pub fn is_expr(&self) -> bool {
+        matches!(self, ColumnLocator::Expr(_))
     }
 }
 
@@ -88,11 +131,11 @@ pub enum PerspectiveViewerMsg {
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
     SettingsPanelSizeUpdate(Option<i32>),
     ColumnSettingsPanelSizeUpdate(Option<i32>),
-
-    /// this is really more like "open the specified column"
-    /// since we call ToggleColumnSettings(None, None) to clear the selected
-    /// column
-    ToggleColumnSettings(Option<ColumnLocator>, Option<Sender<()>>),
+    OpenColumnSettings {
+        locator: Option<ColumnLocator>,
+        sender: Option<Sender<()>>,
+        toggle: bool,
+    },
 }
 
 pub struct PerspectiveViewer {
@@ -102,6 +145,7 @@ pub struct PerspectiveViewer {
     settings_open: bool,
     /// The column which will be opened in the ColumnSettingsSidebar
     selected_column: Option<ColumnLocator>,
+    selected_column_is_active: bool, // TODO: should we use a struct?
     on_resize: Rc<PubSub<()>>,
     on_dimensions_reset: Rc<PubSub<()>>,
     _subscriptions: [Subscription; 1],
@@ -121,13 +165,49 @@ impl Component for PerspectiveViewer {
             .callback(|()| PerspectiveViewerMsg::PreloadFontsUpdate);
 
         let session_sub = {
-            let callback = ctx.link().batch_callback(|(update, x)| {
+            clone!(
+                ctx.props().presentation,
+                ctx.props().session,
+                ctx.props().renderer
+            );
+            let callback = ctx.link().batch_callback(move |(update, render_limits)| {
                 if update {
-                    vec![PerspectiveViewerMsg::RenderLimits(Some(x))]
+                    vec![PerspectiveViewerMsg::RenderLimits(Some(render_limits))]
                 } else {
+                    let mut locator = presentation.get_open_column_settings().locator;
+                    if let Some(name) = locator.as_ref().and_then(|l| l.name()) {
+                        let view_config = session.get_view_config();
+                        let maybe_pos = view_config.columns.iter().find_position(|col| {
+                            col.as_ref().map(|c| name == c).unwrap_or_default()
+                        });
+                        let is_expr = session.metadata().is_column_expression(name);
+                        if maybe_pos.is_none() && !is_expr {
+                            locator = None;
+                        } else if let Some((idx, _)) = maybe_pos {
+                            // Close the symbol editor if the type doesn't match.
+                            // NOTE: to be replaced with plugin.can_render(ty, col_name)
+                            let plugin = renderer.get_active_plugin().unwrap();
+                            let config_names: Option<Vec<String>> = plugin
+                                .config_column_names()
+                                .and_then(|x| x.into_serde_ext().ok())
+                                .unwrap();
+                            if let Some(group) = config_names.as_ref().and_then(|v| v.get(idx))
+                                && &**group == "Symbol" 
+                                && plugin.name() == "X/Y Scatter"
+                                && session.metadata().get_column_view_type(name) != Some(Type::String)
+                            {
+                                locator = None;
+                            }
+                        }
+                    }
+
                     vec![
-                        PerspectiveViewerMsg::RenderLimits(Some(x)),
-                        PerspectiveViewerMsg::ToggleColumnSettings(None, None),
+                        PerspectiveViewerMsg::RenderLimits(Some(render_limits)),
+                        PerspectiveViewerMsg::OpenColumnSettings {
+                            locator,
+                            sender: None,
+                            toggle: false,
+                        },
                     ]
                 }
             });
@@ -140,6 +220,7 @@ impl Component for PerspectiveViewer {
             fonts: FontLoaderProps::new(&elem, callback),
             settings_open: false,
             selected_column: None,
+            selected_column_is_active: false,
             on_resize: Default::default(),
             on_dimensions_reset: Default::default(),
             _subscriptions: [session_sub],
@@ -238,14 +319,25 @@ impl Component for PerspectiveViewer {
                     false
                 }
             },
-            PerspectiveViewerMsg::ToggleColumnSettings(selected_column, sender) => {
-                let (open, column_name) = if self.selected_column == selected_column {
+            PerspectiveViewerMsg::OpenColumnSettings {
+                locator,
+                sender,
+                toggle,
+            } => {
+                let is_active = locator
+                    .as_ref()
+                    .map(|l| l.is_active(&ctx.props().session))
+                    .unwrap_or_default();
+                self.selected_column_is_active = is_active;
+
+                if toggle && self.selected_column == locator {
                     self.selected_column = None;
                     (false, None)
                 } else {
-                    self.selected_column = selected_column.clone();
+                    self.selected_column = locator.clone();
 
-                    selected_column
+                    locator
+                        .clone()
                         .map(|c| match c {
                             ColumnLocator::Plain(s) => (true, Some(s)),
                             ColumnLocator::Expr(maybe_s) => (true, maybe_s),
@@ -253,10 +345,11 @@ impl Component for PerspectiveViewer {
                         .unwrap_or_default()
                 };
 
+                let mut open_column_settings = ctx.props().presentation.get_open_column_settings();
+                open_column_settings.locator = self.selected_column.clone();
                 ctx.props()
                     .presentation
-                    .column_settings_open_changed
-                    .emit((open, column_name));
+                    .set_open_column_settings(Some(open_column_settings));
 
                 if let Some(sender) = sender {
                     sender.send(()).unwrap();
@@ -323,9 +416,13 @@ impl Component for PerspectiveViewer {
             class.push("titled");
         }
 
-        let on_open_expr_panel = ctx
-            .link()
-            .callback(|c| PerspectiveViewerMsg::ToggleColumnSettings(Some(c), None));
+        let on_open_expr_panel =
+            ctx.link()
+                .callback(|c| PerspectiveViewerMsg::OpenColumnSettings {
+                    locator: Some(c),
+                    sender: None,
+                    toggle: true,
+                });
 
         let on_reset = ctx
             .link()
@@ -351,22 +448,28 @@ impl Component for PerspectiveViewer {
                         on_resize={ on_split_panel_resize }
                         on_resize_finished={ ctx.props().render_callback() }>
                         <div id="settings_panel" class="sidebar_column noselect split-panel orient-vertical">
-                            <SidebarCloseButton
-                                id={ "settings_close_button" }
-                                on_close_sidebar={ &on_close_settings }>
-                            </SidebarCloseButton>
+                            if self.selected_column.is_none() {
+                                <SidebarCloseButton
+                                    id={ "settings_close_button" }
+                                    on_close_sidebar={ &on_close_settings }>
+                                </SidebarCloseButton>
+                            }
                             <PluginSelector
                                 session={ &ctx.props().session }
-                                renderer={ &ctx.props().renderer }>
+                                renderer={ &ctx.props().renderer }
+                                presentation={ &ctx.props().presentation }
+                                >
                             </PluginSelector>
                             <ColumnSelector
                                 dragdrop={ &ctx.props().dragdrop }
                                 renderer={ &ctx.props().renderer }
                                 session={ &ctx.props().session }
+                                presentation = { &ctx.props().presentation }
                                 on_resize={ &self.on_resize }
                                 on_open_expr_panel={ &on_open_expr_panel }
                                 on_dimensions_reset={ &self.on_dimensions_reset }
-                                selected_column={ self.selected_column.clone() }>
+                                selected_column={ self.selected_column.clone() }
+                                >
                             </ColumnSelector>
                         </div>
                         <div id="main_column">
@@ -397,9 +500,12 @@ impl Component for PerspectiveViewer {
                                         session={ &ctx.props().session }
                                         renderer={ &ctx.props().renderer }
                                         custom_events={ &ctx.props().custom_events }
+                                        presentation={&ctx.props().presentation}
                                         { selected_column }
-                                        on_close={ ctx.link().callback(|_| PerspectiveViewerMsg::ToggleColumnSettings(None, None)) }
-                                        width_override={ self.column_settings_panel_width_override }/>
+                                        on_close={ctx.link().callback(|_| PerspectiveViewerMsg::OpenColumnSettings{ locator: None, sender: None, toggle: false })}
+                                        width_override={self.column_settings_panel_width_override}
+                                        is_active={self.selected_column_is_active}
+                                    />
                                     <></>
                                 </SplitPanel>
                             }

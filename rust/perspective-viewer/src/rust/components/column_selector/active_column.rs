@@ -19,12 +19,14 @@ use super::aggregate_selector::*;
 use super::expression_toolbar::*;
 use super::InPlaceColumn;
 use crate::components::column_selector::{EmptyColumn, InvalidColumn};
+use crate::components::type_icon::TypeIcon;
 use crate::components::viewer::ColumnLocator;
 use crate::config::*;
 use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::ApiFuture;
@@ -43,6 +45,7 @@ pub struct ActiveColumnProps {
     pub dragdrop: DragDrop,
     pub session: Session,
     pub renderer: Renderer,
+    pub presentation: Presentation,
     pub column_dropdown: ColumnDropDownElement,
     pub ondragenter: Callback<()>,
     pub ondragend: Callback<()>,
@@ -401,6 +404,8 @@ impl Component for ActiveColumn {
 
                             <div class="column-selector-column-border">
 
+                                <TypeIcon ty={col_type} />
+
                                 if ctx.props().is_aggregated {
                                     <AggregateSelector
                                         column={ name.clone() }
@@ -410,7 +415,7 @@ impl Component for ActiveColumn {
                                     </AggregateSelector>
                                 }
 
-                                <span class={ format!("column_name {}", col_type) }>
+                                <span class={"column_name"}>
                                     { name.clone() }
                                 </span>
 

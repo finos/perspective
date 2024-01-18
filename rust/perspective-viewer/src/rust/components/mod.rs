@@ -33,10 +33,12 @@ pub mod status_bar;
 pub mod status_bar_counter;
 pub mod string_column_style;
 pub mod style;
+pub mod type_icon;
 pub mod viewer;
 
 pub mod column_settings_sidebar;
 // pub mod empty_row;
+pub mod editable_header;
 pub mod empty_row;
 #[cfg(test)]
 mod tests;

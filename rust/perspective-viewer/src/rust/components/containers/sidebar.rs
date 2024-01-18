@@ -17,6 +17,7 @@ use yew::{
 };
 
 use crate::clone;
+use crate::components::editable_header::{EditableHeader, EditableHeaderProps};
 
 #[derive(PartialEq, Clone, Properties)]
 pub struct SidebarProps {
@@ -25,11 +26,10 @@ pub struct SidebarProps {
 
     /// When this callback is called, the sidebar will close
     pub on_close: Callback<()>,
-    pub title: String,
     pub id_prefix: String,
-    pub icon: Option<String>,
     pub width_override: Option<i32>,
     pub selected_tab: Option<usize>,
+    pub header_props: EditableHeaderProps,
 }
 
 /// Sidebars are designed to live in a [SplitPanel]
@@ -42,15 +42,16 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
     // this gets the last calculated width and ensures that
     // the auto-width element is at least that big.
     // this ensures the panel grows but does not shrink.
-    use_effect_with((p.children.clone(), p.selected_tab), {
-        clone!(noderef, auto_width, p.width_override);
-        move |_| {
-            if width_override.is_none() {
+    use_effect_with(p.clone(), {
+        clone!(noderef, auto_width);
+        move |p| {
+            if p.width_override.is_none() {
                 let updated_width = noderef
                     .cast::<Element>()
                     .map(|el| el.get_bounding_client_rect().width())
                     .unwrap_or_default();
-                auto_width.set((*auto_width).max(updated_width));
+                let new_auto_width = (*auto_width).max(updated_width);
+                auto_width.set(new_auto_width);
             } else {
                 auto_width.set(0f64);
             }
@@ -62,15 +63,10 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
         <div class="sidebar_column" id={ format!("{id}_sidebar") } ref={ noderef }>
             <SidebarCloseButton
                 id={ format!("{id}_close_button") }
-                on_close_sidebar={ &p.on_close }/>
-            <div class="sidebar_header" id={ format!("{id}_header") }>
-                if let Some(id) = p.icon.clone() {
-                    <span { id }></span>
-                }
-
-                <span class="sidebar_header_title" id={ format!("{id}_header_title") }>
-                    { p.title.clone() }
-                </span>
+                on_close_sidebar={ &p.on_close }
+                />
+            <div class="sidebar_header">
+                <EditableHeader ..p.header_props.clone()/>
             </div>
             <div class="sidebar_border" id={ format!("{id}_border") }></div>
             <div class="sidebar_content" id={ format!("{id}_content") }>
