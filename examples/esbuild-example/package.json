@@ -20,6 +20,6 @@
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "^2.7.1",
         "esbuild": "^0.14.54",
-        "http-server": "^0.11.1"
+        "http-server": "^14.1.1"
     }
 }
