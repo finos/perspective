@@ -17,7 +17,8 @@ use yew::{
     function_component, html, use_callback, use_state, Callback, Html, Properties, TargetCast,
 };
 
-use crate::config::NumericPrecisionOpts;
+use crate::clone;
+use crate::config::{ColumnConfig, FloatColumnConfig, IntColumnConfig, NumericPrecisionOpts, Type};
 
 // use crate::config::{
 //     ColumnConfig, ColumnConfigValueUpdate, FloatColumnConfig,
@@ -41,7 +42,8 @@ pub struct PrecisionControlProps {
     // pub view_type: Type,
     pub label: Option<String>,
     pub opts: NumericPrecisionOpts,
-    pub on_update: Callback<JsValue>,
+    pub on_update: Callback<Option<ColumnConfig>>,
+    pub view_type: Type,
 }
 // derive_model!(Renderer, CustomEvents, Session, Presentation for
 // PrecisionControlProps);
@@ -77,15 +79,32 @@ pub fn numeric_precision(props: &PrecisionControlProps) -> Html {
     let value = use_state(|| default_value);
     let label = use_state(|| make_label(default_value));
 
-    let oninput = props.on_update.reform(|event: InputEvent| {
+    clone!(props.view_type);
+    let oninput = props.on_update.reform(move |event: InputEvent| {
         let raw_value = event.target_unchecked_into::<HtmlInputElement>().value();
-        let value = raw_value
+        let parsed_value = raw_value
             .split_once('.')
             .map(|(int, _)| int.parse::<u32>())
             .unwrap_or(raw_value.parse::<u32>())
             .unwrap_or_default()
             .min(15);
-        serde_wasm_bindgen::to_value(&value).unwrap()
+
+        match view_type {
+            Type::Integer => {
+                Some(ColumnConfig::Int(IntColumnConfig {
+                    precision: Some(parsed_value),
+                    //..Default::default()
+                }))
+            },
+            Type::Float => Some(ColumnConfig::Float(FloatColumnConfig {
+                precision: Some(parsed_value),
+                //..Default::default(),
+            })),
+            _ => {
+                tracing::error!("CONTROL ERROR: Tried to set precision of non-numeric type!");
+                None
+            },
+        }
     });
 
     // let oninput = use_callback(

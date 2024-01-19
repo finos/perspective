@@ -21,6 +21,8 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 
+use crate::components::column_settings_sidebar::ColumnSettingsTab;
+use crate::components::viewer::ColumnLocator;
 use crate::config::{ColumnConfig, ColumnConfigUpdate, ColumnConfigValueUpdate};
 use crate::utils::*;
 

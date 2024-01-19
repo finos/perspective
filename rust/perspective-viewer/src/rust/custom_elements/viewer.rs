@@ -257,18 +257,18 @@ impl PerspectiveViewerElement {
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
         global::document().blur_active_element();
+        let viewer_config_query = self.cloned();
         clone!(self.session, self.renderer, self.root, self.presentation);
         ApiFuture::new(async move {
             let decoded_update = ViewerConfigUpdate::decode(&update)?;
 
             let ViewerConfigUpdate {
                 plugin,
-                plugin_config,
                 settings,
                 theme: theme_name,
                 title,
                 mut view_config,
-                ..//version
+                ..//version, plugin_config
             } = decoded_update;
 
             if !session.has_table() {
@@ -322,11 +322,8 @@ impl PerspectiveViewerElement {
 
                 let internal_task = async {
                     let plugin = renderer.get_active_plugin()?;
-                    if let Some(plugin_config) = &plugin_config {
-                        let js_config = JsValue::from_serde_ext(plugin_config)?;
-                        plugin.restore(&js_config);
-                    }
-
+                    let config = viewer_config_query.get_viewer_config().await?;
+                    plugin.restore(&config);
                     session.validate().await?.create_view().await
                 }
                 .await;

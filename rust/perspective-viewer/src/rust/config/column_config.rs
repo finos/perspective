@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 /// Global column configurations are column configurations that apply to the
 /// column regardless of which plugin it is instantiated in. These styles stick
 /// with the column regardless of its active state.
-#[derive(Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
 #[serde(untagged)]
 pub enum ColumnConfig {
     Float(FloatColumnConfig),
@@ -59,7 +59,7 @@ pub trait UpdateColumnConfig {
 //     pub color: Option<ColorConfig>,
 // }
 
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct FloatColumnConfig {
     pub precision: Option<u32>,
 }
@@ -71,7 +71,7 @@ impl UpdateColumnConfig for FloatColumnConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct IntColumnConfig {
     pub precision: Option<u32>,
 }
@@ -83,7 +83,7 @@ impl UpdateColumnConfig for IntColumnConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct BoolColumnConfig {}
 impl UpdateColumnConfig for BoolColumnConfig {
     fn update(self, _other: Self) -> Self {
@@ -91,7 +91,7 @@ impl UpdateColumnConfig for BoolColumnConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct StringColumnConfig {
     // #[serde(flatten)]
     // pub font_config: FontConfig
@@ -102,7 +102,7 @@ impl UpdateColumnConfig for StringColumnConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct DateColumnConfig {}
 impl UpdateColumnConfig for DateColumnConfig {
     fn update(self, _other: Self) -> Self {
@@ -110,7 +110,7 @@ impl UpdateColumnConfig for DateColumnConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct DatetimeColumnConfig {}
 impl UpdateColumnConfig for DatetimeColumnConfig {
     fn update(self, _other: Self) -> Self {

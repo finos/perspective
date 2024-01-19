@@ -18,7 +18,6 @@ use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
 use crate::components::style::LocalStyle;
-use crate::config::plugin::*;
 use crate::config::*;
 use crate::custom_events::CustomEvents;
 use crate::model::*;
@@ -90,7 +89,7 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
             let on_change = Callback::from(move |config| {
                 props.send_plugin_config(
                     props.column_name.clone(),
-                    serde_json::to_value(config).unwrap(),
+                    serde_json::to_value(config).ok(),
                 )
             });
 

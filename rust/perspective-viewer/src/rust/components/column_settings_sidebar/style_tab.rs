@@ -10,27 +10,27 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-mod column_style;
+// mod column_style;
 pub mod numeric_precision;
 pub mod radio;
 pub mod stub;
-mod symbol;
+// mod symbol;
 
 use wasm_bindgen::JsValue;
 use yew::{function_component, html, Html, Properties};
 
-use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
+// use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
 use crate::components::column_settings_sidebar::style_tab::numeric_precision::NumericPrecision;
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
-use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
-use crate::config::{ControlName, ControlOptions, Type};
+// use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
+use crate::config::{ColumnConfig, ColumnConfigValueUpdate, ControlName, ControlOptions, Type};
 use crate::custom_events::CustomEvents;
-use crate::model::{PluginColumnStyles, UpdatePluginConfig};
+use crate::model::{GetViewerConfigModel, HasPresentation, PluginColumnStyles, UpdatePluginConfig};
 use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::utils::JsValueSerdeExt;
-use crate::{derive_model, json};
+use crate::utils::{ApiFuture, JsValueSerdeExt};
+use crate::{clone, derive_model, json};
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct StyleTabProps {
@@ -44,18 +44,47 @@ pub struct StyleTabProps {
 }
 derive_model!(Session, Renderer, Presentation, CustomEvents for StyleTabProps);
 
+impl StyleTabProps {
+    fn send_plugin_config2(&self, column_name: String, config: ColumnConfig) {
+        tracing::error!("send_plugin_config2: column_name={column_name:?}\nconfig={config:?}");
+        let viewer_config_query = self.cloned();
+        clone!(self.renderer, self.presentation);
+        ApiFuture::spawn(async move {
+            // NOTE: Column config values should be of form e.g. {"numeric-precision": 3,
+            // "color": {blah}}
+            presentation.update_column_config_value(
+                column_name.to_owned(),
+                ColumnConfigValueUpdate(config.clone()),
+            );
+            let viewer_config = viewer_config_query.get_viewer_config().await?;
+            renderer.get_active_plugin()?.restore(&viewer_config);
+            Ok(())
+        })
+    }
+}
+
 #[function_component]
 pub fn StyleTab(props: &StyleTabProps) -> Html {
     // TODO: on_update will send the config back to the plugin
-    let on_update = yew::use_callback(
-        props.clone(),
-        move |(control, value): (&'static str, JsValue), _| {
-            json!({
-                "control": control,
-                "value": value
-            });
-        },
-    );
+    // let on_update = yew::use_callback(
+    //     props.clone(),
+    //     move |(control, value): (&'static str, JsValue), _| {
+    //         json!({
+    //             "control": control,
+    //             "value": value
+    //         });
+    //     },
+    // );
+
+    // this is safe because we're guaranted to have a view type by now
+    let view_type = props.ty.unwrap();
+
+    let on_update = yew::use_callback(props.clone(), |config: Option<ColumnConfig>, props| {
+        if let Some(config) = config {
+            props.send_plugin_config2(props.column_name.clone(), config);
+        }
+    });
+
     let control_opts = props.get_column_style_control_options(&props.column_name);
     let components = match control_opts {
         Ok(opts) => opts
@@ -68,9 +97,8 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                     html! {}
                 },
                 (ControlName::NumericPrecision, Some(ControlOptions::NumericPrecision(opts))) => {
-                    let on_update = on_update.reform(|value| {("numeric-precision", value)});
                     html! {
-                        <NumericPrecision label={opt.label} {opts} {on_update} />
+                        <NumericPrecision {view_type} label={opt.label} {opts} on_update={on_update.clone()} />
                     }
                 },
                 (ControlName::Radio, Some(ControlOptions::Vec(opts))) => {

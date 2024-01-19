@@ -146,7 +146,7 @@ impl ColumnSettingsSidebar {
                 ctx.props().get_plugin_config(),
                 ctx.props().get_plugin_attrs(),
             );
-            if config.is_none() || attrs.is_none() {
+            if config.is_err() || attrs.is_err() {
                 tracing::warn!(
                     "Could not get full plugin config!\nconfig (plugin.save()): \
                      {:?}\nplugin_attrs: {:?}",
@@ -161,7 +161,7 @@ impl ColumnSettingsSidebar {
                     .can_render_column_styles(&column_name)
                     .unwrap_or_default();
 
-            if !is_new_expr && show_styles && config.is_some() {
+            if !is_new_expr && show_styles && config.is_ok() {
                 tabs.push(ColumnSettingsTab::Style);
             }
 

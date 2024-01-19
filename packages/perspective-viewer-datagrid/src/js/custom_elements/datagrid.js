@@ -113,6 +113,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     restore(token) {
+        console.log("DATAGRID: RESTORE!", token);
         return restore.call(this, token);
     }
 
