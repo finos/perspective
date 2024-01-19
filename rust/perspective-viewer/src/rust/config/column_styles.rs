@@ -58,8 +58,20 @@ pub struct ColorMode {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "kebab-case")]
-pub enum ColorMaxValue {
+pub enum ColorMaxStringValue {
     Column,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[serde(untagged)]
+pub enum ColorMaxValue {
+    String(ColorMaxStringValue),
+    Number(f64),
+}
+impl Default for ColorMaxValue {
+    fn default() -> Self {
+        Self::Number(0.0)
+    }
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ColorOpts {
@@ -131,7 +143,7 @@ fn color_from_json() {
                             value: "red".into()
                         }
                     ],
-                    max: Some(ColorMaxValue::Column),
+                    max: Some(ColorMaxValue::String(ColorMaxStringValue::Column)),
                     gradient: true,
                     default: true,
                 },
@@ -221,7 +233,7 @@ fn test_deserialize_from_json() {
                                 value: "red".into(),
                             },
                         ],
-                        max: Some(ColorMaxValue::Column),
+                        max: Some(ColorMaxValue::String(ColorMaxStringValue::Column)),
                         gradient: true,
                         default: false,
                     },

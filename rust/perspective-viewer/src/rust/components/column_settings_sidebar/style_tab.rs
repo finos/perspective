@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 // mod column_style;
+pub mod color;
 pub mod numeric_precision;
 pub mod radio;
 pub mod stub;
@@ -18,6 +19,7 @@ pub mod stub;
 
 use yew::{function_component, html, Html, Properties};
 
+use crate::components::column_settings_sidebar::style_tab::color::ColorControl;
 // use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
 use crate::components::column_settings_sidebar::style_tab::numeric_precision::NumericPrecision;
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
@@ -81,7 +83,9 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
             .into_iter()
             .map(|opt| match (opt.control, opt.options) {
                 (ControlName::Color, Some(ControlOptions::Color(opts))) => {
-                    html! {<p>{"todo"}</p>}
+                    html! {
+                        <ColorControl label={opt.label} {opts} on_update={on_update.clone()} />
+                    }
                 },
                 (ControlName::DatetimeStringFormat, None) => {
                     html! {<p>{"todo"}</p>}
