@@ -13,12 +13,9 @@
 use serde::de::DeserializeOwned;
 use wasm_bindgen::JsValue;
 
-use super::{GetViewerConfigModel, HasCustomEvents, HasPresentation, HasRenderer, HasSession};
-use crate::clone;
-use crate::config::{
-    ColumnConfig, ColumnConfigValueUpdate, PluginAttributes, PluginConfig, ViewerConfig,
-};
-use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt};
+use super::HasRenderer;
+use crate::config::{PluginAttributes, PluginConfig};
+use crate::utils::{ApiFuture, ApiResult};
 
 pub trait GetPluginConfig: HasRenderer {
     /// This function will get the results of calling plugin.save()

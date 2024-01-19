@@ -68,13 +68,13 @@ pub struct ColorOpts {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "kebab-case")]
-enum KvPairKeyStringValue {
+pub enum KvPairKeyStringValue {
     Row,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
-enum KvPairKeys {
+pub enum KvPairKeys {
     Value(KvPairKeyStringValue),
     Vec(Vec<String>),
 }

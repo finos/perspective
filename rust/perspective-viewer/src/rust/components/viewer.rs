@@ -227,10 +227,12 @@ impl Component for PerspectiveViewer {
 
                 ApiFuture::spawn(async move {
                     session.reset(all);
-                    let column_config = (!all).then_some(presentation.all_column_configs());
-                    if all {
+                    let column_config = if all {
                         presentation.reset_column_configs();
-                    }
+                        None
+                    } else {
+                        Some(presentation.all_column_configs())
+                    };
                     renderer.reset(column_config.as_ref()).await;
                     presentation.reset_available_themes(None).await;
                     let result = renderer.draw(session.validate().await?.create_view()).await;

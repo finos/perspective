@@ -18,6 +18,10 @@ use serde::{Deserialize, Serialize};
 /// Global column configurations are column configurations that apply to the
 /// column regardless of which plugin it is instantiated in. These styles stick
 /// with the column regardless of its active state.
+/// ```
+/// viewer_config: {column_config: {column_name: {type: properties}}}
+///                                               ^^^^^^^^^^^^^^^^   
+/// ```
 #[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
 #[serde(untagged)]
 pub enum ColumnConfig {
@@ -46,7 +50,7 @@ impl ColumnConfig {
 pub struct ColumnConfigValueUpdate(pub ColumnConfig);
 pub type ColumnConfigMap = HashMap<String, ColumnConfig>;
 
-pub trait UpdateColumnConfig {
+pub trait ColumnConfigTrait {
     fn update(self, other: Self) -> Self;
 }
 
@@ -64,9 +68,10 @@ pub trait UpdateColumnConfig {
 
 #[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct FloatColumnConfig {
+    #[serde(rename = "numeric-precision")]
     pub precision: Option<u32>,
 }
-impl UpdateColumnConfig for FloatColumnConfig {
+impl ColumnConfigTrait for FloatColumnConfig {
     fn update(self, other: FloatColumnConfig) -> Self {
         Self {
             precision: other.precision.or(self.precision),
@@ -76,9 +81,10 @@ impl UpdateColumnConfig for FloatColumnConfig {
 
 #[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct IntColumnConfig {
+    #[serde(rename = "numeric-precision")]
     pub precision: Option<u32>,
 }
-impl UpdateColumnConfig for IntColumnConfig {
+impl ColumnConfigTrait for IntColumnConfig {
     fn update(self, other: IntColumnConfig) -> Self {
         Self {
             precision: other.precision.or(self.precision),
@@ -88,7 +94,7 @@ impl UpdateColumnConfig for IntColumnConfig {
 
 #[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct BoolColumnConfig {}
-impl UpdateColumnConfig for BoolColumnConfig {
+impl ColumnConfigTrait for BoolColumnConfig {
     fn update(self, _other: Self) -> Self {
         Self {}
     }
@@ -99,7 +105,7 @@ pub struct StringColumnConfig {
     // #[serde(flatten)]
     // pub font_config: FontConfig
 }
-impl UpdateColumnConfig for StringColumnConfig {
+impl ColumnConfigTrait for StringColumnConfig {
     fn update(self, _other: Self) -> Self {
         Self {}
     }
@@ -107,7 +113,7 @@ impl UpdateColumnConfig for StringColumnConfig {
 
 #[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct DateColumnConfig {}
-impl UpdateColumnConfig for DateColumnConfig {
+impl ColumnConfigTrait for DateColumnConfig {
     fn update(self, _other: Self) -> Self {
         Self {}
     }
@@ -115,7 +121,7 @@ impl UpdateColumnConfig for DateColumnConfig {
 
 #[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
 pub struct DatetimeColumnConfig {}
-impl UpdateColumnConfig for DatetimeColumnConfig {
+impl ColumnConfigTrait for DatetimeColumnConfig {
     fn update(self, _other: Self) -> Self {
         Self {}
     }

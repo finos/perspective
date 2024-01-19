@@ -265,11 +265,7 @@ impl Presentation {
     }
 
     /// Updates a single column configuration value.
-    pub fn update_column_config_value(
-        &self,
-        column_name: String,
-        value: ColumnConfigValueUpdate,
-    ) -> ColumnConfig {
+    pub fn update_column_config_value(&self, column_name: String, value: ColumnConfigValueUpdate) {
         let mut config = self.column_config.borrow_mut();
         if let Some(current_config) = config.remove(&column_name) {
             let new_value = current_config.update(value);
@@ -277,7 +273,6 @@ impl Presentation {
         } else {
             config.insert(column_name.clone(), value.0);
         }
-        config.get(&column_name).cloned().unwrap()
     }
 }
 
