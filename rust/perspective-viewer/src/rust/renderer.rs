@@ -44,9 +44,9 @@ use self::render_timer::*;
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::js::plugin::*;
+use crate::json;
 use crate::session::*;
 use crate::utils::*;
-use crate::*;
 
 #[derive(Clone)]
 pub struct Renderer(Rc<RendererData>);
@@ -116,10 +116,10 @@ impl Renderer {
         }))
     }
 
-    pub async fn reset(&self, viewer_config: &ViewerConfig) {
+    pub async fn reset(&self, column_config: Option<&ColumnConfigMap>) {
         self.0.borrow_mut().plugins_idx = None;
         if let Ok(plugin) = self.get_active_plugin() {
-            plugin.restore(viewer_config);
+            plugin.restore(&json!({}), column_config);
         }
     }
 

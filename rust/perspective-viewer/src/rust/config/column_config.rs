@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 /// This struct describes global column style configurations.
@@ -42,6 +44,7 @@ impl ColumnConfig {
     }
 }
 pub struct ColumnConfigValueUpdate(pub ColumnConfig);
+pub type ColumnConfigMap = HashMap<String, ColumnConfig>;
 
 pub trait UpdateColumnConfig {
     fn update(self, other: Self) -> Self;

@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::str::FromStr;
 use std::sync::LazyLock;
@@ -23,8 +22,8 @@ use serde_json::Value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use super::column_config::ColumnConfig;
 use super::view_config::*;
+use super::ColumnConfigMap;
 use crate::utils::*;
 
 pub enum ViewerConfigEncoding {
@@ -55,7 +54,7 @@ pub struct ViewerConfig {
     pub version: String,
     pub plugin: String,
     pub plugin_config: Value,
-    pub column_config: HashMap<String, ColumnConfig>,
+    pub column_config: ColumnConfigMap,
     pub settings: bool,
     pub theme: Option<String>,
     pub title: Option<String>,
@@ -68,7 +67,7 @@ pub struct ViewerConfig {
 // struct fields, so make a tuple alternative for serialization in binary.
 type ViewerConfigBinarySerialFormat<'a> = (
     &'a String,
-    &'a HashMap<String, ColumnConfig>,
+    &'a ColumnConfigMap,
     &'a String,
     &'a Value,
     bool,
@@ -231,7 +230,7 @@ pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
 pub type VersionUpdate = OptionalUpdate<String>;
-pub type ColumnConfigUpdate = OptionalUpdate<HashMap<String, ColumnConfig>>;
+pub type ColumnConfigUpdate = OptionalUpdate<ColumnConfigMap>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {

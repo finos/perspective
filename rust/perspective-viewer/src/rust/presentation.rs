@@ -23,7 +23,7 @@ use yew::html::ImplicitClone;
 
 use crate::components::column_settings_sidebar::ColumnSettingsTab;
 use crate::components::viewer::ColumnLocator;
-use crate::config::{ColumnConfig, ColumnConfigUpdate, ColumnConfigValueUpdate};
+use crate::config::{ColumnConfig, ColumnConfigMap, ColumnConfigUpdate, ColumnConfigValueUpdate};
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -70,7 +70,7 @@ pub struct PresentationHandle {
     is_settings_open: RefCell<bool>,
     open_column_settings: RefCell<OpenColumnSettings>,
     is_workspace: RefCell<Option<bool>>,
-    column_config: RefCell<HashMap<String, ColumnConfig>>,
+    column_config: RefCell<ColumnConfigMap>,
     pub settings_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub column_settings_updated: PubSub<JsValue>,
@@ -235,8 +235,12 @@ impl Presentation {
     }
 
     /// Returns an owned copy of the curent column configuration map.
-    pub fn all_column_configs(&self) -> HashMap<String, ColumnConfig> {
+    pub fn all_column_configs(&self) -> ColumnConfigMap {
         self.column_config.borrow().clone()
+    }
+
+    pub fn reset_column_configs(&self) {
+        *self.column_config.borrow_mut() = ColumnConfigMap::new();
     }
 
     /// Gets a clone of the ColumnConfig for the given column name.

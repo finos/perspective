@@ -257,18 +257,19 @@ impl PerspectiveViewerElement {
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
         global::document().blur_active_element();
-        let viewer_config_query = self.cloned();
         clone!(self.session, self.renderer, self.root, self.presentation);
         ApiFuture::new(async move {
             let decoded_update = ViewerConfigUpdate::decode(&update)?;
 
             let ViewerConfigUpdate {
                 plugin,
+                plugin_config,
+                column_config,
                 settings,
                 theme: theme_name,
                 title,
                 mut view_config,
-                ..//version, plugin_config
+                ..//version
             } = decoded_update;
 
             if !session.has_table() {
@@ -322,8 +323,17 @@ impl PerspectiveViewerElement {
 
                 let internal_task = async {
                     let plugin = renderer.get_active_plugin()?;
-                    let config = viewer_config_query.get_viewer_config().await?;
-                    plugin.restore(&config);
+                    let plugin_update = if let Some(x) = plugin_config {
+                        JsValue::from_serde_ext(&x).unwrap()
+                    } else {
+                        plugin.save()
+                    };
+                    let column_update = if let OptionalUpdate::Update(x) = column_config {
+                        x
+                    } else {
+                        presentation.all_column_configs()
+                    };
+                    plugin.restore(&plugin_update, Some(&column_update));
                     session.validate().await?.create_view().await
                 }
                 .await;
@@ -400,7 +410,8 @@ impl PerspectiveViewerElement {
     /// Reset the viewer's `ViewerConfig` to the default.
     ///
     /// # Arguments
-    /// - `all` Whether to clear `expressions` also.
+    /// - `all` If set, will clear expressions and column settings as well.
+    // TODO: We should replace the boolean value here with an options object.
     pub fn reset(&self, reset_expressions: Option<bool>) -> ApiFuture<()> {
         tracing::info!("Resetting config");
         let root = self.root.clone();
