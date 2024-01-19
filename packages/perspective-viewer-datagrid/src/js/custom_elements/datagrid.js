@@ -68,14 +68,6 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         return 1;
     }
 
-    /** opt-in to column styling */
-    // TODO: Remove me
-    get plugin_attributes() {
-        return {
-            style: getDefaultConfig.call(this),
-        };
-    }
-
     can_render_column_styles(type, _group) {
         return type !== "boolean";
     }

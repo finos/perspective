@@ -81,10 +81,10 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
             .into_iter()
             .map(|opt| match (opt.control, opt.options) {
                 (ControlName::Color, Some(ControlOptions::Color(opts))) => {
-                    html! {}
+                    html! {<p>{"todo"}</p>}
                 },
                 (ControlName::DatetimeStringFormat, None) => {
-                    html! {}
+                    html! {<p>{"todo"}</p>}
                 },
                 (ControlName::NumericPrecision, Some(ControlOptions::NumericPrecision(opts))) => {
                     html! {
@@ -92,11 +92,14 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                     }
                 },
                 (ControlName::Radio, Some(ControlOptions::Vec(opts))) => {
-                    html! {}
+                    html! {<p>{"todo"}</p>}
                 },
                 (ControlName::Dropdown, Some(ControlOptions::Vec(opts))) => {
-                    html! {}
+                    html! {<p>{"todo"}</p>}
                 },
+                (ControlName::KeyValuePair, Some(ControlOptions::KvPair(opts))) => {
+                    html! {<p>{"todo"}</p>}
+                }
                 (control, opts) => html! {
                     <Stub
                         message="Invalid specification"

@@ -72,7 +72,7 @@ pub trait PluginColumnStyles: HasSession + HasRenderer {
             .get_column_view_type(column_name)
             .ok_or("Invalid column")?;
 
-        Ok(plugin.can_render_column_styles(&view_type.to_string(), group))
+        plugin.can_render_column_styles(&view_type.to_string(), group)
     }
 
     /// Queries the plugins for the available plugin components.
@@ -101,7 +101,7 @@ pub trait PluginColumnStyles: HasSession + HasRenderer {
             .get_column_view_type(column_name)
             .ok_or("Invalid column")?;
 
-        let controls = plugin.column_style_controls(&view_type.to_string(), group);
+        let controls = plugin.column_style_controls(&view_type.to_string(), group)?;
         web_sys::console::log_1(&controls);
         let arr = controls.dyn_into::<js_sys::Array>()?;
         let vec = arr.to_vec();

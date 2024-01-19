@@ -142,18 +142,6 @@ impl ColumnSettingsSidebar {
 
         let tabs = {
             let mut tabs = vec![];
-            let (config, attrs) = (
-                ctx.props().get_plugin_config(),
-                ctx.props().get_plugin_attrs(),
-            );
-            if config.is_err() || attrs.is_err() {
-                tracing::warn!(
-                    "Could not get full plugin config!\nconfig (plugin.save()): \
-                     {:?}\nplugin_attrs: {:?}",
-                    config,
-                    attrs
-                );
-            }
             let is_new_expr = ctx.props().selected_column.is_new_expr();
             let show_styles = !is_new_expr
                 && ctx
@@ -161,7 +149,7 @@ impl ColumnSettingsSidebar {
                     .can_render_column_styles(&column_name)
                     .unwrap_or_default();
 
-            if !is_new_expr && show_styles && config.is_ok() {
+            if !is_new_expr && show_styles {
                 tabs.push(ColumnSettingsTab::Style);
             }
 

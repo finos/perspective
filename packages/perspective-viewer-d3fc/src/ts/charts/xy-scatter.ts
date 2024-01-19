@@ -26,6 +26,7 @@ import { symbolsObj } from "../series/seriesSymbols";
 import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
 import xyScatterSeries from "../series/xy-scatter/xyScatterSeries";
 import { D3Scale, HTMLSelection, Settings } from "../types";
+import { Type } from "@finos/perspective";
 
 /**
  * Overrides specific symbols based on plugin settings. This modifies in-place _and_ returns the value.
@@ -180,6 +181,26 @@ xyScatter.plugin = {
         ],
     },
     selectMode: "toggle",
+};
+
+xyScatter.can_render_column_styles = (type: Type, group?: string) => {
+    return type === "string" && group === "Symbol";
+};
+xyScatter.column_style_controls = (type: Type, group?: string) => {
+    if (type === "string" && group === "Symbol") {
+        return [
+            {
+                label: "Symbols",
+                control: "key-value-pair",
+                options: {
+                    keys: "row",
+                    values: Object.keys(symbolsObj),
+                },
+            },
+        ];
+    } else {
+        return null;
+    }
 };
 
 export default xyScatter;
