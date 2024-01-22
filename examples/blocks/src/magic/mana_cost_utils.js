@@ -41,7 +41,7 @@ function mana_cost_to_svg_uri(sym_array, value) {
             const icon =
                 URI_CACHE[cost_code] || get_url(sym_array, cost_code + "}");
             URI_CACHE[cost_code] = icon;
-            const rep = `<img src="${icon}"></img>`;
+            const rep = `<img part="manacoin" src="${icon}"></img>`;
             value2 = replaceRange(value2, i, i + cost_code.length + 1, rep);
             i += rep.length - cost_code.length;
         }
@@ -57,15 +57,15 @@ function color_identity_to_html(value) {
     let out = "";
     for (const color of colors) {
         if (color === "B") {
-            out += `<span class="mcolor" style="background-color:#333">B</span>`;
+            out += `<span part="mcolor" style="background-color:#333">B</span>`;
         } else if (color === "U") {
-            out += `<span class="mcolor" style="background-color:#1f78b4">U</span>`;
+            out += `<span part="mcolor" style="background-color:#1f78b4">U</span>`;
         } else if (color === "G") {
-            out += `<span class="mcolor" style="background-color:#33a02c">G</span>`;
+            out += `<span part="mcolor" style="background-color:#33a02c">G</span>`;
         } else if (color === "W") {
-            out += `<span class="mcolor" style="background-color:white;color:#999">W</span>`;
+            out += `<span part="mcolor" style="background-color:white;color:#999">W</span>`;
         } else if (color === "R") {
-            out += `<span class="mcolor" style="background-color:#e31a1c">R</span>`;
+            out += `<span part="mcolor" style="background-color:#e31a1c">R</span>`;
         }
     }
 
@@ -76,12 +76,11 @@ function color_identity_to_html(value) {
     }
 }
 
-export function manaStyleListener(sym_array) {
+export function manaStyleListener(sym_array, viewer) {
     for (const td of this.querySelectorAll("td")) {
         const meta = this.getMeta(td);
-        let offset = this.parentElement.parentElement.hasAttribute("settings")
-            ? 2
-            : 1;
+        const hasSettings = viewer.hasAttribute("settings");
+        let offset = hasSettings ? 2 : 1;
 
         const col_name = meta.column_header[meta.column_header.length - offset];
         if (col_name === "manaCost" || col_name === "text") {

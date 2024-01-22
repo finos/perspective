@@ -18,7 +18,7 @@ function get_psp_type(metadata) {
     }
 }
 
-export function style_selected_column(regularTable, selectedColumn) {
+export function style_selected_column(regularTable, viewer, selectedColumn) {
     const group_header_trs = Array.from(
         regularTable.children[0].children[0].children
     );
@@ -37,13 +37,8 @@ export function style_selected_column(regularTable, selectedColumn) {
         });
     }
 
-    const settings_open =
-        regularTable.parentElement.parentElement.hasAttribute("settings");
-
-    regularTable.parentElement.classList.toggle(
-        "psp-menu-open",
-        !!selectedColumn
-    );
+    const settings_open = viewer.hasAttribute("settings");
+    viewer.classList.toggle("psp-menu-open", !!selectedColumn);
 
     if (settings_open && len >= 2) {
         // if settings_open, you will never have less than 2 trs unless the
@@ -81,7 +76,7 @@ export function style_selected_column(regularTable, selectedColumn) {
     }
 }
 
-export function column_header_style_listener(regularTable) {
+export function column_header_style_listener(regularTable, viewer) {
     let group_header_trs = Array.from(
         regularTable.children[0].children[0].children
     );
@@ -90,6 +85,7 @@ export function column_header_style_listener(regularTable) {
         style_selected_column.call(
             this,
             regularTable,
+            viewer,
             this._column_settings_selected_column
         );
 

@@ -23,9 +23,11 @@ async function test_column(page, selector, selector2) {
             window.__events__.push(evt);
         });
 
-        const header_button = viewer.querySelector(
-            "regular-table thead tr:last-child th" + selector
-        );
+        const header_button = viewer
+            .querySelector("perspective-viewer-datagrid")
+            .shadowRoot.querySelector(
+                "regular-table thead tr:last-child th" + selector
+            );
 
         const rect = header_button.getBoundingClientRect();
         return {
@@ -83,11 +85,12 @@ test.describe("Column Style Tests", () => {
                     window.__events__.push(evt);
                 }
             );
-
             // Find the column config menu button
-            const header_button = viewer.querySelector(
-                "regular-table thead tr:last-child th"
-            );
+            const header_button = viewer
+                .querySelector("perspective-viewer-datagrid")
+                .shadowRoot.querySelector(
+                    "regular-table thead tr:last-child th"
+                );
 
             // Get the button coords (slightly lower than center
             // because of the location of the menu button within
@@ -163,7 +166,9 @@ test.describe("Column Style Tests", () => {
             await table.update([{ "Row ID": 1, Sales: 3 }]);
         });
 
-        const contents = await page.locator(`perspective-viewer`).innerHTML();
+        const contents = await page
+            .locator(`perspective-viewer-datagrid regular-table`)
+            .innerHTML();
         await compareContentsToSnapshot(contents, [
             "number_column_style_pulse.txt",
         ]);
@@ -198,7 +203,9 @@ test.describe("Column Style Tests", () => {
             await table.update([{ "Row ID": 1, Sales: 3 }]);
         });
 
-        const contents = await page.locator(`perspective-viewer`).innerHTML();
+        const contents = await page
+            .locator(`perspective-viewer-datagrid regular-table`)
+            .innerHTML();
         await compareContentsToSnapshot(contents, [
             "number_column_style_pulse_with_settings.txt",
         ]);

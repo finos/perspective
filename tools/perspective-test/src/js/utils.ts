@@ -120,8 +120,10 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
 
 /**
  * Compares the content of an HTML element to a snapshot.
- * To generate new snapshots, you need to delete ../tools/, ../dist/ and ../results.tar.gz
- * and run the tests again.
+ * To generate new snapshots, run `yarn test --update-snapshots`.
+ * This first runs the focused project(s) tests, which generates new
+ * snapshots, and then updates the contents of results.tar.gz which
+ * you can commit.
  * @param contents
  * @param snapshotPath
  */

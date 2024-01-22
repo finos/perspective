@@ -26,10 +26,9 @@ function get_psp_type(metadata) {
     }
 }
 
-export function table_cell_style_listener(regularTable) {
+export function table_cell_style_listener(regularTable, viewer) {
     const plugins = regularTable[PRIVATE_PLUGIN_SYMBOL] || {};
-    const is_settings_open =
-        regularTable.parentElement.parentElement.hasAttribute("settings");
+    const is_settings_open = viewer.hasAttribute("settings");
 
     for (const tr of regularTable.children[0].children[1].children) {
         for (const td of tr.children) {

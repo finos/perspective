@@ -150,13 +150,16 @@ export async function createModel(regular, table, view, extend = {}) {
 
     // Re-use div factory
     model._div_factory = model._div_factory || new ElemFactory("div");
-    regular.setDataListener(createDataListener().bind(model, regular), {
-        virtual_mode:
-            window
-                .getComputedStyle(regular)
-                .getPropertyValue("--datagrid-virtual-mode")
-                ?.trim() || "both",
-    });
+    regular.setDataListener(
+        createDataListener(this.parentElement).bind(model, regular),
+        {
+            virtual_mode:
+                window
+                    .getComputedStyle(regular)
+                    .getPropertyValue("--datagrid-virtual-mode")
+                    ?.trim() || "both",
+        }
+    );
 
     return model;
 }

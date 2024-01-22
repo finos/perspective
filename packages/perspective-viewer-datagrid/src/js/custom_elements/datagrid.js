@@ -12,10 +12,10 @@
 
 import { activate } from "../plugin/activate.js";
 import { restore } from "../plugin/restore.js";
-import { connectedCallback } from "../plugin/connected";
 import { save } from "../plugin/save";
 import { draw } from "../plugin/draw";
 import getDefaultConfig from "../default_config.js";
+import datagridStyles from "../../../dist/css/perspective-viewer-datagrid.css";
 
 /**
  * The custom element class for this plugin.  The interface methods for this
@@ -24,11 +24,31 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     constructor() {
         super();
         this.regular_table = document.createElement("regular-table");
+        this.regular_table.part = "regular-table";
         this._is_scroll_lock = false;
+        const Elem = HTMLPerspectiveViewerDatagridPluginElement;
+        if (Elem.renderTarget == "shadow") {
+            if (!Elem.#sheet) {
+                Elem.#sheet = new CSSStyleSheet();
+                Elem.#sheet.replaceSync(datagridStyles);
+            }
+
+            const shadow = this.attachShadow({ mode: "open" });
+            shadow.adoptedStyleSheets.push(Elem.#sheet);
+        }
     }
 
     connectedCallback() {
-        return connectedCallback.call(this);
+        if (!this._toolbar) {
+            this._toolbar = document.createElement(
+                "perspective-viewer-datagrid-toolbar"
+            );
+        }
+
+        const parent = this.parentElement;
+        if (parent) {
+            parent.appendChild(this._toolbar);
+        }
     }
 
     disconnectedCallback() {
@@ -116,4 +136,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         }
         this.regular_table.clear();
     }
+
+    static renderTarget = "shadow";
+    static #sheet;
 }

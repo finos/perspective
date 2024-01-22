@@ -41,20 +41,23 @@ describe_jupyter(
             async ({ page }) => {
                 const viewer = await default_body(page);
                 const num_columns = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer.querySelector("regular-table");
+                    const tbl = viewer
+                        .querySelector("perspective-viewer-datagrid")
+                        .shadowRoot.querySelector("regular-table");
                     return tbl.querySelector("thead tr").childElementCount;
                 });
 
                 expect(num_columns).toEqual(3);
 
                 const num_rows = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer.querySelector("regular-table");
+                    const tbl = viewer
+                        .querySelector("perspective-viewer-datagrid")
+                        .shadowRoot.querySelector("regular-table");
                     return tbl.querySelectorAll("tbody tr").length;
                 });
 
                 expect(num_rows).toEqual(5);
-            },
-            { timeout: 120000 }
+            }
         );
 
         test_jupyter(
@@ -70,14 +73,18 @@ describe_jupyter(
             async ({ page }) => {
                 const viewer = await default_body(page);
                 const num_columns = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer.querySelector("regular-table");
+                    const tbl = viewer
+                        .querySelector("perspective-viewer-datagrid")
+                        .shadowRoot.querySelector("regular-table");
                     return tbl.querySelector("thead tr").childElementCount;
                 });
 
                 expect(num_columns).toEqual(3);
 
                 const num_rows = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer.querySelector("regular-table");
+                    const tbl = viewer
+                        .querySelector("perspective-viewer-datagrid")
+                        .shadowRoot.querySelector("regular-table");
                     return tbl.querySelectorAll("tbody tr").length;
                 });
 
@@ -96,14 +103,19 @@ describe_jupyter(
             async ({ page }) => {
                 const viewer = await default_body(page);
                 const num_columns = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer.querySelector("regular-table");
+                    const tbl = viewer
+                        .querySelector("perspective-viewer-datagrid")
+                        .shadowRoot.querySelector("regular-table");
+
                     return tbl.querySelector("thead tr").childElementCount;
                 });
 
                 expect(num_columns).toEqual(3);
 
                 const num_rows = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer.querySelector("regular-table");
+                    const tbl = viewer
+                        .querySelector("perspective-viewer-datagrid")
+                        .shadowRoot.querySelector("regular-table");
                     return tbl.querySelectorAll("tbody tr").length;
                 });
 

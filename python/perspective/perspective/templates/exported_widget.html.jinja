@@ -1,14 +1,8 @@
-<script type="module"
-    src="https://cdn.jsdelivr.net/npm/@finos/perspective@{{psp_version}}/dist/cdn/perspective.js"></script>
-<script type="module"
-    src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{{psp_version}}/dist/cdn/perspective-viewer.js"></script>
-<script type="module"
-    src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@{{psp_version}}/dist/cdn/perspective-viewer-datagrid.js"></script>
-<script type="module"
-    src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@{{psp_version}}/dist/cdn/perspective-viewer-d3fc.js"></script>
-
-<link rel="stylesheet" crossorigin="anonymous"
-    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{{psp_version}}/dist/css/pro.css" />
+<script type="module" src="{{ psp_cdn('perspective') }}"></script>
+<script type="module" src="{{ psp_cdn('perspective-viewer') }}"></script>
+<script type="module" src="{{ psp_cdn('perspective-viewer-datagrid') }}"></script>
+<script type="module" src="{{ psp_cdn('perspective-viewer-d3fc') }}"></script>
+<link rel="stylesheet" crossorigin="anonymous" href="{{ psp_cdn('perspective-viewer', 'css/pro.css') }}" />
 
 <div class="perspective-envelope" id="perspective-envelope-{{viewer_id}}">
     <script type="application/vnd.apache.arrow.file">
@@ -22,7 +16,7 @@
             return Uint8Array.from(binString, (m) => m.codePointAt(0));
         }
 
-        import * as perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@{{psp_version}}/dist/cdn/perspective.js";
+        import * as perspective from "{{ psp_cdn('perspective') }}";
         const viewerId = {{ viewer_id | tojson }};
         const currentScript = document.scripts[document.scripts.length - 1];
         const envelope = document.getElementById(`perspective-envelope-${viewerId}`);

@@ -43,7 +43,7 @@ export async function mousedown_listener(regularTable, viewer, event) {
         event.preventDefault();
         event.stopImmediatePropagation();
     } else if (target.classList.contains("psp-sort-enabled")) {
-        sortHandler.call(this, regularTable, event, target);
+        sortHandler.call(this, regularTable, viewer, event, target);
         event.stopImmediatePropagation();
     }
 }

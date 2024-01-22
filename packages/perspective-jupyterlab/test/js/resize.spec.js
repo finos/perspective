@@ -24,6 +24,7 @@ test.beforeEach(async ({ page }) => {
 
 test.describe("JupyterLab resize", () => {
     test("Config should be hidden by default", async ({ page }) => {
+        // Snapshot is viewer contents
         const contents = await page.evaluate(async () => {
             await window.__WIDGET__.viewer.getTable();
             await window.__WIDGET__.viewer.flush();
@@ -63,6 +64,7 @@ test.describe("JupyterLab resize", () => {
             await document.querySelector("perspective-viewer").notifyResize();
         });
 
+        // Snapshot is viewer contents
         const contents = await page.evaluate(async () => {
             document.querySelector(".PSPContainer").style =
                 "position:absolute;top:0;left:0;width:800px;height:600px";
@@ -89,6 +91,7 @@ test.describe("JupyterLab resize", () => {
             await document.querySelector("perspective-viewer").flush();
         });
 
+        // Snapshot is datagrid contents
         const contents = await page.evaluate(async () => {
             await window.__WIDGET__.restore({ group_by: ["State"] });
             for (const elem of document.querySelectorAll(
@@ -96,8 +99,10 @@ test.describe("JupyterLab resize", () => {
             )) {
                 elem.removeAttribute("style");
             }
-
-            return window.__WIDGET__.viewer.innerHTML;
+            const datagrid = window.__WIDGET__.viewer.querySelector(
+                "perspective-viewer-datagrid"
+            );
+            return datagrid.shadowRoot.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
