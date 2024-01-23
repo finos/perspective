@@ -53,14 +53,13 @@ where
     pub on_change: Callback<T>,
 
     /// The initial selection.
-    /// TODO this could easily be made optional.
-    pub selected: T,
+    pub selected: Option<T>,
 
     #[prop_or_default]
     pub class: Option<&'static str>,
 
     #[prop_or_default]
-    pub name: Option<&'static str>,
+    pub name: Option<String>,
 
     #[cfg(test)]
     #[prop_or_default]
@@ -109,7 +108,7 @@ pub struct RadioList<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
 {
-    selected: T,
+    selected: Option<T>,
 }
 
 impl<T> Component for RadioList<T>
@@ -130,7 +129,7 @@ where
         match msg {
             RadioListMsg::Change(value) => {
                 if let Ok(x) = T::from_str(&value) {
-                    self.selected = x.clone();
+                    self.selected = Some(x.clone());
                     ctx.props().on_change.emit(x);
                 }
             },
@@ -193,20 +192,20 @@ where
         child: yew::virtual_dom::VChild<RadioListItem<T>>,
         class: &str,
         on_change: Callback<InputEvent>,
-        selected: &T,
+        selected: &Option<T>,
     ) -> Html {
         let val = child.props.value.clone();
         html! {
             <div class={ class.to_string() }>
                 <input
                     id={ format!("radio-list-{}", idx) }
-                    name={ ctx.props().name.unwrap_or("radio-list") }
+                    name={ ctx.props().name.clone().unwrap_or("radio-list".to_string()) }
                     type="radio"
                     value={ format!("{}", val) }
                     class="parameter"
                     oninput={ on_change }
                     disabled={ ctx.props().disabled }
-                    checked={ selected == &val } />
+                    checked={ selected.as_ref() == Some(&val) } />
                 { child }
             </div>
         }

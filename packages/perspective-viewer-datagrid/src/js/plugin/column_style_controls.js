@@ -1,134 +1,116 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 export default function column_style_opts(type, _group) {
-    const fg_colors = [
-        { label: "+", value: this.model._pos_fg_color[0] },
-        { label: "-", value: this.model._neg_fg_color[0] },
-    ];
-    const bg_colors = [
-        { label: "+", value: this.model._pos_bg_color[0] },
-        { label: "-", value: this.model._neg_bg_color[0] },
-    ];
-    const default_colors = [{ value: this.model._color[0] }];
+    const fg_colors = {
+        "+": this.model._pos_fg_color[0],
+        "-": this.model._neg_fg_color[0],
+    };
+    const bg_colors = {
+        "+": this.model._pos_bg_color[0],
+        "-": this.model._neg_bg_color[0],
+    };
+    const default_colors = { "": this.model._color[0] };
+    const date_color = {
+        control: "color",
+        modes: {
+            Foreground: {
+                colors: default_colors,
+            },
+            Background: {
+                colors: default_colors,
+            },
+        },
+    };
 
     switch (type) {
         case "integer":
         case "float":
-            return [
-                {
-                    label: "Precision",
+            return {
+                Precision: {
                     control: "numeric-precision",
-                    options: {
-                        default: type === "float" ? 2 : 0,
-                    },
+                    default: type === "float" ? 2 : 0,
                 },
-                {
-                    label: "Foreground",
+                Foreground: {
                     control: "color",
-                    options: {
-                        modes: [
-                            {
-                                label: "Color",
-                                colors: fg_colors,
-                                default: true,
-                            },
-                            {
-                                label: "Bar",
-                                colors: fg_colors,
-                                max: "column", // calculated from the value of the column.
-                            },
-                        ],
+                    modes: {
+                        Color: {
+                            colors: fg_colors,
+                            default: true,
+                        },
+                        Bar: {
+                            colors: fg_colors,
+                            max: "column", // calculated from the value of the column.
+                        },
                     },
                 },
-                {
-                    label: "Background",
+                Background: {
                     control: "color",
-                    options: {
-                        modes: [
-                            {
-                                label: "Color",
-                                colors: bg_colors,
-                            },
-                            {
-                                label: "Gradient",
-                                colors: bg_colors,
-                                max: "column",
-                                gradient: true,
-                            },
-                            {
-                                label: "Pulse (Δ)",
-                                colors: bg_colors,
-                            },
-                        ],
+                    modes: {
+                        Color: {
+                            colors: bg_colors,
+                        },
+                        Gradient: {
+                            colors: bg_colors,
+                            max: "column",
+                            gradient: true,
+                        },
+                        "Pulse (Δ)": {
+                            colors: bg_colors,
+                        },
                     },
                 },
-            ];
+            };
         case "string":
-            return [
-                {
-                    label: "Format",
+            return {
+                Format: {
                     control: "radio",
-                    options: ["Bold", "Italics", "Link"],
+                    values: ["Bold", "Italics", "Link"],
                 },
-                {
-                    label: "Color",
+                Color: {
                     control: "color",
-                    options: {
-                        modes: [
-                            {
-                                label: "Foreground",
-                                colors: default_colors,
-                            },
-                            {
-                                label: "Background",
-                                colors: default_colors,
-                            },
-                            {
-                                label: "Series",
-                                colors: [
-                                    {
-                                        label: "Root",
-                                        value: this.model._color[0],
-                                    },
-                                ],
-                            },
-                        ],
+                    modes: {
+                        Foreground: {
+                            colors: default_colors,
+                        },
+                        Background: {
+                            colors: default_colors,
+                        },
+                        Series: {
+                            colors: [
+                                {
+                                    label: "Root",
+                                    value: this.model._color[0],
+                                },
+                            ],
+                        },
                     },
                 },
-            ];
+            };
         case "date":
-        case "datetime":
-            return [
-                {
-                    label: "Color",
-                    control: "color",
-                    options: {
-                        modes: [
-                            {
-                                label: "Foreground",
-                                colors: default_colors,
-                            },
-                            {
-                                label: "Background",
-                                colors: default_colors,
-                            },
-                        ],
-                    },
+            return {
+                Color: date_color,
+                Format: {
+                    control: "dropdown",
+                    values: ["full", "long", "medium", "short", "disabled"],
                 },
-                type === "date"
-                    ? {
-                          label: "Date Style",
-                          control: "dropdown",
-                          options: [
-                              "full",
-                              "long",
-                              "medium",
-                              "short",
-                              "disabled",
-                          ],
-                      }
-                    : { control: "datetime-string-format" },
-            ];
+            };
+        case "datetime":
+            return {
+                Color: date_color,
+                Format: { control: "datetime-string-format" },
+            };
         case "boolean":
         case "object":
-            return [];
+            return {};
     }
 }

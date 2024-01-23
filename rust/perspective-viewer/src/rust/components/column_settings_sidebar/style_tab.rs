@@ -10,21 +10,17 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// mod column_style;
 pub mod color;
 pub mod numeric_precision;
 pub mod radio;
 pub mod stub;
-// mod symbol;
 
 use yew::{function_component, html, Html, Properties};
 
 use crate::components::column_settings_sidebar::style_tab::color::ColorControl;
-// use crate::components::column_settings_sidebar::style_tab::column_style::ColumnStyle;
 use crate::components::column_settings_sidebar::style_tab::numeric_precision::NumericPrecision;
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
-// use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
-use crate::config::{ColumnConfig, ColumnConfigValueUpdate, ControlName, ControlOptions, Type};
+use crate::config::{ColumnStyleOpts, ColumnStyleValue, Type};
 use crate::custom_events::CustomEvents;
 use crate::model::PluginColumnStyles;
 use crate::presentation::Presentation;
@@ -46,16 +42,17 @@ pub struct StyleTabProps {
 derive_model!(Session, Renderer, Presentation, CustomEvents for StyleTabProps);
 
 impl StyleTabProps {
-    fn send_plugin_config2(&self, column_name: String, config: ColumnConfig) {
+    fn send_plugin_config2(
+        &self,
+        column_name: String,
+        label: String,
+        config: Option<ColumnStyleValue>,
+    ) {
         tracing::error!("send_plugin_config2: column_name={column_name:?}\nconfig={config:?}");
-        clone!(self.renderer, self.presentation);
+        clone!(self.renderer, self.presentation, self.ty);
         ApiFuture::spawn(async move {
-            // NOTE: Column config values should be of form e.g. {"numeric-precision": 3,
-            // "color": {blah}}
-            presentation.update_column_config_value(
-                column_name.to_owned(),
-                ColumnConfigValueUpdate(config.clone()),
-            );
+            // unwrapping the type is safe, we're guaranteed to have a view type by now
+            presentation.update_column_styles(column_name, ty.unwrap(), label, config);
             let column_configs = presentation.all_column_configs();
             let plugin_config = renderer.get_active_plugin()?.save();
             renderer
@@ -68,46 +65,44 @@ impl StyleTabProps {
 
 #[function_component]
 pub fn StyleTab(props: &StyleTabProps) -> Html {
-    // this is safe because we're guaranted to have a view type by now
-    let view_type = props.ty.unwrap();
-
-    let on_update = yew::use_callback(props.clone(), |config: Option<ColumnConfig>, props| {
-        if let Some(config) = config {
-            props.send_plugin_config2(props.column_name.clone(), config);
-        }
-    });
+    let on_update = yew::use_callback(
+        props.clone(),
+        |(label, config): (String, Option<ColumnStyleValue>), props| {
+            props.send_plugin_config2(props.column_name.clone(), label, config);
+        },
+    );
 
     let control_opts = props.get_column_style_control_options(&props.column_name);
     let components = match control_opts {
         Ok(opts) => opts
             .into_iter()
-            .map(|opt| match (opt.control, opt.options) {
-                (ControlName::Color, Some(ControlOptions::Color(opts))) => {
+            .map(|(label, opt)| match opt {
+                ColumnStyleOpts::Color { modes } => {
                     html! {
-                        <ColorControl label={opt.label} {opts} on_update={on_update.clone()} />
+                        <ColorControl
+                            session={props.session.clone()}
+                            column_name={props.column_name.clone()}
+                            {label}
+                            {modes}
+                            on_update={on_update.clone()} />
                     }
                 },
-                (ControlName::DatetimeStringFormat, None) => {
+                ColumnStyleOpts::DatetimeStringFormat => {
                     html! {<p>{"todo"}</p>}
                 },
-                (ControlName::NumericPrecision, Some(ControlOptions::NumericPrecision(opts))) => {
+                ColumnStyleOpts::NumericPrecision { default } => {
                     html! {
-                        <NumericPrecision {view_type} label={opt.label} {opts} on_update={on_update.clone()} />
+                        <NumericPrecision {label} {default} on_update={on_update.clone()} />
                     }
                 },
-                (ControlName::Radio, Some(ControlOptions::Vec(opts))) => {
+                ColumnStyleOpts::Radio { values } => {
                     html! {<p>{"todo"}</p>}
                 },
-                (ControlName::Dropdown, Some(ControlOptions::Vec(opts))) => {
+                ColumnStyleOpts::Dropdown { values } => {
                     html! {<p>{"todo"}</p>}
                 },
-                (ControlName::KeyValuePair, Some(ControlOptions::KvPair(opts))) => {
+                ColumnStyleOpts::KeyValuePair { keys, values } => {
                     html! {<p>{"todo"}</p>}
-                }
-                (control, opts) => html! {
-                    <Stub
-                        message="Invalid specification"
-                        error={format!("Invalid specification\ncontrol={control:?}\nopts={opts:?}")}/>
                 },
             })
             .collect::<Html>(),

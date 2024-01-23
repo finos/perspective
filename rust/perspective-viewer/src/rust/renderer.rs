@@ -45,6 +45,7 @@ use crate::config::*;
 use crate::js::perspective::*;
 use crate::js::plugin::*;
 use crate::json;
+use crate::presentation::ColumnConfigMap;
 use crate::session::*;
 use crate::utils::*;
 

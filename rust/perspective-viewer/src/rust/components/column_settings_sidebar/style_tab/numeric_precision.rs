@@ -13,34 +13,32 @@
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::{function_component, html, use_state, Callback, Html, Properties, TargetCast};
 
-use crate::clone;
-use crate::config::{ColumnConfig, FloatColumnConfig, IntColumnConfig, NumericPrecisionOpts, Type};
+use crate::config::ColumnStyleValue;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PrecisionControlProps {
-    pub label: Option<String>,
-    pub opts: NumericPrecisionOpts,
-    pub on_update: Callback<Option<ColumnConfig>>,
-    pub view_type: Type,
+    pub label: String,
+    pub default: u32,
+    pub on_update: Callback<(String, Option<ColumnStyleValue>)>,
 }
 
-fn make_label(value: u32) -> String {
+fn make_label(label: &str, value: u32) -> String {
     if value > 0 {
-        format!("Precision: 0.{}1", "0".repeat((value - 1) as usize))
+        format!("{label}: 0.{}1", "0".repeat((value - 1) as usize))
     } else {
-        "Precision: 1".to_string()
+        format!("{label}: 1")
     }
 }
 
 #[function_component(NumericPrecision)]
 pub fn numeric_precision(props: &PrecisionControlProps) -> Html {
-    let default_value = props.opts.default;
+    let default_value = props.default;
 
     // these should be restored_value
     let value = use_state(|| default_value);
-    let label = use_state(|| make_label(default_value));
+    let label = use_state(|| make_label(&props.label, default_value));
 
-    clone!(props.view_type);
+    let plabel = props.label.clone();
     let oninput = props.on_update.reform(move |event: InputEvent| {
         let raw_value = event.target_unchecked_into::<HtmlInputElement>().value();
         let parsed_value = raw_value
@@ -50,22 +48,11 @@ pub fn numeric_precision(props: &PrecisionControlProps) -> Html {
             .unwrap_or_default()
             .min(15);
 
-        match view_type {
-            Type::Integer => {
-                Some(ColumnConfig::Int(IntColumnConfig {
-                    precision: Some(parsed_value),
-                    //..Default::default()
-                }))
-            },
-            Type::Float => Some(ColumnConfig::Float(FloatColumnConfig {
-                precision: Some(parsed_value),
-                //..Default::default(),
-            })),
-            _ => {
-                tracing::error!("CONTROL ERROR: Tried to set precision of non-numeric type!");
-                None
-            },
-        }
+        (
+            plabel.clone(),
+            (parsed_value != default_value)
+                .then_some(ColumnStyleValue::NumericPrecision(parsed_value)),
+        )
     });
 
     html! {

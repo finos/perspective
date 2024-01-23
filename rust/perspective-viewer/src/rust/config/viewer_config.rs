@@ -23,7 +23,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 use super::view_config::*;
-use super::ColumnConfigMap;
+use crate::presentation::ColumnConfigMap;
 use crate::utils::*;
 
 pub enum ViewerConfigEncoding {

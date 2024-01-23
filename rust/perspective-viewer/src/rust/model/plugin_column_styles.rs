@@ -10,8 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use indexmap::IndexMap;
 use itertools::Itertools;
-use wasm_bindgen::JsCast;
 
 use super::{HasRenderer, HasSession};
 use crate::config::ColumnStyleOpts;
@@ -79,7 +79,7 @@ pub trait PluginColumnStyles: HasSession + HasRenderer {
     fn get_column_style_control_options(
         &self,
         column_name: &str,
-    ) -> ApiResult<Vec<ColumnStyleOpts>> {
+    ) -> ApiResult<IndexMap<String, ColumnStyleOpts>> {
         let plugin = self.renderer().get_active_plugin()?;
         let names: Vec<String> = plugin
             .config_column_names()
@@ -103,14 +103,7 @@ pub trait PluginColumnStyles: HasSession + HasRenderer {
 
         let controls = plugin.column_style_controls(&view_type.to_string(), group)?;
         web_sys::console::log_1(&controls);
-        let arr = controls.dyn_into::<js_sys::Array>()?;
-        let vec = arr.to_vec();
-        let mut res = vec![];
-        for jsval in vec {
-            web_sys::console::log_2(&"Deserializing value:".into(), &jsval);
-            res.push(serde_wasm_bindgen::from_value(jsval)?);
-        }
-        Ok(res)
+        serde_wasm_bindgen::from_value(controls).map_err(|e| e.into())
     }
 }
 

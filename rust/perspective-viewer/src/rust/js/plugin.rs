@@ -14,7 +14,7 @@ use serde::*;
 use wasm_bindgen::prelude::*;
 
 use super::perspective::JsPerspectiveView;
-use crate::config::ColumnConfigMap;
+use crate::presentation::ColumnConfigMap;
 use crate::utils::*;
 
 /// Perspective FFI
@@ -105,6 +105,7 @@ extern "C" {
 
 impl JsPerspectiveViewerPlugin {
     pub fn restore(&self, token: &JsValue, column_config: Option<&ColumnConfigMap>) {
+        tracing::warn!("RESTORE: token={token:?} config={column_config:?}");
         let column_config = JsValue::from_serde_ext(&column_config).unwrap();
         self._restore(token, &column_config)
     }

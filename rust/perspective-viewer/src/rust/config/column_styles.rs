@@ -10,17 +10,45 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
+use super::Type;
+
+// maps column name to type to return value
+pub type ColumnStyleMap = HashMap<String, HashMap<Type, ColumnStyleValue>>;
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct ColumnStyleOpts {
-    pub label: Option<String>,
-    pub control: ControlName,
-    pub options: Option<ControlOptions>,
+#[serde(rename_all = "camelCase")]
+pub enum ColumnStyleValue {
+    NumericPrecision(u32),
+    Color(Vec<String>),
+    Radio(String),
+    Dropdown(String),
+    DatetimeStringFormat(DatetimeValue),
+    KeyValuePair(String),
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct ColumnStyleValueUpdate(ColumnStyleValue);
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-#[serde(rename_all = "kebab-case")]
+pub struct DatetimeValue {
+    // todo fill me out
+}
+
+/// plugin.column_style_opts(type) => {label, control, options: {}}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct ColumnStyleOpts {
+    // TODO: Should this be the key?
+    // i.e. deserialize from `{"foo": {...}}`` instead of `[{"label": "foo", ...}]`
+    pub label: String,
+    pub control: ControlName,
+    pub options: Option<ControlOptions>,}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[serde(rename_all = "camelCase")]
 pub enum ControlName {
     NumericPrecision,
     Color,
@@ -57,7 +85,7 @@ pub struct ColorMode {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "camelCase")]
 pub enum ColorMaxStringValue {
     Column,
 }
@@ -79,7 +107,7 @@ pub struct ColorOpts {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "camelCase")]
 pub enum KvPairKeyStringValue {
     Row,
 }
@@ -99,6 +127,7 @@ pub struct KvPairOpts {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct NumericPrecisionOpts {
+    pub label: String,
     pub default: u32,
 }
 
@@ -127,7 +156,7 @@ fn color_from_json() {
     );
     let deserde: ColumnStyleOpts = serde_json::from_value(example).unwrap();
     assert_eq!(deserde, ColumnStyleOpts {
-        label: Some("2".into()),
+        label: "2".into(),
         control: ControlName::Color,
         options: Some(ControlOptions::Color(ColorOpts {
             modes: vec![
@@ -194,6 +223,7 @@ fn test_deserialize_from_json() {
             "options": ["a","b","c"]
         },
         {
+            "label": "4",
             "control": "dropdown",
             "options": ["a","b","c"]
         },
@@ -212,12 +242,12 @@ fn test_deserialize_from_json() {
     ]);
     let manual_value = vec![
         ColumnStyleOpts {
-            label: Some("1".into()),
+            label: ("1".into()),
             control: ControlName::NumericPrecision,
             options: None,
         },
         ColumnStyleOpts {
-            label: Some("2".into()),
+            label: ("2".into()),
             control: ControlName::Color,
             options: Some(ControlOptions::Color(ColorOpts {
                 modes: vec![
@@ -251,7 +281,7 @@ fn test_deserialize_from_json() {
             })),
         },
         ColumnStyleOpts {
-            label: Some("3".into()),
+            label: ("3".into()),
             control: ControlName::Radio,
             options: Some(ControlOptions::Vec(vec![
                 "a".into(),
@@ -260,7 +290,7 @@ fn test_deserialize_from_json() {
             ])),
         },
         ColumnStyleOpts {
-            label: None,
+            label: "4".into(),
             control: ControlName::Dropdown,
             options: Some(ControlOptions::Vec(vec![
                 "a".into(),
@@ -269,12 +299,12 @@ fn test_deserialize_from_json() {
             ])),
         },
         ColumnStyleOpts {
-            label: Some("5".into()),
+            label: ("5".into()),
             control: ControlName::DatetimeStringFormat,
             options: None,
         },
         ColumnStyleOpts {
-            label: Some("6".into()),
+            label: ("6".into()),
             control: ControlName::KeyValuePair,
             options: Some(ControlOptions::KvPair(KvPairOpts {
                 keys: KvPairKeys::Value(KvPairKeyStringValue::Row),
