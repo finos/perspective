@@ -190,3 +190,38 @@ function hideTooltip(tooltipDiv) {
             .style("opacity", 0);
     }
 }
+
+// Add CSS styles for the changes
+
+// Increase font size for the entire tooltip
+<style>
+    .tooltip {
+        font-size: larger;
+    }
+</style>
+
+// Apply a different font weight for numbers
+<style>
+    .tooltip {
+        font-weight: normal;
+    }
+
+    .tooltip .number {
+        font-weight: bold;
+    }
+</style>
+
+// Add a different color for numbers
+<style>
+    .tooltip .number {
+        color: #007bff; 
+    }
+</style>
+
+// Adjust tooltip background and border
+<style>
+    .tooltip {
+        background-color: #f8f9fa; 
+        border: 1px solid #ced4da; 
+    }
+</style>

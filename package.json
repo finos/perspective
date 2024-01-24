@@ -107,5 +107,8 @@
         "fix": "node tools/perspective-scripts/fix.mjs",
         "version": "node tools/perspective-scripts/version.mjs",
         "jlab_link": "pip3 install ./python/perspective --no-build-isolation"
+    },
+    "dependencies": {
+        "d3": "^7.8.5"
     }
 }
