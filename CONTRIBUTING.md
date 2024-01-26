@@ -72,4 +72,4 @@ sorted out for you.
 If you have any general questions about contributing to Perspective, please feel
 free to open an issue on
 [github](https://github.com/finos/perspective/issues/new), or email
-[help@finos.org](mailto:finos.org).
+[help@finos.org](mailto:help@finos.org).

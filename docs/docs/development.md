@@ -15,7 +15,7 @@ might not work the way you're used to!
 
 Perspective is organized as a
 [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md),
-and uses [lerna](https://lernajs.io/) to manage dependencies.
+and uses [lerna](https://lerna.js.org/) to manage dependencies.
 
 This guide provides instructions for both the JavaScript and Python libraries.
 To switch your development toolchain between the two, use `yarn setup`. Once the
