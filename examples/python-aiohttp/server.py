@@ -52,9 +52,7 @@ def make_app():
 
     app = web.Application()
     app.router.add_get("/websocket", websocket_handler)
-    app.router.add_static(
-        "/node_modules/@finos", "../../node_modules/@finos", follow_symlinks=True
-    )
+    app.router.add_static("/node_modules/@finos", "../../node_modules/@finos")
     app.router.add_static(
         "/node_modules", "../../node_modules/@finos", follow_symlinks=True
     )
