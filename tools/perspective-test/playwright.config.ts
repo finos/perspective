@@ -161,7 +161,7 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
     quiet: true,
-    reporter: process.env.CI ? "github" : "dot",
+    reporter: process.env.CI ? [["github"], ["html"]] : [["dot"]],
     projects: PROJECTS,
     outputDir: "dist/results",
     use: {
