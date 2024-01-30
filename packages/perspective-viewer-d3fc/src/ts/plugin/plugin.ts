@@ -14,7 +14,10 @@ import "./polyfills/index";
 import charts from "../charts/charts";
 import { initialiseStyles } from "../series/colorStyles";
 import style from "../../../dist/css/perspective-viewer-d3fc.css";
-import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
+import {
+    ColumnConfig,
+    HTMLPerspectiveViewerElement,
+} from "@finos/perspective-viewer";
 
 import * as d3 from "d3";
 import { symbolsObj } from "../series/seriesSymbols";
@@ -44,6 +47,7 @@ const EXCLUDED_SETTINGS = [
     "agg_paths",
     "treemaps",
     "axisMemo",
+    "column_config",
 ];
 
 function getD3FCStyles(): string {
@@ -570,14 +574,18 @@ export function register(...plugin_names: string[]) {
                         return settings;
                     }
 
-                    restore(settings: Settings) {
-                        const new_settings = {};
+                    restore(settings: Settings, column_config: ColumnConfig) {
+                        const new_settings: Partial<Settings> = {};
                         for (const name of EXCLUDED_SETTINGS) {
                             if (this._settings?.[name] !== undefined) {
                                 new_settings[name] = this._settings?.[name];
                             }
                         }
-                        this._settings = { ...new_settings, ...settings };
+                        this._settings = {
+                            ...new_settings,
+                            ...settings,
+                            column_config,
+                        };
                     }
                 }
             );

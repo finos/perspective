@@ -12,10 +12,17 @@
 
 import type * as perspective from "@finos/perspective";
 
+export type ColumnConfig = {
+    [column_name: string]: Partial<{
+        [x in perspective.Type]: { [control_label: string]: any }; //todo: this could be better specified
+    }>;
+};
+
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
     plugin_config?: any;
+    column_config?: ColumnConfig;
 };
 
 export type RenderStats = {

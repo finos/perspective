@@ -19,45 +19,55 @@ import { make_color_record } from "../color_utils.js";
  * Restore this plugin's state from a previously saved `token`.
  *
  * @param {*} token A token returned from `save()`.
+ * @param {*} columns Viewer column settings
  */
-export function restore(token) {
+export function restore(token, columns) {
+    console.log("restore(", token, ",", columns, ")");
     token = JSON.parse(JSON.stringify(token));
+    columns = JSON.parse(JSON.stringify(columns));
     const overrides = {};
+
     if (token.columns) {
-        for (const col of Object.keys(token.columns)) {
-            const col_config = token.columns[col];
-            if (col_config.column_size_override !== undefined) {
-                overrides[col] = col_config.column_size_override;
-                delete col_config["column_size_override"];
-            }
-
-            if (col_config?.pos_fg_color) {
-                col_config.pos_fg_color = make_color_record(
-                    col_config.pos_fg_color
-                );
-                col_config.neg_fg_color = make_color_record(
-                    col_config.neg_fg_color
-                );
-            }
-
-            if (col_config?.pos_bg_color) {
-                col_config.pos_bg_color = make_color_record(
-                    col_config.pos_bg_color
-                );
-                col_config.neg_bg_color = make_color_record(
-                    col_config.neg_bg_color
-                );
-            }
-
-            if (col_config?.color) {
-                col_config.color = make_color_record(col_config.color);
-            }
-
-            if (Object.keys(col_config).length === 0) {
-                delete token.columns[col];
+        for ([col, value] in Object.entries(token.columns)) {
+            if (value.column_size_override !== undefined) {
+                overrides[col_name] = value.column_size_override;
+                delete value["column_size_override"];
             }
         }
     }
+
+    if (columns) {
+        for (const [col_name, type] of Object.entries(columns)) {
+            for (const [col_type, control] of Object.entries(type)) {
+                const value = control.styles; // temp
+                if (value?.pos_fg_color) {
+                    value.pos_fg_color = make_color_record(value.pos_fg_color);
+                    value.neg_fg_color = make_color_record(value.neg_fg_color);
+                }
+
+                if (value?.pos_bg_color) {
+                    value.pos_bg_color = make_color_record(value.pos_bg_color);
+                    value.neg_bg_color = make_color_record(value.neg_bg_color);
+                }
+
+                if (value?.color) {
+                    value.color = make_color_record(value.color);
+                }
+
+                if (Object.keys(value).length === 0) {
+                    delete type[col_type];
+                }
+            }
+            if (Object.keys(type).length === 0) {
+                delete columns[col_name];
+            } else {
+                // this removes type-based settings in order to shim into the current format
+                columns[col_name] = Object.values(type)[0].styles;
+            }
+        }
+    }
+
+    console.log("Columns after filtering:", columns);
 
     if ("editable" in token) {
         toggle_edit_mode.call(this, token.editable);
@@ -69,5 +79,5 @@ export function restore(token) {
 
     const datagrid = this.regular_table;
     restore_column_size_overrides.call(this, overrides, true);
-    datagrid[PRIVATE_PLUGIN_SYMBOL] = token.columns;
+    datagrid[PRIVATE_PLUGIN_SYMBOL] = columns;
 }

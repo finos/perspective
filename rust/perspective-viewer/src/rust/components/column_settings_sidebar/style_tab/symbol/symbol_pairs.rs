@@ -19,8 +19,6 @@ use super::symbol_config::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::row_selector::RowSelector;
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_selector::SymbolSelector;
 use crate::components::style::LocalStyle;
-use crate::config::plugin::Symbol;
-use crate::css;
 use crate::custom_elements::FilterDropDownElement;
 
 #[derive(Properties, PartialEq)]
@@ -30,7 +28,7 @@ pub struct PairsListProps {
     pub update_pairs: Callback<Vec<SymbolKVPair>>,
     pub id: Option<String>,
     pub row_dropdown: Rc<FilterDropDownElement>,
-    pub values: Vec<Symbol>,
+    pub values: Vec<String>,
     pub column_name: String,
 }
 
@@ -107,7 +105,7 @@ pub struct PairsListItemProps {
     pub pairs: Vec<SymbolKVPair>,
     pub update_pairs: Callback<Vec<SymbolKVPair>>,
     pub row_dropdown: Rc<FilterDropDownElement>,
-    pub values: Vec<Symbol>,
+    pub values: Vec<String>,
     pub focused: bool,
     pub set_focused_index: Callback<Option<usize>>,
     pub column_name: String,
@@ -158,9 +156,7 @@ impl yew::Component for PairsListItem {
         let props = ctx.props();
         let on_remove = ctx.link().callback(|_| PairListItemMsg::Remove);
         let on_key_update = ctx.link().callback(|s| PairListItemMsg::UpdateKey(Some(s)));
-        let on_value_update = ctx
-            .link()
-            .callback(|s: Symbol| PairListItemMsg::UpdateValue(s.name));
+        let on_value_update = ctx.link().callback(PairListItemMsg::UpdateValue);
 
         let remove_style =
             (ctx.props().index == ctx.props().pairs.len() - 1).then_some("visibility: hidden");

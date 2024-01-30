@@ -14,14 +14,13 @@ use itertools::Itertools;
 use yew::{function_component, html, Callback, Html, Properties};
 
 use crate::components::containers::select::{Select, SelectItem};
-use crate::config::plugin::Symbol;
 
 #[derive(Properties, PartialEq)]
 pub struct SymbolSelectorProps {
     pub index: usize,
     pub selected_value: Option<String>,
-    pub values: Vec<Symbol>,
-    pub callback: Callback<Symbol>,
+    pub values: Vec<String>,
+    pub callback: Callback<String>,
 }
 
 #[function_component(SymbolSelector)]
@@ -39,14 +38,14 @@ pub fn symbol_selector(p: &SymbolSelectorProps) -> Html {
         .find(|sym| {
             p.selected_value
                 .as_ref()
-                .map(|selected| sym.name == *selected)
+                .map(|selected| *sym == selected)
                 .unwrap_or_default()
         })
         .cloned()
         .unwrap_or_else(|| p.values.get(p.index % values.len()).cloned().unwrap());
 
     html! {
-        <Select<Symbol>
+        <Select<String>
             wrapper_class="symbol-selector-wrapper"
             class="symbol-selector"
             on_select={p.callback.clone()}

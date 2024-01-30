@@ -14,10 +14,7 @@
 //! state, suitable for persistence, history, etc. features.
 
 mod aggregates;
-// mod column_config;
-// mod column_styles;
-// mod column_styles2;
-mod column_styles3;
+mod column_styles;
 mod column_type;
 mod datetime_column_style;
 mod expressions;
@@ -29,9 +26,7 @@ mod view_config;
 mod viewer_config;
 
 pub use aggregates::*;
-// pub use column_config::*;
-// pub use column_styles2::*;
-pub use column_styles3::*;
+pub use column_styles::*;
 pub use column_type::*;
 pub use datetime_column_style::*;
 pub use expressions::*;

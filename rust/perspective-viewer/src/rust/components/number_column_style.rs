@@ -26,7 +26,7 @@ use crate::session::Session;
 use crate::utils::WeakScope;
 use crate::*;
 
-#[derive(PartialEq, Eq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Side {
     Fg,
     Bg,
@@ -34,6 +34,7 @@ pub enum Side {
 
 use Side::*;
 
+#[derive(Debug)]
 pub enum NumberColumnStyleMsg {
     Reset(
         Box<NumberColumnStyleConfig>,

@@ -14,305 +14,57 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::Type;
+use super::{
+    DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig, NumberColumnStyleConfig,
+    NumberColumnStyleDefaultConfig, StringColumnStyleConfig, StringColumnStyleDefaultConfig, Type,
+};
 
-// maps column name to type to return value
-pub type ColumnStyleMap = HashMap<String, HashMap<Type, ColumnStyleValue>>;
+/// Maps view_type to control labels to control values. Expressed in typescript:
+/// ```ts
+/// type viewer_config = {column_config: {[ty: psp.Type]: {[control_label: string]: value}}}
+///                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/// ```
+pub type ColumnStyleMap = HashMap<Type, HashMap<String, ColumnStyleValue>>;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "camelCase")]
+/// The value de/serialized and stored in the viewer config.
+/// Also passed to the plugin via `plugin.save()`.
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[serde(untagged)]
 pub enum ColumnStyleValue {
-    NumericPrecision(u32),
-    Color(Vec<String>),
-    Radio(String),
-    Dropdown(String),
-    DatetimeStringFormat(DatetimeValue),
-    KeyValuePair(String),
+    NumberColumnStyle(NumberColumnStyleConfig),
+    StringColumnStyle(StringColumnStyleConfig),
+    DatetimeColumnStyle(DatetimeColumnStyleConfig),
+    KeyValuePair(HashMap<String, String>),
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct ColumnStyleValueUpdate(ColumnStyleValue);
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-pub struct DatetimeValue {
-    // todo fill me out
+/// The controls returned by plugin.column_style_controls.
+/// This forms a layout schema to be populated in the column_settings_sidebar.
+/// ```ts
+/// type Controls = {[control_label: string]: {control: ControlName, ...control_values}}
+/// const my_controls: Controls = {"foobar": {control: "datetime-column-style", color: "#abc"}}
+/// ````
+// TODO: Rename to ColumnStyleLayout; make corresponding changes in API
+#[derive(Deserialize, PartialEq, Debug)]
+#[serde(tag = "control", rename_all = "kebab-case")]
+pub enum ColumnStyleOpts {
+    NumberColumnStyle(NumberColumnStyleDefaultConfig),
+    StringColumnStyle(StringColumnStyleDefaultConfig),
+    DatetimeColumnStyle(DatetimeColumnStyleDefaultConfig),
+    KeyValuePair {
+        keys: KvPairKeyValue,
+        values: Vec<String>,
+    },
 }
 
-/// plugin.column_style_opts(type) => {label, control, options: {}}
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct ColumnStyleOpts {
-    // TODO: Should this be the key?
-    // i.e. deserialize from `{"foo": {...}}`` instead of `[{"label": "foo", ...}]`
-    pub label: String,
-    pub control: ControlName,
-    pub options: Option<ControlOptions>,}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-#[serde(rename_all = "camelCase")]
-pub enum ControlName {
-    NumericPrecision,
-    Color,
-    Radio,
-    Dropdown,
-    DatetimeStringFormat,
-    KeyValuePair,
-}
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(untagged)]
-pub enum ControlOptions {
-    Color(ColorOpts),
-    NumericPrecision(NumericPrecisionOpts),
-    Vec(Vec<String>),
-    KvPair(KvPairOpts),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct ColorPickerOpts {
-    pub label: Option<String>,
-    pub value: String, // TODO: deserialize into a CSS color
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct ColorMode {
-    pub label: Option<String>,
-    pub colors: Vec<ColorPickerOpts>,
-    pub max: Option<ColorMaxValue>,
-    #[serde(default)]
-    pub gradient: bool,
-    // If no default is specified, the control is disabled by default.
-    #[serde(default)]
-    pub default: bool,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-#[serde(rename_all = "camelCase")]
-pub enum ColorMaxStringValue {
-    Column,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-#[serde(untagged)]
-pub enum ColorMaxValue {
-    String(ColorMaxStringValue),
-    Number(f64),
-}
-impl Default for ColorMaxValue {
-    fn default() -> Self {
-        Self::Number(0.0)
-    }
-}
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct ColorOpts {
-    pub modes: Vec<ColorMode>,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
-#[serde(rename_all = "camelCase")]
-pub enum KvPairKeyStringValue {
+#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
+#[serde(rename_all = "kebab-case")]
+pub enum KvPairKeyValue {
     Row,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[derive(Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum KvPairKeys {
-    Value(KvPairKeyStringValue),
+    String(KvPairKeyValue),
     Vec(Vec<String>),
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct KvPairOpts {
-    pub keys: KvPairKeys,
-    pub values: Vec<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct NumericPrecisionOpts {
-    pub label: String,
-    pub default: u32,
-}
-
-#[test]
-fn color_from_json() {
-    let example = serde_json::json!(
-            {
-                "label": "2",
-                "control": "color",
-                "options": {
-                    "modes": [
-                        {
-                            "label": "1",
-                            "colors": [{"label": "+", "value": "blue"}, {"label": "-", "value": "red"}],
-                            "gradient": true,
-                            "max": "column",
-                            "default": true,
-                        },
-                        {
-                            "label": "2",
-                            "colors": [{"value": "blue"}]
-                        },
-                    ],
-                }
-            }
-    );
-    let deserde: ColumnStyleOpts = serde_json::from_value(example).unwrap();
-    assert_eq!(deserde, ColumnStyleOpts {
-        label: "2".into(),
-        control: ControlName::Color,
-        options: Some(ControlOptions::Color(ColorOpts {
-            modes: vec![
-                ColorMode {
-                    label: Some("1".into()),
-                    colors: vec![
-                        ColorPickerOpts {
-                            label: Some("+".into()),
-                            value: "blue".into()
-                        },
-                        ColorPickerOpts {
-                            label: Some("-".into()),
-                            value: "red".into()
-                        }
-                    ],
-                    max: Some(ColorMaxValue::String(ColorMaxStringValue::Column)),
-                    gradient: true,
-                    default: true,
-                },
-                ColorMode {
-                    label: Some("2".into()),
-                    colors: vec![ColorPickerOpts {
-                        label: None,
-                        value: "blue".into(),
-                    }],
-                    max: None,
-                    gradient: false,
-                    default: false,
-                }
-            ]
-        }))
-    },);
-}
-
-#[test]
-fn test_deserialize_from_json() {
-    let example = serde_json::json!([
-        {
-            "label": "1",
-            "control": "numeric-precision",
-        },
-        {
-            "label": "2",
-            "control": "color",
-            "options": {
-                "modes": [
-                    {
-                        "label": "1",
-                        "colors": [{"label": "+", "value": "blue"}, {"label": "-", "value": "red"}],
-                        "gradient": true,
-                        "max": "column",
-                    },
-                    {
-                        "label": "2",
-                        "colors": [{"value": "blue"}]
-                    },
-                ],
-
-            }
-        },
-        {
-            "label": "3",
-            "control": "radio",
-            "options": ["a","b","c"]
-        },
-        {
-            "label": "4",
-            "control": "dropdown",
-            "options": ["a","b","c"]
-        },
-        {
-            "label": "5",
-            "control": "datetime-string-format",
-        },
-        {
-            "label": "6",
-            "control": "key-value-pair",
-            "options": {
-                "keys": "row",
-                "values": ["a","b","c"]
-            }
-        }
-    ]);
-    let manual_value = vec![
-        ColumnStyleOpts {
-            label: ("1".into()),
-            control: ControlName::NumericPrecision,
-            options: None,
-        },
-        ColumnStyleOpts {
-            label: ("2".into()),
-            control: ControlName::Color,
-            options: Some(ControlOptions::Color(ColorOpts {
-                modes: vec![
-                    ColorMode {
-                        label: Some("1".into()),
-                        colors: vec![
-                            ColorPickerOpts {
-                                label: Some("+".into()),
-                                value: "blue".into(),
-                            },
-                            ColorPickerOpts {
-                                label: Some("-".into()),
-                                value: "red".into(),
-                            },
-                        ],
-                        max: Some(ColorMaxValue::String(ColorMaxStringValue::Column)),
-                        gradient: true,
-                        default: false,
-                    },
-                    ColorMode {
-                        label: Some("2".into()),
-                        colors: vec![ColorPickerOpts {
-                            label: None,
-                            value: "blue".into(),
-                        }],
-                        max: None,
-                        gradient: false,
-                        default: false,
-                    },
-                ],
-            })),
-        },
-        ColumnStyleOpts {
-            label: ("3".into()),
-            control: ControlName::Radio,
-            options: Some(ControlOptions::Vec(vec![
-                "a".into(),
-                "b".into(),
-                "c".into(),
-            ])),
-        },
-        ColumnStyleOpts {
-            label: "4".into(),
-            control: ControlName::Dropdown,
-            options: Some(ControlOptions::Vec(vec![
-                "a".into(),
-                "b".into(),
-                "c".into(),
-            ])),
-        },
-        ColumnStyleOpts {
-            label: ("5".into()),
-            control: ControlName::DatetimeStringFormat,
-            options: None,
-        },
-        ColumnStyleOpts {
-            label: ("6".into()),
-            control: ControlName::KeyValuePair,
-            options: Some(ControlOptions::KvPair(KvPairOpts {
-                keys: KvPairKeys::Value(KvPairKeyStringValue::Row),
-                values: vec!["a".into(), "b".into(), "c".into()],
-            })),
-        },
-    ];
-
-    let deserde_value: Vec<ColumnStyleOpts> = serde_json::from_value(example).unwrap();
-    assert_eq!(deserde_value, manual_value);
 }

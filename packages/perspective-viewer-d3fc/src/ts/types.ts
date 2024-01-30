@@ -10,7 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { IPerspectiveViewerPlugin } from "@finos/perspective-viewer";
+import {
+    IPerspectiveViewerPlugin,
+    ColumnConfig,
+} from "@finos/perspective-viewer";
 import { DataRow, Type } from "@finos/perspective";
 
 export interface Element {
@@ -83,13 +86,6 @@ export type TreemapValue = {
     treemapRoute?: any[]; // string[]?
 };
 
-export type ColumnSettingsConfig = {
-    symbols: Record<string, string>;
-};
-export type ColumnSettings<
-    T extends Record<string, any> = ColumnSettingsConfig
-> = Record<string, T>;
-
 export type Settings = {
     hideKeys?: any[];
     agg_paths?: any; // any[]?
@@ -105,7 +101,7 @@ export type Settings = {
     splitValues: any[];
     textStyles: TextStyles;
     sunburstLevel?: any;
-    columns?: ColumnSettings;
+    column_config?: ColumnConfig;
     treemaps?: Record<string, TreemapValue>;
 };
 

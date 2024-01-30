@@ -128,8 +128,6 @@ impl Component for EditableHeader {
                 self.value = maybe_value.clone();
                 ctx.props().on_change.emit((maybe_value, self.valid));
 
-                tracing::error!("EditableHeader: SetNewValue! {:?}", self);
-
                 true
             },
             EditableHeaderMsg::OnClick(()) => {
