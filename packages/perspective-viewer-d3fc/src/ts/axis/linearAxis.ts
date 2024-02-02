@@ -14,7 +14,7 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import { flattenArray } from "./flatten";
 import { extentLinear as customExtent } from "../d3fc/extent/extentLinear";
-import valueformatter from "./valueFormatter";
+import { getValueFormatterForRange } from "./valueFormatter";
 import { getChartContainer } from "../plugin/root";
 import {
     Component,
@@ -89,7 +89,7 @@ export const labelFunction =
     (d): string =>
         d[valueName][0];
 
-export const tickFormatFunction = valueformatter;
+export const tickFormatFunction = getValueFormatterForRange;
 
 export const component = (_settings: Settings): Component => {
     let domain = null;

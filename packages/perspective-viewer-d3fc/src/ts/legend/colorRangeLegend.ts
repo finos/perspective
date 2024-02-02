@@ -13,7 +13,7 @@
 import * as d3 from "d3";
 import * as fc from "d3fc";
 import { getOrCreateElement } from "../utils/utils";
-import valueformatter from "../axis/valueFormatter";
+import { getValueFormatterForRange as getValueFormatter } from "../axis/valueFormatter";
 
 export function colorRangeLegend() {
     let scale = null;
@@ -61,6 +61,7 @@ export function colorRangeLegend() {
                 : Math.round((domain[1] + domain[0]) / 2);
         const tickValues = [...domain, middle];
 
+        let valueformatter = getValueFormatter(min, max);
         const axisLabel = fc
             .axisRight(yScale)
             .tickValues(tickValues)
