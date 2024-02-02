@@ -129,6 +129,11 @@ export const axisFactory = (settings: Settings): AxisFactory => {
             ? createComponent(axis, domain, data)
             : defaultComponent();
 
+        const tickFormatFunction =
+            axis == linear
+                ? linear.tickFormatFunction(domain[0], domain[1])
+                : undefined;
+
         return {
             scale: axis.scale(),
             domain,
@@ -143,10 +148,7 @@ export const axisFactory = (settings: Settings): AxisFactory => {
             size: component.size,
             decorate: component.decorate,
             label: settings[settingName].map((v) => v.name).join(", "),
-            // Not all Axis provide a tickFormatFunction, but currently it's expected to be
-            // undefined if not used. Ignoring this until we have a better solution.
-            // @ts-ignore
-            tickFormatFunction: axis.tickFormatFunction,
+            tickFormatFunction,
         };
     };
 
