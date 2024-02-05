@@ -44,6 +44,8 @@ impl std::fmt::Display for TypeIconType {
 #[derive(PartialEq, Properties, Debug)]
 pub struct TypeIconProps {
     pub ty: TypeIconType,
+    #[prop_or_default]
+    pub absolute: bool,
 }
 
 #[function_component(TypeIcon)]
@@ -51,7 +53,7 @@ pub fn type_icon(p: &TypeIconProps) -> yew::Html {
     html_template! {
         <LocalStyle href={css!("type-icon")} />
         <span
-            class={classes!(p.ty.to_string(), "type-icon")}
+            class={classes!(p.ty.to_string(), "type-icon", p.absolute.then_some("absolute"))}
         ></span>
     }
 }

@@ -11,19 +11,19 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 :host .type-icon {
+    &.absolute {
+        position: absolute;
+        left: 15px;
+    }
+
     height: 13px;
     width: 13px;
-    // position: absolute;
-    // left: 15px;
-    // top: 4.5px;
-    // @include icon;
     background-repeat: no-repeat;
     background-color: var(--icon--color);
     content: "";
     display: inline-block;
     -webkit-mask-size: cover;
     mask-size: cover;
-    margin-left: 5px;
     flex-shrink: 0;
 
     &.none {

@@ -404,7 +404,7 @@ impl Component for ActiveColumn {
 
                             <div class="column-selector-column-border">
 
-                                <TypeIcon ty={col_type} />
+                                <TypeIcon absolute=true ty={col_type} />
 
                                 if ctx.props().is_aggregated {
                                     <AggregateSelector
