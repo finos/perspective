@@ -81,9 +81,12 @@ perspective-viewer[settings],
     }
 }
 
-perspective-viewer regular-table table thead tr:last-child th {
-    border-bottom-width: 1px;
-    border-bottom-color: var(--inactive--border-color, #8b868045);
+perspective-viewer,
+:host-context(perspective-viewer) {
+    regular-table table thead tr:last-child th {
+        border-bottom-width: 1px;
+        border-bottom-color: var(--inactive--border-color, #8b868045);
+    }
 }
 
 .psp-sort-enabled:hover {
@@ -120,8 +123,11 @@ td:focus {
     outline-width: 1px;
 }
 
-perspective-viewer.dragging regular-table {
-    pointer-events: none;
+perspective-viewer.dragging,
+:host-context(perspective-viewer.dragging) {
+    regular-table {
+        pointer-events: none;
+    }
 }
 
 .psp-header-border:last-child {
