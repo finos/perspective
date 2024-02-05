@@ -205,7 +205,7 @@ impl Component for InactiveColumn {
                     { ondragend }>
 
                     <div class="column-selector-column-border">
-                        <TypeIcon ty={col_type} />
+                        <TypeIcon ty={ col_type }/>
                         <span class={"column_name"}>
                             { ctx.props().name.clone() }
                         </span>

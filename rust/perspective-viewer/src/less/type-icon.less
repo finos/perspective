@@ -10,20 +10,21 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+:host #selected-columns .type-icon,
+:host #sub-columns .type-icon {
+    position: absolute;
+    left: 15px;
+}
+
 :host .type-icon {
     height: 13px;
     width: 13px;
-    // position: absolute;
-    // left: 15px;
-    // top: 4.5px;
-    // @include icon;
     background-repeat: no-repeat;
     background-color: var(--icon--color);
     content: "";
     display: inline-block;
     -webkit-mask-size: cover;
     mask-size: cover;
-    margin-left: 5px;
     flex-shrink: 0;
 
     &.none {

@@ -480,7 +480,7 @@ impl Component for FilterColumn {
 
                 <LocalStyle href={ css!("filter-item") } />
                 <div class="pivot-column-border">
-                    <TypeIcon ty={Type::String} />
+                    <TypeIcon ty={ Type::String }/>
                     <span class="column_name">
                         { filter.0.to_owned() }
                     </span>

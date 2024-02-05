@@ -148,9 +148,11 @@ impl Component for EditableHeader {
         if ctx.props().editable {
             classes.push("editable");
         }
+
         if !self.valid {
             classes.push("invalid");
         }
+
         if self.edited {
             classes.push("edited");
         }
@@ -159,28 +161,30 @@ impl Component for EditableHeader {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
             EditableHeaderMsg::SetNewValue(value)
         });
+
         let onblur = ctx.link().callback(|e: FocusEvent| {
             let value = e.target_unchecked_into::<HtmlInputElement>().value();
             EditableHeaderMsg::SetNewValue(value)
         });
+
         html! {
             <div
-                class={classes}
-                onclick={ctx.link().callback(|_| EditableHeaderMsg::OnClick(()))}
-            >
+                class={ classes }
+                onclick={ ctx.link().callback(|_| EditableHeaderMsg::OnClick(())) }>
+
                 if let Some(icon) = ctx.props().icon_type {
-                    <TypeIcon ty={icon}/>
+                    <TypeIcon ty={ icon }/>
                 }
+
                 <input
-                    ref={self.noderef.clone()}
+                    ref={ self.noderef.clone() }
                     type="search"
                     class="sidebar_header_title"
-                    disabled={!ctx.props().editable}
-                    {onblur}
-                    {onkeyup}
-                    value={self.value.clone()}
-                    placeholder={self.placeholder.clone()}
-                />
+                    disabled={ !ctx.props().editable }
+                    { onblur }
+                    { onkeyup }
+                    value={ self.value.clone() }
+                    placeholder={ self.placeholder.clone() }/>
             </div>
         }
     }
