@@ -60,18 +60,19 @@ perspective-string-column-style[theme="Vaporwave"] {
 }
 
 @mixin perspective-viewer-vaporwave--datagrid {
-    regular-table {
-        --pp-color-1: rgb(9, 33, 50);
-        --pp-color-2: rgb(66, 182, 230);
-        --rt-pos-cell--color: rgb(66, 182, 230) !important;
-        --rt-hover--border-color: var(--pp-color-1) !important;
-    }
+    --pp-color-1: rgb(9, 33, 50);
+    --pp-color-2: rgb(66, 182, 230);
+    --rt-pos-cell--color: rgb(66, 182, 230) !important;
+    --rt-hover--border-color: var(--pp-color-1) !important;
 
+    // TODO: likely broken in shadow DOM
     regular-table table tbody th:empty {
-        background: linear-gradient(to right,
-                transparent 9px,
-                rgb(19, 33, 50) 10px,
-                transparent 11px);
+        background: linear-gradient(
+            to right,
+            transparent 9px,
+            rgb(19, 33, 50) 10px,
+            transparent 11px
+        );
         background-repeat: no-repeat;
         background-position: 0px -10px;
     }
@@ -93,45 +94,51 @@ perspective-string-column-style[theme="Vaporwave"] {
     --d3fc-series-9: hsl(157, 100%, 25%);
     --d3fc-series-10: hsl(272, 100%, 35%);
 
-    --d3fc-negative--gradient: linear-gradient(#f3d431,
-            #efb92d,
-            #ed9c25,
-            #eb7e20,
-            #e75d1e,
-            #d14632,
-            #b03e38,
-            #8c3a36,
-            #643633,
-            #07081d) !important;
+    --d3fc-negative--gradient: linear-gradient(
+        #f3d431,
+        #efb92d,
+        #ed9c25,
+        #eb7e20,
+        #e75d1e,
+        #d14632,
+        #b03e38,
+        #8c3a36,
+        #643633,
+        #07081d
+    ) !important;
 
-    --d3fc-positive--gradient: linear-gradient(#07081d,
-            #2e4463,
-            #1e588a,
-            #086da7,
-            #0082b9,
-            #039ac7,
-            #12b1d4,
-            #2bc8e2,
-            #3ddff0,
-            #61f4fb) !important;
+    --d3fc-positive--gradient: linear-gradient(
+        #07081d,
+        #2e4463,
+        #1e588a,
+        #086da7,
+        #0082b9,
+        #039ac7,
+        #12b1d4,
+        #2bc8e2,
+        #3ddff0,
+        #61f4fb
+    ) !important;
 
-    --d3fc-full--gradient: linear-gradient(#f3d431,
-            #efb92d,
-            #ed9c25,
-            #eb7e20,
-            #e75d1e,
-            #d14632,
-            #b03e38,
-            #8c3a36,
-            #643633,
-            #07081d,
-            #2e4463,
-            #1e588a,
-            #086da7,
-            #0082b9,
-            #039ac7,
-            #12b1d4,
-            #2bc8e2,
-            #3ddff0,
-            #61f4fb) !important;
+    --d3fc-full--gradient: linear-gradient(
+        #f3d431,
+        #efb92d,
+        #ed9c25,
+        #eb7e20,
+        #e75d1e,
+        #d14632,
+        #b03e38,
+        #8c3a36,
+        #643633,
+        #07081d,
+        #2e4463,
+        #1e588a,
+        #086da7,
+        #0082b9,
+        #039ac7,
+        #12b1d4,
+        #2bc8e2,
+        #3ddff0,
+        #61f4fb
+    ) !important;
 }

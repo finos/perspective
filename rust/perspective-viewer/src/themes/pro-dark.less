@@ -95,16 +95,12 @@ perspective-string-column-style[theme="Pro Dark"] {
     --map-category-8: rgb(221, 99, 103);
     --map-category-9: rgb(120, 104, 206);
     --map-category-10: rgb(23, 166, 123);
-    --map-gradient: linear-gradient(#dd6367 0%,
-            #242526 50%,
-            #3289c8 100%);
+    --map-gradient: linear-gradient(#dd6367 0%, #242526 50%, #3289c8 100%);
 }
 
 @mixin perspective-viewer-pro-dark--datagrid {
-    regular-table {
-        --rt-pos-cell--color: #7dc3f0;
-        --rt-neg-cell--color: #ff9485;
-    }
+    --rt-pos-cell--color: #7dc3f0;
+    --rt-neg-cell--color: #ff9485;
 }
 
 @mixin perspective-viewer-pro-dark--d3fc {
@@ -131,9 +127,11 @@ perspective-string-column-style[theme="Pro Dark"] {
     --d3fc-series-9: rgb(120, 104, 206);
     --d3fc-series-10: rgb(23, 166, 123);
 
-    --d3fc-full--gradient: linear-gradient(#dd6367 0%,
-            #242526 50%,
-            #3289c8 100%);
+    --d3fc-full--gradient: linear-gradient(
+        #dd6367 0%,
+        #242526 50%,
+        #3289c8 100%
+    );
 
     --d3fc-positive--gradient: linear-gradient(#242526 0%, #3289c8 100%);
     --d3fc-negative--gradient: linear-gradient(#dd6367 0%, #242526 100%);
