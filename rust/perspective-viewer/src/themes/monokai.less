@@ -64,7 +64,8 @@ perspective-string-column-style[theme="Monokai"] {
     --rt-neg-cell--color: #ff6188 !important;
     --rt--border-color: #444444;
 
-    // TODO: probably doesn't work with shadow DOM
+    // FIXME: broken in shadow DOM.  Can be fixed with a new custom property allowing empty header cell backgrounds
+    // to be styled
     regular-table table tbody th:empty {
         background: linear-gradient(
             to right,

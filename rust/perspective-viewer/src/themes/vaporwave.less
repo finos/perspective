@@ -65,7 +65,8 @@ perspective-string-column-style[theme="Vaporwave"] {
     --rt-pos-cell--color: rgb(66, 182, 230) !important;
     --rt-hover--border-color: var(--pp-color-1) !important;
 
-    // TODO: likely broken in shadow DOM
+    // FIXME: broken in shadow DOM.  Can be fixed with a new custom property allowing empty header cell backgrounds
+    // to be styled
     regular-table table tbody th:empty {
         background: linear-gradient(
             to right,
