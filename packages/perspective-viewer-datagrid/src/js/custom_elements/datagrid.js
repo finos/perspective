@@ -137,6 +137,10 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         this.regular_table.clear();
     }
 
-    static renderTarget = "shadow";
+    static renderTarget =
+        window.CSS?.supports &&
+        window.CSS?.supports("selector(:host-context(foo))")
+            ? "shadow"
+            : "light";
     static #sheet;
 }
