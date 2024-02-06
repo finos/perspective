@@ -33,9 +33,10 @@
         overflow: hidden;
         text-overflow: ellipsis;
         flex: 0 1 auto;
-        padding-left: 5px;
+        padding-left: 23px;
         display: inline-block;
         align-items: center;
+        line-height: normal;
 
         &:only-child {
             padding-right: 12px;
@@ -53,8 +54,8 @@
     // Inactive columns need to account for expression buttons, which won't be
     // the last child if it has a button
     #sub-columns .column-selector--spacer:last-child {
-        width: 94px;
-        flex: 0 100000000 94px;
+        width: 93px;
+        flex: 0 100000000 93px;
     }
 
     .show-aggregate .column-selector--spacer {

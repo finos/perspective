@@ -48,10 +48,9 @@ pub struct TypeIconProps {
 
 #[function_component(TypeIcon)]
 pub fn type_icon(p: &TypeIconProps) -> yew::Html {
+    let class = classes!(p.ty.to_string(), "type-icon");
     html_template! {
-        <LocalStyle href={css!("type-icon")} />
-        <span
-            class={classes!(p.ty.to_string(), "type-icon")}
-        ></span>
+        <LocalStyle href={ css!("type-icon") } />
+        <span { class }></span>
     }
 }
