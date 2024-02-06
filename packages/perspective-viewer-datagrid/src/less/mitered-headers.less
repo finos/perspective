@@ -37,11 +37,18 @@
         0px 10px 0 -9px var(--inactive--border-color, #8b868045);
 }
 
-perspective-viewer[settings],
-:host-context(perspective-viewer[settings]) {
+@mixin disabled-menu-funky-box-shadow {
     tr.rt-autosize .psp-header-leaf.psp-header-border:not(.psp-menu-enabled) {
         box-shadow: 1px 0px var(--inactive--border-color, #8b868045);
     }
+}
+
+perspective-viewer[settings] {
+    @include disabled-menu-funky-box-shadow;
+}
+
+:host-context(perspective-viewer[settings]) {
+    @include disabled-menu-funky-box-shadow;
 }
 
 .psp-header-leaf.psp-header-border {
