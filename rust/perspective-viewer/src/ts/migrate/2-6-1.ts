@@ -10,7 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import { ViewConfig } from "@finos/perspective";
 import Semver from "./semver";
+import { Options } from "../migrate";
 
 /**
  * Migrates from 2.6.1
@@ -18,9 +20,9 @@ import Semver from "./semver";
  * @param options
  * @returns
  */
-export default function migrate_2_6_1(old, options) {
+export default function migrate_2_6_1(old: any, options: Options) {
     let next_version = options.version_chain.shift();
-    if (old.version?.ge(next_version)) {
+    if (old.version?.gt(next_version)) {
         return old;
     } else if (options.warn) {
         console.warn(`Migrating 2.6.1 -> ${next_version}`);
@@ -83,3 +85,10 @@ export default function migrate_2_6_1(old, options) {
     }
     return old;
 }
+
+export type Config261 = ViewConfig & {
+    version: Semver;
+    plugin?: string;
+    settings?: boolean;
+    plugin_config?: any;
+};

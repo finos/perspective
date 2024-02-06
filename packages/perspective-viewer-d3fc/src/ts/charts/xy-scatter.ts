@@ -47,8 +47,8 @@ function overrideSymbols(settings: Settings, symbols): D3Scale {
     for (let [i, _] of domain.entries()) {
         range[i] = range[(i as number) % len];
     }
-    let maybeSymbols: Record<string, string> =
-        settings.column_config?.[symbolCol]?.string?.["Symbols"] ?? {};
+    let maybeSymbols = (settings.column_config?.[symbolCol]?.["symbols"] ??
+        {}) as Record<string, string>;
     Object.entries(maybeSymbols).forEach(([key, value]) => {
         // TODO: Define custom symbol types based on the values passed in here.
         // https://d3js.org/d3-shape/symbol#custom-symbols
@@ -189,8 +189,7 @@ xyScatter.can_render_column_styles = (type: Type, group?: string) => {
 xyScatter.column_style_controls = (type: Type, group?: string) => {
     if (type === "string" && group === "Symbol") {
         return {
-            Symbols: {
-                control: "key-value-pair",
+            symbols: {
                 keys: "row",
                 values: Object.keys(symbolsObj),
             },

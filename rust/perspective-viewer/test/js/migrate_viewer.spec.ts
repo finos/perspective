@@ -15,14 +15,15 @@ import {
     compareContentsToSnapshot,
     API_VERSION,
 } from "@finos/perspective-test";
-
-const { convert } = require("../../dist/cjs/migrate.js");
+import { PerspectiveViewerConfig } from "../../dist/esm/viewer";
+import { convert } from "../../dist/esm/migrate";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
-        const plugin = document.querySelector("perspective-viewer").children[0];
-        if (plugin.tagName === "PERSPECTIVE-VIEWER-DATAGRID") {
-            return plugin?.shadowRoot.innerHTML || "MISSING";
+        const plugin =
+            document.querySelector("perspective-viewer")?.children[0];
+        if (plugin?.tagName === "PERSPECTIVE-VIEWER-DATAGRID") {
+            return plugin?.shadowRoot?.innerHTML || "MISSING";
         } else {
             return (
                 plugin?.shadowRoot?.querySelector("#container")?.innerHTML ||
@@ -32,7 +33,22 @@ async function get_contents(page) {
     });
 }
 
-const TESTS = [
+const DEFAULT_CONFIG: PerspectiveViewerConfig = {
+    aggregates: {},
+    column_config: {},
+    columns: [],
+    expressions: {},
+    filter: [],
+    group_by: [],
+    plugin: "",
+    plugin_config: {},
+    sort: [],
+    split_by: [],
+    version: API_VERSION,
+    title: null,
+};
+
+const TESTS: [string, any, PerspectiveViewerConfig][] = [
     [
         "Bucket by year",
         {
@@ -52,6 +68,7 @@ const TESTS = [
             version: API_VERSION,
             plugin: "Y Area",
             plugin_config: {},
+            column_config: {},
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ["Ship Mode"],
             columns: ["Sales"],
@@ -82,10 +99,13 @@ const TESTS = [
         {
             version: API_VERSION,
             plugin: "Datagrid",
-            plugin_config: {
-                columns: {
-                    Sales: { number_bg_mode: "gradient", bg_gradient: 10 },
+            column_config: {
+                Sales: {
+                    styles: { number_bg_mode: "gradient", bg_gradient: 10 },
                 },
+            },
+            plugin_config: {
+                columns: {},
                 editable: false,
                 scroll_lock: true,
             },
@@ -121,13 +141,16 @@ const TESTS = [
         {
             version: API_VERSION,
             plugin: "Datagrid",
-            plugin_config: {
-                columns: {
-                    Sales: {
+            column_config: {
+                Sales: {
+                    styles: {
                         bg_gradient: 10,
                         number_bg_mode: "gradient",
                     },
                 },
+            },
+            plugin_config: {
+                columns: {},
                 editable: false,
                 scroll_lock: true,
             },
@@ -166,28 +189,24 @@ const TESTS = [
             aggregates: {},
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Datagrid",
-            plugin_config: {
-                columns: {
-                    Sales: {
+            column_config: {
+                Sales: {
+                    styles: {
                         fg_gradient: 10,
                         number_fg_mode: "bar",
                         neg_fg_color: "#115599",
                         pos_fg_color: "#115599",
                     },
                 },
+            },
+            plugin_config: {
+                columns: {},
                 editable: false,
                 scroll_lock: true,
             },
-            group_by: [],
-            split_by: [],
             columns: ["Sales"],
-            filter: [],
-            sort: [],
-            expressions: {},
-            aggregates: {},
-            title: null,
         },
     ],
     [
@@ -236,29 +255,36 @@ const TESTS = [
             title: null,
         },
         {
-            version: API_VERSION,
+            ...DEFAULT_CONFIG,
             plugin: "Datagrid",
-            plugin_config: {
-                columns: {
-                    Discount: {
+            column_config: {
+                Discount: {
+                    styles: {
                         neg_bg_color: "#780aff",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
                         pos_bg_color: "#f5ac0f",
                     },
-                    Profit: {
+                },
+                Profit: {
+                    styles: {
                         neg_bg_color: "#f50fed",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
                         pos_bg_color: "#32cd82",
                     },
-                    Sales: {
+                },
+                Sales: {
+                    styles: {
                         neg_bg_color: "#f5ac0f",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
                         pos_bg_color: "#780aff",
                     },
                 },
+            },
+            plugin_config: {
+                columns: {},
                 editable: false,
                 scroll_lock: true,
             },
@@ -271,12 +297,6 @@ const TESTS = [
                 "Order Date",
             ],
             sort: [["Sub-Category", "desc"]],
-            aggregates: {},
-            filter: [],
-            group_by: [],
-            expressions: {},
-            split_by: [],
-            title: null,
         },
     ],
     [
@@ -298,28 +318,95 @@ const TESTS = [
             aggregates: {},
         },
         {
+            ...DEFAULT_CONFIG,
             version: API_VERSION,
             plugin: "X/Y Scatter",
-            plugin_config: {
-                columns: {
-                    Region: {
-                        symbols: {
-                            Central: "circle",
-                        },
+            column_config: {
+                Region: {
+                    Symbols: {
+                        Central: "circle",
                     },
                 },
             },
-            title: null,
-            group_by: [],
-            split_by: [],
             columns: ["'hello'", "expr"],
-            filter: [],
-            sort: [],
             expressions: {
                 expr: "1+1",
                 "'hello'": "'hello'",
             },
-            aggregates: {},
+        },
+    ],
+    [
+        "From 2.7.1 - Datagrid",
+        {
+            ...DEFAULT_CONFIG,
+            version: "2.7.1",
+            plugin: "Datagrid",
+            plugin_config: {
+                columns: {
+                    "Row ID": {
+                        column_width_override: 100,
+                        neg_bg_color: "#000",
+                        number_bg_mode: "color",
+                        pos_bg_color: "#fff",
+                    },
+                },
+                editable: true,
+                scroll_lock: false,
+            },
+            columns: ["Row ID"],
+        },
+        {
+            ...DEFAULT_CONFIG,
+            plugin: "Datagrid",
+            column_config: {
+                "Row ID": {
+                    styles: {
+                        neg_bg_color: "#000",
+                        number_bg_mode: "color",
+                        pos_bg_color: "#fff",
+                    },
+                },
+            },
+            plugin_config: {
+                columns: {
+                    "Row ID": {
+                        column_width_override: 100,
+                    },
+                },
+                editable: true,
+                scroll_lock: false,
+            },
+            columns: ["Row ID"],
+        },
+    ],
+    [
+        "From 2.7.1 - X/Y Scatter",
+        {
+            ...DEFAULT_CONFIG,
+            version: "2.7.1",
+            plugin: "X/Y Scatter",
+            plugin_config: {
+                columns: {
+                    Category: {
+                        symbols: {
+                            Furniture: "star",
+                        },
+                    },
+                },
+            },
+            columns: ["Row ID", "City", null, null, "Category"],
+        },
+        {
+            ...DEFAULT_CONFIG,
+            plugin: "X/Y Scatter",
+            column_config: {
+                Category: {
+                    Symbols: {
+                        Furniture: "star",
+                    },
+                },
+            },
+            columns: ["Row ID", "City", null, null, "Category"],
         },
     ],
 ];
@@ -332,7 +419,7 @@ test.beforeEach(async ({ page }) => {
         }
     });
     await page.evaluate(async () => {
-        await document.querySelector("perspective-viewer").restore({
+        await document?.querySelector("perspective-viewer")?.restore({
             plugin: "Datagrid",
         });
     });
@@ -342,12 +429,10 @@ test.describe("Migrate Viewer", () => {
     test.describe("Viewer config migrations", () => {
         for (const [name, old, current] of TESTS) {
             test(`Migrate '${name}'`, async ({ page }) => {
-                const converted = convert(
-                    JSON.parse(JSON.stringify(old), { warn: true }),
-                    {
-                        replace_defaults: true,
-                    }
-                );
+                const converted = convert(JSON.parse(JSON.stringify(old)), {
+                    replace_defaults: true,
+                    verbose: true,
+                });
                 expect(converted).toEqual(current);
             });
         }
@@ -359,9 +444,10 @@ test.describe("Migrate Viewer", () => {
             test(`restore '${name}'`, async ({ page }) => {
                 const converted = convert(JSON.parse(JSON.stringify(old)), {
                     replace_defaults: true,
-                });
+                }) as PerspectiveViewerConfig;
                 const config = await page.evaluate(async (old) => {
-                    const viewer = document.querySelector("perspective-viewer");
+                    const viewer =
+                        document.querySelector("perspective-viewer")!;
                     await viewer.getTable();
                     old.settings = true;
                     await viewer.restore(old);

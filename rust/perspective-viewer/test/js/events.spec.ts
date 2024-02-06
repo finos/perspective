@@ -74,6 +74,7 @@ test.describe("Events", () => {
             aggregates: {},
             split_by: [],
             columns: ["Profit", "Sales"],
+            column_config: {},
             expressions: {},
             filter: [],
             plugin: "Debug",

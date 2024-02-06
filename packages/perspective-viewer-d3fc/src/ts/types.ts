@@ -12,7 +12,7 @@
 
 import {
     IPerspectiveViewerPlugin,
-    ColumnConfig,
+    PerspectiveColumnConfig,
 } from "@finos/perspective-viewer";
 import { DataRow, Type } from "@finos/perspective";
 
@@ -101,7 +101,7 @@ export type Settings = {
     splitValues: any[];
     textStyles: TextStyles;
     sunburstLevel?: any;
-    column_config?: ColumnConfig;
+    column_config?: PerspectiveColumnConfig;
     treemaps?: Record<string, TreemapValue>;
 };
 

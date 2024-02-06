@@ -23,7 +23,7 @@ use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
-use crate::config::{ColumnStyleOpts, ColumnStyleValue, Type, ViewConfigUpdate};
+use crate::config::{ColumnConfigValuesUpdate, Type, ViewConfigUpdate};
 use crate::custom_events::CustomEvents;
 use crate::model::{PluginColumnStyles, UpdateAndRender};
 use crate::presentation::Presentation;
@@ -45,19 +45,12 @@ pub struct StyleTabProps {
 derive_model!(Session, Renderer, Presentation, CustomEvents for StyleTabProps);
 
 impl StyleTabProps {
-    fn send_plugin_config(
-        &self,
-        column_name: String,
-        label: String,
-        config: Option<ColumnStyleValue>,
-    ) {
+    fn send_plugin_config(&self, update: ColumnConfigValuesUpdate) {
         clone!(props = self);
         ApiFuture::spawn(async move {
-            // unwrapping the type is safe, we're guaranteed to have a view type by now
-            let detail = serde_wasm_bindgen::to_value(&config).unwrap();
             props
                 .presentation
-                .update_column_styles(column_name, props.ty.unwrap(), label, config);
+                .update_column_config_value(props.column_name.clone(), update);
             let column_configs = props.presentation.all_column_configs();
             let plugin_config = props.renderer.get_active_plugin()?.save();
             props
@@ -65,6 +58,7 @@ impl StyleTabProps {
                 .get_active_plugin()?
                 .restore(&plugin_config, Some(&column_configs));
             props.update_and_render(ViewConfigUpdate::default()).await?;
+            let detail = serde_wasm_bindgen::to_value(&column_configs).unwrap();
             props.custom_events.dispatch_column_style_changed(&detail);
             Ok(())
         })
@@ -73,75 +67,77 @@ impl StyleTabProps {
 
 #[function_component]
 pub fn StyleTab(props: &StyleTabProps) -> Html {
-    let on_change = yew::use_callback(
-        props.clone(),
-        |(label, config): (String, Option<ColumnStyleValue>), props| {
-            props.send_plugin_config(props.column_name.clone(), label, config);
-        },
-    );
+    let on_change = yew::use_callback(props.clone(), |config, props| {
+        props.send_plugin_config(config);
+    });
+    let config = props.presentation.get_column_config(&props.column_name);
+    let components = props
+        .get_column_style_control_options(&props.column_name)
+        .map(|opts| {
+            let mut components = vec![];
 
-    let control_opts = props.get_column_style_control_options(&props.column_name);
-    let components = match control_opts {
-        Ok(opts) => opts
-            .into_iter()
-            .map(|(label, layout)| {
-                let on_change = {
-                    clone!(label);
-                    on_change.reform(move |config| {(label.clone(), config)})
-                };
-                match layout {
-                    ColumnStyleOpts::NumberColumnStyle(default_config) => {
-                        html! {
-                            <NumberColumnStyle
-                                session={props.session.clone()}
-                                column_name={props.column_name.clone()}
-                                config={None}
-                                {default_config}
-                                {on_change} />
-                        }
-                    },
-                    ColumnStyleOpts::StringColumnStyle(default_config) => {
-                        html! {
-                            <StringColumnStyle config={None} {default_config} {on_change} />
-                        }
-                    },
-                    ColumnStyleOpts::DatetimeColumnStyle(default_config) => {
-                        let enable_time_config = props.ty.unwrap() == Type::Datetime;
-                        html! {
-                            <DatetimeColumnStyle {enable_time_config} config={None} {default_config} {on_change} />
-                        }
-                    },
-                    ColumnStyleOpts::KeyValuePair { keys, values } => {
-                        let current_config = props.presentation.get_column_styles(&props.column_name);
-                        let restored_config = current_config.and_then(|config| {
-                            let value = config.get(props.ty.as_ref().unwrap())?.get(&label)?.clone();
-                            if let ColumnStyleValue::KeyValuePair(val) = value {
-                                Some(val)
-                            } else {
-                                None
-                            }
-                        }).unwrap_or_default();
-                        
-                        html! {
-                            <SymbolStyle
-                                {keys}
-                                {values}
-                                {restored_config}
-                                {on_change}
-                                column_name={props.column_name.clone()}
-                                session={props.session.clone()}
-                                />
-                        }
-                    }
-                }
-            })
-            .collect::<Html>(),
-        Err(e) => {
-            html! {
-                <Stub message="No plugin styles available" error={format!("{e:?}")} />
+            if let Some(default_config) = opts.datagrid_number_style {
+                let config = config
+                    .as_ref()
+                    .and_then(|config| config.datagrid_number_style.clone());
+                components.push(html! {
+                    <NumberColumnStyle
+                        session={props.session.clone()}
+                        column_name={props.column_name.clone()}
+                        {config}
+                        {default_config}
+                        on_change={on_change.clone()}
+                    />
+                });
             }
-        },
-    };
+            if let Some(default_config) = opts.datagrid_string_style {
+                let config = config
+                    .as_ref()
+                    .and_then(|config| config.datagrid_string_style.clone());
+                components.push(html! {
+                    <StringColumnStyle {config} {default_config} on_change={on_change.clone()} />
+                });
+            }
+
+            if let Some(default_config) = opts.datagrid_datetime_style {
+                let config = config
+                    .as_ref()
+                    .and_then(|config| config.datagrid_datetime_style.clone());
+                let enable_time_config = props.ty.unwrap() == Type::Datetime;
+                components.push(html! {
+                    <DatetimeColumnStyle
+                        {enable_time_config}
+                        {config}
+                        {default_config}
+                        on_change={on_change.clone()}
+                    />
+                })
+            }
+
+            if let Some(default_config) = opts.symbols {
+                let restored_config = config
+                    .as_ref()
+                    .and_then(|config| config.symbols.clone())
+                    .unwrap_or_default();
+
+                components.push(html! {
+                    <SymbolStyle
+                        {default_config}
+                        {restored_config}
+                        {on_change}
+                        column_name={props.column_name.clone()}
+                        session={props.session.clone()}
+                    />
+                })
+            }
+
+            components
+        })
+        .unwrap_or_else(|error| {
+            vec![html! {
+                <Stub message="Could not render column styles" error={Some(format!("{error:?}"))} />
+            }]
+        });
 
     html! {
         <div

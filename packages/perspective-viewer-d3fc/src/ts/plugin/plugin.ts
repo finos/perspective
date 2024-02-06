@@ -15,7 +15,7 @@ import charts from "../charts/charts";
 import { initialiseStyles } from "../series/colorStyles";
 import style from "../../../dist/css/perspective-viewer-d3fc.css";
 import {
-    ColumnConfig,
+    PerspectiveColumnConfig,
     HTMLPerspectiveViewerElement,
 } from "@finos/perspective-viewer";
 
@@ -574,7 +574,10 @@ export function register(...plugin_names: string[]) {
                         return settings;
                     }
 
-                    restore(settings: Settings, column_config: ColumnConfig) {
+                    restore(
+                        settings: Settings,
+                        column_config: PerspectiveColumnConfig
+                    ) {
                         const new_settings: Partial<Settings> = {};
                         for (const name of EXCLUDED_SETTINGS) {
                             if (this._settings?.[name] !== undefined) {

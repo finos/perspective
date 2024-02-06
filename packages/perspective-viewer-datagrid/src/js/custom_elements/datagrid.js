@@ -15,7 +15,6 @@ import { restore } from "../plugin/restore.js";
 import { save } from "../plugin/save";
 import { draw } from "../plugin/draw";
 import column_style_controls from "../plugin/column_style_controls.js";
-import getDefaultConfig from "../default_config.js";
 import datagridStyles from "../../../dist/css/perspective-viewer-datagrid.css";
 
 /**

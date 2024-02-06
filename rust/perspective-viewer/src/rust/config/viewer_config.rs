@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::str::FromStr;
 use std::sync::LazyLock;
@@ -23,6 +24,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 use super::view_config::*;
+use super::ColumnConfigValues;
 use crate::presentation::ColumnConfigMap;
 use crate::utils::*;
 
@@ -230,7 +232,7 @@ pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
 pub type VersionUpdate = OptionalUpdate<String>;
-pub type ColumnConfigUpdate = OptionalUpdate<ColumnConfigMap>;
+pub type ColumnConfigUpdate = OptionalUpdate<HashMap<String, ColumnConfigValues>>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {

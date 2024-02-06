@@ -14,115 +14,178 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-/// This struct describes global column style configurations.
-/// Global column configurations are column configurations that apply to the
-/// column regardless of which plugin it is instantiated in. These styles stick
-/// with the column regardless of its active state.
-/// ```
-/// viewer_config: {column_config: {column_name: {type: properties}}}
-///                                               ^^^^^^^^^^^^^^^^   
-/// ```
-#[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
+use super::{
+    DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig, NumberColumnStyleConfig,
+    NumberColumnStyleDefaultConfig, StringColumnStyleConfig, StringColumnStyleDefaultConfig,
+};
+
+/// The value de/serialized and stored in the viewer config.
+/// Also passed to the plugin via `plugin.save()`.
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default)]
+pub struct ColumnConfigValues {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub datagrid_number_style: Option<NumberColumnStyleConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub datagrid_string_style: Option<StringColumnStyleConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub datagrid_datetime_style: Option<DatetimeColumnStyleConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub symbols: Option<HashMap<String, String>>,
+}
+
+/// Updates the ColumnConfig. If the outer option is set, then the config value
+/// will be updated. Otherwise it will be ignored.
+/// This type is essentially a `Partial<ColumnConfig>`, or a builder for
+/// ColumnConfig.
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default)]
+pub struct ColumnConfigValuesUpdate {
+    pub datagrid_number_style: Option<Option<NumberColumnStyleConfig>>,
+    pub datagrid_string_style: Option<Option<StringColumnStyleConfig>>,
+    pub datagrid_datetime_style: Option<Option<DatetimeColumnStyleConfig>>,
+    pub symbols: Option<Option<HashMap<String, String>>>,
+}
+impl ColumnConfigValues {
+    pub fn update(self, update: ColumnConfigValuesUpdate) -> Self {
+        ColumnConfigValues {
+            datagrid_number_style: update
+                .datagrid_number_style
+                .and_then(|x| x)
+                .or(self.datagrid_number_style),
+            datagrid_string_style: update
+                .datagrid_string_style
+                .and_then(|x| x)
+                .or(self.datagrid_string_style),
+            datagrid_datetime_style: update
+                .datagrid_datetime_style
+                .and_then(|x| x)
+                .or(self.datagrid_datetime_style),
+            symbols: update.symbols.and_then(|x| x).or(self.symbols),
+        }
+    }
+}
+
+/// The controls returned by plugin.column_style_controls.
+/// This is a way to fill out default values for the given controls.
+/// If a control is not given, it will not be rendered. I would like to
+/// eventually show these as inactive values.
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default)]
+pub struct ColumnStyleOpts {
+    pub datagrid_number_style: Option<NumberColumnStyleDefaultConfig>,
+    pub datagrid_string_style: Option<StringColumnStyleDefaultConfig>,
+    pub datagrid_datetime_style: Option<DatetimeColumnStyleDefaultConfig>,
+    pub symbols: Option<KeyValueOpts>,
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+pub enum KvPairKeyValue {
+    Row,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
-pub enum ColumnConfig {
-    Float(FloatColumnConfig),
-    Int(IntColumnConfig),
-    Bool(BoolColumnConfig),
-    String(StringColumnConfig),
-    Date(DateColumnConfig),
-    Datetime(DatetimeColumnConfig),
+pub enum KvPairKeys {
+    String(KvPairKeyValue),
+    Vec(Vec<String>),
 }
-impl ColumnConfig {
-    // If types match, update the values.
-    // Otherwise, just use the updated value.
-    pub fn update(self, other: ColumnConfigValueUpdate) -> Self {
-        match (self, other.0) {
-            (Self::Float(this), Self::Float(other)) => Self::Float(this.update(other)),
-            (Self::Int(this), Self::Int(other)) => Self::Int(this.update(other)),
-            (Self::Bool(this), Self::Bool(other)) => Self::Bool(this.update(other)),
-            (Self::String(this), Self::String(other)) => Self::String(this.update(other)),
-            (Self::Date(this), Self::Date(other)) => Self::Date(this.update(other)),
-            (Self::Datetime(this), Self::Datetime(other)) => Self::Datetime(this.update(other)),
-            (_, other) => other,
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct KeyValueOpts {
+    pub keys: KvPairKeys,
+    pub values: Vec<String>,
+}
+
+#[test]
+fn serialize_layout() {
+    let default_color = "#abc".to_string();
+    let original = ColumnConfigValues {
+        datagrid_number_style: Some(NumberColumnStyleConfig {
+            number_fg_mode: crate::config::NumberForegroundMode::Bar,
+            number_bg_mode: crate::config::NumberBackgroundMode::Gradient,
+            fixed: Some(3),
+            pos_fg_color: Some(default_color.clone()),
+            neg_fg_color: Some(default_color.clone()),
+            pos_bg_color: None,
+            neg_bg_color: None,
+            fg_gradient: Some(1.),
+            bg_gradient: Some(2.),
+        }),
+        datagrid_string_style: Some(StringColumnStyleConfig {
+            format: Some(crate::config::FormatMode::Italics),
+            string_color_mode: Some(crate::config::StringColorMode::Foreground),
+            color: Some(default_color.clone()),
+        }),
+        datagrid_datetime_style: Some(DatetimeColumnStyleConfig {
+            _format: crate::config::DatetimeFormatType::Simple(
+                crate::config::SimpleDatetimeStyleConfig {
+                    date_style: crate::config::SimpleDatetimeFormat::Long,
+                    time_style: crate::config::SimpleDatetimeFormat::Medium,
+                },
+            ),
+            time_zone: Some(default_color.to_string()),
+            datetime_color_mode: Some(crate::config::DatetimeColorMode::Background),
+            color: Some(default_color.to_string()),
+        }),
+        symbols: Some(HashMap::from_iter([
+            ("a".into(), "b".into()),
+            ("c".into(), "d".into()),
+        ])),
+    };
+    let json = serde_json::to_string(&original).unwrap();
+    let new: ColumnConfigValues = serde_json::from_str(&json).unwrap();
+    assert_eq!(new, original);
+}
+
+#[test]
+fn deserialize_layout() {
+    let default_color = "#abc".to_string();
+    let opts = ColumnStyleOpts {
+        datagrid_number_style: Some(NumberColumnStyleDefaultConfig {
+            fg_gradient: 1.,
+            bg_gradient: 1.,
+            fixed: 3,
+            pos_fg_color: default_color.clone(),
+            neg_fg_color: default_color.clone(),
+            pos_bg_color: default_color.clone(),
+            neg_bg_color: default_color.clone(),
+            number_fg_mode: crate::config::NumberForegroundMode::Bar,
+            number_bg_mode: crate::config::NumberBackgroundMode::Gradient,
+        }),
+        datagrid_string_style: Some(StringColumnStyleDefaultConfig {
+            color: default_color.clone(),
+        }),
+        datagrid_datetime_style: Some(DatetimeColumnStyleDefaultConfig {
+            color: default_color.clone(),
+        }),
+        symbols: Some(KeyValueOpts {
+            keys: KvPairKeys::String(KvPairKeyValue::Row),
+            values: vec!["1".into(), "2".into()],
+        }),
+    };
+
+    let json_layout = serde_json::json!({
+        "datagrid_number_style": {
+            "fg_gradient": 1,
+            "bg_gradient": 1.,
+            "fixed": 3,
+            "pos_bg_color": default_color,
+            "neg_bg_color": default_color,
+            "pos_fg_color": default_color,
+            "neg_fg_color": default_color,
+            "number_fg_mode": "bar",
+            "number_bg_mode": "gradient",
+        },
+        "datagrid_string_style": {
+            "color": default_color,
+        },
+        "datagrid_datetime_style": {
+            "color": default_color,
+        },
+        "symbols": {
+            "keys": "row",
+            "values": ["1","2"]
         }
-    }
-}
-pub struct ColumnConfigValueUpdate(pub ColumnConfig);
-pub type ColumnConfigMap = HashMap<String, ColumnConfig>;
+    });
 
-pub trait ColumnConfigTrait {
-    fn update(self, other: Self) -> Self;
-}
-
-// More complex options can be encapsulated in structs and shared
-// across configs. These should probably get their own mod.
-// #[derive(Serialize, Deserialize)]
-// pub struct FontConfig {
-//     pub font: Option<String>,
-//     pub font_size: Option<String>,
-//     pub bold: Option<bool>,
-//     pub italic: Option<bool>,
-//     pub underline: Option<bool>,
-//     pub color: Option<ColorConfig>,
-// }
-
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
-pub struct FloatColumnConfig {
-    #[serde(rename = "numeric-precision")]
-    pub precision: Option<u32>,
-}
-impl ColumnConfigTrait for FloatColumnConfig {
-    fn update(self, other: FloatColumnConfig) -> Self {
-        Self {
-            precision: other.precision.or(self.precision),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
-pub struct IntColumnConfig {
-    #[serde(rename = "numeric-precision")]
-    pub precision: Option<u32>,
-}
-impl ColumnConfigTrait for IntColumnConfig {
-    fn update(self, other: IntColumnConfig) -> Self {
-        Self {
-            precision: other.precision.or(self.precision),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
-pub struct BoolColumnConfig {}
-impl ColumnConfigTrait for BoolColumnConfig {
-    fn update(self, _other: Self) -> Self {
-        Self {}
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
-pub struct StringColumnConfig {
-    // #[serde(flatten)]
-    // pub font_config: FontConfig
-}
-impl ColumnConfigTrait for StringColumnConfig {
-    fn update(self, _other: Self) -> Self {
-        Self {}
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
-pub struct DateColumnConfig {}
-impl ColumnConfigTrait for DateColumnConfig {
-    fn update(self, _other: Self) -> Self {
-        Self {}
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Default, Clone, Debug)]
-pub struct DatetimeColumnConfig {}
-impl ColumnConfigTrait for DatetimeColumnConfig {
-    fn update(self, _other: Self) -> Self {
-        Self {}
-    }
+    let deserded: ColumnStyleOpts = serde_json::from_value(json_layout).unwrap();
+    assert_eq!(deserded, opts);
 }

@@ -24,23 +24,24 @@ use yew::{html, Callback, Html, Properties};
 use self::symbol_config::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_pairs::PairsList;
 use crate::components::style::LocalStyle;
-use crate::config::{ColumnStyleValue, KvPairKeyValue};
+use crate::config::{ColumnConfigValuesUpdate, KeyValueOpts};
 use crate::custom_elements::FilterDropDownElement;
 use crate::session::Session;
 use crate::{css, html_template};
-
-pub fn next_default_symbol(values: &Vec<String>, pairs_len: usize) -> String {
-    values.get(pairs_len % values.len()).cloned().unwrap()
-}
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct SymbolAttrProps {
     pub session: Session,
     pub column_name: String,
-    pub restored_config: HashMap<String, String>,
-    pub on_change: Callback<Option<ColumnStyleValue>>,
-    pub keys: KvPairKeyValue,
-    pub values: Vec<String>,
+    pub restored_config: Option<HashMap<String, String>>,
+    pub on_change: Callback<ColumnConfigValuesUpdate>,
+    pub default_config: KeyValueOpts,
+}
+impl SymbolAttrProps {
+    pub fn next_default_symbol(&self, pairs_len: usize) -> String {
+        let values = &self.default_config.values;
+        values.get(pairs_len % values.len()).cloned().unwrap()
+    }
 }
 
 pub enum SymbolAttrMsg {
@@ -57,17 +58,23 @@ impl yew::Component for SymbolStyle {
     type Properties = SymbolAttrProps;
 
     fn create(ctx: &yew::Context<Self>) -> Self {
-        let mut pairs = ctx
+        let pairs = ctx
             .props()
             .restored_config
-            .iter()
-            .map(|(key, value)| SymbolKVPair::new(Some(key.to_owned()), value.to_owned()))
-            .collect_vec();
+            .as_ref()
+            .map(|restored_config| {
+                let mut pairs = restored_config
+                    .iter()
+                    .map(|(key, value)| SymbolKVPair::new(Some(key.to_owned()), value.to_owned()))
+                    .collect_vec();
 
-        pairs.push(SymbolKVPair::new(
-            None,
-            next_default_symbol(&ctx.props().values, pairs.len()),
-        ));
+                pairs.push(SymbolKVPair::new(
+                    None,
+                    ctx.props().next_default_symbol(pairs.len()),
+                ));
+                pairs
+            })
+            .unwrap_or_default();
         let row_dropdown = Rc::new(FilterDropDownElement::new(ctx.props().session.clone()));
         Self {
             pairs,
@@ -83,9 +90,11 @@ impl yew::Component for SymbolStyle {
                     .into_iter()
                     .filter_map(|pair| Some((pair.key?, pair.value)))
                     .collect::<HashMap<_, _>>();
-                ctx.props()
-                    .on_change
-                    .emit(Some(ColumnStyleValue::KeyValuePair(symbols)));
+                let update = Some(symbols).filter(|x| !x.is_empty());
+                ctx.props().on_change.emit(ColumnConfigValuesUpdate {
+                    symbols: Some(update),
+                    ..Default::default()
+                });
 
                 let has_last_key = new_pairs
                     .last()
@@ -93,7 +102,7 @@ impl yew::Component for SymbolStyle {
                     .unwrap_or_default();
 
                 if has_last_key {
-                    let val = next_default_symbol(&ctx.props().values, new_pairs.len());
+                    let val = ctx.props().next_default_symbol(new_pairs.len());
                     new_pairs.push(SymbolKVPair::new(None, val))
                 }
 
@@ -113,7 +122,7 @@ impl yew::Component for SymbolStyle {
                 pairs={ self.pairs.clone() }
                 row_dropdown={ self.row_dropdown.clone() }
                 column_name={ ctx.props().column_name.clone() }
-                values={ ctx.props().values.clone() }
+                values={ ctx.props().default_config.values.clone() }
                 { update_pairs }/>
         }
     }

@@ -23,8 +23,7 @@ use yew::html::ImplicitClone;
 
 use crate::components::column_settings_sidebar::ColumnSettingsTab;
 use crate::components::viewer::ColumnLocator;
-use crate::config::{ColumnConfigUpdate, ColumnStyleMap, ColumnStyleValue, Type};
-use crate::maybe;
+use crate::config::{ColumnConfigUpdate, ColumnConfigValues, ColumnConfigValuesUpdate};
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -64,8 +63,7 @@ impl OpenColumnSettings {
     }
 }
 
-pub type ColumnConfigMap = HashMap<String, ColumnStyleMap>;
-
+pub type ColumnConfigMap = HashMap<String, ColumnConfigValues>;
 pub struct PresentationHandle {
     viewer_elem: HtmlElement,
     theme_data: Mutex<ThemeData>,
@@ -247,11 +245,11 @@ impl Presentation {
     }
 
     /// Gets a clone of the ColumnConfig for the given column name.
-    pub fn get_column_styles(&self, column_name: &str) -> Option<ColumnStyleMap> {
+    pub fn get_column_config(&self, column_name: &str) -> Option<ColumnConfigValues> {
         self.column_config.borrow().get(column_name).cloned()
     }
 
-    /// Updates the entire column config struct.
+    /// Updates the entire column config struct. (like from a restore() call)
     pub fn update_column_configs(&self, update: ColumnConfigUpdate) {
         match update {
             crate::config::OptionalUpdate::SetDefault => {
@@ -260,66 +258,27 @@ impl Presentation {
             },
             crate::config::OptionalUpdate::Missing => {},
             crate::config::OptionalUpdate::Update(update) => {
-                for (col_name, style_map) in update.into_iter() {
-                    for (ty, controls) in style_map.into_iter() {
-                        for (control_label, value) in controls.into_iter() {
-                            self.update_column_styles(
-                                col_name.clone(),
-                                ty,
-                                control_label,
-                                Some(value),
-                            );
-                        }
-                    }
+                for (col_name, new_config) in update.into_iter() {
+                    let update = ColumnConfigValuesUpdate {
+                        datagrid_number_style: new_config.datagrid_number_style.map(Some),
+                        datagrid_string_style: new_config.datagrid_string_style.map(Some),
+                        datagrid_datetime_style: new_config.datagrid_datetime_style.map(Some),
+                        symbols: new_config.symbols.map(Some),
+                    };
+                    self.update_column_config_value(col_name, update)
                 }
             },
         }
     }
 
-    /// Updates a single column configuration value.
-    pub fn update_column_styles(
+    pub fn update_column_config_value(
         &self,
         column_name: String,
-        view_type: Type,
-        control_label: String,
-        value: Option<ColumnStyleValue>,
+        update: ColumnConfigValuesUpdate,
     ) {
         let mut config = self.column_config.borrow_mut();
-
-        if let Some(value) = value {
-            config
-                .entry(column_name)
-                .or_default()
-                .entry(view_type)
-                .or_default()
-                .insert(control_label, value);
-        } else {
-            maybe!({
-                let column_map = config.get_mut(&column_name)?;
-                let view_map = column_map.get_mut(&view_type)?;
-                view_map.remove(&control_label);
-                if view_map.is_empty() {
-                    column_map.remove(&view_type);
-                }
-                if column_map.is_empty() {
-                    config.remove(&column_name);
-                }
-                Some(())
-            });
-        }
-
-        // if let Some(value) = value {
-        //     if let Some(mut current_config) = config.remove(column_name) {
-        //         current_config.insert(view_type, value);
-        //         config.insert(column_name.to_string(), current_config);
-        //     } else {
-        //         config.insert(column_name.to_string(),
-        // HashMap::from([(view_type, value)]));     }
-        // } else if let Some(mut current_config) = config.remove(column_name) {
-        //     if let Some(mut map) = current_config.get_mut(&view_type) {
-        //         // map.remove()
-        //     }
-        // }
+        let value = config.remove(&column_name).unwrap_or_default();
+        config.insert(column_name, value.update(update));
     }
 }
 

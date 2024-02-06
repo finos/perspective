@@ -10,14 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// TODO: This is a bad example of how to use the new API,
-// but we're using the current implementation as individual mega-controls
-// to make the process easier for now.
+/**
+ * @param {import("@finos/perspective").Type} type
+ * @param {string} _group
+ * @returns {import("@finos/perspective-viewer").PerspectiveColumnConfigValue}
+ */
 export default function column_style_opts(type, _group) {
     if (type === "integer" || type === "float")
         return {
-            styles: {
-                control: `number-column-style`,
+            datagrid_number_style: {
                 fg_gradient: 0,
                 pos_fg_color: this.model._pos_fg_color[0],
                 neg_fg_color: this.model._neg_fg_color[0],
@@ -29,17 +30,18 @@ export default function column_style_opts(type, _group) {
                 fixed: type === "float" ? 2 : 0,
             },
         };
-    else {
+    else if (type === "date" || type === "datetime" || type === "string") {
         let control =
             type === "date" || type === "datetime"
-                ? "datetime-column-style"
-                : `${type}-column-style`;
+                ? "datagrid_datetime_style"
+                : `datagrid_string_style`;
         return {
-            styles: {
-                control,
+            [control]: {
                 color: this.model._color[0],
                 bg_color: this.model._color[0],
             },
         };
+    } else {
+        return null;
     }
 }

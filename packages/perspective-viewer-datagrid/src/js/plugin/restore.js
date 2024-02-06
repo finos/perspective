@@ -19,10 +19,9 @@ import { make_color_record } from "../color_utils.js";
  * Restore this plugin's state from a previously saved `token`.
  *
  * @param {*} token A token returned from `save()`.
- * @param {*} columns Viewer column settings
+ * @param {import("@finos/perspective-viewer").PerspectiveColumnConfig} columns Viewer column settings
  */
 export function restore(token, columns) {
-    console.log("restore(", token, ",", columns, ")");
     token = JSON.parse(JSON.stringify(token));
     columns = JSON.parse(JSON.stringify(columns));
     const overrides = {};
@@ -36,38 +35,45 @@ export function restore(token, columns) {
         }
     }
 
+    let styles = {};
     if (columns) {
-        for (const [col_name, type] of Object.entries(columns)) {
-            for (const [col_type, control] of Object.entries(type)) {
-                const value = control.styles; // temp
-                if (value?.pos_fg_color) {
-                    value.pos_fg_color = make_color_record(value.pos_fg_color);
-                    value.neg_fg_color = make_color_record(value.neg_fg_color);
-                }
-
-                if (value?.pos_bg_color) {
-                    value.pos_bg_color = make_color_record(value.pos_bg_color);
-                    value.neg_bg_color = make_color_record(value.neg_bg_color);
-                }
-
-                if (value?.color) {
-                    value.color = make_color_record(value.color);
-                }
-
-                if (Object.keys(value).length === 0) {
-                    delete type[col_type];
-                }
-            }
-            if (Object.keys(type).length === 0) {
-                delete columns[col_name];
-            } else {
-                // this removes type-based settings in order to shim into the current format
-                columns[col_name] = Object.values(type)[0].styles;
+        for (const [col_name, controls] of Object.entries(columns)) {
+            if (controls?.datagrid_number_style) {
+                const control = controls?.datagrid_number_style;
+                styles[col_name] = {
+                    ...control,
+                    pos_fg_color: control.pos_fg_color
+                        ? make_color_record(control.pos_fg_color)
+                        : undefined,
+                    neg_fg_color: control.neg_fg_color
+                        ? make_color_record(control.neg_fg_color)
+                        : undefined,
+                    pos_bg_color: control.pos_bg_color
+                        ? make_color_record(control.pos_bg_color)
+                        : undefined,
+                    neg_bg_color: control.neg_bg_color
+                        ? make_color_record(control.neg_bg_color)
+                        : undefined,
+                };
+            } else if (controls?.datagrid_string_style) {
+                const control = controls?.datagrid_string_style;
+                styles[col_name] = {
+                    ...control,
+                    color: control.color
+                        ? make_color_record(control.color)
+                        : undefined,
+                };
+            } else if (controls?.datagrid_datetime_style) {
+                const control = controls?.datagrid_datetime_style;
+                styles[col_name] = {
+                    ...control,
+                    color: control.color
+                        ? make_color_record(control.color)
+                        : undefined,
+                };
             }
         }
     }
-
-    console.log("Columns after filtering:", columns);
 
     if ("editable" in token) {
         toggle_edit_mode.call(this, token.editable);
@@ -79,5 +85,5 @@ export function restore(token, columns) {
 
     const datagrid = this.regular_table;
     restore_column_size_overrides.call(this, overrides, true);
-    datagrid[PRIVATE_PLUGIN_SYMBOL] = columns;
+    datagrid[PRIVATE_PLUGIN_SYMBOL] = styles;
 }

@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use indexmap::IndexMap;
 use itertools::Itertools;
 
 use super::{HasRenderer, HasSession};
@@ -76,10 +75,7 @@ pub trait PluginColumnStyles: HasSession + HasRenderer {
     }
 
     /// Queries the plugins for the available plugin components.
-    fn get_column_style_control_options(
-        &self,
-        column_name: &str,
-    ) -> ApiResult<IndexMap<String, ColumnStyleOpts>> {
+    fn get_column_style_control_options(&self, column_name: &str) -> ApiResult<ColumnStyleOpts> {
         let plugin = self.renderer().get_active_plugin()?;
         let names: Vec<String> = plugin
             .config_column_names()

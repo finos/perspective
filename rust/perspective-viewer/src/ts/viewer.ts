@@ -11,18 +11,16 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import type * as perspective from "@finos/perspective";
-
-export type ColumnConfig = {
-    [column_name: string]: Partial<{
-        [x in perspective.Type]: { [control_label: string]: any }; //todo: this could be better specified
-    }>;
-};
+import { PerspectiveColumnConfig } from "./perspective-viewer";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
+    version?: string;
+    theme?: string;
+    title?: string | null;
     plugin?: string;
     settings?: boolean;
     plugin_config?: any;
-    column_config?: ColumnConfig;
+    column_config?: PerspectiveColumnConfig;
 };
 
 export type RenderStats = {

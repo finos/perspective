@@ -328,12 +328,9 @@ impl PerspectiveViewerElement {
                     } else {
                         plugin.save()
                     };
-                    let column_update = if let OptionalUpdate::Update(x) = column_config {
-                        x
-                    } else {
-                        presentation.all_column_configs()
-                    };
-                    plugin.restore(&plugin_update, Some(&column_update));
+                    presentation.update_column_configs(column_config);
+                    let column_config = presentation.all_column_configs();
+                    plugin.restore(&plugin_update, Some(&column_config));
                     session.validate().await?.create_view().await
                 }
                 .await;
