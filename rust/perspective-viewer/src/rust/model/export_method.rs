@@ -54,9 +54,7 @@ impl ExportMethod {
 
 impl From<ExportMethod> for Html {
     fn from(x: ExportMethod) -> Self {
-        html! {
-            <code>{ x.as_filename() }</code>
-        }
+        html! { <code >{ x.as_filename() }</code> }
     }
 }
 
@@ -89,11 +87,6 @@ impl From<ExportFile> for Html {
             None
         };
 
-        html! {
-            <code class={ class }>
-                { x.name }
-                { x.method.as_filename() }
-            </code>
-        }
+        html! { <code {class}>{ x.name }{ x.method.as_filename() }</code> }
     }
 }

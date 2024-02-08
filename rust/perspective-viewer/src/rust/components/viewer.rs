@@ -192,9 +192,10 @@ impl Component for PerspectiveViewer {
                                 .and_then(|x| x.into_serde_ext().ok())
                                 .unwrap();
                             if let Some(group) = config_names.as_ref().and_then(|v| v.get(idx))
-                                && &**group == "Symbol" 
+                                && &**group == "Symbol"
                                 && plugin.name() == "X/Y Scatter"
-                                && session.metadata().get_column_view_type(name) != Some(Type::String)
+                                && session.metadata().get_column_view_type(name)
+                                    != Some(Type::String)
                             {
                                 locator = None;
                             }

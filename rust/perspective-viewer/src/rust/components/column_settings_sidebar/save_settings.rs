@@ -29,32 +29,40 @@ pub fn save_settings(p: &SaveSettingsProps) -> Html {
     let save = p.on_save.reform(|_| ());
     let delete = p.on_delete.reform(|_| ());
     html! {
-        <div id="save-settings-wrapper">
+        <div
+            id="save-settings-wrapper"
+        >
             if p.show_danger_zone {
-                <div id="danger-zone">
+                <div
+                    id="danger-zone"
+                >
                     <button
                         id="psp-expression-editor-button-delete"
                         class="psp-expression-editor__button"
-                        onmousedown={ delete }
-                        disabled={p.disable_delete}>
+                        onmousedown={delete}
+                        disabled={p.disable_delete}
+                    >
                         { "Delete Column" }
                     </button>
                 </div>
             }
-            <div id="save-settings">
+            <div
+                id="save-settings"
+            >
                 <button
                     id="psp-expression-editor-button-reset"
                     class="psp-expression-editor__button"
-                    onmousedown={ reset }
-                    disabled={ !p.reset_enabled }>
+                    onmousedown={reset}
+                    disabled={!p.reset_enabled}
+                >
                     { "Reset" }
                 </button>
-
                 <button
                     id="psp-expression-editor-button-save"
                     class="psp-expression-editor__button"
-                    onmousedown={ save }
-                    disabled={ !p.save_enabled }>
+                    onmousedown={save}
+                    disabled={!p.save_enabled}
+                >
                     { "Save" }
                 </button>
             </div>

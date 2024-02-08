@@ -205,13 +205,16 @@ impl Component for StatusBar {
 
                 html! {
                     if values.len() > 1 {
-                        <span id="theme" class="button">
+                        <span
+                            id="theme"
+                            class="button"
+                        >
                             <Select<String>
                                 id="theme_selector"
-                                values={ values }
-                                selected={ selected.to_owned() }
-                                on_select={ ontheme }>
-                            </Select<String>>
+                                {values}
+                                selected={selected.to_owned()}
+                                on_select={ontheme}
+                            />
                         </span>
                     }
                 }

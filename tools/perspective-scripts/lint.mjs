@@ -12,26 +12,36 @@
 
 import sh from "./sh.mjs";
 import * as url from "url";
+import * as dotenv from "dotenv";
 
-export function lint(task = sh`--check`) {
-    const cmd = sh`prettier ${task} "examples/**/*.js" "examples/**/*.tsx" "tools/perspective-scripts/*.mjs" "rust/**/*.ts" "rust/**/*.js" "packages/**/*.js" "packages/**/*.ts" "cpp/**/*.js"`;
-    cmd.sh`prettier --prose-wrap=always ${task} "docs/docs/*.md"`;
-    cmd.sh`prettier ${task} "**/*.yml"`;
-    cmd.sh`prettier ${task} "**/less/*.less"`;
-    cmd.sh`prettier ${task} "**/html/*.html"`;
-    cmd.sh`prettier ${task} "packages/**/package.json" "rust/**/package.json" "examples/**/package.json" "docs/package.json"`;
+export function lint_js(fix = false) {
+    const prettier_flags = fix ? "--write" : "--check";
+    const cmd = sh`prettier ${prettier_flags} "examples/**/*.js" "examples/**/*.tsx" "tools/perspective-scripts/*.mjs" "rust/**/*.ts" "rust/**/*.js" "packages/**/*.js" "packages/**/*.ts" "cpp/**/*.js"`;
+    cmd.sh`prettier --prose-wrap=always ${prettier_flags} "docs/docs/*.md"`;
+    cmd.sh`prettier ${prettier_flags} "**/*.yml"`;
+    cmd.sh`prettier ${prettier_flags} "**/less/*.less"`;
+    cmd.sh`prettier ${prettier_flags} "**/html/*.html"`;
+    cmd.sh`prettier ${prettier_flags} "packages/**/package.json" "rust/**/package.json" "examples/**/package.json" "docs/package.json"`;
 
-    // cmd.sh`node tools/perspective-scripts/fix_cpp.mjs`;
-
+    const check = fix ? undefined : "--check";
+    cmd.sh`cd rust/perspective-viewer`;
+    cmd.sh`cargo run -p perspective-lint --bin lint -Zbindeps -- ${check} "*.rs" "src/**/*.rs" "tasks/**/*.rs"`;
+    cmd.sh`echo '> cargo clippy ${fix ? "--fix" : undefined} '`;
+    cmd.sh`cargo clippy ${fix ? "--fix" : undefined}`;
     cmd.runSync();
 }
 
 if (import.meta.url.startsWith("file:")) {
     if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
-        await import("./lint_python.mjs");
+        dotenv.config({ path: "./.perspectiverc" });
+
         const { default: run } = await import("./lint_headers.mjs");
         const exit_code = await run(false);
-        lint(sh`--check`);
+        if (process.env.PSP_PROJECT === "python") {
+            await import("./lint_python.mjs");
+        } else {
+            lint_js();
+        }
         process.exit(exit_code);
     }
 }

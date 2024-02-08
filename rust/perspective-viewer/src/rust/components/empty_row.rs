@@ -85,15 +85,19 @@ impl Component for EmptyRow {
         };
 
         html! {
-            <div class="pivot-column column-empty">
-                <LocalStyle href={ css!("empty-column") } />
+            <div
+                class="pivot-column column-empty"
+            >
+                <LocalStyle
+                    href={css!("empty-column")}
+                />
                 <input
                     spellcheck="false"
-                    ref={ self.input_ref.clone() }
-                    { onblur }
-                    { onkeydown }
-                    { oninput }
-                    { onfocus }
+                    ref={self.input_ref.clone()}
+                    {onblur}
+                    {onkeydown}
+                    {oninput}
+                    {onfocus}
                     class="column-empty-input"
                 />
             </div>

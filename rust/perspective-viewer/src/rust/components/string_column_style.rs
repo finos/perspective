@@ -92,9 +92,7 @@ impl StringColumnStyle {
                 }
             },
             _ => {
-                html! {
-                    <span class="row">{ title }</span>
-                }
+                html! { <span class="row">{ title }</span> }
             },
         }
     }

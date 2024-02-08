@@ -118,8 +118,7 @@ impl Component for FunctionDropDown {
         let body = html! {
             if let Some(ref values) = self.values {
                 if !values.is_empty() {
-                    {
-                        for values
+                    { for values
                             .iter()
                             .enumerate()
                             .map(|(idx, value)| {
@@ -143,8 +142,7 @@ impl Component for FunctionDropDown {
                                         </div>
                                     }
                                 }
-                            })
-                    }
+                            }) }
                 }
             }
         };

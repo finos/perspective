@@ -70,34 +70,34 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
     let components = match col_grp.as_str() {
         "Symbol" => Some(html! {
             <SymbolStyle
-                column_name={ props.column_name.clone() }
-                session={ &props.session }
-                renderer={ &props.renderer }
-                custom_events={ &props.custom_events }/>
+                column_name={props.column_name.clone()}
+                session={&props.session}
+                renderer={&props.renderer}
+                custom_events={&props.custom_events}
+            />
         }),
         "Columns" => Some(html! {
             <ColumnStyle
-                custom_events={ props.custom_events.clone() }
-                session={ props.session.clone() }
-                renderer={ props.renderer.clone() }
-                column_name={ props.column_name.clone() }
+                custom_events={props.custom_events.clone()}
+                session={props.session.clone()}
+                renderer={props.renderer.clone()}
+                column_name={props.column_name.clone()}
                 // This is here so the column styles update on session change.
-                view_type={ props.ty.unwrap() }/>
+                 view_type={props.ty.unwrap()}
+            />
         }),
         _ => None,
     };
 
     let components = components.unwrap_or(html! {
-        <Stub
-            message="No plugin styles available"
-            error="Could not get plugin styles"/>
+        <Stub message="No plugin styles available" error="Could not get plugin styles" />
     });
 
     html! {
-        <div id="style-tab">
-            <div id="column-style-container" class="tab-section">
-                { components }
-            </div>
+        <div
+            id="style-tab"
+        >
+            <div id="column-style-container" class="tab-section">{ components }</div>
         </div>
     }
 }

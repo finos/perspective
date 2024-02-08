@@ -10,15 +10,16 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use wasm_bindgen_test::*;
+use yew::prelude::*;
+
 use super::super::radio_list::{RadioList, RadioListMsg};
 use super::super::radio_list_item::RadioListItem;
 use crate::utils::{await_animation_frame, WeakScope};
 use crate::*;
-
-use std::cell::RefCell;
-use std::rc::Rc;
-use wasm_bindgen_test::*;
-use yew::prelude::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 

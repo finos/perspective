@@ -116,21 +116,13 @@ impl Component for StatusBarRowsCounter {
             }) => {
                 let nrows = tr.to_formatted_string(&Locale::en);
                 let ncols = tc.to_formatted_string(&Locale::en);
-                html! {
-                    <span>
-                        { format!("{} x {}", nrows, ncols) }
-                    </span>
-                }
+                html! { <span >{ format!("{} x {}", nrows, ncols) }</span> }
             },
             Some(ViewStats {
                 num_table_cells: None,
                 ..
-            }) => html! {
-                <span></span>
-            },
-            None => html! {
-                <span></span>
-            },
+            }) => html! { <span /> },
+            None => html! { <span /> },
         }
     }
 }

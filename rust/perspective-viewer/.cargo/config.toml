@@ -1,5 +1,6 @@
 [alias]
 bundle = "run -p perspective-bundle --"
+lint = "run -p lint"
 
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]
@@ -9,3 +10,6 @@ runner = 'wasm-bindgen-test-runner'
 
 [future-incompat-report]
 frequency = 'never'
+
+[unstable]
+bindeps = true

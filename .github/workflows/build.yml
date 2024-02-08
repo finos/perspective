@@ -327,6 +327,8 @@ jobs:
             ###############
             - name: WebAssembly Lint
               run: yarn lint
+              env:
+                  PSP_PROJECT: js
 
             - name: WebAssembly Build
               run: yarn build_js --ci
@@ -524,6 +526,7 @@ jobs:
               run: yarn lint
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
+                  PSP_PROJECT: python
 
     ##########################################################################################################################
     ##########################################################################################################################

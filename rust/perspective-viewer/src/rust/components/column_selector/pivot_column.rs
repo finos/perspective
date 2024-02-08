@@ -65,13 +65,14 @@ impl Component for PivotColumn {
             <div
                 class="pivot-column-draggable"
                 draggable="true"
-                ondragstart={ dragstart }
-                ondragend={ dragend }>
-                <div class="pivot-column-border">
-                    <TypeIcon ty={ Type::String }/>
-                    <span class="column_name">
-                        { ctx.props().column.clone() }
-                    </span>
+                ondragstart={dragstart}
+                ondragend={dragend}
+            >
+                <div
+                    class="pivot-column-border"
+                >
+                    <TypeIcon ty={Type::String} />
+                    <span class="column_name">{ ctx.props().column.clone() }</span>
                 </div>
             </div>
         }

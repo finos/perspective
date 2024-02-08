@@ -169,6 +169,6 @@ impl Component for NoRender {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        html! { { ctx.props().children.iter().collect::<Html>()} }
+        html! { { ctx.props().children.iter().collect::<Html>() } }
     }
 }

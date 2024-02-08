@@ -105,18 +105,18 @@ impl Component for SortColumn {
             <div
                 class="pivot-column-draggable"
                 draggable="true"
-                ondragstart={ dragstart }
-                ondragend={ dragend }>
-                <div class="pivot-column-border">
-                    <TypeIcon ty={ Type::String }/>
+                ondragstart={dragstart}
+                ondragend={dragend}
+            >
+                <div
+                    class="pivot-column-border"
+                >
+                    <TypeIcon ty={Type::String} />
+                    <span class="column_name">{ ctx.props().sort.0.to_owned() }</span>
                     <span
-                        class="column_name">
-                        { ctx.props().sort.0.to_owned() }
-                    </span>
-                    <span
-                        class={ format!("sort-icon {}", ctx.props().sort.1) }
-                        onmousedown={ onclick }>
-                    </span>
+                        class={format!("sort-icon {}", ctx.props().sort.1)}
+                        onmousedown={onclick}
+                    />
                 </div>
             </div>
         }

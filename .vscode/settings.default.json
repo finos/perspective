@@ -8,6 +8,13 @@
     "rust-analyzer.linkedProjects": [
         "${workspaceFolder}/rust/perspective-viewer/Cargo.toml"
     ],
+    // first build the bin, then this will work
+    // `cargo build --manifest-path=rust/perspective-viewer/Cargo.toml -p perspective-lint --bin lint --release -Zbindeps`
+    "rust-analyzer.rustfmt.overrideCommand": [
+        "rust/perspetive-viewer/target/release/lint"
+    ],
+    // alternatively, install and run yew-fmt locally
+    //"rust-analyzer.rustfmt.overrideCommand": ["yew-fmt", "--edition", "2021"],
     "rust-analyzer.check.command": "clippy",
     "playwright.env": {
         "TZ": "UTC"

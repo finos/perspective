@@ -121,8 +121,7 @@ impl Component for ColumnDropDown {
         let body = html! {
             if let Some(ref values) = self.values {
                 if !values.is_empty() {
-                    {
-                        for values
+                    { for values
                             .iter()
                             .enumerate()
                             .map(|(idx, value)| {
@@ -147,8 +146,7 @@ impl Component for ColumnDropDown {
                                         <span onmousedown={ click }>{ row }</span>
                                     }
                                 }
-                            })
-                    }
+                            }) }
                 } else {
                     <span class="no-results">{ "Invalid Column" }</span>
                 }

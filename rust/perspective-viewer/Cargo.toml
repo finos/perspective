@@ -30,7 +30,12 @@ include = [
 ]
 
 [workspace]
-members = ["tasks/bundle", "tasks/bootstrap-runtime", "tasks/bootstrap"]
+members = [
+    "tasks/bundle",
+    "tasks/bootstrap-runtime",
+    "tasks/bootstrap",
+    "tasks/lint",
+]
 
 [lib]
 crate-type = ["cdylib", "rlib"]

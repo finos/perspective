@@ -70,9 +70,7 @@ where
                         });
 
                         html! {
-                            <span onmousedown={ click }class="selected">
-                                { x.clone().into() }
-                            </span>
+                            <span onmousedown={click} class="selected">{ x.clone().into() }</span>
                         }
                     },
                     DropDownMenuItem::OptGroup(name, xs) => {
@@ -98,9 +96,7 @@ where
                 })
                 .collect::<Html>()
         } else {
-            html! {
-                <span class="no-results">{ "No Completions" }</span>
-            }
+            html! { <span class="no-results">{ "No Completions" }</span> }
         };
 
         html_template! {
