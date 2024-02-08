@@ -10,38 +10,39 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import sh from "./sh.mjs";
-import * as url from "url";
-import * as dotenv from "dotenv";
-
-export function lint_js(fix = false) {
-    const prettier_flags = fix ? "--write" : "--check";
-    const cmd = sh`prettier ${prettier_flags} "examples/**/*.js" "examples/**/*.tsx" "tools/perspective-scripts/*.mjs" "rust/**/*.ts" "rust/**/*.js" "packages/**/*.js" "packages/**/*.ts" "cpp/**/*.js"`;
-    cmd.sh`prettier --prose-wrap=always ${prettier_flags} "docs/docs/*.md"`;
-    cmd.sh`prettier ${prettier_flags} "**/*.yml"`;
-    cmd.sh`prettier ${prettier_flags} "**/less/*.less"`;
-    cmd.sh`prettier ${prettier_flags} "**/html/*.html"`;
-    cmd.sh`prettier ${prettier_flags} "packages/**/package.json" "rust/**/package.json" "examples/**/package.json" "docs/package.json"`;
-
-    const check = fix ? undefined : "--check";
-    cmd.sh`cd rust/perspective-viewer`;
-    cmd.sh`cargo run -p perspective-lint --bin lint -Zbindeps -- ${check} "*.rs" "src/**/*.rs" "tasks/**/*.rs"`;
-    cmd.sh`echo '> cargo clippy ${fix ? "--fix" : undefined} '`;
-    cmd.sh`cargo clippy ${fix ? "--fix" : undefined}`;
-    cmd.runSync();
-}
-
-if (import.meta.url.startsWith("file:")) {
-    if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
-        dotenv.config({ path: "./.perspectiverc" });
-
-        const { default: run } = await import("./lint_headers.mjs");
-        const exit_code = await run(false);
-        if (process.env.PSP_PROJECT === "python") {
-            await import("./lint_python.mjs");
-        } else {
-            lint_js();
-        }
-        process.exit(exit_code);
+use glob::glob;
+pub fn main() {
+    let mut args = std::env::args();
+    args.next();
+    let mut args = args.collect::<Vec<String>>();
+    let mut check = false;
+    if let Some((i, _)) = args.iter().enumerate().find(|(_i, val)| **val == "--check") {
+        args.remove(i);
+        check = true;
     }
+    let check_args = if check {
+        vec!["--check".into()]
+    } else {
+        vec![]
+    };
+
+    let mut paths = vec![];
+    for arg in args {
+        let glob = glob(&arg)
+            .unwrap()
+            .filter_map(Result::ok)
+            .map(|buf| buf.to_string_lossy().to_string())
+            .collect::<Vec<String>>();
+        paths.push(glob);
+    }
+    let paths = paths.concat();
+    let fmt_args = vec!["--edition".into(), "2021".into()];
+    let fmt_args = [fmt_args, check_args, paths].concat();
+    let exit_code = std::process::Command::new(env!("CARGO_BIN_FILE_YEW_FMT"))
+        .args(fmt_args)
+        .spawn()
+        .expect("Could not spawn process")
+        .wait()
+        .expect("Process did not start");
+    std::process::exit(exit_code.code().unwrap())
 }

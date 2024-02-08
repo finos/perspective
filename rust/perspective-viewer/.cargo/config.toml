@@ -9,3 +9,6 @@ runner = 'wasm-bindgen-test-runner'
 
 [future-incompat-report]
 frequency = 'never'
+
+[unstable]
+bindeps = true
