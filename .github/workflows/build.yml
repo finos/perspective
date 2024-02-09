@@ -290,7 +290,7 @@ jobs:
             - name: Install latest nightly rust
               uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly-2023-04-07
+                  toolchain: nightly-2023-10-12
                   targets: wasm32-unknown-unknown
                   components: rustfmt, clippy, rust-src
 
@@ -311,6 +311,13 @@ jobs:
               run: yarn _requires_python
 
             ################
+            # Rust
+            - name: cargo-install
+              uses: baptiste0928/cargo-install@v3.0.0
+              with:
+                  crate: yew-fmt
+
+            ################
             # Linux
             - name: Linux init steps
               run: sudo node tools/perspective-scripts/install_tools.mjs
@@ -325,6 +332,7 @@ jobs:
             ###############
             # WebAssembly #
             ###############
+
             - name: WebAssembly Lint
               run: yarn lint
               env:
@@ -496,6 +504,13 @@ jobs:
                   cache: "yarn"
                   cache-dependency-path: yarn.lock
 
+            - name: Install latest nightly rust
+              uses: dtolnay/rust-toolchain@nightly
+              with:
+                  toolchain: nightly-2023-10-12
+                  targets: wasm32-unknown-unknown
+                  components: rustfmt, clippy, rust-src
+
             ################
             # Dependencies #
             ################
@@ -508,6 +523,13 @@ jobs:
               run: yarn
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
+
+            ################
+            # Rust
+            - name: cargo-install
+              uses: baptiste0928/cargo-install@v3.0.0
+              with:
+                  crate: yew-fmt
 
             ################
             # Python
@@ -653,7 +675,7 @@ jobs:
             - name: Install latest nightly rust
               uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly-2023-04-07
+                  toolchain: nightly-2023-10-12
                   targets: wasm32-unknown-unknown
                   components: rustfmt, clippy, rust-src
 
