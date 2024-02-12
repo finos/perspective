@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
+import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
 import {
     compareContentsToSnapshot,
     API_VERSION,
@@ -33,20 +33,12 @@ async function get_contents(page) {
     });
 }
 
-const DEFAULT_CONFIG: PerspectiveViewerConfig = {
-    aggregates: {},
-    column_config: {},
-    columns: [],
-    expressions: {},
-    filter: [],
-    group_by: [],
-    plugin: "",
-    plugin_config: {},
-    sort: [],
-    split_by: [],
-    version: API_VERSION,
-    title: null,
-};
+const MIGRATE_BASE_CONFIG = (() => {
+    const config = DEFAULT_CONFIG;
+    delete config.theme;
+    delete config.settings;
+    return config;
+})();
 
 const TESTS: [string, any, PerspectiveViewerConfig][] = [
     [
@@ -101,7 +93,10 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
             plugin: "Datagrid",
             column_config: {
                 Sales: {
-                    styles: { number_bg_mode: "gradient", bg_gradient: 10 },
+                    datagrid_number_style: {
+                        number_bg_mode: "gradient",
+                        bg_gradient: 10,
+                    },
                 },
             },
             plugin_config: {
@@ -143,7 +138,7 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
             plugin: "Datagrid",
             column_config: {
                 Sales: {
-                    styles: {
+                    datagrid_number_style: {
                         bg_gradient: 10,
                         number_bg_mode: "gradient",
                     },
@@ -189,11 +184,11 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
             aggregates: {},
         },
         {
-            ...DEFAULT_CONFIG,
+            ...MIGRATE_BASE_CONFIG,
             plugin: "Datagrid",
             column_config: {
                 Sales: {
-                    styles: {
+                    datagrid_number_style: {
                         fg_gradient: 10,
                         number_fg_mode: "bar",
                         neg_fg_color: "#115599",
@@ -212,29 +207,36 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
     [
         "New API, reflexive (new API is unmodified)",
         {
-            version: API_VERSION,
+            ...MIGRATE_BASE_CONFIG,
             plugin: "Datagrid",
-            plugin_config: {
-                columns: {
-                    Discount: {
+            column_config: {
+                Discount: {
+                    datagrid_number_style: {
                         neg_bg_color: "#780aff",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
                         pos_bg_color: "#f5ac0f",
                     },
-                    Profit: {
+                },
+                Profit: {
+                    datagrid_number_style: {
                         neg_bg_color: "#f50fed",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
                         pos_bg_color: "#32cd82",
                     },
-                    Sales: {
+                },
+                Sales: {
+                    datagrid_number_style: {
                         neg_bg_color: "#f5ac0f",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
                         pos_bg_color: "#780aff",
                     },
                 },
+            },
+            plugin_config: {
+                columns: {},
                 editable: false,
                 scroll_lock: true,
             },
@@ -247,19 +249,13 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
                 "Order Date",
             ],
             sort: [["Sub-Category", "desc"]],
-            aggregates: {},
-            filter: [],
-            group_by: [],
-            expressions: {},
-            split_by: [],
-            title: null,
         },
         {
-            ...DEFAULT_CONFIG,
+            ...MIGRATE_BASE_CONFIG,
             plugin: "Datagrid",
             column_config: {
                 Discount: {
-                    styles: {
+                    datagrid_number_style: {
                         neg_bg_color: "#780aff",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
@@ -267,7 +263,7 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
                     },
                 },
                 Profit: {
-                    styles: {
+                    datagrid_number_style: {
                         neg_bg_color: "#f50fed",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
@@ -275,7 +271,7 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
                     },
                 },
                 Sales: {
-                    styles: {
+                    datagrid_number_style: {
                         neg_bg_color: "#f5ac0f",
                         number_bg_mode: "color",
                         number_fg_mode: "disabled",
@@ -311,24 +307,24 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
             title: null,
             group_by: [],
             split_by: [],
-            columns: ["'hello'", "expr"],
+            columns: ["'hello'", "expr", null, null, "Region"],
             filter: [],
             sort: [],
             expressions: ["// expr\n1+1", "'hello'"],
             aggregates: {},
         },
         {
-            ...DEFAULT_CONFIG,
+            ...MIGRATE_BASE_CONFIG,
             version: API_VERSION,
             plugin: "X/Y Scatter",
             column_config: {
                 Region: {
-                    Symbols: {
+                    symbols: {
                         Central: "circle",
                     },
                 },
             },
-            columns: ["'hello'", "expr"],
+            columns: ["'hello'", "expr", null, null, "Region"],
             expressions: {
                 expr: "1+1",
                 "'hello'": "'hello'",
@@ -338,51 +334,113 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
     [
         "From 2.7.1 - Datagrid",
         {
-            ...DEFAULT_CONFIG,
             version: "2.7.1",
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
+                    datetime: {
+                        format: "custom",
+                        fractionalSecondDigits: 3,
+                        second: "2-digit",
+                        minute: "disabled",
+                        hour: "2-digit",
+                        day: "2-digit",
+                        weekday: "short",
+                        month: "narrow",
+                        year: "numeric",
+                        hour12: false,
+                        timeZone: "America/Curacao",
+                        datetime_color_mode: "foreground",
+                    },
+                    "Order ID": {
+                        format: "link",
+                        string_color_mode: "foreground",
+                        color: "#ff0000",
+                    },
                     "Row ID": {
-                        column_width_override: 100,
-                        neg_bg_color: "#000",
-                        number_bg_mode: "color",
-                        pos_bg_color: "#fff",
+                        number_bg_mode: "gradient",
+                        fixed: 1,
+                        pos_fg_color: "#000000",
+                        neg_fg_color: "#000000",
+                        bg_gradient: 9,
+                    },
+                    "Order Date": {
+                        dateStyle: "disabled",
+                        datetime_color_mode: "foreground",
+                        color: "#00ff00",
                     },
                 },
                 editable: true,
                 scroll_lock: false,
             },
-            columns: ["Row ID"],
+            columns: ["Row ID", "Order ID", "Order Date", "datetime"],
+            expressions: { datetime: "datetime(100)" },
+            aggregates: {},
+            filter: [],
+            group_by: [],
+            sort: [],
+            split_by: [],
+            title: null,
         },
         {
-            ...DEFAULT_CONFIG,
+            ...MIGRATE_BASE_CONFIG,
+            version: "2.7.1",
             plugin: "Datagrid",
-            column_config: {
-                "Row ID": {
-                    styles: {
-                        neg_bg_color: "#000",
-                        number_bg_mode: "color",
-                        pos_bg_color: "#fff",
-                    },
-                },
-            },
             plugin_config: {
-                columns: {
-                    "Row ID": {
-                        column_width_override: 100,
-                    },
-                },
+                columns: {},
                 editable: true,
                 scroll_lock: false,
             },
-            columns: ["Row ID"],
+            column_config: {
+                datetime: {
+                    datagrid_datetime_style: {
+                        format: "custom",
+                        fractionalSecondDigits: 3,
+                        second: "2-digit",
+                        minute: "disabled",
+                        hour: "2-digit",
+                        day: "2-digit",
+                        weekday: "short",
+                        month: "narrow",
+                        year: "numeric",
+                        hour12: false,
+                        timeZone: "America/Curacao",
+                        datetime_color_mode: "foreground",
+                    },
+                },
+                "Order ID": {
+                    datagrid_string_style: {
+                        format: "link",
+                        string_color_mode: "foreground",
+                        color: "#ff0000",
+                    },
+                },
+                "Row ID": {
+                    datagrid_number_style: {
+                        number_bg_mode: "gradient",
+                        fixed: 1,
+                        pos_fg_color: "#000000",
+                        neg_fg_color: "#000000",
+                        bg_gradient: 9,
+                    },
+                },
+                "Order Date": {
+                    datagrid_datetime_style: {
+                        dateStyle: "disabled",
+                        datetime_color_mode: "foreground",
+                        color: "#00ff00",
+                    },
+                },
+            },
+            columns: ["Row ID", "Order ID", "Order Date", "datetime"],
+            expressions: {
+                datetime: "datetime(100)",
+            },
         },
     ],
     [
         "From 2.7.1 - X/Y Scatter",
         {
-            ...DEFAULT_CONFIG,
             version: "2.7.1",
             plugin: "X/Y Scatter",
             plugin_config: {
@@ -395,13 +453,20 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
                 },
             },
             columns: ["Row ID", "City", null, null, "Category"],
+            aggregates: {},
+            expressions: {},
+            filter: [],
+            group_by: [],
+            sort: [],
+            split_by: [],
+            title: null,
         },
         {
-            ...DEFAULT_CONFIG,
+            ...MIGRATE_BASE_CONFIG,
             plugin: "X/Y Scatter",
             column_config: {
                 Category: {
-                    Symbols: {
+                    symbols: {
                         Furniture: "star",
                     },
                 },
@@ -439,33 +504,26 @@ test.describe("Migrate Viewer", () => {
     });
 
     test.describe("migrate", async () => {
-        for (const [name, old, current] of TESTS) {
-            // NOTE: these tests were previously skipped.
+        for (const [name, given, expected] of TESTS) {
             test(`restore '${name}'`, async ({ page }) => {
-                const converted = convert(JSON.parse(JSON.stringify(old)), {
-                    replace_defaults: true,
-                }) as PerspectiveViewerConfig;
-                const config = await page.evaluate(async (old) => {
+                const saved = await page.evaluate(async (converted) => {
                     const viewer =
                         document.querySelector("perspective-viewer")!;
                     await viewer.getTable();
-                    old.settings = true;
-                    await viewer.restore(old);
-                    const current = await viewer.save();
-                    current.settings = false;
-                    return current;
-                }, converted);
+                    converted.settings = true;
+                    await viewer.restore(converted);
+                    const saved = await viewer.save();
+                    saved.settings = false;
+                    return saved;
+                }, expected);
 
-                expect(config.theme).toEqual("Pro Light");
-                delete config["theme"];
+                expect(saved.theme).toEqual("Pro Light");
+                delete saved["theme"];
 
-                expect(config.settings).toEqual(false);
-                delete config.settings;
+                expect(saved.settings).toEqual(false);
+                delete saved.settings;
 
-                expect(config).toEqual(current);
-                expect(convert(old, { replace_defaults: true })).toEqual(
-                    current
-                );
+                expect(saved).toEqual(expected);
 
                 const contents = await get_contents(page);
                 await compareContentsToSnapshot(contents, [

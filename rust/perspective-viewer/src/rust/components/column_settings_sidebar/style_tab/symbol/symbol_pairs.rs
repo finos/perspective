@@ -19,6 +19,7 @@ use super::symbol_config::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::row_selector::RowSelector;
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_selector::SymbolSelector;
 use crate::components::style::LocalStyle;
+use crate::css;
 use crate::custom_elements::FilterDropDownElement;
 
 #[derive(Properties, PartialEq)]

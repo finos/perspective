@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
+import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
 import {
     API_VERSION,
     compareContentsToSnapshot,
@@ -114,19 +114,12 @@ test.describe("Regression tests", () => {
         });
 
         expect(config).toEqual({
-            version: API_VERSION,
-            aggregates: {},
+            ...DEFAULT_CONFIG,
             columns: ["Sales"],
-            expressions: {},
             filter: [["State", "in", ["California"]]],
             group_by: ["State"],
             plugin: "Debug",
-            plugin_config: {},
             settings: true,
-            sort: [],
-            split_by: [],
-            theme: "Pro Light",
-            title: null,
         });
 
         const contents = await get_contents(page);

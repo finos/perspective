@@ -24,17 +24,17 @@ use yew::{html, Callback, Html, Properties};
 use self::symbol_config::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_pairs::PairsList;
 use crate::components::style::LocalStyle;
-use crate::config::{ColumnConfigValuesUpdate, KeyValueOpts};
+use crate::config::{ColumnConfigValueUpdate, KeyValueOpts};
+use crate::css;
 use crate::custom_elements::FilterDropDownElement;
 use crate::session::Session;
-use crate::{css, html_template};
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct SymbolAttrProps {
     pub session: Session,
     pub column_name: String,
     pub restored_config: Option<HashMap<String, String>>,
-    pub on_change: Callback<ColumnConfigValuesUpdate>,
+    pub on_change: Callback<ColumnConfigValueUpdate>,
     pub default_config: KeyValueOpts,
 }
 impl SymbolAttrProps {
@@ -91,10 +91,9 @@ impl yew::Component for SymbolStyle {
                     .filter_map(|pair| Some((pair.key?, pair.value)))
                     .collect::<HashMap<_, _>>();
                 let update = Some(symbols).filter(|x| !x.is_empty());
-                ctx.props().on_change.emit(ColumnConfigValuesUpdate {
-                    symbols: Some(update),
-                    ..Default::default()
-                });
+                ctx.props()
+                    .on_change
+                    .emit(ColumnConfigValueUpdate::Symbols(update));
 
                 let has_last_key = new_pairs
                     .last()
@@ -114,16 +113,21 @@ impl yew::Component for SymbolStyle {
 
     fn view(&self, ctx: &yew::Context<Self>) -> Html {
         let update_pairs = ctx.link().callback(SymbolAttrMsg::UpdatePairs);
-        html_template! {
-            <LocalStyle href={ css!("column-symbol-attributes") } />
-            <PairsList
-                title="Symbols"
-                id="attributes-symbols"
-                pairs={ self.pairs.clone() }
-                row_dropdown={ self.row_dropdown.clone() }
-                column_name={ ctx.props().column_name.clone() }
-                values={ ctx.props().default_config.values.clone() }
-                { update_pairs }/>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("column-symbol-attributes")}
+                />
+                <PairsList
+                    title="Symbols"
+                    id="attributes-symbols"
+                    pairs={self.pairs.clone()}
+                    row_dropdown={self.row_dropdown.clone()}
+                    column_name={ctx.props().column_name.clone()}
+                    values={ctx.props().default_config.values.clone()}
+                    {update_pairs}
+                />
+            </>
         }
     }
 }

@@ -10,9 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// pub mod color;
-// pub mod numeric_precision;
-// pub mod radio;
 pub mod stub;
 mod symbol;
 
@@ -23,7 +20,7 @@ use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
-use crate::config::{ColumnConfigValuesUpdate, Type, ViewConfigUpdate};
+use crate::config::{ColumnConfigValueUpdate, Type, ViewConfigUpdate};
 use crate::custom_events::CustomEvents;
 use crate::model::{PluginColumnStyles, UpdateAndRender};
 use crate::presentation::Presentation;
@@ -45,7 +42,7 @@ pub struct StyleTabProps {
 derive_model!(Session, Renderer, Presentation, CustomEvents for StyleTabProps);
 
 impl StyleTabProps {
-    fn send_plugin_config(&self, update: ColumnConfigValuesUpdate) {
+    fn send_plugin_config(&self, update: ColumnConfigValueUpdate) {
         clone!(props = self);
         ApiFuture::spawn(async move {
             props

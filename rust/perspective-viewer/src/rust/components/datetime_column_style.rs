@@ -77,7 +77,7 @@ pub struct DatetimeColumnStyleProps {
     pub default_config: DatetimeColumnStyleDefaultConfig,
 
     #[prop_or_default]
-    pub on_change: Callback<ColumnConfigValuesUpdate>,
+    pub on_change: Callback<ColumnConfigValueUpdate>,
 
     #[prop_or_default]
     #[derivative(Debug = "ignore")]
@@ -110,10 +110,9 @@ impl DatetimeColumnStyle {
     fn dispatch_config(&self, ctx: &Context<Self>) {
         let update =
             Some(self.config.clone()).filter(|x| x != &DatetimeColumnStyleConfig::default());
-        ctx.props().on_change.emit(ColumnConfigValuesUpdate {
-            datagrid_datetime_style: Some(update),
-            ..Default::default()
-        });
+        ctx.props()
+            .on_change
+            .emit(ColumnConfigValueUpdate::DatagridDatetimeStyle(update));
     }
 
     /// Generate a color selector component for a specific `StringColorMode`

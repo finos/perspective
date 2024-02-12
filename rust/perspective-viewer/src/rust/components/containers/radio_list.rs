@@ -200,14 +200,15 @@ where
                 class={class.to_string()}
             >
                 <input
-                    id={ format!("radio-list-{}", idx) }
-                    name={ ctx.props().name.clone().unwrap_or("radio-list".to_string()) }
+                    id={format!("radio-list-{}", idx)}
+                    name={ctx.props().name.clone().unwrap_or("radio-list".to_string())}
                     type="radio"
                     value={format!("{}", val)}
                     class="parameter"
-                    oninput={ on_change }
-                    disabled={ ctx.props().disabled }
-                    checked={ selected.as_ref() == Some(&val) } />
+                    oninput={on_change}
+                    disabled={ctx.props().disabled}
+                    checked={selected.as_ref() == Some(&val)}
+                />
                 { child }
             </div>
         }

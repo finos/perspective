@@ -153,9 +153,9 @@ test.describe("Column Style Tests", () => {
             await viewer.restore({
                 plugin: "Datagrid",
                 columns: ["Row ID", "Sales"],
-                plugin_config: {
-                    columns: {
-                        Sales: { number_bg_mode: "pulse" },
+                column_config: {
+                    Sales: {
+                        datagrid_number_style: { number_bg_mode: "pulse" },
                     },
                 },
             });
@@ -190,9 +190,9 @@ test.describe("Column Style Tests", () => {
                 plugin: "Datagrid",
                 columns: ["Row ID", "Sales"],
                 settings: true,
-                plugin_config: {
-                    columns: {
-                        Sales: { number_bg_mode: "pulse" },
+                column_config: {
+                    Sales: {
+                        datagrid_number_style: { number_bg_mode: "pulse" },
                     },
                 },
             });

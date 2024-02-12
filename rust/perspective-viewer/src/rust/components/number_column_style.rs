@@ -63,7 +63,7 @@ pub struct NumberColumnStyleProps {
     pub default_config: NumberColumnStyleDefaultConfig,
 
     #[prop_or_default]
-    pub on_change: Callback<ColumnConfigValuesUpdate>,
+    pub on_change: Callback<ColumnConfigValueUpdate>,
 
     #[prop_or_default]
     pub weak_link: WeakScope<NumberColumnStyle>,
@@ -567,10 +567,9 @@ impl NumberColumnStyle {
 
         let update = Some(config).filter(|config| config != &NumberColumnStyleConfig::default());
 
-        ctx.props().on_change.emit(ColumnConfigValuesUpdate {
-            datagrid_number_style: Some(update),
-            ..Default::default()
-        });
+        ctx.props()
+            .on_change
+            .emit(ColumnConfigValueUpdate::DatagridNumberStyle(update));
     }
 
     fn color_props(&self, side: Side, is_gradient: bool, ctx: &Context<Self>) -> ColorRangeProps {

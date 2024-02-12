@@ -49,10 +49,8 @@ test.describe("Regressions", function () {
         const token = await view.save();
         test.expect(token.column_config).toEqual({
             "Row ID": {
-                integer: {
-                    styles: {
-                        fixed: 4,
-                    },
+                datagrid_number_style: {
+                    fixed: 4,
                 },
             },
         });

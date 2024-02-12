@@ -23,7 +23,7 @@ use yew::html::ImplicitClone;
 
 use crate::components::column_settings_sidebar::ColumnSettingsTab;
 use crate::components::viewer::ColumnLocator;
-use crate::config::{ColumnConfigUpdate, ColumnConfigValues, ColumnConfigValuesUpdate};
+use crate::config::{ColumnConfigUpdate, ColumnConfigValueUpdate, ColumnConfigValues};
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -259,23 +259,25 @@ impl Presentation {
             crate::config::OptionalUpdate::Missing => {},
             crate::config::OptionalUpdate::Update(update) => {
                 for (col_name, new_config) in update.into_iter() {
-                    let update = ColumnConfigValuesUpdate {
-                        datagrid_number_style: new_config.datagrid_number_style.map(Some),
-                        datagrid_string_style: new_config.datagrid_string_style.map(Some),
-                        datagrid_datetime_style: new_config.datagrid_datetime_style.map(Some),
-                        symbols: new_config.symbols.map(Some),
-                    };
-                    self.update_column_config_value(col_name, update)
+                    self.column_config.borrow_mut().insert(col_name, new_config);
+                    // let mut config = self.column_config.borrow_mut();
+                    // let value = config.remove()
+                    // let update = ColumnConfigValuesUpdate{
+                    //     datagrid_number_style:
+                    // new_config.datagrid_number_style.map(Some),
+                    //     datagrid_string_style:
+                    // new_config.datagrid_string_style.map(Some),
+                    //     datagrid_datetime_style:
+                    // new_config.datagrid_datetime_style.map(Some),
+                    //     symbols: new_config.symbols.map(Some),
+                    // };
+                    // self.update_column_config_value(col_name, update)
                 }
             },
         }
     }
 
-    pub fn update_column_config_value(
-        &self,
-        column_name: String,
-        update: ColumnConfigValuesUpdate,
-    ) {
+    pub fn update_column_config_value(&self, column_name: String, update: ColumnConfigValueUpdate) {
         let mut config = self.column_config.borrow_mut();
         let value = config.remove(&column_name).unwrap_or_default();
         config.insert(column_name, value.update(update));

@@ -33,33 +33,31 @@ pub struct ColumnConfigValues {
     pub symbols: Option<HashMap<String, String>>,
 }
 
-/// Updates the ColumnConfig. If the outer option is set, then the config value
-/// will be updated. Otherwise it will be ignored.
-/// This type is essentially a `Partial<ColumnConfig>`, or a builder for
-/// ColumnConfig.
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default)]
-pub struct ColumnConfigValuesUpdate {
-    pub datagrid_number_style: Option<Option<NumberColumnStyleConfig>>,
-    pub datagrid_string_style: Option<Option<StringColumnStyleConfig>>,
-    pub datagrid_datetime_style: Option<Option<DatetimeColumnStyleConfig>>,
-    pub symbols: Option<Option<HashMap<String, String>>>,
+pub enum ColumnConfigValueUpdate {
+    DatagridNumberStyle(Option<NumberColumnStyleConfig>),
+    DatagridStringStyle(Option<StringColumnStyleConfig>),
+    DatagridDatetimeStyle(Option<DatetimeColumnStyleConfig>),
+    Symbols(Option<HashMap<String, String>>),
 }
 impl ColumnConfigValues {
-    pub fn update(self, update: ColumnConfigValuesUpdate) -> Self {
-        ColumnConfigValues {
-            datagrid_number_style: update
-                .datagrid_number_style
-                .and_then(|x| x)
-                .or(self.datagrid_number_style),
-            datagrid_string_style: update
-                .datagrid_string_style
-                .and_then(|x| x)
-                .or(self.datagrid_string_style),
-            datagrid_datetime_style: update
-                .datagrid_datetime_style
-                .and_then(|x| x)
-                .or(self.datagrid_datetime_style),
-            symbols: update.symbols.and_then(|x| x).or(self.symbols),
+    pub fn update(self, update: ColumnConfigValueUpdate) -> Self {
+        match update {
+            ColumnConfigValueUpdate::DatagridNumberStyle(update) => Self {
+                datagrid_number_style: update,
+                ..self
+            },
+            ColumnConfigValueUpdate::DatagridStringStyle(update) => Self {
+                datagrid_string_style: update,
+                ..self
+            },
+            ColumnConfigValueUpdate::DatagridDatetimeStyle(update) => Self {
+                datagrid_datetime_style: update,
+                ..self
+            },
+            ColumnConfigValueUpdate::Symbols(update) => Self {
+                symbols: update,
+                ..self
+            },
         }
     }
 }

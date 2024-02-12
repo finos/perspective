@@ -39,7 +39,7 @@ pub struct StringColumnStyleProps {
     pub default_config: StringColumnStyleDefaultConfig,
 
     #[prop_or_default]
-    pub on_change: Callback<ColumnConfigValuesUpdate>,
+    pub on_change: Callback<ColumnConfigValueUpdate>,
 
     #[prop_or_default]
     weak_link: WeakScope<StringColumnStyle>,
@@ -69,10 +69,9 @@ impl StringColumnStyle {
     /// When this config has changed, we must signal the wrapper element.
     fn dispatch_config(&self, ctx: &Context<Self>) {
         let update = Some(self.config.clone()).filter(|x| x != &StringColumnStyleConfig::default());
-        ctx.props().on_change.emit(ColumnConfigValuesUpdate {
-            datagrid_string_style: Some(update),
-            ..Default::default()
-        });
+        ctx.props()
+            .on_change
+            .emit(ColumnConfigValueUpdate::DatagridStringStyle(update));
     }
 
     /// Generate a color selector component for a specific `StringColorMode`

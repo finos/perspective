@@ -10,12 +10,29 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import { PerspectiveViewerConfig } from "@finos/perspective-viewer";
 import { expect, Locator, Page } from "@playwright/test";
 import * as fs from "node:fs";
 
 export const API_VERSION = JSON.parse(
     fs.readFileSync(__dirname + "/../../package.json").toString()
 )["version"];
+export const DEFAULT_CONFIG: PerspectiveViewerConfig = {
+    aggregates: {},
+    column_config: {},
+    columns: [],
+    expressions: {},
+    filter: [],
+    group_by: [],
+    plugin: "",
+    plugin_config: {},
+    settings: false,
+    sort: [],
+    split_by: [],
+    version: API_VERSION,
+    title: null,
+    theme: "Pro Light",
+};
 
 /**
  * Clean a `<svg>` for serialization/comparison.

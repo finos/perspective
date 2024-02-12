@@ -25,8 +25,8 @@ export type PerspectiveColumnConfig = {
 
 export type PerspectiveColumnConfigValue = {
     datagrid_number_style?: {
-        number_fg_mode?: "color" | "bar";
-        number_bg_mode?: "color" | "gradient" | "pulse";
+        number_fg_mode?: "color" | "bar" | "disabled";
+        number_bg_mode?: "color" | "gradient" | "pulse" | "disabled";
         fixed?: number;
         pos_fg_color?: string;
         neg_fg_color?: string;
