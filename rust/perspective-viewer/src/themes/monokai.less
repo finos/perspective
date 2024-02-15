@@ -60,17 +60,19 @@ perspective-string-column-style[theme="Monokai"] {
 }
 
 @mixin perspective-viewer-monokai--datagrid {
-    regular-table {
-        --rt-pos-cell--color: #78dce8 !important;
-        --rt-neg-cell--color: #ff6188 !important;
-        --rt--border-color: #444444;
-    }
+    --rt-pos-cell--color: #78dce8 !important;
+    --rt-neg-cell--color: #ff6188 !important;
+    --rt--border-color: #444444;
 
+    // FIXME: broken in shadow DOM.  Can be fixed with a new custom property allowing empty header cell backgrounds
+    // to be styled
     regular-table table tbody th:empty {
-        background: linear-gradient(to right,
-                transparent 9px,
-                #444444 10px,
-                transparent 11px);
+        background: linear-gradient(
+            to right,
+            transparent 9px,
+            #444444 10px,
+            transparent 11px
+        );
     }
 }
 
@@ -97,7 +99,9 @@ perspective-string-column-style[theme="Monokai"] {
 
     --d3fc-negative--gradient: linear-gradient(#272822 0%, #ff6188 100%);
     --d3fc-positive--gradient: linear-gradient(#272822 0%, #78dce8 100%);
-    --d3fc-full--gradient: linear-gradient(#ff6188 0%,
-            #272822 50%,
-            #78dce8 100%);
+    --d3fc-full--gradient: linear-gradient(
+        #ff6188 0%,
+        #272822 50%,
+        #78dce8 100%
+    );
 }

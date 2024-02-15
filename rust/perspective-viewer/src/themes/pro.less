@@ -42,9 +42,9 @@ perspective-string-column-style[theme="Pro Light"] {
     @include perspective-viewer-pro--openlayers;
 }
 
-
 @mixin perspective-modal-pro {
-    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     background-color: white;
     border: 1px solid var(--inactive--color);
     border-radius: 0 0 2px 2px;
@@ -80,8 +80,8 @@ perspective-string-column-style[theme="Pro Light"] {
     color: #161616;
     background-color: transparent;
     --icon--color: #161616;
-    --inactive--color: #ABABAB;
-    --inactive--border-color: #DADADA;
+    --inactive--color: #ababab;
+    --inactive--border-color: #dadada;
 
     --root--background: #ffffff;
     --active--color: #2670a9;
@@ -91,15 +91,17 @@ perspective-string-column-style[theme="Pro Light"] {
     --select--background-color: none;
     --column-drop-container--background: none;
     --warning--background: #042121;
-    --warning--color: #FDFFFD;
+    --warning--color: #fdfffd;
 
     // TODO deprecate me
-    --overflow-hint-icon--color: #FDFFFD;
+    --overflow-hint-icon--color: #fdfffd;
 }
 
 @mixin perspective-viewer-pro--fonts {
-    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
-    --interface-monospace--font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
+    --interface-monospace--font-family: "ui-monospace", "SFMono-Regular",
+        "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
 }
 
 @mixin perspective-viewer-pro--d3fc {
@@ -125,21 +127,27 @@ perspective-string-column-style[theme="Pro Light"] {
     --d3fc-series-8: #7f7f7f;
     --d3fc-series-9: #bcbd22;
     --d3fc-series-10: #17becf;
-    --d3fc-full--gradient: linear-gradient(#4d342f 0%,
-            #e4521b 22.5%,
-            #feeb65 42.5%,
-            #f0f0f0 50%,
-            #dcedc8 57.5%,
-            #42b3d5 67.5%,
-            #1a237e 100%);
-    --d3fc-positive--gradient: linear-gradient(#f0f0f0 0%,
-            #dcedc8 10%,
-            #42b3d5 50%,
-            #1a237e 100%);
-    --d3fc-negative--gradient: linear-gradient(#4d342f 0%,
-            #e4521b 50%,
-            #feeb65 90%,
-            #f0f0f0 100%);
+    --d3fc-full--gradient: linear-gradient(
+        #4d342f 0%,
+        #e4521b 22.5%,
+        #feeb65 42.5%,
+        #f0f0f0 50%,
+        #dcedc8 57.5%,
+        #42b3d5 67.5%,
+        #1a237e 100%
+    );
+    --d3fc-positive--gradient: linear-gradient(
+        #f0f0f0 0%,
+        #dcedc8 10%,
+        #42b3d5 50%,
+        #1a237e 100%
+    );
+    --d3fc-negative--gradient: linear-gradient(
+        #4d342f 0%,
+        #e4521b 50%,
+        #feeb65 90%,
+        #f0f0f0 100%
+    );
 }
 
 @mixin perspective-viewer-pro--openlayers {
@@ -155,17 +163,18 @@ perspective-string-column-style[theme="Pro Light"] {
     --map-category-8: #7f7f7f;
     --map-category-9: #bcbd22;
     --map-category-10: #17becf;
-    --map-gradient: linear-gradient(#4d342f 0%,
-            #e4521b 22.5%,
-            #feeb65 42.5%,
-            #f0f0f0 50%,
-            #dcedc8 57.5%,
-            #42b3d5 67.5%,
-            #1a237e 100%);
+    --map-gradient: linear-gradient(
+        #4d342f 0%,
+        #e4521b 22.5%,
+        #feeb65 42.5%,
+        #f0f0f0 50%,
+        #dcedc8 57.5%,
+        #42b3d5 67.5%,
+        #1a237e 100%
+    );
 }
 
 @mixin perspective-viewer-pro--datagrid {
     --rt-pos-cell--color: #338dcd;
     --rt-neg-cell--color: #ff471e;
 }
-

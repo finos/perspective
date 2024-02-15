@@ -56,8 +56,6 @@ perspective-viewer[theme="Gruvbox Light"] {
     // --gruvbox-light-aqua: #8ec07c;
     // --gruvbox-light-orange: #fe8019;
 
-  
-
     @include perspective-viewer-pro;
     @include perspective-viewer-gruvbox-light--colors;
     @include perspective-viewer-gruvbox-light--animation;
@@ -100,7 +98,7 @@ perspective-dropdown[theme="Gruvbox Light"] {
     --theme-alt-purple: #8f3f71;
     --theme-alt-aqua: #427b58;
     --theme-alt-orange: #af3a03;
-    
+
     color: var(--theme-fg1);
     background-color: var(--theme-bg1);
     --icon--color: var(--theme-fg0);
@@ -113,10 +111,8 @@ perspective-dropdown[theme="Gruvbox Light"] {
 }
 
 @mixin perspective-viewer-gruvbox-light--datagrid {
-    regular-table {
-        --rt-pos-cell--color: var(--theme-blue);
-        --rt-neg-cell--color: var(--theme-red); 
-    }
+    --rt-pos-cell--color: var(--theme-blue);
+    --rt-neg-cell--color: var(--theme-red);
 }
 
 @mixin perspective-viewer-gruvbox-light--d3fc {

@@ -27,8 +27,15 @@
     mask-size: cover;
 }
 
-perspective-viewer:not([settings]),
+perspective-viewer:not([settings]) {
+    @include settings-not-open;
+}
+
 :host-context(perspective-viewer:not([settings])) {
+    @include settings-not-open;
+}
+
+@mixin settings-not-open {
     regular-table table tr.rt-autosize + tr th {
         height: 0px;
         span {
@@ -37,8 +44,7 @@ perspective-viewer:not([settings]),
     }
 }
 
-perspective-viewer[settings],
-:host-context(perspective-viewer[settings]) {
+@mixin settings-open {
     .psp-menu-enabled {
         padding: 0 6px;
         font-size: 8px;
@@ -81,9 +87,27 @@ perspective-viewer[settings],
     }
 }
 
-perspective-viewer regular-table table thead tr:last-child th {
-    border-bottom-width: 1px;
-    border-bottom-color: var(--inactive--border-color, #8b868045);
+perspective-viewer[settings] {
+    @include settings-open;
+}
+
+:host-context(perspective-viewer[settings]) {
+    @include settings-open;
+}
+
+@mixin viewer-table-styles {
+    regular-table table thead tr:last-child th {
+        border-bottom-width: 1px;
+        border-bottom-color: var(--inactive--border-color, #8b868045);
+    }
+}
+
+perspective-viewer {
+    @include viewer-table-styles;
+}
+
+:host-context(perspective-viewer) {
+    @include viewer-table-styles;
 }
 
 .psp-sort-enabled:hover {
@@ -120,8 +144,16 @@ td:focus {
     outline-width: 1px;
 }
 
-perspective-viewer.dragging regular-table {
-    pointer-events: none;
+@mixin table-no-dragging {
+    regular-table {
+        pointer-events: none;
+    }
+}
+perspective-viewer.dragging {
+    @include table-no-dragging;
+}
+:host-context(perspective-viewer.dragging) {
+    @include table-no-dragging;
 }
 
 .psp-header-border:last-child {
@@ -282,11 +314,16 @@ regular-table table {
 // until the drawing is done. However, this causes the datagrid to draw its
 // _first_ frame as if its in the wrong state, as it detects sidepanel state
 // via HTML attribute checking.
-perspective-viewer:not([settings]),
-:host-context(:not([settings])) {
+@mixin design-slash-architecture-bug {
     regular-table #psp-column-edit-buttons:after {
         content: none;
     }
+}
+perspective-viewer:not([settings]) {
+    @include design-slash-architecture-bug;
+}
+:host-context(perspective-viewer:not([settings])) {
+    @include design-slash-architecture-bug;
 }
 
 // Style the last row of the `<thead>` so that is has a bottom border.

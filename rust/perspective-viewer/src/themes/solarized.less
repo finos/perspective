@@ -65,12 +65,10 @@ perspective-string-column-style[theme="Solarized"] {
 }
 
 @mixin perspective-viewer-solarized--datagrid {
-    regular-table {
-        --rt-pos-cell--color: #268bd2 !important;
-        --rt-neg-cell--color: #cb4b16 !important;
-        --rt-hover--border-color: #CCC;
-        --rt--border-color: #93a1a1;
-    }
+    --rt-pos-cell--color: #268bd2 !important;
+    --rt-neg-cell--color: #cb4b16 !important;
+    --rt-hover--border-color: #ccc;
+    --rt--border-color: #93a1a1;
 }
 x {
     color: #cb4b16;
@@ -92,11 +90,13 @@ x {
     --d3fc-series-6: #6c71c4;
     --d3fc-series-7: #d33682;
 
-    --d3fc-positive--gradient: linear-gradient(#268bd2 0%,
-            #2aa198,
-            #859900,
-            #b58900,
-            #cb4b16,
-            #dc322f,
-            #d33682 100%);
+    --d3fc-positive--gradient: linear-gradient(
+        #268bd2 0%,
+        #2aa198,
+        #859900,
+        #b58900,
+        #cb4b16,
+        #dc322f,
+        #d33682 100%
+    );
 }
