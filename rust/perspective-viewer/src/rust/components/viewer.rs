@@ -92,6 +92,11 @@ impl ColumnLocator {
     pub fn is_expr(&self) -> bool {
         matches!(self, ColumnLocator::Expr(_))
     }
+
+    pub fn view_type(&self, session: &Session) -> Option<Type> {
+        let name = self.name().cloned().unwrap_or_default();
+        session.metadata().get_column_view_type(name.as_str())
+    }
 }
 
 #[derive(Properties)]

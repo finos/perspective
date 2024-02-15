@@ -33,6 +33,7 @@ type Action =
     | "deactivate"
     | "reorder"
     | "aggregate"
+    | "deaggregate"
     | "groupby"
     | "splitby"
     | "orderby"
@@ -146,6 +147,23 @@ const TEST_SPEC: Record<string, TestSpec> = {
             expr_col: {
                 unchanged: true,
                 type: "integer",
+            },
+        },
+    },
+    Deaggregate: {
+        initial_state: {
+            open: true,
+            active: true,
+        },
+        actions: ["deaggregate"],
+        outputs: {
+            table_col: {
+                unchanged: true,
+                type: "string",
+            },
+            expr_col: {
+                unchanged: true,
+                type: "string",
             },
         },
     },
@@ -263,7 +281,11 @@ async function checkOutput(
 ) {
     const POSSIBLE_TABS = ["Style", "Attributes"];
 
-    const check_tabs = async (selectedTab, tabs, unexpected_tabs) => {
+    const check_tabs = async (
+        selectedTab: string,
+        tabs: string[],
+        unexpected_tabs: string[]
+    ) => {
         await view.columnSettingsSidebar.container
             .locator(".tab.selected")
             .getByText(selectedTab)
@@ -333,7 +355,7 @@ test.describe("Column Settings State on Interaction", () => {
             "orderby",
             "where",
         ],
-        text: ["reorder", "open", "deactivate"],
+        text: ["reorder", "open", "deactivate", "deaggregate"],
         dnd: ["open", "deactivate", "groupby", "splitby"],
     };
 
@@ -364,6 +386,14 @@ test.describe("Column Settings State on Interaction", () => {
                             }
                             case "deactivate": {
                                 await selector.activeBtn.click();
+                                break;
+                            }
+                            case "deaggregate": {
+                                await pageView.settingsPanel.groupby("Row ID");
+                                await pageView.settingsPanel.removeViewParameter(
+                                    "groupby",
+                                    "Row ID"
+                                );
                                 break;
                             }
                             default: {
@@ -487,6 +517,21 @@ test.describe("Column Settings State on Interaction", () => {
                                     pageView.settingsPanel.groupbyInput
                                 );
                                 break;
+                            }
+                            case "deaggregate": {
+                                let aggregator =
+                                    pageView.settingsPanel.inactiveColumns.columnSelector.first();
+                                await aggregator.dragTo(
+                                    pageView.settingsPanel.groupbyInput
+                                );
+                                aggregator = page
+                                    .locator("#group_by .pivot-column")
+                                    .first();
+                                await aggregator.dragTo(
+                                    pageView.settingsPanel.activeColumns.container
+                                        .locator(".column-selector-column")
+                                        .first()
+                                );
                             }
                         }
                         await checkOutput(

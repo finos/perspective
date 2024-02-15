@@ -120,7 +120,7 @@ impl ColumnSettingsSidebar {
         self.save_enabled = changed && valid;
     }
 
-    fn initialize(ctx: &yew::prelude::Context<Self>) -> Self {
+    fn initialize(&mut self, ctx: &yew::prelude::Context<Self>) {
         let column_name = ctx
             .props()
             .selected_column
@@ -134,11 +134,7 @@ impl ColumnSettingsSidebar {
         let initial_expr_value = Rc::new(initial_expr_value);
         let initial_header_value =
             (*initial_expr_value != column_name).then_some(column_name.clone());
-        let maybe_ty = ctx
-            .props()
-            .session
-            .metadata()
-            .get_column_view_type(&column_name);
+        let maybe_ty = ctx.props().selected_column.view_type(ctx.props().session());
 
         // NOTE: This is going to be refactored soon.
         let tabs = {
@@ -177,7 +173,7 @@ impl ColumnSettingsSidebar {
             tabs
         };
 
-        Self {
+        *self = Self {
             column_name,
             expr_value: initial_expr_value.clone(),
             initial_expr_value,
@@ -186,7 +182,8 @@ impl ColumnSettingsSidebar {
             maybe_ty,
             tabs,
             header_valid: true,
-            ..Default::default()
+            session_sub: self.session_sub.take(),
+            ..*self
         }
     }
 }
@@ -196,7 +193,6 @@ impl Component for ColumnSettingsSidebar {
     type Properties = ColumnSettingsProps;
 
     fn create(ctx: &yew::prelude::Context<Self>) -> Self {
-        let mut this = Self::initialize(ctx);
         let session_cb = ctx
             .link()
             .callback(|_| ColumnSettingsMsg::SessionUpdated(()));
@@ -205,14 +201,19 @@ impl Component for ColumnSettingsSidebar {
             .renderer
             .session_changed
             .add_listener(session_cb);
-        this.session_sub = Some(session_sub);
+
+        let mut this = Self {
+            session_sub: Some(session_sub),
+            ..Default::default()
+        };
+        this.initialize(ctx);
         this
     }
 
     fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
         if ctx.props() != old_props {
             let selected_tab = self.selected_tab;
-            *self = Self::initialize(ctx);
+            self.initialize(ctx);
             self.selected_tab = selected_tab;
             self.selected_tab_idx = self
                 .tabs
@@ -300,7 +301,7 @@ impl Component for ColumnSettingsSidebar {
                 true
             },
             ColumnSettingsMsg::SessionUpdated(()) => {
-                *self = Self::initialize(ctx);
+                self.initialize(ctx);
                 true
             },
         }
