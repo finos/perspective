@@ -14,8 +14,6 @@ use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::*;
-
 #[derive(Properties, PartialEq)]
 pub struct NumberInputProps {
     pub max_value: f64,
@@ -32,13 +30,16 @@ pub fn number_input(props: &NumberInputProps) -> Html {
             .value()
     });
 
-    html_template! {
-        <label>{ "Max" }</label>
-        <input
-            value={ format!("{}", props.max_value) }
-            class="parameter"
-            type="number"
-            min="0"
-            oninput={ oninput } />
+    html! {
+        <>
+            <label >{ "Max" }</label>
+            <input
+                value={format!("{}", props.max_value)}
+                class="parameter"
+                type="number"
+                min="0"
+                {oninput}
+            />
+        </>
     }
 }

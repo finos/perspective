@@ -30,11 +30,5 @@ pub fn color_component(props: &ColorProps) -> Html {
             .value()
     });
 
-    html! {
-        <input
-            class="parameter"
-            type="color"
-            value={ props.color.to_owned() }
-            oninput={ oninput }/>
-    }
+    html! { <input class="parameter" type="color" value={props.color.to_owned()} {oninput} /> }
 }

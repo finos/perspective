@@ -49,8 +49,9 @@ pub fn symbol_selector(p: &SymbolSelectorProps) -> Html {
         <Select<Symbol>
             wrapper_class="symbol-selector-wrapper"
             class="symbol-selector"
-            on_select={ p.callback.clone() }
-            { values }
-            { selected }/>
+            on_select={p.callback.clone()}
+            {values}
+            {selected}
+        />
     }
 }

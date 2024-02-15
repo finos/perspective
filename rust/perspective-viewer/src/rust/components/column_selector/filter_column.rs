@@ -397,20 +397,22 @@ impl Component for FilterColumn {
                     placeholder="Value"
                     class="num-filter"
                     step="1"
-                    ref={ noderef.clone() }
-                    onkeydown={ keydown }
-                    value={ self.input.clone() }
-                    oninput={ input }/>
+                    ref={noderef.clone()}
+                    onkeydown={keydown}
+                    value={self.input.clone()}
+                    oninput={input}
+                />
             },
             Some(Type::Float) => html! {
                 <input
                     type="number"
                     placeholder="Value"
                     class="num-filter"
-                    ref={ noderef.clone() }
-                    onkeydown={ keydown }
-                    value={ self.input.clone() }
-                    oninput={ input }/>
+                    ref={noderef.clone()}
+                    onkeydown={keydown}
+                    value={self.input.clone()}
+                    oninput={input}
+                />
             },
             Some(Type::String) => html! {
                 <input
@@ -420,23 +422,25 @@ impl Component for FilterColumn {
                     class="string-filter"
                     spellcheck="false"
                     // TODO This is dirty and it may not work in the future.
-                    onInput="this.parentNode.dataset.value=this.value"
-                    ref={ noderef.clone() }
-                    onkeydown={ keydown }
-                    onfocus={ focus }
-                    onblur={ blur }
-                    value={ self.input.clone() }
-                    oninput={ input }/>
+                     onInput="this.parentNode.dataset.value=this.value"
+                    ref={noderef.clone()}
+                    onkeydown={keydown}
+                    onfocus={focus}
+                    onblur={blur}
+                    value={self.input.clone()}
+                    oninput={input}
+                />
             },
             Some(Type::Date) => html! {
                 <input
                     type="date"
                     placeholder="Value"
                     class="date-filter"
-                    ref={ noderef.clone() }
-                    onkeydown={ keydown }
-                    value={ self.input.clone() }
-                    oninput={ input }/>
+                    ref={noderef.clone()}
+                    onkeydown={keydown}
+                    value={self.input.clone()}
+                    oninput={input}
+                />
             },
             Some(Type::Datetime) => html! {
                 <input
@@ -444,19 +448,21 @@ impl Component for FilterColumn {
                     placeholder="Value"
                     class="datetime-filter"
                     step="0.001"
-                    ref={ noderef.clone() }
-                    onkeydown={ keydown }
-                    value={ self.input.clone() }
-                    oninput={ input }/>
+                    ref={noderef.clone()}
+                    onkeydown={keydown}
+                    value={self.input.clone()}
+                    oninput={input}
+                />
             },
             Some(Type::Bool) => {
                 html! {
                     <input
                         type="checkbox"
                         class="alternate"
-                        ref={ noderef.clone() }
-                        checked={ self.input == "true" }
-                        oninput={ input }/>
+                        ref={noderef.clone()}
+                        checked={self.input == "true"}
+                        oninput={input}
+                    />
                 }
             },
             None => {
@@ -475,29 +481,31 @@ impl Component for FilterColumn {
             <div
                 class="pivot-column-draggable"
                 draggable="true"
-                ondragstart={ dragstart }
-                ondragend={ dragend }>
-
-                <LocalStyle href={ css!("filter-item") } />
-                <div class="pivot-column-border">
-                    <TypeIcon ty={ Type::String }/>
-                    <span class="column_name">
-                        { filter.0.to_owned() }
-                    </span>
+                ondragstart={dragstart}
+                ondragend={dragend}
+            >
+                <LocalStyle
+                    href={css!("filter-item")}
+                />
+                <div
+                    class="pivot-column-border"
+                >
+                    <TypeIcon ty={Type::String} />
+                    <span class="column_name">{ filter.0.to_owned() }</span>
                     <FilterOpSelector
                         class="filterop-selector"
-                        values={ filter_ops }
-                        selected={ filter.1 }
-                        on_select={ select }>
-                    </FilterOpSelector>
-
+                        values={filter_ops}
+                        selected={filter.1}
+                        on_select={select}
+                    />
                     if !matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
                         if col_type == Some(Type::Bool) {
                             { input_elem }
                         } else {
                             <label
-                                class={ format!("input-sizer {}", type_class) }
-                                data-value={ format!("{}", filter.2) }>
+                                class={format!("input-sizer {}", type_class)}
+                                data-value={format!("{}", filter.2)}
+                            >
                                 { input_elem }
                             </label>
                         }

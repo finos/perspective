@@ -188,36 +188,37 @@ impl Component for InactiveColumn {
 
         html! {
             <div
-                class={ class }
-                { onmouseover }
-                { onmouseout }
-                data-index={ ctx.props().idx.to_string() }>
-
+                {class}
+                {onmouseover}
+                {onmouseout}
+                data-index={ctx.props().idx.to_string()}
+            >
                 <span
-                    class={ is_active_class }
-                    onmousedown={ add_column }>
-                </span>
+                    class={is_active_class}
+                    onmousedown={add_column}
+                />
                 <div
                     class="column-selector-draggable column-selector-column-title"
                     draggable="true"
-                    ref={ &self.add_expression_ref }
-                    { ondragstart }
-                    { ondragend }>
-
-                    <div class="column-selector-column-border">
-                        <TypeIcon ty={ col_type }/>
-                        <span class={"column_name"}>
-                            { ctx.props().name.clone() }
-                        </span>
-                        <span class="column-selector--spacer"></span>
-
+                    ref={&self.add_expression_ref}
+                    {ondragstart}
+                    {ondragend}
+                >
+                    <div
+                        class="column-selector-column-border"
+                    >
+                        <TypeIcon ty={col_type} />
+                        <span class="column_name">{ ctx.props().name.clone() }</span>
+                        <span
+                            class="column-selector--spacer"
+                        />
                         if is_expression {
                             <ExprEditButton
-                                name={ ctx.props().name.clone() }
-                                on_open_expr_panel={ &ctx.props().on_open_expr_panel }
-                                is_expression={ true }
-                                is_editing={ ctx.props().is_editing }
-                            ></ExprEditButton>
+                                name={ctx.props().name.clone()}
+                                on_open_expr_panel={&ctx.props().on_open_expr_panel}
+                                is_expression=true
+                                is_editing={ctx.props().is_editing}
+                            />
                         }
                     </div>
                 </div>

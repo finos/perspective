@@ -123,19 +123,27 @@ impl Component for PluginSelector {
             SelectItem::Option(_item) => html! {},
         });
 
-        html_template! {
-            <LocalStyle href={ css!("plugin-selector") } />
-            <div id="plugin_selector_container" { class }>
-                <PluginSelect
-                    name={ plugin_name }
-                    on_click={ callback } />
-                <div id="plugin_selector_border"></div>
-                if self.is_open {
-                    {
-                        items.collect::<Html>()
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("plugin-selector")}
+                />
+                <div
+                    id="plugin_selector_container"
+                    {class}
+                >
+                    <PluginSelect
+                        name={plugin_name}
+                        on_click={callback}
+                    />
+                    <div
+                        id="plugin_selector_border"
+                    />
+                    if self.is_open {
+                        { items.collect::<Html>() }
                     }
-                }
-            </div>
+                </div>
+            </>
         }
     }
 }
@@ -165,12 +173,10 @@ fn PluginSelect(props: &PluginSelectProps) -> Html {
     html! {
         <div
             class="plugin-select-item"
-            data-plugin={ name.0 }
-            onclick={ props.on_click.reform(move |_| name.1.clone()) }>
-
-            <span class="plugin-select-item-name">
-                { &props.name }
-            </span>
+            data-plugin={name.0}
+            onclick={props.on_click.reform(move |_| name.1.clone())}
+        >
+            <span class="plugin-select-item-name">{ &props.name }</span>
         </div>
     }
 }

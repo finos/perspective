@@ -353,127 +353,181 @@ impl Component for NumberColumnStyle {
             .link()
             .callback(NumberColumnStyleMsg::NumberBackModeChanged);
 
-        let fg_color_controls = html_template! {
-            <span class="row">{ "Color" }</span>
-            if self.config.number_fg_mode == NumberForegroundMode::Color {
-                <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(Fg, ctx) />
-                </div>
-            }
+        let fg_color_controls = html! {
+            <>
+                <span class="row">{ "Color" }</span>
+                if self.config.number_fg_mode == NumberForegroundMode::Color {
+                    <div
+                        class="row inner_section"
+                    >
+                        <ColorRangeSelector ..self.color_props(Fg, ctx) />
+                    </div>
+                }
+            </>
         };
 
-        let fg_bar_controls = html_template! {
-            <span class="row">{ "Bar" }</span>
-            if self.config.number_fg_mode == NumberForegroundMode::Bar {
-                <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(Fg, ctx) />
-                    <NumberInput ..self.max_value_props(Fg, ctx) />
-                </div>
-            }
+        let fg_bar_controls = html! {
+            <>
+                <span class="row">{ "Bar" }</span>
+                if self.config.number_fg_mode == NumberForegroundMode::Bar {
+                    <div
+                        class="row inner_section"
+                    >
+                        <ColorRangeSelector ..self.color_props(Fg, ctx) />
+                        <NumberInput ..self.max_value_props(Fg, ctx) />
+                    </div>
+                }
+            </>
         };
 
-        let bg_color_controls = html_template! {
-            <span class="row">{ "Color" }</span>
-            if self.config.number_bg_mode == NumberBackgroundMode::Color {
-                <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(Bg, ctx) />
-                </div>
-            }
+        let bg_color_controls = html! {
+            <>
+                <span class="row">{ "Color" }</span>
+                if self.config.number_bg_mode == NumberBackgroundMode::Color {
+                    <div
+                        class="row inner_section"
+                    >
+                        <ColorRangeSelector ..self.color_props(Bg, ctx) />
+                    </div>
+                }
+            </>
         };
 
-        let bg_gradient_controls = html_template! {
-            <span class="row">{ "Gradient" }</span>
-            if self.config.number_bg_mode == NumberBackgroundMode::Gradient {
-                <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(Bg, ctx) />
-                    <NumberInput ..self.max_value_props(Bg, ctx) />
-                </div>
-            }
+        let bg_gradient_controls = html! {
+            <>
+                <span class="row">{ "Gradient" }</span>
+                if self.config.number_bg_mode == NumberBackgroundMode::Gradient {
+                    <div
+                        class="row inner_section"
+                    >
+                        <ColorRangeSelector ..self.color_props(Bg, ctx) />
+                        <NumberInput ..self.max_value_props(Bg, ctx) />
+                    </div>
+                }
+            </>
         };
 
-        let bg_pulse_controls = html_template! {
-            <span class="row">{ "Pulse (Δ)" }</span>
-            if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
-                <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(Bg, ctx) />
-                </div>
-            }
+        let bg_pulse_controls = html! {
+            <>
+                <span class="row">{ "Pulse (Δ)" }</span>
+                if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
+                    <div
+                        class="row inner_section"
+                    >
+                        <ColorRangeSelector ..self.color_props(Bg, ctx) />
+                    </div>
+                }
+            </>
         };
 
-        html_template! {
-            <LocalStyle href={ css!("column-style") } />
-            <div id="column-style-container" class="number-column-style-container">
-                <div class="column-style-label">
-                    <label id="fixed-examples" class="indent">{
-                        self.make_fixed_text(ctx)
-                    }</label>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("column-style")}
+                />
+                <div
+                    id="column-style-container"
+                    class="number-column-style-container"
+                >
+                    <div
+                        class="column-style-label"
+                    >
+                        <label
+                            id="fixed-examples"
+                            class="indent"
+                        >
+                            { self.make_fixed_text(ctx) }
+                        </label>
+                    </div>
+                    <div
+                        class="row section"
+                    >
+                        <input
+                            type="checkbox"
+                            checked=true
+                            disabled=true
+                        />
+                        <input
+                            id="fixed-param"
+                            class="parameter"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={fixed_value}
+                            oninput={fixed_oninput}
+                        />
+                    </div>
+                    <div
+                        class="column-style-label"
+                    >
+                        <label class="indent">{ "Foreground" }</label>
+                    </div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            oninput={fg_enabled_oninput}
+                            checked={self.config.number_fg_mode.is_enabled()}
+                        />
+                        <RadioList<NumberForegroundMode>
+                            class="indent"
+                            name="foreground-list"
+                            disabled={!self.config.number_fg_mode.is_enabled()}
+                            selected={selected_fg_mode}
+                            on_change={fg_mode_changed}
+                        >
+                            <RadioListItem<NumberForegroundMode>
+                                value={NumberForegroundMode::Color}
+                            >
+                                { fg_color_controls }
+                            </RadioListItem<NumberForegroundMode>>
+                            <RadioListItem<NumberForegroundMode>
+                                value={NumberForegroundMode::Bar}
+                            >
+                                { fg_bar_controls }
+                            </RadioListItem<NumberForegroundMode>>
+                        </RadioList<NumberForegroundMode>>
+                    </div>
+                    <div
+                        class="column-style-label"
+                    >
+                        <label class="indent">{ "Background" }</label>
+                    </div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            oninput={bg_enabled_oninput}
+                            checked={!self.config.number_bg_mode.is_disabled()}
+                        />
+                        <RadioList<NumberBackgroundMode>
+                            class="indent"
+                            name="background-list"
+                            disabled={self.config.number_bg_mode.is_disabled()}
+                            selected={selected_bg_mode}
+                            on_change={bg_mode_changed}
+                        >
+                            <RadioListItem<NumberBackgroundMode>
+                                value={NumberBackgroundMode::Color}
+                            >
+                                { bg_color_controls }
+                            </RadioListItem<NumberBackgroundMode>>
+                            <RadioListItem<NumberBackgroundMode>
+                                value={NumberBackgroundMode::Gradient}
+                            >
+                                { bg_gradient_controls }
+                            </RadioListItem<NumberBackgroundMode>>
+                            <RadioListItem<NumberBackgroundMode>
+                                value={NumberBackgroundMode::Pulse}
+                            >
+                                { bg_pulse_controls }
+                            </RadioListItem<NumberBackgroundMode>>
+                        </RadioList<NumberBackgroundMode>>
+                    </div>
                 </div>
-                <div class="row section">
-                    <input type="checkbox" checked=true disabled=true/>
-                    <input
-                        id="fixed-param"
-                        class="parameter"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={ fixed_value }
-                        oninput={ fixed_oninput }/>
-                </div>
-                <div class="column-style-label">
-                    <label class="indent">{ "Foreground" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        oninput={ fg_enabled_oninput }
-                        checked={ self.config.number_fg_mode.is_enabled() } />
-                    <RadioList<NumberForegroundMode>
-                        class="indent"
-                        name="foreground-list"
-                        disabled={ !self.config.number_fg_mode.is_enabled() }
-                        selected={ selected_fg_mode }
-                        on_change={ fg_mode_changed } >
-
-                        <RadioListItem<NumberForegroundMode>
-                            value={ NumberForegroundMode::Color }>
-                            { fg_color_controls }
-                        </RadioListItem<NumberForegroundMode>>
-                        <RadioListItem<NumberForegroundMode>
-                            value={ NumberForegroundMode::Bar }>
-                            { fg_bar_controls }
-                        </RadioListItem<NumberForegroundMode>>
-                    </RadioList<NumberForegroundMode>>
-                </div>
-                <div class="column-style-label">
-                    <label class="indent">{ "Background" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        oninput={ bg_enabled_oninput }
-                        checked={ !self.config.number_bg_mode.is_disabled() } />
-                    <RadioList<NumberBackgroundMode>
-                        class="indent"
-                        name="background-list"
-                        disabled={ self.config.number_bg_mode.is_disabled() }
-                        selected={ selected_bg_mode }
-                        on_change={ bg_mode_changed } >
-
-                        <RadioListItem<NumberBackgroundMode>
-                            value={ NumberBackgroundMode::Color }>
-                            { bg_color_controls }
-                        </RadioListItem<NumberBackgroundMode>>
-                        <RadioListItem<NumberBackgroundMode>
-                            value={ NumberBackgroundMode::Gradient }>
-                            { bg_gradient_controls }
-                        </RadioListItem<NumberBackgroundMode>>
-                        <RadioListItem<NumberBackgroundMode>
-                            value={ NumberBackgroundMode::Pulse }>
-                            { bg_pulse_controls }
-                        </RadioListItem<NumberBackgroundMode>>
-                    </RadioList<NumberBackgroundMode>>
-                </div>
-            </div>
+            </>
         }
     }
 }

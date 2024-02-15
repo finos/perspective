@@ -20,7 +20,6 @@ use yew::prelude::*;
 use yew::virtual_dom::VChild;
 
 use crate::utils::WeakScope;
-use crate::*;
 
 #[derive(Clone, Default, Eq, PartialEq)]
 pub struct ModalOrientation(Rc<Cell<bool>>);
@@ -134,15 +133,15 @@ where
             .map(Html::from)
             .unwrap_or_default();
 
-        html_template! {
-            <style>
-                { self.css.to_owned() }
-            </style>
-            <ContextProvider<ModalOrientation> context={ &self.rev_vert }>
-                <NoRender>
-                    { child }
-                </NoRender>
-            </ContextProvider<ModalOrientation>>
+        html! {
+            <>
+                <style >{ self.css.to_owned() }</style>
+                <ContextProvider<ModalOrientation>
+                    context={&self.rev_vert}
+                >
+                    <NoRender >{ child }</NoRender>
+                </ContextProvider<ModalOrientation>>
+            </>
         }
     }
 }
@@ -169,6 +168,6 @@ impl Component for NoRender {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        html! { { ctx.props().children.iter().collect::<Html>()} }
+        html! { { ctx.props().children.iter().collect::<Html>() } }
     }
 }

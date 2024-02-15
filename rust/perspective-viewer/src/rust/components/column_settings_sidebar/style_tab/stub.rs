@@ -25,9 +25,14 @@ pub fn stub(p: &StubProps) -> Html {
     }
 
     html! {
-        <div class="style_contents">
-            <div id="column-style-container" class="no-style">
-                <div class="style-contents">{p.message.clone()}</div>
+        <div
+            class="style_contents"
+        >
+            <div
+                id="column-style-container"
+                class="no-style"
+            >
+                <div class="style-contents">{ p.message.clone() }</div>
             </div>
         </div>
     }

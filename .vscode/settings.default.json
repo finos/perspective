@@ -8,6 +8,13 @@
     "rust-analyzer.linkedProjects": [
         "${workspaceFolder}/rust/perspective-viewer/Cargo.toml"
     ],
+    "rust-analyzer.rustfmt.overrideCommand": [
+        "cargo",
+        "run",
+        "-p",
+        "perspective-lint",
+        "--release"
+    ],
     "rust-analyzer.check.command": "clippy",
     "playwright.env": {
         "TZ": "UTC"

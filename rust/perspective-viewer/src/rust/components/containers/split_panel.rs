@@ -359,24 +359,23 @@ impl Component for SplitPanel {
         let head = iter.next().unwrap();
 
         let tail = iter
-            .filter(|x| !ctx.props().skip_empty || x != &html! {<></>})
+            .filter(|x| !ctx.props().skip_empty || x != &html! { <></> })
             .enumerate()
             .map(|(i, x)| {
                 html! {
-                    < key={ i + 2 }>
+                    <key={i + 2}>
                         <SplitPanelDivider
-                            { i }
-                            orientation={ ctx.props().orientation }
-                            link={ ctx.link().clone() }>
-                        </SplitPanelDivider>
-
+                            {i}
+                            orientation={ctx.props().orientation}
+                            link={ctx.link().clone()}
+                        />
                         if i == ctx.props().children.len() - 2 {
                             { x }
                         } else {
                             <SplitPanelChild
-                                style={ self.styles[i + 1].clone() }
-                                ref_={ self.refs[i + 1].clone() }>
-
+                                style={self.styles[i + 1].clone()}
+                                ref_={self.refs[i + 1].clone()}
+                            >
                                 { x }
                             </SplitPanelChild>
                         }
@@ -384,26 +383,28 @@ impl Component for SplitPanel {
                 }
             });
 
-        let contents = html_template! {
-            <LocalStyle key={ 0 } href={ css!("containers/split-panel") } />
-            <SplitPanelChild
-                key={ 1 }
-                style={ self.styles[0].clone() }
-                ref_={ self.refs[0].clone() }>
-                { head }
-            </SplitPanelChild>
-            { for tail }
+        let contents = html! {
+            <>
+                <LocalStyle
+                    key=0
+                    href={css!("containers/split-panel")}
+                />
+                <SplitPanelChild
+                    key=1
+                    style={self.styles[0].clone()}
+                    ref_={self.refs[0].clone()}
+                >
+                    { head }
+                </SplitPanelChild>
+                { for tail }
+            </>
         };
 
         // TODO consider removing this
         if ctx.props().no_wrap {
-            html! {{ contents }}
+            html! { { contents } }
         } else {
-            html! {
-                <div id={ ctx.props().id.clone() } class={ classes }>
-                    { contents }
-                </div>
-            }
+            html! { <div id={ctx.props().id.clone()} class={classes}>{ contents }</div> }
         }
     }
 }
@@ -451,13 +452,15 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
     // open dialogs.
     let ondragstart = Callback::from(|event: DragEvent| event.prevent_default());
 
-    html_template! {
-        <div
-            class="split-panel-divider"
-            ondragstart={ ondragstart }
-            onpointerdown={ onmousedown }
-            ondblclick={ ondblclick }>
-        </div>
+    html! {
+        <>
+            <div
+                class="split-panel-divider"
+                {ondragstart}
+                onpointerdown={onmousedown}
+                {ondblclick}
+            />
+        </>
     }
 }
 
@@ -477,9 +480,10 @@ fn split_panel_child(props: &SplitPanelChildProps) -> Html {
     };
     html! {
         <div
-            { class }
-            ref={ props.ref_.clone() }
-            style={ props.style.clone() }>
+            {class}
+            ref={props.ref_.clone()}
+            style={props.style.clone()}
+        >
             { props.children.iter().next().unwrap() }
         </div>
     }

@@ -16,7 +16,6 @@ use crate::components::containers::select::*;
 use crate::components::modal::{ModalLink, SetModalLink};
 use crate::config::*;
 use crate::utils::WeakScope;
-use crate::*;
 
 pub enum DatetimeStyleSimpleMsg {
     DateEnabled,
@@ -116,42 +115,48 @@ impl Component for DatetimeStyleSimple {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let on_date_reset = ctx.link().callback(|_| DatetimeStyleSimpleMsg::DateEnabled);
         let on_time_reset = ctx.link().callback(|_| DatetimeStyleSimpleMsg::TimeEnabled);
-        html_template! {
-            <div class="column-style-label">
-                <label class="indent">{ "Date Style" }</label>
-            </div>
-            <div class="section">
-                <input
-                    type="checkbox"
-                    onchange={ on_date_reset }
-                    checked={ !self.config.date_style.is_short() } />
 
-                <Select<SimpleDatetimeFormat>
-                    wrapper_class="indent"
-                    selected={ self.config.date_style }
-                    on_select={ ctx.link().callback(DatetimeStyleSimpleMsg::DateStyleChanged) }
-                    values={ SimpleDatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
-                </Select<SimpleDatetimeFormat>>
-            </div>
-
-            if ctx.props().enable_time_config {
-                <div class="column-style-label">
-                    <label class="indent">{ "Time Style" }</label>
-                </div>
-                <div class="section">
+        html! {
+            <>
+                <div class="column-style-label"><label class="indent">{ "Date Style" }</label></div>
+                <div
+                    class="section"
+                >
                     <input
                         type="checkbox"
-                        onchange={ on_time_reset }
-                        checked={ !self.config.time_style.is_medium() } />
-
+                        onchange={on_date_reset}
+                        checked={!self.config.date_style.is_short()}
+                    />
                     <Select<SimpleDatetimeFormat>
                         wrapper_class="indent"
-                        selected={ self.config.time_style }
-                        on_select={ ctx.link().callback(DatetimeStyleSimpleMsg::TimeStyleChanged) }
-                        values={ SimpleDatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
-                    </Select<SimpleDatetimeFormat>>
+                        selected={self.config.date_style}
+                        on_select={ctx.link().callback(DatetimeStyleSimpleMsg::DateStyleChanged)}
+                        values={SimpleDatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>()}
+                    />
                 </div>
-            }
+                if ctx.props().enable_time_config {
+                    <div
+                        class="column-style-label"
+                    >
+                        <label class="indent">{ "Time Style" }</label>
+                    </div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={on_time_reset}
+                            checked={!self.config.time_style.is_medium()}
+                        />
+                        <Select<SimpleDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.time_style}
+                            on_select={ctx.link().callback(DatetimeStyleSimpleMsg::TimeStyleChanged)}
+                            values={SimpleDatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>()}
+                        />
+                    </div>
+                }
+            </>
         }
     }
 }

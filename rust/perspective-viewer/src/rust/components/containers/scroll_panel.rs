@@ -267,45 +267,42 @@ impl Component for ScrollPanel {
             // `regular-table` uses.
             html! {
                 <div
-                    ref={ self.viewport(ctx) }
-                    id={ ctx.props().id }
-                    onscroll={ onscroll }
-                    ondragover={ &ctx.props().dragover }
-                    ondragenter={ &ctx.props().dragenter }
-                    ondragleave={ &ctx.props().dragleave }
-                    ondrop={ &ctx.props().drop }
-                    class={ ctx.props().class.clone() }>
-
-                    <div class="scroll-panel-container" style={ window_style }>
+                    ref={self.viewport(ctx)}
+                    id={ctx.props().id}
+                    {onscroll}
+                    ondragover={&ctx.props().dragover}
+                    ondragenter={&ctx.props().dragenter}
+                    ondragleave={&ctx.props().dragleave}
+                    ondrop={&ctx.props().drop}
+                    class={ctx.props().class.clone()}
+                >
+                    <div
+                        class="scroll-panel-container"
+                        style={window_style}
+                    >
                         { for windowed_items.iter().cloned().map(Html::from) }
                         <div
-                            key={ "__scroll-panel-auto-width__" }
+                            key="__scroll-panel-auto-width__"
                             class="scroll-panel-auto-width"
-                            style={ width_style }>
-                        </div>
+                            style={width_style}
+                        />
                     </div>
-                    <div class="scroll-panel-content" style={ content_style }>
-
-                    </div>
+                    <div class="scroll-panel-content" style={content_style} />
                 </div>
             }
         } else {
             html! {
                 <div
-                    ref={ self.viewport(ctx) }
-                    id={ ctx.props().id }
-                    class={ ctx.props().class.clone() }>
-
-                    <div style={ content_style }>
-                    </div>
+                    ref={self.viewport(ctx)}
+                    id={ctx.props().id}
+                    class={ctx.props().class.clone()}
+                >
+                    <div style={content_style} />
                 </div>
             }
         };
 
-        html_template! {
-            <LocalStyle href={ css!("containers/scroll-panel") } />
-            { items }
-        }
+        html! { <><LocalStyle href={css!("containers/scroll-panel")} />{ items }</> }
     }
 
     fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {

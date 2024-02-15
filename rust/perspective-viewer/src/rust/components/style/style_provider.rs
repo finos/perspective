@@ -15,7 +15,6 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 
 use super::style_cache::StyleCache;
-use crate::*;
 
 #[derive(Properties, PartialEq)]
 pub struct StyleProviderProps {
@@ -43,17 +42,20 @@ impl Component for StyleProvider {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let styles = self.cache.iter_styles();
-        html_template! {
-            {
-                for styles.map(|x| {
-                    html! {
-                        <StyleKeyed key={ x.0 } elem={ x.1 } />
-                    }
-                })
-            }
-            <ContextProvider<StyleCache> context={ self.cache.clone() }>
-                { for ctx.props().children.iter() }
-            </ContextProvider<StyleCache>>
+
+        html! {
+            <>
+                { for styles.map(|x| {
+                html! {
+                    <StyleKeyed key={ x.0 } elem={ x.1 } />
+                }
+            }) }
+                <ContextProvider<StyleCache>
+                    context={self.cache.clone()}
+                >
+                    { for ctx.props().children.iter() }
+                </ContextProvider<StyleCache>>
+            </>
         }
     }
 }

@@ -20,8 +20,8 @@ use crate::components::column_settings_sidebar::style_tab::symbol::row_selector:
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_selector::SymbolSelector;
 use crate::components::style::LocalStyle;
 use crate::config::plugin::Symbol;
+use crate::css;
 use crate::custom_elements::FilterDropDownElement;
-use crate::{css, html_template};
 
 #[derive(Properties, PartialEq)]
 pub struct PairsListProps {
@@ -69,29 +69,33 @@ impl yew::Component for PairsList {
                 let focused = self.next_focus.map(|s| s == index).unwrap_or_default();
                 html! {
                     <PairsListItem
-                        pair={ pair.clone() }
-                        index={ index }
-                        pairs={ props.pairs.clone() }
-                        row_dropdown={ props.row_dropdown.clone() }
-                        values={ props.values.clone() }
-                        update_pairs={ props.update_pairs.clone() }
-                        set_focused_index={ set_focused.clone() }
-                        column_name={ props.column_name.clone() }
-                        { focused }/>
+                        pair={pair.clone()}
+                        {index}
+                        pairs={props.pairs.clone()}
+                        row_dropdown={props.row_dropdown.clone()}
+                        values={props.values.clone()}
+                        update_pairs={props.update_pairs.clone()}
+                        set_focused_index={set_focused.clone()}
+                        column_name={props.column_name.clone()}
+                        {focused}
+                    />
                 }
             })
             .collect_vec();
 
-        html_template! {
-            <LocalStyle href={ css!("containers/pairs-list") }/>
-            <div
-                class="pairs-list"
-                id={ props.id.clone() }
-                data-label={ props.title.clone() }>
-                <ul>
-                    { for main_pairs }
-                </ul>
-            </div>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("containers/pairs-list")}
+                />
+                <div
+                    class="pairs-list"
+                    id={props.id.clone()}
+                    data-label={props.title.clone()}
+                >
+                    <ul >{ for main_pairs }</ul>
+                </div>
+            </>
         }
     }
 }
@@ -162,26 +166,30 @@ impl yew::Component for PairsListItem {
             (ctx.props().index == ctx.props().pairs.len() - 1).then_some("visibility: hidden");
 
         html! {
-            <li class="pairs-list-item">
+            <li
+                class="pairs-list-item"
+            >
                 <RowSelector
-                    selected_row={ props.pair.key.clone() }
-                    on_select={ on_key_update.clone() }
-                    dropdown={ props.row_dropdown.clone() }
-                    pairs={ props.pairs.clone() }
-                    index={ props.index }
-                    focused={ props.focused }
-                    set_focused_index={ props.set_focused_index.clone() }
-                    column_name={ props.column_name.clone() }/>
+                    selected_row={props.pair.key.clone()}
+                    on_select={on_key_update.clone()}
+                    dropdown={props.row_dropdown.clone()}
+                    pairs={props.pairs.clone()}
+                    index={props.index}
+                    focused={props.focused}
+                    set_focused_index={props.set_focused_index.clone()}
+                    column_name={props.column_name.clone()}
+                />
                 <SymbolSelector
-                    index={ props.index }
-                    callback={ on_value_update }
-                    values={ props.values.clone() }
-                    selected_value={ props.pair.value.clone() }/>
+                    index={props.index}
+                    callback={on_value_update}
+                    values={props.values.clone()}
+                    selected_value={props.pair.value.clone()}
+                />
                 <span
                     class="toggle-mode is_column_active"
-                    style={ remove_style }
-                    onclick={ on_remove.clone() }>
-                </span>
+                    style={remove_style}
+                    onclick={on_remove.clone()}
+                />
             </li>
         }
     }

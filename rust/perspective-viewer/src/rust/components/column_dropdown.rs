@@ -16,7 +16,6 @@ use yew::prelude::*;
 use super::column_selector::InPlaceColumn;
 use super::modal::*;
 use crate::utils::WeakScope;
-use crate::*;
 
 static CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/css/column-dropdown.css"));
 
@@ -121,8 +120,7 @@ impl Component for ColumnDropDown {
         let body = html! {
             if let Some(ref values) = self.values {
                 if !values.is_empty() {
-                    {
-                        for values
+                    { for values
                             .iter()
                             .enumerate()
                             .map(|(idx, value)| {
@@ -147,8 +145,7 @@ impl Component for ColumnDropDown {
                                         <span onmousedown={ click }>{ row }</span>
                                     }
                                 }
-                            })
-                    }
+                            }) }
                 } else {
                     <span class="no-results">{ "Invalid Column" }</span>
                 }
@@ -160,14 +157,6 @@ impl Component for ColumnDropDown {
             self.width, self.width
         );
 
-        html_template! {
-            <style>
-                { &CSS }
-            </style>
-            <style>
-                { position }
-            </style>
-            { body }
-        }
+        html! { <><style >{ &CSS }</style><style >{ position }</style>{ body }</> }
     }
 }

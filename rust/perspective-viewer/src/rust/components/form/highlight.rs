@@ -29,22 +29,10 @@ pub fn highlight<'a>(cursor: &mut Cursor<'a>, token: Token<'a>, position: u32) -
     let is_overlap = cursor.is_error();
     let result = match (is_auto, is_overlap, is_break) {
         (true, true, false) => html! {
-            <span
-                ref={ cursor.noderef.clone() }
-                class="error_highlight">
-                { token }
-            </span>
+            <span ref={cursor.noderef.clone()} class="error_highlight">{ token }</span>
         },
-        (false, true, false) => html! {
-            <span class="error_highlight">
-                { token }
-            </span>
-        },
-        (true, false, false) => html! {
-            <span ref={ cursor.noderef.clone() }>
-                { token }
-            </span>
-        },
+        (false, true, false) => html! { <span class="error_highlight">{ token }</span> },
+        (true, false, false) => html! { <span ref={cursor.noderef.clone()}>{ token }</span> },
         _ => token.to_html(),
     };
 

@@ -178,150 +178,166 @@ impl Component for DatetimeStyleCustom {
                 .callback(move |_: Event| DatetimeStyleCustomMsg::Hour12(!hour12))
         };
 
-        html_template! {
-            if ctx.props().enable_time_config {
-                <div class="column-style-label">
-                    <label class="indent">{ "Year" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::Year(CustomDatetimeFormat::TwoDigit)) }
-                        checked={ self.config.year != CustomDatetimeFormat::TwoDigit } />
-                    <Select<CustomDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.year }
-                        on_select={ ctx.link().callback(DatetimeStyleCustomMsg::Year) }
-                        values={ number_values.clone() } >
-                    </Select<CustomDatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Month" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::Month(CustomDatetimeFormat::Numeric)) }
-                        checked={ self.config.month != CustomDatetimeFormat::Numeric } />
-                    <Select<CustomDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.month }
-                        on_select={ ctx.link().callback(DatetimeStyleCustomMsg::Month) }
-                        values={ all_values.clone() } >
-                    </Select<CustomDatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Day" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::Day(CustomDatetimeFormat::Numeric)) }
-                        checked={ self.config.day != CustomDatetimeFormat::Numeric } />
-                    <Select<CustomDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.day }
-                        on_select={ ctx.link().callback(DatetimeStyleCustomMsg::Day) }
-                        values={ number_values.clone() } >
-                    </Select<CustomDatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Weekday" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::Weekday(CustomDatetimeFormat::Disabled)) }
-                        checked={ self.config.weekday != CustomDatetimeFormat::Disabled } />
-                    <Select<CustomDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.weekday }
-                        on_select={ ctx.link().callback(DatetimeStyleCustomMsg::Weekday) }
-                        values={ text_values.clone() } >
-                    </Select<CustomDatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Hour" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::Hour(CustomDatetimeFormat::Numeric)) }
-                        checked={ self.config.hour != CustomDatetimeFormat::Numeric } />
-                    <Select<CustomDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.hour }
-                        on_select={ ctx.link().callback(DatetimeStyleCustomMsg::Hour) }
-                        values={ number_values.clone() } >
-                    </Select<CustomDatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Minute" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::Minute(CustomDatetimeFormat::Numeric)) }
-                        checked={ self.config.minute != CustomDatetimeFormat::Numeric } />
-                    <Select<CustomDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.minute }
-                        on_select={ ctx.link().callback(DatetimeStyleCustomMsg::Minute) }
-                        values={ number_values.clone() } >
-                    </Select<CustomDatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Seconds" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::Second(CustomDatetimeFormat::Numeric)) }
-                        checked={ self.config.second != CustomDatetimeFormat::Numeric } />
-                    <Select<CustomDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.second }
-                        on_select={ ctx.link().callback(DatetimeStyleCustomMsg::Second) }
-                        values={ number_values.clone() } >
-                    </Select<CustomDatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Fractional Seconds" }</label>
-                </div>
-                <div class="row section">
-                    <input
-                        type="checkbox"
-                        onchange={ ctx.link().callback(|_| DatetimeStyleCustomMsg::FractionalSeconds("0".to_owned())) }
-                        checked={ self.config.fractional_seconds != 0 } />
-                    <input
-                        id="fixed-param"
-                        class="parameter"
-                        type="number"
-                        min="0"
-                        step="1"
-                        max="3"
-                        value={ self.config.fractional_seconds.to_string() }
-                        oninput={ fractional_oninput(DatetimeStyleCustomMsg::FractionalSeconds) }/>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "12/24 Hours" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ hour12_ }
-                        checked={ !self.config.hour12 } />
-                    <span>{ if self.config.hour12 { "12 Hour" } else { "24 hour" } }</span>
-                </div>
-            }
+        html! {
+            <>
+                if ctx.props().enable_time_config {
+                    <div class="column-style-label"><label class="indent">{ "Year" }</label></div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Year(CustomDatetimeFormat::TwoDigit))}
+                            checked={self.config.year != CustomDatetimeFormat::TwoDigit}
+                        />
+                        <Select<CustomDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.year}
+                            on_select={ctx.link().callback(DatetimeStyleCustomMsg::Year)}
+                            values={number_values.clone()}
+                        />
+                    </div>
+                    <div class="column-style-label"><label class="indent">{ "Month" }</label></div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Month(CustomDatetimeFormat::Numeric))}
+                            checked={self.config.month != CustomDatetimeFormat::Numeric}
+                        />
+                        <Select<CustomDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.month}
+                            on_select={ctx.link().callback(DatetimeStyleCustomMsg::Month)}
+                            values={all_values.clone()}
+                        />
+                    </div>
+                    <div class="column-style-label"><label class="indent">{ "Day" }</label></div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Day(CustomDatetimeFormat::Numeric))}
+                            checked={self.config.day != CustomDatetimeFormat::Numeric}
+                        />
+                        <Select<CustomDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.day}
+                            on_select={ctx.link().callback(DatetimeStyleCustomMsg::Day)}
+                            values={number_values.clone()}
+                        />
+                    </div>
+                    <div
+                        class="column-style-label"
+                    >
+                        <label class="indent">{ "Weekday" }</label>
+                    </div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Weekday(CustomDatetimeFormat::Disabled))}
+                            checked={self.config.weekday != CustomDatetimeFormat::Disabled}
+                        />
+                        <Select<CustomDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.weekday}
+                            on_select={ctx.link().callback(DatetimeStyleCustomMsg::Weekday)}
+                            values={text_values.clone()}
+                        />
+                    </div>
+                    <div class="column-style-label"><label class="indent">{ "Hour" }</label></div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Hour(CustomDatetimeFormat::Numeric))}
+                            checked={self.config.hour != CustomDatetimeFormat::Numeric}
+                        />
+                        <Select<CustomDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.hour}
+                            on_select={ctx.link().callback(DatetimeStyleCustomMsg::Hour)}
+                            values={number_values.clone()}
+                        />
+                    </div>
+                    <div class="column-style-label"><label class="indent">{ "Minute" }</label></div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Minute(CustomDatetimeFormat::Numeric))}
+                            checked={self.config.minute != CustomDatetimeFormat::Numeric}
+                        />
+                        <Select<CustomDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.minute}
+                            on_select={ctx.link().callback(DatetimeStyleCustomMsg::Minute)}
+                            values={number_values.clone()}
+                        />
+                    </div>
+                    <div
+                        class="column-style-label"
+                    >
+                        <label class="indent">{ "Seconds" }</label>
+                    </div>
+                    <div
+                        class="section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Second(CustomDatetimeFormat::Numeric))}
+                            checked={self.config.second != CustomDatetimeFormat::Numeric}
+                        />
+                        <Select<CustomDatetimeFormat>
+                            wrapper_class="indent"
+                            selected={self.config.second}
+                            on_select={ctx.link().callback(DatetimeStyleCustomMsg::Second)}
+                            values={number_values.clone()}
+                        />
+                    </div>
+                    <div
+                        class="column-style-label"
+                    >
+                        <label class="indent">{ "Fractional Seconds" }</label>
+                    </div>
+                    <div
+                        class="row section"
+                    >
+                        <input
+                            type="checkbox"
+                            onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::FractionalSeconds("0".to_owned()))}
+                            checked={self.config.fractional_seconds != 0}
+                        />
+                        <input
+                            id="fixed-param"
+                            class="parameter"
+                            type="number"
+                            min="0"
+                            step="1"
+                            max="3"
+                            value={self.config.fractional_seconds.to_string()}
+                            oninput={fractional_oninput(DatetimeStyleCustomMsg::FractionalSeconds)}
+                        />
+                    </div>
+                    <div
+                        class="column-style-label"
+                    >
+                        <label class="indent">{ "12/24 Hours" }</label>
+                    </div>
+                    <div
+                        class="section"
+                    >
+                        <input type="checkbox" onchange={hour12_} checked={!self.config.hour12} />
+                        <span >{ if self.config.hour12 { "12 Hour" } else { "24 hour" } }</span>
+                    </div>
+                }
+            </>
         }
     }
 }

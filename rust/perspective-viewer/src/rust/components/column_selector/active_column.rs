@@ -304,12 +304,12 @@ impl Component for ActiveColumn {
 
                 html! {
                     <div
-                        class={ outer_classes }
-                        data-label={ label }
-                        data-index={ ctx.props().idx.to_string() }
-                        ondragenter={ ondragenter.clone() }>
-
-                        <EmptyColumn { column_dropdown } { exclude } { on_select }/>
+                        class={outer_classes}
+                        data-label={label}
+                        data-index={ctx.props().idx.to_string()}
+                        ondragenter={ondragenter.clone()}
+                    >
+                        <EmptyColumn {column_dropdown} {exclude} {on_select} />
                     </div>
                 }
             },
@@ -317,11 +317,11 @@ impl Component for ActiveColumn {
                 classes.push("empty-named");
                 html! {
                     <div
-                        class={ outer_classes }
-                        data-label={ label }
-                        data-index={ ctx.props().idx.to_string() }
-                        ondragenter={ ondragenter.clone() }>
-
+                        class={outer_classes}
+                        data-label={label}
+                        data-index={ctx.props().idx.to_string()}
+                        ondragenter={ondragenter.clone()}
+                    >
                         <InvalidColumn />
                     </div>
                 }
@@ -384,50 +384,49 @@ impl Component for ActiveColumn {
 
                 html! {
                     <div
-                        class={ outer_classes }
-                        data-label={ label }
-                        data-index={ ctx.props().idx.to_string() }
-                        { onmouseover }
-                        { onmouseout }
-                        ondragenter={ ondragenter.clone() }>
-
+                        class={outer_classes}
+                        data-label={label}
+                        data-index={ctx.props().idx.to_string()}
+                        {onmouseover}
+                        {onmouseout}
+                        ondragenter={ondragenter.clone()}
+                    >
                         <span
-                            class={ class }
-                            onmousedown={ remove_column }>
-                        </span>
+                            {class}
+                            onmousedown={remove_column}
+                        />
                         <div
-                            class={ classes }
-                            ref={ &self.add_expression_ref }
+                            class={classes}
+                            ref={&self.add_expression_ref}
                             draggable="true"
-                            { ondragstart }
-                            { ondragend }>
-
-                            <div class="column-selector-column-border">
-                                <TypeIcon ty={ col_type }/>
+                            {ondragstart}
+                            {ondragend}
+                        >
+                            <div
+                                class="column-selector-column-border"
+                            >
+                                <TypeIcon
+                                    ty={col_type}
+                                />
                                 if ctx.props().is_aggregated {
                                     <AggregateSelector
-                                        column={ name.clone() }
-                                        aggregate={ ctx.props().get_aggregate(&name) }
-                                        renderer={ &ctx.props().renderer }
-                                        session={ &ctx.props().session }>
-                                    </AggregateSelector>
+                                        column={name.clone()}
+                                        aggregate={ctx.props().get_aggregate(&name)}
+                                        renderer={&ctx.props().renderer}
+                                        session={&ctx.props().session}
+                                    />
                                 }
-
-                                <span class={"column_name"}>
-                                    { name.clone() }
-                                </span>
-
+                                <span class="column_name">{ name.clone() }</span>
                                 if !ctx.props().is_aggregated {
-                                    <span class="column-selector--spacer"></span>
+                                    <span class="column-selector--spacer" />
                                 }
-
                                 if show_edit_btn {
                                     <ExprEditButton
-                                        name={ name.clone() }
-                                        on_open_expr_panel={ &ctx.props().on_open_expr_panel }
-                                        { is_expression }
-                                        is_editing={ ctx.props().is_editing }
-                                    ></ExprEditButton>
+                                        name={name.clone()}
+                                        on_open_expr_panel={&ctx.props().on_open_expr_panel}
+                                        {is_expression}
+                                        is_editing={ctx.props().is_editing}
+                                    />
                                 }
                             </div>
                         </div>
@@ -441,9 +440,11 @@ impl Component for ActiveColumn {
                 // `change()` method on this component checks for this).
 
                 html! {
-                    <div class="column-selector-column">
-                        <span class="is_column_active inactive"></span>
-                        <div class={ classes }></div>
+                    <div
+                        class="column-selector-column"
+                    >
+                        <span class="is_column_active inactive" />
+                        <div class={classes} />
                     </div>
                 }
             },

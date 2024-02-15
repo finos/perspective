@@ -205,13 +205,16 @@ impl Component for StatusBar {
 
                 html! {
                     if values.len() > 1 {
-                        <span id="theme" class="button">
+                        <span
+                            id="theme"
+                            class="button"
+                        >
                             <Select<String>
                                 id="theme_selector"
-                                values={ values }
-                                selected={ selected.to_owned() }
-                                on_select={ ontheme }>
-                            </Select<String>>
+                                {values}
+                                selected={selected.to_owned()}
+                                on_select={ontheme}
+                            />
                         </span>
                     }
                 }
@@ -236,52 +239,60 @@ impl Component for StatusBar {
             }
         });
 
-        html_template! {
-            <LocalStyle href={ css!("status-bar") } />
-            <div id={ ctx.props().id.clone() } class={ is_updating_class_name }>
-                <div class="section">
-                    <span id="status" class={ class_name }></span>
-                </div>
-                <label
-                    class="input-sizer"
-                    data-value={ ctx.props().presentation.get_title().unwrap_or_default() }>
-
-                    <input
-                        value={ ctx.props().presentation.get_title() }
-                        size="10"
-                        oninput={ oninput }
-                        placeholder="untitled" />
-                </label>
-                <div id="rows" class="section">
-                    <StatusBarRowsCounter stats={ stats } />
-                </div>
-                <div id="menu-bar" class="section">
-                    { theme_button }
-                    <div id="plugin-settings">
-                        <slot name="plugin-settings"></slot>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("status-bar")}
+                />
+                <div
+                    id={ctx.props().id.clone()}
+                    class={is_updating_class_name}
+                >
+                    <div class="section"><span id="status" class={class_name} /></div>
+                    <label
+                        class="input-sizer"
+                        data-value={ctx.props().presentation.get_title().unwrap_or_default()}
+                    >
+                        <input
+                            value={ctx.props().presentation.get_title()}
+                            size="10"
+                            {oninput}
+                            placeholder="untitled"
+                        />
+                    </label>
+                    <div id="rows" class="section"><StatusBarRowsCounter {stats} /></div>
+                    <div
+                        id="menu-bar"
+                        class="section"
+                    >
+                        { theme_button }
+                        <div id="plugin-settings"><slot name="plugin-settings" /></div>
+                        <span
+                            id="reset"
+                            class="button"
+                            onmousedown={reset}
+                        >
+                            <span >{ "Reset" }</span>
+                        </span>
+                        <span
+                            ref={&self.export_ref}
+                            id="export"
+                            class="button"
+                            onmousedown={export}
+                        >
+                            <span >{ "Export" }</span>
+                        </span>
+                        <span
+                            ref={&self.copy_ref}
+                            id="copy"
+                            class="button"
+                            onmousedown={copy}
+                        >
+                            <span >{ "Copy" }</span>
+                        </span>
                     </div>
-                    <span id="reset" class="button" onmousedown={ reset }>
-                        <span>{ "Reset" }</span>
-                    </span>
-                    <span
-                        ref={ &self.export_ref }
-                        id="export"
-                        class="button"
-                        onmousedown={ export }>
-
-                        <span>{ "Export" }</span>
-                    </span>
-                    <span
-                        ref={ &self.copy_ref }
-                        id="copy"
-                        class="button"
-                        onmousedown={ copy }>
-
-                        <span>{ "Copy" }</span>
-                    </span>
                 </div>
-
-            </div>
+            </>
         }
     }
 }

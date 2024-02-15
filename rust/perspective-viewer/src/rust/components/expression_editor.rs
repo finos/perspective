@@ -113,28 +113,41 @@ impl Component for ExpressionEditor {
         let disabled_class = ctx.props().disabled.then_some("disabled");
         clone!(ctx.props().disabled);
 
-        html_template! {
-            <LocalStyle href={ css!("expression-editor") } />
-            <SplitPanel orientation={ Orientation::Vertical }>
-                <>
-                    <label class="item_title">{ "Expression" }</label>
-                    <div id="editor-container" class={ disabled_class }>
-                        <CodeEditor
-                            expr={ &self.expr }
-                            error={ self.error.clone().map(|x| x.into()) }
-                            { disabled }
-                            { oninput }
-                            onsave={ ctx.props().on_save.clone() }/>
-
-                        <div id="psp-expression-editor-meta">
-                            <div class="error">
-                                {&self.error.clone().map(|e| e.error_message).unwrap_or_default()}
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("expression-editor")}
+                />
+                <SplitPanel
+                    orientation={Orientation::Vertical}
+                >
+                    <>
+                        <label class="item_title">{ "Expression" }</label>
+                        <div
+                            id="editor-container"
+                            class={disabled_class}
+                        >
+                            <CodeEditor
+                                expr={&self.expr}
+                                error={self.error.clone().map(|x| x.into())}
+                                {disabled}
+                                {oninput}
+                                onsave={ctx.props().on_save.clone()}
+                            />
+                            <div
+                                id="psp-expression-editor-meta"
+                            >
+                                <div
+                                    class="error"
+                                >
+                                    { &self.error.clone().map(|e| e.error_message).unwrap_or_default() }
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </>
-                <></>
-            </SplitPanel>
+                    </>
+                    <></>
+                </SplitPanel>
+            </>
         }
     }
 

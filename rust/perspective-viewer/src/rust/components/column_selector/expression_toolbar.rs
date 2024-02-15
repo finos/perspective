@@ -41,7 +41,5 @@ pub fn ExprEditButton(p: &ExprEditButtonProps) -> Html {
         "expression-edit-button"
     };
 
-    html! {
-        <span { onmousedown } { class }></span>
-    }
+    html! { <span {onmousedown} {class} /> }
 }

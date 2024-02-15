@@ -90,18 +90,24 @@ impl Component for AggregateSelector {
             .unwrap();
 
         let values = self.aggregates.clone();
-        html_template! {
-            <LocalStyle href={ css!("aggregate-selector") } />
-            <div class="aggregate-selector-wrapper">
-                <Select<Aggregate>
-                    wrapper_class={ "aggregate-selector" }
-                    values={ values }
-                    label="weighted mean"
-                    selected={ selected_agg }
-                    on_select={ callback }>
 
-                </Select<Aggregate>>
-            </div>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("aggregate-selector")}
+                />
+                <div
+                    class="aggregate-selector-wrapper"
+                >
+                    <Select<Aggregate>
+                        wrapper_class="aggregate-selector"
+                        {values}
+                        label="weighted mean"
+                        selected={selected_agg}
+                        on_select={callback}
+                    />
+                </div>
+            </>
         }
     }
 }

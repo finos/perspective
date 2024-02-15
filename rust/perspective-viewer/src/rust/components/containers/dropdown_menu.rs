@@ -70,42 +70,37 @@ where
                         });
 
                         html! {
-                            <span onmousedown={ click }class="selected">
-                                { x.clone().into() }
-                            </span>
+                            <span onmousedown={click} class="selected">{ x.clone().into() }</span>
                         }
                     },
                     DropDownMenuItem::OptGroup(name, xs) => {
-                        html_template! {
-                            <span class="dropdown-group-label">{ name }</span>
-                            <div class="dropdown-group-container">
-                                {
-                                    xs.iter().map(|x| {
-                                        let click = ctx.props().callback.reform({
-                                            let value = x.clone();
-                                            move |_: MouseEvent| value.clone()
-                                        });
-                                        html! {
-                                            <span onmousedown={ click }>
-                                                { x.clone().into() }
-                                            </span>
-                                        }
-                                    }).collect::<Html>()
-                                }
-                            </div>
+                        html! {
+                            <>
+                                <span class="dropdown-group-label">{ name }</span>
+                                <div
+                                    class="dropdown-group-container"
+                                >
+                                    { xs.iter().map(|x| {
+                                    let click = ctx.props().callback.reform({
+                                        let value = x.clone();
+                                        move |_: MouseEvent| value.clone()
+                                    });
+                                    html! {
+                                        <span onmousedown={ click }>
+                                            { x.clone().into() }
+                                        </span>
+                                    }
+                                }).collect::<Html>() }
+                                </div>
+                            </>
                         }
                     },
                 })
                 .collect::<Html>()
         } else {
-            html! {
-                <span class="no-results">{ "No Completions" }</span>
-            }
+            html! { <span class="no-results">{ "No Completions" }</span> }
         };
 
-        html_template! {
-            <LocalStyle href={ css!("containers/dropdown-menu") } />
-            { body }
-        }
+        html! { <><LocalStyle href={css!("containers/dropdown-menu")} />{ body }</> }
     }
 }

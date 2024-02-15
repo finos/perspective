@@ -21,7 +21,6 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
 
-use crate::html_template;
 use crate::utils::*;
 
 const FONT_DOWNLOAD_TIMEOUT_MS: i32 = 1000;
@@ -65,16 +64,14 @@ impl Component for FontLoader {
         if matches!(ctx.props().get_status(), FontLoaderStatus::Finished) {
             html! {}
         } else {
-            html_template! {
-                <style>{ ":host{opacity:0!important;}" }</style>
-                {
-                    ctx.props()
-                        .get_fonts()
-                        .iter()
-                        .map(font_test_html)
-                        .collect::<Html>()
-                }
-            }
+            let inner = ctx
+                .props()
+                .get_fonts()
+                .iter()
+                .map(font_test_html)
+                .collect::<Html>();
+
+            html! { <><style >{ ":host{opacity:0!important;}" }</style>{ inner }</> }
         }
     }
 }
@@ -210,7 +207,7 @@ fn font_test_html((family, weight): &(String, String)) -> Html {
         family, weight
     );
 
-    html! { <span style={ style }>{FONT_TEST_SAMPLE}</span> }
+    html! { <span {style}>{ FONT_TEST_SAMPLE }</span> }
 }
 
 fn parse_font(txt: &str) -> Option<Vec<(String, String)>> {

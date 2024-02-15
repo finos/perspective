@@ -159,18 +159,18 @@ where
             None => "radio-list-item".to_owned(),
         };
 
-        html_template! {
-            <LocalStyle href={ css!("containers/radio-list") } />
-            {
-                ctx.props()
-                .children
-                .iter()
-                .enumerate()
-                .map(|(idx, child)| {
-                    self.render_item(ctx, idx, child, &class, on_change.clone(), &self.selected)
-                })
-                .collect::<Html>()
-            }
+        html! {
+            <>
+                <LocalStyle href={css!("containers/radio-list")} />
+                { ctx.props()
+              .children
+              .iter()
+              .enumerate()
+              .map(|(idx, child)| {
+                  self.render_item(ctx, idx, child, &class, on_change.clone(), &self.selected)
+              })
+              .collect::<Html>() }
+            </>
         }
     }
 }
@@ -197,16 +197,19 @@ where
     ) -> Html {
         let val = child.props.value.clone();
         html! {
-            <div class={ class.to_string() }>
+            <div
+                class={class.to_string()}
+            >
                 <input
-                    id={ format!("radio-list-{}", idx) }
-                    name={ ctx.props().name.unwrap_or("radio-list") }
+                    id={format!("radio-list-{}", idx)}
+                    name={ctx.props().name.unwrap_or("radio-list")}
                     type="radio"
-                    value={ format!("{}", val) }
+                    value={format!("{}", val)}
                     class="parameter"
-                    oninput={ on_change }
-                    disabled={ ctx.props().disabled }
-                    checked={ selected == &val } />
+                    oninput={on_change}
+                    disabled={ctx.props().disabled}
+                    checked={selected == &val}
+                />
                 { child }
             </div>
         }
