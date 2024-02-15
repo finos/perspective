@@ -178,6 +178,32 @@ export class SettingsPanel {
             .waitFor();
         await locator.press("Enter");
     }
+
+    async removeViewParameter(type: ViewParameter, name: string) {
+        let locator: Locator;
+        switch (type) {
+            case "groupby":
+                locator = this.container.locator("#group_by .pivot-column");
+                break;
+            case "orderby":
+                locator = this.container.locator("#sort .pivot-column");
+                break;
+            case "splitby":
+                locator = this.container.locator("#split_by .pivot-column");
+                break;
+            case "where":
+                locator = this.container.locator("#filter .pivot-column");
+                break;
+            default:
+                throw "Invalid type passed!";
+        }
+        await locator
+            .filter({ hasText: name })
+            .first()
+            .locator(".row_close")
+            .click();
+    }
+
     /**
      * Selects a plugin by it's display name, i.e. the innerText of the .plugin-select-item
      * @param name
