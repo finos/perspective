@@ -72,23 +72,33 @@ pub fn row_selector(props: &RowSelectorProps) -> Html {
             .collect();
 
         html! {
-            <div class={ err_class }>
+            <div
+                class={err_class}
+            >
                 <EmptyRow
-                    dropdown={ props.dropdown.clone() }
-                    { exclude }
-                    { on_select }
-                    focused={ props.focused }
-                    index={ props.index }
-                    set_focused_index={ props.set_focused_index.clone() }
-                    value={ props.selected_row.clone().unwrap_or_default() }
-                    column_name={ props.column_name.clone() }/>
+                    dropdown={props.dropdown.clone()}
+                    {exclude}
+                    {on_select}
+                    focused={props.focused}
+                    index={props.index}
+                    set_focused_index={props.set_focused_index.clone()}
+                    value={props.selected_row.clone().unwrap_or_default()}
+                    column_name={props.column_name.clone()}
+                />
             </div>
         }
     } else {
         html! {
-            <div class="row-selector column-selector-column">
-                <div class="column-selector-column-border">
-                    <span class="column_name none" { ondblclick }>
+            <div
+                class="row-selector column-selector-column"
+            >
+                <div
+                    class="column-selector-column-border"
+                >
+                    <span
+                        class="column_name none"
+                        {ondblclick}
+                    >
                         { props.selected_row.clone().unwrap() }
                     </span>
                 </div>
@@ -96,9 +106,5 @@ pub fn row_selector(props: &RowSelectorProps) -> Html {
         }
     };
 
-    html! {
-        <div class="row-selector">
-            { inner }
-        </div>
-    }
+    html! { <div class="row-selector">{ inner }</div> }
 }

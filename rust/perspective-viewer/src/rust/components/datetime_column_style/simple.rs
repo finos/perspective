@@ -16,7 +16,6 @@ use crate::components::containers::select::*;
 use crate::components::modal::{ModalLink, SetModalLink};
 use crate::config::*;
 use crate::utils::WeakScope;
-use crate::*;
 
 pub enum DatetimeStyleSimpleMsg {
     DateEnabled,

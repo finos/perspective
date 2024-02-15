@@ -38,9 +38,7 @@ pub enum Type {
 
 impl ToHtml for Type {
     fn to_html(&self) -> yew::Html {
-        html! {
-            <span class="type-name">{ self.to_string() }</span>
-        }
+        html! { <span class="type-name">{ self.to_string() }</span> }
     }
 }
 

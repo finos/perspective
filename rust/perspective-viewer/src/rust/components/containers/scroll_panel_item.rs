@@ -75,7 +75,11 @@ impl Component for ScrollPanelItem {
     #[cfg(debug_assertions)]
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div class="debug-size-wrapper" style="display:flow-root" ref={ self.node.clone() }>
+            <div
+                class="debug-size-wrapper"
+                style="display:flow-root"
+                ref={self.node.clone()}
+            >
                 { for ctx.props().children.iter() }
             </div>
         }
@@ -83,9 +87,7 @@ impl Component for ScrollPanelItem {
 
     #[cfg(not(debug_assertions))]
     fn view(&self, ctx: &Context<Self>) -> Html {
-        html! {
-            { for ctx.props().children.iter() }
-        }
+        html! { { for ctx.props().children.iter() } }
     }
 
     #[cfg(debug_assertions)]

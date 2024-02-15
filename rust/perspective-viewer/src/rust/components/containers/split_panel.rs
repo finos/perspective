@@ -359,24 +359,23 @@ impl Component for SplitPanel {
         let head = iter.next().unwrap();
 
         let tail = iter
-            .filter(|x| !ctx.props().skip_empty || x != &html! {<></>})
+            .filter(|x| !ctx.props().skip_empty || x != &html! { <></> })
             .enumerate()
             .map(|(i, x)| {
                 html! {
-                    < key={ i + 2 }>
+                    <key={i + 2}>
                         <SplitPanelDivider
-                            { i }
-                            orientation={ ctx.props().orientation }
-                            link={ ctx.link().clone() }>
-                        </SplitPanelDivider>
-
+                            {i}
+                            orientation={ctx.props().orientation}
+                            link={ctx.link().clone()}
+                        />
                         if i == ctx.props().children.len() - 2 {
                             { x }
                         } else {
                             <SplitPanelChild
-                                style={ self.styles[i + 1].clone() }
-                                ref_={ self.refs[i + 1].clone() }>
-
+                                style={self.styles[i + 1].clone()}
+                                ref_={self.refs[i + 1].clone()}
+                            >
                                 { x }
                             </SplitPanelChild>
                         }
@@ -403,13 +402,9 @@ impl Component for SplitPanel {
 
         // TODO consider removing this
         if ctx.props().no_wrap {
-            html! {{ contents }}
+            html! { { contents } }
         } else {
-            html! {
-                <div id={ ctx.props().id.clone() } class={ classes }>
-                    { contents }
-                </div>
-            }
+            html! { <div id={ctx.props().id.clone()} class={classes}>{ contents }</div> }
         }
     }
 }
@@ -485,9 +480,10 @@ fn split_panel_child(props: &SplitPanelChildProps) -> Html {
     };
     html! {
         <div
-            { class }
-            ref={ props.ref_.clone() }
-            style={ props.style.clone() }>
+            {class}
+            ref={props.ref_.clone()}
+            style={props.style.clone()}
+        >
             { props.children.iter().next().unwrap() }
         </div>
     }

@@ -207,7 +207,7 @@ fn font_test_html((family, weight): &(String, String)) -> Html {
         family, weight
     );
 
-    html! { <span style={ style }>{FONT_TEST_SAMPLE}</span> }
+    html! { <span {style}>{ FONT_TEST_SAMPLE }</span> }
 }
 
 fn parse_font(txt: &str) -> Option<Vec<(String, String)>> {

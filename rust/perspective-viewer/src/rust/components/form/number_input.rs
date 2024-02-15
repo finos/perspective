@@ -14,8 +14,6 @@ use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::*;
-
 #[derive(Properties, PartialEq)]
 pub struct NumberInputProps {
     pub max_value: f64,

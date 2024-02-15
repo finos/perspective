@@ -360,8 +360,8 @@ impl Component for ColumnSettingsSidebar {
         };
 
         let tab_children = self.tabs.iter().map(|tab| match tab {
-            ColumnSettingsTab::Attributes => html! {<AttributesTab ..attrs_tab.clone()/>},
-            ColumnSettingsTab::Style => html! {<StyleTab ..style_tab.clone()/>},
+            ColumnSettingsTab::Attributes => html! { <AttributesTab ..attrs_tab.clone() /> },
+            ColumnSettingsTab::Style => html! { <StyleTab ..style_tab.clone() /> },
         });
 
         html! {

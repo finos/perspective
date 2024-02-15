@@ -16,7 +16,6 @@ use yew::prelude::*;
 use super::modal::*;
 use crate::exprtk::CompletionItemSuggestion;
 use crate::utils::WeakScope;
-use crate::*;
 
 static CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/css/function-dropdown.css"));
 
@@ -118,8 +117,7 @@ impl Component for FunctionDropDown {
         let body = html! {
             if let Some(ref values) = self.values {
                 if !values.is_empty() {
-                    {
-                        for values
+                    { for values
                             .iter()
                             .enumerate()
                             .map(|(idx, value)| {
@@ -143,8 +141,7 @@ impl Component for FunctionDropDown {
                                         </div>
                                     }
                                 }
-                            })
-                    }
+                            }) }
                 }
             }
         };

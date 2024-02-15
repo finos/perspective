@@ -174,11 +174,7 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
     };
 
     let contents = opt_html.unwrap_or_else(|e| {
-        html! {
-            <Stub
-                message="No styles available"
-                error={ e }/>
-        }
+        html! { <Stub message="No styles available" error={e} /> }
     });
 
     //

@@ -95,14 +95,15 @@ impl Component for ExportDropDownMenu {
             <StyleProvider>
                 <span class="dropdown-group-label">{ "Save as" }</span>
                 <input
-                    class={ if self.invalid { "invalid" } else { "" }}
-                    oninput={ callback }
-                    ref={ &self.input_ref }
-                    value={ self.title.to_owned() } />
+                    class={if self.invalid { "invalid" } else { "" }}
+                    oninput={callback}
+                    ref={&self.input_ref}
+                    value={self.title.to_owned()}
+                />
                 <DropDownMenu<ExportFile>
-                    values={ Rc::new(get_menu_items(&self.title, has_render)) }
-                    callback={ &ctx.props().callback }>
-                </DropDownMenu<ExportFile>>
+                    values={Rc::new(get_menu_items(&self.title, has_render))}
+                    callback={&ctx.props().callback}
+                />
             </StyleProvider>
         }
     }

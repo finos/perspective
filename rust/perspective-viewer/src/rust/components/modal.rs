@@ -20,7 +20,6 @@ use yew::prelude::*;
 use yew::virtual_dom::VChild;
 
 use crate::utils::WeakScope;
-use crate::*;
 
 #[derive(Clone, Default, Eq, PartialEq)]
 pub struct ModalOrientation(Rc<Cell<bool>>);
@@ -169,6 +168,6 @@ impl Component for NoRender {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        html! { { ctx.props().children.iter().collect::<Html>()} }
+        html! { { ctx.props().children.iter().collect::<Html>() } }
     }
 }

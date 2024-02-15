@@ -15,7 +15,6 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 
 use super::style_cache::StyleCache;
-use crate::*;
 
 #[derive(Properties, PartialEq)]
 pub struct StyleProviderProps {

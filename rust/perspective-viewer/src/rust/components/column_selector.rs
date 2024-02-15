@@ -239,14 +239,17 @@ impl Component for ColumnSelector {
         );
 
         let config_selector = html_nested! {
-            <ScrollPanelItem key={ "config_selector" } { size_hint }>
+            <ScrollPanelItem
+                key="config_selector"
+                {size_hint}
+            >
                 <ConfigSelector
-                    dragdrop={ &ctx.props().dragdrop }
-                    session={ &ctx.props().session }
-                    renderer={ &ctx.props().renderer }
-                    onselect={ onselect.clone() }
-                    ondragenter={ ctx.link().callback(|()| ViewCreated)}>
-                </ConfigSelector>
+                    dragdrop={&ctx.props().dragdrop}
+                    session={&ctx.props().session}
+                    renderer={&ctx.props().renderer}
+                    onselect={onselect.clone()}
+                    ondragenter={ctx.link().callback(|()| ViewCreated)}
+                />
             </ScrollPanelItem>
         };
 
@@ -271,21 +274,25 @@ impl Component for ColumnSelector {
 
                 let on_open_expr_panel = &ctx.props().on_open_expr_panel;
                 html_nested! {
-                    <ScrollPanelItem key={ key } { size_hint }>
+                    <ScrollPanelItem
+                        {key}
+                        {size_hint}
+                    >
                         <ActiveColumn
-                            { column_dropdown }
-                            { idx }
-                            { is_aggregated }
-                            { is_editing }
-                            { name }
-                            { on_open_expr_panel }
-                            dragdrop={ &ctx.props().dragdrop }
-                            session={ &ctx.props().session }
-                            renderer={ &ctx.props().renderer }
-                            presentation = { &ctx.props().presentation }
-                            ondragenter={ ondragenter }
-                            ondragend={ &ondragend }
-                            onselect={ &onselect }/>
+                            {column_dropdown}
+                            {idx}
+                            {is_aggregated}
+                            {is_editing}
+                            {name}
+                            {on_open_expr_panel}
+                            dragdrop={&ctx.props().dragdrop}
+                            session={&ctx.props().session}
+                            renderer={&ctx.props().renderer}
+                            presentation={&ctx.props().presentation}
+                            {ondragenter}
+                            ondragend={&ondragend}
+                            onselect={&onselect}
+                        />
                     </ScrollPanelItem>
                 }
             })
@@ -299,20 +306,22 @@ impl Component for ColumnSelector {
                 let is_editing = matches!(&ctx.props().selected_column, Some(ColumnLocator::Expr(Some(x))) if x.as_str() == vc.name);
                 html_nested! {
                     <ScrollPanelItem
-                        key={ vc.name }
-                        size_hint={ 28.0 }>
+                        key={vc.name}
+                        size_hint=28.0
+                    >
                         <InactiveColumn
-                            { idx }
-                            visible={ vc.is_visible }
-                            name={ vc.name.to_owned() }
-                            dragdrop={ &ctx.props().dragdrop }
-                            session={ &ctx.props().session }
-                            renderer={ &ctx.props().renderer }
-                            presentation={ &ctx.props().presentation }
-                            { is_editing }
-                            onselect={ &onselect }
-                            ondragend={ &ondragend }
-                            on_open_expr_panel={ &ctx.props().on_open_expr_panel } />
+                            {idx}
+                            visible={vc.is_visible}
+                            name={vc.name.to_owned()}
+                            dragdrop={&ctx.props().dragdrop}
+                            session={&ctx.props().session}
+                            renderer={&ctx.props().renderer}
+                            presentation={&ctx.props().presentation}
+                            {is_editing}
+                            onselect={&onselect}
+                            ondragend={&ondragend}
+                            on_open_expr_panel={&ctx.props().on_open_expr_panel}
+                        />
                     </ScrollPanelItem>
                 }
             })
@@ -325,11 +334,14 @@ impl Component for ColumnSelector {
         };
 
         let add_column = html_nested! {
-            <ScrollPanelItem key={ "__add_expression__" } size_hint={ size }>
+            <ScrollPanelItem
+                key="__add_expression__"
+                size_hint={size}
+            >
                 <AddExpressionButton
-                    on_open_expr_panel={ &ctx.props().on_open_expr_panel }
-                    selected_column={ ctx.props().selected_column.clone() }>
-                </AddExpressionButton>
+                    on_open_expr_panel={&ctx.props().on_open_expr_panel}
+                    selected_column={ctx.props().selected_column.clone()}
+                />
             </ScrollPanelItem>
         };
 
@@ -340,19 +352,21 @@ impl Component for ColumnSelector {
         }
 
         let selected_columns = html! {
-            <div id="selected-columns">
+            <div
+                id="selected-columns"
+            >
                 <ScrollPanel
                     id="active-columns"
-                    class={ active_classes }
-                    dragover={ ondragover }
-                    dragenter={ &self.drag_container.dragenter }
-                    dragleave={ &self.drag_container.dragleave }
-                    viewport_ref={ &self.drag_container.noderef }
-                    drop={ ondrop }
-                    on_resize={ &ctx.props().on_resize }
-                    on_dimensions_reset={ &self.on_reset }
-                    children={ std::iter::once(config_selector).chain(active_columns).collect::<Vec<_>>() }>
-                </ScrollPanel>
+                    class={active_classes}
+                    dragover={ondragover}
+                    dragenter={&self.drag_container.dragenter}
+                    dragleave={&self.drag_container.dragleave}
+                    viewport_ref={&self.drag_container.noderef}
+                    drop={ondrop}
+                    on_resize={&ctx.props().on_resize}
+                    on_dimensions_reset={&self.on_reset}
+                    children={std::iter::once(config_selector).chain(active_columns).collect::<Vec<_>>()}
+                />
             </div>
         };
 

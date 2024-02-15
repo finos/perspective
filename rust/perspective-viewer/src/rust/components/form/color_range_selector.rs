@@ -14,8 +14,6 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::*;
-
 #[derive(Properties, PartialEq)]
 pub struct ColorRangeProps {
     pub pos_color: String,

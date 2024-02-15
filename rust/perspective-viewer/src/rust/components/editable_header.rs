@@ -169,22 +169,22 @@ impl Component for EditableHeader {
 
         html! {
             <div
-                class={ classes }
-                onclick={ ctx.link().callback(|_| EditableHeaderMsg::OnClick(())) }>
-
+                class={classes}
+                onclick={ctx.link().callback(|_| EditableHeaderMsg::OnClick(()))}
+            >
                 if let Some(icon) = ctx.props().icon_type {
-                    <TypeIcon ty={ icon }/>
+                    <TypeIcon ty={icon} />
                 }
-
                 <input
-                    ref={ self.noderef.clone() }
+                    ref={self.noderef.clone()}
                     type="search"
                     class="sidebar_header_title"
-                    disabled={ !ctx.props().editable }
-                    { onblur }
-                    { onkeyup }
-                    value={ self.value.clone() }
-                    placeholder={ self.placeholder.clone() }/>
+                    disabled={!ctx.props().editable}
+                    {onblur}
+                    {onkeyup}
+                    value={self.value.clone()}
+                    placeholder={self.placeholder.clone()}
+                />
             </div>
         }
     }
