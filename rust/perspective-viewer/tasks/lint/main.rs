@@ -10,39 +10,39 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use glob::glob;
-pub fn main() {
-    let mut args = std::env::args();
-    args.next();
-    let mut args = args.collect::<Vec<String>>();
-    let mut check = false;
-    if let Some((i, _)) = args.iter().enumerate().find(|(_i, val)| **val == "--check") {
-        args.remove(i);
-        check = true;
+fn check_edition(val: String, edition: &mut bool) -> String {
+    if val == "--edition" {
+        *edition = false;
     }
-    let check_args = if check {
-        vec!["--check".into()]
+
+    val
+}
+
+pub fn main() {
+    let mut needs_edition = true;
+    let args = std::env::args()
+        .skip(1)
+        .map(|x| check_edition(x, &mut needs_edition))
+        .collect::<Vec<String>>();
+
+    let edition_args = if needs_edition {
+        vec!["--edition", "2021"]
     } else {
         vec![]
     };
 
-    let mut paths = vec![];
-    for arg in args {
-        let glob = glob(&arg)
-            .unwrap()
-            .filter_map(Result::ok)
-            .map(|buf| buf.to_string_lossy().to_string())
-            .collect::<Vec<String>>();
-        paths.push(glob);
-    }
-    let paths = paths.concat();
-    let fmt_args = vec!["--edition".into(), "2021".into()];
-    let fmt_args = [fmt_args, check_args, paths].concat();
+    let yewfmt_args = edition_args
+        .into_iter()
+        .map(|x| x.into())
+        .chain(args.into_iter())
+        .collect::<Vec<_>>();
+
     let exit_code = std::process::Command::new(env!("CARGO_BIN_FILE_YEW_FMT"))
-        .args(fmt_args)
+        .args(yewfmt_args)
         .spawn()
         .expect("Could not spawn process")
         .wait()
         .expect("Process did not start");
+
     std::process::exit(exit_code.code().unwrap())
 }

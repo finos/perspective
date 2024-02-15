@@ -180,33 +180,39 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
 
     clone!(props.disabled);
 
-    html_template! {
-        <LocalStyle href={ css!("form/code-editor") } />
-        <div id="editor">
-            <textarea
-                { disabled }
-                id="textarea_editable"
-                ref={ textarea_ref.1 }
-                spellcheck="false"
-                { oninput }
-                { onscroll }
-                { onkeydown }>
-            </textarea>
-            <pre id="content" ref={ content_ref.1 }>
-                { terms }
-                {
-                    // A linebreak which pushs a textarea into scroll overflow
-                    // may not necessarily do so in the `<pre>`, because there is
-                    // no cursor when the last line has no content, so add
-                    // some space here to make sure overlfow is in sync
-                    // with the text area.
-
-                    " "
-                }
-            </pre>
-            <div id="line_numbers" ref={ lineno_ref.1 }>
-                { line_numbers }
+    html! {
+        <>
+            <LocalStyle
+                href={css!("form/code-editor")}
+            />
+            <div
+                id="editor"
+            >
+                <textarea
+                    {disabled}
+                    id="textarea_editable"
+                    ref={textarea_ref.1}
+                    spellcheck="false"
+                    {oninput}
+                    {onscroll}
+                    {onkeydown}
+                />
+                <pre
+                    id="content"
+                    ref={content_ref.1}
+                >
+                    { terms }
+                    { {
+                        // A linebreak which pushs a textarea into scroll overflow
+                        // may not necessarily do so in the `<pre>`, because there is
+                        // no cursor when the last line has no content, so add
+                        // some space here to make sure overlfow is in sync
+                        // with the text area.
+                        " "
+                     } }
+                </pre>
+                <div id="line_numbers" ref={lineno_ref.1}>{ line_numbers }</div>
             </div>
-        </div>
+        </>
     }
 }

@@ -20,8 +20,8 @@ use crate::components::column_settings_sidebar::style_tab::symbol::row_selector:
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_selector::SymbolSelector;
 use crate::components::style::LocalStyle;
 use crate::config::plugin::Symbol;
+use crate::css;
 use crate::custom_elements::FilterDropDownElement;
-use crate::{css, html_template};
 
 #[derive(Properties, PartialEq)]
 pub struct PairsListProps {
@@ -82,16 +82,19 @@ impl yew::Component for PairsList {
             })
             .collect_vec();
 
-        html_template! {
-            <LocalStyle href={ css!("containers/pairs-list") }/>
-            <div
-                class="pairs-list"
-                id={ props.id.clone() }
-                data-label={ props.title.clone() }>
-                <ul>
-                    { for main_pairs }
-                </ul>
-            </div>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("containers/pairs-list")}
+                />
+                <div
+                    class="pairs-list"
+                    id={props.id.clone()}
+                    data-label={props.title.clone()}
+                >
+                    <ul >{ for main_pairs }</ul>
+                </div>
+            </>
         }
     }
 }

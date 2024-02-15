@@ -108,13 +108,15 @@ macro_rules! test_html {
             }
 
             fn view(&self, ctx: &Context<Self>) -> Html {
-                html_template! {
-                    <style>
-                        { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
-                    </style>
-                    <div ref={ ctx.props().root.clone() }>
-                        { ctx.props().html.clone() }
-                    </div>
+                html! {
+                    <>
+                        <style>
+                            { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
+                        </style>
+                        <div ref={ ctx.props().root.clone() }>
+                            { ctx.props().html.clone() }
+                        </div>
+                    </>
                 }
             }
         }

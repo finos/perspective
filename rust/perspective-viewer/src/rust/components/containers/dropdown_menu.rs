@@ -76,23 +76,25 @@ where
                         }
                     },
                     DropDownMenuItem::OptGroup(name, xs) => {
-                        html_template! {
-                            <span class="dropdown-group-label">{ name }</span>
-                            <div class="dropdown-group-container">
-                                {
-                                    xs.iter().map(|x| {
-                                        let click = ctx.props().callback.reform({
-                                            let value = x.clone();
-                                            move |_: MouseEvent| value.clone()
-                                        });
-                                        html! {
-                                            <span onmousedown={ click }>
-                                                { x.clone().into() }
-                                            </span>
-                                        }
-                                    }).collect::<Html>()
-                                }
-                            </div>
+                        html! {
+                            <>
+                                <span class="dropdown-group-label">{ name }</span>
+                                <div
+                                    class="dropdown-group-container"
+                                >
+                                    { xs.iter().map(|x| {
+                                    let click = ctx.props().callback.reform({
+                                        let value = x.clone();
+                                        move |_: MouseEvent| value.clone()
+                                    });
+                                    html! {
+                                        <span onmousedown={ click }>
+                                            { x.clone().into() }
+                                        </span>
+                                    }
+                                }).collect::<Html>() }
+                                </div>
+                            </>
                         }
                     },
                 })
@@ -103,9 +105,6 @@ where
             }
         };
 
-        html_template! {
-            <LocalStyle href={ css!("containers/dropdown-menu") } />
-            { body }
-        }
+        html! { <><LocalStyle href={css!("containers/dropdown-menu")} />{ body }</> }
     }
 }

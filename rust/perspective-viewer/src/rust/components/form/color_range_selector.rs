@@ -42,18 +42,22 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
             .value()
     });
 
-    html_template! {
-        <input
-            id="color-param"
-            class="parameter"
-            type="color"
-            value={ props.pos_color.to_owned() }
-            oninput={ on_pos_color }/>
-        <input
-            id="neg-color-param"
-            class="parameter"
-            type="color"
-            value={ props.neg_color.to_owned() }
-            oninput={ on_neg_color }/>
+    html! {
+        <>
+            <input
+                id="color-param"
+                class="parameter"
+                type="color"
+                value={props.pos_color.to_owned()}
+                oninput={on_pos_color}
+            />
+            <input
+                id="neg-color-param"
+                class="parameter"
+                type="color"
+                value={props.neg_color.to_owned()}
+                oninput={on_neg_color}
+            />
+        </>
     }
 }

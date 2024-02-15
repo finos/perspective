@@ -142,11 +142,6 @@ impl Component for FilterDropDown {
             }
         };
 
-        html_template! {
-            <style>
-                { &CSS }
-            </style>
-            { body }
-        }
+        html! { <><style >{ &CSS }</style>{ body }</> }
     }
 }

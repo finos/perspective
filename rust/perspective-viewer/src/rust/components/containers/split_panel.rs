@@ -384,15 +384,21 @@ impl Component for SplitPanel {
                 }
             });
 
-        let contents = html_template! {
-            <LocalStyle key={ 0 } href={ css!("containers/split-panel") } />
-            <SplitPanelChild
-                key={ 1 }
-                style={ self.styles[0].clone() }
-                ref_={ self.refs[0].clone() }>
-                { head }
-            </SplitPanelChild>
-            { for tail }
+        let contents = html! {
+            <>
+                <LocalStyle
+                    key=0
+                    href={css!("containers/split-panel")}
+                />
+                <SplitPanelChild
+                    key=1
+                    style={self.styles[0].clone()}
+                    ref_={self.refs[0].clone()}
+                >
+                    { head }
+                </SplitPanelChild>
+                { for tail }
+            </>
         };
 
         // TODO consider removing this
@@ -451,13 +457,15 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
     // open dialogs.
     let ondragstart = Callback::from(|event: DragEvent| event.prevent_default());
 
-    html_template! {
-        <div
-            class="split-panel-divider"
-            ondragstart={ ondragstart }
-            onpointerdown={ onmousedown }
-            ondblclick={ ondblclick }>
-        </div>
+    html! {
+        <>
+            <div
+                class="split-panel-divider"
+                {ondragstart}
+                onpointerdown={onmousedown}
+                {ondblclick}
+            />
+        </>
     }
 }
 

@@ -29,7 +29,7 @@ use crate::custom_events::CustomEvents;
 use crate::model::{GetPluginConfig, UpdatePluginConfig};
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::{css, derive_model, html_template};
+use crate::{css, derive_model};
 
 pub fn next_default_symbol(values: &Vec<Symbol>, pairs_len: usize) -> String {
     values
@@ -129,16 +129,22 @@ impl yew::Component for SymbolStyle {
     fn view(&self, ctx: &yew::Context<Self>) -> Html {
         let update_pairs = ctx.link().callback(SymbolAttrMsg::UpdatePairs);
         let (_, values) = ctx.props().get_config();
-        html_template! {
-            <LocalStyle href={ css!("column-symbol-attributes") } />
-            <PairsList
-                title="Symbols"
-                id="attributes-symbols"
-                pairs={ self.pairs.clone() }
-                row_dropdown={ self.row_dropdown.clone() }
-                column_name={ ctx.props().column_name.clone() }
-                { values }
-                { update_pairs }/>
+
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("column-symbol-attributes")}
+                />
+                <PairsList
+                    title="Symbols"
+                    id="attributes-symbols"
+                    pairs={self.pairs.clone()}
+                    row_dropdown={self.row_dropdown.clone()}
+                    column_name={ctx.props().column_name.clone()}
+                    {values}
+                    {update_pairs}
+                />
+            </>
         }
     }
 }

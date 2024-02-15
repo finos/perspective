@@ -160,14 +160,6 @@ impl Component for ColumnDropDown {
             self.width, self.width
         );
 
-        html_template! {
-            <style>
-                { &CSS }
-            </style>
-            <style>
-                { position }
-            </style>
-            { body }
-        }
+        html! { <><style >{ &CSS }</style><style >{ position }</style>{ body }</> }
     }
 }

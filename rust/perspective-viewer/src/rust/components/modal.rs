@@ -134,15 +134,15 @@ where
             .map(Html::from)
             .unwrap_or_default();
 
-        html_template! {
-            <style>
-                { self.css.to_owned() }
-            </style>
-            <ContextProvider<ModalOrientation> context={ &self.rev_vert }>
-                <NoRender>
-                    { child }
-                </NoRender>
-            </ContextProvider<ModalOrientation>>
+        html! {
+            <>
+                <style >{ self.css.to_owned() }</style>
+                <ContextProvider<ModalOrientation>
+                    context={&self.rev_vert}
+                >
+                    <NoRender >{ child }</NoRender>
+                </ContextProvider<ModalOrientation>>
+            </>
         }
     }
 }

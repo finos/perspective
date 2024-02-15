@@ -24,7 +24,7 @@ use crate::custom_events::CustomEvents;
 use crate::model::*;
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::{clone, css, derive_model, html_template};
+use crate::{clone, css, derive_model};
 
 /// This function retrieves the plugin's config using its `save` method.
 /// It also introduces the `default_config` field for the plugin.
@@ -94,14 +94,15 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
                 )
             });
 
-            html_template! {
-                <div class="item_title">{ title.clone() }</div>
-                <div class="style_contents">
-                    <StringColumnStyle
-                        { config }
-                        { default_config }
-                        { on_change }/>
-                </div>
+            html! {
+                <>
+                    <div class="item_title">{ title.clone() }</div>
+                    <div
+                        class="style_contents"
+                    >
+                        <StringColumnStyle {config} {default_config} {on_change} />
+                    </div>
+                </>
             }
         }),
         Type::Datetime | Type::Date => get_column_style::<_, DatetimeColumnStyleDefaultConfig>(
@@ -119,15 +120,20 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
                 )
             });
 
-            html_template! {
-                <div class="item_title">{title.clone()}</div>
-                <div class="style_contents">
-                    <DatetimeColumnStyle
-                        { enable_time_config }
-                        { config }
-                        { default_config }
-                        { on_change }/>
-                </div>
+            html! {
+                <>
+                    <div class="item_title">{ title.clone() }</div>
+                    <div
+                        class="style_contents"
+                    >
+                        <DatetimeColumnStyle
+                            {enable_time_config}
+                            {config}
+                            {default_config}
+                            {on_change}
+                        />
+                    </div>
+                </>
             }
         }),
         Type::Integer | Type::Float => get_column_style::<_, NumberColumnStyleDefaultConfig>(
@@ -147,16 +153,21 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
                 })
             };
 
-            html_template! {
-                <div class="item_title">{ title.clone() }</div>
-                <div class="style_contents">
-                    <NumberColumnStyle
-                        session={ props.session.clone() }
-                        column_name={ props.column_name.clone() }
-                        { config }
-                        { default_config }
-                        { on_change }/>
-                </div>
+            html! {
+                <>
+                    <div class="item_title">{ title.clone() }</div>
+                    <div
+                        class="style_contents"
+                    >
+                        <NumberColumnStyle
+                            session={props.session.clone()}
+                            column_name={props.column_name.clone()}
+                            {config}
+                            {default_config}
+                            {on_change}
+                        />
+                    </div>
+                </>
             }
         }),
         _ => Err("Booleans aren't styled yet.".into()),
@@ -170,8 +181,6 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
         }
     });
 
-    html_template! {
-        <LocalStyle href={ css!("column-style") } />
-        {contents}
-    }
+    //
+    html! { <><LocalStyle href={css!("column-style")} />{ contents }</> }
 }

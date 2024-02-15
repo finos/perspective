@@ -159,18 +159,18 @@ where
             None => "radio-list-item".to_owned(),
         };
 
-        html_template! {
-            <LocalStyle href={ css!("containers/radio-list") } />
-            {
-                ctx.props()
-                .children
-                .iter()
-                .enumerate()
-                .map(|(idx, child)| {
-                    self.render_item(ctx, idx, child, &class, on_change.clone(), &self.selected)
-                })
-                .collect::<Html>()
-            }
+        html! {
+            <>
+                <LocalStyle href={css!("containers/radio-list")} />
+                { ctx.props()
+              .children
+              .iter()
+              .enumerate()
+              .map(|(idx, child)| {
+                  self.render_item(ctx, idx, child, &class, on_change.clone(), &self.selected)
+              })
+              .collect::<Html>() }
+            </>
         }
     }
 }

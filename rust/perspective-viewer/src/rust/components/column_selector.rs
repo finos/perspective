@@ -356,23 +356,28 @@ impl Component for ColumnSelector {
             </div>
         };
 
-        html_template! {
-            <LocalStyle href={ css!("column-selector") } />
-            <SplitPanel
-                no_wrap={ true }
-                on_reset={ self.on_reset.callback() }
-                skip_empty={ true }
-                orientation={ Orientation::Vertical }>
-                { selected_columns }
-                if !inactive_children.is_empty() {
-                    <ScrollPanel
-                        id="sub-columns"
-                        on_resize={ &ctx.props().on_resize }
-                        on_dimensions_reset={ &self.on_reset }
-                        children={ inactive_children }>
-                    </ScrollPanel>
-                }
-            </SplitPanel>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("column-selector")}
+                />
+                <SplitPanel
+                    no_wrap=true
+                    on_reset={self.on_reset.callback()}
+                    skip_empty=true
+                    orientation={Orientation::Vertical}
+                >
+                    { selected_columns }
+                    if !inactive_children.is_empty() {
+                        <ScrollPanel
+                            id="sub-columns"
+                            on_resize={&ctx.props().on_resize}
+                            on_dimensions_reset={&self.on_reset}
+                            children={inactive_children}
+                        />
+                    }
+                </SplitPanel>
+            </>
         }
     }
 }

@@ -127,19 +127,37 @@ impl Component for RenderWarning {
             };
 
             let onclick = ctx.link().callback(|_| RenderWarningMsg::DismissWarning);
-            html_template! {
-                <LocalStyle href={ css!("render-warning") } />
-                <div
-                    class="plugin_information plugin_information--warning"
-                    id="plugin_information--size">
-                    <span class="plugin_information__icon"></span>
-                    <span
-                        class="plugin_information__text"
-                        id="plugin_information_count">{ warning }</span>
-                    <span class="plugin_information__actions">
-                        <span class="plugin_information__action" onmousedown={ onclick }>{ "Render all points" }</span>
-                    </span>
-                </div>
+
+            html! {
+                <>
+                    <LocalStyle
+                        href={css!("render-warning")}
+                    />
+                    <div
+                        class="plugin_information plugin_information--warning"
+                        id="plugin_information--size"
+                    >
+                        <span
+                            class="plugin_information__icon"
+                        />
+                        <span
+                            class="plugin_information__text"
+                            id="plugin_information_count"
+                        >
+                            { warning }
+                        </span>
+                        <span
+                            class="plugin_information__actions"
+                        >
+                            <span
+                                class="plugin_information__action"
+                                onmousedown={onclick}
+                            >
+                                { "Render all points" }
+                            </span>
+                        </span>
+                    </div>
+                </>
             }
         } else {
             html! {}

@@ -302,10 +302,7 @@ impl Component for ScrollPanel {
             }
         };
 
-        html_template! {
-            <LocalStyle href={ css!("containers/scroll-panel") } />
-            { items }
-        }
+        html! { <><LocalStyle href={css!("containers/scroll-panel")} />{ items }</> }
     }
 
     fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {

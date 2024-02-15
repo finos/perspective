@@ -32,13 +32,16 @@ pub fn number_input(props: &NumberInputProps) -> Html {
             .value()
     });
 
-    html_template! {
-        <label>{ "Max" }</label>
-        <input
-            value={ format!("{}", props.max_value) }
-            class="parameter"
-            type="number"
-            min="0"
-            oninput={ oninput } />
+    html! {
+        <>
+            <label >{ "Max" }</label>
+            <input
+                value={format!("{}", props.max_value)}
+                class="parameter"
+                type="number"
+                min="0"
+                {oninput}
+            />
+        </>
     }
 }

@@ -15,7 +15,7 @@ use yew::{classes, function_component, html, Properties};
 
 use crate::components::style::LocalStyle;
 use crate::config::Type;
-use crate::{css, html_template};
+use crate::css;
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum TypeIconType {
@@ -49,8 +49,6 @@ pub struct TypeIconProps {
 #[function_component(TypeIcon)]
 pub fn type_icon(p: &TypeIconProps) -> yew::Html {
     let class = classes!(p.ty.to_string(), "type-icon");
-    html_template! {
-        <LocalStyle href={ css!("type-icon") } />
-        <span { class }></span>
-    }
+
+    html! { <><LocalStyle href={css!("type-icon")} /><span {class} /></> }
 }

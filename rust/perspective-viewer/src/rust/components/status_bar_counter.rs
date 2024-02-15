@@ -70,9 +70,7 @@ impl Component for StatusBarRowsCounter {
                 let nrows = tr.to_formatted_string(&Locale::en);
                 let vcols = vc.to_formatted_string(&Locale::en);
                 let ncols = tc.to_formatted_string(&Locale::en);
-                html_template! {
-                    <span>{ format!("{} ({}) x {} ({})", vrows, nrows, vcols, ncols) }</span>
-                }
+                html! { <span >{ format!("{} ({}) x {} ({})", vrows, nrows, vcols, ncols) }</span> }
             },
 
             Some(
@@ -92,9 +90,7 @@ impl Component for StatusBarRowsCounter {
                 let vrows = vr.to_formatted_string(&Locale::en);
                 let nrows = tr.to_formatted_string(&Locale::en);
                 let vcols = vc.to_formatted_string(&Locale::en);
-                html_template! {
-                    <span>{ format!("{} ({}) x {}", vrows, nrows, vcols) }</span>
-                }
+                html! { <span >{ format!("{} ({}) x {}", vrows, nrows, vcols) }</span> }
             },
 
             Some(ViewStats {
@@ -105,9 +101,7 @@ impl Component for StatusBarRowsCounter {
                 let vrows = vr.to_formatted_string(&Locale::en);
                 let vcols = vc.to_formatted_string(&Locale::en);
                 let ncols = tc.to_formatted_string(&Locale::en);
-                html_template! {
-                    <span>{ format!("{} x {} ({})", vrows, vcols, ncols) }</span>
-                }
+                html! { <span >{ format!("{} x {} ({})", vrows, vcols, ncols) }</span> }
             },
 
             Some(ViewStats {

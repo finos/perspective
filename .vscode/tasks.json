@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Create default VSCode settings.json",
+            "command": "cp",
+            "args": ["-n", "settings.default.json", "settings.json"],
+            "options": {
+                "cwd": "${workspaceFolder}/.vscode"
+            },
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        }
+    ]
+}

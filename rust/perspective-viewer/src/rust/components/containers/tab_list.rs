@@ -13,7 +13,7 @@
 use yew::{classes, html, Callback, Children, Component, Html, Properties};
 
 use crate::components::style::LocalStyle;
-use crate::{css, html_template};
+use crate::css;
 
 pub trait Tab: PartialEq + std::fmt::Display + Clone + Default + 'static {}
 
@@ -85,18 +85,28 @@ impl<T: Tab> Component for TabList<T> {
             }
         });
 
-        html_template! {
-            <LocalStyle href={ css!("containers/tabs") }/>
-            <div class="tab-gutter">
-                { for gutter_tabs }
-                <span class="tab tab-padding">
-                    <div class="tab-title">{ "\u{00a0}" }</div>
-                    <div class="tab-border"></div>
-                </span>
-            </div>
-            <div class="tab-content">
-                { ctx.props().children.iter().nth(self.selected_idx) }
-            </div>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("containers/tabs")}
+                />
+                <div
+                    class="tab-gutter"
+                >
+                    { for gutter_tabs }
+                    <span
+                        class="tab tab-padding"
+                    >
+                        <div class="tab-title">{ "\u{00a0}" }</div>
+                        <div class="tab-border" />
+                    </span>
+                </div>
+                <div
+                    class="tab-content"
+                >
+                    { ctx.props().children.iter().nth(self.selected_idx) }
+                </div>
+            </>
         }
     }
 }

@@ -118,14 +118,3 @@ macro_rules! js_log {
         web_sys::console::log_1(&format!($x, $($y),*).into());
     }};
 }
-
-#[macro_export]
-macro_rules! html_template {
-    ($($x:tt)*) => {{
-        html! {
-            <>
-                $($x)*
-            </>
-        }
-    }};
-}

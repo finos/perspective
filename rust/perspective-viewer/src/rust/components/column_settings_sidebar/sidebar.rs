@@ -36,7 +36,7 @@ use crate::presentation::Presentation;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::{AddListener, Subscription};
-use crate::{css, derive_model, html_template};
+use crate::{css, derive_model};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub enum ColumnSettingsTab {
@@ -364,22 +364,27 @@ impl Component for ColumnSettingsSidebar {
             ColumnSettingsTab::Style => html! {<StyleTab ..style_tab.clone()/>},
         });
 
-        html_template! {
-            <LocalStyle href={ css!("column-settings-panel") } />
-            <Sidebar
-                on_close={ctx.props().on_close.clone()}
-                id_prefix="column_settings"
-                width_override={ctx.props().width_override}
-                selected_tab={self.selected_tab_idx}
-                {header_props}
-            >
-                <TabList<ColumnSettingsTab>
-                    tabs={self.tabs.clone()}
-                    on_tab_change={ctx.link().callback(ColumnSettingsMsg::SetSelectedTab)}
-                    selected_tab={self.selected_tab_idx}>
-                    {for tab_children}
-                </TabList<ColumnSettingsTab>>
-            </Sidebar>
+        html! {
+            <>
+                <LocalStyle
+                    href={css!("column-settings-panel")}
+                />
+                <Sidebar
+                    on_close={ctx.props().on_close.clone()}
+                    id_prefix="column_settings"
+                    width_override={ctx.props().width_override}
+                    selected_tab={self.selected_tab_idx}
+                    {header_props}
+                >
+                    <TabList<ColumnSettingsTab>
+                        tabs={self.tabs.clone()}
+                        on_tab_change={ctx.link().callback(ColumnSettingsMsg::SetSelectedTab)}
+                        selected_tab={self.selected_tab_idx}
+                    >
+                        { for tab_children }
+                    </TabList<ColumnSettingsTab>>
+                </Sidebar>
+            </>
         }
     }
 }
