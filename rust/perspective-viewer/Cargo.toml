@@ -129,6 +129,8 @@ yew = { version = "0.21.0", features = ["csr"] }
 
 # Browser stdlib bindings
 web-sys.version = "0.3.64"
+
+# Browser stdlib bindings
 web-sys.features = [
     "Blob",
     "Clipboard",
@@ -179,3 +181,4 @@ web-sys.features = [
     "VisibilityState",
     "Window",
 ]
+serde_with = "3.6.1"

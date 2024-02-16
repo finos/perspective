@@ -20,6 +20,7 @@ use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
+use crate::components::style_controls::CustomNumberFormat;
 use crate::config::{ColumnConfigValueUpdate, Type, ViewConfigUpdate};
 use crate::custom_events::CustomEvents;
 use crate::model::{PluginColumnStyles, UpdateAndRender};
@@ -126,6 +127,10 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                         session={props.session.clone()}
                     />
                 })
+            }
+
+            if let Some(default_config) = opts.number_string_format {
+                components.push(html! { <CustomNumberFormat /> })
             }
 
             components

@@ -29,6 +29,7 @@ export default function column_style_opts(type, _group) {
                 number_bg_mode: "disabled",
                 fixed: type === "float" ? 2 : 0,
             },
+            number_string_format: {},
         };
     else if (type === "date" || type === "datetime" || type === "string") {
         let control =

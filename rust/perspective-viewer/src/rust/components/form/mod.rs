@@ -20,3 +20,4 @@ pub mod color_range_selector;
 pub mod color_selector;
 mod highlight;
 pub mod number_input;
+pub mod optional_field;

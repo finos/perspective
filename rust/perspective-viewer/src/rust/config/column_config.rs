@@ -13,24 +13,24 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use super::{
-    DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig, NumberColumnStyleConfig,
-    NumberColumnStyleDefaultConfig, StringColumnStyleConfig, StringColumnStyleDefaultConfig,
+    CustomNumberStringFormat, DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig,
+    NumberColumnStyleConfig, NumberColumnStyleDefaultConfig, StringColumnStyleConfig,
+    StringColumnStyleDefaultConfig,
 };
 
 /// The value de/serialized and stored in the viewer config.
 /// Also passed to the plugin via `plugin.save()`.
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default)]
 pub struct ColumnConfigValues {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub datagrid_number_style: Option<NumberColumnStyleConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub datagrid_string_style: Option<StringColumnStyleConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub datagrid_datetime_style: Option<DatetimeColumnStyleConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub symbols: Option<HashMap<String, String>>,
+    pub number_string_format: Option<CustomNumberStringFormat>,
 }
 
 pub enum ColumnConfigValueUpdate {
@@ -38,6 +38,7 @@ pub enum ColumnConfigValueUpdate {
     DatagridStringStyle(Option<StringColumnStyleConfig>),
     DatagridDatetimeStyle(Option<DatetimeColumnStyleConfig>),
     Symbols(Option<HashMap<String, String>>),
+    CustomNumberStringFormat(Option<CustomNumberStringFormat>),
 }
 impl ColumnConfigValues {
     pub fn update(self, update: ColumnConfigValueUpdate) -> Self {
@@ -58,6 +59,10 @@ impl ColumnConfigValues {
                 symbols: update,
                 ..self
             },
+            ColumnConfigValueUpdate::CustomNumberStringFormat(update) => Self {
+                number_string_format: update,
+                ..self
+            },
         }
     }
 }
@@ -72,6 +77,7 @@ pub struct ColumnStyleOpts {
     pub datagrid_string_style: Option<StringColumnStyleDefaultConfig>,
     pub datagrid_datetime_style: Option<DatetimeColumnStyleDefaultConfig>,
     pub symbols: Option<KeyValueOpts>,
+    pub number_string_format: Option<CustomNumberStringFormat>,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
@@ -127,6 +133,7 @@ fn serialize_layout() {
             ("a".into(), "b".into()),
             ("c".into(), "d".into()),
         ])),
+        number_string_format: todo!(),
     };
     let json = serde_json::to_string(&original).unwrap();
     let new: ColumnConfigValues = serde_json::from_str(&json).unwrap();
@@ -157,6 +164,21 @@ fn deserialize_layout() {
         symbols: Some(KeyValueOpts {
             keys: KvPairKeys::String(KvPairKeyValue::Row),
             values: vec!["1".into(), "2".into()],
+        }),
+        number_string_format: Some(CustomNumberStringFormat {
+            _style: todo!(),
+            minimum_integer_digits: todo!(),
+            minimum_fraction_digits: todo!(),
+            maximum_fraction_digits: todo!(),
+            minimum_significant_digits: todo!(),
+            maximum_significant_digits: todo!(),
+            rounding_priority: todo!(),
+            rounding_increment: todo!(),
+            rounding_mode: todo!(),
+            trailing_zero_display: todo!(),
+            _notation: todo!(),
+            use_grouping: todo!(),
+            sign_display: todo!(),
         }),
     };
 

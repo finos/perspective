@@ -10,31 +10,37 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! A collection of (de-)serializable structs which capture the application
-//! state, suitable for persistence, history, etc. features.
+use web_sys::Event;
+use yew::{function_component, html, Callback, Children, Html, Properties};
 
-mod aggregates;
-mod column_config;
-mod column_type;
-mod datetime_column_style;
-mod expressions;
-mod filters;
-mod number_column_style;
-mod number_string_format;
-mod sort;
-mod string_column_style;
-mod view_config;
-mod viewer_config;
+#[derive(Properties, PartialEq)]
+pub struct OptionalFieldProps {
+    pub label: String,
+    pub on_check: Callback<Event>,
+    // Should this be state?
+    pub checked: bool,
+    pub children: Children,
+}
 
-pub use aggregates::*;
-pub use column_config::*;
-pub use column_type::*;
-pub use datetime_column_style::*;
-pub use expressions::*;
-pub use filters::*;
-pub use number_column_style::*;
-pub use number_string_format::*;
-pub use sort::*;
-pub use string_column_style::*;
-pub use view_config::*;
-pub use viewer_config::*;
+#[function_component(OptionalField)]
+pub fn optional_field(props: &OptionalFieldProps) -> Html {
+    html! {
+        <>
+            <div
+                class="column-style-label"
+            >
+                <label class="indent">{ props.label.clone() }</label>
+            </div>
+            <div
+                class="section"
+            >
+                <input
+                    type="checkbox"
+                    onchange={props.on_check.clone()}
+                    checked={props.checked.clone()}
+                />
+                { props.children.clone() }
+            </div>
+        </>
+    }
+}
