@@ -27,6 +27,9 @@
             font-size: 12px;
             min-height: 1.5em;
             color: var(--error--color);
+            top: 0;
+            position: absolute;
+            width: calc(100% - 24px);
         }
 
         &.disabled {
@@ -54,6 +57,7 @@
 
     .item_title {
         margin-bottom: 3px;
+        margin-top: 4px;
     }
 
     input#expression-name {
@@ -102,6 +106,8 @@
         flex-direction: column;
         padding: 0.5em;
         gap: 0.25em;
+        height: 24px;
+        position: relative;
     }
 
     #save-settings,

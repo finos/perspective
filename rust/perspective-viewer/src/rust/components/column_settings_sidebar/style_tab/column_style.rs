@@ -78,7 +78,6 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
     let (config, attrs) = (config.unwrap(), attrs.unwrap());
     let view_type = props.view_type;
 
-    let title = format!("{} Styling", view_type.to_capitalized());
     let opt_html = match view_type {
         Type::String => get_column_style::<_, StringColumnStyleDefaultConfig>(
             config.clone(),
@@ -96,7 +95,6 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
 
             html! {
                 <>
-                    <div class="item_title">{ title.clone() }</div>
                     <div
                         class="style_contents"
                     >
@@ -121,19 +119,16 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
             });
 
             html! {
-                <>
-                    <div class="item_title">{ title.clone() }</div>
-                    <div
-                        class="style_contents"
-                    >
-                        <DatetimeColumnStyle
-                            {enable_time_config}
-                            {config}
-                            {default_config}
-                            {on_change}
-                        />
-                    </div>
-                </>
+                <div
+                    class="style_contents"
+                >
+                    <DatetimeColumnStyle
+                        {enable_time_config}
+                        {config}
+                        {default_config}
+                        {on_change}
+                    />
+                </div>
             }
         }),
         Type::Integer | Type::Float => get_column_style::<_, NumberColumnStyleDefaultConfig>(
@@ -154,20 +149,17 @@ pub fn ColumnStyle(props: &ColumnStyleProps) -> Html {
             };
 
             html! {
-                <>
-                    <div class="item_title">{ title.clone() }</div>
-                    <div
-                        class="style_contents"
-                    >
-                        <NumberColumnStyle
-                            session={props.session.clone()}
-                            column_name={props.column_name.clone()}
-                            {config}
-                            {default_config}
-                            {on_change}
-                        />
-                    </div>
-                </>
+                <div
+                    class="style_contents"
+                >
+                    <NumberColumnStyle
+                        session={props.session.clone()}
+                        column_name={props.column_name.clone()}
+                        {config}
+                        {default_config}
+                        {on_change}
+                    />
+                </div>
             }
         }),
         _ => Err("Booleans aren't styled yet.".into()),

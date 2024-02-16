@@ -21,18 +21,19 @@ pub struct SaveSettingsProps {
     pub on_delete: Callback<()>,
     pub show_danger_zone: bool,
     pub disable_delete: bool,
+    pub is_save: bool,
 }
 
 #[function_component(SaveSettings)]
-pub fn save_settings(p: &SaveSettingsProps) -> Html {
-    let reset = p.on_reset.reform(|_| ());
-    let save = p.on_save.reform(|_| ());
-    let delete = p.on_delete.reform(|_| ());
+pub fn save_settings(props: &SaveSettingsProps) -> Html {
+    let reset = props.on_reset.reform(|_| ());
+    let save = props.on_save.reform(|_| ());
+    let delete = props.on_delete.reform(|_| ());
     html! {
         <div
             id="save-settings-wrapper"
         >
-            if p.show_danger_zone {
+            if props.show_danger_zone {
                 <div
                     id="danger-zone"
                 >
@@ -40,7 +41,7 @@ pub fn save_settings(p: &SaveSettingsProps) -> Html {
                         id="psp-expression-editor-button-delete"
                         class="psp-expression-editor__button"
                         onmousedown={delete}
-                        disabled={p.disable_delete}
+                        disabled={props.disable_delete}
                     >
                         { "Delete Column" }
                     </button>
@@ -49,21 +50,23 @@ pub fn save_settings(p: &SaveSettingsProps) -> Html {
             <div
                 id="save-settings"
             >
-                <button
-                    id="psp-expression-editor-button-reset"
-                    class="psp-expression-editor__button"
-                    onmousedown={reset}
-                    disabled={!p.reset_enabled}
-                >
-                    { "Reset" }
-                </button>
+                if props.is_save {
+                    <button
+                        id="psp-expression-editor-button-reset"
+                        class="psp-expression-editor__button"
+                        onmousedown={reset}
+                        disabled={!props.reset_enabled}
+                    >
+                        { "Reset" }
+                    </button>
+                }
                 <button
                     id="psp-expression-editor-button-save"
                     class="psp-expression-editor__button"
                     onmousedown={save}
-                    disabled={!p.save_enabled}
+                    disabled={!props.save_enabled}
                 >
-                    { "Save" }
+                    { if props.is_save { "Save" } else { "Create" } }
                 </button>
             </div>
         </div>

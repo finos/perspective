@@ -138,10 +138,11 @@ test.describe("Plugin Styles", () => {
         await page.locator("tbody tr").nth(1).waitFor();
         await expect(view.columnSettingsSidebar.container).toBeVisible();
     });
-    test("Column settings should not shrink", async ({ page }) => {
+
+    test("Column settings should not expand", async ({ page }) => {
         let view = new PageView(page);
 
-        const MAX_WIDTH = 300;
+        const MAX_WIDTH = 200;
         let checkWidth = async () => {
             let width = await view.columnSettingsSidebar.container.evaluate(
                 (sidebar) => sidebar.getBoundingClientRect().width
@@ -155,8 +156,7 @@ test.describe("Plugin Styles", () => {
         let editor = view.columnSettingsSidebar.attributesTab.expressionEditor;
         await editor.textarea.focus();
         await editor.textarea.clear();
-        // NOTE: We should find another way to test this as the trick used here is probably not a desired feature.
-        // This creates an error which then expands the sidebar to max width.
+
         await editor.textarea.type(
             "'0000000000000000000000000000000000000000000000000000000000"
         );
@@ -164,6 +164,7 @@ test.describe("Plugin Styles", () => {
         await editor.textarea.clear();
         await checkWidth();
     });
+
     test("Selected tab stays selected when manipulating column", async ({
         page,
     }) => {

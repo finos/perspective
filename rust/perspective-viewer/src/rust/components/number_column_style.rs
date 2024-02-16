@@ -360,7 +360,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Fg, ctx) />
+                        <ColorRangeSelector ..self.color_props(Fg, false, ctx) />
                     </div>
                 }
             </>
@@ -373,7 +373,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Fg, ctx) />
+                        <ColorRangeSelector ..self.color_props(Fg, false, ctx) />
                         <NumberInput ..self.max_value_props(Fg, ctx) />
                     </div>
                 }
@@ -387,7 +387,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Bg, ctx) />
+                        <ColorRangeSelector ..self.color_props(Bg,false, ctx) />
                     </div>
                 }
             </>
@@ -400,7 +400,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Bg, ctx) />
+                        <ColorRangeSelector ..self.color_props(Bg, true, ctx) />
                         <NumberInput ..self.max_value_props(Bg, ctx) />
                     </div>
                 }
@@ -414,7 +414,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Bg, ctx) />
+                        <ColorRangeSelector ..self.color_props(Bg, true, ctx) />
                     </div>
                 }
             </>
@@ -567,7 +567,7 @@ impl NumberColumnStyle {
         ctx.props().on_change.emit(config);
     }
 
-    fn color_props(&self, side: Side, ctx: &Context<Self>) -> ColorRangeProps {
+    fn color_props(&self, side: Side, is_gradient: bool, ctx: &Context<Self>) -> ColorRangeProps {
         let on_pos_color = ctx
             .link()
             .callback(move |x| NumberColumnStyleMsg::PosColorChanged(side, x));
@@ -576,6 +576,7 @@ impl NumberColumnStyle {
             .callback(move |x| NumberColumnStyleMsg::NegColorChanged(side, x));
 
         props!(ColorRangeProps {
+            is_gradient,
             pos_color: if side == Fg {
                 &self.pos_fg_color
             } else {
