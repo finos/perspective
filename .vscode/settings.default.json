@@ -10,7 +10,7 @@
     ],
     "rust-analyzer.server.extraEnv": {
         "RA_LOG": "rust_analyzer::reload=info",
-        "CARGO_TARGET_DIR": "rust/perspective-viewer/dist/analyzer"
+        "CARGO_TARGET_DIR": "${workspaceFolder}/perspective-viewer/dist/analyzer"
     },
     "rust-analyzer.rustfmt.overrideCommand": [
         "cargo",
