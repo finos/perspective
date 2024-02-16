@@ -131,24 +131,47 @@
             flex-wrap: wrap;
         }
 
+        .color-gradient-container {
+            display: flex;
+            flex-wrap: nowrap;
+            flex: 1 1 auto;
+            .color-thermometer {
+                flex: 1 1 auto;
+                height: 24px;
+            }
+        }
+
         input[type="color"] {
             width: 36px;
-            height: 36px;
+            height: 24px;
             cursor: pointer;
             padding: 0;
-            margin-right: 4px;
             font-family: inherit;
             overflow: hidden;
-            border-radius: 3px;
+            border-radius: 6px;
+
+            &:hover {
+                opacity: 0.8;
+            }
 
             &:before {
                 position: absolute;
                 font-family: var(--button--font-family, inherit);
-                margin-top: 4px;
+                margin-top: -1px;
                 margin-left: 12px;
                 font-size: 20px;
                 content: var(--column-style-pos-color--content, "+");
-                color: white;
+                color: var(--sign--color, white);
+            }
+
+            &#pos-color-param {
+                border-radius: 6px 0 0 6px;
+                margin: 0 1px 0 0;
+            }
+
+            &#neg-color-param {
+                border-radius: 0 6px 6px 0;
+                margin: 0 0 0 1px;
             }
 
             &#neg-color-param:before {

@@ -340,6 +340,7 @@ impl Component for ColumnSettingsSidebar {
         let save_section = SaveSettingsProps {
             save_enabled: self.save_enabled,
             reset_enabled: self.reset_enabled,
+            is_save: ctx.props().selected_column.name().is_some(),
             on_reset: ctx.link().callback(ColumnSettingsMsg::OnResetAttributes),
             on_save: ctx.link().callback(ColumnSettingsMsg::OnSaveAttributes),
             on_delete: ctx.link().callback(ColumnSettingsMsg::OnDelete),
