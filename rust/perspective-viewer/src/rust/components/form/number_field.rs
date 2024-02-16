@@ -10,70 +10,64 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "dom/scrollbar.less";
+use web_sys::{HtmlInputElement, InputEvent};
+use yew::{function_component, html, Callback, Properties, TargetCast};
 
-:host {
-    .tab-gutter {
-        border-color: var(--inactive--color, #6e6e6e);
-        display: flex;
+use crate::components::form::optional_field::OptionalField;
+use crate::components::form::required_field::RequiredField;
 
-        .tab.tab-padding {
-            flex: 1;
-            cursor: unset;
-            .tab-title {
-                border-right: none;
-            }
-            .tab-border {
-                border-right: none;
-            }
-        }
+#[derive(Properties, Debug, PartialEq, Clone)]
+pub struct NumberFieldProps {
+    pub label: String,
+    pub current_value: Option<f64>,
+    pub default: f64,
+    pub on_change: Callback<Option<f64>>,
+    #[prop_or_default]
+    pub disabled: bool,
+    #[prop_or_default]
+    pub required: bool,
+    #[prop_or_default]
+    pub min: Option<f64>,
+    #[prop_or_default]
+    pub max: Option<f64>,
+    #[prop_or_default]
+    pub step: Option<f64>,
+}
 
-        .tab {
-            //TODO: This needs to be a variable color. Which one?
-            background: rgba(0, 0, 0, 0.125);
-            border-right: 1px solid var(--inactive--color, #6e6e6e);
-            user-select: none;
-            cursor: pointer;
+#[function_component(NumberField)]
+pub fn number_field(props: &NumberFieldProps) -> yew::Html {
+    let parse_number_input = |event: InputEvent| {
+        Some(
+            event
+                .target_unchecked_into::<HtmlInputElement>()
+                .value_as_number(),
+        )
+    };
 
-            .tab-title {
-                font-size: 12px;
-                padding: 10px;
-                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
-            }
-            .tab-border {
-                height: 2px;
-                width: 100%;
-                background-color: var(--inactive--color, #6e6e6e);
-                margin-top: 1px;
-            }
+    let number_input = html! {
+        <input
+            type="number"
+            class="parameter"
+            min={props.min.map(|val| val.to_string())}
+            max={props.max.map(|val| val.to_string())}
+            step={props.step.map(|val| val.to_string())}
+            value={props.current_value.unwrap_or(props.default).to_string()}
+            oninput={props.on_change.reform(parse_number_input)}
+        />
+    };
 
-            &.selected {
-                background: unset;
-                border-bottom: 1px transparent;
-
-                .tab-title {
-                    border-bottom: 1px transparent;
-                    border-right: none;
-                }
-                .tab-border {
-                    background-color: transparent;
-                    border-right: none;
-                }
-            }
-        }
-    }
-    .tab-content {
-        overflow: auto;
-        max-height: calc(100% - 90px);
-        @include scrollbar;
-
-        .tab-section {
-            padding: 8px;
-            // border-bottom: 1px solid var(--inactive--border-color);
-        }
-        .text {
-            font-size: 14px;
-            margin-left: 1em;
+    html! {
+        if props.required {
+            <RequiredField label={props.label.clone()}>{ number_input }</RequiredField>
+        } else {
+            <OptionalField
+                label={props.label.clone()}
+                on_check={props.on_change.reform(|_| None)}
+                checked={props.current_value.map(|val| val != props.default).unwrap_or_default()}
+                disabled={props.disabled}
+            >
+                { number_input }
+            </OptionalField>
         }
     }
 }

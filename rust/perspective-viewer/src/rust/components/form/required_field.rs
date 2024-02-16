@@ -10,70 +10,27 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "dom/scrollbar.less";
+use yew::{function_component, html, Children, Html, Properties};
 
-:host {
-    .tab-gutter {
-        border-color: var(--inactive--color, #6e6e6e);
-        display: flex;
+#[derive(Properties, PartialEq)]
+pub struct RequiredFieldProps {
+    pub label: String,
+    pub children: Children,
+}
 
-        .tab.tab-padding {
-            flex: 1;
-            cursor: unset;
-            .tab-title {
-                border-right: none;
-            }
-            .tab-border {
-                border-right: none;
-            }
-        }
-
-        .tab {
-            //TODO: This needs to be a variable color. Which one?
-            background: rgba(0, 0, 0, 0.125);
-            border-right: 1px solid var(--inactive--color, #6e6e6e);
-            user-select: none;
-            cursor: pointer;
-
-            .tab-title {
-                font-size: 12px;
-                padding: 10px;
-                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
-            }
-            .tab-border {
-                height: 2px;
-                width: 100%;
-                background-color: var(--inactive--color, #6e6e6e);
-                margin-top: 1px;
-            }
-
-            &.selected {
-                background: unset;
-                border-bottom: 1px transparent;
-
-                .tab-title {
-                    border-bottom: 1px transparent;
-                    border-right: none;
-                }
-                .tab-border {
-                    background-color: transparent;
-                    border-right: none;
-                }
-            }
-        }
-    }
-    .tab-content {
-        overflow: auto;
-        max-height: calc(100% - 90px);
-        @include scrollbar;
-
-        .tab-section {
-            padding: 8px;
-            // border-bottom: 1px solid var(--inactive--border-color);
-        }
-        .text {
-            font-size: 14px;
-            margin-left: 1em;
-        }
+#[function_component(RequiredField)]
+pub fn required_field(props: &RequiredFieldProps) -> Html {
+    html! {
+        <fieldset
+            style="border: none; padding-left: 0px; padding-right: 0px;"
+        >
+            <legend style="font-size: 9px">{ props.label.clone() }</legend>
+            <div
+                class="section row"
+            >
+                <input type="checkbox" disabled=true checked=true />
+                { props.children.clone() }
+            </div>
+        </fieldset>
     }
 }

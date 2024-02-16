@@ -13,6 +13,7 @@
 pub mod stub;
 mod symbol;
 
+use itertools::Itertools;
 use yew::{function_component, html, Html, Properties};
 
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
@@ -78,7 +79,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 let config = config
                     .as_ref()
                     .and_then(|config| config.datagrid_number_style.clone());
-                components.push(html! {
+                components.push(("Number Styles", html! {
                     <NumberColumnStyle
                         session={props.session.clone()}
                         column_name={props.column_name.clone()}
@@ -86,15 +87,15 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                         {default_config}
                         on_change={on_change.clone()}
                     />
-                });
+                }));
             }
             if let Some(default_config) = opts.datagrid_string_style {
                 let config = config
                     .as_ref()
                     .and_then(|config| config.datagrid_string_style.clone());
-                components.push(html! {
+                components.push(("String Styles", html! {
                     <StringColumnStyle {config} {default_config} on_change={on_change.clone()} />
-                });
+                }));
             }
 
             if let Some(default_config) = opts.datagrid_datetime_style {
@@ -102,14 +103,14 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                     .as_ref()
                     .and_then(|config| config.datagrid_datetime_style.clone());
                 let enable_time_config = props.ty.unwrap() == Type::Datetime;
-                components.push(html! {
+                components.push(("Datetime Styles", html! {
                     <DatetimeColumnStyle
                         {enable_time_config}
                         {config}
                         {default_config}
                         on_change={on_change.clone()}
                     />
-                })
+                }))
             }
 
             if let Some(default_config) = opts.symbols {
@@ -118,22 +119,45 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                     .and_then(|config| config.symbols.clone())
                     .unwrap_or_default();
 
-                components.push(html! {
+                components.push(("Symbols", html! {
                     <SymbolStyle
                         {default_config}
                         {restored_config}
-                        {on_change}
+                        on_change={on_change.clone()}
                         column_name={props.column_name.clone()}
                         session={props.session.clone()}
                     />
-                })
+                }))
             }
 
-            if let Some(default_config) = opts.number_string_format {
-                components.push(html! { <CustomNumberFormat /> })
+            if opts.number_string_format.unwrap_or_default() {
+                let restored_config = config
+                    .as_ref()
+                    .and_then(|config| config.number_string_format.clone())
+                    .unwrap_or_default();
+                components.push(("Number Formatting", html! {
+                    <CustomNumberFormat
+                        {restored_config}
+                        {on_change}
+                        view_type={props.ty.unwrap()}
+                        column_name={props.column_name.clone()}
+                    />
+                }));
             }
 
             components
+                .into_iter()
+                .map(|(title, component)| {
+                    html! {
+                        <fieldset
+                            class="style-control"
+                        >
+                            <legend >{ title }</legend>
+                            { component }
+                        </fieldset>
+                    }
+                })
+                .collect_vec()
         })
         .unwrap_or_else(|error| {
             vec![html! {

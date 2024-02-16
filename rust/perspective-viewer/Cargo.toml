@@ -181,4 +181,6 @@ web-sys.features = [
     "VisibilityState",
     "Window",
 ]
+
 serde_with = "3.6.1"
+strum = { version = "0.26.1", features = ["derive"] }

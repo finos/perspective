@@ -10,70 +10,54 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "dom/scrollbar.less";
+use std::fmt::Display;
 
-:host {
-    .tab-gutter {
-        border-color: var(--inactive--color, #6e6e6e);
-        display: flex;
+use itertools::Itertools;
+use strum::IntoEnumIterator;
+use yew::{function_component, html, Callback, Properties};
 
-        .tab.tab-padding {
-            flex: 1;
-            cursor: unset;
-            .tab-title {
-                border-right: none;
-            }
-            .tab-border {
-                border-right: none;
-            }
-        }
+use crate::components::containers::select::{Select, SelectItem};
+use crate::components::form::optional_field::OptionalField;
+use crate::components::form::required_field::RequiredField;
 
-        .tab {
-            //TODO: This needs to be a variable color. Which one?
-            background: rgba(0, 0, 0, 0.125);
-            border-right: 1px solid var(--inactive--color, #6e6e6e);
-            user-select: none;
-            cursor: pointer;
+#[derive(Properties, Debug, PartialEq, Clone)]
+pub struct SelectFieldProps<T>
+where
+    T: IntoEnumIterator + Display + Default + PartialEq + Clone + 'static,
+{
+    pub label: String,
+    pub current_value: Option<T>,
+    pub on_change: Callback<Option<T>>,
+    #[prop_or_default]
+    pub disabled: bool,
+    #[prop_or_default]
+    pub required: bool,
+}
 
-            .tab-title {
-                font-size: 12px;
-                padding: 10px;
-                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
-            }
-            .tab-border {
-                height: 2px;
-                width: 100%;
-                background-color: var(--inactive--color, #6e6e6e);
-                margin-top: 1px;
-            }
-
-            &.selected {
-                background: unset;
-                border-bottom: 1px transparent;
-
-                .tab-title {
-                    border-bottom: 1px transparent;
-                    border-right: none;
-                }
-                .tab-border {
-                    background-color: transparent;
-                    border-right: none;
-                }
-            }
-        }
-    }
-    .tab-content {
-        overflow: auto;
-        max-height: calc(100% - 90px);
-        @include scrollbar;
-
-        .tab-section {
-            padding: 8px;
-            // border-bottom: 1px solid var(--inactive--border-color);
-        }
-        .text {
-            font-size: 14px;
-            margin-left: 1em;
+#[function_component(SelectField)]
+pub fn select_field<T>(props: &SelectFieldProps<T>) -> yew::Html
+where
+    T: IntoEnumIterator + Display + Default + PartialEq + Clone + 'static,
+{
+    let values = T::iter().map(SelectItem::Option).collect_vec();
+    let selected = props.current_value.clone().unwrap_or_default();
+    let checked = selected != T::default();
+    html! {
+        if props.required {
+            <RequiredField
+                label={props.label.clone()}
+            >
+                <Select<T> {values} {selected} on_select={props.on_change.reform(Option::Some)} />
+            </RequiredField>
+        } else {
+            <OptionalField
+                label={props.label.clone()}
+                on_check={props.on_change.reform(|_| None)}
+                {checked}
+                disabled={props.disabled}
+            >
+                <Select<T> {values} {selected} on_select={props.on_change.reform(Option::Some)} />
+            </OptionalField>
         }
     }
 }

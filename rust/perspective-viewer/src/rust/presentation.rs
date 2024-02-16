@@ -260,18 +260,6 @@ impl Presentation {
             crate::config::OptionalUpdate::Update(update) => {
                 for (col_name, new_config) in update.into_iter() {
                     self.column_config.borrow_mut().insert(col_name, new_config);
-                    // let mut config = self.column_config.borrow_mut();
-                    // let value = config.remove()
-                    // let update = ColumnConfigValuesUpdate{
-                    //     datagrid_number_style:
-                    // new_config.datagrid_number_style.map(Some),
-                    //     datagrid_string_style:
-                    // new_config.datagrid_string_style.map(Some),
-                    //     datagrid_datetime_style:
-                    // new_config.datagrid_datetime_style.map(Some),
-                    //     symbols: new_config.symbols.map(Some),
-                    // };
-                    // self.update_column_config_value(col_name, update)
                 }
             },
         }
@@ -280,7 +268,10 @@ impl Presentation {
     pub fn update_column_config_value(&self, column_name: String, update: ColumnConfigValueUpdate) {
         let mut config = self.column_config.borrow_mut();
         let value = config.remove(&column_name).unwrap_or_default();
-        config.insert(column_name, value.update(update));
+        let update = value.update(update);
+        if !update.is_empty() {
+            config.insert(column_name, update);
+        }
     }
 }
 

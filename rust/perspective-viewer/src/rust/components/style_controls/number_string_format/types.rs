@@ -10,70 +10,22 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "dom/scrollbar.less";
+use strum::{Display, EnumIter};
 
-:host {
-    .tab-gutter {
-        border-color: var(--inactive--color, #6e6e6e);
-        display: flex;
+#[derive(Clone, PartialEq, Debug, Copy, Default, EnumIter, Display)]
+pub enum NumberStyle {
+    #[default]
+    Decimal,
+    Percent,
+    Currency,
+    Unit,
+}
 
-        .tab.tab-padding {
-            flex: 1;
-            cursor: unset;
-            .tab-title {
-                border-right: none;
-            }
-            .tab-border {
-                border-right: none;
-            }
-        }
-
-        .tab {
-            //TODO: This needs to be a variable color. Which one?
-            background: rgba(0, 0, 0, 0.125);
-            border-right: 1px solid var(--inactive--color, #6e6e6e);
-            user-select: none;
-            cursor: pointer;
-
-            .tab-title {
-                font-size: 12px;
-                padding: 10px;
-                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
-            }
-            .tab-border {
-                height: 2px;
-                width: 100%;
-                background-color: var(--inactive--color, #6e6e6e);
-                margin-top: 1px;
-            }
-
-            &.selected {
-                background: unset;
-                border-bottom: 1px transparent;
-
-                .tab-title {
-                    border-bottom: 1px transparent;
-                    border-right: none;
-                }
-                .tab-border {
-                    background-color: transparent;
-                    border-right: none;
-                }
-            }
-        }
-    }
-    .tab-content {
-        overflow: auto;
-        max-height: calc(100% - 90px);
-        @include scrollbar;
-
-        .tab-section {
-            padding: 8px;
-            // border-bottom: 1px solid var(--inactive--border-color);
-        }
-        .text {
-            font-size: 14px;
-            margin-left: 1em;
-        }
-    }
+#[derive(Clone, PartialEq, Debug, Copy, Default, Display, EnumIter)]
+pub enum NotationName {
+    #[default]
+    Standard,
+    Scientific,
+    Engineering,
+    Compact,
 }

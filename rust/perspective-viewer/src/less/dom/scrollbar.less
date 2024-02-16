@@ -1,0 +1,16 @@
+@mixin scrollbar {
+        &::-webkit-scrollbar-thumb {
+            border: 0 solid var(--icon--color);
+            border-left-width: 1px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        &::-webkit-scrollbar,
+        &::-webkit-scrollbar-corner {
+            background-color: transparent;
+            width: 6px;
+        }
+}

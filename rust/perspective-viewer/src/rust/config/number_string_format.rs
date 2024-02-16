@@ -1,8 +1,22 @@
-//! This module describes configurations for formatting numbers as strings.
-//! It follows the [Intl.NumberFormat specification](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat)
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+mod enums;
+pub use enums::*;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
+use strum::{Display, EnumIter};
+
+use crate::max;
 
 // #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 // pub enum NumberStringFormat {
@@ -30,7 +44,7 @@ pub enum NumberFormatStyle {
     Unit(UnitNumberFormatStyle),
 }
 
-#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum CurrencyDisplay {
     Code,
@@ -39,7 +53,8 @@ pub enum CurrencyDisplay {
     NarrowSymbol,
     Name,
 }
-#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone)]
+
+#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum CurrencySign {
     #[default]
@@ -51,20 +66,13 @@ pub enum CurrencySign {
 #[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CurrencyNumberFormatStyle {
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#currency_2
-    pub currency: Option<String>,
+    #[serde(default)]
+    pub currency: CurrencyCode,
     pub currency_display: Option<CurrencyDisplay>,
     pub currency_sign: Option<CurrencySign>,
 }
 
-// https://tc39.es/ecma402/#table-sanctioned-single-unit-identifiers
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-#[serde(rename_all = "camelCase")]
-pub enum Unit {
-    Todo,
-}
-
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum UnitDisplay {
     #[default]
@@ -77,11 +85,12 @@ pub enum UnitDisplay {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UnitNumberFormatStyle {
+    #[serde(default)]
     pub unit: Unit,
     pub unit_display: Option<UnitDisplay>,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum RoundingPriority {
     #[default]
@@ -90,7 +99,7 @@ pub enum RoundingPriority {
     LessPrecision,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum RoundingMode {
     Ceil,
@@ -105,7 +114,26 @@ pub enum RoundingMode {
     HalfEven,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Default, Debug, PartialEq, Clone)]
+pub enum RoundingIncrement {
+    #[default]
+    Auto,
+    Custom(f64),
+}
+impl std::fmt::Display for RoundingIncrement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RoundingIncrement::Auto => f.write_str("Auto"),
+            RoundingIncrement::Custom(val) => f.write_fmt(format_args!("{val}")),
+        }
+    }
+}
+
+pub const ROUNDING_INCREMENTS: [f64; 15] = [
+    1., 2., 5., 10., 20., 25., 50., 100., 200., 250., 500., 1000., 2000., 2500., 5000.,
+];
+
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum TrailingZeroDisplay {
     #[default]
@@ -123,7 +151,7 @@ pub enum Notation {
     Compact(CompactDisplay),
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase", tag = "compactDisplay")]
 pub enum CompactDisplay {
     #[default]
@@ -131,7 +159,7 @@ pub enum CompactDisplay {
     Long,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum UseGrouping {
     Always,
@@ -141,7 +169,7 @@ pub enum UseGrouping {
     False,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
 #[serde(rename_all = "camelCase")]
 pub enum SignDisplay {
     #[default]
@@ -155,23 +183,23 @@ pub enum SignDisplay {
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Default, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct CustomNumberStringFormat {
+pub struct CustomNumberFormatConfig {
     #[serde(flatten)]
     pub _style: Option<NumberFormatStyle>,
     // see Digit Options
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumintegerdigits
     // these min/max props can all be specified but it results in possible conflicts
     // may consider making them distinct options
-    pub minimum_integer_digits: Option<u8>,
-    pub minimum_fraction_digits: Option<u8>,
-    pub maximum_fraction_digits: Option<u8>,
-    pub minimum_significant_digits: Option<u8>,
-    pub maximum_significant_digits: Option<u8>,
+    pub minimum_integer_digits: Option<f64>,
+    pub minimum_fraction_digits: Option<f64>,
+    pub maximum_fraction_digits: Option<f64>,
+    pub minimum_significant_digits: Option<f64>,
+    pub maximum_significant_digits: Option<f64>,
     pub rounding_priority: Option<RoundingPriority>,
     // specific values https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#roundingincrement
     // Only available with automatic rounding priority
     // Cannot be mixed with sigfig rounding. (Does this mean max/min sigfig must be unset?)
-    pub rounding_increment: Option<String>,
+    pub rounding_increment: Option<f64>,
     pub rounding_mode: Option<RoundingMode>,
     pub trailing_zero_display: Option<TrailingZeroDisplay>,
     #[serde(flatten)]
@@ -179,15 +207,94 @@ pub struct CustomNumberStringFormat {
     pub use_grouping: Option<UseGrouping>,
     pub sign_display: Option<SignDisplay>,
 }
+impl CustomNumberFormatConfig {
+    pub fn filter_default(
+        self,
+        send_sig: bool,
+        send_frac: bool,
+        send_rounding_increment: bool,
+        send_rounding_priority: bool,
+    ) -> Self {
+        let (frac_min, frac_max) = self.default_fraction_digits();
+        Self {
+            _style: self
+                ._style
+                .filter(|style| !matches!(style, NumberFormatStyle::Decimal)),
+            minimum_integer_digits: self.minimum_integer_digits.filter(|val| *val != 1.),
+            minimum_fraction_digits: self
+                .minimum_fraction_digits
+                .filter(|_| send_frac)
+                .filter(|val| *val != frac_min),
+            maximum_fraction_digits: self
+                .rounding_increment
+                .filter(|_| send_rounding_increment)
+                .map(|_| 0.)
+                .or_else(|| {
+                    self.maximum_fraction_digits
+                        .filter(|_| send_frac)
+                        .filter(|val| *val != frac_max)
+                }),
+            minimum_significant_digits: self
+                .minimum_significant_digits
+                .filter(|_| send_sig)
+                .filter(|val| *val != 1.),
+            maximum_significant_digits: self
+                .maximum_significant_digits
+                .filter(|_| send_sig)
+                .filter(|val| *val != 21.),
+            rounding_priority: self
+                .rounding_priority
+                .filter(|_| send_rounding_priority)
+                .filter(|val| *val != RoundingPriority::default()),
+            rounding_increment: self.rounding_increment.filter(|_| send_rounding_increment),
+            rounding_mode: self
+                .rounding_mode
+                .filter(|val| *val != RoundingMode::default()),
+            trailing_zero_display: self
+                .trailing_zero_display
+                .filter(|val| *val != TrailingZeroDisplay::default()),
+            _notation: self
+                ._notation
+                .filter(|notation| !matches!(notation, Notation::Standard)),
+            use_grouping: self
+                .use_grouping
+                .filter(|val| *val != UseGrouping::default()),
+            sign_display: self
+                .sign_display
+                .filter(|val| *val != SignDisplay::default()),
+        }
+    }
+
+    pub fn default_fraction_digits(&self) -> (f64, f64) {
+        let min = if matches!(self._style, Some(NumberFormatStyle::Currency(_))) {
+            2.
+        } else {
+            0.
+        };
+
+        let max = match self._style {
+            // Technically this should depend on the currency.
+            // https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml
+            Some(NumberFormatStyle::Currency(_)) => {
+                max!(self.minimum_fraction_digits.unwrap_or(min), 2.)
+            },
+            Some(NumberFormatStyle::Percent) => {
+                max!(self.minimum_fraction_digits.unwrap_or(min), 0.)
+            },
+            _ => max!(self.minimum_fraction_digits.unwrap_or(min), 3.),
+        };
+        (min, max)
+    }
+}
 
 // NOTE: These will need to be shimmed into d3-style format strings for the d3fc
 // plugins
 
 #[test]
 pub fn test() {
-    let config = CustomNumberStringFormat {
+    let config = CustomNumberFormatConfig {
         _style: Some(NumberFormatStyle::Currency(CurrencyNumberFormatStyle {
-            currency: Some("USD".to_string()),
+            currency: CurrencyCode::XXX,
             currency_display: Some(CurrencyDisplay::NarrowSymbol),
             currency_sign: Some(CurrencySign::Accounting),
         })),
@@ -200,6 +307,6 @@ pub fn test() {
 #[test]
 pub fn test2() {
     let json = serde_json::json!({});
-    let config: CustomNumberStringFormat = serde_json::from_value(json).unwrap();
-    assert_eq!(config, CustomNumberStringFormat::default());
+    let config: CustomNumberFormatConfig = serde_json::from_value(json).unwrap();
+    assert_eq!(config, CustomNumberFormatConfig::default());
 }

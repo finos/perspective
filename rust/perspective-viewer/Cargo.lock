@@ -1427,6 +1427,7 @@ dependencies = [
  "serde-wasm-bindgen 0.6.1",
  "serde_json",
  "serde_with",
+ "strum 0.26.1",
  "tracing",
  "tracing-subscriber",
  "wasm-bindgen",
@@ -1930,6 +1931,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "063e6045c0e62079840579a7e47a355ae92f60eb74daaf156fb1e84ba164e63f"
 
 [[package]]
+name = "strum"
+version = "0.26.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "723b93e8addf9aa965ebe2d11da6d7540fa2283fcea14b3371ff055f7ba13f5f"
+dependencies = [
+ "strum_macros 0.26.1",
+]
+
+[[package]]
 name = "strum_macros"
 version = "0.24.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1940,6 +1950,19 @@ dependencies = [
  "quote 1.0.33",
  "rustversion",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.26.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a3417fc93d76740d974a01654a09777cb500428cc874ca9f45edfe0c4d4cd18"
+dependencies = [
+ "heck 0.4.1",
+ "proc-macro2 1.0.69",
+ "quote 1.0.33",
+ "rustversion",
+ "syn 2.0.39",
 ]
 
 [[package]]
@@ -2408,8 +2431,8 @@ checksum = "fc942673e7684671f0c5708fc18993569d184265fd5223bb51fc8e5b9b6cfd52"
 dependencies = [
  "anyhow",
  "libc",
- "strum",
- "strum_macros",
+ "strum 0.24.1",
+ "strum_macros 0.24.3",
  "tempfile",
  "thiserror",
  "wasm-opt-cxx-sys",
