@@ -72,6 +72,12 @@ export function restore(token, columns) {
                         : undefined,
                 };
             }
+            if (controls?.number_string_format) {
+                styles[col_name] = {
+                    ...styles[col_name],
+                    number_string_format: controls?.number_string_format,
+                };
+            }
         }
     }
 

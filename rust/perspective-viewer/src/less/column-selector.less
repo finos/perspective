@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@import "dom/scrollbar.less";
+
 // TODO this could be a class
 @mixin icon {
     background-repeat: no-repeat;
@@ -309,21 +311,7 @@
         overflow-x: hidden !important;
         overflow-y: scroll;
         min-height: 20%;
-
-        &::-webkit-scrollbar-thumb {
-            border: 0 solid var(--icon--color);
-            border-left-width: 1px;
-        }
-
-        &::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        &::-webkit-scrollbar,
-        &::-webkit-scrollbar-corner {
-            background-color: transparent;
-            width: 6px;
-        }
+        @include scrollbar;
     }
 
     #sub-columns:before {

@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@import "dom/scrollbar.less";
+
 :host {
     .tab-gutter {
         border-color: var(--inactive--color, #6e6e6e);
@@ -61,6 +63,10 @@
         }
     }
     .tab-content {
+        overflow: auto;
+        max-height: calc(100% - 90px);
+        @include scrollbar;
+
         .tab-section {
             padding: 8px;
             // border-bottom: 1px solid var(--inactive--border-color);

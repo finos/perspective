@@ -10,45 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- * Gets the default column configurations used for styling.
- * @returns The default configuration per type.
- */
-export default function getDefaultConfig() {
-    const get_type_default = (column_type) => {
-        let type_default;
-        if (column_type === "integer" || column_type === "float") {
-            type_default = {
-                fg_gradient: 0,
-                pos_fg_color: this.model._pos_fg_color[0],
-                neg_fg_color: this.model._neg_fg_color[0],
-                number_fg_mode: "color",
-                bg_gradient: 0,
-                pos_bg_color: this.model._pos_bg_color[0],
-                neg_bg_color: this.model._neg_bg_color[0],
-                number_bg_mode: "disabled",
-                fixed: column_type === "float" ? 2 : 0,
-            };
-        } else {
-            // date, datetime, string, boolean
-            type_default = {
-                color: this.model._color[0],
-                bg_color: this.model._color[0],
-            };
-        }
-        return type_default;
-    };
+import Semver from "./semver";
+import { Options } from "../migrate";
+import { Config261 } from "./2-6-1";
+import {
+    PerspectiveColumnConfig,
+    PerspectiveColumnConfigValue,
+    PerspectiveViewerConfig,
+} from "../perspective-viewer";
+import { Config271 } from "./2-7-1";
 
-    let default_config = {};
-    for (let val of [
-        "string",
-        "float",
-        "integer",
-        "bool",
-        "date",
-        "datetime",
-    ]) {
-        default_config[val] = get_type_default(val);
+/**
+ * Migrates from 2.7.1. Focus is on plugin API changes, moving plugin_config.columns to column_config
+ * @param old
+ * @param options
+ * @returns
+ */
+export default function migrate_2_8_0(old: Config271, options: Options) {
+    let next_version = options.version_chain!.shift();
+    if (old.version?.gt(next_version!)) {
+        return old;
+    } else if (options.warn) {
+        console.warn(`Migrating 2.8.0 -> ${next_version}`);
     }
-    return default_config;
+    old.version = new Semver(next_version!);
+
+    for (let [col, val] of Object.entries(old.column_config ?? {})) {
+        if (val?.datagrid_number_style?.fixed) {
+            val.number_string_format = val.number_string_format ?? {};
+            val.number_string_format["minimumFractionDigits"] =
+                val.datagrid_number_style.fixed;
+            val.number_string_format["maximumFractionDigits"] =
+                val.datagrid_number_style.fixed;
+            delete val.datagrid_number_style.fixed;
+        }
+    }
+
+    if (options.verbose) {
+        console.log(old);
+    }
+    return old;
 }

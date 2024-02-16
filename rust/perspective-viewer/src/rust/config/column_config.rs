@@ -13,24 +13,24 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use super::{
-    DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig, NumberColumnStyleConfig,
-    NumberColumnStyleDefaultConfig, StringColumnStyleConfig, StringColumnStyleDefaultConfig,
+    CustomNumberFormatConfig, DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig,
+    NumberColumnStyleConfig, NumberColumnStyleDefaultConfig, StringColumnStyleConfig,
+    StringColumnStyleDefaultConfig,
 };
 
 /// The value de/serialized and stored in the viewer config.
 /// Also passed to the plugin via `plugin.save()`.
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default)]
 pub struct ColumnConfigValues {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub datagrid_number_style: Option<NumberColumnStyleConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub datagrid_string_style: Option<StringColumnStyleConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub datagrid_datetime_style: Option<DatetimeColumnStyleConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub symbols: Option<HashMap<String, String>>,
+    pub number_string_format: Option<CustomNumberFormatConfig>,
 }
 
 pub enum ColumnConfigValueUpdate {
@@ -38,6 +38,7 @@ pub enum ColumnConfigValueUpdate {
     DatagridStringStyle(Option<StringColumnStyleConfig>),
     DatagridDatetimeStyle(Option<DatetimeColumnStyleConfig>),
     Symbols(Option<HashMap<String, String>>),
+    CustomNumberStringFormat(Option<CustomNumberFormatConfig>),
 }
 impl ColumnConfigValues {
     pub fn update(self, update: ColumnConfigValueUpdate) -> Self {
@@ -58,7 +59,19 @@ impl ColumnConfigValues {
                 symbols: update,
                 ..self
             },
+            ColumnConfigValueUpdate::CustomNumberStringFormat(update) => Self {
+                number_string_format: update,
+                ..self
+            },
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.datagrid_number_style.is_none()
+            && self.datagrid_string_style.is_none()
+            && self.datagrid_datetime_style.is_none()
+            && self.symbols.is_none()
+            && self.number_string_format.is_none()
     }
 }
 
@@ -72,6 +85,7 @@ pub struct ColumnStyleOpts {
     pub datagrid_string_style: Option<StringColumnStyleDefaultConfig>,
     pub datagrid_datetime_style: Option<DatetimeColumnStyleDefaultConfig>,
     pub symbols: Option<KeyValueOpts>,
+    pub number_string_format: Option<bool>,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
@@ -94,6 +108,7 @@ pub struct KeyValueOpts {
 
 #[test]
 fn serialize_layout() {
+    use crate::config::*;
     let default_color = "#abc".to_string();
     let original = ColumnConfigValues {
         datagrid_number_style: Some(NumberColumnStyleConfig {
@@ -127,6 +142,14 @@ fn serialize_layout() {
             ("a".into(), "b".into()),
             ("c".into(), "d".into()),
         ])),
+        number_string_format: Some(CustomNumberFormatConfig {
+            _style: Some(NumberFormatStyle::Currency(CurrencyNumberFormatStyle {
+                currency: CurrencyCode::XXX,
+                currency_display: Some(CurrencyDisplay::Code),
+                currency_sign: Some(CurrencySign::Accounting),
+            })),
+            ..Default::default()
+        }),
     };
     let json = serde_json::to_string(&original).unwrap();
     let new: ColumnConfigValues = serde_json::from_str(&json).unwrap();
@@ -158,6 +181,7 @@ fn deserialize_layout() {
             keys: KvPairKeys::String(KvPairKeyValue::Row),
             values: vec!["1".into(), "2".into()],
         }),
+        number_string_format: Some(true),
     };
 
     let json_layout = serde_json::json!({
@@ -181,7 +205,8 @@ fn deserialize_layout() {
         "symbols": {
             "keys": "row",
             "values": ["1","2"]
-        }
+        },
+        "number_string_format": true,
     });
 
     let deserded: ColumnStyleOpts = serde_json::from_value(json_layout).unwrap();

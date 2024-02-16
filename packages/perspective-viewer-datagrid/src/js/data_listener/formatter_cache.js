@@ -130,10 +130,9 @@ export class FormatterCache {
     }
 
     create_number_formatter(type, plugin) {
-        const { format } = get_type_config(type);
-        if (plugin.fixed !== undefined) {
-            format.minimumFractionDigits = plugin.fixed;
-            format.maximumFractionDigits = plugin.fixed;
+        let { format } = get_type_config(type);
+        if (plugin.number_string_format !== undefined) {
+            format = plugin.number_string_format;
         }
 
         return new FORMATTER_CONS[type]([], format);
@@ -147,7 +146,6 @@ export class FormatterCache {
     get(type, plugin) {
         let formatter_key = [
             type,
-            plugin.fixed,
             plugin.timeZone,
             plugin.dateStyle,
             plugin.timeStyle,
@@ -161,6 +159,7 @@ export class FormatterCache {
             plugin.minute,
             plugin.second,
             plugin.hour12,
+            ...Object.values(plugin.number_string_format ?? {}),
         ].join("-");
 
         if (!this._formatters.has(formatter_key)) {

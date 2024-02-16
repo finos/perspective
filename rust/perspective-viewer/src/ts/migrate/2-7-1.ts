@@ -24,12 +24,7 @@ import {
  * @param options
  * @returns
  */
-export default function migrate_2_7_1(
-    old: Config261 & {
-        column_config?: PerspectiveColumnConfig;
-    },
-    options: Options
-) {
+export default function migrate_2_7_1(old: Config271, options: Options) {
     let next_version = options.version_chain.shift();
     if (old.version?.gt(next_version!)) {
         return old;
@@ -155,3 +150,7 @@ export default function migrate_2_7_1(
     }
     return old;
 }
+
+export type Config271 = Config261 & {
+    column_config?: PerspectiveColumnConfig;
+};

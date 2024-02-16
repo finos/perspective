@@ -10,38 +10,64 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- * @param {import("@finos/perspective").Type} type
- * @param {string} _group
- * @returns {import("@finos/perspective-viewer").PerspectiveColumnConfigValue}
- */
-export default function column_style_opts(type, _group) {
-    if (type === "integer" || type === "float")
-        return {
-            datagrid_number_style: {
-                fg_gradient: 0,
-                pos_fg_color: this.model._pos_fg_color[0],
-                neg_fg_color: this.model._neg_fg_color[0],
-                number_fg_mode: "color",
-                bg_gradient: 0,
-                pos_bg_color: this.model._pos_bg_color[0],
-                neg_bg_color: this.model._neg_bg_color[0],
-                number_bg_mode: "disabled",
-            },
-            number_string_format: true,
-        };
-    else if (type === "date" || type === "datetime" || type === "string") {
-        let control =
-            type === "date" || type === "datetime"
-                ? "datagrid_datetime_style"
-                : `datagrid_string_style`;
-        return {
-            [control]: {
-                color: this.model._color[0],
-                bg_color: this.model._color[0],
-            },
-        };
-    } else {
-        return null;
+use web_sys::{HtmlInputElement, InputEvent};
+use yew::{function_component, html, Callback, Properties, TargetCast};
+
+use crate::components::form::optional_field::OptionalField;
+use crate::components::form::required_field::RequiredField;
+
+#[derive(Properties, Debug, PartialEq, Clone)]
+pub struct NumberFieldProps {
+    pub label: String,
+    pub current_value: Option<f64>,
+    pub default: f64,
+    pub on_change: Callback<Option<f64>>,
+    #[prop_or_default]
+    pub disabled: bool,
+    #[prop_or_default]
+    pub required: bool,
+    #[prop_or_default]
+    pub min: Option<f64>,
+    #[prop_or_default]
+    pub max: Option<f64>,
+    #[prop_or_default]
+    pub step: Option<f64>,
+}
+
+#[function_component(NumberField)]
+pub fn number_field(props: &NumberFieldProps) -> yew::Html {
+    let parse_number_input = |event: InputEvent| {
+        Some(
+            event
+                .target_unchecked_into::<HtmlInputElement>()
+                .value_as_number(),
+        )
+    };
+
+    let number_input = html! {
+        <input
+            type="number"
+            class="parameter"
+            min={props.min.map(|val| val.to_string())}
+            max={props.max.map(|val| val.to_string())}
+            step={props.step.map(|val| val.to_string())}
+            value={props.current_value.unwrap_or(props.default).to_string()}
+            oninput={props.on_change.reform(parse_number_input)}
+        />
+    };
+
+    html! {
+        if props.required {
+            <RequiredField label={props.label.clone()}>{ number_input }</RequiredField>
+        } else {
+            <OptionalField
+                label={props.label.clone()}
+                on_check={props.on_change.reform(|_| None)}
+                checked={props.current_value.map(|val| val != props.default).unwrap_or_default()}
+                disabled={props.disabled}
+            >
+                { number_input }
+            </OptionalField>
+        }
     }
 }

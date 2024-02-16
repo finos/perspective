@@ -63,4 +63,6 @@ export type PerspectiveColumnConfigValue = {
         color?: string;
     };
     symbols?: Record<string, string>;
+    // TODO: tsify this
+    number_string_format?: Object;
 };

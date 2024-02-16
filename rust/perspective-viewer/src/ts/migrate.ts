@@ -14,6 +14,7 @@ import Semver from "./migrate/semver";
 import migrate_0_0_0 from "./migrate/0-0-0";
 import migrate_2_6_1 from "./migrate/2-6-1";
 import migrate_2_7_1 from "./migrate/2-7-1";
+import migrate_2_8_0 from "./migrate/2-8-0";
 import packageJSON from "@finos/perspective/package.json" assert { type: "json" };
 import { PerspectiveViewerConfig } from "./viewer";
 
@@ -144,7 +145,7 @@ function migrate_viewer(old: any, omit_attributes: boolean, options: Options) {
     // Note that because we will be working with the latest version on master,
     // and those versions will need to update from themselves to themselves,
     // migration scripts must be idempotent.
-    options.version_chain = ["2.6.1", "2.7.1"];
+    options.version_chain = ["2.6.1", "2.7.1", "2.8.0"];
     options.version_chain.push(PKG_VERSION);
     let res = chain(
         old,
@@ -152,6 +153,7 @@ function migrate_viewer(old: any, omit_attributes: boolean, options: Options) {
             migrate_0_0_0,
             migrate_2_6_1,
             migrate_2_7_1,
+            migrate_2_8_0,
             assure_latest,
             (old) => {
                 return {

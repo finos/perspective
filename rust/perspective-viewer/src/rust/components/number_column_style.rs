@@ -40,7 +40,6 @@ pub enum NumberColumnStyleMsg {
         Box<NumberColumnStyleConfig>,
         Box<NumberColumnStyleDefaultConfig>,
     ),
-    FixedChanged(String),
     ForeEnabledChanged(bool),
     BackEnabledChanged(bool),
     PosColorChanged(Side, String),
@@ -147,18 +146,6 @@ impl Component for NumberColumnStyle {
             NumberColumnStyleMsg::Reset(config, default_config) => {
                 let mut new = Self::reset(&config, &default_config);
                 std::mem::swap(self, &mut new);
-                true
-            },
-            NumberColumnStyleMsg::FixedChanged(fixed) => {
-                let fixed = match fixed.parse::<u32>() {
-                    Ok(x) if x != self.default_config.fixed => Some(x),
-                    Ok(_) => None,
-                    Err(_) if fixed.is_empty() => Some(0),
-                    Err(_) => None,
-                };
-
-                self.config.fixed = fixed.map(|x| std::cmp::min(15, x));
-                self.dispatch_config(ctx);
                 true
             },
             NumberColumnStyleMsg::ForeEnabledChanged(val) => {
@@ -301,23 +288,6 @@ impl Component for NumberColumnStyle {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        // Fixed precision control oninput callback
-        let fixed_oninput = ctx.link().callback(|event: InputEvent| {
-            NumberColumnStyleMsg::FixedChanged(
-                event
-                    .target()
-                    .unwrap()
-                    .unchecked_into::<web_sys::HtmlInputElement>()
-                    .value(),
-            )
-        });
-
-        let fixed_value = self
-            .config
-            .fixed
-            .unwrap_or(self.default_config.fixed)
-            .to_string();
-
         // Color enabled/disabled oninput callback
         let fg_enabled_oninput = ctx.link().callback(move |event: InputEvent| {
             let input = event
@@ -361,7 +331,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Fg, false, ctx) />
+                        <ColorRangeSelector ..self.color_props("fg-color", Fg, false, ctx) />
                     </div>
                 }
             </>
@@ -374,7 +344,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Fg, false, ctx) />
+                        <ColorRangeSelector ..self.color_props("bar-color", Fg, false, ctx) />
                         <NumberInput ..self.max_value_props(Fg, ctx) />
                     </div>
                 }
@@ -388,7 +358,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Bg,false, ctx) />
+                        <ColorRangeSelector ..self.color_props("bg-color", Bg,false, ctx) />
                     </div>
                 }
             </>
@@ -401,7 +371,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Bg, true, ctx) />
+                        <ColorRangeSelector ..self.color_props("gradient-color", Bg, true, ctx) />
                         <NumberInput ..self.max_value_props(Bg, ctx) />
                     </div>
                 }
@@ -415,7 +385,7 @@ impl Component for NumberColumnStyle {
                     <div
                         class="row inner_section"
                     >
-                        <ColorRangeSelector ..self.color_props(Bg, true, ctx) />
+                        <ColorRangeSelector ..self.color_props("pulse-color", Bg, true, ctx) />
                     </div>
                 }
             </>
@@ -430,34 +400,6 @@ impl Component for NumberColumnStyle {
                     id="column-style-container"
                     class="number-column-style-container"
                 >
-                    <div
-                        class="column-style-label"
-                    >
-                        <label
-                            id="fixed-examples"
-                            class="indent"
-                        >
-                            { self.make_fixed_text(ctx) }
-                        </label>
-                    </div>
-                    <div
-                        class="row section"
-                    >
-                        <input
-                            type="checkbox"
-                            checked=true
-                            disabled=true
-                        />
-                        <input
-                            id="fixed-param"
-                            class="parameter"
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={fixed_value}
-                            oninput={fixed_oninput}
-                        />
-                    </div>
                     <div
                         class="column-style-label"
                     >
@@ -572,7 +514,13 @@ impl NumberColumnStyle {
             .emit(ColumnConfigValueUpdate::DatagridNumberStyle(update));
     }
 
-    fn color_props(&self, side: Side, is_gradient: bool, ctx: &Context<Self>) -> ColorRangeProps {
+    fn color_props(
+        &self,
+        id: &str,
+        side: Side,
+        is_gradient: bool,
+        ctx: &Context<Self>,
+    ) -> ColorRangeProps {
         let on_pos_color = ctx
             .link()
             .callback(move |x| NumberColumnStyleMsg::PosColorChanged(side, x));
@@ -581,6 +529,7 @@ impl NumberColumnStyle {
             .callback(move |x| NumberColumnStyleMsg::NegColorChanged(side, x));
 
         props!(ColorRangeProps {
+            id: id.to_string(),
             is_gradient,
             pos_color: if side == Fg {
                 &self.pos_fg_color
@@ -612,20 +561,6 @@ impl NumberColumnStyle {
             },
             on_max_value
         })
-    }
-
-    /// Human readable precision hint, e.g. "Prec 0.001" for `{fixed: 3}`.
-    fn make_fixed_text(&self, _ctx: &Context<Self>) -> String {
-        let fixed = match self.config.fixed {
-            Some(x) if x > 0 => format!("0.{}1", "0".repeat(x as usize - 1)),
-            None if self.default_config.fixed > 0 => {
-                let n = self.default_config.fixed as usize - 1;
-                format!("0.{}1", "0".repeat(n))
-            },
-            Some(_) | None => "1".to_owned(),
-        };
-
-        format!("Prec {}", fixed)
     }
 
     fn reset(

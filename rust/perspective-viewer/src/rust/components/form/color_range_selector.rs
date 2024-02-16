@@ -16,6 +16,7 @@ use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct ColorRangeProps {
+    pub id: String,
     pub pos_color: String,
     pub neg_color: String,
     pub is_gradient: bool,
@@ -82,26 +83,46 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
         <div
             class="color-gradient-container"
         >
-            <input
-                id="pos-color-param"
-                style={fg_pos}
-                class="parameter"
-                type="color"
-                value={gradient.0.to_owned()}
-                oninput={on_pos_color}
-            />
+            <div
+                class="color-selector"
+            >
+                <input
+                    id={format!("{}-pos", props.id)}
+                    style={fg_pos}
+                    class="parameter pos-color-param"
+                    type="color"
+                    value={gradient.0.to_owned()}
+                    oninput={on_pos_color}
+                />
+                <label
+                    for={format!("{}-pos", props.id)}
+                    class="color-label"
+                >
+                    { "+" }
+                </label>
+            </div>
             <div
                 class="color-thermometer"
                 {style}
             />
-            <input
-                id="neg-color-param"
-                style={fg_neg}
-                class="parameter"
-                type="color"
-                value={gradient.1.to_owned()}
-                oninput={on_neg_color}
-            />
+            <div
+                class="color-selector"
+            >
+                <input
+                    id={format!("{}-neg", props.id)}
+                    style={fg_neg}
+                    class="parameter neg-color-param"
+                    type="color"
+                    value={gradient.1.to_owned()}
+                    oninput={on_neg_color}
+                />
+                <label
+                    for={format!("{}-neg", props.id)}
+                    class="color-label"
+                >
+                    { "-" }
+                </label>
+            </div>
         </div>
     }
 }

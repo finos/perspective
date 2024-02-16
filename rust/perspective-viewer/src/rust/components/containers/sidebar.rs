@@ -67,16 +67,8 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
         >
             <SidebarCloseButton id={format!("{id}_close_button")} on_close_sidebar={&p.on_close} />
             <div class="sidebar_header"><EditableHeader ..p.header_props.clone() /></div>
-            <div
-                class="sidebar_border"
-                id={format!("{id}_border")}
-            />
-            <div
-                class="sidebar_content"
-                id={format!("{id}_content")}
-            >
-                { p.children.iter().collect::<Html>() }
-            </div>
+            <div class="sidebar_border" id={format!("{id}_border")} />
+            { p.children.iter().collect::<Html>() }
             <div class="sidebar-auto-width" style={width_style} />
         </div>
     }

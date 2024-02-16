@@ -10,38 +10,43 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- * @param {import("@finos/perspective").Type} type
- * @param {string} _group
- * @returns {import("@finos/perspective-viewer").PerspectiveColumnConfigValue}
- */
-export default function column_style_opts(type, _group) {
-    if (type === "integer" || type === "float")
-        return {
-            datagrid_number_style: {
-                fg_gradient: 0,
-                pos_fg_color: this.model._pos_fg_color[0],
-                neg_fg_color: this.model._neg_fg_color[0],
-                number_fg_mode: "color",
-                bg_gradient: 0,
-                pos_bg_color: this.model._pos_bg_color[0],
-                neg_bg_color: this.model._neg_bg_color[0],
-                number_bg_mode: "disabled",
-            },
-            number_string_format: true,
-        };
-    else if (type === "date" || type === "datetime" || type === "string") {
-        let control =
-            type === "date" || type === "datetime"
-                ? "datagrid_datetime_style"
-                : `datagrid_string_style`;
-        return {
-            [control]: {
-                color: this.model._color[0],
-                bg_color: this.model._color[0],
-            },
-        };
-    } else {
-        return null;
+use web_sys::Event;
+use yew::{function_component, html, Callback, Children, Html, Properties};
+
+#[derive(Properties, PartialEq)]
+pub struct OptionalFieldProps {
+    pub label: String,
+    pub on_check: Callback<Event>,
+    pub checked: bool,
+    pub children: Children,
+    #[prop_or(String::from("section row"))]
+    pub class: String,
+
+    #[prop_or_default]
+    pub disabled: bool,
+}
+
+#[function_component(OptionalField)]
+pub fn optional_field(props: &OptionalFieldProps) -> Html {
+    html! {
+        <fieldset
+            style="border: none; padding-left: 0px; padding-right: 0px;"
+            disabled={props.disabled}
+        >
+            <legend style="font-size: 9px">{ props.label.clone() }</legend>
+            <div
+                class={props.class.clone()}
+            >
+                <input
+                    type="checkbox"
+                    // this isn't necessary to disable the field but is necessary for the style
+                     disabled={props.disabled}
+                    onchange={props.on_check.clone()}
+                    checked={props.checked}
+                    id={format!("{}-checkbox", props.label.replace(' ', "-"))}
+                />
+                { props.children.clone() }
+            </div>
+        </fieldset>
     }
 }

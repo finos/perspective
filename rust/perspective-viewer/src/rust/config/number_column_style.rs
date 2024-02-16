@@ -134,9 +134,6 @@ pub struct NumberColumnStyleConfig {
     pub number_bg_mode: NumberBackgroundMode,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub fixed: Option<u32>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub pos_fg_color: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -165,7 +162,6 @@ derive_wasm_abi!(NumberColumnStyleConfig, FromWasmAbi, IntoWasmAbi);
 pub struct NumberColumnStyleDefaultConfig {
     pub fg_gradient: f64,
     pub bg_gradient: f64,
-    pub fixed: u32,
     pub pos_fg_color: String,
     pub neg_fg_color: String,
     pub pos_bg_color: String,

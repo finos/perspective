@@ -422,10 +422,13 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
                 "Row ID": {
                     datagrid_number_style: {
                         number_bg_mode: "gradient",
-                        fixed: 1,
                         pos_fg_color: "#000000",
                         neg_fg_color: "#000000",
                         bg_gradient: 9,
+                    },
+                    number_string_format: {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
                     },
                 },
                 "Order Date": {
