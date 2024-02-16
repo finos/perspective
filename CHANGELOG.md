@@ -1,3 +1,36 @@
+# [v2.8.0](https://github.com/finos/perspective/releases/tag/v2.8.0)
+
+_16 February 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.7.2...v2.8.0))
+
+Features
+
+- Add column edit highlight to `perspective-viewer-datagrid` [#2486](https://github.com/finos/perspective/pull/2486)
+- New color selector component [#2536](https://github.com/finos/perspective/pull/2536)
+- Render table in the shadow DOM for `@finos/perspective-viewer-datagrid` [#2482](https://github.com/finos/perspective/pull/2482)
+
+Fixes
+
+- Bugfix - De-aggregating doesn't change column style type [#2535](https://github.com/finos/perspective/pull/2535)
+- A few CSS fixes for regular-table in shadow DOM [#2526](https://github.com/finos/perspective/pull/2526)
+- Settings panel width is inconsistent for columns moved to `Config` [#2527](https://github.com/finos/perspective/pull/2527)
+- Fix datagrid scroll performance regression via `regular-table` upgrade [#2498](https://github.com/finos/perspective/pull/2498)
+- Fix output scrolling in Jupyter when `perspective-python` is installed [#2495](https://github.com/finos/perspective/pull/2495)
+- Fix datagrid cell pulse styling [#2489](https://github.com/finos/perspective/pull/2489)
+- Update ipynb examples with new expression syntax [#2463](https://github.com/finos/perspective/pull/2463)
+- Fix Jupyterlab Widget Save/Restore Symmetry [#2465](https://github.com/finos/perspective/pull/2465)
+
+Misc
+
+- Add `yew-fmt` [#2533](https://github.com/finos/perspective/pull/2533)
+- Expression Names in Column Settings Header + Refactors [#2459](https://github.com/finos/perspective/pull/2459)
+- Update `http-server` examples dependency [#2505](https://github.com/finos/perspective/pull/2505)
+- Use a boost mirror [#2484](https://github.com/finos/perspective/pull/2484)
+- Refactor How Column Style Components Are Selected [#2443](https://github.com/finos/perspective/pull/2443)
+- Remove docs build from CI [#2483](https://github.com/finos/perspective/pull/2483)
+- Add starting support for Typescript in perspective-viewer-d3fc package [#2432](https://github.com/finos/perspective/pull/2432)
+- Fix cargo features [#2481](https://github.com/finos/perspective/pull/2481)
+- Fix docs site [#2462](https://github.com/finos/perspective/pull/2462)
+
 # [v2.7.1](https://github.com/finos/perspective/releases/tag/v2.7.1)
 
 _29 November 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.7.0...v2.7.1))
