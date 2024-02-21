@@ -13,6 +13,7 @@
         }
     },
     "emscripten": "3.1.48",
+    "llvm": "17.0.6",
     "engines": {
         "node": ">=14.18.2"
     },
@@ -86,6 +87,7 @@
         "postinstall:emsdk": "node tools/perspective-scripts/install_emsdk.mjs",
         "postinstall:playwright": "npx playwright install --with-deps",
         "postinstall:vscode": "cp -n ./.vscode/settings.default.json ./.vscode/settings.json || true",
+        "install_llvm": "node tools/perspective-scripts/install_llvm.mjs",
         "build,test": "npm run --silent build && npm run --silent test",
         "build_js": "node tools/perspective-scripts/build_js.mjs",
         "build": "node tools/perspective-scripts/build.mjs",
