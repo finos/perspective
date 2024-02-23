@@ -39,24 +39,18 @@ describe_jupyter(
                 "w",
             ],
             async ({ page }) => {
-                const viewer = await default_body(page);
-                const num_columns = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer
-                        .querySelector("perspective-viewer-datagrid")
-                        .shadowRoot.querySelector("regular-table");
-                    return tbl.querySelector("thead tr").childElementCount;
-                });
+                await default_body(page);
+
+                const num_columns = await page
+                    .locator("regular-table thead tr")
+                    .first()
+                    .evaluate((tr) => tr.childElementCount);
 
                 expect(num_columns).toEqual(3);
 
-                const num_rows = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer
-                        .querySelector("perspective-viewer-datagrid")
-                        .shadowRoot.querySelector("regular-table");
-                    return tbl.querySelectorAll("tbody tr").length;
-                });
-
-                expect(num_rows).toEqual(5);
+                await expect(
+                    page.locator("regular-table tbody tr")
+                ).toHaveCount(5);
             }
         );
 
@@ -71,24 +65,17 @@ describe_jupyter(
                 "table.update(arrow_data)",
             ],
             async ({ page }) => {
-                const viewer = await default_body(page);
-                const num_columns = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer
-                        .querySelector("perspective-viewer-datagrid")
-                        .shadowRoot.querySelector("regular-table");
-                    return tbl.querySelector("thead tr").childElementCount;
-                });
+                await default_body(page);
+                const num_columns = await page
+                    .locator("regular-table thead tr")
+                    .first()
+                    .evaluate((tr) => tr.childElementCount);
 
                 expect(num_columns).toEqual(3);
 
-                const num_rows = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer
-                        .querySelector("perspective-viewer-datagrid")
-                        .shadowRoot.querySelector("regular-table");
-                    return tbl.querySelectorAll("tbody tr").length;
-                });
-
-                expect(num_rows).toEqual(10);
+                await expect(
+                    page.locator("regular-table tbody tr")
+                ).toHaveCount(10);
             }
         );
         test_jupyter(
@@ -101,25 +88,18 @@ describe_jupyter(
                 "w",
             ],
             async ({ page }) => {
-                const viewer = await default_body(page);
-                const num_columns = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer
-                        .querySelector("perspective-viewer-datagrid")
-                        .shadowRoot.querySelector("regular-table");
+                await default_body(page);
 
-                    return tbl.querySelector("thead tr").childElementCount;
-                });
+                const num_columns = await page
+                    .locator("regular-table thead tr")
+                    .first()
+                    .evaluate((tr) => tr.childElementCount);
 
                 expect(num_columns).toEqual(3);
 
-                const num_rows = await viewer.evaluate(async (viewer) => {
-                    const tbl = viewer
-                        .querySelector("perspective-viewer-datagrid")
-                        .shadowRoot.querySelector("regular-table");
-                    return tbl.querySelectorAll("tbody tr").length;
-                });
-
-                expect(num_rows).toEqual(5);
+                await expect(
+                    page.locator("regular-table tbody tr")
+                ).toHaveCount(5);
             }
         );
 
@@ -228,6 +208,7 @@ describe_jupyter(
                 // Check default config
                 expect(config).toEqual({
                     version: utils.API_VERSION,
+                    column_config: {},
                     aggregates: {},
                     columns: [
                         "ui8",
@@ -281,6 +262,7 @@ w.theme = "Pro Dark"`
                 // and check it
                 expect(config).toEqual({
                     version: utils.API_VERSION,
+                    column_config: {},
                     aggregates: {},
                     columns: ["ui8"],
                     expressions: {},
@@ -315,6 +297,7 @@ w.theme = "Pro Dark"`
                 // Check default config
                 expect(config).toEqual({
                     version: utils.API_VERSION,
+                    column_config: {},
                     aggregates: {},
                     columns: [
                         "ui8",

@@ -10,7 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
+import {
+    test,
+    expect,
+    DEFAULT_CONFIG,
+    compareSVGContentsToSnapshot,
+} from "@finos/perspective-test";
 import {
     compareContentsToSnapshot,
     API_VERSION,
@@ -384,7 +389,6 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
         },
         {
             ...MIGRATE_BASE_CONFIG,
-            version: "2.7.1",
             plugin: "Datagrid",
             plugin_config: {
                 columns: {},
@@ -525,8 +529,18 @@ test.describe("Migrate Viewer", () => {
 
                 expect(saved).toEqual(expected);
 
-                const contents = await get_contents(page);
-                await compareContentsToSnapshot(contents, [
+                let selector;
+                if (saved.plugin === "Datagrid") {
+                    selector = "perspective-viewer-datagrid";
+                } else if (saved.plugin === "Map Scatter") {
+                    selector = "perspective-viewer-openlayers-scatter";
+                } else {
+                    const plugin = saved.plugin
+                        ?.replace(/[-\/\s]/gi, "")
+                        .toLowerCase();
+                    selector = `perspective-viewer-d3fc-${plugin}`;
+                }
+                await compareSVGContentsToSnapshot(page, selector, [
                     `migrate-restore-${name}.txt`,
                 ]);
             });
