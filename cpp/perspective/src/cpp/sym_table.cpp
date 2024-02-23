@@ -22,10 +22,10 @@ namespace perspective {
 
 std::mutex sym_table_mutex;
 
-t_symtable::t_symtable() {}
+t_symtable::t_symtable() = default;
 
 t_symtable::~t_symtable() {
-    for (auto& kv : m_mapping) {
+    for (const auto& kv : m_mapping) {
         free(const_cast<char*>(kv.second));
     }
 }
@@ -38,7 +38,7 @@ t_symtable::get_interned_cstr(const char* s) {
         return iter->second;
     }
 
-    auto scopy = strdup(s);
+    auto* scopy = strdup(s);
     m_mapping[scopy] = scopy;
     return scopy;
 }
@@ -58,8 +58,9 @@ t_symtable::get_interned_tscalar(const char* s) {
 
 t_tscalar
 t_symtable::get_interned_tscalar(const t_tscalar& s) {
-    if (!s.is_str() || s.is_inplace())
+    if (!s.is_str() || s.is_inplace()) {
         return s;
+    }
 
     t_tscalar rval;
     rval.set(get_interned_cstr(s.get_char_ptr()));
@@ -74,9 +75,9 @@ t_symtable::size() const {
 
 static t_symtable*
 get_symtable() {
-    static t_symtable* sym = 0;
+    static t_symtable* sym = nullptr;
 
-    if (!sym) {
+    if (sym == nullptr) {
         sym = new t_symtable;
     }
     return sym;
@@ -85,7 +86,7 @@ get_symtable() {
 const char*
 get_interned_cstr(const char* s) {
     std::lock_guard<std::mutex> guard(sym_table_mutex);
-    auto sym = get_symtable();
+    auto* sym = get_symtable();
     return sym->get_interned_cstr(s);
 }
 
@@ -103,8 +104,9 @@ get_interned_tscalar(const char* s) {
 
 t_tscalar
 get_interned_tscalar(const t_tscalar& s) {
-    if (!s.is_str() || s.is_inplace())
+    if (!s.is_str() || s.is_inplace()) {
         return s;
+    }
 
     t_tscalar rval;
     rval.set(get_interned_cstr(s.get_char_ptr()));

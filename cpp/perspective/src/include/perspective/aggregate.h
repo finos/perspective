@@ -46,15 +46,15 @@ public:
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter) {
-        ROLLING_T value
-            = std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
+        ROLLING_T value =
+            std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
         return value;
     }
 
     ROLLING_T
     roll_up(const ROLLING_T* biter, const ROLLING_T* eiter) {
-        ROLLING_T value
-            = std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
+        ROLLING_T value =
+            std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
         return value;
     }
 };
@@ -68,15 +68,23 @@ public:
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter) {
-        ROLLING_T value = std::accumulate(biter, eiter,
-            static_cast<ROLLING_T>(1), std::multiplies<ROLLING_T>());
+        ROLLING_T value = std::accumulate(
+            biter,
+            eiter,
+            static_cast<ROLLING_T>(1),
+            std::multiplies<ROLLING_T>()
+        );
         return value;
     }
 
     ROLLING_T
     roll_up(const ROLLING_T* biter, const ROLLING_T* eiter) {
-        ROLLING_T value = std::accumulate(biter, eiter,
-            static_cast<ROLLING_T>(1), std::multiplies<ROLLING_T>());
+        ROLLING_T value = std::accumulate(
+            biter,
+            eiter,
+            static_cast<ROLLING_T>(1),
+            std::multiplies<ROLLING_T>()
+        );
         return value;
     }
 };
@@ -144,15 +152,17 @@ public:
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter) {
-        if (biter >= eiter)
+        if (biter >= eiter) {
             return ROLLING_T();
+        }
         return ROLLING_T(*(std::max_element(biter, eiter)));
     }
 
     ROLLING_T
     roll_up(const ROLLING_T* biter, const ROLLING_T* eiter) {
-        if (biter >= eiter)
+        if (biter >= eiter) {
             return ROLLING_T();
+        }
         return *(std::max_element(biter, eiter));
     }
 };
@@ -166,24 +176,29 @@ public:
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter) {
-        if (biter >= eiter)
+        if (biter >= eiter) {
             return ROLLING_T();
+        }
         return ROLLING_T(*(std::min_element(biter, eiter)));
     }
 
     ROLLING_T
     roll_up(const ROLLING_T* biter, const ROLLING_T* eiter) {
-        if (biter >= eiter)
+        if (biter >= eiter) {
             return ROLLING_T();
+        }
         return *(std::min_element(biter, eiter));
     }
 };
 
 class PERSPECTIVE_EXPORT t_aggregate {
 public:
-    t_aggregate(const t_dtree& tree, t_aggtype aggtype,
+    t_aggregate(
+        const t_dtree& tree,
+        t_aggtype aggtype,
         std::vector<std::shared_ptr<const t_column>> icolumns,
-        std::shared_ptr<t_column> column);
+        std::shared_ptr<t_column> column
+    );
     void init();
 
     template <typename AGGIMPL_T>
@@ -196,14 +211,19 @@ private:
     std::shared_ptr<t_column> m_ocolumn;
 };
 
-template <typename AGGIMPL_T,
+template <
+    typename AGGIMPL_T,
     typename std::enable_if<
         !std::is_same<const char*, typename AGGIMPL_T::t_rolling>::value,
-        int>::type
-    = 0>
+        int>::type = 0>
 void
-build_aggregate_helper(AGGIMPL_T& aggimpl, t_index bcidx, t_index ecidx,
-    t_column* ocolumn, t_index nidx) {
+build_aggregate_helper(
+    AGGIMPL_T& aggimpl,
+    t_index bcidx,
+    t_index ecidx,
+    t_column* ocolumn,
+    t_index nidx
+) {
     typedef typename AGGIMPL_T::t_rolling t_rolling;
     const t_rolling* biter = ocolumn->get_nth<t_rolling>(bcidx);
     const t_rolling* eiter = ocolumn->get_nth<t_rolling>(ecidx);
@@ -211,14 +231,19 @@ build_aggregate_helper(AGGIMPL_T& aggimpl, t_index bcidx, t_index ecidx,
     ocolumn->set_nth<t_rolling>(nidx, rolling);
 }
 
-template <typename AGGIMPL_T,
+template <
+    typename AGGIMPL_T,
     typename std::enable_if<
         std::is_same<const char*, typename AGGIMPL_T::t_rolling>::value,
-        int>::type
-    = 0>
+        int>::type = 0>
 void
-build_aggregate_helper(AGGIMPL_T& aggimpl, t_index bcidx, t_index ecidx,
-    t_column* ocolumn, t_index nidx) {
+build_aggregate_helper(
+    AGGIMPL_T& aggimpl,
+    t_index bcidx,
+    t_index ecidx,
+    t_column* ocolumn,
+    t_index nidx
+) {
     const t_column* c_ocolumn = ocolumn;
     typedef typename AGGIMPL_T::t_rolling t_rolling;
     std::vector<t_rolling> sbuf(ecidx - bcidx);
@@ -230,8 +255,8 @@ build_aggregate_helper(AGGIMPL_T& aggimpl, t_index bcidx, t_index ecidx,
 
     if (!sbuf.empty()) {
 
-        t_rolling rolling
-            = aggimpl.roll_up(sbuf.data(), sbuf.data() + sbuf.size());
+        t_rolling rolling =
+            aggimpl.roll_up(sbuf.data(), sbuf.data() + sbuf.size());
         ocolumn->set_nth<t_rolling>(nidx, rolling);
     }
 }
@@ -251,8 +276,9 @@ t_aggregate::build_aggregate() {
     typedef typename t_dtree::t_tnode t_tnode;
     t_column* ocolumn = m_ocolumn.get();
 
-    PSP_VERBOSE_ASSERT(m_icolumns.size() == 1,
-        "Multiple input dependencies not supported yet");
+    PSP_VERBOSE_ASSERT(
+        m_icolumns.size() == 1, "Multiple input dependencies not supported yet"
+    );
 
     const t_column* icptr = m_icolumns[0].get();
     t_uindex icptr_size = icptr->size();
@@ -266,8 +292,8 @@ t_aggregate::build_aggregate() {
     const t_uindex* base_lcptr = lcptr->get<const t_uindex>(0);
 
     for (t_index level_idx = n_levels; level_idx > -1; level_idx--) {
-        std::pair<t_index, t_index> markers
-            = m_tree.get_level_markers(level_idx);
+        std::pair<t_index, t_index> markers =
+            m_tree.get_level_markers(level_idx);
 
         t_index bidx = markers.first;
         t_index eidx = markers.second;

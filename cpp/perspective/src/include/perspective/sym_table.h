@@ -18,7 +18,10 @@
 namespace perspective {
 
 class PERSPECTIVE_EXPORT t_symtable {
-    typedef tsl::hopscotch_map<const char*, const char*, t_cchar_umap_hash,
+    typedef tsl::hopscotch_map<
+        const char*,
+        const char*,
+        t_cchar_umap_hash,
         t_cchar_umap_cmp>
         t_mapping;
 

@@ -58,14 +58,16 @@ th_trace_fini() {
 
     uint64_t ifsize = fb.st_size;
 
-    if (ifsize == 0)
+    if (ifsize == 0) {
         return;
+    }
 
     void* iptr = mmap(0, ifsize, PROT_READ, MAP_SHARED, ifd, 0);
 
     PSP_VERBOSE_ASSERT(iptr != MAP_FAILED, "Error in mmap");
     PSP_VERBOSE_ASSERT(
-        ifsize % sizeof(t_instrec) == 0, "Partial record encountered");
+        ifsize % sizeof(t_instrec) == 0, "Partial record encountered"
+    );
 
     std::int64_t ndrecs = ifsize / sizeof(t_instrec);
 
@@ -79,7 +81,8 @@ th_trace_fini() {
     }
 
     for (tsl::hopscotch_set<void*>::const_iterator iter = fptrs.begin();
-         iter != fptrs.end(); ++iter) {
+         iter != fptrs.end();
+         ++iter) {
 
         of << *iter << " ";
         char** mangled;
@@ -112,9 +115,9 @@ th_trace_fini() {
                 function[sz - 1] = ' ';
             }
 
-            of << function << std::endl;
+            of << function << "\n";
         } else {
-            of << stack_strings[0] << std::endl;
+            of << stack_strings[0] << "\n";
         }
         free(function);
         free(stack_strings);

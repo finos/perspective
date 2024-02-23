@@ -47,10 +47,13 @@ public:
      * explicitly set, a primary key will be generated.
      * @param op
      */
-    Table(std::shared_ptr<t_pool> pool,
+    Table(
+        std::shared_ptr<t_pool> pool,
         const std::vector<std::string>& column_names,
-        const std::vector<t_dtype>& data_types, std::uint32_t limit,
-        const std::string& index);
+        const std::vector<t_dtype>& data_types,
+        std::uint32_t limit,
+        std::string index
+    );
 
     /**
      * @brief Register the given `t_data_table` with the underlying pool and
@@ -60,8 +63,12 @@ public:
      * @param row_count
      * @param op
      */
-    void init(t_data_table& data_table, std::uint32_t row_count, const t_op op,
-        const t_uindex port_id);
+    void init(
+        t_data_table& data_table,
+        std::uint32_t row_count,
+        const t_op op,
+        const t_uindex port_id
+    );
 
     /**
      * @brief The size of the underlying `t_data_table`, i.e. a row count
@@ -100,9 +107,12 @@ public:
      * @return t_validated_expression_map
      */
     t_validated_expression_map validate_expressions(
-        const std::vector<std::tuple<std::string, std::string, std::string,
-            std::vector<std::pair<std::string, std::string>>>>& expressions)
-        const;
+        const std::vector<std::tuple<
+            std::string,
+            std::string,
+            std::string,
+            std::vector<std::pair<std::string, std::string>>>>& expressions
+    ) const;
 
     /**
      * @brief Given a schema, create a `t_gnode` that manages the

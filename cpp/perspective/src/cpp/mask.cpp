@@ -14,12 +14,13 @@
 #include <perspective/mask.h>
 #include <perspective/raii.h>
 
+#include <utility>
+
 namespace perspective {
 
 t_mask::t_mask() { LOG_CONSTRUCTOR("t_mask"); }
 
-t_mask::t_mask(t_uindex size)
-    : m_bitmap(t_msize(size)) {
+t_mask::t_mask(t_uindex size) : m_bitmap(t_msize(size)) {
     LOG_CONSTRUCTOR("t_mask");
 }
 
@@ -99,7 +100,7 @@ t_mask::find_next(t_uindex pos) const {
 
 void
 t_mask::pprint() const {
-    std::cout << *this << std::endl;
+    std::cout << *this << '\n';
 }
 
 t_uindex
@@ -114,9 +115,9 @@ t_mask_iterator::has_next() const {
     return m_pos != m_end;
 }
 
-t_mask_iterator::t_mask_iterator(t_maskcsptr m)
-    : m_mask(m)
-    , m_pos(m_mask->find_first()) {
+t_mask_iterator::t_mask_iterator(t_maskcsptr m) :
+    m_mask(std::move(std::move(m))),
+    m_pos(m_mask->find_first()) {
     LOG_CONSTRUCTOR("t_mask_iterator");
 }
 
@@ -142,7 +143,7 @@ operator<<(std::ostream& os, const perspective::t_mask& mask) {
     std::cout << "t_mask<\n";
     for (perspective::t_uindex idx = 0, loop_end = mask.size(); idx < loop_end;
          ++idx) {
-        std::cout << "\t" << idx << ". " << mask.get(idx) << std::endl;
+        std::cout << "\t" << idx << ". " << mask.get(idx) << '\n';
     }
     std::cout << ">\n";
     return os;

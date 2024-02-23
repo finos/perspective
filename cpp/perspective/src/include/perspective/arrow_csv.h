@@ -25,9 +25,12 @@ namespace apachearrow {
      *
      * @param ptr
      */
-    std::shared_ptr<::arrow::Table> csvToTable(std::string& csv, bool is_update,
+    std::shared_ptr<::arrow::Table> csvToTable(
+        std::string& csv,
+        bool is_update,
         std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
-            schema);
+            schema
+    );
 
 } // namespace apachearrow
 } // namespace perspective

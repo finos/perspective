@@ -92,8 +92,12 @@ namespace binding {
     namespace arraybuffer {
 
         template <typename T>
-        void vecFromTypedArray(const T& typedArray, void* data,
-            std::int32_t length, const char* destType = nullptr);
+        void vecFromTypedArray(
+            const T& typedArray,
+            void* data,
+            std::int32_t length,
+            const char* destType = nullptr
+        );
 
         template <typename T>
         void fill_col_valid(T dcol, std::shared_ptr<t_column> col);
@@ -131,45 +135,81 @@ namespace binding {
 
     template <typename T, typename U>
     t_dtype get_data_type(
-        T data, std::int32_t format, std::string name, U date_validator);
+        T data, std::int32_t format, std::string name, U date_validator
+    );
 
     template <typename T, typename U>
-    std::vector<t_dtype> get_data_types(T data, std::int32_t format,
-        std::vector<std::string> names, U date_validator);
+    std::vector<t_dtype> get_data_types(
+        T data,
+        std::int32_t format,
+        std::vector<std::string> names,
+        U date_validator
+    );
 
     /**
      * @brief Given a data accessor and a pointer to a column, iterate through
      * the data and fill the column.
      */
     template <typename T>
-    void _fill_col_numeric(T accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update);
+    void _fill_col_numeric(
+        T accessor,
+        t_data_table& tbl,
+        std::shared_ptr<t_column> col,
+        const std::string& name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update
+    );
 
     template <typename T>
-    void _fill_col_int64(T accessor, std::shared_ptr<t_column> col,
-        const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update);
+    void _fill_col_int64(
+        T accessor,
+        std::shared_ptr<t_column> col,
+        const std::string& name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update
+    );
 
     template <typename T>
-    void _fill_col_time(T accessor, std::shared_ptr<t_column> col,
-        const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update);
+    void _fill_col_time(
+        T accessor,
+        std::shared_ptr<t_column> col,
+        const std::string& name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update
+    );
 
     template <typename T>
-    void _fill_col_date(T accessor, std::shared_ptr<t_column> col,
-        const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update);
+    void _fill_col_date(
+        T accessor,
+        std::shared_ptr<t_column> col,
+        const std::string& name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update
+    );
 
     template <typename T>
-    void _fill_col_bool(T accessor, std::shared_ptr<t_column> col,
-        const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update);
+    void _fill_col_bool(
+        T accessor,
+        std::shared_ptr<t_column> col,
+        const std::string& name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update
+    );
 
     template <typename T>
-    void _fill_col_string(T accessor, std::shared_ptr<t_column> col,
-        const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update);
+    void _fill_col_string(
+        T accessor,
+        std::shared_ptr<t_column> col,
+        const std::string& name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update
+    );
 
     /**
      * @brief Change a value at a given index inside the column.
@@ -190,9 +230,15 @@ namespace binding {
      * @param is_update
      */
     template <typename T>
-    void _fill_data_helper(T accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update);
+    void _fill_data_helper(
+        T accessor,
+        t_data_table& tbl,
+        std::shared_ptr<t_column> col,
+        const std::string& name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update
+    );
 
     /**
      * @brief Given a table, iterate through each column and fill it with data.
@@ -204,9 +250,15 @@ namespace binding {
      * @param is_update
      */
     template <typename T>
-    void _fill_data(t_data_table& tbl, T accessor, const t_schema& input_schema,
-        const std::string& index, std::uint32_t offset, std::uint32_t limit,
-        bool is_update);
+    void _fill_data(
+        t_data_table& tbl,
+        T accessor,
+        const t_schema& input_schema,
+        const std::string& index,
+        std::uint32_t offset,
+        std::uint32_t limit,
+        bool is_update
+    );
 
     /**
      * @brief Create and populate a table.
@@ -222,9 +274,17 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<Table> make_table(T table, T accessor, std::uint32_t limit,
-        const std::string& index, t_op op, bool is_update, bool is_arrow,
-        bool is_csv, t_uindex port_id);
+    std::shared_ptr<Table> make_table(
+        T table,
+        T accessor,
+        std::uint32_t limit,
+        const std::string& index,
+        t_op op,
+        bool is_update,
+        bool is_arrow,
+        bool is_csv,
+        t_uindex port_id
+    );
 
     /******************************************************************************
      *
@@ -247,8 +307,12 @@ namespace binding {
      * @return false
      */
     template <typename T>
-    bool is_valid_filter(t_dtype column_type, T date_parser,
-        t_filter_op filter_operator, T filter_term);
+    bool is_valid_filter(
+        t_dtype column_type,
+        T date_parser,
+        t_filter_op filter_operator,
+        T filter_term
+    );
 
     /**
      * @brief Create a filter by parsing the filter term from the binding
@@ -264,9 +328,13 @@ namespace binding {
      */
     template <typename T>
     std::tuple<std::string, std::string, std::vector<t_tscalar>>
-    make_filter_term(t_dtype column_type, T date_parser,
-        const std::string& column_name, const std::string& filter_op_str,
-        T filter_term);
+    make_filter_term(
+        t_dtype column_type,
+        T date_parser,
+        const std::string& column_name,
+        const std::string& filter_op_str,
+        T filter_term
+    );
     /**
      * @brief Create a shared pointer to a `t_view_config` object from the
      * binding language's `view_config` object.
@@ -278,8 +346,12 @@ namespace binding {
      * @return t_config
      */
     template <typename T>
-    std::shared_ptr<t_view_config> make_view_config(const t_gnode& gnode,
-        std::shared_ptr<t_schema> schema, T date_parser, T config);
+    std::shared_ptr<t_view_config> make_view_config(
+        const t_gnode& gnode,
+        std::shared_ptr<t_schema> schema,
+        T date_parser,
+        T config
+    );
 
     /**
      * @brief Create a new view.
@@ -304,9 +376,13 @@ namespace binding {
      * @return std::shared_ptr<View<CTX_T>>
      */
     template <typename T, typename CTX_T>
-    std::shared_ptr<View<CTX_T>> make_view(std::shared_ptr<Table> table,
-        const std::string& name, const std::string& separator, T view_config,
-        T date_parser);
+    std::shared_ptr<View<CTX_T>> make_view(
+        std::shared_ptr<Table> table,
+        const std::string& name,
+        const std::string& separator,
+        T view_config,
+        T date_parser
+    );
 
     /**
      * @brief Create a new context of type `CTX_T`, which will be one of 3
@@ -322,9 +398,12 @@ namespace binding {
      * @return std::shared_ptr<CTX_T>
      */
     template <typename CTX_T>
-    std::shared_ptr<CTX_T> make_context(std::shared_ptr<Table> table,
+    std::shared_ptr<CTX_T> make_context(
+        std::shared_ptr<Table> table,
         std::shared_ptr<t_schema> schema,
-        std::shared_ptr<t_view_config> view_config, const std::string& name);
+        std::shared_ptr<t_view_config> view_config,
+        const std::string& name
+    );
 
     /**
      * @brief Given a table and a list of expressions, validate the expressions
@@ -338,7 +417,8 @@ namespace binding {
     template <typename T>
     t_validated_expression_map validate_expressions(
         std::shared_ptr<Table> table,
-        const std::vector<std::vector<T>>& j_expressions);
+        const std::vector<std::vector<T>>& j_expressions
+    );
 
     /**
      * @brief Get a slice of data for a single column, serialized to t_val.
@@ -350,7 +430,8 @@ namespace binding {
      */
     template <typename T>
     T get_column_data(
-        std::shared_ptr<t_data_table> table, const std::string& colname);
+        std::shared_ptr<t_data_table> table, const std::string& colname
+    );
 
     /**
      * @brief Get the t_data_slice object, which contains an underlying slice of
@@ -364,8 +445,12 @@ namespace binding {
      */
     template <typename CTX_T>
     std::shared_ptr<t_data_slice<CTX_T>> get_data_slice(
-        std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
-        std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col);
+        std::shared_ptr<View<CTX_T>> view,
+        std::uint32_t start_row,
+        std::uint32_t end_row,
+        std::uint32_t start_col,
+        std::uint32_t end_col
+    );
 
     /**
      * @brief Retrieve a single value from the data slice and serialize it to an
@@ -379,8 +464,11 @@ namespace binding {
      * @return val
      */
     template <typename CTX_T, typename T>
-    T get_from_data_slice(std::shared_ptr<t_data_slice<CTX_T>> data_slice,
-        t_uindex ridx, t_uindex cidx);
+    T get_from_data_slice(
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice,
+        t_uindex ridx,
+        t_uindex cidx
+    );
 
 } // end namespace binding
 } // end namespace perspective

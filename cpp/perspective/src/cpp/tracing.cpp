@@ -51,8 +51,8 @@ t_trace::write_record(t_trace_type ttype) const {
     ptr = th_trace_buffer + th_traceidx;
     ptr->m_trace_type = ttype;
     ptr->m_time = psp_curtime();
-    ptr->t_fntrace.m_fn
-        = __builtin_extract_return_addr(__builtin_return_address(0));
+    ptr->t_fntrace.m_fn =
+        __builtin_extract_return_addr(__builtin_return_address(0));
     ++th_traceidx;
 }
 

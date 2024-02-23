@@ -15,14 +15,12 @@
 #include <perspective/rlookup.h>
 
 namespace perspective {
-t_rlookup::t_rlookup(t_uindex idx, bool exists)
-    : m_idx(idx)
-    , m_exists(exists) {
+t_rlookup::t_rlookup(t_uindex idx, bool exists) : m_idx(idx), m_exists(exists) {
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_rlookup");
 }
 
-t_rlookup::t_rlookup() {}
+t_rlookup::t_rlookup() = default;
 
 t_rlookup::~t_rlookup() {
     PSP_TRACE_SENTINEL();

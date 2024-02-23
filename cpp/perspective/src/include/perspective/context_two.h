@@ -56,14 +56,15 @@ public:
 
     void set_depth(t_header header, t_depth depth);
 
-    std::pair<t_tscalar, t_tscalar> get_min_max(
-        const std::string& colname) const;
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname
+    ) const;
 
     using t_ctxbase<t_ctx2>::get_data;
 
 protected:
-    std::vector<t_cellinfo> resolve_cells(
-        const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
+    std::vector<t_cellinfo>
+    resolve_cells(const std::vector<std::pair<t_uindex, t_uindex>>& cells
+    ) const;
 
     std::shared_ptr<t_stree> rtree();
     std::shared_ptr<const t_stree> rtree() const;

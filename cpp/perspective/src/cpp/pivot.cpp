@@ -22,15 +22,15 @@ t_pivot::t_pivot(const t_pivot_recipe& r) {
     m_mode = r.m_mode;
 }
 
-t_pivot::t_pivot(const std::string& colname)
-    : m_colname(colname)
-    , m_name(colname)
-    , m_mode(PIVOT_MODE_NORMAL) {}
+t_pivot::t_pivot(const std::string& colname) :
+    m_colname(colname),
+    m_name(colname),
+    m_mode(PIVOT_MODE_NORMAL) {}
 
-t_pivot::t_pivot(const std::string& colname, t_pivot_mode mode)
-    : m_colname(colname)
-    , m_name(colname)
-    , m_mode(mode) {}
+t_pivot::t_pivot(const std::string& colname, t_pivot_mode mode) :
+    m_colname(colname),
+    m_name(colname),
+    m_mode(mode) {}
 
 const std::string&
 t_pivot::name() const {

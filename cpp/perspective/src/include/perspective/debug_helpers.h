@@ -25,8 +25,9 @@ struct t_debug_helper {
 
     void
     operator delete(void* mem) {
-        if (mem)
+        if (mem) {
             PSP_FREE(mem);
+        }
     }
 
     void*
@@ -36,8 +37,9 @@ struct t_debug_helper {
 
     void
     operator delete[](void* p) {
-        if (p)
+        if (p) {
             PSP_FREE(p);
+        }
     }
 #endif // end PSP_DEBUG_HELPER
 };

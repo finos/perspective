@@ -14,8 +14,9 @@ perspective::t_index get_row_count() const;
 
 perspective::t_index get_column_count() const;
 
-std::vector<t_tscalar> get_data(t_index start_row, t_index end_row,
-    t_index start_col, t_index end_col) const;
+std::vector<t_tscalar> get_data(
+    t_index start_row, t_index end_row, t_index start_col, t_index end_col
+) const;
 
 std::vector<t_tscalar> get_data(const std::vector<t_uindex>& rows) const;
 
@@ -26,9 +27,14 @@ void reset_sortby();
 // will only work on empty contexts
 void notify(const t_data_table& flattened);
 
-void notify(const t_data_table& flattened, const t_data_table& delta,
-    const t_data_table& prev, const t_data_table& current,
-    const t_data_table& transitions, const t_data_table& existed);
+void notify(
+    const t_data_table& flattened,
+    const t_data_table& delta,
+    const t_data_table& prev,
+    const t_data_table& current,
+    const t_data_table& transitions,
+    const t_data_table& existed
+);
 
 void step_begin();
 
@@ -50,8 +56,8 @@ void set_deltas_enabled(bool enabled_state);
 
 void set_feature_state(t_ctx_feature feature, bool state);
 
-std::vector<t_tscalar> get_pkeys(
-    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
+std::vector<t_tscalar>
+get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
 t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 
@@ -96,18 +102,25 @@ std::shared_ptr<t_expression_tables> get_expression_tables() const;
 
 // Given shared pointers to data tables from the gnode, use them to
 // compute the results of expression columns.
-void compute_expressions(std::shared_ptr<t_data_table> master,
-    const t_gstate::t_mapping& pkey_map, t_expression_vocab& expression_vocab,
-    t_regex_mapping& regex_mapping);
-
-void compute_expressions(std::shared_ptr<t_data_table> master,
+void compute_expressions(
+    const std::shared_ptr<t_data_table>& master,
     const t_gstate::t_mapping& pkey_map,
-    std::shared_ptr<t_data_table> flattened,
-    std::shared_ptr<t_data_table> delta, std::shared_ptr<t_data_table> prev,
-    std::shared_ptr<t_data_table> current,
-    std::shared_ptr<t_data_table> transitions,
-    std::shared_ptr<t_data_table> existed, t_expression_vocab& expression_vocab,
-    t_regex_mapping& regex_mapping);
+    t_expression_vocab& expression_vocab,
+    t_regex_mapping& regex_mapping
+);
+
+void compute_expressions(
+    const std::shared_ptr<t_data_table>& master,
+    const t_gstate::t_mapping& pkey_map,
+    const std::shared_ptr<t_data_table>& flattened,
+    const std::shared_ptr<t_data_table>& delta,
+    const std::shared_ptr<t_data_table>& prev,
+    const std::shared_ptr<t_data_table>& current,
+    const std::shared_ptr<t_data_table>& transitions,
+    const std::shared_ptr<t_data_table>& existed,
+    t_expression_vocab& expression_vocab,
+    t_regex_mapping& regex_mapping
+);
 
 // Unity api
 std::vector<t_tscalar> unity_get_row_data(t_uindex idx) const;

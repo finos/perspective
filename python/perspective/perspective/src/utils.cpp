@@ -100,7 +100,8 @@ namespace binding {
     t_dtype
     type_string_to_t_dtype(py::str type, py::str name) {
         return type_string_to_t_dtype(
-            type.cast<std::string>(), name.cast<std::string>());
+            type.cast<std::string>(), name.cast<std::string>()
+        );
     }
 
     t_val
@@ -123,8 +124,8 @@ namespace binding {
                     double y = *reinterpret_cast<double*>(&x);
                     return py::cast(y);
                 } else if (cast_string) {
-                    return py::cast(
-                        scalar.to_string(false)); // should reimplement
+                    return py::cast(scalar.to_string(false)
+                    ); // should reimplement
                 } else {
                     /**
                      * datetimes are stored as milliseconds since epoch.
@@ -146,15 +147,14 @@ namespace binding {
                               "`datetime.max` - timestamp `";
                         ss << i64;
                         ss << "` will be truncated to `datetime.max`.";
-                        ss << std::endl;
+                        ss << "\n";
                         std::cerr << ss.str();
                         i64 = 253402300799000;
                     }
 
                     auto ms = std::chrono::milliseconds(i64);
-                    auto time_point
-                        = std::chrono::time_point<std::chrono::system_clock>(
-                            ms);
+                    auto time_point =
+                        std::chrono::time_point<std::chrono::system_clock>(ms);
                     /**
                      * Pybind converts std::time_point to local time, and the
                      * `datetime.datetime` object created by `py::cast` has NO

@@ -19,6 +19,10 @@
 
 namespace perspective {
 
-t_tscalar extract_aggregate(const t_aggspec& aggspec, const t_column* aggcol,
-    t_uindex ridx, t_index pridx);
+t_tscalar extract_aggregate(
+    const t_aggspec& aggspec,
+    const t_column* aggcol,
+    t_uindex ridx,
+    t_index pridx
+);
 } // end namespace perspective

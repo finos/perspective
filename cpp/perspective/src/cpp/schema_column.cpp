@@ -13,11 +13,14 @@
 #include <perspective/first.h>
 #include <perspective/schema_column.h>
 
+#include <utility>
+
 namespace perspective {
 
-t_schema_column::t_schema_column(const std::string& tblname,
-    const std::string& name, const std::string& altname, t_dtype dtype)
-    : m_tblname(tblname)
-    , m_name(name)
-    , m_altname(altname) {}
+t_schema_column::t_schema_column(
+    std::string tblname, std::string name, std::string altname, t_dtype dtype
+) :
+    m_tblname(std::move(tblname)),
+    m_name(std::move(name)),
+    m_altname(std::move(altname)) {}
 } // namespace perspective

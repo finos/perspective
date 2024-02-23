@@ -21,8 +21,10 @@ namespace perspective {
 struct PERSPECTIVE_EXPORT t_schema {
 
     t_schema();
-    t_schema(const std::vector<std::string>& columns,
-        const std::vector<t_dtype>& types);
+    t_schema(
+        const std::vector<std::string>& columns,
+        const std::vector<t_dtype>& types
+    );
 
     t_uindex size() const;
     t_uindex get_num_columns() const;
@@ -35,12 +37,12 @@ struct PERSPECTIVE_EXPORT t_schema {
     void add_column(const std::string& colname, t_dtype dtype);
     void retype_column(const std::string& colname, t_dtype dtype);
     t_schema drop(const std::set<std::string>& columns) const;
-    bool has_column(const std::string& cname) const;
+    bool has_column(const std::string& colname) const;
 
     bool is_pkey() const;
 
     const std::vector<std::string>& columns() const;
-    const std::vector<t_dtype> types() const;
+    std::vector<t_dtype> types() const;
 
     std::string str() const;
 
@@ -61,6 +63,6 @@ struct PERSPECTIVE_EXPORT t_schema {
 
 namespace std {
 
-PERSPECTIVE_EXPORT std::ostream& operator<<(
-    std::ostream& os, const perspective::t_schema& s);
+PERSPECTIVE_EXPORT std::ostream&
+operator<<(std::ostream& os, const perspective::t_schema& s);
 }

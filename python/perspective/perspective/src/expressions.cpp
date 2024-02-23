@@ -23,9 +23,14 @@ namespace binding {
     }
 
     t_validated_expression_map
-    validate_expressions_py(std::shared_ptr<Table> table,
-        const std::vector<std::vector<t_val>>& p_expressions) {
-        std::vector<std::tuple<std::string, std::string, std::string,
+    validate_expressions_py(
+        std::shared_ptr<Table> table,
+        const std::vector<std::vector<t_val>>& p_expressions
+    ) {
+        std::vector<std::tuple<
+            std::string,
+            std::string,
+            std::string,
             std::vector<std::pair<std::string, std::string>>>>
             expressions;
         expressions.resize(p_expressions.size());
@@ -45,12 +50,17 @@ namespace binding {
             for (const auto& item : p_column_ids) {
                 column_ids[cidx] = std::pair<std::string, std::string>(
                     item.first.cast<std::string>(),
-                    item.second.cast<std::string>());
+                    item.second.cast<std::string>()
+                );
                 ++cidx;
             }
 
-            auto tp = std::make_tuple(expression_alias, expression_string,
-                parsed_expression_string, column_ids);
+            auto tp = std::make_tuple(
+                expression_alias,
+                expression_string,
+                parsed_expression_string,
+                column_ids
+            );
 
             expressions[idx] = tp;
         }

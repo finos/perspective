@@ -25,6 +25,12 @@ struct t_get_data_extents {
     t_index m_ecol;
 };
 
-t_get_data_extents sanitize_get_data_extents(t_index nrows, t_index ncols,
-    t_index start_row, t_index end_row, t_index start_col, t_index end_col);
+t_get_data_extents sanitize_get_data_extents(
+    t_index nrows,
+    t_index ncols,
+    t_index start_row,
+    t_index end_row,
+    t_index start_col,
+    t_index end_col
+);
 } // namespace perspective

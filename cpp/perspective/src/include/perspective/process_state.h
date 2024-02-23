@@ -30,21 +30,21 @@ struct t_process_state {
      * @brief Clear each transitional `t_data_table`, i.e. all tables except
      * `flattened` and `state`.
      */
-    void clear_transitional_data_tables();
+    void clear_transitional_data_tables() const;
 
     /**
      * @brief Reserve `size` elements for each transitional table in the state.
      *
      * @param size
      */
-    void reserve_transitional_data_tables(t_uindex size);
+    void reserve_transitional_data_tables(t_uindex size) const;
 
     /**
      * @brief For each transitional table in the state, set its size to `size`.
      *
      * @param size
      */
-    void set_size_transitional_data_tables(t_uindex size);
+    void set_size_transitional_data_tables(t_uindex size) const;
 
     std::shared_ptr<t_data_table> m_state_data_table;
     std::shared_ptr<t_data_table> m_flattened_data_table;

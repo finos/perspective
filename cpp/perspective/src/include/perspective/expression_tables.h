@@ -30,7 +30,8 @@ struct t_expression_tables {
     PSP_NON_COPYABLE(t_expression_tables);
 
     t_expression_tables(
-        const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
+        const std::vector<std::shared_ptr<t_computed_expression>>& expressions
+    );
 
     /**
      * @brief Reserve space on each transitional table - reserve is important
@@ -41,18 +42,18 @@ struct t_expression_tables {
      *
      * @param size
      */
-    void reserve_transitional_table_size(t_uindex size);
+    void reserve_transitional_table_size(t_uindex size) const;
 
-    void set_transitional_table_size(t_uindex size);
+    void set_transitional_table_size(t_uindex size) const;
 
-    void clear_transitional_tables();
+    void clear_transitional_tables() const;
 
     // Calculate the `t_transitions` value for each row.
-    void calculate_transitions(std::shared_ptr<t_data_table> existed);
+    void calculate_transitions(const std::shared_ptr<t_data_table>& existed);
 
-    void set_flattened(std::shared_ptr<t_data_table> flattened);
+    void set_flattened(const std::shared_ptr<t_data_table>& flattened) const;
 
-    void reset();
+    void reset() const;
 
     t_data_table* get_table() const;
 

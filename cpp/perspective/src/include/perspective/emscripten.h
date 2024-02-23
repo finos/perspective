@@ -59,7 +59,10 @@ namespace binding {
 
     template <>
     t_val scalar_to(const t_tscalar& scalar);
-    t_val scalar_to_val(const t_tscalar& scalar, bool cast_double = false,
-        bool cast_string = false);
+    t_val scalar_to_val(
+        const t_tscalar& scalar,
+        bool cast_double = false,
+        bool cast_string = false
+    );
 } // namespace binding
 } // namespace perspective

@@ -16,8 +16,12 @@
 namespace perspective {
 
 t_tscalar
-extract_aggregate(const t_aggspec& aggspec, const t_column* aggcol,
-    t_uindex ridx, t_index pridx) {
+extract_aggregate(
+    const t_aggspec& aggspec,
+    const t_column* aggcol,
+    t_uindex ridx,
+    t_index pridx
+) {
 
     switch (aggspec.agg()) {
         case AGGTYPE_PCT_SUM_PARENT: {
@@ -93,8 +97,7 @@ extract_aggregate(const t_aggspec& aggspec, const t_column* aggcol,
         case AGGTYPE_MEAN_BY_COUNT:
         case AGGTYPE_WEIGHTED_MEAN:
         case AGGTYPE_MEAN: {
-            const std::pair<double, double>* pair
-                = aggcol->get_nth<std::pair<double, double>>(ridx);
+            const auto* pair = aggcol->get_nth<std::pair<double, double>>(ridx);
             t_tscalar rval;
             double second = pair->second;
             if (second != 0) {

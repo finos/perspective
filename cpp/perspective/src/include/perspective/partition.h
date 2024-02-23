@@ -35,8 +35,7 @@ namespace perspective {
 
 template <typename DATA_T>
 struct t_argsort_cmp {
-    t_argsort_cmp(const DATA_T* base)
-        : m_base(base) {}
+    t_argsort_cmp(const DATA_T* base) : m_base(base) {}
 
     inline bool
     operator()(t_uindex a, t_uindex b) {
@@ -58,9 +57,13 @@ argsort(const DATA_T* b, std::vector<t_uindex>& output) {
 }
 
 inline void
-partition(const t_column* PSP_RESTRICT data_, t_column* PSP_RESTRICT leaves_,
-    t_uindex bidx, t_uindex eidx,
-    std::vector<t_chunk_value_span<t_tscalar>>& out_spans) {
+partition(
+    const t_column* PSP_RESTRICT data_,
+    t_column* PSP_RESTRICT leaves_,
+    t_uindex bidx,
+    t_uindex eidx,
+    std::vector<t_chunk_value_span<t_tscalar>>& out_spans
+) {
     t_uindex* leaves = leaves_->get_nth<t_uindex>(0);
     typedef t_chunk_value_span<t_tscalar> t_cvs;
     t_uindex nelems = eidx - bidx;
@@ -71,7 +74,8 @@ partition(const t_column* PSP_RESTRICT data_, t_column* PSP_RESTRICT leaves_,
             out_spans.push_back(t_cvs());
             t_cvs& c = out_spans[0];
             fill_chunk_value_span<t_tscalar>(
-                c, data_->get_scalar(leaves[bidx]), bidx, eidx);
+                c, data_->get_scalar(leaves[bidx]), bidx, eidx
+            );
         } break;
         default: {
             std::vector<t_tscalar> buf(nelems);
@@ -114,17 +118,22 @@ partition(const t_column* PSP_RESTRICT data_, t_column* PSP_RESTRICT leaves_,
                 boundaries.push_back(order.size());
 
                 for (t_uindex i = 0, loop_end = boundaries.size() - 1;
-                     i < loop_end; ++i) {
+                     i < loop_end;
+                     ++i) {
                     t_uindex begin = boundaries[i];
                     t_uindex end = boundaries[i + 1];
                     value = sdata[begin];
                     t_uindex num_new_bytes = sizeof(t_uindex) * (end - begin);
-                    memcpy(leaves + begin + bidx, &temp_leaves[begin],
-                        num_new_bytes);
+                    memcpy(
+                        leaves + begin + bidx,
+                        &temp_leaves[begin],
+                        num_new_bytes
+                    );
                     out_spans.push_back(t_cvs());
                     t_cvs& cvs = out_spans.back();
                     fill_chunk_value_span<t_tscalar>(
-                        cvs, value, bidx + begin, bidx + end);
+                        cvs, value, bidx + begin, bidx + end
+                    );
                 }
             }
         }

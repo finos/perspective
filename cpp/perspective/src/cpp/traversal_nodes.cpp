@@ -16,8 +16,14 @@
 namespace perspective {
 
 void
-fill_travnode(t_tvnode* node, bool expanded, t_uindex depth, t_uindex rel_pidx,
-    t_uindex ndesc, t_uindex tnid) {
+fill_travnode(
+    t_tvnode* node,
+    bool expanded,
+    t_uindex depth,
+    t_uindex rel_pidx,
+    t_uindex ndesc,
+    t_uindex tnid
+) {
     node->m_expanded = expanded;
     node->m_depth = depth;
     node->m_rel_pidx = rel_pidx;

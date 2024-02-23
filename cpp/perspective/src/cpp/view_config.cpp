@@ -12,9 +12,12 @@
 
 #include <perspective/view_config.h>
 
+#include <utility>
+
 namespace perspective {
 
-t_view_config::t_view_config(const std::vector<std::string>& row_pivots,
+t_view_config::t_view_config(
+    const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& column_pivots,
     const tsl::ordered_map<std::string, std::vector<std::string>>& aggregates,
     const std::vector<std::string>& columns,
@@ -22,22 +25,24 @@ t_view_config::t_view_config(const std::vector<std::string>& row_pivots,
         std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
     const std::vector<std::vector<std::string>>& sort,
     const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
-    const std::string& filter_op, bool column_only)
-    : m_init(false)
-    , m_row_pivots(row_pivots)
-    , m_column_pivots(column_pivots)
-    , m_aggregates(aggregates)
-    , m_columns(columns)
-    , m_filter(filter)
-    , m_sort(sort)
-    , m_expressions(expressions)
-    , m_row_pivot_depth(-1)
-    , m_column_pivot_depth(-1)
-    , m_filter_op(filter_op)
-    , m_column_only(column_only) {}
+    std::string filter_op,
+    bool column_only
+) :
+    m_init(false),
+    m_row_pivots(row_pivots),
+    m_column_pivots(column_pivots),
+    m_aggregates(aggregates),
+    m_columns(columns),
+    m_filter(filter),
+    m_sort(sort),
+    m_expressions(expressions),
+    m_row_pivot_depth(-1),
+    m_column_pivot_depth(-1),
+    m_filter_op(std::move(filter_op)),
+    m_column_only(column_only) {}
 
 void
-t_view_config::init(std::shared_ptr<t_schema> schema) {
+t_view_config::init(const std::shared_ptr<t_schema>& schema) {
     validate(schema);
     fill_aggspecs(schema);
     fill_fterm();
@@ -47,7 +52,7 @@ t_view_config::init(std::shared_ptr<t_schema> schema) {
 }
 
 void
-t_view_config::validate(std::shared_ptr<t_schema> schema) {
+t_view_config::validate(const std::shared_ptr<t_schema>& schema) {
     std::unordered_set<std::string> expression_aliases;
     expression_aliases.reserve(m_expressions.size());
 
@@ -59,7 +64,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View columns."
-               << std::endl;
+               << '\n';
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -69,7 +74,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View aggregates."
-               << std::endl;
+               << '\n';
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -78,7 +83,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View group_by."
-               << std::endl;
+               << '\n';
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -87,7 +92,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View split_by."
-               << std::endl;
+               << '\n';
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -97,7 +102,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View filters."
-               << std::endl;
+               << '\n';
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -106,8 +111,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         const std::string& col = sort[0];
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View sorts."
-               << std::endl;
+            ss << "Invalid column '" << col << "' found in View sorts." << '\n';
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -117,10 +121,14 @@ std::vector<std::shared_ptr<t_computed_expression>>
 t_view_config::get_used_expressions() {
     std::vector<std::shared_ptr<t_computed_expression>> exprs = m_expressions;
     tsl::hopscotch_set<std::string> used_cols(
-        m_columns.begin(), m_columns.end());
+        m_columns.begin(), m_columns.end()
+    );
 
-    std::copy(m_row_pivots.begin(), m_row_pivots.end(),
-        std::inserter(used_cols, used_cols.end()));
+    std::copy(
+        m_row_pivots.begin(),
+        m_row_pivots.end(),
+        std::inserter(used_cols, used_cols.end())
+    );
 
     for (auto i : m_filter) {
         used_cols.insert(std::get<0>(i));
@@ -130,29 +138,42 @@ t_view_config::get_used_expressions() {
         used_cols.insert(i[0]);
     }
 
-    std::copy(m_column_pivots.begin(), m_column_pivots.end(),
-        std::inserter(used_cols, used_cols.end()));
+    std::copy(
+        m_column_pivots.begin(),
+        m_column_pivots.end(),
+        std::inserter(used_cols, used_cols.end())
+    );
 
-    std::copy(m_row_pivots.begin(), m_row_pivots.end(),
-        std::inserter(used_cols, used_cols.end()));
+    std::copy(
+        m_row_pivots.begin(),
+        m_row_pivots.end(),
+        std::inserter(used_cols, used_cols.end())
+    );
 
-    std::copy(m_row_pivots.begin(), m_row_pivots.end(),
-        std::inserter(used_cols, used_cols.end()));
+    std::copy(
+        m_row_pivots.begin(),
+        m_row_pivots.end(),
+        std::inserter(used_cols, used_cols.end())
+    );
 
-    auto iter = std::remove_if(exprs.begin(), exprs.end(),
+    auto iter = std::remove_if(
+        exprs.begin(),
+        exprs.end(),
         [&](std::shared_ptr<perspective::t_computed_expression>& i) {
-            bool unused
-                = used_cols.find(i->get_expression_alias()) == used_cols.end();
+            bool unused =
+                used_cols.find(i->get_expression_alias()) == used_cols.end();
 
 #ifdef PSP_DEBUG
             if (unused) {
                 std::cout << "Unused expression `" << i->get_expression_alias()
-                          << "`" << std::endl;
+                          << "`"
+                          << "\n";
             }
 #endif
 
             return unused;
-        });
+        }
+    );
 
     if (iter != exprs.end()) {
         exprs.erase(iter, exprs.end());
@@ -163,7 +184,8 @@ t_view_config::get_used_expressions() {
 
 void
 t_view_config::add_filter_term(
-    std::tuple<std::string, std::string, std::vector<t_tscalar>> term) {
+    const std::tuple<std::string, std::string, std::vector<t_tscalar>>& term
+) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_filter.push_back(term);
 }
@@ -254,7 +276,7 @@ t_view_config::get_column_pivot_depth() const {
 
 // PRIVATE
 void
-t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
+t_view_config::fill_aggspecs(const std::shared_ptr<t_schema>& schema) {
     auto max_agg_count = m_columns.size() + m_sort.size();
     m_aggspecs.reserve(max_agg_count);
     m_aggregate_names.reserve(max_agg_count);
@@ -279,7 +301,7 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
             t_aggtype agg_type;
             m_column_only ? agg_type = AGGTYPE_ANY
                           : agg_type = _get_default_aggregate(dtype);
-            m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
+            m_aggspecs.emplace_back(column, agg_type, dependencies);
             m_aggregate_names.push_back(column);
         }
     }
@@ -288,18 +310,20 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
     for (auto sort : m_sort) {
         std::string column = sort[0];
 
-        bool is_hidden_column
-            = std::find(m_columns.begin(), m_columns.end(), column)
+        bool is_hidden_column =
+            std::find(m_columns.begin(), m_columns.end(), column)
             == m_columns.end();
 
         if (is_hidden_column) {
-            bool is_row_pivot
-                = std::find(m_row_pivots.begin(), m_row_pivots.end(), column)
+            bool is_row_pivot =
+                std::find(m_row_pivots.begin(), m_row_pivots.end(), column)
                 != m_row_pivots.end();
-            bool is_column_pivot = std::find(m_column_pivots.begin(),
-                                       m_column_pivots.end(), column)
+            bool is_column_pivot =
+                std::find(
+                    m_column_pivots.begin(), m_column_pivots.end(), column
+                )
                 != m_column_pivots.end();
-            bool is_column_only = m_row_pivots.size() == 0 || m_column_only;
+            bool is_column_only = m_row_pivots.empty() || m_column_only;
             bool is_row_sort = sort[1].rfind("col", 0) != 0;
 
             std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
@@ -308,15 +332,14 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
             if (is_column_only) {
                 // Always sort by `ANY` in column only views
                 agg_type = t_aggtype::AGGTYPE_ANY;
-            } else if ((is_row_pivot && is_row_sort)
-                || (is_column_pivot && !is_row_sort)) {
+            } else if ((is_row_pivot && is_row_sort) || (is_column_pivot && !is_row_sort)) {
                 // Otherwise if the hidden column is in pivot on the same axis,
                 // use `UNIQUE`
                 agg_type = t_aggtype::AGGTYPE_UNIQUE;
             } else if (m_aggregates.count(column) > 0) {
                 auto col = m_aggregates.at(column);
                 if (col.at(0) == "weighted mean") {
-                    dependencies.push_back(t_dep(col.at(1), DEPTYPE_COLUMN));
+                    dependencies.emplace_back(col.at(1), DEPTYPE_COLUMN);
                     agg_type = AGGTYPE_WEIGHTED_MEAN;
                 } else {
                     agg_type = str_to_aggtype(col.at(0));
@@ -326,7 +349,7 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
                 agg_type = _get_default_aggregate(dtype);
             }
 
-            m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
+            m_aggspecs.emplace_back(column, agg_type, dependencies);
             m_aggregate_names.push_back(column);
         }
     }
@@ -339,13 +362,18 @@ t_view_config::fill_fterm() {
         switch (op) {
             case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
-                m_fterm.push_back(t_fterm(std::get<0>(filter), op, mktscalar(0),
-                    std::get<2>(filter)));
+                m_fterm.emplace_back(
+                    std::get<0>(filter), op, mktscalar(0), std::get<2>(filter)
+                );
             } break;
             default: {
                 t_tscalar filter_term = std::get<2>(filter)[0];
-                m_fterm.push_back(t_fterm(std::get<0>(filter), op, filter_term,
-                    std::vector<t_tscalar>()));
+                m_fterm.emplace_back(
+                    std::get<0>(filter),
+                    op,
+                    filter_term,
+                    std::vector<t_tscalar>()
+                );
             }
         }
     }
@@ -370,8 +398,8 @@ t_view_config::fill_sortspec() {
 
 t_index
 t_view_config::get_aggregate_index(const std::string& column) const {
-    auto it
-        = std::find(m_aggregate_names.begin(), m_aggregate_names.end(), column);
+    auto it =
+        std::find(m_aggregate_names.begin(), m_aggregate_names.end(), column);
     if (it != m_aggregate_names.end()) {
         return t_index(std::distance(m_aggregate_names.begin(), it));
     }
@@ -379,8 +407,11 @@ t_view_config::get_aggregate_index(const std::string& column) const {
 }
 
 void
-t_view_config::make_aggspec(const std::string& column,
-    const std::vector<std::string>& aggregate, t_dtype dtype) {
+t_view_config::make_aggspec(
+    const std::string& column,
+    const std::vector<std::string>& aggregate,
+    t_dtype dtype
+) {
     t_aggtype agg_type;
     t_aggspec aggspec;
 
@@ -392,7 +423,7 @@ t_view_config::make_aggspec(const std::string& column,
         agg_type = t_aggtype::AGGTYPE_ANY;
     } else {
         if (aggregate.at(0) == "weighted mean") {
-            dependencies.push_back(t_dep(aggregate.at(1), DEPTYPE_COLUMN));
+            dependencies.emplace_back(aggregate.at(1), DEPTYPE_COLUMN);
             agg_type = AGGTYPE_WEIGHTED_MEAN;
         } else {
             agg_type = str_to_aggtype(aggregate.at(0));
@@ -401,9 +432,10 @@ t_view_config::make_aggspec(const std::string& column,
 
     if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX
         || agg_type == AGGTYPE_LAST_MINUS_FIRST) {
-        dependencies.push_back(t_dep("psp_okey", DEPTYPE_COLUMN));
+        dependencies.emplace_back("psp_okey", DEPTYPE_COLUMN);
         aggspec = t_aggspec(
-            column, column, agg_type, dependencies, SORTTYPE_ASCENDING);
+            column, column, agg_type, dependencies, SORTTYPE_ASCENDING
+        );
     } else {
         aggspec = t_aggspec(column, agg_type, dependencies);
     }

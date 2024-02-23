@@ -15,8 +15,7 @@
 #include <perspective/update_task.h>
 
 namespace perspective {
-t_update_task::t_update_task(t_pool& pool)
-    : m_pool(pool) {}
+t_update_task::t_update_task(t_pool& pool) : m_pool(pool) {}
 
 void
 t_update_task::run() {
@@ -24,8 +23,8 @@ t_update_task::run() {
     m_pool.m_data_remaining.store(false);
 
     if (work_to_do) {
-        for (auto g : m_pool.m_gnodes) {
-            if (g) {
+        for (auto* g : m_pool.m_gnodes) {
+            if (g != nullptr) {
                 t_uindex num_input_ports = g->num_input_ports();
 
                 // Call process for each port, and notify the updates from

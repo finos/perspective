@@ -19,7 +19,7 @@ namespace perspective {
 std::string
 get_error_str() {
     // handled by perror
-    return std::string();
+    return {};
 }
 
 } // end namespace perspective

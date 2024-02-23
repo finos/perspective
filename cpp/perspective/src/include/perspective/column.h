@@ -57,8 +57,12 @@ public:
     t_column();
     t_column(const t_column_recipe& recipe);
     t_column(t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a);
-    t_column(t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a,
-        t_uindex row_capacity);
+    t_column(
+        t_dtype dtype,
+        bool missing_enabled,
+        const t_lstore_recipe& a,
+        t_uindex row_capacity
+    );
     ~t_column();
 
     void column_copy_helper(const t_column& other);
@@ -116,18 +120,18 @@ public:
 
     void set_status(t_uindex idx, t_status status);
 
-    void set_size(t_uindex idx);
+    void set_size(t_uindex size);
 
-    void reserve(t_uindex idx);
+    void reserve(t_uindex size);
 
     // object storage
     template <typename T>
     void object_copied(t_uindex ptr) const;
-    void notify_object_copied(t_uindex ptr) const;
+    void notify_object_copied(t_uindex idx) const;
 
     template <typename T>
     void object_cleared(t_uindex ptr) const;
-    void notify_object_cleared(t_uindex ptr) const;
+    void notify_object_cleared(t_uindex idx) const;
 
     const t_lstore& data_lstore() const;
 
@@ -157,7 +161,7 @@ public:
     void append(const t_column& other);
 
     void clear();
-    void clear_objects();
+    void clear_objects() const;
 
     template <typename VEC_T>
     void fill(VEC_T& vec, const t_uindex* bidx, const t_uindex* eidx) const;
@@ -190,11 +194,17 @@ public:
     void invalid_raw_fill();
 
     template <typename DATA_T>
-    void copy_helper(const t_column* other,
-        const std::vector<t_uindex>& indices, t_uindex offset);
+    void copy_helper(
+        const t_column* other,
+        const std::vector<t_uindex>& indices,
+        t_uindex offset
+    );
 
-    void copy(const t_column* other, const std::vector<t_uindex>& indices,
-        t_uindex offset);
+    void copy(
+        const t_column* other,
+        const std::vector<t_uindex>& indices,
+        t_uindex offset
+    );
 
     void clear(t_uindex idx);
     void clear(t_uindex idx, t_status status);
@@ -247,24 +257,24 @@ template <>
 PERSPECTIVE_EXPORT void t_column::push_back<t_tscalar>(t_tscalar elem);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(
-    t_uindex idx, const char* elem);
+PERSPECTIVE_EXPORT void
+t_column::set_nth<const char*>(t_uindex idx, const char* elem);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<std::string>(
-    t_uindex idx, std::string elem);
+PERSPECTIVE_EXPORT void
+t_column::set_nth<std::string>(t_uindex idx, std::string elem);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(
-    t_uindex idx, const char* elem, t_status status);
+PERSPECTIVE_EXPORT void
+t_column::set_nth<const char*>(t_uindex idx, const char* elem, t_status status);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<std::string>(
-    t_uindex idx, std::string elem, t_status status);
+PERSPECTIVE_EXPORT void
+t_column::set_nth<std::string>(t_uindex idx, std::string elem, t_status status);
 
 template <>
-PERSPECTIVE_EXPORT const char* t_column::get_nth<const char>(
-    t_uindex idx) const;
+PERSPECTIVE_EXPORT const char* t_column::get_nth<const char>(t_uindex idx
+) const;
 
 template <typename T>
 T*
@@ -347,8 +357,9 @@ t_column::set_nth(t_uindex idx, T v, t_status status) {
 }
 
 template <>
-void t_column::fill<std::vector<const char*>>(std::vector<const char*>& vec,
-    const t_uindex* bidx, const t_uindex* eidx) const;
+void t_column::fill<std::vector<const char*>>(
+    std::vector<const char*>& vec, const t_uindex* bidx, const t_uindex* eidx
+) const;
 
 template <typename VEC_T>
 void
@@ -392,24 +403,28 @@ t_column::raw_fill(DATA_T v) {
 template <typename VOCAB_T>
 void
 t_column::set_vocabulary(const VOCAB_T& vocab, size_t total_size) {
-    if (total_size)
+    if (total_size) {
         m_vocab->reserve(total_size, vocab.size() + 1);
+    }
 
-    for (const auto& kv : vocab)
+    for (const auto& kv : vocab) {
         m_vocab->get_interned(kv.first.get_char_ptr());
+    }
 }
 
 template <>
-void t_column::copy_helper<const char>(const t_column* other,
-    const std::vector<t_uindex>& indices, t_uindex offset);
+void t_column::copy_helper<const char>(
+    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset
+);
 
 template <typename DATA_T>
 void
-t_column::copy_helper(const t_column* other,
-    const std::vector<t_uindex>& indices, t_uindex offset) {
+t_column::copy_helper(
+    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset
+) {
 
-    t_uindex eidx
-        = std::min(other->size(), static_cast<t_uindex>(indices.size()));
+    t_uindex eidx =
+        std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 
     const DATA_T* o_base = other->get_nth<DATA_T>(0);

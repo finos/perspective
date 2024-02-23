@@ -10,11 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-
 /**
  * Main
  */
 int
 main(int argc, char** argv) {
-    std::cout << "Perspective initialized successfully" << std::endl;
+    std::cout << "Perspective initialized successfully"
+              << "\n";
 }

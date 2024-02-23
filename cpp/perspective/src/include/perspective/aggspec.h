@@ -23,7 +23,7 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_col_name_type {
     t_col_name_type();
-    t_col_name_type(const std::string& name, t_dtype type);
+    t_col_name_type(std::string name, t_dtype type);
     std::string m_name;
     t_dtype m_type;
 };
@@ -34,24 +34,42 @@ public:
 
     ~t_aggspec();
 
-    t_aggspec(const std::string& aggname, t_aggtype agg,
-        const std::vector<t_dep>& dependencies);
+    t_aggspec(
+        const std::string& aggname,
+        t_aggtype agg,
+        const std::vector<t_dep>& dependencies
+    );
 
     t_aggspec(
-        const std::string& aggname, t_aggtype agg, const std::string& dep);
+        const std::string& aggname, t_aggtype agg, const std::string& dep
+    );
 
     t_aggspec(t_aggtype agg, const std::string& dep);
 
-    t_aggspec(const std::string& aggname, const std::string& disp_aggname,
-        t_aggtype agg, const std::vector<t_dep>& dependencies);
+    t_aggspec(
+        std::string aggname,
+        std::string disp_name,
+        t_aggtype agg,
+        const std::vector<t_dep>& dependencies
+    );
 
-    t_aggspec(const std::string& aggname, const std::string& disp_aggname,
-        t_aggtype agg, const std::vector<t_dep>& dependencies,
-        t_sorttype sort_type);
+    t_aggspec(
+        std::string aggname,
+        std::string disp_name,
+        t_aggtype agg,
+        const std::vector<t_dep>& dependencies,
+        t_sorttype sort_type
+    );
 
-    t_aggspec(const std::string& aggname, const std::string& disp_aggname,
-        t_aggtype agg, t_uindex agg_one_idx, t_uindex agg_two_idx,
-        double agg_one_weight, double agg_two_weight);
+    t_aggspec(
+        std::string aggname,
+        std::string disp_aggname,
+        t_aggtype agg,
+        t_uindex agg_one_idx,
+        t_uindex agg_two_idx,
+        double agg_one_weight,
+        double agg_two_weight
+    );
 
     std::string name() const;
     t_tscalar name_scalar() const;
@@ -73,8 +91,8 @@ public:
     std::vector<std::string> get_output_depnames() const;
 
     std::vector<t_col_name_type> get_output_specs(const t_schema& schema) const;
-    std::vector<t_col_name_type> mk_col_name_type_vec(
-        const std::string& name, t_dtype dtype) const;
+    std::vector<t_col_name_type>
+    mk_col_name_type_vec(const std::string& name, t_dtype dtype) const;
     bool is_combiner_agg() const;
     bool is_reducer_agg() const;
 

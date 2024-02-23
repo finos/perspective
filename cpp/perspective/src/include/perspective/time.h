@@ -54,10 +54,16 @@ struct t_tdelta {
 std::int32_t isleap(long int year);
 std::int32_t days_before_year(std::int32_t year);
 std::int32_t days_before_month(std::int32_t year, std::int32_t month);
-std::int32_t ymd_to_ord(
-    std::int32_t year, std::int32_t month, std::int32_t day);
-std::int64_t to_gmtime(std::int32_t year, std::int32_t month, std::int32_t day,
-    std::int32_t hour, std::int32_t min, std::int32_t sec);
+std::int32_t
+ymd_to_ord(std::int32_t year, std::int32_t month, std::int32_t day);
+std::int64_t to_gmtime(
+    std::int32_t year,
+    std::int32_t month,
+    std::int32_t day,
+    std::int32_t hour,
+    std::int32_t min,
+    std::int32_t sec
+);
 
 // Interal details: m_storage stores "microseconds since the
 // epoch-defined-in-the-class".
@@ -78,8 +84,14 @@ public:
     t_time();
     explicit t_time(std::int64_t raw_val);
 
-    t_time(std::int32_t year, std::int32_t month, std::int32_t day,
-        std::int32_t hour, std::int32_t min, std::int32_t sec);
+    t_time(
+        std::int32_t year,
+        std::int32_t month,
+        std::int32_t day,
+        std::int32_t hour,
+        std::int32_t min,
+        std::int32_t sec
+    );
 
     std::int64_t raw_value() const;
 
@@ -100,8 +112,8 @@ public:
      */
     std::tm get_tm() const;
 
-    std::int32_t gmtime(
-        struct tm& out, std::int64_t secs, std::int32_t offset) const;
+    std::int32_t
+    gmtime(struct tm& out, std::int64_t secs, std::int32_t offset) const;
 
     std::int32_t year(const struct tm& t) const;
     std::int32_t month(const struct tm& t) const;

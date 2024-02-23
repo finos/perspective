@@ -27,8 +27,9 @@ struct t_chunk_value_span {
 
 template <typename DATA_T>
 void
-fill_chunk_value_span(t_chunk_value_span<DATA_T>& cvs, DATA_T value,
-    t_uindex bidx, t_uindex eidx) {
+fill_chunk_value_span(
+    t_chunk_value_span<DATA_T>& cvs, DATA_T value, t_uindex bidx, t_uindex eidx
+) {
     cvs.m_value = value;
     cvs.m_bidx = bidx;
     cvs.m_eidx = eidx;
@@ -36,8 +37,9 @@ fill_chunk_value_span(t_chunk_value_span<DATA_T>& cvs, DATA_T value,
 
 template <typename DATA_T>
 void
-fill_chunk_value_span(t_chunk_value_span<DATA_T>* cvs, DATA_T value,
-    t_uindex bidx, t_uindex eidx) {
+fill_chunk_value_span(
+    t_chunk_value_span<DATA_T>* cvs, DATA_T value, t_uindex bidx, t_uindex eidx
+) {
     cvs->m_value = value;
     cvs->m_bidx = bidx;
     cvs->m_eidx = eidx;

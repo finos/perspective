@@ -26,9 +26,9 @@ struct PERSPECTIVE_EXPORT t_mselem {
     t_mselem(const std::vector<t_tscalar>& row, t_uindex order);
     t_mselem(const t_tscalar& pkey, const std::vector<t_tscalar>& row);
     t_mselem(const t_mselem& other);
-    t_mselem(t_mselem&& other);
+    t_mselem(t_mselem&& other) noexcept;
     t_mselem& operator=(const t_mselem& other);
-    t_mselem& operator=(t_mselem&& other);
+    t_mselem& operator=(t_mselem&& other) noexcept;
 
     std::vector<t_tscalar> m_row;
     t_tscalar m_pkey;
@@ -68,8 +68,8 @@ struct PERSPECTIVE_EXPORT t_minmax_idx {
 
 // Given a vector return the indices of the
 // minimum and maximum elements in it.
-PERSPECTIVE_EXPORT t_minmax_idx get_minmax_idx(
-    const std::vector<t_tscalar>& vec, t_sorttype stype);
+PERSPECTIVE_EXPORT t_minmax_idx
+get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype);
 
 PERSPECTIVE_EXPORT double to_double(const t_tscalar& c);
 
@@ -80,17 +80,21 @@ struct PERSPECTIVE_EXPORT t_nancmp {
     t_cmp_op m_cmpval;
 };
 
-PERSPECTIVE_EXPORT t_nancmp nan_compare(
-    t_sorttype order, const t_tscalar& a, const t_tscalar& b);
+PERSPECTIVE_EXPORT t_nancmp
+nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b);
 
 inline PERSPECTIVE_EXPORT bool
-cmp_mselem(const t_mselem& a, const t_mselem& b,
-    const std::vector<t_sorttype>& sort_order) {
+cmp_mselem(
+    const t_mselem& a,
+    const t_mselem& b,
+    const std::vector<t_sorttype>& sort_order
+) {
     typedef std::pair<double, t_tscalar> dpair;
 
     if (a.m_row.size() != b.m_row.size()
         || a.m_row.size() != sort_order.size()) {
-        std::cout << "ERROR detected in MultiSort." << std::endl;
+        std::cout << "ERROR detected in MultiSort."
+                  << "\n";
         return false;
     }
 
@@ -120,8 +124,9 @@ cmp_mselem(const t_mselem& a, const t_mselem& b,
             }
         }
 
-        if (first == second)
+        if (first == second) {
             continue;
+        }
 
         switch (order) {
             case SORTTYPE_ASCENDING: {
@@ -156,8 +161,11 @@ cmp_mselem(const t_mselem& a, const t_mselem& b,
 }
 
 inline PERSPECTIVE_EXPORT bool
-cmp_mselem(const t_mselem* a, const t_mselem* b,
-    const std::vector<t_sorttype>& sort_order) {
+cmp_mselem(
+    const t_mselem* a,
+    const t_mselem* b,
+    const std::vector<t_sorttype>& sort_order
+) {
     return cmp_mselem(*a, *b, sort_order);
 }
 
@@ -166,8 +174,10 @@ cmp_mselem(const t_mselem* a, const t_mselem* b,
 struct PERSPECTIVE_EXPORT t_multisorter {
     t_multisorter(const std::vector<t_sorttype>& order);
 
-    t_multisorter(std::shared_ptr<const std::vector<t_mselem>> elems,
-        const std::vector<t_sorttype>& order);
+    t_multisorter(
+        std::shared_ptr<const std::vector<t_mselem>> elems,
+        const std::vector<t_sorttype>& order
+    );
 
     bool operator()(const t_mselem& a, const t_mselem& b) const;
 

@@ -24,8 +24,19 @@
 
 namespace perspective {
 static const std::int32_t CUMULATIVE_DAYS[2][13] = {
-    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334,
-        365} /* Normal years.  */,
+    {0,
+     31,
+     59,
+     90,
+     120,
+     151,
+     181,
+     212,
+     243,
+     273,
+     304,
+     334,
+     365} /* Normal years.  */,
     {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366} /* Leap
                                                                     years.
                                                                     */
@@ -60,8 +71,8 @@ public:
      */
     t_date(std::int16_t year, std::int8_t month, std::int8_t day);
 
-    void set_year_month_day(
-        std::int16_t year, std::int8_t month, std::int8_t day);
+    void
+    set_year_month_day(std::int16_t year, std::int8_t month, std::int8_t day);
 
     void set_year(std::int16_t year);
     void set_month(std::int8_t month);

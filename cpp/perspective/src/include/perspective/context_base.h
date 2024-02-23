@@ -29,8 +29,7 @@ namespace perspective {
 template <typename CTX_T>
 class t_ctx_common {
 public:
-    t_ctx_common(CTX_T* ctx)
-        : m_ctx(ctx) {}
+    t_ctx_common(CTX_T* ctx) : m_ctx(ctx) {}
 
     t_slice
     get_data(const t_range& rng, const std::vector<t_fetch>& fvec) const {
@@ -48,8 +47,8 @@ public:
     typedef DERIVED_T t_derived;
 
     t_ctxbase();
-    static std::shared_ptr<DERIVED_T> build(
-        const t_schema& schema, const t_config& config);
+    static std::shared_ptr<DERIVED_T>
+    build(const t_schema& schema, const t_config& config);
     t_ctxbase(const t_schema& schema, const t_config& config);
 
     void set_name(const std::string& name);
@@ -75,12 +74,14 @@ public:
     }
 
     void unity_populate_slice_row(
-        t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const;
+        t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx
+    ) const;
     void unity_populate_slice_column(
-        t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const;
+        t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx
+    ) const;
 
-    t_slice unity_get_data(
-        const t_range& rng, const std::vector<t_fetch>& fvec) const;
+    t_slice
+    unity_get_data(const t_range& rng, const std::vector<t_fetch>& fvec) const;
 
     std::vector<t_tscalar> get_data() const;
 
@@ -104,10 +105,10 @@ t_ctxbase<DERIVED_T>::build(const t_schema& schema, const t_config& config) {
 }
 
 template <typename DERIVED_T>
-t_ctxbase<DERIVED_T>::t_ctxbase()
-    : m_rows_changed(true)
-    , m_columns_changed(true)
-    , m_init(false) {
+t_ctxbase<DERIVED_T>::t_ctxbase() :
+    m_rows_changed(true),
+    m_columns_changed(true),
+    m_init(false) {
     m_features = std::vector<bool>(CTX_FEAT_LAST_FEATURE);
     m_features[CTX_FEAT_ENABLED] = true;
 }
@@ -115,11 +116,12 @@ t_ctxbase<DERIVED_T>::t_ctxbase()
 template <typename DERIVED_T>
 t_ctxbase<DERIVED_T>::t_ctxbase(const t_schema& schema, const t_config& config)
 
-    : m_schema(schema)
-    , m_config(config)
-    , m_rows_changed(true)
-    , m_columns_changed(true)
-    , m_init(false) {
+    :
+    m_schema(schema),
+    m_config(config),
+    m_rows_changed(true),
+    m_columns_changed(true),
+    m_init(false) {
     m_features = std::vector<bool>(CTX_FEAT_LAST_FEATURE);
     m_features[CTX_FEAT_ENABLED] = true;
 }
@@ -199,18 +201,21 @@ t_ctxbase<DERIVED_T>::get_feature_state(t_ctx_feature feature) const {
 template <typename DERIVED_T>
 void
 t_ctxbase<DERIVED_T>::unity_populate_slice_column(
-    t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const {
+    t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx
+) const {
     for (auto f : fvec) {
         switch (f) {
             case FETCH_COLUMN_DEPTH: {
                 s.column_depth().push_back(
                     reinterpret_cast<const DERIVED_T*>(this)
-                        ->unity_get_column_depth(idx));
+                        ->unity_get_column_depth(idx)
+                );
             } break;
             case FETCH_COLUMN_PATHS: {
                 s.column_paths().push_back(
                     reinterpret_cast<const DERIVED_T*>(this)
-                        ->unity_get_column_path(idx));
+                        ->unity_get_column_path(idx)
+                );
             } break;
             case FETCH_COLUMN_INDICES: {
                 s.column_indices().push_back(idx);
@@ -218,7 +223,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
             case FETCH_IS_COLUMN_EXPANDED: {
                 s.is_column_expanded().push_back(
                     reinterpret_cast<const DERIVED_T*>(this)
-                        ->unity_get_column_expanded(idx));
+                        ->unity_get_column_expanded(idx)
+                );
             } break;
             default: {
             }
@@ -229,7 +235,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
 template <typename DERIVED_T>
 void
 t_ctxbase<DERIVED_T>::unity_populate_slice_row(
-    t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const {
+    t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx
+) const {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     for (auto f : fvec) {
         switch (f) {
@@ -243,8 +250,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(
                 s.row_data().push_back(cptr->unity_get_row_data(idx));
             } break;
             case FETCH_IS_ROW_EXPANDED: {
-                s.is_row_expanded().push_back(
-                    cptr->unity_get_row_expanded(idx));
+                s.is_row_expanded().push_back(cptr->unity_get_row_expanded(idx)
+                );
             } break;
             case FETCH_ROW_DEPTH: {
                 s.row_depth().push_back(cptr->unity_get_row_depth(idx));
@@ -258,7 +265,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(
 template <typename DERIVED_T>
 t_slice
 t_ctxbase<DERIVED_T>::unity_get_data(
-    const t_range& rng, const std::vector<t_fetch>& fvec) const {
+    const t_range& rng, const std::vector<t_fetch>& fvec
+) const {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     t_uindex row_count = cptr->get_row_count();
     t_uindex bridx, eridx;
@@ -274,13 +282,14 @@ t_ctxbase<DERIVED_T>::unity_get_data(
         } break;
         default: {
             std::cout << "Unexpected mode encountered => " << rng.get_mode()
-                      << std::endl;
+                      << "\n";
             return t_slice();
         }
     }
 
-    if (bridx > eridx || bridx >= row_count || eridx > row_count)
+    if (bridx > eridx || bridx >= row_count || eridx > row_count) {
         return t_slice();
+    }
 
     t_slice rv;
 
@@ -303,7 +312,8 @@ std::vector<t_tscalar>
 t_ctxbase<DERIVED_T>::get_data() const {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     return cptr->get_data(
-        0, cptr->get_row_count(), 0, cptr->get_column_count());
+        0, cptr->get_row_count(), 0, cptr->get_column_count()
+    );
 }
 
 } // end namespace perspective

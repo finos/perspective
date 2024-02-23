@@ -45,9 +45,12 @@ public:
      * @param combiner
      * @param fterms specifications for filtering down the context
      */
-    t_config(const std::vector<std::string>& detail_columns,
-        const std::vector<t_fterm>& fterms, t_filter_op combiner,
-        const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
+    t_config(
+        const std::vector<std::string>& detail_columns,
+        const std::vector<t_fterm>& fterms,
+        t_filter_op combiner,
+        const std::vector<std::shared_ptr<t_computed_expression>>& expressions
+    );
 
     /**
      * @brief Construct a new config for a `t_ctx1` object, which has 1 or more
@@ -58,10 +61,13 @@ public:
      * @param combiner
      * @param fterms
      */
-    t_config(const std::vector<std::string>& row_pivots,
+    t_config(
+        const std::vector<std::string>& row_pivots,
         const std::vector<t_aggspec>& aggregates,
-        const std::vector<t_fterm>& fterms, t_filter_op combiner,
-        const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
+        const std::vector<t_fterm>& fterms,
+        t_filter_op combiner,
+        const std::vector<std::shared_ptr<t_computed_expression>>& expressions
+    );
 
     /**
      * @brief Construct a new config for a `t_ctx2` object, which has 1 or more
@@ -75,31 +81,45 @@ public:
      * @param fterms
      * @param column_only
      */
-    t_config(const std::vector<std::string>& row_pivots,
+    t_config(
+        const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots,
-        const std::vector<t_aggspec>& aggregates, const t_totals totals,
-        const std::vector<t_fterm>& fterms, t_filter_op combiner,
+        const std::vector<t_aggspec>& aggregates,
+        const t_totals totals,
+        const std::vector<t_fterm>& fterms,
+        t_filter_op combiner,
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
-        bool column_only);
+        bool column_only
+    );
 
     // An empty config, used for the unit context.
     t_config();
 
     // Constructors used for C++ tests, not exposed to other parts of the engine
-    t_config(const std::vector<std::string>& row_pivots,
+    t_config(
+        const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots,
-        const std::vector<t_aggspec>& aggregates);
+        const std::vector<t_aggspec>& aggregates
+    );
 
-    t_config(const std::vector<std::string>& row_pivots,
+    t_config(
+        const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots,
-        const std::vector<t_aggspec>& aggregates, const t_totals totals,
-        t_filter_op combiner, const std::vector<t_fterm>& fterms);
+        const std::vector<t_aggspec>& aggregates,
+        const t_totals totals,
+        t_filter_op combiner,
+        const std::vector<t_fterm>& fterms
+    );
 
-    t_config(const std::vector<t_pivot>& row_pivots,
-        const std::vector<t_aggspec>& aggregates);
+    t_config(
+        const std::vector<t_pivot>& row_pivots,
+        const std::vector<t_aggspec>& aggregates
+    );
 
-    t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<t_aggspec>& aggregates);
+    t_config(
+        const std::vector<std::string>& row_pivots,
+        const std::vector<t_aggspec>& aggregates
+    );
 
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
 
@@ -111,9 +131,11 @@ public:
      */
     void setup(const std::vector<std::string>& detail_columns);
 
-    void setup(const std::vector<std::string>& detail_columns,
+    void setup(
+        const std::vector<std::string>& detail_columns,
         const std::vector<std::string>& sort_pivot,
-        const std::vector<std::string>& sort_pivot_by);
+        const std::vector<std::string>& sort_pivot_by
+    );
 
     /**
      * @brief A t_config is trivial if it does not have any pivots, sorts,
@@ -124,7 +146,7 @@ public:
      * @return true
      * @return false
      */
-    bool is_trivial_config();
+    bool is_trivial_config() const;
 
     t_index get_colidx(const std::string& colname) const;
 

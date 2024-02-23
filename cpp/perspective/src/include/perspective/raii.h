@@ -24,7 +24,7 @@ class t_file_handle {
 public:
     t_file_handle(t_handle value);
     ~t_file_handle();
-    t_handle value();
+    t_handle value() const;
     bool valid() const;
     void release();
 };

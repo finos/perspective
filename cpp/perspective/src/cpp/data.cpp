@@ -14,10 +14,9 @@
 #include <perspective/data.h>
 
 namespace perspective {
-t_data::t_data() {}
+t_data::t_data() = default;
 
-t_data::t_data(const std::vector<t_tscalar>& data)
-    : m_data(data) {}
+t_data::t_data(const std::vector<t_tscalar>& data) : m_data(data) {}
 
 const std::vector<t_tscalar>&
 t_data::data() const {

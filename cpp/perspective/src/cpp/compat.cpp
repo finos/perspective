@@ -28,11 +28,11 @@ file_size_pair(t_handle h) {
     return std::pair<std::uint32_t, std::uint32_t>(upper32(sz), lower32(sz));
 }
 
-t_rfmapping::t_rfmapping() {}
+t_rfmapping::t_rfmapping() = default;
 
-t_rfmapping::t_rfmapping(t_handle fd, void* base, t_uindex size)
-    : m_fd(fd)
-    , m_base(base)
-    , m_size(size) {}
+t_rfmapping::t_rfmapping(t_handle fd, void* base, t_uindex size) :
+    m_fd(fd),
+    m_base(base),
+    m_size(size) {}
 
 } // end namespace perspective

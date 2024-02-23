@@ -12,29 +12,38 @@
 
 #include <perspective/table.h>
 
+#include <utility>
+
 // Give each Table a unique ID so that operations on it map back correctly
 static perspective::t_uindex GLOBAL_TABLE_ID = 0;
 
 namespace perspective {
-Table::Table(std::shared_ptr<t_pool> pool,
+Table::Table(
+    std::shared_ptr<t_pool> pool,
     const std::vector<std::string>& column_names,
-    const std::vector<t_dtype>& data_types, std::uint32_t limit,
-    const std::string& index)
-    : m_init(false)
-    , m_id(GLOBAL_TABLE_ID++)
-    , m_pool(pool)
-    , m_column_names(column_names)
-    , m_data_types(data_types)
-    , m_offset(0)
-    , m_limit(limit)
-    , m_index(index)
-    , m_gnode_set(false) {
+    const std::vector<t_dtype>& data_types,
+    std::uint32_t limit,
+    std::string index
+) :
+    m_init(false),
+    m_id(GLOBAL_TABLE_ID++),
+    m_pool(std::move(std::move(pool))),
+    m_column_names(column_names),
+    m_data_types(data_types),
+    m_offset(0),
+    m_limit(limit),
+    m_index(std::move(index)),
+    m_gnode_set(false) {
     validate_columns(m_column_names);
 }
 
 void
-Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op,
-    const t_uindex port_id) {
+Table::init(
+    t_data_table& data_table,
+    std::uint32_t row_count,
+    const t_op op,
+    const t_uindex port_id
+) {
     /**
      * For the Table to be initialized correctly, make sure that the operation
      * and index columns are processed before the new offset is calculated.
@@ -73,8 +82,12 @@ Table::get_schema() const {
 
 t_validated_expression_map
 Table::validate_expressions(
-    const std::vector<std::tuple<std::string, std::string, std::string,
-        std::vector<std::pair<std::string, std::string>>>>& expressions) const {
+    const std::vector<std::tuple<
+        std::string,
+        std::string,
+        std::string,
+        std::vector<std::pair<std::string, std::string>>>>& expressions
+) const {
     t_validated_expression_map rval = t_validated_expression_map();
 
     // Expression columns live on the `t_gstate` master table, so this
@@ -115,9 +128,17 @@ Table::validate_expressions(
         const auto& column_ids = std::get<3>(expr);
 
         t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
-            expression_alias, expression_string, parsed_expression_string,
-            column_ids, m_gnode->get_table_sptr(), m_gnode->get_pkey_map(),
-            gnode_schema, error, expression_vocab, regex_mapping);
+            expression_alias,
+            expression_string,
+            parsed_expression_string,
+            column_ids,
+            m_gnode->get_table_sptr(),
+            m_gnode->get_pkey_map(),
+            gnode_schema,
+            error,
+            expression_vocab,
+            regex_mapping
+        );
 
         // FIXME: none == bad type? what about clear
         if (expression_dtype == DTYPE_NONE) {
@@ -125,7 +146,8 @@ Table::validate_expressions(
             rval.add_error(expression_alias, error);
         } else {
             rval.add_expression(
-                expression_alias, dtype_to_str(expression_dtype));
+                expression_alias, dtype_to_str(expression_dtype)
+            );
         }
     }
 
@@ -142,7 +164,7 @@ Table::make_gnode(const t_schema& in_schema) {
 
 void
 Table::set_gnode(std::shared_ptr<t_gnode> gnode) {
-    m_gnode = gnode;
+    m_gnode = std::move(gnode);
     m_gnode_set = true;
 }
 
@@ -163,15 +185,17 @@ t_uindex
 Table::make_port() {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(
-        m_gnode_set, "Cannot make input port on a gnode that does not exist.");
+        m_gnode_set, "Cannot make input port on a gnode that does not exist."
+    );
     return m_gnode->make_input_port();
 }
 
 void
 Table::remove_port(t_uindex port_id) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(m_gnode_set,
-        "Cannot remove input port on a gnode that does not exist.");
+    PSP_VERBOSE_ASSERT(
+        m_gnode_set, "Cannot remove input port on a gnode that does not exist."
+    );
     m_gnode->remove_input_port(port_id);
 }
 
@@ -240,21 +264,22 @@ Table::set_data_types(const std::vector<t_dtype>& data_types) {
 
 void
 Table::validate_columns(const std::vector<std::string>& column_names) {
-    if (m_index != "") {
+    if (!m_index.empty()) {
         // Check if index is valid after getting column names
-        bool explicit_index
-            = std::find(column_names.begin(), column_names.end(), m_index)
+        bool explicit_index =
+            std::find(column_names.begin(), column_names.end(), m_index)
             != column_names.end();
         if (!explicit_index) {
             PSP_COMPLAIN_AND_ABORT(
-                "Specified index `" + m_index + "` does not exist in dataset.");
+                "Specified index `" + m_index + "` does not exist in dataset."
+            );
         }
     }
 }
 
 void
 Table::process_op_column(t_data_table& data_table, const t_op op) {
-    auto op_col = data_table.add_column("psp_op", DTYPE_UINT8, false);
+    auto* op_col = data_table.add_column("psp_op", DTYPE_UINT8, false);
     switch (op) {
         case OP_DELETE: {
             op_col->raw_fill<std::uint8_t>(OP_DELETE);

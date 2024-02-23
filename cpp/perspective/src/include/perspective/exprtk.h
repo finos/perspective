@@ -45,42 +45,46 @@ namespace details {
     template <typename T>                                                      \
     inline T FunctionName##_impl(const T v, t_tscalar_type_tag);
 
-            define_unary_function_impl_header(abs) define_unary_function_impl_header(
-                acos) define_unary_function_impl_header(acosh) define_unary_function_impl_header(asin)
-                define_unary_function_impl_header(asinh) define_unary_function_impl_header(
-                    atan) define_unary_function_impl_header(atanh)
-                    define_unary_function_impl_header(ceil) define_unary_function_impl_header(
-                        cos) define_unary_function_impl_header(cosh)
-                        define_unary_function_impl_header(exp) define_unary_function_impl_header(
-                            expm1) define_unary_function_impl_header(floor)
-                            define_unary_function_impl_header(log) define_unary_function_impl_header(
-                                log10) define_unary_function_impl_header(log2)
-                                define_unary_function_impl_header(log1p) define_unary_function_impl_header(
-                                    neg) define_unary_function_impl_header(pos)
-                                    define_unary_function_impl_header(round) define_unary_function_impl_header(
-                                        sin) define_unary_function_impl_header(sinc)
-                                        define_unary_function_impl_header(sinh) define_unary_function_impl_header(
-                                            sqrt) define_unary_function_impl_header(tan)
-                                            define_unary_function_impl_header(tanh) define_unary_function_impl_header(
-                                                cot) define_unary_function_impl_header(sec)
-                                                define_unary_function_impl_header(
-                                                    csc) define_unary_function_impl_header(r2d)
-                                                    define_unary_function_impl_header(
-                                                        d2r) define_unary_function_impl_header(d2g)
-                                                        define_unary_function_impl_header(
-                                                            g2d) define_unary_function_impl_header(notl)
-                                                            define_unary_function_impl_header(
-                                                                sgn)
-                                                                define_unary_function_impl_header(
-                                                                    erf)
-                                                                    define_unary_function_impl_header(
-                                                                        erfc)
-                                                                        define_unary_function_impl_header(
-                                                                            ncdf)
-                                                                            define_unary_function_impl_header(
-                                                                                frac)
-                                                                                define_unary_function_impl_header(
-                                                                                    trunc)
+            define_unary_function_impl_header(abs
+            ) define_unary_function_impl_header(acos
+            ) define_unary_function_impl_header(acosh
+            ) define_unary_function_impl_header(asin
+            ) define_unary_function_impl_header(asinh
+            ) define_unary_function_impl_header(atan
+            ) define_unary_function_impl_header(atanh
+            ) define_unary_function_impl_header(ceil
+            ) define_unary_function_impl_header(cos
+            ) define_unary_function_impl_header(cosh
+            ) define_unary_function_impl_header(exp
+            ) define_unary_function_impl_header(expm1
+            ) define_unary_function_impl_header(floor
+            ) define_unary_function_impl_header(log
+            ) define_unary_function_impl_header(log10
+            ) define_unary_function_impl_header(log2
+            ) define_unary_function_impl_header(log1p
+            ) define_unary_function_impl_header(neg
+            ) define_unary_function_impl_header(pos
+            ) define_unary_function_impl_header(round
+            ) define_unary_function_impl_header(sin
+            ) define_unary_function_impl_header(sinc
+            ) define_unary_function_impl_header(sinh
+            ) define_unary_function_impl_header(sqrt
+            ) define_unary_function_impl_header(tan
+            ) define_unary_function_impl_header(tanh
+            ) define_unary_function_impl_header(cot
+            ) define_unary_function_impl_header(sec
+            ) define_unary_function_impl_header(csc
+            ) define_unary_function_impl_header(r2d
+            ) define_unary_function_impl_header(d2r
+            ) define_unary_function_impl_header(d2g
+            ) define_unary_function_impl_header(g2d)
+                define_unary_function_impl_header(notl)
+                    define_unary_function_impl_header(sgn)
+                        define_unary_function_impl_header(erf)
+                            define_unary_function_impl_header(erfc)
+                                define_unary_function_impl_header(ncdf)
+                                    define_unary_function_impl_header(frac)
+                                        define_unary_function_impl_header(trunc)
 
 #undef define_unary_function_impl_header
 
@@ -89,28 +93,27 @@ namespace details {
     inline T FunctionName##_impl(const T v0, const T v1, t_tscalar_type_tag);
 
                 // except reserved words: and, or, xor
-                define_binary_function_impl_header(min) define_binary_function_impl_header(
-                    max) define_binary_function_impl_header(equal)
-                    define_binary_function_impl_header(
-                        nequal) define_binary_function_impl_header(modulus)
-                        define_binary_function_impl_header(
-                            pow) define_binary_function_impl_header(logn)
-                            define_binary_function_impl_header(
-                                root) define_binary_function_impl_header(roundn)
-                                define_binary_function_impl_header(
-                                    hypot) define_binary_function_impl_header(atan2)
-                                    define_binary_function_impl_header(
-                                        shr) define_binary_function_impl_header(shl)
-                                        define_binary_function_impl_header(nand)
-                                            define_binary_function_impl_header(
-                                                nor)
-                                                define_binary_function_impl_header(
-                                                    xnor)
+                define_binary_function_impl_header(min
+                ) define_binary_function_impl_header(max
+                ) define_binary_function_impl_header(equal
+                ) define_binary_function_impl_header(nequal
+                ) define_binary_function_impl_header(modulus
+                ) define_binary_function_impl_header(pow
+                ) define_binary_function_impl_header(logn
+                ) define_binary_function_impl_header(root
+                ) define_binary_function_impl_header(roundn
+                ) define_binary_function_impl_header(hypot)
+                    define_binary_function_impl_header(atan2)
+                        define_binary_function_impl_header(shr)
+                            define_binary_function_impl_header(shl)
+                                define_binary_function_impl_header(nand)
+                                    define_binary_function_impl_header(nor)
+                                        define_binary_function_impl_header(xnor)
 
 #undef define_binary_function_impl_header
 
-                                                    template <typename T>
-                                                    inline T
+                                            template <typename T>
+                                            inline T
                 and_impl(const T v0, const T v1, t_tscalar_type_tag);
 
             template <typename T>
@@ -152,8 +155,12 @@ namespace details {
     inline bool is_false(const t_tscalar& v);
 
     template <typename Iterator>
-    inline bool string_to_real(Iterator& itr_external, const Iterator end,
-        t_tscalar& t, numeric::details::t_tscalar_type_tag);
+    inline bool string_to_real(
+        Iterator& itr_external,
+        const Iterator end,
+        t_tscalar& t,
+        numeric::details::t_tscalar_type_tag
+    );
 
 } // end namespace details
 } // end namespace exprtk
@@ -255,8 +262,9 @@ namespace details {
             template <>
             inline int
             to_int32_impl(const t_tscalar& v, t_tscalar_type_tag) {
-                if (!v.is_valid())
+                if (!v.is_valid()) {
                     return std::numeric_limits<int>::quiet_NaN();
+                }
                 switch (v.get_dtype()) {
                     case perspective::t_dtype::DTYPE_INT64:
                         return static_cast<int>(v.get<std::int64_t>());
@@ -286,32 +294,33 @@ namespace details {
             template <>
             inline long long int
             to_int64_impl(const t_tscalar& v, t_tscalar_type_tag) {
-                if (!v.is_valid())
+                if (!v.is_valid()) {
                     return std::numeric_limits<long long int>::quiet_NaN();
+                }
                 switch (v.get_dtype()) {
                     case perspective::t_dtype::DTYPE_INT64:
-                        return static_cast<long long int>(
-                            v.get<std::int64_t>());
+                        return static_cast<long long int>(v.get<std::int64_t>()
+                        );
                     case perspective::t_dtype::DTYPE_INT32:
-                        return static_cast<long long int>(
-                            v.get<std::int32_t>());
+                        return static_cast<long long int>(v.get<std::int32_t>()
+                        );
                     case perspective::t_dtype::DTYPE_INT16:
-                        return static_cast<long long int>(
-                            v.get<std::int16_t>());
+                        return static_cast<long long int>(v.get<std::int16_t>()
+                        );
                     case perspective::t_dtype::DTYPE_INT8:
                         return static_cast<long long int>(v.get<std::int8_t>());
                     case perspective::t_dtype::DTYPE_UINT64:
-                        return static_cast<long long int>(
-                            v.get<std::uint64_t>());
+                        return static_cast<long long int>(v.get<std::uint64_t>()
+                        );
                     case perspective::t_dtype::DTYPE_UINT32:
-                        return static_cast<long long int>(
-                            v.get<std::uint32_t>());
+                        return static_cast<long long int>(v.get<std::uint32_t>()
+                        );
                     case perspective::t_dtype::DTYPE_UINT16:
-                        return static_cast<long long int>(
-                            v.get<std::uint16_t>());
+                        return static_cast<long long int>(v.get<std::uint16_t>()
+                        );
                     case perspective::t_dtype::DTYPE_UINT8:
-                        return static_cast<long long int>(
-                            v.get<std::uint8_t>());
+                        return static_cast<long long int>(v.get<std::uint8_t>()
+                        );
                     case perspective::t_dtype::DTYPE_FLOAT64:
                         return static_cast<long long int>(v.get<double>());
                     case perspective::t_dtype::DTYPE_FLOAT32:
@@ -448,8 +457,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_INT32: {
@@ -465,8 +475,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_INT8: {
@@ -474,8 +485,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_UINT64: {
@@ -483,8 +495,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_UINT32: {
@@ -492,8 +505,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_UINT16: {
@@ -501,8 +515,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_UINT8: {
@@ -510,8 +525,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_FLOAT64: {
@@ -519,8 +535,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     case perspective::t_dtype::DTYPE_FLOAT32: {
@@ -528,8 +545,9 @@ namespace details {
                         if (val == 0) {
                             rval.set(static_cast<std::int32_t>(val));
                         } else {
-                            rval.set(static_cast<std::int32_t>(
-                                (0 < val) - (val < 0)));
+                            rval.set(
+                                static_cast<std::int32_t>((0 < val) - (val < 0))
+                            );
                         }
                     } break;
                     default:
@@ -638,8 +656,10 @@ namespace details {
                 }
 
                 // radians to degrees
-                rval.set(v.to_double()
-                    * 57.29577951308232087679815481410517033240547246656443);
+                rval.set(
+                    v.to_double()
+                    * 57.29577951308232087679815481410517033240547246656443
+                );
                 return rval;
             }
 
@@ -659,8 +679,10 @@ namespace details {
                 }
 
                 // degrees to radians
-                rval.set(v.to_double()
-                    * 0.01745329251994329576923690768488612713442871888542);
+                rval.set(
+                    v.to_double()
+                    * 0.01745329251994329576923690768488612713442871888542
+                );
                 return rval;
             }
 
@@ -791,7 +813,8 @@ namespace details {
             template <>
             inline t_tscalar
             min_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
 
@@ -811,7 +834,8 @@ namespace details {
             template <>
             inline t_tscalar
             max_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
 
@@ -831,7 +855,8 @@ namespace details {
             template <>
             inline t_tscalar
             equal_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.m_type = perspective::t_dtype::DTYPE_BOOL;
 
@@ -847,7 +872,8 @@ namespace details {
             template <>
             inline t_tscalar
             nequal_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.m_type = perspective::t_dtype::DTYPE_BOOL;
 
@@ -864,14 +890,16 @@ namespace details {
             template <>
             inline t_tscalar
             modulus_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 return v0 % v1;
             }
 
             template <>
             inline t_tscalar
             pow_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.clear();
                 rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
@@ -892,7 +920,8 @@ namespace details {
             template <>
             inline t_tscalar
             logn_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.clear();
                 rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
@@ -920,7 +949,8 @@ namespace details {
             template <>
             inline t_tscalar
             root_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.clear();
                 rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
@@ -940,8 +970,8 @@ namespace details {
                     return mknone();
                 }
 
-                double result
-                    = std::pow(v0.to_double(), (1.0 / v1.to_double()));
+                double result =
+                    std::pow(v0.to_double(), (1.0 / v1.to_double()));
 
                 rval.set(result);
                 return rval;
@@ -950,38 +980,44 @@ namespace details {
             template <>
             inline t_tscalar
             roundn_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 return mknone();
             }
             template <>
             inline t_tscalar
             hypot_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 return mknone();
             }
             template <>
             inline t_tscalar
             atan2_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 return mknone();
             }
             template <>
             inline t_tscalar
             shr_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 return mknone();
             }
             template <>
             inline t_tscalar
             shl_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 return mknone();
             }
 
             template <>
             inline t_tscalar
             and_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.set(v0.as_bool() && v1.as_bool());
                 return rval;
@@ -990,7 +1026,8 @@ namespace details {
             template <>
             inline t_tscalar
             or_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.set(v0.as_bool() || v1.as_bool());
                 return rval;
@@ -999,7 +1036,8 @@ namespace details {
             template <>
             inline t_tscalar
             xor_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.set(!v0.as_bool() != !v1.as_bool());
                 return rval;
@@ -1008,7 +1046,8 @@ namespace details {
             template <>
             inline t_tscalar
             nand_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.set(!(v0.as_bool() && v1.as_bool()));
                 return rval;
@@ -1017,7 +1056,8 @@ namespace details {
             template <>
             inline t_tscalar
             nor_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.set(!(v0.as_bool() || v1.as_bool()));
                 return rval;
@@ -1026,7 +1066,8 @@ namespace details {
             template <>
             inline t_tscalar
             xnor_impl(
-                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+                const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag
+            ) {
                 t_tscalar rval;
                 rval.set(v0.as_bool() == v1.as_bool());
                 return rval;
@@ -1070,8 +1111,11 @@ namespace details {
              */
             template <>
             inline t_tscalar
-            process_impl(const operator_type operation, const t_tscalar arg0,
-                const t_tscalar arg1) {
+            process_impl(
+                const operator_type operation,
+                const t_tscalar arg0,
+                const t_tscalar arg1
+            ) {
                 // use the scalar type tag to dispatch to the right fns
                 t_tscalar_type_tag scalar_type_tag;
 
@@ -1086,19 +1130,22 @@ namespace details {
                         return (arg0 / arg1);
                     case e_mod:
                         return modulus_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_pow:
                         return pow_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
                     case e_atan2:
                         return atan2_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_min:
                         return min_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
                     case e_max:
                         return max_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
                     case e_logn:
                         return logn_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_lt: {
                         perspective::t_tscalar rval;
                         rval.set(arg0 < arg1);
@@ -1133,7 +1180,8 @@ namespace details {
                         return and_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
                     case e_nand:
                         return nand_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_or:
                         return or_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
                     case e_nor:
@@ -1142,20 +1190,24 @@ namespace details {
                         return xor_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
                     case e_xnor:
                         return xnor_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_root:
                         return root_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_roundn:
                         return roundn_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_equal:
                         return equal_impl(arg0, arg1, scalar_type_tag);
                     case e_nequal:
                         return nequal_impl(arg0, arg1, scalar_type_tag);
                     case e_hypot:
                         return hypot_impl<t_tscalar>(
-                            arg0, arg1, scalar_type_tag);
+                            arg0, arg1, scalar_type_tag
+                        );
                     case e_shr:
                         return shr_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
                     case e_shl:
@@ -1561,8 +1613,9 @@ namespace details {
             return rval;
         }
         static inline t_tscalar
-        process(const std::string& t0, const std::string& t1,
-            const std::string& t2) {
+        process(
+            const std::string& t0, const std::string& t1, const std::string& t2
+        ) {
             t_tscalar rval;
             rval.set((t0 <= t1) && (t1 <= t2));
             return rval;
@@ -1587,8 +1640,11 @@ namespace details {
     struct vararg_mand_op<t_tscalar> : public opr_base<t_tscalar> {
         typedef typename opr_base<t_tscalar>::Type Type;
 
-        template <typename Type, typename Allocator,
-            template <typename, typename> class Sequence>
+        template <
+            typename Type,
+            typename Allocator,
+            template <typename, typename>
+            class Sequence>
         static inline t_tscalar
         process(const Sequence<Type, Allocator>& arg_list) {
             t_tscalar rval = mktscalar(false);
@@ -1630,8 +1686,11 @@ namespace details {
     struct vararg_mor_op<t_tscalar> : public opr_base<t_tscalar> {
         typedef typename opr_base<t_tscalar>::Type Type;
 
-        template <typename Type, typename Allocator,
-            template <typename, typename> class Sequence>
+        template <
+            typename Type,
+            typename Allocator,
+            template <typename, typename>
+            class Sequence>
         static inline t_tscalar
         process(const Sequence<Type, Allocator>& arg_list) {
             t_tscalar rval = mktscalar(false);
@@ -1681,7 +1740,8 @@ namespace details {
     inline bool
     is_true(const std::pair<expression_node<t_tscalar>*, bool>& node) {
         return std::not_equal_to<t_tscalar>()(
-            mktscalar(false), node.first->value());
+            mktscalar(false), node.first->value()
+        );
     }
 
     template <>
@@ -1694,7 +1754,8 @@ namespace details {
     inline bool
     is_false(const std::pair<expression_node<t_tscalar>*, bool>& node) {
         return std::equal_to<t_tscalar>()(
-            mktscalar(false), node.first->value());
+            mktscalar(false), node.first->value()
+        );
     }
 
     /**
@@ -1738,11 +1799,12 @@ namespace details {
         static const char_t inf_lc[] = "infinity";
         static const std::size_t inf_length = 8;
 
-        const std::size_t length
-            = static_cast<std::size_t>(std::distance(itr, end));
+        const std::size_t length =
+            static_cast<std::size_t>(std::distance(itr, end));
 
-        if ((3 != length) && (inf_length != length))
+        if ((3 != length) && (inf_length != length)) {
             return false;
+        }
 
         char_cptr inf_itr = ('i' == (*itr)) ? inf_lc : inf_uc;
 
@@ -1785,10 +1847,18 @@ namespace details {
      */
     template <typename Iterator>
     inline bool
-    string_to_real(Iterator& itr_external, const Iterator end, t_tscalar& t,
-        numeric::details::t_tscalar_type_tag) {
-        bool parsed = string_to_real(itr_external, end, t.m_data.m_float64,
-            numeric::details::real_type_tag());
+    string_to_real(
+        Iterator& itr_external,
+        const Iterator end,
+        t_tscalar& t,
+        numeric::details::t_tscalar_type_tag
+    ) {
+        bool parsed = string_to_real(
+            itr_external,
+            end,
+            t.m_data.m_float64,
+            numeric::details::real_type_tag()
+        );
 
         if (parsed) {
             t.m_type = perspective::DTYPE_FLOAT64;

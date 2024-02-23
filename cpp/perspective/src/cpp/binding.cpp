@@ -14,6 +14,3 @@
 #include <perspective/base.h>
 #include <perspective/binding.h>
 using namespace perspective;
-namespace perspective {
-namespace binding {}
-} // namespace perspective

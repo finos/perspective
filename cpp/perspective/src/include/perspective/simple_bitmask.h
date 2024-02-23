@@ -20,11 +20,10 @@ namespace perspective {
 
 class t_simple_bitmask {
 public:
-    t_simple_bitmask(t_uindex nentries)
-        : m_nentries(nentries)
-        , m_ptr(0) {
-        if (!nentries)
+    t_simple_bitmask(t_uindex nentries) : m_nentries(nentries), m_ptr(0) {
+        if (!nentries) {
             return;
+        }
 
         m_ptr = calloc(1, static_cast<size_t>(calc_capacity(nentries)));
     }
@@ -33,8 +32,9 @@ public:
 
     inline bool
     is_set(t_uindex idx) const {
-        if (!m_ptr || idx >= m_nentries)
+        if (!m_ptr || idx >= m_nentries) {
             return false;
+        }
 
         t_uindex byte_idx = get_byte_idx(idx);
         t_uindex bit_idx = get_bit_idx(idx);
@@ -44,8 +44,9 @@ public:
 
     inline void
     set(t_uindex idx) {
-        if (!m_ptr || idx >= m_nentries)
+        if (!m_ptr || idx >= m_nentries) {
             return;
+        }
         t_uindex byte_idx = get_byte_idx(idx);
         std::uint8_t& bv = get_block(byte_idx);
         bv |= 1 << get_bit_idx(idx);
@@ -53,8 +54,9 @@ public:
 
     inline void
     clear(t_uindex idx) {
-        if (!m_ptr || idx >= m_nentries)
+        if (!m_ptr || idx >= m_nentries) {
             return;
+        }
         t_uindex byte_idx = get_byte_idx(idx);
         std::uint8_t& bv = get_block(byte_idx);
         bv &= ~std::uint8_t(1 << get_bit_idx(idx));
