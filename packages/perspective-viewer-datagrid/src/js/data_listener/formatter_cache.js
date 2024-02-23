@@ -133,9 +133,6 @@ export class FormatterCache {
         let { format } = get_type_config(type);
         if (plugin.number_string_format !== undefined) {
             format = plugin.number_string_format;
-        } else if (plugin.fixed !== undefined) {
-            format.minimumFractionDigits = plugin.fixed;
-            format.maximumFractionDigits = plugin.fixed;
         }
 
         return new FORMATTER_CONS[type]([], format);
@@ -149,7 +146,6 @@ export class FormatterCache {
     get(type, plugin) {
         let formatter_key = [
             type,
-            plugin.fixed,
             plugin.timeZone,
             plugin.dateStyle,
             plugin.timeStyle,

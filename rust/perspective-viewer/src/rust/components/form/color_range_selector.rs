@@ -16,6 +16,7 @@ use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct ColorRangeProps {
+    pub id: String,
     pub pos_color: String,
     pub neg_color: String,
     pub is_gradient: bool,
@@ -86,15 +87,15 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
                 class="color-selector"
             >
                 <input
-                    id="pos-color-param"
+                    id={format!("{}-pos", props.id)}
                     style={fg_pos}
-                    class="parameter"
+                    class="parameter pos-color-param"
                     type="color"
                     value={gradient.0.to_owned()}
                     oninput={on_pos_color}
                 />
                 <label
-                    for="pos-color-param"
+                    for={format!("{}-pos", props.id)}
                     class="color-label"
                 >
                     { "+" }
@@ -108,15 +109,15 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
                 class="color-selector"
             >
                 <input
-                    id="neg-color-param"
+                    id={format!("{}-neg", props.id)}
                     style={fg_neg}
-                    class="parameter"
+                    class="parameter neg-color-param"
                     type="color"
                     value={gradient.1.to_owned()}
                     oninput={on_neg_color}
                 />
                 <label
-                    for="neg-color-param"
+                    for={format!("{}-neg", props.id)}
                     class="color-label"
                 >
                     { "-" }

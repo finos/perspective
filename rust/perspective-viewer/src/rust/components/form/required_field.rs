@@ -28,7 +28,12 @@ pub fn required_field(props: &RequiredFieldProps) -> Html {
             <div
                 class="section row"
             >
-                <input type="checkbox" disabled=true checked=true />
+                <input
+                    type="checkbox"
+                    disabled=true
+                    checked=true
+                    id={format!("{}-checkbox", props.label.replace(' ', "-"))}
+                />
                 { props.children.clone() }
             </div>
         </fieldset>

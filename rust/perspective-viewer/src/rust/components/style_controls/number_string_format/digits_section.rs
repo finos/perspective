@@ -148,7 +148,7 @@ impl CustomNumberFormat {
                 { self.rounding_increment(ctx) }
                 <SelectField<RoundingPriority>
                     label="Rounding Priority"
-                    disabled={!(self.show_frac && self.show_sig)}
+                    disabled={self.disable_rounding_priority}
                     current_value={self.config.rounding_priority}
                     on_change={ctx.link().callback(CustomNumberFormatMsg::RoundingPriority)}
                 />

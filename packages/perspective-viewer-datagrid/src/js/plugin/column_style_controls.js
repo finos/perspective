@@ -27,7 +27,6 @@ export default function column_style_opts(type, _group) {
                 pos_bg_color: this.model._pos_bg_color[0],
                 neg_bg_color: this.model._neg_bg_color[0],
                 number_bg_mode: "disabled",
-                fixed: type === "float" ? 2 : 0,
             },
             number_string_format: true,
         };

@@ -68,16 +68,23 @@ pub struct CustomNumberFormat {
 impl CustomNumberFormat {
     fn initialize(ctx: &yew::prelude::Context<Self>) -> Self {
         let config = ctx.props().restored_config.clone();
+        let show_frac = config
+            .minimum_fraction_digits
+            .or(config.maximum_fraction_digits)
+            .or(config.rounding_increment)
+            .is_some();
+        let show_sig = config
+            .minimum_significant_digits
+            .or(config.maximum_significant_digits)
+            .is_some();
+        let disable_rounding_increment = show_sig
+            || show_frac
+            || !matches!(
+                config.rounding_priority,
+                Some(RoundingPriority::Auto) | None
+            );
+        let disable_rounding_priority = !(show_frac && show_sig);
         Self {
-            show_frac: config
-                .minimum_fraction_digits
-                .or(config.maximum_fraction_digits)
-                .or(config.rounding_increment)
-                .is_some(),
-            show_sig: config
-                .minimum_significant_digits
-                .or(config.maximum_significant_digits)
-                .is_some(),
             style: config
                 ._style
                 .as_ref()
@@ -89,7 +96,11 @@ impl CustomNumberFormat {
                 })
                 .unwrap_or_default(),
             config,
-            ..Default::default()
+            show_frac,
+            show_sig,
+            disable_rounding_increment,
+            disable_rounding_priority,
+            notation: None,
         }
     }
 }
@@ -245,7 +256,7 @@ impl Component for CustomNumberFormat {
                 self.config.rounding_priority,
                 Some(RoundingPriority::Auto) | None
             );
-        self.disable_rounding_priority = self.show_sig || self.show_frac;
+        self.disable_rounding_priority = !(self.show_frac && self.show_sig);
 
         let filtered_config = self.config.clone().filter_default(
             self.show_sig,

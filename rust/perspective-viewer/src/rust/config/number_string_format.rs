@@ -106,7 +106,7 @@ pub enum RoundingMode {
     Floor,
     Expand,
     Trunc,
-    HalfCiel,
+    HalfCeil,
     HalfFloor,
     #[default]
     HalfExpand,
