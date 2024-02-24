@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.7.1/dist/cdn/perspective.js";
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.8.0/dist/cdn/perspective.js";
 import { manaStyleListener } from "./mana_cost_utils.js";
 
 import "./upload_dialog.js";
@@ -69,9 +69,10 @@ class MagicApp extends HTMLElement {
     }
 
     async on_new_view(event) {
-        const grid = await event.detail.widget.viewer.getPlugin("Datagrid");
+        const viewer = event.detail.widget.viewer;
+        const grid = await viewer.getPlugin("Datagrid");
         grid.regular_table.addStyleListener(
-            manaStyleListener.bind(grid.regular_table, await SYMBOLS)
+            manaStyleListener.bind(grid.regular_table, await SYMBOLS, viewer)
         );
     }
 
@@ -94,8 +95,8 @@ class MagicApp extends HTMLElement {
             <div id="app">
                 <div id="header">
                     <a href="https://perspective.finos.org">
-                        <img 
-                            height="12" 
+                        <img
+                            height="12"
                             src="https://raw.githubusercontent.com/finos/perspective/master/docs/static/svg/perspective-logo-light.svg" />
                     </a>
                     <label>Magic: the Gathering Deck Demo</label>

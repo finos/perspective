@@ -54,13 +54,20 @@ perspective-workspace {
     --preload-fonts: "Goudy Bookletter 1911:400" !important;
 }
 
-perspective-viewer td img {
+/*
+ * How to style elements that we've added to the datagrid,
+ *   - when Shadow DOM is not enabled,
+ *   - when it is enabled.
+ */
+perspective-viewer td img,
+perspective-viewer-datagrid::part(manacoin) {
     width: 16px;
     height: 16px;
     margin-right: 2px;
 }
 
-perspective-viewer td span.mcolor {
+perspective-viewer td span.mcolor,
+perspective-viewer-datagrid::part(mcolor) {
     padding: 0px 4px;
     border-radius: 2px;
     color: white;
