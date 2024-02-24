@@ -20,8 +20,8 @@ t_regex_mapping::intern(const std::string& pattern) {
         return m_regex_map[pattern].get();
     }
 
-    std::shared_ptr<RE2> compiled_pattern
-        = std::make_shared<RE2>(pattern, RE2::Quiet);
+    std::shared_ptr<RE2> compiled_pattern =
+        std::make_shared<RE2>(pattern, RE2::Quiet);
 
     if (!compiled_pattern->ok()) {
         // TODO: provide a better error message when the regex can't compile.

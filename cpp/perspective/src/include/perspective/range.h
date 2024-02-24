@@ -23,17 +23,21 @@ class PERSPECTIVE_EXPORT t_range {
 public:
     t_range(t_uindex bridx, t_uindex eridx);
 
-    t_range(t_uindex bridx, t_uindex eridx, t_uindex bcidx, t_uindex beidx);
+    t_range(t_uindex bridx, t_uindex eridx, t_uindex bcidx, t_uindex ecidx);
 
     t_range(); // select all
 
-    t_range(const std::vector<t_tscalar>& brpath,
-        const std::vector<t_tscalar>& erpath);
+    t_range(
+        const std::vector<t_tscalar>& brpath,
+        const std::vector<t_tscalar>& erpath
+    );
 
-    t_range(const std::vector<t_tscalar>& brpath,
+    t_range(
+        const std::vector<t_tscalar>& brpath,
         const std::vector<t_tscalar>& erpath,
         const std::vector<t_tscalar>& bcpath,
-        const std::vector<t_tscalar>& ecpath);
+        const std::vector<t_tscalar>& ecpath
+    );
 
     t_range(const std::string& expr_name);
 

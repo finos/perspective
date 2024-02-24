@@ -16,30 +16,30 @@
 #include <boost/functional/hash.hpp>
 namespace perspective {
 
-t_none::t_none() {}
+t_none::t_none() = default;
 
 bool
-t_none::operator==(const t_none&) const {
+t_none::operator==(const t_none& /*unused*/) const {
     return true;
 }
 
 bool
-t_none::operator<(const t_none&) const {
+t_none::operator<(const t_none& /*unused*/) const {
     return false;
 }
 
 bool
-t_none::operator<=(const t_none&) const {
+t_none::operator<=(const t_none& /*unused*/) const {
     return true;
 }
 
 bool
-t_none::operator>(const t_none&) const {
+t_none::operator>(const t_none& /*unused*/) const {
     return true;
 }
 
 bool
-t_none::operator>=(const t_none&) const {
+t_none::operator>=(const t_none& /*unused*/) const {
     return true;
 }
 

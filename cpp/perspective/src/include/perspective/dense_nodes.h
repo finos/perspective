@@ -28,13 +28,19 @@ struct PERSPECTIVE_EXPORT t_dense_tnode {
     t_uindex m_nleaves;
 };
 
-PERSPECTIVE_EXPORT void fill_dense_tnode(t_dense_tnode* node, t_uindex idx,
-    t_uindex pidx, t_uindex fcidx, t_uindex nchild, t_uindex flidx,
-    t_uindex nleaves);
+PERSPECTIVE_EXPORT void fill_dense_tnode(
+    t_dense_tnode* node,
+    t_uindex idx,
+    t_uindex pidx,
+    t_uindex fcidx,
+    t_uindex nchild,
+    t_uindex flidx,
+    t_uindex nleaves
+);
 
 } // end namespace perspective
 
 namespace std {
-PERSPECTIVE_EXPORT std::ostream& operator<<(
-    std::ostream& os, const perspective::t_dense_tnode& s);
+PERSPECTIVE_EXPORT std::ostream&
+operator<<(std::ostream& os, const perspective::t_dense_tnode& s);
 }

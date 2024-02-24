@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-
 #pragma once
 #include <perspective/first.h>
 #include <perspective/base.h>
@@ -391,7 +390,7 @@ t_tscalar::compare_common(const t_tscalar& rhs) const {
         default: {
 #ifdef PSP_DEBUG
             std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type "
-                      << m_type << std::endl;
+                      << m_type << "\n";
 #endif
             return false;
         }
@@ -448,10 +447,10 @@ struct hash<perspective::t_tscalar> {
     }
 };
 
-PERSPECTIVE_EXPORT std::ostream& operator<<(
-    std::ostream& os, const perspective::t_tscalar& t);
-PERSPECTIVE_EXPORT std::ostream& operator<<(
-    std::ostream& os, const std::vector<perspective::t_tscalar>& t);
+PERSPECTIVE_EXPORT std::ostream&
+operator<<(std::ostream& os, const perspective::t_tscalar& t);
+PERSPECTIVE_EXPORT std::ostream&
+operator<<(std::ostream& os, const std::vector<perspective::t_tscalar>& t);
 
 /**
  * exprtk uses std::numeric_limits<T>::quiet_NaN() and min_exponent10.

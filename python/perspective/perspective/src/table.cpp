@@ -32,10 +32,20 @@ namespace binding {
      */
 
     std::shared_ptr<Table>
-    _make_table_py(std::shared_ptr<Table> tbl, std::shared_ptr<t_gnode> gnode,
-        std::shared_ptr<t_pool> pool, std::uint32_t offset,
-        t_data_accessor accessor, std::uint32_t limit, std::string index,
-        t_op op, bool is_update, bool is_arrow, bool is_csv, t_uindex port_id) {
+    _make_table_py(
+        std::shared_ptr<Table> tbl,
+        std::shared_ptr<t_gnode> gnode,
+        std::shared_ptr<t_pool> pool,
+        std::uint32_t offset,
+        t_data_accessor accessor,
+        std::uint32_t limit,
+        std::string index,
+        t_op op,
+        bool is_update,
+        bool is_arrow,
+        bool is_csv,
+        t_uindex port_id
+    ) {
         bool table_initialized = is_update;
         void* ptr = nullptr;
 
@@ -45,8 +55,8 @@ namespace binding {
         numpy::NumpyLoader numpy_loader(accessor);
 
         // don't call `is_numpy` on an arrow binary
-        bool is_numpy
-            = !is_arrow && !is_csv && accessor.attr("_is_numpy").cast<bool>();
+        bool is_numpy =
+            !is_arrow && !is_csv && accessor.attr("_is_numpy").cast<bool>();
 
         // Determine metadata
         bool is_delete = op == OP_DELETE;
@@ -63,7 +73,8 @@ namespace binding {
                 binary_size = bytes.attr("__len__")().cast<std::int32_t>();
                 ptr = malloc(binary_size);
                 std::memcpy(
-                    ptr, bytes.cast<std::string>().c_str(), binary_size);
+                    ptr, bytes.cast<std::string>().c_str(), binary_size
+                );
             }
 
             {
@@ -71,7 +82,8 @@ namespace binding {
 
                 // With the GIL released, load the arrow
                 if (is_csv) {
-                    auto map = std::unordered_map<std::string,
+                    auto map = std::unordered_map<
+                        std::string,
                         std::shared_ptr<arrow::DataType>>();
 
                     if (is_update) {
@@ -85,50 +97,51 @@ namespace binding {
                             const t_dtype& type = data_types[idx];
                             switch (type) {
                                 case DTYPE_FLOAT32:
-                                    map[name]
-                                        = std::make_shared<arrow::FloatType>();
+                                    map[name] =
+                                        std::make_shared<arrow::FloatType>();
                                     break;
                                 case DTYPE_FLOAT64:
-                                    map[name]
-                                        = std::make_shared<arrow::DoubleType>();
+                                    map[name] =
+                                        std::make_shared<arrow::DoubleType>();
                                     break;
                                 case DTYPE_STR:
-                                    map[name]
-                                        = std::make_shared<arrow::StringType>();
+                                    map[name] =
+                                        std::make_shared<arrow::StringType>();
                                     break;
                                 case DTYPE_BOOL:
-                                    map[name] = std::make_shared<
-                                        arrow::BooleanType>();
+                                    map[name] =
+                                        std::make_shared<arrow::BooleanType>();
                                     break;
                                 case DTYPE_UINT32:
-                                    map[name]
-                                        = std::make_shared<arrow::UInt32Type>();
+                                    map[name] =
+                                        std::make_shared<arrow::UInt32Type>();
                                     break;
                                 case DTYPE_UINT64:
-                                    map[name]
-                                        = std::make_shared<arrow::UInt64Type>();
+                                    map[name] =
+                                        std::make_shared<arrow::UInt64Type>();
                                     break;
                                 case DTYPE_INT32:
-                                    map[name]
-                                        = std::make_shared<arrow::Int32Type>();
+                                    map[name] =
+                                        std::make_shared<arrow::Int32Type>();
                                     break;
                                 case DTYPE_INT64:
-                                    map[name]
-                                        = std::make_shared<arrow::Int64Type>();
+                                    map[name] =
+                                        std::make_shared<arrow::Int64Type>();
                                     break;
                                 case DTYPE_TIME:
-                                    map[name] = std::make_shared<
-                                        arrow::TimestampType>();
+                                    map[name] =
+                                        std::make_shared<arrow::TimestampType>(
+                                        );
                                     break;
                                 case DTYPE_DATE:
-                                    map[name]
-                                        = std::make_shared<arrow::Date64Type>();
+                                    map[name] =
+                                        std::make_shared<arrow::Date64Type>();
                                     break;
                                 default:
                                     std::stringstream ss;
                                     ss << "Error loading arrow type "
                                        << dtype_to_str(type) << " for column "
-                                       << name << std::endl;
+                                       << name << "\n";
                                     PSP_COMPLAIN_AND_ABORT(ss.str())
                                     break;
                             }
@@ -154,8 +167,8 @@ namespace binding {
                          * int/float needs to be promoted to a 64-bit int/float
                          * if specified in the Arrow schema.
                          */
-                        std::vector<t_dtype> arrow_dtypes
-                            = arrow_loader.types();
+                        std::vector<t_dtype> arrow_dtypes =
+                            arrow_loader.types();
                         for (auto idx = 0; idx < column_names.size(); ++idx) {
                             const std::string& name = column_names[idx];
                             bool can_retype = name != "psp_okey"
@@ -172,9 +185,10 @@ namespace binding {
                                             << column_names[idx]
                                             << "` to maintain consistency with "
                                                "Arrow type."
-                                            << std::endl;
+                                            << "\n";
                                         gnode->promote_column(
-                                            name, arrow_dtype);
+                                            name, arrow_dtype
+                                        );
                                     } break;
                                     default: {
                                         continue;
@@ -184,8 +198,8 @@ namespace binding {
                         }
                     }
                     // Make sure promoted types are used to construct data table
-                    auto new_schema
-                        = gnode->get_output_schema().drop({"psp_okey"});
+                    auto new_schema =
+                        gnode->get_output_schema().drop({"psp_okey"});
                     data_types = new_schema.types();
                 } else {
                     column_names = arrow_loader.names();
@@ -213,8 +227,8 @@ namespace binding {
 
             // `column_names` and `data_types` contain every single column in
             // the dataset, as well as `__INDEX__` if it exists.
-            column_names
-                = accessor.attr("names")().cast<std::vector<std::string>>();
+            column_names =
+                accessor.attr("names")().cast<std::vector<std::string>>();
             data_types = accessor.attr("types")().cast<std::vector<t_dtype>>();
         } else if (is_numpy) {
             /**
@@ -233,23 +247,31 @@ namespace binding {
             // Infer data type for each column, and then use a composite of
             // numpy dtype, inferred `t_dtype`, and stringified numpy dtype to
             // get the final, canonical data type mapping.
-            std::vector<t_dtype> inferred_types
-                = get_data_types(accessor.attr("data")(), 1, column_names,
-                    accessor.attr("date_validator")().cast<t_val>());
+            std::vector<t_dtype> inferred_types = get_data_types(
+                accessor.attr("data")(),
+                1,
+                column_names,
+                accessor.attr("date_validator")().cast<t_val>()
+            );
             data_types = numpy_loader.reconcile_dtypes(inferred_types);
         } else {
             // Infer names and types
             t_val data = accessor.attr("data")();
-            std::int32_t format
-                = accessor.attr("format")().cast<std::int32_t>();
+            std::int32_t format =
+                accessor.attr("format")().cast<std::int32_t>();
             column_names = get_column_names(data, format);
-            data_types = get_data_types(data, format, column_names,
-                accessor.attr("date_validator")().cast<t_val>());
+            data_types = get_data_types(
+                data,
+                format,
+                column_names,
+                accessor.attr("date_validator")().cast<t_val>()
+            );
         }
 
         if (!table_initialized) {
             tbl = std::make_shared<Table>(
-                pool, column_names, data_types, limit, index);
+                pool, column_names, data_types, limit, index
+            );
             offset = 0;
         }
 
@@ -258,8 +280,8 @@ namespace binding {
         t_schema input_schema(column_names, data_types);
 
         // strip implicit index, if present
-        auto implicit_index_it
-            = std::find(column_names.begin(), column_names.end(), "__INDEX__");
+        auto implicit_index_it =
+            std::find(column_names.begin(), column_names.end(), "__INDEX__");
         if (implicit_index_it != column_names.end()) {
             auto idx = std::distance(column_names.begin(), implicit_index_it);
             // position of the column is at the same index in both vectors
@@ -269,9 +291,11 @@ namespace binding {
 
         // Create output schema - contains only columns to be displayed to the
         // user
-        t_schema output_schema(column_names,
-            data_types); // names + types might have been mutated at this point
-                         // after implicit index removal
+        t_schema output_schema(
+            column_names,
+            data_types
+        ); // names + types might have been mutated at this point
+           // after implicit index removal
         t_data_table data_table(output_schema);
         data_table.init();
         std::uint32_t row_count;
@@ -281,17 +305,26 @@ namespace binding {
             row_count = arrow_loader.row_count();
             data_table.extend(row_count);
             arrow_loader.fill_table(
-                data_table, input_schema, index, offset, limit, is_update);
+                data_table, input_schema, index, offset, limit, is_update
+            );
         } else if (is_numpy) {
             row_count = numpy_loader.row_count();
             data_table.extend(row_count);
             numpy_loader.fill_table(
-                data_table, input_schema, index, offset, limit, is_update);
+                data_table, input_schema, index, offset, limit, is_update
+            );
         } else {
             row_count = accessor.attr("row_count")().cast<std::int32_t>();
             data_table.extend(row_count);
-            _fill_data(data_table, accessor, input_schema, index, offset, limit,
-                is_update);
+            _fill_data(
+                data_table,
+                accessor,
+                input_schema,
+                index,
+                offset,
+                limit,
+                is_update
+            );
         }
 
         if (is_arrow && !is_csv) {
@@ -306,22 +339,47 @@ namespace binding {
     }
 
     std::shared_ptr<Table>
-    make_table_py(t_data_accessor accessor, std::uint32_t limit,
-        std::string index, t_op op, bool is_arrow, bool is_csv,
-        t_uindex port_id) {
+    make_table_py(
+        t_data_accessor accessor,
+        std::uint32_t limit,
+        std::string index,
+        t_op op,
+        bool is_arrow,
+        bool is_csv,
+        t_uindex port_id
+    ) {
 
         std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
         std::shared_ptr<Table> tbl;
         std::shared_ptr<t_gnode> gnode;
 
-        return _make_table_py(tbl, gnode, pool, 0, accessor, limit, index, op,
-            false, is_arrow, is_csv, port_id);
+        return _make_table_py(
+            tbl,
+            gnode,
+            pool,
+            0,
+            accessor,
+            limit,
+            index,
+            op,
+            false,
+            is_arrow,
+            is_csv,
+            port_id
+        );
     }
 
     std::shared_ptr<Table>
-    update_table_py(t_val table, t_data_accessor accessor, std::uint32_t limit,
-        std::string index, t_op op, bool is_arrow, bool is_csv,
-        t_uindex port_id) {
+    update_table_py(
+        t_val table,
+        t_data_accessor accessor,
+        std::uint32_t limit,
+        std::string index,
+        t_op op,
+        bool is_arrow,
+        bool is_csv,
+        t_uindex port_id
+    ) {
 
         std::shared_ptr<Table> tbl = table.cast<std::shared_ptr<Table>>();
         std::shared_ptr<t_pool> pool = tbl->get_pool();
@@ -331,8 +389,20 @@ namespace binding {
         std::shared_ptr<t_gnode> gnode = tbl->get_gnode();
         std::uint32_t offset = tbl->get_offset();
 
-        return _make_table_py(tbl, gnode, pool, offset, accessor, limit, index,
-            op, true, is_arrow, is_csv, port_id);
+        return _make_table_py(
+            tbl,
+            gnode,
+            pool,
+            offset,
+            accessor,
+            limit,
+            index,
+            op,
+            true,
+            is_arrow,
+            is_csv,
+            port_id
+        );
     }
 
 } // namespace binding

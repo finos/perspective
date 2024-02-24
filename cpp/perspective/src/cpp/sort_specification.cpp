@@ -14,31 +14,35 @@
 #include <perspective/base.h>
 #include <perspective/sort_specification.h>
 
+#include <utility>
+
 namespace perspective {
 
 t_sortspec::t_sortspec(
-    const std::string& column_name, t_index agg_index, t_sorttype sort_type)
-    : m_colname(column_name)
-    , m_agg_index(agg_index)
-    , m_sort_type(sort_type)
-    , m_sortspec_type(SORTSPEC_TYPE_IDX) {}
+    std::string column_name, t_index agg_index, t_sorttype sort_type
+) :
+    m_colname(std::move(column_name)),
+    m_agg_index(agg_index),
+    m_sort_type(sort_type),
+    m_sortspec_type(SORTSPEC_TYPE_IDX) {}
 
-t_sortspec::t_sortspec(t_index agg_index, t_sorttype sort_type)
-    : m_agg_index(agg_index)
-    , m_sort_type(sort_type)
-    , m_sortspec_type(SORTSPEC_TYPE_IDX) {}
+t_sortspec::t_sortspec(t_index agg_index, t_sorttype sort_type) :
+    m_agg_index(agg_index),
+    m_sort_type(sort_type),
+    m_sortspec_type(SORTSPEC_TYPE_IDX) {}
 
 t_sortspec::t_sortspec(
-    const std::vector<t_tscalar>& path, t_index agg_index, t_sorttype sort_type)
-    : m_agg_index(agg_index)
-    , m_sort_type(sort_type)
-    , m_sortspec_type(SORTSPEC_TYPE_PATH)
-    , m_path(path) {}
+    const std::vector<t_tscalar>& path, t_index agg_index, t_sorttype sort_type
+) :
+    m_agg_index(agg_index),
+    m_sort_type(sort_type),
+    m_sortspec_type(SORTSPEC_TYPE_PATH),
+    m_path(path) {}
 
-t_sortspec::t_sortspec()
-    : m_agg_index(INVALID_INDEX)
-    , m_sort_type(SORTTYPE_NONE)
-    , m_sortspec_type(SORTSPEC_TYPE_IDX) {}
+t_sortspec::t_sortspec() :
+    m_agg_index(INVALID_INDEX),
+    m_sort_type(SORTTYPE_NONE),
+    m_sortspec_type(SORTSPEC_TYPE_IDX) {}
 
 bool
 t_sortspec::operator==(const t_sortspec& s2) const {
@@ -52,8 +56,9 @@ t_sortspec::operator!=(const t_sortspec& s2) const {
 
 std::vector<t_sorttype>
 get_sort_orders(const std::vector<t_sortspec>& vec) {
-    if (vec.empty())
-        return std::vector<t_sorttype>();
+    if (vec.empty()) {
+        return {};
+    }
     auto num = vec.size();
     std::vector<t_sorttype> sort_orders(num);
 

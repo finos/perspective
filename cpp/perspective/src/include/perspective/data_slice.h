@@ -45,11 +45,17 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT t_data_slice {
 public:
-    t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-        t_uindex end_row, t_uindex start_col, t_uindex end_col,
-        t_uindex row_offset, t_uindex col_offset,
+    t_data_slice(
+        std::shared_ptr<CTX_T> ctx,
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col,
+        t_uindex row_offset,
+        t_uindex col_offset,
         const std::vector<t_tscalar>& slice,
-        const std::vector<std::vector<t_tscalar>>& column_names);
+        const std::vector<std::vector<t_tscalar>>& column_names
+    );
 
     /**
      * @brief Construct a new data slice, with a vector of row indices on which
@@ -60,12 +66,18 @@ public:
      * @param slice
      * @param row_indices
      */
-    t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-        t_uindex end_row, t_uindex start_col, t_uindex end_col,
-        t_uindex row_offset, t_uindex col_offset,
+    t_data_slice(
+        std::shared_ptr<CTX_T> ctx,
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col,
+        t_uindex row_offset,
+        t_uindex col_offset,
         const std::vector<t_tscalar>& slice,
         const std::vector<std::vector<t_tscalar>>& column_names,
-        const std::vector<t_uindex>& column_indices);
+        const std::vector<t_uindex>& column_indices
+    );
 
     ~t_data_slice();
 

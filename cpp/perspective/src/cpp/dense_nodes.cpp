@@ -27,8 +27,15 @@ operator<<(std::ostream& os, const perspective::t_dense_tnode& s) {
 namespace perspective {
 
 void
-fill_dense_tnode(t_dense_tnode* node, t_uindex idx, t_uindex pidx,
-    t_uindex fcidx, t_uindex nchild, t_uindex flidx, t_uindex nleaves) {
+fill_dense_tnode(
+    t_dense_tnode* node,
+    t_uindex idx,
+    t_uindex pidx,
+    t_uindex fcidx,
+    t_uindex nchild,
+    t_uindex flidx,
+    t_uindex nleaves
+) {
     node->m_idx = idx;
     node->m_pidx = pidx;
     node->m_fcidx = fcidx;

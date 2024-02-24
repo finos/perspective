@@ -14,30 +14,32 @@
 #include <perspective/vocab.h>
 #include <tsl/hopscotch_set.h>
 
+#include <memory>
+
 namespace perspective {
 
-t_vocab::t_vocab()
-    : m_vlenidx(0) {
-    m_vlendata.reset(new t_lstore);
-    m_extents.reset(new t_lstore);
+t_vocab::t_vocab() : m_vlenidx(0) {
+    m_vlendata = std::make_shared<t_lstore>();
+    m_extents = std::make_shared<t_lstore>();
 }
 
-t_vocab::t_vocab(const t_column_recipe& r)
-    : m_vlenidx(r.m_vlenidx) {
+t_vocab::t_vocab(const t_column_recipe& r) : m_vlenidx(r.m_vlenidx) {
     if (is_vlen_dtype(r.m_dtype)) {
-        m_vlendata.reset(new t_lstore(r.m_vlendata));
-        m_extents.reset(new t_lstore(r.m_extents));
+        m_vlendata = std::make_shared<t_lstore>(r.m_vlendata);
+        m_extents = std::make_shared<t_lstore>(r.m_extents);
     } else {
-        m_vlendata.reset(new t_lstore);
-        m_extents.reset(new t_lstore);
+        m_vlendata = std::make_shared<t_lstore>();
+        m_extents = std::make_shared<t_lstore>();
     }
 }
 
-t_vocab::t_vocab(const t_lstore_recipe& vlendata_recipe,
-    const t_lstore_recipe& extents_recipe)
-    : m_vlenidx(0) {
-    m_vlendata.reset(new t_lstore(vlendata_recipe));
-    m_extents.reset(new t_lstore(extents_recipe));
+t_vocab::t_vocab(
+    const t_lstore_recipe& vlendata_recipe,
+    const t_lstore_recipe& extents_recipe
+) :
+    m_vlenidx(0) {
+    m_vlendata = std::make_shared<t_lstore>(vlendata_recipe);
+    m_extents = std::make_shared<t_lstore>(extents_recipe);
 }
 
 void
@@ -60,8 +62,9 @@ bool
 t_vocab::string_exists(const char* c, t_uindex& interned) const {
     auto iter = m_map.find(c);
 
-    if (iter == m_map.end())
+    if (iter == m_map.end()) {
         return false;
+    }
 
     interned = iter->second;
     return true;
@@ -75,7 +78,9 @@ t_vocab::get_interned(const char* s) {
 
     t_sidxmap::iterator iter = m_map.find(s);
 
-    t_uindex idx, bidx, eidx;
+    t_uindex idx;
+    t_uindex bidx;
+    t_uindex eidx;
     t_uindex len = strlen(s) + 1;
 
     if (iter == m_map.end()) {
@@ -84,13 +89,13 @@ t_vocab::get_interned(const char* s) {
         bidx = m_vlendata->size();
         eidx = bidx + len;
         const void* obase = m_vlendata->get_nth<const char>(0);
-        const void* oebase
-            = m_extents->get_nth<std::pair<t_uindex, t_uindex>>(0);
+        const void* oebase =
+            m_extents->get_nth<std::pair<t_uindex, t_uindex>>(0);
         m_vlendata->push_back(static_cast<const void*>(s), len);
         m_extents->push_back(std::pair<t_uindex, t_uindex>(bidx, eidx));
         const void* nbase = m_vlendata->get_nth<const char>(0);
-        const void* nebase
-            = m_extents->get_nth<std::pair<t_uindex, t_uindex>>(0);
+        const void* nebase =
+            m_extents->get_nth<std::pair<t_uindex, t_uindex>>(0);
         if ((obase == nbase) && (oebase == nebase)) {
             m_map[unintern_c(idx)] = idx;
         } else {
@@ -140,21 +145,26 @@ t_vocab::verify() const {
         std::string curstr = std::string(rlookup.at(idx));
 
         PSP_VERBOSE_ASSERT(
-            seen.find(curstr) == seen.end(), "string encountered again");
+            seen.find(curstr) == seen.end(), "string encountered again"
+        );
 
         PSP_VERBOSE_ASSERT(
-            std::string(unintern_c(idx)) == curstr, "String mismatch");
+            std::string(unintern_c(idx)) == curstr, "String mismatch"
+        );
     }
 }
 
 void
 t_vocab::verify_size() const {
     PSP_VERBOSE_ASSERT(
-        m_vlenidx == m_map.size(), "Size and vlenidx size dont line up");
+        m_vlenidx == m_map.size(), "Size and vlenidx size dont line up"
+    );
 
-    PSP_VERBOSE_ASSERT(m_vlenidx * sizeof(std::pair<t_uindex, t_uindex>)
+    PSP_VERBOSE_ASSERT(
+        m_vlenidx * sizeof(std::pair<t_uindex, t_uindex>)
             <= m_extents->capacity(),
-        "Not enough space reserved for extents");
+        "Not enough space reserved for extents"
+    );
 }
 
 t_uindex
@@ -167,7 +177,8 @@ t_vocab::nbytes() const {
 
 void
 t_vocab::fill(
-    const t_lstore& o_vlen, const t_lstore& o_extents, t_uindex vlenidx) {
+    const t_lstore& o_vlen, const t_lstore& o_extents, t_uindex vlenidx
+) {
     m_vlendata->fill(o_vlen);
     m_extents->fill(o_extents);
     m_vlenidx = vlenidx;
@@ -185,8 +196,7 @@ void
 t_vocab::pprint_vocabulary() const {
     std::cout << "vocabulary =========\n";
     for (t_uindex idx = 0; idx < m_vlenidx; ++idx) {
-        std::cout << "\t" << idx << " => '" << unintern_c(idx) << "'"
-                  << std::endl;
+        std::cout << "\t" << idx << " => '" << unintern_c(idx) << "'" << '\n';
     }
 
     std::cout << "end vocabulary =========\n";
@@ -194,8 +204,8 @@ t_vocab::pprint_vocabulary() const {
 
 const char*
 t_vocab::unintern_c(t_uindex idx) const {
-    const std::pair<t_uindex, t_uindex>* p
-        = m_extents->get_nth<std::pair<t_uindex, t_uindex>>(idx);
+    const std::pair<t_uindex, t_uindex>* p =
+        m_extents->get_nth<std::pair<t_uindex, t_uindex>>(idx);
     const char* rv = static_cast<const char*>(m_vlendata->get_ptr(p->first));
     return rv;
 }

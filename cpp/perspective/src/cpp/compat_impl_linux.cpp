@@ -29,9 +29,17 @@
 #include <stdio.h>
 
 namespace perspective {
-static void map_file_internal_(const std::string& fname, t_fflag fflag,
-    t_fflag fmode, t_fflag creation_disposition, t_fflag mprot, t_fflag mflag,
-    bool is_read, t_uindex size, t_rfmapping& out);
+static void map_file_internal_(
+    const std::string& fname,
+    t_fflag fflag,
+    t_fflag fmode,
+    t_fflag creation_disposition,
+    t_fflag mprot,
+    t_fflag mflag,
+    bool is_read,
+    t_uindex size,
+    t_rfmapping& out
+);
 
 t_uindex
 file_size(t_handle h) {
@@ -62,9 +70,17 @@ t_rfmapping::~t_rfmapping() {
 }
 
 static void
-map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
-    t_fflag creation_disposition, t_fflag mprot, t_fflag mflag, bool is_read,
-    t_uindex size, t_rfmapping& out) {
+map_file_internal_(
+    const std::string& fname,
+    t_fflag fflag,
+    t_fflag fmode,
+    t_fflag creation_disposition,
+    t_fflag mprot,
+    t_fflag mflag,
+    bool is_read,
+    t_uindex size,
+    t_rfmapping& out
+) {
     t_file_handle fh(open(fname.c_str(), fflag, fmode));
 
     PSP_VERBOSE_ASSERT(fh.valid(), "Error opening file");
@@ -90,17 +106,32 @@ map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
 
 void
 map_file_read(const std::string& fname, t_rfmapping& out) {
-    map_file_internal_(fname, O_RDONLY, S_IRUSR,
+    map_file_internal_(
+        fname,
+        O_RDONLY,
+        S_IRUSR,
         0, // no disposition
-        PROT_READ, MAP_SHARED, true, 0, out);
+        PROT_READ,
+        MAP_SHARED,
+        true,
+        0,
+        out
+    );
 }
 
 void
 map_file_write(const std::string& fname, t_uindex size, t_rfmapping& out) {
-    return map_file_internal_(fname, O_RDWR | O_TRUNC | O_CREAT,
+    return map_file_internal_(
+        fname,
+        O_RDWR | O_TRUNC | O_CREAT,
         S_IRUSR | S_IWUSR,
         0, // no disposition
-        PROT_WRITE | PROT_READ, MAP_SHARED, false, size, out);
+        PROT_WRITE | PROT_READ,
+        MAP_SHARED,
+        false,
+        size,
+        out
+    );
 }
 
 std::int64_t
@@ -136,11 +167,20 @@ psp_curmem() {
         abort();
     }
 
-    PSP_VERBOSE_ASSERT(fscanf(f, "%ld %ld %ld %ld %ld %ld %ld", &result.m_size,
-                           &result.m_resident, &result.m_share, &result.m_text,
-                           &result.m_lib, &result.m_data, &result.m_dt)
-            == 7,
-        "Failed to read memory size");
+    PSP_VERBOSE_ASSERT(
+        fscanf(
+            f,
+            "%ld %ld %ld %ld %ld %ld %ld",
+            &result.m_size,
+            &result.m_resident,
+            &result.m_share,
+            &result.m_text,
+            &result.m_lib,
+            &result.m_data,
+            &result.m_dt
+        ) == 7,
+        "Failed to read memory size"
+    );
     fclose(f);
     return result.m_resident * multiplier;
 }

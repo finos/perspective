@@ -159,6 +159,12 @@ class PSPBuild(build_ext):
         build_args = ["--config", cfg]
         env = os.environ.copy()
 
+        # Breaks universal binaries on MacOS somehow :'(
+        # if "LLVM_ROOT" in os.environ:
+        #     llvm_module = os.path.join(ext.sourcedir, "cmake", "modules", "LLVMToolchain.cmake")
+        #     cmake_args.append("-DCMAKE_TOOLCHAIN_FILE={}".format(llvm_module))
+        #     env["LLVM_ROOT"] = os.environ["LLVM_ROOT"]
+
         if platform.system() == "Windows":
             import distutils.msvccompiler as dm
 

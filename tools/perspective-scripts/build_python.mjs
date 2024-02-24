@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as url from "url";
+import * as os from "os";
 
 import {
     default as sh,
@@ -58,8 +59,17 @@ if (IS_CI) {
 }
 
 if (IS_DOCKER) {
-    sh.docker`${cmd.cwd("python/perspective")}`.runSync();
+    sh.docker`${cmd.cwd("python/perspective").env({
+        LLVM_ROOT: `${__dirname}/../../.llvm/llvm-toolchain`,
+    })}`.runSync();
 } else {
     const python_path = sh.path`${__dirname}/../../python/perspective`;
-    sh`${cmd}`.cwd(python_path).log().runSync();
+    const cmd2 = sh`${cmd}`.cwd(python_path);
+
+    // use MSVC on Windows
+    if (os.platform() !== "win32") {
+        cmd2.env({ LLVM_ROOT: `${__dirname}/../../.llvm/llvm-toolchain` });
+    }
+
+    cmd2.log().runSync();
 }

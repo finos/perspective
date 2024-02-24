@@ -14,8 +14,7 @@
 
 namespace perspective {
 
-t_expression_vocab::t_expression_vocab()
-    : m_empty_string("") {
+t_expression_vocab::t_expression_vocab() {
     // Allocate 4096 bytes per page
     m_max_vocab_size = 64 * 64;
 
@@ -55,7 +54,7 @@ t_expression_vocab::get_empty_string() const {
 
 void
 t_expression_vocab::pprint() const {
-    for (auto& vocab : m_vocabs) {
+    for (const auto& vocab : m_vocabs) {
         vocab.pprint_vocabulary();
     }
 }

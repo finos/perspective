@@ -13,6 +13,7 @@
 import * as url from "url";
 import * as dotenv from "dotenv";
 import { lint_js } from "./lint.mjs";
+import * as cppLint from "./lint_cpp.mjs";
 
 if (import.meta.url.startsWith("file:")) {
     if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
@@ -25,5 +26,7 @@ if (import.meta.url.startsWith("file:")) {
         } else {
             lint_js(true);
         }
+
+        cppLint.fixFormatting();
     }
 }

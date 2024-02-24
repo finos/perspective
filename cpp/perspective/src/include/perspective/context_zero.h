@@ -47,14 +47,15 @@ public:
     void sort_by();
     std::vector<t_sortspec> get_sort_by() const;
 
-    std::pair<t_tscalar, t_tscalar> get_min_max(
-        const std::string& colname) const;
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname
+    ) const;
 
     using t_ctxbase<t_ctx0>::get_data;
 
 protected:
-    std::vector<t_tscalar> get_all_pkeys(
-        const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
+    std::vector<t_tscalar>
+    get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells
+    ) const;
 
     /**
      * @brief During a call to `notify` when the master table is being updated
@@ -76,9 +77,12 @@ protected:
      * @param curr
      * @param transitions
      */
-    void calc_step_delta(const t_data_table& flattened,
-        const t_data_table& prev, const t_data_table& curr,
-        const t_data_table& transitions);
+    void calc_step_delta(
+        const t_data_table& flattened,
+        const t_data_table& prev,
+        const t_data_table& curr,
+        const t_data_table& transitions
+    );
 
     void add_delta_pkey(t_tscalar pkey);
 
@@ -91,9 +95,11 @@ protected:
      * @param pkeys
      * @param out_data
      */
-    void read_column_from_gstate(const std::string& colname,
+    void read_column_from_gstate(
+        const std::string& colname,
         const std::vector<t_tscalar>& pkeys,
-        std::vector<t_tscalar>& out_data) const;
+        std::vector<t_tscalar>& out_data
+    ) const;
 
 private:
     std::shared_ptr<t_ftrav> m_traversal;

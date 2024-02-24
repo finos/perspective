@@ -24,15 +24,15 @@ enum t_port_mode {
 
 class PERSPECTIVE_EXPORT t_port {
 public:
-    t_port(t_port_mode mode, const t_schema& schema);
+    t_port(t_port_mode mode, t_schema schema);
     ~t_port();
     void init();
     std::shared_ptr<t_data_table> get_table();
-    void set_table(std::shared_ptr<t_data_table> tbl);
+    void set_table(std::shared_ptr<t_data_table> table);
 
     // append to existing table
-    void send(std::shared_ptr<const t_data_table> tbl);
-    void send(const t_data_table& tbl);
+    void send(const std::shared_ptr<const t_data_table>& table);
+    void send(const t_data_table& table);
 
     t_schema get_schema() const;
 

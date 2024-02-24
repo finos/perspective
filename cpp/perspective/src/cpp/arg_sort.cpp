@@ -20,18 +20,21 @@ namespace perspective {
 
 void
 argsort(std::vector<t_index>& output, const t_multisorter& sorter) {
-    if (output.empty())
+    if (output.empty()) {
         return;
+    }
     // Output should be the same size is v
-    for (t_index i = 0, loop_end = output.size(); i != loop_end; ++i)
+    for (t_index i = 0, loop_end = output.size(); i != loop_end; ++i) {
         output[i] = i;
+    }
     std::sort(output.begin(), output.end(), sorter);
 }
 
 t_argsort_comparator::t_argsort_comparator(
-    const std::vector<t_tscalar>& v, const t_sorttype& sort_type)
-    : m_v(v)
-    , m_sort_type(sort_type) {}
+    const std::vector<t_tscalar>& v, const t_sorttype& sort_type
+) :
+    m_v(v),
+    m_sort_type(sort_type) {}
 
 bool
 t_argsort_comparator::operator()(t_index a, t_index b) const {
@@ -61,11 +64,15 @@ t_argsort_comparator::operator()(t_index a, t_index b) const {
 }
 
 void
-simple_argsort(std::vector<t_tscalar>& v, std::vector<t_index>& output,
-    const t_sorttype& sort_type) {
+simple_argsort(
+    std::vector<t_tscalar>& v,
+    std::vector<t_index>& output,
+    const t_sorttype& sort_type
+) {
     // Output should be the same size is v
-    for (t_index i = 0, loop_end = output.size(); i != loop_end; ++i)
+    for (t_index i = 0, loop_end = output.size(); i != loop_end; ++i) {
         output[i] = i;
+    }
     t_argsort_comparator cmp(v, sort_type);
 
     std::sort(output.begin(), output.end(), cmp);

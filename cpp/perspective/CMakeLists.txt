@@ -201,15 +201,6 @@ if(PSP_WASM_BUILD)
     # ###################
     # EMSCRIPTEN BUILD #
     # ###################
-    execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
-    execute_process(COMMAND which em++ OUTPUT_VARIABLE EMPP)
-    string(STRIP "${EMCC}" EMCC)
-    string(STRIP "${EMPP}" EMPP)
-    set(CMAKE_C_COMPILER ${EMCC})
-    set(CMAKE_CXX_COMPILER ${EMPP})
-    set(CMAKE_TOOLCHAIN_FILE "$ENV{EMSCRIPTEN_ROOT}/cmake/Modules/Platform/Emscripten.cmake")
-    set(CMAKE_AR emar)
-    set(CMAKE_RANLIB emranlib)
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
@@ -300,9 +291,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
     else()
         psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-        include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
         if(WIN32)
+            include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
             add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
         endif()
     endif()
@@ -659,4 +650,41 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_compile_definitions(psp PRIVATE WIN32=1)
         target_compile_definitions(psp PRIVATE _WIN32=1)
     endif()
+endif()
+
+# C++ IDE Setup
+
+set(WORKSPACE_ROOT "${CMAKE_SOURCE_DIR}/../..")
+
+if(PSP_WASM_BUILD)
+    set(CLANGD_ADD_FLAGS "Add:
+        [
+            -target,
+            wasm32-unknown-emscripten,
+            --sysroot=${WORKSPACE_ROOT}/.emsdk/upstream/emscripten/cache/sysroot,
+        ]")
+else()
+    set(CLANGD_ADD_FLAGS "")
+endif()
+
+# Check for existence of .clangd file
+if(EXISTS ${CMAKE_SOURCE_DIR}/.clangd.in)
+    message(STATUS "${Cyan}Found ${CMAKE_SOURCE_DIR}/.clangd.in${ColorReset}")
+    # Configure the .clangd file from the template
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/.clangd.in
+        ${CMAKE_BINARY_DIR}/.clangd
+        @ONLY
+    )
+    # Symlink .clangd to the project root
+    execute_process(
+        COMMAND ln -sf ${CMAKE_BINARY_DIR}/.clangd ${WORKSPACE_ROOT}/.clangd
+    )
+    message(STATUS "${Cyan}Created ${CMAKE_BINARY_DIR}/.clangd${ColorReset}")
+else()
+    message("${Yellow}No .clangd.in found, skipping IDE setup${ColorReset}")
+endif()
+
+if(NOT WIN32)
+    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 endif()

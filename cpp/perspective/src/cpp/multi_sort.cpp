@@ -15,36 +15,37 @@
 #include <perspective/base.h>
 #include <perspective/multi_sort.h>
 #include <perspective/scalar.h>
+#include <utility>
 #include <vector>
 
 namespace perspective {
 
-t_mselem::t_mselem()
-    : m_pkey(mknone())
-    , m_order(0)
-    , m_deleted(false)
-    , m_updated(false) {}
+t_mselem::t_mselem() :
+    m_pkey(mknone()),
+    m_order(0),
+    m_deleted(false),
+    m_updated(false) {}
 
-t_mselem::t_mselem(const std::vector<t_tscalar>& row)
-    : m_row(row)
-    , m_pkey(mknone())
-    , m_order(0)
-    , m_deleted(false)
-    , m_updated(false) {}
+t_mselem::t_mselem(const std::vector<t_tscalar>& row) :
+    m_row(row),
+    m_pkey(mknone()),
+    m_order(0),
+    m_deleted(false),
+    m_updated(false) {}
 
-t_mselem::t_mselem(const std::vector<t_tscalar>& row, t_uindex order)
-    : m_row(row)
-    , m_pkey(mknone())
-    , m_order(order)
-    , m_deleted(false)
-    , m_updated(false) {}
+t_mselem::t_mselem(const std::vector<t_tscalar>& row, t_uindex order) :
+    m_row(row),
+    m_pkey(mknone()),
+    m_order(order),
+    m_deleted(false),
+    m_updated(false) {}
 
-t_mselem::t_mselem(const t_tscalar& pkey, const std::vector<t_tscalar>& row)
-    : m_row(row)
-    , m_pkey(pkey)
-    , m_order(0)
-    , m_deleted(false)
-    , m_updated(false) {}
+t_mselem::t_mselem(const t_tscalar& pkey, const std::vector<t_tscalar>& row) :
+    m_row(row),
+    m_pkey(pkey),
+    m_order(0),
+    m_deleted(false),
+    m_updated(false) {}
 
 t_mselem::t_mselem(const t_mselem& other) {
     m_pkey = other.m_pkey;
@@ -54,7 +55,7 @@ t_mselem::t_mselem(const t_mselem& other) {
     m_order = other.m_order;
 }
 
-t_mselem::t_mselem(t_mselem&& other) {
+t_mselem::t_mselem(t_mselem&& other) noexcept {
     m_pkey = other.m_pkey;
     m_row = std::move(other.m_row);
     m_deleted = other.m_deleted;
@@ -62,18 +63,10 @@ t_mselem::t_mselem(t_mselem&& other) {
     m_order = other.m_order;
 }
 
-t_mselem&
-t_mselem::operator=(const t_mselem& other) {
-    m_pkey = other.m_pkey;
-    m_row = other.m_row;
-    m_deleted = other.m_deleted;
-    m_order = other.m_order;
-    m_updated = other.m_updated;
-    return *this;
-}
+t_mselem& t_mselem::operator=(const t_mselem& other) = default;
 
 t_mselem&
-t_mselem::operator=(t_mselem&& other) {
+t_mselem::operator=(t_mselem&& other) noexcept {
     m_pkey = other.m_pkey;
     m_row = std::move(other.m_row);
     m_deleted = other.m_deleted;
@@ -82,9 +75,7 @@ t_mselem::operator=(t_mselem&& other) {
     return *this;
 }
 
-t_minmax_idx::t_minmax_idx(t_index mn, t_index mx)
-    : m_min(mn)
-    , m_max(mx) {}
+t_minmax_idx::t_minmax_idx(t_index mn, t_index mx) : m_min(mn), m_max(mx) {}
 
 // Given a vector return the indices of the
 // minimum and maximum elements in it.
@@ -92,8 +83,9 @@ t_minmax_idx
 get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype) {
     t_minmax_idx rval(-1, -1);
 
-    if (vec.empty())
+    if (vec.empty()) {
         return rval;
+    }
 
     // min, max
     std::pair<t_tscalar, t_tscalar> min_max;
@@ -156,9 +148,7 @@ to_double(const t_tscalar& c) {
     return c.to_double();
 }
 
-t_nancmp::t_nancmp()
-    : m_active(false)
-    , m_cmpval(CMP_OP_EQ) {}
+t_nancmp::t_nancmp() : m_active(false), m_cmpval(CMP_OP_EQ) {}
 
 t_nancmp
 nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
@@ -166,8 +156,9 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
     bool a_fp = a.is_floating_point();
     bool b_fp = b.is_floating_point();
 
-    if (!a_fp && !b_fp)
+    if (!a_fp && !b_fp) {
         return rval;
+    }
 
     double a_dbl = a.to_double();
     double b_dbl = b.to_double();
@@ -177,8 +168,9 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
 
     rval.m_active = a_nan || b_nan;
 
-    if (!rval.m_active)
+    if (!rval.m_active) {
         return rval;
+    }
 
     if (a_nan && b_nan) {
         rval.m_cmpval = CMP_OP_EQ;
@@ -215,13 +207,15 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
     return rval;
 }
 
-t_multisorter::t_multisorter(const std::vector<t_sorttype>& order)
-    : m_sort_order(order) {}
+t_multisorter::t_multisorter(const std::vector<t_sorttype>& order) :
+    m_sort_order(order) {}
 
-t_multisorter::t_multisorter(std::shared_ptr<const std::vector<t_mselem>> elems,
-    const std::vector<t_sorttype>& order)
-    : m_sort_order(order)
-    , m_elems(elems) {}
+t_multisorter::t_multisorter(
+    std::shared_ptr<const std::vector<t_mselem>> elems,
+    const std::vector<t_sorttype>& order
+) :
+    m_sort_order(order),
+    m_elems(std::move(std::move(elems))) {}
 
 bool
 t_multisorter::operator()(const t_mselem& a, const t_mselem& b) const {

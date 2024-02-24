@@ -23,13 +23,11 @@
 #include <perspective/compat.h>
 #include <perspective/utils.h>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <csignal>
-#include <iostream>
 #include <map>
 #include <sstream>
 #include <vector>
-#include <csignal>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -37,24 +35,24 @@
 
 namespace perspective {
 
-t_lstore::t_lstore(const t_lstore_recipe& a)
-    : m_base(0)
-    , m_dirname(a.m_dirname)
-    , m_colname(a.m_colname)
-    , m_fd(-1)
-    , m_capacity(a.m_capacity)
-    , m_size(0)
-    , m_alignment(a.m_alignment)
-    , m_fflags(a.m_fflags)
-    , m_fmode(a.m_fmode)
-    , m_creation_disposition(a.m_creation_disposition)
-    , m_mprot(a.m_mprot)
-    , m_mflags(a.m_mflags)
-    , m_backing_store(a.m_backing_store)
-    , m_init(false)
-    , m_resize_factor(1.3)
-    , m_version(0)
-    , m_from_recipe(a.m_from_recipe) {
+t_lstore::t_lstore(const t_lstore_recipe& a) :
+    m_base(nullptr),
+    m_dirname(a.m_dirname),
+    m_colname(a.m_colname),
+    m_fd(-1),
+    m_capacity(a.m_capacity),
+    m_size(0),
+    m_alignment(a.m_alignment),
+    m_fflags(a.m_fflags),
+    m_fmode(a.m_fmode),
+    m_creation_disposition(a.m_creation_disposition),
+    m_mprot(a.m_mprot),
+    m_mflags(a.m_mflags),
+    m_backing_store(a.m_backing_store),
+    m_init(false),
+    m_resize_factor(1.3),
+    m_version(0),
+    m_from_recipe(a.m_from_recipe) {
     if (m_from_recipe) {
         m_fname = a.m_fname;
         return;
@@ -73,10 +71,11 @@ t_lstore::create_file() {
     t_handle fd = open(m_fname.c_str(), m_fflags, m_fmode);
     PSP_VERBOSE_ASSERT(fd != -1, "Error opening file");
 
-    if (m_from_recipe)
+    if (m_from_recipe) {
         return fd;
+    }
 
-    t_index truncate_bytes = static_cast<t_index>(capacity());
+    auto truncate_bytes = static_cast<t_index>(capacity());
 
     t_index rcode = ftruncate(fd, truncate_bytes);
 
@@ -85,8 +84,8 @@ t_lstore::create_file() {
 }
 
 void*
-t_lstore::create_mapping() {
-    void* rval = mmap(0, capacity(), m_mprot, m_mflags, m_fd, 0);
+t_lstore::create_mapping() const {
+    void* rval = mmap(nullptr, capacity(), m_mprot, m_mflags, m_fd, 0);
     PSP_VERBOSE_ASSERT(rval, != MAP_FAILED, "mmap failed");
     return rval;
 }
@@ -100,7 +99,8 @@ t_lstore::resize_mapping(t_uindex cap_new) {
         throw;
     }
 
-    void* base = mmap(0, cap_new, PROT_READ | PROT_WRITE, MAP_SHARED, m_fd, 0);
+    void* base =
+        mmap(nullptr, cap_new, PROT_READ | PROT_WRITE, MAP_SHARED, m_fd, 0);
 
     if (base == MAP_FAILED) {
         PSP_COMPLAIN_AND_ABORT("mremap failed!");

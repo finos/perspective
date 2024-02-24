@@ -52,8 +52,11 @@ namespace computed_function {
 // A regex function that returns a string stored in the expression vocab.
 #define REGEX_STRING_FUNCTION_HEADER(NAME)                                     \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
-        NAME(t_expression_vocab& expression_vocab,                             \
-            t_regex_mapping& regex_mapping, bool is_type_validator);           \
+        NAME(                                                                  \
+            t_expression_vocab& expression_vocab,                              \
+            t_regex_mapping& regex_mapping,                                    \
+            bool is_type_validator                                             \
+        );                                                                     \
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
         t_expression_vocab& m_expression_vocab;                                \
@@ -186,8 +189,11 @@ namespace computed_function {
     FUNCTION_HEADER(length)
 
     struct index : public exprtk::igeneric_function<t_tscalar> {
-        index(const t_pkey_mapping& pkey_map,
-            std::shared_ptr<t_data_table> source_table, t_uindex& row_idx);
+        index(
+            const t_pkey_mapping& pkey_map,
+            std::shared_ptr<t_data_table> source_table,
+            t_uindex& row_idx
+        );
         ~index();
         t_tscalar operator()(t_parameter_list parameters);
 
@@ -198,8 +204,10 @@ namespace computed_function {
     };
 
     struct col : public exprtk::igeneric_function<t_tscalar> {
-        col(t_expression_vocab& expression_vocab, bool is_type_validator,
-            std::shared_ptr<t_data_table> source_table, t_uindex& row_idx);
+        col(t_expression_vocab& expression_vocab,
+            bool is_type_validator,
+            std::shared_ptr<t_data_table> source_table,
+            t_uindex& row_idx);
         ~col();
         t_tscalar operator()(t_parameter_list parameters);
 
@@ -211,8 +219,12 @@ namespace computed_function {
     };
 
     struct vlookup : public exprtk::igeneric_function<t_tscalar> {
-        vlookup(t_expression_vocab& expression_vocab, bool is_type_validator,
-            std::shared_ptr<t_data_table> source_table, t_uindex& row_idx);
+        vlookup(
+            t_expression_vocab& expression_vocab,
+            bool is_type_validator,
+            std::shared_ptr<t_data_table> source_table,
+            t_uindex& row_idx
+        );
         ~vlookup();
         t_tscalar operator()(t_parameter_list parameters);
 

@@ -120,15 +120,18 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #ifdef LOG_LIFETIMES
 #define LOG_CONSTRUCTOR(X)                                                     \
     std::cout << "constructing L: " << __LINE__ << " " << (X) << " <" << this  \
-              << ">" << std::endl;
+              << ">"                                                           \
+              << "\n";
 
 #define LOG_DESTRUCTOR(X)                                                      \
     std::cout << "destroying L: " << __LINE__ << " " << (X) << " <" << this    \
-              << ">" << std::endl;
+              << ">"                                                           \
+              << "\n";
 
 #define LOG_INIT(X)                                                            \
     std::cout << "initing L: " << __LINE__ << " " << (X) << " <" << this       \
-              << ">" << std::endl;
+              << ">"                                                           \
+              << "\n";
 #else
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
@@ -160,12 +163,13 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #endif
 
 #define PSP_COMPLAIN_AND_ABORT(X)                                              \
-    ::perspective::psp_abort(X);                                                              \
+    ::perspective::psp_abort(X);                                               \
     abort();
 
-#define PSP_VERBOSE_ASSERT(...)                                                \
-    _ID(GET_PSP_VERBOSE_ASSERT(                                                \
-        __VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(__VA_ARGS__))
+#define PSP_VERBOSE_ASSERT(...)                                                        \
+    _ID(GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)( \
+        __VA_ARGS__                                                                    \
+    ))
 
 // Currently only supporting single ports
 enum t_gnode_processing_mode {
@@ -400,7 +404,7 @@ PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string dtype_to_str(t_dtype dtype);
 PERSPECTIVE_EXPORT t_dtype str_to_dtype(const std::string& typestring);
-PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
+PERSPECTIVE_EXPORT std::string get_status_descr(t_status status);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_neq_transition(t_value_transition t);

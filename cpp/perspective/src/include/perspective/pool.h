@@ -35,7 +35,7 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_updctx {
     t_updctx();
-    t_updctx(t_uindex gnode_id, const std::string& ctx);
+    t_updctx(t_uindex gnode_id, std::string ctx);
 
     t_uindex m_gnode_id;
     std::string m_ctx;
@@ -58,11 +58,19 @@ public:
 #endif
 
 #if defined PSP_ENABLE_WASM and !defined PSP_ENABLE_PYTHON
-    void register_context(t_uindex gnode_id, const std::string& name,
-        t_ctx_type type, std::int32_t ptr);
+    void register_context(
+        t_uindex gnode_id,
+        const std::string& name,
+        t_ctx_type type,
+        std::int32_t ptr
+    );
 #else
-    void register_context(t_uindex gnode_id, const std::string& name,
-        t_ctx_type type, std::int64_t ptr);
+    void register_context(
+        t_uindex gnode_id,
+        const std::string& name,
+        t_ctx_type type,
+        std::int64_t ptr
+    );
 #endif
 
 #ifdef PSP_PARALLEL_FOR
@@ -101,12 +109,12 @@ public:
     t_uindex epoch() const;
     void inc_epoch();
     std::vector<t_uindex> get_gnodes_last_updated();
-    t_gnode* get_gnode(t_uindex gnode_id);
+    t_gnode* get_gnode(t_uindex idx);
 
 protected:
     // Unused methods
-    std::vector<t_tscalar> get_row_data_pkeys(
-        t_uindex gnode_id, const std::vector<t_tscalar>& pkeys);
+    std::vector<t_tscalar>
+    get_row_data_pkeys(t_uindex gnode_id, const std::vector<t_tscalar>& pkeys);
 
     // Following three functions
     // use the python api

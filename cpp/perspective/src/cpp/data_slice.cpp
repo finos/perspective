@@ -16,45 +16,57 @@
 namespace perspective {
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col,
-    t_uindex row_offset, t_uindex col_offset,
+t_data_slice<CTX_T>::t_data_slice(
+    std::shared_ptr<CTX_T> ctx,
+    t_uindex start_row,
+    t_uindex end_row,
+    t_uindex start_col,
+    t_uindex end_col,
+    t_uindex row_offset,
+    t_uindex col_offset,
     const std::vector<t_tscalar>& slice,
-    const std::vector<std::vector<t_tscalar>>& column_names)
-    : m_ctx(ctx)
-    , m_start_row(start_row)
-    , m_end_row(end_row)
-    , m_start_col(start_col)
-    , m_end_col(end_col)
-    , m_row_offset(row_offset)
-    , m_col_offset(col_offset)
-    , m_slice(slice)
-    , m_column_names(column_names) {
+    const std::vector<std::vector<t_tscalar>>& column_names
+) :
+    m_ctx(ctx),
+    m_start_row(start_row),
+    m_end_row(end_row),
+    m_start_col(start_col),
+    m_end_col(end_col),
+    m_row_offset(row_offset),
+    m_col_offset(col_offset),
+    m_slice(slice),
+    m_column_names(column_names) {
     m_stride = m_end_col - m_start_col;
 }
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col,
-    t_uindex row_offset, t_uindex col_offset,
+t_data_slice<CTX_T>::t_data_slice(
+    std::shared_ptr<CTX_T> ctx,
+    t_uindex start_row,
+    t_uindex end_row,
+    t_uindex start_col,
+    t_uindex end_col,
+    t_uindex row_offset,
+    t_uindex col_offset,
     const std::vector<t_tscalar>& slice,
     const std::vector<std::vector<t_tscalar>>& column_names,
-    const std::vector<t_uindex>& column_indices)
-    : m_ctx(ctx)
-    , m_start_row(start_row)
-    , m_end_row(end_row)
-    , m_start_col(start_col)
-    , m_end_col(end_col)
-    , m_row_offset(row_offset)
-    , m_col_offset(col_offset)
-    , m_slice(slice)
-    , m_column_names(column_names)
-    , m_column_indices(column_indices) {
+    const std::vector<t_uindex>& column_indices
+) :
+    m_ctx(ctx),
+    m_start_row(start_row),
+    m_end_row(end_row),
+    m_start_col(start_col),
+    m_end_col(end_col),
+    m_row_offset(row_offset),
+    m_col_offset(col_offset),
+    m_slice(slice),
+    m_column_names(column_names),
+    m_column_indices(column_indices) {
     m_stride = m_end_col - m_start_col;
 }
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::~t_data_slice() {}
+t_data_slice<CTX_T>::~t_data_slice() = default;
 
 // Public API
 template <typename CTX_T>
@@ -168,7 +180,8 @@ t_data_slice<CTX_T>::get_data_extents() const {
     auto nrows = m_ctx->get_row_count();
     auto ncols = m_ctx->get_column_count();
     t_get_data_extents ext = sanitize_get_data_extents(
-        nrows, ncols, m_start_row, m_end_row, m_start_col, m_end_col);
+        nrows, ncols, m_start_row, m_end_row, m_start_col, m_end_col
+    );
     return ext;
 }
 

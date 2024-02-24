@@ -14,10 +14,10 @@
 
 namespace perspective {
 
-t_process_state::t_process_state(){};
+t_process_state::t_process_state() = default;
 
 void
-t_process_state::clear_transitional_data_tables() {
+t_process_state::clear_transitional_data_tables() const {
     m_delta_data_table->clear();
     m_prev_data_table->clear();
     m_current_data_table->clear();
@@ -26,7 +26,7 @@ t_process_state::clear_transitional_data_tables() {
 };
 
 void
-t_process_state::reserve_transitional_data_tables(t_uindex size) {
+t_process_state::reserve_transitional_data_tables(t_uindex size) const {
     m_delta_data_table->reserve(size);
     m_prev_data_table->reserve(size);
     m_current_data_table->reserve(size);
@@ -35,7 +35,7 @@ t_process_state::reserve_transitional_data_tables(t_uindex size) {
 };
 
 void
-t_process_state::set_size_transitional_data_tables(t_uindex size) {
+t_process_state::set_size_transitional_data_tables(t_uindex size) const {
     m_delta_data_table->set_size(size);
     m_prev_data_table->set_size(size);
     m_current_data_table->set_size(size);

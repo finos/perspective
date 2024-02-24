@@ -33,10 +33,11 @@ public:
     t_dep(const t_dep_recipe& v);
     t_dep(const std::string& name, t_deptype type);
 
-    t_dep(const std::string& name, const std::string& disp_name, t_deptype type,
-        t_dtype dtype);
+    t_dep(
+        std::string name, std::string disp_name, t_deptype type, t_dtype dtype
+    );
 
-    t_dep(t_tscalar dep);
+    t_dep(t_tscalar imm);
 
     const std::string& name() const;
     const std::string& disp_name() const;

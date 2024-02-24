@@ -29,7 +29,7 @@ class PERSPECTIVE_EXPORT t_ctx_grouped_pkey
     : public t_ctxbase<t_ctx_grouped_pkey> {
 public:
     t_ctx_grouped_pkey();
-    t_ctx_grouped_pkey(t_schema schema, t_config config);
+    t_ctx_grouped_pkey(const t_schema& schema, const t_config& config);
 
     ~t_ctx_grouped_pkey();
 
@@ -45,8 +45,8 @@ public:
     void set_expansion_state(const std::vector<t_path>& paths);
     t_tscalar get_tree_value(t_index idx) const;
     t_stree* _get_tree();
-    std::vector<t_ftreenode> get_flattened_tree(
-        t_index idx, t_depth stop_depth);
+    std::vector<t_ftreenode>
+    get_flattened_tree(t_index idx, t_depth stop_depth);
     std::shared_ptr<const t_traversal> get_traversal() const;
 
     void set_depth(t_depth depth);
@@ -55,9 +55,9 @@ public:
 
     // aggregates should be presized to be same size
     // as agg_indices
-    void get_aggregates_for_sorting(t_uindex nidx,
-        const std::vector<t_index>& agg_indices,
-        std::vector<t_tscalar>& aggregates, t_ctx2*) const;
+    void
+    get_aggregates_for_sorting(t_uindex nidx, const std::vector<t_index>& agg_indices, std::vector<t_tscalar>& aggregates, t_ctx2*)
+        const;
 
     using t_ctxbase<t_ctx_grouped_pkey>::get_data;
 
@@ -65,7 +65,8 @@ private:
     void rebuild();
 
     t_tscalar get_value_from_gstate(
-        const std::string& colname, const t_tscalar& pkey) const;
+        const std::string& colname, const t_tscalar& pkey
+    ) const;
 
     std::shared_ptr<t_traversal> m_traversal;
     std::shared_ptr<t_stree> m_tree;

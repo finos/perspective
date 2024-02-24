@@ -24,9 +24,17 @@
 
 namespace perspective {
 
-static void map_file_internal_(const std::string& fname, t_fflag fflag,
-    t_fflag fmode, t_fflag creation_disposition, t_fflag mprot, t_fflag mflag,
-    bool is_read, t_uindex size, t_rfmapping& out);
+static void map_file_internal_(
+    const std::string& fname,
+    t_fflag fflag,
+    t_fflag fmode,
+    t_fflag creation_disposition,
+    t_fflag mprot,
+    t_fflag mflag,
+    bool is_read,
+    t_uindex size,
+    t_rfmapping& out
+);
 
 t_uindex
 file_size(t_handle h) {
@@ -56,14 +64,26 @@ t_rfmapping::~t_rfmapping() {
 }
 
 static void
-map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
-    t_fflag creation_disposition, t_fflag mprot, t_fflag mflag, bool is_read,
-    t_uindex size, t_rfmapping& out) {
-    t_file_handle fh(CreateFile(fname.c_str(), fflag, FILE_SHARE_READ,
+map_file_internal_(
+    const std::string& fname,
+    t_fflag fflag,
+    t_fflag fmode,
+    t_fflag creation_disposition,
+    t_fflag mprot,
+    t_fflag mflag,
+    bool is_read,
+    t_uindex size,
+    t_rfmapping& out
+) {
+    t_file_handle fh(CreateFile(
+        fname.c_str(),
+        fflag,
+        FILE_SHARE_READ,
         0, // security
-        creation_disposition, FILE_ATTRIBUTE_NORMAL,
+        creation_disposition,
+        FILE_ATTRIBUTE_NORMAL,
         0 // template file
-        ));
+    ));
 
     PSP_VERBOSE_ASSERT(fh.valid(), "Error opening file");
 
@@ -80,15 +100,20 @@ map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
         PSP_VERBOSE_ASSERT(rb, "Error setting eof");
     }
 
-    t_handle m = CreateFileMapping(fh.value(),
+    t_handle m = CreateFileMapping(
+        fh.value(),
         0, // default security
-        mprot, upper32(size), lower32(size),
+        mprot,
+        upper32(size),
+        lower32(size),
         0 // anonymous mapping
     );
 
     PSP_VERBOSE_ASSERT(m != 0, "Error creating filemapping");
 
-    void* ptr = MapViewOfFile(m, mflag,
+    void* ptr = MapViewOfFile(
+        m,
+        mflag,
         0, // 0 offset
         0, // 0 offset
         0  // entire file
@@ -110,17 +135,32 @@ map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
 
 void
 map_file_read(const std::string& fname, t_rfmapping& out) {
-    map_file_internal_(fname, GENERIC_READ,
+    map_file_internal_(
+        fname,
+        GENERIC_READ,
         0, // unused
-        OPEN_EXISTING, PAGE_READONLY, FILE_MAP_READ, true, 0, out);
+        OPEN_EXISTING,
+        PAGE_READONLY,
+        FILE_MAP_READ,
+        true,
+        0,
+        out
+    );
 }
 
 void
 map_file_write(const std::string& fname, t_uindex size, t_rfmapping& out) {
-    map_file_internal_(fname, GENERIC_READ | GENERIC_WRITE,
+    map_file_internal_(
+        fname,
+        GENERIC_READ | GENERIC_WRITE,
         0, // unused
-        CREATE_ALWAYS, PAGE_READWRITE, FILE_MAP_WRITE, false,
-        static_cast<size_t>(size), out);
+        CREATE_ALWAYS,
+        PAGE_READWRITE,
+        FILE_MAP_WRITE,
+        false,
+        static_cast<size_t>(size),
+        out
+    );
 }
 
 int64_t
@@ -155,10 +195,13 @@ set_thread_name_win(uint32_t thrid, const std::string& name) {
 
     SUPPRESS_WARNINGS_VC(6320 6322)
     __try {
-        RaiseException(MS_VC_EXCEPTION, 0,
-            sizeof(thrstruct) / sizeof(ULONG_PTR), (ULONG_PTR*)&thrstruct);
-    } __except (EXCEPTION_EXECUTE_HANDLER) {
-    }
+        RaiseException(
+            MS_VC_EXCEPTION,
+            0,
+            sizeof(thrstruct) / sizeof(ULONG_PTR),
+            (ULONG_PTR*)&thrstruct
+        );
+    } __except (EXCEPTION_EXECUTE_HANDLER) {}
     RESTORE_WARNINGS_VC()
 }
 
@@ -187,7 +230,8 @@ launch_proc(const std::string& cmdline) {
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
 
-    if (!CreateProcess(NULL, // No module name (use command line)
+    if (!CreateProcess(
+            NULL, // No module name (use command line)
             const_cast<char*>(cmdline.c_str()), // Command line
             NULL,  // Process handle not inheritable
             NULL,  // Thread handle not inheritable
@@ -196,9 +240,10 @@ launch_proc(const std::string& cmdline) {
             NULL,  // Use parent's environment block
             NULL,  // Use parent's starting directory
             &si,   // Pointer to STARTUPINFO structure
-            &pi)   // Pointer to PROCESS_INFORMATION structure
+            &pi
+        ) // Pointer to PROCESS_INFORMATION structure
     ) {
-        std::cout << "CreateProcess failed => " << GetLastError() << std::endl;
+        std::cout << "CreateProcess failed => " << GetLastError() << "\n";
         return;
     }
 
@@ -231,13 +276,14 @@ psp_dbg_malloc(size_t size) {
     GetSystemInfo(&sys_info);
     auto page = 2 * sys_info.dwPageSize;
     assert((page & (static_cast<size_t>(page) - 1)) == 0);
-    auto rounded_size
-        = (size + static_cast<size_t>(page) - 1) & (-static_cast<size_t>(page));
+    auto rounded_size =
+        (size + static_cast<size_t>(page) - 1) & (-static_cast<size_t>(page));
     BYTE* start = (BYTE*)VirtualAlloc(
-        NULL, rounded_size + page, MEM_COMMIT, PAGE_READWRITE);
+        NULL, rounded_size + page, MEM_COMMIT, PAGE_READWRITE
+    );
     DWORD old_protect;
-    BOOL res = VirtualProtect(
-        start + rounded_size, page, PAGE_NOACCESS, &old_protect);
+    BOOL res =
+        VirtualProtect(start + rounded_size, page, PAGE_NOACCESS, &old_protect);
     assert(res);
     UNREFERENCED_PARAMETER(res);
     return start + (rounded_size - size);
@@ -251,7 +297,8 @@ psp_dbg_free(void* mem) {
 void*
 psp_page_aligned_malloc(int64_t size) {
     return _aligned_malloc(
-        static_cast<size_t>(size), static_cast<size_t>(get_page_size()));
+        static_cast<size_t>(size), static_cast<size_t>(get_page_size())
+    );
 }
 
 void

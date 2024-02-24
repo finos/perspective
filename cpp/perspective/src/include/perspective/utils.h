@@ -68,16 +68,18 @@ vec_to_set(const std::vector<DATA_T>& v, std::set<DATA_T>& out_s) {
 inline void
 ltrim_inplace(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c) {
-        return !std::isspace(c);
-    }));
+                return !std::isspace(c);
+            }));
 }
 
 inline void
 rtrim_inplace(std::string& s) {
-    s.erase(std::find_if(
-                s.rbegin(), s.rend(), [](int c) { return !std::isspace(c); })
-                .base(),
-        s.end());
+    s.erase(
+        std::find_if(
+            s.rbegin(), s.rend(), [](int c) { return !std::isspace(c); }
+        ).base(),
+        s.end()
+    );
 }
 
 inline void
@@ -111,8 +113,9 @@ split(const std::string& s, char delim) {
     ss.str(s);
     std::string item;
     while (std::getline(ss, item, delim)) {
-        if (!item.empty())
+        if (!item.empty()) {
             elems.push_back(item);
+        }
     }
     return elems;
 }
@@ -132,8 +135,7 @@ class t_cmod {
     t_color_code m_code;
 
 public:
-    t_cmod(t_color_code code)
-        : m_code(code) {}
+    t_cmod(t_color_code code) : m_code(code) {}
 
     inline friend std::ostream&
     operator<<(std::ostream& os, const t_cmod& mod) {
@@ -149,12 +151,13 @@ struct t_ns_timer {
     std::chrono::high_resolution_clock::time_point m_t0;
     std::function<void(int)> m_cb;
 
-    t_ns_timer(std::function<void(int)> callback)
-        : m_t0(std::chrono::high_resolution_clock::now())
-        , m_cb(callback) {}
+    t_ns_timer(std::function<void(int)> callback) :
+        m_t0(std::chrono::high_resolution_clock::now()),
+        m_cb(callback) {}
     ~t_ns_timer(void) {
         auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::high_resolution_clock::now() - m_t0)
+                         std::chrono::high_resolution_clock::now() - m_t0
+        )
                          .count();
 
         m_cb(static_cast<int>(nanos));
@@ -163,11 +166,13 @@ struct t_ns_timer {
 
 inline std::string
 join_str(const std::vector<std::string>& terms, const std::string& sep) {
-    if (terms.empty())
+    if (terms.empty()) {
         return "";
+    }
 
-    if (terms.size() == 1)
+    if (terms.size() == 1) {
         return terms[0];
+    }
 
     std::string rv;
 

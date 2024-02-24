@@ -19,8 +19,12 @@
 namespace perspective {
 
 class t_schema_column {
-    t_schema_column(const std::string& tblname, const std::string& name,
-        const std::string& altname, t_dtype dtype);
+    t_schema_column(
+        std::string tblname,
+        std::string name,
+        std::string altname,
+        t_dtype dtype
+    );
 
 private:
     std::string m_tblname;

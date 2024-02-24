@@ -37,9 +37,13 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
-    View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx,
-        const std::string& name, const std::string& separator,
-        std::shared_ptr<t_view_config> view_config);
+    View(
+        std::shared_ptr<Table> table,
+        std::shared_ptr<CTX_T> ctx,
+        std::string name,
+        std::string separator,
+        std::shared_ptr<t_view_config> view_config
+    );
 
     ~View();
 
@@ -106,8 +110,8 @@ public:
      *
      * @return std::vector<std::vector<t_tscalar>>
      */
-    std::vector<std::vector<t_tscalar>> column_names(
-        bool skip = false, std::int32_t depth = 0) const;
+    std::vector<std::vector<t_tscalar>>
+    column_names(bool skip = false, std::int32_t depth = 0) const;
 
     /**
      * @brief The aggregated column names of this View, showing the columns that
@@ -126,26 +130,45 @@ public:
      *
      * @return std::pair<t_tscalar, t_tscalar>
      */
-    std::pair<t_tscalar, t_tscalar> get_min_max(
-        const std::string& colname) const;
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname
+    ) const;
 
-    void write_scalar(t_tscalar scalar, bool is_formatted,
-        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+    void write_scalar(
+        t_tscalar scalar,
+        bool is_formatted,
+        rapidjson::Writer<rapidjson::StringBuffer>& writer
+    ) const;
 
-    void write_row_path(t_uindex start_row, t_uindex end_row, bool has_row_path,
-        bool leaves_only, bool is_formatted,
-        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+    void write_row_path(
+        t_uindex start_row,
+        t_uindex end_row,
+        bool has_row_path,
+        bool leaves_only,
+        bool is_formatted,
+        rapidjson::Writer<rapidjson::StringBuffer>& writer
+    ) const;
 
-    void write_column(t_uindex c, t_uindex start_row, t_uindex end_row,
-        bool has_row_path, bool leaves_only, bool is_formatted,
+    void write_column(
+        t_uindex c,
+        t_uindex start_row,
+        t_uindex end_row,
+        bool has_row_path,
+        bool leaves_only,
+        bool is_formatted,
         std::shared_ptr<t_data_slice<CTX_T>> slice,
         const std::vector<std::vector<t_tscalar>>& col_names,
-        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+        rapidjson::Writer<rapidjson::StringBuffer>& writer
+    ) const;
 
-    void write_index_column(t_uindex start_row, t_uindex end_row,
-        bool has_row_path, bool leaves_only, bool is_formatted,
+    void write_index_column(
+        t_uindex start_row,
+        t_uindex end_row,
+        bool has_row_path,
+        bool leaves_only,
+        bool is_formatted,
         std::shared_ptr<t_data_slice<CTX_T>> slice,
-        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+        rapidjson::Writer<rapidjson::StringBuffer>& writer
+    ) const;
 
     /**
      * @brief Returns shared pointer to a t_data_slice object, which
@@ -159,14 +182,29 @@ public:
      * @param end_col
      * @return std::shared_ptr<t_data_slice<t_ctx0>>
      */
-    std::shared_ptr<t_data_slice<CTX_T>> get_data(t_uindex start_row,
-        t_uindex end_row, t_uindex start_col, t_uindex end_col) const;
+    std::shared_ptr<t_data_slice<CTX_T>> get_data(
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col
+    ) const;
 
-    std::string to_columns(t_uindex start_row, t_uindex end_row,
-        t_uindex start_col, t_uindex end_col, t_uindex hidden,
-        bool is_formatted, bool get_pkeys, bool get_ids, bool leaves_only,
-        t_uindex num_sides, bool has_row_path, std::string nidx,
-        t_uindex columns_length, t_uindex group_by_length) const;
+    std::string to_columns(
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col,
+        t_uindex hidden,
+        bool is_formatted,
+        bool get_pkeys,
+        bool get_ids,
+        bool leaves_only,
+        t_uindex num_sides,
+        bool has_row_path,
+        std::string nidx,
+        t_uindex columns_length,
+        t_uindex group_by_length
+    ) const;
 
     /**
      * @brief Serializes the `View`'s data into the Apache Arrow format
@@ -180,9 +218,14 @@ public:
      * @param emit_group_by
      * @return std::shared_ptr<std::string>
      */
-    std::shared_ptr<std::string> to_arrow(std::int32_t start_row,
-        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col,
-        bool emit_group_by, bool compress) const;
+    std::shared_ptr<std::string> to_arrow(
+        std::int32_t start_row,
+        std::int32_t end_row,
+        std::int32_t start_col,
+        std::int32_t end_col,
+        bool emit_group_by,
+        bool compress
+    ) const;
 
     /**
      * @brief Serializes the `View`'s data into the Apache Arrow format
@@ -195,9 +238,12 @@ public:
      * @param end_col
      * @return std::shared_ptr<std::string>
      */
-    std::shared_ptr<std::string> to_csv(std::int32_t start_row,
-        std::int32_t end_row, std::int32_t start_col,
-        std::int32_t end_col) const;
+    std::shared_ptr<std::string> to_csv(
+        std::int32_t start_row,
+        std::int32_t end_row,
+        std::int32_t start_col,
+        std::int32_t end_col
+    ) const;
 
     /**
      * @brief Serializes a given data slice into the Apache Arrow format. Can
@@ -211,8 +257,10 @@ public:
      * @return std::shared_ptr<std::string>
      */
     std::shared_ptr<std::string> data_slice_to_arrow(
-        std::shared_ptr<t_data_slice<CTX_T>> data_slice, bool emit_group_b,
-        bool compress) const;
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice,
+        bool emit_group_b,
+        bool compress
+    ) const;
 
     /**
      * @brief Serializes a given data slice into the Apache Arrow format. Can
@@ -225,8 +273,8 @@ public:
      * @param end_col
      * @return std::shared_ptr<std::string>
      */
-    std::shared_ptr<std::string> data_slice_to_csv(
-        std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
+    std::shared_ptr<std::string>
+    data_slice_to_csv(std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
 
     // Delta calculation
     bool _get_deltas_enabled() const;
@@ -308,7 +356,8 @@ private:
      * @return std::string
      */
     std::string _map_aggregate_types(
-        const std::string& name, const std::string& typestring) const;
+        const std::string& name, const std::string& typestring
+    ) const;
 
     /**
      * @brief Serializes a given data slice into the Apache Arrow format. Can
@@ -321,10 +370,12 @@ private:
      * @param end_col
      * @return std::shared_ptr<std::string>
      */
-    std::pair<std::shared_ptr<arrow::Schema>,
+    std::pair<
+        std::shared_ptr<arrow::Schema>,
         std::shared_ptr<arrow::RecordBatch>>
-    data_slice_to_batches(bool emit_group_by,
-        std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
+    data_slice_to_batches(
+        bool emit_group_by, std::shared_ptr<t_data_slice<CTX_T>> data_slice
+    ) const;
 
     void _find_hidden_sort(const std::vector<t_sortspec>& sort);
 

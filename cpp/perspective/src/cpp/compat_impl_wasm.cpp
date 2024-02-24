@@ -29,9 +29,17 @@
 #include <stdio.h>
 
 namespace perspective {
-static void map_file_internal_(const std::string& fname, t_fflag fflag,
-    t_fflag fmode, t_fflag creation_disposition, t_fflag mprot, t_fflag mflag,
-    bool is_read, t_uindex size, t_rfmapping& out);
+static void map_file_internal_(
+    const std::string& fname,
+    t_fflag fflag,
+    t_fflag fmode,
+    t_fflag creation_disposition,
+    t_fflag mprot,
+    t_fflag mflag,
+    bool is_read,
+    t_uindex size,
+    t_rfmapping& out
+);
 
 t_uindex
 file_size(t_handle h) {
@@ -48,12 +56,20 @@ flush_mapping(void* base, t_uindex len) {
     PSP_COMPLAIN_AND_ABORT("Not implemented");
 }
 
-t_rfmapping::~t_rfmapping() {
-}
+t_rfmapping::~t_rfmapping() {}
 
-static void map_file_internal_(const std::string& fname, t_fflag fflag,
-    t_fflag fmode, t_fflag creation_disposition, t_fflag mprot, t_fflag mflag,
-    bool is_read, t_uindex size, t_rfmapping& out) {
+static void
+map_file_internal_(
+    const std::string& fname,
+    t_fflag fflag,
+    t_fflag fmode,
+    t_fflag creation_disposition,
+    t_fflag mprot,
+    t_fflag mflag,
+    bool is_read,
+    t_uindex size,
+    t_rfmapping& out
+) {
     PSP_COMPLAIN_AND_ABORT("Not implemented");
 }
 

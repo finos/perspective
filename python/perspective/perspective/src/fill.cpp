@@ -27,9 +27,15 @@ namespace binding {
      */
 
     void
-    _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_update,
-        bool is_limit) {
+    _fill_col_time(
+        t_data_accessor accessor,
+        std::shared_ptr<t_column> col,
+        std::string name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update,
+        bool is_limit
+    ) {
         t_uindex nrows = col->size();
 
         for (auto i = 0; i < nrows; ++i) {
@@ -54,9 +60,15 @@ namespace binding {
     }
 
     void
-    _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_update,
-        bool is_limit) {
+    _fill_col_date(
+        t_data_accessor accessor,
+        std::shared_ptr<t_column> col,
+        std::string name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update,
+        bool is_limit
+    ) {
         t_uindex nrows = col->size();
 
         for (auto i = 0; i < nrows; ++i) {
@@ -76,18 +88,27 @@ namespace binding {
                 continue;
             }
 
-            auto date_components
-                = item.cast<std::map<std::string, std::int32_t>>();
-            t_date dt = t_date(date_components["year"],
-                date_components["month"], date_components["day"]);
+            auto date_components =
+                item.cast<std::map<std::string, std::int32_t>>();
+            t_date dt = t_date(
+                date_components["year"],
+                date_components["month"],
+                date_components["day"]
+            );
             col->set_nth(i, dt);
         }
     }
 
     void
-    _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_update,
-        bool is_limit) {
+    _fill_col_bool(
+        t_data_accessor accessor,
+        std::shared_ptr<t_column> col,
+        std::string name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update,
+        bool is_limit
+    ) {
         t_uindex nrows = col->size();
 
         for (auto i = 0; i < nrows; ++i) {
@@ -113,9 +134,15 @@ namespace binding {
     }
 
     void
-    _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_update,
-        bool is_limit) {
+    _fill_col_string(
+        t_data_accessor accessor,
+        std::shared_ptr<t_column> col,
+        std::string name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update,
+        bool is_limit
+    ) {
 
         t_uindex nrows = col->size();
 
@@ -163,22 +190,26 @@ namespace binding {
             }
             case DTYPE_UINT32: {
                 col->set_nth<std::uint32_t>(
-                    idx, value.cast<std::uint32_t>(), STATUS_VALID);
+                    idx, value.cast<std::uint32_t>(), STATUS_VALID
+                );
                 break;
             }
             case DTYPE_UINT64: {
                 col->set_nth<std::uint64_t>(
-                    idx, value.cast<std::uint64_t>(), STATUS_VALID);
+                    idx, value.cast<std::uint64_t>(), STATUS_VALID
+                );
                 break;
             }
             case DTYPE_INT32: {
                 col->set_nth<std::int32_t>(
-                    idx, value.cast<std::int32_t>(), STATUS_VALID);
+                    idx, value.cast<std::int32_t>(), STATUS_VALID
+                );
                 break;
             }
             case DTYPE_INT64: {
                 col->set_nth<std::int64_t>(
-                    idx, value.cast<std::int64_t>(), STATUS_VALID);
+                    idx, value.cast<std::int64_t>(), STATUS_VALID
+                );
                 break;
             }
             case DTYPE_STR: {
@@ -186,16 +217,20 @@ namespace binding {
                 break;
             }
             case DTYPE_DATE: {
-                t_date dt = t_date(value.attr("year").cast<std::int32_t>(),
+                t_date dt = t_date(
+                    value.attr("year").cast<std::int32_t>(),
                     value.attr("month").cast<std::int32_t>(),
-                    value.attr("day").cast<std::int32_t>());
+                    value.attr("day").cast<std::int32_t>()
+                );
                 col->set_nth<t_date>(idx, dt, STATUS_VALID);
                 break;
             }
             case DTYPE_TIME: {
-                col->set_nth<std::int64_t>(idx,
+                col->set_nth<std::int64_t>(
+                    idx,
                     static_cast<std::int64_t>(value.cast<double>()),
-                    STATUS_VALID);
+                    STATUS_VALID
+                );
                 break;
             }
             case DTYPE_UINT8:
@@ -209,9 +244,16 @@ namespace binding {
     }
 
     void
-    _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
-        t_dtype type, bool is_update, bool is_limit) {
+    _fill_col_numeric(
+        t_data_accessor accessor,
+        t_data_table& tbl,
+        std::shared_ptr<t_column> col,
+        std::string name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update,
+        bool is_limit
+    ) {
         t_uindex nrows = col->size();
 
         for (auto i = 0; i < nrows; ++i) {
@@ -279,11 +321,19 @@ namespace binding {
                         col->set_nth(i, fval);
                     } else if (!is_update && isnan(fval)) {
                         WARN(
-                            "Promoting column `%s` to string from int32", name);
+                            "Promoting column `%s` to string from int32", name
+                        );
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
-                        _fill_col_string(accessor, col, name, cidx, DTYPE_STR,
-                            is_update, is_limit);
+                        _fill_col_string(
+                            accessor,
+                            col,
+                            name,
+                            cidx,
+                            DTYPE_STR,
+                            is_update,
+                            is_limit
+                        );
                         return;
                     } else {
                         col->set_nth(i, static_cast<std::int32_t>(fval));
@@ -306,11 +356,19 @@ namespace binding {
 
                     if (!is_update && isnan(fval)) {
                         WARN(
-                            "Promoting column `%s` to string from int64", name);
+                            "Promoting column `%s` to string from int64", name
+                        );
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
-                        _fill_col_string(accessor, col, name, cidx, DTYPE_STR,
-                            is_update, is_limit);
+                        _fill_col_string(
+                            accessor,
+                            col,
+                            name,
+                            cidx,
+                            DTYPE_STR,
+                            is_update,
+                            is_limit
+                        );
                         return;
                     } else {
                         col->set_nth(i, static_cast<std::int64_t>(fval));
@@ -331,12 +389,20 @@ namespace binding {
                     }
 
                     if (!is_update && (!is_float || is_numpy_nan)) {
-                        WARN("Promoting column `%s` to string from float64",
-                            name);
+                        WARN(
+                            "Promoting column `%s` to string from float64", name
+                        );
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
-                        _fill_col_string(accessor, col, name, cidx, DTYPE_STR,
-                            is_update, is_limit);
+                        _fill_col_string(
+                            accessor,
+                            col,
+                            name,
+                            cidx,
+                            DTYPE_STR,
+                            is_update,
+                            is_limit
+                        );
                         return;
                     }
 
@@ -345,7 +411,8 @@ namespace binding {
                     if (!py::isinstance<py::float_>(item)
                         && !py::hasattr(item, "__float__")) {
                         col->set_nth(
-                            i, static_cast<double>(item.cast<std::int64_t>()));
+                            i, static_cast<double>(item.cast<std::int64_t>())
+                        );
                     } else {
                         col->set_nth(i, item.cast<double>());
                     }
@@ -360,32 +427,44 @@ namespace binding {
     }
 
     void
-    _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
-        t_dtype type, bool is_update, bool is_limit) {
+    _fill_data_helper(
+        t_data_accessor accessor,
+        t_data_table& tbl,
+        std::shared_ptr<t_column> col,
+        std::string name,
+        std::int32_t cidx,
+        t_dtype type,
+        bool is_update,
+        bool is_limit
+    ) {
         switch (type) {
             case DTYPE_BOOL: {
                 _fill_col_bool(
-                    accessor, col, name, cidx, type, is_update, is_limit);
+                    accessor, col, name, cidx, type, is_update, is_limit
+                );
             } break;
             case DTYPE_DATE: {
                 _fill_col_date(
-                    accessor, col, name, cidx, type, is_update, is_limit);
+                    accessor, col, name, cidx, type, is_update, is_limit
+                );
             } break;
             case DTYPE_TIME: {
                 _fill_col_time(
-                    accessor, col, name, cidx, type, is_update, is_limit);
+                    accessor, col, name, cidx, type, is_update, is_limit
+                );
             } break;
             case DTYPE_STR: {
                 _fill_col_string(
-                    accessor, col, name, cidx, type, is_update, is_limit);
+                    accessor, col, name, cidx, type, is_update, is_limit
+                );
             } break;
             case DTYPE_NONE: {
                 break;
             }
             default:
                 _fill_col_numeric(
-                    accessor, tbl, col, name, cidx, type, is_update, is_limit);
+                    accessor, tbl, col, name, cidx, type, is_update, is_limit
+                );
         }
     }
 
@@ -395,9 +474,15 @@ namespace binding {
      */
 
     void
-    _fill_data(t_data_table& tbl, t_data_accessor accessor,
-        const t_schema& input_schema, const std::string& index,
-        std::uint32_t offset, std::uint32_t limit, bool is_update) {
+    _fill_data(
+        t_data_table& tbl,
+        t_data_accessor accessor,
+        const t_schema& input_schema,
+        const std::string& index,
+        std::uint32_t offset,
+        std::uint32_t limit,
+        bool is_update
+    ) {
         bool implicit_index = false;
         bool is_limit = limit != UINT32_MAX;
         std::vector<std::string> col_names(input_schema.columns());
@@ -409,17 +494,26 @@ namespace binding {
 
             if (name == "__INDEX__") {
                 implicit_index = true;
-                std::shared_ptr<t_column> pkey_col_sptr
-                    = tbl.add_column_sptr("psp_pkey", type, true);
-                _fill_data_helper(accessor, tbl, pkey_col_sptr, "psp_pkey",
-                    cidx, type, is_update, is_limit);
+                std::shared_ptr<t_column> pkey_col_sptr =
+                    tbl.add_column_sptr("psp_pkey", type, true);
+                _fill_data_helper(
+                    accessor,
+                    tbl,
+                    pkey_col_sptr,
+                    "psp_pkey",
+                    cidx,
+                    type,
+                    is_update,
+                    is_limit
+                );
                 tbl.clone_column("psp_pkey", "psp_okey");
                 continue;
             }
 
             auto col = tbl.get_column(name);
             _fill_data_helper(
-                accessor, tbl, col, name, cidx, type, is_update, is_limit);
+                accessor, tbl, col, name, cidx, type, is_update, is_limit
+            );
         }
         // Fill index column - recreated every time a `t_data_table` is created.
         if (!implicit_index) {
@@ -431,9 +525,11 @@ namespace binding {
 
                 for (std::uint32_t ridx = 0; ridx < tbl.size(); ++ridx) {
                     key_col->set_nth<std::int32_t>(
-                        ridx, (ridx + offset) % limit);
+                        ridx, (ridx + offset) % limit
+                    );
                     okey_col->set_nth<std::int32_t>(
-                        ridx, (ridx + offset) % limit);
+                        ridx, (ridx + offset) % limit
+                    );
                 }
             } else {
                 tbl.clone_column(index, "psp_pkey");

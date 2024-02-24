@@ -13,6 +13,7 @@
 import sh from "./sh.mjs";
 import * as url from "url";
 import * as dotenv from "dotenv";
+import * as cppLint from "./lint_cpp.mjs";
 
 export function lint_js(is_fix = false) {
     const prettier_flags = is_fix ? "--write" : "--check";
@@ -44,6 +45,8 @@ if (import.meta.url.startsWith("file:")) {
         } else {
             lint_js();
         }
+
+        cppLint.checkFormatting();
         process.exit(exit_code);
     }
 }

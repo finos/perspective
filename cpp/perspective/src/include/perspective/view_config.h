@@ -44,16 +44,20 @@ public:
      * @param filter
      * @param sort
      */
-    t_view_config(const std::vector<std::string>& row_pivots,
+    t_view_config(
+        const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& column_pivots,
         const tsl::ordered_map<std::string, std::vector<std::string>>&
             aggregates,
         const std::vector<std::string>& columns,
-        const std::vector<std::tuple<std::string, std::string,
-            std::vector<t_tscalar>>>& filter,
+        const std::vector<
+            std::tuple<std::string, std::string, std::vector<t_tscalar>>>&
+            filter,
         const std::vector<std::vector<std::string>>& sort,
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
-        const std::string& filter_op, bool column_only);
+        std::string filter_op,
+        bool column_only
+    );
 
     /**
      * @brief Given a `t_schema` specifying the underlying `Table`'s columns,
@@ -61,7 +65,7 @@ public:
      *
      * @param schema
      */
-    void init(std::shared_ptr<t_schema> schema);
+    void init(const std::shared_ptr<t_schema>& schema);
 
     /**
      * @brief Validate the view config to make sure that no invalid columns
@@ -69,7 +73,7 @@ public:
      * PSP_COMPLAIN_AND_ABORT, which will abort() in WASM and raise an
      * exception in Python.
      */
-    void validate(std::shared_ptr<t_schema> schema);
+    void validate(const std::shared_ptr<t_schema>& schema);
 
     /**
      * @brief Retrieve only the used expressions.
@@ -83,7 +87,8 @@ public:
      * @param term
      */
     void add_filter_term(
-        std::tuple<std::string, std::string, std::vector<t_tscalar>> term);
+        const std::tuple<std::string, std::string, std::vector<t_tscalar>>& term
+    );
 
     /**
      * @brief Set the number of pivot levels the engine should generate.
@@ -136,7 +141,7 @@ private:
      * @param schema
      * @return void
      */
-    void fill_aggspecs(std::shared_ptr<t_schema> schema);
+    void fill_aggspecs(const std::shared_ptr<t_schema>& schema);
 
     /**
      * @brief Fill the `m_fterm` vector with `t_fterm` objects which define the
@@ -167,8 +172,11 @@ private:
      */
     t_index get_aggregate_index(const std::string& column) const;
 
-    void make_aggspec(const std::string& column,
-        const std::vector<std::string>& aggregate, t_dtype dtype);
+    void make_aggspec(
+        const std::string& column,
+        const std::vector<std::string>& aggregate,
+        t_dtype dtype
+    );
 
     // containers for primitive data that does not need transformation into
     // abstractions

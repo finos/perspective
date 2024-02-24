@@ -15,8 +15,14 @@
 
 namespace perspective {
 t_get_data_extents
-sanitize_get_data_extents(t_index nrows, t_index ncols, t_index start_row,
-    t_index end_row, t_index start_col, t_index end_col) {
+sanitize_get_data_extents(
+    t_index nrows,
+    t_index ncols,
+    t_index start_row,
+    t_index end_row,
+    t_index start_col,
+    t_index end_col
+) {
     start_row = std::min(start_row, nrows);
     end_row = std::min(end_row, nrows);
 

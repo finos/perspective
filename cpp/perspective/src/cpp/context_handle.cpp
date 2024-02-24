@@ -15,13 +15,11 @@
 
 namespace perspective {
 
-t_ctx_handle::t_ctx_handle()
-    : m_ctx_type(ZERO_SIDED_CONTEXT)
-    , m_ctx(0) {}
+t_ctx_handle::t_ctx_handle() : m_ctx_type(ZERO_SIDED_CONTEXT), m_ctx(nullptr) {}
 
-t_ctx_handle::t_ctx_handle(void* ctx, t_ctx_type ctx_type)
-    : m_ctx_type(ctx_type)
-    , m_ctx(ctx) {}
+t_ctx_handle::t_ctx_handle(void* ctx, t_ctx_type ctx_type) :
+    m_ctx_type(ctx_type),
+    m_ctx(ctx) {}
 
 std::string
 t_ctx_handle::get_type_descr() const {

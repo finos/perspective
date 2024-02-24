@@ -54,13 +54,14 @@ public:
 
     perspective::t_index get_column_count() const;
 
-    std::pair<t_tscalar, t_tscalar> get_min_max(
-        const std::string& colname) const;
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname
+    ) const;
 
     using t_ctxbase<t_ctxunit>::get_data;
 
-    std::vector<t_tscalar> get_data(t_index start_row, t_index end_row,
-        t_index start_col, t_index end_col) const;
+    std::vector<t_tscalar> get_data(
+        t_index start_row, t_index end_row, t_index start_col, t_index end_col
+    ) const;
 
     std::vector<t_tscalar> get_data(const std::vector<t_uindex>& rows) const;
 
@@ -69,9 +70,14 @@ public:
     // will only work on empty contexts
     void notify(const t_data_table& flattened);
 
-    void notify(const t_data_table& flattened, const t_data_table& delta,
-        const t_data_table& prev, const t_data_table& current,
-        const t_data_table& transitions, const t_data_table& existed);
+    void notify(
+        const t_data_table& flattened,
+        const t_data_table& delta,
+        const t_data_table& prev,
+        const t_data_table& current,
+        const t_data_table& transitions,
+        const t_data_table& existed
+    );
 
     void step_begin();
 
@@ -88,8 +94,8 @@ public:
     bool get_deltas_enabled() const;
     void set_deltas_enabled(bool enabled_state);
 
-    std::vector<t_tscalar> get_pkeys(
-        const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
+    std::vector<t_tscalar>
+    get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
     t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 

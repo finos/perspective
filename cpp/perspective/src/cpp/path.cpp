@@ -14,10 +14,9 @@
 #include <perspective/path.h>
 
 namespace perspective {
-t_path::t_path() {}
+t_path::t_path() = default;
 
-t_path::t_path(const std::vector<t_tscalar>& path)
-    : m_path(path) {}
+t_path::t_path(const std::vector<t_tscalar>& path) : m_path(path) {}
 
 const std::vector<t_tscalar>&
 t_path::path() const {
