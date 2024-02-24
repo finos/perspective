@@ -10,6 +10,7 @@ Checks: >
     -readability-identifier-length,
     -readability-magic-numbers,
     -bugprone-easily-swappable-parameters,
+    -bugprone-implicit-widening-of-multiplication-result,
     -readability-convert-member-functions-to-static,
     -misc-const-correctness,
     -readability-function-cognitive-complexity

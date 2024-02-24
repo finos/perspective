@@ -45,6 +45,7 @@ if (import.meta.url.startsWith("file:")) {
         } else {
             lint_js();
         }
+
         cppLint.checkFormatting();
         process.exit(exit_code);
     }

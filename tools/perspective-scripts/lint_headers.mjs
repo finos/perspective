@@ -21,6 +21,7 @@ const IGNORE_PATHS = fs_sync
     .map((x) => x.trim())
     .filter((x) => x.length > 0 && !x.startsWith("#"))
     .concat([
+        "llvm/*",
         "cmake/*",
         "cpp/perspective/src/cpp/vendor",
         "cpp/perspective/src/include/perspective/vendor",

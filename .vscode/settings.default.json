@@ -16,12 +16,10 @@
         "cargo",
         "run",
         "-p",
-        "perspective-lint",
-        "--release"
+        "perspective-lint"
     ],
     "rust-analyzer.check.command": "clippy",
     "playwright.env": {
         "TZ": "UTC"
-    },
-    "clangd.path": "${workspaceFolder}/.llvm/llvm-toolchain/bin/clangd"
+    }
 }

@@ -188,7 +188,7 @@ jobs:
         strategy:
             matrix:
                 os:
-                    - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
+                    - ubuntu-22.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
                 node-version: [18.x]
@@ -202,6 +202,15 @@ jobs:
         if: ${{ needs.initialize.outputs.SKIP_CI == 'false' }}
 
         steps:
+            - name: Clean System
+              uses: AdityaGarg8/remove-unwanted-software@v2
+              if: ${{ runner.os == 'Linux' }}
+              with:
+                  remove-android: "true"
+                  remove-dotnet: "true"
+                  remove-haskell: "true"
+                  remove-codeql: "true"
+
             - name: Checkout
               uses: actions/checkout@v3
 
@@ -298,6 +307,12 @@ jobs:
             # Dependencies #
             ################
             ################
+            - name: Install LLVM 16
+              uses: KyleMayes/install-llvm-action@v1
+              with:
+                  version: "16"
+                  directory: "./.llvm"
+
             # JS
             - name: Install yarn
               run: npm install -g yarn
@@ -326,11 +341,6 @@ jobs:
             # WebAssembly #
             ###############
 
-            - name: WebAssembly Lint
-              run: yarn lint
-              env:
-                  PSP_PROJECT: js
-
             - name: WebAssembly Build
               run: yarn build_js --ci
               env:
@@ -338,6 +348,11 @@ jobs:
 
             # - name: Docs Build
             #   run: yarn docs
+
+            - name: Lint
+              run: yarn lint
+              env:
+                  PSP_PROJECT: "js"
 
             #################################
             # Compress and upload Artifacts #
@@ -431,7 +446,7 @@ jobs:
         strategy:
             matrix:
                 os:
-                    - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
+                    - ubuntu-22.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
 
@@ -446,6 +461,12 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v3
+
+            - name: Install LLVM and Clang
+              uses: KyleMayes/install-llvm-action@v1
+              with:
+                  version: "16"
+                  directory: "./.llvm"
 
             ##########
             # Caches #
@@ -523,11 +544,17 @@ jobs:
             #################
             ########
             # Linux
-            - name: Python Lint Steps (Linux)
+            - name: Python Lint (Linux)
               run: yarn lint
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   PSP_PROJECT: python
+
+            - name: JavaScript Lint
+              run: yarn lint
+              env:
+                  PYTHON_VERSION: ${{ matrix.python-version }}
+                  PSP_PROJECT: js
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -910,6 +937,15 @@ jobs:
         if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
 
         steps:
+            - name: Clean System
+              uses: AdityaGarg8/remove-unwanted-software@v2
+              if: ${{ runner.os == 'Linux' }}
+              with:
+                  remove-android: "true"
+                  remove-dotnet: "true"
+                  remove-haskell: "true"
+                  remove-codeql: "true"
+
             - name: Checkout
               uses: actions/checkout@v3
 
@@ -1021,6 +1057,13 @@ jobs:
             # Dependencies #
             ################
             ################
+            - name: Install LLVM and Clang
+              uses: KyleMayes/install-llvm-action@v1
+              if: false
+              with:
+                  version: "16"
+                  directory: "./.llvm"
+
             # JS
             - name: Install yarn
               run: npm install -g yarn

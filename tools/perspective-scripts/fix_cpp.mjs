@@ -11,9 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import sh from "./sh.mjs";
+import { execSync } from "child_process";
 
 function lint(dir) {
-    sh`clang-format -i -style=file ${dir}`.runSync();
+    execSync(`clang-format -i -style=file ${dir}`, { stdio: "inherit" });
 }
 
 lint(sh.path`./cpp/perspective/src/cpp/*.cpp`);

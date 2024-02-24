@@ -136,7 +136,7 @@ class PSPBuild(build_ext):
         cfg = "Debug" if self.debug else "Release"
 
         PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-        
+
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + os.path.abspath(os.path.join(extdir, "perspective", "table")).replace("\\", "/"),
             "-DCMAKE_BUILD_TYPE=" + cfg,
