@@ -72,6 +72,10 @@ const BROWSER_PACKAGES = [
         packageName: "perspective-cli",
         testDir: "packages/perspective-cli/test/js",
     },
+    {
+        packageName: "docs",
+        testDir: "docs/test/js",
+    },
 ];
 
 const NODE_PACKAGES = [
@@ -157,7 +161,7 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
     quiet: true,
-    reporter: process.env.CI ? "github" : "dot",
+    reporter: process.env.CI ? [["github"], ["html"]] : [["dot"]],
     projects: PROJECTS,
     outputDir: "dist/results",
     use: {
