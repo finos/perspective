@@ -13,6 +13,7 @@
 from starlette.websockets import WebSocketDisconnect
 from .common import PerspectiveHandlerBase
 
+__all__ = ['PerspectiveStarletteHandler'] 
 
 class PerspectiveStarletteHandler(PerspectiveHandlerBase):
     """PerspectiveStarletteHandler is a drop-in implementation of Perspective.

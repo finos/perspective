@@ -12,17 +12,22 @@
 
 from .common import PerspectiveHandlerBase
 
+__all__ = ['PerspectiveHandlerBase']
+
 try:
     from .aiohttp import *
+    __all__.extend(aiohttp.__all__)
 except ImportError:
     ...
 
 try:
     from .starlette import *
+    __all__.extend(starlette.__all__)
 except ImportError:
     ...
 
 try:
     from .tornado import *
+    __all__.extend(tornado.__all__)
 except ImportError:
     ...

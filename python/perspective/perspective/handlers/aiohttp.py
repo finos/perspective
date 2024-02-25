@@ -14,6 +14,7 @@ from aiohttp import web, WSMsgType, WebSocketError
 
 from .common import PerspectiveHandlerBase
 
+__all__ = ['PerspectiveAIOHTTPHandler']
 
 class PerspectiveAIOHTTPHandler(PerspectiveHandlerBase):
     """PerspectiveAIOHTTPHandler is a drop-in implementation of Perspective.

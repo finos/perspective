@@ -16,6 +16,7 @@ import functools
 
 from ..core.exception import PerspectiveError
 
+__all__ = ['PerspectiveHandlerBase'] 
 
 class PerspectiveHandlerBase(ABC):
     def __init__(self, **kwargs):

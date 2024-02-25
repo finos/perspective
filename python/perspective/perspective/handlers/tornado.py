@@ -15,6 +15,7 @@ from tornado.websocket import WebSocketHandler, WebSocketClosedError
 
 from .common import PerspectiveHandlerBase
 
+__all__ = ['PerspectiveTornadoHandler'] 
 
 class PerspectiveTornadoHandler(PerspectiveHandlerBase, WebSocketHandler):
     """PerspectiveTornadoHandler is a drop-in implementation of Perspective.
