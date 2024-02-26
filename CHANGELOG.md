@@ -1,12 +1,26 @@
+# [v2.8.1](https://github.com/finos/perspective/releases/tag/v2.8.1)
+
+_26 February 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.8.0...v2.8.1))
+
+Fixes
+
+- Fix `split_by` with `date`/`datetime` columns [#2545](https://github.com/finos/perspective/pull/2545)
+
+Misc
+
+- Add `clang-format`, `clang-tidy` and `clangd` support for C++ development [#2541](https://github.com/finos/perspective/pull/2541)
+- Add Docs Tests [#2502](https://github.com/finos/perspective/pull/2502)
+- Add workspaceFolder to cargo_target_dir [#2537](https://github.com/finos/perspective/pull/2537)
+
 # [v2.8.0](https://github.com/finos/perspective/releases/tag/v2.8.0)
 
-_16 February 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.7.2...v2.8.0))
+_16 February 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.7.1...v2.8.0))
 
 Features
 
-- Add column edit highlight to `perspective-viewer-datagrid` [#2486](https://github.com/finos/perspective/pull/2486)
 - New color selector component [#2536](https://github.com/finos/perspective/pull/2536)
 - Render table in the shadow DOM for `@finos/perspective-viewer-datagrid` [#2482](https://github.com/finos/perspective/pull/2482)
+- Add column edit highlight to `perspective-viewer-datagrid` [#2486](https://github.com/finos/perspective/pull/2486)
 
 Fixes
 

@@ -118,8 +118,10 @@ boost_*.tar.gz
 .idea
 rust/perspective-viewer/target.vscode
 target.vscode
-.vscode/c_cpp_properties.json
-.vscode/settings.json
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.default.json
+!.vscode/tasks.json
 
 # docs
 website/translated_docs
@@ -197,7 +199,6 @@ rust/perspective-viewer/pkg
 .perspectiverc
 .emsdk
 vcpkg
-.vscode/c_cpp_properties.json
 
 # jupyterlab test artifacts
 packages/perspective-jupyterlab/test/config/jupyter/lab
@@ -209,7 +210,6 @@ tools/perspective-build/lib
 docs/.docusaurus
 packages/perspective-esbuild-plugin/lib
 docs/static/blocks
-.vscode/c_cpp_properties.json
 test-results/
 playwright-report/
 playwright/.cache/
