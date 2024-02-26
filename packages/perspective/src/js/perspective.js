@@ -324,6 +324,25 @@ export default function (Module) {
         return extracted;
     };
 
+    const extract_vector_string = function (vector) {
+        // handles deletion already - do not call delete() on the input vector
+        // again
+        let extracted = [];
+        for (let i = 0; i < vector.size(); i++) {
+            let item = vector.get(i);
+            let row = [];
+            for (let i = 0; i < item.size(); i++) {
+                let s = item.get(i);
+                row.push(s);
+            }
+
+            item.delete();
+            extracted.push(row);
+        }
+        vector.delete();
+        return extracted;
+    };
+
     /**
      * The schema of this {@link module:perspective~view}.
      *
@@ -420,7 +439,7 @@ export default function (Module) {
      * @returns {Array<String>} an Array of Strings containing the column paths.
      */
     view.prototype.column_paths = function () {
-        return extract_vector_scalar(this._View.column_paths()).map((x) =>
+        return extract_vector_string(this._View.column_paths()).map((x) =>
             x.join(defaults.COLUMN_SEPARATOR_STRING)
         );
     };

@@ -62,4 +62,30 @@ test.describe("Datagrid with superstore data set", () => {
             "row-headers-are-printed-correctly"
         );
     });
+
+    test("Column headers are printed correctly, split_by a date column", async ({
+        page,
+    }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+                columns: ["Sales", "Profit"],
+                group_by: ["State"],
+                split_by: ["New Col"],
+                expressions: { "New Col": "bucket(\"Order Date\",'Y')" },
+            });
+        });
+
+        compareContentsToSnapshot(
+            await getDatagridContents(page),
+            "column-headers-are-printed-correctly-split-by-a-date-column"
+        );
+    });
 });

@@ -2141,7 +2141,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("schema", &View<t_ctxunit>::schema)
         .function("expression_schema", &View<t_ctxunit>::expression_schema)
         .function("column_names", &View<t_ctxunit>::column_names)
-        .function("column_paths", &View<t_ctxunit>::column_paths)
+        .function("column_paths", &View<t_ctxunit>::column_paths_string)
         .function("_get_deltas_enabled", &View<t_ctxunit>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctxunit>::_set_deltas_enabled)
         .function(
@@ -2172,7 +2172,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("schema", &View<t_ctx0>::schema)
         .function("expression_schema", &View<t_ctx0>::expression_schema)
         .function("column_names", &View<t_ctx0>::column_names)
-        .function("column_paths", &View<t_ctx0>::column_paths)
+        .function("column_paths", &View<t_ctx0>::column_paths_string)
         .function("_get_deltas_enabled", &View<t_ctx0>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx0>::_set_deltas_enabled)
         .function(
@@ -2207,7 +2207,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("schema", &View<t_ctx1>::schema)
         .function("expression_schema", &View<t_ctx1>::expression_schema)
         .function("column_names", &View<t_ctx1>::column_names)
-        .function("column_paths", &View<t_ctx1>::column_paths)
+        .function("column_paths", &View<t_ctx1>::column_paths_string)
         .function("_get_deltas_enabled", &View<t_ctx1>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx1>::_set_deltas_enabled)
         .function(
@@ -2241,7 +2241,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("schema", &View<t_ctx2>::schema)
         .function("expression_schema", &View<t_ctx2>::expression_schema)
         .function("column_names", &View<t_ctx2>::column_names)
-        .function("column_paths", &View<t_ctx2>::column_paths)
+        .function("column_paths", &View<t_ctx2>::column_paths_string)
         .function("_get_deltas_enabled", &View<t_ctx2>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx2>::_set_deltas_enabled)
         .function(

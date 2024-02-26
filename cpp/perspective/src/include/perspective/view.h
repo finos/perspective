@@ -125,6 +125,8 @@ public:
      */
     std::vector<std::vector<t_tscalar>> column_paths() const;
 
+    std::vector<std::vector<std::string>> column_paths_string() const;
+
     /**
      * @brief
      *
