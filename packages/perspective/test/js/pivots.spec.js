@@ -3082,5 +3082,32 @@ const std = (nums) => {
             view.delete();
             table.delete();
         });
+
+        test("Should format date columns in split_by", async function () {
+            const table = await perspective.table({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "date",
+            });
+
+            await table.update(data_8);
+            const view = await table.view({ group_by: ["y"], split_by: ["z"] });
+            const paths = await view.column_paths();
+            expect(paths).toEqual([
+                "__ROW_PATH__",
+                "2019-04-11|w",
+                "2019-04-11|x",
+                "2019-04-11|y",
+                "2019-04-11|z",
+                "2019-04-13|w",
+                "2019-04-13|x",
+                "2019-04-13|y",
+                "2019-04-13|z",
+            ]);
+
+            view.delete();
+            table.delete();
+        });
     });
 })(perspective);

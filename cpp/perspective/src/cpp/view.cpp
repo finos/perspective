@@ -271,6 +271,25 @@ View<CTX_T>::column_paths() const {
 }
 
 template <typename CTX_T>
+std::vector<std::vector<std::string>>
+View<CTX_T>::column_paths_string() const {
+    auto paths = column_paths();
+    std::vector<std::vector<std::string>> out;
+    out.reserve(paths.size());
+    for (const auto& path : paths) {
+        std::vector<std::string> row;
+        row.reserve(path.size());
+        for (const auto& c : path) {
+            row.push_back(c.to_string());
+        }
+
+        out.push_back(row);
+    }
+
+    return out;
+}
+
+template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() const {
     // TODO: should revert to m_table
