@@ -84,7 +84,7 @@ t_lstore::create_file() {
 }
 
 void*
-t_lstore::create_mapping() const {
+t_lstore::create_mapping() {
     void* rval = mmap(nullptr, capacity(), m_mprot, m_mflags, m_fd, 0);
     PSP_VERBOSE_ASSERT(rval, != MAP_FAILED, "mmap failed");
     return rval;

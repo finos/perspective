@@ -93,7 +93,7 @@ t_lstore::create_file() {
 }
 
 void*
-t_lstore::create_mapping() const {
+t_lstore::create_mapping() {
     std::pair<std::uint32_t, std::uint32_t> capacity = capacity_pair();
 
     m_winmapping_handle = CreateFileMapping(
