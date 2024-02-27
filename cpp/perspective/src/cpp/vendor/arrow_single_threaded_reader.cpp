@@ -108,7 +108,8 @@ namespace csv {
                 std::shared_ptr<DataType> type
             ) {
                 return Column{
-                    std::move(col_name), col_index, false, std::move(type)};
+                    std::move(col_name), col_index, false, std::move(type)
+                };
             }
 
             static Column
@@ -308,7 +309,8 @@ namespace csv {
                             block_index_++,
                             is_final,
                             bytes_skipped,
-                            [](int64_t) { return Status::OK(); }});
+                            [](int64_t) { return Status::OK(); }
+                        });
                     }
                     partial_ = std::move(empty);
                 }
@@ -353,7 +355,8 @@ namespace csv {
                     block_index_++,
                     is_final,
                     bytes_skipped,
-                    std::move(consume_bytes)});
+                    std::move(consume_bytes)
+                });
             }
         };
 
@@ -453,7 +456,8 @@ namespace csv {
                     }
                     views = {
                         std::string_view(*straddling),
-                        std::string_view(*block.buffer)};
+                        std::string_view(*block.buffer)
+                    };
                 } else {
                     views = {std::string_view(*block.buffer)};
                 }
@@ -470,7 +474,8 @@ namespace csv {
                 return ParsedBlock{
                     std::move(parser),
                     block.block_index,
-                    static_cast<int64_t>(parsed_size) + block.bytes_skipped};
+                    static_cast<int64_t>(parsed_size) + block.bytes_skipped
+                };
             }
 
         private:
@@ -736,8 +741,8 @@ namespace csv {
                         );
                     }
                     views = {
-                        std::string_view(*straddling),
-                        std::string_view(*block)};
+                        std::string_view(*straddling), std::string_view(*block)
+                    };
                 } else {
                     views = {std::string_view(*block)};
                 }
@@ -751,7 +756,8 @@ namespace csv {
                     num_rows_seen_ += parser->total_num_rows();
                 }
                 return ParseResult{
-                    std::move(parser), static_cast<int64_t>(parsed_size)};
+                    std::move(parser), static_cast<int64_t>(parsed_size)
+                };
             }
 
             io::IOContext io_context_;

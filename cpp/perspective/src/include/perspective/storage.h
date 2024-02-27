@@ -240,6 +240,7 @@ protected:
 private:
     void reserve_impl(t_uindex capacity, bool allow_shrink);
     t_handle create_file();
+    // NOLINTNEXTLINE
     void* create_mapping();
     void resize_mapping(t_uindex cap_new);
     void destroy_mapping();

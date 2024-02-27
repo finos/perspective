@@ -1332,7 +1332,8 @@ namespace ipc {
     static inline FileBlock
     FileBlockFromFlatbuffer(const flatbuf::Block* block) {
         return FileBlock{
-            block->offset(), block->metaDataLength(), block->bodyLength()};
+            block->offset(), block->metaDataLength(), block->bodyLength()
+        };
     }
 
     Status
@@ -1542,7 +1543,8 @@ namespace ipc {
                     ));
                 }
                 return RecordBatchWithMetadata{
-                    std::move(batch), std::move(custom_metadata)};
+                    std::move(batch), std::move(custom_metadata)
+                };
             }
 
             RETURN_NOT_OK(WaitForDictionaryReadFinished());
@@ -2489,7 +2491,8 @@ namespace ipc {
         if (cached_source_) {
             auto cached_source = cached_source_;
             io::ReadRange range{
-                block.offset, block.metadata_length + block.body_length};
+                block.offset, block.metadata_length + block.body_length
+            };
             auto* pool = state_->options_.memory_pool;
             return cached_source->WaitFor({range}).Then(
                 [cached_source, pool, range](
@@ -3553,8 +3556,9 @@ namespace ipc {
             } else {
                 // no real IO is performed, it is only saved into a vector for
                 // replaying later
-                read_ranges_.emplace_back(io::ReadRange{
-                    position, num_bytes_read});
+                read_ranges_.emplace_back(
+                    io::ReadRange{position, num_bytes_read}
+                );
             }
             return num_bytes_read;
         }

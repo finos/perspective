@@ -82,7 +82,8 @@ t_gnode::t_gnode(t_schema input_schema, t_schema output_schema) :
         m_output_schema,
         m_output_schema,
         trans_schema,
-        existed_schema};
+        existed_schema
+    };
     m_epoch = std::chrono::high_resolution_clock::now();
 }
 

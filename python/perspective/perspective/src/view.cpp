@@ -165,7 +165,8 @@ namespace binding {
             if (p_aggregates.contains(py_column_name)) {
                 if (py::isinstance<py::str>(p_aggregates[py_column_name])) {
                     std::vector<std::string> agg{
-                        p_aggregates[py_column_name].cast<std::string>()};
+                        p_aggregates[py_column_name].cast<std::string>()
+                    };
                     aggregates[column] = agg;
                 } else {
                     aggregates[column] = p_aggregates[py_column_name]

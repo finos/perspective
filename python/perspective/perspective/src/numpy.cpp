@@ -20,7 +20,8 @@ namespace perspective {
 namespace numpy {
 
     const std::vector<std::string> NumpyLoader::DATE_UNITS = {
-        "[D]", "[W]", "[M]", "[Y]"};
+        "[D]", "[W]", "[M]", "[Y]"
+    };
 
     NumpyLoader::NumpyLoader(t_val accessor) :
         m_init(false),

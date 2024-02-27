@@ -307,10 +307,10 @@ jobs:
             # Dependencies #
             ################
             ################
-            - name: Install LLVM 16
+            - name: Install LLVM 17
               uses: KyleMayes/install-llvm-action@v1
               with:
-                  version: "16"
+                  version: "17"
                   directory: "./.llvm"
 
             # JS
@@ -462,10 +462,10 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Install LLVM and Clang
+            - name: Install LLVM 17
               uses: KyleMayes/install-llvm-action@v1
               with:
-                  version: "16"
+                  version: "17"
                   directory: "./.llvm"
 
             ##########
@@ -1067,12 +1067,12 @@ jobs:
             # Dependencies #
             ################
             ################
-            - name: Install LLVM and Clang
-              uses: KyleMayes/install-llvm-action@v1
-              if: false
-              with:
-                  version: "16"
-                  directory: "./.llvm"
+            # - name: Install LLVM 17
+            #   uses: KyleMayes/install-llvm-action@v1
+            #   if: false
+            #   with:
+            #       version: "17"
+            #       directory: "./.llvm"
 
             # JS
             - name: Install yarn

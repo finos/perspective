@@ -27,11 +27,11 @@ AlignConsecutiveMacros:
     AcrossComments: false
     AlignCompound: false
     PadOperators: false
-# AlignConsecutiveShortCaseStatements:
-#     Enabled: false
-#     AcrossEmptyLines: false
-#     AcrossComments: false
-#     AlignCaseColons: false
+AlignConsecutiveShortCaseStatements:
+    Enabled: false
+    AcrossEmptyLines: false
+    AcrossComments: false
+    AlignCaseColons: false
 AlignEscapedNewlines: Right
 AlignOperands: DontAlign
 AlignTrailingComments:
@@ -141,7 +141,7 @@ IntegerLiteralSeparator:
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
 KeepEmptyLinesAtTheStartOfBlocks: true
-# KeepEmptyLinesAtEOF: false
+KeepEmptyLinesAtEOF: false
 LambdaBodyIndentation: Signature
 LineEnding: LF
 MacroBlockBegin: ""
@@ -170,6 +170,7 @@ QualifierAlignment: Leave
 ReferenceAlignment: Pointer
 ReflowComments: true
 RemoveBracesLLVM: false
+RemoveParentheses: Leave
 RemoveSemicolon: false
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
@@ -187,7 +188,7 @@ SpaceBeforeCaseColon: false
 SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
-# SpaceBeforeJsonColon: false
+SpaceBeforeJsonColon: false
 SpaceBeforeParens: ControlStatements
 SpaceBeforeParensOptions:
     AfterControlStatements: true
@@ -208,12 +209,12 @@ SpacesInContainerLiterals: true
 SpacesInLineCommentPrefix:
     Minimum: 1
     Maximum: -1
-# SpacesInParens: Never
-# SpacesInParensOptions:
-#     InCStyleCasts: false
-#     InConditionalStatements: false
-#     InEmptyParentheses: false
-#     Other: false
+SpacesInParens: Never
+SpacesInParensOptions:
+    InCStyleCasts: false
+    InConditionalStatements: false
+    InEmptyParentheses: false
+    Other: false
 SpacesInSquareBrackets: false
 Standard: c++17
 StatementAttributeLikeMacros:
@@ -223,7 +224,7 @@ StatementMacros:
     - QT_REQUIRE_VERSION
 TabWidth: 4
 UseTab: Never
-# VerilogBreakBetweenInstancePorts: true
+VerilogBreakBetweenInstancePorts: true
 WhitespaceSensitiveMacros:
     - BOOST_PP_STRINGIZE
     - CF_SWIFT_NAME
