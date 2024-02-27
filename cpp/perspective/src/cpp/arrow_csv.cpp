@@ -74,7 +74,8 @@ ParseYYYY_MM_DD(const char* s, arrow_vendored::date::year_month_day* out) {
     *out = {
         arrow_vendored::date::year{year},
         arrow_vendored::date::month{month},
-        arrow_vendored::date::day{day}};
+        arrow_vendored::date::day{day}
+    };
     return out->ok();
 }
 
@@ -99,7 +100,8 @@ ParseYYYY_DD_MM(const char* s, arrow_vendored::date::year_month_day* out) {
     *out = {
         arrow_vendored::date::year{year},
         arrow_vendored::date::month{month},
-        arrow_vendored::date::day{day}};
+        arrow_vendored::date::day{day}
+    };
     return out->ok();
 }
 
@@ -125,7 +127,8 @@ ParseYYYY_D_M(const char* s, arrow_vendored::date::year_month_day* out) {
     *out = {
         arrow_vendored::date::year{year},
         arrow_vendored::date::month{month},
-        arrow_vendored::date::day{day}};
+        arrow_vendored::date::day{day}
+    };
     return out->ok();
 }
 
@@ -390,7 +393,8 @@ std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_PARSERS{
     arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
     arrow::TimestampParser::MakeStrptime("%d %m %Y"),
     // TODO: time type column
-    arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
+    arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")
+};
 
 std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{
     std::make_shared<UnixTimestampParser>(),
@@ -402,7 +406,8 @@ std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{
     arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
     arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
     arrow::TimestampParser::MakeStrptime("%d %m %Y"),
-    arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
+    arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")
+};
 
 int64_t
 parseAsArrowTimestamp(const std::string& input) {

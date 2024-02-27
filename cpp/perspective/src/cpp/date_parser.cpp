@@ -31,7 +31,8 @@ const std::string t_date_parser::VALID_FORMATS[12] = {
     "%m %d %Y",
     "%m/%d/%Y",
     "%m/%d/%y",
-    "%d %m %Y"};
+    "%d %m %Y"
+};
 
 t_date_parser::t_date_parser() {}
 

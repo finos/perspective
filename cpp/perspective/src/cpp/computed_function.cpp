@@ -975,7 +975,8 @@ const std::string days_of_week[7] = {
     "4 Wednesday",
     "5 Thursday",
     "6 Friday",
-    "7 Saturday"};
+    "7 Saturday"
+};
 
 const std::string months_of_year[12] = {
     "01 January",
@@ -989,7 +990,8 @@ const std::string months_of_year[12] = {
     "09 September",
     "10 October",
     "11 November",
-    "12 December"};
+    "12 December"
+};
 
 day_of_week::day_of_week(
     t_expression_vocab& expression_vocab, bool is_type_validator
@@ -1158,7 +1160,8 @@ tsl::hopscotch_map<char, t_date_bucket_unit> bucket::UNIT_MAP = {
     {'D', t_date_bucket_unit::DAYS},
     {'W', t_date_bucket_unit::WEEKS},
     {'M', t_date_bucket_unit::MONTHS},
-    {'Y', t_date_bucket_unit::YEARS}};
+    {'Y', t_date_bucket_unit::YEARS}
+};
 
 bucket::bucket() : exprtk::igeneric_function<t_tscalar>("T?") {}
 
