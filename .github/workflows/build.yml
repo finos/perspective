@@ -1167,16 +1167,6 @@ jobs:
             - name: Install pyodide-build
               run: pip install pyodide-build==$PYODIDE_VERSION "pydantic<2"
 
-            # NOTA BENE: When removing this step, also remove the vendored pyodide file
-            - name: Provision workaround for bug in Pyodide 0.24.1
-              run: |
-                  PYTHON_HOME="$(python -c 'import sys; print(sys.prefix)')"
-                  TOOLCHAIN_DIR="$PYTHON_HOME/lib/python3.11/site-packages/pyodide_build/tools/cmake/Modules/Platform"
-                  echo "$PYTHON_HOME"
-                  echo "$TOOLCHAIN_DIR"
-                  mkdir -p "$TOOLCHAIN_DIR"
-                  cp vendor/pyodide/Emscripten.cmake "$TOOLCHAIN_DIR"
-
             - name: Build
               # Without --exports=pyinit, pyodide-build tries to export all symbols from every .o,
               # which causes the em++ linker command line invocation to be so long
