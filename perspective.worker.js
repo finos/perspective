@@ -5,7 +5,7 @@
 /***/ 373:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-module.exports = __webpack_require__.p + "aba87eae504ca5bc.wasm";
+module.exports = __webpack_require__.p + "6ba0941cd59572b0.wasm";
 
 /***/ })
 
@@ -472,7 +472,9 @@ while(i<this.update_callbacks.length){let val=this.update_callbacks[i];if(val.vi
      */view.prototype._num_hidden=function(){// Count hidden columns.
 let hidden=0;for(const sort of this.config.sort){if(this.config.columns.indexOf(sort[0])===-1){hidden++;}}return hidden;};function col_path_vector_to_string(vector){let extracted=[];for(let i=0;i<vector.size();i++){let s=vector.get(i);extracted.push(__MODULE__.scalar_to_val(s,false,true));s.delete();}vector.delete();return extracted;}const extract_vector_scalar=function(vector){// handles deletion already - do not call delete() on the input vector
 // again
-let extracted=[];for(let i=0;i<vector.size();i++){let item=vector.get(i);extracted.push(col_path_vector_to_string(item));}vector.delete();return extracted;};/**
+let extracted=[];for(let i=0;i<vector.size();i++){let item=vector.get(i);extracted.push(col_path_vector_to_string(item));}vector.delete();return extracted;};const extract_vector_string=function(vector){// handles deletion already - do not call delete() on the input vector
+// again
+let extracted=[];for(let i=0;i<vector.size();i++){let item=vector.get(i);let row=[];for(let i=0;i<item.size();i++){let s=item.get(i);row.push(s);}item.delete();extracted.push(row);}vector.delete();return extracted;};/**
      * The schema of this {@link module:perspective~view}.
      *
      * A schema is an Object, the keys of which are the columns of this
@@ -522,7 +524,7 @@ let extracted=[];for(let i=0;i<vector.size();i++){let item=vector.get(i);extract
      * are applied.
      *
      * @returns {Array<String>} an Array of Strings containing the column paths.
-     */view.prototype.column_paths=function(){return extract_vector_scalar(this._View.column_paths()).map(x=>x.join(COLUMN_SEPARATOR_STRING));};view.prototype.get_data_slice=function(start_row,end_row,start_col,end_col){if(this.is_unit_context){return __MODULE__.get_data_slice_unit(this._View,start_row,end_row,start_col,end_col);}else{const num_sides=this.sides();const nidx=SIDES[num_sides];return __MODULE__[`get_data_slice_${nidx}`](this._View,start_row,end_row,start_col,end_col);}};/**
+     */view.prototype.column_paths=function(){return extract_vector_string(this._View.column_paths()).map(x=>x.join(COLUMN_SEPARATOR_STRING));};view.prototype.get_data_slice=function(start_row,end_row,start_col,end_col){if(this.is_unit_context){return __MODULE__.get_data_slice_unit(this._View,start_row,end_row,start_col,end_col);}else{const num_sides=this.sides();const nidx=SIDES[num_sides];return __MODULE__[`get_data_slice_${nidx}`](this._View,start_row,end_row,start_col,end_col);}};/**
      * Given an `options` Object, calculate the correct start/end rows and
      * columns, as well as other metadata required by the data formatter.
      *
