@@ -16,6 +16,7 @@
 import pytest
 import random
 
+from contextlib import asynccontextmanager
 from datetime import datetime
 
 from fastapi import FastAPI, WebSocket
@@ -63,6 +64,14 @@ class TestPerspectiveStarletteHandler(object):
         Perspective starlette server.
         """
         return await websocket(CLIENT, "/websocket")
+
+    @asynccontextmanager
+    async def managed_websocket_client(self):
+        client = await self.websocket_client()
+        try:
+            yield client
+        finally:
+            await client.terminate()
 
     @pytest.mark.asyncio
     async def test_starlette_handler_init_terminate(self):
@@ -325,3 +334,13 @@ class TestPerspectiveStarletteHandler(object):
         assert size2 == 110
 
         await client.terminate()
+
+    @pytest.mark.asyncio
+    async def test_starlette_handler_get_hosted_table_names(self):
+        table_name = str(random.random())
+        _table = Table(data)
+        MANAGER.host_table(table_name, _table)
+
+        async with self.managed_websocket_client() as client:
+            names = await client.get_hosted_table_names()
+            assert names == [table_name]

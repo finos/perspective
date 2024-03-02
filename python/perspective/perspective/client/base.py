@@ -97,7 +97,9 @@ class PerspectiveClient(object):
 
     def get_hosted_table_names(self):
         msg = {"cmd": "get_hosted_table_names"}
-        return self.post(msg)
+        future = asyncio.Future()
+        self.post(msg, future=future)
+        return future
 
     def post(self, msg, future=None, keep_alive=False):
         """Given a message and an associated `Future` object, store the future
