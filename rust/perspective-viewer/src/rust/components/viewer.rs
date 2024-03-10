@@ -232,13 +232,13 @@ impl Component for PerspectiveViewer {
 
                 ApiFuture::spawn(async move {
                     session.reset(all);
-                    let column_config = if all {
-                        presentation.reset_column_configs();
+                    let columns_config = if all {
+                        presentation.reset_columns_configs();
                         None
                     } else {
-                        Some(presentation.all_column_configs())
+                        Some(presentation.all_columns_configs())
                     };
-                    renderer.reset(column_config.as_ref()).await;
+                    renderer.reset(columns_config.as_ref()).await;
                     presentation.reset_available_themes(None).await;
                     let result = renderer.draw(session.validate().await?.create_view()).await;
                     if let Some(sender) = sender {

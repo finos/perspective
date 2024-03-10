@@ -71,7 +71,7 @@ pub struct PresentationHandle {
     is_settings_open: RefCell<bool>,
     open_column_settings: RefCell<OpenColumnSettings>,
     is_workspace: RefCell<Option<bool>>,
-    column_config: RefCell<ColumnConfigMap>,
+    columns_config: RefCell<ColumnConfigMap>,
     pub settings_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub column_settings_updated: PubSub<JsValue>,
@@ -93,7 +93,7 @@ impl Presentation {
             settings_open_changed: Default::default(),
             column_settings_open_changed: Default::default(),
             column_settings_updated: Default::default(),
-            column_config: Default::default(),
+            columns_config: Default::default(),
             is_settings_open: Default::default(),
             is_workspace: Default::default(),
             open_column_settings: Default::default(),
@@ -236,37 +236,43 @@ impl Presentation {
     }
 
     /// Returns an owned copy of the curent column configuration map.
-    pub fn all_column_configs(&self) -> ColumnConfigMap {
-        self.column_config.borrow().clone()
+    pub fn all_columns_configs(&self) -> ColumnConfigMap {
+        self.columns_config.borrow().clone()
     }
 
-    pub fn reset_column_configs(&self) {
-        *self.column_config.borrow_mut() = ColumnConfigMap::new();
+    pub fn reset_columns_configs(&self) {
+        *self.columns_config.borrow_mut() = ColumnConfigMap::new();
     }
 
     /// Gets a clone of the ColumnConfig for the given column name.
-    pub fn get_column_config(&self, column_name: &str) -> Option<ColumnConfigValues> {
-        self.column_config.borrow().get(column_name).cloned()
+    pub fn get_columns_config(&self, column_name: &str) -> Option<ColumnConfigValues> {
+        self.columns_config.borrow().get(column_name).cloned()
     }
 
     /// Updates the entire column config struct. (like from a restore() call)
-    pub fn update_column_configs(&self, update: ColumnConfigUpdate) {
+    pub fn update_columns_configs(&self, update: ColumnConfigUpdate) {
         match update {
             crate::config::OptionalUpdate::SetDefault => {
-                let mut config = self.column_config.borrow_mut();
+                let mut config = self.columns_config.borrow_mut();
                 *config = HashMap::default()
             },
             crate::config::OptionalUpdate::Missing => {},
             crate::config::OptionalUpdate::Update(update) => {
                 for (col_name, new_config) in update.into_iter() {
-                    self.column_config.borrow_mut().insert(col_name, new_config);
+                    self.columns_config
+                        .borrow_mut()
+                        .insert(col_name, new_config);
                 }
             },
         }
     }
 
-    pub fn update_column_config_value(&self, column_name: String, update: ColumnConfigValueUpdate) {
-        let mut config = self.column_config.borrow_mut();
+    pub fn update_columns_config_value(
+        &self,
+        column_name: String,
+        update: ColumnConfigValueUpdate,
+    ) {
+        let mut config = self.columns_config.borrow_mut();
         let value = config.remove(&column_name).unwrap_or_default();
         let update = value.update(update);
         if !update.is_empty() {

@@ -264,7 +264,7 @@ impl PerspectiveViewerElement {
             let ViewerConfigUpdate {
                 plugin,
                 plugin_config,
-                column_config,
+                columns_config,
                 settings,
                 theme: theme_name,
                 title,
@@ -328,9 +328,9 @@ impl PerspectiveViewerElement {
                     } else {
                         plugin.save()
                     };
-                    presentation.update_column_configs(column_config);
-                    let column_config = presentation.all_column_configs();
-                    plugin.restore(&plugin_update, Some(&column_config));
+                    presentation.update_columns_configs(columns_config);
+                    let columns_config = presentation.all_columns_configs();
+                    plugin.restore(&plugin_update, Some(&columns_config));
                     session.validate().await?.create_view().await
                 }
                 .await;

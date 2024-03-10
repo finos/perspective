@@ -43,12 +43,8 @@ pub enum CustomNumberFormatMsg {
     Unit(Option<Unit>),
     UnitDisplay(Option<UnitDisplay>),
     MinimumIntegerDigits(Option<f64>),
-    SigMax(Option<f64>),
-    SigMin(Option<f64>),
-    FracMax(Option<f64>),
-    FracMin(Option<f64>),
-    ShowFrac(bool),
-    ShowSig(bool),
+    SigChange(Option<(f64, f64)>),
+    FracChange(Option<(f64, f64)>),
     RoundingIncrement(RoundingIncrement),
     TrailingZero(Option<TrailingZeroDisplay>),
     RoundingMode(Option<RoundingMode>),
@@ -60,30 +56,31 @@ pub struct CustomNumberFormat {
     config: CustomNumberFormatConfig,
     style: NumberStyle,
     notation: Option<NotationName>,
-    show_frac: bool,
-    show_sig: bool,
-    disable_rounding_increment: bool,
-    disable_rounding_priority: bool,
+    // show_frac: bool,
+    // show_sig: bool,
+    // disable_rounding_increment: bool,
+    // disable_rounding_priority: bool,
 }
+
 impl CustomNumberFormat {
     fn initialize(ctx: &yew::prelude::Context<Self>) -> Self {
         let config = ctx.props().restored_config.clone();
-        let show_frac = config
-            .minimum_fraction_digits
-            .or(config.maximum_fraction_digits)
-            .or(config.rounding_increment)
-            .is_some();
-        let show_sig = config
-            .minimum_significant_digits
-            .or(config.maximum_significant_digits)
-            .is_some();
-        let disable_rounding_increment = show_sig
-            || show_frac
-            || !matches!(
-                config.rounding_priority,
-                Some(RoundingPriority::Auto) | None
-            );
-        let disable_rounding_priority = !(show_frac && show_sig);
+        // let show_frac = config
+        //     .minimum_fraction_digits
+        //     .or(config.maximum_fraction_digits)
+        //     .or(config.rounding_increment)
+        //     .is_some();
+        // let show_sig = config
+        //     .minimum_significant_digits
+        //     .or(config.maximum_significant_digits)
+        //     .is_some();
+        // let disable_rounding_increment = show_sig
+        //     || show_frac
+        //     || !matches!(
+        //         config.rounding_priority,
+        //         Some(RoundingPriority::Auto) | None
+        //     );
+        // let disable_rounding_priority = !(show_frac && show_sig);
         Self {
             style: config
                 ._style
@@ -96,14 +93,15 @@ impl CustomNumberFormat {
                 })
                 .unwrap_or_default(),
             config,
-            show_frac,
-            show_sig,
-            disable_rounding_increment,
-            disable_rounding_priority,
+            // show_frac,
+            // show_sig,
+            // disable_rounding_increment,
+            // disable_rounding_priority,
             notation: None,
         }
     }
 }
+
 impl Component for CustomNumberFormat {
     type Message = CustomNumberFormatMsg;
     type Properties = CustomNumberFormatProps;
@@ -122,11 +120,9 @@ impl Component for CustomNumberFormat {
     }
 
     fn update(&mut self, ctx: &yew::prelude::Context<Self>, msg: Self::Message) -> bool {
-        let (default_frac_min, default_frac_max) = self.config.default_fraction_digits();
         match msg {
             CustomNumberFormatMsg::StyleChanged(style) => {
-                // required field - this will always be Some
-                let style = style.unwrap();
+                let style = style.unwrap_or_default();
                 let new_style = match style {
                     NumberStyle::Decimal => NumberFormatStyle::Decimal,
                     NumberStyle::Percent => NumberFormatStyle::Percent,
@@ -194,47 +190,35 @@ impl Component for CustomNumberFormat {
             CustomNumberFormatMsg::MinimumIntegerDigits(val) => {
                 self.config.minimum_integer_digits = val;
             },
-            CustomNumberFormatMsg::FracMax(val) => {
-                self.config.maximum_fraction_digits = val.map(|val| {
-                    let min = self
-                        .config
-                        .minimum_fraction_digits
-                        .unwrap_or(default_frac_min);
+            CustomNumberFormatMsg::FracChange(val) => {
+                self.config.rounding_increment = None;
+                self.config.maximum_fraction_digits = val.map(|(_, val)| {
+                    let min = self.config.minimum_fraction_digits.unwrap_or(2.);
                     max!(val, min)
                 });
-            },
-            CustomNumberFormatMsg::FracMin(val) => {
-                self.config.minimum_fraction_digits = val.map(|val| {
-                    let max = self
-                        .config
-                        .maximum_fraction_digits
-                        .unwrap_or(default_frac_max);
+
+                self.config.minimum_fraction_digits = val.map(|(val, _)| {
+                    let max = self.config.maximum_fraction_digits.unwrap_or(2.);
                     min!(val, max)
                 });
             },
-            CustomNumberFormatMsg::SigMax(val) => {
-                self.config.maximum_significant_digits = val.map(|val| {
+            CustomNumberFormatMsg::SigChange(val) => {
+                self.config.maximum_significant_digits = val.map(|(_, val)| {
                     let min = self.config.minimum_significant_digits.unwrap_or(1.);
                     max!(val, min)
                 });
-            },
-            CustomNumberFormatMsg::SigMin(val) => {
-                self.config.minimum_significant_digits = val.map(|val| {
+
+                self.config.minimum_significant_digits = val.map(|(val, _)| {
                     let max = self.config.maximum_significant_digits.unwrap_or(21.);
                     min!(val, max)
                 });
             },
-            CustomNumberFormatMsg::ShowFrac(val) => {
-                self.show_frac = val;
-            },
-            CustomNumberFormatMsg::ShowSig(val) => {
-                self.show_sig = val;
-            },
             CustomNumberFormatMsg::RoundingIncrement(val) => {
                 if let RoundingIncrement::Custom(val) = val {
+                    self.config.rounding_priority = None;
                     self.config.rounding_increment = Some(val);
                     self.config.maximum_fraction_digits = Some(0.);
-                    self.show_frac = false;
+                    self.config.minimum_fraction_digits = Some(0.);
                 } else {
                     self.config.rounding_increment = None;
                 }
@@ -246,26 +230,16 @@ impl Component for CustomNumberFormat {
                 self.config.rounding_mode = val;
             },
             CustomNumberFormatMsg::RoundingPriority(val) => {
+                self.config.rounding_increment = None;
                 self.config.rounding_priority = val;
             },
         };
 
-        self.disable_rounding_increment = self.show_sig
-            || self.show_frac
-            || !matches!(
-                self.config.rounding_priority,
-                Some(RoundingPriority::Auto) | None
-            );
-        self.disable_rounding_priority = !(self.show_frac && self.show_sig);
-
-        let filtered_config = self.config.clone().filter_default(
-            self.show_sig,
-            self.show_frac,
-            !self.disable_rounding_increment,
-            !self.disable_rounding_priority,
-        );
+        let is_float = ctx.props().view_type == Type::Float;
+        let filtered_config = self.config.clone().filter_default(is_float);
         let value =
             (filtered_config != CustomNumberFormatConfig::default()).then_some(filtered_config);
+
         let update = ColumnConfigValueUpdate::CustomNumberStringFormat(value);
         ctx.props().on_change.emit(update);
         true

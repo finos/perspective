@@ -36,7 +36,7 @@
             cursor: pointer;
 
             .tab-title {
-                font-size: 12px;
+                font-size: 10px;
                 padding: 10px;
                 border-bottom: 1px solid var(--inactive--color, #6e6e6e);
             }
@@ -63,12 +63,12 @@
         }
     }
     .tab-content {
-        overflow: auto;
+        overflow-y: scroll;
         max-height: calc(100% - 90px);
         @include scrollbar;
 
         .tab-section {
-            padding: 8px;
+            padding: 8px 4px 8px 8px;
             // border-bottom: 1px solid var(--inactive--border-color);
         }
         .text {

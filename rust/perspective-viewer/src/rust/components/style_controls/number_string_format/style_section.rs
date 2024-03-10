@@ -13,7 +13,7 @@
 use yew::html;
 
 use super::CustomNumberFormat;
-use crate::components::form::select_field::SelectField;
+use crate::components::form::select_field::SelectEnumField;
 use crate::components::style_controls::{CustomNumberFormatMsg, NumberStyle};
 use crate::config::*;
 
@@ -22,17 +22,17 @@ impl CustomNumberFormat {
         let section = match self.config._style.as_ref() {
             Some(NumberFormatStyle::Currency(style)) => Some(html! {
                 <>
-                    <SelectField<CurrencyCode>
+                    <SelectEnumField<CurrencyCode>
                         label="Currency"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::CurrencyCode)}
                         current_value={style.currency}
                     />
-                    <SelectField<CurrencyDisplay>
+                    <SelectEnumField<CurrencyDisplay>
                         label="Currency Display"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::CurrencyDisplay)}
                         current_value={style.currency_display.unwrap_or_default()}
                     />
-                    <SelectField<CurrencySign>
+                    <SelectEnumField<CurrencySign>
                         label="Currency Sign"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::CurrencySign)}
                         current_value={style.currency_sign.unwrap_or_default()}
@@ -41,12 +41,12 @@ impl CustomNumberFormat {
             }),
             Some(NumberFormatStyle::Unit(style)) => Some(html!(
                 <>
-                    <SelectField<Unit>
+                    <SelectEnumField<Unit>
                         label="Unit"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::Unit)}
                         current_value={style.unit}
                     />
-                    <SelectField<UnitDisplay>
+                    <SelectEnumField<UnitDisplay>
                         label="Unit Display"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::UnitDisplay)}
                         current_value={style.unit_display.unwrap_or_default()}
@@ -57,8 +57,7 @@ impl CustomNumberFormat {
         };
         html! {
             <>
-                <SelectField<NumberStyle>
-                    required=true
+                <SelectEnumField<NumberStyle>
                     label="Style"
                     current_value={self.style}
                     on_change={ctx.link().callback(CustomNumberFormatMsg::StyleChanged)}

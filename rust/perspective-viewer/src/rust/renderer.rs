@@ -117,10 +117,10 @@ impl Renderer {
         }))
     }
 
-    pub async fn reset(&self, column_config: Option<&ColumnConfigMap>) {
+    pub async fn reset(&self, columns_config: Option<&ColumnConfigMap>) {
         self.0.borrow_mut().plugins_idx = None;
         if let Ok(plugin) = self.get_active_plugin() {
-            plugin.restore(&json!({}), column_config);
+            plugin.restore(&json!({}), columns_config);
         }
     }
 

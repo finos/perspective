@@ -18,22 +18,6 @@ use strum::{Display, EnumIter};
 
 use crate::max;
 
-// #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-// pub enum NumberStringFormat {
-//     Simple(SimpleNumberStringFormat),
-//     Custom(CustomNumberStringFormat),
-// }
-// impl Default for NumberStringFormat {
-//     fn default() -> Self {
-//         Self::Simple(SimpleNumberStringFormat {})
-//     }
-// }
-
-// #[derive(Serialize, Deserialize, Debug, Default, PartialEq, Clone)]
-// pub struct SimpleNumberStringFormat {
-//     // todo
-// }
-
 #[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase", tag = "style")]
 pub enum NumberFormatStyle {
@@ -160,13 +144,16 @@ pub enum CompactDisplay {
 }
 
 #[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub enum UseGrouping {
     Always,
+
     #[default]
     Auto,
     Min2, // default if notation is compact
-    False,
+
+    #[serde(untagged)]
+    False(bool),
 }
 
 #[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
@@ -186,6 +173,7 @@ pub enum SignDisplay {
 pub struct CustomNumberFormatConfig {
     #[serde(flatten)]
     pub _style: Option<NumberFormatStyle>,
+
     // see Digit Options
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumintegerdigits
     // these min/max props can all be specified but it results in possible conflicts
@@ -196,57 +184,72 @@ pub struct CustomNumberFormatConfig {
     pub minimum_significant_digits: Option<f64>,
     pub maximum_significant_digits: Option<f64>,
     pub rounding_priority: Option<RoundingPriority>,
+
     // specific values https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#roundingincrement
     // Only available with automatic rounding priority
     // Cannot be mixed with sigfig rounding. (Does this mean max/min sigfig must be unset?)
     pub rounding_increment: Option<f64>,
     pub rounding_mode: Option<RoundingMode>,
     pub trailing_zero_display: Option<TrailingZeroDisplay>,
+
     #[serde(flatten)]
     pub _notation: Option<Notation>,
     pub use_grouping: Option<UseGrouping>,
     pub sign_display: Option<SignDisplay>,
 }
+
 impl CustomNumberFormatConfig {
-    pub fn filter_default(
-        self,
-        send_sig: bool,
-        send_frac: bool,
-        send_rounding_increment: bool,
-        send_rounding_priority: bool,
-    ) -> Self {
-        let (frac_min, frac_max) = self.default_fraction_digits();
+    pub fn filter_default(self, is_float: bool) -> Self {
+        let (frac_min, frac_max) = if is_float { (2., 2.) } else { (0., 0.) };
+        let rounding_increment = self.rounding_increment;
+        let use_grouping = self
+            .use_grouping
+            .filter(|val| *val != UseGrouping::default());
+
+        let mut minimum_fraction_digits =
+            self.minimum_fraction_digits.filter(|val| *val != frac_min);
+
+        let mut maximum_fraction_digits =
+            self.maximum_fraction_digits.filter(|val| *val != frac_max);
+
+        let mut show_frac = is_float
+            && (minimum_fraction_digits.is_some()
+                || maximum_fraction_digits.is_some()
+                || use_grouping.is_some()
+                || matches!(
+                    self._style,
+                    Some(NumberFormatStyle::Percent | NumberFormatStyle::Unit(_))
+                ))
+            || !is_float && matches!(self._style, Some(NumberFormatStyle::Currency(_)));
+
+        // Rounding increment does not work unless `minimum_fraction_digits`
+        // and `maximum_fraction_digits` are set to 0.
+        if rounding_increment.is_some() {
+            show_frac = true;
+            minimum_fraction_digits = Some(0.);
+            maximum_fraction_digits = Some(0.);
+        }
+
+        let minimum_significant_digits = self.minimum_significant_digits.filter(|val| *val != 1.);
+        let maximum_significant_digits = self.maximum_significant_digits.filter(|val| *val != 21.);
+        let show_sig = minimum_significant_digits.is_some() || maximum_significant_digits.is_some();
         Self {
             _style: self
                 ._style
                 .filter(|style| !matches!(style, NumberFormatStyle::Decimal)),
             minimum_integer_digits: self.minimum_integer_digits.filter(|val| *val != 1.),
-            minimum_fraction_digits: self
-                .minimum_fraction_digits
-                .filter(|_| send_frac)
-                .filter(|val| *val != frac_min),
-            maximum_fraction_digits: self
-                .rounding_increment
-                .filter(|_| send_rounding_increment)
-                .map(|_| 0.)
-                .or_else(|| {
-                    self.maximum_fraction_digits
-                        .filter(|_| send_frac)
-                        .filter(|val| *val != frac_max)
-                }),
-            minimum_significant_digits: self
-                .minimum_significant_digits
-                .filter(|_| send_sig)
-                .filter(|val| *val != 1.),
-            maximum_significant_digits: self
-                .maximum_significant_digits
-                .filter(|_| send_sig)
-                .filter(|val| *val != 21.),
+            minimum_fraction_digits: show_frac
+                .then_some(minimum_fraction_digits.unwrap_or(frac_min)),
+            maximum_fraction_digits: show_frac
+                .then_some(maximum_fraction_digits.unwrap_or(frac_max)),
+            minimum_significant_digits: show_sig
+                .then_some(minimum_significant_digits.unwrap_or(1.)),
+            maximum_significant_digits: show_sig
+                .then_some(minimum_significant_digits.unwrap_or(21.)),
             rounding_priority: self
                 .rounding_priority
-                .filter(|_| send_rounding_priority)
                 .filter(|val| *val != RoundingPriority::default()),
-            rounding_increment: self.rounding_increment.filter(|_| send_rounding_increment),
+            rounding_increment,
             rounding_mode: self
                 .rounding_mode
                 .filter(|val| *val != RoundingMode::default()),
@@ -256,57 +259,10 @@ impl CustomNumberFormatConfig {
             _notation: self
                 ._notation
                 .filter(|notation| !matches!(notation, Notation::Standard)),
-            use_grouping: self
-                .use_grouping
-                .filter(|val| *val != UseGrouping::default()),
+            use_grouping,
             sign_display: self
                 .sign_display
                 .filter(|val| *val != SignDisplay::default()),
         }
     }
-
-    pub fn default_fraction_digits(&self) -> (f64, f64) {
-        let min = if matches!(self._style, Some(NumberFormatStyle::Currency(_))) {
-            2.
-        } else {
-            0.
-        };
-
-        let max = match self._style {
-            // Technically this should depend on the currency.
-            // https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml
-            Some(NumberFormatStyle::Currency(_)) => {
-                max!(self.minimum_fraction_digits.unwrap_or(min), 2.)
-            },
-            Some(NumberFormatStyle::Percent) => {
-                max!(self.minimum_fraction_digits.unwrap_or(min), 0.)
-            },
-            _ => max!(self.minimum_fraction_digits.unwrap_or(min), 3.),
-        };
-        (min, max)
-    }
-}
-
-// NOTE: These will need to be shimmed into d3-style format strings for the d3fc
-// plugins
-
-#[test]
-pub fn test() {
-    let config = CustomNumberFormatConfig {
-        _style: Some(NumberFormatStyle::Currency(CurrencyNumberFormatStyle {
-            currency: CurrencyCode::XXX,
-            currency_display: Some(CurrencyDisplay::NarrowSymbol),
-            currency_sign: Some(CurrencySign::Accounting),
-        })),
-        _notation: Some(Notation::Compact(CompactDisplay::Long)),
-        ..Default::default()
-    };
-    let config = serde_json::to_string(&config).unwrap();
-    assert_eq!(config, String::new());
-}
-#[test]
-pub fn test2() {
-    let json = serde_json::json!({});
-    let config: CustomNumberFormatConfig = serde_json::from_value(json).unwrap();
-    assert_eq!(config, CustomNumberFormatConfig::default());
 }

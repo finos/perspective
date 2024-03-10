@@ -38,7 +38,7 @@ export { PerspectiveViewerConfig } from "./viewer";
 export {
     PerspectiveColumnConfig,
     PerspectiveColumnConfigValue,
-} from "./column_config";
+} from "./columns_config";
 
 export * from "./extensions";
 export * from "./migrate";

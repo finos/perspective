@@ -208,7 +208,7 @@ describe_jupyter(
                 // Check default config
                 expect(config).toEqual({
                     version: utils.API_VERSION,
-                    column_config: {},
+                    columns_config: {},
                     aggregates: {},
                     columns: [
                         "ui8",
@@ -262,7 +262,7 @@ w.theme = "Pro Dark"`
                 // and check it
                 expect(config).toEqual({
                     version: utils.API_VERSION,
-                    column_config: {},
+                    columns_config: {},
                     aggregates: {},
                     columns: ["ui8"],
                     expressions: {},
@@ -297,7 +297,7 @@ w.theme = "Pro Dark"`
                 // Check default config
                 expect(config).toEqual({
                     version: utils.API_VERSION,
-                    column_config: {},
+                    columns_config: {},
                     aggregates: {},
                     columns: [
                         "ui8",

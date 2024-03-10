@@ -101,7 +101,7 @@ export type Settings = {
     splitValues: any[];
     textStyles: TextStyles;
     sunburstLevel?: any;
-    column_config?: PerspectiveColumnConfig;
+    columns_config?: PerspectiveColumnConfig;
     treemaps?: Record<string, TreemapValue>;
 };
 

@@ -62,7 +62,6 @@ test.describe("Save/Restore", async () => {
         });
 
         const contents = await get_contents(page);
-
         await compareContentsToSnapshot(contents, [
             "save-returns-current-config.txt",
         ]);

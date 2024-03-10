@@ -65,7 +65,7 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
             version: API_VERSION,
             plugin: "Y Area",
             plugin_config: {},
-            column_config: {},
+            columns_config: {},
             group_by: ["bucket(\"Order Date\", 'M')"],
             split_by: ["Ship Mode"],
             columns: ["Sales"],
@@ -96,12 +96,10 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
         {
             version: API_VERSION,
             plugin: "Datagrid",
-            column_config: {
+            columns_config: {
                 Sales: {
-                    datagrid_number_style: {
-                        number_bg_mode: "gradient",
-                        bg_gradient: 10,
-                    },
+                    number_bg_mode: "gradient",
+                    bg_gradient: 10,
                 },
             },
             plugin_config: {
@@ -141,12 +139,10 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
         {
             version: API_VERSION,
             plugin: "Datagrid",
-            column_config: {
+            columns_config: {
                 Sales: {
-                    datagrid_number_style: {
-                        bg_gradient: 10,
-                        number_bg_mode: "gradient",
-                    },
+                    bg_gradient: 10,
+                    number_bg_mode: "gradient",
                 },
             },
             plugin_config: {
@@ -191,14 +187,12 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
         {
             ...MIGRATE_BASE_CONFIG,
             plugin: "Datagrid",
-            column_config: {
+            columns_config: {
                 Sales: {
-                    datagrid_number_style: {
-                        fg_gradient: 10,
-                        number_fg_mode: "bar",
-                        neg_fg_color: "#115599",
-                        pos_fg_color: "#115599",
-                    },
+                    fg_gradient: 10,
+                    number_fg_mode: "bar",
+                    neg_fg_color: "#115599",
+                    pos_fg_color: "#115599",
                 },
             },
             plugin_config: {
@@ -214,30 +208,24 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
         {
             ...MIGRATE_BASE_CONFIG,
             plugin: "Datagrid",
-            column_config: {
+            columns_config: {
                 Discount: {
-                    datagrid_number_style: {
-                        neg_bg_color: "#780aff",
-                        number_bg_mode: "color",
-                        number_fg_mode: "disabled",
-                        pos_bg_color: "#f5ac0f",
-                    },
+                    neg_bg_color: "#780aff",
+                    number_bg_mode: "color",
+                    number_fg_mode: "disabled",
+                    pos_bg_color: "#f5ac0f",
                 },
                 Profit: {
-                    datagrid_number_style: {
-                        neg_bg_color: "#f50fed",
-                        number_bg_mode: "color",
-                        number_fg_mode: "disabled",
-                        pos_bg_color: "#32cd82",
-                    },
+                    neg_bg_color: "#f50fed",
+                    number_bg_mode: "color",
+                    number_fg_mode: "disabled",
+                    pos_bg_color: "#32cd82",
                 },
                 Sales: {
-                    datagrid_number_style: {
-                        neg_bg_color: "#f5ac0f",
-                        number_bg_mode: "color",
-                        number_fg_mode: "disabled",
-                        pos_bg_color: "#780aff",
-                    },
+                    neg_bg_color: "#f5ac0f",
+                    number_bg_mode: "color",
+                    number_fg_mode: "disabled",
+                    pos_bg_color: "#780aff",
                 },
             },
             plugin_config: {
@@ -258,30 +246,24 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
         {
             ...MIGRATE_BASE_CONFIG,
             plugin: "Datagrid",
-            column_config: {
+            columns_config: {
                 Discount: {
-                    datagrid_number_style: {
-                        neg_bg_color: "#780aff",
-                        number_bg_mode: "color",
-                        number_fg_mode: "disabled",
-                        pos_bg_color: "#f5ac0f",
-                    },
+                    neg_bg_color: "#780aff",
+                    number_bg_mode: "color",
+                    number_fg_mode: "disabled",
+                    pos_bg_color: "#f5ac0f",
                 },
                 Profit: {
-                    datagrid_number_style: {
-                        neg_bg_color: "#f50fed",
-                        number_bg_mode: "color",
-                        number_fg_mode: "disabled",
-                        pos_bg_color: "#32cd82",
-                    },
+                    neg_bg_color: "#f50fed",
+                    number_bg_mode: "color",
+                    number_fg_mode: "disabled",
+                    pos_bg_color: "#32cd82",
                 },
                 Sales: {
-                    datagrid_number_style: {
-                        neg_bg_color: "#f5ac0f",
-                        number_bg_mode: "color",
-                        number_fg_mode: "disabled",
-                        pos_bg_color: "#780aff",
-                    },
+                    neg_bg_color: "#f5ac0f",
+                    number_bg_mode: "color",
+                    number_fg_mode: "disabled",
+                    pos_bg_color: "#780aff",
                 },
             },
             plugin_config: {
@@ -322,7 +304,7 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
             ...MIGRATE_BASE_CONFIG,
             version: API_VERSION,
             plugin: "X/Y Scatter",
-            column_config: {
+            columns_config: {
                 Region: {
                     symbols: {
                         Central: "circle",
@@ -395,9 +377,9 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
                 editable: true,
                 scroll_lock: false,
             },
-            column_config: {
+            columns_config: {
                 datetime: {
-                    datagrid_datetime_style: {
+                    date_format: {
                         format: "custom",
                         fractionalSecondDigits: 3,
                         second: "2-digit",
@@ -407,36 +389,32 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
                         weekday: "short",
                         month: "narrow",
                         year: "numeric",
-                        hour12: false,
                         timeZone: "America/Curacao",
-                        datetime_color_mode: "foreground",
+                        hour12: false,
                     },
+                    datetime_color_mode: "foreground",
                 },
                 "Order ID": {
-                    datagrid_string_style: {
-                        format: "link",
-                        string_color_mode: "foreground",
-                        color: "#ff0000",
-                    },
+                    format: "link",
+                    string_color_mode: "foreground",
+                    color: "#ff0000",
                 },
                 "Row ID": {
-                    datagrid_number_style: {
-                        number_bg_mode: "gradient",
-                        pos_fg_color: "#000000",
-                        neg_fg_color: "#000000",
-                        bg_gradient: 9,
-                    },
-                    number_string_format: {
+                    number_bg_mode: "gradient",
+                    pos_fg_color: "#000000",
+                    neg_fg_color: "#000000",
+                    bg_gradient: 9,
+                    number_format: {
                         minimumFractionDigits: 1,
                         maximumFractionDigits: 1,
                     },
                 },
                 "Order Date": {
-                    datagrid_datetime_style: {
+                    date_format: {
                         dateStyle: "disabled",
-                        datetime_color_mode: "foreground",
-                        color: "#00ff00",
                     },
+                    datetime_color_mode: "foreground",
+                    color: "#00ff00",
                 },
             },
             columns: ["Row ID", "Order ID", "Order Date", "datetime"],
@@ -471,7 +449,7 @@ const TESTS: [string, any, PerspectiveViewerConfig][] = [
         {
             ...MIGRATE_BASE_CONFIG,
             plugin: "X/Y Scatter",
-            column_config: {
+            columns_config: {
                 Category: {
                     symbols: {
                         Furniture: "star",

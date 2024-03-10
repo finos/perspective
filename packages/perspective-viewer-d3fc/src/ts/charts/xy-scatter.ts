@@ -47,7 +47,7 @@ function overrideSymbols(settings: Settings, symbols): D3Scale {
     for (let [i, _] of domain.entries()) {
         range[i] = range[(i as number) % len];
     }
-    let maybeSymbols = (settings.column_config?.[symbolCol]?.["symbols"] ??
+    let maybeSymbols = (settings.columns_config?.[symbolCol]?.["symbols"] ??
         {}) as Record<string, string>;
     Object.entries(maybeSymbols).forEach(([key, value]) => {
         // TODO: Define custom symbol types based on the values passed in here.

@@ -49,15 +49,15 @@ impl StyleTabProps {
         ApiFuture::spawn(async move {
             props
                 .presentation
-                .update_column_config_value(props.column_name.clone(), update);
-            let column_configs = props.presentation.all_column_configs();
+                .update_columns_config_value(props.column_name.clone(), update);
+            let columns_configs = props.presentation.all_columns_configs();
             let plugin_config = props.renderer.get_active_plugin()?.save();
             props
                 .renderer
                 .get_active_plugin()?
-                .restore(&plugin_config, Some(&column_configs));
-            props.update_and_render(ViewConfigUpdate::default()).await?;
-            let detail = serde_wasm_bindgen::to_value(&column_configs).unwrap();
+                .restore(&plugin_config, Some(&columns_configs));
+            props.renderer.update(&props.session).await?;
+            let detail = serde_wasm_bindgen::to_value(&columns_configs).unwrap();
             props.custom_events.dispatch_column_style_changed(&detail);
             Ok(())
         })
@@ -69,7 +69,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
     let on_change = yew::use_callback(props.clone(), |config, props| {
         props.send_plugin_config(config);
     });
-    let config = props.presentation.get_column_config(&props.column_name);
+    let config = props.presentation.get_columns_config(&props.column_name);
     let components = props
         .get_column_style_control_options(&props.column_name)
         .map(|opts| {
@@ -78,7 +78,8 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
             if let Some(default_config) = opts.datagrid_number_style {
                 let config = config
                     .as_ref()
-                    .and_then(|config| config.datagrid_number_style.clone());
+                    .map(|config| config.datagrid_number_style.clone());
+
                 components.push(("Number Styles", html! {
                     <NumberColumnStyle
                         session={props.session.clone()}
@@ -92,7 +93,8 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
             if let Some(default_config) = opts.datagrid_string_style {
                 let config = config
                     .as_ref()
-                    .and_then(|config| config.datagrid_string_style.clone());
+                    .map(|config| config.datagrid_string_style.clone());
+
                 components.push(("String Styles", html! {
                     <StringColumnStyle {config} {default_config} on_change={on_change.clone()} />
                 }));
@@ -101,7 +103,8 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
             if let Some(default_config) = opts.datagrid_datetime_style {
                 let config = config
                     .as_ref()
-                    .and_then(|config| config.datagrid_datetime_style.clone());
+                    .map(|config| config.datagrid_datetime_style.clone());
+
                 let enable_time_config = props.ty.unwrap() == Type::Datetime;
                 components.push(("Datetime Styles", html! {
                     <DatetimeColumnStyle
@@ -116,7 +119,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
             if let Some(default_config) = opts.symbols {
                 let restored_config = config
                     .as_ref()
-                    .and_then(|config| config.symbols.clone())
+                    .map(|config| config.symbols.clone())
                     .unwrap_or_default();
 
                 components.push(("Symbols", html! {
@@ -133,8 +136,9 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
             if opts.number_string_format.unwrap_or_default() {
                 let restored_config = config
                     .as_ref()
-                    .and_then(|config| config.number_string_format.clone())
+                    .and_then(|config| config.number_format.clone())
                     .unwrap_or_default();
+
                 components.push(("Number Formatting", html! {
                     <CustomNumberFormat
                         {restored_config}
@@ -147,10 +151,10 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
 
             components
                 .into_iter()
-                .map(|(title, component)| {
+                .map(|(_title, component)| {
                     html! {
                         <fieldset class="style-control">
-                            <legend>{ title }</legend>
+                            // <legend >{ title }</legend>
                             { component }
                         </fieldset>
                     }

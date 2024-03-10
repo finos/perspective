@@ -154,9 +154,9 @@ const PROJECTS = (() => {
 
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-    timeout: 300_000,
+    timeout: 60_000,
     expect: {
-        timeout: 100_000,
+        timeout: 10_000,
     },
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,

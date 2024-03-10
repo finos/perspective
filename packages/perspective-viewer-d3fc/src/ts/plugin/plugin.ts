@@ -47,7 +47,7 @@ const EXCLUDED_SETTINGS = [
     "agg_paths",
     "treemaps",
     "axisMemo",
-    "column_config",
+    "columns_config",
 ];
 
 function getD3FCStyles(): string {
@@ -576,7 +576,7 @@ export function register(...plugin_names: string[]) {
 
                     restore(
                         settings: Settings,
-                        column_config: PerspectiveColumnConfig
+                        columns_config: PerspectiveColumnConfig
                     ) {
                         const new_settings: Partial<Settings> = {};
                         for (const name of EXCLUDED_SETTINGS) {
@@ -587,7 +587,7 @@ export function register(...plugin_names: string[]) {
                         this._settings = {
                             ...new_settings,
                             ...settings,
-                            column_config,
+                            columns_config,
                         };
                     }
                 }

@@ -151,6 +151,7 @@ test.describe("Regression tests", () => {
 
         const value = await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer");
+            await viewer.flush();
             return viewer.shadowRoot.querySelector("input.num-filter").value;
         });
 

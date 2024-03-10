@@ -56,7 +56,7 @@ pub struct ViewerConfig {
     pub version: String,
     pub plugin: String,
     pub plugin_config: Value,
-    pub column_config: ColumnConfigMap,
+    pub columns_config: ColumnConfigMap,
     pub settings: bool,
     pub theme: Option<String>,
     pub title: Option<String>,
@@ -103,7 +103,7 @@ impl ViewerConfig {
     fn token(&self) -> ViewerConfigBinarySerialFormat<'_> {
         (
             &self.version,
-            &self.column_config,
+            &self.columns_config,
             &self.plugin,
             &self.plugin_config,
             self.settings,
@@ -166,7 +166,7 @@ pub struct ViewerConfigUpdate {
     pub plugin_config: Option<Value>,
 
     #[serde(default)]
-    pub column_config: ColumnConfigUpdate,
+    pub columns_config: ColumnConfigUpdate,
 
     #[serde(flatten)]
     pub view_config: ViewConfigUpdate,
@@ -174,11 +174,11 @@ pub struct ViewerConfigUpdate {
 
 impl ViewerConfigUpdate {
     fn from_token(
-        (version, column_config, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
+        (version, columns_config, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
     ) -> ViewerConfigUpdate {
         ViewerConfigUpdate {
             version,
-            column_config,
+            columns_config,
             plugin,
             plugin_config,
             settings,

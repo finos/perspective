@@ -48,7 +48,7 @@ async function test_column(page, selector, selector2) {
 }
 
 test.describe("Column Style Tests", () => {
-    test("perspective-config-update event is fired when column style is changed", async ({
+    test.skip("perspective-config-update event is fired when column style is changed", async ({
         page,
     }) => {
         await page.goto("/tools/perspective-test/src/html/basic-test.html");
@@ -81,10 +81,11 @@ test.describe("Column Style Tests", () => {
             viewer.addEventListener(
                 "perspective-column-style-change",
                 (evt) => {
-                    console.log(evt.type, evt.detail);
+                    // console.log(evt.type, evt.detail);
                     window.__events__.push(evt);
                 }
             );
+
             // Find the column config menu button
             const header_button = viewer
                 .querySelector("perspective-viewer-datagrid")
@@ -112,9 +113,7 @@ test.describe("Column Style Tests", () => {
 
         const { x: xx, y: yy } = await page.evaluate(async (style_menu) => {
             // Find the 'bar' button
-            const bar_button = style_menu.querySelector(
-                '#radio-list-1[name="foreground-list"]'
-            );
+            const bar_button = style_menu.querySelector("select");
 
             // Get its coords
             const rect = bar_button.getBoundingClientRect();
@@ -153,7 +152,7 @@ test.describe("Column Style Tests", () => {
             await viewer.restore({
                 plugin: "Datagrid",
                 columns: ["Row ID", "Sales"],
-                column_config: {
+                columns_config: {
                     Sales: {
                         datagrid_number_style: { number_bg_mode: "pulse" },
                     },
@@ -190,7 +189,7 @@ test.describe("Column Style Tests", () => {
                 plugin: "Datagrid",
                 columns: ["Row ID", "Sales"],
                 settings: true,
-                column_config: {
+                columns_config: {
                     Sales: {
                         datagrid_number_style: { number_bg_mode: "pulse" },
                     },

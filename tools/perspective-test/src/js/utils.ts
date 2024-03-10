@@ -19,7 +19,7 @@ export const API_VERSION = JSON.parse(
 )["version"];
 export const DEFAULT_CONFIG: PerspectiveViewerConfig = {
     aggregates: {},
-    column_config: {},
+    columns_config: {},
     columns: [],
     expressions: {},
     filter: [],

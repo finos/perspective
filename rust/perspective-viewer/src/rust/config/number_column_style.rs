@@ -10,14 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::fmt::Display;
 use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumIter};
 
 use crate::*;
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Display, EnumIter, Eq, PartialEq, Serialize)]
 pub enum NumberForegroundMode {
     #[serde(rename = "disabled")]
     Disabled,
@@ -28,21 +28,6 @@ pub enum NumberForegroundMode {
 
     #[serde(rename = "bar")]
     Bar,
-}
-
-/// `Display` and `FromStr` are only used for rendering these types as HTML
-/// attributes, where `disabled` will never be rendered as it represents the
-/// options being unavailable.
-impl Display for NumberForegroundMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let text = match self {
-            Self::Color => Ok("color"),
-            Self::Bar => Ok("bar"),
-            _ => Err(std::fmt::Error),
-        }?;
-
-        write!(f, "{}", text)
-    }
 }
 
 impl FromStr for NumberForegroundMode {
@@ -71,7 +56,7 @@ impl NumberForegroundMode {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Display, EnumIter, Eq, PartialEq, Serialize)]
 pub enum NumberBackgroundMode {
     #[default]
     #[serde(rename = "disabled")]
@@ -85,32 +70,6 @@ pub enum NumberBackgroundMode {
 
     #[serde(rename = "pulse")]
     Pulse,
-}
-
-impl Display for NumberBackgroundMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let text = match self {
-            Self::Color => Ok("color"),
-            Self::Gradient => Ok("gradient"),
-            Self::Pulse => Ok("pulse"),
-            _ => Err(std::fmt::Error),
-        }?;
-
-        write!(f, "{}", text)
-    }
-}
-
-impl FromStr for NumberBackgroundMode {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "color" => Ok(Self::Color),
-            "gradient" => Ok(Self::Gradient),
-            "pulse" => Ok(Self::Pulse),
-            x => Err(format!("Unknown NumberBackgroundMode::{}", x)),
-        }
-    }
 }
 
 impl NumberBackgroundMode {

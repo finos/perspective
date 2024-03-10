@@ -27,9 +27,9 @@ export function restore(token, columns) {
     const overrides = {};
 
     if (token.columns) {
-        for ([col, value] in Object.entries(token.columns)) {
+        for (const [col, value] of Object.entries(token.columns)) {
             if (value.column_size_override !== undefined) {
-                overrides[col_name] = value.column_size_override;
+                overrides[col] = value.column_size_override;
                 delete value["column_size_override"];
             }
         }
@@ -38,46 +38,24 @@ export function restore(token, columns) {
     let styles = {};
     if (columns) {
         for (const [col_name, controls] of Object.entries(columns)) {
-            if (controls?.datagrid_number_style) {
-                const control = controls?.datagrid_number_style;
-                styles[col_name] = {
-                    ...control,
-                    pos_fg_color: control.pos_fg_color
-                        ? make_color_record(control.pos_fg_color)
-                        : undefined,
-                    neg_fg_color: control.neg_fg_color
-                        ? make_color_record(control.neg_fg_color)
-                        : undefined,
-                    pos_bg_color: control.pos_bg_color
-                        ? make_color_record(control.pos_bg_color)
-                        : undefined,
-                    neg_bg_color: control.neg_bg_color
-                        ? make_color_record(control.neg_bg_color)
-                        : undefined,
-                };
-            } else if (controls?.datagrid_string_style) {
-                const control = controls?.datagrid_string_style;
-                styles[col_name] = {
-                    ...control,
-                    color: control.color
-                        ? make_color_record(control.color)
-                        : undefined,
-                };
-            } else if (controls?.datagrid_datetime_style) {
-                const control = controls?.datagrid_datetime_style;
-                styles[col_name] = {
-                    ...control,
-                    color: control.color
-                        ? make_color_record(control.color)
-                        : undefined,
-                };
-            }
-            if (controls?.number_string_format) {
-                styles[col_name] = {
-                    ...styles[col_name],
-                    number_string_format: controls?.number_string_format,
-                };
-            }
+            styles[col_name] = {
+                ...controls,
+                pos_fg_color: controls.pos_fg_color
+                    ? make_color_record(controls.pos_fg_color)
+                    : undefined,
+                neg_fg_color: controls.neg_fg_color
+                    ? make_color_record(controls.neg_fg_color)
+                    : undefined,
+                pos_bg_color: controls.pos_bg_color
+                    ? make_color_record(controls.pos_bg_color)
+                    : undefined,
+                neg_bg_color: controls.neg_bg_color
+                    ? make_color_record(controls.neg_bg_color)
+                    : undefined,
+                color: controls.color
+                    ? make_color_record(controls.color)
+                    : undefined,
+            };
         }
     }
 

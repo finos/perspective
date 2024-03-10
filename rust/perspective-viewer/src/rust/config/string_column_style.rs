@@ -14,13 +14,17 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
+use strum::EnumIter;
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, EnumIter, PartialEq, Serialize)]
 pub enum StringColorMode {
+    #[default]
+    #[serde(rename = "none")]
+    None,
+
     #[serde(rename = "foreground")]
     Foreground,
 
-    #[default]
     #[serde(rename = "background")]
     Background,
 
@@ -31,6 +35,7 @@ pub enum StringColorMode {
 impl Display for StringColorMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
+            Self::None => "none",
             Self::Foreground => "foreground",
             Self::Background => "background",
             Self::Series => "series",
@@ -45,6 +50,7 @@ impl FromStr for StringColorMode {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "none" => Ok(Self::None),
             "foreground" => Ok(Self::Foreground),
             "background" => Ok(Self::Background),
             "series" => Ok(Self::Series),
@@ -53,15 +59,23 @@ impl FromStr for StringColorMode {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+impl StringColorMode {
+    pub fn is_none(&self) -> bool {
+        self == &Self::None
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, EnumIter, Eq, PartialEq, Serialize)]
 pub enum FormatMode {
+    #[default]
+    #[serde(rename = "none")]
+    None,
+
     #[serde(rename = "link")]
     Link,
 
-    #[serde(rename = "image")]
-    Image,
-
-    #[default]
+    // #[serde(rename = "image")]
+    // Image,
     #[serde(rename = "bold")]
     Bold,
 
@@ -72,8 +86,9 @@ pub enum FormatMode {
 impl Display for FormatMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
+            Self::None => "none",
             Self::Link => "link",
-            Self::Image => "image",
+            // Self::Image => "image",
             Self::Bold => "bold",
             Self::Italics => "italics",
         };
@@ -87,8 +102,9 @@ impl FromStr for FormatMode {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "none" => Ok(Self::None),
             "link" => Ok(Self::Link),
-            "image" => Ok(Self::Image),
+            // "image" => Ok(Self::Image),
             "bold" => Ok(Self::Bold),
             "italics" => Ok(Self::Italics),
             x => Err(format!("Unknown format mode {}", x)),
@@ -96,15 +112,21 @@ impl FromStr for FormatMode {
     }
 }
 
+impl FormatMode {
+    fn is_none(&self) -> bool {
+        self == &Self::None
+    }
+}
+
 #[derive(Debug, Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StringColumnStyleConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "FormatMode::is_none")]
     #[serde(default)]
-    pub format: Option<FormatMode>,
+    pub format: FormatMode,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "StringColorMode::is_none")]
     #[serde(default)]
-    pub string_color_mode: Option<StringColorMode>,
+    pub string_color_mode: StringColorMode,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]

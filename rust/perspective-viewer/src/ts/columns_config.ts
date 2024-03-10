@@ -10,55 +10,62 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use super::super::radio_list::{RadioList, RadioListMsg};
-use super::super::radio_list_item::RadioListItem;
-use crate::utils::{await_animation_frame, WeakScope};
-use crate::*;
+type CustomDatetimeFormat =
+    | "long"
+    | "short"
+    | "narrow"
+    | "numeric"
+    | "2-digit"
+    | "disabled";
 
-use std::cell::RefCell;
-use std::rc::Rc;
-use wasm_bindgen_test::*;
-use yew::prelude::*;
+type SimpleDatetimeFormat = "full" | "long" | "medium" | "short" | "disabled";
 
-wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+export type PerspectiveColumnConfig = {
+    [column_name: string]: PerspectiveColumnConfigValue;
+};
 
-#[wasm_bindgen_test]
-pub async fn test_change_u32() {
-    let link: WeakScope<RadioList<String>> = WeakScope::default();
-    let result: Rc<RefCell<String>> = Rc::new(RefCell::new("false".to_owned()));
-    let on_change = {
-        clone!(result);
-        Callback::from(move |val| {
-            *result.borrow_mut() = val;
-        })
-    };
+export type DateFormat = {
+    timeZone?: string;
+} & (
+    | {
+          format: "custom";
+          fractionalSecondDigits?: number;
+          second?: CustomDatetimeFormat;
+          minute?: CustomDatetimeFormat;
+          hour?: CustomDatetimeFormat;
+          day?: CustomDatetimeFormat;
+          weekday?: CustomDatetimeFormat;
+          month?: CustomDatetimeFormat;
+          year?: CustomDatetimeFormat;
+          hour12?: boolean;
+      }
+    | {
+          dateStyle?: SimpleDatetimeFormat;
+          timeStyle?: SimpleDatetimeFormat;
+      }
+);
 
-    test_html! {
-        <RadioList<String>
-            disabled=false
-            selected="2"
-            on_change={ on_change }
-            weak_link={ link.clone() }>
+export type NumberFormat = {
+    maximumFractionDigits?: number;
+    minimumFractionDigits?: number;
+};
 
-            <RadioListItem<String> value="1"><span>{ "One" }</span></RadioListItem<String>>
-            <RadioListItem<String> value="2"><span>{ "Two" }</span></RadioListItem<String>>
-            <RadioListItem<String> value="3"><span>{ "Three" }</span></RadioListItem<String>>
-
-        </RadioList<String>>
-    };
-
-    await_animation_frame().await.unwrap();
-    let radio_list = link.borrow().clone().unwrap();
-    radio_list.send_message(RadioListMsg::Change("2".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "2");
-    radio_list.send_message(RadioListMsg::Change("3".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "3");
-    radio_list.send_message(RadioListMsg::Change("1".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "1");
-}
+export type PerspectiveColumnConfigValue = {
+    number_fg_mode?: "color" | "bar" | "disabled";
+    number_bg_mode?: "color" | "gradient" | "pulse" | "disabled";
+    fixed?: number;
+    pos_fg_color?: string;
+    neg_fg_color?: string;
+    pos_bg_color?: string;
+    neg_bg_color?: string;
+    fg_gradient?: number;
+    bg_gradient?: number;
+    color?: string;
+    datetime_color_mode?: "foreground" | "background";
+    date_format?: DateFormat;
+    string_color_mode?: "foreground" | "background" | "series";
+    format?: "link" | "image" | "bold" | "italics" | "custom";
+    symbols?: Record<string, string>;
+    // TODO: tsify this
+    number_format?: NumberFormat;
+};

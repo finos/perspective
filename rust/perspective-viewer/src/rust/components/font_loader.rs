@@ -104,7 +104,7 @@ impl FontLoaderProps {
         };
 
         let state = yew::props!(Self {
-            state: Rc::new(inner),
+            state: Rc::new(inner)
         });
 
         ApiFuture::spawn(state.clone().load_fonts_task_safe());

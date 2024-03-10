@@ -98,7 +98,6 @@ pub trait PluginColumnStyles: HasSession + HasRenderer {
             .ok_or("Invalid column")?;
 
         let controls = plugin.column_style_controls(&view_type.to_string(), group)?;
-        web_sys::console::log_1(&controls);
         serde_wasm_bindgen::from_value(controls).map_err(|e| e.into())
     }
 }

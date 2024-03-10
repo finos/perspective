@@ -14,8 +14,9 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
+use strum::EnumIter;
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, EnumIter, Eq, PartialEq, Serialize)]
 pub enum SimpleDatetimeFormat {
     #[serde(rename = "full")]
     Full,
@@ -26,6 +27,7 @@ pub enum SimpleDatetimeFormat {
     #[serde(rename = "medium")]
     Medium,
 
+    #[default]
     #[serde(rename = "short")]
     Short,
 

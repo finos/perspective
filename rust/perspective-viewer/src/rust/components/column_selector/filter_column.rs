@@ -490,6 +490,7 @@ impl Component for FilterColumn {
                     <span class="column_name">{ filter.0.to_owned() }</span>
                     <FilterOpSelector
                         class="filterop-selector"
+                        is_autosize=true
                         values={filter_ops}
                         selected={filter.1}
                         on_select={select}

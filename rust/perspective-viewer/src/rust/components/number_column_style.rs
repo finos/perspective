@@ -10,17 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use wasm_bindgen::*;
-use web_sys::*;
 use yew::prelude::*;
 use yew::*;
 
-use super::containers::radio_list::RadioList;
-use super::containers::radio_list_item::RadioListItem;
 use super::form::color_range_selector::*;
-use super::form::number_input::*;
+use super::form::number_field::NumberFieldProps;
 use super::modal::*;
 use super::style::LocalStyle;
+use crate::components::form::number_field::NumberField;
+use crate::components::form::select_field::SelectEnumField;
 use crate::config::*;
 use crate::session::Session;
 use crate::utils::WeakScope;
@@ -46,7 +44,7 @@ pub enum NumberColumnStyleMsg {
     NegColorChanged(Side, String),
     NumberForeModeChanged(NumberForegroundMode),
     NumberBackModeChanged(NumberBackgroundMode),
-    GradientChanged(Side, String),
+    GradientChanged(Side, Option<f64>),
     DefaultGradientChanged(f64),
 }
 
@@ -122,9 +120,7 @@ impl Component for NumberColumnStyle {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-
         ctx.props().set_default_gradient(ctx);
-
         Self::reset(
             &ctx.props().config.clone().unwrap_or_default(),
             &ctx.props().default_config.clone(),
@@ -247,28 +243,20 @@ impl Component for NumberColumnStyle {
                 true
             },
             NumberColumnStyleMsg::GradientChanged(side, gradient) => {
-                match (side, gradient.parse::<f64>()) {
-                    (Fg, Ok(x)) => {
+                match (side, gradient) {
+                    (Fg, Some(x)) => {
                         self.fg_gradient = Some(x);
                         self.config.fg_gradient = Some(x);
                     },
-                    (Fg, Err(_)) if gradient.is_empty() => {
-                        self.fg_gradient = Some(self.default_config.fg_gradient);
-                        self.config.fg_gradient = Some(self.default_config.fg_gradient);
-                    },
-                    (Fg, Err(_)) => {
+                    (Fg, None) => {
                         self.fg_gradient = Some(self.default_config.fg_gradient);
                         self.config.fg_gradient = None;
                     },
-                    (Bg, Ok(x)) => {
+                    (Bg, Some(x)) => {
                         self.bg_gradient = Some(x);
                         self.config.bg_gradient = Some(x);
                     },
-                    (Bg, Err(_)) if gradient.is_empty() => {
-                        self.bg_gradient = Some(self.default_config.bg_gradient);
-                        self.config.bg_gradient = Some(self.default_config.bg_gradient);
-                    },
-                    (Bg, Err(_)) => {
+                    (Bg, None) => {
                         self.bg_gradient = Some(self.default_config.bg_gradient);
                         self.config.bg_gradient = None;
                     },
@@ -288,162 +276,69 @@ impl Component for NumberColumnStyle {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        // Color enabled/disabled oninput callback
-        let fg_enabled_oninput = ctx.link().callback(move |event: InputEvent| {
-            let input = event
-                .target()
-                .unwrap()
-                .unchecked_into::<web_sys::HtmlInputElement>();
-            NumberColumnStyleMsg::ForeEnabledChanged(input.checked())
+        let fg_mode_changed = ctx.link().callback(|x: Option<_>| {
+            NumberColumnStyleMsg::NumberForeModeChanged(x.unwrap_or_default())
         });
 
-        let bg_enabled_oninput = ctx.link().callback(move |event: InputEvent| {
-            let input = event
-                .target()
-                .unwrap()
-                .unchecked_into::<web_sys::HtmlInputElement>();
-            NumberColumnStyleMsg::BackEnabledChanged(input.checked())
+        let bg_mode_changed = ctx.link().callback(|x: Option<_>| {
+            NumberColumnStyleMsg::NumberBackModeChanged(x.unwrap_or_default())
         });
 
-        let selected_fg_mode = match self.fg_mode {
-            NumberForegroundMode::Disabled => NumberForegroundMode::default(),
-            x => x,
-        };
-
-        let selected_bg_mode = match self.bg_mode {
-            NumberBackgroundMode::Disabled => NumberBackgroundMode::Color,
-            x => x,
-        };
-
-        // Color mode radio callback
-        let fg_mode_changed = ctx
-            .link()
-            .callback(NumberColumnStyleMsg::NumberForeModeChanged);
-
-        let bg_mode_changed = ctx
-            .link()
-            .callback(NumberColumnStyleMsg::NumberBackModeChanged);
-
-        let fg_color_controls = html! {
-            <>
-                <span class="row">{ "Color" }</span>
-                if self.config.number_fg_mode == NumberForegroundMode::Color {
-                    <div class="row inner_section">
-                        <ColorRangeSelector ..self.color_props("fg-color", Fg, false, ctx) />
-                    </div>
-                }
-            </>
-        };
-
-        let fg_bar_controls = html! {
-            <>
-                <span class="row">{ "Bar" }</span>
-                if self.config.number_fg_mode == NumberForegroundMode::Bar {
-                    <div class="row inner_section">
+        let fg_controls = match self.fg_mode {
+            NumberForegroundMode::Disabled => html! {},
+            NumberForegroundMode::Color => html! {
+                <div class="row">
+                    <ColorRangeSelector ..self.color_props("fg-color", Fg, false, ctx) />
+                </div>
+            },
+            NumberForegroundMode::Bar => html! {
+                <>
+                    <div class="row">
                         <ColorRangeSelector ..self.color_props("bar-color", Fg, false, ctx) />
-                        <NumberInput ..self.max_value_props(Fg, ctx) />
                     </div>
-                }
-            </>
+                    <NumberField ..self.max_value_props(Fg, ctx) />
+                </>
+            },
         };
 
-        let bg_color_controls = html! {
-            <>
-                <span class="row">{ "Color" }</span>
-                if self.config.number_bg_mode == NumberBackgroundMode::Color {
-                    <div class="row inner_section">
-                        <ColorRangeSelector ..self.color_props("bg-color", Bg,false, ctx) />
-                    </div>
-                }
-            </>
-        };
-
-        let bg_gradient_controls = html! {
-            <>
-                <span class="row">{ "Gradient" }</span>
-                if self.config.number_bg_mode == NumberBackgroundMode::Gradient {
-                    <div class="row inner_section">
+        let bg_controls = match self.bg_mode {
+            NumberBackgroundMode::Disabled => html! {},
+            NumberBackgroundMode::Color => html! {
+                <div class="row">
+                    <ColorRangeSelector ..self.color_props("bg-color", Bg,false, ctx) />
+                </div>
+            },
+            NumberBackgroundMode::Gradient => html! {
+                <>
+                    <div class="row">
                         <ColorRangeSelector ..self.color_props("gradient-color", Bg, true, ctx) />
-                        <NumberInput ..self.max_value_props(Bg, ctx) />
                     </div>
-                }
-            </>
-        };
-
-        let bg_pulse_controls = html! {
-            <>
-                <span class="row">{ "Pulse (Δ)" }</span>
-                if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
-                    <div class="row inner_section">
-                        <ColorRangeSelector ..self.color_props("pulse-color", Bg, true, ctx) />
-                    </div>
-                }
-            </>
+                    <NumberField ..self.max_value_props(Bg, ctx) />
+                </>
+            },
+            NumberBackgroundMode::Pulse => html! {
+                <div class="row">
+                    <ColorRangeSelector ..self.color_props("pulse-color", Bg, true, ctx) />
+                </div>
+            },
         };
 
         html! {
             <>
                 <LocalStyle href={css!("column-style")} />
                 <div id="column-style-container" class="number-column-style-container">
-                    <div class="column-style-label">
-                        <label class="indent">{ "Foreground" }</label>
-                    </div>
-                    <div class="section">
-                        <input
-                            type="checkbox"
-                            oninput={fg_enabled_oninput}
-                            checked={self.config.number_fg_mode.is_enabled()}
-                        />
-                        <RadioList<NumberForegroundMode>
-                            class="indent"
-                            name="foreground-list"
-                            disabled={!self.config.number_fg_mode.is_enabled()}
-                            selected={selected_fg_mode}
-                            on_change={fg_mode_changed}
-                        >
-                            <RadioListItem<NumberForegroundMode>
-                                value={NumberForegroundMode::Color}
-                            >
-                                { fg_color_controls }
-                            </RadioListItem<NumberForegroundMode>>
-                            <RadioListItem<NumberForegroundMode> value={NumberForegroundMode::Bar}>
-                                { fg_bar_controls }
-                            </RadioListItem<NumberForegroundMode>>
-                        </RadioList<NumberForegroundMode>>
-                    </div>
-                    <div class="column-style-label">
-                        <label class="indent">{ "Background" }</label>
-                    </div>
-                    <div class="section">
-                        <input
-                            type="checkbox"
-                            oninput={bg_enabled_oninput}
-                            checked={!self.config.number_bg_mode.is_disabled()}
-                        />
-                        <RadioList<NumberBackgroundMode>
-                            class="indent"
-                            name="background-list"
-                            disabled={self.config.number_bg_mode.is_disabled()}
-                            selected={selected_bg_mode}
-                            on_change={bg_mode_changed}
-                        >
-                            <RadioListItem<NumberBackgroundMode>
-                                value={NumberBackgroundMode::Color}
-                            >
-                                { bg_color_controls }
-                            </RadioListItem<NumberBackgroundMode>>
-                            <RadioListItem<NumberBackgroundMode>
-                                value={NumberBackgroundMode::Gradient}
-                            >
-                                { bg_gradient_controls }
-                            </RadioListItem<NumberBackgroundMode>>
-                            <RadioListItem<NumberBackgroundMode>
-                                value={NumberBackgroundMode::Pulse}
-                            >
-                                { bg_pulse_controls }
-                            </RadioListItem<NumberBackgroundMode>>
-                        </RadioList<NumberBackgroundMode>>
-                    </div>
+                    <SelectEnumField<NumberForegroundMode>
+                        label="Foreground"
+                        on_change={fg_mode_changed}
+                        current_value={self.fg_mode}
+                    />
+                    { fg_controls }
+                    <SelectEnumField<NumberBackgroundMode>
+                        label="Background"
+                        on_change={bg_mode_changed}
+                        current_value={self.bg_mode}
+                    />
+                    { bg_controls }
                 </div>
             </>
         }
@@ -523,18 +418,22 @@ impl NumberColumnStyle {
         })
     }
 
-    fn max_value_props(&self, side: Side, ctx: &Context<Self>) -> NumberInputProps {
-        let on_max_value = ctx
+    fn max_value_props(&self, side: Side, ctx: &Context<Self>) -> NumberFieldProps {
+        let on_change = ctx
             .link()
             .callback(move |x| NumberColumnStyleMsg::GradientChanged(side, x));
 
-        props!(NumberInputProps {
-            max_value: if side == Fg {
-                self.fg_gradient.unwrap_or_default()
-            } else {
-                self.bg_gradient.unwrap_or_default()
-            },
-            on_max_value
+        let value = if side == Fg {
+            self.fg_gradient.unwrap_or_default()
+        } else {
+            self.bg_gradient.unwrap_or_default()
+        };
+
+        props!(NumberFieldProps {
+            default: value,
+            current_value: value,
+            label: "Max Value",
+            on_change
         })
     }
 
@@ -570,24 +469,12 @@ impl NumberColumnStyle {
             .unwrap_or(&default_config.neg_bg_color)
             .to_owned();
 
-        let fg_mode = match config.number_fg_mode {
-            NumberForegroundMode::Disabled => NumberForegroundMode::default(),
-            x => {
-                config.pos_fg_color = Some(pos_fg_color.to_owned());
-                config.neg_fg_color = Some(neg_fg_color.to_owned());
-                x
-            },
-        };
-
-        let bg_mode = match config.number_bg_mode {
-            NumberBackgroundMode::Disabled => NumberBackgroundMode::default(),
-            x => {
-                config.pos_bg_color = Some(pos_bg_color.to_owned());
-                config.neg_bg_color = Some(neg_bg_color.to_owned());
-                x
-            },
-        };
-
+        config.pos_fg_color = Some(pos_fg_color.to_owned());
+        config.neg_fg_color = Some(neg_fg_color.to_owned());
+        let fg_mode = config.number_fg_mode;
+        config.pos_bg_color = Some(pos_bg_color.to_owned());
+        config.neg_bg_color = Some(neg_bg_color.to_owned());
+        let bg_mode = config.number_bg_mode;
         Self {
             config,
             default_config: default_config.clone(),

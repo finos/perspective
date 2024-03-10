@@ -56,7 +56,7 @@ test.describe("Scatter Tests", () => {
         await compareSVGContentsToSnapshot(
             page,
             "perspective-viewer perspective-viewer-d3fc-xyscatter",
-            ["xyscatter-label"]
+            ["xyscatter-label.txt"]
         );
     });
 
@@ -75,7 +75,7 @@ test.describe("Scatter Tests", () => {
         await compareSVGContentsToSnapshot(
             page,
             "perspective-viewer perspective-viewer-d3fc-xyscatter",
-            ["xyscatter-label-grouped"]
+            ["xyscatter-label-grouped.txt"]
         );
     });
 });

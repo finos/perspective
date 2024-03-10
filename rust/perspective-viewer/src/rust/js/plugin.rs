@@ -66,7 +66,7 @@ extern "C" {
     pub fn save(this: &JsPerspectiveViewerPlugin) -> JsValue;
 
     #[wasm_bindgen(method, js_name=restore)]
-    pub fn _restore(this: &JsPerspectiveViewerPlugin, token: &JsValue, column_config: &JsValue);
+    pub fn _restore(this: &JsPerspectiveViewerPlugin, token: &JsValue, columns_config: &JsValue);
 
     #[wasm_bindgen(method)]
     pub fn delete(this: &JsPerspectiveViewerPlugin);
@@ -104,9 +104,9 @@ extern "C" {
 }
 
 impl JsPerspectiveViewerPlugin {
-    pub fn restore(&self, token: &JsValue, column_config: Option<&ColumnConfigMap>) {
-        let column_config = JsValue::from_serde_ext(&column_config).unwrap();
-        self._restore(token, &column_config)
+    pub fn restore(&self, token: &JsValue, columns_config: Option<&ColumnConfigMap>) {
+        let columns_config = JsValue::from_serde_ext(&columns_config).unwrap();
+        self._restore(token, &columns_config)
     }
 }
 
