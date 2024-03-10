@@ -45,10 +45,10 @@ export class ColumnSettingsSidebar {
     }
 
     async openTab(name: string) {
-        let locator = this.tabTitle.filter({ hasText: name });
+        let locator = this.container.locator("#" + name);
         await locator.click({ timeout: 1000 });
         await this.container
-            .locator(".tab.selected", { hasText: name })
+            .locator(`.tab.selected #${name}`)
             .waitFor({ timeout: 1000 });
     }
 

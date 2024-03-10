@@ -151,56 +151,56 @@ impl Component for DatetimeStyleCustom {
             <>
                 if ctx.props().enable_time_config {
                     <SelectValueField<CustomDatetimeFormat>
-                        label="Year"
+                        label="year"
                         values={number_values.clone()}
                         default_value={CustomDatetimeFormat::TwoDigit}
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Year(x.unwrap_or(CustomDatetimeFormat::TwoDigit)))}
                         current_value={self.config.year}
                     />
                     <SelectValueField<CustomDatetimeFormat>
-                        label="Month"
+                        label="month"
                         values={all_values.clone()}
                         default_value={CustomDatetimeFormat::Numeric}
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Month(x.unwrap_or(CustomDatetimeFormat::Numeric)))}
                         current_value={self.config.month}
                     />
                     <SelectValueField<CustomDatetimeFormat>
-                        label="Day"
+                        label="day"
                         values={number_values.clone()}
                         default_value={CustomDatetimeFormat::Numeric}
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Day(x.unwrap_or(CustomDatetimeFormat::Numeric)))}
                         current_value={self.config.day}
                     />
                     <SelectValueField<CustomDatetimeFormat>
-                        label="Weekday"
+                        label="weekday"
                         values={text_values.clone()}
                         default_value={CustomDatetimeFormat::Disabled}
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Weekday(x.unwrap_or(CustomDatetimeFormat::Disabled)))}
                         current_value={self.config.weekday}
                     />
                     <SelectValueField<CustomDatetimeFormat>
-                        label="Hour"
+                        label="hour"
                         values={number_values.clone()}
                         default_value={CustomDatetimeFormat::Numeric}
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Hour(x.unwrap_or(CustomDatetimeFormat::Numeric)))}
                         current_value={self.config.hour}
                     />
                     <SelectValueField<CustomDatetimeFormat>
-                        label="Minute"
+                        label="minute"
                         values={number_values.clone()}
                         default_value={CustomDatetimeFormat::Numeric}
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Minute(x.unwrap_or(CustomDatetimeFormat::Numeric)))}
                         current_value={self.config.minute}
                     />
                     <SelectValueField<CustomDatetimeFormat>
-                        label="Second"
+                        label="second"
                         values={number_values.clone()}
                         default_value={CustomDatetimeFormat::Numeric}
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Second(x.unwrap_or(CustomDatetimeFormat::Numeric)))}
                         current_value={self.config.second}
                     />
                     <NumberField
-                        label="Fractional Seconds"
+                        label="fractional-seconds"
                         min=0.
                         max=3.
                         step=1.
@@ -209,7 +209,7 @@ impl Component for DatetimeStyleCustom {
                         on_change={ctx.link().callback(DatetimeStyleCustomMsg::FractionalSeconds)}
                     />
                     <SelectStrField
-                        label="12/24 Hours"
+                        label="hours"
                         values={Arc::new(vec!["12 Hour", "24 Hour"])}
                         default_value="12 Hour"
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Hour12(x != Some("24 Hour") ))}

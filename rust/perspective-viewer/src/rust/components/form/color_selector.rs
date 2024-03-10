@@ -41,7 +41,7 @@ pub fn color_component(props: &ColorProps) -> Html {
 
     html! {
         <>
-            <label style="font-size: 9px">{ props.title.as_deref().unwrap_or("Color") }</label>
+            <label id={props.title.as_deref().unwrap_or("color-label").to_owned()} />
             <div class="color-gradient-container">
                 <input class="parameter" type="color" value={props.color.to_owned()} {oninput} />
                 if *changed != props.color {

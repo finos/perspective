@@ -286,16 +286,32 @@ async function checkOutput(
         tabs: string[],
         unexpected_tabs: string[]
     ) => {
-        await view.columnSettingsSidebar.container
-            .locator(".tab.selected")
-            .getByText(selectedTab)
-            .waitFor();
+        if (selectedTab === "") {
+            await view.columnSettingsSidebar.container
+                .locator(".tab.selected .tab-title")
+                .first()
+                .waitFor();
+        } else {
+            await view.columnSettingsSidebar.container
+                .locator(`.tab.selected #${selectedTab}`)
+                .waitFor();
+        }
+
         for (let tab of tabs) {
-            await view.columnSettingsSidebar.tabTitle.getByText(tab).waitFor();
+            if (tab === "") {
+                await view.columnSettingsSidebar.container
+                    .locator(`.tab-title`)
+                    .first()
+                    .waitFor();
+            } else {
+                await view.columnSettingsSidebar.container
+                    .locator(`#${tab}`)
+                    .waitFor();
+            }
         }
         for (let tab of unexpected_tabs) {
             await view.columnSettingsSidebar.tabTitle
-                .getByText(tab)
+                .locator(`#${tab}`)
                 .waitFor({ state: "hidden" });
         }
     };
@@ -622,7 +638,7 @@ test.describe("Unique Behaviors", () => {
             true
         );
         await date.editBtn.click();
-        await view.columnSettingsSidebar.openTab("style");
+        await view.columnSettingsSidebar.openTab("Style");
         const dateSnapshot =
             await view.columnSettingsSidebar.styleTab.container.innerHTML();
         const datetime = await view.settingsPanel.activeColumns.getColumnByName(

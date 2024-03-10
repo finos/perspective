@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use num_format::{Locale, ToFormattedString};
 use yew::prelude::*;
 
 use crate::session::ViewStats;
@@ -32,6 +31,8 @@ impl PartialEq for StatusBarRowsCounterProps {
         self.stats == other.stats
     }
 }
+
+use crate::utils::ToFormattedString;
 
 /// A label widget which displays a row count and a "projection" count, the
 /// number of rows in the `View` which includes aggregate rows.
@@ -66,10 +67,10 @@ impl Component for StatusBarRowsCounter {
                     ..
                 },
             ) if vc != tc => {
-                let vrows = vr.to_formatted_string(&Locale::en);
-                let nrows = tr.to_formatted_string(&Locale::en);
-                let vcols = vc.to_formatted_string(&Locale::en);
-                let ncols = tc.to_formatted_string(&Locale::en);
+                let vrows = vr.to_formatted_string();
+                let nrows = tr.to_formatted_string();
+                let vcols = vc.to_formatted_string();
+                let ncols = tc.to_formatted_string();
                 html! { <span>{ format!("{} ({}) x {} ({})", vrows, nrows, vcols, ncols) }</span> }
             },
 
@@ -87,9 +88,9 @@ impl Component for StatusBarRowsCounter {
                     ..
                 },
             ) => {
-                let vrows = vr.to_formatted_string(&Locale::en);
-                let nrows = tr.to_formatted_string(&Locale::en);
-                let vcols = vc.to_formatted_string(&Locale::en);
+                let vrows = vr.to_formatted_string();
+                let nrows = tr.to_formatted_string();
+                let vcols = vc.to_formatted_string();
                 html! { <span>{ format!("{} ({}) x {}", vrows, nrows, vcols) }</span> }
             },
 
@@ -98,9 +99,9 @@ impl Component for StatusBarRowsCounter {
                 num_view_cells: Some((vr, vc)),
                 ..
             }) if vc != tc => {
-                let vrows = vr.to_formatted_string(&Locale::en);
-                let vcols = vc.to_formatted_string(&Locale::en);
-                let ncols = tc.to_formatted_string(&Locale::en);
+                let vrows = vr.to_formatted_string();
+                let vcols = vc.to_formatted_string();
+                let ncols = tc.to_formatted_string();
                 html! { <span>{ format!("{} x {} ({})", vrows, vcols, ncols) }</span> }
             },
 
@@ -108,8 +109,8 @@ impl Component for StatusBarRowsCounter {
                 num_table_cells: Some((tr, tc)),
                 ..
             }) => {
-                let nrows = tr.to_formatted_string(&Locale::en);
-                let ncols = tc.to_formatted_string(&Locale::en);
+                let nrows = tr.to_formatted_string();
+                let ncols = tc.to_formatted_string();
                 html! { <span>{ format!("{} x {}", nrows, ncols) }</span> }
             },
             Some(ViewStats {

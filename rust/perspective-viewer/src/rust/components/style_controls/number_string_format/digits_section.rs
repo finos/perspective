@@ -31,7 +31,7 @@ impl CustomNumberFormat {
         html! {
             <>
                 <NumberField
-                    label="Minimum Integer Digits"
+                    label="minimum-integer-digits"
                     min=1.
                     max=21.
                     step=1.
@@ -63,7 +63,7 @@ impl CustomNumberFormat {
         html! {
             <div class="row">
                 <OptionalField
-                    label="Rounding Increment"
+                    label="rounding-increment"
                     {on_check}
                     // {disabled}
                     checked={self.config.rounding_increment.is_some()}
@@ -93,7 +93,7 @@ impl CustomNumberFormat {
             <>
                 <div class="row">
                     <NumberRangeField
-                        label="Fractional Digits"
+                        label="fractional-digits"
                         min=0.
                         max=20.
                         step=1.
@@ -104,7 +104,7 @@ impl CustomNumberFormat {
                 </div>
                 <div class="row">
                     <NumberRangeField
-                        label="Significant Digits"
+                        label="significant-digits"
                         min=1.
                         max=21.
                         step=1.
@@ -114,20 +114,18 @@ impl CustomNumberFormat {
                     />
                 </div>
                 { self.rounding_increment(ctx) }
-                // if true {
                 <SelectEnumField<RoundingPriority>
-                    label="Rounding Priority"
+                    label="rounding-priority"
                     current_value={self.config.rounding_priority}
                     on_change={ctx.link().callback(CustomNumberFormatMsg::RoundingPriority)}
                 />
-                // }
                 <SelectEnumField<RoundingMode>
-                    label="Rounding Mode"
+                    label="rounding-mode"
                     current_value={self.config.rounding_mode}
                     on_change={ctx.link().callback(CustomNumberFormatMsg::RoundingMode)}
                 />
                 <SelectEnumField<TrailingZeroDisplay>
-                    label="Trailing Zero Display"
+                    label="trailing-zero-display"
                     current_value={self.config.trailing_zero_display}
                     on_change={ctx.link().callback(CustomNumberFormatMsg::TrailingZero)}
                 />

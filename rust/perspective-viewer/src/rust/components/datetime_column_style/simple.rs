@@ -104,13 +104,13 @@ impl Component for DatetimeStyleSimple {
         html! {
             <>
                 <SelectEnumField<SimpleDatetimeFormat>
-                    label="Date Style"
+                    label="date-style"
                     on_change={ctx.link().callback(DatetimeStyleSimpleMsg::DateStyleChanged)}
                     current_value={self.config.date_style}
                 />
                 if ctx.props().enable_time_config {
                     <SelectEnumField<SimpleDatetimeFormat>
-                        label="Time Style"
+                        label="time-style"
                         on_change={ctx.link().callback(DatetimeStyleSimpleMsg::TimeStyleChanged)}
                         current_value={self.config.time_style}
                         default_value={SimpleDatetimeFormat::Medium}

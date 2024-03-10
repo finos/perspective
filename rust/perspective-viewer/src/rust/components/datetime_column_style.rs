@@ -27,6 +27,7 @@ use crate::components::datetime_column_style::custom::DatetimeStyleCustom;
 use crate::components::datetime_column_style::simple::DatetimeStyleSimple;
 use crate::components::form::select_field::{SelectEnumField, SelectValueField};
 use crate::config::*;
+use crate::utils::global::navigator;
 use crate::utils::WeakScope;
 use crate::*;
 
@@ -47,7 +48,7 @@ static ALL_TIMEZONES: LazyLock<Arc<Vec<String>>> = LazyLock::new(|| {
 
 static USER_TIMEZONE: LazyLock<String> = LazyLock::new(|| {
     js_sys::Reflect::get(
-        &js_sys::Intl::DateTimeFormat::new(&json!([]), &json!({})).resolved_options(),
+        &js_sys::Intl::DateTimeFormat::new(&navigator().languages(), &json!({})).resolved_options(),
         &JsValue::from("timeZone"),
     )
     .unwrap()
@@ -212,10 +213,10 @@ impl Component for DatetimeColumnStyle {
         let color_controls = match selected_color_mode {
             DatetimeColorMode::None => html! {},
             DatetimeColorMode::Foreground => {
-                self.color_select_row(ctx, &DatetimeColorMode::Foreground, "Foreground")
+                self.color_select_row(ctx, &DatetimeColorMode::Foreground, "foreground-label")
             },
             DatetimeColorMode::Background => {
-                self.color_select_row(ctx, &DatetimeColorMode::Background, "Background")
+                self.color_select_row(ctx, &DatetimeColorMode::Background, "background-label")
             },
         };
 
@@ -224,14 +225,14 @@ impl Component for DatetimeColumnStyle {
                 <LocalStyle href={css!("column-style")} />
                 <div id="column-style-container" class="datetime-column-style-container">
                     <SelectEnumField<DatetimeColorMode>
-                        label="Color"
+                        label="color"
                         on_change={color_mode_changed}
                         current_value={selected_color_mode}
                     />
                     { color_controls }
                     if ctx.props().enable_time_config {
                         <SelectValueField<String>
-                            label="Timezone"
+                            label="timezone"
                             values={ALL_TIMEZONES.clone()}
                             default_value={(*USER_TIMEZONE).clone()}
                             on_change={ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged)}
@@ -256,12 +257,14 @@ impl Component for DatetimeColumnStyle {
                         />
                     } else if let DatetimeFormatType::Custom(config) = &self.config.date_format {
                         if ctx.props().enable_time_config {
-                            <button
-                                id="datetime_format"
-                                data-title="Custom"
-                                data-title-hover="Switch to Simple"
-                                onclick={ctx.link().callback(|_| DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig::default()))}
-                            />
+                            <div class="row">
+                                <button
+                                    id="datetime_format"
+                                    data-title="Custom"
+                                    data-title-hover="Switch to Simple"
+                                    onclick={ctx.link().callback(|_| DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig::default()))}
+                                />
+                            </div>
                         }
                         <DatetimeStyleCustom
                             enable_time_config={ctx.props().enable_time_config}

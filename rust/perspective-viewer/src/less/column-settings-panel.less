@@ -25,7 +25,7 @@
 
     .item_title {
         flex: 0 0 auto;
-        font-size: 9px;
+        font-size: var(--label--font-size, 0.75em);
     }
 
     .radio-list-item label {
@@ -41,7 +41,7 @@
             border: none;
             margin-bottom: 0.5em;
             font-family: inherit;
-            font-size: 12px;
+            font-size: 1em;
             &:disabled {
                 background-color: var(--inactive--color);
             }
@@ -93,5 +93,139 @@
                 color: unset;
             }
         }
+    }
+
+    label#color-label:before {
+        content: var(--color-label--content, "Color");
+    }
+
+    label#format-label:before {
+        content: var(--format-label--content, "Format");
+    }
+
+    label#timezone-label:before {
+        content: var(--timezone-label--content, "Timezone");
+    }
+
+    label#date-style-label:before {
+        content: var(--date-style-label--content, "Date Style");
+    }
+
+    label#time-style-label:before {
+        content: var(--time-style-label--content, "Time Style");
+    }
+
+    label#foreground-label:before {
+        content: var(--foreground-label--content, "Foreground");
+    }
+
+    label#background-label:before {
+        content: var(--background-label--content, "Background");
+    }
+
+    label#series-label:before {
+        content: var(--series-label--content, "Series");
+    }
+
+    label#color-range-label:before {
+        content: var(--color-range-label--content, "Color Range");
+    }
+
+    label#style-label:before {
+        content: var(--style-label--content, "Style");
+    }
+
+    label#minimum-integer-digits-label:before {
+        content: var(
+            --minimum-integer-digits-label--content,
+            "Minimum Integer Digits"
+        );
+    }
+
+    label#rounding-increment-label:before {
+        content: var(--rounding-increment-label--content, "Rounding Increment");
+    }
+
+    label#notation-label:before {
+        content: var(--notation-label--content, "Notation");
+    }
+
+    label#use-grouping-label:before {
+        content: var(--use-grouping-label--content, "Use Grouping");
+    }
+
+    label#sign-display-label:before {
+        content: var(--sign-display-label--content, "Sign Display");
+    }
+
+    label#max-value-label:before {
+        content: var(--max-value-label--content, "Max Value");
+    }
+
+    label#rounding-priority-label:before {
+        content: var(--rounding-priority-label--content, "Rounding Priority");
+    }
+
+    label#rounding-mode-label:before {
+        content: var(--rounding-mode-label--content, "Rounding Mode");
+    }
+
+    label#trailing-zero-display-label:before {
+        content: var(
+            --trailing-zero-display-label--content,
+            "Trailing Zero Display"
+        );
+    }
+
+    label#significant-digits-label:before {
+        content: var(--significant-digits-label--content, "Significant Digits");
+    }
+
+    label#fractional-digits-label:before {
+        content: var(--fractional-digits-label--content, "Fractional Digits");
+    }
+
+    label#year-label:before {
+        content: var(--year-label--content, "Year");
+    }
+
+    label#month-label:before {
+        content: var(--month-label--content, "Month");
+    }
+
+    label#day-label:before {
+        content: var(--day-label--content, "Day");
+    }
+
+    label#weekday-label:before {
+        content: var(--weekday-label--content, "Weekday");
+    }
+
+    label#hour-label:before {
+        content: var(--hour-label--content, "Hour");
+    }
+
+    label#minute-label:before {
+        content: var(--minute-label--content, "Minute");
+    }
+
+    label#second-label:before {
+        content: var(--second-label--content, "Second");
+    }
+
+    label#fractional-seconds-label:before {
+        content: var(--fractional-seconds-label--content, "Fractional Seconds");
+    }
+
+    label#hours-label:before {
+        content: var(--hours-label--content, "12/24 Hours");
+    }
+
+    div.tab-title#Style:before {
+        content: var(--style-tab-label--content, "Style");
+    }
+
+    div.tab-title#Attributes:before {
+        content: var(--attributes-tab-label--content, "Attributes");
     }
 }

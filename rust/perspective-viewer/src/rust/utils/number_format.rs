@@ -10,44 +10,40 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::{classes, function_component, html, Callback, Children, Html, MouseEvent, Properties};
+use std::sync::LazyLock;
 
-#[derive(Properties, PartialEq)]
-pub struct OptionalFieldProps {
-    pub label: String,
-    pub on_check: Callback<MouseEvent>,
-    pub checked: bool,
-    pub children: Children,
+use js_sys::Intl;
+use wasm_bindgen::JsValue;
 
-    #[prop_or(String::from("section"))]
-    pub class: String,
+use super::global::navigator;
+use crate::json;
 
-    #[prop_or_default]
-    pub disabled: bool,
+pub trait ToFormattedString {
+    fn to_formatted_string(&self) -> String;
 }
 
-#[function_component(OptionalField)]
-pub fn optional_field(props: &OptionalFieldProps) -> Html {
-    html! {
-        <>
-            <label id={format!("{}-label", props.label)} />
-            <div
-                class={classes!(props.class.clone(), props.checked.then_some("is-default-value"))}
-            >
-                { props.children.clone() }
-                if props.checked {
-                    <span
-                        class="reset-default-style"
-                        onclick={props.on_check.clone()}
-                        id={format!("{}-checkbox", props.label)}
-                    />
-                } else {
-                    <span
-                        class="reset-default-style-disabled"
-                        id={format!("{}-checkbox", props.label)}
-                    />
-                }
-            </div>
-        </>
+struct UnsafeNumberFormat(Intl::NumberFormat);
+
+unsafe impl Send for UnsafeNumberFormat {}
+unsafe impl Sync for UnsafeNumberFormat {}
+
+static NUMBER_FORMAT: LazyLock<UnsafeNumberFormat> = LazyLock::new(|| {
+    let locale = navigator().languages();
+    let opts = json!({});
+    let number_format = Intl::NumberFormat::new(&locale, &opts);
+    UnsafeNumberFormat(number_format)
+});
+
+impl UnsafeNumberFormat {}
+
+impl ToFormattedString for u32 {
+    fn to_formatted_string(&self) -> String {
+        NUMBER_FORMAT
+            .0
+            .format()
+            .call1(&NUMBER_FORMAT.0, &JsValue::from_f64(*self as f64))
+            .unwrap()
+            .as_string()
+            .unwrap()
     }
 }

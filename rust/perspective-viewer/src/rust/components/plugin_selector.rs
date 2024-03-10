@@ -158,13 +158,26 @@ struct PluginSelectProps {
 #[function_component]
 fn PluginSelect(props: &PluginSelectProps) -> Html {
     let name = props.name.clone().tee::<2>();
+    let path: String = props
+        .name
+        .chars()
+        .map(|x| {
+            if x.is_alphanumeric() {
+                x.to_ascii_lowercase()
+            } else {
+                '-'
+            }
+        })
+        .collect();
+
     html! {
         <div
             class="plugin-select-item"
             data-plugin={name.0}
+            style={format!("--default-column-title:var(--plugin-name-{}--content, \"{}\")", path, props.name)}
             onclick={props.on_click.reform(move |_| name.1.clone())}
         >
-            <span class="plugin-select-item-name">{ &props.name }</span>
+            <span class="plugin-select-item-name" />
         </div>
     }
 }

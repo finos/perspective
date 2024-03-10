@@ -20,7 +20,6 @@ perspective-number-column-style,
 perspective-string-column-style {
     @include perspective-viewer-base--icons;
     @include perspective-viewer-base--colors;
-    @include perspective-viewer-base--intl;
     @include perspective-viewer-base--datagrid;
 }
 
@@ -71,21 +70,11 @@ perspective-string-column-style {
     --sort-none-icon--mask-image: url("../svg/sort-none-icon.svg");
     --add-expression-icon--mask-image: url("../svg/expression.svg");
     --close-icon--mask-image: url("../svg/close-icon.svg");
-}
-
-@mixin perspective-viewer-base--intl {
-    // Query overlay labels
-    --group_by--content: "Group By";
-    --split_by--content: "Split By";
-
-    // Icons
     --inactive-column-selector--content: url("../svg/checkbox-unchecked-icon.svg");
     --active-column-selector--content: url("../svg/checkbox-checked-icon.svg");
     --overflow-hint-icon--content: "!";
     --reset-button-icon--content: "refresh";
     --save-button-icon--content: "save";
-    --transpose-button--content: "Swap";
-    --config-button-icon--content: "configure";
 }
 
 @mixin perspective-viewer-base--datagrid {

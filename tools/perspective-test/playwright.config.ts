@@ -154,7 +154,7 @@ const PROJECTS = (() => {
 
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-    timeout: 60_000,
+    timeout: 30_000,
     expect: {
         timeout: 10_000,
     },

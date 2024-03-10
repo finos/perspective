@@ -319,9 +319,18 @@ regular-table table {
         content: none;
     }
 }
+
+regular-table
+    #psp-column-edit-buttons
+    th:not(.rt-group-corner)
+    span:not(.rt-column-resize):before {
+    content: var(--datagrid-column-edit-button--content, "Edit");
+}
+
 perspective-viewer:not([settings]) {
     @include design-slash-architecture-bug;
 }
+
 :host-context(perspective-viewer:not([settings])) {
     @include design-slash-architecture-bug;
 }

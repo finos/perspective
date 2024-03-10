@@ -58,6 +58,7 @@ fn main() -> Result<(), anyhow::Error> {
     if !cfg!(feature = "define_custom_elements_async") {
         build.add_file("variables.less");
         build.add_file("icons.less");
+        build.add_file("intl.less");
         build.add_file("pro.less");
         build.add_file("pro-dark.less");
         build.add_file("monokai.less");

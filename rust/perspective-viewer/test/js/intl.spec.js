@@ -10,44 +10,36 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::{classes, function_component, html, Callback, Children, Html, MouseEvent, Properties};
+import { PageView as PspViewer } from "@finos/perspective-test";
+import { expect, test } from "@finos/perspective-test";
+import fs from "node:fs";
 
-#[derive(Properties, PartialEq)]
-pub struct OptionalFieldProps {
-    pub label: String,
-    pub on_check: Callback<MouseEvent>,
-    pub checked: bool,
-    pub children: Children,
+test.describe("Localization", function () {
+    test.beforeEach(async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+    });
 
-    #[prop_or(String::from("section"))]
-    pub class: String,
+    test("All label tags are empty", async function ({ page }) {
+        const view = new PspViewer(page);
+        await view.openSettingsPanel();
+        const editBtn = view.dataGrid.regularTable.editBtnRow
+            .locator("th.psp-menu-enabled span")
+            .first();
 
-    #[prop_or_default]
-    pub disabled: bool,
-}
+        await editBtn.click();
+        await view.columnSettingsSidebar.container.waitFor();
+        const contents = await page.evaluate(() => {
+            const viewer = document.querySelector("perspective-viewer");
+            return Array.from(viewer.shadowRoot.querySelectorAll("label"))
+                .map((x) => x.textContent)
+                .filter((x) => x != "");
+        });
 
-#[function_component(OptionalField)]
-pub fn optional_field(props: &OptionalFieldProps) -> Html {
-    html! {
-        <>
-            <label id={format!("{}-label", props.label)} />
-            <div
-                class={classes!(props.class.clone(), props.checked.then_some("is-default-value"))}
-            >
-                { props.children.clone() }
-                if props.checked {
-                    <span
-                        class="reset-default-style"
-                        onclick={props.on_check.clone()}
-                        id={format!("{}-checkbox", props.label)}
-                    />
-                } else {
-                    <span
-                        class="reset-default-style-disabled"
-                        id={format!("{}-checkbox", props.label)}
-                    />
-                }
-            </div>
-        </>
-    }
-}
+        expect(contents).toEqual(["+", "-"]);
+    });
+});

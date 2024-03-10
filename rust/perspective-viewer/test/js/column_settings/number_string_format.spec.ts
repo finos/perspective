@@ -42,7 +42,7 @@ test("Integer/float styles", async ({ page }) => {
     );
     await profit.editBtn.click();
     const styleContainer = view.columnSettingsSidebar.styleTab.container;
-    await styleContainer.getByText("Fractional Digits").waitFor();
+    await styleContainer.locator("#fractional-digits-label").waitFor();
     const rowId = await view.settingsPanel.activeColumns.getColumnByName(
         "Row ID"
     );
@@ -114,7 +114,6 @@ test.skip("Rounding Priority doesn't send unless Fractional and Significant Digi
     const select = styleContainer
         .locator('div[data-value="Auto"] select')
         .nth(1);
-
     await select.scrollIntoViewIfNeeded();
     await select.selectOption("MorePrecision");
     const config = await view.save();

@@ -147,7 +147,7 @@ impl Component for ColumnDropDown {
                                 }
                             }) }
                 } else {
-                    <span class="no-results">{ "Invalid Column" }</span>
+                    <span class="no-results" />
                 }
             }
         };

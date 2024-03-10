@@ -328,13 +328,13 @@ impl Component for NumberColumnStyle {
                 <LocalStyle href={css!("column-style")} />
                 <div id="column-style-container" class="number-column-style-container">
                     <SelectEnumField<NumberForegroundMode>
-                        label="Foreground"
+                        label="foreground"
                         on_change={fg_mode_changed}
                         current_value={self.fg_mode}
                     />
                     { fg_controls }
                     <SelectEnumField<NumberBackgroundMode>
-                        label="Background"
+                        label="background"
                         on_change={bg_mode_changed}
                         current_value={self.bg_mode}
                     />
@@ -432,7 +432,7 @@ impl NumberColumnStyle {
         props!(NumberFieldProps {
             default: value,
             current_value: value,
-            label: "Max Value",
+            label: "max-value",
             on_change
         })
     }
