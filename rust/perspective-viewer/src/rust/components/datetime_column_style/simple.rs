@@ -119,9 +119,7 @@ impl Component for DatetimeStyleSimple {
         html! {
             <>
                 <div class="column-style-label"><label class="indent">{ "Date Style" }</label></div>
-                <div
-                    class="section"
-                >
+                <div class="section">
                     <input
                         type="checkbox"
                         onchange={on_date_reset}
@@ -135,14 +133,10 @@ impl Component for DatetimeStyleSimple {
                     />
                 </div>
                 if ctx.props().enable_time_config {
-                    <div
-                        class="column-style-label"
-                    >
+                    <div class="column-style-label">
                         <label class="indent">{ "Time Style" }</label>
                     </div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={on_time_reset}

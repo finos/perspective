@@ -351,9 +351,7 @@ impl Component for ColumnSettingsSidebar {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-settings-panel")}
-                />
+                <LocalStyle href={css!("column-settings-panel")} />
                 <Sidebar
                     on_close={ctx.props().on_close.clone()}
                     id_prefix="column_settings"

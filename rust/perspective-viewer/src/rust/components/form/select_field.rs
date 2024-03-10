@@ -44,9 +44,7 @@ where
     let checked = selected != T::default();
     html! {
         if props.required {
-            <RequiredField
-                label={props.label.clone()}
-            >
+            <RequiredField label={props.label.clone()}>
                 <Select<T> {values} {selected} on_select={props.on_change.reform(Option::Some)} />
             </RequiredField>
         } else {

@@ -80,12 +80,8 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
     };
 
     html! {
-        <div
-            class="color-gradient-container"
-        >
-            <div
-                class="color-selector"
-            >
+        <div class="color-gradient-container">
+            <div class="color-selector">
                 <input
                     id={format!("{}-pos", props.id)}
                     style={fg_pos}
@@ -94,20 +90,10 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
                     value={gradient.0.to_owned()}
                     oninput={on_pos_color}
                 />
-                <label
-                    for={format!("{}-pos", props.id)}
-                    class="color-label"
-                >
-                    { "+" }
-                </label>
+                <label for={format!("{}-pos", props.id)} class="color-label">{ "+" }</label>
             </div>
-            <div
-                class="color-thermometer"
-                {style}
-            />
-            <div
-                class="color-selector"
-            >
+            <div class="color-thermometer" {style} />
+            <div class="color-selector">
                 <input
                     id={format!("{}-neg", props.id)}
                     style={fg_neg}
@@ -116,12 +102,7 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
                     value={gradient.1.to_owned()}
                     oninput={on_neg_color}
                 />
-                <label
-                    for={format!("{}-neg", props.id)}
-                    class="color-label"
-                >
-                    { "-" }
-                </label>
+                <label for={format!("{}-neg", props.id)} class="color-label">{ "-" }</label>
             </div>
         </div>
     }

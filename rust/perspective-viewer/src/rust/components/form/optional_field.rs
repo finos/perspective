@@ -34,13 +34,11 @@ pub fn optional_field(props: &OptionalFieldProps) -> Html {
             disabled={props.disabled}
         >
             <legend style="font-size: 9px">{ props.label.clone() }</legend>
-            <div
-                class={props.class.clone()}
-            >
+            <div class={props.class.clone()}>
                 <input
                     type="checkbox"
                     // this isn't necessary to disable the field but is necessary for the style
-                     disabled={props.disabled}
+                    disabled={props.disabled}
                     onchange={props.on_check.clone()}
                     checked={props.checked}
                     id={format!("{}-checkbox", props.label.replace(' ', "-"))}

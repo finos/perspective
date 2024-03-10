@@ -114,7 +114,7 @@ fn serialize_layout() {
         datagrid_number_style: Some(NumberColumnStyleConfig {
             number_fg_mode: crate::config::NumberForegroundMode::Bar,
             number_bg_mode: crate::config::NumberBackgroundMode::Gradient,
-            fixed: Some(3),
+            // fixed: Some(3),
             pos_fg_color: Some(default_color.clone()),
             neg_fg_color: Some(default_color.clone()),
             pos_bg_color: None,
@@ -163,7 +163,7 @@ fn deserialize_layout() {
         datagrid_number_style: Some(NumberColumnStyleDefaultConfig {
             fg_gradient: 1.,
             bg_gradient: 1.,
-            fixed: 3,
+            // fixed: 3,
             pos_fg_color: default_color.clone(),
             neg_fg_color: default_color.clone(),
             pos_bg_color: default_color.clone(),

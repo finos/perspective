@@ -149,10 +149,8 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 .into_iter()
                 .map(|(title, component)| {
                     html! {
-                        <fieldset
-                            class="style-control"
-                        >
-                            <legend >{ title }</legend>
+                        <fieldset class="style-control">
+                            <legend>{ title }</legend>
                             { component }
                         </fieldset>
                     }
@@ -166,9 +164,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
         });
 
     html! {
-        <div
-            id="style-tab"
-        >
+        <div id="style-tab">
             <div id="column-style-container" class="tab-section">{ components }</div>
         </div>
     }

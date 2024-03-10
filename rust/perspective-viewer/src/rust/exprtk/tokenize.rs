@@ -48,9 +48,7 @@ use Token::*;
 impl<'a> ToHtml for Token<'a> {
     fn to_html(&self) -> Html {
         html! {
-            if matches!(self, Break(_)) {
-                <br />
-            } else {
+            if matches!(self, Break(_)) { <br /> } else {
                 <span class={self.class_name()}>{ self.content() }</span>
             }
         }

@@ -328,9 +328,7 @@ impl Component for NumberColumnStyle {
             <>
                 <span class="row">{ "Color" }</span>
                 if self.config.number_fg_mode == NumberForegroundMode::Color {
-                    <div
-                        class="row inner_section"
-                    >
+                    <div class="row inner_section">
                         <ColorRangeSelector ..self.color_props("fg-color", Fg, false, ctx) />
                     </div>
                 }
@@ -341,9 +339,7 @@ impl Component for NumberColumnStyle {
             <>
                 <span class="row">{ "Bar" }</span>
                 if self.config.number_fg_mode == NumberForegroundMode::Bar {
-                    <div
-                        class="row inner_section"
-                    >
+                    <div class="row inner_section">
                         <ColorRangeSelector ..self.color_props("bar-color", Fg, false, ctx) />
                         <NumberInput ..self.max_value_props(Fg, ctx) />
                     </div>
@@ -355,9 +351,7 @@ impl Component for NumberColumnStyle {
             <>
                 <span class="row">{ "Color" }</span>
                 if self.config.number_bg_mode == NumberBackgroundMode::Color {
-                    <div
-                        class="row inner_section"
-                    >
+                    <div class="row inner_section">
                         <ColorRangeSelector ..self.color_props("bg-color", Bg,false, ctx) />
                     </div>
                 }
@@ -368,9 +362,7 @@ impl Component for NumberColumnStyle {
             <>
                 <span class="row">{ "Gradient" }</span>
                 if self.config.number_bg_mode == NumberBackgroundMode::Gradient {
-                    <div
-                        class="row inner_section"
-                    >
+                    <div class="row inner_section">
                         <ColorRangeSelector ..self.color_props("gradient-color", Bg, true, ctx) />
                         <NumberInput ..self.max_value_props(Bg, ctx) />
                     </div>
@@ -382,9 +374,7 @@ impl Component for NumberColumnStyle {
             <>
                 <span class="row">{ "Pulse (Δ)" }</span>
                 if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
-                    <div
-                        class="row inner_section"
-                    >
+                    <div class="row inner_section">
                         <ColorRangeSelector ..self.color_props("pulse-color", Bg, true, ctx) />
                     </div>
                 }
@@ -393,21 +383,12 @@ impl Component for NumberColumnStyle {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-style")}
-                />
-                <div
-                    id="column-style-container"
-                    class="number-column-style-container"
-                >
-                    <div
-                        class="column-style-label"
-                    >
+                <LocalStyle href={css!("column-style")} />
+                <div id="column-style-container" class="number-column-style-container">
+                    <div class="column-style-label">
                         <label class="indent">{ "Foreground" }</label>
                     </div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             oninput={fg_enabled_oninput}
@@ -425,21 +406,15 @@ impl Component for NumberColumnStyle {
                             >
                                 { fg_color_controls }
                             </RadioListItem<NumberForegroundMode>>
-                            <RadioListItem<NumberForegroundMode>
-                                value={NumberForegroundMode::Bar}
-                            >
+                            <RadioListItem<NumberForegroundMode> value={NumberForegroundMode::Bar}>
                                 { fg_bar_controls }
                             </RadioListItem<NumberForegroundMode>>
                         </RadioList<NumberForegroundMode>>
                     </div>
-                    <div
-                        class="column-style-label"
-                    >
+                    <div class="column-style-label">
                         <label class="indent">{ "Background" }</label>
                     </div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             oninput={bg_enabled_oninput}

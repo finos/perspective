@@ -2621,9 +2621,9 @@ dependencies = [
 
 [[package]]
 name = "yew-fmt"
-version = "0.3.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "341d52569c5c43344e18de1101a2243c08010d3e37fd282dbec0f21657c7eec3"
+checksum = "5dd6092bf0a95eb3d61a085a9f079c67fa19ba365455df6b6036c544e22b5ce0"
 dependencies = [
  "anyhow",
  "basic-toml",

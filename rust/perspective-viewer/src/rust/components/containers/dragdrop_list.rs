@@ -267,22 +267,14 @@ where
 
                     if let (key, (true, Some(column))) = column {
                         html! {
-                            <div
-                                {key}
-                                class="pivot-column"
-                                ondragenter={dragenter}
-                            >
+                            <div {key} class="pivot-column" ondragenter={dragenter}>
                                 { Html::from(column) }
                                 <span class="row_close" onmousedown={close} />
                             </div>
                         }
                     } else if let (key, (_, Some(column))) = column {
                         html! {
-                            <div
-                                {key}
-                                class="pivot-column"
-                                ondragenter={dragenter}
-                            >
+                            <div {key} class="pivot-column" ondragenter={dragenter}>
                                 { Html::from(column) }
                                 <span class="row_close" style="opacity:0.3" />
                             </div>
@@ -290,11 +282,7 @@ where
                     } else {
                         let (key, _) = column;
                         html! {
-                            <div
-                                {key}
-                                class="pivot-column"
-                                ondragenter={dragenter}
-                            >
+                            <div {key} class="pivot-column" ondragenter={dragenter}>
                                 <div class="config-drop" />
                             </div>
                         }
@@ -307,10 +295,7 @@ where
         let exclude = ctx.props().exclude.clone();
         let on_select = ctx.props().parent.callback(V::create);
         html! {
-            <div
-                ref={&self.elem}
-                class="rrow"
-            >
+            <div ref={&self.elem} class="rrow">
                 <div
                     id={ctx.props().name}
                     ondragover={dragover}
@@ -319,13 +304,8 @@ where
                     ref={drag_container.noderef}
                     ondrop={drop}
                 >
-                    <div
-                        class="psp-text-field"
-                    >
-                        <ul
-                            class="psp-text-field__input"
-                            for={ctx.props().name}
-                        >
+                    <div class="psp-text-field">
+                        <ul class="psp-text-field__input" for={ctx.props().name}>
                             { columns_html }
                             if ctx.props().is_dragover.is_none() | (!invalid_drag && valid_duplicate_drag) {
                                 <EmptyColumn {column_dropdown} {exclude} {on_select} />

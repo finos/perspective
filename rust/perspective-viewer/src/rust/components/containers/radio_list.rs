@@ -196,9 +196,7 @@ where
     ) -> Html {
         let val = child.props.value.clone();
         html! {
-            <div
-                class={class.to_string()}
-            >
+            <div class={class.to_string()}>
                 <input
                     id={format!("radio-list-{}", idx)}
                     name={ctx.props().name.clone().unwrap_or("radio-list".to_string())}

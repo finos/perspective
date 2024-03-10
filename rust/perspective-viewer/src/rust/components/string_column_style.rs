@@ -199,17 +199,10 @@ impl Component for StringColumnStyle {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-style")}
-                />
-                <div
-                    id="column-style-container"
-                    class="string-column-style-container"
-                >
+                <LocalStyle href={css!("column-style")} />
+                <div id="column-style-container" class="string-column-style-container">
                     <div class="column-style-label"><label class="indent">{ "Format" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             oninput={format_enabled_oninput}
@@ -221,27 +214,19 @@ impl Component for StringColumnStyle {
                             selected={format_mode_selected}
                             on_change={format_mode_changed}
                         >
-                            <RadioListItem<FormatMode>
-                                value={FormatMode::Bold}
-                            >
-                                <span >{ "Bold" }</span>
+                            <RadioListItem<FormatMode> value={FormatMode::Bold}>
+                                <span>{ "Bold" }</span>
                             </RadioListItem<FormatMode>>
-                            <RadioListItem<FormatMode>
-                                value={FormatMode::Italics}
-                            >
-                                <span >{ "Italics" }</span>
+                            <RadioListItem<FormatMode> value={FormatMode::Italics}>
+                                <span>{ "Italics" }</span>
                             </RadioListItem<FormatMode>>
-                            <RadioListItem<FormatMode>
-                                value={FormatMode::Link}
-                            >
-                                <span >{ "Link" }</span>
+                            <RadioListItem<FormatMode> value={FormatMode::Link}>
+                                <span>{ "Link" }</span>
                             </RadioListItem<FormatMode>>
                         </RadioList<FormatMode>>
                     </div>
                     <div class="column-style-label"><label class="indent">{ "Color" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             oninput={color_enabled_oninput}
@@ -254,19 +239,13 @@ impl Component for StringColumnStyle {
                             selected={selected_color_mode}
                             on_change={color_mode_changed}
                         >
-                            <RadioListItem<StringColorMode>
-                                value={StringColorMode::Foreground}
-                            >
+                            <RadioListItem<StringColorMode> value={StringColorMode::Foreground}>
                                 { foreground_controls }
                             </RadioListItem<StringColorMode>>
-                            <RadioListItem<StringColorMode>
-                                value={StringColorMode::Background}
-                            >
+                            <RadioListItem<StringColorMode> value={StringColorMode::Background}>
                                 { background_controls }
                             </RadioListItem<StringColorMode>>
-                            <RadioListItem<StringColorMode>
-                                value={StringColorMode::Series}
-                            >
+                            <RadioListItem<StringColorMode> value={StringColorMode::Series}>
                                 { series_controls }
                             </RadioListItem<StringColorMode>>
                         </RadioList<StringColorMode>>

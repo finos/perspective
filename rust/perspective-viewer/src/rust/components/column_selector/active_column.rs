@@ -382,10 +382,7 @@ impl Component for ActiveColumn {
                         {onmouseout}
                         ondragenter={ondragenter.clone()}
                     >
-                        <span
-                            {class}
-                            onmousedown={remove_column}
-                        />
+                        <span {class} onmousedown={remove_column} />
                         <div
                             class={classes}
                             ref={&self.add_expression_ref}
@@ -393,12 +390,8 @@ impl Component for ActiveColumn {
                             {ondragstart}
                             {ondragend}
                         >
-                            <div
-                                class="column-selector-column-border"
-                            >
-                                <TypeIcon
-                                    ty={col_type}
-                                />
+                            <div class="column-selector-column-border">
+                                <TypeIcon ty={col_type} />
                                 if ctx.props().is_aggregated {
                                     <AggregateSelector
                                         column={name.clone()}
@@ -431,9 +424,7 @@ impl Component for ActiveColumn {
                 // `change()` method on this component checks for this).
 
                 html! {
-                    <div
-                        class="column-selector-column"
-                    >
+                    <div class="column-selector-column">
                         <span class="is_column_active inactive" />
                         <div class={classes} />
                     </div>

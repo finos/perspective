@@ -39,11 +39,7 @@ impl CustomNumberFormat {
                     current_value={self.config.minimum_integer_digits}
                     on_change={ctx.link().callback(CustomNumberFormatMsg::MinimumIntegerDigits)}
                 />
-                if is_float {
-                    { self.float_section(ctx) }
-                } else {
-                    { self.rounding_increment(ctx) }
-                }
+                if is_float { { self.float_section(ctx) } } else { { self.rounding_increment(ctx) } }
             </>
         }
     }

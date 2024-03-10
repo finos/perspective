@@ -64,12 +64,8 @@ impl Component for EmptyColumn {
             .callback(|event: KeyboardEvent| KeyDown(event.key_code()));
 
         html! {
-            <div
-                class="pivot-column column-empty"
-            >
-                <LocalStyle
-                    href={css!("empty-column")}
-                />
+            <div class="pivot-column column-empty">
+                <LocalStyle href={css!("empty-column")} />
                 <input
                     spellcheck="false"
                     ref={self.input_ref.clone()}

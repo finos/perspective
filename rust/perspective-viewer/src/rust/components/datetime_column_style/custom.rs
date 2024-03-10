@@ -182,9 +182,7 @@ impl Component for DatetimeStyleCustom {
             <>
                 if ctx.props().enable_time_config {
                     <div class="column-style-label"><label class="indent">{ "Year" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Year(CustomDatetimeFormat::TwoDigit))}
@@ -198,9 +196,7 @@ impl Component for DatetimeStyleCustom {
                         />
                     </div>
                     <div class="column-style-label"><label class="indent">{ "Month" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Month(CustomDatetimeFormat::Numeric))}
@@ -214,9 +210,7 @@ impl Component for DatetimeStyleCustom {
                         />
                     </div>
                     <div class="column-style-label"><label class="indent">{ "Day" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Day(CustomDatetimeFormat::Numeric))}
@@ -229,14 +223,10 @@ impl Component for DatetimeStyleCustom {
                             values={number_values.clone()}
                         />
                     </div>
-                    <div
-                        class="column-style-label"
-                    >
+                    <div class="column-style-label">
                         <label class="indent">{ "Weekday" }</label>
                     </div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Weekday(CustomDatetimeFormat::Disabled))}
@@ -250,9 +240,7 @@ impl Component for DatetimeStyleCustom {
                         />
                     </div>
                     <div class="column-style-label"><label class="indent">{ "Hour" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Hour(CustomDatetimeFormat::Numeric))}
@@ -266,9 +254,7 @@ impl Component for DatetimeStyleCustom {
                         />
                     </div>
                     <div class="column-style-label"><label class="indent">{ "Minute" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Minute(CustomDatetimeFormat::Numeric))}
@@ -281,14 +267,10 @@ impl Component for DatetimeStyleCustom {
                             values={number_values.clone()}
                         />
                     </div>
-                    <div
-                        class="column-style-label"
-                    >
+                    <div class="column-style-label">
                         <label class="indent">{ "Seconds" }</label>
                     </div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::Second(CustomDatetimeFormat::Numeric))}
@@ -301,14 +283,10 @@ impl Component for DatetimeStyleCustom {
                             values={number_values.clone()}
                         />
                     </div>
-                    <div
-                        class="column-style-label"
-                    >
+                    <div class="column-style-label">
                         <label class="indent">{ "Fractional Seconds" }</label>
                     </div>
-                    <div
-                        class="row section"
-                    >
+                    <div class="row section">
                         <input
                             type="checkbox"
                             onchange={ctx.link().callback(|_| DatetimeStyleCustomMsg::FractionalSeconds("0".to_owned()))}
@@ -325,16 +303,12 @@ impl Component for DatetimeStyleCustom {
                             oninput={fractional_oninput(DatetimeStyleCustomMsg::FractionalSeconds)}
                         />
                     </div>
-                    <div
-                        class="column-style-label"
-                    >
+                    <div class="column-style-label">
                         <label class="indent">{ "12/24 Hours" }</label>
                     </div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input type="checkbox" onchange={hour12_} checked={!self.config.hour12} />
-                        <span >{ if self.config.hour12 { "12 Hour" } else { "24 hour" } }</span>
+                        <span>{ if self.config.hour12 { "12 Hour" } else { "24 hour" } }</span>
                     </div>
                 }
             </>

@@ -34,32 +34,19 @@ pub fn collapsable_section(props: &CollapsableSectionProps) -> Html {
             style="border: none; padding-left: 0px; padding-right: 0px;"
             disabled={props.disabled}
         >
-            <div
-                class="section bool-field"
-                style="display:flex"
-            >
+            <div class="section bool-field" style="display:flex">
                 <input
                     type="checkbox"
                     id={id.clone()}
                     // this isn't necessary to disable the field but is necessary for the style
-                     disabled={props.disabled}
+                    disabled={props.disabled}
                     onchange={props.on_check.clone()}
                     checked={props.checked}
                 />
-                <label
-                    for={id}
-                    style="font-size: 11px;"
-                >
-                    { props.label.clone() }
-                </label>
+                <label for={id} style="font-size: 11px;">{ props.label.clone() }</label>
             </div>
-            <div
-                class="section"
-                style="padding-left: 4px; padding-right: 4px;"
-            >
-                if props.checked {
-                    { props.children.clone() }
-                }
+            <div class="section" style="padding-left: 4px; padding-right: 4px;">
+                if props.checked { { props.children.clone() } }
             </div>
         </fieldset>
     }

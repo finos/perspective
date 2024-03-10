@@ -427,9 +427,7 @@ impl Component for PerspectiveViewer {
         html! {
             <>
                 <StyleProvider>
-                    <LocalStyle
-                        href={css!("viewer")}
-                    />
+                    <LocalStyle href={css!("viewer")} />
                     if self.settings_open {
                         <SplitPanel
                             id="app_panel"
@@ -465,9 +463,7 @@ impl Component for PerspectiveViewer {
                                     selected_column={self.selected_column.clone()}
                                 />
                             </div>
-                            <div
-                                id="main_column"
-                            >
+                            <div id="main_column">
                                 <StatusBar
                                     id="status_bar"
                                     session={&ctx.props().session}
@@ -475,15 +471,13 @@ impl Component for PerspectiveViewer {
                                     presentation={&ctx.props().presentation}
                                     {on_reset}
                                 />
-                                <div
-                                    id="main_panel_container"
-                                >
+                                <div id="main_panel_container">
                                     <RenderWarning
                                         dimensions={self.dimensions}
                                         session={&ctx.props().session}
                                         renderer={&ctx.props().renderer}
                                     />
-                                    <slot/>
+                                    <slot />
                                 </div>
                                 if let Some(selected_column) = self.selected_column.clone() {
                                     <SplitPanel

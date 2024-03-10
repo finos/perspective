@@ -39,3 +39,4 @@ imports_granularity = "Module"
 newline_style = "Unix"
 condense_wildcard_suffixes = true
 match_block_trailing_comma = true
+yew.use_small_heuristics = "Max"

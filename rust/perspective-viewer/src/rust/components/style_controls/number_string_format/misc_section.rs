@@ -42,10 +42,7 @@ impl CustomNumberFormat {
                     class="section bool-field"
                     {checked}
                 >
-                    <label
-                        for="Compact-Display-checkbox"
-                        style="font-size:11px"
-                    >
+                    <label for="Compact-Display-checkbox" style="font-size:11px">
                         { val.to_string() }
                     </label>
                 </OptionalField>

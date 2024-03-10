@@ -77,9 +77,7 @@ where
                         html! {
                             <>
                                 <span class="dropdown-group-label">{ name }</span>
-                                <div
-                                    class="dropdown-group-container"
-                                >
+                                <div class="dropdown-group-container">
                                     { xs.iter().map(|x| {
                                     let click = ctx.props().callback.reform({
                                         let value = x.clone();

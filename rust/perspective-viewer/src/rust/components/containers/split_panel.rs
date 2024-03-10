@@ -369,9 +369,7 @@ impl Component for SplitPanel {
                             orientation={ctx.props().orientation}
                             link={ctx.link().clone()}
                         />
-                        if i == ctx.props().children.len() - 2 {
-                            { x }
-                        } else {
+                        if i == ctx.props().children.len() - 2 { { x } } else {
                             <SplitPanelChild
                                 style={self.styles[i + 1].clone()}
                                 ref_={self.refs[i + 1].clone()}
@@ -385,15 +383,8 @@ impl Component for SplitPanel {
 
         let contents = html! {
             <>
-                <LocalStyle
-                    key=0
-                    href={css!("containers/split-panel")}
-                />
-                <SplitPanelChild
-                    key=1
-                    style={self.styles[0].clone()}
-                    ref_={self.refs[0].clone()}
-                >
+                <LocalStyle key=0 href={css!("containers/split-panel")} />
+                <SplitPanelChild key=1 style={self.styles[0].clone()} ref_={self.refs[0].clone()}>
                     { head }
                 </SplitPanelChild>
                 { for tail }
@@ -479,11 +470,7 @@ fn split_panel_child(props: &SplitPanelChildProps) -> Html {
         classes!("split-panel-child")
     };
     html! {
-        <div
-            {class}
-            ref={props.ref_.clone()}
-            style={props.style.clone()}
-        >
+        <div {class} ref={props.ref_.clone()} style={props.style.clone()}>
             { props.children.iter().next().unwrap() }
         </div>
     }

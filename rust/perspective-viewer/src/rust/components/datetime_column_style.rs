@@ -251,17 +251,10 @@ impl Component for DatetimeColumnStyle {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-style")}
-                />
-                <div
-                    id="column-style-container"
-                    class="datetime-column-style-container"
-                >
+                <LocalStyle href={css!("column-style")} />
+                <div id="column-style-container" class="datetime-column-style-container">
                     <div class="column-style-label"><label class="indent">{ "Color" }</label></div>
-                    <div
-                        class="section"
-                    >
+                    <div class="section">
                         <input
                             type="checkbox"
                             oninput={color_enabled_oninput}
@@ -287,14 +280,10 @@ impl Component for DatetimeColumnStyle {
                         </RadioList<DatetimeColorMode>>
                     </div>
                     if ctx.props().enable_time_config {
-                        <div
-                            class="column-style-label"
-                        >
+                        <div class="column-style-label">
                             <label class="indent">{ "Timezone" }</label>
                         </div>
-                        <div
-                            class="section"
-                        >
+                        <div class="section">
                             <input
                                 type="checkbox"
                                 onchange={on_time_zone_reset}

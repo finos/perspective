@@ -84,15 +84,9 @@ impl yew::Component for PairsList {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("containers/pairs-list")}
-                />
-                <div
-                    class="pairs-list"
-                    id={props.id.clone()}
-                    data-label={props.title.clone()}
-                >
-                    <ul >{ for main_pairs }</ul>
+                <LocalStyle href={css!("containers/pairs-list")} />
+                <div class="pairs-list" id={props.id.clone()} data-label={props.title.clone()}>
+                    <ul>{ for main_pairs }</ul>
                 </div>
             </>
         }
@@ -163,9 +157,7 @@ impl yew::Component for PairsListItem {
             (ctx.props().index == ctx.props().pairs.len() - 1).then_some("visibility: hidden");
 
         html! {
-            <li
-                class="pairs-list-item"
-            >
+            <li class="pairs-list-item">
                 <RowSelector
                     selected_row={props.pair.key.clone()}
                     on_select={on_key_update.clone()}

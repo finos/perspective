@@ -21,13 +21,9 @@ pub struct RequiredFieldProps {
 #[function_component(RequiredField)]
 pub fn required_field(props: &RequiredFieldProps) -> Html {
     html! {
-        <fieldset
-            style="border: none; padding-left: 0px; padding-right: 0px;"
-        >
+        <fieldset style="border: none; padding-left: 0px; padding-right: 0px;">
             <legend style="font-size: 9px">{ props.label.clone() }</legend>
-            <div
-                class="section row"
-            >
+            <div class="section row">
                 <input
                     type="checkbox"
                     disabled=true

@@ -115,9 +115,7 @@ impl yew::Component for SymbolStyle {
         let update_pairs = ctx.link().callback(SymbolAttrMsg::UpdatePairs);
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-symbol-attributes")}
-                />
+                <LocalStyle href={css!("column-symbol-attributes")} />
                 <PairsList
                     title="Symbols"
                     id="attributes-symbols"

@@ -471,15 +471,8 @@ impl Component for ConfigSelector {
         });
 
         html! {
-            <div
-                slot="top_panel"
-                id="top_panel"
-                {class}
-                ondragend={dragend}
-            >
-                <LocalStyle
-                    href={css!("config-selector")}
-                />
+            <div slot="top_panel" id="top_panel" {class} ondragend={dragend}>
+                <LocalStyle href={css!("config-selector")} />
                 if !config.group_by.is_empty() && config.split_by.is_empty() {
                     <span
                         id="transpose_button"

@@ -150,12 +150,7 @@ where
             .any(|x| matches!(x, SelectItem::Option(y) if *y == ctx.props().selected));
 
         let select = html! {
-            <select
-                id={ctx.props().id}
-                {class}
-                ref={&self.select_ref}
-                onchange={callback}
-            >
+            <select id={ctx.props().id} {class} ref={&self.select_ref} onchange={callback}>
                 { for ctx.props().values.iter().map(|value| match value {
                         SelectItem::Option(value) => {
                             let selected = *value == ctx.props().selected;
@@ -208,18 +203,12 @@ where
 
         html! {
             if is_group_selected && ctx.props().label.is_some() {
-                <label >{ ctx.props().label.unwrap() }</label>
-                <div
-                    class={wrapper_class}
-                    data-value={format!("{}", self.selected)}
-                >
+                <label>{ ctx.props().label.unwrap() }</label>
+                <div class={wrapper_class} data-value={format!("{}", self.selected)}>
                     { select }
                 </div>
             } else {
-                <div
-                    class={wrapper_class}
-                    data-value={format!("{}", self.selected)}
-                >
+                <div class={wrapper_class} data-value={format!("{}", self.selected)}>
                     { select }
                 </div>
             }

@@ -71,7 +71,7 @@ impl Component for FontLoader {
                 .map(font_test_html)
                 .collect::<Html>();
 
-            html! { <><style >{ ":host{opacity:0!important;}" }</style>{ inner }</> }
+            html! { <><style>{ ":host{opacity:0!important;}" }</style>{ inner }</> }
         }
     }
 }
