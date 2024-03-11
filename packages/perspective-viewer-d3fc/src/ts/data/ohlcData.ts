@@ -36,22 +36,6 @@ export function ohlcData(settings: Settings, data: DataRowsWithKey) {
     );
 }
 
-function getOHLCValue(realValue: string, col: DataRow): number | undefined {
-    if (!!realValue) {
-        let value = col[realValue];
-
-        if (typeof value === "string") {
-            return parseFloat(value);
-        }
-
-        if (typeof value !== "number") {
-            return undefined;
-        }
-    }
-
-    return undefined;
-}
-
 function seriesToOHLC(
     settings: Settings,
     data: DataRowsWithKey
@@ -60,8 +44,12 @@ function seriesToOHLC(
     const getNextOpen = (i) =>
         data[i < data.length - 1 ? i + 1 : i][settings.realValues[0]];
     const mappedSeries: any = data.map((col, i) => {
-        const openValue = getOHLCValue(settings.realValues[0], col);
-        const closeValue = getOHLCValue(settings.realValues[1], col);
+        const openValue = !!settings.realValues[0]
+            ? col[settings.realValues[0]]
+            : undefined;
+        const closeValue = !!settings.realValues[1]
+            ? col[settings.realValues[1]]
+            : getNextOpen(i);
 
         return {
             crossValue: labelfn(col, i),
@@ -70,10 +58,10 @@ function seriesToOHLC(
             closeValue: closeValue,
             highValue: !!settings.realValues[2]
                 ? col[settings.realValues[2]]
-                : Math.max(openValue, closeValue),
+                : Math.max(openValue as number, closeValue as number),
             lowValue: !!settings.realValues[3]
                 ? col[settings.realValues[3]]
-                : Math.min(openValue, closeValue),
+                : Math.min(openValue as number, closeValue as number),
             key: data.key,
             row: col,
         };
