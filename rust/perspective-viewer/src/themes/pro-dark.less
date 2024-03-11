@@ -68,6 +68,8 @@ perspective-string-column-style[theme="Pro Dark"] {
     --warning--color: #242526;
     --warning--background: var(--icon--color);
 
+    --select-arrow--background-image: url("../svg/dropdown-selector.svg");
+
     // Column type indicators
     --float--column-type--color: #7dc3f0;
     --string--column-type--color: #ff9485;
@@ -135,4 +137,8 @@ perspective-string-column-style[theme="Pro Dark"] {
 
     --d3fc-positive--gradient: linear-gradient(#242526 0%, #3289c8 100%);
     --d3fc-negative--gradient: linear-gradient(#dd6367 0%, #242526 100%);
+}
+
+:host select {
+    background-image: url("../svg/dropdown-selector.svg");
 }

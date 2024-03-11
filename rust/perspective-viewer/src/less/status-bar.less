@@ -34,7 +34,6 @@
     }
 
     #status_bar {
-        overflow: hidden;
         box-shadow: 0 13px 0 -12px var(--inactive--border-color);
         z-index: 1;
         display: flex;
@@ -118,14 +117,9 @@
         // Exceptions when the menu bar is visible and the settings panel is closed.
 
         #menu-bar {
-            overflow: hidden;
             flex: 0 1000000 auto;
             .button {
                 height: 22px;
-                select {
-                    height: 20px;
-                    font-size: 9px;
-                }
             }
         }
 
@@ -145,7 +139,6 @@
             line-height: 36px;
 
             &:before {
-                margin-right: 4px;
                 position: relative;
             }
 
@@ -194,7 +187,7 @@
             }
         }
 
-        span.button:before {
+        .button:before {
             height: 21px;
             width: 21px;
             background-repeat: no-repeat;
@@ -233,22 +226,24 @@
             }
         }
 
-        span#theme {
+        #theme {
             &:before {
                 -webkit-mask-image: url("../svg/theme-icon.svg");
                 mask-image: url("../svg/theme-icon.svg");
             }
         }
 
-        span.button {
+        .button {
             display: inline-flex;
+            justify-content: center;
             align-items: center;
             margin: 0px;
-            padding: 0 5px 0px 5px;
+            padding: 0 5px;
             color: var(--inactive--color, #ccc);
             border: 1px solid transparent;
             border-radius: 3px;
             font-size: 9px;
+            line-height: 36;
 
             & > span,
             & > .dropdown-width-container {
@@ -268,7 +263,8 @@
 
             &:hover,
             &.modal-target {
-                min-width: var(--button--min-width, 75px);
+                position: relative;
+                min-width: var(--button--min-width, 33px);
                 color: inherit;
                 cursor: pointer;
                 transition: none;
@@ -280,20 +276,45 @@
                     background-color: var(--plugin--background);
                 }
 
+                // The label.
+                @mixin label {
+                    display: block;
+                    position: absolute;
+                    top: calc(100% + 3px);
+                    left: 50%;
+                    translate: -50%;
+                    margin: 0;
+                    padding: 5px;
+                    height: auto;
+                    white-space: nowrap;
+                    line-height: 1;
+                    background-color: var(--icon--color);
+                    border-radius: 3px;
+                }
                 & > span {
-                    display: contents;
+                    @include label;
                 }
 
                 & > .dropdown-width-container {
+                    @include label;
                     overflow: visible;
-                    display: inline;
                     pointer-events: all;
                     & > select {
+                        position: static;
                         cursor: pointer;
-                        margin-left: -28px;
-                        padding-left: 28px;
-                        width: calc(100% + 28px);
-                        height: 36px;
+                    }
+
+                    &::before {
+                        content: "";
+                        display: block;
+                        position: absolute;
+                        inset-block-start: -3px;
+                        inset-inline-start: 0;
+                        inline-size: 100%;
+                        block-size: 3px;
+                    }
+                    &::after {
+                        content: none;
                     }
                 }
             }
