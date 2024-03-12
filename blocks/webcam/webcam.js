@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.8.1/dist/cdn/perspective.js";
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.9.0/dist/cdn/perspective.js";
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -69,11 +69,16 @@ window.addEventListener("DOMContentLoaded", async function () {
     const viewer = document.querySelector("perspective-viewer");
     viewer.load(table);
     await viewer.restore({ settings, ...layouts[0] });
-    const regular_table = document.querySelector("regular-table");
+    const regular_table = document
+        .querySelector("perspective-viewer-datagrid")
+        .shadowRoot.querySelector("regular-table");
+
     regular_table.scrollTop =
         regular_table.scrollHeight / 2 - regular_table.clientHeight / 2;
+
     regular_table.scrollLeft =
         regular_table.scrollWidth / 2 - regular_table.clientWidth / 2;
+
     for (const layout of layouts) {
         const option = document.createElement("option");
         option.value = layout.title;

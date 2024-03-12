@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.8.1/dist/cdn/perspective.js";
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.9.0/dist/cdn/perspective.js";
 
 var SECURITIES = [
     "AAPL.N",
@@ -75,15 +75,15 @@ window.addEventListener("DOMContentLoaded", async function () {
     elem.restore({
         plugin: "Datagrid",
         plugin_config: {
-            columns: {
-                "(+)chg": { fg_gradient: 7.93, number_fg_mode: "bar" },
-                "(-)chg": { fg_gradient: 8.07, number_fg_mode: "bar" },
-                chg: { bg_gradient: 9.97, number_bg_mode: "gradient" },
-            },
             editable: false,
             scroll_lock: true,
         },
         settings: true,
+        columns_config: {
+            "(+)chg": { fg_gradient: 7.93, number_fg_mode: "bar" },
+            "(-)chg": { fg_gradient: 8.07, number_fg_mode: "bar" },
+            chg: { bg_gradient: 9.97, number_bg_mode: "gradient" },
+        },
         theme: "Pro Light",
         group_by: ["name"],
         split_by: ["client"],
