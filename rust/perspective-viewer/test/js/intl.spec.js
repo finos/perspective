@@ -42,4 +42,23 @@ test.describe("Localization", function () {
 
         expect(contents).toEqual(["+", "-"]);
     });
+
+    const intl = fs
+        .readFileSync(`${__dirname}/../../src/themes/intl.less`)
+        .toString();
+
+    const keys = Array.from(intl.matchAll(/--[a-zA-Z0-9\-]+/g)).flat();
+    const langfiles = fs.readdirSync(`${__dirname}/../../src/themes/intl`);
+    for (const file of langfiles) {
+        test(`${file} has all intl keys present`, async function ({ page }) {
+            const langfile = fs
+                .readFileSync(`${__dirname}/../../src/themes/intl/${file}`)
+                .toString();
+            for (const key of keys) {
+                const re = new RegExp(key, "g");
+                const x = langfile.match(re);
+                expect(x).toEqual([key]);
+            }
+        });
+    }
 });

@@ -69,6 +69,12 @@ fn main() -> Result<(), anyhow::Error> {
         build.add_file("gruvbox-dark.less");
         build.add_file("dracula.less");
         build.add_file("themes.less");
+        build.add_file("intl/de.less");
+        build.add_file("intl/es.less");
+        build.add_file("intl/fr.less");
+        build.add_file("intl/ja.less");
+        build.add_file("intl/pt.less");
+        build.add_file("intl/zh.less");
         build.compile()?.write("./target/themes")?;
     }
 

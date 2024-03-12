@@ -1,0 +1,97 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+perspective-viewer,
+perspective-dropdown {
+    // Config
+    --group-by-label--content: "Gruppiere nach";
+    --split-by-label--content: "Geteilt nach";
+    --sort-label--content: "Sortieren nach";
+    --filter-label--content: "Wo";
+    --transpose-button--content: "Tauschen";
+    --config-button-icon--content: "Konfigurieren";
+    --all-columns-label--content: "Alle Spalten";
+    --untitled--content: "Ohne Titel";
+
+    // Plugin names
+    --plugin-name-datagrid--content: "Datengitter";
+    --plugin-name-treemap--content: "Baumkarte";
+    --plugin-name-sunburst--content: "Sonnendurchbruch";
+    --plugin-name-heatmap--content: "Heatmap";
+    --plugin-name-x-bar--content: "X-Bar";
+    --plugin-name-y-bar--content: "Und Bar";
+    --plugin-name-y-line--content: "und Linie";
+    --plugin-name-x-y-line--content: "X/Y-Linie";
+    --plugin-name-x-y-scatter--content: "X/Y-Streuung";
+    --plugin-name-y-scatter--content: "Y-Scatter";
+    --plugin-name-y-area--content: "und Bereich";
+    --plugin-name-ohlc--content: "Autsch";
+    --plugin-name-candlestick--content: "Leuchter";
+
+    // Column Selector names
+    --column-selector-column-columns--content: "Säulen";
+    --column-selector-column-x-axis--content: "X-Achse";
+    --column-selector-column-y-axis--content: "Y-Achse";
+    --column-selector-column-color--content: "Farbe";
+    --column-selector-column-size--content: "Größe";
+    --column-selector-column-symbol--content: "Symbol";
+    --column-selector-column-label--content: "Etikett";
+    --column-selector-column-tooltip--content: "Tooltip";
+    --add-expression-button--content: "Neue Spalte";
+
+    // Toolbar
+    --no-results--content: "Ungültige Spalte";
+    --datagrid-column-edit-button--content: "Bearbeiten";
+    --copy-button--content: "Kopieren";
+    --export-button--content: "Export";
+    --reset-button--content: "Zurücksetzen";
+    --edit-mode-toggle--content: "Schreibgeschützt";
+    --edit-mode-alt-toggle--content: "Editbale";
+    --scroll-lock-toggle--content: "Kostenlose Schriftrolle";
+    --scroll-lock-alt-toggle--content: "Bildlauf ausrichten";
+
+    // Column Settings
+    --color-label--content: "Farbe";
+    --format-label--content: "Format";
+    --timezone-label--content: "Zeitzone";
+    --date-style-label--content: "Datumsstil";
+    --time-style-label--content: "Zeitstil";
+    --foreground-label--content: "Vordergrund";
+    --background-label--content: "Hintergrund";
+    --series-label--content: "Serie";
+    --color-range-label--content: "Farbspektrum";
+    --style-label--content: "Stil";
+    --minimum-integer-digits-label--content: "Mindestanzahl ganzzahliger Ziffern";
+    --rounding-increment-label--content: "Rundungsinkrement";
+    --notation-label--content: "Notation";
+    --use-grouping-label--content: "Verwenden Sie Gruppierung";
+    --sign-display-label--content: "Schilderanzeige";
+    --max-value-label--content: "Maximaler Wert";
+    --rounding-priority-label--content: "Rundungspriorität";
+    --rounding-mode-label--content: "Rundungsmodus";
+    --trailing-zero-display-label--content: "Anzeige der nachgestellten Null";
+    --fractional-digits-label--content: "Bruchstellen";
+    --significant-digits-label--content: "Wichtige Ziffer";
+    --year-label--content: "Jahr";
+    --month-label--content: "Monat";
+    --day-label--content: "Tag";
+    --weekday-label--content: "Wochentag";
+    --hour-label--content: "Stunde";
+    --minute-label--content: "Minute";
+    --second-label--content: "Zweite";
+    --fractional-seconds-label--content: "Sekundenbruchteile";
+    --hours-label--content: "12/24 Stunden";
+
+    // Tabs
+    --style-tab-label--content: "Stil";
+    --attributes-tab-label--content: "Attribute";
+}
