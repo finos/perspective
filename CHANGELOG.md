@@ -1,3 +1,24 @@
+# [v2.9.0](https://github.com/finos/perspective/releases/tag/v2.9.0)
+
+_12 March 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.8.1...v2.9.0))
+
+**Breaking**
+
+- Formatting for `float` and `integer` columns via `Intl.NumberFormat` [#2563](https://github.com/finos/perspective/pull/2563)
+
+Features
+
+- Localization Support [#2565](https://github.com/finos/perspective/pull/2565)
+
+Fixes
+
+- Fix get_hosted_table_names in Python client [#2551](https://github.com/finos/perspective/pull/2551)
+- Fix Candlestick & OHLC charts [#2562](https://github.com/finos/perspective/pull/2562)
+
+Misc
+
+- Update Pyodide to version 0.25.0 [#2547](https://github.com/finos/perspective/pull/2547)
+
 # [v2.8.1](https://github.com/finos/perspective/releases/tag/v2.8.1)
 
 _26 February 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.8.0...v2.8.1))
@@ -8,6 +29,7 @@ Fixes
 
 Misc
 
+- Update to LLVM 17 & fix Python/Windows build [#2546](https://github.com/finos/perspective/pull/2546)
 - Add `clang-format`, `clang-tidy` and `clangd` support for C++ development [#2541](https://github.com/finos/perspective/pull/2541)
 - Add Docs Tests [#2502](https://github.com/finos/perspective/pull/2502)
 - Add workspaceFolder to cargo_target_dir [#2537](https://github.com/finos/perspective/pull/2537)

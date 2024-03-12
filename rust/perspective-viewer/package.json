@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "2.8.1",
+    "version": "2.9.0",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
@@ -40,12 +40,12 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^2.8.1"
+        "@finos/perspective": "^2.9.0"
     },
     "devDependencies": {
         "react": "^16.14.0",
-        "@finos/perspective-esbuild-plugin": "^2.8.1",
-        "@finos/perspective-test": "^2.8.1",
+        "@finos/perspective-esbuild-plugin": "^2.9.0",
+        "@finos/perspective-test": "^2.9.0",
         "cpy": "^9.0.1"
     }
 }

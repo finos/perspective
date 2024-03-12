@@ -79,7 +79,7 @@ window.addEventListener("DOMContentLoaded", async function () {
             scroll_lock: true,
         },
         settings: true,
-        column_config: {
+        columns_config: {
             "(+)chg": { fg_gradient: 7.93, number_fg_mode: "bar" },
             "(-)chg": { fg_gradient: 8.07, number_fg_mode: "bar" },
             chg: { bg_gradient: 9.97, number_bg_mode: "gradient" },
