@@ -16,8 +16,6 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter};
 
-use crate::max;
-
 #[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase", tag = "style")]
 pub enum NumberFormatStyle {

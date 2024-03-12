@@ -1,0 +1,97 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+perspective-viewer,
+perspective-dropdown {
+    // Config
+    --group-by-label--content: "Agrupar por";
+    --split-by-label--content: "Dividir por";
+    --sort-label--content: "Ordenar por";
+    --filter-label--content: "Onde";
+    --transpose-button--content: "Trocar";
+    --config-button-icon--content: "Configurar";
+    --all-columns-label--content: "Todas as colunas";
+    --untitled--content: "Sem título";
+
+    // Plugin names
+    --plugin-name-datagrid--content: "Grade de dados";
+    --plugin-name-treemap--content: "Mapa de árvore";
+    --plugin-name-sunburst--content: "reluzente";
+    --plugin-name-heatmap--content: "Mapa de calor";
+    --plugin-name-x-bar--content: "Barra X";
+    --plugin-name-y-bar--content: "E Barra";
+    --plugin-name-y-line--content: "e linha";
+    --plugin-name-x-y-line--content: "Linha X/Y";
+    --plugin-name-x-y-scatter--content: "Dispersão X/Y";
+    --plugin-name-y-scatter--content: "Dispersão Y";
+    --plugin-name-y-area--content: "e área";
+    --plugin-name-ohlc--content: "Ai";
+    --plugin-name-candlestick--content: "Castiçal";
+
+    // Column Selector names
+    --column-selector-column-columns--content: "Colunas";
+    --column-selector-column-x-axis--content: "Eixo X";
+    --column-selector-column-y-axis--content: "Eixo Y";
+    --column-selector-column-color--content: "Cor";
+    --column-selector-column-size--content: "Tamanho";
+    --column-selector-column-symbol--content: "Símbolo";
+    --column-selector-column-label--content: "Rótulo";
+    --column-selector-column-tooltip--content: "Dica";
+    --add-expression-button--content: "Nova Coluna";
+
+    // Toolbar
+    --no-results--content: "Coluna inválida";
+    --datagrid-column-edit-button--content: "Editar";
+    --copy-button--content: "cópia de";
+    --export-button--content: "Exportar";
+    --reset-button--content: "Reiniciar";
+    --edit-mode-toggle--content: "Somente leitura";
+    --edit-mode-alt-toggle--content: "Editar Bale";
+    --scroll-lock-toggle--content: "Rolagem Grátis";
+    --scroll-lock-alt-toggle--content: "Alinhar rolagem";
+
+    // Column Settings
+    --color-label--content: "Cor";
+    --format-label--content: "Formatar";
+    --timezone-label--content: "Fuso horário";
+    --date-style-label--content: "Estilo de data";
+    --time-style-label--content: "Estilo de tempo";
+    --foreground-label--content: "Primeiro plano";
+    --background-label--content: "Fundo";
+    --series-label--content: "Series";
+    --color-range-label--content: "Gama de cores";
+    --style-label--content: "Estilo";
+    --minimum-integer-digits-label--content: "Dígitos inteiros mínimos";
+    --rounding-increment-label--content: "Incremento de arredondamento";
+    --notation-label--content: "Notação";
+    --use-grouping-label--content: "Usar agrupamento";
+    --sign-display-label--content: "Exibição de sinalização";
+    --max-value-label--content: "Valor máximo";
+    --rounding-priority-label--content: "Prioridade de arredondamento";
+    --rounding-mode-label--content: "Modo de arredondamento";
+    --trailing-zero-display-label--content: "Exibição de zero à direita";
+    --fractional-digits-label--content: "Dígitos Fracionários";
+    --significant-digits-label--content: "Dígitos significantes";
+    --year-label--content: "Ano";
+    --month-label--content: "Mês";
+    --day-label--content: "Dia";
+    --weekday-label--content: "Dia da semana";
+    --hour-label--content: "Hora";
+    --minute-label--content: "Minuto";
+    --second-label--content: "Segundo";
+    --fractional-seconds-label--content: "Segundos fracionários";
+    --hours-label--content: "12/24 horas";
+
+    // Tabs
+    --style-tab-label--content: "Estilo";
+    --attributes-tab-label--content: "Atributos";
+}

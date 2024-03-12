@@ -57,6 +57,7 @@
     flex-direction: column;
     align-items: stretch;
     font-family: Arial;
+    font-size: 0.75em;
 
     * {
         box-sizing: border-box;
@@ -227,7 +228,7 @@
 
         &:before {
             font-feature-settings: "liga";
-            content: var(--config-button-icon--content, "\1f527");
+            content: var(--config-button-icon--content, "Configure");
         }
     }
 
@@ -293,7 +294,6 @@
     #expr_panel_header_title,
     .sidebar_header_title {
         padding-left: 9px;
-        font-size: 12px;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;

@@ -35,18 +35,18 @@ export async function checkTab(
     if (active) {
         if (expression) {
             if (hasStyles) {
-                expect(await titles[0].innerText()).toBe("Style");
-                expect(await titles[1].innerText()).toBe("Attributes");
+                expect(await titles[0].getAttribute("id")).toBe("Style");
+                expect(await titles[1].getAttribute("id")).toBe("Attributes");
             } else {
-                expect(await titles[0].innerText()).toBe("Attributes");
+                expect(await titles[0].getAttribute("id")).toBe("Attributes");
             }
         } else {
-            expect(await titles[0].innerText()).toBe("Style");
+            expect(await titles[0].getAttribute("id")).toBe("Style");
         }
     } else {
         if (expression) {
             expect(titles.length).toBe(1);
-            expect(await titles[0].innerText()).toBe("Attributes");
+            expect(await titles[0].getAttribute("id")).toBe("Attributes");
         } else {
             test.fail(
                 true,
@@ -184,7 +184,9 @@ test.describe("Plugin Styles", () => {
         await view.columnSettingsSidebar.openTab("Attributes");
         await checkTab(view.columnSettingsSidebar, false, true);
         const selectedTab = async () => {
-            return await view.columnSettingsSidebar.selectedTab.innerText();
+            return await view.columnSettingsSidebar.selectedTab
+                .locator(".tab-title")
+                .getAttribute("id");
         };
         expect(await selectedTab()).toBe("Attributes");
         await col.activeBtn.click();

@@ -23,6 +23,10 @@
 }
 
 :host {
+    #add-expression-button:before {
+        content: var(--add-expression-button--content, "New Column");
+    }
+
     .column-selector-column-title {
         display: flex;
         width: 100%;
@@ -80,7 +84,6 @@
         border: var(--column-add--border, 1px solid transparent);
         min-height: 24px;
         flex-direction: row;
-        font-size: 12px;
         background-color: #8b868045;
         border-radius: 2px;
         display: flex;
@@ -184,7 +187,6 @@
         display: flex;
         flex-direction: row-reverse;
         align-items: center;
-        font-size: 12px;
 
         // Expression column toolbar buttons
         span.expression-edit-button,
@@ -233,7 +235,6 @@
             cursor: move;
             display: flex;
             align-items: start;
-            font-size: 12px;
             flex-grow: 1;
             color: inherit;
             box-sizing: border-box;
@@ -315,12 +316,12 @@
     }
 
     #sub-columns:before {
-        font-size: 9px;
+        font-size: var(--label--font-size, 0.75em);
         padding: var(--column_type--padding, 0px 0px 0px 0px);
         position: absolute;
         margin-top: 14px;
         top: 0;
-        content: "All Columns";
+        content: var(--all-columns-label--content, "All Columns");
     }
 
     #sub-columns #add-expression {
@@ -393,6 +394,30 @@
             }
         }
 
+        // .column-selector-column[data-index="0"]:before {
+        //     content: var(--column-selector-column-0--label, attr(data-label));
+        // }
+
+        // .column-selector-column[data-index="1"]:before {
+        //     content: var(--column-selector-column-1--label, attr(data-label));
+        // }
+
+        // .column-selector-column[data-index="2"]:before {
+        //     content: var(--column-selector-column-2--label, attr(data-label));
+        // }
+
+        // .column-selector-column[data-index="3"]:before {
+        //     content: var(--column-selector-column-3--label, attr(data-label));
+        // }
+
+        // .column-selector-column[data-index="4"]:before {
+        //     content: var(--column-selector-column-4--label, attr(data-label));
+        // }
+
+        // .column-selector-column[data-index="5"]:before {
+        //     content: var(--column-selector-column-5--label, attr(data-label));
+        // }
+
         .column-selector-column {
             position: relative;
 
@@ -406,12 +431,12 @@
             }
 
             &:before {
-                font-size: 9px;
+                font-size: var(--label--font-size, 0.75em);
                 left: 0px;
                 padding: var(--column_type--padding, 0px 0px 0px 0px);
                 position: absolute;
                 margin-top: -43px;
-                content: attr(data-label);
+                content: var(--default-column-title, attr(data-label));
             }
 
             &[data-label] {

@@ -16,9 +16,9 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use super::{
-    CustomDatetimeFormat, CustomNumberFormatConfig, DatetimeColumnStyleConfig,
-    DatetimeColumnStyleDefaultConfig, NumberColumnStyleConfig, NumberColumnStyleDefaultConfig,
-    StringColumnStyleConfig, StringColumnStyleDefaultConfig,
+    CustomNumberFormatConfig, DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig,
+    NumberColumnStyleConfig, NumberColumnStyleDefaultConfig, StringColumnStyleConfig,
+    StringColumnStyleDefaultConfig,
 };
 
 /// The value de/serialized and stored in the viewer config.

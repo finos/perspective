@@ -1,0 +1,97 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+perspective-viewer,
+perspective-dropdown {
+    // Config
+    --group-by-label--content: "通过...分组";
+    --split-by-label--content: "分割依据";
+    --sort-label--content: "订购依据";
+    --filter-label--content: "在哪里";
+    --transpose-button--content: "交换";
+    --config-button-icon--content: "配置";
+    --all-columns-label--content: "所有栏目";
+    --untitled--content: "无标题";
+
+    // Plugin names
+    --plugin-name-datagrid--content: "数据网格";
+    --plugin-name-treemap--content: "树形图";
+    --plugin-name-sunburst--content: "旭日";
+    --plugin-name-heatmap--content: "热图";
+    --plugin-name-x-bar--content: "X吧";
+    --plugin-name-y-bar--content: "和酒吧";
+    --plugin-name-y-line--content: "和线";
+    --plugin-name-x-y-line--content: "X/Y线";
+    --plugin-name-x-y-scatter--content: "X/Y 散点图";
+    --plugin-name-y-scatter--content: "Y 散点图";
+    --plugin-name-y-area--content: "和面积";
+    --plugin-name-ohlc--content: "哎哟";
+    --plugin-name-candlestick--content: "烛台";
+
+    // Column Selector names
+    --column-selector-column-columns--content: "列";
+    --column-selector-column-x-axis--content: "X轴";
+    --column-selector-column-y-axis--content: "Y轴";
+    --column-selector-column-color--content: "颜色";
+    --column-selector-column-size--content: "尺寸";
+    --column-selector-column-symbol--content: "象征";
+    --column-selector-column-label--content: "标签";
+    --column-selector-column-tooltip--content: "工具提示";
+    --add-expression-button--content: "新专栏";
+
+    // Toolbar
+    --no-results--content: "无效列";
+    --datagrid-column-edit-button--content: "编辑";
+    --copy-button--content: "复制";
+    --export-button--content: "出口";
+    --reset-button--content: "重置";
+    --edit-mode-toggle--content: "只读";
+    --edit-mode-alt-toggle--content: "伊迪特巴莱";
+    --scroll-lock-toggle--content: "自由滚动";
+    --scroll-lock-alt-toggle--content: "对齐滚动";
+
+    // Column Settings
+    --color-label--content: "颜色";
+    --format-label--content: "格式";
+    --timezone-label--content: "时区";
+    --date-style-label--content: "日期样式";
+    --time-style-label--content: "时间风格";
+    --foreground-label--content: "前景";
+    --background-label--content: "背景";
+    --series-label--content: "系列";
+    --color-range-label--content: "颜色范围";
+    --style-label--content: "风格";
+    --minimum-integer-digits-label--content: "最小整数位数";
+    --rounding-increment-label--content: "舍入增量";
+    --notation-label--content: "符号";
+    --use-grouping-label--content: "使用分组";
+    --sign-display-label--content: "标志展示";
+    --max-value-label--content: "最大值";
+    --rounding-priority-label--content: "舍入优先级";
+    --rounding-mode-label--content: "舍入模式";
+    --trailing-zero-display-label--content: "尾随零显示";
+    --fractional-digits-label--content: "小数位";
+    --significant-digits-label--content: "有效数字";
+    --year-label--content: "年";
+    --month-label--content: "月";
+    --day-label--content: "天";
+    --weekday-label--content: "工作日";
+    --hour-label--content: "小时";
+    --minute-label--content: "分钟";
+    --second-label--content: "第二";
+    --fractional-seconds-label--content: "小数秒";
+    --hours-label--content: "12/24 小时";
+
+    // Tabs
+    --style-tab-label--content: "风格";
+    --attributes-tab-label--content: "属性";
+}

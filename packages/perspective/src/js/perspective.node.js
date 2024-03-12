@@ -89,9 +89,9 @@ const DEFAULT_ASSETS = [
 ];
 
 const CONTENT_TYPES = {
-    ".js": "text/javascript",
-    ".css": "text/css",
-    ".json": "application/json",
+    ".js": "text/javascript; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
     ".arrow": "arraybuffer",
     ".feather": "arraybuffer",
     ".wasm": "application/wasm",

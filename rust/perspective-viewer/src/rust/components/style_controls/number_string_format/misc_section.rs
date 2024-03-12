@@ -23,7 +23,7 @@ impl CustomNumberFormat {
             let cb = ctx.link().callback(CustomNumberFormatMsg::CompactDisplay);
             Some(html! {
                 <SelectEnumField<CompactDisplay>
-                    label="Compact Display"
+                    label="compact-display"
                     on_change={cb}
                     current_value={val}
                 />
@@ -35,18 +35,18 @@ impl CustomNumberFormat {
         html! {
             <>
                 <SelectEnumField<NotationName>
-                    label="Notation"
+                    label="notation"
                     on_change={ctx.link().callback(CustomNumberFormatMsg::NotationChanged)}
                     current_value={self.notation.unwrap_or_default()}
                 />
                 { compact_display_checkbox }
                 <SelectEnumField<UseGrouping>
-                    label="Use Grouping"
+                    label="use-grouping"
                     on_change={ctx.link().callback(CustomNumberFormatMsg::UseGrouping)}
                     current_value={self.config.use_grouping.unwrap_or_default()}
                 />
                 <SelectEnumField<SignDisplay>
-                    label="Sign Display"
+                    label="sign-display"
                     on_change={ctx.link().callback(CustomNumberFormatMsg::SignDisplay)}
                     current_value={self.config.sign_display.unwrap_or_default()}
                 />

@@ -23,17 +23,17 @@ impl CustomNumberFormat {
             Some(NumberFormatStyle::Currency(style)) => Some(html! {
                 <>
                     <SelectEnumField<CurrencyCode>
-                        label="Currency"
+                        label="currency"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::CurrencyCode)}
                         current_value={style.currency}
                     />
                     <SelectEnumField<CurrencyDisplay>
-                        label="Currency Display"
+                        label="currency-display"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::CurrencyDisplay)}
                         current_value={style.currency_display.unwrap_or_default()}
                     />
                     <SelectEnumField<CurrencySign>
-                        label="Currency Sign"
+                        label="currency-sign"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::CurrencySign)}
                         current_value={style.currency_sign.unwrap_or_default()}
                     />
@@ -42,12 +42,12 @@ impl CustomNumberFormat {
             Some(NumberFormatStyle::Unit(style)) => Some(html!(
                 <>
                     <SelectEnumField<Unit>
-                        label="Unit"
+                        label="unit"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::Unit)}
                         current_value={style.unit}
                     />
                     <SelectEnumField<UnitDisplay>
-                        label="Unit Display"
+                        label="unit-display"
                         on_change={ctx.link().callback(CustomNumberFormatMsg::UnitDisplay)}
                         current_value={style.unit_display.unwrap_or_default()}
                     />
@@ -58,7 +58,7 @@ impl CustomNumberFormat {
         html! {
             <>
                 <SelectEnumField<NumberStyle>
-                    label="Style"
+                    label="style"
                     current_value={self.style}
                     on_change={ctx.link().callback(CustomNumberFormatMsg::StyleChanged)}
                 />

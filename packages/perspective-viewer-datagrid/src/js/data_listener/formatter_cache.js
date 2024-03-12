@@ -51,7 +51,7 @@ export class FormatterCache {
                     options.timeStyle = type_config.format.timeStyle;
                 }
 
-                return new Intl.DateTimeFormat([], options);
+                return new Intl.DateTimeFormat(navigator.languages, options);
             } else {
                 const options = {
                     // ...type_config.format,
@@ -112,7 +112,7 @@ export class FormatterCache {
                     options.hour12 = true;
                 }
 
-                return new Intl.DateTimeFormat([], options);
+                return new Intl.DateTimeFormat(navigator.languages, options);
             }
         } else {
             const options = {
@@ -126,7 +126,7 @@ export class FormatterCache {
                 options.dateStyle = type_config.format.dateStyle;
             }
 
-            return new Intl.DateTimeFormat([], options);
+            return new Intl.DateTimeFormat(navigator.languages, options);
         }
     }
 
@@ -136,7 +136,7 @@ export class FormatterCache {
             format = plugin.number_format;
         }
 
-        return new FORMATTER_CONS[type]([], format);
+        return new FORMATTER_CONS[type](navigator.languages, format);
     }
 
     create_boolean_formatter(type, plugin) {

@@ -30,7 +30,7 @@ export function lint_js(is_fix = false) {
     const fix = is_fix ? "--fix" : undefined;
     cmd.sh`cd rust/perspective-viewer`;
     cmd.sh`cargo build -p perspective-lint --release`;
-    cmd.sh`cargo clippy ${fix} ${dirty} ${staged}`;
+    cmd.sh`cargo clippy ${fix} ${dirty} ${staged} -- -Dwarnings`;
     cmd.sh`RUSTFMT="target/release/lint" cargo fmt ${check}`;
     cmd.runSync();
 }

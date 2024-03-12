@@ -162,23 +162,19 @@
         }
 
         #group_by label.pivot-selector-label:before {
-            content: var(--group_by--content, "Group By");
+            content: var(--group-by-label--content, "Group By");
         }
 
         #split_by label.pivot-selector-label:before {
-            content: var(--split_by--content, "Split By");
+            content: var(--split-by-label--content, "Split By");
         }
 
         #sort label.pivot-selector-label:before {
-            content: "Order By";
+            content: var(--sort-label--content, "Order By");
         }
 
-        // #filter {
-        //     min-width: 300px;
-        // }
-
         #filter label.pivot-selector-label:before {
-            content: "Where";
+            content: var(--filter-label--content, "Where");
         }
 
         .highlight-drop {
@@ -235,7 +231,6 @@
             display: none;
             margin: 0;
             padding: 0 0 0 0;
-            font-size: 12px;
             min-height: 26px;
             // margin-bottom: -1px;
 
@@ -259,7 +254,7 @@
             // color: var(--inactive--color);
             white-space: nowrap;
             padding: var(--column-drop-container--padding, 0px);
-            font-size: 12px;
+            font-size: var(--label--font-size, 0.75em);
             display: inline-block;
         }
 
@@ -271,7 +266,7 @@
             position: absolute;
             top: 0px;
             margin: var(--column-drop-label--margin, -16px 0px 0px 0px);
-            font-size: 9px; //var(--column-drop-label--font-size, 10px);
+            font-size: var(--label--font-size, 0.75em);
             display: var(--column-drop-label--display, none);
         }
 
@@ -279,7 +274,7 @@
             cursor: pointer;
             flex-grow: 0;
             font-family: inherit;
-            font-size: 9px;
+            font-size: var(--label--font-size, 0.75em);
             user-select: none;
             padding: 0;
             align-self: center;

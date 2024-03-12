@@ -1,0 +1,97 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+perspective-viewer,
+perspective-dropdown {
+    // Config
+    --group-by-label--content: "Par groupe";
+    --split-by-label--content: "Divisé par";
+    --sort-label--content: "Commandé par";
+    --filter-label--content: "Où";
+    --transpose-button--content: "Échanger";
+    --config-button-icon--content: "Configurer";
+    --all-columns-label--content: "Toutes les colonnes";
+    --untitled--content: "Sans titre";
+
+    // Plugin names
+    --plugin-name-datagrid--content: "Grille de données";
+    --plugin-name-treemap--content: "Treemap";
+    --plugin-name-sunburst--content: "Coup de soleil";
+    --plugin-name-heatmap--content: "Carte de chaleur";
+    --plugin-name-x-bar--content: "Barre X";
+    --plugin-name-y-bar--content: "Et le bar";
+    --plugin-name-y-line--content: "et ligne";
+    --plugin-name-x-y-line--content: "Ligne X/Y";
+    --plugin-name-x-y-scatter--content: "Dispersion X/Y";
+    --plugin-name-y-scatter--content: "Dispersion Y";
+    --plugin-name-y-area--content: "et la superficie";
+    --plugin-name-ohlc--content: "Aie";
+    --plugin-name-candlestick--content: "Chandelier";
+
+    // Column Selector names
+    --column-selector-column-columns--content: "Colonnes";
+    --column-selector-column-x-axis--content: "Axe X";
+    --column-selector-column-y-axis--content: "Axe Y";
+    --column-selector-column-color--content: "Couleur";
+    --column-selector-column-size--content: "Taille";
+    --column-selector-column-symbol--content: "Symbole";
+    --column-selector-column-label--content: "Étiquette";
+    --column-selector-column-tooltip--content: "Info-bulle";
+    --add-expression-button--content: "Nouvelle colonne";
+
+    // Toolbar
+    --no-results--content: "Colonne invalide";
+    --datagrid-column-edit-button--content: "Modifier";
+    --copy-button--content: "Copie";
+    --export-button--content: "Exporter";
+    --reset-button--content: "Réinitialiser";
+    --edit-mode-toggle--content: "Lecture seulement";
+    --edit-mode-alt-toggle--content: "Editbale";
+    --scroll-lock-toggle--content: "Défilement gratuit";
+    --scroll-lock-alt-toggle--content: "Aligner le défilement";
+
+    // Column Settings
+    --color-label--content: "Couleur";
+    --format-label--content: "Format";
+    --timezone-label--content: "Fuseau horaire";
+    --date-style-label--content: "Style de date";
+    --time-style-label--content: "Style temporel";
+    --foreground-label--content: "Premier plan";
+    --background-label--content: "Arrière-plan";
+    --series-label--content: "Série";
+    --color-range-label--content: "Gamme de couleurs";
+    --style-label--content: "Style";
+    --minimum-integer-digits-label--content: "Chiffres entiers minimaux";
+    --rounding-increment-label--content: "Incrément d'arrondi";
+    --notation-label--content: "Notation";
+    --use-grouping-label--content: "Utiliser le regroupement";
+    --sign-display-label--content: "Affichage des panneaux";
+    --max-value-label--content: "Valeur max";
+    --rounding-priority-label--content: "Priorité d'arrondi";
+    --rounding-mode-label--content: "Mode d'arrondi";
+    --trailing-zero-display-label--content: "Affichage du zéro final";
+    --fractional-digits-label--content: "Chiffres fractionnaires";
+    --significant-digits-label--content: "Chiffres significatifs";
+    --year-label--content: "Année";
+    --month-label--content: "Mois";
+    --day-label--content: "Jour";
+    --weekday-label--content: "Jour de la semaine";
+    --hour-label--content: "Heure";
+    --minute-label--content: "Minute";
+    --second-label--content: "Deuxième";
+    --fractional-seconds-label--content: "Fractions de secondes";
+    --hours-label--content: "12/24 heures";
+
+    // Tabs
+    --style-tab-label--content: "Style";
+    --attributes-tab-label--content: "Les attributs";
+}

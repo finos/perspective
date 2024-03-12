@@ -210,7 +210,7 @@ export class SettingsPanel {
      */
     async selectPlugin(name: string) {
         await this.pluginSelector.click();
-        await this.pluginSelector.getByText(name).click();
+        await this.pluginSelector.locator(`[data-plugin="${name}"]`).click();
     }
 }
 

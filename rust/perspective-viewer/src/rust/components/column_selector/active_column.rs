@@ -286,6 +286,20 @@ impl Component for ActiveColumn {
             }
         });
 
+        let path: String = name
+            .0
+            .clone()
+            .unwrap_or_default()
+            .chars()
+            .map(|x| {
+                if x.is_alphanumeric() {
+                    x.to_ascii_lowercase()
+                } else {
+                    '-'
+                }
+            })
+            .collect();
+
         let col_type = ctx.props().get_table_type();
         match (name, col_type) {
             ((label, ColumnState::Empty), _) => {
@@ -306,6 +320,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
+                        style={format!("--default-column-title:var(--column-selector-column-{}--content)",path)}
                         data-index={ctx.props().idx.to_string()}
                         ondragenter={ondragenter.clone()}
                     >
@@ -319,6 +334,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
+                        style={format!("--default-column-title:var(--column-selector-column-{}--content)",path)}
                         data-index={ctx.props().idx.to_string()}
                         ondragenter={ondragenter.clone()}
                     >
@@ -377,6 +393,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
+                        style={format!("--default-column-title:var(--column-selector-column-{}--content)",path)}
                         data-index={ctx.props().idx.to_string()}
                         {onmouseover}
                         {onmouseout}

@@ -53,7 +53,7 @@ pub fn AddExpressionButton(p: &AddExpressionButtonProps) -> Html {
 
     html! {
         <div id="add-expression" data-index="-1" {class} {onmouseover} {onmouseout} {onmousedown}>
-            <span id="add-expression-title">{ "New Column" }</span>
+            <span id="add-expression-button" />
         </div>
     }
 }

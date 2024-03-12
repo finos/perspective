@@ -79,7 +79,7 @@ impl<T: Tab> Component for TabList<T> {
             let onclick = ctx.link().callback(move |_| TabListMsg::SetSelected(idx));
             html! {
                 <span {class} {onclick}>
-                    <div class="tab-title">{ tab.to_string() }</div>
+                    <div class="tab-title" id={tab.to_string()} />
                     <div class="tab-border" />
                 </span>
             }

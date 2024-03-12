@@ -10,69 +10,55 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "dom/scrollbar.less";
+import { PageView as PspViewer } from "@finos/perspective-test";
+import { expect, test } from "@finos/perspective-test";
+import fs from "node:fs";
 
-:host {
-    .tab-gutter {
-        border-color: var(--inactive--color, #6e6e6e);
-        display: flex;
-
-        .tab.tab-padding {
-            flex: 1;
-            cursor: unset;
-            .tab-title {
-                border-right: none;
+test.describe("Localization", function () {
+    test.beforeEach(async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
             }
-            .tab-border {
-                border-right: none;
-            }
-        }
+        });
+    });
 
-        .tab {
-            //TODO: This needs to be a variable color. Which one?
-            background: rgba(0, 0, 0, 0.125);
-            border-right: 1px solid var(--inactive--color, #6e6e6e);
-            user-select: none;
-            cursor: pointer;
+    test("All label tags are empty", async function ({ page }) {
+        const view = new PspViewer(page);
+        await view.openSettingsPanel();
+        const editBtn = view.dataGrid.regularTable.editBtnRow
+            .locator("th.psp-menu-enabled span")
+            .first();
 
-            .tab-title {
-                font-size: 10px;
-                padding: 10px;
-                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
-            }
-            .tab-border {
-                height: 2px;
-                width: 100%;
-                background-color: var(--inactive--color, #6e6e6e);
-                margin-top: 1px;
-            }
+        await editBtn.click();
+        await view.columnSettingsSidebar.container.waitFor();
+        const contents = await page.evaluate(() => {
+            const viewer = document.querySelector("perspective-viewer");
+            return Array.from(viewer.shadowRoot.querySelectorAll("label"))
+                .map((x) => x.textContent)
+                .filter((x) => x != "");
+        });
 
-            &.selected {
-                background: unset;
-                border-bottom: 1px transparent;
+        expect(contents).toEqual(["+", "-"]);
+    });
 
-                .tab-title {
-                    border-bottom: 1px transparent;
-                    border-right: none;
-                }
-                .tab-border {
-                    background-color: transparent;
-                    border-right: none;
-                }
+    const intl = fs
+        .readFileSync(`${__dirname}/../../src/themes/intl.less`)
+        .toString();
+
+    const keys = Array.from(intl.matchAll(/--[a-zA-Z0-9\-]+/g)).flat();
+    const langfiles = fs.readdirSync(`${__dirname}/../../src/themes/intl`);
+    for (const file of langfiles) {
+        test(`${file} has all intl keys present`, async function ({ page }) {
+            const langfile = fs
+                .readFileSync(`${__dirname}/../../src/themes/intl/${file}`)
+                .toString();
+            for (const key of keys) {
+                const re = new RegExp(key, "g");
+                const x = langfile.match(re);
+                expect(x).toEqual([key]);
             }
-        }
+        });
     }
-    .tab-content {
-        overflow-y: scroll;
-        max-height: calc(100% - 90px);
-        @include scrollbar;
-
-        .tab-section {
-            padding: 8px 4px 8px 8px;
-            // border-bottom: 1px solid var(--inactive--border-color);
-        }
-        .text {
-            margin-left: 1em;
-        }
-    }
-}
+});

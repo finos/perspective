@@ -178,7 +178,7 @@ runTests("Datagrid Column Styles", () => {
         await td.waitFor();
 
         // bg style
-        await view.columnSettingsSidebar.openTab("style");
+        await view.columnSettingsSidebar.openTab("Style");
 
         let oldContents = await td.evaluate((node) => node.innerHTML);
         let listener = await view.getEventListener(
@@ -203,7 +203,7 @@ runTests("Datagrid Column Styles", () => {
 
         // text style
         view.assureColumnSettingsOpen(col);
-        await view.columnSettingsSidebar.openTab("style");
+        await view.columnSettingsSidebar.openTab("Style");
         let checkbox = view.columnSettingsSidebar.container
             .getByRole("checkbox", { disabled: false })
             .first();
@@ -238,7 +238,7 @@ runTests("Datagrid Column Styles", () => {
 
         // bg color
         await view.assureColumnSettingsOpen(col);
-        await view.columnSettingsSidebar.openTab("style");
+        await view.columnSettingsSidebar.openTab("Style");
         let container = view.columnSettingsSidebar.container;
         let checkbox = container.getByRole("checkbox").last();
         await checkbox.waitFor();

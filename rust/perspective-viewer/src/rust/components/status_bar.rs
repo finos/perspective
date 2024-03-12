@@ -246,29 +246,28 @@ impl Component for StatusBar {
                         data-value={ctx.props().presentation.get_title().unwrap_or_default()}
                     >
                         <input
+                            placeholder=" "
                             value={ctx.props().presentation.get_title()}
                             size="10"
                             {oninput}
-                            placeholder="untitled"
                         />
+                        <span id="status-bar-placeholder" />
                     </label>
                     <div id="rows" class="section"><StatusBarRowsCounter {stats} /></div>
                     <div id="menu-bar" class="section">
                         { theme_button }
                         <div id="plugin-settings"><slot name="plugin-settings" /></div>
-                        <span id="reset" class="button" onmousedown={reset}>
-                            <span>{ "Reset" }</span>
-                        </span>
+                        <span id="reset" class="button" onmousedown={reset}><span /></span>
                         <span
                             ref={&self.export_ref}
                             id="export"
                             class="button"
                             onmousedown={export}
                         >
-                            <span>{ "Export" }</span>
+                            <span />
                         </span>
                         <span ref={&self.copy_ref} id="copy" class="button" onmousedown={copy}>
-                            <span>{ "Copy" }</span>
+                            <span />
                         </span>
                     </div>
                 </div>

@@ -72,7 +72,6 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
 
     let fg_pos = infer_fg(&gradient.0);
     let fg_neg = infer_fg(&gradient.1);
-
     let style = if props.is_gradient {
         format!(
             "background:linear-gradient(to right, {} 0%, transparent 50%, {} 100%)",
@@ -87,7 +86,7 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
 
     html! {
         <>
-            <label style="font-size: 9px">{ "Color Range" }</label>
+            <label id="color-range-label" />
             <div class="color-gradient-container">
                 <div class="color-selector">
                     <input

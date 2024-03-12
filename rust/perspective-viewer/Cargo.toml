@@ -99,9 +99,6 @@ js-sys = "0.3.64"
 # Parse ExprTK for syntax highlighting.
 nom = "7.1.1"
 
-# Comma-sep numeric representation
-num-format = "0.4.4"
-
 # MessagePack serialization
 rmp-serde = "1.1.1"
 

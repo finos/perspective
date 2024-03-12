@@ -147,13 +147,13 @@ impl Component for StringColumnStyle {
         let color_mode_changed = ctx.link().callback(StringColumnStyleMsg::ColorModeChanged);
         let color_controls = match selected_color_mode {
             StringColorMode::Foreground => {
-                self.color_select_row(ctx, &StringColorMode::Foreground, "Foreground")
+                self.color_select_row(ctx, &StringColorMode::Foreground, "foreground-label")
             },
             StringColorMode::Background => {
-                self.color_select_row(ctx, &StringColorMode::Background, "Background")
+                self.color_select_row(ctx, &StringColorMode::Background, "background-label")
             },
             StringColorMode::Series => {
-                self.color_select_row(ctx, &StringColorMode::Series, "Series")
+                self.color_select_row(ctx, &StringColorMode::Series, "series-label")
             },
             StringColorMode::None => html! {},
         };
@@ -163,12 +163,12 @@ impl Component for StringColumnStyle {
                 <LocalStyle href={css!("column-style")} />
                 <div id="column-style-container" class="string-column-style-container">
                     <SelectEnumField<FormatMode>
-                        label="Format"
+                        label="format"
                         on_change={format_mode_changed}
                         current_value={format_mode_selected}
                     />
                     <SelectEnumField<StringColorMode>
-                        label="Color"
+                        label="color"
                         on_change={color_mode_changed}
                         current_value={selected_color_mode}
                     />

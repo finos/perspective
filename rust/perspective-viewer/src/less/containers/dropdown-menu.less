@@ -14,7 +14,7 @@
     position: fixed;
     z-index: 10000;
     outline: none;
-    font-size: 14px;
+    font-size: 0.75em;
     border: inherit;
     box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
@@ -26,9 +26,7 @@
     min-width: 80px;
 
     code {
-        font-size: 12px;
-        font-family: var(--interface-monospace--font-family),
-            monospace;
+        font-family: var(--interface-monospace--font-family), monospace;
     }
 
     input {
@@ -38,9 +36,7 @@
         border: none;
         border-bottom: 1px solid var(--inactive--color, #ccc);
         background: transparent;
-        font-family: var(--interface-monospace--font-family),
-            monospace;
-        font-size: 12px;
+        font-family: var(--interface-monospace--font-family), monospace;
         color: inherit;
         outline: none;
     }
@@ -55,7 +51,7 @@
     }
 
     .dropdown-group-label {
-        font-size: 10px;
+        font-size: var(--label--font-size, 0.75em);
     }
 
     .dropdown-group-container {
