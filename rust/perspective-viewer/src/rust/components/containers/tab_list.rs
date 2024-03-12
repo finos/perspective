@@ -78,10 +78,7 @@ impl<T: Tab> Component for TabList<T> {
 
             let onclick = ctx.link().callback(move |_| TabListMsg::SetSelected(idx));
             html! {
-                <span
-                    {class}
-                    {onclick}
-                >
+                <span {class} {onclick}>
                     <div class="tab-title">{ tab.to_string() }</div>
                     <div class="tab-border" />
                 </span>
@@ -90,23 +87,15 @@ impl<T: Tab> Component for TabList<T> {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("containers/tabs")}
-                />
-                <div
-                    class="tab-gutter"
-                >
+                <LocalStyle href={css!("containers/tabs")} />
+                <div class="tab-gutter">
                     { for gutter_tabs }
-                    <span
-                        class="tab tab-padding"
-                    >
+                    <span class="tab tab-padding">
                         <div class="tab-title">{ "\u{00a0}" }</div>
                         <div class="tab-border" />
                     </span>
                 </div>
-                <div
-                    class="tab-content"
-                >
+                <div class="tab-content">
                     { ctx.props().children.iter().nth(self.selected_idx) }
                 </div>
             </>

@@ -125,23 +125,11 @@ impl Component for PluginSelector {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("plugin-selector")}
-                />
-                <div
-                    id="plugin_selector_container"
-                    {class}
-                >
-                    <PluginSelect
-                        name={plugin_name}
-                        on_click={callback}
-                    />
-                    <div
-                        id="plugin_selector_border"
-                    />
-                    if self.is_open {
-                        { items.collect::<Html>() }
-                    }
+                <LocalStyle href={css!("plugin-selector")} />
+                <div id="plugin_selector_container" {class}>
+                    <PluginSelect name={plugin_name} on_click={callback} />
+                    <div id="plugin_selector_border" />
+                    if self.is_open { { items.collect::<Html>() } }
                 </div>
             </>
         }

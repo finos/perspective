@@ -32,12 +32,12 @@ export class FormatterCache {
     create_datetime_formatter(type, plugin) {
         const type_config = get_type_config(type);
         if (type === "datetime") {
-            if (plugin.format !== "custom") {
+            if (plugin.date_format?.format !== "custom") {
                 const options = {
                     ...type_config.format,
-                    timeZone: plugin.timeZone,
-                    dateStyle: plugin.dateStyle,
-                    timeStyle: plugin.timeStyle,
+                    timeZone: plugin.date_format?.timeZone,
+                    dateStyle: plugin.date_format?.dateStyle,
+                    timeStyle: plugin.date_format?.timeStyle,
                 };
                 if (options.dateStyle === "disabled") {
                     options.dateStyle = undefined;
@@ -55,16 +55,17 @@ export class FormatterCache {
             } else {
                 const options = {
                     // ...type_config.format,
-                    timeZone: plugin.timeZone,
-                    second: plugin.second,
-                    minute: plugin.minute,
-                    hour: plugin.hour,
-                    day: plugin.day,
-                    weekday: plugin.weekday,
-                    month: plugin.month,
-                    year: plugin.year,
-                    hour12: plugin.hour12,
-                    fractionalSecondDigits: plugin.fractionalSecondDigits,
+                    timeZone: plugin.date_format?.timeZone,
+                    second: plugin.date_format?.second,
+                    minute: plugin.date_format?.minute,
+                    hour: plugin.date_format?.hour,
+                    day: plugin.date_format?.day,
+                    weekday: plugin.date_format?.weekday,
+                    month: plugin.date_format?.month,
+                    year: plugin.date_format?.year,
+                    hour12: plugin.date_format?.hour12,
+                    fractionalSecondDigits:
+                        plugin.date_format?.fractionalSecondDigits,
                 };
 
                 if (options.year === "disabled") {
@@ -116,7 +117,7 @@ export class FormatterCache {
         } else {
             const options = {
                 ...type_config.format,
-                dateStyle: plugin.dateStyle,
+                dateStyle: plugin.date_format?.dateStyle,
             };
 
             if (options.dateStyle === "disabled") {
@@ -130,10 +131,9 @@ export class FormatterCache {
     }
 
     create_number_formatter(type, plugin) {
-        const { format } = get_type_config(type);
-        if (plugin.fixed !== undefined) {
-            format.minimumFractionDigits = plugin.fixed;
-            format.maximumFractionDigits = plugin.fixed;
+        let { format } = get_type_config(type);
+        if (plugin.number_format !== undefined) {
+            format = plugin.number_format;
         }
 
         return new FORMATTER_CONS[type]([], format);
@@ -141,26 +141,17 @@ export class FormatterCache {
 
     create_boolean_formatter(type, plugin) {
         const type_config = get_type_config(type);
-        return new FORMATTER_CONS[type]([], type_config.format);
+        return new FORMATTER_CONS[type](
+            navigator.languages,
+            type_config.format
+        );
     }
 
     get(type, plugin) {
         let formatter_key = [
             type,
-            plugin.fixed,
-            plugin.timeZone,
-            plugin.dateStyle,
-            plugin.timeStyle,
-            plugin.fractionalSecondDigits,
-            plugin.format,
-            plugin.year,
-            plugin.month,
-            plugin.day,
-            plugin.weekday,
-            plugin.hour,
-            plugin.minute,
-            plugin.second,
-            plugin.hour12,
+            ...Object.values(plugin.date_format ?? {}),
+            ...Object.values(plugin.number_format ?? {}),
         ].join("-");
 
         if (!this._formatters.has(formatter_key)) {

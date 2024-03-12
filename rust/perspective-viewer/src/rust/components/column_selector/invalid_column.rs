@@ -28,9 +28,7 @@ impl Component for InvalidColumn {
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
-            <div
-                class="pivot-column column-empty column-invalid"
-            >
+            <div class="pivot-column column-empty column-invalid">
                 <LocalStyle href={css!("empty-column")} />
                 <div class="column-invalid-input" />
             </div>

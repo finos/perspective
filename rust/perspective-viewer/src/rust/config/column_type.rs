@@ -12,10 +12,10 @@
 
 use std::fmt::Display;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use yew::{html, ToHtml};
 
-#[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 pub enum Type {
     #[serde(rename = "string")]
     String,

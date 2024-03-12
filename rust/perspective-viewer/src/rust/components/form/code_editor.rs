@@ -182,12 +182,8 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
 
     html! {
         <>
-            <LocalStyle
-                href={css!("form/code-editor")}
-            />
-            <div
-                id="editor"
-            >
+            <LocalStyle href={css!("form/code-editor")} />
+            <div id="editor">
                 <textarea
                     {disabled}
                     id="textarea_editable"
@@ -197,10 +193,7 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
                     {onscroll}
                     {onkeydown}
                 />
-                <pre
-                    id="content"
-                    ref={content_ref.1}
-                >
+                <pre id="content" ref={content_ref.1}>
                     { terms }
                     { {
                         // A linebreak which pushs a textarea into scroll overflow

@@ -10,7 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { IPerspectiveViewerPlugin } from "@finos/perspective-viewer";
+import {
+    IPerspectiveViewerPlugin,
+    PerspectiveColumnConfig,
+} from "@finos/perspective-viewer";
 import { DataRow, Type } from "@finos/perspective";
 
 export interface Element {
@@ -32,6 +35,9 @@ export interface Chart {
         };
         selectMode?: string;
     };
+    can_render_column_styles?: (type: Type, group?: string) => boolean;
+    // TODO: Generate the type for the column style schema.
+    column_style_controls?: (type: Type, group?: string) => unknown;
 }
 
 export type PadUnit = "percent" | "domain";
@@ -80,13 +86,6 @@ export type TreemapValue = {
     treemapRoute?: any[]; // string[]?
 };
 
-export type ColumnSettingsConfig = {
-    symbols: Record<string, string>;
-};
-export type ColumnSettings<
-    T extends Record<string, any> = ColumnSettingsConfig
-> = Record<string, T>;
-
 export type Settings = {
     hideKeys?: any[];
     agg_paths?: any; // any[]?
@@ -102,7 +101,7 @@ export type Settings = {
     splitValues: any[];
     textStyles: TextStyles;
     sunburstLevel?: any;
-    columns?: ColumnSettings;
+    columns_config?: PerspectiveColumnConfig;
     treemaps?: Record<string, TreemapValue>;
 };
 
@@ -194,15 +193,6 @@ export interface ChartElement extends IPerspectiveViewerPlugin {
 
     get max_columns(): number;
     set max_columns(value: number);
-
-    get plugin_attributes(): {
-        symbol: {
-            symbols: {
-                name: string;
-                html: string;
-            }[];
-        };
-    };
 
     _draw(): void;
 

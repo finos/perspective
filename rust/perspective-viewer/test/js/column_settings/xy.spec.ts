@@ -10,11 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import {
-    PageView as PspViewer,
-    compareNodes,
-    getEventListener,
-} from "@finos/perspective-test";
+import { PageView as PspViewer, compareNodes } from "@finos/perspective-test";
 import { SymbolPair } from "@finos/perspective-test/src/js/models/column_settings";
 
 import { expect, test } from "@finos/perspective-test";

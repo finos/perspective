@@ -354,7 +354,6 @@ test.describe("Expressions", () => {
 
     // Currently does not work in Firefox!
     test("Clicking on New Expression Button marks it.", async ({ page }) => {
-        await page.pause();
         await page.evaluate(openSidebarAndScrollToBottom);
         let addExprButton = await page.waitForSelector("#add-expression");
         let unclicked = await addExprButton.getAttribute("class");

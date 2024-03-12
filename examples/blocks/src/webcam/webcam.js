@@ -69,11 +69,16 @@ window.addEventListener("DOMContentLoaded", async function () {
     const viewer = document.querySelector("perspective-viewer");
     viewer.load(table);
     await viewer.restore({ settings, ...layouts[0] });
-    const regular_table = document.querySelector("regular-table");
+    const regular_table = document
+        .querySelector("perspective-viewer-datagrid")
+        .shadowRoot.querySelector("regular-table");
+
     regular_table.scrollTop =
         regular_table.scrollHeight / 2 - regular_table.clientHeight / 2;
+
     regular_table.scrollLeft =
         regular_table.scrollWidth / 2 - regular_table.clientWidth / 2;
+
     for (const layout of layouts) {
         const option = document.createElement("option");
         option.value = layout.title;

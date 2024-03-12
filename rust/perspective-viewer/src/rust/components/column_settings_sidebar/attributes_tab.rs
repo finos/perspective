@@ -24,13 +24,8 @@ pub struct AttributesTabProps {
 #[function_component]
 pub fn AttributesTab(p: &AttributesTabProps) -> Html {
     html! {
-        <div
-            id="attributes-tab"
-        >
-            <div
-                class="tab-section"
-                id="attributes-expr"
-            >
+        <div id="attributes-tab">
+            <div class="tab-section" id="attributes-expr">
                 <ExpressionEditor ..p.expr_editor.clone() />
             </div>
             <div class="tab-section"><SaveSettings ..p.save_section.clone() /></div>

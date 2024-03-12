@@ -52,6 +52,10 @@ export default class Semver {
         return this;
     }
 
+    to_string() {
+        return `${this.major}.${this.minor}.${this.patch}`;
+    }
+
     gt(val: string | Semver) {
         let right = new Semver(val);
         return (

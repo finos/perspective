@@ -276,10 +276,7 @@ impl Component for ScrollPanel {
                     ondrop={&ctx.props().drop}
                     class={ctx.props().class.clone()}
                 >
-                    <div
-                        class="scroll-panel-container"
-                        style={window_style}
-                    >
+                    <div class="scroll-panel-container" style={window_style}>
                         { for windowed_items.iter().cloned().map(Html::from) }
                         <div
                             key="__scroll-panel-auto-width__"

@@ -102,7 +102,7 @@ export class PageView {
             }
             await this.settingsPanel.createNewExpression("expr", expr, true);
             await settingsPanel.activeColumns.activateColumn("expr");
-            col = settingsPanel.activeColumns.getColumnByName("expr");
+            col = await settingsPanel.activeColumns.getColumnByName("expr");
         }
         await expect(col.container).toBeVisible();
         return col;
@@ -130,5 +130,39 @@ export class PageView {
         return await this.container.evaluate((viewer) => {
             return viewer.shadowRoot?.activeElement;
         });
+    }
+
+    /**
+     * Adds an event listener to the viewer.
+     * Unlike page.
+     * @param eventName
+     * @param options
+     * @returns A future
+     */
+    async getEventListener(eventName: string, options?: { timeout?: number }) {
+        let key = `__${eventName}_FIRED__`;
+        await this.container.evaluate(
+            (target, { eventName, key }) => {
+                target.addEventListener(eventName, (event) => {
+                    window[key] = true;
+                    console.log(event);
+                });
+            },
+            { eventName, key }
+        );
+        return async () => {
+            return await this.page.evaluate(
+                async ({ options, key }) => {
+                    let i = 0;
+                    while (!window[key]) {
+                        await new Promise((x) => setTimeout(x, 10));
+                        let timeout = options?.timeout ?? 1000;
+                        if (i++ > timeout / 10) return false;
+                    }
+                    return true;
+                },
+                { options, key }
+            );
+        };
     }
 }

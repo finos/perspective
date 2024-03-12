@@ -10,40 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::fmt::Display;
-use std::marker::PhantomData;
-use std::str::FromStr;
-
-use derivative::Derivative;
-use yew::prelude::*;
-
-#[derive(Derivative)]
-#[derivative(Default(bound = ""))]
-pub struct RadioListItem<T> {
-    _typeref: PhantomData<T>,
-}
+use yew::{classes, function_component, html, Callback, Children, Html, MouseEvent, Properties};
 
 #[derive(Properties, PartialEq)]
-pub struct RadioListItemProps<T>
-where
-    T: Clone + Display + FromStr + PartialEq + 'static,
-{
+pub struct OptionalFieldProps {
+    pub label: String,
+    pub on_check: Callback<MouseEvent>,
+    pub checked: bool,
     pub children: Children,
-    pub value: T,
+
+    #[prop_or(String::from("section"))]
+    pub class: String,
+
+    #[prop_or_default]
+    pub disabled: bool,
 }
 
-impl<T> Component for RadioListItem<T>
-where
-    T: Clone + Display + FromStr + PartialEq + 'static,
-{
-    type Message = ();
-    type Properties = RadioListItemProps<T>;
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self::default()
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        ctx.props().children.iter().collect::<Html>()
+#[function_component(OptionalField)]
+pub fn optional_field(props: &OptionalFieldProps) -> Html {
+    html! {
+        <>
+            <label style="font-size: 9px">{ props.label.clone() }</label>
+            <div
+                class={classes!(props.class.clone(), props.checked.then_some("is-default-value"))}
+            >
+                { props.children.clone() }
+                if props.checked {
+                    <span
+                        class="reset-default-style"
+                        onclick={props.on_check.clone()}
+                        id={format!("{}-checkbox", props.label.replace(' ', "-"))}
+                    />
+                } else {
+                    <span
+                        class="reset-default-style-disabled"
+                        id={format!("{}-checkbox", props.label.replace(' ', "-"))}
+                    />
+                }
+            </div>
+        </>
     }
 }

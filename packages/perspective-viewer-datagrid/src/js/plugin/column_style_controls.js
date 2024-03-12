@@ -10,55 +10,38 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use super::super::radio_list::{RadioList, RadioListMsg};
-use super::super::radio_list_item::RadioListItem;
-use crate::utils::{await_animation_frame, WeakScope};
-use crate::*;
-
-use std::cell::RefCell;
-use std::rc::Rc;
-use wasm_bindgen_test::*;
-use yew::prelude::*;
-
-wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
-
-#[wasm_bindgen_test]
-pub async fn test_change_u32() {
-    let link: WeakScope<RadioList<String>> = WeakScope::default();
-    let result: Rc<RefCell<String>> = Rc::new(RefCell::new("false".to_owned()));
-    let on_change = {
-        clone!(result);
-        Callback::from(move |val| {
-            *result.borrow_mut() = val;
-        })
-    };
-
-    test_html! {
-        <RadioList<String>
-            disabled=false
-            selected="2"
-            on_change={ on_change }
-            weak_link={ link.clone() }>
-
-            <RadioListItem<String> value="1"><span>{ "One" }</span></RadioListItem<String>>
-            <RadioListItem<String> value="2"><span>{ "Two" }</span></RadioListItem<String>>
-            <RadioListItem<String> value="3"><span>{ "Three" }</span></RadioListItem<String>>
-
-        </RadioList<String>>
-    };
-
-    await_animation_frame().await.unwrap();
-    let radio_list = link.borrow().clone().unwrap();
-    radio_list.send_message(RadioListMsg::Change("2".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "2");
-    radio_list.send_message(RadioListMsg::Change("3".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "3");
-    radio_list.send_message(RadioListMsg::Change("1".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "1");
+/**
+ * @param {import("@finos/perspective").Type} type
+ * @param {string} _group
+ * @returns {import("@finos/perspective-viewer").PerspectiveColumnConfigValue}
+ */
+export default function column_style_opts(type, _group) {
+    if (type === "integer" || type === "float")
+        return {
+            datagrid_number_style: {
+                fg_gradient: 0,
+                pos_fg_color: this.model._pos_fg_color[0],
+                neg_fg_color: this.model._neg_fg_color[0],
+                number_fg_mode: "color",
+                bg_gradient: 0,
+                pos_bg_color: this.model._pos_bg_color[0],
+                neg_bg_color: this.model._neg_bg_color[0],
+                number_bg_mode: "disabled",
+            },
+            number_string_format: true,
+        };
+    else if (type === "date" || type === "datetime" || type === "string") {
+        let control =
+            type === "date" || type === "datetime"
+                ? "datagrid_datetime_style"
+                : `datagrid_string_style`;
+        return {
+            [control]: {
+                color: this.model._color[0],
+                bg_color: this.model._color[0],
+            },
+        };
+    } else {
+        return null;
+    }
 }

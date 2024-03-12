@@ -264,6 +264,7 @@ impl PerspectiveViewerElement {
             let ViewerConfigUpdate {
                 plugin,
                 plugin_config,
+                columns_config,
                 settings,
                 theme: theme_name,
                 title,
@@ -322,11 +323,14 @@ impl PerspectiveViewerElement {
 
                 let internal_task = async {
                     let plugin = renderer.get_active_plugin()?;
-                    if let Some(plugin_config) = &plugin_config {
-                        let js_config = JsValue::from_serde_ext(plugin_config)?;
-                        plugin.restore(&js_config);
-                    }
-
+                    let plugin_update = if let Some(x) = plugin_config {
+                        JsValue::from_serde_ext(&x).unwrap()
+                    } else {
+                        plugin.save()
+                    };
+                    presentation.update_columns_configs(columns_config);
+                    let columns_config = presentation.all_columns_configs();
+                    plugin.restore(&plugin_update, Some(&columns_config));
                     session.validate().await?.create_view().await
                 }
                 .await;
@@ -403,7 +407,8 @@ impl PerspectiveViewerElement {
     /// Reset the viewer's `ViewerConfig` to the default.
     ///
     /// # Arguments
-    /// - `all` Whether to clear `expressions` also.
+    /// - `all` If set, will clear expressions and column settings as well.
+    // TODO: We should replace the boolean value here with an options object.
     pub fn reset(&self, reset_expressions: Option<bool>) -> ApiFuture<()> {
         tracing::info!("Resetting config");
         let root = self.root.clone();

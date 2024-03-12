@@ -128,8 +128,6 @@ impl Component for EditableHeader {
                 self.value = maybe_value.clone();
                 ctx.props().on_change.emit((maybe_value, self.valid));
 
-                tracing::error!("EditableHeader: SetNewValue! {:?}", self);
-
                 true
             },
             EditableHeaderMsg::OnClick(()) => {
@@ -168,13 +166,8 @@ impl Component for EditableHeader {
         });
 
         html! {
-            <div
-                class={classes}
-                onclick={ctx.link().callback(|_| EditableHeaderMsg::OnClick(()))}
-            >
-                if let Some(icon) = ctx.props().icon_type {
-                    <TypeIcon ty={icon} />
-                }
+            <div class={classes} onclick={ctx.link().callback(|_| EditableHeaderMsg::OnClick(()))}>
+                if let Some(icon) = ctx.props().icon_type { <TypeIcon ty={icon} /> }
                 <input
                     ref={self.noderef.clone()}
                     type="search"

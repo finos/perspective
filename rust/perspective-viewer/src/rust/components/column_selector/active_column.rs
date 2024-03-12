@@ -79,7 +79,7 @@ impl ActiveColumnProps {
             .and_then(|x| self.session.metadata().get_column_table_type(x))
     }
 
-    fn get_view_type(&self) -> Option<Type> {
+    fn _get_view_type(&self) -> Option<Type> {
         self.get_name()
             .as_ref()
             .and_then(|x| self.session.metadata().get_column_view_type(x))
@@ -367,20 +367,11 @@ impl Component for ActiveColumn {
                     class.push("required");
                 };
 
-                // TODO: This doesn't scale well. Need a better attrs API.
-                // Thankfully this will be removed when we unify expression and table columns.
-                let show_edit_btn = match &*ctx.props().renderer.get_active_plugin().unwrap().name()
-                {
-                    "Datagrid" => col_type != Type::Bool,
-                    "X/Y Scatter" => {
-                        ctx.props()
-                            .get_view_type()
-                            .map(|ty| ty == Type::String)
-                            .unwrap_or_default()
-                            && label.as_deref() == Some("Symbol")
-                    },
-                    _ => false,
-                } || is_expression;
+                let can_render_styles = ctx
+                    .props()
+                    .can_render_column_styles(&name)
+                    .unwrap_or_default();
+                let show_edit_btn = is_expression || can_render_styles;
 
                 html! {
                     <div
@@ -391,10 +382,7 @@ impl Component for ActiveColumn {
                         {onmouseout}
                         ondragenter={ondragenter.clone()}
                     >
-                        <span
-                            {class}
-                            onmousedown={remove_column}
-                        />
+                        <span {class} onmousedown={remove_column} />
                         <div
                             class={classes}
                             ref={&self.add_expression_ref}
@@ -402,12 +390,8 @@ impl Component for ActiveColumn {
                             {ondragstart}
                             {ondragend}
                         >
-                            <div
-                                class="column-selector-column-border"
-                            >
-                                <TypeIcon
-                                    ty={col_type}
-                                />
+                            <div class="column-selector-column-border">
+                                <TypeIcon ty={col_type} />
                                 if ctx.props().is_aggregated {
                                     <AggregateSelector
                                         column={name.clone()}
@@ -440,9 +424,7 @@ impl Component for ActiveColumn {
                 // `change()` method on this component checks for this).
 
                 html! {
-                    <div
-                        class="column-selector-column"
-                    >
+                    <div class="column-selector-column">
                         <span class="is_column_active inactive" />
                         <div class={classes} />
                     </div>

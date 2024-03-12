@@ -72,9 +72,7 @@ pub fn row_selector(props: &RowSelectorProps) -> Html {
             .collect();
 
         html! {
-            <div
-                class={err_class}
-            >
+            <div class={err_class}>
                 <EmptyRow
                     dropdown={props.dropdown.clone()}
                     {exclude}
@@ -89,16 +87,9 @@ pub fn row_selector(props: &RowSelectorProps) -> Html {
         }
     } else {
         html! {
-            <div
-                class="row-selector column-selector-column"
-            >
-                <div
-                    class="column-selector-column-border"
-                >
-                    <span
-                        class="column_name none"
-                        {ondblclick}
-                    >
+            <div class="row-selector column-selector-column">
+                <div class="column-selector-column-border">
+                    <span class="column_name none" {ondblclick}>
                         { props.selected_row.clone().unwrap() }
                     </span>
                 </div>

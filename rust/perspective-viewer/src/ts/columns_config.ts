@@ -10,58 +10,62 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::collections::HashMap;
-use std::fmt::Debug;
+type CustomDatetimeFormat =
+    | "long"
+    | "short"
+    | "narrow"
+    | "numeric"
+    | "2-digit"
+    | "disabled";
 
-use serde::{Deserialize, Serialize};
+type SimpleDatetimeFormat = "full" | "long" | "medium" | "short" | "disabled";
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct Symbol {
-    /// the name of the symbol
-    pub name: String,
-    /// unescaped HTML string
-    pub html: String,
-}
-impl std::fmt::Display for Symbol {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.name)
-    }
-}
+export type PerspectiveColumnConfig = {
+    [column_name: string]: PerspectiveColumnConfigValue;
+};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct SymbolAttributes {
-    /// a vec of SVGs to render
-    pub symbols: Vec<Symbol>,
-}
+export type DateFormat = {
+    timeZone?: string;
+} & (
+    | {
+          format: "custom";
+          fractionalSecondDigits?: number;
+          second?: CustomDatetimeFormat;
+          minute?: CustomDatetimeFormat;
+          hour?: CustomDatetimeFormat;
+          day?: CustomDatetimeFormat;
+          weekday?: CustomDatetimeFormat;
+          month?: CustomDatetimeFormat;
+          year?: CustomDatetimeFormat;
+          hour12?: boolean;
+      }
+    | {
+          dateStyle?: SimpleDatetimeFormat;
+          timeStyle?: SimpleDatetimeFormat;
+      }
+);
 
-/// The default style configurations per type, as retrived by
-/// plugin.plugin_attributes
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct DefaultStyleAttributes {
-    pub string: serde_json::Value,
-    pub datetime: serde_json::Value,
-    pub date: serde_json::Value,
-    pub integer: serde_json::Value,
-    pub float: serde_json::Value,
-    pub bool: serde_json::Value,
-}
+export type NumberFormat = {
+    maximumFractionDigits?: number;
+    minimumFractionDigits?: number;
+};
 
-/// The data needed to populate a column's settings. These are typically default
-/// values, a listing of possible values, or other basic configuration settings
-/// for the plugin. This is the result of calling plugin.plugin_attributes
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct PluginAttributes {
-    pub symbol: Option<SymbolAttributes>,
-    pub style: Option<DefaultStyleAttributes>,
-    // color: ColorAttributes,
-    // axis: AxisAttributes,
-    //...
-}
-
-/// The configuration which is created as the result of calling plugin.save
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct PluginConfig {
-    /// Refers to the currently active columns. Maps name to configuration.
-    #[serde(default)]
-    pub columns: HashMap<String, serde_json::Value>,
-}
+export type PerspectiveColumnConfigValue = {
+    number_fg_mode?: "color" | "bar" | "disabled";
+    number_bg_mode?: "color" | "gradient" | "pulse" | "disabled";
+    fixed?: number;
+    pos_fg_color?: string;
+    neg_fg_color?: string;
+    pos_bg_color?: string;
+    neg_bg_color?: string;
+    fg_gradient?: number;
+    bg_gradient?: number;
+    color?: string;
+    datetime_color_mode?: "foreground" | "background";
+    date_format?: DateFormat;
+    string_color_mode?: "foreground" | "background" | "series";
+    format?: "link" | "image" | "bold" | "italics" | "custom";
+    symbols?: Record<string, string>;
+    // TODO: tsify this
+    number_format?: NumberFormat;
+};

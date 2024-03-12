@@ -12,16 +12,14 @@
 
 use yew::prelude::*;
 
-use crate::components::containers::select::*;
+use crate::components::form::select_field::SelectEnumField;
 use crate::components::modal::{ModalLink, SetModalLink};
 use crate::config::*;
 use crate::utils::WeakScope;
 
 pub enum DatetimeStyleSimpleMsg {
-    DateEnabled,
-    TimeEnabled,
-    DateStyleChanged(SimpleDatetimeFormat),
-    TimeStyleChanged(SimpleDatetimeFormat),
+    DateStyleChanged(Option<SimpleDatetimeFormat>),
+    TimeStyleChanged(Option<SimpleDatetimeFormat>),
 }
 
 #[derive(Properties)]
@@ -78,23 +76,13 @@ impl Component for DatetimeStyleSimple {
     // TODO could be more conservative here with re-rendering
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            DatetimeStyleSimpleMsg::DateEnabled => {
-                self.config.date_style = SimpleDatetimeFormat::Short;
-                self.dispatch_config(ctx);
-                true
-            },
-            DatetimeStyleSimpleMsg::TimeEnabled => {
-                self.config.time_style = SimpleDatetimeFormat::Medium;
-                self.dispatch_config(ctx);
-                true
-            },
             DatetimeStyleSimpleMsg::DateStyleChanged(format) => {
-                self.config.date_style = format;
+                self.config.date_style = format.unwrap_or_default();
                 self.dispatch_config(ctx);
                 true
             },
             DatetimeStyleSimpleMsg::TimeStyleChanged(format) => {
-                self.config.time_style = format;
+                self.config.time_style = format.unwrap_or_default();
                 self.dispatch_config(ctx);
                 true
             },
@@ -113,48 +101,20 @@ impl Component for DatetimeStyleSimple {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let on_date_reset = ctx.link().callback(|_| DatetimeStyleSimpleMsg::DateEnabled);
-        let on_time_reset = ctx.link().callback(|_| DatetimeStyleSimpleMsg::TimeEnabled);
-
         html! {
             <>
-                <div class="column-style-label"><label class="indent">{ "Date Style" }</label></div>
-                <div
-                    class="section"
-                >
-                    <input
-                        type="checkbox"
-                        onchange={on_date_reset}
-                        checked={!self.config.date_style.is_short()}
-                    />
-                    <Select<SimpleDatetimeFormat>
-                        wrapper_class="indent"
-                        selected={self.config.date_style}
-                        on_select={ctx.link().callback(DatetimeStyleSimpleMsg::DateStyleChanged)}
-                        values={SimpleDatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>()}
-                    />
-                </div>
+                <SelectEnumField<SimpleDatetimeFormat>
+                    label="Date Style"
+                    on_change={ctx.link().callback(DatetimeStyleSimpleMsg::DateStyleChanged)}
+                    current_value={self.config.date_style}
+                />
                 if ctx.props().enable_time_config {
-                    <div
-                        class="column-style-label"
-                    >
-                        <label class="indent">{ "Time Style" }</label>
-                    </div>
-                    <div
-                        class="section"
-                    >
-                        <input
-                            type="checkbox"
-                            onchange={on_time_reset}
-                            checked={!self.config.time_style.is_medium()}
-                        />
-                        <Select<SimpleDatetimeFormat>
-                            wrapper_class="indent"
-                            selected={self.config.time_style}
-                            on_select={ctx.link().callback(DatetimeStyleSimpleMsg::TimeStyleChanged)}
-                            values={SimpleDatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>()}
-                        />
-                    </div>
+                    <SelectEnumField<SimpleDatetimeFormat>
+                        label="Time Style"
+                        on_change={ctx.link().callback(DatetimeStyleSimpleMsg::TimeStyleChanged)}
+                        current_value={self.config.time_style}
+                        default_value={SimpleDatetimeFormat::Medium}
+                    />
                 }
             </>
         }

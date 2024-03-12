@@ -13,7 +13,6 @@
 use std::rc::Rc;
 
 use futures::channel::oneshot::*;
-use itertools::Itertools;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
@@ -36,61 +35,55 @@ use crate::session::*;
 use crate::utils::*;
 use crate::*;
 
-/// A ColumnLocator is a combination of the column's type and its name.
-/// It's used to locate columns for the column_settings_sidebar.
+/// Locates a view column.
+/// Table columns are those defined on the table, but their types will reflect
+/// the view type, not the table type.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ColumnLocator {
-    Plain(String),
-    Expr(Option<String>),
+    Table(String),
+    Expression(String),
+    NewExpression,
 }
 impl ColumnLocator {
+    /// Pulls the column's name from the locator.
+    /// If the column is a new expression which has yet to be saved, the
+    /// function will return None.
     pub fn name(&self) -> Option<&String> {
         match self {
-            ColumnLocator::Plain(s) => Some(s),
-            ColumnLocator::Expr(s) => s.as_ref(),
+            Self::Table(s) | Self::Expression(s) => Some(s),
+            Self::NewExpression => None,
         }
     }
 
     pub fn name_or_default(&self, session: &Session) -> String {
         match self {
-            ColumnLocator::Plain(s) | ColumnLocator::Expr(Some(s)) => s.clone(),
-            ColumnLocator::Expr(None) => session.metadata().make_new_column_name(None),
+            Self::Table(s) | Self::Expression(s) => s.clone(),
+            Self::NewExpression => session.metadata().make_new_column_name(None),
         }
     }
 
     pub fn is_active(&self, session: &Session) -> bool {
-        match self {
-            ColumnLocator::Plain(name) | ColumnLocator::Expr(Some(name)) => {
-                session.is_column_active(name)
-            },
-            ColumnLocator::Expr(None) => false,
-        }
-    }
-
-    /// Determines if the column is one of view's query parameters, i.e.
-    /// GroupBy, SplitBy, OrderBy, or Where
-    pub fn is_in_query(&self, session: &Session) -> bool {
-        if matches!(self, Self::Expr(None)) {
-            return false;
-        }
-        let name = self.name().unwrap();
-        let view_config = session.get_view_config();
-        view_config.group_by.contains(name)
-            || view_config.split_by.contains(name)
-            || view_config.filter.iter().any(|filter| &filter.0 == name)
-            || view_config.sort.iter().any(|sort| &sort.0 == name)
+        self.name()
+            .map(|name| session.is_column_active(name))
+            .unwrap_or_default()
     }
 
     #[inline(always)]
     pub fn is_saved_expr(&self) -> bool {
-        matches!(self, ColumnLocator::Expr(Some(_)))
+        matches!(self, ColumnLocator::Expression(_))
     }
 
-    /// Returns true if the column is an expression.
-    /// Use `is_saved_expr` if you want to exclude new expressions.
     #[inline(always)]
     pub fn is_expr(&self) -> bool {
-        matches!(self, ColumnLocator::Expr(_))
+        matches!(
+            self,
+            ColumnLocator::Expression(_) | ColumnLocator::NewExpression
+        )
+    }
+
+    #[inline(always)]
+    pub fn is_new_expr(&self) -> bool {
+        matches!(self, ColumnLocator::NewExpression)
     }
 
     pub fn view_type(&self, session: &Session) -> Option<Type> {
@@ -112,7 +105,7 @@ pub struct PerspectiveViewerProps {
     pub weak_link: WeakScope<PerspectiveViewer>,
 }
 
-derive_model!(Renderer, Session for PerspectiveViewerProps);
+derive_model!(Renderer, Session, Presentation for PerspectiveViewerProps);
 
 impl PartialEq for PerspectiveViewerProps {
     fn eq(&self, _rhs: &Self) -> bool {
@@ -173,38 +166,25 @@ impl Component for PerspectiveViewer {
             clone!(
                 ctx.props().presentation,
                 ctx.props().session,
-                ctx.props().renderer
+                plugin_query = ctx.props().get_plugin_column_styles_query()
             );
             let callback = ctx.link().batch_callback(move |(update, render_limits)| {
                 if update {
                     vec![PerspectiveViewerMsg::RenderLimits(Some(render_limits))]
                 } else {
-                    let mut locator = presentation.get_open_column_settings().locator;
-                    if let Some(name) = locator.as_ref().and_then(|l| l.name()) {
-                        let view_config = session.get_view_config();
-                        let maybe_pos = view_config.columns.iter().find_position(|col| {
-                            col.as_ref().map(|c| name == c).unwrap_or_default()
-                        });
-                        let is_expr = session.metadata().is_column_expression(name);
-                        if maybe_pos.is_none() && !is_expr {
-                            locator = None;
-                        } else if let Some((idx, _)) = maybe_pos {
-                            // Close the symbol editor if the type doesn't match.
-                            // NOTE: to be replaced with plugin.can_render(ty, col_name)
-                            let plugin = renderer.get_active_plugin().unwrap();
-                            let config_names: Option<Vec<String>> = plugin
-                                .config_column_names()
-                                .and_then(|x| x.into_serde_ext().ok())
-                                .unwrap();
-                            if let Some(group) = config_names.as_ref().and_then(|v| v.get(idx))
-                                && &**group == "Symbol" 
-                                && plugin.name() == "X/Y Scatter"
-                                && session.metadata().get_column_view_type(name) != Some(Type::String)
-                            {
-                                locator = None;
-                            }
-                        }
-                    }
+                    let locator =
+                        presentation
+                            .get_open_column_settings()
+                            .locator
+                            .filter(|locator| match locator {
+                                ColumnLocator::Table(ref name) => {
+                                    locator.is_active(&session)
+                                        && plugin_query
+                                            .can_render_column_styles(name)
+                                            .unwrap_or_default()
+                                },
+                                _ => true,
+                            });
 
                     vec![
                         PerspectiveViewerMsg::RenderLimits(Some(render_limits)),
@@ -252,7 +232,13 @@ impl Component for PerspectiveViewer {
 
                 ApiFuture::spawn(async move {
                     session.reset(all);
-                    renderer.reset().await;
+                    let columns_config = if all {
+                        presentation.reset_columns_configs();
+                        None
+                    } else {
+                        Some(presentation.all_columns_configs())
+                    };
+                    renderer.reset(columns_config.as_ref()).await;
                     presentation.reset_available_themes(None).await;
                     let result = renderer.draw(session.validate().await?.create_view()).await;
                     if let Some(sender) = sender {
@@ -343,10 +329,7 @@ impl Component for PerspectiveViewer {
 
                     locator
                         .clone()
-                        .map(|c| match c {
-                            ColumnLocator::Plain(s) => (true, Some(s)),
-                            ColumnLocator::Expr(maybe_s) => (true, maybe_s),
-                        })
+                        .map(|c| (true, c.name().cloned()))
                         .unwrap_or_default()
                 };
 
@@ -444,9 +427,7 @@ impl Component for PerspectiveViewer {
         html! {
             <>
                 <StyleProvider>
-                    <LocalStyle
-                        href={css!("viewer")}
-                    />
+                    <LocalStyle href={css!("viewer")} />
                     if self.settings_open {
                         <SplitPanel
                             id="app_panel"
@@ -482,9 +463,7 @@ impl Component for PerspectiveViewer {
                                     selected_column={self.selected_column.clone()}
                                 />
                             </div>
-                            <div
-                                id="main_column"
-                            >
+                            <div id="main_column">
                                 <StatusBar
                                     id="status_bar"
                                     session={&ctx.props().session}
@@ -492,15 +471,13 @@ impl Component for PerspectiveViewer {
                                     presentation={&ctx.props().presentation}
                                     {on_reset}
                                 />
-                                <div
-                                    id="main_panel_container"
-                                >
+                                <div id="main_panel_container">
                                     <RenderWarning
                                         dimensions={self.dimensions}
                                         session={&ctx.props().session}
                                         renderer={&ctx.props().renderer}
                                     />
-                                    <slot/>
+                                    <slot />
                                 </div>
                                 if let Some(selected_column) = self.selected_column.clone() {
                                     <SplitPanel

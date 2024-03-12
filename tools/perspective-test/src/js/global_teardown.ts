@@ -13,6 +13,7 @@
 import tar from "tar";
 import fs from "fs";
 import path from "path";
+import glob from "glob";
 
 const RESULTS_PATH = path.join(__dirname, "../../results.tar.gz");
 
@@ -39,7 +40,10 @@ export default async function run() {
                     return !path.endsWith(".DS_Store");
                 },
             },
-            [path.join("tools/perspective-test/dist/snapshots")],
+            [
+                ...glob.sync("tools/perspective-test/dist/snapshots/**/*.txt"),
+                ...glob.sync("tools/perspective-test/dist/snapshots/**/*.html"),
+            ],
             x
         )
     );

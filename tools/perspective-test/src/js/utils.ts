@@ -10,12 +10,29 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import { PerspectiveViewerConfig } from "@finos/perspective-viewer";
 import { expect, Locator, Page } from "@playwright/test";
 import * as fs from "node:fs";
 
 export const API_VERSION = JSON.parse(
     fs.readFileSync(__dirname + "/../../package.json").toString()
 )["version"];
+export const DEFAULT_CONFIG: PerspectiveViewerConfig = {
+    aggregates: {},
+    columns_config: {},
+    columns: [],
+    expressions: {},
+    filter: [],
+    group_by: [],
+    plugin: "",
+    plugin_config: {},
+    settings: false,
+    sort: [],
+    split_by: [],
+    version: API_VERSION,
+    title: null,
+    theme: "Pro Light",
+};
 
 /**
  * Clean a `<svg>` for serialization/comparison.
@@ -312,33 +329,4 @@ export async function compareNodes(left: Locator, right: Locator, page: Page) {
             rightEl,
         }
     );
-}
-
-/**
- * Adds an event listener and returns a handle which, when awaited, will check if the event has been triggered.
- * @param page
- * @param event
- */
-export async function getEventListener(page: Page, eventName: string) {
-    let hasListener = await page.evaluate((eventName) => {
-        let viewer = document.querySelector("perspective-viewer");
-        if (!viewer) {
-            return false;
-        } else {
-            viewer.addEventListener(eventName, async (event) => {
-                window.__PSP_TEST_LAST_EVENT__ = eventName;
-            });
-            return true;
-        }
-    }, eventName);
-    expect(hasListener).toBe(true);
-
-    // TODO: This should wait for the event to fire instead of just checking.
-    // That would require something like an abort handler and a timeout,
-    // or to race two promises, or something like that. I wasn't able to figure it out but this still works.
-    return async () =>
-        await page.evaluate(
-            (eventName) => window.__PSP_TEST_LAST_EVENT__ === eventName,
-            eventName
-        );
 }

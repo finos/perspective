@@ -37,6 +37,7 @@ pub mod type_icon;
 pub mod viewer;
 
 pub mod column_settings_sidebar;
+pub mod style_controls;
 // pub mod empty_row;
 pub mod editable_header;
 pub mod empty_row;

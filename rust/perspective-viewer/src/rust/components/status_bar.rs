@@ -205,10 +205,7 @@ impl Component for StatusBar {
 
                 html! {
                     if values.len() > 1 {
-                        <span
-                            id="theme"
-                            class="button"
-                        >
+                        <span id="theme" class="button">
                             <Select<String>
                                 id="theme_selector"
                                 {values}
@@ -241,13 +238,8 @@ impl Component for StatusBar {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("status-bar")}
-                />
-                <div
-                    id={ctx.props().id.clone()}
-                    class={is_updating_class_name}
-                >
+                <LocalStyle href={css!("status-bar")} />
+                <div id={ctx.props().id.clone()} class={is_updating_class_name}>
                     <div class="section"><span id="status" class={class_name} /></div>
                     <label
                         class="input-sizer"
@@ -261,18 +253,11 @@ impl Component for StatusBar {
                         />
                     </label>
                     <div id="rows" class="section"><StatusBarRowsCounter {stats} /></div>
-                    <div
-                        id="menu-bar"
-                        class="section"
-                    >
+                    <div id="menu-bar" class="section">
                         { theme_button }
                         <div id="plugin-settings"><slot name="plugin-settings" /></div>
-                        <span
-                            id="reset"
-                            class="button"
-                            onmousedown={reset}
-                        >
-                            <span >{ "Reset" }</span>
+                        <span id="reset" class="button" onmousedown={reset}>
+                            <span>{ "Reset" }</span>
                         </span>
                         <span
                             ref={&self.export_ref}
@@ -280,15 +265,10 @@ impl Component for StatusBar {
                             class="button"
                             onmousedown={export}
                         >
-                            <span >{ "Export" }</span>
+                            <span>{ "Export" }</span>
                         </span>
-                        <span
-                            ref={&self.copy_ref}
-                            id="copy"
-                            class="button"
-                            onmousedown={copy}
-                        >
-                            <span >{ "Copy" }</span>
+                        <span ref={&self.copy_ref} id="copy" class="button" onmousedown={copy}>
+                            <span>{ "Copy" }</span>
                         </span>
                     </div>
                 </div>

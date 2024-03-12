@@ -93,12 +93,8 @@ impl Component for AggregateSelector {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("aggregate-selector")}
-                />
-                <div
-                    class="aggregate-selector-wrapper"
-                >
+                <LocalStyle href={css!("aggregate-selector")} />
+                <div class="aggregate-selector-wrapper">
                     <Select<Aggregate>
                         wrapper_class="aggregate-selector"
                         {values}

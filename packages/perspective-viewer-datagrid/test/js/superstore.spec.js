@@ -59,7 +59,7 @@ test.describe("Datagrid with superstore data set", () => {
 
         compareContentsToSnapshot(
             await getDatagridContents(page),
-            "row-headers-are-printed-correctly"
+            "row-headers-are-printed-correctly.txt"
         );
     });
 
@@ -85,7 +85,7 @@ test.describe("Datagrid with superstore data set", () => {
 
         compareContentsToSnapshot(
             await getDatagridContents(page),
-            "column-headers-are-printed-correctly-split-by-a-date-column"
+            "column-headers-are-printed-correctly-split-by-a-date-column.txt"
         );
     });
 });

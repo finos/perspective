@@ -28,8 +28,8 @@ perspective-string-column-style {
     color: #161616;
     background-color: transparent;
     --icon--color: #161616;
-    --inactive--color: #ABABAB;
-    --inactive--border-color: #DADADA;
+    --inactive--color: #ababab;
+    --inactive--border-color: #dadada;
 
     --root--background: #ffffff;
     --active--color: #2670a9;
@@ -39,10 +39,10 @@ perspective-string-column-style {
     --select--background-color: none;
     --column-drop-container--background: none;
     --warning--background: #042121;
-    --warning--color: #FDFFFD;
+    --warning--color: #fdfffd;
 
     // TODO deprecate me
-    --overflow-hint-icon--color: #FDFFFD;
+    --overflow-hint-icon--color: #fdfffd;
 }
 
 @mixin perspective-viewer-base--icons {
@@ -51,14 +51,14 @@ perspective-string-column-style {
     --column-type-string--mask-image: url("../svg/string-type.svg");
     --column-type-date--mask-image: url("../svg/date-type.svg");
     --column-type-boolean--mask-image: url("../svg/boolean-type.svg");
-    --column-type-datetime--mask-image:  var(--column-type-date--mask-image);
+    --column-type-datetime--mask-image: var(--column-type-date--mask-image);
     --column-drag-handle--mask-image: url("../svg/drag-handle.svg");
     --column-radio-on--mask-image: url("../svg/radio-on.svg");
-    --column-radio-hover--mask-image:  url("../svg/radio-hover.svg");
-    --column-radio-off--mask-image:  url("../svg/radio-off.svg");
+    --column-radio-hover--mask-image: url("../svg/radio-hover.svg");
+    --column-radio-off--mask-image: url("../svg/radio-off.svg");
     --column-checkbox-on--mask-image: url("../svg/checkbox-on.svg");
-    --column-checkbox-hover--mask-image:  url("../svg/checkbox-hover.svg");
-    --column-checkbox-off--mask-image:  url("../svg/checkbox-off.svg");
+    --column-checkbox-hover--mask-image: url("../svg/checkbox-hover.svg");
+    --column-checkbox-off--mask-image: url("../svg/checkbox-off.svg");
     --column-settings-icon--mask-image: url("../svg/column-settings-icon.svg");
     --sort-asc-icon--mask-image: url("../svg/sort-asc-icon.svg");
     --sort-desc-icon--mask-image: url("../svg/sort-desc-icon.svg");
@@ -70,6 +70,7 @@ perspective-string-column-style {
     --sort-abs-col-desc-icon--mask-image: url("../svg/sort-abs-col-desc-icon.svg");
     --sort-none-icon--mask-image: url("../svg/sort-none-icon.svg");
     --add-expression-icon--mask-image: url("../svg/expression.svg");
+    --close-icon--mask-image: url("../svg/close-icon.svg");
 }
 
 @mixin perspective-viewer-base--intl {
@@ -78,8 +79,8 @@ perspective-string-column-style {
     --split_by--content: "Split By";
 
     // Icons
-    --inactive-column-selector--content:  url("../svg/checkbox-unchecked-icon.svg");
-    --active-column-selector--content:  url("../svg/checkbox-checked-icon.svg");
+    --inactive-column-selector--content: url("../svg/checkbox-unchecked-icon.svg");
+    --active-column-selector--content: url("../svg/checkbox-checked-icon.svg");
     --overflow-hint-icon--content: "!";
     --reset-button-icon--content: "refresh";
     --save-button-icon--content: "save";
@@ -93,9 +94,8 @@ perspective-string-column-style {
     --column-style-close-button--content: ">\00a0 style";
     --tree-label-collapse--content: "-";
     --tree-label-expand--content: "+";
-    --toolbar-scroll-lock--content:  url("../svg/free-scroll-icon.svg");
-    --toolbar-scroll-lock-active--content:  url("../svg/align-scroll-icon.svg");
+    --toolbar-scroll-lock--content: url("../svg/free-scroll-icon.svg");
+    --toolbar-scroll-lock-active--content: url("../svg/align-scroll-icon.svg");
     --toolbar-edit-mode--content: url("../svg/read-only-icon.svg");
-    --toolbar-edit-mode-active--content:  url("../svg/editable-icon.svg");
+    --toolbar-edit-mode-active--content: url("../svg/editable-icon.svg");
 }
-

@@ -24,6 +24,10 @@ const fn time_style_default() -> SimpleDatetimeFormat {
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SimpleDatetimeStyleConfig {
+    #[serde(default)]
+    #[serde(rename = "timeZone", skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
+
     #[serde(
         default = "date_style_default",
         rename = "dateStyle",
@@ -42,6 +46,7 @@ pub struct SimpleDatetimeStyleConfig {
 impl Default for SimpleDatetimeStyleConfig {
     fn default() -> Self {
         Self {
+            time_zone: None,
             date_style: SimpleDatetimeFormat::Short,
             time_style: SimpleDatetimeFormat::Medium,
         }
