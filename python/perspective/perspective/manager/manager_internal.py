@@ -167,7 +167,7 @@ class _PerspectiveManagerInternal(object):
             # Log errors and return them to the client
             error_string = str(error)
             error_message = self._make_error_message(msg["id"], error_string)
-            logging.error("[PerspectiveManager._process] %s", error_string)
+            logging.exception("[PerspectiveManager._process] %s", error_string)
             post_callback(self._message_to_json(msg["id"], error_message))
 
     def _process_method_call(self, msg, post_callback, client_id):
@@ -176,6 +176,9 @@ class _PerspectiveManagerInternal(object):
         """
         if msg["cmd"] == "table_method":
             table_or_view = self._tables.get(msg["name"], None)
+            if table_or_view is None:
+                error_message = self._make_error_message(msg["id"], f'Unknown table {msg["name"]}')
+                post_callback(self._message_to_json(msg["id"], error_message))
         else:
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
@@ -219,24 +222,28 @@ class _PerspectiveManagerInternal(object):
                         # over the wire API.
                         raise PerspectiveError("table.delete() cannot be called on a remote table, as the remote has full ownership.")
 
+                table_or_view_inst = getattr(table_or_view, msg["method"], None)
+                if table_or_view_inst is None:
+                    raise PerspectiveError(f'Table or view is undefined, cannot get attribute {msg["method"]}. Ensure that perspective client/server have compatible versions')
+
                 # Dispatch the method using the expected argument form
                 if msg["method"].startswith("to_"):
                     # to_format takes dictionary of options
-                    result = getattr(table_or_view, msg["method"])(**arguments)
+                    result = table_or_view_inst(**arguments)
                 elif msg["method"] in ("update", "remove"):
                     # Apply first arg as positional, then options dict as kwargs
                     data = arguments[0]
                     options = {}
                     if len(arguments) > 1 and isinstance(arguments[1], dict):
                         options = arguments[1]
-                    result = getattr(table_or_view, msg["method"])(data, **options)
+                    result = table_or_view_inst(data, **options)
                 elif msg["cmd"] == "table_method" and msg["method"] == "validate_expressions":
                     # validate_expressions on the table takes `as_string` in
                     # wargs,
-                    result = getattr(table_or_view, msg["method"])(*msg.get("args", []), **arguments)
+                    result = table_or_view_inst(*msg.get("args", []), **arguments)
                 else:
                     # otherwise parse arguments as list
-                    result = getattr(table_or_view, msg["method"])(*arguments)
+                    result = table_or_view_inst(*arguments)
 
                 # result has been returned from Perspective, now deliver
                 # it back to the user.
@@ -253,7 +260,7 @@ class _PerspectiveManagerInternal(object):
         except Exception as error:
             error_string = str(error)
             message = self._make_error_message(msg["id"], error_string)
-            logging.error("[PerspectiveManager._process_method_call] %s", error_string)
+            logging.exception("[PerspectiveManager._process_method_call] %s", error_string)
             post_callback(self._message_to_json(msg["id"], message))
 
     def _process_subscribe(self, msg, table_or_view, post_callback, client_id):
