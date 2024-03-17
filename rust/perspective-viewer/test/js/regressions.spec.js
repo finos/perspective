@@ -88,7 +88,7 @@ test.describe("Regression tests", () => {
             });
 
             const filter = viewer.shadowRoot.querySelector(
-                ".pivot-column input[type=text]"
+                ".pivot-column input[type=search]"
             );
             filter.value = "C";
             const event = new Event("input", {

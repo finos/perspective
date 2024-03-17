@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use wasm_bindgen::JsCast;
@@ -99,40 +98,12 @@ fn autocomplete(
     }
 }
 
-/// Set "open" state, initial text area content and caret position.
-fn set_initial_state(
-    textarearef: &NodeRef,
-    contentref: &NodeRef,
-    connect_state: &Rc<RefCell<bool>>,
-    expr: &Rc<String>,
-) -> ApiResult<()> {
-    let elem = textarearef
-        .cast::<web_sys::HtmlTextAreaElement>()
-        .ok_or("Unable to get textarea!")?;
-    let is_connected = elem.is_connected();
-    let was_connected = connect_state.replace(is_connected);
-    if elem.value() != **expr {
-        elem.set_value(&format!("{}", expr));
-    }
-
-    if is_connected && !was_connected {
-        elem.set_caret_position(expr.len())?;
-        let content = contentref
-            .cast::<HtmlElement>()
-            .ok_or("Unable to get content!")?;
-        content.set_scroll_top(elem.scroll_top());
-        content.set_scroll_left(elem.scroll_left());
-    }
-    Ok(())
-}
-
 /// A syntax-highlighted text editor component.
 #[function_component(CodeEditor)]
 pub fn code_editor(props: &CodeEditorProps) -> Html {
-    let caret_position = use_state_eq(|| props.expr.len() as u32);
+    let caret_position = use_state_eq(|| 0_u32);
     let scroll_offset = use_state_eq(|| (0, 0));
-    let is_connected = use_mut_ref(|| false);
-    let textarea_ref = use_node_ref().tee::<3>();
+    let textarea_ref = use_node_ref().tee::<4>();
     let content_ref = use_node_ref().tee::<3>();
     let lineno_ref = use_node_ref().tee::<2>();
     let filter_dropdown = use_memo((), |_| FunctionDropDownElement::default());
@@ -152,16 +123,23 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         on_scroll(&deps.0, &deps.1)
     });
 
-    use_effect({
-        clone!(props.expr);
-        move || {
-            ApiFuture::spawn(async move {
-                request_animation_frame().await;
-                // This can fail to get noderefs when switching between a new expression and an
-                // active column. Ignore it for now.
-                let _ = set_initial_state(&textarea_ref.0, &content_ref.2, &is_connected, &expr);
-                Ok(())
-            })
+    use_effect_with((props.expr.clone(), textarea_ref.0), {
+        move |(expr, textarea_ref)| {
+            let elem = textarea_ref.cast::<web_sys::HtmlTextAreaElement>().unwrap();
+            elem.focus().unwrap();
+            if **expr != elem.value() {
+                elem.set_value(&format!("{}", expr));
+                elem.set_scroll_top(0);
+                elem.set_scroll_left(0);
+                elem.set_caret_position(0).unwrap();
+            }
+        }
+    });
+
+    use_effect_with((props.error.clone(), textarea_ref.1), {
+        move |(_, textarea_ref)| {
+            let elem = textarea_ref.cast::<web_sys::HtmlTextAreaElement>().unwrap();
+            elem.focus().unwrap();
         }
     });
 
@@ -187,7 +165,7 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
                 <textarea
                     {disabled}
                     id="textarea_editable"
-                    ref={textarea_ref.1}
+                    ref={textarea_ref.3}
                     spellcheck="false"
                     {oninput}
                     {onscroll}

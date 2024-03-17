@@ -108,6 +108,11 @@ pub struct ColumnSettingsSidebar {
     column_name: String,
     maybe_ty: Option<Type>,
     tabs: Vec<ColumnSettingsTab>,
+
+    on_input: Callback<Rc<String>>,
+    on_save: Callback<()>,
+    on_validate: Callback<bool>,
+
     #[derivative(Debug = "ignore")]
     session_sub: Option<Subscription>,
 }
@@ -155,6 +160,9 @@ impl ColumnSettingsSidebar {
             tabs
         };
 
+        let on_input = ctx.link().callback(ColumnSettingsMsg::SetExprValue);
+        let on_save = ctx.link().callback(ColumnSettingsMsg::OnSaveAttributes);
+        let on_validate = ctx.link().callback(ColumnSettingsMsg::SetExprValid);
         *self = Self {
             column_name,
             expr_value: initial_expr_value.clone(),
@@ -164,6 +172,9 @@ impl ColumnSettingsSidebar {
             maybe_ty,
             tabs,
             header_valid: true,
+            on_input,
+            on_save,
+            on_validate,
             session_sub: self.session_sub.take(),
             ..*self
         }
@@ -311,9 +322,9 @@ impl Component for ColumnSettingsSidebar {
 
         let expr_editor = ExpressionEditorProps {
             session: ctx.props().session.clone(),
-            on_input: ctx.link().callback(ColumnSettingsMsg::SetExprValue),
-            on_save: ctx.link().callback(ColumnSettingsMsg::OnSaveAttributes),
-            on_validate: ctx.link().callback(ColumnSettingsMsg::SetExprValid),
+            on_input: self.on_input.clone(),
+            on_save: self.on_save.clone(),
+            on_validate: self.on_validate.clone(),
             alias: ctx.props().selected_column.name().cloned(),
             disabled: !ctx.props().selected_column.is_expr(),
             reset_count: self.reset_count,

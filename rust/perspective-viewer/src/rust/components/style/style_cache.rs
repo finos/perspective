@@ -111,10 +111,11 @@ impl StyleCacheData {
     fn new(is_shadow: bool) -> Self {
         let styles = DOM_STYLES
             .iter()
-            .map(|x| (x.0, StyleCache::into_style(x.0, x.1, is_shadow)));
+            .map(|x| (x.0, StyleCache::into_style(x.0, x.1, is_shadow)))
+            .collect();
 
         Self {
-            styles: RefCell::new(styles.collect()),
+            styles: RefCell::new(styles),
             is_shadow,
         }
     }

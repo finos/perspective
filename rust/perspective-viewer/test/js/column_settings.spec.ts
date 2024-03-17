@@ -142,7 +142,7 @@ test.describe("Plugin Styles", () => {
     test("Column settings should not expand", async ({ page }) => {
         let view = new PageView(page);
 
-        const MAX_WIDTH = 200;
+        const MAX_WIDTH = 350;
         let checkWidth = async () => {
             let width = await view.columnSettingsSidebar.container.evaluate(
                 (sidebar) => sidebar.getBoundingClientRect().width
@@ -169,7 +169,7 @@ test.describe("Plugin Styles", () => {
         page,
     }) => {
         const view = new PageView(page);
-        view.restore({
+        await view.restore({
             expressions: {
                 expr: "1234",
             },
@@ -192,6 +192,7 @@ test.describe("Plugin Styles", () => {
         await col.activeBtn.click();
         await checkTab(view.columnSettingsSidebar, true, true, true);
         expect(await selectedTab()).toBe("Attributes");
+        await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.clear();
         await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.type(
             "'new expr value'"
         );

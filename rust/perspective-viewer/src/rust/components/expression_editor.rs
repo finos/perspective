@@ -14,7 +14,6 @@ use std::rc::Rc;
 
 use yew::prelude::*;
 
-use super::containers::split_panel::*;
 use super::form::code_editor::*;
 use super::style::LocalStyle;
 use crate::js::PerspectiveValidationError;
@@ -30,7 +29,6 @@ pub enum ExpressionEditorMsg {
 #[derive(Properties, PartialEq, Clone)]
 pub struct ExpressionEditorProps {
     pub session: Session,
-    // called on shift+enter in the code editor
     pub on_save: Callback<()>,
     pub on_validate: Callback<bool>,
     pub on_input: Callback<Rc<String>>,
@@ -54,6 +52,7 @@ impl ExpressionEditorProps {
 pub struct ExpressionEditor {
     expr: Rc<String>,
     error: Option<PerspectiveValidationError>,
+    oninput: Callback<Rc<String>>,
 }
 
 impl Component for ExpressionEditor {
@@ -61,10 +60,16 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
+        let oninput = ctx.link().callback(ExpressionEditorMsg::SetExpr);
         let expr = ctx.props().initial_expr();
         ctx.link()
             .send_message(Self::Message::SetExpr(expr.clone()));
-        Self { error: None, expr }
+
+        Self {
+            error: None,
+            expr,
+            oninput,
+        }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -109,33 +114,26 @@ impl Component for ExpressionEditor {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let oninput = ctx.link().callback(ExpressionEditorMsg::SetExpr);
         let disabled_class = ctx.props().disabled.then_some("disabled");
         clone!(ctx.props().disabled);
-
         html! {
             <>
                 <LocalStyle href={css!("expression-editor")} />
-                <SplitPanel orientation={Orientation::Vertical}>
-                    <>
-                        <label class="item_title">{ "Expression" }</label>
-                        <div id="editor-container" class={disabled_class}>
-                            <CodeEditor
-                                expr={&self.expr}
-                                error={self.error.clone().map(|x| x.into())}
-                                {disabled}
-                                {oninput}
-                                onsave={ctx.props().on_save.clone()}
-                            />
-                            <div id="psp-expression-editor-meta">
-                                <div class="error">
-                                    { &self.error.clone().map(|e| e.error_message).unwrap_or_default() }
-                                </div>
-                            </div>
+                <label class="item_title">{ "Expression" }</label>
+                <div id="editor-container" class={disabled_class}>
+                    <CodeEditor
+                        expr={&self.expr}
+                        error={self.error.clone().map(|x| x.into())}
+                        {disabled}
+                        oninput={self.oninput.clone()}
+                        onsave={ctx.props().on_save.clone()}
+                    />
+                    <div id="psp-expression-editor-meta">
+                        <div class="error">
+                            { &self.error.clone().map(|e| e.error_message).unwrap_or_default() }
                         </div>
-                    </>
-                    <></>
-                </SplitPanel>
+                    </div>
+                </div>
             </>
         }
     }
@@ -144,9 +142,10 @@ impl Component for ExpressionEditor {
         if ctx.props().alias != old_props.alias || ctx.props().reset_count != old_props.reset_count
         {
             ctx.link()
-                .send_message(ExpressionEditorMsg::SetExpr(ctx.props().initial_expr()))
+                .send_message(ExpressionEditorMsg::SetExpr(ctx.props().initial_expr()));
+            false
+        } else {
+            true
         }
-
-        true
     }
 }
