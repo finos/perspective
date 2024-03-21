@@ -119,9 +119,12 @@ test.describe("Plugin Styles", () => {
         await tabs[0].click();
         await sidebar.styleTab.container.waitFor();
     });
+
     test("View updates don't re-render sidebar", async ({ page }) => {
         await page.evaluate(async () => {
+            // @ts-ignore
             let table = await window.__TEST_WORKER__.table({ x: [0] });
+            // @ts-ignore
             window.__TEST_TABLE__ = table;
             let viewer = document.querySelector("perspective-viewer");
             viewer?.load(table);
@@ -133,6 +136,7 @@ test.describe("Plugin Styles", () => {
         await col.editBtn.click();
         await view.columnSettingsSidebar.container.waitFor();
         await page.evaluate(() => {
+            // @ts-ignore
             window.__TEST_TABLE__.update({ x: [1] });
         });
         await page.locator("tbody tr").nth(1).waitFor();

@@ -81,14 +81,18 @@ fn parse_fragment(sep: char, input: &str) -> IResult<&str, StringFragment> {
     ))(input)
 }
 
-pub fn parse_string_literal(sep: char) -> impl for<'a> Fn(&'a str) -> IResult<&'a str, &'a str> {
+pub fn parse_string_literal(
+    sep: char,
+) -> impl for<'a> Fn(&'a str) -> IResult<&'a str, Vec<&'a str>> {
     move |input| {
         let build_string = fold_many0(
             |x| parse_fragment(sep, x),
             || 2,
             |len, frag| frag.len() + len,
         );
+
         let offset = delimited(char(sep), build_string, char(sep));
-        map(offset, |x| &input[..x])(input)
+        let (input, lit) = map(offset, |x| &input[..x])(input)?;
+        Ok((input, lit.split('\n').collect()))
     }
 }

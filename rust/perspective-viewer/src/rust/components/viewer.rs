@@ -198,7 +198,10 @@ impl Component for PerspectiveViewer {
                     ]
                 }
             });
-            ctx.props().renderer.session_changed.add_listener(callback)
+            ctx.props()
+                .renderer
+                .render_limits_changed
+                .add_listener(callback)
         };
 
         let on_close_column_settings =

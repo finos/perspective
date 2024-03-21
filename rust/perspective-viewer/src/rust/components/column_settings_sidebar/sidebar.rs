@@ -192,7 +192,7 @@ impl Component for ColumnSettingsSidebar {
         let session_sub = ctx
             .props()
             .renderer
-            .session_changed
+            .render_limits_changed
             .add_listener(session_cb);
 
         let mut this = Self {
