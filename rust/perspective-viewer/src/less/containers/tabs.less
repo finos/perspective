@@ -66,9 +66,15 @@
         @include scrollbar;
         flex: 1 1 auto;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        .tab-section:last-child {
+            padding: 12px 8px 12px 8px;
+        }
+
         .tab-section {
-            padding: 8px 8px 12px 8px;
-            flex: 0 1 auto;
+            padding: 12px 8px 0px 8px;
+            flex: 0 0 auto;
             overflow: hidden;
         }
 

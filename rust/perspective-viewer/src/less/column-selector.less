@@ -25,6 +25,8 @@
 :host {
     #add-expression-button:before {
         content: var(--add-expression-button--content, "New Column");
+        text-transform: uppercase;
+        font-size: 0.8333333em;
     }
 
     .column-selector-column-title {
@@ -499,9 +501,10 @@
     // Inactive Columns are the columns in the column selector not currently
     // selected for the `columns` field of the `ViewConfig`.
     #sub-columns {
-        & > div:not(:empty) {
-            margin-bottom: 6px;
-        }
+        padding-bottom: 8px;
+        // & > div:not(:empty) {
+        //     margin-bottom: 6px;
+        // }
 
         &:empty {
             display: none;

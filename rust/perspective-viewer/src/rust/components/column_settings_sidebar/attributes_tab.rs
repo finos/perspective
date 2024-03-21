@@ -13,7 +13,6 @@
 use yew::{function_component, html, Html, Properties};
 
 use super::save_settings::{SaveSettings, SaveSettingsProps};
-use crate::components::containers::split_panel::{Orientation, SplitPanel};
 use crate::components::expression_editor::{ExpressionEditor, ExpressionEditorProps};
 
 #[derive(PartialEq, Properties, Clone)]
@@ -25,13 +24,11 @@ pub struct AttributesTabProps {
 #[function_component]
 pub fn AttributesTab(p: &AttributesTabProps) -> Html {
     html! {
-        <SplitPanel id="attributes-tab" orientation={Orientation::Vertical}>
+        <div id="attributes-tab">
             <div class="tab-section" id="attributes-expr">
                 <ExpressionEditor ..p.expr_editor.clone() />
             </div>
-            <div id="attributes-button-panel" class="tab-section">
-                <SaveSettings ..p.save_section.clone() />
-            </div>
-        </SplitPanel>
+            <div class="tab-section"><SaveSettings ..p.save_section.clone() /></div>
+        </div>
     }
 }

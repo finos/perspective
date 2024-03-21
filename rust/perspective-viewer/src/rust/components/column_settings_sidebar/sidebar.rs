@@ -87,7 +87,7 @@ pub enum ColumnSettingsMsg {
     OnSaveAttributes(()),
     OnResetAttributes(()),
     OnDelete(()),
-    SessionUpdated(()),
+    SessionUpdated(bool),
 }
 
 #[derive(Default, Derivative)]
@@ -188,7 +188,8 @@ impl Component for ColumnSettingsSidebar {
     fn create(ctx: &yew::prelude::Context<Self>) -> Self {
         let session_cb = ctx
             .link()
-            .callback(|_| ColumnSettingsMsg::SessionUpdated(()));
+            .callback(|(is_update, _)| ColumnSettingsMsg::SessionUpdated(is_update));
+
         let session_sub = ctx
             .props()
             .renderer
@@ -293,9 +294,13 @@ impl Component for ColumnSettingsSidebar {
                 ctx.props().on_close.emit(());
                 true
             },
-            ColumnSettingsMsg::SessionUpdated(()) => {
-                self.initialize(ctx);
-                true
+            ColumnSettingsMsg::SessionUpdated(is_update) => {
+                if !is_update {
+                    self.initialize(ctx);
+                    true
+                } else {
+                    false
+                }
             },
         }
     }

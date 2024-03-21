@@ -63,6 +63,7 @@ pub struct SessionHandle {
 pub struct SessionData {
     table: Option<JsPerspectiveTable>,
     metadata: SessionMetadata,
+    old_config: Option<ViewConfig>,
     config: ViewConfig,
     view_sub: Option<ViewSubscription>,
     stats: Option<ViewStats>,
@@ -348,6 +349,11 @@ impl Session {
     /// Update the config, setting the `columns` property to the plugin defaults
     /// if provided.
     pub fn update_view_config(&self, config_update: ViewConfigUpdate) {
+        if self.borrow().old_config.is_none() {
+            let config = self.borrow().config.clone();
+            self.borrow_mut().old_config = Some(config);
+        }
+
         if self.borrow_mut().config.apply_update(config_update) {
             self.borrow_mut().view_sub = None;
             self.0.borrow_mut().is_clean = false;
@@ -369,26 +375,25 @@ impl Session {
     pub async fn validate(&self) -> Result<ValidSession<'_>, JsValue> {
         if let Err(err) = self.validate_view_config().await {
             web_sys::console::error_3(
-                &"Invalid config, resetting to default".into(),
+                &"Invalid config:".into(),
+                &err.clone().into(),
                 &JsValue::from_serde_ext(&self.borrow().config).unwrap(),
-                &err.into(),
             );
 
-            self.reset(true);
-            self.validate_view_config().await?;
+            let old = self.borrow_mut().old_config.take();
+            if let Some(config) = old {
+                self.borrow_mut().config = config;
+            } else {
+                self.reset(true);
+            }
+
+            self.0.view_created.emit(());
+            Err(err)?;
         }
 
+        self.borrow_mut().old_config = None;
         Ok(ValidSession(self))
     }
-
-    // async fn get_validated_expression_name(&self, expr: &JsValue) ->
-    // ApiResult<String> {     let arr =
-    // std::iter::once(expr).collect::<js_sys::Array>();     let table =
-    // self.borrow().table.as_ref().unwrap().clone();     let schema =
-    // table.validate_expressions(arr).await?.expression_schema();
-    //     let schema_keys = js_sys::Object::keys(&schema);
-    //     schema_keys.get(0).as_string().into_apierror()
-    // }
 
     async fn flat_as_jsvalue(&self, flat: bool) -> ApiResult<View> {
         if flat {
@@ -532,8 +537,6 @@ impl<'a> ValidSession<'a> {
                 ViewSubscription::new(view, config, on_stats, on_update)
             };
 
-            // self.0.borrow_mut().metadata.as_mut().unwrap().view_schema =
-            // Some(view_schema);
             self.0.borrow_mut().view_sub = Some(sub);
         }
 

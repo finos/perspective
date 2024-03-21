@@ -58,6 +58,8 @@ pub struct RendererData {
     draw_lock: DebounceMutex,
     pub plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
     pub render_limits_changed: PubSub<(bool, RenderLimits)>,
+    pub style_changed: PubSub<()>,
+    pub reset_changed: PubSub<()>,
 }
 
 /// Mutable state
@@ -114,6 +116,8 @@ impl Renderer {
             draw_lock: Default::default(),
             plugin_changed: Default::default(),
             render_limits_changed: Default::default(),
+            style_changed: Default::default(),
+            reset_changed: Default::default(),
         }))
     }
 
@@ -304,15 +308,15 @@ impl Renderer {
     pub async fn presize(
         &self,
         open: bool,
-        on_toggle: impl Future<Output = ApiResult<()>>,
+        panel_task: impl Future<Output = ApiResult<()>>,
     ) -> ApiResult<JsValue> {
-        let task = self.resize_with_timeout(open);
+        let render_task = self.resize_with_timeout(open);
         let result = if open {
-            on_toggle.await?;
-            task.await
+            panel_task.await?;
+            render_task.await
         } else {
-            let result = task.await;
-            on_toggle.await?;
+            let result = render_task.await;
+            panel_task.await?;
             result
         };
 

@@ -24,12 +24,24 @@ use crate::js::PerspectiveValidationError;
 use crate::utils::*;
 use crate::*;
 
-#[derive(Debug, Properties, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct CodeEditorProps {
     pub expr: Rc<String>,
     pub oninput: Callback<Rc<String>>,
     pub onsave: Callback<()>,
     pub disabled: bool,
+
+    #[prop_or_default]
+    pub autofocus: bool,
+
+    #[prop_or_default]
+    pub wordwrap: bool,
+
+    #[prop_or_default]
+    pub autosuggest: bool,
+
+    #[prop_or_default]
+    pub select_all: Subscriber<()>,
 
     #[prop_or_default]
     pub error: Option<PerspectiveValidationError>,
@@ -39,7 +51,7 @@ pub struct CodeEditorProps {
 /// text changes.
 fn on_input_callback(
     event: InputEvent,
-    position: &UseStateSetter<u32>,
+    // position: &UseStateSetter<u32>,
     oninput: &Callback<Rc<String>>,
 ) {
     let elem = event
@@ -48,14 +60,20 @@ fn on_input_callback(
         .unchecked_into::<web_sys::HtmlTextAreaElement>();
 
     oninput.emit(elem.value().into());
-    position.set(elem.get_caret_position().unwrap_or_default());
+    // position.set(elem.get_caret_position().unwrap_or_default());
 }
 
 /// Overide for special non-character commands e.g. shift+enter
-fn on_keydown(event: KeyboardEvent, onsave: &Callback<()>) {
+fn on_keydown(event: KeyboardEvent, deps: &(UseStateSetter<u32>, Callback<()>)) {
+    let elem = event
+        .target()
+        .unwrap()
+        .unchecked_into::<web_sys::HtmlTextAreaElement>();
+
+    deps.0.set(elem.get_caret_position().unwrap_or_default());
     if event.shift_key() && event.key_code() == 13 {
         event.prevent_default();
-        onsave.emit(())
+        deps.1.emit(())
     }
 }
 
@@ -101,9 +119,10 @@ fn autocomplete(
 /// A syntax-highlighted text editor component.
 #[function_component(CodeEditor)]
 pub fn code_editor(props: &CodeEditorProps) -> Html {
+    let select_all = use_state_eq(|| false);
     let caret_position = use_state_eq(|| 0_u32);
     let scroll_offset = use_state_eq(|| (0, 0));
-    let textarea_ref = use_node_ref().tee::<4>();
+    let textarea_ref = use_node_ref().tee::<5>();
     let content_ref = use_node_ref().tee::<3>();
     let lineno_ref = use_node_ref().tee::<2>();
     let filter_dropdown = use_memo((), |_| FunctionDropDownElement::default());
@@ -113,20 +132,23 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         .map(|token| highlight(&mut cursor, token, *caret_position))
         .collect::<Html>();
 
-    let onkeydown = use_callback(props.onsave.clone(), on_keydown);
-    let oninput = use_callback(
-        (caret_position.setter(), props.oninput.clone()),
-        |event, deps| on_input_callback(event, &deps.0, &deps.1),
-    );
+    let onkeydown = use_callback((caret_position.setter(), props.onsave.clone()), on_keydown);
+    let oninput = use_callback(props.oninput.clone(), |event, deps| {
+        on_input_callback(event, deps)
+    });
 
-    let onscroll = use_callback((scroll_offset.setter(), textarea_ref.2), |_, deps| {
+    let onscroll = use_callback((scroll_offset.setter(), textarea_ref.0), |_, deps| {
         on_scroll(&deps.0, &deps.1)
     });
 
-    use_effect_with((props.expr.clone(), textarea_ref.0), {
+    let autofocus = props.autofocus;
+    use_effect_with((props.expr.clone(), textarea_ref.1), {
         move |(expr, textarea_ref)| {
             let elem = textarea_ref.cast::<web_sys::HtmlTextAreaElement>().unwrap();
-            elem.focus().unwrap();
+            if autofocus {
+                elem.focus().unwrap();
+            }
+
             if **expr != elem.value() {
                 elem.set_value(&format!("{}", expr));
                 elem.set_scroll_top(0);
@@ -136,53 +158,106 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         }
     });
 
-    use_effect_with((props.error.clone(), textarea_ref.1), {
-        move |(_, textarea_ref)| {
-            let elem = textarea_ref.cast::<web_sys::HtmlTextAreaElement>().unwrap();
-            elem.focus().unwrap();
+    // select_all.set(props.select_all);
+    use_effect_with((select_all.setter(), props.select_all.clone()), {
+        move |(select_all, props_select_all)| {
+            clone!(select_all);
+            let sub = props_select_all.add_listener(move |()| select_all.set(true));
+            move || drop(sub)
         }
     });
 
+    // select_all.set(props.select_all);
+    use_effect_with((select_all, textarea_ref.2), {
+        move |(select_all, textarea_ref)| {
+            let elem = textarea_ref.cast::<web_sys::HtmlTextAreaElement>().unwrap();
+            if **select_all {
+                elem.focus().unwrap();
+                elem.select_all().unwrap();
+            }
+
+            select_all.set(false);
+        }
+    });
+
+    // ????
+    let autofocus = props.autofocus;
+    use_effect_with((props.error.clone(), textarea_ref.3), {
+        move |(_, textarea_ref)| {
+            if autofocus {
+                let elem = textarea_ref.cast::<web_sys::HtmlTextAreaElement>().unwrap();
+                elem.focus().unwrap();
+            }
+        }
+    });
+
+    // Sync scrolling between textarea and formatted HTML
     use_effect_with((scroll_offset, content_ref.0, lineno_ref.0), |deps| {
         scroll_sync(&deps.0, &deps.1, &deps.2)
     });
 
+    // Blur if this element is not in the tree
+    use_effect_with(filter_dropdown.clone(), |filter_dropdown| {
+        clone!(filter_dropdown);
+        move || filter_dropdown.hide().unwrap()
+    });
+
+    // Show autocomplete
     use_effect_with(
-        (filter_dropdown, cursor.auto.clone(), cursor.noderef.clone()),
-        |deps| autocomplete(&deps.0, &deps.1, &deps.2),
+        (
+            props.autosuggest,
+            filter_dropdown,
+            cursor.auto.clone(),
+            cursor.noderef.clone(),
+        ),
+        |deps| {
+            if deps.0 {
+                autocomplete(&deps.1, &deps.2, &deps.3)
+            }
+        },
     );
 
+    let error_line = props.error.as_ref().map(|x| x.line as usize);
     let line_numbers = cursor
-        .map_rows(|x| html!(<span class="line_number">{ x + 1 }</span>))
+        .map_rows(|x| html!(
+            <span
+                class={if Some(x) == error_line {"line_number error_highlight"} else {"line_number"}}
+            >
+                { x + 1 }
+            </span>
+        ))
         .collect::<Html>();
 
+    let class = if props.wordwrap { "wordwrap" } else { "" };
     clone!(props.disabled);
-
     html! {
         <>
             <LocalStyle href={css!("form/code-editor")} />
-            <div id="editor">
-                <textarea
-                    {disabled}
-                    id="textarea_editable"
-                    ref={textarea_ref.3}
-                    spellcheck="false"
-                    {oninput}
-                    {onscroll}
-                    {onkeydown}
-                />
-                <pre id="content" ref={content_ref.1}>
-                    { terms }
-                    { {
+            <div id="editor" {class}>
+                <div id="line_numbers" ref={lineno_ref.1}>{ line_numbers }</div>
+                <div id="editor-inner" {class}>
+                    <textarea
+                        {disabled}
+                        id="textarea_editable"
+                        ref={textarea_ref.4}
+                        spellcheck="false"
+                        {oninput}
+                        {onscroll}
+                        {onkeydown}
+                    />
+                    <div id="editor-height-sizer" />
+                    <pre id="content" ref={content_ref.1}>
+                        { terms }
+                        { {
                         // A linebreak which pushs a textarea into scroll overflow
                         // may not necessarily do so in the `<pre>`, because there is
                         // no cursor when the last line has no content, so add
                         // some space here to make sure overlfow is in sync
                         // with the text area.
                         " "
-                     } }
-                </pre>
-                <div id="line_numbers" ref={lineno_ref.1}>{ line_numbers }</div>
+                    } }
+                    </pre>
+                </div>
             </div>
         </>
     }

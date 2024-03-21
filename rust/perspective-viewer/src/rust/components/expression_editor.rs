@@ -122,7 +122,9 @@ impl Component for ExpressionEditor {
                 <label class="item_title">{ "Expression" }</label>
                 <div id="editor-container" class={disabled_class}>
                     <CodeEditor
+                        autofocus=true
                         expr={&self.expr}
+                        autosuggest=true
                         error={self.error.clone().map(|x| x.into())}
                         {disabled}
                         oninput={self.oninput.clone()}

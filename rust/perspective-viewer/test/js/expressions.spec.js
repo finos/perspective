@@ -89,7 +89,6 @@ test.describe("Expressions", () => {
 
     test("Close expression editor with button", async ({ page }) => {
         await page.evaluate(openSidebarAndScrollToBottom);
-
         await page.waitForFunction(
             () =>
                 !!document
@@ -98,7 +97,6 @@ test.describe("Expressions", () => {
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
-
         await page.waitForSelector("#editor-container");
         await page.evaluate(async () => {
             let root = document.querySelector("perspective-viewer").shadowRoot;

@@ -22,24 +22,25 @@ export function style_selected_column(regularTable, viewer, selectedColumn) {
     const group_header_trs = Array.from(
         regularTable.children[0].children[0].children
     );
+
     const len = group_header_trs.length;
+    const settings_open = viewer.hasAttribute("settings");
     if (len <= 1) {
         group_header_trs[0]?.removeAttribute("id");
     } else {
         group_header_trs.forEach((tr, i) => {
+            const offset = settings_open ? 1 : 0;
             let id =
-                i === len - 2
+                i === len - (offset + 1)
                     ? "psp-column-titles"
-                    : i === len - 1
+                    : i === len - offset
                     ? "psp-column-edit-buttons"
                     : null;
             id ? tr.setAttribute("id", id) : tr.removeAttribute("id");
         });
     }
 
-    const settings_open = viewer.hasAttribute("settings");
     viewer.classList.toggle("psp-menu-open", !!selectedColumn);
-
     if (settings_open && len >= 2) {
         // if settings_open, you will never have less than 2 trs unless the
         // table is empty, but possibly more e.g. with group-by.

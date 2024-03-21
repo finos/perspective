@@ -29,6 +29,7 @@
             top: 0.5em;
             left: 0.5em;
             position: absolute;
+            font-size: 10px;
             width: calc(100% - 24px);
         }
 
@@ -44,6 +45,8 @@
     #attributes-expr {
         flex: 1 1 auto;
         margin-top: 1px;
+        display: flex;
+        flex-direction: column;
     }
 
     #attribtues-tab .split-panel-child {
@@ -94,38 +97,40 @@
 
     #psp-expression-editor-actions {
         display: flex;
-        gap: 0.5em;
+        gap: 0.333333em;
         justify-content: flex-end;
         align-items: center;
     }
 
     #psp-expression-editor-meta {
         display: flex;
-        flex: 0 0 30px;
+        flex: 0 0 24px;
         flex-direction: column;
         padding: 0.5em;
         gap: 0.25em;
-        height: 30px;
+        height: 24px;
         position: relative;
     }
 
     #save-settings,
     #danger-zone {
         display: flex;
-        gap: 0.5em;
+        gap: 0.333333em;
     }
     #save-settings-wrapper {
         display: flex;
         flex-direction: column;
-        gap: 0.5em;
+        gap: 0.333333em;
     }
 
     .psp-expression-editor__button {
         flex: 1;
         justify-content: center;
         font-family: inherit;
-        font-size: 1em;
+        font-size: 0.8333em;
+        text-transform: uppercase;
         border: 1px solid var(--icon--color);
+        border-radius: 2px;
         height: 24px;
         padding: 2px 12px;
         display: flex;

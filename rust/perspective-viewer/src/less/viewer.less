@@ -17,27 +17,34 @@
 :host .sidebar_close_button {
     position: absolute;
     top: 0;
-    padding-top: 14px;
+    padding-top: 15px;
+    padding-bottom: 15px;
     z-index: 10000;
     height: 48px;
     &:hover {
         cursor: pointer;
     }
 
-    &:before {
+    .sidebar_close_button_inner {
+        border-radius: 5px 0 0 5px;
+        height: 18px;
+        background-color: var(--plugin--background);
+    }
+
+    .sidebar_close_button_inner:before {
         display: inline-block;
-        height: 19px;
+        height: 18px;
         width: 26px;
         content: "";
         mask-size: cover;
-        -webkit-mask-size: cover; //40px 35px;
+        -webkit-mask-size: cover;
         background-repeat: no-repeat;
         background-color: var(--icon--color);
         mask-image: url(../svg/drawer-tab.svg);
         -webkit-mask-image: url(../svg/drawer-tab.svg);
     }
 
-    &:hover:before {
+    &:hover .sidebar_close_button_inner:before {
         mask-image: url(../svg/drawer-tab-hover.svg);
         -webkit-mask-image: url(../svg/drawer-tab-hover.svg);
     }
@@ -45,16 +52,7 @@
 
 :host #settings_close_button,
 :host #column_settings_close_button {
-    background-color: var(--plugin--background);
     left: -26px;
-}
-
-:host #column_settings_close_button.sidebar_close_button {
-    &:before {
-        background-image: url(../svg/bg-pattern.png);
-        background-size: 4px;
-        background-attachment: fixed;
-    }
 }
 
 :host(:hover) {
@@ -317,10 +315,6 @@
     .expr_editor_column {
         z-index: 2;
         width: 100%;
-    }
-
-    #modal_panel .is-width-override {
-        min-width: 50px !important;
     }
 
     .is-width-override > .expr_editor_column {

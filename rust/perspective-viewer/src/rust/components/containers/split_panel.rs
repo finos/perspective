@@ -57,6 +57,10 @@ impl Drop for ResizingState {
     }
 }
 
+/// The minimum size a split panel child can be, including when overridden via
+/// user drag/drop.
+const MINIMUM_SIZE: i32 = 8;
+
 /// When the instantiated, capture the initial dimensions and create the
 /// MouseEvent callbacks.
 impl ResizingState {
@@ -121,7 +125,7 @@ impl ResizingState {
             client_offset - self.start
         };
 
-        max(0, self.total + delta)
+        max(MINIMUM_SIZE, self.total + delta)
     }
 
     pub fn get_style(&self, client_offset: i32) -> Option<String> {
@@ -141,8 +145,8 @@ impl ResizingState {
     pub fn get_dimensions(&self, client_offset: i32) -> (i32, i32) {
         let offset = self.get_offset(client_offset);
         match self.orientation {
-            Orientation::Horizontal => (std::cmp::max(0, offset), self.alt),
-            Orientation::Vertical => (self.alt, std::cmp::max(0, offset)),
+            Orientation::Horizontal => (std::cmp::max(MINIMUM_SIZE, offset), self.alt),
+            Orientation::Vertical => (self.alt, std::cmp::max(MINIMUM_SIZE, offset)),
         }
     }
 

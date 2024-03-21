@@ -143,6 +143,7 @@ impl PerspectiveViewerElement {
             .dyn_into::<js_sys::Promise>()
             .unwrap_or_else(|_| js_sys::Promise::resolve(&table));
 
+        self.session.reset(true);
         let mut config = ViewConfigUpdate {
             columns: Some(self.session.get_view_config().columns.clone()),
             ..ViewConfigUpdate::default()

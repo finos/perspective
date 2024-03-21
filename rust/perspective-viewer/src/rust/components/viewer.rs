@@ -252,6 +252,7 @@ impl Component for PerspectiveViewer {
                     } else {
                         Some(presentation.all_columns_configs())
                     };
+
                     renderer.reset(columns_config.as_ref()).await;
                     presentation.reset_available_themes(None).await;
                     let result = renderer.draw(session.validate().await?.create_view()).await;
@@ -259,6 +260,7 @@ impl Component for PerspectiveViewer {
                         sender.send(()).unwrap();
                     }
 
+                    renderer.reset_changed.emit(());
                     result
                 });
 
@@ -438,6 +440,73 @@ impl Component for PerspectiveViewer {
             .link()
             .callback(|(x, _)| PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(Some(x)));
 
+        let settings_panel = html! {
+            <div id="settings_panel" class="sidebar_column noselect split-panel orient-vertical">
+                if self.selected_column.is_none() {
+                    <SidebarCloseButton
+                        id="settings_close_button"
+                        on_close_sidebar={&on_close_settings}
+                    />
+                }
+                <PluginSelector
+                    session={&ctx.props().session}
+                    renderer={&ctx.props().renderer}
+                    presentation={&ctx.props().presentation}
+                />
+                <ColumnSelector
+                    dragdrop={&ctx.props().dragdrop}
+                    renderer={&ctx.props().renderer}
+                    session={&ctx.props().session}
+                    presentation={&ctx.props().presentation}
+                    on_resize={&self.on_resize}
+                    on_open_expr_panel={&on_open_expr_panel}
+                    on_dimensions_reset={&self.on_dimensions_reset}
+                    selected_column={self.selected_column.clone()}
+                />
+            </div>
+        };
+
+        let main_panel = html! {
+            <div id="main_column">
+                <StatusBar
+                    id="status_bar"
+                    session={&ctx.props().session}
+                    renderer={&ctx.props().renderer}
+                    presentation={&ctx.props().presentation}
+                    on_reset={on_reset.clone()}
+                />
+                <div id="main_panel_container">
+                    <RenderWarning
+                        dimensions={self.dimensions}
+                        session={&ctx.props().session}
+                        renderer={&ctx.props().renderer}
+                    />
+                    <slot />
+                </div>
+                if let Some(selected_column) = self.selected_column.clone() {
+                    <SplitPanel
+                        id="modal_panel"
+                        reverse=true
+                        initial_size={self.column_settings_panel_width_override}
+                        on_reset={ctx.link().callback(|_| PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(None))}
+                        on_resize={on_column_settings_panel_resize}
+                    >
+                        <ColumnSettingsSidebar
+                            session={&ctx.props().session}
+                            renderer={&ctx.props().renderer}
+                            custom_events={&ctx.props().custom_events}
+                            presentation={&ctx.props().presentation}
+                            {selected_column}
+                            on_close={self.on_close_column_settings.clone()}
+                            width_override={self.column_settings_panel_width_override}
+                            is_active={self.selected_column_is_active}
+                        />
+                        <></>
+                    </SplitPanel>
+                }
+            </div>
+        };
+
         html! {
             <>
                 <StyleProvider>
@@ -451,70 +520,8 @@ impl Component for PerspectiveViewer {
                             on_resize={on_split_panel_resize}
                             on_resize_finished={ctx.props().render_callback()}
                         >
-                            <div
-                                id="settings_panel"
-                                class="sidebar_column noselect split-panel orient-vertical"
-                            >
-                                if self.selected_column.is_none() {
-                                    <SidebarCloseButton
-                                        id="settings_close_button"
-                                        on_close_sidebar={&on_close_settings}
-                                    />
-                                }
-                                <PluginSelector
-                                    session={&ctx.props().session}
-                                    renderer={&ctx.props().renderer}
-                                    presentation={&ctx.props().presentation}
-                                />
-                                <ColumnSelector
-                                    dragdrop={&ctx.props().dragdrop}
-                                    renderer={&ctx.props().renderer}
-                                    session={&ctx.props().session}
-                                    presentation={&ctx.props().presentation}
-                                    on_resize={&self.on_resize}
-                                    on_open_expr_panel={&on_open_expr_panel}
-                                    on_dimensions_reset={&self.on_dimensions_reset}
-                                    selected_column={self.selected_column.clone()}
-                                />
-                            </div>
-                            <div id="main_column">
-                                <StatusBar
-                                    id="status_bar"
-                                    session={&ctx.props().session}
-                                    renderer={&ctx.props().renderer}
-                                    presentation={&ctx.props().presentation}
-                                    {on_reset}
-                                />
-                                <div id="main_panel_container">
-                                    <RenderWarning
-                                        dimensions={self.dimensions}
-                                        session={&ctx.props().session}
-                                        renderer={&ctx.props().renderer}
-                                    />
-                                    <slot />
-                                </div>
-                                if let Some(selected_column) = self.selected_column.clone() {
-                                    <SplitPanel
-                                        id="modal_panel"
-                                        reverse=true
-                                        initial_size={self.column_settings_panel_width_override}
-                                        on_reset={ctx.link().callback(|_| PerspectiveViewerMsg::ColumnSettingsPanelSizeUpdate(None))}
-                                        on_resize={on_column_settings_panel_resize}
-                                    >
-                                        <ColumnSettingsSidebar
-                                            session={&ctx.props().session}
-                                            renderer={&ctx.props().renderer}
-                                            custom_events={&ctx.props().custom_events}
-                                            presentation={&ctx.props().presentation}
-                                            {selected_column}
-                                            on_close={self.on_close_column_settings.clone()}
-                                            width_override={self.column_settings_panel_width_override}
-                                            is_active={self.selected_column_is_active}
-                                        />
-                                        <></>
-                                    </SplitPanel>
-                                }
-                            </div>
+                            { settings_panel }
+                            { main_panel }
                         </SplitPanel>
                     } else {
                         <RenderWarning
