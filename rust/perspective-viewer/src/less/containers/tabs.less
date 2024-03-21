@@ -63,14 +63,15 @@
         }
     }
     .tab-content {
-        overflow-y: scroll;
-        max-height: calc(100% - 90px);
         @include scrollbar;
-
+        flex: 1 1 auto;
+        overflow: hidden;
         .tab-section {
-            padding: 8px 4px 8px 8px;
-            // border-bottom: 1px solid var(--inactive--border-color);
+            padding: 8px 8px 12px 8px;
+            flex: 0 1 auto;
+            overflow: hidden;
         }
+
         .text {
             margin-left: 1em;
         }

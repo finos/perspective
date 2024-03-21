@@ -119,9 +119,12 @@ test.describe("Plugin Styles", () => {
         await tabs[0].click();
         await sidebar.styleTab.container.waitFor();
     });
+
     test("View updates don't re-render sidebar", async ({ page }) => {
         await page.evaluate(async () => {
+            // @ts-ignore
             let table = await window.__TEST_WORKER__.table({ x: [0] });
+            // @ts-ignore
             window.__TEST_TABLE__ = table;
             let viewer = document.querySelector("perspective-viewer");
             viewer?.load(table);
@@ -133,6 +136,7 @@ test.describe("Plugin Styles", () => {
         await col.editBtn.click();
         await view.columnSettingsSidebar.container.waitFor();
         await page.evaluate(() => {
+            // @ts-ignore
             window.__TEST_TABLE__.update({ x: [1] });
         });
         await page.locator("tbody tr").nth(1).waitFor();
@@ -142,7 +146,7 @@ test.describe("Plugin Styles", () => {
     test("Column settings should not expand", async ({ page }) => {
         let view = new PageView(page);
 
-        const MAX_WIDTH = 200;
+        const MAX_WIDTH = 350;
         let checkWidth = async () => {
             let width = await view.columnSettingsSidebar.container.evaluate(
                 (sidebar) => sidebar.getBoundingClientRect().width
@@ -169,7 +173,7 @@ test.describe("Plugin Styles", () => {
         page,
     }) => {
         const view = new PageView(page);
-        view.restore({
+        await view.restore({
             expressions: {
                 expr: "1234",
             },
@@ -192,6 +196,7 @@ test.describe("Plugin Styles", () => {
         await col.activeBtn.click();
         await checkTab(view.columnSettingsSidebar, true, true, true);
         expect(await selectedTab()).toBe("Attributes");
+        await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.clear();
         await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.type(
             "'new expr value'"
         );

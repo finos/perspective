@@ -149,6 +149,8 @@ pub struct PerspectiveViewer {
     _subscriptions: [Subscription; 1],
     settings_panel_width_override: Option<i32>,
     column_settings_panel_width_override: Option<i32>,
+
+    on_close_column_settings: Callback<()>,
 }
 
 impl Component for PerspectiveViewer {
@@ -196,8 +198,19 @@ impl Component for PerspectiveViewer {
                     ]
                 }
             });
-            ctx.props().renderer.session_changed.add_listener(callback)
+            ctx.props()
+                .renderer
+                .render_limits_changed
+                .add_listener(callback)
         };
+
+        let on_close_column_settings =
+            ctx.link()
+                .callback(|_| PerspectiveViewerMsg::OpenColumnSettings {
+                    locator: None,
+                    sender: None,
+                    toggle: false,
+                });
 
         Self {
             dimensions: None,
@@ -211,6 +224,7 @@ impl Component for PerspectiveViewer {
             _subscriptions: [session_sub],
             settings_panel_width_override: None,
             column_settings_panel_width_override: None,
+            on_close_column_settings,
         }
     }
 
@@ -493,7 +507,7 @@ impl Component for PerspectiveViewer {
                                             custom_events={&ctx.props().custom_events}
                                             presentation={&ctx.props().presentation}
                                             {selected_column}
-                                            on_close={ctx.link().callback(|_| PerspectiveViewerMsg::OpenColumnSettings{ locator: None, sender: None, toggle: false })}
+                                            on_close={self.on_close_column_settings.clone()}
                                             width_override={self.column_settings_panel_width_override}
                                             is_active={self.selected_column_is_active}
                                         />

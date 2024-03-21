@@ -17,6 +17,7 @@
 #![feature(lazy_cell)]
 #![feature(let_chains)]
 #![feature(macro_metavar_expr)]
+#![feature(iter_intersperse)]
 #![feature(return_position_impl_trait_in_trait)]
 #![feature(stmt_expr_attributes)]
 #![warn(

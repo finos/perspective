@@ -310,12 +310,7 @@ impl Component for FilterColumn {
                 }
                 false
             },
-            FilterColumnMsg::FilterKeyDown(_) => {
-                if ctx.props().is_suggestable() {
-                    ctx.props().filter_dropdown.reautocomplete();
-                }
-                false
-            },
+            FilterColumnMsg::FilterKeyDown(_) => false,
             FilterColumnMsg::FilterOpSelect(op) => {
                 ctx.props().update_filter_op(op);
                 true
@@ -416,7 +411,7 @@ impl Component for FilterColumn {
             },
             Some(Type::String) => html! {
                 <input
-                    type="text"
+                    type="search"
                     size="4"
                     placeholder="Value"
                     class="string-filter"

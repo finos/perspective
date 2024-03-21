@@ -57,7 +57,7 @@ pub struct RendererData {
     plugin_data: RefCell<RendererMutData>,
     draw_lock: DebounceMutex,
     pub plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
-    pub session_changed: PubSub<(bool, RenderLimits)>,
+    pub render_limits_changed: PubSub<(bool, RenderLimits)>,
 }
 
 /// Mutable state
@@ -113,7 +113,7 @@ impl Renderer {
             }),
             draw_lock: Default::default(),
             plugin_changed: Default::default(),
-            session_changed: Default::default(),
+            render_limits_changed: Default::default(),
         }))
     }
 
@@ -286,7 +286,7 @@ impl Renderer {
         let plugin = self.get_active_plugin()?;
         let meta = self.metadata().clone();
         let limits = get_row_and_col_limits(view, &meta).await?;
-        self.session_changed.emit((is_update, limits));
+        self.render_limits_changed.emit((is_update, limits));
         let viewer_elem = &self.0.borrow().viewer_elem.clone();
         if is_update {
             let task = plugin.update(view, limits.2, limits.3, false);

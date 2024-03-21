@@ -16,81 +16,95 @@
     #column_settings_sidebar {
         overflow: hidden;
         text-overflow: ellipsis;
-    }
 
-    // NOTE: These should probably make their way to global form styling eventually.
-    .errored {
-        outline-color: var(--error--color);
-    }
-
-    .item_title {
-        flex: 0 0 auto;
-        font-size: var(--label--font-size, 0.75em);
-    }
-
-    .radio-list-item label {
-        margin-top: 6px;
-    }
-
-    input {
-        &[type="text"],
-        &[type="search"] {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
-            background-color: var(--plugin--background);
-            border: none;
-            margin-bottom: 0.5em;
-            font-family: inherit;
-            font-size: 1em;
-            &:disabled {
-                background-color: var(--inactive--color);
-            }
+        #attributes-button-panel {
+            flex: 0 0 auto;
+            margin-top: 4px;
         }
 
-        &[type="search"] {
-            min-height: 24px;
-            border-radius: 2px;
+        #attributes-tab > .split-panel-child {
+            min-height: 200px;
+            flex: 0 1 auto;
         }
-    }
 
-    .sidebar_header_contents {
-        display: flex;
-        margin: 8px;
-        align-items: center;
-        border-radius: 3px;
-        outline-width: 1px;
-        outline-color: var(--inactive--color);
-
-        &.editable {
-            &:hover {
-                outline-style: solid;
-                cursor: text;
-            }
-        }
-        &::focus {
-            outline-style: solid;
-            background: var(--plugin--background);
-        }
-        &.edited {
-            outline-style: dashed;
-        }
-        &.invalid {
+        // NOTE: These should probably make their way to global form styling eventually.
+        .errored {
             outline-color: var(--error--color);
         }
 
-        .sidebar_header_title {
-            line-height: normal;
-            margin: 0;
-            flex: 1;
-            padding-left: 5px;
-            background: none;
-            outline: none;
-            color: unset;
+        .item_title {
+            flex: 0 0 auto;
+            font-size: var(--label--font-size, 0.75em);
+        }
 
-            &:disabled {
+        .radio-list-item label {
+            margin-top: 6px;
+        }
+
+        input {
+            &[type="text"],
+            &[type="search"] {
+                outline: 1px solid;
+                outline-color: var(--inactive--color);
+                background-color: var(--plugin--background);
+                border: none;
+                margin-bottom: 0.5em;
+                font-family: inherit;
+                font-size: 1em;
+                &:disabled {
+                    background-color: var(--inactive--color);
+                }
+            }
+
+            &[type="search"] {
+                min-height: 24px;
+                border-radius: 2px;
+            }
+
+            &::-webkit-search-cancel-button {
+                cursor: pointer;
+            }
+        }
+
+        .sidebar_header_contents {
+            display: flex;
+            margin: 8px;
+            align-items: center;
+            border-radius: 3px;
+            outline-width: 1px;
+            outline-color: var(--inactive--color);
+
+            &.editable {
+                &:hover {
+                    outline-style: solid;
+                    cursor: text;
+                }
+            }
+            &::focus {
+                outline-style: solid;
+                background: var(--plugin--background);
+            }
+            &.edited {
+                outline-style: dashed;
+            }
+            &.invalid {
+                outline-color: var(--error--color);
+            }
+
+            .sidebar_header_title {
+                line-height: normal;
+                margin: 0;
+                flex: 1;
+                padding-left: 5px;
                 background: none;
                 outline: none;
                 color: unset;
+
+                &:disabled {
+                    background: none;
+                    outline: none;
+                    color: unset;
+                }
             }
         }
     }

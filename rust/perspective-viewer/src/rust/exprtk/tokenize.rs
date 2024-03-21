@@ -20,6 +20,7 @@ use nom::bytes::complete::{is_a, is_not};
 use nom::character::complete::{line_ending, space1};
 use nom::combinator::map;
 use nom::multi::many0;
+use nom::IResult;
 use yew::prelude::*;
 
 use self::comment::*;
@@ -86,24 +87,37 @@ impl<'a> Token<'a> {
     }
 }
 
+#[allow(clippy::redundant_closure)]
+fn parse_multiline_string<'a>(
+    sep: char,
+    lit: impl Fn(&'a str) -> Token<'a>,
+) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<Token<'a>>> {
+    map(parse_string_literal(sep), move |x| {
+        x.into_iter()
+            .map(|x| lit(x))
+            .intersperse(Token::Break("\n"))
+            .collect()
+    })
+}
+
 /// Parse a string representing an ExprTK Expression Column into `Token`s. A
 /// token list is sufficient for syntax-highlighting purposes, faster than a
 /// full parser and much easier to write a renderer for.
 pub fn tokenize(input: &str) -> Vec<Token<'_>> {
-    let comment = map(parse_comment, Token::Comment);
-    let string = map(parse_string_literal('"'), Token::Literal);
-    let column = map(parse_string_literal('\''), Token::Column);
-    let symbol = map(parse_symbol_literal, Token::Symbol);
-    let number = map(parse_number_literal, Token::Literal);
-    let whitespace = map(space1, Token::Whitespace);
-    let linebreak = map(line_ending, Token::Break);
-    let ops = map(is_a("+-/*^%&|=:;,.(){}[]"), Token::Operator);
-    let unknown = map(is_not(" \t\n\r"), Token::Unknown);
-
-    let mut expr = many0(alt((
+    let comment = map(parse_comment, |x| vec![Token::Comment(x)]);
+    let string = parse_multiline_string('\'', Token::Literal);
+    let column = parse_multiline_string('"', Token::Column);
+    let symbol = map(parse_symbol_literal, |x| vec![Token::Symbol(x)]);
+    let number = map(parse_number_literal, |x| vec![Token::Literal(x)]);
+    let whitespace = map(space1, |x| vec![Token::Whitespace(x)]);
+    let linebreak = map(line_ending, |x| vec![Token::Break(x)]);
+    let ops = map(is_a("+-/*^%&|=:;,.(){}[]"), |x| vec![Token::Operator(x)]);
+    let unknown = map(is_not(" \t\n\r"), |x| vec![Token::Unknown(x)]);
+    let token = alt((
         comment, string, column, symbol, number, whitespace, linebreak, ops, unknown,
-    )));
+    ));
 
+    let mut expr = map(many0(token), |x| x.into_iter().flatten().collect());
     let (rest, mut tokens) = expr(input).unwrap_or_else(|_| (input, vec![]));
     if !rest.is_empty() {
         tracing::warn!(

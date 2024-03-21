@@ -21,7 +21,7 @@ pub struct StubProps {
 #[function_component(Stub)]
 pub fn stub(p: &StubProps) -> Html {
     if let Some(error) = p.error.clone() {
-        tracing::error!("RENDERED STUB: {error}");
+        tracing::error!("Rendered stub: {error}");
     }
 
     html! {
