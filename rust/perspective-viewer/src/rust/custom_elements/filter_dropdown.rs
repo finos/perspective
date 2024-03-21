@@ -92,6 +92,10 @@ impl FilterDropDownElement {
                         FilterDropDownMsg::SetCallback(callback),
                         FilterDropDownMsg::SetValues(values),
                     ]);
+
+                    if let Some(x) = self.target.borrow().clone() && !self.modal.is_open() {
+                        ApiFuture::spawn(self.modal.clone().open(x, None))
+                    }
                 }
             },
             _ => {
@@ -108,6 +112,14 @@ impl FilterDropDownElement {
                         *values.borrow_mut() = Some(all_values);
                         let filter_values = filter_values(&input, &values, &exclude);
                         if filter_values.len() == 1 && filter_values[0] == input {
+                            *old_column.borrow_mut() = Some(column);
+                            *old_target.borrow_mut() = Some(target.clone());
+                            let filter_values = self::filter_values("", &values, &exclude);
+                            modal.send_message_batch(vec![
+                                FilterDropDownMsg::SetCallback(callback),
+                                FilterDropDownMsg::SetValues(filter_values),
+                            ]);
+
                             modal.hide()
                         } else {
                             *old_column.borrow_mut() = Some(column);

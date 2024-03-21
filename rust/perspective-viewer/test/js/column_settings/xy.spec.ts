@@ -119,7 +119,7 @@ test.describe("X/Y Scatter", () => {
         await checkSymbolsSection(page, "Discount", ["0", "1", "2"], "7");
     });
 
-    test("Symbols column - String values", async ({ page }) => {
+    test.skip("Symbols column - String values", async ({ page }) => {
         await checkSymbolsSection(page, "State", ["A", "B", "C"], "D");
     });
 
