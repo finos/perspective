@@ -1,0 +1,249 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+
+        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
+
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
+        
+        <style>
+        
+            perspective-viewer {
+                flex: 1;
+                margin: 24px;
+                overflow: visible;
+            }
+
+            #app {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #f2f4f6;
+            }
+
+            #controls {
+                display: flex;
+                margin: 24px 24px 0px 40px;
+            }
+
+            .range {
+                position: relative;
+                display: inline-flex;
+                flex-direction: column;
+                margin-right: 24px;
+            }
+
+            span, input, button {
+                font-family: "Open Sans";
+                font-size: 12px;
+                background: none;
+                margin: 0px;
+                border-color: #ccc;
+                color: #666;
+                padding: 6px 12px 6px 0px;
+            }
+
+            input {
+                height: 14px;
+                border-width: 0px;
+                border-style: solid;
+                border-bottom-width: 1px;
+                color: inherit;
+                outline: none;
+            }
+
+            input[type=range] {
+                margin-top: 2px;
+            }
+
+            input[type=number] {
+                font-family: "Roboto Mono";
+            }
+
+            input:focus {
+                border-color: #1a7da1;
+            }
+
+            input::placeholder {
+                color: #ccc;
+            }
+            
+            button {
+                border: 1px solid #ccc;
+                text-transform: uppercase;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                padding-left: 12px;
+                height: 28px;
+                outline: none;
+            }
+
+            button:hover {
+                cursor: pointer;
+            }
+
+            #run {
+                justify-self: center;
+                margin-right: 24px;
+                height: 83px;
+                width: 80px;
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <div id="app">
+            <div id="controls">
+                <button id="run">Run</button>
+                <div class="range">
+                    <span>Rows</span>
+                    <input id="num_rows" min="25" max="1000000" type="number" placeholder="#" value="10000"></input>
+                    <input id="num_batches" min="1" max="100" type="number" placeholder="#" value="1"></input>
+                </div>
+                <div class="range">
+                    <span>Float columns</span>
+                    <input id="num_float" min="0" max="50" type="number" placeholder="#" value="5"></input>
+                </div>
+                <div class="range">
+                    <span>Integer columns</span>
+                    <input id="num_integer" min="0" max="50" type="number" placeholder="#" value="5"></input>
+                </div>
+                <div class="range">
+                    <span>String columns</span>
+                    <input id="num_string" min="0" max="50" type="number" placeholder="#" value="5"></input>
+                    <input id="num_strings" min="1" max="500" type="number" placeholder="Unique Strings" value="50"></input>
+                </div>
+                <div class="range">
+                    <span>Datetime columns</span>
+                    <input id="num_datetime" min="0" max="50" type="number" placeholder="#" value="5"></input>
+                </div>
+                <div class="range">
+                    <span>Bool columns</span>
+                    <input id="num_boolean" min="0" max="50" type="number" placeholder="#" value="1"></input>
+                </div>
+            </div>
+
+            <perspective-viewer 
+                editable
+                id="viewer">
+
+            </perspective-viewer>
+        </div>
+
+        <script type="module">
+
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+            const WORKER = perspective.worker();
+
+            const choose = x => x[Math.floor(Math.random() * x.length)];
+            const range = (x, y) => Math.random() * (y - x) + x;
+            const rand_string = () => Math.random().toString(36).substring(7);
+            const strings = choices => new Array(choices).fill(null).map(rand_string);
+            const colname = (name, x) => `${name.charAt(0).toUpperCase() + name.slice(1)} ${x}`;
+
+            function* col_iter() {
+                for (const name of ["float", "integer", "string", "datetime", "boolean"]) {
+                    const ncols = window[`num_${name}`].value;
+                    for (let x = 0; x < ncols; x ++) {
+                        yield [name, x];;
+                    }
+                }
+            }
+
+            const assign = fn => {
+                const obj = {};
+                for (const [name, x] of col_iter()) {
+                    obj[colname(name, x)] = fn(name, x);
+                }
+                return obj;
+            }
+
+            const new_schema = () => assign(x => x);
+
+            let STRINGS;
+            function reset_strings_cache() {
+                STRINGS = {};
+            }
+
+            reset_strings_cache();
+
+            const get_dict = xs => {
+                STRINGS[xs] = STRINGS[xs] || strings(parseInt(num_strings.value));
+                return STRINGS[xs];
+            }
+
+            const CELL_ARGS = {
+                "float": () => range(-10, 10),
+                "integer": () => Math.floor(range(-10, 10)),
+                "string" : xs => choose(get_dict(xs)),
+                "datetime": () => new Date(),
+                "boolean": () => choose([true, false, null])
+            };
+
+            const new_row = () => assign((name, x) => CELL_ARGS[name](x));
+
+            const gen_data = async () => {
+                reset_strings_cache();
+                let nrows = num_rows.value;
+                let rows = [];
+                const batch_size = Math.floor(nrows / num_batches.value);
+                const tbl = await WORKER.table(new_schema());
+                (function batch() {
+                    while (nrows > 0) {
+                        rows.push(new_row());
+                        nrows--;
+                        if (nrows % batch_size === 0) {
+                            tbl.update(rows);
+                            rows = [];
+                            setTimeout(batch, 100);
+                            break;
+                        }
+                    }
+                })();
+                return tbl;
+            }
+
+            // GUI
+
+            const make_run_click_callback = (state) => async () => {            
+                const old_table = state.table
+                state.table = gen_data();
+                await window.viewer.load(state.table);
+                if (old_table) {
+                    old_table.then(old_table => {
+                        if (old_table) {
+                            old_table.delete();
+                        }
+                    });
+                }            
+            }
+
+            // Main
+
+            window.addEventListener("DOMContentLoaded", async function () {
+                run.addEventListener("click", make_run_click_callback({}));
+                run.dispatchEvent(new Event("click"));
+            });
+
+        </script>
+    </body>
+</html>

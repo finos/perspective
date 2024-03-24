@@ -11,18 +11,25 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 @mixin scrollbar {
-        &::-webkit-scrollbar-thumb {
-            border: 0 solid var(--icon--color);
-            border-left-width: 1px;
-        }
+    &:hover {
+        --fix: ;
+    }
 
-        &::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
+    &::-webkit-scrollbar-thumb {
+        border-radius: 2px;
+        border: 2px solid transparent;
+        box-shadow: inset 0px 0px 0 4px var(--inactive--color);
+    }
 
-        &::-webkit-scrollbar,
-        &::-webkit-scrollbar-corner {
-            background-color: transparent;
-            width: 6px;
-        }
+    &:hover::-webkit-scrollbar-thumb {
+        border: 1px solid transparent;
+        box-shadow: inset 0px 0px 0 4px var(--inactive--color);
+    }
+
+    &::-webkit-scrollbar,
+    &::-webkit-scrollbar-corner {
+        background-color: transparent;
+        width: 6px;
+        height: 6px;
+    }
 }

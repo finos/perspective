@@ -181,13 +181,18 @@ impl Session {
         self.borrow().config.is_column_expression_in_use(name)
     }
 
+    /// Is this column currently being used or not
     pub fn is_column_active(&self, name: &str) -> bool {
-        self.borrow().config.columns.iter().any(|maybe_col| {
+        let config = Ref::map(self.borrow(), |x| &x.config);
+        config.columns.iter().any(|maybe_col| {
             maybe_col
                 .as_ref()
                 .map(|col| col == name)
                 .unwrap_or_default()
-        })
+        }) || config.group_by.iter().any(|col| col == name)
+            || config.split_by.iter().any(|col| col == name)
+            || config.filter.iter().any(|col| col.0 == name)
+            || config.sort.iter().any(|col| col.0 == name)
     }
 
     pub fn create_drag_drop_update(

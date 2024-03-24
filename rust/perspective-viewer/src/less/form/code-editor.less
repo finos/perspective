@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@import "dom/scrollbar.less";
+
 :host {
     #editor {
         display: flex;
@@ -22,21 +24,24 @@
         }
 
         #editor-inner {
+            overflow: hidden;
             position: relative;
             display: flex;
             flex: 1 1 auto;
         }
 
         #line_numbers {
-            pointer-events: none;
-            padding: 6px 0 6px 6px;
+            color: var(--inactive--color);
+            background-color: var(--plugin--background, white);
             box-sizing: border-box;
-            font-weight: 400;
-            font-family: var(--interface-monospace--font-family, monospace);
             display: flex;
             flex-direction: column;
+            flex: 0 0 auto;
+            font-family: var(--interface-monospace--font-family, monospace);
+            font-weight: 400;
             overflow: hidden;
-            background-color: var(--plugin--background, white);
+            padding: 6px 0 6px 6px;
+            pointer-events: none;
             span:after {
                 color: var(--code-editor-error--color, red);
                 white-space: pre;
@@ -50,7 +55,7 @@
         }
 
         pre#content {
-            margin: 0;
+            margin: 0 6px 6px 0;
             padding: 6px 0;
             // margin-left: 36px;
             box-sizing: border-box;
@@ -100,8 +105,10 @@
         }
 
         #textarea_editable {
+            @include scrollbar;
+
             position: absolute;
-            width: calc(100% - 36px);
+            width: 100%;
             height: 100%;
             font-family: var(--interface-monospace--font-family, monospace);
             font-size: 1em;

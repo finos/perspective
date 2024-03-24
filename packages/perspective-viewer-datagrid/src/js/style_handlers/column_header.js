@@ -59,7 +59,7 @@ export function style_selected_column(regularTable, viewer, selectedColumn) {
                 const title = titles[i];
                 const editBtn = editBtns[i];
 
-                let open = title.innerText === selectedColumn;
+                let open = title.textContent === selectedColumn;
                 title.classList.toggle("psp-menu-open", open);
                 editBtn.classList.toggle("psp-menu-open", open);
                 if (this._config.columns.length > 1) {

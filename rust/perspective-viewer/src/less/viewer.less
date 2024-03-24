@@ -55,6 +55,49 @@
     left: -26px;
 }
 
+:host #debug_close_button.sidebar_close_button .sidebar_close_button_inner {
+    background-attachment: fixed;
+    background-color: var(--plugin--background);
+    background-image: url(../svg/bg-pattern.png);
+    background-size: 4px;
+
+    &:before {
+        mask-image: url(../svg/drawer-tab-hover.svg);
+        -webkit-mask-image: url(../svg/drawer-tab-hover.svg);
+    }
+}
+
+:host
+    #debug_close_button.sidebar_close_button:hover
+    .sidebar_close_button_inner:before {
+    mask-image: url(../svg/drawer-tab.svg);
+    -webkit-mask-image: url(../svg/drawer-tab.svg);
+}
+
+:host #debug_open_button.sidebar_close_button {
+    right: 0px;
+    cursor: pointer;
+    .sidebar_close_button_inner {
+        background-color: transparent;
+    }
+}
+
+:host #debug_open_button.sidebar_close_button .sidebar_close_button_inner {
+    &:before {
+        mask-image: url(../svg/drawer-tab-invert.svg);
+        -webkit-mask-image: url(../svg/drawer-tab-invert.svg);
+    }
+
+    &:hover:before {
+        mask-image: url(../svg/drawer-tab-invert-hover.svg);
+        -webkit-mask-image: url(../svg/drawer-tab-invert-hover.svg);
+    }
+}
+
+:host #debug_close_button.sidebar_close_button {
+    right: 0px;
+}
+
 :host(:hover) {
     #menu-bar {
         opacity: 1 !important;

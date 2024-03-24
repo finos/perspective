@@ -54,6 +54,7 @@ use crate::*;
 ///     │                │└──────────────┘└───────┘││
 ///     │                └─────────────────────────┘│
 ///     └───────────────────────────────────────────┘
+#[derive(Clone)]
 #[wasm_bindgen]
 pub struct PerspectiveViewerElement {
     elem: HtmlElement,
@@ -258,97 +259,23 @@ impl PerspectiveViewerElement {
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
         global::document().blur_active_element();
-        clone!(self.session, self.renderer, self.root, self.presentation);
+        let this = self.clone();
         ApiFuture::new(async move {
             let decoded_update = ViewerConfigUpdate::decode(&update)?;
-
-            let ViewerConfigUpdate {
-                plugin,
-                plugin_config,
-                columns_config,
-                settings,
-                theme: theme_name,
-                title,
-                mut view_config,
-                ..//version
-            } = decoded_update;
-
-            if !session.has_table() {
-                if let OptionalUpdate::Update(x) = settings {
-                    presentation.set_settings_attribute(x);
-                }
-            }
-
-            if let OptionalUpdate::Update(title) = title {
-                presentation.set_title(Some(title));
-            } else if matches!(title, OptionalUpdate::SetDefault) {
-                presentation.set_title(None);
-            }
-
-            let needs_restyle = match theme_name {
-                OptionalUpdate::SetDefault => {
-                    let current_name = presentation.get_selected_theme_name().await;
-                    if current_name.is_some() {
-                        presentation.set_theme_name(None).await?;
-                        true
-                    } else {
-                        false
-                    }
-                },
-                OptionalUpdate::Update(x) => {
-                    let current_name = presentation.get_selected_theme_name().await;
-                    if current_name.is_some() && current_name.as_ref().unwrap() != &x {
-                        presentation.set_theme_name(Some(&x)).await?;
-                        true
-                    } else {
-                        false
-                    }
-                },
-                _ => false,
-            };
-
-            let plugin_changed = renderer.update_plugin(&plugin)?;
-            if plugin_changed {
-                session.set_update_column_defaults(&mut view_config, &renderer.metadata());
-            }
-
-            session.update_view_config(view_config);
-            let draw_task = renderer.draw(async {
-                let task = root
+            let settings = decoded_update.settings.clone();
+            let root = this.root.clone();
+            this.restore_and_render(decoded_update, async move {
+                let result = root
                     .borrow()
                     .as_ref()
-                    .ok_or("Already deleted")?
+                    .into_apierror()?
                     .send_message_async(move |x| {
                         PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
                     });
 
-                let internal_task = async {
-                    let plugin = renderer.get_active_plugin()?;
-                    let plugin_update = if let Some(x) = plugin_config {
-                        JsValue::from_serde_ext(&x).unwrap()
-                    } else {
-                        plugin.save()
-                    };
-                    presentation.update_columns_configs(columns_config);
-                    let columns_config = presentation.all_columns_configs();
-                    plugin.restore(&plugin_update, Some(&columns_config));
-                    session.validate().await?.create_view().await
-                }
-                .await;
-
-                task.await?;
-                internal_task
-            });
-
-            draw_task.await?;
-
-            // TODO this should be part of the API for `draw()` above, such that
-            // the plugin need not render twice when a theme is provided.
-            if needs_restyle {
-                let view = session.get_view().into_apierror()?;
-                renderer.restyle_all(&view).await?;
-            }
-
+                Ok(result.await?)
+            })
+            .await?;
             Ok(())
         })
     }

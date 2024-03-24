@@ -10,19 +10,46 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! `containers` are generic container-like components for collections of other
-//! `Component` types.
+use yew::*;
 
-pub mod dragdrop_list;
-pub mod dropdown_menu;
-pub mod kvpair;
-pub mod scroll_panel;
-pub mod scroll_panel_item;
-pub mod select;
-pub mod sidebar;
-pub mod split_panel;
-pub mod tab_list;
-pub mod trap_door_panel;
+use crate::clone;
 
-#[cfg(test)]
-mod tests;
+#[derive(Properties)]
+pub struct TrapDoorPanelProps {
+    pub id: Option<&'static str>,
+    pub class: Option<&'static str>,
+    pub children: Children,
+}
+
+impl PartialEq for TrapDoorPanelProps {
+    fn eq(&self, _other: &Self) -> bool {
+        false
+    }
+}
+
+/// A simple panel with an invisible inner `<div>` which stretches to fit the
+/// width of the container, but will not shrink (unless the state is reset).
+#[function_component(TrapDoorPanel)]
+pub fn trap_door_panel(props: &TrapDoorPanelProps) -> Html {
+    let sizer = use_node_ref();
+    let width = use_state_eq(|| 0.0);
+    use_effect({
+        clone!(width, sizer);
+        move || {
+            width.set(
+                sizer
+                    .cast::<web_sys::HtmlElement>()
+                    .unwrap()
+                    .get_bounding_client_rect()
+                    .width(),
+            )
+        }
+    });
+
+    html! {
+        <div id={props.id} class={props.class} ref={sizer}>
+            { props.children.clone() }
+            <div class="scroll-panel-auto-width" style={format!("width:{}px", *width)} />
+        </div>
+    }
+}

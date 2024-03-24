@@ -75,6 +75,7 @@ mod intersection_observer;
 mod is_invalid_drop;
 mod plugin_column_styles;
 mod resize_observer;
+mod restore_and_render;
 mod structural;
 mod update_and_render;
 
@@ -87,5 +88,6 @@ pub use self::intersection_observer::*;
 pub use self::is_invalid_drop::*;
 pub use self::plugin_column_styles::*;
 pub use self::resize_observer::*;
+pub use self::restore_and_render::*;
 pub use self::structural::*;
 pub use self::update_and_render::*;
