@@ -80,5 +80,9 @@ pub struct SidebarCloseButtonProps {
 pub fn SidebarCloseButton(p: &SidebarCloseButtonProps) -> Html {
     let onclick = yew::use_callback(p.on_close_sidebar.clone(), |_, cb| cb.emit(()));
     let id = &p.id;
-    html! { <div {onclick} {id} class="sidebar_close_button" /> }
+    html! {
+        <div {onclick} {id} class="sidebar_close_button">
+            <div class="sidebar_close_button_inner" />
+        </div>
+    }
 }

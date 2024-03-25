@@ -10,25 +10,46 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::{function_component, html, Html, Properties};
+use yew::*;
 
-use super::save_settings::{SaveSettings, SaveSettingsProps};
-use crate::components::expression_editor::{ExpressionEditor, ExpressionEditorProps};
+use crate::clone;
 
-#[derive(PartialEq, Properties, Clone)]
-pub struct AttributesTabProps {
-    pub expr_editor: ExpressionEditorProps,
-    pub save_section: SaveSettingsProps,
+#[derive(Properties)]
+pub struct TrapDoorPanelProps {
+    pub id: Option<&'static str>,
+    pub class: Option<&'static str>,
+    pub children: Children,
 }
 
-#[function_component]
-pub fn AttributesTab(p: &AttributesTabProps) -> Html {
+impl PartialEq for TrapDoorPanelProps {
+    fn eq(&self, _other: &Self) -> bool {
+        false
+    }
+}
+
+/// A simple panel with an invisible inner `<div>` which stretches to fit the
+/// width of the container, but will not shrink (unless the state is reset).
+#[function_component(TrapDoorPanel)]
+pub fn trap_door_panel(props: &TrapDoorPanelProps) -> Html {
+    let sizer = use_node_ref();
+    let width = use_state_eq(|| 0.0);
+    use_effect({
+        clone!(width, sizer);
+        move || {
+            width.set(
+                sizer
+                    .cast::<web_sys::HtmlElement>()
+                    .unwrap()
+                    .get_bounding_client_rect()
+                    .width(),
+            )
+        }
+    });
+
     html! {
-        <div id="attributes-tab">
-            <div class="tab-section" id="attributes-expr">
-                <ExpressionEditor ..p.expr_editor.clone() />
-            </div>
-            <div class="tab-section"><SaveSettings ..p.save_section.clone() /></div>
+        <div id={props.id} class={props.class} ref={sizer}>
+            { props.children.clone() }
+            <div class="scroll-panel-auto-width" style={format!("width:{}px", *width)} />
         </div>
     }
 }

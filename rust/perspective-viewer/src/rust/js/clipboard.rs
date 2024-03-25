@@ -16,11 +16,19 @@ use std::rc::Rc;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
 
 use super::mimetype::*;
 use crate::js::clipboard_item::*;
 use crate::utils::*;
 use crate::*;
+
+pub async fn paste_from_clipboard() -> Option<String> {
+    JsFuture::from(global::clipboard().read_text())
+        .await
+        .ok()
+        .and_then(|x| x.as_string())
+}
 
 /// Copy a `JsPerspectiveView` to the clipboard as a CSV.
 pub fn copy_to_clipboard(

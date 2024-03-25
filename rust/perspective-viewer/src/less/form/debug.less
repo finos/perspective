@@ -10,81 +10,79 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "dom/scrollbar.less";
-
 :host {
-    .tab-gutter {
-        border-color: var(--inactive--color, #6e6e6e);
-        display: flex;
-
-        .tab.tab-padding {
-            flex: 1;
-            cursor: unset;
-            .tab-title {
-                border-right: none;
-            }
-            .tab-border {
-                border-right: none;
-            }
-        }
-
-        .tab {
-            //TODO: This needs to be a variable color. Which one?
-            background: rgba(0, 0, 0, 0.125);
-            border-right: 1px solid var(--inactive--color, #6e6e6e);
-            user-select: none;
-            cursor: pointer;
-
-            .tab-title {
-                font-size: 10px;
-                padding: 10px;
-                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
-            }
-            .tab-border {
-                height: 2px;
-                width: 100%;
-                background-color: var(--inactive--color, #6e6e6e);
-                margin-top: 1px;
-            }
-
-            &.selected {
-                background: unset;
-                border-bottom: 1px transparent;
-
-                .tab-title {
-                    border-bottom: 1px transparent;
-                    border-right: none;
-                }
-                .tab-border {
-                    background-color: transparent;
-                    border-right: none;
-                }
-            }
-        }
+    div.tab-title#Debug:before {
+        content: var(--debug-tab-label--content, "Debug JSON");
     }
 
-    #format-tab {
-        overflow: scroll;
-    }
-
-    .tab-content {
-        @include scrollbar;
-        flex: 1 1 auto;
+    #debug-panel-overflow {
         overflow: hidden;
         display: flex;
-        flex-direction: column;
-        .tab-section:last-child {
+    }
+
+    .tab-padding {
+        border-right: none;
+    }
+
+    .tab-title {
+        height: 36px;
+    }
+
+    #debug-panel {
+        display: flex;
+        min-width: 150px;
+        label {
+            display: block;
+            margin-bottom: 2px;
+            font-size: var(--label--font-size, 0.75em);
+        }
+
+        #debug-panel-controls {
+            display: flex;
+            flex: 0 0 auto;
+            gap: 0.333333em;
+            padding: 0px 8px 12px 8px;
+            align-items: center;
+            button {
+                appearance: none;
+                background-color: transparent;
+                border-radius: 3px;
+                border: 1px solid var(--icon--color);
+                color: inherit;
+                cursor: pointer;
+                flex: 0 1 100px;
+                font-family: inherit;
+                font-size: 0.8333em;
+                text-transform: uppercase;
+                height: 24px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                width: 0px;
+                &:not([disabled]):hover {
+                    background-color: var(--icon--color);
+                    color: var(--plugin--background);
+                }
+
+                &[disabled] {
+                    cursor: not-allowed;
+                    opacity: 0.2;
+                }
+            }
+        }
+
+        #debug-panel-editor {
+            display: flex;
+            flex-direction: column;
+            flex: 0 1 auto;
+            overflow: hidden;
             padding: 12px 8px 12px 8px;
         }
 
-        .tab-section {
-            padding: 12px 8px 0px 8px;
-            flex: 0 0 auto;
-            overflow: hidden;
-        }
-
-        .text {
-            margin-left: 1em;
+        #editor {
+            background-color: var(--plugin--background);
+            border: 1px solid var(--inactive--color);
+            border-radius: 2px;
+            // height: 100%;
         }
     }
 }

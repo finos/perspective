@@ -70,6 +70,7 @@ gen_tee!(T, T, T, T);
 gen_tee!(T, T, T, T, T);
 gen_tee!(T, T, T, T, T, T);
 gen_tee!(T, T, T, T, T, T, T);
+gen_tee!(T, T, T, T, T, T, T, T);
 
 #[cfg(test)]
 mod tests {

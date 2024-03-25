@@ -95,7 +95,7 @@ impl<T: Tab> Component for TabList<T> {
                         <div class="tab-border" />
                     </span>
                 </div>
-                <div class="tab-content">
+                <div id="format-tab" class="tab-content">
                     { ctx.props().children.iter().nth(self.selected_idx) }
                 </div>
             </>

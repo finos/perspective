@@ -19,11 +19,22 @@ use crate::*;
 /// but `Deref` makes them fall through, so it is important that this method
 /// be called on the correct struct type!
 pub trait CaretPosition {
+    fn select_all(&self) -> ApiResult<()>;
     fn set_caret_position(&self, offset: usize) -> ApiResult<()>;
     fn get_caret_position(&self) -> Option<u32>;
 }
 
 impl CaretPosition for web_sys::HtmlElement {
+    fn select_all(&self) -> ApiResult<()> {
+        let range = global::document().create_range()?;
+        let selection = global::window().get_selection()?.into_apierror()?;
+        range.set_start(self, 0_u32)?;
+        range.set_end(self, 10000000_u32)?;
+        selection.remove_all_ranges()?;
+        selection.add_range(&range)?;
+        Ok(())
+    }
+
     fn set_caret_position(&self, offset: usize) -> ApiResult<()> {
         let range = global::document().create_range()?;
         let selection = global::window().get_selection()?.into_apierror()?;
@@ -50,8 +61,13 @@ impl CaretPosition for web_sys::HtmlElement {
 }
 
 impl CaretPosition for web_sys::HtmlTextAreaElement {
+    fn select_all(&self) -> ApiResult<()> {
+        self.set_selection_start(Some(0_u32))?;
+        self.set_selection_end(Some(1000000000_u32))?;
+        Ok(())
+    }
+
     fn set_caret_position(&self, offset: usize) -> ApiResult<()> {
-        self.focus().unwrap();
         self.set_selection_end(Some(offset as u32))?;
         self.set_selection_start(Some(offset as u32))?;
         Ok(())

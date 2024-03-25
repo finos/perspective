@@ -127,7 +127,7 @@ test.describe("Plugin Styles", () => {
             // @ts-ignore
             window.__TEST_TABLE__ = table;
             let viewer = document.querySelector("perspective-viewer");
-            viewer?.load(table);
+            await viewer?.load(table);
         });
 
         let view = new PageView(page);

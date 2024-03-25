@@ -111,7 +111,9 @@ pub fn tokenize(input: &str) -> Vec<Token<'_>> {
     let number = map(parse_number_literal, |x| vec![Token::Literal(x)]);
     let whitespace = map(space1, |x| vec![Token::Whitespace(x)]);
     let linebreak = map(line_ending, |x| vec![Token::Break(x)]);
-    let ops = map(is_a("+-/*^%&|=:;,.(){}[]"), |x| vec![Token::Operator(x)]);
+    let ops = map(is_a("+-/*^%&|=:;,.(){}[]<>\\"), |x| {
+        vec![Token::Operator(x)]
+    });
     let unknown = map(is_not(" \t\n\r"), |x| vec![Token::Unknown(x)]);
     let token = alt((
         comment, string, column, symbol, number, whitespace, linebreak, ops, unknown,

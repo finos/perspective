@@ -12,7 +12,7 @@
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use derivative::Derivative;
 use futures::channel::oneshot::*;
@@ -116,6 +116,13 @@ impl<T: Clone + 'static> PubSub<T> {
         self.0.once_listeners.borrow_mut().insert(Box::new(f));
         receiver.await
     }
+
+    /// Create a `Subscriber` from this `PubSub`, which is the reciprocal of
+    /// `PubSub::callback` (a struct which only allows sending), a struct which
+    /// only allows receiving via `Subscriber::add_listener`.
+    pub fn subscriber(&self) -> Subscriber<T> {
+        Subscriber(Rc::<PubSubInternal<T>>::downgrade(&self.0))
+    }
 }
 
 impl<T: Clone> Drop for PubSub<T> {
@@ -146,6 +153,47 @@ where
         Subscription(Box::new(move || {
             internal.listeners.borrow_mut().remove(key)
         }))
+    }
+}
+
+/// Like a `PubSub` without `PubSub::emit`; the reciprocal of
+/// `PubSub::callback`. `Subscriber` does not keep the parent `PubSub` alive.
+#[derive(Clone)]
+pub struct Subscriber<T: Clone>(Weak<PubSubInternal<T>>);
+
+impl<T, U> AddListener<U> for Subscriber<T>
+where
+    T: Clone + 'static,
+    U: Fn(T) + 'static,
+{
+    fn add_listener(&self, f: U) -> Subscription {
+        if let Some(internal) = self.0.upgrade() {
+            let key = internal.listeners.borrow_mut().insert(Box::new(f));
+            Subscription(Box::new(move || {
+                internal.listeners.borrow_mut().remove(key)
+            }))
+        } else {
+            Subscription(Box::new(|| {}))
+        }
+    }
+}
+
+impl<T: Clone> Default for Subscriber<T> {
+    fn default() -> Self {
+        Self(Weak::new())
+    }
+}
+
+impl<T: Clone> PartialEq for Subscriber<T> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self.0.upgrade(), other.0.upgrade()) {
+            (Some(x), Some(y)) => std::ptr::eq(
+                &*x as *const PubSubInternal<T>,
+                &*y as *const PubSubInternal<T>,
+            ),
+            (None, None) => true,
+            _ => false,
+        }
     }
 }
 
