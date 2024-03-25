@@ -1,3 +1,12 @@
+# [v2.10.0](https://github.com/finos/perspective/releases/tag/v2.10.0)
+
+_25 March 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.9.0...v2.10.0))
+
+Features
+
+- Debug component [#2574](https://github.com/finos/perspective/pull/2574)
+- Expression editor & filter UX updates [#2572](https://github.com/finos/perspective/pull/2572)
+
 # [v2.9.0](https://github.com/finos/perspective/releases/tag/v2.9.0)
 
 _12 March 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.8.1...v2.9.0))
