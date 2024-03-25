@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.9.0/dist/cdn/perspective.js";
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.10.0/dist/cdn/perspective.js";
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d", { willReadFrequently: true });
