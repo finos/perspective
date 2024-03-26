@@ -176,7 +176,7 @@ class PSPBuild(build_ext):
                 "14.1": "Visual Studio 15 2017",
                 "14.2": "Visual Studio 16 2019",
                 "14.3": "Visual Studio 17 2022",
-            }.get(dm.get_build_version(), "Visual Studio 15 2017")
+            }.get(str(dm.get_build_version()), "Visual Studio 15 2017")
 
             cmake_args.extend(
                 [
