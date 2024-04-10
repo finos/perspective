@@ -429,11 +429,13 @@ namespace binding {
         std::int32_t end_col,
         bool compress
     ) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<std::string> str = view->to_arrow(
-            start_row, end_row, start_col, end_col, true, compress
-        );
+        std::shared_ptr<std::string> str;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            str = view->to_arrow(
+                start_row, end_row, start_col, end_col, true, compress);
+        }
         return py::bytes(*str);
     }
 
@@ -446,11 +448,13 @@ namespace binding {
         std::int32_t end_col,
         bool compress
     ) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<std::string> str = view->to_arrow(
-            start_row, end_row, start_col, end_col, true, compress
-        );
+        std::shared_ptr<std::string> str;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            str = view->to_arrow(
+                start_row, end_row, start_col, end_col, true, compress);
+        }
         return py::bytes(*str);
     }
 
@@ -463,11 +467,13 @@ namespace binding {
         std::int32_t end_col,
         bool compress
     ) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<std::string> str = view->to_arrow(
-            start_row, end_row, start_col, end_col, true, compress
-        );
+        std::shared_ptr<std::string> str;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            str = view->to_arrow(
+                start_row, end_row, start_col, end_col, true, compress);
+        }
         return py::bytes(*str);
     }
 
@@ -530,41 +536,49 @@ namespace binding {
 
     py::bytes
     get_row_delta_unit(std::shared_ptr<View<t_ctxunit>> view) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<t_data_slice<t_ctxunit>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow =
-            view->data_slice_to_arrow(slice, false, false);
+        std::shared_ptr<std::string> arrow;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            std::shared_ptr<t_data_slice<t_ctxunit>> slice = view->get_row_delta();
+            arrow = view->data_slice_to_arrow(slice, false, false);
+        }
         return py::bytes(*arrow);
     }
 
     py::bytes
     get_row_delta_zero(std::shared_ptr<View<t_ctx0>> view) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<t_data_slice<t_ctx0>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow =
-            view->data_slice_to_arrow(slice, false, false);
+        std::shared_ptr<std::string> arrow;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            std::shared_ptr<t_data_slice<t_ctx0>> slice = view->get_row_delta();
+            arrow = view->data_slice_to_arrow(slice, false, false);
+        }
         return py::bytes(*arrow);
     }
 
     py::bytes
     get_row_delta_one(std::shared_ptr<View<t_ctx1>> view) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<t_data_slice<t_ctx1>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow =
-            view->data_slice_to_arrow(slice, false, false);
+        std::shared_ptr<std::string> arrow;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            std::shared_ptr<t_data_slice<t_ctx1>> slice = view->get_row_delta();
+            arrow = view->data_slice_to_arrow(slice, false, false);
+        }
         return py::bytes(*arrow);
     }
 
     py::bytes
     get_row_delta_two(std::shared_ptr<View<t_ctx2>> view) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<t_data_slice<t_ctx2>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow =
-            view->data_slice_to_arrow(slice, false, false);
+        std::shared_ptr<std::string> arrow;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            std::shared_ptr<t_data_slice<t_ctx2>> slice = view->get_row_delta();
+            arrow = view->data_slice_to_arrow(slice, false, false);
+        }
         return py::bytes(*arrow);
     }
 
