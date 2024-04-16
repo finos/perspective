@@ -412,11 +412,13 @@ namespace binding {
         std::int32_t end_col,
         bool compress
     ) {
-        PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
-        std::shared_ptr<std::string> str = view->to_arrow(
-            start_row, end_row, start_col, end_col, true, compress
-        );
+        std::shared_ptr<std::string> str;
+        {
+            PSP_GIL_UNLOCK();
+            PSP_READ_LOCK(view->get_lock());
+            str = view->to_arrow(
+                start_row, end_row, start_col, end_col, true, compress);
+        }
         return py::bytes(*str);
     }
 
