@@ -415,24 +415,28 @@ _*index.html*_
     window.addEventListener("DOMContentLoaded", async function () {
         // Create a client that expects a Perspective server
         // to accept connections at the specified URL.
-        const websocket = perspective.websocket(
-            "ws://localhost:8888/websocket"
-        );
+        const websocket = perspective.websocket("ws://localhost:8888/websocket");
 
         // Get a handle to the Table on the server
-        const server_table = websocket.open_table("data_source_one");
+        const server_table = await websocket.open_table("data_source_one");
 
-        // Create a new view
-        const server_view = await table.view();
+        // Create a new view from the server table
+        const server_view = await server_table.view();
 
         // Create a Table on the client using `perspective.worker()`
         const worker = perspective.worker();
-        const client_table = await worker.table(view);
+        
+        // Convert the server view to JSON
+        const view_data = await server_view.to_json();
+        
+        // Create a client-side table with the data from the server view
+        const client_table = await worker.table(view_data);
 
-        // Load the client table in the `<perspective-viewer>`.
+        // Load the client-side table in the `<perspective-viewer>`.
         document.getElementById("viewer").load(client_table);
     });
 </script>
+
 ```
 
 For a more complex example that offers distributed editing of the server
