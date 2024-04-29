@@ -1179,58 +1179,58 @@ jobs:
                   path: python/perspective/dist/*.tar.gz
               if: ${{ matrix.os == 'macos-11' }}
 
-    build_pyodide:
-        strategy:
-            matrix:
-                os: [ubuntu-20.04]
-        runs-on: ${{ matrix.os }}
-        needs: [initialize]
-        env:
-            PYODIDE_VERSION: 0.25.0
-            # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
-            # The appropriate versions can be found in the Pyodide repodata.json
-            # "info" field, or in Makefile.envs:
-            # https://github.com/pyodide/pyodide/blob/0.25.0/Makefile.envs#L2
-            PYTHON_VERSION: 3.11.3
-            EMSCRIPTEN_VERSION: 3.1.46
-        steps:
-            - name: Checkout perspective
-              uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+    # build_pyodide:
+    #     strategy:
+    #         matrix:
+    #             os: [ubuntu-20.04]
+    #     runs-on: ${{ matrix.os }}
+    #     needs: [initialize]
+    #     env:
+    #         PYODIDE_VERSION: 0.25.0
+    #         # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
+    #         # The appropriate versions can be found in the Pyodide repodata.json
+    #         # "info" field, or in Makefile.envs:
+    #         # https://github.com/pyodide/pyodide/blob/0.25.0/Makefile.envs#L2
+    #         PYTHON_VERSION: 3.11.3
+    #         EMSCRIPTEN_VERSION: 3.1.46
+    #     steps:
+    #         - name: Checkout perspective
+    #           uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
-            - name: set up python
-              id: setup-python
-              uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
-              with:
-                  python-version: ${{ env.PYTHON_VERSION }}
+    #         - name: set up python
+    #           id: setup-python
+    #           uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+    #           with:
+    #               python-version: ${{ env.PYTHON_VERSION }}
 
-            - uses: mymindstorm/setup-emsdk@ab889da2abbcbb280f91ec4c215d3bb4f3a8f775 # v12
-              with:
-                  version: ${{ env.EMSCRIPTEN_VERSION }}
-                  actions-cache-folder: emsdk-cache
+    #         - uses: mymindstorm/setup-emsdk@ab889da2abbcbb280f91ec4c215d3bb4f3a8f775 # v12
+    #           with:
+    #               version: ${{ env.EMSCRIPTEN_VERSION }}
+    #               actions-cache-folder: emsdk-cache
 
-            - name: copy files
-              run: |
-                  npm install -g yarn
-                  yarn --frozen-lockfile
-                  yarn build_python --setup-only
+    #         - name: copy files
+    #           run: |
+    #               npm install -g yarn
+    #               yarn --frozen-lockfile
+    #               yarn build_python --setup-only
 
-            - name: Linux init steps
-              run: sudo node tools/perspective-scripts/install_tools.mjs
+    #         - name: Linux init steps
+    #           run: sudo node tools/perspective-scripts/install_tools.mjs
 
-            - name: Install pyodide-build
-              run: pip install pyodide-build==$PYODIDE_VERSION "pydantic<2"
+    #         - name: Install pyodide-build
+    #           run: pip install pyodide-build==$PYODIDE_VERSION "pydantic<2"
 
-            - name: Build
-              # Without --exports=pyinit, pyodide-build tries to export all symbols from every .o,
-              # which causes the em++ linker command line invocation to be so long
-              # that the command fails.
-              run: pyodide build python/perspective --exports=pyinit
+    #         - name: Build
+    #           # Without --exports=pyinit, pyodide-build tries to export all symbols from every .o,
+    #           # which causes the em++ linker command line invocation to be so long
+    #           # that the command fails.
+    #           run: pyodide build python/perspective --exports=pyinit
 
-            - name: Upload pyodide wheel
-              uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-python-dist-pyodide
-                  path: dist/*.whl
+    #         - name: Upload pyodide wheel
+    #           uses: actions/upload-artifact@v3
+    #           with:
+    #               name: perspective-python-dist-pyodide
+    #               path: dist/*.whl
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1861,7 +1861,7 @@ jobs:
                 test_js_and_python,
                 test_python,
                 test_python_sdist,
-                build_pyodide,
+                # build_pyodide,
                 test_js,
                 benchmark_js,
                 benchmark_python,
