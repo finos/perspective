@@ -30,9 +30,8 @@ we may remove or reclassify comments or Issues which violate the guidelines.
 When submitting Pull Request (PR), please respect the following coding
 guidelines:
 
--   Complete your
-    [FINOS CLA](https://finosfoundation.atlassian.net/wiki/spaces/FINOS/pages/75530375/Contribution+Compliance+Requirements#ContributionComplianceRequirements-ContributorLicenseAgreement)
-    _before_ opening a PR.
+-   Sign commits (e.g. with `-s`) in accordance with the DCO policy detailed
+    below, _before_ opening a PR.
 -   Please make sure PRs include:
 
     -   Tests asserting behavior of any new or modified features.
@@ -47,29 +46,23 @@ guidelines:
     -   Try to organize commits as functional components (as opposed to
         timeline-of-development).
 
-## CLA
+Please note that non substantive changes, large changes without prior
+discussion, etc, are not accepted and pull requests may be closed.
 
-Note that commits and pull requests to FINOS repositories such as Perspective
-may only be accepted from those contributors with a
-[Contributor License Agreement (CLA)](https://finosfoundation.atlassian.net/wiki/spaces/FINOS/pages/75530375/Contribution+Compliance+Requirements#ContributionComplianceRequirements-ContributorLicenseAgreement)
-with FINOS. This may take the form of either:
+## DCO
 
--   an active, executed Individual Contributor License Agreement (ICLA) with
-    FINOS, OR
--   coverage under an existing, active Corporate Contribution License Agreement
-    (CCLA) executed with FINOS (most likely by the developer's employer). Please
-    note that some, though not all, CCLAs require individuals/employees to be
-    explicitly named on the CCLA.
+The Perspective project requires contributors to affirm their contributions via
+a [Developer Certificate of Origin](https://developercertificate.org), which
+certifies that developers are authorized to make their contribution, either on
+their own behalf or on behalf of their employer.
 
-Commits from individuals not covered under an CLA can not be merged by
-Perspective's committers. We encourage you to check that you have a CLA in place
-well in advance of making your first pull request.
-
-Need an ICLA? Unsure if you are covered under an existing CCLA? Confused? Email
-[help@finos.org](mailto:help@finos.org) and the foundation team will help get it
-sorted out for you.
+In practice, this means that all commits to Perspective must be signed (e.g.
+with `-s`/`-S`). Pull requests with any unsigned commits, or where the signer
+does not match the commit author, can not be merged by Perspective's committers.
+We ask that you check that you have a signed all your commits before making a
+pull request. A [DCO enforcement bot](https://github.com/apps/dco) will
+automatically scan and flag any pull requests that lack a valid sign-off.
 
 If you have any general questions about contributing to Perspective, please feel
-free to open an issue on
-[github](https://github.com/finos/perspective/issues/new), or email
-[help@finos.org](mailto:finos.org).
+free to open an discussion on
+[github](https://github.com/finos/perspective/discussions)
