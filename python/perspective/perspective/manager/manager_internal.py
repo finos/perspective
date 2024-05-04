@@ -212,6 +212,7 @@ class _PerspectiveManagerInternal(object):
                         # calls to `delete` on the view and return.
                         self._views[msg["name"]].delete()
                         self._views.pop(msg["name"], None)
+                        post_callback(self._message_to_json(msg["id"], {"id": msg["id"]}))
                         return
                     else:
                         # Return an error when `table.delete()` is called
