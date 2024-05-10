@@ -10,42 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "@finos/perspective-viewer/dist/css/themes.css";
+import THEMES from "../../../dist/css/perspective-jupyterlab.css";
 
-div.PSPContainer {
-    overflow: auto;
-    padding-right: 5px;
-    padding-bottom: 5px;
-    height: 100%;
-    width: 100%;
-    flex: 1;
-}
-
-.jp-Notebook div.PSPContainer {
-    resize: vertical;
-}
-
-// Widget height for Jupyterlab
-.jp-NotebookPanel-notebook div.PSPContainer {
-    height: 520px;
-}
-
-// Widget height for Jupyter Notebook
-.jupyter-widgets-view div.PSPContainer {
-    height: 520px;
-}
-
-// Widget height for VS Code
-body[data-vscode-theme-id] .cell-output-ipywidget-background div.PSPContainer {
-    min-height: 520px;
-    height: 520px;
-}
-
-div.PSPContainer perspective-viewer[theme="Pro Light"] {
-    --plugin--border: 1px solid #e0e0e0;
-}
-
-div.PSPContainer perspective-viewer {
-    display: block;
-    height: 98%;
-}
+// Export the required load_ipython_extension
+exports.load_css = () => {
+    const style = document.createElement("style");
+    style.textContent = THEMES;
+    document.head.appendChild(style);
+};
