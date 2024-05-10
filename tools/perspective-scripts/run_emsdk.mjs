@@ -20,7 +20,7 @@ const emsdkdir = sh.path`${__dirname}/../../.emsdk`;
 const {
     default: { emscripten },
 } = await import(sh.path`${__dirname}/../../package.json`, {
-    assert: { type: "json" },
+    with: { type: "json" },
 });
 
 if (!emscripten) {
