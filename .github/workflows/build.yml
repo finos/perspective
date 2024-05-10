@@ -85,7 +85,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   # for pull_request so we can do HEAD^2
                   fetch-depth: 2
@@ -191,7 +191,7 @@ jobs:
                     - ubuntu-22.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [18.x]
+                node-version: [20.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -203,7 +203,7 @@ jobs:
 
         steps:
             - name: Clean System
-              uses: AdityaGarg8/remove-unwanted-software@v2
+              uses: AdityaGarg8/remove-unwanted-software@v3
               if: ${{ runner.os == 'Linux' }}
               with:
                   remove-android: "true"
@@ -212,7 +212,7 @@ jobs:
                   remove-codeql: "true"
 
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
@@ -226,7 +226,7 @@ jobs:
                   version: 9
 
             - name: Setup emsdk cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               id: emsdk-cache
               with:
                   path: .emsdk
@@ -238,7 +238,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -249,7 +249,7 @@ jobs:
             ################
             # Cargo Cache
             - name: Setup cargo cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       ~/.cargo/bin/
@@ -272,13 +272,13 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -296,7 +296,7 @@ jobs:
             ################
             ################
             - name: Install LLVM 17
-              uses: KyleMayes/install-llvm-action@v1
+              uses: KyleMayes/install-llvm-action@v2
               with:
                   version: "17"
                   directory: "./.llvm"
@@ -346,65 +346,65 @@ jobs:
             # Upload built JS artifacts for tests
             #
             # (listed here in the same order they appear in the directory)
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-esbuild-plugin-dist
                   path: packages/perspective-esbuild-plugin/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-webpack-plugin-dist
                   path: packages/perspective-webpack-plugin/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-cli-dist
                   path: packages/perspective-cli/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
             ######################################################
             # Upload Jupyter artifacts for python build/test/dist
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
                   if-no-files-found: error # TODO
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
@@ -445,10 +445,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Install LLVM 17
-              uses: KyleMayes/install-llvm-action@v1
+              uses: KyleMayes/install-llvm-action@v2
               with:
                   version: "17"
                   directory: "./.llvm"
@@ -467,7 +467,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -479,13 +479,13 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -550,7 +550,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [18.x]
+                node-version: [20.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -562,7 +562,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
@@ -576,7 +576,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -587,7 +587,7 @@ jobs:
             ################
             # Cargo Cache
             - name: Setup cargo cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       ~/.cargo/bin/
@@ -602,13 +602,13 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -641,37 +641,37 @@ jobs:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
@@ -685,7 +685,7 @@ jobs:
             ######################
             # Fancy HTML reports #
             ######################
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               if: failure()
               with:
                   name: playwright-report
@@ -710,12 +710,12 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-20.04]
-                node-version: [18.x]
+                node-version: [20.x]
         runs-on: ${{ matrix.os }}
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
@@ -727,7 +727,7 @@ jobs:
                   version: 9
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -746,37 +746,37 @@ jobs:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
@@ -784,7 +784,7 @@ jobs:
             - name: Benchmarks
               run: pnpm run bench
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-js-benchmarks
                   path: tools/perspective-bench/dist/benchmark-js.arrow
@@ -831,7 +831,7 @@ jobs:
                 container:
                     - none # Not manylinux, we will use this space to build the WASM assets
                     - 2014
-                node-version: [18.x]
+                node-version: [20.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:
@@ -884,7 +884,7 @@ jobs:
 
         steps:
             - name: Clean System
-              uses: AdityaGarg8/remove-unwanted-software@v2
+              uses: AdityaGarg8/remove-unwanted-software@v3
               if: ${{ runner.os == 'Linux' }}
               with:
                   remove-android: "true"
@@ -893,7 +893,7 @@ jobs:
                   remove-codeql: "true"
 
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             #####################################################
             # Conditionals                                      #
@@ -910,12 +910,12 @@ jobs:
             ################
             # JS Artifacts #
             ################
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
@@ -932,7 +932,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -943,7 +943,7 @@ jobs:
             ################
             # Homebrew Cache
             - name: Setup homebrew cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       ~/Library/Caches/Homebrew/boost--*
@@ -955,7 +955,7 @@ jobs:
             ################
             # vcpkg Cache
             - name: Setup vcpkg cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       C:\Users\runneradmin\AppData\Local\vcpkg\archives
@@ -971,14 +971,14 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -990,7 +990,7 @@ jobs:
             ################
             ################
             # - name: Install LLVM 17
-            #   uses: KyleMayes/install-llvm-action@v1
+            #   uses: KyleMayes/install-llvm-action@v2
             #   if: false
             #   with:
             #       version: "17"
@@ -1079,19 +1079,19 @@ jobs:
             ####################
             # Upload artifacts #
             ####################
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
                   path: python/perspective/dist/*.whl
               if: ${{ runner.os == 'Windows' }}
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
                   path: python/perspective/wheelhouse/*.whl
               if: ${{ runner.os != 'Windows' }}
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-sdist
                   path: python/perspective/dist/*.tar.gz
@@ -1145,7 +1145,7 @@ jobs:
               run: pyodide build python/perspective --exports=pyinit
 
             - name: Upload pyodide wheel
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-dist-pyodide
                   path: dist/*.whl
@@ -1177,7 +1177,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [18.x]
+                node-version: [20.x]
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
 
@@ -1189,44 +1189,44 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
@@ -1243,7 +1243,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1255,13 +1255,13 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -1286,7 +1286,7 @@ jobs:
               run: pnpm run _requires_python
 
             # Download artifact
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
@@ -1338,7 +1338,7 @@ jobs:
                     - 3.9
                     - "3.10"
                     - 3.11
-                node-version: [18.x]
+                node-version: [20.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:
@@ -1383,7 +1383,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
@@ -1397,7 +1397,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1409,13 +1409,13 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -1443,7 +1443,7 @@ jobs:
             # Python - Test #
             #################
             # Download artifact
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
@@ -1506,7 +1506,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
@@ -1520,7 +1520,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1532,13 +1532,13 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -1568,7 +1568,7 @@ jobs:
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # Download sdist
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-sdist
 
@@ -1604,12 +1604,12 @@ jobs:
             matrix:
                 os: [ubuntu-20.04]
                 python-version: [3.11]
-                node-version: [18.x]
+                node-version: [20.x]
         if: startsWith(github.ref, 'refs/tags/v')
         runs-on: ${{ matrix.os }}
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
@@ -1623,7 +1623,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1635,13 +1635,13 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -1669,7 +1669,7 @@ jobs:
             # Python - Test #
             #################
             # Download artifact
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
@@ -1684,7 +1684,7 @@ jobs:
               env:
                   PSP_PROJECT: python
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-benchmarks
                   path: tools/perspective-bench/dist/benchmark-python.arrow
@@ -1728,139 +1728,139 @@ jobs:
             # path is empty, but `actions/downlaod-artifact` fails, and 3 JS
             # packages have no `dist`.
 
-            # - uses: actions/download-artifact@v3
+            # - uses: actions/download-artifact@v4
             #   with:
             #       name: perspective-cli-dist
             #       path: packages/perspective-cli/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
-            # - uses: actions/download-artifact@v3
+            # - uses: actions/download-artifact@v4
             #   with:
             #       name: perspective-esbuild-plugin-dist
             #       path: packages/perspective-esbuild-plugin/dist
 
-            # - uses: actions/download-artifact@v3
+            # - uses: actions/download-artifact@v4
             #   with:
             #       name: perspective-webpack-plugin-dist
             #       path: packages/perspective-webpack-plugin/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.7
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.8
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.9
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.10
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.11
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.7
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.8
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.9
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.10
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.11
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.7
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.8
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.9
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.10
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.11
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-pyodide
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-sdist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-js-benchmarks
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-benchmarks
 
@@ -1908,7 +1908,7 @@ jobs:
               run: ls -lah
 
             - name: Release wheels
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v2
               with:
                   draft: true
                   generate_release_notes: true
