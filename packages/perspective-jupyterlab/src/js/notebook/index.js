@@ -14,8 +14,14 @@ import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 import "@finos/perspective-viewer-openlayers";
 
+import { load_css } from "./css";
 import { PerspectiveView } from "../view";
 import { PerspectiveModel } from "../model";
 
 exports.PerspectiveModel = PerspectiveModel;
 exports.PerspectiveView = PerspectiveView;
+
+// Run if in vs-code
+if (window.vscIPyWidgets) {
+    load_css();
+}
