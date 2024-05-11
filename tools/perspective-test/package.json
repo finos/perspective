@@ -19,7 +19,6 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^2.10.0",
         "xml-formatter": "2.4.0"
     }
 }

@@ -160,7 +160,7 @@ export default defineConfig({
     },
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    quiet: true,
+    quiet: !process.env.PSP_DEBUG,
     reporter: process.env.CI ? [["github"], ["html"]] : [["dot"]],
     projects: PROJECTS,
     outputDir: "dist/results",
@@ -187,5 +187,7 @@ export default defineConfig({
         command: "yarn ts-node src/js/start_test_server.ts",
         port: TEST_SERVER_PORT,
         reuseExistingServer: true,
+        stdout: "pipe",
+        stderr: "pipe",
     },
 });

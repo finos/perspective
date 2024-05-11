@@ -1864,19 +1864,45 @@ jobs:
               with:
                   name: perspective-python-benchmarks
 
-            - name: NPM pack
-              run: |
-                  pnpm pack \
-                      --workspace=@finos/perspective \
-                      --workspace=@finos/perspective-viewer \
-                      --workspace=@finos/perspective-viewer-datagrid \
-                      --workspace=@finos/perspective-viewer-d3fc \
-                      --workspace=@finos/perspective-viewer-openlayers \
-                      --workspace=@finos/perspective-workspace \
-                      --workspace=@finos/perspective-cli \
-                      --workspace=@finos/perspective-webpack-plugin \
-                      --workspace=@finos/perspective-esbuild-plugin \
-                      --workspace=@finos/perspective-jupyterlab
+            - name: NPM pack perspective
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective
+
+            - name: NPM pack perspective-viewer
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./rust/perspective-viewer
+
+            - name: NPM pack perspective-viewer-datagrid
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-datagrid
+
+            - name: NPM pack perspective-viewer-d3fc
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-d3fc
+
+            - name: NPM pack perspective-viewer-openlayers
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-openlayers
+
+            - name: NPM pack perspective-workspace
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-workspace
+
+            - name: NPM pack perspective-cli
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-cli
+
+            - name: NPM pack perspective-webpack-plugin
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-webpack-plugin
+
+            - name: NPM pack perspective-esbuild-plugin
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-esbuild-plugin
+
+            - name: NPM pack perspective-jupyterlab
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-jupyterlab
 
             - name: Debug
               run: ls -lah
