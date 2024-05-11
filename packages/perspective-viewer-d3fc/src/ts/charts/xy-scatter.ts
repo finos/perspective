@@ -25,8 +25,7 @@ import { filterDataByGroup } from "../legend/filter";
 import { symbolsObj } from "../series/seriesSymbols";
 import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
 import xyScatterSeries from "../series/xy-scatter/xyScatterSeries";
-import { D3Scale, HTMLSelection, Settings } from "../types";
-import { Type } from "@finos/perspective";
+import { D3Scale, HTMLSelection, Settings, Type } from "../types";
 
 /**
  * Overrides specific symbols based on plugin settings. This modifies in-place _and_ returns the value.

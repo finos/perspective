@@ -240,3 +240,4 @@ rust/perspective-js/build
 rust/perspective-js/src/ts/ts-rs
 rust/perspective-server/cpp
 rust/perspective-server/cmake
+rust/perspective-js/docs

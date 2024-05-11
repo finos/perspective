@@ -13,8 +13,12 @@
 #pragma once
 
 #ifdef PSP_PARALLEL_FOR
+#include "base.h"
 #include <arrow/util/parallel.h>
 #include <arrow/status.h>
+#include <mutex>
+#else
+#include "raw_types.h"
 #endif
 
 namespace perspective {

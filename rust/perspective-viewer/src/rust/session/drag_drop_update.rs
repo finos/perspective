@@ -10,20 +10,26 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use crate::config::*;
+use perspective_client::config::*;
+use perspective_client::ColumnType;
+
 use crate::dragdrop::{DragEffect, DragTarget};
 use crate::js::plugin::ViewConfigRequirements;
 
-impl ViewConfig {
+#[allow(clippy::too_many_arguments)]
+#[extend::ext]
+pub impl ViewConfig {
     /// Create an update for this `ViewConfig` which applies a drag/drop action.
     /// This method is designed to be called from `crate::session`.
-    pub(super) fn create_drag_drop_update(
+    fn create_drag_drop_update(
         &self,
         column: String,
+        col_type: ColumnType,
         index: usize,
         drop: DragTarget,
         drag: DragEffect,
         requirements: &ViewConfigRequirements,
+        features: &perspective_client::Features,
     ) -> ViewConfigUpdate {
         let mut config = self.clone();
         let mut update = ViewConfigUpdate::default();
@@ -88,7 +94,7 @@ impl ViewConfig {
                 update.sort = Some(config.sort.clone());
             },
             DragEffect::Move(DragTarget::Filter) => {
-                config.filter.retain(|x| x.0 != column);
+                config.filter.retain(|x| x.column() != column);
                 update.filter = Some(config.filter.clone());
             },
         }
@@ -158,7 +164,11 @@ impl ViewConfig {
                 let index = std::cmp::min(index, config.filter.len());
                 config.filter.insert(
                     index,
-                    Filter(column, FilterOp::EQ, FilterTerm::Scalar(Scalar::Null)),
+                    Filter::new(
+                        column,
+                        features.default_op(col_type).cloned().unwrap_or_default(),
+                        FilterTerm::Scalar(Scalar::Null),
+                    ),
                 );
                 update.filter = Some(config.filter);
             },

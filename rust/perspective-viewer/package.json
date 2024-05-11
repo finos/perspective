@@ -6,13 +6,14 @@
         "type": "git",
         "url": "https://github.com/finos/perspective"
     },
+    "type": "module",
     "license": "Apache-2.0",
     "unpkg": "dist/cdn/perspective-viewer.js",
     "jsdelivr": "dist/cdn/perspective-viewer.js",
     "exports": {
         ".": {
             "types": "./dist/esm/perspective-viewer.d.ts",
-            "default": "./dist/esm/perspective-viewer.inline.js"
+            "default": "./dist/esm/perspective-viewer.js"
         },
         "./dist/*": "./dist/*",
         "./src/*": "./src/*",

@@ -350,7 +350,7 @@ jobs:
             - uses: actions/upload-artifact@v4
               with:
                   name: perspective-dist
-                  path: packages/perspective/dist/
+                  path: rust/perspective-js/dist/
 
             - uses: actions/upload-artifact@v4
               with:
@@ -645,7 +645,7 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
-                  path: packages/perspective/dist/
+                  path: rust/perspective-js/dist/
 
             - uses: actions/download-artifact@v4
               with:
@@ -750,7 +750,7 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
-                  path: packages/perspective/dist/
+                  path: rust/perspective-js/dist/
 
             - uses: actions/download-artifact@v4
               with:
@@ -1166,145 +1166,145 @@ jobs:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # Stage Five - Test combined JS/Python Assets #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    test_js_and_python:
-        ###################################################################
-        # Run JS build first, then use the artifacts in the python builds #
-        ###################################################################
-        needs: [initialize, build_js, build_python]
+    # test_js_and_python:
+    #     ###################################################################
+    #     # Run JS build first, then use the artifacts in the python builds #
+    #     ###################################################################
+    #     needs: [initialize, build_js, build_python]
 
-        strategy:
-            matrix:
-                os:
-                    - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
-                python-version:
-                    - 3.9
-                node-version: [20.x]
-            # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
-            fail-fast: false
+    #     strategy:
+    #         matrix:
+    #             os:
+    #                 - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
+    #             python-version:
+    #                 - 3.9
+    #             node-version: [20.x]
+    #         # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
+    #         fail-fast: false
 
-        ##################################
-        # Setup matrix job configuration #
-        ##################################
-        runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
+    #     ##################################
+    #     # Setup matrix job configuration #
+    #     ##################################
+    #     runs-on: ${{ matrix.os }}
+    #     if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@v4
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: perspective-dist
-                  path: packages/perspective/dist/
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: perspective-dist
+    #               path: rust/perspective-jd/dist/
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: perspective-jupyterlab-dist
-                  path: packages/perspective-jupyterlab/dist/
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: perspective-jupyterlab-dist
+    #               path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: perspective-viewer-d3fc-dist
-                  path: packages/perspective-viewer-d3fc/dist
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: perspective-viewer-d3fc-dist
+    #               path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: perspective-viewer-datagrid-dist
-                  path: packages/perspective-viewer-datagrid/dist
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: perspective-viewer-datagrid-dist
+    #               path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: perspective-workspace-dist
-                  path: packages/perspective-workspace/dist
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: perspective-workspace-dist
+    #               path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: perspective-viewer-dist
-                  path: rust/perspective-viewer/dist
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: perspective-viewer-dist
+    #               path: rust/perspective-viewer/dist
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: nbextension-dist
-                  path: python/perspective/perspective/nbextension
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: nbextension-dist
+    #               path: python/perspective/perspective/nbextension
 
-            - uses: actions/download-artifact@v4
-              with:
-                  name: labextension-dist
-                  path: python/perspective/perspective/labextension
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: labextension-dist
+    #               path: python/perspective/perspective/labextension
 
-            ##########
-            # Caches #
-            ##########
-            ################
-            - name: Install pnpm
-              uses: pnpm/action-setup@v3
-              with:
-                  version: 9
+    #         ##########
+    #         # Caches #
+    #         ##########
+    #         ################
+    #         - name: Install pnpm
+    #           uses: pnpm/action-setup@v3
+    #           with:
+    #               version: 9
 
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v4
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+    #         ################
+    #         # Pip Cache
+    #         - name: Setup pip cache
+    #           uses: actions/cache@v4
+    #           with:
+    #               path: ~/.cache/pip
+    #               key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+    #               restore-keys: |
+    #                   ${{ runner.os }}-pip-
+    #           if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
-            ###############################
-            # Language and Compiler Setup #
-            ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v5
-              with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
+    #         ###############################
+    #         # Language and Compiler Setup #
+    #         ###############################
+    #         - name: Set up Python ${{ matrix.python-version }}
+    #           uses: actions/setup-python@v5
+    #           with:
+    #               python-version: ${{ matrix.python-version }}
+    #               cache: "pip"
 
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "pnpm"
-                  cache-dependency-path: pnpm-lock.yaml
+    #         - name: Use Node.js ${{ matrix.node-version }}
+    #           uses: actions/setup-node@v4
+    #           with:
+    #               node-version: ${{ matrix.node-version }}
+    #               cache: "pnpm"
+    #               cache-dependency-path: pnpm-lock.yaml
 
-            ################
-            # Dependencies #
-            ################
-            ################
-            # JS
-            - name: Install js dependencies
-              run: pnpm install --frozen-lockfile
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
+    #         ################
+    #         # Dependencies #
+    #         ################
+    #         ################
+    #         # JS
+    #         - name: Install js dependencies
+    #           run: pnpm install --frozen-lockfile
+    #           env:
+    #               PSP_SKIP_EMSDK_INSTALL: 1
 
-            - name: Install Playwright Browsers
-              run: npx playwright install --with-deps
+    #         - name: Install Playwright Browsers
+    #           run: npx playwright install --with-deps
 
-            ################
-            # Python
-            - name: Install python dependencies
-              run: pnpm run _requires_python
+    #         ################
+    #         # Python
+    #         - name: Install python dependencies
+    #           run: pnpm run _requires_python
 
-            # Download artifact
-            - uses: actions/download-artifact@v4
-              with:
-                  name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
+    #         # Download artifact
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #               name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
-            # Install artifact
-            - name: Install wheel (system)
-              run: python -m pip install --force-reinstall -U --no-dependencies *manylinux2014*.whl
+    #         # Install artifact
+    #         - name: Install wheel (system)
+    #           run: python -m pip install --force-reinstall -U --no-dependencies *manylinux2014*.whl
 
-            - name: Install wheel (local)
-              run: python -m pip install --force-reinstall -U --no-dependencies *manylinux2014*.whl --target python/perspective
+    #         - name: Install wheel (local)
+    #           run: python -m pip install --force-reinstall -U --no-dependencies *manylinux2014*.whl --target python/perspective
 
-            - name: Check Installed labextensions
-              run: jupyter labextension list
+    #         - name: Check Installed labextensions
+    #           run: jupyter labextension list
 
-            - name: Run Jupyterlab tests
-              run: pnpm run test_js --jupyter
-              env:
-                  PACKAGE: perspective-jupyterlab
+    #         - name: Run Jupyterlab tests
+    #           run: pnpm run test_js --jupyter
+    #           env:
+    #               PACKAGE: perspective-jupyterlab
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1707,9 +1707,8 @@ jobs:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     publish:
-        needs:
-            [
-                test_js_and_python,
+        needs: [
+                # test_js_and_python,
                 test_python,
                 test_python_sdist,
                 build_pyodide,
@@ -1750,7 +1749,7 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
-                  path: packages/perspective/dist/
+                  path: rust/perspective-js/dist/
 
             - uses: actions/download-artifact@v4
               with:

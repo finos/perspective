@@ -56,12 +56,12 @@
 #endif
 
 #ifdef PSP_ENABLE_PYTHON
-// #include <pybind11/pybind11.h>
-// #include <pybind11/numpy.h>
-// namespace py = pybind11;
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+namespace py = pybind11;
 
 // Define object serialization type
-#define PSP_OBJECT_TYPE std::uint64_t
+#define PSP_OBJECT_TYPE PyObject*
 
 #else
 // TODO javascript

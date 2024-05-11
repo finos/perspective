@@ -232,7 +232,6 @@ if(PSP_WASM_BUILD)
         set(OPT_FLAGS " \
             -O3 \
             -g0 \
-            -flto \
             -s SUPPORT_LONGJMP=wasm \
             -fwasm-exceptions \
             ")
@@ -277,9 +276,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                 -fexceptions \
                 -g1 \
                 ")
-            if (PSP_PYODIDE)
-                set(OPT_FLAGS "${OPT_FLAGS} -flto")
-            endif ()
         endif()
     endif()
 
@@ -365,16 +361,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 endif()
 
 set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
-
-
-set(CMAKE_C_FLAGS "  \
--O3 \
--flto \
-")
-set(CMAKE_CXX_FLAGS " \
--O3 \
--flto \
-")
 
 
 # Build header-only dependencies from external source
@@ -515,8 +501,6 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/view_config.cpp
     ${PSP_CPP_SRC}/src/cpp/vocab.cpp
     ${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
-    ${PSP_CPP_SRC}/src/cpp/server.cpp
-    ${PSP_CPP_SRC}/src/cpp/proto_api.cpp
 )
 
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
@@ -524,6 +508,9 @@ set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
 )
 
 set(WASM_SOURCE_FILES ${SOURCE_FILES}
+    ${PSP_CPP_SRC}/src/cpp/server.cpp
+    ${PSP_CPP_SRC}/src/cpp/proto_api.cpp
+
     # ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
 )
 
@@ -575,7 +562,7 @@ set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
 ")
 
 if(PSP_WASM_BUILD)
-    set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} --pre-js \"${PSP_CPP_SRC}/env.js\" ")
 
     add_library(psp ${WASM_SOURCE_FILES})
     target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)

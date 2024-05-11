@@ -16,7 +16,9 @@ mod simple;
 use std::sync::{Arc, LazyLock};
 
 use derivative::Derivative;
-use wasm_bindgen::*;
+use perspective_js::json;
+use perspective_js::utils::global::navigator;
+use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 use yew::*;
 
@@ -27,7 +29,6 @@ use crate::components::datetime_column_style::custom::DatetimeStyleCustom;
 use crate::components::datetime_column_style::simple::DatetimeStyleSimple;
 use crate::components::form::select_field::{SelectEnumField, SelectValueField};
 use crate::config::*;
-use crate::utils::global::navigator;
 use crate::utils::WeakScope;
 use crate::*;
 
@@ -57,7 +58,6 @@ static USER_TIMEZONE: LazyLock<String> = LazyLock::new(|| {
 });
 
 pub enum DatetimeColumnStyleMsg {
-    Reset(DatetimeColumnStyleConfig),
     SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig),
     CustomDatetimeStyleConfigChanged(CustomDatetimeStyleConfig),
     TimezoneChanged(Option<String>),
@@ -166,10 +166,6 @@ impl Component for DatetimeColumnStyle {
     // TODO could be more conservative here with re-rendering
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            DatetimeColumnStyleMsg::Reset(config) => {
-                self.config = config;
-                true
-            },
             DatetimeColumnStyleMsg::TimezoneChanged(val) => {
                 if Some(&*USER_TIMEZONE) != val.as_ref() {
                     *self.config.date_format.time_zone_mut() = val;

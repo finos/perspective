@@ -34,15 +34,9 @@
 export { IPerspectiveViewerPlugin } from "./plugin";
 export { HTMLPerspectiveViewerPluginElement } from "./plugin";
 export { IPerspectiveViewerElement } from "./viewer";
-export { PerspectiveViewerConfig } from "./viewer";
-export {
-    PerspectiveColumnConfig,
-    PerspectiveColumnConfigValue,
-} from "./columns_config";
 
 export * from "./extensions";
-export * from "./migrate";
+export type * from "./ts-rs/ViewerConfigUpdate.d.ts";
+export type * from "./ts-rs/ColumnConfigValues.d.ts";
 
 import "./bootstrap";
-
-export default {};

@@ -13,7 +13,7 @@
 import { Project, defineConfig, devices } from "@playwright/test";
 import path from "path";
 import * as dotenv from "dotenv";
-
+import { createRequire } from "node:module";
 import url from "node:url";
 
 const __filename = url.fileURLToPath(import.meta.url);
@@ -159,6 +159,16 @@ const PROJECTS = (() => {
     return acc;
 })();
 
+const __require = createRequire(import.meta.url);
+
+const GLOBAL_SETUP_PATH = __require.resolve(
+    "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
+);
+
+const GLOBAL_TEARDOWN_PATH = __require.resolve(
+    "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
+);
+
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
     timeout: 30_000,
@@ -179,14 +189,10 @@ export default defineConfig({
         // video: "retain-on-failure",
     },
     globalSetup: RUN_JUPYTERLAB
-        ? require.resolve(
-              "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
-          )
+        ? GLOBAL_SETUP_PATH
         : path.join(__dirname, "src/js/global_startup.ts"),
     globalTeardown: RUN_JUPYTERLAB
-        ? require.resolve(
-              "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
-          )
+        ? GLOBAL_TEARDOWN_PATH
         : path.join(__dirname, "src/js/global_teardown.ts"),
     snapshotPathTemplate:
         "dist/snapshots/{projectName}/{testFilePath}/{arg}{ext}",

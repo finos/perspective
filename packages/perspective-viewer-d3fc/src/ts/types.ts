@@ -12,13 +12,21 @@
 
 import {
     IPerspectiveViewerPlugin,
-    PerspectiveColumnConfig,
+    ColumnConfigValues,
 } from "@finos/perspective-viewer";
-import { DataRow, Type } from "@finos/perspective";
 
 export interface Element {
     msMatchesSelector(selectors: string): boolean;
 }
+
+// TODO polyfill until these can be replacedwith native types from perspective
+export type Type =
+    | "integer"
+    | "string"
+    | "boolean"
+    | "date"
+    | "datetime"
+    | "float";
 
 export interface Chart {
     (container: HTMLSelection, settings: Settings): void;
@@ -71,13 +79,13 @@ export type ColorStyles = {
 
 export type TextStyles = Record<string, string>; // Should this be optional?
 
-export type DataRowsWithKey = DataRow[] & {
+export type DataRowsWithKey = any[] & {
     key?: string;
 };
 
 export type MainValue = {
     name: string;
-    type: Type;
+    type: any;
 };
 
 // NOTE: Should these props be optional?
@@ -92,7 +100,7 @@ export type Settings = {
     axisMemo: Axis[];
     colorStyles?: ColorStyles;
     crossValues: any[]; // string[]?
-    data: DataRow[];
+    data: any[];
     filter: any[];
     mainValues: MainValue[];
     splitMainValues?: string[];
@@ -101,7 +109,7 @@ export type Settings = {
     splitValues: any[];
     textStyles: TextStyles;
     sunburstLevel?: any;
-    columns_config?: PerspectiveColumnConfig;
+    columns_config?: ColumnConfigValues;
     treemaps?: Record<string, TreemapValue>;
 };
 

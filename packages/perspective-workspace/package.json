@@ -7,6 +7,7 @@
         "src/**/*",
         "index.d.ts"
     ],
+    "type": "module",
     "exports": {
         ".": "./dist/esm/perspective-workspace.js",
         "./esm/": "./dist/esm/",

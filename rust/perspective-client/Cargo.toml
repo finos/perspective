@@ -1,0 +1,64 @@
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+[package]
+name = "perspective-client"
+version = "2.10.1"
+authors = ["Andrew Stein <steinlink@gmail.com>"]
+edition = "2021"
+description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
+repository = "https://github.com/finos/perspective"
+license = "Apache-2.0"
+homepage = "https://perspective.finos.org"
+keywords = []
+include = [
+    "src/**/*",
+    "Cargo.toml",
+    "package.json",
+    "build.rs",
+    "docs/**/*",
+    "perspective.proto",
+]
+
+[features]
+default = []
+external-proto = ["protobuf-src"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/rust/lib.rs"
+
+[build-dependencies]
+prost-build = { version = "0.12.3" }
+protobuf-src = { version = "2.0.1", optional = true }
+
+[dependencies]
+async-lock = { version = "2.5.0" }
+futures = { version = "0.3.28" }
+itertools = { version = "0.10.1" }
+nanoid = { version = "0.4.0" }
+paste = { version = "1.0.14" }
+prost-types = { version = "0.12.3" }
+serde = { version = "1.0", features = ["derive"] }
+serde_bytes = { version = "0.11" }
+serde_json = { version = "1.0.107", features = ["raw_value"] }
+thiserror = { version = "1.0.56" }
+tracing = { version = ">=0.1.36" }
+
+[dependencies.prost]
+version = "0.12.3"
+default-features = false
+features = ["prost-derive", "std"]
+
+[dependencies.ts-rs]
+version = "8.1.0"
+features = ["serde-json-impl", "no-serde-warnings"]

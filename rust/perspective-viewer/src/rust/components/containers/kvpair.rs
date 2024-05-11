@@ -44,8 +44,4 @@ where
             value,
         }
     }
-
-    pub fn tuple(&self) -> (&K, &V) {
-        (&self.key, &self.value)
-    }
 }

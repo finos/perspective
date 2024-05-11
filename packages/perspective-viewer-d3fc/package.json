@@ -4,6 +4,7 @@
     "description": "Perspective.js D3FC Plugin",
     "unpkg": "./dist/cdn/perspective-viewer-d3fc.js",
     "jsdelivr": "./dist/cdn/perspective-viewer-d3fc.js",
+    "type": "module",
     "exports": {
         ".": {
             "types": "./dist/esm/types/index.d.ts",

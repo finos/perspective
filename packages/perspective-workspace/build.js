@@ -10,14 +10,17 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { execSync } = require("child_process");
-const {
-    NodeModulesExternal,
-} = require("@finos/perspective-esbuild-plugin/external");
-const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
-const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
-const { ResolvePlugin } = require("@finos/perspective-esbuild-plugin/resolve");
-const { build } = require("@finos/perspective-esbuild-plugin/build");
+import { execSync } from "child_process";
+import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
+import { WasmPlugin } from "@finos/perspective-esbuild-plugin/wasm.js";
+import { WorkerPlugin } from "@finos/perspective-esbuild-plugin/worker.js";
+import { ResolvePlugin } from "@finos/perspective-esbuild-plugin/resolve.js";
+import { build } from "@finos/perspective-esbuild-plugin/build.js";
+import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
+import * as fs from "fs";
+import { createRequire } from "node:module";
+
+const _require = createRequire(import.meta.url);
 
 const BUILD = [
     {
@@ -61,14 +64,10 @@ const BUILD = [
         outdir: "dist/cdn",
     },
 ];
-
-const { BuildCss } = require("@prospective.co/procss/target/cjs/procss.js");
-const fs = require("fs");
-
 function add(builder, path, path2) {
     builder.add(
         path,
-        fs.readFileSync(require.resolve(path2 || path)).toString()
+        fs.readFileSync(_require.resolve(path2 || path)).toString()
     );
 }
 

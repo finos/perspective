@@ -12,18 +12,18 @@
 
 use std::rc::Rc;
 
+use perspective_client::{clone, ExprValidationError};
 use yew::prelude::*;
 
 use super::form::code_editor::*;
 use super::style::LocalStyle;
-use crate::js::PerspectiveValidationError;
 use crate::session::Session;
 use crate::*;
 
 #[derive(Debug)]
 pub enum ExpressionEditorMsg {
     SetExpr(Rc<String>),
-    ValidateComplete(Option<PerspectiveValidationError>),
+    ValidateComplete(Option<ExprValidationError>),
 }
 
 #[derive(Properties, PartialEq, Clone)]
@@ -51,7 +51,7 @@ impl ExpressionEditorProps {
 /// Expression editor component `CodeEditor` and a button toolbar.
 pub struct ExpressionEditor {
     expr: Rc<String>,
-    error: Option<PerspectiveValidationError>,
+    error: Option<ExprValidationError>,
     oninput: Callback<Rc<String>>,
 }
 
@@ -82,7 +82,7 @@ impl Component for ExpressionEditor {
                     match session.validate_expr(&val).await {
                         Ok(x) => ExpressionEditorMsg::ValidateComplete(x),
                         Err(err) => {
-                            web_sys::console::error_1(&err);
+                            web_sys::console::error_1(&format!("{:?}", err).into());
                             ExpressionEditorMsg::ValidateComplete(None)
                         },
                     }

@@ -99,7 +99,7 @@ class Table(object):
 
         pool = self._table.get_pool()
         pool.set_update_delegate(self)
-        pool._process()
+        pool._process(None)
 
         # Each table always contains its own instance of state manager.
         self._state_manager = _PerspectiveStateManager()

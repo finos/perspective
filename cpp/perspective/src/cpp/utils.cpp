@@ -18,7 +18,9 @@
 #include <perspective/raw_types.h>
 #include <perspective/base.h>
 #include <string>
+#include <chrono>
 #include <sstream>
+
 namespace perspective {
 
 std::string

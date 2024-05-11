@@ -13,7 +13,7 @@
 import { test, expect } from "@finos/perspective-test";
 import { compareContentsToSnapshot } from "@finos/perspective-test";
 
-const path = require("path");
+// import path from "node:path";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -114,11 +114,11 @@ test.describe("Settings", () => {
 
             consoleLogs.expectedLogs.push(
                 "error",
-                /Invalid config: `restore\(\)` called before `load\(\)` \{[^}]+\}/
+                /Invalid config: Error: `restore\(\)` called before `load\(\)`.*/
             );
             consoleLogs.expectedLogs.push(
                 "error",
-                /Caught error: `restore\(\)` called before `load\(\)`/
+                /Caught error: Error: `restore\(\)` called before `load\(\)`.*/
             );
         });
     });

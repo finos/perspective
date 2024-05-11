@@ -14,6 +14,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
+use ts_rs::TS;
 
 use super::{
     CustomNumberFormatConfig, DatetimeColumnStyleConfig, DatetimeColumnStyleDefaultConfig,
@@ -24,7 +25,7 @@ use super::{
 /// The value de/serialized and stored in the viewer config.
 /// Also passed to the plugin via `plugin.save()`.
 #[skip_serializing_none]
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, TS)]
 pub struct ColumnConfigValues {
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]

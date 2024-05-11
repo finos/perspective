@@ -10,17 +10,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="/perspective.js"></script>
-        <script type="module" src="/perspective-viewer.js"></script>
-        <link rel="stylesheet" href="/@finos/perspective-viewer/dist/css/pro.css" />
+        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
         <link rel="stylesheet" href="../css/demo.css" />
-        <link rel="stylesheet" href="/@fontsource/roboto-mono/400.css" />
+        <link rel="stylesheet" href="/node_modules/@finos/perspective-viewer/dist/css/pro.css" />
+        <link rel="stylesheet" href="/node_modules/@fontsource/roboto-mono/400.css" />
     </head>
     <body>
         <perspective-viewer> </perspective-viewer>
-
         <script type="module">
-            import perspective from "./perspective.js";
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
             window.WORKER = perspective.worker();
             const datetime_range_data = [
                 {

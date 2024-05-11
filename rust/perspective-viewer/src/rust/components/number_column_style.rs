@@ -34,12 +34,6 @@ use Side::*;
 
 #[derive(Debug)]
 pub enum NumberColumnStyleMsg {
-    Reset(
-        Box<NumberColumnStyleConfig>,
-        Box<NumberColumnStyleDefaultConfig>,
-    ),
-    ForeEnabledChanged(bool),
-    BackEnabledChanged(bool),
     PosColorChanged(Side, String),
     NegColorChanged(Side, String),
     NumberForeModeChanged(NumberForegroundMode),
@@ -91,8 +85,11 @@ impl NumberColumnStyleProps {
         {
             ctx.link().send_future(async move {
                 let view = session.get_view().unwrap();
-                let min_max = view.get_min_max(&column_name).await.unwrap();
-                let abs_max = max!(min_max.0.abs(), min_max.1.abs());
+                let min_max = view.get_min_max(column_name).await.unwrap();
+                let abs_max = max!(
+                    min_max.0.parse::<f64>().unwrap().abs(),
+                    min_max.1.parse::<f64>().unwrap().abs()
+                );
                 let gradient = (abs_max * 100.).round() / 100.;
                 NumberColumnStyleMsg::DefaultGradientChanged(gradient)
             });
@@ -141,61 +138,61 @@ impl Component for NumberColumnStyle {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            NumberColumnStyleMsg::Reset(config, default_config) => {
-                let mut new = Self::reset(&config, &default_config);
-                std::mem::swap(self, &mut new);
-                true
-            },
-            NumberColumnStyleMsg::ForeEnabledChanged(val) => {
-                if val {
-                    let color_mode = match self.fg_mode {
-                        NumberForegroundMode::Disabled => NumberForegroundMode::default(),
-                        x => x,
-                    };
+            // NumberColumnStyleMsg::Reset(config, default_config) => {
+            //     let mut new = Self::reset(&config, &default_config);
+            //     std::mem::swap(self, &mut new);
+            //     true
+            // },
+            // NumberColumnStyleMsg::ForeEnabledChanged(val) => {
+            //     if val {
+            //         let color_mode = match self.fg_mode {
+            //             NumberForegroundMode::Disabled => NumberForegroundMode::default(),
+            //             x => x,
+            //         };
 
-                    self.config.number_fg_mode = color_mode;
-                    self.config.pos_fg_color = Some(self.pos_fg_color.to_owned());
-                    self.config.neg_fg_color = Some(self.neg_fg_color.to_owned());
-                    if self.fg_mode.needs_gradient() {
-                        self.config.fg_gradient = Some(self.fg_gradient.unwrap());
-                    } else {
-                        self.config.fg_gradient = None;
-                    }
-                } else {
-                    self.config.number_fg_mode = NumberForegroundMode::Disabled;
-                    self.config.pos_fg_color = None;
-                    self.config.neg_fg_color = None;
-                    self.config.fg_gradient = None;
-                }
+            //         self.config.number_fg_mode = color_mode;
+            //         self.config.pos_fg_color = Some(self.pos_fg_color.to_owned());
+            //         self.config.neg_fg_color = Some(self.neg_fg_color.to_owned());
+            //         if self.fg_mode.needs_gradient() {
+            //             self.config.fg_gradient = Some(self.fg_gradient.unwrap());
+            //         } else {
+            //             self.config.fg_gradient = None;
+            //         }
+            //     } else {
+            //         self.config.number_fg_mode = NumberForegroundMode::Disabled;
+            //         self.config.pos_fg_color = None;
+            //         self.config.neg_fg_color = None;
+            //         self.config.fg_gradient = None;
+            //     }
 
-                self.dispatch_config(ctx);
-                true
-            },
-            NumberColumnStyleMsg::BackEnabledChanged(val) => {
-                if val {
-                    let color_mode = match self.bg_mode {
-                        NumberBackgroundMode::Disabled => NumberBackgroundMode::Color,
-                        x => x,
-                    };
+            //     self.dispatch_config(ctx);
+            //     true
+            // },
+            // NumberColumnStyleMsg::BackEnabledChanged(val) => {
+            //     if val {
+            //         let color_mode = match self.bg_mode {
+            //             NumberBackgroundMode::Disabled => NumberBackgroundMode::Color,
+            //             x => x,
+            //         };
 
-                    self.config.number_bg_mode = color_mode;
-                    self.config.pos_bg_color = Some(self.pos_bg_color.to_owned());
-                    self.config.neg_bg_color = Some(self.neg_bg_color.to_owned());
-                    if self.bg_mode.needs_gradient() {
-                        self.config.bg_gradient = Some(self.bg_gradient.unwrap());
-                    } else {
-                        self.config.bg_gradient = None;
-                    }
-                } else {
-                    self.config.number_bg_mode = NumberBackgroundMode::Disabled;
-                    self.config.pos_bg_color = None;
-                    self.config.neg_bg_color = None;
-                    self.config.bg_gradient = None;
-                }
+            //         self.config.number_bg_mode = color_mode;
+            //         self.config.pos_bg_color = Some(self.pos_bg_color.to_owned());
+            //         self.config.neg_bg_color = Some(self.neg_bg_color.to_owned());
+            //         if self.bg_mode.needs_gradient() {
+            //             self.config.bg_gradient = Some(self.bg_gradient.unwrap());
+            //         } else {
+            //             self.config.bg_gradient = None;
+            //         }
+            //     } else {
+            //         self.config.number_bg_mode = NumberBackgroundMode::Disabled;
+            //         self.config.pos_bg_color = None;
+            //         self.config.neg_bg_color = None;
+            //         self.config.bg_gradient = None;
+            //     }
 
-                self.dispatch_config(ctx);
-                true
-            },
+            //     self.dispatch_config(ctx);
+            //     true
+            // },
             NumberColumnStyleMsg::PosColorChanged(side, val) => {
                 if side == Fg {
                     self.pos_fg_color = val;

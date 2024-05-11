@@ -11,11 +11,12 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 use super::custom_format::CustomDatetimeFormat;
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-enum FormatUnit {
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, TS)]
+pub enum FormatUnit {
     #[serde(rename = "custom")]
     #[default]
     FormatUnit,
@@ -61,7 +62,7 @@ const fn numeric_default() -> u32 {
     0
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, TS)]
 pub struct CustomDatetimeStyleConfig {
     format: FormatUnit,
 

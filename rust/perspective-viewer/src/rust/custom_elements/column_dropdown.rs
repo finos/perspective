@@ -12,6 +12,10 @@
 
 use std::collections::HashSet;
 
+use perspective_client::clone;
+use perspective_client::config::Expression;
+use perspective_js::json;
+use perspective_js::utils::global;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -20,10 +24,8 @@ use yew::{props, Callback};
 
 use crate::components::column_dropdown::*;
 use crate::components::column_selector::InPlaceColumn;
-use crate::config::Expression;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
-use crate::utils::ApiFuture;
 use crate::*;
 
 #[wasm_bindgen]
@@ -37,8 +39,7 @@ impl ImplicitClone for ColumnDropDownElement {}
 
 impl ColumnDropDownElement {
     pub fn new(session: Session) -> Self {
-        let document = window().unwrap().document().unwrap();
-        let dropdown = document
+        let dropdown = global::document()
             .create_element("perspective-dropdown")
             .unwrap()
             .unchecked_into::<HtmlElement>();

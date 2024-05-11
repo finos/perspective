@@ -6,6 +6,7 @@
     "publishConfig": {
         "access": "public"
     },
+    "type": "module",
     "files": [
         "src/**/*",
         "perspective"

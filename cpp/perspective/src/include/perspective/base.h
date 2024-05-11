@@ -184,11 +184,7 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
     }
 #else
 #define PSP_COMPLAIN_AND_ABORT(X)                                              \
-    {                                                                          \
-        std::stringstream __SS__;                                              \
-        __SS__ << (X) << "\n  at " << __FILE__ << ":" << __LINE__ << "\n";     \
-        psp_abort(__SS__.str());                                               \
-    }
+    { psp_abort(X); }
 #endif
 
 #define PSP_VERBOSE_ASSERT(...)                                                        \

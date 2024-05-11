@@ -19,7 +19,7 @@ use crate::config::*;
 
 impl CustomNumberFormat {
     pub fn style_section(&self, ctx: &yew::prelude::Context<Self>) -> yew::prelude::Html {
-        let section = match self.config._style.as_ref() {
+        let section = match &self.config._style {
             Some(NumberFormatStyle::Currency(style)) => Some(html! {
                 <>
                     <SelectEnumField<CurrencyCode>

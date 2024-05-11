@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 use super::simple_format::*;
 
@@ -22,7 +23,7 @@ const fn time_style_default() -> SimpleDatetimeFormat {
     SimpleDatetimeFormat::Medium
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, TS)]
 pub struct SimpleDatetimeStyleConfig {
     #[serde(default)]
     #[serde(rename = "timeZone", skip_serializing_if = "Option::is_none")]

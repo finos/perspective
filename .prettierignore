@@ -5,3 +5,4 @@ target/
 .emsdk/
 boost*/
 py_modules/
+ts-rs/

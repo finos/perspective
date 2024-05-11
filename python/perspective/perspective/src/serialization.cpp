@@ -34,7 +34,7 @@ namespace binding {
         std::uint32_t end_col
     ) {
         PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
+        PSP_READ_LOCK(*view->get_lock());
         auto data_slice =
             view->get_data(start_row, end_row, start_col, end_col);
         return data_slice;

@@ -10,8 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const exec = require("child_process").exec;
-const { table } = require("@finos/perspective");
+import { exec } from "child_process";
+import { table } from "@finos/perspective";
 
 const OPEN = (port) => `
 if which xdg-open > /dev/null
@@ -25,7 +25,7 @@ then
     open http://localhost:${port}/
 fi`;
 
-function infer_table(buffer) {
+export function infer_table(buffer) {
     if (buffer.slice(0, 6).toString() === "ARROW1") {
         console.log("Loaded Arrow");
         return table(buffer.buffer);
@@ -42,7 +42,7 @@ function infer_table(buffer) {
     }
 }
 
-module.exports.read_stdin = function read_stdin() {
+export const read_stdin = function read_stdin() {
     const ret = [];
     let len = 0;
     return new Promise((resolve) => {
@@ -61,7 +61,7 @@ module.exports.read_stdin = function read_stdin() {
     });
 };
 
-module.exports.execute = function execute(command, callback) {
+export const execute = function execute(command, callback) {
     exec(command, function (error, stdout) {
         if (callback) {
             callback(stdout);
@@ -69,6 +69,6 @@ module.exports.execute = function execute(command, callback) {
     });
 };
 
-module.exports.open_browser = function open_browser(port) {
+export const open_browser = function open_browser(port) {
     module.exports.execute(OPEN(port), console.log);
 };

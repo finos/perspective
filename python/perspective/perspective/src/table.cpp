@@ -150,7 +150,9 @@ namespace binding {
 
                     arrow_loader.init_csv(csv_string, is_update, map);
                 } else {
-                    arrow_loader.initialize((uintptr_t)ptr, binary_size);
+                    arrow_loader.initialize(
+                        (const std::uint8_t*)ptr, binary_size
+                    );
                 }
 
                 // Always use the `Table` column names and data types on update.

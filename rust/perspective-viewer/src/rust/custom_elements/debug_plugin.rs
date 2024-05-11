@@ -12,7 +12,6 @@
 
 use wasm_bindgen::prelude::*;
 
-use crate::js::*;
 use crate::utils::*;
 use crate::*;
 
@@ -65,15 +64,15 @@ impl PerspectiveDebugPluginElement {
         JsValue::UNDEFINED
     }
 
-    pub fn update(&self, view: JsPerspectiveView) -> ApiFuture<()> {
+    pub fn update(&self, view: perspective_js::JsView) -> ApiFuture<()> {
         self.draw(view)
     }
 
-    pub fn draw(&self, view: JsPerspectiveView) -> ApiFuture<()> {
+    pub fn draw(&self, view: perspective_js::JsView) -> ApiFuture<()> {
         let css = "margin:0;overflow:scroll;position:absolute;width:100%;height:100%";
         clone!(self.elem);
         ApiFuture::new(async move {
-            let csv = view.to_csv(json!({})).await?.as_string().into_apierror()?;
+            let csv = view.to_csv(None).await?;
             elem.style().set_property("background-color", "#fff")?;
             elem.set_inner_html(&format!("<pre style='{}'>{}</pre>", css, csv));
             Ok(())

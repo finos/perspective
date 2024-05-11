@@ -17,19 +17,14 @@
 #include <perspective/exports.h>
 #include <mutex>
 #include <atomic>
-
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
 #include <shared_mutex>
 #endif
 
-#if defined PSP_ENABLE_WASM and !defined(PSP_ENABLE_PYTHON)
-#include <emscripten/val.h>
-typedef emscripten::val t_val;
-#elif defined PSP_ENABLE_PYTHON
-// #include <pybind11/pybind11.h>
-// typedef py::object std::uint64_t;
-using t_val = std::uint64_t;
+#ifdef PSP_ENABLE_PYTHON
+#include <pybind11/pybind11.h>
+typedef py::object t_val;
 #endif
 
 namespace perspective {
@@ -54,7 +49,7 @@ public:
     t_pool();
     t_uindex register_gnode(t_gnode* node);
 
-#if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
+#if defined PSP_ENABLE_PYTHON
     void set_update_delegate(t_val ud);
 #endif
 
@@ -131,7 +126,7 @@ private:
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;
 
-#if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
+#if defined PSP_ENABLE_PYTHON
     t_val m_update_delegate;
 #endif
     std::atomic_flag m_run;

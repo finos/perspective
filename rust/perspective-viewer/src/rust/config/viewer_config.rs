@@ -12,21 +12,23 @@
 
 use std::collections::HashMap;
 use std::io::{Read, Write};
+use std::ops::Deref;
 use std::str::FromStr;
 use std::sync::LazyLock;
 
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
+use perspective_client::config::*;
+use perspective_js::utils::*;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
+use ts_rs::TS;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use super::view_config::*;
 use super::ColumnConfigValues;
 use crate::presentation::ColumnConfigMap;
-use crate::utils::*;
 
 pub enum ViewerConfigEncoding {
     Json,
@@ -144,7 +146,41 @@ impl ViewerConfig {
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, TS, Deserialize)]
+#[serde(transparent)]
+pub struct PluginConfig(serde_json::Value);
+
+// impl Type for PluginConfig {
+//     fn inline(type_map: &mut specta::TypeMap, generics: specta::Generics) ->
+// specta::DataType {         specta::Map::from(());
+//         // specta::Map {
+//         //     key_ty:
+//         // specta::DataType::Primitive(specta::PrimitiveType::String),
+//         //     value_ty: specta::DataType::Any,
+//         // }
+
+//         // specta::DataType::Map(specta::Map { Box::new((
+//         //     specta::DataType::Primitive(specta::PrimitiveType::String),
+//         //     specta::DataType::Any,
+//         // )))
+//     }
+//     // fn inline(_type_map: &mut specta::TypeMap, _generics:
+// &[specta::DataType]) ->     // specta::DataType {
+// specta::DataType::Map(Box::new((     //
+// specta::DataType::Primitive(specta::PrimitiveType::String),     //
+// specta::DataType::Any,     //     )))
+//     // }
+// }
+
+impl Deref for PluginConfig {
+    type Target = Value;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Clone, Deserialize, TS)]
 // #[serde(deny_unknown_fields)]
 pub struct ViewerConfigUpdate {
     #[serde(default)]
@@ -163,7 +199,7 @@ pub struct ViewerConfigUpdate {
     pub settings: SettingsUpdate,
 
     #[serde(default)]
-    pub plugin_config: Option<Value>,
+    pub plugin_config: Option<PluginConfig>,
 
     #[serde(default)]
     pub columns_config: ColumnConfigUpdate,
@@ -180,7 +216,7 @@ impl ViewerConfigUpdate {
             version,
             columns_config,
             plugin,
-            plugin_config,
+            plugin_config: plugin_config.map(PluginConfig),
             settings,
             theme,
             title,
@@ -219,7 +255,7 @@ impl ViewerConfigUpdate {
     }
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, TS)]
 #[serde(untagged)]
 pub enum OptionalUpdate<T: Clone> {
     SetDefault,

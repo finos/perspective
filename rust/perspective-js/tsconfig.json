@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "allowImportingTsExtensions": true,
+        "strict": true,
+        "module": "NodeNext",
+        "target": "ESNext",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "./dist/esm",
+        "rootDir": ".",
+        "moduleResolution": "NodeNext",
+        "skipLibCheck": true,
+        "resolveJsonModule": true
+    },
+    "include": [
+        "./src/ts/perspective.node.ts",
+        "./src/ts/perspective.ts",
+        "./test/js/*.ts"
+    ]
+}

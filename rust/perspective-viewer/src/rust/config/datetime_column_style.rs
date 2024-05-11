@@ -22,11 +22,12 @@ pub use custom_format::*;
 use serde::{Deserialize, Serialize};
 pub use simple::*;
 pub use simple_format::*;
+use ts_rs::TS;
 
 use crate::*;
 
 /// `Simple` case has all default-able keys and must be last!
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, TS)]
 // #[serde(tag = "format", content = "date_format")]
 #[serde(untagged)]
 pub enum DatetimeFormatType {
@@ -63,7 +64,7 @@ impl DatetimeFormatType {
 
 /// A model for the JSON serialized style configuration for a column of type
 /// `datetime`.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, TS)]
 pub struct DatetimeColumnStyleConfig {
     #[serde(default)]
     #[serde(skip_serializing_if = "DatetimeFormatType::is_simple")]
@@ -75,6 +76,7 @@ pub struct DatetimeColumnStyleConfig {
 
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[ts(skip)]
     pub color: Option<String>,
 }
 

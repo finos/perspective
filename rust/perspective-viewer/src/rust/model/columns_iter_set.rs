@@ -13,9 +13,10 @@
 use std::collections::HashSet;
 
 use itertools::Itertools;
+use perspective_client::config::*;
+use perspective_client::ColumnType;
 
 use super::{HasRenderer, HasSession, IsInvalidDrop};
-use crate::config::*;
 use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::*;
@@ -312,7 +313,7 @@ impl<'a> ColumnsIteratorSet<'a> {
 pub struct OrderedColumn<'a> {
     pub is_visible: bool,
     pub name: &'a str,
-    col_type: Type,
+    col_type: ColumnType,
 }
 
 impl<'a> PartialEq for OrderedColumn<'a> {
