@@ -12,8 +12,8 @@
 
 import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-window.addEventListener("DOMContentLoaded", function () {
-    const worker = perspective.worker();
+window.addEventListener("DOMContentLoaded", async function () {
+    const worker = await perspective.worker();
 
     // Get `dropArea` element from the DOM.
     var dropArea = document.getElementById("drop-area");

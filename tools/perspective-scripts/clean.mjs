@@ -10,9 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { clean, run_with_scope } from "./sh_perspective.mjs";
+import { default as sh, clean, run_with_scope } from "./sh_perspective.mjs";
 import glob from "glob";
-import minimatch from "minimatch";
 
 const args = process.argv.slice(2);
 
@@ -40,7 +39,8 @@ if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
     );
 }
 
-if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
+const PACKAGES = process.env.PACKAGE?.split(",") || [];
+if (!process.env.PACKAGE || PACKAGES.indexOf("perspective") >= 0) {
     const files = [
         "CMakeFiles",
         "build",
@@ -51,6 +51,16 @@ if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
         "Makefile",
     ];
     clean(...files.map((x) => `cpp/perspective/obj/${x}`));
+}
+
+if (
+    !process.env.PACKAGE ||
+    PACKAGES.indexOf("perspective") >= 0 ||
+    PACKAGES.indexOf("perspective-viewer") >= 0
+) {
+    console.log("-- Running cargo clean\n");
+    sh`cargo clean`.runSync();
+    console.log();
 }
 
 await run_with_scope`clean`;

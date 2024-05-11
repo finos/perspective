@@ -26,9 +26,6 @@
 //! `WebAssembly.Memory` externally. Afterwards, the compiled wasm archive
 //! is garbage-collected by the JavaScript runtime (just like any JS object),
 //! freeing the uncompressed memory from the archive.
-//!
-//! This module is not built in debug builds, and there is a separate load path
-//! in `init.ts` to handle this.
 
 use std::io::Read;
 

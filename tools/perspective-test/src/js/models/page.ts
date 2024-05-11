@@ -14,9 +14,9 @@ import { Locator, Page, expect } from "@playwright/test";
 import { ColumnSettingsSidebar } from "./column_settings";
 import { ColumnSelector, ColumnType, SettingsPanel } from "./settings_panel";
 import { DataGridPlugin } from "./plugins";
-import {
+import type {
     IPerspectiveViewerElement,
-    PerspectiveViewerConfig,
+    ViewerConfigUpdate,
 } from "@finos/perspective-viewer";
 
 /**
@@ -56,11 +56,11 @@ export class PageView {
         });
     }
 
-    async restore(config: PerspectiveViewerConfig) {
-        return this.container.evaluate(async (viewer, config) => {
+    async restore(config: ViewerConfigUpdate) {
+        return this.container.evaluate(function (viewer, config) {
             let el = viewer as unknown as IPerspectiveViewerElement;
-            return await el.restore(config);
-        }, config);
+            return el.restore(config);
+        }, config as any);
     }
 
     async openSettingsPanel() {

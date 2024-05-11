@@ -11,7 +11,11 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { WebSocketServer } from "@finos/perspective";
-import path from "path";
+import path from "node:path";
+import url from "node:url";
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const _server = new WebSocketServer({
     assets: [
@@ -19,6 +23,5 @@ const _server = new WebSocketServer({
         path.join(__dirname, "../../../..", "node_modules"),
     ],
     port: 6598,
-    host_psp: undefined,
-    on_start: undefined,
+    hostPsp: true,
 });

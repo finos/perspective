@@ -11,7 +11,7 @@ packages:
     - "packages/perspective-jupyterlab"
     - "packages/perspective-webpack-plugin"
     - "packages/perspective-cli"
-    - "packages/perspective"
+    - "rust/perspective-js"
     - "rust/perspective-viewer"
     - "python/perspective"
     - "examples/*"

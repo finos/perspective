@@ -11,16 +11,18 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 [package]
-name = "perspective-bundle"
-description = "A CLI utility to build and link persecptive-viewer"
-version = "2.10.1"
+name = "perspective-bootstrap-runtime"
+description = "A tiny runtime wrapper to create self-extracting wasm binaries"
 edition = "2021"
+publish = false
 
-[[bin]]
-name = "bundle"
-path = "main.rs"
-bench = false
+[lib]
+crate-type = ["cdylib"]
+path = "lib.rs"
 
 [dependencies]
-wasm-bindgen-cli-support = "0.2.87"
-wasm-opt = "0.116.0"
+flate2 = "1.0.28"
+
+[features]
+env_target = []
+default_features = []

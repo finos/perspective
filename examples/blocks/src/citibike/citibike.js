@@ -39,7 +39,7 @@ async function get_feed(feedname, callback) {
 }
 
 // Create a new Perspective WebWorker instance.
-const worker = perspective.worker();
+const worker = await perspective.worker();
 
 // Use Perspective WebWorker's table to infer the feed's schema.
 async function get_schema(feed) {

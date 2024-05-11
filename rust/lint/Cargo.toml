@@ -11,18 +11,17 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 [package]
-name = "perspective-bootstrap-runtime"
-description = "A tiny runtime wrapper to create self-extracting wasm binaries"
+name = "perspective-lint"
+description = "A CLI utility to lint rust code"
 version = "2.10.1"
 edition = "2021"
+publish = false
 
-[lib]
-crate-type = ["cdylib"]
-path = "lib.rs"
+[[bin]]
+name = "lint"
+path = "main.rs"
+bench = false
 
 [dependencies]
-flate2 = "1.0.28"
-
-[features]
-env_target = []
-default_features = []
+yew-fmt = { version = "0.5.1", artifact = "bin" }
+glob = "0.3.1"

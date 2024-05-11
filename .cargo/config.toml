@@ -1,8 +1,9 @@
 [alias]
-bundle = "run -p perspective-bundle --"
+bundle = "run -p perspective-bundle"
 
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]
+target-dir = "rust/target"
 
 [target.wasm32-unknown-unknown]
 runner = 'wasm-bindgen-test-runner'

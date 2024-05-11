@@ -22,7 +22,7 @@
         <script type="module">
             import { worker } from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-            const WORKER = worker();
+            const WORKER = await worker();
             const REQ = fetch("https://api.covidtracking.com/v1/states/daily.csv");
 
             const LAYOUT = {

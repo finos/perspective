@@ -46,20 +46,20 @@ fn main() {
     zip(Path::new(&args.input));
     Command::new("cargo")
         .args(["build"])
+        .args(["-p", "perspective-bootstrap-runtime"])
         .args(["--target", "wasm32-unknown-unknown"])
         .args(["--features", "env_target"])
         .args(["-Z", "build-std=std,panic_abort"])
         .args(["-Z", "build-std-features=panic_immediate_abort"])
-        .args(["-p", "perspective-bootstrap-runtime"])
         .args(["--release"])
         .env("TARGET", &fs::canonicalize(args.input.clone()).unwrap())
         .execute();
 
-    let inpath = Path::new("target/wasm32-unknown-unknown/release")
+    let inpath = Path::new("../target/wasm32-unknown-unknown/release")
         .join("perspective_bootstrap_runtime.wasm");
 
     OptimizationOptions::new_optimize_for_size()
-        .one_caller_inline_max_size(15)
+        .one_caller_inline_max_size(19306)
         .run(inpath.clone(), args.output.unwrap_or(args.input))
         .unwrap();
 }

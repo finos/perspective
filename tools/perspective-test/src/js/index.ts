@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-export * from "./utils";
-export * from "./simple_viewer_tests";
-export * from "./models/page";
-export * from "./fixture";
+export * from "./utils.ts";
+export * from "./simple_viewer_tests.ts";
+export * from "./models/page.ts";
+export { test, expect } from "./fixture.ts";

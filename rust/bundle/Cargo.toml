@@ -11,16 +11,17 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 [package]
-name = "perspective-lint"
-description = "A CLI utility to lint rust code"
-version = "2.10.1"
+name = "perspective-bundle"
+description = "A CLI utility to build and link persecptive-viewer"
 edition = "2021"
+publish = false
 
 [[bin]]
-name = "lint"
+name = "bundle"
 path = "main.rs"
 bench = false
 
 [dependencies]
-yew-fmt = { version = "0.5.1", artifact = "bin" }
-glob = "0.3.1"
+clap = { version = "4.4.8", features = ["derive"] }
+wasm-bindgen-cli-support = "0.2.90"
+wasm-opt = "0.116.0"

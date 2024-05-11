@@ -10,11 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const perspective = require("@finos/perspective");
-
-const worker = perspective.shared_worker
-    ? perspective.shared_worker()
-    : perspective;
+import perspective from "@finos/perspective";
 
 // Cache updates for faster update rates (but less data diversity)>
 const CACHE_INPUT = false;
@@ -60,7 +56,7 @@ const CLIENTS = [
 
 const __CACHE__ = [];
 
-perspective.initialize_profile_thread();
+// perspective.initialize_profile_thread();
 
 /*******************************************************************************
  *
@@ -89,8 +85,9 @@ function newRows(total_rows) {
 
 async function init_dynamic({ table_size, update_size, tick_rate }) {
     // Create a `table`.
-    const table = await worker.table(newRows(table_size), {
+    const table = await perspective.table(newRows(table_size), {
         limit: table_size,
+        name: "securities",
     });
 
     // The `table` needs to be registered to a name with the Perspective
@@ -110,7 +107,7 @@ async function init_dynamic({ table_size, update_size, tick_rate }) {
  */
 
 async function newArrow(total_rows) {
-    const table = await worker.table(newRows(total_rows));
+    const table = await perspective.table(newRows(total_rows));
     const vw = await table.view();
     const arrow = await vw.to_arrow();
     vw.delete();
@@ -120,15 +117,16 @@ async function newArrow(total_rows) {
 
 async function populate_cache(cache_entries) {
     for (let x = 0; x < cache_entries; x++) {
-        let arrow = await newArrow();
+        let arrow = await newArrow(100);
         __CACHE__[x] = arrow;
     }
 }
 
 async function init_cached({ table_size, tick_rate, cache_entries }) {
     await populate_cache(cache_entries);
-    const table = await worker.table(newRows(table_size), {
+    const table = await perspective.table(newRows(table_size), {
         limit: table_size,
+        name: "securities",
     });
     (function postRow() {
         const entry = __CACHE__[Math.floor(Math.random() * __CACHE__.length)];
@@ -138,7 +136,7 @@ async function init_cached({ table_size, tick_rate, cache_entries }) {
     return table;
 }
 
-const getTable = (
+export const getTable = (
     config = {
         cached: CACHE_INPUT,
         tick_rate: TICK_RATE,
@@ -153,5 +151,3 @@ const getTable = (
         return init_dynamic(config);
     }
 };
-
-module.exports = getTable;
