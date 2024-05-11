@@ -11,6 +11,12 @@ importers:
       '@finos/perspective':
         specifier: workspace:^
         version: link:packages/perspective
+      '@finos/perspective-jupyterlab':
+        specifier: workspace:^
+        version: link:packages/perspective-jupyterlab
+      '@finos/perspective-test':
+        specifier: workspace:^
+        version: link:tools/perspective-test
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:rust/perspective-viewer
@@ -20,6 +26,12 @@ importers:
       '@finos/perspective-viewer-datagrid':
         specifier: workspace:^
         version: link:packages/perspective-viewer-datagrid
+      '@finos/perspective-viewer-openlayers':
+        specifier: workspace:^
+        version: link:packages/perspective-viewer-openlayers
+      '@finos/perspective-workspace':
+        specifier: workspace:^
+        version: link:packages/perspective-workspace
       '@fontsource/roboto-mono':
         specifier: 4.5.10
         version: 4.5.10
@@ -821,7 +833,7 @@ importers:
         specifier: workspace:^
         version: link:../../tools/perspective-test
       '@prospective.co/procss':
-        specifier: ^0.1.13
+        specifier: ^0.1.15
         version: 0.1.15
 
   packages/perspective-viewer-openlayers:
@@ -852,7 +864,7 @@ importers:
         specifier: workspace:^
         version: link:../perspective-esbuild-plugin
       '@prospective.co/procss':
-        specifier: ^0.1.13
+        specifier: ^0.1.15
         version: 0.1.15
 
   packages/perspective-webpack-plugin:
@@ -1015,6 +1027,9 @@ importers:
       perspective-2-1-0:
         specifier: npm:@finos/perspective@2.1.0
         version: '@finos/perspective@2.1.0'
+      perspective-2-10-0:
+        specifier: npm:@finos/perspective@2.10.0
+        version: '@finos/perspective@2.10.0'
       perspective-2-2-0:
         specifier: npm:@finos/perspective@2.2.0
         version: '@finos/perspective@2.2.0'
@@ -1033,6 +1048,12 @@ importers:
       perspective-2-7-0:
         specifier: npm:@finos/perspective@2.7.0
         version: '@finos/perspective@2.7.0'
+      perspective-2-8-0:
+        specifier: npm:@finos/perspective@2.8.0
+        version: '@finos/perspective@2.8.0'
+      perspective-2-9-0:
+        specifier: npm:@finos/perspective@2.9.0
+        version: '@finos/perspective@2.9.0'
     devDependencies:
       '@finos/perspective':
         specifier: workspace:^
@@ -1054,9 +1075,6 @@ importers:
 
   tools/perspective-test:
     dependencies:
-      '@finos/perspective':
-        specifier: ^2.10.0
-        version: 2.10.0
       xml-formatter:
         specifier: 2.4.0
         version: 2.4.0
@@ -2211,6 +2229,14 @@ packages:
 
   '@finos/perspective@2.7.0':
     resolution: {integrity: sha512-/9UHAnH1iW8ANnfplDLGMS60dx3R8UWRoL0dKTx9A3jNbeP2l+5wd0twsal00FqR/wgUomd3+tbbkzOIMsNclA==}
+    engines: {node: '>=14'}
+
+  '@finos/perspective@2.8.0':
+    resolution: {integrity: sha512-D2LSwwFqs4mcZjwBBCNn7JdidK+Th29ZA6rdA1LMKn4pvedok0YzKii0beKTzovhVeKthlcVROKQpFY3DEjptw==}
+    engines: {node: '>=14'}
+
+  '@finos/perspective@2.9.0':
+    resolution: {integrity: sha512-O40EzleYRpmX2k8xwbcJfWlgi4QDJ2cUJlmEA0wG1LLVmSOQD7vFeQK9H2v6xQBwn6+/andpDLglrzDYCEBOHg==}
     engines: {node: '>=14'}
 
   '@fontsource/roboto-mono@4.5.10':
@@ -10855,6 +10881,22 @@ snapshots:
       - utf-8-validate
 
   '@finos/perspective@2.7.0':
+    dependencies:
+      stoppable: 1.1.0
+      ws: 6.2.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@finos/perspective@2.8.0':
+    dependencies:
+      stoppable: 1.1.0
+      ws: 6.2.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@finos/perspective@2.9.0':
     dependencies:
       stoppable: 1.1.0
       ws: 6.2.2

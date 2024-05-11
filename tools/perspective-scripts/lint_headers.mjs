@@ -23,6 +23,8 @@ const IGNORE_PATHS = fs_sync
     .concat([
         "llvm/*",
         "cmake/*",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
         "cpp/perspective/src/cpp/vendor",
         "cpp/perspective/src/include/perspective/vendor",
         "python/perspective/perspective/core/_version.py",
