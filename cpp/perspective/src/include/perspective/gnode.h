@@ -33,7 +33,7 @@
 
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
-#include <boost/thread/shared_mutex.hpp>
+#include <shared_mutex>
 #endif
 
 namespace perspective {
@@ -225,7 +225,7 @@ public:
     const t_gstate::t_mapping& get_pkey_map() const;
 
 #ifdef PSP_PARALLEL_FOR
-    void set_lock(boost::shared_mutex* lock);
+    void set_lock(std::shared_mutex* lock);
 #endif
 
 protected:
@@ -402,7 +402,7 @@ private:
     std::shared_ptr<t_regex_mapping> m_expression_regex_mapping;
 
 #ifdef PSP_PARALLEL_FOR
-    boost::shared_mutex* m_lock;
+    std::shared_mutex* m_lock;
 #endif
 };
 

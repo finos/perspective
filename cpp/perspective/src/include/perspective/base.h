@@ -36,6 +36,9 @@
 #include <perspective/portable.h>
 #include <boost/functional/hash.hpp>
 #include <stdlib.h>
+#if defined(PSP_DEBUG) && defined(PSP_ENABLE_WASM)
+#include <emscripten.h>
+#endif
 
 namespace perspective {
 
@@ -69,6 +72,7 @@ const t_index INVALID_INDEX = -1;
  * @param message
  * @return PERSPECTIVE_EXPORT
  */
+[[noreturn]]
 PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
 
 // #define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
@@ -137,6 +141,8 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
+#define LOG_DEBUG(X)                                                           \
+    std::cout << __FILE__ << ":" << __LINE__ << " DEBUG: " << X << '\n'
 #else
 #define PSP_VERBOSE_ASSERT1(COND, MSG)                                         \
     {                                                                          \
@@ -160,11 +166,30 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
+#define LOG_DEBUG(X)
 #endif
 
+#if defined(PSP_DEBUG) && defined(PSP_ENABLE_WASM)
 #define PSP_COMPLAIN_AND_ABORT(X)                                              \
-    ::perspective::psp_abort(X);                                               \
-    abort();
+    {                                                                          \
+        std::stringstream __SS__;                                              \
+        __SS__ << (X) << "\n";                                                 \
+        auto flags = EM_LOG_NO_PATHS;                                          \
+        auto len = emscripten_get_callstack(flags, 0, 0);                      \
+        std::string err;                                                       \
+        err.resize(len);                                                       \
+        emscripten_get_callstack(flags, err.data(), len);                      \
+        __SS__ << err << "\n";                                                 \
+        psp_abort(__SS__.str());                                               \
+    }
+#else
+#define PSP_COMPLAIN_AND_ABORT(X)                                              \
+    {                                                                          \
+        std::stringstream __SS__;                                              \
+        __SS__ << (X) << "\n  at " << __FILE__ << ":" << __LINE__ << "\n";     \
+        psp_abort(__SS__.str());                                               \
+    }
+#endif
 
 #define PSP_VERBOSE_ASSERT(...)                                                        \
     _ID(GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)( \
@@ -404,7 +429,7 @@ PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string dtype_to_str(t_dtype dtype);
 PERSPECTIVE_EXPORT t_dtype str_to_dtype(const std::string& typestring);
-PERSPECTIVE_EXPORT std::string get_status_descr(t_status status);
+PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_neq_transition(t_value_transition t);

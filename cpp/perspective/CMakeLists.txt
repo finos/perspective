@@ -24,7 +24,7 @@ cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0094 NEW)
 
 if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
-    set(PSP_CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/")
+    set(PSP_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
 endif()
 
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
@@ -129,7 +129,7 @@ else()
 endif()
 
 if(NOT DEFINED PSP_CPP_SRC)
-    set(PSP_CPP_SRC "${CMAKE_SOURCE_DIR}")
+    set(PSP_CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 if(PSP_CPP_BUILD)
@@ -140,7 +140,7 @@ endif()
 
 if(PSP_PYTHON_BUILD)
     if(NOT DEFINED PSP_PYTHON_SRC)
-        set(PSP_PYTHON_SRC "${CMAKE_SOURCE_DIR}/../../python/perspective/perspective")
+        set(PSP_PYTHON_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../../python/perspective/perspective")
     endif()
 
     set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building Python ${Red}${PSP_PYTHON_VERSION}${Cyan} binding${ColorReset}")
@@ -191,7 +191,12 @@ if(PSP_PYTHON_BUILD AND MACOS)
 endif()
 
 # ######################
-include_directories("${CMAKE_SOURCE_DIR}/src/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/include")
+
+# Needs to be set early so that all translation units use it.
+if(NOT PSP_WASM_BUILD)
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fexceptions")
+endif()
 
 # if(NOT WIN32)
 # set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -219,9 +224,8 @@ if(PSP_WASM_BUILD)
         set(OPT_FLAGS " \
             -O0 \
             -g3 \
-            -gsource-map \
-            --profiling \
             -Wcast-align \
+            -fwasm-exceptions \
             -Wover-aligned \
             ")
     else()
@@ -229,6 +233,8 @@ if(PSP_WASM_BUILD)
             -O3 \
             -g0 \
             -flto \
+            -s SUPPORT_LONGJMP=wasm \
+            -fwasm-exceptions \
             ")
     endif()
 
@@ -250,25 +256,26 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     else()
         if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
             if (PSP_PYODIDE)
-              set(OPT_FLAGS " \
-                  -O0 \
-                  -g3 \
-                  -gsource-map \
-                  --profiling \
-                  -Wcast-align \
-                  -Wover-aligned \
-                  ")
+                set(OPT_FLAGS " \
+                    -O0 \
+                    -g3 \
+                    -gsource-map \
+                    --profiling \
+                    -Wcast-align \
+                    -Wover-aligned \
+                    ")
             else ()
-              set(OPT_FLAGS " \
-                  -O0 \
-                  -g3 \
-                  ")
+                 set(OPT_FLAGS " \
+                    -O0 \
+                    -fexceptions \
+                    -g3 \
+                    ")
             endif ()
         else()
             set(OPT_FLAGS " \
                 -O3 \
+                -fexceptions \
                 -g1 \
-                -flto \
                 ")
             if (PSP_PYODIDE)
                 set(OPT_FLAGS "${OPT_FLAGS} -flto")
@@ -357,6 +364,19 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 endif()
 
+set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
+
+
+set(CMAKE_C_FLAGS "  \
+-O3 \
+-flto \
+")
+set(CMAKE_CXX_FLAGS " \
+-O3 \
+-flto \
+")
+
+
 # Build header-only dependencies from external source
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
@@ -382,8 +402,12 @@ psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
 # Build exprtk for expression parsing
 psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
 
+# Protobuf setup
+add_subdirectory(${PSP_CMAKE_MODULE_PATH}/../cpp/protos "${CMAKE_BINARY_DIR}/protos-build")
+
 # ####################
 set(CMAKE_C_FLAGS_DEBUG "")
+set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_C_FLAGS " \
     ${CMAKE_C_FLAGS} \
     ${EXTENDED_FLAGS} \
@@ -393,6 +417,7 @@ set(CMAKE_C_FLAGS " \
 # prevents the default debug flags from overriding the debug flags we
 # set in OPT_FLAGS
 set(CMAKE_CXX_FLAGS_DEBUG "")
+set(CMAKE_CXX_FLAGS_RELEASE "")
 set(CMAKE_CXX_FLAGS " \
     ${CMAKE_CXX_FLAGS} \
     ${EXTENDED_FLAGS} \
@@ -414,7 +439,6 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/base_impl_osx.cpp
     ${PSP_CPP_SRC}/src/cpp/base_impl_wasm.cpp
     ${PSP_CPP_SRC}/src/cpp/base_impl_win.cpp
-    ${PSP_CPP_SRC}/src/cpp/binding.cpp
 
     # ${PSP_CPP_SRC}/src/cpp/build_filter.cpp
     # ${PSP_CPP_SRC}/src/cpp/calc_agg_dtype.cpp
@@ -491,6 +515,8 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/view_config.cpp
     ${PSP_CPP_SRC}/src/cpp/vocab.cpp
     ${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
+    ${PSP_CPP_SRC}/src/cpp/server.cpp
+    ${PSP_CPP_SRC}/src/cpp/proto_api.cpp
 )
 
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
@@ -525,19 +551,27 @@ message("${BUILD_MESSAGE}\n")
 # Common flags for WASM/JS build and Pyodide
 set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     --bind \
+    --embind-emit-tsd perspective-server.d.ts \
     --source-map-base \"\" \
     --memory-init-file 0 \
     --no-entry \
+    --closure=1 \
     -s NO_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s MODULARIZE=1 \
-    -s STANDALONE_WASM=1 \
     -s WASM_BIGINT=1 \
+    -s TEXTDECODER=2 \
+    -s STANDALONE_WASM=1 \
+    -s DYNAMIC_EXECUTION=0 \
+    -s BINARYEN_EXTRA_PASSES=--one-caller-inline-max-function-size=19306 \
     -s EXPORT_NAME=\"load_perspective\" \
     -s MAXIMUM_MEMORY=4gb \
     -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
     -s NODEJS_CATCH_EXIT=0 \
+    -s EXCEPTION_STACK_TRACES=1 \
     -s NODEJS_CATCH_REJECTION=0 \
+    -s USE_ES6_IMPORT_META=1 \
+    -s EXPORT_ES6=1 \
 ")
 
 if(PSP_WASM_BUILD)
@@ -546,22 +580,21 @@ if(PSP_WASM_BUILD)
     add_library(psp ${WASM_SOURCE_FILES})
     target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
-    target_link_libraries(psp arrow re2)
+    target_link_libraries(psp PRIVATE arrow re2 protos)
 
-    # "cjs/perspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
-    add_executable(perspective_cjs src/cpp/emscripten.cpp)
-    target_link_libraries(perspective_cjs psp)
+    add_executable(perspective_cjs src/cpp/emscripten_api.cpp)
+    target_link_libraries(perspective_cjs psp protos)
     target_compile_definitions(perspective_cjs PRIVATE PSP_ENABLE_WASM=1)
-    target_link_options(perspective_cjs PUBLIC -sENVIRONMENT="node" -sUSE_ES6_IMPORT_META=0 -sEXPORT_ES6=0)
+    target_link_options(perspective_cjs PUBLIC -sENVIRONMENT="node"  ${PSP_SANITIZE_FLAGS})
     set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./node/")
-    set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
+    set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective-server")
 
-    add_executable(perspective_esm src/cpp/emscripten.cpp)
-    target_link_libraries(perspective_esm psp)
+    add_executable(perspective_esm src/cpp/emscripten_api.cpp)
+    target_link_libraries(perspective_esm psp protos)
     target_compile_definitions(perspective_esm PRIVATE PSP_ENABLE_WASM=1)
-    target_link_options(perspective_esm PUBLIC -sENVIRONMENT="web" -sUSE_ES6_IMPORT_META=1 -sEXPORT_ES6=1)
+    target_link_options(perspective_esm PUBLIC -sENVIRONMENT="web"  ${PSP_SANITIZE_FLAGS})
     set_target_properties(perspective_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./web/")
-    set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective.cpp")
+    set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective-server")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(NOT WIN32)
         set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
@@ -652,37 +685,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 endif()
 
-# C++ IDE Setup
-
-set(WORKSPACE_ROOT "${CMAKE_SOURCE_DIR}/../..")
-
-if(PSP_WASM_BUILD)
-    set(CLANGD_ADD_FLAGS "Add:
-        [
-            -target,
-            wasm32-unknown-emscripten,
-            --sysroot=${WORKSPACE_ROOT}/.emsdk/upstream/emscripten/cache/sysroot,
-        ]")
-else()
-    set(CLANGD_ADD_FLAGS "")
-endif()
-
-# Check for existence of .clangd file
-if(EXISTS ${CMAKE_SOURCE_DIR}/.clangd.in)
-    message(STATUS "${Cyan}Found ${CMAKE_SOURCE_DIR}/.clangd.in${ColorReset}")
-    # Configure the .clangd file from the template
-    configure_file(
-        ${CMAKE_SOURCE_DIR}/.clangd.in
-        ${CMAKE_BINARY_DIR}/.clangd
-        @ONLY
-    )
-    # Symlink .clangd to the project root
-    execute_process(
-        COMMAND ln -sf ${CMAKE_BINARY_DIR}/.clangd ${WORKSPACE_ROOT}/.clangd
-    )
-    message(STATUS "${Cyan}Created ${CMAKE_BINARY_DIR}/.clangd${ColorReset}")
-else()
-    message("${Yellow}No .clangd.in found, skipping IDE setup${ColorReset}")
+# TODO this needs to be omitted when built by `cmake-rs`, because 
+#`cargo publish --dry-run` complains when this generate `.clangd` in the Rust
+# root dir instead of teh `target` dir.
+if(NOT DEFINED ENV{PSP_DISABLE_CLANGD})
+    include(SetupClangd)
 endif()
 
 if(NOT WIN32)

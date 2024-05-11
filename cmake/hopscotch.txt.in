@@ -5,7 +5,7 @@ project(hopscotch-download NONE)
 include(ExternalProject)
 ExternalProject_Add(hopscotch
   GIT_REPOSITORY    https://github.com/Tessil/hopscotch-map.git
-  GIT_TAG           v2.3.0
+  GIT_TAG           v2.3.1
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/hopscotch-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/hopscotch-build"
   CONFIGURE_COMMAND ""

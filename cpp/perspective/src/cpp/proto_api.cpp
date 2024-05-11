@@ -10,40 +10,49 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#include <perspective/first.h>
-#include <perspective/pool.h>
-#include <perspective/update_task.h>
+#include "perspective/server.h"
+#include "perspective/proto_api.h"
+#include <memory>
 
-namespace perspective {
-t_update_task::t_update_task(t_pool& pool) : m_pool(pool) {}
+class ProtoApiServer::ProtoApiServerImpl {
+public:
+    std::unique_ptr<perspective::server::ProtoServer> m_server;
+    ProtoApiServerImpl();
+    ~ProtoApiServerImpl();
+};
 
-void
-t_update_task::run(std::optional<std::function<void(std::uint32_t)>> callback) {
-    auto work_to_do = m_pool.m_data_remaining.load();
-    m_pool.m_data_remaining.store(false);
+ProtoApiServer::ProtoApiServer() :
+    m_impl(std::make_unique<ProtoApiServer::ProtoApiServerImpl>()) {}
+ProtoApiServer::~ProtoApiServer() = default;
 
-    if (work_to_do) {
-        for (auto* g : m_pool.m_gnodes) {
-            if (g != nullptr) {
-                t_uindex num_input_ports = g->num_input_ports();
+ProtoApiServer::ProtoApiServerImpl::ProtoApiServerImpl() :
+    m_server(std::make_unique<perspective::server::ProtoServer>()) {}
+ProtoApiServer::ProtoApiServerImpl::~ProtoApiServerImpl() = default;
 
-                // Call process for each port, and notify the updates from
-                // each port individually.
-                for (t_uindex port_id = 0; port_id < num_input_ports;
-                     ++port_id) {
-                    bool did_notify_context = g->process(port_id);
-                    if (did_notify_context) {
-                        if (callback) {
-                            (*callback)(port_id);
-                        }
-                        m_pool.notify_userspace(port_id);
-                    }
-                    g->clear_output_ports();
-                }
-            }
-        }
+std::vector<ProtoApiResponse>
+ProtoApiServer::handle_message(std::uint32_t client_id, const std::string& data)
+    const {
+    auto responses = m_impl->m_server->handle_message(client_id, data);
+    std::vector<ProtoApiResponse> results;
+    for (const auto& msg : responses) {
+        ProtoApiResponse resp;
+        resp.client_id = msg.client_id;
+        resp.data = msg.data;
+        results.push_back(resp);
     }
 
-    m_pool.inc_epoch();
+    return results;
 }
-} // end namespace perspective
+
+std::vector<ProtoApiResponse>
+ProtoApiServer::poll() {
+    std::vector<ProtoApiResponse> results;
+    for (const auto& msg : m_impl->m_server->poll()) {
+        ProtoApiResponse resp;
+        resp.client_id = msg.client_id;
+        resp.data = msg.data;
+        results.push_back(resp);
+    }
+
+    return results;
+}

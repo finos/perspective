@@ -13,6 +13,7 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/raw_types.h>
+#include <perspective/base.h>
 #include <sstream>
 #include <iomanip>
 #include <set>
@@ -183,4 +184,25 @@ join_str(const std::vector<std::string>& terms, const std::string& sep) {
     rv = rv + terms.back();
     return rv;
 }
+
+bool parse_all_date_time(
+    std::tm& tm,
+    std::chrono::system_clock::time_point& tp,
+    std::string_view date_time_str
+);
+
+inline bool
+parse_all_date_time(std::tm& tm, std::string_view date_time_str) {
+    std::chrono::system_clock::time_point tp;
+    return parse_all_date_time(tm, tp, date_time_str);
+}
+
+inline bool
+parse_all_date_time(
+    std::chrono::system_clock::time_point& tp, std::string_view date_time_str
+) {
+    std::tm tm;
+    return parse_all_date_time(tm, tp, date_time_str);
+}
+
 } // namespace perspective

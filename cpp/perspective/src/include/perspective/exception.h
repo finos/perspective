@@ -18,13 +18,14 @@ namespace perspective {
 class PERSPECTIVE_EXPORT PerspectiveException : public std::exception {
 public:
     explicit PerspectiveException(const char* m) : message{m} {}
-    virtual const char*
+    [[nodiscard]]
+    const char*
     what() const noexcept override {
         return message.c_str();
     }
 
 private:
-    std::string message = "";
+    std::string message;
 };
 
 } // namespace perspective
