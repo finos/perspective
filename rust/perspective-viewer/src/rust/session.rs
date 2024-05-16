@@ -273,43 +273,54 @@ impl Session {
         Ok(errors.get("_").cloned())
     }
 
-    pub async fn arrow_as_vec(&self, flat: bool) -> Result<Vec<u8>, ApiError> {
+    pub async fn arrow_as_vec(
+        &self,
+        flat: bool,
+        window: Option<ViewWindow>,
+    ) -> Result<Vec<u8>, ApiError> {
         Ok(self
             .flat_view(flat)
             .await?
-            .to_arrow(ViewWindow::default())
+            .to_arrow(window.unwrap_or_default())
             .await?)
     }
 
-    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<js_sys::ArrayBuffer, ApiError> {
+    pub async fn arrow_as_jsvalue(
+        self,
+        flat: bool,
+        window: Option<ViewWindow>,
+    ) -> Result<js_sys::ArrayBuffer, ApiError> {
         let arrow = self
             .flat_view(flat)
             .await?
-            .to_arrow(ViewWindow::default())
+            .to_arrow(window.unwrap_or_default())
             .await?;
-
         Ok(js_sys::Uint8Array::from(&arrow[..])
             .buffer()
             .unchecked_into())
     }
 
-    pub async fn json_as_jsvalue(self, flat: bool) -> Result<js_sys::Object, ApiError> {
+    pub async fn json_as_jsvalue(
+        self,
+        flat: bool,
+        window: Option<ViewWindow>,
+    ) -> Result<js_sys::Object, ApiError> {
         let json = self
             .flat_view(flat)
             .await?
-            .to_columns_string(ViewWindow::default())
+            .to_columns_string(window.unwrap_or_default())
             .await?;
 
         Ok(js_sys::JSON::parse(&json)?.unchecked_into())
     }
 
-    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<js_sys::JsString, ApiError> {
-        let opts = ViewWindow {
-            formatted: Some(true),
-            ..ViewWindow::default()
-        };
-
-        let csv = self.flat_view(flat).await?.to_csv(opts).await;
+    pub async fn csv_as_jsvalue(
+        &self,
+        flat: bool,
+        window: Option<ViewWindow>,
+    ) -> Result<js_sys::JsString, ApiError> {
+        let window = window.unwrap_or_default();
+        let csv = self.flat_view(flat).await?.to_csv(window).await;
         Ok(csv.map(js_sys::JsString::from)?)
     }
 

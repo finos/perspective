@@ -114,6 +114,7 @@ async function build_all() {
         "icons.less",
         "@finos/perspective-viewer/src/themes/icons.less"
     );
+    add(builder, "intl.less", "@finos/perspective-viewer/src/themes/intl.less");
     add(builder, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
     add(builder, "output.scss", "./src/themes/pro.less");
     fs.writeFileSync("dist/css/pro.css", builder.compile().get("output.css"));
@@ -123,6 +124,11 @@ async function build_all() {
         builder2,
         "icons.less",
         "@finos/perspective-viewer/src/themes/icons.less"
+    );
+    add(
+        builder2,
+        "intl.less",
+        "@finos/perspective-viewer/src/themes/intl.less"
     );
     add(builder2, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
     add(builder2, "@finos/perspective-viewer/src/themes/pro-dark.less");

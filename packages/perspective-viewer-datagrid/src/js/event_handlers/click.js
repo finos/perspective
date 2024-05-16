@@ -10,49 +10,52 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { PRIVATE_PLUGIN_SYMBOL } from "../model";
+import * as edit_click from "./click/edit_click.js";
+import * as edit_keydown from "./keydown/edit_keydown.js";
 
-function isEditable(viewer, allowed = false) {
+export function is_editable(viewer, allowed = false) {
     const has_pivots =
         this._config.group_by.length === 0 &&
         this._config.split_by.length === 0;
     const selectable = viewer.hasAttribute("selectable");
-    const editable = allowed || viewer.children[0].dataset.editMode === "EDIT";
+    const editable = allowed || !!viewer.children[0]._is_edit_mode;
     return has_pivots && !selectable && editable;
 }
 
-export function editable_style_listener(table, viewer, datagrid) {
-    // Independently check "editable" and `isEditable()`, so we can skip
-    // the styler entirely if editing was disabled at the time of element
-    // creation, but toggle in when e.g. pivots or selectable will
-    // affect editability.
-    const plugins = table[PRIVATE_PLUGIN_SYMBOL] || {};
-    const edit = isEditable.call(this, viewer);
-    datagrid.classList.toggle(
-        "edit-mode-allowed",
-        isEditable.call(this, viewer, true)
-    );
-
-    for (const td of table.querySelectorAll("td")) {
-        const meta = table.getMeta(td);
-        const type = this.get_psp_type(meta);
-        if (edit && this._is_editable[meta.x]) {
-            const col_name = meta.column_header[this._config.split_by.length];
-            if (type === "string" && plugins[col_name]?.format === "link") {
-                td.toggleAttribute("contenteditable", false);
-                td.classList.toggle("boolean-editable", false);
-            } else if (type === "boolean") {
-                td.toggleAttribute("contenteditable", false);
-                td.classList.toggle("boolean-editable", meta.user !== null);
-            } else {
-                if (edit !== td.hasAttribute("contenteditable")) {
-                    td.toggleAttribute("contenteditable", edit);
-                }
-                td.classList.toggle("boolean-editable", false);
-            }
-        } else {
-            td.toggleAttribute("contenteditable", false);
-            td.classList.toggle("boolean-editable", false);
+export function keydownListener(table, viewer, selected_position_map, event) {
+    if (this._edit_mode === "EDIT") {
+        if (!is_editable.call(this, viewer)) {
+            return;
         }
+
+        edit_keydown.keydownListener.call(
+            this,
+            table,
+            viewer,
+            selected_position_map,
+            event
+        );
+    } else {
+        console.log(
+            `Mode ${this._edit_mode} for "keydown" event not yet implemented`
+        );
+    }
+}
+
+export function clickListener(table, viewer, event) {
+    if (this._edit_mode === "EDIT") {
+        if (!is_editable.call(this, viewer)) {
+            return;
+        }
+
+        edit_click.clickListener.call(this, table, viewer, event);
+    } else if (this._edit_mode === "READ_ONLY") {
+    } else if (this._edit_mode === "SELECT_COLUMN") {
+    } else if (this._edit_mode === "SELECT_ROW") {
+    } else if (this._edit_mode === "SELECT_REGION") {
+    } else {
+        console.log(
+            `Mode ${this._edit_mode} for "click" event not yet implemented`
+        );
     }
 }

@@ -48,6 +48,8 @@ export async function mousedown_listener(regularTable, viewer, event) {
     }
 }
 
+// TODO I hav eno idea what this does ...
+
 export function click_listener(regularTable, event) {
     if (event.which !== 1) {
         return;

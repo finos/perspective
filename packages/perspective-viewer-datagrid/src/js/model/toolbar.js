@@ -10,15 +10,33 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-export function toggle_edit_mode(force = undefined) {
-    if (typeof force === "undefined") {
-        force = !this._is_edit_mode;
+export const EDIT_MODES = [
+    "READ_ONLY",
+    "EDIT",
+    "SELECT_ROW",
+    "SELECT_COLUMN",
+    "SELECT_REGION",
+];
+
+export function toggle_edit_mode(mode = undefined) {
+    if (typeof mode === "undefined") {
+        mode =
+            EDIT_MODES[
+                (EDIT_MODES.indexOf(this._is_edit_mode) + 1) % EDIT_MODES.length
+            ];
     }
 
-    this._is_edit_mode = force;
-    this.classList.toggle("editable", force);
-    if (this._edit_mode !== undefined) {
-        this._edit_mode.classList.toggle("editable", force);
+    this.model._edit_mode = mode;
+    this.parentElement.setSelection();
+    this.model._selection_state = {
+        selected_areas: [],
+        dirty: true,
+    };
+
+    this._is_edit_mode = mode;
+    this.dataset.editMode = mode;
+    if (this._edit_button !== undefined) {
+        this._edit_button.dataset.editMode = mode;
     }
 }
 

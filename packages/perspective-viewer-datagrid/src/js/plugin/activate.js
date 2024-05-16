@@ -24,10 +24,7 @@ import {
 import { editable_style_listener } from "../style_handlers/editable.js";
 import { focus_style_listener } from "../style_handlers/focus.js";
 import { focusinListener, focusoutListener } from "../event_handlers/focus.js";
-import {
-    keydownListener,
-    clickListener,
-} from "../event_handlers/edit_click.js";
+import { keydownListener, clickListener } from "../event_handlers/click.js";
 
 import { selectionListener } from "../event_handlers/row_select_click";
 import { selectionStyleListener } from "../style_handlers/selection";
@@ -35,6 +32,8 @@ import { deselect_all_listener } from "../event_handlers/deselect_all.js";
 
 import { createModel } from "../model/create.js";
 import { dispatch_click_listener } from "../event_handlers/dispatch_click";
+
+import { addAreaMouseSelection } from "../event_handlers/select_region.js";
 
 /**
  * Lazy initialize this plugin with various listeners.
@@ -56,6 +55,10 @@ export async function activate(view) {
             view
         );
 
+        addAreaMouseSelection(this, this.regular_table, {
+            className: "psp-select-region",
+        });
+
         this.regular_table.addStyleListener(
             table_cell_style_listener.bind(
                 this.model,
@@ -76,17 +79,19 @@ export async function activate(view) {
             )
         );
 
+        // uh ..
         this.regular_table.addEventListener(
             "click",
             click_listener.bind(this.model, this.regular_table)
         );
 
+        // tree collapse, expand, edit button headers
         this.regular_table.addEventListener(
             "mousedown",
             mousedown_listener.bind(this.model, this.regular_table, viewer)
         );
 
-        // Row selection
+        // (Legacy) Row selection
         const selected_rows_map = new WeakMap();
         this.regular_table.addStyleListener(
             selectionStyleListener.bind(
@@ -117,7 +122,7 @@ export async function activate(view) {
             )
         );
 
-        // User click
+        // User event click
         this.regular_table.addEventListener(
             "click",
             dispatch_click_listener.bind(this.model, this.regular_table, viewer)
@@ -141,10 +146,13 @@ export async function activate(view) {
                 selected_position_map
             )
         );
+
+        // TODO relies on this.model._is_editable
         this.regular_table.addEventListener(
             "click",
             clickListener.bind(this.model, this.regular_table, viewer)
         );
+
         this.regular_table.addEventListener(
             "focusin",
             focusinListener.bind(

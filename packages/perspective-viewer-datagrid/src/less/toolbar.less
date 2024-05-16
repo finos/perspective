@@ -33,6 +33,19 @@
     height: 36px;
 }
 
+:host #toolbar .hover-target {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    height: 48px;
+    cursor: pointer;
+
+    &:hover {
+        outline: 4px solid var(--icon--color);
+        background-color: var(--icon--color);
+    }
+}
+
 :host #slot-container {
     flex: 1;
     position: relative;
@@ -51,19 +64,51 @@
 }
 
 #edit_mode:before {
-    -webkit-mask-image: var(--toolbar-edit-mode--content);
+    -webkit-mask-image: "";
 }
 
-#edit_mode.editable:before {
-    -webkit-mask-image: var(--toolbar-edit-mode-active--content);
+#edit_mode[data-edit-mode="READ_ONLY"]:before {
+    -webkit-mask-image: var(--toolbar-edit-mode--read-only--content);
 }
 
-#edit_mode span:before {
-    content: var(--edit-mode-toggle--content, "Read Only");
+#edit_mode[data-edit-mode="EDIT"]:before {
+    -webkit-mask-image: var(--toolbar-edit-mode--edit--content);
 }
 
-#edit_mode.editable span:before {
-    content: var(--edit-mode-alt-toggle--content, "Editable");
+#edit_mode[data-edit-mode="SELECT_ROW"]:before {
+    -webkit-mask-image: var(--toolbar-edit-mode--select-row--content);
+}
+
+#edit_mode[data-edit-mode="SELECT_COLUMN"]:before {
+    -webkit-mask-image: var(--toolbar-edit-mode--select-column--content);
+}
+
+#edit_mode[data-edit-mode="SELECT_REGION"]:before {
+    -webkit-mask-image: var(--toolbar-edit-mode--select-region--content);
+}
+
+// #edit_mode span:before {
+//     content: var(--edit-mode-toggle--content, "N/A");
+// }
+
+#edit_mode[data-edit-mode="READ_ONLY"] span:before {
+    content: var(--edit-mode--read-only--content, "Read Only");
+}
+
+#edit_mode[data-edit-mode="EDIT"] span:before {
+    content: var(--edit-mode--edit--content, "Editable");
+}
+
+#edit_mode[data-edit-mode="SELECT_ROW"] span:before {
+    content: var(--edit-mode--select-row--content, "Row Select");
+}
+
+#edit_mode[data-edit-mode="SELECT_COLUMN"] span:before {
+    content: var(--edit-mode--select-column--content, "Column Select");
+}
+
+#edit_mode[data-edit-mode="SELECT_REGION"] span:before {
+    content: var(--edit-mode--select-region--content, "Region Select");
 }
 
 #scroll_lock span:before {
@@ -80,7 +125,7 @@
 
 // The icon.
 .button:before {
-    width: 25px;
+    width: 21px;
     height: 21px;
     content: "";
     -webkit-mask-size: cover;
@@ -117,7 +162,7 @@
     padding: 0;
 }
 
-.button:hover {
+.hover-target:hover .button {
     position: relative;
     background-color: var(--icon--color);
     color: var(--plugin--background);
@@ -127,12 +172,12 @@
     cursor: pointer;
 }
 
-.button:hover:before {
+.hover-target:hover .button:before {
     background-color: var(--plugin--background);
 }
 
 // The label.
-.button:hover > span {
+.hover-target:hover .button > span {
     display: block;
     position: absolute;
     top: calc(100% + 3px);
@@ -141,9 +186,11 @@
     margin: 0;
     padding: 5px;
     height: auto;
-    white-space: nowrap;
+    white-space: pre-wrap;
     line-height: 1;
     font-size: 9px;
     background-color: var(--icon--color);
-    border-radius: 3px;
+    width: 35px;
+    text-align: center;
+    border-radius: 0 0 3px 3px;
 }

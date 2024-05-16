@@ -280,13 +280,32 @@
             &:before {
                 z-index: 1;
             }
+        }
 
-            &:hover select {
+        .hover-target {
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            height: 48px;
+            cursor: pointer;
+            &:hover,
+            &.modal-target {
+                // outline: 4px solid var(--icon--color);
+                box-shadow: -4px 0 0 var(--icon--color),
+                    4px 0 0 var(--icon--color);
+                background-color: var(--icon--color);
+            }
+
+            &:hover .button select {
                 background-color: transparent;
             }
 
-            &:hover,
-            &.modal-target {
+            .modal-target .button > span {
+                color: var(--icon--color) !important;
+            }
+
+            &:hover .button,
+            .modal-target .button {
                 position: relative;
                 min-width: var(--button--min-width, 33px);
                 color: inherit;
@@ -303,6 +322,7 @@
                 // The label.
                 @mixin label {
                     display: block;
+                    text-align: center;
                     position: absolute;
                     top: calc(100% + 3px);
                     left: 50%;
@@ -312,17 +332,30 @@
                     height: auto;
                     white-space: nowrap;
                     line-height: 1;
+                    width: 41px;
                     background-color: var(--icon--color);
-                    border-radius: 3px;
+                    border-radius: 0 0 3px 3px;
                 }
                 & > span {
                     @include label;
                 }
 
                 & > .dropdown-width-container {
-                    @include label;
-                    overflow: visible;
+                    display: block;
+                    // position: absolute;
+                    // top: calc(100% + 3px);
+                    // left: 50%;
+                    // translate: -50%;
+                    margin: 0;
+                    // padding: 5px;
+                    height: auto;
+                    white-space: nowrap;
+                    line-height: 1;
+                    background-color: var(--icon--color);
+                    // border-radius: 3px;
+                    // overflow: visible;
                     pointer-events: all;
+
                     & > select {
                         position: static;
                         cursor: pointer;

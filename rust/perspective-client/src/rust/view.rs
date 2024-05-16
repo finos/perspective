@@ -65,7 +65,7 @@ pub struct Dimensions {
     pub num_table_columns: usize,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, TS)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 pub struct ViewWindow {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub start_row: Option<f32>,

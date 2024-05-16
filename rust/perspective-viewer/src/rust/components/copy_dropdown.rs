@@ -50,10 +50,11 @@ impl Component for CopyDropDownMenu {
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
         let has_render = js_sys::Reflect::has(&plugin, js_intern::js_intern!("render")).unwrap();
+        let has_selection = ctx.props().renderer.get_selection().is_some();
         html! {
             <StyleProvider>
                 <DropDownMenu<ExportMethod>
-                    values={Rc::new(get_menu_items(has_render))}
+                    values={Rc::new(get_menu_items(has_render, has_selection))}
                     callback={&ctx.props().callback}
                 />
             </StyleProvider>
@@ -76,8 +77,8 @@ impl Component for CopyDropDownMenu {
     }
 }
 
-fn get_menu_items(has_render: bool) -> Vec<CopyDropDownMenuItem> {
-    vec![
+fn get_menu_items(has_render: bool, has_selection: bool) -> Vec<CopyDropDownMenuItem> {
+    let mut items = vec![
         CopyDropDownMenuItem::OptGroup(
             "Current View".into(),
             if has_render {
@@ -91,5 +92,17 @@ fn get_menu_items(has_render: bool) -> Vec<CopyDropDownMenuItem> {
             ExportMethod::JsonAll,
         ]),
         CopyDropDownMenuItem::OptGroup("Config".into(), vec![ExportMethod::JsonConfig]),
-    ]
+    ];
+
+    if has_selection {
+        items.insert(
+            0,
+            CopyDropDownMenuItem::OptGroup("Current Selection".into(), vec![
+                ExportMethod::CsvSelected,
+                ExportMethod::JsonSelected,
+            ]),
+        )
+    }
+
+    items
 }

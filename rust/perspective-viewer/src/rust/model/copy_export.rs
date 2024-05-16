@@ -53,7 +53,7 @@ pub trait CopyExportModel:
             .collect::<Vec<_>>();
 
         ApiFuture::new(async move {
-            let (arrow, config) = join!(session.arrow_as_vec(true), view_config);
+            let (arrow, config) = join!(session.arrow_as_vec(true, None), view_config);
             let arrow = arrow?;
             let mut config = config?;
             config.settings = false;
@@ -87,30 +87,51 @@ pub trait CopyExportModel:
 
     /// Generate a result `Blob` for all types of `ExportMethod`.
     fn export_method_to_jsvalue(&self, method: ExportMethod) -> ApiFuture<web_sys::Blob> {
+        let viewport = self.renderer().get_selection();
         match method {
             ExportMethod::Csv => {
                 let session = self.session().clone();
-                ApiFuture::new(async move { session.csv_as_jsvalue(false).await?.as_blob() })
+                ApiFuture::new(async move { session.csv_as_jsvalue(false, None).await?.as_blob() })
+            },
+            ExportMethod::CsvSelected => {
+                let session = self.session().clone();
+                ApiFuture::new(
+                    async move { session.csv_as_jsvalue(false, viewport).await?.as_blob() },
+                )
             },
             ExportMethod::CsvAll => {
                 let session = self.session().clone();
-                ApiFuture::new(async move { session.csv_as_jsvalue(true).await?.as_blob() })
+                ApiFuture::new(async move { session.csv_as_jsvalue(true, None).await?.as_blob() })
             },
             ExportMethod::Json => {
                 let session = self.session().clone();
-                ApiFuture::new(async move { session.json_as_jsvalue(false).await?.as_blob() })
+                ApiFuture::new(async move { session.json_as_jsvalue(false, None).await?.as_blob() })
+            },
+            ExportMethod::JsonSelected => {
+                let session = self.session().clone();
+                ApiFuture::new(
+                    async move { session.json_as_jsvalue(false, viewport).await?.as_blob() },
+                )
             },
             ExportMethod::JsonAll => {
                 let session = self.session().clone();
-                ApiFuture::new(async move { session.json_as_jsvalue(true).await?.as_blob() })
+                ApiFuture::new(async move { session.json_as_jsvalue(true, None).await?.as_blob() })
             },
             ExportMethod::Arrow => {
                 let session = self.session().clone();
-                ApiFuture::new(async move { session.arrow_as_jsvalue(false).await?.as_blob() })
+                ApiFuture::new(
+                    async move { session.arrow_as_jsvalue(false, None).await?.as_blob() },
+                )
+            },
+            ExportMethod::ArrowSelected => {
+                let session = self.session().clone();
+                ApiFuture::new(
+                    async move { session.arrow_as_jsvalue(false, viewport).await?.as_blob() },
+                )
             },
             ExportMethod::ArrowAll => {
                 let session = self.session().clone();
-                ApiFuture::new(async move { session.arrow_as_jsvalue(true).await?.as_blob() })
+                ApiFuture::new(async move { session.arrow_as_jsvalue(true, None).await?.as_blob() })
             },
             ExportMethod::Html => {
                 let html_task = self.html_as_jsvalue();

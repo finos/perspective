@@ -11,7 +11,11 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { restore_column_size_overrides } from "../model/column_overrides.js";
-import { toggle_edit_mode, toggle_scroll_lock } from "../model/toolbar.js";
+import {
+    EDIT_MODES,
+    toggle_edit_mode,
+    toggle_scroll_lock,
+} from "../model/toolbar.js";
 import { PRIVATE_PLUGIN_SYMBOL } from "../model";
 import { make_color_record } from "../color_utils.js";
 
@@ -59,8 +63,13 @@ export function restore(token, columns) {
         }
     }
 
-    if ("editable" in token) {
-        toggle_edit_mode.call(this, token.editable);
+    // TODO this is going away.
+    if ("edit_mode" in token) {
+        if (EDIT_MODES.indexOf(token.edit_mode) !== -1) {
+            toggle_edit_mode.call(this, token.edit_mode);
+        } else {
+            console.error("Unknown edit mode " + token.edit_mode);
+        }
     }
 
     if ("scroll_lock" in token) {

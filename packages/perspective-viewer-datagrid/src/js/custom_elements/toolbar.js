@@ -33,10 +33,16 @@ export class HTMLPerspectiveViewerDatagridToolbarElement extends HTMLElement {
                 ${TOOLBAR_STYLE}
             </style>
             <div id="toolbar">
-                <span id="scroll_lock" class="button">
-                    <span></span>
+                <span class="hover-target">
+                    <span id="scroll_lock" class="button">
+                        <span></span>
+                    </span>
                 </span>
-                <span id="edit_mode" class="button"><span></span></span>
+                <span class="hover-target">
+                    <span id="edit_mode" class="button" data-edit-mode="READ_ONLY">
+                        <span></span>
+                    </span>
+                </span>
             </div>
         `;
 
@@ -47,8 +53,8 @@ export class HTMLPerspectiveViewerDatagridToolbarElement extends HTMLElement {
             toggle_scroll_lock.call(plugin)
         );
 
-        plugin._edit_mode = this.shadowRoot.querySelector("#edit_mode");
-        plugin._edit_mode.addEventListener("click", () => {
+        plugin._edit_button = this.shadowRoot.querySelector("#edit_mode");
+        plugin._edit_button.addEventListener("click", () => {
             toggle_edit_mode.call(plugin);
             plugin.regular_table.draw();
             viewer.dispatchEvent(new Event("perspective-config-update"));

@@ -10,89 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::rc::Rc;
-
-use yew::prelude::*;
-
-use crate::js::*;
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub enum ExportMethod {
-    Csv,
-    CsvAll,
-    CsvSelected,
-    Json,
-    JsonAll,
-    JsonSelected,
-    Html,
-    Png,
-    Arrow,
-    ArrowSelected,
-    ArrowAll,
-    JsonConfig,
-}
-
-impl ExportMethod {
-    pub const fn as_filename(&self) -> &'static str {
-        match self {
-            Self::Csv => ".csv",
-            Self::CsvAll => ".all.csv",
-            Self::Json => ".json",
-            Self::JsonAll => ".all.json",
-            Self::Html => ".html",
-            Self::Png => ".png",
-            Self::Arrow => ".arrow",
-            Self::ArrowAll => ".all.arrow",
-            Self::JsonConfig => ".config.json",
-            Self::CsvSelected => ".selected.csv",
-            Self::JsonSelected => ".selected.json",
-            Self::ArrowSelected => ".selected.arrow",
+export function write_cell(table, model, active_cell) {
+    const meta = table.getMeta(active_cell);
+    const type = model._schema[model._column_paths[meta.x]];
+    if (meta) {
+        let text = active_cell.textContent;
+        const id = model._ids[meta.y - meta.y0][0];
+        if (type === "float" || type === "integer") {
+            text = parseFloat(text.replace(/,/g, ""));
+            if (isNaN(text)) {
+                return false;
+            }
+        } else if (type === "date" || type === "datetime") {
+            text = Date.parse(text);
+            if (isNaN(text)) {
+                return false;
+            }
+        } else if (type === "boolean") {
+            text = text === "true" ? false : text === "false" ? true : null;
         }
-    }
 
-    pub const fn mimetype(&self) -> MimeType {
-        match self {
-            Self::Png => MimeType::ImagePng,
-            _ => MimeType::TextPlain,
-        }
-    }
-}
-
-impl From<ExportMethod> for Html {
-    fn from(x: ExportMethod) -> Self {
-        html! { <code>{ x.as_filename() }</code> }
-    }
-}
-
-impl ExportMethod {
-    pub fn new_file(&self, x: &str) -> ExportFile {
-        ExportFile {
-            name: Rc::new(x.to_owned()),
-            method: *self,
-        }
-    }
-}
-
-#[derive(Clone, Eq, PartialEq)]
-pub struct ExportFile {
-    pub name: Rc<String>,
-    pub method: ExportMethod,
-}
-
-impl ExportFile {
-    pub fn as_filename(&self) -> String {
-        format!("{}{}", self.name, self.method.as_filename())
-    }
-}
-
-impl From<ExportFile> for Html {
-    fn from(x: ExportFile) -> Self {
-        let class = if x.name.is_empty() {
-            Some("invalid")
-        } else {
-            None
+        const msg = {
+            __INDEX__: id,
+            [model._column_paths[meta.x]]: text,
         };
 
-        html! { <code {class}>{ x.name }{ x.method.as_filename() }</code> }
+        model._table.update([msg], { port_id: model._edit_port });
+        return true;
+    }
+}
+
+export function clickListener(table, _viewer, event) {
+    const meta = table.getMeta(event.target);
+    if (typeof meta?.x !== "undefined") {
+        const is_editable2 = this._is_editable[meta.x];
+        const is_bool = this.get_psp_type(meta) === "boolean";
+        const is_null = event.target.textContent === "-";
+        if (is_editable2 && is_bool && !is_null) {
+            write_cell(table, this, event.target);
+        }
     }
 }
