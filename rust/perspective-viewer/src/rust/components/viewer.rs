@@ -354,7 +354,7 @@ impl Component for PerspectiveViewer {
                     self.selected_column = None;
                     (false, None)
                 } else {
-                    self.selected_column = locator.clone();
+                    self.selected_column.clone_from(&locator);
 
                     locator
                         .clone()
@@ -363,7 +363,9 @@ impl Component for PerspectiveViewer {
                 };
 
                 let mut open_column_settings = ctx.props().presentation.get_open_column_settings();
-                open_column_settings.locator = self.selected_column.clone();
+                open_column_settings
+                    .locator
+                    .clone_from(&self.selected_column);
                 ctx.props()
                     .presentation
                     .set_open_column_settings(Some(open_column_settings));

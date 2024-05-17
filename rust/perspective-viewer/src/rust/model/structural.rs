@@ -15,7 +15,6 @@
 //! `struct`s only if the define accessors for the necessary applications state
 //! objects (which are conviently derivable with the `derive_model!` macro).
 
-use crate::custom_events::*;
 use crate::dragdrop::*;
 use crate::presentation::*;
 use crate::renderer::*;
@@ -35,10 +34,6 @@ pub trait HasPresentation {
 
 pub trait HasDragDrop {
     fn dragdrop(&self) -> &'_ DragDrop;
-}
-
-pub trait HasCustomEvents {
-    fn custom_events(&self) -> &'_ CustomEvents;
 }
 
 #[macro_export]
@@ -68,13 +63,6 @@ macro_rules! derive_model {
         impl $crate::model::HasPresentation for $key {
             fn presentation(&self) -> &'_ Presentation {
                 &self.presentation
-            }
-        }
-    };
-    (CustomEvents for $key:ty) => {
-        impl $crate::model::HasCustomEvents for $key {
-            fn custom_events(&self) -> &'_ CustomEvents {
-                &self.custom_events
             }
         }
     };
