@@ -307,6 +307,7 @@ jobs:
             # Dependencies #
             ################
             ################
+            # Install LLVM - also adds .llvm/bin to the PATH
             - name: Install LLVM 17
               uses: KyleMayes/install-llvm-action@v1
               with:
