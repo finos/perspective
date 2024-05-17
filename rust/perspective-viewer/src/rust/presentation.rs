@@ -110,7 +110,7 @@ impl Presentation {
     }
 
     pub fn set_title(&self, title: Option<String>) {
-        *self.name.borrow_mut() = title.clone();
+        self.name.borrow_mut().clone_from(&title);
         self.title_changed.emit(title);
     }
 
@@ -155,7 +155,7 @@ impl Presentation {
     pub fn set_open_column_settings(&self, settings: Option<OpenColumnSettings>) {
         let settings = settings.unwrap_or_default();
         if *(self.open_column_settings.borrow()) != settings {
-            *(self.open_column_settings.borrow_mut()) = settings.to_owned();
+            settings.clone_into(&mut (self.open_column_settings.borrow_mut()));
             self.column_settings_open_changed
                 .emit((true, settings.name()));
         }
@@ -224,7 +224,7 @@ impl Presentation {
             self.set_theme_attribute(Some(theme))?;
             themes.iter().position(|x| x == theme)
         } else if !themes.is_empty() {
-            self.set_theme_attribute(themes.get(0).map(|x| x.as_str()))?;
+            self.set_theme_attribute(themes.first().map(|x| x.as_str()))?;
             Some(0)
         } else {
             self.set_theme_attribute(None)?;
