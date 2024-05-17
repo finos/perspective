@@ -41,7 +41,7 @@ pub struct StyleTabProps {
     pub ty: Option<Type>,
     pub column_name: String,
 }
-derive_model!(Session, Renderer, Presentation, CustomEvents for StyleTabProps);
+derive_model!(Session, Renderer, Presentation for StyleTabProps);
 
 impl StyleTabProps {
     fn send_plugin_config(&self, update: ColumnConfigValueUpdate) {

@@ -51,7 +51,7 @@ derive_model!(Renderer, Session for ConfigSelectorProps);
 
 #[derive(Debug)]
 pub enum ConfigSelectorMsg {
-    DragStart(DragEffect),
+    DragStart,
     DragEnd,
     DragOver(usize, DragTarget),
     DragLeave(DragTarget),
@@ -173,7 +173,7 @@ impl Component for ConfigSelector {
     type Properties = ConfigSelectorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cb = ctx.link().callback(ConfigSelectorMsg::DragStart);
+        let cb = ctx.link().callback(|_| ConfigSelectorMsg::DragStart);
         let drag_sub = Rc::new(ctx.props().dragdrop.dragstart_received.add_listener(cb));
 
         let cb = ctx.link().callback(|_| ConfigSelectorMsg::DragEnd);
@@ -201,7 +201,7 @@ impl Component for ConfigSelector {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ConfigSelectorMsg::DragStart(_) | ConfigSelectorMsg::ViewCreated => true,
+            ConfigSelectorMsg::DragStart | ConfigSelectorMsg::ViewCreated => true,
             ConfigSelectorMsg::DragEnd => true,
             ConfigSelectorMsg::DragOver(index, action) => {
                 let should_render = ctx.props().dragdrop.notify_drag_enter(action, index);
