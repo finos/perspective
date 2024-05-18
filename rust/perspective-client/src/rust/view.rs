@@ -12,13 +12,15 @@
 
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::Arc;
 
+use futures::Future;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use self::view_on_update_req::Mode;
 use crate::assert_view_api;
-use crate::client::Client;
+use crate::client::{Client, IntoBoxFnPinBoxFut};
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::*;
@@ -289,36 +291,74 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/on_update.md")]
-    pub async fn on_update(
-        &self,
-        on_update: Box<dyn Fn(OnUpdateArgs) + Send + Sync + 'static>,
-        options: OnUpdateOptions,
-    ) -> ClientResult<u32> {
-        let callback = move |resp| match resp {
-            ClientResp::ViewOnUpdateResp(ViewOnUpdateResp { arrow, port_id }) => {
-                on_update(OnUpdateArgs {
-                    delta: arrow,
-                    port_id,
-                });
-
-                Ok(())
-            },
-            resp => Err(resp.into()),
+    /// This is used when constructing a [`Table`] from a [`View`].
+    /// The callback needs to be async to wire up the views on_update to the
+    /// tables.
+    pub async fn on_update<T, U>(&self, on_update: T, options: OnUpdateOptions) -> ClientResult<u32>
+    where
+        T: Fn(OnUpdateArgs) -> U + Send + Sync + 'static,
+        U: Future<Output = ()> + Send + 'static,
+    {
+        let on_update = Arc::new(on_update);
+        let callback = move |client_resp| {
+            let on_update = on_update.clone();
+            async move {
+                match client_resp {
+                    ClientResp::ViewOnUpdateResp(ViewOnUpdateResp { delta, port_id }) => {
+                        on_update(OnUpdateArgs { delta, port_id }).await;
+                        Ok(())
+                    },
+                    other => Err(other.into()),
+                }
+            }
         };
 
         let msg = self.client_message(ClientReq::ViewOnUpdateReq(ViewOnUpdateReq {
             mode: options.mode.map(|OnUpdateMode::Row| Mode::Row as i32),
         }));
-        self.client.subscribe(&msg, Box::new(callback)).await;
+
+        self.client
+            .subscribe(&msg, callback.into_box_fn_pin_bix_fut())
+            .await;
         Ok(msg.msg_id)
     }
+
+    // #[doc = include_str!("../../docs/view/on_update.md")]
+    // pub async fn on_update(
+    //     &self,
+    //     on_update: Box<dyn Fn(OnUpdateArgs) + Send + Sync + 'static>,
+    //     options: OnUpdateOptions,
+    // ) -> ClientResult<u32> {
+    //     let on_update = Arc::new(on_update);
+    //     let callback = move |resp| {
+    //         let on_update = on_update.clone();
+    //         async move {
+    //             match resp {
+    //                 ClientResp::ViewOnUpdateResp(ViewOnUpdateResp { delta,
+    // port_id }) => {                     on_update(OnUpdateArgs { delta,
+    // port_id });                     Ok(())
+    //                 },
+    //                 resp => Err(resp.into()),
+    //             }
+    //         }
+    //     };
+
+    //     let msg = self.client_message(ClientReq::ViewOnUpdateReq(ViewOnUpdateReq
+    // {         mode: options.mode.map(|OnUpdateMode::Row| Mode::Row as i32),
+    //     }));
+
+    //     self.client
+    //         .subscribe(&msg, callback.into_box_fn_pin_bix_fut())
+    //         .await;
+    //     Ok(msg.msg_id)
+    // }
 
     #[doc = include_str!("../../docs/view/remove_update.md")]
     pub async fn remove_update(&self, update_id: u32) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::ViewRemoveOnUpdateReq(ViewRemoveOnUpdateReq {
             id: update_id,
         }));
+
         self.client.unsubscribe(update_id)?;
         match self.client.oneshot(&msg).await {
             ClientResp::ViewRemoveOnUpdateResp(_) => Ok(()),

@@ -50,6 +50,7 @@ fn build(pkg: Option<&str>, is_release: bool, features: Vec<String>) {
     cmd.env("RUSTFLAGS", "--cfg=web_sys_unstable_apis")
         .args(["build"])
         .args(["--lib"])
+        .args(["--color", "always"])
         .args(["--features", &features])
         .args(["--target", "wasm32-unknown-unknown"])
         .args(["-Z", "build-std=std,panic_abort"])

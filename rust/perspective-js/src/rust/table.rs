@@ -19,7 +19,7 @@ use wasm_bindgen::convert::TryFromJsValue;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
-use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError};
+use crate::utils::{ApiError, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError};
 pub use crate::view::*;
 
 #[ext]
@@ -44,17 +44,8 @@ impl Vec<(String, ColumnType)> {
 pub(crate) impl TableData {
     fn from_js_value(value: &JsValue) -> ApiResult<TableData> {
         let err_fn = || JsValue::from(format!("Failed to construct Table {:?}", value));
-        if value.is_undefined() {
-            Err(err_fn().into())
-        } else if value.is_string() {
-            Ok(TableData::Csv(value.as_string().into_apierror()?))
-        } else if value.is_instance_of::<ArrayBuffer>() {
-            let uint8array = Uint8Array::new(value);
-            let slice = uint8array.to_vec();
-            Ok(TableData::Arrow(slice))
-        } else if value.is_instance_of::<Array>() {
-            let rows = JSON::stringify(value)?.as_string().into_apierror()?;
-            Ok(TableData::JsonRows(rows))
+        if let Some(result) = UpdateData::from_js_value_partial(value)? {
+            Ok(TableData::Update(result))
         } else if value.is_instance_of::<Object>() && Reflect::has(value, &"__get_model".into())? {
             let val = Reflect::get(value, &"__get_model".into())?
                 .dyn_into::<Function>()?
@@ -80,14 +71,47 @@ pub(crate) impl TableData {
             if all_strings() {
                 Ok(TableData::Schema(Vec::from_js_value(value)?))
             } else if all_arrays() {
-                Ok(TableData::JsonColumns(
+                Ok(TableData::Update(UpdateData::JsonColumns(
                     JSON::stringify(value)?.as_string().into_apierror()?,
-                ))
+                )))
             } else {
                 Err(err_fn().into())
             }
         } else {
             Err(err_fn().into())
+        }
+    }
+}
+
+#[ext]
+pub(crate) impl UpdateData {
+    fn from_js_value_partial(value: &JsValue) -> ApiResult<Option<UpdateData>> {
+        let err_fn = || JsValue::from(format!("Failed to construct Table {:?}", value));
+        if value.is_undefined() {
+            Err(err_fn().into())
+        } else if value.is_string() {
+            Ok(Some(UpdateData::Csv(value.as_string().into_apierror()?)))
+        } else if value.is_instance_of::<ArrayBuffer>() {
+            let uint8array = Uint8Array::new(value);
+            let slice = uint8array.to_vec();
+            Ok(Some(UpdateData::Arrow(slice)))
+        } else if value.is_instance_of::<Array>() {
+            let rows = JSON::stringify(value)?.as_string().into_apierror()?;
+            Ok(Some(UpdateData::JsonRows(rows)))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn from_js_value(value: &JsValue) -> ApiResult<UpdateData> {
+        match TableData::from_js_value(value)? {
+            TableData::Schema(_) => Err(ApiError::new(
+                "Method cannot be called with `Schema` argument",
+            )),
+            TableData::Update(x) => Ok(x),
+            TableData::View(_) => Err(ApiError::new(
+                "Method cannot be called with `Schema` argument",
+            )),
         }
     }
 }
@@ -197,7 +221,7 @@ impl JsTable {
     #[doc = include_str!("../../docs/table/replace.md")]
     #[wasm_bindgen]
     pub async fn remove(&self, value: &JsValue) -> ApiResult<()> {
-        let input = TableData::from_js_value(value)?;
+        let input = UpdateData::from_js_value(value)?;
         self.0.remove(input).await?;
         Ok(())
     }
@@ -205,7 +229,7 @@ impl JsTable {
     #[doc = include_str!("../../docs/table/replace.md")]
     #[wasm_bindgen]
     pub async fn replace(&self, input: &JsValue) -> ApiResult<()> {
-        let input = TableData::from_js_value(input)?;
+        let input = UpdateData::from_js_value(input)?;
         self.0.replace(input).await?;
         Ok(())
     }
@@ -217,7 +241,7 @@ impl JsTable {
         input: &JsTableInitData,
         options: Option<JsUpdateOptions>,
     ) -> ApiResult<()> {
-        let input = TableData::from_js_value(input)?;
+        let input = UpdateData::from_js_value(input)?;
         let options = options
             .into_serde_ext::<Option<UpdateOptions>>()?
             .unwrap_or_default();
@@ -229,14 +253,13 @@ impl JsTable {
     #[doc = include_str!("../../docs/table/view.md")]
     #[wasm_bindgen]
     pub async fn view(&self, config: Option<JsViewConfig>) -> ApiResult<JsView> {
-        let clean_json = config
-            .as_ref()
-            .and_then(|config| js_sys::JSON::stringify(config).ok())
+        let config = config
+            .map(|config| js_sys::JSON::stringify(&config))
+            .transpose()?
             .and_then(|x| x.as_string())
-            .and_then(|x| js_sys::JSON::parse(&x).ok())
-            .unwrap_or(JsValue::UNDEFINED);
+            .map(|x| serde_json::from_str(x.as_str()))
+            .transpose()?;
 
-        let config = JsValue::into_serde_ext::<Option<ViewConfigUpdate>>(clean_json)?;
         let view = self.0.view(config).await?;
         Ok(JsView(view))
     }

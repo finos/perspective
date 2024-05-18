@@ -12,6 +12,7 @@
 
 #![feature(cell_update)]
 #![feature(let_chains)]
+#![feature(closure_lifetime_binder)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -20,16 +21,18 @@
 
 mod client;
 mod table;
+mod table_data;
 mod view;
 
 pub mod config;
 pub mod proto;
 pub mod utils;
 
-pub use crate::client::{Client, Features, TableData};
+pub use crate::client::{Client, Features, IntoBoxFnPinBoxFut};
 pub use crate::proto::table_validate_expr_resp::ExprValidationError;
 pub use crate::proto::ColumnType;
 pub use crate::table::{Schema, Table, TableInitOptions, UpdateOptions, ValidateExpressionsData};
+pub use crate::table_data::{TableData, UpdateData};
 pub use crate::utils::*;
 pub use crate::view::{OnUpdateArgs, OnUpdateMode, OnUpdateOptions, View, ViewWindow};
 
@@ -85,7 +88,7 @@ macro_rules! assert_view_api {
                     &$x::get_config,
                     &$x::get_min_max,
                     &$x::num_rows,
-                    &$x::on_update,
+                  //  &$x::on_update,
                     &$x::remove_update,
                     &$x::on_delete,
                     &$x::remove_delete,

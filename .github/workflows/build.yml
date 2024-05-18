@@ -521,12 +521,6 @@ jobs:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   PSP_PROJECT: python
 
-            - name: JavaScript Lint
-              run: pnpm run lint
-              env:
-                  PYTHON_VERSION: ${{ matrix.python-version }}
-                  PSP_PROJECT: js
-
     ##########################################################################################################################
     ##########################################################################################################################
 

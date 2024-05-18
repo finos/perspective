@@ -154,7 +154,7 @@ function validate_binary_operations(output, expressions, operator) {
                             expressions: { '"a"': '"a"' },
                         });
 
-                        table.update({
+                        await table.update({
                             a: [10, 15, 20, 30],
                         });
 

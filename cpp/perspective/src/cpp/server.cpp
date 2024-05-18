@@ -38,13 +38,6 @@
 #include <vector>
 #include <ctime>
 
-// TODO: Put this in its own translation unit
-// and handle platform specific details of gathering system
-// metadata.
-#ifdef PSP_ENABLE_WASM
-#include <emscripten/heap.h>
-#endif
-
 namespace perspective {
 template <>
 std::shared_ptr<t_ctxunit>
@@ -623,7 +616,7 @@ ServerResources::is_table_dirty(const t_id& id) {
 }
 
 std::vector<ProtoServerResp<std::string>>
-ProtoServer::handle_message(
+ProtoServer::handle_request(
     std::uint32_t client_id, const std::string_view& data
 ) {
     proto::Request req_env;
@@ -631,7 +624,7 @@ ProtoServer::handle_message(
     std::vector<ProtoServerResp<std::string>> serialized_responses;
     std::vector<proto::Response> responses;
     try {
-        auto resp_msg = _handle_message(client_id, req_env);
+        auto resp_msg = _handle_request(client_id, req_env);
         for (auto& resp : resp_msg) {
             ProtoServerResp<std::string> str_resp;
             str_resp.data = resp.data.SerializeAsString();
@@ -1045,7 +1038,7 @@ coerce_to(const t_dtype dtype, const A& val) {
 }
 
 std::vector<ProtoServerResp<ProtoServer::Response>>
-ProtoServer::_handle_message(std::uint32_t client_id, const Request& req) {
+ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
     static bool is_init_expr = false;
     if (!is_init_expr) {
         t_computed_expression_parser::init();
@@ -2200,10 +2193,9 @@ ProtoServer::_handle_message(std::uint32_t client_id, const Request& req) {
         case proto::Request::kServerSystemInfoReq: {
             proto::Response resp;
             auto* sys_info = resp.mutable_server_system_info_resp();
-            // TODO: Like I said above at the emscripten include,
-            // This should be abstracted to its own translation unit.
 #ifdef PSP_ENABLE_WASM
-            sys_info->set_heap_size(emscripten_get_heap_size());
+            auto heap_size = psp_heap_size();
+            sys_info->set_heap_size(heap_size);
 #else
             PSP_COMPLAIN_AND_ABORT(
                 "ServerSystemInfoReq not implemented for non-emscripten targets"
@@ -2253,13 +2245,13 @@ ProtoServer::_process_table_unchecked(
                 auto* r = out.mutable_view_on_update_resp();
                 r->set_port_id(port_id);
                 if (view->get_deltas_enabled()) {
-                    *r->mutable_arrow() = *view->get_row_delta_as_arrow();
+                    *r->mutable_delta() = *view->get_row_delta_as_arrow();
                 } else {
                     // If we don't do this, the delta field becomes
                     // `undefined` on the client side and all the tests that
                     // construct tables from deltas blow up constructing
                     // `perspective.Table(undefined)`
-                    *r->mutable_arrow() = "";
+                    *r->mutable_delta() = "";
                 }
 
                 ProtoServerResp<proto::Response> resp2;

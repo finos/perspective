@@ -12,7 +12,10 @@
 
 // @ts-ignore
 import perspective_wasm from "../../dist/pkg/web/perspective-server.wasm";
+
+// @ts-ignore
 import perspective_wasm_worker from "../../src/ts/perspective-server.worker.js";
+
 import type * as psp from "../../dist/pkg/perspective-js.d.ts";
 
 function invert_promise<T>(): [(t: T) => void, Promise<T>] {
@@ -44,7 +47,13 @@ async function _init(ws: Worker, wasm: ArrayBuffer) {
 export async function worker(module: Promise<typeof psp>) {
     const { JsClient } = await module;
     const [wasm, webworker]: [ArrayBuffer, Worker] = await Promise.all([
-        perspective_wasm().then((x: Response) => x.arrayBuffer()),
+        perspective_wasm().then((x: Response | ArrayBuffer) => {
+            if (x instanceof Response) {
+                return x.arrayBuffer();
+            } else {
+                return x.slice(0);
+            }
+        }),
         perspective_wasm_worker(),
     ]);
 
@@ -55,7 +64,7 @@ export async function worker(module: Promise<typeof psp>) {
 
     await _init(webworker, wasm);
     webworker.addEventListener("message", (json: MessageEvent<Uint8Array>) => {
-        client.handle_message(json.data);
+        client.handle_response(json.data);
     });
 
     await client.init();
@@ -91,7 +100,7 @@ export async function websocket(
     );
 
     ws.onmessage = (msg) => {
-        client.handle_message(msg.data);
+        client.handle_response(msg.data);
     };
 
     await client.init();

@@ -648,41 +648,46 @@ fill_column_json(
         }
         case t_dtype::DTYPE_INT32: {
             if (value.IsInt()) {
-                // std::cout << "WIP " << value.GetInt() << std::endl;
                 col->set_nth<std::int32_t>(i, value.GetInt());
-                // if (value.IsInt()) [[likely]] {
-                //     col->set_nth<std::int32_t>(i, value.GetInt());
-                // } else if (value.IsInt64()) {
-                //     if (value.GetInt64() >
-                //     std::numeric_limits<std::int32_t>::max())
-                //         [[unlikely]] {
-                //         LOG_DEBUG("Promoting column "
-                //             << " from " << dtype_to_str(col->get_dtype()) <<
-                //             " to "
-                //             << dtype_to_str(DTYPE_FLOAT64));
-                //         return {DTYPE_FLOAT64};
-                //     }
-                // return {DTYPE_INT32};
                 return std::nullopt;
             }
 
             if (value.IsInt64()) {
-                // std::cout << "WIP " << value.GetInt() << std::endl;
                 if (value.GetInt64() > std::numeric_limits<std::int32_t>::max())
                     [[likely]] {
-                    LOG_DEBUG("Promoting due to int32 overflow");
-                    return {DTYPE_FLOAT64};
+                    if (!is_update) {
+                        LOG_DEBUG("Promoting due to int32 overflow");
+                        return {DTYPE_FLOAT64};
+                    }
                 }
-                return {DTYPE_INT64};
+
+                // Coerce in update mode
+                col->set_nth<std::int32_t>(
+                    i, static_cast<std::int32_t>(value.GetInt64())
+                );
+
+                return std::nullopt;
             }
 
             if (value.IsDouble()) {
+                if (is_update) {
+                    col->set_nth<std::int32_t>(
+                        i, static_cast<std::int32_t>(value.GetDouble())
+                    );
+                    return std::nullopt;
+                }
+
                 return {DTYPE_FLOAT64};
             }
 
             if (value.IsString()) {
                 const auto& str = value.GetString();
                 if (str[0] == '\0') {
+                    if (is_update) {
+                        col->set_valid(i, false);
+                        return std::nullopt;
+                    }
+
                     return {t_dtype::DTYPE_STR};
                 }
 
@@ -693,8 +698,15 @@ fill_column_json(
                     return std::nullopt;
                 }
 
-                strtof(str, &endptr);
+                float result2 = strtof(str, &endptr);
                 if (*endptr == '\0') {
+                    if (is_update) {
+                        col->set_nth<std::int32_t>(
+                            i, static_cast<std::int32_t>(result2)
+                        );
+                        return std::nullopt;
+                    }
+
                     return {t_dtype::DTYPE_FLOAT64};
                 }
 
@@ -799,9 +811,11 @@ Table::remove_rows(const std::string_view& data) {
     for (const auto& cell : document.GetArray()) {
         auto promote = fill_column_json(col, ii, cell, true);
         if (promote) {
-            std::cout << dtype_to_str(*promote) << " : "
-                      << dtype_to_str(schema.get_dtype(m_index)) << '\n';
-            PSP_COMPLAIN_AND_ABORT("Can't promote remove");
+            std::stringstream ss;
+            ss << "Cannot append value of type " << dtype_to_str(*promote)
+               << " to column of type " << dtype_to_str(col->get_dtype())
+               << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
 
         // if (!is_implicit && m_index == col_name) {
@@ -854,7 +868,11 @@ Table::remove_cols(const std::string_view& data) {
     for (const auto& cell : document.GetArray()) {
         auto promote = fill_column_json(col, ii, cell, true);
         if (promote) {
-            PSP_COMPLAIN_AND_ABORT("Can't promote remove");
+            std::stringstream ss;
+            ss << "Cannot append value of type " << dtype_to_str(*promote)
+               << " to column of type " << dtype_to_str(col->get_dtype())
+               << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
 
         // if (!is_implicit && m_index == col_name) {
@@ -941,9 +959,11 @@ Table::update_cols(const std::string_view& data, std::uint32_t port_id) {
             auto col = data_table.get_column(col_name);
             auto promote = fill_column_json(col, ii, cell, true);
             if (promote) {
-                data_table.promote_column(col_name, *promote, ii, true);
-                col = data_table.get_column(col_name);
-                fill_column_json(col, ii, cell, true);
+                std::stringstream ss;
+                ss << "Cannot append value of type " << dtype_to_str(*promote)
+                   << " to column of type " << dtype_to_str(col->get_dtype())
+                   << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             }
 
             if (!is_implicit && m_index == column.name.GetString()) {
@@ -1040,7 +1060,6 @@ Table::from_cols(
         for (const auto& cell : col.value.GetArray()) {
             auto col = data_table.get_column(col_name);
             auto promote = fill_column_json(col, ii, cell, false);
-            LOG_DEBUG("PROMOTE_RESPONSE: " << promote.value_or(DTYPE_NONE));
             if (promote) {
                 LOG_DEBUG(
                     "Promoting column " << col_name << " from "
@@ -1153,13 +1172,14 @@ Table::update_rows(const std::string_view& data, std::uint32_t port_id) {
                 );
             }
 
-            // col_count--;
             col = data_table.get_column(col_name);
             auto promote = fill_column_json(col, ii, it.value, true);
             if (promote) {
-                data_table.promote_column(col_name, *promote, ii, true);
-                col = data_table.get_column(col_name);
-                fill_column_json(col, ii, it.value, true);
+                std::stringstream ss;
+                ss << "Cannot append value of type " << dtype_to_str(*promote)
+                   << " to column of type " << dtype_to_str(col->get_dtype())
+                   << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             }
 
             if (!is_implicit && m_index == it.name.GetString()) {
@@ -1295,7 +1315,6 @@ Table::from_rows(
             const auto* col_name = it.name.GetString();
             const auto& cell = it.value;
             auto promote = fill_column_json(col, ii, cell, false);
-            LOG_DEBUG("PROMOTE_RESPONSE: " << promote.value_or(DTYPE_NONE));
             if (promote) {
                 LOG_DEBUG(
                     "Promoting column " << col_name << " from "

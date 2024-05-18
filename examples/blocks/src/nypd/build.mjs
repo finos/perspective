@@ -58,8 +58,7 @@ async function fetch_progress(url) {
 
     zipReader.close();
 
-    let worker = perspective.worker();
-    let t = await worker.table(csv);
+    let t = await perspective.table(csv);
     let view = await t.view();
 
     return new Uint8Array(await view.to_arrow());

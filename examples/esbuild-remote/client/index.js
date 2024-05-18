@@ -27,13 +27,11 @@ document.body.append(viewer);
 // and one local via WebWorker.
 const url = `${window.location.origin.replace("http", "ws")}/subscribe`;
 const websocket = await perspective.websocket(url);
-const worker = await perspective.worker();
 
 // Open a `Table` that is hosted on the server. All instructions
 // will be proxied to the server `Table` - no calculations are
 // done on the client.
-const remote_table = await websocket.open_table("superstore");
-// const view = await remote_table.view();
+const remote_table = await websocket.open_table("securities");
 
 // Create a `table` from this, owned by the local WebWorker.
 // Data is transferred from `view` to the local WebWorker, both

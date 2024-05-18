@@ -25,8 +25,7 @@
 
         <script type="module">
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
-
-            const worker = await perspective.websocket("ws://localhost:3000/ws");
+            const worker = await perspective.worker();
             const resp = await fetch("/node_modules/superstore-arrow/superstore.lz4.arrow");
             const arrow = await resp.arrayBuffer();
             const viewer = document.getElementsByTagName("perspective-viewer")[0];

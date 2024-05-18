@@ -352,15 +352,15 @@ t_data_table::pprint() const {
     pprint(size(), &std::cout);
 }
 
-void
-t_data_table::pprint(const std::string& fname) const {
+// void
+// t_data_table::pprint(const std::string& fname) const {
 
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    std::ofstream file;
-    file.open(fname);
-    pprint(size(), &file);
-}
+//     PSP_TRACE_SENTINEL();
+//     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+//     std::ofstream file;
+//     file.open(fname);
+//     pprint(size(), &file);
+// }
 
 void
 t_data_table::pprint(t_uindex nrows, std::ostream* os) const {

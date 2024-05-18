@@ -537,28 +537,26 @@ message("${BUILD_MESSAGE}\n")
 
 # Common flags for WASM/JS build and Pyodide
 set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-    --bind \
-    --embind-emit-tsd perspective-server.d.ts \
-    --source-map-base \"\" \
-    --memory-init-file 0 \
     --no-entry \
     --closure=1 \
     -s NO_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s MODULARIZE=1 \
     -s WASM_BIGINT=1 \
+    -s INCOMING_MODULE_JS_API=locateFile,psp_heap_size,psp_stack_trace,HEAPU8,HEAPU32,instantiateWasm \
     -s TEXTDECODER=2 \
     -s STANDALONE_WASM=1 \
     -s DYNAMIC_EXECUTION=0 \
     -s BINARYEN_EXTRA_PASSES=--one-caller-inline-max-function-size=19306 \
     -s EXPORT_NAME=\"load_perspective\" \
     -s MAXIMUM_MEMORY=4gb \
-    -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
+    -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
     -s NODEJS_CATCH_EXIT=0 \
     -s EXCEPTION_STACK_TRACES=1 \
     -s NODEJS_CATCH_REJECTION=0 \
     -s USE_ES6_IMPORT_META=1 \
     -s EXPORT_ES6=1 \
+    -s EXPORTED_FUNCTIONS=_js_poll,_js_new_server,_js_free,_js_alloc,_js_handle_request \
 ")
 
 if(PSP_WASM_BUILD)
@@ -568,13 +566,6 @@ if(PSP_WASM_BUILD)
     target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
     target_link_libraries(psp PRIVATE arrow re2 protos)
-
-    add_executable(perspective_cjs src/cpp/emscripten_api.cpp)
-    target_link_libraries(perspective_cjs psp protos)
-    target_compile_definitions(perspective_cjs PRIVATE PSP_ENABLE_WASM=1)
-    target_link_options(perspective_cjs PUBLIC -sENVIRONMENT="node"  ${PSP_SANITIZE_FLAGS})
-    set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./node/")
-    set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective-server")
 
     add_executable(perspective_esm src/cpp/emscripten_api.cpp)
     target_link_libraries(perspective_esm psp protos)
@@ -672,7 +663,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 endif()
 
-# TODO this needs to be omitted when built by `cmake-rs`, because 
+# TODO this needs to be omitted when built by `cmake-rs`, because
 #`cargo publish --dry-run` complains when this generate `.clangd` in the Rust
 # root dir instead of teh `target` dir.
 if(NOT DEFINED ENV{PSP_DISABLE_CLANGD})

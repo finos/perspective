@@ -24,7 +24,7 @@ const IS_DEBUG =
 
 const BUILD = [
     {
-        entryPoints: ["src/ts/perspective.ts"],
+        entryPoints: ["src/ts/perspective.inline.ts"],
         format: "esm",
         target: "es2022",
         plugins: [
@@ -54,6 +54,7 @@ const BUILD = [
         format: "esm",
         platform: "node",
         target: "es2022",
+        minify: false,
         plugins: [
             PerspectiveEsbuildPlugin({ wasm: { inline: true } }),
             NodeModulesExternal(),
@@ -95,7 +96,6 @@ function build_rust() {
 
 async function build_web_assets() {
     await cpy(["../../cpp/perspective/dist/web/*"], "dist/pkg/web");
-    await cpy(["../../cpp/perspective/dist/node/*"], "dist/pkg/node");
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 
@@ -106,8 +106,8 @@ async function build_all() {
 
     // "files": ["./src/ts/perspective.node.ts", "./src/ts/perspective.ts"]
     // Typecheck
-    // execSync("npx tsc --project ./tsconfig.bindgen.json", INHERIT);
     execSync("npx tsc --project ./tsconfig.browser.json", INHERIT);
+    // execSync("npx tsc --project ./tsconfig.browser.json", INHERIT);
     await cpy("target/themes/*", "dist/css");
     await cpy("target/themes/*", "dist/css");
 }

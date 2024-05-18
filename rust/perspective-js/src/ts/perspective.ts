@@ -20,20 +20,28 @@ type WasmElement = {
     __wasm_module__: Promise<typeof psp>;
 };
 
-export async function websocket(url: string | URL) {
-    const elem = (await customElements.whenDefined(
+async function get_module() {
+    let elem = customElements.get(
         "perspective-viewer"
-    )) as unknown as WasmElement;
+    ) as unknown as WasmElement;
+    if (!elem) {
+        console.warn("No `<perspective-viewer>` Custom Element found, waiting");
+        elem = (await customElements.whenDefined(
+            "perspective-viewer"
+        )) as unknown as WasmElement;
+    }
 
-    return await api.websocket(elem.__wasm_module__, url);
+    return elem.__wasm_module__;
+}
+
+export async function websocket(url: string | URL) {
+    const wasm_module = get_module();
+    return await api.websocket(wasm_module, url);
 }
 
 export async function worker() {
-    const elem = (await customElements.whenDefined(
-        "perspective-viewer"
-    )) as unknown as WasmElement;
-
-    return await api.worker.call(undefined, elem.__wasm_module__);
+    const wasm_module = get_module();
+    return await api.worker.call(undefined, wasm_module);
 }
 
 export default { websocket, worker };

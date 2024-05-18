@@ -46,7 +46,7 @@
         "@finos/perspective-jupyterlab": "workspace:^",
         "@finos/perspective-test": "workspace:^",
         "@fontsource/roboto-mono": "4.5.10",
-        "@playwright/test": "^1.37.1",
+        "@playwright/test": "1.37.1",
         "@types/ws": "^7.2.2",
         "@zip.js/zip.js": "^2.7.27",
         "auto-changelog": "^2.4.0",

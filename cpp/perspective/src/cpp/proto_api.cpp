@@ -30,9 +30,9 @@ ProtoApiServer::ProtoApiServerImpl::ProtoApiServerImpl() :
 ProtoApiServer::ProtoApiServerImpl::~ProtoApiServerImpl() = default;
 
 std::vector<ProtoApiResponse>
-ProtoApiServer::handle_message(std::uint32_t client_id, const std::string& data)
+ProtoApiServer::handle_request(std::uint32_t client_id, const std::string& data)
     const {
-    auto responses = m_impl->m_server->handle_message(client_id, data);
+    auto responses = m_impl->m_server->handle_request(client_id, data);
     std::vector<ProtoApiResponse> results;
     for (const auto& msg : responses) {
         ProtoApiResponse resp;

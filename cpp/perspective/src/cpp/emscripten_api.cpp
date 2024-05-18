@@ -10,102 +10,135 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#include <perspective/emscripten.h>
-#include <perspective/emscripten_api_utils.h>
+#include "perspective/exports.h"
+#include <algorithm>
+#include <cstdint>
 #include <perspective/proto_api.h>
 #include <string>
 #include <tsl/hopscotch_map.h>
 
-using namespace emscripten;
-using namespace perspective;
+// TODO: use uintptr_t instead of size_t.
 
-namespace perspective::binding {
-/**
- * @brief Takes a container of values and returns a matching typed array.
- *
- * Works with std::vector and std::string, but should also work with
- * any container that supports operator[].
- *
- * @tparam F
- * @tparam operator[]
- * @param vec
- * @return emscripten::val
- */
-template <
-    typename F,
-    typename Underlying = std::remove_reference_t<decltype(std::declval<F>()[0]
-    )> // Type of the underlying value in the
-       // container based on operator[]
-    >
-static emscripten::val
-to_typed_array(const F& vec) {
-    static_assert(
-        js_array_type<Underlying>::name,
-        "Unsupported type for vecToTypedArray. Please add a specialization for "
-        "this type."
+/// places a 32 bit number at the first 4 bytes of the given address
+void
+place_number(std::uint32_t num, std::uint8_t* addr) {
+    addr[0] = num & 0x000000ff;
+    addr[1] = (num & 0x0000ff00) >> 8;
+    addr[2] = (num & 0x00ff0000) >> 16;
+    addr[3] = (num & 0xff000000) >> 24;
+    //   std::copy(reinterpret_cast<std::uint8_t *>(num),
+    //             reinterpret_cast<std::uint8_t *>(num + sizeof(num)), addr);
+}
+
+/// copies the given vector into a new memory region that is encoded
+/// for easy reading
+size_t
+encode_vec(std::vector<std::uint8_t> vec) {
+    // TODO: this is 32-bit only! wasm64 beware
+    auto* new_ptr = (std::uint32_t*)malloc(vec.size() + sizeof(std::uint32_t));
+    *new_ptr = vec.size();
+    // place_number(size, new_ptr);
+    std::copy(vec.begin(), vec.end(), (std::uint8_t*)(new_ptr + 1));
+    return (size_t)new_ptr;
+}
+
+size_t
+encode_string(std::string s) {
+    std::vector<uint8_t> vec(s.begin(), s.end());
+    return encode_vec(vec);
+}
+
+// struct EncodedApiResp {
+//     size_t data;
+//     std::uint32_t size;
+//     std::uint32_t client_id;
+// };
+
+/// The size_t is a pointer that points to an object:
+/// [data_ptr,client_id]
+/// The string (data) is a (len,data) tuple.
+/// The string is copied and leaked and so is the pointer here.
+/// TODO: we need to make a lot of complex `free`ing procedures.
+void
+encode_api_response(const ProtoApiResponse& msg, std::uint32_t* encoded) {
+    // size_t data = encode_string(msg.data);
+
+    // auto* new_ptr = (std::uint32_t*)malloc(vec.size() +
+    // sizeof(std::uint32_t));
+    // TODO: this is 32-bit only! wasm64 beware
+    auto* data = (std::uint32_t*)malloc(msg.data.size());
+    // *new_ptr = msg.data.size();
+    // place_number(size, new_ptr);
+    std::copy(msg.data.begin(), msg.data.end(), (std::uint8_t*)(data));
+
+    // EncodedApiResp
+    //     encoded; // = (EncodedApiResp*)malloc(sizeof(EncodedApiResp));
+    *encoded = (size_t)data;
+    *(encoded + 1) = msg.data.size();
+    *(encoded + 2) = msg.client_id;
+}
+
+size_t
+encode_api_responses(const std::vector<ProtoApiResponse>& msgs) {
+    auto* encoded = (std::uint32_t*)malloc(
+        msgs.size() * sizeof(std::uint32_t) * 3 + sizeof(std::uint32_t)
     );
 
-    auto view = emscripten::typed_memory_view(vec.size(), vec.data());
-    return val(view);
+    *encoded = msgs.size();
+    auto* encoded_mem = (std::uint32_t*)(encoded + 1);
+    for (int i = 0; i < msgs.size(); i++) {
+        encode_api_response(msgs[i], (encoded_mem + i * 3));
+    }
+
+    return (size_t)encoded;
 }
 
-void
-handle_message(
-    ProtoApiServer& server,
-    const std::uint32_t client_id,
-    const emscripten::val& msg,
-    const emscripten::val& callback
+extern "C" {
+
+PERSPECTIVE_EXPORT
+ProtoApiServer*
+js_new_server() {
+    auto* server = new ProtoApiServer;
+    return server;
+}
+
+PERSPECTIVE_EXPORT
+size_t
+js_handle_request(
+    ProtoApiServer* server,
+    std::uint32_t client_id,
+    char* msg_ptr,
+    std::size_t msg_len
 ) {
-    // static std::string str_msg;
-    // auto size = msg["byteLength"].as<std::int32_t>();
-    // if (str_msg.capacity() < size) {
-    //     str_msg.reserve(size);
-    // }
-
-    // str_msg.resize(size);
-    // emscripten::val(emscripten::typed_memory_view(size, str_msg.data()))
-    //     .call<void>("set", msg);
-
-    std::string str_msg;
-    auto size = msg["byteLength"].as<std::int32_t>();
-    str_msg.reserve(size);
-    str_msg.resize(size);
-    emscripten::val(emscripten::typed_memory_view(size, str_msg.data()))
-        .call<void>("set", msg);
-
-    for (const auto& msg : server.handle_message(client_id, str_msg)) {
-        callback.call<void>(
-            "call",
-            emscripten::val::undefined(),
-            t_val(msg.client_id),
-            t_val(to_typed_array(msg.data))
-        );
-    }
+    std::string msg(msg_ptr, msg_len);
+    auto msgs = server->handle_request(client_id, msg);
+    return encode_api_responses(msgs);
 }
+
+PERSPECTIVE_EXPORT
+size_t
+js_poll(ProtoApiServer* server) {
+    auto responses = server->poll();
+    return encode_api_responses(responses);
+}
+
+PERSPECTIVE_EXPORT
+std::size_t
+js_alloc(std::size_t size) {
+    auto* mem = (char*)malloc(size);
+    return (size_t)mem;
+}
+
+PERSPECTIVE_EXPORT
+void
+js_free(void* ptr) {
+    free(ptr);
+}
+
+} // end extern "C"
 
 void
-poll(ProtoApiServer& server, const emscripten::val& callback) {
-    auto output = server.poll();
-    for (const auto& msg : output) {
-        callback.call<void>(
-            "call",
-            emscripten::val::undefined(),
-            t_val(msg.client_id),
-            t_val(to_typed_array(msg.data))
-        );
-    }
+js_delete_server(void* proto_server) {
+    auto* server = (ProtoApiServer*)proto_server;
+    delete server;
 }
-
-void
-em_init() {}
-
-EMSCRIPTEN_BINDINGS(perspective) {
-    function("init", &em_init);
-
-    class_<ProtoApiServer>("ProtoServer")
-        .constructor()
-        .smart_ptr<std::shared_ptr<ProtoApiServer>>("shared_ptr<ProtoServer>")
-        .function("handle_message", &handle_message)
-        .function("poll", &poll);
-}
-} // namespace perspective::binding

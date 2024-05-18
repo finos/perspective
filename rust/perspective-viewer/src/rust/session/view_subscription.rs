@@ -16,7 +16,6 @@ use std::rc::Rc;
 use perspective_client::config::*;
 use perspective_client::OnUpdateOptions;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
 use super::view::*;
@@ -117,7 +116,7 @@ impl ViewSubscription {
             async move {
                 let result = view
                     .on_update(
-                        Box::new(move |msg| spawn_local(emit.poll(msg))),
+                        Box::new(move |msg| emit.poll(msg)),
                         OnUpdateOptions::default(),
                     )
                     .await?;

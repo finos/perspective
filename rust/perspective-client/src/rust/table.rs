@@ -16,13 +16,14 @@ use nanoid::*;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::client::{Client, Features, TableData};
+use crate::client::{Client, Features};
 use crate::config::{Expressions, ViewConfigUpdate};
 use crate::proto::make_table_req::make_table_options::MakeTableType;
 use crate::proto::make_table_req::MakeTableOptions;
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::*;
+use crate::table_data::UpdateData;
 use crate::utils::*;
 use crate::view::View;
 use crate::{assert_table_api, proto};
@@ -97,6 +98,13 @@ pub struct Table {
     name: String,
     client: Client,
     options: TableInitOptions,
+    // TODO: when we first worked on the bugfix for the Table(View) constructor,
+    //       we stored the (View, token) pair. Do we need to keep the View though?
+    //       if it goes out of scope, this token will become stale though.
+    /// If this table is constructed from a View, the view's on_update callback
+    /// is wired into this table. So, we store the token to clean it up properly
+    /// on destruction.
+    pub(crate) view_update_token: Option<u32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -120,6 +128,7 @@ impl Table {
             name,
             client,
             options,
+            view_update_token: None,
         }
     }
 
@@ -147,7 +156,7 @@ impl Table {
 
     #[doc = include_str!("../../docs/table/clear.md")]
     pub async fn clear(&self) -> ClientResult<()> {
-        self.replace(TableData::JsonRows("[]".to_owned())).await
+        self.replace(UpdateData::JsonRows("[]".to_owned())).await
     }
 
     #[doc = include_str!("../../docs/table/delete.md")]
@@ -235,22 +244,9 @@ impl Table {
     }
 
     #[doc = include_str!("../../docs/table/remove.md")]
-    pub async fn remove(&self, input: TableData) -> ClientResult<()> {
-        let data = match input {
-            TableData::Csv(x) => make_table_data::Data::FromCsv(x),
-            TableData::Arrow(x) => make_table_data::Data::FromArrow(x),
-            TableData::JsonRows(x) => make_table_data::Data::FromRows(x),
-            TableData::JsonColumns(x) => make_table_data::Data::FromCols(x),
-            TableData::Schema(_) => Err(ClientError::Internal(
-                "Can't `remove()` from Schema".to_string(),
-            ))?,
-            TableData::View(_) => Err(ClientError::Internal(
-                "Can't `remove()` from View".to_string(),
-            ))?,
-        };
-
+    pub async fn remove(&self, input: UpdateData) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::TableRemoveReq(TableRemoveReq {
-            data: Some(MakeTableData { data: Some(data) }),
+            data: Some(input.into()),
         }));
 
         match self.client.oneshot(&msg).await {
@@ -260,22 +256,9 @@ impl Table {
     }
 
     #[doc = include_str!("../../docs/table/replace.md")]
-    pub async fn replace(&self, input: TableData) -> ClientResult<()> {
-        let data = match input {
-            TableData::Csv(x) => make_table_data::Data::FromCsv(x),
-            TableData::Arrow(x) => make_table_data::Data::FromArrow(x),
-            TableData::JsonRows(x) => make_table_data::Data::FromRows(x),
-            TableData::JsonColumns(x) => make_table_data::Data::FromCols(x),
-            TableData::Schema(_) => Err(ClientError::Internal(
-                "Can't `replace()` from Schema".to_string(),
-            ))?,
-            TableData::View(_) => Err(ClientError::Internal(
-                "Can't `replace()` from View".to_string(),
-            ))?,
-        };
-
+    pub async fn replace(&self, input: UpdateData) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::TableReplaceReq(TableReplaceReq {
-            data: Some(MakeTableData { data: Some(data) }),
+            data: Some(input.into()),
         }));
 
         match self.client.oneshot(&msg).await {
@@ -285,22 +268,9 @@ impl Table {
     }
 
     #[doc = include_str!("../../docs/table/update.md")]
-    pub async fn update(&self, input: TableData, options: UpdateOptions) -> ClientResult<()> {
-        let data = match input {
-            TableData::Csv(x) => make_table_data::Data::FromCsv(x),
-            TableData::Arrow(x) => make_table_data::Data::FromArrow(x),
-            TableData::JsonRows(x) => make_table_data::Data::FromRows(x),
-            TableData::JsonColumns(x) => make_table_data::Data::FromCols(x),
-            TableData::Schema(_) => Err(ClientError::Internal(
-                "Can't `update()` from Schema".to_string(),
-            ))?,
-            TableData::View(_) => Err(ClientError::Internal(
-                "Can't `update()` from View".to_string(),
-            ))?,
-        };
-
+    pub async fn update(&self, input: UpdateData, options: UpdateOptions) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::TableUpdateReq(TableUpdateReq {
-            data: Some(MakeTableData { data: Some(data) }),
+            data: Some(input.into()),
             port_id: options.port_id.unwrap_or(0),
         }));
 

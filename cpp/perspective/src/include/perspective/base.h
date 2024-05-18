@@ -19,26 +19,16 @@
 #include <windows.h>
 #endif // WIN32
 
-#include <perspective/first.h>
-#include <perspective/raw_types.h>
-#include <perspective/exports.h>
-#include <sstream>
-#include <csignal>
-#include <iostream>
-#include <cstring>
-#include <cstdint>
-#include <memory>
-#include <functional>
-#include <algorithm>
-#include <iomanip>
-#include <chrono>
-#include <fstream>
-#include <perspective/portable.h>
 #include <boost/functional/hash.hpp>
-#include <stdlib.h>
-#if defined(PSP_DEBUG) && defined(PSP_ENABLE_WASM)
-#include <emscripten.h>
-#endif
+#include <cstdint>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <perspective/exports.h>
+#include <perspective/first.h>
+#include <perspective/portable.h>
+#include <perspective/raw_types.h>
+#include <sstream>
 
 namespace perspective {
 
@@ -169,17 +159,24 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_DEBUG(X)
 #endif
 
+#if defined(PSP_ENABLE_WASM)
+#define ESM_EXPORT(X) __attribute__((import_module("env"), import_name(X)))
+
+PERSPECTIVE_EXPORT ESM_EXPORT("psp_stack_trace") extern "C" const
+    char* psp_stack_trace();
+
+PERSPECTIVE_EXPORT ESM_EXPORT("psp_heap_size") extern "C" size_t
+    psp_heap_size();
+
+#endif
+
 #if defined(PSP_DEBUG) && defined(PSP_ENABLE_WASM)
 #define PSP_COMPLAIN_AND_ABORT(X)                                              \
     {                                                                          \
         std::stringstream __SS__;                                              \
         __SS__ << (X) << "\n";                                                 \
-        auto flags = EM_LOG_NO_PATHS;                                          \
-        auto len = emscripten_get_callstack(flags, 0, 0);                      \
-        std::string err;                                                       \
-        err.resize(len);                                                       \
-        emscripten_get_callstack(flags, err.data(), len);                      \
-        __SS__ << err << "\n";                                                 \
+        __SS__ << psp_stack_trace();                                           \
+        std::cout << __SS__.str() << '\n';                                     \
         psp_abort(__SS__.str());                                               \
     }
 #else

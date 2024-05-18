@@ -19,8 +19,8 @@ use async_lock::{Mutex, RwLock};
 use futures::Future;
 use nanoid::*;
 use prost::Message;
-use proto::make_table_data::Data;
 
+use crate::proto::make_table_data::Data;
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::{
@@ -31,9 +31,10 @@ use crate::proto::{
 use crate::table::{SystemInfo, Table, TableInitOptions};
 use crate::table_data::{TableData, UpdateData};
 use crate::utils::*;
-use crate::view::View;
-use crate::{proto, Table, TableInitOptions};
+use crate::view::ViewWindow;
 
+/// Metadata about what features are supported by the `Server` this `Client`
+/// is connected to.
 pub type Features = Arc<GetFeaturesResp>;
 
 impl GetFeaturesResp {
@@ -42,47 +43,29 @@ impl GetFeaturesResp {
     }
 }
 
-/// The possible formats of input data which [`Client::table`] and
-/// [`Table::update`] may take as an argument. The latter method will not work
-/// with [`TableData::View`] and [`TableData::Schema`] variants, and attempts to
-/// call [`Table::update`] with these variants will error.
-#[derive(Debug)]
-pub enum TableData {
-    Schema(Vec<(String, ColumnType)>),
-    Csv(String),
-    Arrow(Vec<u8>),
-    JsonRows(String),
-    JsonColumns(String),
-    View(View),
+type BoxFn<I, O> = Box<dyn Fn(I) -> O + Send + Sync + 'static>;
+type PinBoxFut<O> = Pin<Box<dyn Future<Output = O> + Send + 'static>>;
+
+pub trait IntoBoxFnPinBoxFut<I, O> {
+    /// Convert an `impl Fn(I) -> impl Future<Output = O>` (with sufficiently
+    /// strict autotrait bounds) into a heap allocated version, which is
+    /// useful for storing them in dynamic data structures.
+    fn into_box_fn_pin_bix_fut(self) -> BoxFn<I, PinBoxFut<O>>;
 }
 
-impl From<TableData> for proto::make_table_data::Data {
-    fn from(value: TableData) -> Self {
-        match value {
-            TableData::Csv(x) => make_table_data::Data::FromCsv(x),
-            TableData::Arrow(x) => make_table_data::Data::FromArrow(x),
-            TableData::JsonRows(x) => make_table_data::Data::FromRows(x),
-            TableData::JsonColumns(x) => make_table_data::Data::FromCols(x),
-            TableData::View(view) => make_table_data::Data::FromView(view.name),
-            TableData::Schema(x) => make_table_data::Data::FromSchema(proto::Schema {
-                schema: x
-                    .into_iter()
-                    .map(|(name, r#type)| schema::KeyTypePair {
-                        name,
-                        r#type: r#type as i32,
-                    })
-                    .collect(),
-            }),
-        }
+impl<T, U, I, O> IntoBoxFnPinBoxFut<I, O> for T
+where
+    T: Fn(I) -> U + Send + Sync + 'static,
+    U: Future<Output = O> + Send + 'static,
+{
+    fn into_box_fn_pin_bix_fut(self) -> BoxFn<I, PinBoxFut<O>> {
+        Box::new(move |resp| Box::pin(self(resp)) as Pin<Box<dyn Future<Output = _> + Send>>)
     }
 }
 
 type Subscriptions<C> = Arc<RwLock<HashMap<u32, C>>>;
-type ManyCallback = Box<dyn Fn(ClientResp) -> Result<(), ClientError> + Send + Sync + 'static>;
 type OnceCallback = Box<dyn FnOnce(ClientResp) -> Result<(), ClientError> + Send + Sync + 'static>;
-
-type SendFuture = Pin<Box<dyn Future<Output = ()> + Send + Sync + 'static>>;
-type SendCallback = Arc<dyn Fn(&Client, &Request) -> SendFuture + Send + Sync + 'static>;
+type SendCallback = Arc<dyn Fn(&Client, &Request) -> PinBoxFut<()> + Send + Sync + 'static>;
 
 #[derive(Clone)]
 #[doc = include_str!("../../docs/client.md")]
@@ -91,7 +74,7 @@ pub struct Client {
     send: SendCallback,
     id_gen: Arc<AtomicU32>,
     subscriptions_once: Subscriptions<OnceCallback>,
-    subscriptions_many: Subscriptions<ManyCallback>,
+    subscriptions: Subscriptions<BoxFn<ClientResp, PinBoxFut<Result<(), ClientError>>>>,
 }
 
 impl std::fmt::Debug for Client {
@@ -102,55 +85,31 @@ impl std::fmt::Debug for Client {
     }
 }
 
-fn encode(req: &Request) -> Vec<u8> {
-    let mut bytes: Vec<u8> = Vec::new();
-    req.encode(&mut bytes).unwrap();
-    bytes
-}
-
 impl Client {
-    /// Create a new client instance with a closure over an external message
-    /// queue's `push()`.
-    pub fn new<T>(send_handler: T) -> Self
+    /// Create a new client instance with a closure over a
+    /// `Server::handle_request`.
+    pub fn new<T, U>(send_request: T) -> Self
     where
-        T: Fn(&Client, &Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + Send + Sync + 'static>>
-            + Send
-            + Sync
-            + 'static,
+        T: Fn(&Client, &Vec<u8>) -> U + Send + Sync + 'static,
+        U: Future<Output = ()> + Send + 'static,
     {
-        Client {
-            features: Arc::default(),
-            id_gen: Arc::new(AtomicU32::new(1)),
-            subscriptions_once: Arc::default(),
-            subscriptions_many: Subscriptions::default(),
-            send: Arc::new(move |client, msg| send_handler(client, &encode(msg))),
-        }
-    }
+        let send: SendCallback = Arc::new(move |client, req| {
+            let mut bytes: Vec<u8> = Vec::new();
+            req.encode(&mut bytes).unwrap();
+            Box::pin(send_request(client, &bytes))
+        });
 
-    /// Create a new client instance with a closure over an external message
-    /// queue's `push()`.
-    pub fn new_sync<T>(send_handler: T) -> Self
-    where
-        T: Fn(&Client, &Vec<u8>) + Send + Sync + 'static + Clone,
-    {
         Client {
-            id_gen: Arc::new(AtomicU32::new(1)),
             features: Arc::default(),
+            id_gen: Arc::new(AtomicU32::new(1)),
             subscriptions_once: Arc::default(),
-            subscriptions_many: Subscriptions::default(),
-            send: Arc::new(move |client, msg| {
-                let client = client.clone();
-                let msg = msg.clone();
-                let send_handler = send_handler.clone();
-                Box::pin(async move {
-                    send_handler(&client, &encode(&msg));
-                })
-            }),
+            subscriptions: Subscriptions::default(),
+            send,
         }
     }
 
     /// Handle a message from the external message queue.
-    pub fn receive(&self, msg: &Vec<u8>) -> Result<(), ClientError> {
+    pub async fn handle_response(&self, msg: &Vec<u8>) -> ClientResult<()> {
         let msg = Response::decode(msg.as_slice())?;
         tracing::info!("RECV {}", msg);
         let payload = msg.client_resp.ok_or(ClientError::Option)?;
@@ -158,9 +117,9 @@ impl Client {
         if let Some(handler) = (*wr).remove(&msg.msg_id) {
             drop(wr);
             handler(payload)?;
-        } else if let Some(handler) = self.subscriptions_many.try_read().unwrap().get(&msg.msg_id) {
+        } else if let Some(handler) = self.subscriptions.try_read().unwrap().get(&msg.msg_id) {
             drop(wr);
-            handler(payload)?;
+            handler(payload).await?;
         } else {
             tracing::warn!("Received unsolicited server message");
         }
@@ -191,7 +150,7 @@ impl Client {
 
     pub(crate) fn unsubscribe(&self, update_id: u32) -> ClientResult<()> {
         let callback = self
-            .subscriptions_many
+            .subscriptions
             .try_write()
             .unwrap()
             .remove(&update_id)
@@ -216,17 +175,15 @@ impl Client {
         (self.send)(self, msg).await;
     }
 
-    /// Register a callback which is expected to respond many times.
     pub(crate) async fn subscribe(
         &self,
         msg: &Request,
-        on_update: Box<dyn Fn(ClientResp) -> ClientResult<()> + Send + Sync + 'static>,
+        on_update: BoxFn<ClientResp, PinBoxFut<Result<(), ClientError>>>,
     ) {
-        self.subscriptions_many
+        self.subscriptions
             .try_write()
             .unwrap()
             .insert(msg.msg_id, on_update);
-
         tracing::info!("SEND {}", msg);
         (self.send)(self, msg).await;
     }
@@ -263,13 +220,58 @@ impl Client {
             None => nanoid!(),
         };
 
+        if let TableData::View(view) = &input {
+            let window = ViewWindow::default();
+            let arrow = view.to_arrow(window).await?;
+            let mut table = self
+                .crate_table_inner(
+                    TableData::Update(UpdateData::Arrow(arrow)),
+                    options,
+                    entity_id,
+                )
+                .await?;
+
+            let on_update_token = view
+                .on_update(
+                    {
+                        let table = table.clone();
+                        move |update: crate::view::OnUpdateArgs| {
+                            let table = table.clone();
+                            async move {
+                                table
+                                    .update(
+                                        UpdateData::Arrow(update.delta.expect("No update??")),
+                                        crate::UpdateOptions::default(),
+                                    )
+                                    .await
+                                    .expect("TODO: errors here?");
+                            }
+                        }
+                    },
+                    crate::OnUpdateOptions {
+                        mode: Some(crate::OnUpdateMode::Row),
+                    },
+                )
+                .await?;
+
+            table.view_update_token = Some(on_update_token);
+            Ok(table)
+        } else {
+            self.crate_table_inner(input, options, entity_id).await
+        }
+    }
+
+    async fn crate_table_inner(
+        &self,
+        input: TableData,
+        options: TableInitOptions,
+        entity_id: String,
+    ) -> ClientResult<Table> {
         let msg = Request {
             msg_id: self.gen_id(),
             entity_id: entity_id.clone(),
             client_req: Some(ClientReq::MakeTableReq(MakeTableReq {
-                data: Some(MakeTableData {
-                    data: Some(input.into()),
-                }),
+                data: Some(input.into()),
                 options: Some(options.clone().try_into()?),
             })),
         };
@@ -341,7 +343,7 @@ impl std::fmt::Display for Request {
         msg = match msg {
             Request {
                 client_req:
-                    Some(request::ClientReq::MakeTableReq(MakeTableReq {
+                    Some(ClientReq::MakeTableReq(MakeTableReq {
                         ref options,
                         data:
                             Some(MakeTableData {
@@ -350,7 +352,7 @@ impl std::fmt::Display for Request {
                     })),
                 ..
             } => Request {
-                client_req: Some(request::ClientReq::MakeTableReq(MakeTableReq {
+                client_req: Some(ClientReq::MakeTableReq(MakeTableReq {
                     options: options.clone(),
                     data: Some(MakeTableData {
                         data: Some(replace(data.clone())),

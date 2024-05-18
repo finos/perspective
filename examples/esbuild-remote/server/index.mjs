@@ -10,22 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import {
-    table,
+import psp, {
     cwd_static_file_handler,
-    make_server,
+    make_sync_session,
 } from "@finos/perspective";
-import path from "path";
 import express from "express";
 import expressWs from "express-ws";
 import * as securities from "../../datasources/index.mjs";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-console.log(path.resolve(__dirname, "../dist"));
-
+// node buffer -> JS buffer
 function buffer_to_arraybuffer(buffer) {
     return new Int8Array(
         buffer.buffer.slice(
@@ -39,16 +32,17 @@ function buffer_to_arraybuffer(buffer) {
 // to create it so the WebSocket clients can find it.
 const _table = await securities.securities.getTable();
 
+// const w = await psp.worker();
 const app = expressWs(express()).app;
-app.ws("/subscribe", (ws) => {
-    console.log("Connecting websocket!");
-    const server = make_server((proto) => {
-        ws.send(buffer_to_arraybuffer(proto));
+app.ws("/subscribe", async (ws) => {
+    const session = await make_sync_session(async (proto) => {
+        await ws.send(buffer_to_arraybuffer(proto));
     });
 
-    ws.on("message", (proto) =>
-        server.handle_message(buffer_to_arraybuffer(proto))
-    );
+    ws.on("message", (proto) => {
+        const x = session.handle_request(buffer_to_arraybuffer(proto));
+        return x;
+    });
 });
 
 app.use("/", (x, y) => cwd_static_file_handler(x, y, ["dist/"]));

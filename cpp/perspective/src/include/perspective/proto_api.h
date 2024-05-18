@@ -33,7 +33,7 @@ public:
 
     [[nodiscard]]
     std::vector<ProtoApiResponse>
-    handle_message(std::uint32_t client_id, const std::string& data) const;
+    handle_request(std::uint32_t client_id, const std::string& data) const;
 
     [[nodiscard]]
     std::vector<ProtoApiResponse> poll();

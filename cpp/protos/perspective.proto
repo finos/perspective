@@ -334,7 +334,7 @@ message ViewOnUpdateReq {
     optional Mode mode = 1;
 }
 message ViewOnUpdateResp {
-    optional bytes arrow = 1;
+    optional bytes delta = 1;
     uint32 port_id = 2;
 }
 

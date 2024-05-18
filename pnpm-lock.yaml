@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:packages/perspective
+        version: link:rust/perspective-js
       '@finos/perspective-jupyterlab':
         specifier: workspace:^
         version: link:packages/perspective-jupyterlab
@@ -36,7 +36,7 @@ importers:
         specifier: 4.5.10
         version: 4.5.10
       '@playwright/test':
-        specifier: ^1.37.1
+        specifier: 1.37.1
         version: 1.37.1
       '@types/ws':
         specifier: ^7.2.2
@@ -147,8 +147,11 @@ importers:
         specifier: ^6.2.0
         version: 6.2.2(typescript@5.1.6)
       ts-node:
-        specifier: ^10.9.1
+        specifier: ^10.9.2
         version: 10.9.2(@types/node@20.12.12)(typescript@5.1.6)
+      tsx:
+        specifier: ^4.7.1
+        version: 4.10.5
       typedoc:
         specifier: ^0.24.8
         version: 0.24.8(typescript@5.1.6)
@@ -183,7 +186,7 @@ importers:
         version: 2.2.0(@algolia/client-search@4.23.3)(@types/react@17.0.80)(esbuild@0.14.54)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(search-insights@2.13.0)(typescript@5.1.6)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../packages/perspective
+        version: link:../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../rust/perspective-viewer
@@ -223,7 +226,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -251,7 +254,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -282,7 +285,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -310,7 +313,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -325,7 +328,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -356,7 +359,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -387,7 +390,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -418,7 +421,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -449,7 +452,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -480,7 +483,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -517,7 +520,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -557,7 +560,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -597,7 +600,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -628,7 +631,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -655,42 +658,11 @@ importers:
         specifier: ^2.5.2
         version: 2.7.1
 
-  packages/perspective:
-    dependencies:
-      stoppable:
-        specifier: 1.1.0
-        version: 1.1.0
-      ws:
-        specifier: ^6.1.2
-        version: 6.2.2
-    devDependencies:
-      '@finos/perspective-cpp':
-        specifier: workspace:^
-        version: link:../../cpp/perspective
-      '@finos/perspective-esbuild-plugin':
-        specifier: workspace:^
-        version: link:../perspective-esbuild-plugin
-      cpy:
-        specifier: ^9.0.1
-        version: 9.0.1
-      jsverify:
-        specifier: ^0.8.4
-        version: 0.8.4
-      lodash:
-        specifier: ^4.17.4
-        version: 4.17.21
-      moment:
-        specifier: ^2.19.1
-        version: 2.30.1
-      superstore-arrow:
-        specifier: ^3.0.0
-        version: 3.0.0
-
   packages/perspective-cli:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -726,7 +698,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -772,7 +744,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -815,7 +787,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -840,7 +812,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -871,7 +843,7 @@ importers:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -935,7 +907,7 @@ importers:
     devDependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
@@ -949,11 +921,48 @@ importers:
         specifier: workspace:^
         version: link:../../packages/perspective-webpack-plugin
 
+  rust/perspective-js:
+    dependencies:
+      stoppable:
+        specifier: ^1.1.0
+        version: 1.1.0
+      ws:
+        specifier: ^8.17.0
+        version: 8.17.0
+    devDependencies:
+      '@finos/perspective-cpp':
+        specifier: workspace:^
+        version: link:../../cpp/perspective
+      '@finos/perspective-esbuild-plugin':
+        specifier: workspace:^
+        version: link:../../packages/perspective-esbuild-plugin
+      '@finos/perspective-test':
+        specifier: workspace:^
+        version: link:../../tools/perspective-test
+      '@types/stoppable':
+        specifier: ^1.1.0
+        version: 1.1.3
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
+      cpy:
+        specifier: ^9.0.1
+        version: 9.0.1
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      moment:
+        specifier: ^2.30.1
+        version: 2.30.1
+      underscore:
+        specifier: ^1.13.6
+        version: 1.13.6
+
   rust/perspective-viewer:
     dependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../perspective-js
     devDependencies:
       '@finos/perspective-esbuild-plugin':
         specifier: workspace:^
@@ -1057,7 +1066,7 @@ importers:
     devDependencies:
       '@finos/perspective':
         specifier: workspace:^
-        version: link:../../packages/perspective
+        version: link:../../rust/perspective-js
       express:
         specifier: 4.18.2
         version: 4.18.2
@@ -2124,11 +2133,149 @@ packages:
       '@docusaurus/types':
         optional: true
 
+  '@esbuild/aix-ppc64@0.20.2':
+    resolution: {integrity: sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g==}
+    engines: {node: '>=12'}
+    cpu: [ppc64]
+    os: [aix]
+
+  '@esbuild/android-arm64@0.20.2':
+    resolution: {integrity: sha512-mRzjLacRtl/tWU0SvD8lUEwb61yP9cqQo6noDZP/O8VkwafSYwZ4yWy24kan8jE/IMERpYncRt2dw438LP3Xmg==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [android]
+
+  '@esbuild/android-arm@0.20.2':
+    resolution: {integrity: sha512-t98Ra6pw2VaDhqNWO2Oph2LXbz/EJcnLmKLGBJwEwXX/JAN83Fym1rU8l0JUWK6HkIbWONCSSatf4sf2NBRx/w==}
+    engines: {node: '>=12'}
+    cpu: [arm]
+    os: [android]
+
+  '@esbuild/android-x64@0.20.2':
+    resolution: {integrity: sha512-btzExgV+/lMGDDa194CcUQm53ncxzeBrWJcncOBxuC6ndBkKxnHdFJn86mCIgTELsooUmwUm9FkhSp5HYu00Rg==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [android]
+
+  '@esbuild/darwin-arm64@0.20.2':
+    resolution: {integrity: sha512-4J6IRT+10J3aJH3l1yzEg9y3wkTDgDk7TSDFX+wKFiWjqWp/iCfLIYzGyasx9l0SAFPT1HwSCR+0w/h1ES/MjA==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@esbuild/darwin-x64@0.20.2':
+    resolution: {integrity: sha512-tBcXp9KNphnNH0dfhv8KYkZhjc+H3XBkF5DKtswJblV7KlT9EI2+jeA8DgBjp908WEuYll6pF+UStUCfEpdysA==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@esbuild/freebsd-arm64@0.20.2':
+    resolution: {integrity: sha512-d3qI41G4SuLiCGCFGUrKsSeTXyWG6yem1KcGZVS+3FYlYhtNoNgYrWcvkOoaqMhwXSMrZRl69ArHsGJ9mYdbbw==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [freebsd]
+
+  '@esbuild/freebsd-x64@0.20.2':
+    resolution: {integrity: sha512-d+DipyvHRuqEeM5zDivKV1KuXn9WeRX6vqSqIDgwIfPQtwMP4jaDsQsDncjTDDsExT4lR/91OLjRo8bmC1e+Cw==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@esbuild/linux-arm64@0.20.2':
+    resolution: {integrity: sha512-9pb6rBjGvTFNira2FLIWqDk/uaf42sSyLE8j1rnUpuzsODBq7FvpwHYZxQ/It/8b+QOS1RYfqgGFNLRI+qlq2A==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@esbuild/linux-arm@0.20.2':
+    resolution: {integrity: sha512-VhLPeR8HTMPccbuWWcEUD1Az68TqaTYyj6nfE4QByZIQEQVWBB8vup8PpR7y1QHL3CpcF6xd5WVBU/+SBEvGTg==}
+    engines: {node: '>=12'}
+    cpu: [arm]
+    os: [linux]
+
+  '@esbuild/linux-ia32@0.20.2':
+    resolution: {integrity: sha512-o10utieEkNPFDZFQm9CoP7Tvb33UutoJqg3qKf1PWVeeJhJw0Q347PxMvBgVVFgouYLGIhFYG0UGdBumROyiig==}
+    engines: {node: '>=12'}
+    cpu: [ia32]
+    os: [linux]
+
   '@esbuild/linux-loong64@0.14.54':
     resolution: {integrity: sha512-bZBrLAIX1kpWelV0XemxBZllyRmM6vgFQQG2GdNb+r3Fkp0FOh1NJSvekXDs7jq70k4euu1cryLMfU+mTXlEpw==}
     engines: {node: '>=12'}
     cpu: [loong64]
     os: [linux]
+
+  '@esbuild/linux-loong64@0.20.2':
+    resolution: {integrity: sha512-PR7sp6R/UC4CFVomVINKJ80pMFlfDfMQMYynX7t1tNTeivQ6XdX5r2XovMmha/VjR1YN/HgHWsVcTRIMkymrgQ==}
+    engines: {node: '>=12'}
+    cpu: [loong64]
+    os: [linux]
+
+  '@esbuild/linux-mips64el@0.20.2':
+    resolution: {integrity: sha512-4BlTqeutE/KnOiTG5Y6Sb/Hw6hsBOZapOVF6njAESHInhlQAghVVZL1ZpIctBOoTFbQyGW+LsVYZ8lSSB3wkjA==}
+    engines: {node: '>=12'}
+    cpu: [mips64el]
+    os: [linux]
+
+  '@esbuild/linux-ppc64@0.20.2':
+    resolution: {integrity: sha512-rD3KsaDprDcfajSKdn25ooz5J5/fWBylaaXkuotBDGnMnDP1Uv5DLAN/45qfnf3JDYyJv/ytGHQaziHUdyzaAg==}
+    engines: {node: '>=12'}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@esbuild/linux-riscv64@0.20.2':
+    resolution: {integrity: sha512-snwmBKacKmwTMmhLlz/3aH1Q9T8v45bKYGE3j26TsaOVtjIag4wLfWSiZykXzXuE1kbCE+zJRmwp+ZbIHinnVg==}
+    engines: {node: '>=12'}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@esbuild/linux-s390x@0.20.2':
+    resolution: {integrity: sha512-wcWISOobRWNm3cezm5HOZcYz1sKoHLd8VL1dl309DiixxVFoFe/o8HnwuIwn6sXre88Nwj+VwZUvJf4AFxkyrQ==}
+    engines: {node: '>=12'}
+    cpu: [s390x]
+    os: [linux]
+
+  '@esbuild/linux-x64@0.20.2':
+    resolution: {integrity: sha512-1MdwI6OOTsfQfek8sLwgyjOXAu+wKhLEoaOLTjbijk6E2WONYpH9ZU2mNtR+lZ2B4uwr+usqGuVfFT9tMtGvGw==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [linux]
+
+  '@esbuild/netbsd-x64@0.20.2':
+    resolution: {integrity: sha512-K8/DhBxcVQkzYc43yJXDSyjlFeHQJBiowJ0uVL6Tor3jGQfSGHNNJcWxNbOI8v5k82prYqzPuwkzHt3J1T1iZQ==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [netbsd]
+
+  '@esbuild/openbsd-x64@0.20.2':
+    resolution: {integrity: sha512-eMpKlV0SThJmmJgiVyN9jTPJ2VBPquf6Kt/nAoo6DgHAoN57K15ZghiHaMvqjCye/uU4X5u3YSMgVBI1h3vKrQ==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [openbsd]
+
+  '@esbuild/sunos-x64@0.20.2':
+    resolution: {integrity: sha512-2UyFtRC6cXLyejf/YEld4Hajo7UHILetzE1vsRcGL3earZEW77JxrFjH4Ez2qaTiEfMgAXxfAZCm1fvM/G/o8w==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [sunos]
+
+  '@esbuild/win32-arm64@0.20.2':
+    resolution: {integrity: sha512-GRibxoawM9ZCnDxnP3usoUDO9vUkpAxIIZ6GQI+IlVmr5kP3zUq+l17xELTHMWTWzjxa2guPNyrpq1GWmPvcGQ==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@esbuild/win32-ia32@0.20.2':
+    resolution: {integrity: sha512-HfLOfn9YWmkSKRQqovpnITazdtquEW8/SoHW7pWpuEeguaZI4QnCRW6b+oZTztdBnZOS2hqJ6im/D5cPzBTTlQ==}
+    engines: {node: '>=12'}
+    cpu: [ia32]
+    os: [win32]
+
+  '@esbuild/win32-x64@0.20.2':
+    resolution: {integrity: sha512-N49X4lJX27+l9jbLKSqZ6bKNjzQvHaT8IIFUy+YIqmXQdjYCToGWwOItDrfby14c78aDd5NHQl29xingXfCdLQ==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [win32]
 
   '@finos/perspective@0.10.0':
     resolution: {integrity: sha512-PmsUiaOjChJaivDxGLNH8vAw8lG98OLlPjKCvci3iAFAEclGKMhSkHP/qYDU+NUZSPqsvk2Rf66TFsK8aiy/jg==}
@@ -3035,6 +3182,9 @@ packages:
 
   '@types/source-list-map@0.1.6':
     resolution: {integrity: sha512-5JcVt1u5HDmlXkwOD2nslZVllBBc7HDuOICfiZah2Z0is8M8g+ddAEawbmd3VjedfDHBzxCaXLs07QEmb7y54g==}
+
+  '@types/stoppable@1.1.3':
+    resolution: {integrity: sha512-7wGKIBJGE4ZxFjk9NkjAxZMLlIXroETqP1FJCdoSvKmEznwmBxQFmTB1dsCkAvVcNemuSZM5qkkd9HE/NL2JTw==}
 
   '@types/underscore@1.11.15':
     resolution: {integrity: sha512-HP38xE+GuWGlbSRq9WrZkousaQ7dragtZCruBVMi0oX1migFZavZ3OROKHSkNp/9ouq82zrWtZpg18jFnVN96g==}
@@ -4682,6 +4832,11 @@ packages:
     engines: {node: '>=12'}
     hasBin: true
 
+  esbuild@0.20.2:
+    resolution: {integrity: sha512-WdOOppmUNU+IbZ0PaDiTst80zjnrOkyJNHoKupIcVyU8Lvla3Ugx94VzkQ32Ijqd7UhHJy75gNWDMUekcrSJ6g==}
+    engines: {node: '>=12'}
+    hasBin: true
+
   escalade@3.1.2:
     resolution: {integrity: sha512-ErCHMCae19vR8vQGe50xIsVomy19rg6gFu3+r3jkEO46suLMWBksvVyoGgQV+jOfl84ZSOSlmv6Gxa89PmTGmA==}
     engines: {node: '>=6'}
@@ -5047,6 +5202,9 @@ packages:
   get-symbol-description@1.0.2:
     resolution: {integrity: sha512-g0QYk1dZBxGwk+Ngc+ltRH2IBp2f7zBkBMBJZCDerh6EhlhSR6+9irMCuT/09zD6qkarHUSn529sK/yL4S27mg==}
     engines: {node: '>= 0.4'}
+
+  get-tsconfig@4.7.5:
+    resolution: {integrity: sha512-ZCuZCnlqNzjb4QprAzXKdpp/gh6KTxSJuw3IBsPnV/7fV4NxC9ckB+vPTt8w7fJA0TaSD7c55BR47JD6MEDyDw==}
 
   github-slugger@1.5.0:
     resolution: {integrity: sha512-wIh+gKBI9Nshz2o46B0B3f5k/W+WI9ZAv6y5Dn5WJ5SK1t0TnDimB4WE5rmTD05ZAIn8HALCZVmCsvj0w0v0lw==}
@@ -7491,6 +7649,9 @@ packages:
   resolve-pathname@3.0.0:
     resolution: {integrity: sha512-C7rARubxI8bXFNB/hqcp/4iUeIXJhJZvFPFPiSPRnhU5UPxzMFIl+2E6yY6c4k9giDJAhtV+enfA+G89N6Csng==}
 
+  resolve-pkg-maps@1.0.0:
+    resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
+
   resolve-protobuf-schema@2.1.0:
     resolution: {integrity: sha512-kI5ffTiZWmJaS/huM8wZfEMer1eRd7oJQhDuxeCLe3t7N7mX3z94CN0xPxBQxFYQTSNz9T0i+v6inKqSdK8xrQ==}
 
@@ -8178,6 +8339,11 @@ packages:
 
   tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+
+  tsx@4.10.5:
+    resolution: {integrity: sha512-twDSbf7Gtea4I2copqovUiNTEDrT8XNFXsuHpfGbdpW/z9ZW4fTghzzhAG0WfrCuJmJiOEY1nLIjq4u3oujRWQ==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
 
   type-detect@4.0.8:
     resolution: {integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==}
@@ -10615,7 +10781,76 @@ snapshots:
       - uglify-js
       - webpack-cli
 
+  '@esbuild/aix-ppc64@0.20.2':
+    optional: true
+
+  '@esbuild/android-arm64@0.20.2':
+    optional: true
+
+  '@esbuild/android-arm@0.20.2':
+    optional: true
+
+  '@esbuild/android-x64@0.20.2':
+    optional: true
+
+  '@esbuild/darwin-arm64@0.20.2':
+    optional: true
+
+  '@esbuild/darwin-x64@0.20.2':
+    optional: true
+
+  '@esbuild/freebsd-arm64@0.20.2':
+    optional: true
+
+  '@esbuild/freebsd-x64@0.20.2':
+    optional: true
+
+  '@esbuild/linux-arm64@0.20.2':
+    optional: true
+
+  '@esbuild/linux-arm@0.20.2':
+    optional: true
+
+  '@esbuild/linux-ia32@0.20.2':
+    optional: true
+
   '@esbuild/linux-loong64@0.14.54':
+    optional: true
+
+  '@esbuild/linux-loong64@0.20.2':
+    optional: true
+
+  '@esbuild/linux-mips64el@0.20.2':
+    optional: true
+
+  '@esbuild/linux-ppc64@0.20.2':
+    optional: true
+
+  '@esbuild/linux-riscv64@0.20.2':
+    optional: true
+
+  '@esbuild/linux-s390x@0.20.2':
+    optional: true
+
+  '@esbuild/linux-x64@0.20.2':
+    optional: true
+
+  '@esbuild/netbsd-x64@0.20.2':
+    optional: true
+
+  '@esbuild/openbsd-x64@0.20.2':
+    optional: true
+
+  '@esbuild/sunos-x64@0.20.2':
+    optional: true
+
+  '@esbuild/win32-arm64@0.20.2':
+    optional: true
+
+  '@esbuild/win32-ia32@0.20.2':
+    optional: true
+
+  '@esbuild/win32-x64@0.20.2':
     optional: true
 
   '@finos/perspective@0.10.0':
@@ -12340,6 +12575,10 @@ snapshots:
       '@types/node': 20.12.12
 
   '@types/source-list-map@0.1.6': {}
+
+  '@types/stoppable@1.1.3':
+    dependencies:
+      '@types/node': 20.12.12
 
   '@types/underscore@1.11.15': {}
 
@@ -14336,6 +14575,32 @@ snapshots:
       esbuild-windows-64: 0.14.54
       esbuild-windows-arm64: 0.14.54
 
+  esbuild@0.20.2:
+    optionalDependencies:
+      '@esbuild/aix-ppc64': 0.20.2
+      '@esbuild/android-arm': 0.20.2
+      '@esbuild/android-arm64': 0.20.2
+      '@esbuild/android-x64': 0.20.2
+      '@esbuild/darwin-arm64': 0.20.2
+      '@esbuild/darwin-x64': 0.20.2
+      '@esbuild/freebsd-arm64': 0.20.2
+      '@esbuild/freebsd-x64': 0.20.2
+      '@esbuild/linux-arm': 0.20.2
+      '@esbuild/linux-arm64': 0.20.2
+      '@esbuild/linux-ia32': 0.20.2
+      '@esbuild/linux-loong64': 0.20.2
+      '@esbuild/linux-mips64el': 0.20.2
+      '@esbuild/linux-ppc64': 0.20.2
+      '@esbuild/linux-riscv64': 0.20.2
+      '@esbuild/linux-s390x': 0.20.2
+      '@esbuild/linux-x64': 0.20.2
+      '@esbuild/netbsd-x64': 0.20.2
+      '@esbuild/openbsd-x64': 0.20.2
+      '@esbuild/sunos-x64': 0.20.2
+      '@esbuild/win32-arm64': 0.20.2
+      '@esbuild/win32-ia32': 0.20.2
+      '@esbuild/win32-x64': 0.20.2
+
   escalade@3.1.2: {}
 
   escape-goat@2.1.1: {}
@@ -14730,6 +14995,10 @@ snapshots:
       call-bind: 1.0.7
       es-errors: 1.3.0
       get-intrinsic: 1.2.4
+
+  get-tsconfig@4.7.5:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
 
   github-slugger@1.5.0: {}
 
@@ -17369,6 +17638,8 @@ snapshots:
 
   resolve-pathname@3.0.0: {}
 
+  resolve-pkg-maps@1.0.0: {}
+
   resolve-protobuf-schema@2.1.0:
     dependencies:
       protocol-buffers-schema: 3.6.0
@@ -18144,6 +18415,13 @@ snapshots:
   tslib@2.5.3: {}
 
   tslib@2.6.2: {}
+
+  tsx@4.10.5:
+    dependencies:
+      esbuild: 0.20.2
+      get-tsconfig: 4.7.5
+    optionalDependencies:
+      fsevents: 2.3.3
 
   type-detect@4.0.8: {}
 

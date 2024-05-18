@@ -187,7 +187,7 @@ impl JsView {
             })
         };
 
-        let on_update = Box::new(move |msg| spawn_local(emit.poll(msg)));
+        let on_update = Box::new(move |msg| emit.poll(msg));
         let on_update_opts = options
             .into_serde_ext::<Option<OnUpdateOptions>>()?
             .unwrap_or_default();

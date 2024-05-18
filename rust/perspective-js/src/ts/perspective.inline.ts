@@ -10,27 +10,24 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "@finos/perspective";
+import * as api from "./browser.ts";
+export type * from "../../dist/pkg/perspective-js.d.ts";
+export type * from "./ts-rs/ViewConfigUpdate.d.ts";
 
-import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
+import * as wasm_module from "../../dist/pkg/perspective-js.js";
+import wasm_binary from "../../dist/pkg/perspective-js.wasm";
+import { load_wasm_stage_0 } from "@finos/perspective/src/ts/decompress.ts";
 
-import "@finos/perspective-viewer/dist/css/pro-dark.css";
+const module = await load_wasm_stage_0(wasm_binary as unknown as ArrayBuffer);
+await wasm_module.default(module);
+await wasm_module.init();
 
-import "./index.css";
+export async function websocket(url: string | URL) {
+    return await api.websocket(Promise.resolve(wasm_module), url);
+}
 
-import arrow from "superstore-arrow/superstore.lz4.arrow";
-const req = fetch(arrow);
+export async function worker() {
+    return await api.worker.call(undefined, Promise.resolve(wasm_module));
+}
 
-const viewer = document.createElement("perspective-viewer");
-document.body.append(viewer);
-
-const worker = await perspective.worker();
-
-const resp = await req;
-const buffer = await resp.arrayBuffer();
-console.log("Making table??");
-const table = worker.table(buffer);
-console.log("TABLE:", table);
-viewer.load(table);
+export default { websocket, worker };

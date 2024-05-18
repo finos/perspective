@@ -554,7 +554,7 @@ namespace server {
         using Request = perspective::proto::Request;
         using Response = perspective::proto::Response;
         std::vector<ProtoServerResp<std::string>>
-        handle_message(std::uint32_t client_id, const std::string_view& data);
+        handle_request(std::uint32_t client_id, const std::string_view& data);
         std::vector<ProtoServerResp<std::string>> poll();
 
     private:
@@ -564,7 +564,7 @@ namespace server {
         );
 
         std::vector<ProtoServerResp<Response>>
-        _handle_message(std::uint32_t client_id, const Request& req);
+        _handle_request(std::uint32_t client_id, const Request& req);
 
         std::vector<ProtoServerResp<Response>> _poll();
 

@@ -46,7 +46,7 @@ pub enum ClientError {
     #[error("Not yet implemented {0:?}")]
     NotImplemented(&'static str),
 
-    #[error("Can't use both `limit` and `index` parameters")]
+    #[error("Can't use both `limit` and `index` arguments")]
     BadTableOptions,
 }
 

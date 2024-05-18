@@ -81,8 +81,8 @@ extern "C" {
 #[wasm_bindgen]
 impl JsClient {
     #[wasm_bindgen(constructor)]
-    pub fn new(send: Function, close: Option<Function>) -> Self {
-        let send1 = send.clone();
+    pub fn new(send_request: Function, close: Option<Function>) -> Self {
+        let send1 = send_request.clone();
         let send_loop = LocalPollLoop::new(move |mut buff: Vec<u8>| {
             let buff2 = unsafe { js_sys::Uint8Array::view_mut_raw(buff.as_mut_ptr(), buff.len()) };
             send1.call1(&JsValue::UNDEFINED, &buff2)
@@ -90,7 +90,7 @@ impl JsClient {
 
         JsClient {
             close: close.clone(),
-            client: Client::new(move |_client, msg| Box::pin(send_loop.poll(msg.clone()))),
+            client: Client::new(move |_client, msg| send_loop.poll(msg.clone())),
         }
     }
 
@@ -102,10 +102,10 @@ impl JsClient {
 
     #[doc(hidden)]
     #[wasm_bindgen]
-    pub fn handle_message(&self, value: &JsValue) -> ApiResult<()> {
+    pub async fn handle_response(&self, value: &JsValue) -> ApiResult<()> {
         let uint8array = Uint8Array::new(value);
         let slice = uint8array.to_vec();
-        self.client.receive(&slice)?;
+        self.client.handle_response(&slice).await?;
         Ok(())
     }
 

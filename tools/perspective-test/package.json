@@ -9,7 +9,6 @@
     "files": [
         "src/**/*"
     ],
-    "type": "module",
     "repository": {
         "type": "git",
         "url": "https://github.com/finos/perspective/tools/perspective-test"

@@ -161,8 +161,8 @@ export const copy_files_to_python_folder = (link_files) => {
     const dreadme = sh.path`${dist}/README.md`;
     const clangd = sh.path`${__dirname}/../../cpp/perspective/.clangd.in`;
     const dclangd = sh.path`${dist}/.clangd.in`;
-    const protos = sh.path`${__dirname}/../../protos`;
-    const protosd = sh.path`${dist}/protos`;
+    const protos = sh.path`${__dirname}/../../cpp/protos`;
+    const protosd = sh.path`${dist}/cpp/protos`;
 
     fse.mkdirpSync(dist);
     const copies = [
