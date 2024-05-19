@@ -19,7 +19,11 @@
     "author": "",
     "license": "Apache-2.0",
     "devDependencies": {
-        "microtime": "^3.0.0"
+        "microtime": "^3.0.0",
+        "superstore-arrow": "3.0.0",
+        "express": "4.18.2",
+        "@finos/perspective": "workspace:^",
+        "express-ws": "^5.0.2"
     },
     "dependencies": {
         "perspective-2-7-0": "npm:@finos/perspective@2.7.0",

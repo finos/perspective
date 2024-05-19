@@ -34,19 +34,19 @@
         "version": "yarn build"
     },
     "dependencies": {
-        "@finos/perspective": "^2.10.0",
-        "@finos/perspective-viewer": "^2.10.0",
-        "@finos/perspective-viewer-d3fc": "^2.10.0",
-        "@finos/perspective-viewer-datagrid": "^2.10.0",
-        "@finos/perspective-viewer-openlayers": "^2.10.0",
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "@finos/perspective-viewer-openlayers": "workspace:^",
         "@jupyter-widgets/base": "^2 || ^3 || ^4 || ^5 || ^6",
         "@jupyterlab/application": "^3.6.1",
         "@lumino/application": "^1.27.0",
         "@lumino/widgets": "^1.37.0"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "^2.10.0",
-        "@finos/perspective-test": "^2.10.0",
+        "@finos/perspective-esbuild-plugin": "workspace:^",
+        "@finos/perspective-test": "workspace:^",
         "@jupyterlab/builder": "^3.4.0",
         "@prospective.co/procss": "^0.1.15",
         "cpy": "^9.0.1"

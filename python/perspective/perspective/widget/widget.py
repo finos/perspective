@@ -537,7 +537,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         def psp_cdn(module, path=None):
             if path is None:
                 path = f"cdn/{module}.js"
-            # perspective developer affordance: works with your local `yarn start blocks`
+            # perspective developer affordance: works with your local `pnpm run start blocks`
             # return f"http://localhost:8080/node_modules/@finos/{module}/dist/{path}"
             return f"https://cdn.jsdelivr.net/npm/@finos/{module}@{__version__}/dist/{path}"
 

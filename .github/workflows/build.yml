@@ -217,25 +217,13 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            ################
+            # PNPM Cache
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             - name: Setup emsdk cache
               uses: actions/cache@v3
@@ -293,8 +281,8 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             - name: Install latest nightly rust
               uses: dtolnay/rust-toolchain@nightly
@@ -314,16 +302,13 @@ jobs:
                   directory: "./.llvm"
 
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             ################
             # Linux
@@ -342,15 +327,15 @@ jobs:
             ###############
 
             - name: WebAssembly Build
-              run: yarn build_js --ci
+              run: pnpm run build_js --ci
               env:
                   PSP_USE_CCACHE: 1
 
             # - name: Docs Build
-            #   run: yarn docs
+            #   run: pnpm run docs
 
             - name: Lint
-              run: yarn lint
+              run: pnpm run lint
               env:
                   PSP_PROJECT: "js"
 
@@ -471,25 +456,13 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            ################
+            # PNPM Cache
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
@@ -515,26 +488,23 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -545,13 +515,13 @@ jobs:
             ########
             # Linux
             - name: Python Lint (Linux)
-              run: yarn lint
+              run: pnpm run lint
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   PSP_PROJECT: python
 
             - name: JavaScript Lint
-              run: yarn lint
+              run: pnpm run lint
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   PSP_PROJECT: js
@@ -598,24 +568,10 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
@@ -655,26 +611,23 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             ################
             # Rust
@@ -727,7 +680,7 @@ jobs:
             # WebAssembly #
             ###############
             - name: WebAssembly Test
-              run: yarn test_js --ci
+              run: pnpm run test_js --ci
 
             ######################
             # Fancy HTML reports #
@@ -768,42 +721,25 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
@@ -846,7 +782,7 @@ jobs:
                   path: rust/perspective-viewer/dist
 
             - name: Benchmarks
-              run: yarn bench
+              run: pnpm run bench
 
             - uses: actions/upload-artifact@v3
               with:
@@ -988,24 +924,10 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
@@ -1059,8 +981,8 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             ################
@@ -1075,19 +997,15 @@ jobs:
             #       directory: "./.llvm"
 
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-              if: ${{ runner.os != 'Linux' }}
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             ################
@@ -1123,7 +1041,7 @@ jobs:
             ########
             # Linux
             - name: Python Wheel Steps (Linux)
-              run: yarn _wheel_python --ci
+              run: pnpm run _wheel_python --ci
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   MANYLINUX: ${{ matrix.container }}
@@ -1134,8 +1052,8 @@ jobs:
             # Macos
             - name: Python Build Steps (Macos)
               run: |
-                  yarn _wheel_python --ci --macos
-                  yarn _wheel_python --ci --macos --arm
+                  pnpm run _wheel_python --ci --macos
+                  pnpm run _wheel_python --ci --macos --arm
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
               if: ${{ runner.os == 'macOS' }}
@@ -1152,7 +1070,7 @@ jobs:
             ##########
             # Windows
             - name: Python Build Steps (Windows vc14.3)
-              run: yarn _wheel_python --ci
+              run: pnpm run _wheel_python --ci
               env:
                   PSP_GENERATOR: Visual Studio 17 2022
                   PSP_VCPKG_PATH: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -1210,9 +1128,9 @@ jobs:
 
             - name: copy files
               run: |
-                  npm install -g yarn
-                  yarn --frozen-lockfile
-                  yarn build_python --setup-only
+                  npm install -g pnpm
+                  pnpm install --frozen-lockfile
+                  pnpm run build_python --setup-only
 
             - name: Linux init steps
               run: sudo node tools/perspective-scripts/install_tools.mjs
@@ -1317,24 +1235,10 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
@@ -1360,19 +1264,16 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn --frozen-lockfile
+              run: pnpm install --frozen-lockfile
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
@@ -1382,7 +1283,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             # Download artifact
             - uses: actions/download-artifact@v3
@@ -1400,7 +1301,7 @@ jobs:
               run: jupyter labextension list
 
             - name: Run Jupyterlab tests
-              run: yarn test_js --jupyter
+              run: pnpm run test_js --jupyter
               env:
                   PACKAGE: perspective-jupyterlab
 
@@ -1488,24 +1389,10 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
@@ -1531,26 +1418,23 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1584,7 +1468,7 @@ jobs:
 
             # Run tests
             - name: Python Test Steps
-              run: yarn test_python --debug
+              run: pnpm run test_python --debug
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1628,24 +1512,10 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
@@ -1671,19 +1541,16 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn --frozen-lockfile
+              run: pnpm install --frozen-lockfile
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
@@ -1695,7 +1562,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1748,24 +1615,10 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
@@ -1791,26 +1644,23 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm rin _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1829,7 +1679,7 @@ jobs:
               if: ${{ runner.os == 'Linux' }}
 
             - name: Run Benchmark
-              run: yarn bench
+              run: pnpm run bench
               shell: bash
               env:
                   PSP_PROJECT: python
@@ -2016,7 +1866,7 @@ jobs:
 
             - name: NPM pack
               run: |
-                  npm pack \
+                  pnpm pack \
                       --workspace=@finos/perspective \
                       --workspace=@finos/perspective-viewer \
                       --workspace=@finos/perspective-viewer-datagrid \

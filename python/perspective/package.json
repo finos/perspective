@@ -7,10 +7,10 @@
         "docs": "python3 docs/generate.py"
     },
     "devDependencies": {
-        "@finos/perspective": "^2.10.0",
-        "@finos/perspective-viewer": "^2.10.0",
-        "@finos/perspective-viewer-d3fc": "^2.10.0",
-        "@finos/perspective-viewer-datagrid": "^2.10.0",
-        "@finos/perspective-webpack-plugin": "^2.10.0"
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "@finos/perspective-webpack-plugin": "workspace:^"
     }
 }
