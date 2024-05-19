@@ -24,8 +24,8 @@
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
     },
     "dependencies": {
-        "@finos/perspective": "^2.10.0",
-        "@finos/perspective-viewer": "^2.10.0",
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
         "d3": "^7.1.1",
         "d3-color": "^3.0.1",
         "gradient-parser": "1.0.2",
@@ -33,6 +33,7 @@
         "ol": "^5.3.2"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "^2.10.0"
+        "@finos/perspective-esbuild-plugin": "workspace:^",
+        "@prospective.co/procss": "^0.1.13"
     }
 }

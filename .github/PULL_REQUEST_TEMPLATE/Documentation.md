@@ -12,18 +12,18 @@ about: Improves documentation for the API or on the docs website.
 
 <!--- Describe how you have validated your documentation additions:
 
-1. Run `yarn docs` from the project root to regenerate the API documentation
+1. Run `pnpm run docs` from the project root to regenerate the API documentation
    from source.
 
-2. Inside the `/docs` subdirectory, run `yarn start` to generate the
+2. Inside the `/docs` subdirectory, run `pnpm run start` to generate the
    Docusaurus site, and validate that your documentation is formatted
    and styled correctly.
 
 -->
 
 - [ ] I have linted, spell-checked, and grammar-checked my documentation additions.
-- [ ] I have run `yarn docs` to regenerate the API documentation from source.
-- [ ] Within `/docs`, I have run `yarn start` to regenerate the Docusaurus site, and I have validated the changes
+- [ ] I have run `pnpm run docs` to regenerate the API documentation from source.
+- [ ] Within `/docs`, I have run `pnpm run start` to regenerate the Docusaurus site, and I have validated the changes
 - [ ] My additions are styled and structured correctly on the Docusaurus site
 
 ## Checklist

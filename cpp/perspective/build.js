@@ -21,7 +21,7 @@ const cwd = path.join(process.cwd(), "dist", env);
 delete process.env.NODE;
 
 function bootstrap(file) {
-    execSync(`cargo run -p perspective-bootstrap -- ${file}`, {
+    execSync(`cargo run --color always -p perspective-bootstrap -- ${file}`, {
         cwd: path.join(process.cwd(), "..", "..", "rust", "perspective-viewer"),
         stdio,
     });

@@ -9,15 +9,15 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^2.10.0",
-        "@finos/perspective-viewer": "^2.10.0",
-        "@finos/perspective-viewer-d3fc": "^2.10.0",
-        "@finos/perspective-viewer-datagrid": "^2.10.0",
-        "express": "^4.17.1",
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "express": "4.18.2",
         "express-ws": "^5.0.2"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "^2.10.0",
+        "@finos/perspective-esbuild-plugin": "workspace:^",
         "esbuild": "^0.14.54"
     }
 }

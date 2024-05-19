@@ -12,9 +12,9 @@
 
 import * as fs from "fs";
 import { get_examples, LOCAL_EXAMPLES } from "./examples.js";
-import sh from "@finos/perspective-scripts/sh.mjs";
 import * as url from "url";
 import * as path from "node:path";
+import { execSync } from "child_process";
 
 const version = JSON.parse(fs.readFileSync("./package.json")).version;
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
@@ -37,7 +37,7 @@ const replacements = {
 export async function dist_examples(
     outpath = `${__dirname}/../../docs/static/blocks`
 ) {
-    sh`mkdir -p ${outpath}`.runSync();
+    execSync(`mkdir -p ${outpath}`, {stdio:"inherit"});
     const readme = generate_readme();
     let existing = fs.readFileSync(`${__dirname}/../../README.md`).toString();
     existing = existing.replace(
@@ -51,7 +51,7 @@ export async function dist_examples(
         if (fs.existsSync(`${__dirname}/src/${name}`)) {
             // Copy
             for (const filename of fs.readdirSync(`${__dirname}/src/${name}`)) {
-                sh`mkdir -p ${outpath}/${name}`.runSync();
+                execSync(`mkdir -p ${outpath}/${name}`, {stdio:"inherit"});
                 if (
                     filename.endsWith(".mjs") ||
                     filename.endsWith(".js") ||
@@ -71,7 +71,7 @@ export async function dist_examples(
                         filecontents
                     );
                 } else if (filename !== ".git") {
-                    sh`cp ${__dirname}/src/${name}/${filename} ${outpath}/${name}/${filename}`.runSync();
+                    execSync(`cp ${__dirname}/src/${name}/${filename} ${outpath}/${name}/${filename}`, {stdio:"inherit"});
                 }
             }
 
@@ -79,7 +79,7 @@ export async function dist_examples(
             if (fs.existsSync(path.join(outpath, name, "build.mjs"))) {
                 console.log("Building " + name);
                 const script = `${outpath}/${name}/build.mjs`;
-                sh`node ${script}`.runSync();
+                execSync(`node ${script}`, {stdio:"inherit"});
             }
         }
     }

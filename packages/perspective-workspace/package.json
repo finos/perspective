@@ -31,18 +31,18 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective-viewer": "^2.10.0",
+        "@finos/perspective-viewer": "workspace:^",
         "@lumino/algorithm": "^1.9.1",
         "@lumino/commands": "^1.20.0",
         "@lumino/domutils": "^1.8.1",
         "@lumino/messaging": "^1.10.1",
         "@lumino/virtualdom": "^1.14.1",
         "@lumino/widgets": "^1.37.0",
-        "lodash": "^4.17.4"
+        "lodash": "^4.17.21"
     },
     "devDependencies": {
         "@prospective.co/procss": "^0.1.15",
-        "@finos/perspective-esbuild-plugin": "^2.10.0",
-        "@finos/perspective-test": "^2.10.0"
+        "@finos/perspective-esbuild-plugin": "workspace:^",
+        "@finos/perspective-test": "workspace:^"
     }
 }

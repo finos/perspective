@@ -10,9 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import sh from "@finos/perspective-scripts/sh.mjs";
-// import * as url from "url";
-
+import { execSync } from "child_process";
 import perspective from "@finos/perspective";
 import {
     Uint8ArrayReader,
@@ -34,9 +32,10 @@ async function main() {
         return;
     }
 
-    sh`kaggle datasets download -d heesoo37/120-years-of-olympic-history-athletes-and-results`
-        .cwd(__dirname)
-        .runSync();
+    execSync(
+        `cd ${__dirname} && kaggle datasets download -d heesoo37/120-years-of-olympic-history-athletes-and-results`,
+        { stdio: "inherit" }
+    );
 
     const zip = fs.readFileSync(
         `${__dirname}/120-years-of-olympic-history-athletes-and-results.zip`
