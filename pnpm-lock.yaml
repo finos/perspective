@@ -516,6 +516,8 @@ importers:
         specifier: ^6.2.1
         version: 6.2.2(typescript@5.1.6)
 
+  examples/rust-axum: {}
+
   examples/webpack-cross-origin:
     dependencies:
       '@finos/perspective':
@@ -903,24 +905,6 @@ importers:
         specifier: ^0.1.15
         version: 0.1.15
 
-  python/perspective:
-    devDependencies:
-      '@finos/perspective':
-        specifier: workspace:^
-        version: link:../../rust/perspective-js
-      '@finos/perspective-viewer':
-        specifier: workspace:^
-        version: link:../../rust/perspective-viewer
-      '@finos/perspective-viewer-d3fc':
-        specifier: workspace:^
-        version: link:../../packages/perspective-viewer-d3fc
-      '@finos/perspective-viewer-datagrid':
-        specifier: workspace:^
-        version: link:../../packages/perspective-viewer-datagrid
-      '@finos/perspective-webpack-plugin':
-        specifier: workspace:^
-        version: link:../../packages/perspective-webpack-plugin
-
   rust/perspective-js:
     dependencies:
       stoppable:
@@ -957,6 +941,8 @@ importers:
       underscore:
         specifier: ^1.13.6
         version: 1.13.6
+
+  rust/perspective-python: {}
 
   rust/perspective-viewer:
     dependencies:

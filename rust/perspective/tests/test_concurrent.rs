@@ -10,58 +10,54 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#include <memory>
-#include <string>
+// use tokio::sync::Mutex;
+use std::error::Error;
+use std::sync::Arc;
 
-#include "rust/cxx.h"
-#include "perspective/proto_api.h"
-#include "server.h"
-#include "perspective-server/src/ffi.rs.h"
+use perspective::LocalClient;
+use perspective_client::{OnUpdateOptions, TableInitOptions, UpdateData, UpdateOptions};
+use tokio::sync::Mutex;
 
-std::unique_ptr<ProtoApiServer>
-new_proto_server() {
-    return std::make_unique<ProtoApiServer>();
-}
+#[tokio::test]
+async fn test_two_sync_clients_receive_messages_on_update() -> Result<(), Box<dyn Error>> {
+    let server = perspective::server::Server::default();
+    let client1 = LocalClient::new(&server);
+    let client2 = LocalClient::new(&server);
 
-std::uint32_t
-new_session(const ProtoApiServer& self) {
-    auto& server = const_cast<ProtoApiServer&>(self);
-    return server.new_session();
-};
+    let table = client1
+        .table(
+            UpdateData::Csv("x,y\n1,2\n3,4".to_owned()).into(),
+            TableInitOptions {
+                name: Some("Table1".to_owned()),
+                index: None,
+                limit: None,
+            },
+        )
+        .await?;
 
-void
-close_session(const ProtoApiServer& self, std::uint32_t client_id) {
-    auto& server = const_cast<ProtoApiServer&>(self);
-    server.close_session(client_id);
-}
+    let table2 = client2.open_table("Table1".to_owned()).await?;
+    let view = table2.view(None).await?;
+    let result = Arc::new(Mutex::new(false));
+    let _sub = view
+        .on_update(
+            {
+                let result = result.clone();
+                move |_| {
+                    let result = result.clone();
+                    async move { *result.lock().await = true }
+                }
+            },
+            OnUpdateOptions::default(),
+        )
+        .await?;
 
-rust::Box<ResponseBatch>
-handle_request(
-    const ProtoApiServer& self,
-    std::uint32_t client_id,
-    rust::Slice<const std::uint8_t> message
-) {
+    table
+        .update(
+            UpdateData::Csv("x,y\n5,6".to_owned()),
+            UpdateOptions::default(),
+        )
+        .await?;
 
-    std::string message_str(message.begin(), message.end());
-    std::vector<ProtoApiResponse> responses =
-        self.handle_request(client_id, message_str);
-    rust::Box<ResponseBatch> batch = create_response_batch();
-
-    for (const auto& response : responses) {
-        batch->push_response(response.client_id, response.data);
-    }
-
-    return batch;
-}
-
-rust::Box<ResponseBatch>
-poll(const ProtoApiServer& s) {
-    auto& self = const_cast<ProtoApiServer&>(s);
-    std::vector<ProtoApiResponse> responses = self.poll();
-    rust::Box<ResponseBatch> batch = create_response_batch();
-    for (const auto& response : responses) {
-        batch->push_response(response.client_id, response.data);
-    }
-
-    return batch;
+    assert!(*result.lock().await);
+    Ok(())
 }

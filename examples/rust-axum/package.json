@@ -1,0 +1,13 @@
+{
+    "name": "rust-axum",
+    "private": true,
+    "version": "2.10.1",
+    "description": "An example of a Rust/Axum virtual Perspective server",
+    "scripts": {
+        "start": "cargo run"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {},
+    "devDependencies": {}
+}

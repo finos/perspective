@@ -18,10 +18,12 @@ members = [
     "rust/bootstrap-runtime",
     "rust/perspective-viewer",
     "rust/bundle",
+    "rust/perspective",
     "rust/perspective-client",
     "rust/perspective-js",
     "rust/perspective-python",
     "rust/perspective-server",
+    "examples/rust-axum",
 ]
 
 [profile.dev]

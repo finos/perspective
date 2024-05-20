@@ -11,42 +11,16 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 [package]
-name = "perspective-server"
-version = "2.10.1"
-authors = ["Andrew Stein <steinlink@gmail.com>"]
+name = "rust-axum"
+version = "0.1.0"
 edition = "2021"
-description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
-repository = "https://github.com/finos/perspective"
-license = "Apache-2.0"
-homepage = "https://perspective.finos.org"
-keywords = []
-build = "build.rs"
-include = [
-    "src/**/*",
-    "include/**/*",
-    "cpp/**/*",
-    "cmake/**/*",
-    "Cargo.toml",
-    "build.rs",
-]
-
-[features]
-default = ["python"]
-external-cpp = []
-wasm-exceptions = []
-python = []
-
-[build-dependencies]
-cxx-build = "1.0.115"
-cmake = "0.1.50"
-num_cpus = "1.16.0"
+publish = false
 
 [dependencies]
-async-lock = "2.5.0"
-cxx = "1.0.115"
-tracing = { version = ">=0.1.36" }
+perspective = { version = "2.10.1", path = "../../rust/perspective" }
+axum = { version = "=0.7.4", features = ["ws"] }
 futures = "0.3"
-
-[lib]
-crate-type = ["rlib"]
-path = "src/lib.rs"
+tokio = { version = "1.0", features = ["full"] }
+tower-http = { version = "0.5.0", features = ["fs", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

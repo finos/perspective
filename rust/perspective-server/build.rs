@@ -44,22 +44,44 @@ fn cmake_build() -> Result<(), std::io::Error> {
         let root_dir = Path::new(root_dir_env.as_str());
         copy_dir_all(Path::join(root_dir, "cpp"), "cpp", &HashSet::from(["dist"]))?;
         copy_dir_all(Path::join(root_dir, "cmake"), "cmake", &HashSet::new())?;
+        println!(
+            "cargo:rerun-if-changed={}/cpp/perspective",
+            root_dir.display()
+        );
     }
 
     let mut dst = Config::new("cpp/perspective");
     let profile = std::env::var("PROFILE").unwrap();
     dst.always_configure(true);
     dst.define("CMAKE_BUILD_TYPE", profile.as_str());
-    dst.define("PSP_WASM_BUILD", "0");
-    dst.define("PSP_PYTHON_BUILD", "1");
+
+    if std::env::var("TARGET")
+        .unwrap_or_default()
+        .contains("wasm32")
+    {
+        dst.define("PSP_WASM_BUILD", "1");
+    } else {
+        dst.define("PSP_WASM_BUILD", "0");
+    }
+    if std::env::var("CARGO_FEATURE_PYTHON").is_ok() {
+        dst.define("CMAKE_POSITION_INDEPENDENT_CODE", "ON");
+        dst.define("PSP_PYTHON_BUILD", "1");
+    }
     if std::env::var("CARGO_FEATURE_EXTERNAL_CPP").is_err() {
         dst.env("PSP_DISABLE_CLANGD", "1");
+    }
+
+    // WASM Exceptions don't work with the prebuilt Pyodide distribution.
+    // It must be rebuilt with WASM exceptions enabled
+    if std::env::var("CARGO_FEATURE_WASM_EXCEPTIONS").is_ok() {
+        dst.define("PSP_WASM_EXCEPTIONS", "1");
+    } else {
+        dst.define("PSP_WASM_EXCEPTIONS", "0");
     }
 
     dst.build_arg(format!("-j{}", num_cpus::get()));
     println!("cargo:warning=MESSAGE Building cmake {}", profile);
     let artifact = dst.build();
-
     println!("cargo:warning=MESSAGE Building cxx");
     cxx_build::bridge("src/ffi.rs")
         .file("src/server.cpp")
