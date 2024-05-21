@@ -86,7 +86,9 @@ impl PartialEq for NumberColumnStyleProps {
 
 impl NumberColumnStyleProps {
     fn set_default_gradient(&self, ctx: &Context<NumberColumnStyle>) {
-        if let Some(session) = self.session.clone() && let Some(column_name) = self.column_name.clone() {
+        if let Some(session) = self.session.clone()
+            && let Some(column_name) = self.column_name.clone()
+        {
             ctx.link().send_future(async move {
                 let view = session.get_view().unwrap();
                 let min_max = view.get_min_max(&column_name).await.unwrap();

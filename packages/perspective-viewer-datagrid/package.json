@@ -29,14 +29,14 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^2.10.0",
-        "@finos/perspective-viewer": "^2.10.0",
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
         "chroma-js": "^1.3.4",
         "regular-table": "=0.6.4"
     },
     "devDependencies": {
-        "@prospective.co/procss": "^0.1.13",
-        "@finos/perspective-esbuild-plugin": "^2.10.0",
-        "@finos/perspective-test": "^2.10.0"
+        "@prospective.co/procss": "^0.1.15",
+        "@finos/perspective-esbuild-plugin": "workspace:^",
+        "@finos/perspective-test": "workspace:^"
     }
 }

@@ -84,11 +84,11 @@ impl Component for EditableHeader {
 
     fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
         if ctx.props().reset_count != old_props.reset_count {
-            self.value = ctx.props().initial_value.clone();
+            self.value.clone_from(&ctx.props().initial_value);
         }
         if ctx.props().initial_value != old_props.initial_value {
             self.edited = false;
-            self.value = ctx.props().initial_value.clone();
+            self.value.clone_from(&ctx.props().initial_value);
         }
         if !ctx.props().editable {
             self.edited = false;
@@ -125,7 +125,7 @@ impl Component for EditableHeader {
                 })
                 .unwrap_or(true);
 
-                self.value = maybe_value.clone();
+                self.value.clone_from(&maybe_value);
                 ctx.props().on_change.emit((maybe_value, self.valid));
 
                 true

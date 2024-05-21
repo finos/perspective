@@ -12,13 +12,13 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^2.10.0",
-        "@finos/perspective-viewer": "^2.10.0",
-        "@finos/perspective-viewer-d3fc": "^2.10.0",
-        "@finos/perspective-viewer-datagrid": "^2.10.0"
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^2.10.0",
+        "@finos/perspective-webpack-plugin": "workspace:^",
         "css-loader": "^0.28.7",
         "html-webpack-plugin": "^5.1.0",
         "http-server": "^14.1.1",

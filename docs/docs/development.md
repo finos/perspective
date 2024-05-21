@@ -147,12 +147,20 @@ yarn jlab_link # run this whenever you need to update a local perspective packag
 Install system dependencies through Homebrew:
 
 ```bash
-brew install cmake
+brew install cmake llvm@17
+brew link llvm@17 # optional, see below
 ```
 
 On M1 (Apple Silicon) systems, make sure your brew-installed dependencies are in
 `/opt/homebrew` (the default location), and that `/opt/homebrew/bin` is on the
 `PATH`.
+
+If you do not want to link the llvm@17 keg, then while developing ensure it is
+on your PATH too, like this:
+
+```
+PATH=$(brew --prefix llvm@17)/bin:$PATH
+```
 
 **Note**: Perspective vendors its C++ extensions, so you may run into trouble
 building if you have `brew`-installed versions of libraries, such as

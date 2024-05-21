@@ -45,7 +45,7 @@ export function tidyLint(flags) {
  * @param {string} sourceDir
  */
 function tidy(buildDir, sourceDir, flags) {
-    const ctpath = CLANG_TIDY_PATH;
+    const ctpath = CLANG_TIDY;
     // if (!fs.existsSync(ctpath)) {
     //     console.warn("run-clang-tidy not found, skipping lint");
     //     return;
@@ -62,24 +62,17 @@ function tidy(buildDir, sourceDir, flags) {
     }
 }
 
-const CLANG_TIDY_PATH = fs.existsSync(`${__dirname}/../../.llvm`)
-    ? `${__dirname}/../../.llvm/bin/run-clang-tidy`
-    : `run-clang-tidy`;
-
-const CLANG_FMT_PATH = fs.existsSync(`${__dirname}/../../.llvm`)
-    ? `${__dirname}/../../.llvm/bin/clang-format`
-    : `clang-format`;
-
-console.log(`${__dirname}/../../.llvm`);
+const CLANG_TIDY = `run-clang-tidy`;
+const CLANG_FORMAT = `clang-format`;
 
 function formatLint(dir) {
-    execSync(`${CLANG_FMT_PATH} -style=file --dry-run -Werror ${dir}`, {
+    execSync(`${CLANG_FORMAT} -style=file --dry-run -Werror ${dir}`, {
         stdio: "inherit",
     });
 }
 
 function clangFormatFix(dir) {
-    execSync(`${CLANG_FMT_PATH} -style=file -i ${dir}`, {
+    execSync(`${CLANG_FORMAT} -style=file -i ${dir}`, {
         stdio: "inherit",
     });
 }

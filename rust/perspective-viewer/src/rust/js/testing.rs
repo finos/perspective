@@ -38,7 +38,7 @@ extern "C" {
 #[cfg(test)]
 pub async fn get_mock_table() -> JsPerspectiveTable {
     thread_local! {
-        static WORKER: RefCell<Option<JsPerspectiveWorker>> = RefCell::new(None);
+        static WORKER: RefCell<Option<JsPerspectiveWorker>> = const { RefCell::new(None) };
     }
 
     let worker: JsPerspectiveWorker = match WORKER.with(|x| x.borrow().clone()) {

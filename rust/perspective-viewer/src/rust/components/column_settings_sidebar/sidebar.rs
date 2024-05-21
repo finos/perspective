@@ -69,7 +69,7 @@ pub struct ColumnSettingsProps {
     pub is_active: bool,
 }
 
-derive_model!(CustomEvents, Session, Renderer, Presentation for ColumnSettingsProps);
+derive_model!(Session, Renderer, Presentation for ColumnSettingsProps);
 
 impl PartialEq for ColumnSettingsProps {
     fn eq(&self, other: &Self) -> bool {
@@ -258,8 +258,8 @@ impl Component for ColumnSettingsSidebar {
                 rerender
             },
             ColumnSettingsMsg::OnResetAttributes(()) => {
-                self.header_value = self.initial_header_value.clone();
-                self.expr_value = self.initial_expr_value.clone();
+                self.header_value.clone_from(&self.initial_header_value);
+                self.expr_value.clone_from(&self.initial_expr_value);
                 self.save_enabled = false;
                 self.reset_enabled = false;
                 self.reset_count += 1;
@@ -280,8 +280,8 @@ impl Component for ColumnSettingsSidebar {
                     ColumnLocator::NewExpression => ctx.props().save_expr(new_expr),
                 }
 
-                self.initial_expr_value = self.expr_value.clone();
-                self.initial_header_value = self.header_value.clone();
+                self.initial_expr_value.clone_from(&self.expr_value);
+                self.initial_header_value.clone_from(&self.header_value);
                 self.save_enabled = false;
                 self.reset_enabled = false;
                 self.save_count += 1;

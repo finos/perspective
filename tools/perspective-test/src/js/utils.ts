@@ -141,7 +141,7 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
 
 /**
  * Compares the content of an HTML element to a snapshot.
- * To generate new snapshots, run `yarn test --update-snapshots`.
+ * To generate new snapshots, run `pnpm run test --update-snapshots`.
  * This first runs the focused project(s) tests, which generates new
  * snapshots, and then updates the contents of results.tar.gz which
  * you can commit.

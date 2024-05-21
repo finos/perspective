@@ -306,7 +306,7 @@ impl Component for SplitPanel {
         match msg {
             SplitPanelMsg::Reset(index) => {
                 self.styles[index] = None;
-                self.on_reset = ctx.props().on_reset.clone();
+                self.on_reset.clone_from(&ctx.props().on_reset);
             },
             SplitPanelMsg::StartResizing(index, client_offset, pointer_id, pointer_elem) => {
                 let elem = self.refs[index].cast::<HtmlElement>().unwrap();
