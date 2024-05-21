@@ -182,31 +182,33 @@ async function update_package_jsons() {
         })) {
             const pkg = JSON.parse(fs.readFileSync(path));
             pkg.version = NEW_VERSION;
+            fs.writeFileSync(path, JSON.stringify(pkg, undefined, 4) + "\n");
             packages[pkg.name] = {
                 pkg,
                 path,
             };
         }
     }
-    for (const pkg_name of Object.keys(packages)) {
-        const { pkg, path } = packages[pkg_name];
-        for (const deptype of [
-            "dependencies",
-            "devDependencies",
-            "peerDependencies",
-        ]) {
-            if (pkg[deptype]) {
-                for (const dep of Object.keys(pkg[deptype])) {
-                    if (packages[dep] !== undefined) {
-                        pkg[deptype][dep] = `^${NEW_VERSION}`;
-                    }
-                }
-            }
-        }
-        const pkg_json = `${JSON.stringify(pkg, undefined, 4)}\n`;
-        fs.writeFileSync(path, pkg_json);
-        sh`git add ${path}`.runSync();
-    }
+
+    // for (const pkg_name of Object.keys(packages)) {
+    //     const { pkg, path } = packages[pkg_name];
+    //     for (const deptype of [
+    //         "dependencies",
+    //         "devDependencies",
+    //         "peerDependencies",
+    //     ]) {
+    //         if (pkg[deptype]) {
+    //             for (const dep of Object.keys(pkg[deptype])) {
+    //                 if (packages[dep] !== undefined) {
+    //                     pkg[deptype][dep] = `^${NEW_VERSION}`;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     const pkg_json = `${JSON.stringify(pkg, undefined, 4)}\n`;
+    //     fs.writeFileSync(path, pkg_json);
+    //     sh`git add ${path}`.runSync();
+    // }
 }
 
 await update_changelog();

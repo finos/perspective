@@ -1,7 +1,7 @@
 {
     "name": "workspace",
     "private": true,
-    "version": "2.10.0",
+    "version": "2.10.1",
     "description": "An example app built using `@finos/perspective-workspace`.",
     "scripts": {
         "start": "webpack serve --open",

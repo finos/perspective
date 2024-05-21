@@ -1,7 +1,7 @@
 {
     "name": "webpack-cross-origin",
     "private": true,
-    "version": "2.10.0",
+    "version": "2.10.1",
     "description": "An example of using the Perspective Webpack plugin to build a JS file with Webpack.",
     "scripts": {
         "start": "npm-run-all -l -p webpack-watch host:app host:bundles",

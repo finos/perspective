@@ -1096,7 +1096,7 @@ jobs:
               with:
                   name: perspective-python-sdist
                   path: python/perspective/dist/*.tar.gz
-              if: ${{ matrix.os == 'macos-11' }}
+              if: ${{ matrix.os == 'macos-11' && matrix.python-version == 3.8 }}
 
     build_pyodide:
         strategy:
@@ -1661,7 +1661,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pnpm rin _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1725,7 +1725,20 @@ jobs:
         steps:
             - uses: actions/checkout@v2
 
-            # TODO: `actions/upload-artifact` succedds with a warning when the
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
+              with:
+                  version: 9
+
+            ################
+            # JS
+            - name: Install js dependencies
+              run: pnpm install
+              env:
+                  PSP_SKIP_EMSDK_INSTALL:
+                      1
+
+                      # TODO: `actions/upload-artifact` succedds with a warning when the
             # path is empty, but `actions/downlaod-artifact` fails, and 3 JS
             # packages have no `dist`.
 

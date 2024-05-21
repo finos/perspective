@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-test",
-    "version": "2.10.0",
+    "version": "2.10.1",
     "description": "Test utility based on perspective",
     "private": true,
     "main": "src/js/index",

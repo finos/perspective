@@ -1,3 +1,19 @@
+# [v2.10.1](https://github.com/finos/perspective/releases/tag/v2.10.1)
+
+_20 May 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.10.0...v2.10.1))
+
+Fixes
+
+- Fix `delete()` Python async call not resolving [#2610](https://github.com/finos/perspective/pull/2610)
+- Fix intermittent `to_arrow()` error in Python [#2608](https://github.com/finos/perspective/pull/2608)
+- Fix compatibility with other MSVC versions by explicitly converting to string [#2570](https://github.com/finos/perspective/pull/2570)
+
+Misc
+
+- Developer clean-up [#2623](https://github.com/finos/perspective/pull/2623)
+- Update contributing documentation for DCO [#2595](https://github.com/finos/perspective/pull/2595)
+- Update to pyodide 0.25.1 for pyodide/pyodide#4655 [#2596](https://github.com/finos/perspective/pull/2596)
+
 # [v2.10.0](https://github.com/finos/perspective/releases/tag/v2.10.0)
 
 _25 March 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.9.0...v2.10.0))
