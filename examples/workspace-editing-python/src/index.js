@@ -83,7 +83,8 @@ const datasource = async function () {
  */
 const setup_handlers = async () => {
     const viewers = window.workspace.querySelectorAll("perspective-viewer");
-    const client_table = viewers[0].table;
+    const server_table = await server_table_promise;
+    const client_table = await viewers[0].getTable();
     const client_view = await client_table.view();
 
     for (const viewer of viewers) {
