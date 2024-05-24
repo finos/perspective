@@ -92,6 +92,7 @@
         "webpack-dev-server": "^4.11.1"
     },
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "postinstall": "npm-run-all postinstall:*",
         "postinstall:emsdk": "node tools/perspective-scripts/install_emsdk.mjs",
         "postinstall:playwright": "npx playwright install --with-deps",
