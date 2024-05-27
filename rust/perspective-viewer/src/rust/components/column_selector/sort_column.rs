@@ -10,17 +10,17 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use perspective_client::config::*;
+use perspective_client::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::containers::dragdrop_list::*;
 use crate::components::type_icon::TypeIcon;
-use crate::config::*;
 use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
-use crate::utils::ApiFuture;
 use crate::*;
 
 /// A `SortColumn` includes the column name and `SortDir` arrow, a clickable
@@ -109,7 +109,7 @@ impl Component for SortColumn {
                 ondragend={dragend}
             >
                 <div class="pivot-column-border">
-                    <TypeIcon ty={Type::String} />
+                    <TypeIcon ty={ColumnType::String} />
                     <span class="column_name">{ ctx.props().sort.0.to_owned() }</span>
                     <span
                         class={format!("sort-icon {}", ctx.props().sort.1)}

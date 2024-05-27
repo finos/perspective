@@ -10,9 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { test, expect } = require("@finos/perspective-test");
-const path = require("path");
-const { host } = require("../../src/js/index.js");
+import { test, expect } from "@finos/perspective-test";
+import * as path from "node:path";
+import { host } from "../../src/js/index.js";
+import * as url from "url";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
 test.describe("CLI", function () {
     let server, port;

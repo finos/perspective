@@ -1,0 +1,60 @@
+{
+    "name": "@finos/perspective",
+    "version": "2.10.1",
+    "description": "",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective"
+    },
+    "type": "module",
+    "license": "Apache-2.0",
+    "unpkg": "dist/cdn/perspective.js",
+    "jsdelivr": "dist/cdn/perspective.js",
+    "exports": {
+        ".": {
+            "node": {
+                "types": "./dist/esm/perspective.node.d.ts",
+                "default": "./dist/esm/perspective.node.js"
+            },
+            "types": "./dist/esm/perspective.d.ts",
+            "default": "./dist/esm/perspective.js"
+        },
+        "./node": {
+            "types": "./dist/esm/perspective.node.d.ts",
+            "default": "./dist/esm/perspective.node.js"
+        },
+        "./dist/*": "./dist/*",
+        "./src/*": "./src/*",
+        "./test/*": "./test/*",
+        "./package.json": "./package.json",
+        "./tsconfig.json": "./tsconfig.json"
+    },
+    "files": [
+        "dist/**/*",
+        "src/**/*",
+        "tsconfig.json"
+    ],
+    "types": "./dist/esm/perspective.d.ts",
+    "scripts": {
+        "build": "node ./build.js",
+        "clean": "rimraf dist && rimraf build"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "ws": "^8.17.0",
+        "stoppable": "^1.1.0"
+    },
+    "devDependencies": {
+        "@finos/perspective-cpp": "workspace:^",
+        "@finos/perspective-esbuild-plugin": "workspace:^",
+        "@finos/perspective-test": "workspace:^",
+        "@types/stoppable": "^1.1.0",
+        "@types/ws": "^8.5.10",
+        "cpy": "^9.0.1",
+        "lodash": "^4.17.21",
+        "moment": "^2.30.1",
+        "underscore": "^1.13.6"
+    }
+}

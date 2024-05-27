@@ -15,7 +15,7 @@ import sh from "./sh.mjs";
 
 dotenv.config({ path: "./.perspectiverc" });
 
-if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
+if (true) {
     sh`pnpm run --recursive --filter perspective-bench bench`.runSync();
 } else {
     sh`PYTHONPATH=python/perspective nice -n 0 python3 python/perspective/bench/runtime/run_perspective_benchmark.py`

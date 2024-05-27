@@ -40,7 +40,7 @@
 
             const datasource = async () => {
                 const request = fetch(DATA_URL);
-                const worker = perspective.worker();
+                const worker = await perspective.worker();
                 const response = await request;
                 const buffer = await response.arrayBuffer();
                 return await worker.table(buffer);

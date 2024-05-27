@@ -15,8 +15,9 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use strum::EnumIter;
+use ts_rs::TS;
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, EnumIter, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, EnumIter, PartialEq, Serialize, TS)]
 pub enum StringColorMode {
     #[default]
     #[serde(rename = "none")]
@@ -65,7 +66,7 @@ impl StringColorMode {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, EnumIter, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, EnumIter, Eq, PartialEq, Serialize, TS)]
 pub enum FormatMode {
     #[default]
     #[serde(rename = "none")]
@@ -118,7 +119,7 @@ impl FormatMode {
     }
 }
 
-#[derive(Debug, Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Eq, PartialEq, Serialize, TS)]
 pub struct StringColumnStyleConfig {
     #[serde(skip_serializing_if = "FormatMode::is_none")]
     #[serde(default)]

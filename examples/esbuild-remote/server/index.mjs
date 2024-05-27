@@ -10,27 +10,42 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { WebSocketManager, perspective_assets } from "@finos/perspective";
-import path from "path";
+import psp, {
+    cwd_static_file_handler,
+    make_sync_session,
+} from "@finos/perspective";
 import express from "express";
 import expressWs from "express-ws";
-import { securities } from "../../datasources/index.js";
+import * as securities from "../../datasources/index.mjs";
 
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+// node buffer -> JS buffer
+function buffer_to_arraybuffer(buffer) {
+    return new Int8Array(
+        buffer.buffer.slice(
+            buffer.byteOffset,
+            buffer.byteOffset + buffer.length
+        )
+    );
+}
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Don't need this table since it won't be read from node itself, just need
+// to create it so the WebSocket clients can find it.
+const _table = await securities.securities.getTable();
 
-console.log(path.resolve(__dirname, "../dist"));
-
+// const w = await psp.worker();
 const app = expressWs(express()).app;
+app.ws("/subscribe", async (ws) => {
+    const session = await make_sync_session(async (proto) => {
+        await ws.send(buffer_to_arraybuffer(proto));
+    });
 
-const manager = new WebSocketManager();
-securities().then((table) => manager.host_table("remote_table", table));
+    ws.on("message", (proto) => {
+        const x = session.handle_request(buffer_to_arraybuffer(proto));
+        return x;
+    });
+});
 
-app.ws("/subscribe", (ws) => manager.add_connection(ws));
-app.use("/", perspective_assets([path.resolve(__dirname, "../dist")], true));
+app.use("/", (x, y) => cwd_static_file_handler(x, y, ["dist/"]));
 
 const server = app.listen(8080, () =>
     console.log(`Listening on port ${server.address().port}`)

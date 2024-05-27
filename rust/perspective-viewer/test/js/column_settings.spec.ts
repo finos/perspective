@@ -139,7 +139,15 @@ test.describe("Plugin Styles", () => {
             // @ts-ignore
             window.__TEST_TABLE__.update({ x: [1] });
         });
-        await page.locator("tbody tr").nth(1).waitFor();
+
+        await page.waitForFunction(() => {
+            return (
+                document
+                    .querySelector("perspective-viewer-datagrid")
+                    ?.shadowRoot?.querySelectorAll("tbody tr").length! >= 1
+            );
+        });
+
         await expect(view.columnSettingsSidebar.container).toBeVisible();
     });
 

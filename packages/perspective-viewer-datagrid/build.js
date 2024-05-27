@@ -10,10 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const {
-    NodeModulesExternal,
-} = require("@finos/perspective-esbuild-plugin/external");
-const { build } = require("@finos/perspective-esbuild-plugin/build");
+import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
+import { build } from "@finos/perspective-esbuild-plugin/build.js";
+import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
+import * as fs from "node:fs";
+import * as path_mod from "node:path";
 
 const BUILD = [
     {
@@ -44,9 +45,6 @@ const BUILD = [
     },
 ];
 
-const { BuildCss } = require("@prospective.co/procss/target/cjs/procss.js");
-const fs = require("fs");
-const path_mod = require("path");
 function add(builder, path) {
     builder.add(
         path,

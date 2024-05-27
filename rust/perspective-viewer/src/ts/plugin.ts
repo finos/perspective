@@ -10,7 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import type * as perspective from "@finos/perspective";
+import { JsView } from "@finos/perspective";
+
+// import type * as perspective from "@finos/perspective";
 
 /**
  * The `IPerspectiveViewerPlugin` interface defines the necessary API for a
@@ -98,17 +100,14 @@ export interface IPerspectiveViewerPlugin {
      * and its view type, determines whether or not to render column styles in the settings sidebar.
      * Implementing this function and `column_style_config` allows the plugin to interface with the viewer's column configuration API.
      */
-    can_render_column_styles?: (
-        view_type: perspective.Type,
-        group: string
-    ) => boolean;
+    can_render_column_styles?: (view_type: string, group: string) => boolean;
 
     /**
      * Determines which column configuration controls are populated in the viewer.
      * Corresponds to the data the plugin will recieve on save.
      * Implementing this function and `can_render_column_styles` allows the plugin to interface with the viewer's column configuration API.
      */
-    column_style_config?: (view_type: perspective.Type, group: string) => any;
+    column_style_config?: (view_type: string, group: string) => any;
 
     /**
      * Render this plugin using the provided `View`.  While there is no
@@ -123,7 +122,7 @@ export interface IPerspectiveViewerPlugin {
      * }
      * ```
      */
-    draw(view: perspective.View): Promise<void>;
+    // draw(view: perspective.View): Promise<void>;
 
     /**
      * Draw under the assumption that the `ViewConfig` has not changed since
@@ -137,7 +136,7 @@ export interface IPerspectiveViewerPlugin {
      * }
      * ```
      */
-    update(view: perspective.View): Promise<void>;
+    // update(view: perspective.View): Promise<void>;
 
     /**
      * Clear this plugin, though it is up to the discretion of the plugin
@@ -243,11 +242,11 @@ export class HTMLPerspectiveViewerPluginElement
         }
     }
 
-    async update(view: perspective.View): Promise<void> {
+    async update(view: JsView): Promise<void> {
         return this.draw(view);
     }
 
-    async draw(view: perspective.View): Promise<void> {
+    async draw(view: JsView): Promise<void> {
         this.style.backgroundColor = "#fff";
         const csv = await view.to_csv();
         const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;

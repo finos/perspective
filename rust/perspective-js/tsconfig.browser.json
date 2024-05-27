@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNext",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "./dist/esm",
+        "rootDir": "./src/ts",
+        "moduleResolution": "bundler",
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "allowImportingTsExtensions": true
+    },
+    "files": ["./src/ts/perspective.node.ts", "./src/ts/perspective.ts"]
+}

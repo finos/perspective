@@ -19,7 +19,8 @@ import tornado.ioloop
 import threading
 import concurrent.futures
 
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
+from perspective.core.globalpsp import shared_client
+from perspective.handlers.new_tornado import PerspectiveTornadoHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -45,24 +46,21 @@ def perspective_thread(manager, table):
         psp_loop.start()
 
 
-def make_app():
+async def init_table():
+    client = await shared_client()
     with open(file_path, mode="rb") as file:
         data = file.read()
-        table = Table(data)
+        table = await client.table(data, name="data_source_one")
         for _ in range(10):
-            table.update(data)
+            await table.update(data)
 
-    manager = PerspectiveManager()
-    thread = threading.Thread(target=perspective_thread, args=(manager, table))
-    thread.daemon = True
-    thread.start()
-
+def make_app():
     return tornado.web.Application(
         [
             (
                 r"/websocket",
                 PerspectiveTornadoHandler,
-                {"manager": manager, "check_origin": True},
+                {},
             ),
             (
                 r"/node_modules/(.*)",
@@ -80,7 +78,8 @@ def make_app():
 
 if __name__ == "__main__":
     app = make_app()
-    app.listen(8080)
+    app.listen(8082)
     logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
+    loop.call_later(0, init_table)
     loop.start()

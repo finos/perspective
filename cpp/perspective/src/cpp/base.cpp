@@ -14,31 +14,13 @@
 #include <perspective/base.h>
 #include <cstdint>
 #include <limits>
-#if defined PSP_ENABLE_WASM
-#include <emscripten.h>
-#else
 #include <perspective/exception.h>
-#endif
 
 namespace perspective {
 
 void
 psp_abort(const std::string& message) {
-#if defined PSP_ENABLE_WASM
-    std::string error = "Abort(): " + message;
-    const char* error_cstr = error.c_str();
-
-    EM_ASM(
-        {
-            // copy string out from heap
-            // https://emscripten.org/docs/api_reference/emscripten.h.html#c.EM_ASM
-            throw new Error(UTF8ToString($0));
-        },
-        error_cstr
-    );
-#else
     throw PerspectiveException(message.c_str());
-#endif
 }
 
 bool
@@ -353,7 +335,7 @@ filter_op_to_str(t_filter_op op) {
             return "endswith";
         } break;
         case FILTER_OP_CONTAINS: {
-            return "in";
+            return "contains";
         } break;
         case FILTER_OP_OR: {
             return "or";
@@ -425,8 +407,9 @@ str_to_filter_op(const std::string& str) {
     if (str == "is not null" || str == "is not None") {
         return t_filter_op::FILTER_OP_IS_NOT_NULL;
     }
+
     std::stringstream ss;
-    ss << "Unknown filter operator string: `" << str << '\n';
+    ss << "Unknown filter operator string: `" << str << "`" << std::endl;
     PSP_COMPLAIN_AND_ABORT(ss.str());
     return t_filter_op::FILTER_OP_AND;
 }
@@ -448,10 +431,35 @@ str_to_sorttype(const std::string& str) {
     if (str == "desc abs" || str == "col desc abs") {
         return SORTTYPE_DESCENDING_ABS;
     }
+
     std::stringstream ss;
-    ss << "Unknown sort type string: `" << str << "\n";
+    ss << "Unknown sort type string: `" << str << std::endl;
     PSP_COMPLAIN_AND_ABORT(ss.str());
     return SORTTYPE_DESCENDING;
+}
+
+std::string
+sorttype_to_str(t_sorttype type) {
+    switch (type) {
+        case SORTTYPE_NONE: {
+            return "none";
+        } break;
+        case SORTTYPE_ASCENDING: {
+            return "asc";
+        } break;
+        case SORTTYPE_DESCENDING: {
+            return "desc";
+        } break;
+        case SORTTYPE_ASCENDING_ABS: {
+            return "asc abs";
+        } break;
+        case SORTTYPE_DESCENDING_ABS: {
+            return "desc abs";
+        } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown sort type");
+        }
+    }
 }
 
 t_aggtype

@@ -71,7 +71,7 @@ class _PerspectiveStateManager(object):
         """
         pool = _PerspectiveStateManager.TO_PROCESS.pop(table_id, None)
         if pool is not None:
-            pool._process()
+            pool._process(None)
 
     def remove_process(self, table_id):
         """Remove a pool from the execution cache, indicating that it should no

@@ -12,11 +12,11 @@
 
 use std::collections::HashSet;
 
+use perspective_client::config::Expression;
 use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::style::LocalStyle;
-use crate::config::Expression;
 use crate::css;
 use crate::custom_elements::ColumnDropDownElement;
 

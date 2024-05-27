@@ -15,8 +15,9 @@ pub use enums::*;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumIter};
+use ts_rs::TS;
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, TS)]
 #[serde(rename_all = "camelCase", tag = "style")]
 pub enum NumberFormatStyle {
     #[default]
@@ -26,7 +27,7 @@ pub enum NumberFormatStyle {
     Unit(UnitNumberFormatStyle),
 }
 
-#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase")]
 pub enum CurrencyDisplay {
     Code,
@@ -36,7 +37,7 @@ pub enum CurrencyDisplay {
     Name,
 }
 
-#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase")]
 pub enum CurrencySign {
     #[default]
@@ -45,7 +46,7 @@ pub enum CurrencySign {
 }
 
 #[skip_serializing_none]
-#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, PartialEq, Clone, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct CurrencyNumberFormatStyle {
     #[serde(default)]
@@ -54,7 +55,7 @@ pub struct CurrencyNumberFormatStyle {
     pub currency_sign: Option<CurrencySign>,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase")]
 pub enum UnitDisplay {
     #[default]
@@ -64,7 +65,7 @@ pub enum UnitDisplay {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct UnitNumberFormatStyle {
     #[serde(default)]
@@ -72,7 +73,7 @@ pub struct UnitNumberFormatStyle {
     pub unit_display: Option<UnitDisplay>,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase")]
 pub enum RoundingPriority {
     #[default]
@@ -81,7 +82,7 @@ pub enum RoundingPriority {
     LessPrecision,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase")]
 pub enum RoundingMode {
     Ceil,
@@ -96,7 +97,7 @@ pub enum RoundingMode {
     HalfEven,
 }
 
-#[derive(Default, Debug, PartialEq, Clone)]
+#[derive(Default, Debug, PartialEq, Clone, TS)]
 pub enum RoundingIncrement {
     #[default]
     Auto,
@@ -115,7 +116,7 @@ pub const ROUNDING_INCREMENTS: [f64; 15] = [
     1., 2., 5., 10., 20., 25., 50., 100., 200., 250., 500., 1000., 2000., 2500., 5000.,
 ];
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase")]
 pub enum TrailingZeroDisplay {
     #[default]
@@ -123,7 +124,7 @@ pub enum TrailingZeroDisplay {
     StripIfInteger,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, TS)]
 #[serde(rename_all = "camelCase", tag = "notation")]
 pub enum Notation {
     #[default]
@@ -133,7 +134,7 @@ pub enum Notation {
     Compact(CompactDisplay),
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase", tag = "compactDisplay")]
 pub enum CompactDisplay {
     #[default]
@@ -141,7 +142,7 @@ pub enum CompactDisplay {
     Long,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "snake_case")]
 pub enum UseGrouping {
     Always,
@@ -154,7 +155,7 @@ pub enum UseGrouping {
     False(bool),
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Clone, Copy, EnumIter, Display, TS)]
 #[serde(rename_all = "camelCase")]
 pub enum SignDisplay {
     #[default]
@@ -166,10 +167,11 @@ pub enum SignDisplay {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, Clone, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct CustomNumberFormatConfig {
     #[serde(flatten)]
+    #[ts(skip)]
     pub _style: Option<NumberFormatStyle>,
 
     // see Digit Options
@@ -191,6 +193,7 @@ pub struct CustomNumberFormatConfig {
     pub trailing_zero_display: Option<TrailingZeroDisplay>,
 
     #[serde(flatten)]
+    #[ts(skip)]
     pub _notation: Option<Notation>,
     pub use_grouping: Option<UseGrouping>,
     pub sign_display: Option<SignDisplay>,

@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use perspective_client::config::ViewConfigUpdate;
 use yew::prelude::*;
 
 use super::containers::select::*;
@@ -56,7 +57,6 @@ impl Component for PluginSelector {
     type Properties = PluginSelectorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        enable_weak_link_test!(ctx.props(), ctx.link());
         let options = generate_plugin_optgroups(&ctx.props().renderer);
         let _plugin_sub = ctx.props().renderer.plugin_changed.add_listener({
             let link = ctx.link().clone();

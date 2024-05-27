@@ -79,7 +79,7 @@ pub trait RestoreAndRender: HasRenderer + HasSession + HasPresentation {
                 task.await?;
                 let plugin = renderer.get_active_plugin()?;
                 let plugin_update = if let Some(x) = plugin_config {
-                    JsValue::from_serde_ext(&x).unwrap()
+                    wasm_bindgen::JsValue::from_serde_ext(&*x).unwrap()
                 } else {
                     plugin.save()
                 };

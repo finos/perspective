@@ -96,7 +96,7 @@ async function main() {
     const schema = {
         name: "string",
         manaCost: "string",
-        convertedManaCost: "integer",
+        convertedManaCost: "float",
         types: "string",
         colorIdentity: "string",
         text: "string",
@@ -114,7 +114,7 @@ async function main() {
         colors_2: "string",
         colors_3: "string",
         edhrecRank: "integer",
-        edhrecSaltiness: "integer",
+        edhrecSaltiness: "float",
         finishes: "string",
         finishes_0: "string",
         flavorText: "string",

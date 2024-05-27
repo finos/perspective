@@ -14,10 +14,13 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter};
+use ts_rs::TS;
 
 use crate::*;
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Display, EnumIter, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Display, EnumIter, Eq, PartialEq, Serialize, TS,
+)]
 pub enum NumberForegroundMode {
     #[serde(rename = "disabled")]
     Disabled,
@@ -56,7 +59,9 @@ impl NumberForegroundMode {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Display, EnumIter, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Display, EnumIter, Eq, PartialEq, Serialize, TS,
+)]
 pub enum NumberBackgroundMode {
     #[default]
     #[serde(rename = "disabled")]
@@ -82,7 +87,7 @@ impl NumberBackgroundMode {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq, TS)]
 pub struct NumberColumnStyleConfig {
     #[serde(default = "NumberForegroundMode::default")]
     #[serde(skip_serializing_if = "NumberForegroundMode::is_color")]

@@ -127,7 +127,6 @@ impl Component for EditableHeader {
 
                 self.value.clone_from(&maybe_value);
                 ctx.props().on_change.emit((maybe_value, self.valid));
-
                 true
             },
             EditableHeaderMsg::OnClick(()) => {

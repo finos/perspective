@@ -8,6 +8,7 @@
         "./dist/*": "./dist/*",
         "./package.json": "./package.json"
     },
+    "type": "module",
     "files": [
         "dist/**/*",
         "index.d.ts"

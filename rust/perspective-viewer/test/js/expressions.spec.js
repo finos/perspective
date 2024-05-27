@@ -34,7 +34,9 @@ async function checkSaveDisabled(page, expr) {
 }
 
 test.beforeEach(async ({ page }) => {
-    await page.goto("/@finos/perspective-viewer/test/html/superstore.html");
+    await page.goto(
+        "/node_modules/@finos/perspective-viewer/test/html/superstore.html"
+    );
     await page.evaluate(async () => {
         while (!window["__TEST_PERSPECTIVE_READY__"]) {
             await new Promise((x) => setTimeout(x, 10));

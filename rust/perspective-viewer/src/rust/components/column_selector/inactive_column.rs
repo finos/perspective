@@ -11,20 +11,19 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use itertools::Itertools;
+use perspective_client::config::*;
 use web_sys::*;
 use yew::prelude::*;
 
 use super::expression_toolbar::*;
 use crate::components::type_icon::TypeIcon;
 use crate::components::viewer::ColumnLocator;
-use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
 use crate::model::*;
 use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
-use crate::utils::ApiFuture;
 use crate::*;
 
 #[derive(Properties, Clone)]

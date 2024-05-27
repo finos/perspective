@@ -17,11 +17,11 @@
 namespace perspective {
 
 #ifdef PSP_ENABLE_PYTHON
-PerspectiveGILUnlock::PerspectiveGILUnlock() :
-    m_thread_state(PyEval_SaveThread()) {}
+PerspectiveGILUnlock::PerspectiveGILUnlock() {}
+// m_thread_state(PyEval_SaveThread()) {}
 
 PerspectiveGILUnlock::~PerspectiveGILUnlock() {
-    PyEval_RestoreThread(m_thread_state);
+    // PyEval_RestoreThread(m_thread_state);
 }
 #endif
 

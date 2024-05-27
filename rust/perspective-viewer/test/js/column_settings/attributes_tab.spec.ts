@@ -32,16 +32,17 @@ test.describe("Attributes Tab", () => {
             expressions: { expr: "12345" },
             columns: ["expr"],
         });
+
         let expr = await view.settingsPanel.activeColumns.getColumnByName(
             "expr"
         );
-        await expr.editBtn.click();
 
+        await expr.editBtn.click();
         let input = view.columnSettingsSidebar.nameInput;
         await view.columnSettingsSidebar.openTab("Style");
-        expect(input).toBeDisabled();
+        await expect(input).toBeDisabled();
         await view.columnSettingsSidebar.openTab("Attributes");
-        expect(input).toBeEnabled();
+        await expect(input).toBeEnabled();
     });
     test("Empty expression names", async ({ page }) => {
         // Setup

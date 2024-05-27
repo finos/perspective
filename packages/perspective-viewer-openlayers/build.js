@@ -10,10 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const {
-    NodeModulesExternal,
-} = require("@finos/perspective-esbuild-plugin/external");
-const { build } = require("@finos/perspective-esbuild-plugin/build");
+import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
+import { build } from "@finos/perspective-esbuild-plugin/build.js";
+import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
+import * as fs from "node:fs";
+import * as path_mod from "node:path";
+import { createRequire } from "node:module";
+
+const _require = createRequire(import.meta.url);
 
 const BUILD = [
     {
@@ -36,16 +40,12 @@ const BUILD = [
     },
 ];
 
-const { BuildCss } = require("@prospective.co/procss/target/cjs/procss.js");
-const fs = require("fs");
-const path_mod = require("path");
-
 async function compile_css() {
     fs.mkdirSync("dist/css", { recursive: true });
     const builder = new BuildCss("");
     builder.add(
         "ol/ol.css",
-        fs.readFileSync(require.resolve("ol/ol.css")).toString()
+        fs.readFileSync(_require.resolve("ol/ol.css")).toString()
     );
     builder.add(
         "./plugin.less",

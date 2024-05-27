@@ -3,8 +3,9 @@
     "version": "2.10.1",
     "description": "Test utility based on perspective",
     "private": true,
-    "main": "src/js/index",
-    "module": "src/js/index",
+    "main": "src/js/index.ts",
+    "module": "src/js/index.ts",
+    "type": "module",
     "files": [
         "src/**/*"
     ],

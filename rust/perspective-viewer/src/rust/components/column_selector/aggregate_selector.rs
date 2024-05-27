@@ -10,15 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use perspective_client::config::*;
 use yew::prelude::*;
 
 use crate::components::containers::select::*;
 use crate::components::style::LocalStyle;
-use crate::config::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
-use crate::utils::ApiFuture;
 use crate::*;
 
 #[derive(Properties)]

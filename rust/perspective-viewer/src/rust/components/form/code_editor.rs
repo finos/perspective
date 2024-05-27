@@ -12,6 +12,7 @@
 
 use std::rc::Rc;
 
+use perspective_client::ExprValidationError;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
@@ -20,7 +21,6 @@ use crate::components::form::highlight::highlight;
 use crate::components::style::LocalStyle;
 use crate::custom_elements::FunctionDropDownElement;
 use crate::exprtk::{tokenize, Cursor};
-use crate::js::PerspectiveValidationError;
 use crate::utils::*;
 use crate::*;
 
@@ -44,7 +44,7 @@ pub struct CodeEditorProps {
     pub select_all: Subscriber<()>,
 
     #[prop_or_default]
-    pub error: Option<PerspectiveValidationError>,
+    pub error: Option<ExprValidationError>,
 }
 
 /// Capture the input (for re-parse) and caret position whenever the input
@@ -217,7 +217,7 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
         },
     );
 
-    let error_line = props.error.as_ref().map(|x| x.line as usize);
+    let error_line = props.error.as_ref().map(|x| x.line);
     let line_numbers = cursor
         .map_rows(|x| html!(
             <span

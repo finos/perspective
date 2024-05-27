@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "NodeNext",
+        "target": "ESNext",
+        "declaration": true,
+        "diagnostics": true,
+        "emitDeclarationOnly": true,
+        "outDir": "dist/esm",
+        "rootDir": ".",
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "NodeNext",
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "allowImportingTsExtensions": true
+    },
+    "files": ["./src/js/index.ts"]
+}

@@ -30,6 +30,13 @@ const SCHEMA = {
     status: "string",
 };
 
+async function query_columns(table, config) {
+    const view = await table.view(config);
+    const columns = await view.to_columns();
+    await view.delete();
+    return columns;
+}
+
 class OrderBook {
     constructor(table, side) {
         this._memo = undefined;
@@ -59,7 +66,7 @@ class OrderBook {
     async matched_orders(price) {
         const sort_dir = this._side === "buy" ? "desc" : "asc";
         const op = this._side === "buy" ? ">" : "<";
-        return await this._table.query_columns({
+        return await query_columns(this._table, {
             columns: ["id"],
             filter: [
                 ["side", "==", this._side],
@@ -173,7 +180,7 @@ class Market {
     }
 
     async _expire_trades() {
-        const expired = await this._table.query_columns({
+        const expired = await query_columns(this._table, {
             columns: ["id"],
             filter: [
                 ["status", "==", "open"],
@@ -234,8 +241,8 @@ async function reset_tables(market, market_table, gui_table) {
 }
 
 async function init_tables() {
-    const market_worker = perspective.worker();
-    const gui_worker = perspective.worker();
+    const market_worker = await perspective.worker();
+    const gui_worker = await perspective.worker();
     const market_table = await market_worker.table(SCHEMA, { index: "id" });
     const market_view = await market_table.view();
     const gui_table = await gui_worker.table(market_view, { index: "id" });

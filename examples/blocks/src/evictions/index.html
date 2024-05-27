@@ -24,7 +24,7 @@
         <script type="module">
             import { worker } from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-            const WORKER = worker();
+            const WORKER = await worker();
             const URL = `https://data.sfgov.org/resource/5cei-gny5.csv?$limit=50000`;
 
             async function get_evictions() {

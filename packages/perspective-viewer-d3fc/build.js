@@ -10,12 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const {
-    NodeModulesExternal,
-} = require("@finos/perspective-esbuild-plugin/external");
-const { build } = require("@finos/perspective-esbuild-plugin/build");
-const util = require("node:util");
-const execSync = util.promisify(require("node:child_process").execSync);
+import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
+import { build } from "@finos/perspective-esbuild-plugin/build.js";
+import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
+import { promisify } from "node:util";
+import { execSync } from "node:child_process";
+import * as fs from "node:fs";
+import * as path_mod from "node:path";
+
+const exec = promisify(execSync);
 
 const BUILD = [
     {
@@ -72,9 +75,6 @@ const BUILD = [
     },
 ];
 
-const { BuildCss } = require("@prospective.co/procss/target/cjs/procss.js");
-const fs = require("fs");
-const path_mod = require("path");
 function add(builder, path) {
     builder.add(
         path,
@@ -103,7 +103,7 @@ async function build_all() {
     // esbuild can handle typescript files, and strips out types from the output,
     // but it is unable to check types, so we must run tsc as a separate step.
     try {
-        await execSync("tsc", { stdio: "inherit" });
+        await exec("tsc", { stdio: "inherit" });
     } catch (error) {
         console.error(error);
         // tsc errors tend to get buried when running multiple package builds. If

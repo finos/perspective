@@ -13,10 +13,9 @@
 use std::sync::LazyLock;
 
 use js_sys::Intl;
+use perspective_js::json;
+use perspective_js::utils::global::navigator;
 use wasm_bindgen::JsValue;
-
-use super::global::navigator;
-use crate::json;
 
 pub trait ToFormattedString {
     fn to_formatted_string(&self) -> String;

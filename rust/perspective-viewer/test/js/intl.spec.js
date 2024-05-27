@@ -13,6 +13,10 @@
 import { PageView as PspViewer } from "@finos/perspective-test";
 import { expect, test } from "@finos/perspective-test";
 import fs from "node:fs";
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 test.describe("Localization", function () {
     test.beforeEach(async ({ page }) => {

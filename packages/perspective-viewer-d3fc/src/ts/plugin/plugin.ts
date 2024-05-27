@@ -14,15 +14,12 @@ import "./polyfills/index";
 import charts from "../charts/charts";
 import { initialiseStyles } from "../series/colorStyles";
 import style from "../../../dist/css/perspective-viewer-d3fc.css";
-import {
-    PerspectiveColumnConfig,
-    HTMLPerspectiveViewerElement,
-} from "@finos/perspective-viewer";
+import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
+import type * as psp_types from "@finos/perspective-viewer";
 
 import * as d3 from "d3";
 import { symbolsObj } from "../series/seriesSymbols";
-import { Chart, Settings } from "../types";
-import { Type } from "@finos/perspective";
+import { Chart, Settings, Type } from "../types";
 
 const DEFAULT_PLUGIN_SETTINGS = {
     initial: {
@@ -576,7 +573,7 @@ export function register(...plugin_names: string[]) {
 
                     restore(
                         settings: Settings,
-                        columns_config: PerspectiveColumnConfig
+                        columns_config: psp_types.ColumnConfigValues
                     ) {
                         const new_settings: Partial<Settings> = {};
                         for (const name of EXCLUDED_SETTINGS) {

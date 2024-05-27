@@ -13,8 +13,6 @@
 #pragma once
 
 #include <perspective/binding.h>
-#include <emscripten.h>
-#include <emscripten/bind.h>
 
 #ifdef PSP_ENABLE_WASM
 #include <emscripten/val.h>

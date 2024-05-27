@@ -15,6 +15,8 @@ use std::rc::Rc;
 
 use derivative::Derivative;
 use itertools::Itertools;
+use perspective_client::config::Expression;
+use perspective_client::ColumnType;
 use yew::{html, Callback, Component, Html, Properties};
 
 use super::attributes_tab::AttributesTabProps;
@@ -29,7 +31,6 @@ use crate::components::expression_editor::ExpressionEditorProps;
 use crate::components::style::LocalStyle;
 use crate::components::type_icon::TypeIconType;
 use crate::components::viewer::ColumnLocator;
-use crate::config::{Expression, Type};
 use crate::custom_events::CustomEvents;
 use crate::model::*;
 use crate::presentation::Presentation;
@@ -106,7 +107,7 @@ pub struct ColumnSettingsSidebar {
     reset_enabled: bool,
     reset_count: u8,
     column_name: String,
-    maybe_ty: Option<Type>,
+    maybe_ty: Option<ColumnType>,
     tabs: Vec<ColumnSettingsTab>,
 
     on_input: Callback<Rc<String>>,

@@ -20,7 +20,7 @@ test.describe("Bar Tests", () => {
     test.describe("Y Bar", () => {
         test.beforeEach(async ({ page }) => {
             await page.goto(
-                "/@finos/perspective-test/src/html/basic-test.html"
+                "/node_modules/@finos/perspective-test/src/html/basic-test.html"
             );
             await page.evaluate(async () => {
                 while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -47,7 +47,7 @@ test.describe("Bar Tests", () => {
     test.describe("X Bar", () => {
         test.beforeEach(async ({ page }) => {
             await page.goto(
-                "/@finos/perspective-test/src/html/basic-test.html"
+                "/node_modules/@finos/perspective-test/src/html/basic-test.html"
             );
             await page.evaluate(async () => {
                 while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -73,7 +73,7 @@ test.describe("Bar Tests", () => {
     test.describe("Y Bar (Themed)", () => {
         test.beforeEach(async ({ page }) => {
             await page.goto(
-                "/@finos/perspective-test/src/html/themed-test.html"
+                "/node_modules/@finos/perspective-test/src/html/themed-test.html"
             );
             await page.evaluate(async () => {
                 while (!window["__TEST_PERSPECTIVE_READY__"]) {

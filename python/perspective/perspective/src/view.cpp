@@ -177,7 +177,7 @@ namespace binding {
 
         bool column_only = false;
 
-        // make sure that primary keys are created for column-only views
+        // // make sure that primary keys are created for column-only views
         if (row_pivots.size() == 0 && column_pivots.size() > 0) {
             row_pivots.push_back("psp_okey");
             column_only = true;
@@ -328,7 +328,7 @@ namespace binding {
         // Use a copy of the table schema that we can freely mutate during
         // `make_view_config` and pass into the context constructors.
         std::shared_ptr<t_schema> schema =
-            std::make_shared<t_schema>(table->get_schema());
+            std::make_shared<t_schema>(table->get_gnode()->get_output_schema());
 
         // Pass the gnode into `make_view_config` so we can use its vocab to
         // validate expressions.
@@ -415,7 +415,7 @@ namespace binding {
         std::shared_ptr<std::string> str;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             str = view->to_arrow(
                 start_row, end_row, start_col, end_col, true, compress
             );
@@ -435,7 +435,7 @@ namespace binding {
         std::shared_ptr<std::string> str;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             str = view->to_arrow(
                 start_row, end_row, start_col, end_col, true, compress
             );
@@ -455,7 +455,7 @@ namespace binding {
         std::shared_ptr<std::string> str;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             str = view->to_arrow(
                 start_row, end_row, start_col, end_col, true, compress
             );
@@ -475,7 +475,7 @@ namespace binding {
         std::shared_ptr<std::string> str;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             str = view->to_arrow(
                 start_row, end_row, start_col, end_col, true, compress
             );
@@ -492,7 +492,7 @@ namespace binding {
         std::int32_t end_col
     ) {
         PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
+        PSP_READ_LOCK(*view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
@@ -505,7 +505,7 @@ namespace binding {
         std::int32_t end_col
     ) {
         PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
+        PSP_READ_LOCK(*view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
@@ -518,7 +518,7 @@ namespace binding {
         std::int32_t end_col
     ) {
         PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
+        PSP_READ_LOCK(*view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
@@ -531,7 +531,7 @@ namespace binding {
         std::int32_t end_col
     ) {
         PSP_GIL_UNLOCK();
-        PSP_READ_LOCK(view->get_lock());
+        PSP_READ_LOCK(*view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
@@ -545,7 +545,7 @@ namespace binding {
         std::shared_ptr<std::string> arrow;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             std::shared_ptr<t_data_slice<t_ctxunit>> slice =
                 view->get_row_delta();
             arrow = view->data_slice_to_arrow(slice, false, false);
@@ -558,7 +558,7 @@ namespace binding {
         std::shared_ptr<std::string> arrow;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             std::shared_ptr<t_data_slice<t_ctx0>> slice = view->get_row_delta();
             arrow = view->data_slice_to_arrow(slice, false, false);
         }
@@ -570,7 +570,7 @@ namespace binding {
         std::shared_ptr<std::string> arrow;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             std::shared_ptr<t_data_slice<t_ctx1>> slice = view->get_row_delta();
             arrow = view->data_slice_to_arrow(slice, false, false);
         }
@@ -582,7 +582,7 @@ namespace binding {
         std::shared_ptr<std::string> arrow;
         {
             PSP_GIL_UNLOCK();
-            PSP_READ_LOCK(view->get_lock());
+            PSP_READ_LOCK(*view->get_lock());
             std::shared_ptr<t_data_slice<t_ctx2>> slice = view->get_row_delta();
             arrow = view->data_slice_to_arrow(slice, false, false);
         }

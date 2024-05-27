@@ -13,8 +13,15 @@
 import { Project, defineConfig, devices } from "@playwright/test";
 import path from "path";
 import * as dotenv from "dotenv";
+import { createRequire } from "node:module";
+import url from "node:url";
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: "./.perspectiverc" });
+
+Error.stackTraceLimit = Infinity;
 
 // TODO Don't hardcode this. AFAICT this can only be accomplished by choosing
 // the port before calling the playwright CLI, via env var.
@@ -81,11 +88,11 @@ const BROWSER_PACKAGES = [
 const NODE_PACKAGES = [
     {
         packageName: "perspective",
-        testDir: "packages/perspective/test/js",
+        testDir: "rust/perspective-js/test/js",
     },
     {
         packageName: "perspective-tz",
-        testDir: "packages/perspective/test/tz",
+        testDir: "rust/perspective-js/test/tz",
     },
 ];
 
@@ -152,6 +159,16 @@ const PROJECTS = (() => {
     return acc;
 })();
 
+const __require = createRequire(import.meta.url);
+
+const GLOBAL_SETUP_PATH = __require.resolve(
+    "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
+);
+
+const GLOBAL_TEARDOWN_PATH = __require.resolve(
+    "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
+);
+
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
     timeout: 30_000,
@@ -167,24 +184,20 @@ export default defineConfig({
     use: {
         viewport: { width: 1280, height: 720 },
         actionTimeout: 0,
-        trace: "retain-on-failure",
-        screenshot: "only-on-failure",
-        video: "retain-on-failure",
+        // trace: "retain-on-failure",
+        // screenshot: "only-on-failure",
+        // video: "retain-on-failure",
     },
     globalSetup: RUN_JUPYTERLAB
-        ? require.resolve(
-              "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
-          )
+        ? GLOBAL_SETUP_PATH
         : path.join(__dirname, "src/js/global_startup.ts"),
     globalTeardown: RUN_JUPYTERLAB
-        ? require.resolve(
-              "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
-          )
+        ? GLOBAL_TEARDOWN_PATH
         : path.join(__dirname, "src/js/global_teardown.ts"),
     snapshotPathTemplate:
         "dist/snapshots/{projectName}/{testFilePath}/{arg}{ext}",
     webServer: {
-        command: "yarn ts-node src/js/start_test_server.ts",
+        command: "node --loader ts-node/esm src/js/start_test_server.ts",
         port: TEST_SERVER_PORT,
         reuseExistingServer: true,
         stdout: "pipe",

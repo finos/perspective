@@ -15,8 +15,9 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use strum::EnumIter;
+use ts_rs::TS;
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, EnumIter, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, EnumIter, Eq, PartialEq, Serialize, TS)]
 pub enum SimpleDatetimeFormat {
     #[serde(rename = "full")]
     Full,

@@ -10,15 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use perspective_client::config::{Expression, ViewConfigUpdate};
+
 use super::structural::*;
 use super::UpdateAndRender;
 use crate::components::column_settings_sidebar::ColumnSettingsTab;
 use crate::components::viewer::ColumnLocator;
-use crate::config::{Expression, ViewConfigUpdate};
 use crate::presentation::{OpenColumnSettings, Presentation};
 use crate::renderer::Renderer;
 use crate::session::Session;
-use crate::utils::*;
 use crate::*;
 
 #[derive(PartialEq)]

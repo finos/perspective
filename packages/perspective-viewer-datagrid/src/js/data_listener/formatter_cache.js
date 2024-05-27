@@ -10,8 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { get_type_config } from "@finos/perspective/src/js/config/index.js";
-
 const FORMATTER_CONS = {
     datetime: Intl.DateTimeFormat,
     date: Intl.DateTimeFormat,
@@ -24,17 +22,43 @@ const FORMATTER_CONS = {
     },
 };
 
+const LEGACY_CONFIG = {
+    types: {
+        float: {
+            format: {
+                style: "decimal",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            },
+        },
+        datetime: {
+            format: {
+                dateStyle: "short",
+                timeStyle: "medium",
+            },
+        },
+        date: {
+            format: {
+                dateStyle: "short",
+            },
+        },
+    },
+};
+
 export class FormatterCache {
     constructor() {
         this._formatters = new Map();
     }
 
     create_datetime_formatter(type, plugin) {
-        const type_config = get_type_config(type);
+        const type_config = {
+            dateStyle: "short",
+            timeStyle: "medium",
+        };
         if (type === "datetime") {
             if (plugin.date_format?.format !== "custom") {
                 const options = {
-                    ...type_config.format,
+                    ...type_config,
                     timeZone: plugin.date_format?.timeZone,
                     dateStyle: plugin.date_format?.dateStyle,
                     timeStyle: plugin.date_format?.timeStyle,
@@ -42,13 +66,13 @@ export class FormatterCache {
                 if (options.dateStyle === "disabled") {
                     options.dateStyle = undefined;
                 } else if (options.dateStyle === undefined) {
-                    options.dateStyle = type_config.format.dateStyle;
+                    options.dateStyle = "short";
                 }
 
                 if (options.timeStyle === "disabled") {
                     options.timeStyle = undefined;
                 } else if (options.timeStyle === undefined) {
-                    options.timeStyle = type_config.format.timeStyle;
+                    options.timeStyle = "medium";
                 }
 
                 return new Intl.DateTimeFormat(navigator.languages, options);
@@ -123,7 +147,7 @@ export class FormatterCache {
             if (options.dateStyle === "disabled") {
                 options.dateStyle = undefined;
             } else if (options.dateStyle === undefined) {
-                options.dateStyle = type_config.format.dateStyle;
+                options.dateStyle = "short";
             }
 
             return new Intl.DateTimeFormat(navigator.languages, options);
@@ -131,7 +155,7 @@ export class FormatterCache {
     }
 
     create_number_formatter(type, plugin) {
-        let { format } = get_type_config(type);
+        let format = LEGACY_CONFIG.types[type]?.format;
         if (plugin.number_format !== undefined) {
             format = plugin.number_format;
         }
@@ -140,11 +164,7 @@ export class FormatterCache {
     }
 
     create_boolean_formatter(type, plugin) {
-        const type_config = get_type_config(type);
-        return new FORMATTER_CONS[type](
-            navigator.languages,
-            type_config.format
-        );
+        return new FORMATTER_CONS[type](navigator.languages, {});
     }
 
     get(type, plugin) {
@@ -155,7 +175,6 @@ export class FormatterCache {
         ].join("-");
 
         if (!this._formatters.has(formatter_key)) {
-            const type_config = get_type_config(type);
             if (type === "date" || type === "datetime") {
                 this._formatters.set(
                     formatter_key,

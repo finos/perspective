@@ -12,9 +12,10 @@
 
 use std::rc::Rc;
 
+use perspective_client::ExprValidationError;
+use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-use self::js::PerspectiveValidationError;
 use crate::components::containers::trap_door_panel::TrapDoorPanel;
 use crate::components::form::code_editor::CodeEditor;
 use crate::components::style::LocalStyle;
@@ -53,7 +54,7 @@ impl DebugPanelProps {
     fn reset_callback(
         &self,
         text: UseStateSetter<Rc<String>>,
-        error: UseStateSetter<Option<PerspectiveValidationError>>,
+        error: UseStateSetter<Option<ExprValidationError>>,
         modified: UseStateSetter<bool>,
     ) -> impl Fn(()) {
         let props = self.clone();
@@ -68,7 +69,7 @@ impl DebugPanelProps {
 fn on_save(
     props: &DebugPanelProps,
     text: &Rc<String>,
-    error: &UseStateHandle<Option<PerspectiveValidationError>>,
+    error: &UseStateHandle<Option<ExprValidationError>>,
     modified: &UseStateHandle<bool>,
 ) {
     clone!(props, text, error, modified);
@@ -81,11 +82,11 @@ fn on_save(
                     },
                     Err(e) => {
                         modified.set(true);
-                        error.set(Some(PerspectiveValidationError {
+                        error.set(Some(ExprValidationError {
                             error_message: JsValue::from(e)
                                 .as_string()
                                 .unwrap_or_else(|| "Failed to validate viewer config".to_owned()),
-                            line: 0_i32,
+                            line: 0_u32,
                             column: 0,
                         }));
                     },
@@ -94,10 +95,10 @@ fn on_save(
             },
             Err(err) => {
                 modified.set(true);
-                error.set(Some(PerspectiveValidationError {
+                error.set(Some(ExprValidationError {
                     error_message: err.to_string(),
-                    line: err.line() as i32 - 1,
-                    column: err.column() as i32 - 1,
+                    line: err.line() as u32 - 1,
+                    column: err.column() as u32 - 1,
                 }));
 
                 Ok(())
@@ -109,7 +110,7 @@ fn on_save(
 #[function_component(DebugPanel)]
 pub fn debug_panel(props: &DebugPanelProps) -> Html {
     let expr = use_state_eq(|| Rc::new("".to_string()));
-    let error = use_state_eq(|| Option::<PerspectiveValidationError>::None);
+    let error = use_state_eq(|| Option::<ExprValidationError>::None);
     let select_all = use_memo((), |()| PubSub::default());
     let modified = use_state_eq(|| false);
     use_effect_with((expr.setter(), props.clone()), {

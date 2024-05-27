@@ -60,7 +60,7 @@ export function write_cell(table, model, active_cell) {
         }
 
         const msg = {
-            __INDEX__: id,
+            __INDEX__: id[0],
             [model._column_paths[meta.x]]: text,
         };
 

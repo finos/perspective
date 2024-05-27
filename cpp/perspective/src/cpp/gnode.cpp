@@ -727,7 +727,7 @@ t_gnode::process(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `process` on an uninited gnode.");
     PSP_GIL_UNLOCK();
-    PSP_WRITE_LOCK(m_lock);
+    PSP_WRITE_LOCK(*m_lock);
     t_process_table_result result = _process_table(port_id);
 
     if (result.m_flattened_data_table) {
@@ -1606,7 +1606,7 @@ t_gnode::clear_input_ports() {
 void
 t_gnode::clear_output_ports() {
     PSP_GIL_UNLOCK();
-    PSP_WRITE_LOCK(m_lock);
+    PSP_WRITE_LOCK(*m_lock);
     for (const auto& m_oport : m_oports) {
         m_oport->get_table()->clear();
     }
@@ -1641,7 +1641,7 @@ t_gnode::repr() const {
 
 #ifdef PSP_PARALLEL_FOR
 void
-t_gnode::set_lock(boost::shared_mutex* lock) {
+t_gnode::set_lock(std::shared_mutex* lock) {
     m_lock = lock;
 }
 #endif

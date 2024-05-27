@@ -1,17 +1,14 @@
 {
-  "compilerOptions": {
-    "module": "esnext",
-    "target": "es2018",
-    "declaration": true,
-    "diagnostics": true,
-    "emitDeclarationOnly": true,
-    "outDir": "dist/esm/types",
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-  },
-  "include": [
-    "./src/ts/**/*",
-    "./types.d.ts",
-  ],
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNext",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "./dist/esm",
+        "rootDir": "./src/ts",
+        "moduleResolution": "bundler",
+        "skipLibCheck": true,
+        "resolveJsonModule": true
+    },
+    "include": ["./src/ts/**/*", "./types.d.ts"]
 }

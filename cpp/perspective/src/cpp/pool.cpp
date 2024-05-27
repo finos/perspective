@@ -30,16 +30,7 @@ t_updctx::t_updctx(t_uindex gnode_id, std::string ctx) :
 
 #if defined PSP_ENABLE_WASM && !defined PSP_ENABLE_PYTHON
 
-t_val
-empty_callback() {
-    t_val callback = t_val::global("Object").new_();
-    callback.set("_update_callback", t_val::global("Function").new_());
-    return callback;
-}
-
-t_pool::t_pool() : m_update_delegate(empty_callback()), m_sleep(0) {
-    m_run.clear();
-}
+t_pool::t_pool() : m_sleep(0) { m_run.clear(); }
 
 #elif defined PSP_ENABLE_PYTHON
 
@@ -49,12 +40,12 @@ empty_callback() {
 }
 
 t_pool::t_pool() :
-    m_update_delegate(empty_callback())
-#ifdef PSP_PARALLEL_FOR
-    ,
-    m_lock(new boost::shared_mutex())
+#ifdef PSP_ENABLE_PYTHON
+    m_update_delegate(empty_callback()),
 #endif
-    ,
+#ifdef PSP_PARALLEL_FOR
+    m_lock(new std::shared_mutex()),
+#endif
     m_sleep(0) {
     m_run.clear();
 }
@@ -74,7 +65,7 @@ t_pool::~t_pool() {
 void
 t_pool::init() {
     if (t_env::log_progress()) {
-        std::cout << "t_pool.init " << '\n';
+        std::cout << "t_pool.init " << std::endl;
     }
     m_run.test_and_set(std::memory_order_acquire);
     m_data_remaining.store(false);
@@ -94,7 +85,7 @@ t_pool::register_gnode(t_gnode* node) {
 
     if (t_env::log_progress()) {
         std::cout << "t_pool.register_gnode node => " << node << " rv => " << id
-                  << '\n';
+                  << std::endl;
     }
 
     return id;
@@ -105,7 +96,7 @@ t_pool::unregister_gnode(t_uindex idx) {
     std::lock_guard<std::mutex> lgxo(m_mtx);
 
     if (t_env::log_progress()) {
-        std::cout << "t_pool.unregister_gnode idx => " << idx << '\n';
+        std::cout << "t_pool.unregister_gnode idx => " << idx << std::endl;
     }
 
     m_gnodes[idx] = nullptr;
@@ -124,29 +115,29 @@ t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table) {
         if (t_env::log_progress()) {
             std::cout << "t_pool.send gnode_id => " << gnode_id
                       << " port_id => " << port_id << " tbl_size => "
-                      << table.size() << '\n';
+                      << table.size() << std::endl;
         }
 
         if (t_env::log_data_pool_send()) {
-            std::cout << "t_pool.send" << '\n';
+            std::cout << "t_pool.send" << std::endl;
             table.pprint();
         }
     }
 }
 
 #ifdef PSP_PARALLEL_FOR
-boost::shared_mutex*
+std::shared_mutex*
 t_pool::get_lock() const {
     return m_lock;
 }
 #endif
 
 void
-t_pool::_process() {
+t_pool::_process(std::optional<std::function<void(std::uint32_t)>> callback) {
     auto work_to_do = m_data_remaining.load();
     if (work_to_do) {
         t_update_task task(*this);
-        task.run();
+        task.run(callback);
     }
 }
 
@@ -155,7 +146,7 @@ t_pool::stop() {
     m_run.clear(std::memory_order_release);
     _process();
     if (t_env::log_progress()) {
-        std::cout << "t_pool.stop" << '\n';
+        std::cout << "t_pool.stop" << std::endl;
     }
 }
 
@@ -163,7 +154,7 @@ void
 t_pool::set_sleep(t_uindex ms) {
     m_sleep.store(ms);
     if (t_env::log_progress()) {
-        std::cout << "t_pool.set_sleep ms => " << ms << '\n';
+        std::cout << "t_pool.set_sleep ms => " << ms << std::endl;
     }
 }
 
@@ -180,7 +171,7 @@ t_pool::get_trees() {
 
     if (t_env::log_progress()) {
         std::cout << "t_pool.get_trees: "
-                  << " rv => " << rval << '\n';
+                  << " rv => " << rval << std::endl;
     }
 
     return rval;
@@ -217,7 +208,7 @@ t_pool::register_context(
 }
 #endif
 
-#if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
+#if defined PSP_ENABLE_PYTHON
 void
 t_pool::set_update_delegate(t_val ud) {
     m_update_delegate = ud;
@@ -227,7 +218,6 @@ t_pool::set_update_delegate(t_val ud) {
 void
 t_pool::notify_userspace(t_uindex port_id) {
 #if defined PSP_ENABLE_WASM && !defined PSP_ENABLE_PYTHON
-    m_update_delegate.call<void>("_update_callback", port_id);
 #elif PSP_ENABLE_PYTHON
     if (!m_update_delegate.is_none()) {
         m_update_delegate.attr("_update_callback")(port_id);
@@ -241,7 +231,8 @@ t_pool::unregister_context(t_uindex gnode_id, const std::string& name) {
 
     if (t_env::log_progress()) {
         std::cout << repr() << " << t_pool.unregister_context: "
-                  << " gnode_id => " << gnode_id << " name => " << name << '\n';
+                  << " gnode_id => " << gnode_id << " name => " << name
+                  << std::endl;
     }
 
     if (!validate_gnode_id(gnode_id)) {
@@ -271,7 +262,7 @@ t_pool::get_row_data_pkeys(
     if (t_env::log_progress()) {
         std::cout << "t_pool.get_row_data_pkeys: "
                   << " gnode_id => " << gnode_id << " pkeys => " << pkeys
-                  << " rv => " << rv << '\n';
+                  << " rv => " << rv << std::endl;
     }
 
     return rv;
@@ -294,7 +285,7 @@ t_pool::get_contexts_last_updated() {
             if (t_env::log_progress()) {
                 std::cout << "t_pool.get_contexts_last_updated: "
                           << " gnode_id => " << gnode_id << " ctx_name => "
-                          << ctx_name << '\n';
+                          << ctx_name << std::endl;
             }
             rval.emplace_back(gnode_id, ctx_name);
         }
@@ -327,7 +318,7 @@ t_pool::pprint_registered() const {
 
         for (const auto& cname : ctxnames) {
             std::cout << self << " gnode_id => " << gnode_id << " ctxname => "
-                      << cname << '\n';
+                      << cname << std::endl;
         }
     }
 }
