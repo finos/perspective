@@ -94,7 +94,7 @@ export function createDataListener(viewer) {
             );
             metadata.push(column);
             if (is_settings_open) {
-                path_parts.push("Edit");
+                path_parts.push("");
             }
 
             column_headers.push(path_parts);

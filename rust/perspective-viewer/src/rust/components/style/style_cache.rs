@@ -66,10 +66,17 @@ impl StyleCache {
             let style = Self::into_style(name, css, self.0.is_shadow);
             let first = map.values().next().cloned();
             map.insert(name, style.clone());
-            if let Some(x) = first {
+            let mut values = map.values();
+            if let Some(mut x) = first {
+                while let Some(y) = values.next()
+                    && y.get_attribute("name").as_deref() < Some(name)
+                {
+                    x = y.clone();
+                }
+
                 x.parent_node()
                     .unwrap_or_else(|| x.get_root_node())
-                    .insert_before(&style, Some(&x))
+                    .insert_before(&style, x.next_sibling().as_ref())
                     .unwrap();
             }
         }
@@ -106,10 +113,11 @@ impl StyleCacheData {
     fn new(is_shadow: bool) -> Self {
         let styles = DOM_STYLES
             .iter()
-            .map(|x| (x.0, StyleCache::into_style(x.0, x.1, is_shadow)));
+            .map(|x| (x.0, StyleCache::into_style(x.0, x.1, is_shadow)))
+            .collect();
 
         Self {
-            styles: RefCell::new(styles.collect()),
+            styles: RefCell::new(styles),
             is_shadow,
         }
     }

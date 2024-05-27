@@ -16,82 +16,236 @@
     #column_settings_sidebar {
         overflow: hidden;
         text-overflow: ellipsis;
-    }
 
-    // NOTE: These should probably make their way to global form styling eventually.
-    .errored {
-        outline-color: var(--error--color);
-    }
-
-    .item_title {
-        flex: 0 0 auto;
-        font-size: 9px;
-    }
-
-    .radio-list-item label {
-        margin-top: 6px;
-    }
-
-    input {
-        &[type="text"],
-        &[type="search"] {
-            outline: 1px solid;
-            outline-color: var(--inactive--color);
-            background-color: var(--plugin--background);
-            border: none;
-            margin-bottom: 0.5em;
-            font-family: inherit;
-            font-size: 12px;
-            &:disabled {
-                background-color: var(--inactive--color);
-            }
+        #attributes-button-panel {
+            flex: 0 0 auto;
+            margin-top: 4px;
         }
 
-        &[type="search"] {
-            min-height: 24px;
-            border-radius: 2px;
+        #attributes-tab {
+            flex-direction: column;
+            display: flex;
+            overflow: hidden;
         }
-    }
 
-    .sidebar_header_contents {
-        display: flex;
-        margin: 8px;
-        align-items: center;
-        border-radius: 3px;
-        outline-width: 1px;
-        outline-color: var(--inactive--color);
+        #attributes-tab > .split-panel-child {
+            min-height: 200px;
+            flex: 0 1 auto;
+        }
 
-        &.editable {
-            &:hover {
-                outline-style: solid;
-                cursor: text;
-            }
-        }
-        &::focus {
-            outline-style: solid;
-            background: var(--plugin--background);
-        }
-        &.edited {
-            outline-style: dashed;
-        }
-        &.invalid {
+        // NOTE: These should probably make their way to global form styling eventually.
+        .errored {
             outline-color: var(--error--color);
         }
 
-        .sidebar_header_title {
-            line-height: normal;
-            margin: 0;
-            flex: 1;
-            padding-left: 5px;
-            background: none;
-            outline: none;
-            color: unset;
+        .item_title {
+            flex: 0 0 auto;
+            font-size: var(--label--font-size, 0.75em);
+        }
 
-            &:disabled {
+        .radio-list-item label {
+            margin-top: 6px;
+        }
+
+        input {
+            &[type="text"],
+            &[type="search"] {
+                outline: 1px solid;
+                outline-color: var(--inactive--color);
+                background-color: var(--plugin--background);
+                border: none;
+                margin-bottom: 0.5em;
+                font-family: inherit;
+                font-size: 1em;
+                &:disabled {
+                    background-color: var(--inactive--color);
+                }
+            }
+
+            &[type="search"] {
+                min-height: 24px;
+                border-radius: 2px;
+            }
+
+            &::-webkit-search-cancel-button {
+                cursor: pointer;
+            }
+        }
+
+        .sidebar_header_contents {
+            display: flex;
+            margin: 8px;
+            align-items: center;
+            border-radius: 3px;
+            outline-width: 1px;
+            outline-color: var(--inactive--color);
+
+            &.editable {
+                &:hover {
+                    outline-style: solid;
+                    cursor: text;
+                }
+            }
+            &::focus {
+                outline-style: solid;
+                background: var(--plugin--background);
+            }
+            &.edited {
+                outline-style: dashed;
+            }
+            &.invalid {
+                outline-color: var(--error--color);
+            }
+
+            .sidebar_header_title {
+                line-height: normal;
+                margin: 0;
+                flex: 1;
+                padding-left: 5px;
                 background: none;
                 outline: none;
                 color: unset;
+
+                &:disabled {
+                    background: none;
+                    outline: none;
+                    color: unset;
+                }
             }
         }
+    }
+
+    label#color-label:before {
+        content: var(--color-label--content, "Color");
+    }
+
+    label#format-label:before {
+        content: var(--format-label--content, "Format");
+    }
+
+    label#timezone-label:before {
+        content: var(--timezone-label--content, "Timezone");
+    }
+
+    label#date-style-label:before {
+        content: var(--date-style-label--content, "Date Style");
+    }
+
+    label#time-style-label:before {
+        content: var(--time-style-label--content, "Time Style");
+    }
+
+    label#foreground-label:before {
+        content: var(--foreground-label--content, "Foreground");
+    }
+
+    label#background-label:before {
+        content: var(--background-label--content, "Background");
+    }
+
+    label#series-label:before {
+        content: var(--series-label--content, "Series");
+    }
+
+    label#color-range-label:before {
+        content: var(--color-range-label--content, "Color Range");
+    }
+
+    label#style-label:before {
+        content: var(--style-label--content, "Style");
+    }
+
+    label#minimum-integer-digits-label:before {
+        content: var(
+            --minimum-integer-digits-label--content,
+            "Minimum Integer Digits"
+        );
+    }
+
+    label#rounding-increment-label:before {
+        content: var(--rounding-increment-label--content, "Rounding Increment");
+    }
+
+    label#notation-label:before {
+        content: var(--notation-label--content, "Notation");
+    }
+
+    label#use-grouping-label:before {
+        content: var(--use-grouping-label--content, "Use Grouping");
+    }
+
+    label#sign-display-label:before {
+        content: var(--sign-display-label--content, "Sign Display");
+    }
+
+    label#max-value-label:before {
+        content: var(--max-value-label--content, "Max Value");
+    }
+
+    label#rounding-priority-label:before {
+        content: var(--rounding-priority-label--content, "Rounding Priority");
+    }
+
+    label#rounding-mode-label:before {
+        content: var(--rounding-mode-label--content, "Rounding Mode");
+    }
+
+    label#trailing-zero-display-label:before {
+        content: var(
+            --trailing-zero-display-label--content,
+            "Trailing Zero Display"
+        );
+    }
+
+    label#significant-digits-label:before {
+        content: var(--significant-digits-label--content, "Significant Digits");
+    }
+
+    label#fractional-digits-label:before {
+        content: var(--fractional-digits-label--content, "Fractional Digits");
+    }
+
+    label#year-label:before {
+        content: var(--year-label--content, "Year");
+    }
+
+    label#month-label:before {
+        content: var(--month-label--content, "Month");
+    }
+
+    label#day-label:before {
+        content: var(--day-label--content, "Day");
+    }
+
+    label#weekday-label:before {
+        content: var(--weekday-label--content, "Weekday");
+    }
+
+    label#hour-label:before {
+        content: var(--hour-label--content, "Hour");
+    }
+
+    label#minute-label:before {
+        content: var(--minute-label--content, "Minute");
+    }
+
+    label#second-label:before {
+        content: var(--second-label--content, "Second");
+    }
+
+    label#fractional-seconds-label:before {
+        content: var(--fractional-seconds-label--content, "Fractional Seconds");
+    }
+
+    label#hours-label:before {
+        content: var(--hours-label--content, "12/24 Hours");
+    }
+
+    div.tab-title#Style:before {
+        content: var(--style-tab-label--content, "Style");
+    }
+
+    div.tab-title#Attributes:before {
+        content: var(--attributes-tab-label--content, "Attributes");
     }
 }

@@ -404,10 +404,16 @@ export class PerspectiveView extends DOMWidgetView {
                 table.update(updated.delta);
         }
 
-        this._client_view.on_update(
-            (updated) => this._client_view_update_callback(updated),
-            { mode: "row" }
-        );
+        if (this._client_view) {
+            // NOTE: if `plugin_config_changed` called before
+            // `_handle_load_message`, this will be undefined
+            // Ignore, as `_handle_load_message` is sure to
+            // follow.
+            this._client_view.on_update(
+                (updated) => this._client_view_update_callback(updated),
+                { mode: "row" }
+            );
+        }
 
         this._kernel_view.on_update(
             (updated) => this._kernel_view_update_callback(updated),

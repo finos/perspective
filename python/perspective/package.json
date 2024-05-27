@@ -1,16 +1,16 @@
 {
     "private": true,
     "name": "perspective-python-internal",
-    "version": "2.8.1",
+    "version": "2.10.1",
     "scripts": {
         "bench": "python3 bench/perspective_benchmark.py",
         "docs": "python3 docs/generate.py"
     },
     "devDependencies": {
-        "@finos/perspective": "^2.8.1",
-        "@finos/perspective-viewer": "^2.8.1",
-        "@finos/perspective-viewer-d3fc": "^2.8.1",
-        "@finos/perspective-viewer-datagrid": "^2.8.1",
-        "@finos/perspective-webpack-plugin": "^2.8.1"
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "@finos/perspective-webpack-plugin": "workspace:^"
     }
 }

@@ -1,3 +1,49 @@
+# [v2.10.1](https://github.com/finos/perspective/releases/tag/v2.10.1)
+
+_20 May 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.10.0...v2.10.1))
+
+Fixes
+
+- Fix `delete()` Python async call not resolving [#2610](https://github.com/finos/perspective/pull/2610)
+- Fix intermittent `to_arrow()` error in Python [#2608](https://github.com/finos/perspective/pull/2608)
+- Fix compatibility with other MSVC versions by explicitly converting to string [#2570](https://github.com/finos/perspective/pull/2570)
+
+Misc
+
+- Developer clean-up [#2623](https://github.com/finos/perspective/pull/2623)
+- Update contributing documentation for DCO [#2595](https://github.com/finos/perspective/pull/2595)
+- Update to pyodide 0.25.1 for pyodide/pyodide#4655 [#2596](https://github.com/finos/perspective/pull/2596)
+
+# [v2.10.0](https://github.com/finos/perspective/releases/tag/v2.10.0)
+
+_25 March 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.9.0...v2.10.0))
+
+Features
+
+- Debug component [#2574](https://github.com/finos/perspective/pull/2574)
+- Expression editor & filter UX updates [#2572](https://github.com/finos/perspective/pull/2572)
+
+# [v2.9.0](https://github.com/finos/perspective/releases/tag/v2.9.0)
+
+_12 March 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.8.1...v2.9.0))
+
+**Breaking**
+
+- Formatting for `float` and `integer` columns via `Intl.NumberFormat` [#2563](https://github.com/finos/perspective/pull/2563)
+
+Features
+
+- Localization Support [#2565](https://github.com/finos/perspective/pull/2565)
+
+Fixes
+
+- Fix get_hosted_table_names in Python client [#2551](https://github.com/finos/perspective/pull/2551)
+- Fix Candlestick & OHLC charts [#2562](https://github.com/finos/perspective/pull/2562)
+
+Misc
+
+- Update Pyodide to version 0.25.0 [#2547](https://github.com/finos/perspective/pull/2547)
+
 # [v2.8.1](https://github.com/finos/perspective/releases/tag/v2.8.1)
 
 _26 February 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.8.0...v2.8.1))
@@ -8,6 +54,7 @@ Fixes
 
 Misc
 
+- Update to LLVM 17 & fix Python/Windows build [#2546](https://github.com/finos/perspective/pull/2546)
 - Add `clang-format`, `clang-tidy` and `clangd` support for C++ development [#2541](https://github.com/finos/perspective/pull/2541)
 - Add Docs Tests [#2502](https://github.com/finos/perspective/pull/2502)
 - Add workspaceFolder to cargo_target_dir [#2537](https://github.com/finos/perspective/pull/2537)

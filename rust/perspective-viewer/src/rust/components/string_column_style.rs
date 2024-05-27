@@ -10,26 +10,21 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use wasm_bindgen::*;
-use web_sys::*;
 use yew::prelude::*;
 use yew::*;
 
-use super::containers::radio_list::RadioList;
-use super::containers::radio_list_item::RadioListItem;
 use super::form::color_selector::*;
 use super::modal::{ModalLink, SetModalLink};
 use super::style::LocalStyle;
+use crate::components::form::select_field::SelectEnumField;
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
 
 pub enum StringColumnStyleMsg {
     Reset(StringColumnStyleConfig),
-    FormatEnabled(bool),
-    FormatChanged(FormatMode),
-    ColorModeEnabled(bool),
-    ColorModeChanged(StringColorMode),
+    FormatChanged(Option<FormatMode>),
+    ColorModeChanged(Option<StringColorMode>),
     ColorChanged(String),
 }
 
@@ -39,7 +34,7 @@ pub struct StringColumnStyleProps {
     pub default_config: StringColumnStyleDefaultConfig,
 
     #[prop_or_default]
-    pub on_change: Callback<StringColumnStyleConfig>,
+    pub on_change: Callback<ColumnConfigValueUpdate>,
 
     #[prop_or_default]
     weak_link: WeakScope<StringColumnStyle>,
@@ -68,7 +63,10 @@ pub struct StringColumnStyle {
 impl StringColumnStyle {
     /// When this config has changed, we must signal the wrapper element.
     fn dispatch_config(&self, ctx: &Context<Self>) {
-        ctx.props().on_change.emit(self.config.clone());
+        let update = Some(self.config.clone()).filter(|x| x != &StringColumnStyleConfig::default());
+        ctx.props()
+            .on_change
+            .emit(ColumnConfigValueUpdate::DatagridStringStyle(update));
     }
 
     /// Generate a color selector component for a specific `StringColorMode`
@@ -81,19 +79,16 @@ impl StringColumnStyle {
             .clone()
             .unwrap_or_else(|| self.default_config.color.to_owned());
 
-        let color_props = props!(ColorProps { color, on_color });
-        match &self.config.string_color_mode {
-            Some(x) if x == mode => {
-                html! {
-                    <>
-                        <span class="row">{ title }</span>
-                        <div class="row inner_section"><ColorSelector ..color_props /></div>
-                    </>
-                }
-            },
-            _ => {
-                html! { <span class="row">{ title }</span> }
-            },
+        let color_props = props!(ColorProps {
+            title: title.to_owned(),
+            color,
+            on_color
+        });
+
+        if &self.config.string_color_mode == mode {
+            html! { <div class="row"><ColorSelector ..color_props /></div> }
+        } else {
+            html! {}
         }
     }
 }
@@ -127,147 +122,57 @@ impl Component for StringColumnStyle {
                 self.config = config;
                 true
             },
-            StringColumnStyleMsg::FormatEnabled(val) => {
-                self.config.format = if val {
-                    Some(FormatMode::default())
-                } else {
-                    None
-                };
-
-                self.dispatch_config(ctx);
-                true
-            },
             StringColumnStyleMsg::FormatChanged(val) => {
-                self.config.format = Some(val);
-                self.dispatch_config(ctx);
-                true
-            },
-            StringColumnStyleMsg::ColorModeEnabled(enabled) => {
-                if enabled {
-                    self.config.string_color_mode = Some(StringColorMode::default());
-                } else {
-                    self.config.string_color_mode = None;
-                    self.config.color = None;
-                }
-
+                self.config.format = val.unwrap_or_default();
                 self.dispatch_config(ctx);
                 true
             },
             StringColumnStyleMsg::ColorModeChanged(mode) => {
-                self.config.string_color_mode = Some(mode);
+                self.config.string_color_mode = mode.unwrap_or_default();
                 self.dispatch_config(ctx);
                 true
             },
             StringColumnStyleMsg::ColorChanged(color) => {
                 self.config.color = Some(color);
                 self.dispatch_config(ctx);
-                true
+                false
             },
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let format_enabled_oninput = ctx.link().callback(move |event: InputEvent| {
-            let input = event
-                .target()
-                .unwrap()
-                .unchecked_into::<web_sys::HtmlInputElement>();
-            StringColumnStyleMsg::FormatEnabled(input.checked())
-        });
-
-        let format_mode_selected = self.config.format.unwrap_or_default();
+        let format_mode_selected = self.config.format;
         let format_mode_changed = ctx.link().callback(StringColumnStyleMsg::FormatChanged);
-        let color_enabled_oninput = ctx.link().callback(move |event: InputEvent| {
-            let input = event
-                .target()
-                .unwrap()
-                .unchecked_into::<web_sys::HtmlInputElement>();
-            StringColumnStyleMsg::ColorModeEnabled(input.checked())
-        });
-
-        let selected_color_mode = self.config.string_color_mode.unwrap_or_default();
+        let selected_color_mode = self.config.string_color_mode;
         let color_mode_changed = ctx.link().callback(StringColumnStyleMsg::ColorModeChanged);
-        let series_controls = self.color_select_row(ctx, &StringColorMode::Series, "Series");
-        let foreground_controls =
-            self.color_select_row(ctx, &StringColorMode::Foreground, "Foreground");
-
-        let background_controls =
-            self.color_select_row(ctx, &StringColorMode::Background, "Background");
+        let color_controls = match selected_color_mode {
+            StringColorMode::Foreground => {
+                self.color_select_row(ctx, &StringColorMode::Foreground, "foreground-label")
+            },
+            StringColorMode::Background => {
+                self.color_select_row(ctx, &StringColorMode::Background, "background-label")
+            },
+            StringColorMode::Series => {
+                self.color_select_row(ctx, &StringColorMode::Series, "series-label")
+            },
+            StringColorMode::None => html! {},
+        };
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-style")}
-                />
-                <div
-                    id="column-style-container"
-                    class="string-column-style-container"
-                >
-                    <div class="column-style-label"><label class="indent">{ "Format" }</label></div>
-                    <div
-                        class="section"
-                    >
-                        <input
-                            type="checkbox"
-                            oninput={format_enabled_oninput}
-                            checked={self.config.format.is_some()}
-                        />
-                        <RadioList<FormatMode>
-                            class="indent"
-                            disabled={self.config.format.is_none()}
-                            selected={format_mode_selected}
-                            on_change={format_mode_changed}
-                        >
-                            <RadioListItem<FormatMode>
-                                value={FormatMode::Bold}
-                            >
-                                <span >{ "Bold" }</span>
-                            </RadioListItem<FormatMode>>
-                            <RadioListItem<FormatMode>
-                                value={FormatMode::Italics}
-                            >
-                                <span >{ "Italics" }</span>
-                            </RadioListItem<FormatMode>>
-                            <RadioListItem<FormatMode>
-                                value={FormatMode::Link}
-                            >
-                                <span >{ "Link" }</span>
-                            </RadioListItem<FormatMode>>
-                        </RadioList<FormatMode>>
-                    </div>
-                    <div class="column-style-label"><label class="indent">{ "Color" }</label></div>
-                    <div
-                        class="section"
-                    >
-                        <input
-                            type="checkbox"
-                            oninput={color_enabled_oninput}
-                            checked={self.config.string_color_mode.is_some()}
-                        />
-                        <RadioList<StringColorMode>
-                            class="indent"
-                            name="color-radio-list"
-                            disabled={self.config.string_color_mode.is_none()}
-                            selected={selected_color_mode}
-                            on_change={color_mode_changed}
-                        >
-                            <RadioListItem<StringColorMode>
-                                value={StringColorMode::Foreground}
-                            >
-                                { foreground_controls }
-                            </RadioListItem<StringColorMode>>
-                            <RadioListItem<StringColorMode>
-                                value={StringColorMode::Background}
-                            >
-                                { background_controls }
-                            </RadioListItem<StringColorMode>>
-                            <RadioListItem<StringColorMode>
-                                value={StringColorMode::Series}
-                            >
-                                { series_controls }
-                            </RadioListItem<StringColorMode>>
-                        </RadioList<StringColorMode>>
-                    </div>
+                <LocalStyle href={css!("column-style")} />
+                <div id="column-style-container" class="string-column-style-container">
+                    <SelectEnumField<FormatMode>
+                        label="format"
+                        on_change={format_mode_changed}
+                        current_value={format_mode_selected}
+                    />
+                    <SelectEnumField<StringColorMode>
+                        label="color"
+                        on_change={color_mode_changed}
+                        current_value={selected_color_mode}
+                    />
+                    { color_controls }
                 </div>
             </>
         }

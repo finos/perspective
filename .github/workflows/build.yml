@@ -85,7 +85,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   # for pull_request so we can do HEAD^2
                   fetch-depth: 2
@@ -191,7 +191,7 @@ jobs:
                     - ubuntu-22.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [18.x]
+                node-version: [20.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -203,7 +203,7 @@ jobs:
 
         steps:
             - name: Clean System
-              uses: AdityaGarg8/remove-unwanted-software@v2
+              uses: AdityaGarg8/remove-unwanted-software@v3
               if: ${{ runner.os == 'Linux' }}
               with:
                   remove-android: "true"
@@ -212,33 +212,21 @@ jobs:
                   remove-codeql: "true"
 
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            ################
+            # PNPM Cache
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             - name: Setup emsdk cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               id: emsdk-cache
               with:
                   path: .emsdk
@@ -250,7 +238,7 @@ jobs:
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -261,7 +249,7 @@ jobs:
             ################
             # Cargo Cache
             - name: Setup cargo cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       ~/.cargo/bin/
@@ -284,17 +272,17 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             - name: Install latest nightly rust
               uses: dtolnay/rust-toolchain@nightly
@@ -307,23 +295,21 @@ jobs:
             # Dependencies #
             ################
             ################
+            # Install LLVM - also adds .llvm/bin to the PATH
             - name: Install LLVM 17
-              uses: KyleMayes/install-llvm-action@v1
+              uses: KyleMayes/install-llvm-action@v2
               with:
                   version: "17"
                   directory: "./.llvm"
 
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             ################
             # Linux
@@ -342,15 +328,15 @@ jobs:
             ###############
 
             - name: WebAssembly Build
-              run: yarn build_js --ci
+              run: pnpm run build_js --ci
               env:
                   PSP_USE_CCACHE: 1
 
             # - name: Docs Build
-            #   run: yarn docs
+            #   run: pnpm run docs
 
             - name: Lint
-              run: yarn lint
+              run: pnpm run lint
               env:
                   PSP_PROJECT: "js"
 
@@ -361,65 +347,65 @@ jobs:
             # Upload built JS artifacts for tests
             #
             # (listed here in the same order they appear in the directory)
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-esbuild-plugin-dist
                   path: packages/perspective-esbuild-plugin/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-webpack-plugin-dist
                   path: packages/perspective-webpack-plugin/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-cli-dist
                   path: packages/perspective-cli/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
             ######################################################
             # Upload Jupyter artifacts for python build/test/dist
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
                   if-no-files-found: error # TODO
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
@@ -460,10 +446,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Install LLVM 17
-              uses: KyleMayes/install-llvm-action@v1
+              uses: KyleMayes/install-llvm-action@v2
               with:
                   version: "17"
                   directory: "./.llvm"
@@ -471,30 +457,18 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            ################
+            # PNPM Cache
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -506,35 +480,32 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -545,13 +516,13 @@ jobs:
             ########
             # Linux
             - name: Python Lint (Linux)
-              run: yarn lint
+              run: pnpm run lint
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   PSP_PROJECT: python
 
             - name: JavaScript Lint
-              run: yarn lint
+              run: pnpm run lint
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   PSP_PROJECT: js
@@ -580,7 +551,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [18.x]
+                node-version: [20.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -592,35 +563,21 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -631,7 +588,7 @@ jobs:
             ################
             # Cargo Cache
             - name: Setup cargo cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       ~/.cargo/bin/
@@ -646,35 +603,32 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             ################
             # Rust
@@ -688,37 +642,37 @@ jobs:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
@@ -727,12 +681,12 @@ jobs:
             # WebAssembly #
             ###############
             - name: WebAssembly Test
-              run: yarn test_js --ci
+              run: pnpm run test_js --ci
 
             ######################
             # Fancy HTML reports #
             ######################
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               if: failure()
               with:
                   name: playwright-report
@@ -757,98 +711,81 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-20.04]
-                node-version: [18.x]
+                node-version: [20.x]
         runs-on: ${{ matrix.os }}
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
             - name: Benchmarks
-              run: yarn bench
+              run: pnpm run bench
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-js-benchmarks
                   path: tools/perspective-bench/dist/benchmark-js.arrow
@@ -895,7 +832,7 @@ jobs:
                 container:
                     - none # Not manylinux, we will use this space to build the WASM assets
                     - 2014
-                node-version: [18.x]
+                node-version: [20.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:
@@ -948,7 +885,7 @@ jobs:
 
         steps:
             - name: Clean System
-              uses: AdityaGarg8/remove-unwanted-software@v2
+              uses: AdityaGarg8/remove-unwanted-software@v3
               if: ${{ runner.os == 'Linux' }}
               with:
                   remove-android: "true"
@@ -957,7 +894,7 @@ jobs:
                   remove-codeql: "true"
 
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             #####################################################
             # Conditionals                                      #
@@ -974,12 +911,12 @@ jobs:
             ################
             # JS Artifacts #
             ################
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
@@ -988,29 +925,15 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1021,7 +944,7 @@ jobs:
             ################
             # Homebrew Cache
             - name: Setup homebrew cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       ~/Library/Caches/Homebrew/boost--*
@@ -1033,7 +956,7 @@ jobs:
             ################
             # vcpkg Cache
             - name: Setup vcpkg cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: |
                       C:\Users\runneradmin\AppData\Local\vcpkg\archives
@@ -1049,18 +972,18 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             ################
@@ -1068,26 +991,22 @@ jobs:
             ################
             ################
             # - name: Install LLVM 17
-            #   uses: KyleMayes/install-llvm-action@v1
+            #   uses: KyleMayes/install-llvm-action@v2
             #   if: false
             #   with:
             #       version: "17"
             #       directory: "./.llvm"
 
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-              if: ${{ runner.os != 'Linux' }}
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             ################
@@ -1123,7 +1042,7 @@ jobs:
             ########
             # Linux
             - name: Python Wheel Steps (Linux)
-              run: yarn _wheel_python --ci
+              run: pnpm run _wheel_python --ci
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
                   MANYLINUX: ${{ matrix.container }}
@@ -1134,8 +1053,8 @@ jobs:
             # Macos
             - name: Python Build Steps (Macos)
               run: |
-                  yarn _wheel_python --ci --macos
-                  yarn _wheel_python --ci --macos --arm
+                  pnpm run _wheel_python --ci --macos
+                  pnpm run _wheel_python --ci --macos --arm
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
               if: ${{ runner.os == 'macOS' }}
@@ -1152,7 +1071,7 @@ jobs:
             ##########
             # Windows
             - name: Python Build Steps (Windows vc14.3)
-              run: yarn _wheel_python --ci
+              run: pnpm run _wheel_python --ci
               env:
                   PSP_GENERATOR: Visual Studio 17 2022
                   PSP_VCPKG_PATH: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -1161,23 +1080,23 @@ jobs:
             ####################
             # Upload artifacts #
             ####################
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
                   path: python/perspective/dist/*.whl
               if: ${{ runner.os == 'Windows' }}
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
                   path: python/perspective/wheelhouse/*.whl
               if: ${{ runner.os != 'Windows' }}
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-sdist
                   path: python/perspective/dist/*.tar.gz
-              if: ${{ matrix.os == 'macos-11' }}
+              if: ${{ matrix.os == 'macos-11' && matrix.python-version == 3.8 }}
 
     build_pyodide:
         strategy:
@@ -1186,14 +1105,13 @@ jobs:
         runs-on: ${{ matrix.os }}
         needs: [initialize]
         env:
-            # NOTA BENE: When upgrading past 0.24.1, remove workaround below for https://github.com/pyodide/pyodide/issues/4216
-            PYODIDE_VERSION: 0.24.1
+            PYODIDE_VERSION: 0.25.1
             # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
             # The appropriate versions can be found in the Pyodide repodata.json
             # "info" field, or in Makefile.envs:
-            # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
+            # https://github.com/pyodide/pyodide/blob/0.25.1/Makefile.envs#L2
             PYTHON_VERSION: 3.11.3
-            EMSCRIPTEN_VERSION: 3.1.45
+            EMSCRIPTEN_VERSION: 3.1.46
         steps:
             - name: Checkout perspective
               uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
@@ -1211,25 +1129,15 @@ jobs:
 
             - name: copy files
               run: |
-                  npm install -g yarn
-                  yarn --frozen-lockfile
-                  yarn build_python --setup-only
+                  npm install -g pnpm
+                  pnpm install --frozen-lockfile
+                  pnpm run build_python --setup-only
 
             - name: Linux init steps
               run: sudo node tools/perspective-scripts/install_tools.mjs
 
             - name: Install pyodide-build
               run: pip install pyodide-build==$PYODIDE_VERSION "pydantic<2"
-
-            # NOTA BENE: When removing this step, also remove the vendored pyodide file
-            - name: Provision workaround for bug in Pyodide 0.24.1
-              run: |
-                  PYTHON_HOME="$(python -c 'import sys; print(sys.prefix)')"
-                  TOOLCHAIN_DIR="$PYTHON_HOME/lib/python3.11/site-packages/pyodide_build/tools/cmake/Modules/Platform"
-                  echo "$PYTHON_HOME"
-                  echo "$TOOLCHAIN_DIR"
-                  mkdir -p "$TOOLCHAIN_DIR"
-                  cp vendor/pyodide/Emscripten.cmake "$TOOLCHAIN_DIR"
 
             - name: Build
               # Without --exports=pyinit, pyodide-build tries to export all symbols from every .o,
@@ -1238,7 +1146,7 @@ jobs:
               run: pyodide build python/perspective --exports=pyinit
 
             - name: Upload pyodide wheel
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-dist-pyodide
                   path: dist/*.whl
@@ -1270,7 +1178,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [18.x]
+                node-version: [20.x]
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
 
@@ -1282,44 +1190,44 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
@@ -1328,29 +1236,15 @@ jobs:
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1362,28 +1256,25 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn --frozen-lockfile
+              run: pnpm install --frozen-lockfile
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
@@ -1393,10 +1284,10 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             # Download artifact
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
@@ -1411,7 +1302,7 @@ jobs:
               run: jupyter labextension list
 
             - name: Run Jupyterlab tests
-              run: yarn test_js --jupyter
+              run: pnpm run test_js --jupyter
               env:
                   PACKAGE: perspective-jupyterlab
 
@@ -1448,7 +1339,7 @@ jobs:
                     - 3.9
                     - "3.10"
                     - 3.11
-                node-version: [18.x]
+                node-version: [20.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:
@@ -1493,35 +1384,21 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1533,35 +1410,32 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1570,7 +1444,7 @@ jobs:
             # Python - Test #
             #################
             # Download artifact
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
@@ -1595,7 +1469,7 @@ jobs:
 
             # Run tests
             - name: Python Test Steps
-              run: yarn test_python --debug
+              run: pnpm run test_python --debug
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1633,35 +1507,21 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1673,28 +1533,25 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn --frozen-lockfile
+              run: pnpm install --frozen-lockfile
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
@@ -1706,13 +1563,13 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             # Download sdist
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-sdist
 
@@ -1748,40 +1605,26 @@ jobs:
             matrix:
                 os: [ubuntu-20.04]
                 python-version: [3.11]
-                node-version: [18.x]
+                node-version: [20.x]
         if: startsWith(github.ref, 'refs/tags/v')
         runs-on: ${{ matrix.os }}
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             ##########
             # Caches #
             ##########
             ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  version: 9
 
             ################
             # Pip Cache
             - name: Setup pip cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: ~/.cache/pip
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -1793,35 +1636,32 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
 
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
 
             ################
             # Dependencies #
             ################
             ################
             # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
             - name: Install js dependencies
-              run: yarn
+              run: pnpm install
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1830,7 +1670,7 @@ jobs:
             # Python - Test #
             #################
             # Download artifact
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
@@ -1840,12 +1680,12 @@ jobs:
               if: ${{ runner.os == 'Linux' }}
 
             - name: Run Benchmark
-              run: yarn bench
+              run: pnpm run bench
               shell: bash
               env:
                   PSP_PROJECT: python
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-benchmarks
                   path: tools/perspective-bench/dist/benchmark-python.arrow
@@ -1885,165 +1725,204 @@ jobs:
         steps:
             - uses: actions/checkout@v2
 
-            # TODO: `actions/upload-artifact` succedds with a warning when the
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
+              with:
+                  version: 9
+
+            ################
+            # JS
+            - name: Install js dependencies
+              run: pnpm install
+              env:
+                  PSP_SKIP_EMSDK_INSTALL:
+                      1
+
+                      # TODO: `actions/upload-artifact` succedds with a warning when the
             # path is empty, but `actions/downlaod-artifact` fails, and 3 JS
             # packages have no `dist`.
 
-            # - uses: actions/download-artifact@v3
+            # - uses: actions/download-artifact@v4
             #   with:
             #       name: perspective-cli-dist
             #       path: packages/perspective-cli/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-dist
                   path: packages/perspective/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-openlayers-dist
                   path: packages/perspective-viewer-openlayers/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
-            # - uses: actions/download-artifact@v3
+            # - uses: actions/download-artifact@v4
             #   with:
             #       name: perspective-esbuild-plugin-dist
             #       path: packages/perspective-esbuild-plugin/dist
 
-            # - uses: actions/download-artifact@v3
+            # - uses: actions/download-artifact@v4
             #   with:
             #       name: perspective-webpack-plugin-dist
             #       path: packages/perspective-webpack-plugin/dist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.7
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.8
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.9
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.10
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-ubuntu-20.04-3.11
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.7
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.8
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.9
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.10
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-macos-11-3.11
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.7
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.8
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.9
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.10
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-windows-2022-3.11
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-pyodide
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-sdist
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-js-benchmarks
 
-            - uses: actions/download-artifact@v3
+            - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-benchmarks
 
-            - name: NPM pack
-              run: |
-                  npm pack \
-                      --workspace=@finos/perspective \
-                      --workspace=@finos/perspective-viewer \
-                      --workspace=@finos/perspective-viewer-datagrid \
-                      --workspace=@finos/perspective-viewer-d3fc \
-                      --workspace=@finos/perspective-viewer-openlayers \
-                      --workspace=@finos/perspective-workspace \
-                      --workspace=@finos/perspective-cli \
-                      --workspace=@finos/perspective-webpack-plugin \
-                      --workspace=@finos/perspective-esbuild-plugin \
-                      --workspace=@finos/perspective-jupyterlab
+            - name: NPM pack perspective
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective
+
+            - name: NPM pack perspective-viewer
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./rust/perspective-viewer
+
+            - name: NPM pack perspective-viewer-datagrid
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-datagrid
+
+            - name: NPM pack perspective-viewer-d3fc
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-d3fc
+
+            - name: NPM pack perspective-viewer-openlayers
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-openlayers
+
+            - name: NPM pack perspective-workspace
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-workspace
+
+            - name: NPM pack perspective-cli
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-cli
+
+            - name: NPM pack perspective-webpack-plugin
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-webpack-plugin
+
+            - name: NPM pack perspective-esbuild-plugin
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-esbuild-plugin
+
+            - name: NPM pack perspective-jupyterlab
+              run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-jupyterlab
 
             - name: Debug
               run: ls -lah
 
             - name: Release wheels
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v2
               with:
                   draft: true
                   generate_release_notes: true

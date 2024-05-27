@@ -1,17 +1,16 @@
 [
     {
         "plugin": "Datagrid",
+        "columns_config": {
+            "color": {
+                "bg_gradient": 251.04,
+                "neg_bg_color": "#ffa38f",
+                "number_bg_mode": "gradient",
+                "number_fg_mode": "disabled",
+                "pos_bg_color": "#346ead"
+            }
+        },
         "plugin_config": {
-            "columns": {
-                "color": {
-                    "fixed": 0,
-                    "bg_gradient": 251.04,
-                    "neg_bg_color": "#ffa38f",
-                    "number_bg_mode": "gradient",
-                    "number_fg_mode": "disabled",
-                    "pos_bg_color": "#346ead"
-                }
-            },
             "editable": false,
             "scroll_lock": false
         },
@@ -77,16 +76,16 @@
     },
     {
         "plugin": "Datagrid",
+        "columns_config": {
+            "color": {
+                "bg_gradient": 2463.68,
+                "neg_bg_color": "#ffa38f",
+                "number_bg_mode": "gradient",
+                "number_fg_mode": "disabled",
+                "pos_bg_color": "#307bb0"
+            }
+        },
         "plugin_config": {
-            "columns": {
-                "color": {
-                    "bg_gradient": 2463.68,
-                    "neg_bg_color": "#ffa38f",
-                    "number_bg_mode": "gradient",
-                    "number_fg_mode": "disabled",
-                    "pos_bg_color": "#307bb0"
-                }
-            },
             "editable": false,
             "scroll_lock": false
         },
@@ -138,7 +137,6 @@
     {
         "plugin": "Datagrid",
         "plugin_config": {
-            "columns": {},
             "editable": false,
             "scroll_lock": false
         },

@@ -26,6 +26,7 @@ import { symbolsObj } from "../series/seriesSymbols";
 import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
 import xyScatterSeries from "../series/xy-scatter/xyScatterSeries";
 import { D3Scale, HTMLSelection, Settings } from "../types";
+import { Type } from "@finos/perspective";
 
 /**
  * Overrides specific symbols based on plugin settings. This modifies in-place _and_ returns the value.
@@ -46,8 +47,8 @@ function overrideSymbols(settings: Settings, symbols): D3Scale {
     for (let [i, _] of domain.entries()) {
         range[i] = range[(i as number) % len];
     }
-    let maybeSymbols: Record<string, string> =
-        settings.columns?.[symbolCol]?.symbols ?? {};
+    let maybeSymbols = (settings.columns_config?.[symbolCol]?.["symbols"] ??
+        {}) as Record<string, string>;
     Object.entries(maybeSymbols).forEach(([key, value]) => {
         // TODO: Define custom symbol types based on the values passed in here.
         // https://d3js.org/d3-shape/symbol#custom-symbols
@@ -180,6 +181,22 @@ xyScatter.plugin = {
         ],
     },
     selectMode: "toggle",
+};
+
+xyScatter.can_render_column_styles = (type: Type, group?: string) => {
+    return type === "string" && group === "Symbol";
+};
+xyScatter.column_style_controls = (type: Type, group?: string) => {
+    if (type === "string" && group === "Symbol") {
+        return {
+            symbols: {
+                keys: "row",
+                values: Object.keys(symbolsObj),
+            },
+        };
+    } else {
+        return null;
+    }
 };
 
 export default xyScatter;

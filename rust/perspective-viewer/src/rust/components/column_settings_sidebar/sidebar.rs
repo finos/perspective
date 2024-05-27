@@ -69,7 +69,7 @@ pub struct ColumnSettingsProps {
     pub is_active: bool,
 }
 
-derive_model!(CustomEvents, Session, Renderer, Presentation for ColumnSettingsProps);
+derive_model!(Session, Renderer, Presentation for ColumnSettingsProps);
 
 impl PartialEq for ColumnSettingsProps {
     fn eq(&self, other: &Self) -> bool {
@@ -87,7 +87,7 @@ pub enum ColumnSettingsMsg {
     OnSaveAttributes(()),
     OnResetAttributes(()),
     OnDelete(()),
-    SessionUpdated(()),
+    SessionUpdated(bool),
 }
 
 #[derive(Default, Derivative)]
@@ -108,6 +108,11 @@ pub struct ColumnSettingsSidebar {
     column_name: String,
     maybe_ty: Option<Type>,
     tabs: Vec<ColumnSettingsTab>,
+
+    on_input: Callback<Rc<String>>,
+    on_save: Callback<()>,
+    on_validate: Callback<bool>,
+
     #[derivative(Debug = "ignore")]
     session_sub: Option<Subscription>,
 }
@@ -136,34 +141,16 @@ impl ColumnSettingsSidebar {
             (*initial_expr_value != column_name).then_some(column_name.clone());
         let maybe_ty = ctx.props().selected_column.view_type(ctx.props().session());
 
-        // NOTE: This is going to be refactored soon.
         let tabs = {
             let mut tabs = vec![];
-            let plugin = ctx.props().renderer.get_active_plugin().unwrap().name();
-            let (config, attrs) = (
-                ctx.props().get_plugin_config(),
-                ctx.props().get_plugin_attrs(),
-            );
-            if config.is_none() || attrs.is_none() {
-                tracing::warn!(
-                    "Could not get full plugin config!\nconfig (plugin.save()): \
-                     {:?}\nplugin_attrs: {:?}",
-                    config,
-                    attrs
-                );
-            }
-            let show_styles = maybe_ty
-                .map(|ty| match &*plugin {
-                    "Datagrid" => ty != Type::Bool,
-                    "X/Y Scatter" => ty == Type::String,
-                    _ => false,
-                })
-                .unwrap_or_default();
+            let is_new_expr = ctx.props().selected_column.is_new_expr();
+            let show_styles = !is_new_expr
+                && ctx
+                    .props()
+                    .can_render_column_styles(&column_name)
+                    .unwrap_or_default();
 
-            if !matches!(ctx.props().selected_column, ColumnLocator::Expr(None))
-                && show_styles
-                && config.is_some()
-            {
+            if !is_new_expr && show_styles {
                 tabs.push(ColumnSettingsTab::Style);
             }
 
@@ -173,6 +160,9 @@ impl ColumnSettingsSidebar {
             tabs
         };
 
+        let on_input = ctx.link().callback(ColumnSettingsMsg::SetExprValue);
+        let on_save = ctx.link().callback(ColumnSettingsMsg::OnSaveAttributes);
+        let on_validate = ctx.link().callback(ColumnSettingsMsg::SetExprValid);
         *self = Self {
             column_name,
             expr_value: initial_expr_value.clone(),
@@ -182,6 +172,9 @@ impl ColumnSettingsSidebar {
             maybe_ty,
             tabs,
             header_valid: true,
+            on_input,
+            on_save,
+            on_validate,
             session_sub: self.session_sub.take(),
             ..*self
         }
@@ -195,11 +188,12 @@ impl Component for ColumnSettingsSidebar {
     fn create(ctx: &yew::prelude::Context<Self>) -> Self {
         let session_cb = ctx
             .link()
-            .callback(|_| ColumnSettingsMsg::SessionUpdated(()));
+            .callback(|(is_update, _)| ColumnSettingsMsg::SessionUpdated(is_update));
+
         let session_sub = ctx
             .props()
             .renderer
-            .session_changed
+            .render_limits_changed
             .add_listener(session_cb);
 
         let mut this = Self {
@@ -264,8 +258,8 @@ impl Component for ColumnSettingsSidebar {
                 rerender
             },
             ColumnSettingsMsg::OnResetAttributes(()) => {
-                self.header_value = self.initial_header_value.clone();
-                self.expr_value = self.initial_expr_value.clone();
+                self.header_value.clone_from(&self.initial_header_value);
+                self.expr_value.clone_from(&self.initial_expr_value);
                 self.save_enabled = false;
                 self.reset_enabled = false;
                 self.reset_count += 1;
@@ -277,17 +271,17 @@ impl Component for ColumnSettingsSidebar {
                     (*(self.expr_value)).clone().into(),
                 );
                 match &ctx.props().selected_column {
-                    ColumnLocator::Plain(_) => {
+                    ColumnLocator::Table(_) => {
                         tracing::error!("Tried to save non-expression column!")
                     },
-                    ColumnLocator::Expr(name) => match name {
-                        Some(old_name) => ctx.props().update_expr(old_name.clone(), new_expr),
-                        None => ctx.props().save_expr(new_expr),
+                    ColumnLocator::Expression(name) => {
+                        ctx.props().update_expr(name.clone(), new_expr)
                     },
+                    ColumnLocator::NewExpression => ctx.props().save_expr(new_expr),
                 }
 
-                self.initial_expr_value = self.expr_value.clone();
-                self.initial_header_value = self.header_value.clone();
+                self.initial_expr_value.clone_from(&self.expr_value);
+                self.initial_header_value.clone_from(&self.header_value);
                 self.save_enabled = false;
                 self.reset_enabled = false;
                 self.save_count += 1;
@@ -300,9 +294,13 @@ impl Component for ColumnSettingsSidebar {
                 ctx.props().on_close.emit(());
                 true
             },
-            ColumnSettingsMsg::SessionUpdated(()) => {
-                self.initialize(ctx);
-                true
+            ColumnSettingsMsg::SessionUpdated(is_update) => {
+                if !is_update {
+                    self.initialize(ctx);
+                    true
+                } else {
+                    false
+                }
             },
         }
     }
@@ -329,9 +327,9 @@ impl Component for ColumnSettingsSidebar {
 
         let expr_editor = ExpressionEditorProps {
             session: ctx.props().session.clone(),
-            on_input: ctx.link().callback(ColumnSettingsMsg::SetExprValue),
-            on_save: ctx.link().callback(ColumnSettingsMsg::OnSaveAttributes),
-            on_validate: ctx.link().callback(ColumnSettingsMsg::SetExprValid),
+            on_input: self.on_input.clone(),
+            on_save: self.on_save.clone(),
+            on_validate: self.on_validate.clone(),
             alias: ctx.props().selected_column.name().cloned(),
             disabled: !ctx.props().selected_column.is_expr(),
             reset_count: self.reset_count,
@@ -357,6 +355,7 @@ impl Component for ColumnSettingsSidebar {
             custom_events: ctx.props().custom_events.clone(),
             session: ctx.props().session.clone(),
             renderer: ctx.props().renderer.clone(),
+            presentation: ctx.props().presentation.clone(),
             ty: self.maybe_ty,
             column_name: self.column_name.clone(),
         };
@@ -368,9 +367,7 @@ impl Component for ColumnSettingsSidebar {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-settings-panel")}
-                />
+                <LocalStyle href={css!("column-settings-panel")} />
                 <Sidebar
                     on_close={ctx.props().on_close.clone()}
                     id_prefix="column_settings"

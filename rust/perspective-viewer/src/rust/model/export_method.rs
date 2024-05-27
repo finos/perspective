@@ -54,7 +54,7 @@ impl ExportMethod {
 
 impl From<ExportMethod> for Html {
     fn from(x: ExportMethod) -> Self {
-        html! { <code >{ x.as_filename() }</code> }
+        html! { <code>{ x.as_filename() }</code> }
     }
 }
 

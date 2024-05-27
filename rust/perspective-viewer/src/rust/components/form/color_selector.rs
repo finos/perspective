@@ -18,17 +18,41 @@ use yew::prelude::*;
 pub struct ColorProps {
     pub color: String,
     pub on_color: Callback<String>,
+
+    #[prop_or_default]
+    pub title: Option<String>,
 }
 
 #[function_component(ColorSelector)]
 pub fn color_component(props: &ColorProps) -> Html {
-    let oninput = props.on_color.reform(|event: InputEvent| {
-        event
-            .target()
-            .unwrap()
-            .unchecked_into::<HtmlInputElement>()
-            .value()
-    });
+    let changed = use_state(|| props.color.clone());
+    let oninput = use_callback(
+        (changed.clone(), props.on_color.clone()),
+        |event: InputEvent, deps| {
+            let color = event
+                .target()
+                .unwrap()
+                .unchecked_into::<HtmlInputElement>()
+                .value();
+            deps.0.set(color.clone());
+            deps.1.emit(color);
+        },
+    );
 
-    html! { <input class="parameter" type="color" value={props.color.to_owned()} {oninput} /> }
+    html! {
+        <>
+            <label id={props.title.as_deref().unwrap_or("color-label").to_owned()} />
+            <div class="color-gradient-container">
+                <input class="parameter" type="color" value={props.color.to_owned()} {oninput} />
+                if *changed != props.color {
+                    <span class="reset-default-style" />
+                    // onclick={props.on_check.clone()}
+                    // id={format!("{}-checkbox", props.label.replace(' ', "-"))}
+                } else {
+                    <span class="reset-default-style-disabled" />
+                    // id={format!("{}-checkbox", props.label.replace(' ', "-"))}
+                }
+            </div>
+        </>
+    }
 }

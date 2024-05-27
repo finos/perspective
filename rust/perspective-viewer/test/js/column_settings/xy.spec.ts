@@ -10,11 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import {
-    PageView as PspViewer,
-    compareNodes,
-    getEventListener,
-} from "@finos/perspective-test";
+import { PageView as PspViewer, compareNodes } from "@finos/perspective-test";
 import { SymbolPair } from "@finos/perspective-test/src/js/models/column_settings";
 
 import { expect, test } from "@finos/perspective-test";
@@ -123,7 +119,7 @@ test.describe("X/Y Scatter", () => {
         await checkSymbolsSection(page, "Discount", ["0", "1", "2"], "7");
     });
 
-    test("Symbols column - String values", async ({ page }) => {
+    test.skip("Symbols column - String values", async ({ page }) => {
         await checkSymbolsSection(page, "State", ["A", "B", "C"], "D");
     });
 

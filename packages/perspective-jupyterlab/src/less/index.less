@@ -35,6 +35,14 @@ div.PSPContainer {
     height: 520px;
 }
 
+// Widget height for Voila
+// Widget height for VS Code
+body[data-voila="voila"] .jp-OutputArea-output div.PSPContainer,
+body[data-vscode-theme-id] .cell-output-ipywidget-background div.PSPContainer {
+    min-height: 520px;
+    height: 520px;
+}
+
 div.PSPContainer perspective-viewer[theme="Pro Light"] {
     --plugin--border: 1px solid #e0e0e0;
 }

@@ -310,12 +310,7 @@ impl Component for FilterColumn {
                 }
                 false
             },
-            FilterColumnMsg::FilterKeyDown(_) => {
-                if ctx.props().is_suggestable() {
-                    ctx.props().filter_dropdown.reautocomplete();
-                }
-                false
-            },
+            FilterColumnMsg::FilterKeyDown(_) => false,
             FilterColumnMsg::FilterOpSelect(op) => {
                 ctx.props().update_filter_op(op);
                 true
@@ -416,13 +411,13 @@ impl Component for FilterColumn {
             },
             Some(Type::String) => html! {
                 <input
-                    type="text"
+                    type="search"
                     size="4"
                     placeholder="Value"
                     class="string-filter"
                     spellcheck="false"
                     // TODO This is dirty and it may not work in the future.
-                     onInput="this.parentNode.dataset.value=this.value"
+                    onInput="this.parentNode.dataset.value=this.value"
                     ref={noderef.clone()}
                     onkeydown={keydown}
                     onfocus={focus}
@@ -484,24 +479,19 @@ impl Component for FilterColumn {
                 ondragstart={dragstart}
                 ondragend={dragend}
             >
-                <LocalStyle
-                    href={css!("filter-item")}
-                />
-                <div
-                    class="pivot-column-border"
-                >
+                <LocalStyle href={css!("filter-item")} />
+                <div class="pivot-column-border">
                     <TypeIcon ty={Type::String} />
                     <span class="column_name">{ filter.0.to_owned() }</span>
                     <FilterOpSelector
                         class="filterop-selector"
+                        is_autosize=true
                         values={filter_ops}
                         selected={filter.1}
                         on_select={select}
                     />
                     if !matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
-                        if col_type == Some(Type::Bool) {
-                            { input_elem }
-                        } else {
+                        if col_type == Some(Type::Bool) { { input_elem } } else {
                             <label
                                 class={format!("input-sizer {}", type_class)}
                                 data-value={format!("{}", filter.2)}

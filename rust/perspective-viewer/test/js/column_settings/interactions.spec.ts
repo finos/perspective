@@ -251,7 +251,7 @@ async function open(
     }, viewer_settings);
 
     let selector = active
-        ? view.settingsPanel.activeColumns.getColumnByName(
+        ? await view.settingsPanel.activeColumns.getColumnByName(
               expr ? expr_name : view_columns[0]
           )
         : expr
@@ -286,16 +286,32 @@ async function checkOutput(
         tabs: string[],
         unexpected_tabs: string[]
     ) => {
-        await view.columnSettingsSidebar.container
-            .locator(".tab.selected")
-            .getByText(selectedTab)
-            .waitFor();
+        if (selectedTab === "") {
+            await view.columnSettingsSidebar.container
+                .locator(".tab.selected .tab-title")
+                .first()
+                .waitFor();
+        } else {
+            await view.columnSettingsSidebar.container
+                .locator(`.tab.selected #${selectedTab}`)
+                .waitFor();
+        }
+
         for (let tab of tabs) {
-            await view.columnSettingsSidebar.tabTitle.getByText(tab).waitFor();
+            if (tab === "") {
+                await view.columnSettingsSidebar.container
+                    .locator(`.tab-title`)
+                    .first()
+                    .waitFor();
+            } else {
+                await view.columnSettingsSidebar.container
+                    .locator(`#${tab}`)
+                    .waitFor();
+            }
         }
         for (let tab of unexpected_tabs) {
             await view.columnSettingsSidebar.tabTitle
-                .getByText(tab)
+                .locator(`#${tab}`)
                 .waitFor({ state: "hidden" });
         }
     };
@@ -598,10 +614,40 @@ test.describe("Unique Behaviors", () => {
             plugin: "X/Y Scatter",
             columns: ["Row ID", "Postal Code", null, null, "Category"],
         });
-        let col = view.settingsPanel.activeColumns.getColumnByName("Category");
+        let col = await view.settingsPanel.activeColumns.getColumnByName(
+            "Category"
+        );
         await col.editBtn.click();
         await expect(view.columnSettingsSidebar.container).toBeVisible();
         view.settingsPanel.groupby("City");
         await expect(view.columnSettingsSidebar.container).toBeHidden();
+    });
+
+    test("Datagrid - switching between date and datetime should rerender", async ({
+        page,
+    }) => {
+        const view = new PageView(page);
+        await view.restore({
+            settings: true,
+            plugin: "Datagrid",
+            columns: ["date", "datetime"],
+            expressions: { date: "date(0,0,0)", datetime: "now()" },
+        });
+        const date = await view.settingsPanel.activeColumns.getColumnByName(
+            "date",
+            true
+        );
+        await date.editBtn.click();
+        await view.columnSettingsSidebar.openTab("Style");
+        const dateSnapshot =
+            await view.columnSettingsSidebar.styleTab.container.innerHTML();
+        const datetime = await view.settingsPanel.activeColumns.getColumnByName(
+            "datetime",
+            true
+        );
+        await datetime.editBtn.click();
+        const datetimeSnapshot =
+            await view.columnSettingsSidebar.styleTab.container.innerHTML();
+        expect(datetimeSnapshot).not.toEqual(dateSnapshot);
     });
 });

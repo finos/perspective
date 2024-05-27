@@ -239,10 +239,7 @@ impl Component for ColumnSelector {
         );
 
         let config_selector = html_nested! {
-            <ScrollPanelItem
-                key="config_selector"
-                {size_hint}
-            >
+            <ScrollPanelItem key="config_selector" {size_hint}>
                 <ConfigSelector
                     dragdrop={&ctx.props().dragdrop}
                     session={&ctx.props().session}
@@ -269,15 +266,12 @@ impl Component for ColumnSelector {
                 let column_dropdown = self.column_dropdown.clone();
                 let is_editing = matches!(
                     &ctx.props().selected_column,
-                    Some(ColumnLocator::Plain(x)) | Some(ColumnLocator::Expr(Some(x))) if x == &key
-                );
+                    Some(ColumnLocator::Table(x)) | Some(ColumnLocator::Expression(x))
+                if x == &key );
 
                 let on_open_expr_panel = &ctx.props().on_open_expr_panel;
                 html_nested! {
-                    <ScrollPanelItem
-                        {key}
-                        {size_hint}
-                    >
+                    <ScrollPanelItem {key} {size_hint}>
                         <ActiveColumn
                             {column_dropdown}
                             {idx}
@@ -303,12 +297,10 @@ impl Component for ColumnSelector {
             .chain(columns_iter.inactive())
             .enumerate()
             .map(|(idx, vc)| {
-                let is_editing = matches!(&ctx.props().selected_column, Some(ColumnLocator::Expr(Some(x))) if x.as_str() == vc.name);
+                let selected_column = ctx.props().selected_column.as_ref();
+                let is_editing = matches!(selected_column, Some(ColumnLocator::Expression(x)) if x.as_str() == vc.name);
                 html_nested! {
-                    <ScrollPanelItem
-                        key={vc.name}
-                        size_hint=28.0
-                    >
+                    <ScrollPanelItem key={vc.name} size_hint=28.0>
                         <InactiveColumn
                             {idx}
                             visible={vc.is_visible}
@@ -334,10 +326,7 @@ impl Component for ColumnSelector {
         };
 
         let add_column = html_nested! {
-            <ScrollPanelItem
-                key="__add_expression__"
-                size_hint={size}
-            >
+            <ScrollPanelItem key="__add_expression__" size_hint={size}>
                 <AddExpressionButton
                     on_open_expr_panel={&ctx.props().on_open_expr_panel}
                     selected_column={ctx.props().selected_column.clone()}
@@ -352,9 +341,7 @@ impl Component for ColumnSelector {
         }
 
         let selected_columns = html! {
-            <div
-                id="selected-columns"
-            >
+            <div id="selected-columns">
                 <ScrollPanel
                     id="active-columns"
                     class={active_classes}
@@ -372,9 +359,7 @@ impl Component for ColumnSelector {
 
         html! {
             <>
-                <LocalStyle
-                    href={css!("column-selector")}
-                />
+                <LocalStyle href={css!("column-selector")} />
                 <SplitPanel
                     no_wrap=true
                     on_reset={self.on_reset.callback()}

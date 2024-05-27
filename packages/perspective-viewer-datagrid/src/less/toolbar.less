@@ -58,6 +58,22 @@
     -webkit-mask-image: var(--toolbar-edit-mode-active--content);
 }
 
+#edit_mode span:before {
+    content: var(--edit-mode-toggle--content, "Read Only");
+}
+
+#edit_mode.editable span:before {
+    content: var(--edit-mode-alt-toggle--content, "Editable");
+}
+
+#scroll_lock span:before {
+    content: var(--scroll-lock-toggle--content, "Free Scroll");
+}
+
+#scroll_lock.lock-scroll span:before {
+    content: var(--scroll-lock-alt-toggle--content, "Align Scroll");
+}
+
 :host(.aggregated) #toolbar #edit_mode {
     display: none;
 }
@@ -85,6 +101,14 @@
     padding: 0 5px;
     border: 1px solid transparent;
     border-radius: 3px;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    display: inline-flex;
+    font-size: var(--label--font-size, 0.75em);
+    height: 22px;
+    user-select: none;
+    white-space: nowrap;
+    width: 37px;
 }
 
 .button > span {

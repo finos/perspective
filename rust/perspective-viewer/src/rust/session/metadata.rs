@@ -115,7 +115,7 @@ impl SessionMetadata {
             .map(|x| x.edited)
             .unwrap_or_default();
 
-        edited.retain(|k, _| expression_alias.get(k).is_some());
+        edited.retain(|k, _| expression_alias.contains_key(k));
         self.as_mut().unwrap().expr_meta = Some(SessionViewExpressionMetadata {
             schema: expression_schema,
             alias: expression_alias,
@@ -193,11 +193,11 @@ impl SessionMetadata {
         name.and_then(|name| {
             self.as_ref().and_then(|meta| {
                 if self.is_column_expression(&name) {
-                    Some(ColumnLocator::Expr(Some(name)))
+                    Some(ColumnLocator::Expression(name))
                 } else {
                     meta.column_names
                         .iter()
-                        .find_map(|n| (n == &name).then_some(ColumnLocator::Plain(name.clone())))
+                        .find_map(|n| (n == &name).then_some(ColumnLocator::Table(name.clone())))
                 }
             })
         })

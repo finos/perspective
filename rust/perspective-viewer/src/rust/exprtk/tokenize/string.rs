@@ -43,8 +43,13 @@ fn parse_escaped_char(input: &str) -> IResult<&str, char> {
     )(input)
 }
 
-fn parse_literal(input: &str) -> IResult<&str, &str> {
-    let not_quote_slash = is_not("\'\"\\");
+fn parse_literal(sep: char, input: &str) -> IResult<&str, &str> {
+    let not_quote_slash = if sep == '\'' {
+        is_not("\'\\")
+    } else {
+        is_not("\"\\")
+    };
+
     verify(not_quote_slash, |s: &str| !s.is_empty())(input)
 }
 
@@ -65,18 +70,29 @@ impl StringFragment {
     }
 }
 
-fn parse_fragment(input: &str) -> IResult<&str, StringFragment> {
+fn parse_fragment(sep: char, input: &str) -> IResult<&str, StringFragment> {
     alt((
-        map(parse_literal, |x| StringFragment::Literal(x.len())),
+        map(
+            |x| parse_literal(sep, x),
+            |x| StringFragment::Literal(x.len()),
+        ),
         map(parse_escaped_char, |_| StringFragment::EscapedChar),
         value(StringFragment::EscapedWS, preceded(char('\\'), multispace1)),
     ))(input)
 }
 
-pub fn parse_string_literal(sep: char) -> impl for<'a> Fn(&'a str) -> IResult<&'a str, &'a str> {
+pub fn parse_string_literal(
+    sep: char,
+) -> impl for<'a> Fn(&'a str) -> IResult<&'a str, Vec<&'a str>> {
     move |input| {
-        let build_string = fold_many0(parse_fragment, || 2, |len, frag| frag.len() + len);
+        let build_string = fold_many0(
+            |x| parse_fragment(sep, x),
+            || 2,
+            |len, frag| frag.len() + len,
+        );
+
         let offset = delimited(char(sep), build_string, char(sep));
-        map(offset, |x| &input[..x])(input)
+        let (input, lit) = map(offset, |x| &input[..x])(input)?;
+        Ok((input, lit.split('\n').collect()))
     }
 }

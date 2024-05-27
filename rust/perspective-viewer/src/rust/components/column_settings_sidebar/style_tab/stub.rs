@@ -21,17 +21,12 @@ pub struct StubProps {
 #[function_component(Stub)]
 pub fn stub(p: &StubProps) -> Html {
     if let Some(error) = p.error.clone() {
-        tracing::error!("RENDERED STUB: {error}");
+        tracing::error!("Rendered stub: {error}");
     }
 
     html! {
-        <div
-            class="style_contents"
-        >
-            <div
-                id="column-style-container"
-                class="no-style"
-            >
+        <div class="style_contents">
+            <div id="column-style-container" class="no-style">
                 <div class="style-contents">{ p.message.clone() }</div>
             </div>
         </div>

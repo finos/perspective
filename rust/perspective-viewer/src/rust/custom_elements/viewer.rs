@@ -54,6 +54,7 @@ use crate::*;
 ///     │                │└──────────────┘└───────┘││
 ///     │                └─────────────────────────┘│
 ///     └───────────────────────────────────────────┘
+#[derive(Clone)]
 #[wasm_bindgen]
 pub struct PerspectiveViewerElement {
     elem: HtmlElement,
@@ -143,6 +144,7 @@ impl PerspectiveViewerElement {
             .dyn_into::<js_sys::Promise>()
             .unwrap_or_else(|_| js_sys::Promise::resolve(&table));
 
+        self.session.reset(true);
         let mut config = ViewConfigUpdate {
             columns: Some(self.session.get_view_config().columns.clone()),
             ..ViewConfigUpdate::default()
@@ -257,93 +259,23 @@ impl PerspectiveViewerElement {
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
         global::document().blur_active_element();
-        clone!(self.session, self.renderer, self.root, self.presentation);
+        let this = self.clone();
         ApiFuture::new(async move {
             let decoded_update = ViewerConfigUpdate::decode(&update)?;
-
-            let ViewerConfigUpdate {
-                plugin,
-                plugin_config,
-                settings,
-                theme: theme_name,
-                title,
-                mut view_config,
-                ..//version
-            } = decoded_update;
-
-            if !session.has_table() {
-                if let OptionalUpdate::Update(x) = settings {
-                    presentation.set_settings_attribute(x);
-                }
-            }
-
-            if let OptionalUpdate::Update(title) = title {
-                presentation.set_title(Some(title));
-            } else if matches!(title, OptionalUpdate::SetDefault) {
-                presentation.set_title(None);
-            }
-
-            let needs_restyle = match theme_name {
-                OptionalUpdate::SetDefault => {
-                    let current_name = presentation.get_selected_theme_name().await;
-                    if current_name.is_some() {
-                        presentation.set_theme_name(None).await?;
-                        true
-                    } else {
-                        false
-                    }
-                },
-                OptionalUpdate::Update(x) => {
-                    let current_name = presentation.get_selected_theme_name().await;
-                    if current_name.is_some() && current_name.as_ref().unwrap() != &x {
-                        presentation.set_theme_name(Some(&x)).await?;
-                        true
-                    } else {
-                        false
-                    }
-                },
-                _ => false,
-            };
-
-            let plugin_changed = renderer.update_plugin(&plugin)?;
-            if plugin_changed {
-                session.set_update_column_defaults(&mut view_config, &renderer.metadata());
-            }
-
-            session.update_view_config(view_config);
-            let draw_task = renderer.draw(async {
-                let task = root
+            let settings = decoded_update.settings.clone();
+            let root = this.root.clone();
+            this.restore_and_render(decoded_update, async move {
+                let result = root
                     .borrow()
                     .as_ref()
-                    .ok_or("Already deleted")?
+                    .into_apierror()?
                     .send_message_async(move |x| {
                         PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
                     });
 
-                let internal_task = async {
-                    let plugin = renderer.get_active_plugin()?;
-                    if let Some(plugin_config) = &plugin_config {
-                        let js_config = JsValue::from_serde_ext(plugin_config)?;
-                        plugin.restore(&js_config);
-                    }
-
-                    session.validate().await?.create_view().await
-                }
-                .await;
-
-                task.await?;
-                internal_task
-            });
-
-            draw_task.await?;
-
-            // TODO this should be part of the API for `draw()` above, such that
-            // the plugin need not render twice when a theme is provided.
-            if needs_restyle {
-                let view = session.get_view().into_apierror()?;
-                renderer.restyle_all(&view).await?;
-            }
-
+                Ok(result.await?)
+            })
+            .await?;
             Ok(())
         })
     }
@@ -403,7 +335,8 @@ impl PerspectiveViewerElement {
     /// Reset the viewer's `ViewerConfig` to the default.
     ///
     /// # Arguments
-    /// - `all` Whether to clear `expressions` also.
+    /// - `all` If set, will clear expressions and column settings as well.
+    // TODO: We should replace the boolean value here with an options object.
     pub fn reset(&self, reset_expressions: Option<bool>) -> ApiFuture<()> {
         tracing::info!("Resetting config");
         let root = self.root.clone();

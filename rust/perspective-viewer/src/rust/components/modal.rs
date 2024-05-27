@@ -135,11 +135,9 @@ where
 
         html! {
             <>
-                <style >{ self.css.to_owned() }</style>
-                <ContextProvider<ModalOrientation>
-                    context={&self.rev_vert}
-                >
-                    <NoRender >{ child }</NoRender>
+                <style>{ self.css.to_owned() }</style>
+                <ContextProvider<ModalOrientation> context={&self.rev_vert}>
+                    <NoRender>{ child }</NoRender>
                 </ContextProvider<ModalOrientation>>
             </>
         }

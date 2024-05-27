@@ -1,0 +1,98 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+perspective-viewer,
+perspective-dropdown {
+    // Config
+    --group-by-label--content: "Agrupar por";
+    --split-by-label--content: "Dividir por";
+    --sort-label--content: "Ordenar por";
+    --filter-label--content: "Dónde";
+    --transpose-button--content: "Intercambio";
+    --config-button-icon--content: "Configurar";
+    --all-columns-label--content: "Todas las columnas";
+    --untitled--content: "Intitulado";
+
+    // Plugin names
+    --plugin-name-datagrid--content: "Cuadrícula de datos";
+    --plugin-name-treemap--content: "Mapa de árbol";
+    --plugin-name-sunburst--content: "resplandor solar";
+    --plugin-name-heatmap--content: "Mapa de calor";
+    --plugin-name-x-bar--content: "Barra X";
+    --plugin-name-y-bar--content: "Y Bar";
+    --plugin-name-y-line--content: "Y Line";
+    --plugin-name-x-y-line--content: "Línea X/Y";
+    --plugin-name-x-y-scatter--content: "Dispersión X/Y";
+    --plugin-name-y-scatter--content: "Dispersión Y";
+    --plugin-name-y-area--content: "Y Area";
+    --plugin-name-ohlc--content: "Ay";
+    --plugin-name-candlestick--content: "Candelero";
+
+    // Column Selector names
+    --column-selector-column-columns--content: "columnas";
+    --column-selector-column-x-axis--content: "Eje X";
+    --column-selector-column-y-axis--content: "Y Axis";
+    --column-selector-column-color--content: "Color";
+    --column-selector-column-size--content: "Tamaño";
+    --column-selector-column-symbol--content: "Símbolo";
+    --column-selector-column-label--content: "Etiqueta";
+    --column-selector-column-tooltip--content: "Información sobre herramientas";
+    --add-expression-button--content: "Nueva columna";
+
+    // Toolbar
+    --no-results--content: "Columna no válida";
+    --datagrid-column-edit-button--content: "Editar";
+    --copy-button--content: "Copiar";
+    --export-button--content: "Exportar";
+    --reset-button--content: "Reiniciar";
+    --edit-mode-toggle--content: "Solo lectura";
+    --edit-mode-alt-toggle--content: "Editable";
+    --scroll-lock-toggle--content: "Desplazamiento libre";
+    --scroll-lock-alt-toggle--content: "Alinear desplazamiento";
+
+    // Column Settings
+    --color-label--content: "Color";
+    --format-label--content: "Formato";
+    --timezone-label--content: "Zona horaria";
+    --date-style-label--content: "Estilo de fecha";
+    --time-style-label--content: "Estilo de hora";
+    --foreground-label--content: "Primer plano";
+    --background-label--content: "Fondo";
+    --series-label--content: "Serie";
+    --color-range-label--content: "Gama de colores";
+    --style-label--content: "Estilo";
+    --minimum-integer-digits-label--content: "Dígitos enteros mínimos";
+    --rounding-increment-label--content: "Incremento de redondeo";
+    --notation-label--content: "Notación";
+    --use-grouping-label--content: "Usar agrupación";
+    --sign-display-label--content: "Visualización de letreros";
+    --max-value-label--content: "Valor máximo";
+    --rounding-priority-label--content: "Prioridad de redondeo";
+    --rounding-mode-label--content: "Modo de redondeo";
+    --trailing-zero-display-label--content: "Visualización del cero final";
+    --fractional-digits-label--content: "Dígitos fraccionarios";
+    --significant-digits-label--content: "Dígitos significantes";
+    --year-label--content: "Año";
+    --month-label--content: "Mes";
+    --day-label--content: "Día";
+    --weekday-label--content: "Día laborable";
+    --hour-label--content: "Hora";
+    --minute-label--content: "Minuto";
+    --second-label--content: "Segundo";
+    --fractional-seconds-label--content: "Segundos fraccionarios";
+    --hours-label--content: "12/24 Horas";
+
+    // Tabs
+    --style-tab-label--content: "Estilo";
+    --attributes-tab-label--content: "Atributos";
+    --debug-tab-label--content: "Debug JSON";
+}

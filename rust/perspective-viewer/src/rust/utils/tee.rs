@@ -54,10 +54,10 @@ impl<T: Clone> Tee for T {
 
 macro_rules! gen_tee {
     ($($x:ty),*) => {
-        impl<T: Clone> TeeInternal<{${count(x)} + 1}> for T {
+        impl<T: Clone> TeeInternal<{${count($x)} + 1}> for T {
             type Output = ($($x),*, T);
             fn tee_internal(self) -> Self::Output {
-                ($( ${ignore(x)} self.clone() ),*, self)
+                ($( ${ignore($x)} self.clone() ),*, self)
             }
         }
     };
@@ -70,6 +70,7 @@ gen_tee!(T, T, T, T);
 gen_tee!(T, T, T, T, T);
 gen_tee!(T, T, T, T, T, T);
 gen_tee!(T, T, T, T, T, T, T);
+gen_tee!(T, T, T, T, T, T, T, T);
 
 #[cfg(test)]
 mod tests {

@@ -210,7 +210,7 @@ export class SettingsPanel {
      */
     async selectPlugin(name: string) {
         await this.pluginSelector.click();
-        await this.pluginSelector.getByText(name).click();
+        await this.pluginSelector.locator(`[data-plugin="${name}"]`).click();
     }
 }
 
@@ -267,10 +267,20 @@ export class ActiveColumns {
         return new ColumnSelector(this.columnSelector.first(), true);
     }
 
-    getColumnByName(name: string) {
-        let locator = this.columnSelector.filter({
+    async getColumnByName(name: string, exact: boolean = false) {
+        let locators = this.columnSelector.filter({
             hasText: name,
         });
+
+        let locator: Locator;
+        if (exact) {
+            locator = (await locators.all()).filter(
+                async (l) => (await l.innerText()) === name
+            )[0];
+        } else {
+            locator = locators.first();
+        }
+
         return new ColumnSelector(locator, true);
     }
 

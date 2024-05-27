@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -22,6 +23,7 @@ use yew::html::ImplicitClone;
 
 use crate::components::column_settings_sidebar::ColumnSettingsTab;
 use crate::components::viewer::ColumnLocator;
+use crate::config::{ColumnConfigUpdate, ColumnConfigValueUpdate, ColumnConfigValues};
 use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
@@ -61,6 +63,7 @@ impl OpenColumnSettings {
     }
 }
 
+pub type ColumnConfigMap = HashMap<String, ColumnConfigValues>;
 pub struct PresentationHandle {
     viewer_elem: HtmlElement,
     theme_data: Mutex<ThemeData>,
@@ -68,6 +71,7 @@ pub struct PresentationHandle {
     is_settings_open: RefCell<bool>,
     open_column_settings: RefCell<OpenColumnSettings>,
     is_workspace: RefCell<Option<bool>>,
+    columns_config: RefCell<ColumnConfigMap>,
     pub settings_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub column_settings_updated: PubSub<JsValue>,
@@ -89,6 +93,7 @@ impl Presentation {
             settings_open_changed: Default::default(),
             column_settings_open_changed: Default::default(),
             column_settings_updated: Default::default(),
+            columns_config: Default::default(),
             is_settings_open: Default::default(),
             is_workspace: Default::default(),
             open_column_settings: Default::default(),
@@ -105,7 +110,7 @@ impl Presentation {
     }
 
     pub fn set_title(&self, title: Option<String>) {
-        *self.name.borrow_mut() = title.clone();
+        self.name.borrow_mut().clone_from(&title);
         self.title_changed.emit(title);
     }
 
@@ -150,7 +155,7 @@ impl Presentation {
     pub fn set_open_column_settings(&self, settings: Option<OpenColumnSettings>) {
         let settings = settings.unwrap_or_default();
         if *(self.open_column_settings.borrow()) != settings {
-            *(self.open_column_settings.borrow_mut()) = settings.to_owned();
+            settings.clone_into(&mut (self.open_column_settings.borrow_mut()));
             self.column_settings_open_changed
                 .emit((true, settings.name()));
         }
@@ -219,7 +224,7 @@ impl Presentation {
             self.set_theme_attribute(Some(theme))?;
             themes.iter().position(|x| x == theme)
         } else if !themes.is_empty() {
-            self.set_theme_attribute(themes.get(0).map(|x| x.as_str()))?;
+            self.set_theme_attribute(themes.first().map(|x| x.as_str()))?;
             Some(0)
         } else {
             self.set_theme_attribute(None)?;
@@ -228,6 +233,51 @@ impl Presentation {
 
         self.theme_config_updated.emit((themes, index));
         Ok(())
+    }
+
+    /// Returns an owned copy of the curent column configuration map.
+    pub fn all_columns_configs(&self) -> ColumnConfigMap {
+        self.columns_config.borrow().clone()
+    }
+
+    pub fn reset_columns_configs(&self) {
+        *self.columns_config.borrow_mut() = ColumnConfigMap::new();
+    }
+
+    /// Gets a clone of the ColumnConfig for the given column name.
+    pub fn get_columns_config(&self, column_name: &str) -> Option<ColumnConfigValues> {
+        self.columns_config.borrow().get(column_name).cloned()
+    }
+
+    /// Updates the entire column config struct. (like from a restore() call)
+    pub fn update_columns_configs(&self, update: ColumnConfigUpdate) {
+        match update {
+            crate::config::OptionalUpdate::SetDefault => {
+                let mut config = self.columns_config.borrow_mut();
+                *config = HashMap::default()
+            },
+            crate::config::OptionalUpdate::Missing => {},
+            crate::config::OptionalUpdate::Update(update) => {
+                for (col_name, new_config) in update.into_iter() {
+                    self.columns_config
+                        .borrow_mut()
+                        .insert(col_name, new_config);
+                }
+            },
+        }
+    }
+
+    pub fn update_columns_config_value(
+        &self,
+        column_name: String,
+        update: ColumnConfigValueUpdate,
+    ) {
+        let mut config = self.columns_config.borrow_mut();
+        let value = config.remove(&column_name).unwrap_or_default();
+        let update = value.update(update);
+        if !update.is_empty() {
+            config.insert(column_name, update);
+        }
     }
 }
 

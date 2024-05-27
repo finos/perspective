@@ -22,7 +22,7 @@ pub struct CompletionItemSuggestion {
 }
 
 thread_local! {
-    pub static COMPLETION_COLUMN_NAMES: RefCell<Vec<String>> = RefCell::new(vec![]);
+    pub static COMPLETION_COLUMN_NAMES: RefCell<Vec<String>> = const { RefCell::new(vec![]) };
 
     pub static COMPLETIONS: Vec<CompletionItemSuggestion> = vec![
             CompletionItemSuggestion {

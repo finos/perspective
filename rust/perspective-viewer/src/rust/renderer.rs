@@ -44,9 +44,10 @@ use self::render_timer::*;
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::js::plugin::*;
+use crate::json;
+use crate::presentation::ColumnConfigMap;
 use crate::session::*;
 use crate::utils::*;
-use crate::*;
 
 #[derive(Clone)]
 pub struct Renderer(Rc<RendererData>);
@@ -56,7 +57,9 @@ pub struct RendererData {
     plugin_data: RefCell<RendererMutData>,
     draw_lock: DebounceMutex,
     pub plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
-    pub session_changed: PubSub<(bool, RenderLimits)>,
+    pub render_limits_changed: PubSub<(bool, RenderLimits)>,
+    pub style_changed: PubSub<()>,
+    pub reset_changed: PubSub<()>,
 }
 
 /// Mutable state
@@ -112,14 +115,16 @@ impl Renderer {
             }),
             draw_lock: Default::default(),
             plugin_changed: Default::default(),
-            session_changed: Default::default(),
+            render_limits_changed: Default::default(),
+            style_changed: Default::default(),
+            reset_changed: Default::default(),
         }))
     }
 
-    pub async fn reset(&self) {
+    pub async fn reset(&self, columns_config: Option<&ColumnConfigMap>) {
         self.0.borrow_mut().plugins_idx = None;
         if let Ok(plugin) = self.get_active_plugin() {
-            plugin.restore(&json!({}));
+            plugin.restore(&json!({}), columns_config);
         }
     }
 
@@ -285,7 +290,7 @@ impl Renderer {
         let plugin = self.get_active_plugin()?;
         let meta = self.metadata().clone();
         let limits = get_row_and_col_limits(view, &meta).await?;
-        self.session_changed.emit((is_update, limits));
+        self.render_limits_changed.emit((is_update, limits));
         let viewer_elem = &self.0.borrow().viewer_elem.clone();
         if is_update {
             let task = plugin.update(view, limits.2, limits.3, false);
@@ -303,15 +308,15 @@ impl Renderer {
     pub async fn presize(
         &self,
         open: bool,
-        on_toggle: impl Future<Output = ApiResult<()>>,
+        panel_task: impl Future<Output = ApiResult<()>>,
     ) -> ApiResult<JsValue> {
-        let task = self.resize_with_timeout(open);
+        let render_task = self.resize_with_timeout(open);
         let result = if open {
-            on_toggle.await?;
-            task.await
+            panel_task.await?;
+            render_task.await
         } else {
-            let result = task.await;
-            on_toggle.await?;
+            let result = render_task.await;
+            panel_task.await?;
             result
         };
 

@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@import "dom/scrollbar.less";
+
 :host {
     .tab-gutter {
         border-color: var(--inactive--color, #6e6e6e);
@@ -34,7 +36,7 @@
             cursor: pointer;
 
             .tab-title {
-                font-size: 12px;
+                font-size: 10px;
                 padding: 10px;
                 border-bottom: 1px solid var(--inactive--color, #6e6e6e);
             }
@@ -60,13 +62,28 @@
             }
         }
     }
+
+    #format-tab {
+        overflow: scroll;
+    }
+
     .tab-content {
-        .tab-section {
-            padding: 8px;
-            // border-bottom: 1px solid var(--inactive--border-color);
+        @include scrollbar;
+        flex: 1 1 auto;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        .tab-section:last-child {
+            padding: 12px 8px 12px 8px;
         }
+
+        .tab-section {
+            padding: 12px 8px 0px 8px;
+            flex: 0 0 auto;
+            overflow: hidden;
+        }
+
         .text {
-            font-size: 14px;
             margin-left: 1em;
         }
     }

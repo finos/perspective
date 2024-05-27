@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
+import { test, expect, DEFAULT_CONFIG } from "@finos/perspective-test";
 import { API_VERSION } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
@@ -35,8 +35,8 @@ test.describe("Plugin Priority Order", () => {
         });
 
         const expected = {
+            ...DEFAULT_CONFIG,
             version: API_VERSION,
-            aggregates: {},
             columns: [
                 "Row ID",
                 "Order ID",
@@ -58,16 +58,7 @@ test.describe("Plugin Priority Order", () => {
                 "Discount",
                 "Profit",
             ],
-            expressions: {},
-            filter: [],
-            group_by: [],
             plugin: "HighPriority",
-            plugin_config: {},
-            settings: false,
-            sort: [],
-            split_by: [],
-            theme: "Pro Light",
-            title: null,
         };
 
         expect(saved).toEqual(expected);

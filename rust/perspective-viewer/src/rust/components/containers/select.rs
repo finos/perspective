@@ -45,6 +45,9 @@ where
     pub on_select: Callback<T>,
 
     #[prop_or_default]
+    pub is_autosize: bool,
+
+    #[prop_or_default]
     pub label: Option<&'static str>,
 
     #[prop_or_default]
@@ -150,12 +153,7 @@ where
             .any(|x| matches!(x, SelectItem::Option(y) if *y == ctx.props().selected));
 
         let select = html! {
-            <select
-                id={ctx.props().id}
-                {class}
-                ref={&self.select_ref}
-                onchange={callback}
-            >
+            <select id={ctx.props().id} {class} ref={&self.select_ref} onchange={callback}>
                 { for ctx.props().values.iter().map(|value| match value {
                         SelectItem::Option(value) => {
                             let selected = *value == ctx.props().selected;
@@ -206,22 +204,18 @@ where
             None => classes!("dropdown-width-container"),
         };
 
+        let value = if ctx.props().is_autosize {
+            self.selected.to_string()
+        } else {
+            "".to_owned()
+        };
+
         html! {
             if is_group_selected && ctx.props().label.is_some() {
-                <label >{ ctx.props().label.unwrap() }</label>
-                <div
-                    class={wrapper_class}
-                    data-value={format!("{}", self.selected)}
-                >
-                    { select }
-                </div>
+                <label>{ ctx.props().label.unwrap() }</label>
+                <div class={wrapper_class} data-value={value.clone()}>{ select }</div>
             } else {
-                <div
-                    class={wrapper_class}
-                    data-value={format!("{}", self.selected)}
-                >
-                    { select }
-                </div>
+                <div class={wrapper_class} data-value={value}>{ select }</div>
             }
         }
     }

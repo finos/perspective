@@ -99,9 +99,7 @@ impl Component for RenderWarning {
         if self.col_warn.is_some() || self.row_warn.is_some() {
             let warning = match (self.col_warn, self.row_warn) {
                 (Some((x, y)), Some((a, b))) => html! {
-                    <span
-                        style="white-space:nowrap"
-                    >
+                    <span style="white-space:nowrap">
                         { "Rendering" }
                         { render_pair(x, y) }
                         { "of columns and" }
@@ -110,18 +108,14 @@ impl Component for RenderWarning {
                     </span>
                 },
                 (Some((x, y)), None) => html! {
-                    <span
-                        style="white-space:nowrap"
-                    >
+                    <span style="white-space:nowrap">
                         { "Rendering" }
                         { render_pair(x, y) }
                         { "of columns." }
                     </span>
                 },
                 (None, Some((x, y))) => html! {
-                    <span
-                        style="white-space:nowrap"
-                    >
+                    <span style="white-space:nowrap">
                         { "Rendering" }
                         { render_pair(x, y) }
                         { "of points." }
@@ -134,29 +128,17 @@ impl Component for RenderWarning {
 
             html! {
                 <>
-                    <LocalStyle
-                        href={css!("render-warning")}
-                    />
+                    <LocalStyle href={css!("render-warning")} />
                     <div
                         class="plugin_information plugin_information--warning"
                         id="plugin_information--size"
                     >
-                        <span
-                            class="plugin_information__icon"
-                        />
-                        <span
-                            class="plugin_information__text"
-                            id="plugin_information_count"
-                        >
+                        <span class="plugin_information__icon" />
+                        <span class="plugin_information__text" id="plugin_information_count">
                             { warning }
                         </span>
-                        <span
-                            class="plugin_information__actions"
-                        >
-                            <span
-                                class="plugin_information__action"
-                                onmousedown={onclick}
-                            >
+                        <span class="plugin_information__actions">
+                            <span class="plugin_information__action" onmousedown={onclick}>
                                 { "Render all points" }
                             </span>
                         </span>
@@ -187,10 +169,7 @@ fn render_pair(n: usize, d: usize) -> Html {
     let y = pretty_print_int(d);
     let total = ((n as f64 / d as f64) * 100_f64).floor() as usize;
     html! {
-        <span
-            title={format!("${} / ${}", x, y)}
-            class="plugin_information--overflow-hint"
-        >
+        <span title={format!("${} / ${}", x, y)} class="plugin_information--overflow-hint">
             { "\u{00a0}" }
             <span class="plugin_information--overflow-hint-percent">{ format!("{}%", total) }</span>
             { "\u{00a0}" }

@@ -58,6 +58,12 @@
 
             .plugin-select-item-name {
                 padding-left: 10px;
+                font-size: 1.33333em;
+            }
+
+            .plugin-select-item-name:before {
+                // This value is set in a `style` tag from Yew!
+                content: var(--default-column-title);
             }
 
             .plugin-select-item {

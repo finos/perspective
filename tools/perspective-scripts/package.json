@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-scripts",
-    "version": "2.8.1",
+    "version": "2.10.1",
     "description": "Build scripts based on perspective",
     "private": true,
     "files": [

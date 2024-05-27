@@ -71,7 +71,7 @@ impl Component for FontLoader {
                 .map(font_test_html)
                 .collect::<Html>();
 
-            html! { <><style >{ ":host{opacity:0!important;}" }</style>{ inner }</> }
+            html! { <><style>{ ":host{opacity:0!important;}" }</style>{ inner }</> }
         }
     }
 }
@@ -104,7 +104,7 @@ impl FontLoaderProps {
         };
 
         let state = yew::props!(Self {
-            state: Rc::new(inner),
+            state: Rc::new(inner)
         });
 
         ApiFuture::spawn(state.clone().load_fonts_task_safe());
@@ -145,7 +145,7 @@ impl FontLoaderProps {
 
         let mut block_promises: PromiseSet = vec![];
         let preload_fonts = parse_fonts(&txt);
-        *self.state.fonts.borrow_mut() = preload_fonts.clone();
+        self.state.fonts.borrow_mut().clone_from(&preload_fonts);
         self.state.status.set(FontLoaderStatus::Loading);
         self.state.on_update.emit(());
 

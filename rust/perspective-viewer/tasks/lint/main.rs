@@ -34,7 +34,7 @@ pub fn main() {
     let yewfmt_args = edition_args
         .into_iter()
         .map(|x| x.into())
-        .chain(args.into_iter())
+        .chain(args)
         .collect::<Vec<_>>();
 
     let exit_code = std::process::Command::new(env!("CARGO_BIN_FILE_YEW_FMT"))

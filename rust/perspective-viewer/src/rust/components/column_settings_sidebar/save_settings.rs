@@ -30,13 +30,9 @@ pub fn save_settings(props: &SaveSettingsProps) -> Html {
     let save = props.on_save.reform(|_| ());
     let delete = props.on_delete.reform(|_| ());
     html! {
-        <div
-            id="save-settings-wrapper"
-        >
+        <div id="save-settings-wrapper">
             if props.show_danger_zone {
-                <div
-                    id="danger-zone"
-                >
+                <div id="danger-zone">
                     <button
                         id="psp-expression-editor-button-delete"
                         class="psp-expression-editor__button"
@@ -47,9 +43,7 @@ pub fn save_settings(props: &SaveSettingsProps) -> Html {
                     </button>
                 </div>
             }
-            <div
-                id="save-settings"
-            >
+            <div id="save-settings">
                 if props.is_save {
                     <button
                         id="psp-expression-editor-button-reset"

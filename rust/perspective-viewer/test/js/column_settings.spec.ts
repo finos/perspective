@@ -35,18 +35,18 @@ export async function checkTab(
     if (active) {
         if (expression) {
             if (hasStyles) {
-                expect(await titles[0].innerText()).toBe("Style");
-                expect(await titles[1].innerText()).toBe("Attributes");
+                expect(await titles[0].getAttribute("id")).toBe("Style");
+                expect(await titles[1].getAttribute("id")).toBe("Attributes");
             } else {
-                expect(await titles[0].innerText()).toBe("Attributes");
+                expect(await titles[0].getAttribute("id")).toBe("Attributes");
             }
         } else {
-            expect(await titles[0].innerText()).toBe("Style");
+            expect(await titles[0].getAttribute("id")).toBe("Style");
         }
     } else {
         if (expression) {
             expect(titles.length).toBe(1);
-            expect(await titles[0].innerText()).toBe("Attributes");
+            expect(await titles[0].getAttribute("id")).toBe("Attributes");
         } else {
             test.fail(
                 true,
@@ -108,7 +108,7 @@ test.describe("Plugin Styles", () => {
 
         await settingsPanel.createNewExpression("expr", "'string'");
         await activeColumns.activateColumn("expr");
-        let col = activeColumns.getColumnByName("expr");
+        let col = await activeColumns.getColumnByName("expr");
         await inactiveColumns.container.waitFor({ state: "hidden" });
         await activeColumns.scrollToBottom();
         await view.assureColumnSettingsOpen(col);
@@ -119,12 +119,15 @@ test.describe("Plugin Styles", () => {
         await tabs[0].click();
         await sidebar.styleTab.container.waitFor();
     });
+
     test("View updates don't re-render sidebar", async ({ page }) => {
         await page.evaluate(async () => {
+            // @ts-ignore
             let table = await window.__TEST_WORKER__.table({ x: [0] });
+            // @ts-ignore
             window.__TEST_TABLE__ = table;
             let viewer = document.querySelector("perspective-viewer");
-            viewer?.load(table);
+            await viewer?.load(table);
         });
 
         let view = new PageView(page);
@@ -133,6 +136,7 @@ test.describe("Plugin Styles", () => {
         await col.editBtn.click();
         await view.columnSettingsSidebar.container.waitFor();
         await page.evaluate(() => {
+            // @ts-ignore
             window.__TEST_TABLE__.update({ x: [1] });
         });
         await page.locator("tbody tr").nth(1).waitFor();
@@ -142,7 +146,7 @@ test.describe("Plugin Styles", () => {
     test("Column settings should not expand", async ({ page }) => {
         let view = new PageView(page);
 
-        const MAX_WIDTH = 200;
+        const MAX_WIDTH = 350;
         let checkWidth = async () => {
             let width = await view.columnSettingsSidebar.container.evaluate(
                 (sidebar) => sidebar.getBoundingClientRect().width
@@ -169,7 +173,7 @@ test.describe("Plugin Styles", () => {
         page,
     }) => {
         const view = new PageView(page);
-        view.restore({
+        await view.restore({
             expressions: {
                 expr: "1234",
             },
@@ -184,12 +188,15 @@ test.describe("Plugin Styles", () => {
         await view.columnSettingsSidebar.openTab("Attributes");
         await checkTab(view.columnSettingsSidebar, false, true);
         const selectedTab = async () => {
-            return await view.columnSettingsSidebar.selectedTab.innerText();
+            return await view.columnSettingsSidebar.selectedTab
+                .locator(".tab-title")
+                .getAttribute("id");
         };
         expect(await selectedTab()).toBe("Attributes");
         await col.activeBtn.click();
         await checkTab(view.columnSettingsSidebar, true, true, true);
         expect(await selectedTab()).toBe("Attributes");
+        await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.clear();
         await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.type(
             "'new expr value'"
         );

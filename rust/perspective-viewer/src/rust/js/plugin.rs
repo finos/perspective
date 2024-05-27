@@ -14,6 +14,7 @@ use serde::*;
 use wasm_bindgen::prelude::*;
 
 use super::perspective::JsPerspectiveView;
+use crate::presentation::ColumnConfigMap;
 use crate::utils::*;
 
 /// Perspective FFI
@@ -52,16 +53,20 @@ extern "C" {
     pub fn config_column_names(this: &JsPerspectiveViewerPlugin) -> Option<js_sys::Array>;
 
     #[wasm_bindgen(method, getter)]
-    pub fn plugin_attributes(this: &JsPerspectiveViewerPlugin) -> Option<js_sys::Object>;
-
-    #[wasm_bindgen(method, getter)]
     pub fn priority(this: &JsPerspectiveViewerPlugin) -> Option<i32>;
+
+    /// Don't call this method directly. Instead, call the corresponding method on the PluginColumnStyles model.
+    #[wasm_bindgen(method, catch)]
+    pub fn can_render_column_styles(this: &JsPerspectiveViewerPlugin, view_type: &str, group: Option<&str>) -> ApiResult<bool>;
+
+    #[wasm_bindgen(method, catch)]
+    pub fn column_style_controls(this: &JsPerspectiveViewerPlugin, view_type: &str, group: Option<&str>) -> ApiResult<JsValue>;
 
     #[wasm_bindgen(method)]
     pub fn save(this: &JsPerspectiveViewerPlugin) -> JsValue;
 
-    #[wasm_bindgen(method)]
-    pub fn restore(this: &JsPerspectiveViewerPlugin, token: &JsValue);
+    #[wasm_bindgen(method, js_name=restore)]
+    pub fn _restore(this: &JsPerspectiveViewerPlugin, token: &JsValue, columns_config: &JsValue);
 
     #[wasm_bindgen(method)]
     pub fn delete(this: &JsPerspectiveViewerPlugin);
@@ -96,6 +101,13 @@ extern "C" {
     #[wasm_bindgen(method, catch)]
     pub async fn resize(this: &JsPerspectiveViewerPlugin) -> ApiResult<JsValue>;
 
+}
+
+impl JsPerspectiveViewerPlugin {
+    pub fn restore(&self, token: &JsValue, columns_config: Option<&ColumnConfigMap>) {
+        let columns_config = JsValue::from_serde_ext(&columns_config).unwrap();
+        self._restore(token, &columns_config)
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq)]

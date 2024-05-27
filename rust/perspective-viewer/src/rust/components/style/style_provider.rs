@@ -50,9 +50,7 @@ impl Component for StyleProvider {
                     <StyleKeyed key={ x.0 } elem={ x.1 } />
                 }
             }) }
-                <ContextProvider<StyleCache>
-                    context={self.cache.clone()}
-                >
+                <ContextProvider<StyleCache> context={self.cache.clone()}>
                     { for ctx.props().children.iter() }
                 </ContextProvider<StyleCache>>
             </>

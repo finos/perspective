@@ -11,11 +11,16 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import type * as perspective from "@finos/perspective";
+import { PerspectiveColumnConfig } from "./perspective-viewer";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
+    version?: string;
+    theme?: string;
+    title?: string | null;
     plugin?: string;
     settings?: boolean;
     plugin_config?: any;
+    columns_config?: PerspectiveColumnConfig;
 };
 
 export type RenderStats = {

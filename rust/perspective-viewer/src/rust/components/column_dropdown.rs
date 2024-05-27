@@ -147,7 +147,7 @@ impl Component for ColumnDropDown {
                                 }
                             }) }
                 } else {
-                    <span class="no-results">{ "Invalid Column" }</span>
+                    <span class="no-results" />
                 }
             }
         };
@@ -157,6 +157,6 @@ impl Component for ColumnDropDown {
             self.width, self.width
         );
 
-        html! { <><style >{ &CSS }</style><style >{ position }</style>{ body }</> }
+        html! { <><style>{ &CSS }</style><style>{ position }</style>{ body }</> }
     }
 }

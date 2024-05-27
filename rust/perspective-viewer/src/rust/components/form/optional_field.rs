@@ -10,55 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use super::super::radio_list::{RadioList, RadioListMsg};
-use super::super::radio_list_item::RadioListItem;
-use crate::utils::{await_animation_frame, WeakScope};
-use crate::*;
+use yew::{classes, function_component, html, Callback, Children, Html, MouseEvent, Properties};
 
-use std::cell::RefCell;
-use std::rc::Rc;
-use wasm_bindgen_test::*;
-use yew::prelude::*;
+#[derive(Properties, PartialEq)]
+pub struct OptionalFieldProps {
+    pub label: String,
+    pub on_check: Callback<MouseEvent>,
+    pub checked: bool,
+    pub children: Children,
 
-wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+    #[prop_or(String::from("section"))]
+    pub class: String,
 
-#[wasm_bindgen_test]
-pub async fn test_change_u32() {
-    let link: WeakScope<RadioList<String>> = WeakScope::default();
-    let result: Rc<RefCell<String>> = Rc::new(RefCell::new("false".to_owned()));
-    let on_change = {
-        clone!(result);
-        Callback::from(move |val| {
-            *result.borrow_mut() = val;
-        })
-    };
+    #[prop_or_default]
+    pub disabled: bool,
+}
 
-    test_html! {
-        <RadioList<String>
-            disabled=false
-            selected="2"
-            on_change={ on_change }
-            weak_link={ link.clone() }>
-
-            <RadioListItem<String> value="1"><span>{ "One" }</span></RadioListItem<String>>
-            <RadioListItem<String> value="2"><span>{ "Two" }</span></RadioListItem<String>>
-            <RadioListItem<String> value="3"><span>{ "Three" }</span></RadioListItem<String>>
-
-        </RadioList<String>>
-    };
-
-    await_animation_frame().await.unwrap();
-    let radio_list = link.borrow().clone().unwrap();
-    radio_list.send_message(RadioListMsg::Change("2".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "2");
-    radio_list.send_message(RadioListMsg::Change("3".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "3");
-    radio_list.send_message(RadioListMsg::Change("1".to_owned()));
-    await_animation_frame().await.unwrap();
-
-    assert_eq!(*result.borrow(), "1");
+#[function_component(OptionalField)]
+pub fn optional_field(props: &OptionalFieldProps) -> Html {
+    html! {
+        <>
+            <label id={format!("{}-label", props.label)} />
+            <div
+                class={classes!(props.class.clone(), props.checked.then_some("is-default-value"))}
+            >
+                { props.children.clone() }
+                if props.checked {
+                    <span
+                        class="reset-default-style"
+                        onclick={props.on_check.clone()}
+                        id={format!("{}-checkbox", props.label)}
+                    />
+                } else {
+                    <span
+                        class="reset-default-style-disabled"
+                        id={format!("{}-checkbox", props.label)}
+                    />
+                }
+            </div>
+        </>
+    }
 }

@@ -19,43 +19,43 @@ import { make_color_record } from "../color_utils.js";
  * Restore this plugin's state from a previously saved `token`.
  *
  * @param {*} token A token returned from `save()`.
+ * @param {import("@finos/perspective-viewer").PerspectiveColumnConfig} columns Viewer column settings
  */
-export function restore(token) {
+export function restore(token, columns) {
     token = JSON.parse(JSON.stringify(token));
+    columns = JSON.parse(JSON.stringify(columns));
     const overrides = {};
+
     if (token.columns) {
-        for (const col of Object.keys(token.columns)) {
-            const col_config = token.columns[col];
-            if (col_config.column_size_override !== undefined) {
-                overrides[col] = col_config.column_size_override;
-                delete col_config["column_size_override"];
+        for (const [col, value] of Object.entries(token.columns)) {
+            if (value.column_size_override !== undefined) {
+                overrides[col] = value.column_size_override;
+                delete value["column_size_override"];
             }
+        }
+    }
 
-            if (col_config?.pos_fg_color) {
-                col_config.pos_fg_color = make_color_record(
-                    col_config.pos_fg_color
-                );
-                col_config.neg_fg_color = make_color_record(
-                    col_config.neg_fg_color
-                );
-            }
-
-            if (col_config?.pos_bg_color) {
-                col_config.pos_bg_color = make_color_record(
-                    col_config.pos_bg_color
-                );
-                col_config.neg_bg_color = make_color_record(
-                    col_config.neg_bg_color
-                );
-            }
-
-            if (col_config?.color) {
-                col_config.color = make_color_record(col_config.color);
-            }
-
-            if (Object.keys(col_config).length === 0) {
-                delete token.columns[col];
-            }
+    let styles = {};
+    if (columns) {
+        for (const [col_name, controls] of Object.entries(columns)) {
+            styles[col_name] = {
+                ...controls,
+                pos_fg_color: controls.pos_fg_color
+                    ? make_color_record(controls.pos_fg_color)
+                    : undefined,
+                neg_fg_color: controls.neg_fg_color
+                    ? make_color_record(controls.neg_fg_color)
+                    : undefined,
+                pos_bg_color: controls.pos_bg_color
+                    ? make_color_record(controls.pos_bg_color)
+                    : undefined,
+                neg_bg_color: controls.neg_bg_color
+                    ? make_color_record(controls.neg_bg_color)
+                    : undefined,
+                color: controls.color
+                    ? make_color_record(controls.color)
+                    : undefined,
+            };
         }
     }
 
@@ -69,5 +69,5 @@ export function restore(token) {
 
     const datagrid = this.regular_table;
     restore_column_size_overrides.call(this, overrides, true);
-    datagrid[PRIVATE_PLUGIN_SYMBOL] = token.columns;
+    datagrid[PRIVATE_PLUGIN_SYMBOL] = styles;
 }

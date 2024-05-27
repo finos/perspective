@@ -1,0 +1,98 @@
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+perspective-viewer,
+perspective-dropdown {
+    // Config
+    --group-by-label--content: "グループ化";
+    --split-by-label--content: "分割";
+    --sort-label--content: "注文方法";
+    --filter-label--content: "どこ";
+    --transpose-button--content: "スワップ";
+    --config-button-icon--content: "構成、設定";
+    --all-columns-label--content: "すべての列";
+    --untitled--content: "無題";
+
+    // Plugin names
+    --plugin-name-datagrid--content: "データグリッド";
+    --plugin-name-treemap--content: "ツリーマップ";
+    --plugin-name-sunburst--content: "サンバースト";
+    --plugin-name-heatmap--content: "ヒートマップ";
+    --plugin-name-x-bar--content: "Xバー";
+    --plugin-name-y-bar--content: "アンドバー";
+    --plugin-name-y-line--content: "そしてライン";
+    --plugin-name-x-y-line--content: "X/Y ライン";
+    --plugin-name-x-y-scatter--content: "X/Y 散布図";
+    --plugin-name-y-scatter--content: "Y散布図";
+    --plugin-name-y-area--content: "とエリア";
+    --plugin-name-ohlc--content: "痛い";
+    --plugin-name-candlestick--content: "ローソク足";
+
+    // Column Selector names
+    --column-selector-column-columns--content: "コラム";
+    --column-selector-column-x-axis--content: "X軸";
+    --column-selector-column-y-axis--content: "Y軸";
+    --column-selector-column-color--content: "色";
+    --column-selector-column-size--content: "サイズ";
+    --column-selector-column-symbol--content: "シンボル";
+    --column-selector-column-label--content: "ラベル";
+    --column-selector-column-tooltip--content: "ツールチップ";
+    --add-expression-button--content: "新しい列";
+
+    // Toolbar
+    --no-results--content: "無効な列";
+    --datagrid-column-edit-button--content: "編集";
+    --copy-button--content: "コピー";
+    --export-button--content: "輸出";
+    --reset-button--content: "リセット";
+    --edit-mode-toggle--content: "読み取り専用";
+    --edit-mode-alt-toggle--content: "エディベール";
+    --scroll-lock-toggle--content: "フリースクロ​​ール";
+    --scroll-lock-alt-toggle--content: "スクロールを揃える";
+
+    // Column Settings
+    --color-label--content: "色";
+    --format-label--content: "フォーマット";
+    --timezone-label--content: "タイムゾーン";
+    --date-style-label--content: "日付スタイル";
+    --time-style-label--content: "時間スタイル";
+    --foreground-label--content: "前景";
+    --background-label--content: "背景";
+    --series-label--content: "シリーズ";
+    --color-range-label--content: "色の範囲";
+    --style-label--content: "スタイル";
+    --minimum-integer-digits-label--content: "整数の最小桁数";
+    --rounding-increment-label--content: "丸め増分";
+    --notation-label--content: "表記";
+    --use-grouping-label--content: "グループ化を使用する";
+    --sign-display-label--content: "サインディスプレイ";
+    --max-value-label--content: "最大値";
+    --rounding-priority-label--content: "丸めの優先順位";
+    --rounding-mode-label--content: "丸めモード";
+    --trailing-zero-display-label--content: "末尾ゼロの表示";
+    --fractional-digits-label--content: "小数桁";
+    --significant-digits-label--content: "有効数字";
+    --year-label--content: "年";
+    --month-label--content: "月";
+    --day-label--content: "日";
+    --weekday-label--content: "平日";
+    --hour-label--content: "時間";
+    --minute-label--content: "分";
+    --second-label--content: "2番";
+    --fractional-seconds-label--content: "小数秒";
+    --hours-label--content: "12/24時間";
+
+    // Tabs
+    --style-tab-label--content: "スタイル";
+    --attributes-tab-label--content: "属性";
+    --debug-tab-label--content: "Debug JSON";
+}

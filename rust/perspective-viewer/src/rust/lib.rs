@@ -12,12 +12,11 @@
 
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
-#![feature(async_fn_in_trait)]
 #![feature(const_type_name)]
 #![feature(lazy_cell)]
 #![feature(let_chains)]
 #![feature(macro_metavar_expr)]
-#![feature(return_position_impl_trait_in_trait)]
+#![feature(iter_intersperse)]
 #![feature(stmt_expr_attributes)]
 #![warn(
     clippy::all,

@@ -22,7 +22,6 @@
                 align-items: center;
                 position: relative;
                 margin-top: 1px;
-                font-size: 12px;
                 min-width: 45px;
                 overflow: hidden;
                 height: 16px;
@@ -42,7 +41,6 @@
                     border: none;
                     border-bottom: 1px solid var(--inactive--color, #ccc);
                     background: transparent;
-                    font-size: 12px;
                     color: inherit;
                 }
 
@@ -51,7 +49,7 @@
                     color: var(--inactive--color, inherit);
                     visibility: hidden;
                     white-space: nowrap;
-                    padding-right: 12px;
+                    padding-right: 18px;
                 }
 
                 &.num-filter {
@@ -90,6 +88,26 @@
         // The filter comparator
         #filter {
             .pivot-column {
+                input {
+                    font-size: 1em;
+                }
+
+                input[type="search"] {
+                    text-overflow: ellipsis;
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    &::-webkit-search-cancel-button {
+                        cursor: pointer;
+                        opacity: 1;
+                        margin-left: 6px;
+                    }
+
+                    &:not(:empty)::-webkit-search-cancel-button {
+                        opacity: 1;
+                    }
+                }
+
                 .dropdown-width-container {
                     height: 100%;
                     flex: 0 0 auto;

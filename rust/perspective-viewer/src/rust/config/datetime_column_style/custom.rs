@@ -65,6 +65,10 @@ const fn numeric_default() -> u32 {
 pub struct CustomDatetimeStyleConfig {
     format: FormatUnit,
 
+    #[serde(default)]
+    #[serde(rename = "timeZone", skip_serializing_if = "Option::is_none")]
+    pub time_zone: Option<String>,
+
     #[serde(
         skip_serializing_if = "is_zero",
         rename = "fractionalSecondDigits",
@@ -102,6 +106,7 @@ impl Default for CustomDatetimeStyleConfig {
         CustomDatetimeStyleConfig {
             format: FormatUnit::FormatUnit,
             fractional_seconds: 0,
+            time_zone: None,
             second: CustomDatetimeFormat::Numeric,
             minute: CustomDatetimeFormat::Numeric,
             hour: CustomDatetimeFormat::Numeric,

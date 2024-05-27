@@ -92,22 +92,40 @@ impl FilterDropDownElement {
                         FilterDropDownMsg::SetCallback(callback),
                         FilterDropDownMsg::SetValues(values),
                     ]);
+
+                    if let Some(x) = self.target.borrow().clone()
+                        && !self.modal.is_open()
+                    {
+                        ApiFuture::spawn(self.modal.clone().open(x, None))
+                    }
                 }
             },
             _ => {
-                // TODO is this a race condition? `column` and `values` are out-of-sync
-                // across an `await` point.
-                *self.column.borrow_mut() = Some(column.clone());
-                *self.target.borrow_mut() = Some(target.clone());
                 ApiFuture::spawn({
-                    clone!(self.modal, self.session, self.values);
+                    clone!(
+                        self.modal,
+                        self.session,
+                        self.values,
+                        old_column = self.column,
+                        old_target = self.target
+                    );
                     async move {
-                        let all_values = session.get_column_values(column.1).await?;
+                        let all_values = session.get_column_values(column.1.clone()).await?;
                         *values.borrow_mut() = Some(all_values);
                         let filter_values = filter_values(&input, &values, &exclude);
                         if filter_values.len() == 1 && filter_values[0] == input {
+                            *old_column.borrow_mut() = Some(column);
+                            *old_target.borrow_mut() = Some(target.clone());
+                            let filter_values = self::filter_values("", &values, &exclude);
+                            modal.send_message_batch(vec![
+                                FilterDropDownMsg::SetCallback(callback),
+                                FilterDropDownMsg::SetValues(filter_values),
+                            ]);
+
                             modal.hide()
                         } else {
+                            *old_column.borrow_mut() = Some(column);
+                            *old_target.borrow_mut() = Some(target.clone());
                             modal.send_message_batch(vec![
                                 FilterDropDownMsg::SetCallback(callback),
                                 FilterDropDownMsg::SetValues(filter_values),

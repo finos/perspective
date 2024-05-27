@@ -52,11 +52,13 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
             let plugin_config: serde_json::Value = js_plugin.save().into_serde_ext()?;
             let theme = presentation.get_selected_theme_name().await;
             let title = presentation.get_title();
+            let columns_config = presentation.all_columns_configs();
             Ok(ViewerConfig {
                 version,
                 plugin,
                 title,
                 plugin_config,
+                columns_config,
                 settings,
                 view_config,
                 theme,

@@ -16,14 +16,13 @@
 pub mod dragdrop_list;
 pub mod dropdown_menu;
 pub mod kvpair;
-pub mod radio_list;
-pub mod radio_list_item;
 pub mod scroll_panel;
 pub mod scroll_panel_item;
 pub mod select;
 pub mod sidebar;
 pub mod split_panel;
 pub mod tab_list;
+pub mod trap_door_panel;
 
 #[cfg(test)]
 mod tests;

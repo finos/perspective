@@ -43,9 +43,9 @@
                 sort: [["deathIncrease", "col desc"]],
                 expressions: {
                     [`Parsed "date" bucket by week`]: `var year := integer(floor("date" / 10000));
-            var month := integer(floor("date" / 100)) - year * 100;
-            var day := integer("date" % 100);
-            bucket(date(year, month, day), \'W\')`,
+var month := integer(floor("date" / 100)) - year * 100;
+var day := integer("date" % 100);
+bucket(date(year, month, day), \'W\')`,
                 },
                 aggregates: {},
             };

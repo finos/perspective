@@ -65,6 +65,7 @@ const TESTS = [
                     table: "superstore",
                     title: "One",
                     plugin: "Y Area",
+                    columns_config: {},
                     plugin_config: {},
                     group_by: ["bucket(\"Order Date\", 'M')"],
                     split_by: ["Ship Mode"],

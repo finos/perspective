@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective"
-version = "2.8.1"
+version = "2.10.1"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -99,9 +99,6 @@ js-sys = "0.3.64"
 # Parse ExprTK for syntax highlighting.
 nom = "7.1.1"
 
-# Comma-sep numeric representation
-num-format = "0.4.4"
-
 # MessagePack serialization
 rmp-serde = "1.1.1"
 
@@ -129,6 +126,8 @@ yew = { version = "0.21.0", features = ["csr"] }
 
 # Browser stdlib bindings
 web-sys.version = "0.3.64"
+
+# Browser stdlib bindings
 web-sys.features = [
     "Blob",
     "Clipboard",
@@ -179,3 +178,6 @@ web-sys.features = [
     "VisibilityState",
     "Window",
 ]
+
+serde_with = "3.6.1"
+strum = { version = "0.26.1", features = ["derive"] }

@@ -18,5 +18,11 @@
 pub mod code_editor;
 pub mod color_range_selector;
 pub mod color_selector;
+pub mod debug;
 mod highlight;
+pub mod number_field;
 pub mod number_input;
+pub mod number_range_field;
+pub mod optional_field;
+
+pub mod select_field;

@@ -60,23 +60,11 @@ pub fn Sidebar(p: &SidebarProps) -> Html {
 
     let width_style = format!("min-width: 200px; width: {}px", *auto_width);
     html! {
-        <div
-            class="sidebar_column"
-            id={format!("{id}_sidebar")}
-            ref={noderef}
-        >
+        <div class="sidebar_column" id={format!("{id}_sidebar")} ref={noderef}>
             <SidebarCloseButton id={format!("{id}_close_button")} on_close_sidebar={&p.on_close} />
             <div class="sidebar_header"><EditableHeader ..p.header_props.clone() /></div>
-            <div
-                class="sidebar_border"
-                id={format!("{id}_border")}
-            />
-            <div
-                class="sidebar_content"
-                id={format!("{id}_content")}
-            >
-                { p.children.iter().collect::<Html>() }
-            </div>
+            <div class="sidebar_border" id={format!("{id}_border")} />
+            { p.children.iter().collect::<Html>() }
             <div class="sidebar-auto-width" style={width_style} />
         </div>
     }
@@ -92,5 +80,9 @@ pub struct SidebarCloseButtonProps {
 pub fn SidebarCloseButton(p: &SidebarCloseButtonProps) -> Html {
     let onclick = yew::use_callback(p.on_close_sidebar.clone(), |_, cb| cb.emit(()));
     let id = &p.id;
-    html! { <div {onclick} {id} class="sidebar_close_button" /> }
+    html! {
+        <div {onclick} {id} class="sidebar_close_button">
+            <div class="sidebar_close_button_inner" />
+        </div>
+    }
 }

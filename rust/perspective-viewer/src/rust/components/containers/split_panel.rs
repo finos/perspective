@@ -57,6 +57,10 @@ impl Drop for ResizingState {
     }
 }
 
+/// The minimum size a split panel child can be, including when overridden via
+/// user drag/drop.
+const MINIMUM_SIZE: i32 = 8;
+
 /// When the instantiated, capture the initial dimensions and create the
 /// MouseEvent callbacks.
 impl ResizingState {
@@ -121,7 +125,7 @@ impl ResizingState {
             client_offset - self.start
         };
 
-        max(0, self.total + delta)
+        max(MINIMUM_SIZE, self.total + delta)
     }
 
     pub fn get_style(&self, client_offset: i32) -> Option<String> {
@@ -141,8 +145,8 @@ impl ResizingState {
     pub fn get_dimensions(&self, client_offset: i32) -> (i32, i32) {
         let offset = self.get_offset(client_offset);
         match self.orientation {
-            Orientation::Horizontal => (std::cmp::max(0, offset), self.alt),
-            Orientation::Vertical => (self.alt, std::cmp::max(0, offset)),
+            Orientation::Horizontal => (std::cmp::max(MINIMUM_SIZE, offset), self.alt),
+            Orientation::Vertical => (self.alt, std::cmp::max(MINIMUM_SIZE, offset)),
         }
     }
 
@@ -302,7 +306,7 @@ impl Component for SplitPanel {
         match msg {
             SplitPanelMsg::Reset(index) => {
                 self.styles[index] = None;
-                self.on_reset = ctx.props().on_reset.clone();
+                self.on_reset.clone_from(&ctx.props().on_reset);
             },
             SplitPanelMsg::StartResizing(index, client_offset, pointer_id, pointer_elem) => {
                 let elem = self.refs[index].cast::<HtmlElement>().unwrap();
@@ -369,9 +373,7 @@ impl Component for SplitPanel {
                             orientation={ctx.props().orientation}
                             link={ctx.link().clone()}
                         />
-                        if i == ctx.props().children.len() - 2 {
-                            { x }
-                        } else {
+                        if i == ctx.props().children.len() - 2 { { x } } else {
                             <SplitPanelChild
                                 style={self.styles[i + 1].clone()}
                                 ref_={self.refs[i + 1].clone()}
@@ -385,15 +387,8 @@ impl Component for SplitPanel {
 
         let contents = html! {
             <>
-                <LocalStyle
-                    key=0
-                    href={css!("containers/split-panel")}
-                />
-                <SplitPanelChild
-                    key=1
-                    style={self.styles[0].clone()}
-                    ref_={self.refs[0].clone()}
-                >
+                <LocalStyle key=0 href={css!("containers/split-panel")} />
+                <SplitPanelChild key=1 style={self.styles[0].clone()} ref_={self.refs[0].clone()}>
                     { head }
                 </SplitPanelChild>
                 { for tail }
@@ -479,11 +474,7 @@ fn split_panel_child(props: &SplitPanelChildProps) -> Html {
         classes!("split-panel-child")
     };
     html! {
-        <div
-            {class}
-            ref={props.ref_.clone()}
-            style={props.style.clone()}
-        >
+        <div {class} ref={props.ref_.clone()} style={props.style.clone()}>
             { props.children.iter().next().unwrap() }
         </div>
     }

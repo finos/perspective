@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-docs",
-    "version": "2.8.1",
+    "version": "2.10.1",
     "private": true,
     "scripts": {
         "docusaurus": "docusaurus",
@@ -16,13 +16,13 @@
     "dependencies": {
         "@docusaurus/core": "2.2.0",
         "@docusaurus/preset-classic": "2.2.0",
-        "@finos/perspective": "^2.8.1",
-        "@finos/perspective-viewer": "^2.8.1",
-        "@finos/perspective-viewer-d3fc": "^2.8.1",
-        "@finos/perspective-viewer-datagrid": "^2.8.1",
-        "@finos/perspective-webpack-plugin": "^2.8.1",
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "@finos/perspective-webpack-plugin": "workspace:^",
         "@mdx-js/react": "^1.6.22",
-        "blocks": "^2.8.1",
+        "blocks": "workspace:^",
         "clsx": "^1.1.1",
         "prism-react-renderer": "^1.3.3",
         "react": "^17.0.2",

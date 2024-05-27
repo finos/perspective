@@ -89,7 +89,6 @@ test.describe("Expressions", () => {
 
     test("Close expression editor with button", async ({ page }) => {
         await page.evaluate(openSidebarAndScrollToBottom);
-
         await page.waitForFunction(
             () =>
                 !!document
@@ -98,7 +97,6 @@ test.describe("Expressions", () => {
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
-
         await page.waitForSelector("#editor-container");
         await page.evaluate(async () => {
             let root = document.querySelector("perspective-viewer").shadowRoot;
@@ -354,7 +352,6 @@ test.describe("Expressions", () => {
 
     // Currently does not work in Firefox!
     test("Clicking on New Expression Button marks it.", async ({ page }) => {
-        await page.pause();
         await page.evaluate(openSidebarAndScrollToBottom);
         let addExprButton = await page.waitForSelector("#add-expression");
         let unclicked = await addExprButton.getAttribute("class");

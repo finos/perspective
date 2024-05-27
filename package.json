@@ -4,7 +4,7 @@
         "type": "git",
         "url": "https://github.com/finos/perspective"
     },
-    "version": "2.8.1",
+    "version": "2.10.1",
     "changelog": {
         "labels": {
             "enhancement": "Added",
@@ -15,7 +15,7 @@
     "emscripten": "3.1.48",
     "llvm": "17.0.6",
     "engines": {
-        "node": ">=14.18.2"
+        "node": ">=14.18.2 <22"
     },
     "workspaces": [
         "tools/perspective-test",
@@ -36,8 +36,16 @@
         "python/perspective"
     ],
     "devDependencies": {
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-openlayers": "workspace:^",
+        "@finos/perspective-workspace": "workspace:^",
+        "@finos/perspective-jupyterlab": "workspace:^",
+        "@finos/perspective-test": "workspace:^",
         "@fontsource/roboto-mono": "4.5.10",
-        "@playwright/test": "^1.30.0",
+        "@playwright/test": "^1.37.1",
         "@types/ws": "^7.2.2",
         "@zip.js/zip.js": "^2.7.27",
         "auto-changelog": "^2.4.0",
@@ -68,6 +76,7 @@
         "sinon": "^7.3.1",
         "stoppable": "^1.1.0",
         "style-loader": "^3.3.1",
+        "superstore-arrow": "3.0.0",
         "tar": "^6.1.13",
         "term-img": "^4.1.0",
         "timezone-mock": "^1.3.6",
@@ -98,7 +107,7 @@
         "setup": "node tools/perspective-scripts/setup.mjs",
         "docs": "node tools/perspective-scripts/docs.mjs",
         "test": "node tools/perspective-scripts/test.mjs",
-        "test:jupyter": "yarn workspace @finos/perspective-jupyterlab test:jupyter",
+        "test:jupyter": "pnpm run --recursive --filter @finos/perspective-jupyterlab test:jupyter",
         "test_js": "node tools/perspective-scripts/test_js.mjs",
         "test_python": "node tools/perspective-scripts/test_python.mjs",
         "clean": "node tools/perspective-scripts/clean.mjs",

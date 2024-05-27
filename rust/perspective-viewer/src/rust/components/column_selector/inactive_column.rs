@@ -187,16 +187,8 @@ impl Component for InactiveColumn {
         }
 
         html! {
-            <div
-                {class}
-                {onmouseover}
-                {onmouseout}
-                data-index={ctx.props().idx.to_string()}
-            >
-                <span
-                    class={is_active_class}
-                    onmousedown={add_column}
-                />
+            <div {class} {onmouseover} {onmouseout} data-index={ctx.props().idx.to_string()}>
+                <span class={is_active_class} onmousedown={add_column} />
                 <div
                     class="column-selector-draggable column-selector-column-title"
                     draggable="true"
@@ -204,14 +196,10 @@ impl Component for InactiveColumn {
                     {ondragstart}
                     {ondragend}
                 >
-                    <div
-                        class="column-selector-column-border"
-                    >
+                    <div class="column-selector-column-border">
                         <TypeIcon ty={col_type} />
                         <span class="column_name">{ ctx.props().name.clone() }</span>
-                        <span
-                            class="column-selector--spacer"
-                        />
+                        <span class="column-selector--spacer" />
                         if is_expression {
                             <ExprEditButton
                                 name={ctx.props().name.clone()}

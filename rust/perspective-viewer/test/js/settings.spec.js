@@ -114,7 +114,7 @@ test.describe("Settings", () => {
 
             consoleLogs.expectedLogs.push(
                 "error",
-                /Invalid config, resetting to default \{[^}]+\} `restore\(\)` called before `load\(\)`/
+                /Invalid config: `restore\(\)` called before `load\(\)` \{[^}]+\}/
             );
             consoleLogs.expectedLogs.push(
                 "error",

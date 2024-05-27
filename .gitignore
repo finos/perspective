@@ -222,3 +222,4 @@ testenv
 .cache
 .clangd
 .llvm/
+examples/blocks/src/nypd/nypdccrb.arrow
