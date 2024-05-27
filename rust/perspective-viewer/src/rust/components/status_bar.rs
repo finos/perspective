@@ -205,11 +205,7 @@ impl Component for StatusBar {
 
                 html! {
                     if values.len() > 1 {
-                        <label
-                            id="theme"
-                            class="button"
-                            for="theme_selector"
-                        >
+                        <label id="theme" class="button" for="theme_selector">
                             <Select<String>
                                 id="theme_selector"
                                 {values}
