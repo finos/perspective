@@ -22,11 +22,6 @@
 #include <shared_mutex>
 #endif
 
-#ifdef PSP_ENABLE_PYTHON
-#include <pybind11/pybind11.h>
-typedef py::object t_val;
-#endif
-
 namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_updctx {
@@ -49,9 +44,9 @@ public:
     t_pool();
     t_uindex register_gnode(t_gnode* node);
 
-#if defined PSP_ENABLE_PYTHON
-    void set_update_delegate(t_val ud);
-#endif
+    // #if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
+    //   void set_update_delegate(t_val ud);
+    // #endif
 
 #if defined PSP_ENABLE_WASM and !defined PSP_ENABLE_PYTHON
     void register_context(
@@ -126,9 +121,9 @@ private:
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;
 
-#if defined PSP_ENABLE_PYTHON
-    t_val m_update_delegate;
-#endif
+    // #if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
+    //   t_val m_update_delegate;
+    // #endif
     std::atomic_flag m_run;
     std::atomic<bool> m_data_remaining;
     std::atomic<t_uindex> m_sleep;

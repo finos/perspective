@@ -20,6 +20,7 @@ members = [
     "rust/bundle",
     "rust/perspective-client",
     "rust/perspective-js",
+    "rust/perspective-python",
     "rust/perspective-server",
 ]
 
