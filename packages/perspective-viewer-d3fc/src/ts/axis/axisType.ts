@@ -19,7 +19,7 @@ export const AXIS_TYPES = {
     linear: "linear",
 } as const;
 
-export type AxisTypeValues = (typeof AXIS_TYPES)[keyof typeof AXIS_TYPES];
+export type AxisTypeValues = typeof AXIS_TYPES[keyof typeof AXIS_TYPES];
 
 export interface AxisType {
     (): AxisTypeValues;
