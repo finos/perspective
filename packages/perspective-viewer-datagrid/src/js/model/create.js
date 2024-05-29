@@ -143,6 +143,10 @@ export async function createModel(regular, table, view, extend = {}) {
         _column_paths,
         _column_types,
         _is_editable,
+        _selection_state: {
+            selected_areas: [],
+            dirty: false,
+        },
         _row_header_types: config.group_by.map((column_path) => {
             return _table_schema[column_path];
         }),

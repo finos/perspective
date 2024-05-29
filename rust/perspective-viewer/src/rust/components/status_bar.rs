@@ -66,8 +66,6 @@ pub struct StatusBar {
     themes: Vec<String>,
     export_ref: NodeRef,
     copy_ref: NodeRef,
-    export_dropdown: Option<ExportDropDownMenuElement>,
-    copy_dropdown: Option<CopyDropDownMenuElement>,
     _sub: [Subscription; 5],
 }
 
@@ -111,9 +109,7 @@ impl Component for StatusBar {
             _sub,
             theme: None,
             themes: vec![],
-            copy_dropdown: None,
             copy_ref: NodeRef::default(),
-            export_dropdown: None,
             export_ref: NodeRef::default(),
             is_updating: 0,
         }
@@ -153,16 +149,12 @@ impl Component for StatusBar {
             },
             StatusBarMsg::Export => {
                 let target = self.export_ref.cast::<HtmlElement>().unwrap();
-                self.export_dropdown
-                    .get_or_insert_with(|| ExportDropDownMenuElement::new_from_model(ctx.props()))
-                    .open(target);
+                ExportDropDownMenuElement::new_from_model(ctx.props()).open(target);
                 false
             },
             StatusBarMsg::Copy => {
                 let target = self.copy_ref.cast::<HtmlElement>().unwrap();
-                self.copy_dropdown
-                    .get_or_insert_with(|| CopyDropDownMenuElement::new_from_model(ctx.props()))
-                    .open(target);
+                CopyDropDownMenuElement::new_from_model(ctx.props()).open(target);
                 false
             },
             StatusBarMsg::SetTitle(title) => {
@@ -204,13 +196,15 @@ impl Component for StatusBar {
 
                 html! {
                     if values.len() > 1 {
-                        <span id="theme" class="button">
-                            <Select<String>
-                                id="theme_selector"
-                                {values}
-                                selected={selected.to_owned()}
-                                on_select={ontheme}
-                            />
+                        <span class="hover-target">
+                            <span id="theme" class="button">
+                                <Select<String>
+                                    id="theme_selector"
+                                    {values}
+                                    selected={selected.to_owned()}
+                                    on_select={ontheme}
+                                />
+                            </span>
                         </span>
                     }
                 }
@@ -256,17 +250,14 @@ impl Component for StatusBar {
                     <div id="menu-bar" class="section">
                         { theme_button }
                         <div id="plugin-settings"><slot name="plugin-settings" /></div>
-                        <span id="reset" class="button" onmousedown={reset}><span /></span>
-                        <span
-                            ref={&self.export_ref}
-                            id="export"
-                            class="button"
-                            onmousedown={export}
-                        >
-                            <span />
+                        <span class="hover-target">
+                            <span id="reset" class="button" onmousedown={reset}><span /></span>
                         </span>
-                        <span ref={&self.copy_ref} id="copy" class="button" onmousedown={copy}>
-                            <span />
+                        <span class="hover-target" ref={&self.export_ref} onmousedown={export}>
+                            <span id="export" class="button"><span /></span>
+                        </span>
+                        <span class="hover-target" ref={&self.copy_ref} onmousedown={copy}>
+                            <span id="copy" class="button"><span /></span>
                         </span>
                     </div>
                 </div>

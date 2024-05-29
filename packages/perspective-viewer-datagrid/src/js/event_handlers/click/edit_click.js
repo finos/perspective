@@ -10,61 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "icons.less";
+export function write_cell(table, model, active_cell) {
+    const meta = table.getMeta(active_cell);
+    const type = model._schema[model._column_paths[meta.x]];
+    if (meta) {
+        let text = active_cell.textContent;
+        const id = model._ids[meta.y - meta.y0][0];
+        if (type === "float" || type === "integer") {
+            text = parseFloat(text.replace(/,/g, ""));
+            if (isNaN(text)) {
+                return false;
+            }
+        } else if (type === "date" || type === "datetime") {
+            text = Date.parse(text);
+            if (isNaN(text)) {
+                return false;
+            }
+        } else if (type === "boolean") {
+            text = text === "true" ? false : text === "false" ? true : null;
+        }
 
-@import url("ref://pro-dark.less");
-@import url("ref://solarized.less");
+        const msg = {
+            __INDEX__: id,
+            [model._column_paths[meta.x]]: text,
+        };
 
-perspective-viewer,
-perspective-viewer[theme="Solarized Dark"] {
-    --theme-name: "Solarized Dark";
+        model._table.update([msg], { port_id: model._edit_port });
+        return true;
+    }
 }
 
-perspective-viewer[theme="Solarized Dark"] {
-    @include perspective-viewer-pro-dark--colors;
-    @include perspective-viewer-solarized;
-    @include perspective-viewer-solarized-dark--colors;
-    // @include perspective-viewer-solarized-dark--datagrid;
-    @include perspective-viewer-solarized-dark--d3fc;
-}
-
-perspective-copy-menu[theme="Solarized Dark"],
-perspective-export-menu[theme="Solarized Dark"],
-perspective-dropdown[theme="Solarized Dark"],
-perspective-date-column-style[theme="Solarized Dark"],
-perspective-datetime-column-style[theme="Solarized Dark"],
-perspective-number-column-style[theme="Solarized Dark"],
-perspective-string-column-style[theme="Solarized Dark"] {
-    @include perspective-modal-solarized;
-    @include perspective-viewer-solarized-dark--colors;
-    background-color: #073642;
-}
-
-@mixin perspective-viewer-solarized-dark--colors {
-    color: #93a1a1;
-    background-color: #002b36;
-
-    --inactive--color: #586e75;
-    --inactive--border-color: var(--inactive--color);
-    --plugin--background: #073642;
-
-    --select-arrow--background-image: url("../svg/dropdown-selector.svg");
-}
-
-// @mixin perspective-viewer-solarized-dark--datagrid {}
-
-@mixin perspective-viewer-solarized-dark--d3fc {
-    --d3fc-treedata--labels: white;
-    --d3fc-treedata--hover-highlight: white;
-    --d3fc-axis-ticks--color: #93a1a1;
-    --d3fc-axis--lines: #93a1a1;
-    --d3fc-gridline--color: #002b36;
-    --d3fc-legend--text: #93a1a1;
-
-    --d3fc-full--gradient: linear-gradient(#cb4b16 0%,
-            #073642 50%,
-            #268bd2 100%);
-
-    // --d3fc-positive--gradient: linear-gradient(#073642 0%, #268bd2 100%);
-    --d3fc-negative--gradient: linear-gradient(#cb4b16 0%, #073642 100%);
+export function clickListener(table, _viewer, event) {
+    const meta = table.getMeta(event.target);
+    if (typeof meta?.x !== "undefined") {
+        const is_editable2 = this._is_editable[meta.x];
+        const is_bool = this.get_psp_type(meta) === "boolean";
+        const is_null = event.target.textContent === "-";
+        if (is_editable2 && is_bool && !is_null) {
+            write_cell(table, this, event.target);
+        }
+    }
 }

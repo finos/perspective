@@ -306,6 +306,40 @@ regular-table table {
     tbody th:empty {
         background-position: 0px -10px;
     }
+
+    td.psp-select-region,
+    th.psp-select-region {
+        // transition: background-color 0.5s, color 0.5s, border-color 0.5s;
+        background-color: var(--icon--color) !important;
+        color: var(--plugin--background) !important;
+        border-color: var(--plugin--background) !important;
+    }
+}
+
+regular-table
+    tbody
+    tr:hover
+    td.psp-select-region:not(.psp-row-selected):not(.psp-row-subselected),
+regular-table
+    tbody
+    tr:hover
+    + tr
+    td.psp-select-region:not(.psp-row-selected):not(.psp-row-subselected) {
+    border-color: var(--plugin--background) !important;
+}
+
+regular-table tbody tr:hover {
+    td.psp-select-region.psp-menu-open {
+        &:not(.psp-row-selected):not(.psp-row-subselected) {
+            box-shadow: inset -2px 0px 0px var(--plugin--background),
+                inset 2px 0px 0px var(--plugin--background);
+        }
+    }
+}
+
+:host-context(perspective-viewer[settings]) td.psp-select-region.psp-menu-open {
+    box-shadow: inset -2px 0px 0px var(--plugin--background),
+        inset 2px 0px 0px var(--plugin--background);
 }
 
 // This is a design/architecture bug. When the datagrid draws during a sidepanel

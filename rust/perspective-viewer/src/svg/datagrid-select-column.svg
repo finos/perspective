@@ -1,0 +1,15 @@
+<svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs></defs>
+    <rect x="3" y="4" width="15" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
+    </rect>
+    <rect x="3" y="6.973" width="15" height="1"
+        style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;"></rect>
+    <rect x="3" y="10" width="15" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
+    </rect>
+    <rect x="3" y="13" width="15" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
+    </rect>
+    <rect x="3" y="16" width="15" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
+    </rect>
+    <rect style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;" y="4" width="3" height="13" x="6">
+    </rect>
+</svg>

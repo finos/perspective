@@ -10,7 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { is_editable, write_cell } from "./edit_click.js";
+import { is_editable } from "./click.js";
+import { write_cell } from "./click/edit_click.js";
 
 export function focusoutListener(table, viewer, selected_position_map, event) {
     if (is_editable.call(this, viewer) && selected_position_map.has(table)) {

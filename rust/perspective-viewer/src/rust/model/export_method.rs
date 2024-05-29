@@ -20,11 +20,14 @@ use crate::js::*;
 pub enum ExportMethod {
     Csv,
     CsvAll,
+    CsvSelected,
     Json,
     JsonAll,
+    JsonSelected,
     Html,
     Png,
     Arrow,
+    ArrowSelected,
     ArrowAll,
     JsonConfig,
 }
@@ -41,6 +44,9 @@ impl ExportMethod {
             Self::Arrow => ".arrow",
             Self::ArrowAll => ".all.arrow",
             Self::JsonConfig => ".config.json",
+            Self::CsvSelected => ".selected.csv",
+            Self::JsonSelected => ".selected.json",
+            Self::ArrowSelected => ".selected.arrow",
         }
     }
 

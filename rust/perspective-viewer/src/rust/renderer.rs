@@ -31,8 +31,9 @@ use std::pin::Pin;
 use std::rc::Rc;
 
 use futures::future::{join_all, select_all};
+use perspective_client::ViewWindow;
 use perspective_js::json;
-use perspective_js::utils::{ApiError, ApiResult};
+use perspective_js::utils::ApiResult;
 use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::html::ImplicitClone;
@@ -68,6 +69,7 @@ pub struct RendererMutData {
     plugin_store: PluginStore,
     plugins_idx: Option<usize>,
     timer: MovingWindowRenderTimer,
+    selection: Option<ViewWindow>,
 }
 
 type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
@@ -110,6 +112,7 @@ impl Renderer {
                 metadata: ViewConfigRequirements::default(),
                 plugin_store: PluginStore::default(),
                 plugins_idx: None,
+                selection: None,
                 timer: MovingWindowRenderTimer::default(),
             }),
             draw_lock: Default::default(),
@@ -189,6 +192,14 @@ impl Renderer {
         self.0.borrow_mut().timer.set_throttle(val);
     }
 
+    pub fn set_selection(&self, window: Option<ViewWindow>) {
+        self.borrow_mut().selection = window
+    }
+
+    pub fn get_selection(&self) -> Option<ViewWindow> {
+        self.borrow().selection.clone()
+    }
+
     pub fn disable_active_plugin_render_warning(&self) {
         self.borrow_mut().metadata.render_warning = false;
         self.get_active_plugin().unwrap().set_render_warning(false);
@@ -249,10 +260,7 @@ impl Renderer {
 
     /// This will take a future which _should_ create a new view and then will
     /// draw it.
-    pub async fn draw(
-        &self,
-        session: impl Future<Output = Result<&Session, ApiError>>,
-    ) -> ApiResult<()> {
+    pub async fn draw(&self, session: impl Future<Output = ApiResult<&Session>>) -> ApiResult<()> {
         self.draw_plugin(session, false).await
     }
 
@@ -263,7 +271,7 @@ impl Renderer {
 
     async fn draw_plugin(
         &self,
-        session: impl Future<Output = Result<&Session, ApiError>>,
+        session: impl Future<Output = ApiResult<&Session>>,
         is_update: bool,
     ) -> ApiResult<()> {
         let timer = self.render_timer();

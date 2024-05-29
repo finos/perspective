@@ -20,11 +20,23 @@ use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiEr
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = "view_window.ViewWindow")]
+    #[derive(Clone)]
     pub type JsViewWindow;
+
+    #[wasm_bindgen(method, setter, js_name = "formatted")]
+    pub fn set_formatted(this: &JsViewWindow, x: bool);
 
     #[wasm_bindgen(typescript_type = "on_update_options.OnUpdateOptions")]
     pub type JsOnUpdateOptions;
 
+}
+
+impl From<ViewWindow> for JsViewWindow {
+    fn from(value: ViewWindow) -> Self {
+        JsViewWindow::from_serde_ext(&value)
+            .unwrap()
+            .unchecked_into()
+    }
 }
 
 #[doc = include_str!("../../docs/view.md")]

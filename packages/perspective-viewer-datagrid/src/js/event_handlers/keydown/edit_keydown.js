@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { focus_style_listener } from "../style_handlers/focus.js";
+import { focus_style_listener } from "../../style_handlers/focus.js";
 
 function lock(body) {
     let lock;
@@ -37,45 +37,6 @@ function getPos() {
     } else {
         return this.target.selectionStart;
     }
-}
-
-export function write_cell(table, model, active_cell) {
-    const meta = table.getMeta(active_cell);
-    const type = model._schema[model._column_paths[meta.x]];
-    if (meta) {
-        let text = active_cell.textContent;
-        const id = model._ids[meta.y - meta.y0];
-        if (type === "float" || type === "integer") {
-            text = parseFloat(text.replace(/,/g, ""));
-            if (isNaN(text)) {
-                return false;
-            }
-        } else if (type === "date" || type === "datetime") {
-            text = Date.parse(text);
-            if (isNaN(text)) {
-                return false;
-            }
-        } else if (type === "boolean") {
-            text = text === "true" ? false : text === "false" ? true : null;
-        }
-
-        const msg = {
-            __INDEX__: id[0],
-            [model._column_paths[meta.x]]: text,
-        };
-
-        model._table.update([msg], { port_id: model._edit_port });
-        return true;
-    }
-}
-
-export function is_editable(viewer, allowed = false) {
-    const has_pivots =
-        this._config.group_by.length === 0 &&
-        this._config.split_by.length === 0;
-    const selectable = viewer.hasAttribute("selectable");
-    const editable = allowed || !!viewer.children[0]._is_edit_mode;
-    return has_pivots && !selectable && editable;
 }
 
 const moveSelection = lock(async function (
@@ -124,9 +85,6 @@ const moveSelection = lock(async function (
 // Events
 
 export function keydownListener(table, viewer, selected_position_map, event) {
-    if (!is_editable.call(this, viewer)) {
-        return;
-    }
     const target = table.getRootNode().activeElement;
     event.target.classList.remove("psp-error");
     switch (event.key) {
@@ -201,18 +159,5 @@ export function keydownListener(table, viewer, selected_position_map, event) {
             );
             break;
         default:
-    }
-}
-
-export function clickListener(table, _viewer, event) {
-    const meta = table.getMeta(event.target);
-    if (typeof meta?.x !== "undefined") {
-        const is_all_editable = is_editable.call(this, _viewer);
-        const is_editable2 = this._is_editable[meta.x];
-        const is_bool = this.get_psp_type(meta) === "boolean";
-        const is_null = event.target.textContent === "-";
-        if (is_all_editable && is_editable2 && is_bool && !is_null) {
-            write_cell(table, this, event.target);
-        }
     }
 }

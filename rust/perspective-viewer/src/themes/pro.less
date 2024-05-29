@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 @import "icons.less";
+@import "intl.less";
 
 // Register theme for auto-detection
 perspective-viewer,
@@ -73,7 +74,7 @@ perspective-string-column-style[theme="Pro Light"] {
     --side-panel--padding: 0px 0px 0px 4px;
     --top-panel--padding: 0px 0px 12px 0px;
     --top-panel-row--display: inline-flex;
-    --button--min-width: 110px;
+    --button--min-width: 33px;
 }
 
 @mixin perspective-viewer-pro--colors {
@@ -92,6 +93,8 @@ perspective-string-column-style[theme="Pro Light"] {
     --column-drop-container--background: none;
     --warning--background: #042121;
     --warning--color: #fdfffd;
+
+    --select-arrow--background-image: url("../svg/dropdown-selector-light.svg");
 
     // TODO deprecate me
     --overflow-hint-icon--color: #fdfffd;
