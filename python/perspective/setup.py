@@ -1,7 +1,7 @@
 #  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 #  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
 #  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
-#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃z
 #  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
 #  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
 #  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
@@ -32,7 +32,7 @@ try:
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
-    raise Exception("Requires Python 3.7 or later")
+    raise RuntimeError("Requires Python 3.7 or later")
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -43,11 +43,11 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
 if sys.version_info.major < 3:
-    raise Exception("Requires Python 3.7 or later")
+    raise RuntimeError("Requires Python 3.7 or later")
 
 # Check for `cmake`
 if which("cmake") is None and which("cmake.exe") is None:
-    raise Exception("Requires cmake")
+    raise RuntimeError("Requires cmake")
 
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
@@ -244,13 +244,13 @@ class PSPCheckSDist(sdist):
         for file in ("CMakeLists.txt", "cmake", "src"):
             path = os.path.abspath(os.path.join(here, "dist", file))
             if not os.path.exists(path):
-                raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
+                raise FileNotFoundError("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
         # Check for JS assets
         if not SKIP_JS_FILES:
             for file in ("labextension/package.json", "nbextension/static/index.js"):
                 path = os.path.abspath(os.path.join(here, "perspective", file))
                 if not os.path.exists(path):
-                    raise Exception("Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(path))
+                    raise FileNotFoundError("Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(path))
 
 
 ##############################
