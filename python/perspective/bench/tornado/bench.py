@@ -155,7 +155,7 @@ class PerspectiveTornadoBenchmark(object):
 
         logging.info("Interpolating {} over {} runs, range: {} to {}".format(self.interpolate_attr, self.interpolate_range, start, end))
 
-        for i in range(0, self.interpolate_range):
+        for _ in range(0, self.interpolate_range):
             value = start
             setattr(self, self.interpolate_attr, value)
             logging.info("Interpolating {}: {}".format(self.interpolate_attr, value))
