@@ -22,7 +22,7 @@ title: "perspective-python API"
 """
 
 def fix_param_lists(txt):
-    return re.sub("^ *?\n    \\* ", "    * ", txt, flags=re.DOTALL | re.MULTILINE)
+    return re.sub("^ *?\n {4}\\* ", "    * ", txt, flags=re.DOTALL | re.MULTILINE)
 
 def fix_headers(txt):
     txt = re.sub("^# ", "## ", txt, flags=re.DOTALL | re.MULTILINE)
@@ -33,7 +33,7 @@ def fix_returns(txt):
     offset = 0
     for match in re.finditer("^\\* \\*\\*Returns\\*\\*.+?\\* \\*\\*Return type\\*\\*", txt, flags=re.DOTALL | re.MULTILINE):
         group = match.group(0)
-        new_group = re.sub("        ", "    ", group)
+        new_group = re.sub(" {8}", "    ", group)
         txt = txt[:match.start(0) - offset] + new_group + txt[match.end(0) - offset:]
         offset += len(group) - len(new_group)
     return txt
