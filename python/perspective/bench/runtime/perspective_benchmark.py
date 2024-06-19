@@ -39,6 +39,10 @@ def make_meta(group, name):
 
 
 def empty_callback(port_id):
+    """
+    This function is an empty callback function. It is used as a placeholder for a callback function,
+    but it doesn't perform any action.
+    """
     pass
 
 
@@ -54,7 +58,7 @@ class PerspectiveBenchmark(Suite):
     def __init__(self):
         """Create a benchmark suite for the `perspective-python` runtime."""
         tbl = Table(SUPERSTORE_ARROW_DATA)
-        for x in range(19):
+        for _ in range(19):
             tbl.update(SUPERSTORE_ARROW_DATA)
         self._schema = tbl.schema()
         self._df_schema = tbl.schema()
@@ -111,7 +115,7 @@ class PerspectiveBenchmark(Suite):
         the on update callback that forces resolution of updates across
         10 views."""
         table = Table(self._schema)
-        views = [table.view() for i in range(25)]
+        views = [table.view() for _ in range(25)]
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
@@ -138,7 +142,7 @@ class PerspectiveBenchmark(Suite):
         the on update callback that forces resolution of updates across
         25 views."""
         table = Table(self._schema)
-        views = [table.view(group_by=["State", "City"]) for i in range(25)]
+        views = [table.view(group_by=["State", "City"]) for _ in range(25)]
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
@@ -167,7 +171,7 @@ class PerspectiveBenchmark(Suite):
         the on update callback that forces resolution of updates across
         25 views."""
         table = Table(self._schema)
-        views = [table.view(group_by=["State", "City"], split_by=["Category", "Sub-Category"]) for i in range(25)]
+        views = [table.view(group_by=["State", "City"], split_by=["Category", "Sub-Category"]) for _ in range(25)]
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
