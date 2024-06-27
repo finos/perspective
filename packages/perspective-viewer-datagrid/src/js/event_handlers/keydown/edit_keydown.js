@@ -11,6 +11,8 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { focus_style_listener } from "../../style_handlers/focus.js";
+import { is_editable } from "../click.js";
+import { write_cell } from "../click/edit_click.js";
 
 function lock(body) {
     let lock;
@@ -82,6 +84,17 @@ const moveSelection = lock(async function (
     }
 });
 
+function isLastCell(model, table, target) {
+    const meta = table.getMeta(target);
+    return meta.y === model._num_rows - 1 && meta.x === model._column_paths.length - 1;
+}
+
+function saveCellContent(model, table, target) {
+    if (is_editable.call(model, model._view)) {
+        write_cell(table, model, target);
+    }
+}
+
 // Events
 
 export function keydownListener(table, viewer, selected_position_map, event) {
@@ -90,7 +103,11 @@ export function keydownListener(table, viewer, selected_position_map, event) {
     switch (event.key) {
         case "Enter":
             event.preventDefault();
-            if (event.shiftKey) {
+            if (isLastCell(this, table, target)) {
+                saveCellContent(this, table, target);
+                target.blur();
+                selected_position_map.delete(table);
+            } else if (event.shiftKey) {
                 moveSelection.call(
                     this,
                     table,
