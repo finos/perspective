@@ -159,7 +159,11 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_DEBUG(X)
 #endif
 
-#if defined(PSP_ENABLE_WASM)
+#ifndef PSP_ENABLE_PYTHON
+#error "WTF"
+#endif
+
+#if PSP_ENABLE_WASM && !PSP_ENABLE_PYTHON
 #define ESM_EXPORT(X) __attribute__((import_module("env"), import_name(X)))
 
 PERSPECTIVE_EXPORT ESM_EXPORT("psp_stack_trace") extern "C" const
@@ -170,7 +174,7 @@ PERSPECTIVE_EXPORT ESM_EXPORT("psp_heap_size") extern "C" size_t
 
 #endif
 
-#if defined(PSP_DEBUG) && defined(PSP_ENABLE_WASM)
+#if defined(PSP_DEBUG) && PSP_ENABLE_WASM
 #define PSP_COMPLAIN_AND_ABORT(X)                                              \
     {                                                                          \
         std::stringstream __SS__;                                              \

@@ -28,11 +28,11 @@ t_updctx::t_updctx(t_uindex gnode_id, std::string ctx) :
     m_gnode_id(gnode_id),
     m_ctx(std::move(ctx)) {}
 
-#if defined PSP_ENABLE_WASM && !defined PSP_ENABLE_PYTHON
+#if PSP_ENABLE_WASM
 
 t_pool::t_pool() : m_sleep(0) { m_run.clear(); }
 
-#elif defined PSP_ENABLE_PYTHON
+#elif PSP_ENABLE_PYTHON
 
 // t_val
 // empty_callback() {

@@ -115,7 +115,7 @@ elseif(PSP_PYTHON_BUILD)
     if(NOT DEFINED PSP_PYTHON_VERSION)
         set(PSP_PYTHON_VERSION 3.10)
     endif()
-    if($ENV{PYODIDE})
+    if(PSP_WASM_BUILD)
         set(PSP_PYODIDE 1)
     else()
         set(PSP_PYODIDE 0)
@@ -245,6 +245,8 @@ if(PSP_WASM_BUILD)
             ")
         if (PSP_WASM_EXCEPTIONS)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
+        else()
+            set(OPT_FLAGS "${OPT_FLAGS} -fexceptions ")
         endif()
         if(PSP_SANITIZE)
             set(OPT_FLAGS "${OPT_FLAGS} \
@@ -259,6 +261,8 @@ if(PSP_WASM_BUILD)
             ")
         if (PSP_WASM_EXCEPTIONS)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
+        else()
+            set(OPT_FLAGS "${OPT_FLAGS} -fexceptions ")
         endif()
     endif()
 
@@ -576,10 +580,13 @@ set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     -s NODEJS_CATCH_REJECTION=0 \
     -s USE_ES6_IMPORT_META=1 \
     -s EXPORT_ES6=1 \
+    -s SIDE_MODULE=1 \
     -s EXPORTED_FUNCTIONS=_js_poll,_js_new_server,_js_free,_js_alloc,_js_handle_request,_js_new_session,_js_close_session \
 ")
-if (PSP_WASM_EXCEPTIONS)
-    set(PSP_WASM_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} -s EXCEPTION_STACK_TRACES=1 ")
+if (NOT PSP_WASM_EXCEPTIONS)
+    set(PSP_WASM_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} \
+        -sDISABLE_EXCEPTION_CATCHING=0 \
+    ")
 endif()
 
 if(PSP_SANITIZE)
@@ -597,6 +604,9 @@ if(PSP_WASM_BUILD)
 
     add_library(psp ${WASM_SOURCE_FILES})
     target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
+    if(PSP_PYTHON_BUILD)
+        target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
+    endif()
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
     target_link_libraries(psp PRIVATE arrow re2 protos)
 
@@ -696,9 +706,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 endif()
 
-# TODO this needs to be omitted when built by `cmake-rs`, because
-#`cargo publish --dry-run` complains when this generate `.clangd` in the Rust
-# root dir instead of teh `target` dir.
 if(NOT DEFINED ENV{PSP_DISABLE_CLANGD})
     include(SetupClangd)
 endif()
