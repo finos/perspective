@@ -35,6 +35,8 @@ export interface EmscriptenApi {
         buffer_len: number
     ): number;
     _js_poll(server: EmscriptenServer): number;
+    _js_new_session(server: EmscriptenServer): number;
+    _js_close_session(server: EmscriptenServer, client_id: number): void;
 }
 
 export async function compile_perspective(

@@ -1,0 +1,26 @@
+{
+    "name": "server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@finos/perspective": "workspace:*",
+        "perspective-2-10-0": "npm:@finos/perspective@2.10.0"
+    },
+    "scripts": {
+        "bench_client": "tsx benchmark_client.mts",
+        "_create_dist": "mkdir -p dist",
+        "bench_server": "PYTHONPATH=../../.. python new_api.py",
+        "bench_server_2_10_0": "./ephemeral_venv.sh -d perspective-python==2.10.1 python old_api.py",
+        "bench_server_2_9_0": "./ephemeral_venv.sh -d perspective-python==2.9.0 python old_api.py",
+        "bench_all": "$npm_execpath _create_dist && cd dist && ../bench_all.sh",
+        "serve_arrows": "cd dist && http-server --cors -p8085"
+    },
+    "devDependencies": {
+        "cmd-ts": "^0.13.0",
+        "http-server": "^14.1.1",
+        "tsx": "^4.10.5"
+    }
+}

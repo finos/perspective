@@ -10,9 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#![feature(cell_update)]
-#![feature(let_chains)]
-#![feature(closure_lifetime_binder)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -28,13 +25,13 @@ pub mod config;
 pub mod proto;
 pub mod utils;
 
-pub use crate::client::{Client, Features, IntoBoxFnPinBoxFut};
+pub use crate::client::{Client, ClientHandler, Features};
 pub use crate::proto::table_validate_expr_resp::ExprValidationError;
 pub use crate::proto::ColumnType;
 pub use crate::table::{Schema, Table, TableInitOptions, UpdateOptions, ValidateExpressionsData};
 pub use crate::table_data::{TableData, UpdateData};
 pub use crate::utils::*;
-pub use crate::view::{OnUpdateArgs, OnUpdateMode, OnUpdateOptions, View, ViewWindow};
+pub use crate::view::{OnUpdateMode, OnUpdateOptions, View, ViewWindow};
 
 pub mod vendor {
     pub use paste;

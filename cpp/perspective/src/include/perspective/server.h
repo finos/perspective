@@ -476,6 +476,7 @@ namespace server {
          */
         void host_table(const t_id& id, std::shared_ptr<Table> table);
         void host_view(
+            const std::uint32_t& client_id,
             const t_id& id,
             const t_id& table_id,
             std::shared_ptr<ErasedView> view
@@ -488,13 +489,13 @@ namespace server {
         std::shared_ptr<ErasedView> get_view(const t_id& id);
         std::vector<t_id> get_table_ids();
 
-        void delete_view(const t_id& id);
+        void delete_view(const std::uint32_t& client_id, const t_id& id);
         void delete_table(const t_id& id);
 
         // `on_update()`
         void create_view_on_update_sub(const t_id& view_id, Subscription sub);
         std::vector<Subscription> get_view_on_update_sub(const t_id& view_id);
-        void remove_update_subscription(
+        void remove_view_on_update_sub(
             const t_id& view_id, std::uint32_t sub_id, std::uint32_t client_id
         );
         void drop_view_on_update_sub(const t_id& view_id);
@@ -502,16 +503,17 @@ namespace server {
         // `Table::on_delete()`
         void create_table_on_delete_sub(const t_id& table_id, Subscription sub);
         std::vector<Subscription> get_table_on_delete_sub(const t_id& table_id);
-        void drop_table_on_delete_sub(
+        void remove_table_on_delete_sub(
             const t_id& table_id, std::uint32_t sub_id, std::uint32_t client_id
         );
 
         // `View::on_delete()`
         void create_view_on_delete_sub(const t_id& view_id, Subscription sub);
         std::vector<Subscription> get_view_on_delete_sub(const t_id& view_id);
-        void drop_view_on_delete_sub(
+        void remove_view_on_delete_sub(
             const t_id& view_id, std::uint32_t sub_id, std::uint32_t client_id
         );
+        void drop_view_on_delete_sub(const t_id& view_id);
 
         void mark_table_dirty(const t_id& id);
         void mark_table_clean(const t_id& id);
@@ -520,10 +522,12 @@ namespace server {
         std::vector<std::pair<std::shared_ptr<Table>, const std::string>>
         get_dirty_tables();
         bool is_table_dirty(const t_id& id);
+        void drop_client(const std::uint32_t);
 
     protected:
         tsl::hopscotch_map<t_id, t_id> m_view_to_table;
         std::multimap<t_id, t_id> m_table_to_view;
+        tsl::hopscotch_map<std::uint32_t, std::vector<t_id>> m_client_to_view;
         tsl::hopscotch_map<t_id, std::shared_ptr<Table>> m_tables;
         tsl::hopscotch_map<t_id, std::shared_ptr<ErasedView>> m_views;
 
@@ -553,6 +557,9 @@ namespace server {
     public:
         using Request = perspective::proto::Request;
         using Response = perspective::proto::Response;
+
+        std::uint32_t new_session();
+        void close_session(std::uint32_t);
         std::vector<ProtoServerResp<std::string>>
         handle_request(std::uint32_t client_id, const std::string_view& data);
         std::vector<ProtoServerResp<std::string>> poll();
@@ -580,6 +587,7 @@ namespace server {
             std::vector<ProtoServerResp<Response>>& outs
         );
 
+        static std::uint32_t m_client_id;
         ServerResources m_resources;
     };
 

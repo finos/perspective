@@ -12,28 +12,43 @@
 
 export const LAYOUTS = {
     sparkgrid: {
+        version: "2.10.1",
         plugin: "Datagrid",
-        title: "Market Monitor",
         plugin_config: {
-            columns: {
-                chg: { bg_gradient: 16.5, number_bg_mode: "gradient" },
-                "chg (+)": { fg_gradient: 15.83, number_fg_mode: "bar" },
-                "chg (-)": { fg_gradient: 14.58, number_fg_mode: "bar" },
-            },
-            editable: false,
+            columns: {},
             scroll_lock: true,
         },
+        columns_config: {
+            "chg (-)": {
+                number_fg_mode: "bar",
+                fg_gradient: 14.34,
+            },
+            chg: {
+                number_bg_mode: "gradient",
+                bg_gradient: 29.17,
+            },
+            "chg (+)": {
+                number_fg_mode: "bar",
+                fg_gradient: 17.4,
+            },
+        },
         settings: true,
+        theme: "Pro Light",
+        title: "Market Monitor",
         group_by: ["name"],
         split_by: ["client"],
         columns: ["chg (-)", "chg", "chg (+)"],
         filter: [],
         sort: [["chg", "desc"]],
         expressions: {
-            "chg (-)": 'if("chg"<0){"chg"}else{0}',
             "chg (+)": 'if("chg">0){"chg"}else{0}',
+            "chg (-)": 'if("chg"<0){"chg"}else{0}',
         },
-        aggregates: { "chg (+)": "avg", chg: "avg", "chg (-)": "avg" },
+        aggregates: {
+            chg: "avg",
+            "chg (+)": "avg",
+            "chg (-)": "avg",
+        },
     },
     datagrid: {
         plugin: "datagrid",

@@ -308,8 +308,8 @@ jobs:
 
             ################
             # Python
-            - name: Install python dependencies
-              run: pnpm run _requires_python
+            # - name: Install python dependencies
+            #   run: pnpm run _requires_python
 
             ################
             # Linux
@@ -504,8 +504,8 @@ jobs:
 
             ################
             # Python
-            - name: Install python dependencies
-              run: pnpm run _requires_python
+            # - name: Install python dependencies
+            #   run: pnpm run _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -621,8 +621,8 @@ jobs:
 
             ################
             # Python
-            - name: Install python dependencies
-              run: pnpm run _requires_python
+            # - name: Install python dependencies
+            #   run: pnpm run _requires_python
 
             ################
             # Rust
@@ -999,9 +999,9 @@ jobs:
 
             ################
             # Python
-            - name: Install python dependencies
-              run: pnpm run _requires_python
-              if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
+            # - name: Install python dependencies
+            #   run: pnpm run _requires_python
+            #   if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             ################
             # Linux

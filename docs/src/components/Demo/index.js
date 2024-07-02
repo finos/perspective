@@ -10,10 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "@finos/perspective";
-import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
 import { useColorMode } from "@docusaurus/theme-common";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import clsx from "clsx";
@@ -23,7 +19,6 @@ import { random_row } from "./data.js";
 import { LAYOUTS } from "./layouts.js";
 import styles from "./styles.module.css";
 
-const WORKER = perspective.shared_worker();
 const IS_ROTATE = false;
 
 let TABLE,
@@ -35,9 +30,9 @@ let total = 0;
 let id = "sparkgrid";
 let globalUseSelected;
 
-async function lazy_load(colorMode, viewer) {
+async function lazy_load(colorMode, perspective, viewer) {
     if (TABLE === undefined) {
-        TABLE = await start_streaming(viewer);
+        TABLE = await start_streaming(perspective, viewer);
     }
 
     if (VIEWER !== undefined && VIEWER !== viewer) {
@@ -72,7 +67,7 @@ function LayoutButton(props) {
     );
 }
 
-export function PerspectiveViewerDemo() {
+export function PerspectiveViewerDemo(props) {
     const { colorMode } = useColorMode();
     const [selected, setSelected] = useState(id);
     const [freq, setFreq] = useState(FREQ);
@@ -96,12 +91,20 @@ export function PerspectiveViewerDemo() {
     );
 
     useEffect(() => {
+        if (!props.perspective) {
+            return;
+        }
+
         REALTIME_PAUSED = false;
-        lazy_load(colorMode, viewerRef.current);
+        lazy_load(colorMode, props.perspective, viewerRef.current);
         return () => {
             REALTIME_PAUSED = true;
         };
-    }, [viewerRef, colorMode]);
+    }, [viewerRef, colorMode, props.perspective]);
+
+    if (!props.perspective) {
+        return false;
+    }
 
     return (
         <div className={clsx(styles.container)}>
@@ -175,13 +178,14 @@ function select(viewer, _id, extra = {}) {
     viewer.restore({ ...LAYOUTS[id], ...extra });
 }
 
-async function start_streaming(viewer) {
+async function start_streaming(perspective, viewer) {
     var data = [];
     for (var x = 0; x < 1000; x++) {
         data.push(random_row());
     }
 
-    var tbl = WORKER.table(data, { index: "id" });
+    const worker = await perspective.worker();
+    var tbl = worker.table(data, { index: "id" });
     setTimeout(async function () {
         let table = await tbl;
         update(table, viewer);

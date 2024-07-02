@@ -34,7 +34,7 @@ default = []
 external-proto = ["protobuf-src"]
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["rlib"]
 path = "src/rust/lib.rs"
 
 [build-dependencies]
@@ -53,6 +53,7 @@ serde_bytes = { version = "0.11" }
 serde_json = { version = "1.0.107", features = ["raw_value"] }
 thiserror = { version = "1.0.56" }
 tracing = { version = ">=0.1.36" }
+tracing-unwrap = "1.0.1"
 
 [dependencies.prost]
 version = "0.12.3"

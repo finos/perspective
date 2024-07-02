@@ -1599,7 +1599,7 @@ write_scalar(
                 t_date date_val = scalar.get<t_date>();
                 tm t = date_val.get_tm();
                 time_t epoch_delta = mktime(&t);
-                writer.Double(epoch_delta * 1000);
+                writer.Int64(epoch_delta * 1000);
             }
             break;
         }
@@ -1854,7 +1854,7 @@ View<t_ctx1>::to_rows(
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     writer.StartArray();
 
-    if (start_row == end_row || start_col == end_col) {
+    if (start_row == end_row || (start_col == end_col && !has_row_path)) {
         writer.EndArray();
         return s.GetString();
     }
@@ -1960,7 +1960,7 @@ View<t_ctx2>::to_rows(
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     writer.StartArray();
 
-    if (start_row == end_row || start_col == end_col) {
+    if (start_row == end_row || (start_col == end_col && !has_row_path)) {
         writer.EndArray();
         return s.GetString();
     }

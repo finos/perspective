@@ -16,7 +16,9 @@
 #include "perspective/data_table.h"
 #include "perspective/raw_types.h"
 #include "perspective/schema.h"
+// #include "arrow/vendored/datetime/date.h"
 #include "rapidjson/document.h"
+#include <chrono>
 #include <ctime>
 #include <memory>
 #include <optional>
@@ -26,7 +28,6 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <unordered_set>
 #include <utility>
 
 // Give each Table a unique ID so that operations on it map back correctly
@@ -452,7 +453,12 @@ rapidjson_type_to_dtype(const rapidjson::Value& value) {
                                     << "-" << tm.tm_mday << " " << tm.tm_hour
                                     << ":" << tm.tm_min << ":" << tm.tm_sec
                 );
-                LOG_DEBUG("TP: " << tp.time_since_epoch().count() << '\n');
+                auto tpm =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                        tp.time_since_epoch()
+                    )
+                        .count();
+                LOG_DEBUG("TP: " << tpm << '\n');
 
                 if (tm.tm_hour == 0 && tm.tm_min == 0 && tm.tm_sec == 0) {
                     return t_dtype::DTYPE_DATE;
@@ -582,25 +588,30 @@ json_into(const rapidjson::Value& value) {
            << "a string";
         PSP_COMPLAIN_AND_ABORT(ss.str());
     } else if constexpr (std::is_same_v<A, t_date>) {
-        time_t tt;
+        std::tm tm;
         if (value.IsString()) {
-            tt = time_t(
-                *apachearrow::parseAsArrowTimestamp(value.GetString()) / 1000
-            );
+            if (!parse_all_date_time(tm, value.GetString())) {
+                PSP_COMPLAIN_AND_ABORT("Could not coerce to date");
+            }
         } else if (value.IsInt64()) {
-            tt = time_t(value.GetInt64() / 1000);
+            auto tt = time_t(value.GetInt64() / 1000);
+            tm = *localtime(&tt);
         } else {
             PSP_COMPLAIN_AND_ABORT("Could not coerce to date");
         }
-        tm local_tm = *localtime(&tt);
 
-        return t_date(
-            local_tm.tm_year + 1900, local_tm.tm_mon, local_tm.tm_mday
-        );
+        return t_date(tm.tm_year + 1900, tm.tm_mon, tm.tm_mday);
     } else if constexpr (std::is_same_v<A, t_time>) {
         if (value.IsString()) {
-            return t_time(*apachearrow::parseAsArrowTimestamp(value.GetString())
-            );
+            std::chrono::system_clock::time_point tp;
+            if (!parse_all_date_time(tp, value.GetString())) {
+                PSP_COMPLAIN_AND_ABORT("Could not coerce to time");
+            }
+
+            return t_time(std::chrono::duration_cast<std::chrono::milliseconds>(
+                              tp.time_since_epoch()
+            )
+                              .count());
         }
         if (value.IsDouble()) {
             return t_time(value.GetDouble());
@@ -755,6 +766,8 @@ fill_column_json(
                 col->set_nth<bool>(i, true);
             } else if (value.IsString() && istrequals(value.GetString(), "false")) {
                 col->set_nth<bool>(i, false);
+            } else if (value.IsInt()) {
+                col->set_nth<bool>(i, value.GetInt() != 0);
             } else {
                 std::stringstream ss;
                 ss << "Expected bool, found " << value.GetType();
@@ -1223,11 +1236,11 @@ Table::from_rows(
     // 1.) Infer schema
     rapidjson::Document document;
     document.Parse(data.data());
-    if (document.Size() == 0) {
-        PSP_COMPLAIN_AND_ABORT("Can't create table from empty rows")
-    }
+    // if (document.Size() == 0) {
+    //     PSP_COMPLAIN_AND_ABORT("Can't create table from empty rows")
+    // }
 
-    if (!document[0].IsObject()) {
+    if (document.Size() > 0 && !document[0].IsObject()) {
         LOG_DEBUG("Received non-object " << document[0].GetType());
         // TODO Legacy error message
         PSP_COMPLAIN_AND_ABORT(
@@ -1238,8 +1251,8 @@ Table::from_rows(
     std::vector<std::string> column_names;
     std::vector<t_dtype> data_types;
     bool is_implicit = true;
-    std::unordered_set<std::string> columns_known_type;
-    std::unordered_set<std::string> columns_seen;
+    std::set<std::string> columns_known_type;
+    std::set<std::string> columns_seen;
 
     [&]() {
         for (const auto& row : document.GetArray()) {
@@ -1395,9 +1408,22 @@ Table::update_arrow(const std::string_view& data, std::uint32_t port_id) {
     data_table.init();
     auto row_count = arrow_loader.row_count();
     data_table.extend(row_count);
-    // TODO: Was this limit on purpose? Why not use table->get_limit()?
+    auto input_schema = this->get_schema();
+
+    auto arrow_names = arrow_loader.names();
+    if (std::find(arrow_names.begin(), arrow_names.end(), "__INDEX__")
+        != arrow_names.end()) {
+        if (m_index.empty()) {
+            input_schema.add_column("__INDEX__", DTYPE_INT32);
+        } else {
+            input_schema.add_column(
+                "__INDEX__", input_schema.get_dtype(m_index)
+            );
+        }
+    }
+
     arrow_loader.fill_table(
-        data_table, this->get_schema(), m_index, m_offset, m_limit, true
+        data_table, input_schema, m_index, m_offset, m_limit, true
     );
 
     process_op_column(data_table, t_op::OP_INSERT);
@@ -1430,7 +1456,7 @@ Table::from_arrow(
         // position of the column is at the same index in both
         // vectors
         columns.erase(columns.begin() + idx);
-        columns.erase(columns.begin() + idx);
+        types.erase(types.begin() + idx);
     }
 
     t_schema output_schema{columns, types};

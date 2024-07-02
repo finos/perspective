@@ -274,12 +274,6 @@ include_directories(src)
 # Build Arrow as a static library
 set(ARROW_BUILD_STATIC ON)
 
-if(PSP_WASM_BUILD)
-    set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
-
 add_library(arrow STATIC ${ARROW_SRCS})
 
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)

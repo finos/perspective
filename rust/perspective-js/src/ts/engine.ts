@@ -35,7 +35,7 @@ export class PerspectiveServer {
     make_session(
         callback: (buffer: Uint8Array) => Promise<void>
     ): PerspectiveSession {
-        const client_id = this.id_gen++;
+        const client_id = this.module._js_new_session(this.server);
         this.clients.set(client_id, callback);
         return new PerspectiveSession(
             this.module,
@@ -43,6 +43,10 @@ export class PerspectiveServer {
             client_id,
             this.clients
         );
+    }
+
+    delete() {
+        this.module._js_delete_server(this.server);
     }
 }
 
@@ -80,8 +84,8 @@ export class PerspectiveSession {
         });
     }
 
-    delete() {
-        this.mod._js_delete_server(this.server);
+    close() {
+        this.mod._js_close_session(this.server, this.client_id);
     }
 }
 

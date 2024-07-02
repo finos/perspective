@@ -60,7 +60,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
                 contents: `
                 import wasm from ${JSON.stringify(args.path)};
                 export default function() { 
-                    return fetch(new URL(wasm, import.meta.url));
+                    return fetch(new URL(__PSP_INLINE_WASM__(wasm), import.meta.url));
                 };
             `,
             })
@@ -74,6 +74,30 @@ exports.WasmPlugin = function WasmPlugin(inline) {
                 contents,
                 loader: inline ? "binary" : "file",
             };
+        });
+
+        build.onEnd(({ metafile }) => {
+            for (const file of Object.keys(metafile.outputs)) {
+                if (file.endsWith(".js")) {
+                    let contents = fs.readFileSync(file).toString();
+                    const symbol = contents.match(
+                        /__PSP_INLINE_WASM__\(([a-zA-Z0-9_]+?)\)/
+                    );
+
+                    if (symbol?.[1]) {
+                        const filename = contents.match(
+                            new RegExp(`${symbol[1]}\\s*?=\\s*?\\"(.+?)\\"`)
+                        );
+
+                        contents = contents.replace(
+                            /__PSP_INLINE_WASM__\([a-zA-Z0-9_]+?\)/g,
+                            `"${filename[1]}"`
+                        );
+
+                        fs.writeFileSync(file, contents);
+                    }
+                }
+            }
         });
     }
 

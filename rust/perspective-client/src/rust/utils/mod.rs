@@ -11,17 +11,17 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 mod clone;
-
-use thiserror::*;
+mod logging;
 
 #[cfg(test)]
 mod tests;
+
+use thiserror::*;
 
 use crate::proto;
 
 #[derive(Error, Debug)]
 pub enum ClientError {
-    // #[error("Internal error: {0}")]
     #[error("Abort(): {0}")]
     Internal(String),
 
@@ -48,6 +48,9 @@ pub enum ClientError {
 
     #[error("Can't use both `limit` and `index` arguments")]
     BadTableOptions,
+
+    #[error("External error: {0:?}")]
+    ExternalError(#[from] Box<dyn std::error::Error + Send + Sync>),
 }
 
 pub type ClientResult<T> = Result<T, ClientError>;

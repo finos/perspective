@@ -24,7 +24,7 @@ import {
 
 import "./index.css";
 
-const worker = perspective.default.shared_worker();
+const worker = perspective.default.worker();
 
 const getTable = async (): Promise<perspective.Table> => {
     const req = fetch("./superstore.lz4.arrow");

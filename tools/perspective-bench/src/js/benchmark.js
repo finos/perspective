@@ -261,10 +261,10 @@ function buffer_to_arraybuffer(buffer) {
  * @param {*} param0
  * @returns
  */
-function start_server({ cwd_static_file_handler, make_sync_session }) {
+function start_server({ cwd_static_file_handler, make_session }) {
     const app = expressWs(express()).app;
     app.ws("/subscribe", async (ws) => {
-        const server = await make_sync_session((proto) =>
+        const server = await make_session((proto) =>
             ws.send(buffer_to_arraybuffer(proto))
         );
 

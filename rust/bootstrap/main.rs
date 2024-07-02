@@ -10,8 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#![feature(lazy_cell)]
-
 use std::fs;
 use std::io::Write;
 use std::path::Path;
@@ -31,6 +29,10 @@ struct BundleArgs {
     /// Output path
     #[arg(short, long)]
     output: Option<String>,
+
+    /// Compile in release mode?
+    #[arg(short, long)]
+    release: bool,
 }
 
 fn zip(outpath: &Path) {
@@ -44,18 +46,28 @@ fn zip(outpath: &Path) {
 fn main() {
     let args = BundleArgs::parse();
     zip(Path::new(&args.input));
+    let mut debug_flags = vec![];
+    if args.release {
+        debug_flags.push("--release");
+    }
+
     Command::new("cargo")
         .args(["build"])
         .args(["-p", "perspective-bootstrap-runtime"])
+        .args(["--lib"])
         .args(["--target", "wasm32-unknown-unknown"])
         .args(["--features", "env_target"])
         .args(["-Z", "build-std=std,panic_abort"])
         .args(["-Z", "build-std-features=panic_immediate_abort"])
-        .args(["--release"])
-        .env("TARGET", &fs::canonicalize(args.input.clone()).unwrap())
+        .args(debug_flags)
+        .env(
+            "BOOTSTRAP_TARGET",
+            &fs::canonicalize(args.input.clone()).unwrap(),
+        )
         .execute();
 
-    let inpath = Path::new("../target/wasm32-unknown-unknown/release")
+    let inpath = Path::new("../target/wasm32-unknown-unknown")
+        .join(if args.release { "release" } else { "debug" })
         .join("perspective_bootstrap_runtime.wasm");
 
     OptimizationOptions::new_optimize_for_size()

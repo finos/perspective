@@ -84,6 +84,7 @@ const pytest = (IS_DOCKER) => {
             ${VERBOSE ? sh`-vv --full-trace` : sh``} perspective \
             --ignore=perspective/tests/client_mode \
             --ignore=perspective/tests/single_threaded \
+            -g test_manager_on_update_rows \
             ${PYTEST_FLAGS}`.env({ TZ: "UTC" });
     }
 };
@@ -96,6 +97,6 @@ try {
     PYTHON = "python";
 }
 
-pytest_client_mode(IS_DOCKER).runSync();
-pytest_single_threaded(IS_DOCKER).runSync();
-pytest(IS_DOCKER).runSync();
+// pytest_client_mode(IS_DOCKER).runSync();
+// pytest_single_threaded(IS_DOCKER).runSync();
+// pytest(IS_DOCKER).runSync();

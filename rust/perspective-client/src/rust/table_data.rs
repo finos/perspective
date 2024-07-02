@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use prost::bytes::Bytes;
+
 use crate::proto;
 use crate::proto::*;
 use crate::view::View;
@@ -28,9 +30,15 @@ pub enum TableData {
 #[derive(Debug)]
 pub enum UpdateData {
     Csv(String),
-    Arrow(Vec<u8>),
+    Arrow(Bytes),
     JsonRows(String),
     JsonColumns(String),
+}
+
+impl From<UpdateData> for TableData {
+    fn from(value: UpdateData) -> Self {
+        TableData::Update(value)
+    }
 }
 
 impl From<TableData> for proto::MakeTableData {
@@ -57,7 +65,7 @@ impl From<UpdateData> for proto::MakeTableData {
     fn from(value: UpdateData) -> Self {
         let data = match value {
             UpdateData::Csv(x) => make_table_data::Data::FromCsv(x),
-            UpdateData::Arrow(x) => make_table_data::Data::FromArrow(x),
+            UpdateData::Arrow(x) => make_table_data::Data::FromArrow(x.into()),
             UpdateData::JsonRows(x) => make_table_data::Data::FromRows(x),
             UpdateData::JsonColumns(x) => make_table_data::Data::FromCols(x),
         };

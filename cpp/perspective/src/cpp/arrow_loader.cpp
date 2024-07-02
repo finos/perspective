@@ -211,16 +211,11 @@ ArrowLoader::fill_table(
 
             if (name == "__INDEX__") {
                 implicit_index = true;
+                auto input_schema_type = input_schema.get_dtype(name);
                 std::shared_ptr<t_column> pkey_col_sptr =
-                    tbl.add_column_sptr("psp_pkey", type, true);
+                    tbl.add_column_sptr("psp_pkey", input_schema_type, true);
                 fill_column(
-                    tbl,
-                    pkey_col_sptr,
-                    "psp_pkey",
-                    cidx,
-                    type,
-                    raw_type,
-                    is_update
+                    tbl, pkey_col_sptr, name, cidx, type, raw_type, is_update
                 );
                 tbl.clone_column("psp_pkey", "psp_okey");
                 // continue;
@@ -247,7 +242,7 @@ ArrowLoader::fill_table(
         } else {
             if (!input_schema.has_column(index)) {
                 std::stringstream ss;
-                ss << "Specified indexx `" << index
+                ss << "Specified index `" << index
                    << "` is invalid as it does not appear in the Table."
                    << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -625,6 +620,13 @@ ArrowLoader::fill_column(
     std::shared_ptr<arrow::ChunkedArray> carray =
         m_table->GetColumnByName(name);
 
+    if (carray == nullptr) {
+        LOG_DEBUG(
+            "Could not find column `" << name << "` in arrow table."
+                                      << "\n"
+        );
+        return;
+    }
     for (auto i = 0; i < carray->num_chunks(); ++i) {
         std::shared_ptr<arrow::Array> array = carray->chunk(i);
         int64_t len = array->length();
@@ -701,7 +703,15 @@ ArrowLoader::fill_column(
                 for (uint32_t i = 0; i < len; ++i) {
                     std::uint8_t elem = null_bitmap[i / 8];
                     bool v = (elem & (1 << (i % 8))) != 0;
-                    col->set_valid(offset + i, v);
+                    if (!v) {
+                        if (is_update) {
+                            col->unset(offset + i);
+                        } else {
+                            col->clear(offset + i);
+                        }
+                    } else {
+                        col->set_valid(offset + i, v);
+                    }
                 }
             }
         }

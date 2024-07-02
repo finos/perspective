@@ -27,7 +27,35 @@
 //! is garbage-collected by the JavaScript runtime (just like any JS object),
 //! freeing the uncompressed memory from the archive.
 
-use std::io::Read;
+#![no_std]
+#![allow(internal_features, improper_ctypes_definitions)]
+#![feature(core_intrinsics, lang_items, alloc_error_handler)]
+
+extern crate alloc;
+
+use alloc::vec::Vec;
+
+use zune_inflate::DeflateDecoder;
+
+#[global_allocator]
+static ALLOCATOR: talc::Talck<talc::locking::AssumeUnlockable, talc::ClaimOnOom> = {
+    static mut MEMORY: [u8; 64000000] = [0; 64000000];
+    let span = unsafe { talc::Span::from_const_array(core::ptr::addr_of!(MEMORY)) };
+    talc::Talc::new(unsafe { talc::ClaimOnOom::new(span) }).lock()
+};
+
+#[cfg(not(test))]
+#[panic_handler]
+#[no_mangle]
+pub fn panic(_info: &::core::panic::PanicInfo) -> ! {
+    ::core::intrinsics::abort();
+}
+
+#[alloc_error_handler]
+#[no_mangle]
+pub extern "C" fn oom(_: ::core::alloc::Layout) -> ! {
+    ::core::intrinsics::abort();
+}
 
 /// The target executable is provided from the environment at compile time, but
 /// this is hidden behind a feature flag so `rust-analyzer` does not freak out.
@@ -35,23 +63,25 @@ use std::io::Read;
 const COMPRESSED_BYTES: &[u8] = &[];
 
 #[cfg(feature = "env_target")]
-const COMPRESSED_BYTES: &[u8] = include_bytes!(env!("TARGET"));
+const COMPRESSED_BYTES: &[u8] = include_bytes!(env!("BOOTSTRAP_TARGET"));
 
-static DECOMPRESSED_BYTES: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
+static mut DECOMPRESSED_BYTES: Vec<u8> = Vec::new();
 
 #[no_mangle]
 pub fn size() -> usize {
-    DECOMPRESSED_BYTES.get_or_init(init).len()
+    init();
+    unsafe { DECOMPRESSED_BYTES.len() }
 }
 
 #[no_mangle]
 pub fn offset() -> *const u8 {
-    DECOMPRESSED_BYTES.get_or_init(init).as_ptr()
+    unsafe { DECOMPRESSED_BYTES.as_ptr() }
 }
 
-fn init() -> Vec<u8> {
-    let mut decoder = flate2::read::ZlibDecoder::new(COMPRESSED_BYTES);
-    let mut y = vec![];
-    decoder.read_to_end(&mut y).unwrap();
-    y
+fn init() {
+    let mut decoder = DeflateDecoder::new(COMPRESSED_BYTES);
+    let v = decoder.decode_zlib().unwrap();
+    unsafe {
+        DECOMPRESSED_BYTES = v;
+    }
 }

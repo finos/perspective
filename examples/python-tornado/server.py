@@ -19,8 +19,9 @@ import tornado.ioloop
 import threading
 import concurrent.futures
 
-from perspective.core.globalpsp import shared_client
+from perspective.core.globalpsp import shared_client, _psp_server
 from perspective.handlers.new_tornado import PerspectiveTornadoHandler
+import asyncio
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -48,11 +49,19 @@ def perspective_thread(manager, table):
 
 async def init_table():
     client = await shared_client()
-    with open(file_path, mode="rb") as file:
-        data = file.read()
-        table = await client.table(data, name="data_source_one")
-        for _ in range(10):
-            await table.update(data)
+    # with open(file_path, mode="rb") as file:
+    #     data = file.read()
+    table = await client.table({"x": "integer"}, name="data_source_one")
+    size = 10
+    for i in range(size):
+        rows = [*range(i * size, (i + 1) * size)]
+        await table.update({'x': rows})
+        # await table.size()
+        _psp_server.poll()
+        await asyncio.sleep(5)
+
+def update_thread():
+    asyncio.run(init_table())
 
 def make_app():
     return tornado.web.Application(
@@ -81,5 +90,7 @@ if __name__ == "__main__":
     app.listen(8082)
     logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
-    loop.call_later(0, init_table)
+    t = threading.Thread(target=update_thread)
+    t.daemon = True
+    t.start()
     loop.start()

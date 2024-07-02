@@ -10,12 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use js_sys::{Array, ArrayBuffer, Function, JsString, Object};
+use js_sys::{Array, ArrayBuffer, Function, Object};
 use perspective_client::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
-use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError};
+use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop};
 
 #[wasm_bindgen]
 extern "C" {
@@ -63,16 +63,6 @@ impl JsView {
     pub async fn column_paths(&self) -> ApiResult<JsValue> {
         let columns = self.0.column_paths().await?;
         Ok(JsValue::from_serde_ext(&columns)?)
-    }
-
-    #[doc = include_str!("../../docs/view/col_to_js_typed_array.md")]
-    #[wasm_bindgen]
-    pub async fn col_to_js_typed_array(&self, column: &JsString) -> ApiResult<ArrayBuffer> {
-        let column = column.as_string().into_apierror()?;
-        let arrow = self.0.col_to_js_typed_array(column.as_str()).await?;
-        Ok(js_sys::Uint8Array::from(&arrow[..])
-            .buffer()
-            .unchecked_into())
     }
 
     #[doc = include_str!("../../docs/view/delete.md")]
@@ -181,25 +171,12 @@ impl JsView {
         on_update_js: Function,
         options: Option<JsOnUpdateOptions>,
     ) -> ApiResult<u32> {
-        let emit = {
-            let on_update_js = on_update_js.clone();
-            LocalPollLoop::new(move |OnUpdateArgs { delta, port_id }| {
-                let js_obj = js_sys::Object::new();
-                if let Some(arrow) = delta {
-                    js_sys::Reflect::set(
-                        &js_obj,
-                        &"delta".into(),
-                        &js_sys::Uint8Array::from(&arrow[..]).buffer(),
-                    )
-                    .unwrap();
-                }
+        let poll_loop = LocalPollLoop::new(move |args| {
+            let js_obj = JsValue::from_serde_ext(&args)?;
+            on_update_js.call1(&JsValue::UNDEFINED, &js_obj)
+        });
 
-                js_sys::Reflect::set(&js_obj, &"port_id".into(), &port_id.into()).unwrap();
-                on_update_js.call1(&JsValue::UNDEFINED, &js_obj)
-            })
-        };
-
-        let on_update = Box::new(move |msg| emit.poll(msg));
+        let on_update = Box::new(move |msg| poll_loop.poll(msg));
         let on_update_opts = options
             .into_serde_ext::<Option<OnUpdateOptions>>()?
             .unwrap_or_default();
@@ -242,19 +219,19 @@ impl JsView {
 
     #[doc = include_str!("../../docs/view/collapse.md")]
     #[wasm_bindgen]
-    pub async fn collapse(&self, row_index: i32) -> ApiResult<i32> {
-        Ok(self.0.collapse(row_index).await? as i32)
+    pub async fn collapse(&self, row_index: u32) -> ApiResult<u32> {
+        Ok(self.0.collapse(row_index).await?)
     }
 
     #[doc = include_str!("../../docs/view/expand.md")]
     #[wasm_bindgen]
-    pub async fn expand(&self, row_index: i32) -> ApiResult<i32> {
-        Ok(self.0.expand(row_index).await? as i32)
+    pub async fn expand(&self, row_index: u32) -> ApiResult<u32> {
+        Ok(self.0.expand(row_index).await?)
     }
 
     #[doc = include_str!("../../docs/view/set_depth.md")]
     #[wasm_bindgen]
-    pub async fn set_depth(&self, depth: i32) -> ApiResult<()> {
+    pub async fn set_depth(&self, depth: u32) -> ApiResult<()> {
         Ok(self.0.set_depth(depth).await?)
     }
 }

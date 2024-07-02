@@ -26,9 +26,10 @@ async function get_module() {
     ) as unknown as WasmElement;
     if (!elem) {
         console.warn("No `<perspective-viewer>` Custom Element found, waiting");
-        elem = (await customElements.whenDefined(
+        await customElements.whenDefined("perspective-viewer");
+        elem = customElements.get(
             "perspective-viewer"
-        )) as unknown as WasmElement;
+        ) as unknown as WasmElement;
     }
 
     return elem.__wasm_module__;

@@ -38,9 +38,7 @@ default = []
 external-cpp = ["perspective-client/external-proto"]
 
 [build-dependencies]
-serde_json = { version = "1.0.59", features = ["raw_value"] }
-procss = { version = "0.1.15" }
-glob = "0.3.0"
+serde_json = { version = "1.0.107", features = ["raw_value"] }
 anyhow = "1.0.66"
 
 [dev-dependencies]
@@ -52,15 +50,17 @@ base64 = "0.13.0"
 chrono = "0.4"
 extend = "1.1.2"
 futures = "0.3.28"
+getrandom = { version = "0.2", features = ["js"] }
 js-intern = "0.3.1"
 js-sys = "0.3.64"
 prost = { version = "0.12.3", default-features = false, features = [
     "prost-derive",
     "std",
 ] }
-rmp-serde = "1.1.1" # TODO
+rmp-serde = "1.1.1"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0.107", features = ["raw_value"] } # TODO
+serde_bytes = "0.11"
+serde_json = { version = "1.0.107", features = ["raw_value"] }
 serde-wasm-bindgen = "0.6.0"
 ts-rs = { version = "8.1.0", features = [
     "serde-json-impl",
@@ -71,11 +71,11 @@ tracing-subscriber = "0.3.15"
 console_error_panic_hook = "0.1.6"
 wasm-bindgen = { version = "=0.2.92", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.42"
-yew = { version = "0.21.0", features = ["csr"] }
 
 [dependencies.web-sys]
 version = "0.3.64"
 features = [
+    "console",
     "Blob",
     "Clipboard",
     "CssStyleDeclaration",

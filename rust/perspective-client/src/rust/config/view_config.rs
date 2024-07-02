@@ -52,7 +52,7 @@ pub struct ViewConfig {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub group_by_depth: Option<i32>,
+    pub group_by_depth: Option<u32>,
 }
 
 fn is_default_value<A: Default + PartialEq>(value: &A) -> bool {
@@ -105,7 +105,7 @@ pub struct ViewConfigUpdate {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
-    pub group_by_depth: Option<i32>,
+    pub group_by_depth: Option<u32>,
 }
 
 impl From<ViewConfigUpdate> for proto::ViewConfig {
