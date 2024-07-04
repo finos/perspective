@@ -40,7 +40,7 @@ pub struct PySyncClient(PyClient);
 #[pymethods]
 impl PySyncClient {
     #[new]
-    pub fn new(callback: Py<PyFunction>) -> PyResult<Self> {
+    pub fn new(callback: Py<PyAny>) -> PyResult<Self> {
         let client = PyClient::new(callback);
         Ok(PySyncClient(client))
     }
@@ -77,7 +77,7 @@ impl PySyncClient {
     }
 
     #[doc = include_str!("../../docs/client/set_loop_callback.md")]
-    pub fn set_loop_callback(&self, loop_cb: Py<PyFunction>) -> PyResult<()> {
+    pub fn set_loop_callback(&self, loop_cb: Py<PyAny>) -> PyResult<()> {
         self.0.set_loop_cb(loop_cb).block_on()
     }
 }
@@ -119,7 +119,7 @@ impl PySyncTable {
     }
 
     #[doc = include_str!("../../docs/table/on_delete.md")]
-    fn on_delete(&self, callback: Py<PyFunction>) -> PyResult<u32> {
+    fn on_delete(&self, callback: Py<PyAny>) -> PyResult<u32> {
         let table = self.0.clone();
         table.on_delete(callback).block_on()
     }
@@ -131,7 +131,7 @@ impl PySyncTable {
     }
 
     #[doc = include_str!("../../docs/table/remove_delete.md")]
-    fn remove_delete(&self, callback: Py<PyFunction>) -> PyResult<()> {
+    fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
         let table = self.0.clone();
         table.remove_delete(callback).block_on()
     }
@@ -292,17 +292,17 @@ impl PySyncView {
     }
 
     #[doc = include_str!("../../docs/view/on_delete.md")]
-    fn on_delete(&self, callback: Py<PyFunction>) -> PyResult<u32> {
+    fn on_delete(&self, callback: Py<PyAny>) -> PyResult<u32> {
         self.0.on_delete(callback).block_on()
     }
 
     #[doc = include_str!("../../docs/view/remove_delete.md")]
-    fn remove_delete(&self, callback: Py<PyFunction>) -> PyResult<()> {
+    fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
         self.0.remove_delete(callback).block_on()
     }
 
     #[doc = include_str!("../../docs/view/on_update.md")]
-    fn on_update(&self, callback: Py<PyFunction>, mode: Option<String>) -> PyResult<u32> {
+    fn on_update(&self, callback: Py<PyAny>, mode: Option<String>) -> PyResult<u32> {
         self.0.on_update(callback, mode).block_on()
     }
 

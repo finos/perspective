@@ -25,13 +25,13 @@ use perspective_client::{
 use pyo3::create_exception;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyDict, PyFunction, PyList, PyString};
+use pyo3::types::{PyAny, PyBytes, PyDict, PyList, PyString};
 use pythonize::depythonize_bound;
 
 #[derive(Clone)]
 pub struct PyClient {
     client: Client,
-    loop_cb: Arc<RwLock<Option<Py<PyFunction>>>>,
+    loop_cb: Arc<RwLock<Option<Py<PyAny>>>>,
 }
 
 #[extend::ext]
@@ -259,7 +259,7 @@ fn pandas_to_arrow_bytes<'py>(
 }
 
 impl PyClient {
-    pub fn new(handle_request: Py<PyFunction>) -> Self {
+    pub fn new(handle_request: Py<PyAny>) -> Self {
         let client = Client::new_with_callback({
             move |msg| {
                 clone!(handle_request);
@@ -351,7 +351,7 @@ impl PyClient {
         self.client.get_hosted_table_names().await.into_pyerr()
     }
 
-    pub async fn set_loop_cb(&self, loop_cb: Py<PyFunction>) -> PyResult<()> {
+    pub async fn set_loop_cb(&self, loop_cb: Py<PyAny>) -> PyResult<()> {
         *self.loop_cb.write().await = Some(loop_cb);
         Ok(())
     }
@@ -394,7 +394,7 @@ impl PyTable {
         self.table.make_port().await.into_pyerr()
     }
 
-    pub async fn on_delete(&self, callback_py: Py<PyFunction>) -> PyResult<u32> {
+    pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let loop_cb = self.client.loop_cb.read().await.clone();
         let callback = {
             let callback_py = callback_py.clone();
@@ -417,7 +417,7 @@ impl PyTable {
         Ok(callback_id)
     }
 
-    pub async fn remove_delete(&self, callback: Py<PyFunction>) -> PyResult<()> {
+    pub async fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
         let callback_id =
             Python::with_gil(|py| callback.getattr(py, PSP_CALLBACK_ID)?.extract(py))?;
         self.table.remove_delete(callback_id).await.into_pyerr()
@@ -559,7 +559,7 @@ impl PyView {
             .collect())
     }
 
-    pub async fn on_delete(&self, callback_py: Py<PyFunction>) -> PyResult<u32> {
+    pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let callback = {
             let callback_py = callback_py.clone();
             let loop_cb = self.client.loop_cb.read().await.clone();
@@ -583,13 +583,13 @@ impl PyView {
         Ok(callback_id)
     }
 
-    pub async fn remove_delete(&self, callback: Py<PyFunction>) -> PyResult<()> {
+    pub async fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
         let callback_id =
             Python::with_gil(|py| callback.getattr(py, PSP_CALLBACK_ID)?.extract(py))?;
         self.view.remove_delete(callback_id).await.into_pyerr()
     }
 
-    pub async fn on_update(&self, callback: Py<PyFunction>, mode: Option<String>) -> PyResult<u32> {
+    pub async fn on_update(&self, callback: Py<PyAny>, mode: Option<String>) -> PyResult<u32> {
         let loop_cb = self.client.loop_cb.read().await.clone();
         let callback = move |x: ViewOnUpdateResp| {
             let loop_cb = loop_cb.clone();
