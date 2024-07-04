@@ -664,7 +664,7 @@ ProtoServer::handle_request(
     std::uint32_t client_id, const std::string_view& data
 ) {
     proto::Request req_env;
-    req_env.ParseFromString(data);
+    req_env.ParseFromString(std::string(data));
     std::vector<ProtoServerResp<std::string>> serialized_responses;
     std::vector<proto::Response> responses;
     try {
@@ -1844,7 +1844,6 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
             view_dims->set_num_view_rows(view->num_rows());
             view_dims->set_num_table_columns(table->get_schema().size());
             view_dims->set_num_table_rows(table->size());
-
             push_resp(std::move(resp));
             break;
         }
