@@ -25,47 +25,6 @@ process.env.FORCE_COLOR = true;
 const _require = createRequire(import.meta.url);
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
-/*******************************************************************************
- *
- * Public
- */
-
-export function get_scope() {
-    if (PACKAGE_MANAGER === "npm") {
-        if (process.env.PACKAGE !== undefined && process.env.PACKAGE !== "") {
-            return (
-                process.env.PACKAGE.split(",")
-                    .map((x) => `--workspace=\"@finos/${x}\"`)
-                    .join(" ") + " --if-present"
-            );
-        } else {
-            return "--workspaces --if-present";
-        }
-    } else if (PACKAGE_MANAGER === "lerna") {
-        const scope = process.env.PACKAGE
-            ? process.env.PACKAGE.startsWith("@")
-                ? process.env.PACKAGE.slice(2, process.env.PACKAGE.length - 1)
-                      .split("|")
-                      .map((x) => `--filter @finos/${x}`)
-                      .join(" ")
-                : `--filter @finos/${process.env.PACKAGE}`
-            : "--filter '*'";
-        return scope;
-    } else if (PACKAGE_MANAGER === "pnpm") {
-        if (process.env.PACKAGE !== undefined && process.env.PACKAGE !== "") {
-            return (
-                process.env.PACKAGE.split(",")
-                    .map((x) => `--filter=\"@finos/${x}\"`)
-                    .join(" ") + " --if-present"
-            );
-        } else {
-            return "--filter=* --if-present";
-        }
-    }
-}
-
-export const PACKAGE_MANAGER = "npm";
-
 /**
  * Calls `join` on each of the input path arguments, then `rimraf`s the path if
  * it exists.   Can be used as an template literal, and can also take multiple
@@ -130,14 +89,41 @@ export function getarg(flag, ...args) {
     }
 }
 
-export const run_with_scope = async function run_recursive(strings, ...args) {
-    let scope =
-        process.env.PACKAGE && process.env.PACKAGE !== ""
-            ? process.env.PACKAGE.split(",").map((x) => `@finos/${x}`)
-            : [];
+export function get_scope() {
+    const package_venn = (process.env.PACKAGE || "").split(",").reduce(
+        (acc, x) => {
+            if (x.startsWith("!")) {
+                acc.exclude.push(x);
+            } else {
+                acc.include.push(x);
+            }
 
+            return acc;
+        },
+        { include: [], exclude: [] }
+    );
+
+    let packages;
+    if (package_venn.include.length === 0) {
+        packages = JSON.parse(
+            execSync(`pnpm m ls --json --depth=-1`).toString()
+        )
+            .filter((x) => x.name !== undefined)
+            .map((x) => x.name.replace("@finos/", ""))
+            .filter((x) => package_venn.exclude.indexOf(`!${x}`) === -1);
+    } else {
+        packages = package_venn.include.filter(
+            (x) => package_venn.exclude.indexOf(`!${x}`) === -1
+        );
+    }
+
+    return packages;
+}
+
+export const run_with_scope = async function run_recursive(strings, ...args) {
+    let scope = get_scope();
     const cmd = strings[0].split(" ")[0];
-    const filters = scope.map((x) => `--filter ${x}`).join(" ");
+    const filters = scope.map((x) => `--filter ${x} --if-present`).join(" ");
     execSync(`pnpm run --sequential --recursive ${filters} ${cmd}`, {
         stdio: "inherit",
     });

@@ -57,10 +57,16 @@ export async function worker(module: Promise<typeof psp>) {
         perspective_wasm_worker(),
     ]);
 
-    const client = new JsClient((proto: Uint8Array) => {
-        const f = proto.slice().buffer;
-        webworker.postMessage(f, { transfer: [f] });
-    });
+    const client = new JsClient(
+        (proto: Uint8Array) => {
+            const f = proto.slice().buffer;
+            webworker.postMessage(f, { transfer: [f] });
+        },
+        () => {
+            console.debug("Closing WebWorker");
+            webworker.terminate();
+        }
+    );
 
     await _init(webworker, wasm);
     webworker.addEventListener("message", (json: MessageEvent<Uint8Array>) => {
@@ -94,7 +100,7 @@ export async function websocket(
             ws.send(buffer);
         },
         () => {
-            console.log("WebSocket terminated!");
+            console.debug("Closing WebSocket");
             ws.close();
         }
     );

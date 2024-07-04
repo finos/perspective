@@ -12,6 +12,7 @@
 
 import sh from "./sh.mjs";
 import * as url from "url";
+import * as fs from "node:fs";
 
 export function install_boost(version = "1_82_0") {
     const version_dash = version.replace(/\./g, "_");
@@ -56,7 +57,9 @@ sudo ./b2 -j8 cxxflags=-fPIC cflags=-fPIC -a --with-program_options --with-files
 
 if (import.meta.url.startsWith("file:")) {
     if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
-        console.log("-- Installing Boost 1.82.0");
-        install_boost().runSync();
+        if (!fs.existsSync("./boost_1_82_0")) {
+            console.log("-- Installing Boost 1.82.0");
+            install_boost().runSync();
+        }
     }
 }

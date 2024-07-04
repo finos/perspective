@@ -1,0 +1,133 @@
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+name: "Initialize"
+description: "Initialize the build environment with caching"
+
+inputs:
+    skip_cache:
+        description: "Don't use cache from previous builds"
+
+runs:
+    using: "composite"
+    steps:
+        # - name: Clean System
+        #   uses: AdityaGarg8/remove-unwanted-software@v3
+        #   if: ${{ runner.os == 'Linux' }}
+        #   with:
+        #       remove-android: "true"
+        #       remove-dotnet: "true"
+        #       remove-haskell: "true"
+        #       remove-codeql: "true"
+
+        - name: Install pnpm
+          uses: pnpm/action-setup@v3
+          with:
+              version: 9
+
+        - name: Setup emsdk cache
+          uses: actions/cache@v4
+          id: emsdk-cache
+          if: ${{ inputs.skip_cache == 'false' }}
+          with:
+              path: |
+                  ~/boost_1_82_0/
+                  ~/.emsdk/
+                  ~/.llvm/
+              key: ${{ runner.os }}-emsdk-${{ hashFiles('package.json') }}
+              restore-keys: |
+                  ${{ runner.os }}-emsdk-
+
+        - name: Setup pip cache
+          uses: actions/cache@v4
+          if: ${{ inputs.skip_cache == 'false' }}
+          with:
+              path: |
+                  ~/.cache/pip
+                  ~/py_modules/
+              key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+              restore-keys: |
+                  ${{ runner.os }}-pip-
+
+        - name: Setup cargo cache
+          uses: actions/cache@v4
+          if: ${{ inputs.skip_cache == 'false' }}
+          with:
+              key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+              path: |
+                  ~/.cargo/bin/
+                  ~/.cargo/registry/index/
+                  ~/.cargo/registry/cache/
+                  ~/.cargo/git/db/
+                  rust/perspective-viewer/target/
+              restore-keys: |
+                  ${{ runner.os }}-cargo-
+
+        - name: ccache
+          uses: hendrikmuhs/ccache-action@v1.2
+          if: ${{ inputs.skip_cache == 'false' }}
+          with:
+              key: ${{ github.job }}-${{ matrix.os }}
+
+        - name: Set up Python ${{ matrix.python-version }}
+          uses: actions/setup-python@v5
+          with:
+              python-version: ${{ matrix.python-version }}
+              cache: "pip"
+
+        - name: Use Node.js ${{ matrix.node-version }}
+          uses: actions/setup-node@v4
+          with:
+              node-version: ${{ matrix.node-version }}
+              cache: "pnpm"
+              cache-dependency-path: pnpm-lock.yaml
+
+        - name: Install latest nightly rust
+          uses: dtolnay/rust-toolchain@nightly
+          with:
+              toolchain: nightly-2024-05-07
+              targets: wasm32-unknown-unknown
+              components: rustfmt, clippy, rust-src
+
+        - name: Install LLVM 17
+          uses: KyleMayes/install-llvm-action@v2
+          with:
+              version: "17"
+              directory: "./.llvm"
+              cached: true
+
+        # JS
+        - name: Install JS dependencies
+          shell: bash
+          run: pnpm install
+
+        - name: Install venv
+          shell: bash
+          run:
+
+        - name: Activate virtualenv
+          shell: bash
+          run: |
+              python3 -m venv py_modules
+              . ./py_modules/bin/activate
+              echo PATH=$PATH >> $GITHUB_ENV
+              echo VIRTUAL_ENV=$VIRTUAL_ENV >> $GITHUB_ENV
+              pip3 install maturin
+
+        - name: Linux init steps
+          shell: bash
+          run: sudo node tools/perspective-scripts/install_tools.mjs
+          if: ${{ runner.os == 'Linux' }}
+
+        - name: Install CCache
+          shell: bash
+          run: sudo apt install -y ccache

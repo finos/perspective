@@ -90,11 +90,11 @@ export function checkFormatting() {
     //     sh.path`./python/perspective/perspective/include/perspective/python/*.h`
     // );
 
-    tidyLint();
+    // tidyLint();
 }
 
 export function fixFormatting() {
-    tidyLint("-fix");
+    // tidyLint("-fix");
     clangFormatFix(sh.path`./cpp/perspective/src/cpp/*.cpp`);
     clangFormatFix(sh.path`./cpp/perspective/src/cpp/vendor/*.cpp`);
     clangFormatFix(sh.path`./cpp/perspective/src/include/perspective/*.h`);

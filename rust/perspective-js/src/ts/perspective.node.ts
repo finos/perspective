@@ -57,7 +57,11 @@ SYNC_CLIENT = new perspective_client.JsClient(async (req: Uint8Array) => {
 
 await SYNC_CLIENT.init();
 
-export const make_sync_session = async (
+export function make_server() {
+    return new PerspectiveServer(SYNC_MODULE);
+}
+
+export const make_session = async (
     send_response: (buffer: Uint8Array) => Promise<void>
 ) => await SYNC_SERVER.make_session(send_response);
 
@@ -160,7 +164,10 @@ function invert_promise<T>(): [(t: T) => void, Promise<T>] {
 export class WebSocketServer {
     _server: http.Server | any; // stoppable has no type ...
     _wss: HttpWebSocketServer;
-    constructor({ port = 8080, assets = ["./"] } = {}) {
+    constructor({ port = 8080, assets = ["./"], server = undefined } = {}) {
+        const perspective_server =
+            typeof server === "undefined" ? SYNC_SERVER : server;
+
         port = typeof port === "undefined" ? 8080 : port;
         this._server = stoppable(
             http.createServer((x, y) => cwd_static_file_handler(x, y, assets))
@@ -173,15 +180,19 @@ export class WebSocketServer {
 
         this._wss.on("connection", (ws) => {
             console.log("... Connecting websocket");
-            const server = SYNC_SERVER.make_session(
+            const session = perspective_server.make_session(
                 async (proto: Uint8Array) => {
                     ws.send(buffer_to_arraybuffer(proto));
                 }
             );
 
             ws.on("message", (proto) => {
-                server.handle_request(buffer_to_arraybuffer(proto));
-                setTimeout(() => server.poll());
+                session.handle_request(buffer_to_arraybuffer(proto));
+                setTimeout(() => session.poll());
+            });
+
+            ws.on("close", () => {
+                session.close();
             });
         });
 

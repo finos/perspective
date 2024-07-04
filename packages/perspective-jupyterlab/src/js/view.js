@@ -252,7 +252,7 @@ export class PerspectiveView extends DOMWidgetView {
 
     get client_worker() {
         if (!this._client_worker) {
-            this._client_worker = perspective.shared_worker();
+            this._client_worker = perspective.worker();
         }
         return this._client_worker;
     }

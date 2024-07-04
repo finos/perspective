@@ -18,6 +18,8 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
     const inline = !!options.inline;
     const targetdir = options.targetdir || "build/worker";
     function setup(build) {
+        const options = build.initialOptions;
+        options.metafile = true;
         build.onResolve({ filter: /\.worker(\.js)?$/ }, (args) => {
             if (args.namespace === "worker-stub") {
                 const outfile =
@@ -126,7 +128,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                     contents: `
                     import worker from ${JSON.stringify(args.path)};
                     async function get_worker_code() {
-                        const url = new URL(worker, import.meta.url);
+                        const url = new URL(__PSP_INLINE_WORKER__(worker), import.meta.url);
                         const req = await fetch(url);
                         const code = await req.text();
                         return code;
@@ -160,9 +162,8 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                         return make_host(mains, workers);
                     }
 
-                    const code_promise = get_worker_code();
                     export const initialize = async function () {
-                        const code = await code_promise;
+                        const code = await get_worker_code();
                         if (window.location.protocol.startsWith("file") && !window.isElectron) {
                             console.warn("file:// protocol does not support Web Workers");
                             return run_single_threaded(code);
@@ -210,6 +211,29 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                 contents,
                 loader: inline ? "text" : "file",
             };
+        });
+
+        build.onEnd(({ metafile }) => {
+            for (const file of Object.keys(metafile.outputs)) {
+                if (file.endsWith(".js")) {
+                    let contents = fs.readFileSync(file).toString();
+                    const symbol = contents.match(
+                        /__PSP_INLINE_WORKER__\(([a-zA-Z0-9_]+?)\)/
+                    );
+                    if (symbol?.[1]) {
+                        const filename = contents.match(
+                            new RegExp(`${symbol[1]}\\s*?=\\s*?\\"(.+?)\\"`)
+                        );
+
+                        contents = contents.replace(
+                            /__PSP_INLINE_WORKER__\([a-zA-Z0-9_]+?\)/,
+                            `"${filename[1]}"`
+                        );
+
+                        fs.writeFileSync(file, contents);
+                    }
+                }
+            }
         });
     }
 

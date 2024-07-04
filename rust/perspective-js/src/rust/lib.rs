@@ -13,7 +13,8 @@
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
-    clippy::await_holding_refcell_ref
+    clippy::await_holding_refcell_ref,
+    unstable_features
 )]
 #![allow(non_snake_case)]
 
@@ -24,6 +25,7 @@ mod view;
 use js_sys::{Function, Uint8Array};
 use perspective_client::config::*;
 use perspective_client::*;
+use proto::ViewOnUpdateResp;
 use ts_rs::TS;
 use utils::{ApiResult, LocalPollLoop};
 use wasm_bindgen::prelude::*;
@@ -52,7 +54,7 @@ pub fn generate_type_bindings() {
     ViewWindow::export_all().unwrap();
     TableInitOptions::export_all().unwrap();
     ViewConfigUpdate::export_all().unwrap();
-    OnUpdateArgs::export_all().unwrap();
+    ViewOnUpdateResp::export_all().unwrap();
     OnUpdateOptions::export_all().unwrap();
     UpdateOptions::export_all().unwrap()
 }
@@ -88,10 +90,15 @@ impl JsClient {
             send1.call1(&JsValue::UNDEFINED, &buff2)
         });
 
-        JsClient {
-            close: close.clone(),
-            client: Client::new(move |_client, msg| send_loop.poll(msg.clone())),
-        }
+        let client = Client::new_with_callback(move |msg| {
+            let task = send_loop.poll(msg.to_vec());
+            Box::pin(async move {
+                task.await;
+                Ok(())
+            })
+        });
+
+        JsClient { close, client }
     }
 
     #[wasm_bindgen]

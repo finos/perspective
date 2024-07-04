@@ -16,7 +16,7 @@ import { run_with_scope } from "./sh_perspective.mjs";
 
 dotenv.config({ path: "./.perspectiverc" });
 
-if (!fs.existsSync("./.perspectiverc")) {
+if (!fs.existsSync("./.perspectiverc") && !process.env.PACKAGE) {
     console.error("No .perspectiverc, running setup");
     process.env.PSP_BUILD_IMMEDIATELY = 1;
     await import("./setup.mjs");

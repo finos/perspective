@@ -124,12 +124,12 @@ class TestViewExpression(object):
 
     def test_table_validate_expressions_with_errors(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        expressions = ['"Sales" + "Profit"', "datetime()", "string()", "for () {}"]
+        expressions = ['"Sales" + "a"', "datetime()", "string()", "for () {}"]
         validate = table.validate_expressions(expressions)
         assert validate["expression_schema"] == {}
         assert validate["expression_alias"] == {expr: expr for expr in expressions}
         assert validate["errors"] == {
-            '"Sales" + "Profit"': {
+            '"Sales" + "a"': {
                 "column": 0,
                 "error_message": 'Value Error - Input column "Sales" does not exist.',
                 "line": 0,

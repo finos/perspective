@@ -10,15 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const fs = require("node:fs");
-const cp = require("node:child_process");
-const process = require("node:process");
-const path = require("node:path");
-const microtime = require("microtime");
-const express = require("express");
-const expressWs = require("express-ws");
-
-const MAX_ITERATIONS = 200;
+const MAX_ITERATIONS = 100;
 const MIN_ITERATIONS = 5;
 const WARM_UP_ITERATIONS = 10;
 
@@ -90,6 +82,7 @@ function markOutliers(someArray) {
  * @param {Array} obs_records an array of records to persist
  */
 async function persist_to_arrow(benchmarks_table, out_path = "") {
+    const fs = await import("node:fs");
     const view = await benchmarks_table.view();
     const arrow = await view.to_arrow();
     fs.writeFileSync(out_path, Buffer.from(arrow), "binary");
@@ -110,6 +103,7 @@ async function benchmark_case({
     after,
     i,
 }) {
+    const { default: microtime } = await import("microtime");
     const args2 = args.slice();
     push_if(args2, await before?.(...args2));
     global.gc(false);
@@ -138,7 +132,10 @@ async function benchmark_case({
  * the child process.
  * @returns an array of observation records for this version.
  */
-async function benchmark_version(version, benchmarks_table) {
+async function benchmark_node_version(version, benchmarks_table) {
+    const cp = await import("node:child_process");
+    const process = await import("node:process");
+    const path = await import("node:path");
     const suite_path = path.join(process.argv[1]);
     let stats = [];
     const worker = cp.fork(suite_path, {
@@ -170,10 +167,94 @@ async function benchmark_version(version, benchmarks_table) {
 }
 
 /**
+ * Run the benchmarks in a forked process and colelct the observations.
+ * @param {{version: string, i: number}} version the versions spec to send to
+ * the child process.
+ * @returns an array of observation records for this version.
+ */
+async function benchmark_puppeteer_version(version, benchmarks_table) {
+    const process = await import("node:process");
+    const path = await import("node:path");
+    const { default: puppeteer } = await import("puppeteer");
+    const suite_path = path.join(process.argv[1]);
+    let stats = [];
+    const browser = await puppeteer.launch({ headless: false });
+    const page = await browser.newPage();
+    await page.goto("http://localhost:8081/empty.html");
+    await page.setContent(`
+    <html>
+        <head>
+            <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+
+            <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+
+            <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.js" as="fetch" type="application/javascript" crossorigin="anonymous" />
+            <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+            <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+            <link rel="preload" href="/node_modules/superstore-arrow/superstore.lz4.arrow" as="fetch" type="arraybuffer" crossorigin="anonymous" />
+
+        </head>
+    </html>`);
+
+    await page.evaluate(async function () {
+        // const bench = await import("/tools/perspective-bench/basic_suite.mjs");
+        // console.log(bench);
+        // <script type="module">
+        //     import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+        //     const worker = await perspective.worker();
+        //     const resp = await fetch("/node_modules/superstore-arrow/superstore.lz4.arrow");
+        //     const arrow = await resp.arrayBuffer();
+        //     const viewer = document.getElementsByTagName("perspective-viewer")[0];
+        //     const table = worker.table(arrow);
+        //     viewer.load(table);
+        //     viewer.restore({ settings: true, plugin_config: { edit_mode: "EDIT" } });
+        // </script>
+        // <style>
+        //     perspective-viewer {
+        //         position: absolute;
+        //         top: 0;
+        //         left: 0;
+        //         bottom: 0;
+        //         right: 0;
+        //     }
+        // </style>
+    });
+
+    await page.waitForTimeout(100_000);
+
+    // const worker = cp.fork(suite_path, {
+    //     execArgv: ["--expose-gc"],
+    //     env: { BENCH_FLAG: "1" },
+    // });
+
+    // let cont;
+    // worker.on("message", (details) => {
+    //     if (details.finished) {
+    //         cont();
+    //     } else {
+    //         benchmarks_table.update(details.obs_records);
+    //         stats.push(details.stats);
+    //     }
+    // });
+
+    // worker.send({
+    //     ...version,
+    //     stats,
+    // });
+
+    // await new Promise((r) => {
+    //     cont = r;
+    // });
+
+    // worker.kill();
+    // return { stats };
+}
+
+/**
  * Register a benchmark for a test case.
  * @param {*} param0
  */
-exports.benchmark = async function benchmark({
+export async function benchmark({
     name: benchmark,
     before,
     before_all,
@@ -187,6 +268,9 @@ exports.benchmark = async function benchmark({
     min_iterations = MIN_ITERATIONS,
     max_time = 3_000_000,
 } = {}) {
+    const { default: process } = await import("node:process");
+    const { default: microtime } = await import("microtime");
+
     let obs_records = [];
     push_if(args, await before_all?.(...args));
     const start_time = microtime.now();
@@ -245,7 +329,7 @@ exports.benchmark = async function benchmark({
 
     await after_all?.(...args);
     process.send({ obs_records, stats });
-};
+}
 
 function buffer_to_arraybuffer(buffer) {
     return new Int8Array(
@@ -261,7 +345,10 @@ function buffer_to_arraybuffer(buffer) {
  * @param {*} param0
  * @returns
  */
-function start_server({ cwd_static_file_handler, make_session }) {
+async function start_server({ cwd_static_file_handler, make_session }) {
+    const { default: express } = await import("express");
+    const { default: expressWs } = await import("express-ws");
+
     const app = expressWs(express()).app;
     app.ws("/subscribe", async (ws) => {
         const server = await make_session((proto) =>
@@ -291,13 +378,14 @@ function start_server({ cwd_static_file_handler, make_session }) {
  * @param {*} versions
  * @param {*} run_version_callback
  */
-exports.suite = async function (
+export async function suite(
     versions,
     out_path,
     run_version_callback,
     start_server_callback
 ) {
     if (!!process.env.BENCH_FLAG) {
+        const { default: process } = await import("node:process");
         process.on("message", async function bench_all({ path, i }) {
             await run_version_callback(path, i);
             process.send({ finished: true });
@@ -327,7 +415,14 @@ exports.suite = async function (
             }
 
             await Promise.all([
-                benchmark_version({ path: versions[i], i }, benchmarks_table),
+                benchmark_node_version(
+                    { path: versions[i], i },
+                    benchmarks_table
+                ),
+                // benchmark_puppeteer_version(
+                //     { path: versions[i], i },
+                //     benchmarks_table
+                // ),
                 // benchmark_version({ path: versions[i], i }, benchmarks_table),
                 // benchmark_version({ path: versions[i], i }, benchmarks_table),
                 // benchmark_version({ path: versions[i], i }, benchmarks_table),
@@ -341,4 +436,4 @@ exports.suite = async function (
 
         await app.close();
     }
-};
+}
