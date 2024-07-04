@@ -123,6 +123,18 @@ js_poll(ProtoApiServer* server) {
 }
 
 PERSPECTIVE_EXPORT
+std::uint32_t
+js_new_session(ProtoApiServer* server) {
+    return server->new_session();
+}
+
+PERSPECTIVE_EXPORT
+void
+js_close_session(ProtoApiServer* server, std::uint32_t client_id) {
+    server->close_session(client_id);
+}
+
+PERSPECTIVE_EXPORT
 std::size_t
 js_alloc(std::size_t size) {
     auto* mem = (char*)malloc(size);

@@ -16,6 +16,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 struct ProtoApiResponse {
     std::string data;
@@ -30,6 +31,9 @@ private:
 public:
     ProtoApiServer();
     ~ProtoApiServer();
+
+    std::uint32_t new_session();
+    void close_session(const std::uint32_t& client_id);
 
     [[nodiscard]]
     std::vector<ProtoApiResponse>

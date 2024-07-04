@@ -13,3 +13,8 @@ frequency = 'never'
 
 [unstable]
 bindeps = true
+
+[term]
+quiet = false
+verbose = false
+color = 'always'

@@ -1,7 +1,7 @@
-The View is Perspective's query and serialization interface. It represents a
-query on the `Table`'s dataset and is always created from an existing `Table`
-instance via the `view()` method with a set of
-[`View` configuration parameters](obj/perspective.md#module_perspective..table+view):
+The [`View`] struct is Perspective's query and serialization interface. It
+represents a query on the `Table`'s dataset and is always created from an
+existing `Table` instance via the `view()` method.
+.
 
 ```javascript
 const table = await perspective.table({

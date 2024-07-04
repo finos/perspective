@@ -241,3 +241,7 @@ rust/perspective-js/src/ts/ts-rs
 rust/perspective-server/cpp
 rust/perspective-server/cmake
 rust/perspective-js/docs
+rust/perspective-python/docs
+
+
+.pyodide-*/

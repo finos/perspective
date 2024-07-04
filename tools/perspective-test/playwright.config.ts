@@ -15,6 +15,7 @@ import path from "path";
 import * as dotenv from "dotenv";
 import { createRequire } from "node:module";
 import url from "node:url";
+import { execSync } from "child_process";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,7 +30,31 @@ const TEST_SERVER_PORT = 6598;
 
 const RUN_JUPYTERLAB = !!process.env.PSP_JUPYTERLAB_TESTS;
 
-const PACKAGE = process.env.PACKAGE?.split(",");
+// TODO use this from core
+const package_venn = (process.env.PACKAGE || "").split(",").reduce(
+    (acc, x) => {
+        if (x.startsWith("!")) {
+            acc.exclude.push(x);
+        } else {
+            acc.include.push(x);
+        }
+
+        return acc;
+    },
+    { include: [] as string[], exclude: [] as string[] }
+);
+
+let PACKAGE: string[] = [];
+if (package_venn.include.length === 0) {
+    PACKAGE = JSON.parse(execSync(`pnpm m ls --json --depth=-1`).toString())
+        .filter((x) => x.name !== undefined)
+        .map((x) => x.name.replace("@finos/", ""))
+        .filter((x) => package_venn.exclude.indexOf(`!${x}`) === -1);
+} else {
+    PACKAGE = package_venn.include.filter(
+        (x) => package_venn.exclude.indexOf(`!${x}`) === -1
+    );
+}
 
 const DEVICE_OPTIONS = {
     "Desktop Chrome": {
@@ -105,7 +130,7 @@ const BROWSER_AND_PYTHON_PACKAGES = [
 
 //const RUN_JUPYTERLAB = PACKAGE.includes("perspective-jupyterlab");
 
-const PROJECTS = (() => {
+let PROJECTS = (() => {
     const acc = new Array();
     if (RUN_JUPYTERLAB) {
         for (const pkg of BROWSER_AND_PYTHON_PACKAGES) {

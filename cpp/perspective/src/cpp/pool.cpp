@@ -34,18 +34,17 @@ t_pool::t_pool() : m_sleep(0) { m_run.clear(); }
 
 #elif defined PSP_ENABLE_PYTHON
 
-t_val
-empty_callback() {
-    return py::none();
-}
+// t_val
+// empty_callback() {
+//     return py::none();
+// }
 
 t_pool::t_pool() :
-#ifdef PSP_ENABLE_PYTHON
-    m_update_delegate(empty_callback()),
-#endif
+// : m_update_delegate(empty_callback())
 #ifdef PSP_PARALLEL_FOR
-    m_lock(new std::shared_mutex()),
+    m_lock(new std::shared_mutex())
 #endif
+    ,
     m_sleep(0) {
     m_run.clear();
 }
@@ -208,21 +207,15 @@ t_pool::register_context(
 }
 #endif
 
-#if defined PSP_ENABLE_PYTHON
-void
-t_pool::set_update_delegate(t_val ud) {
-    m_update_delegate = ud;
-}
-#endif
-
 void
 t_pool::notify_userspace(t_uindex port_id) {
-#if defined PSP_ENABLE_WASM && !defined PSP_ENABLE_PYTHON
-#elif PSP_ENABLE_PYTHON
-    if (!m_update_delegate.is_none()) {
-        m_update_delegate.attr("_update_callback")(port_id);
-    }
-#endif
+    // #if defined PSP_ENABLE_WASM && !defined PSP_ENABLE_PYTHON
+    //     m_update_delegate.call<void>("_update_callback", port_id);
+    // #elif PSP_ENABLE_PYTHON
+    //     if (!m_update_delegate.is_none()) {
+    //         m_update_delegate.attr("_update_callback")(port_id);
+    //     }
+    // #endif
 }
 
 void

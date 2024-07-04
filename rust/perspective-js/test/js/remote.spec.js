@@ -35,6 +35,13 @@ test.describe("WebSocketManager", function () {
         const client_data = await client_view.to_json();
         expect(client_data).toEqual(data);
         await client.terminate();
+
+        // // TODO Can't await delete here because `terminate()` doesn't
+        // // guarantee server-side cleanup happens immediately. So this test
+        // // leaks a small `Table` sometimes, as do several others in this
+        // // suite.
+
+        await new Promise((x) => setTimeout(x, 10));
         await table.delete();
     });
 
@@ -54,6 +61,8 @@ test.describe("WebSocketManager", function () {
         const client_data = await client_view.to_json();
         expect(client_data).toEqual(data);
         await client.terminate();
+
+        await new Promise((x) => setTimeout(x, 10));
         await table.delete();
     });
 
@@ -72,6 +81,8 @@ test.describe("WebSocketManager", function () {
         await client_2.terminate();
         expect(client_1_data).toEqual(data);
         expect(client_2_data).toEqual(data);
+
+        await new Promise((x) => setTimeout(x, 10));
         await table.delete();
     });
 
@@ -97,6 +108,8 @@ test.describe("WebSocketManager", function () {
         await client_2.terminate();
         expect(client_1_data).toEqual(data);
         expect(client_2_data).toEqual(data);
+
+        await new Promise((x) => setTimeout(x, 10));
         await table.delete();
     });
 
@@ -113,6 +126,7 @@ test.describe("WebSocketManager", function () {
 
         const on_update = () => {
             client_view.to_json().then(async (updated_data) => {
+                await client_view.delete();
                 await table.delete();
                 expect(updated_data).toEqual([{ x: 1 }, { x: 2 }]);
                 await client.terminate();
@@ -141,10 +155,12 @@ test.describe("WebSocketManager", function () {
         const client_data = await client_view.to_json();
         expect(client_data).toEqual([{ x: 1 }, { x: 1 }]);
         await client.terminate();
+        await new Promise((x) => setTimeout(x, 10));
+        await view.delete();
         await table.delete();
     });
 
-    test("Calls `update` and sends arraybuffers using `binary_length` multiple times", async () => {
+    test("Calls `update` and sends `Uint8Array` using `binary_length` multiple times", async () => {
         const data = [{ x: 1 }];
         const table = await perspective.table(data, { name: "test" });
         const view = await table.view();
@@ -157,11 +173,12 @@ test.describe("WebSocketManager", function () {
         const client_view = await client_table.view();
         const client_data = await client_view.to_json();
         expect(client_data).toEqual([{ x: 1 }, { x: 1 }, { x: 1 }, { x: 1 }]);
-        await client.terminate();
+        await client_view.delete();
+        await view.delete();
         await table.delete();
     });
 
-    test("Calls `update` and sends arraybuffers using `on_update`", async () => {
+    test("Calls `update` and sends `Uint8Array` using `on_update`", async () => {
         const data = [{ x: 1 }];
         const table = await perspective.table(data, { name: "test" });
         const view = await table.view();
@@ -174,10 +191,12 @@ test.describe("WebSocketManager", function () {
 
         const updater = async (updated) => {
             expect(updated.port_id).toEqual(update_port);
-            expect(updated.delta instanceof ArrayBuffer).toEqual(true);
+            expect(updated.delta instanceof Uint8Array).toEqual(true);
             expect(updated.delta.byteLength).toBeGreaterThan(0);
-            await client.terminate();
+            await view.delete();
             await table.delete();
+            await client.terminate();
+
             done();
         };
 

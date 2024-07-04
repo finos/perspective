@@ -282,7 +282,8 @@ impl Session {
             .flat_view(flat)
             .await?
             .to_arrow(window.unwrap_or_default())
-            .await?)
+            .await?
+            .into())
     }
 
     pub async fn arrow_as_jsvalue(

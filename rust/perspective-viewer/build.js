@@ -69,7 +69,7 @@ async function build_all() {
             entryPoints: ["src/ts/perspective-viewer.ts"],
             format: "esm",
             plugins: [NodeModulesExternal()],
-            external: ["*.wasm", "*.worker.js"],
+            external: ["*.wasm"],
             outdir: "dist/esm",
         },
         {

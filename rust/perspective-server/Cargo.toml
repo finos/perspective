@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-server"
-version = "3.0.0-alpha.1"
+version = "2.10.1"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -31,8 +31,10 @@ include = [
 ]
 
 [features]
-default = []
+default = ["python"]
 external-cpp = []
+wasm-exceptions = []
+python = []
 
 [build-dependencies]
 cxx-build = "1.0.115"
@@ -40,9 +42,11 @@ cmake = "0.1.50"
 num_cpus = "1.16.0"
 
 [dependencies]
+async-lock = "2.5.0"
 cxx = "1.0.115"
 tracing = { version = ">=0.1.36" }
+futures = "0.3"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["rlib"]
 path = "src/lib.rs"

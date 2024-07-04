@@ -19,9 +19,14 @@ publish = false
 [lib]
 crate-type = ["cdylib"]
 path = "lib.rs"
+test = false
 
 [dependencies]
-flate2 = "1.0.28"
+talc = "4.4.1"
+simd-adler32 = { version = "0.3.7", default-features = false }
+zune-inflate = { version = "0.2", default-features = false, features = [
+    "zlib",
+] }
 
 [features]
 env_target = []

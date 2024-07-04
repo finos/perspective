@@ -13,7 +13,6 @@ packages:
     - "packages/perspective-cli"
     - "rust/perspective-js"
     - "rust/perspective-viewer"
-    - "python/perspective"
+    - "rust/perspective-python"
     - "examples/*"
     - "docs"
-    - "python/perspective"

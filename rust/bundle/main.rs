@@ -10,8 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#![feature(lazy_cell)]
-
 use std::path::Path;
 use std::process::{exit, Command};
 
@@ -40,22 +38,19 @@ use wasm_opt::OptimizationOptions;
 /// script's parameters also, and there is no way to reset e.g. the `target`
 /// field to the host platform.
 fn build(pkg: Option<&str>, is_release: bool, features: Vec<String>) {
-    let mut debug_flags = vec![];
-    if is_release {
-        debug_flags.push("--release");
-    }
 
-    let mut cmd = Command::new("cargo");
     let features = format!("tracing/release_max_level_warn,{}", features.join(","));
-    cmd.env("RUSTFLAGS", "--cfg=web_sys_unstable_apis")
-        .args(["build"])
+    let mut cmd = Command::new("cargo");
+    cmd.args(["build"])
         .args(["--lib"])
-        .args(["--color", "always"])
         .args(["--features", &features])
         .args(["--target", "wasm32-unknown-unknown"])
         .args(["-Z", "build-std=std,panic_abort"])
-        .args(["-Z", "build-std-features=panic_immediate_abort"])
-        .args(debug_flags);
+        .args(["-Z", "build-std-features=panic_immediate_abort"]);
+
+    if is_release {
+        cmd.args(["--release"]);
+    }
 
     if let Some(pkg) = pkg {
         cmd.args(["-p", pkg]);
@@ -89,13 +84,17 @@ fn opt(outpath: &Path, is_release: bool) {
             .unwrap();
     }
 
-    Command::new("cargo")
-        .args(["run"])
+    let mut cmd = Command::new("cargo");
+    cmd.args(["run"])
         .args(["-p", "perspective-bootstrap"])
         .args(["--target", env!("TARGET")])
-        .args(["--"])
-        .args([outpath])
-        .execute();
+        .args(["--"]);
+
+    if is_release {
+        cmd.args(["--release"]);
+    }
+
+    cmd.args([outpath]).execute();
 }
 
 fn main() {

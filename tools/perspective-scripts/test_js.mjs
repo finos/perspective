@@ -72,7 +72,16 @@ if (process.env.PACKAGE) {
         process.exit(0);
     }
 
-    playwright(process.env.PACKAGE).runSync();
+    if (process.env.PACKAGE !== "perspective-python") {
+        playwright(process.env.PACKAGE).runSync();
+    }
+
+    if (
+        process.env.PACKAGE.indexOf("perspective-python") >= 0 &&
+        process.env.PACKAGE.indexOf("!perspective-python") === -1
+    ) {
+        sh`pnpm run --recursive --filter @finos/perspective-python test`.runSync();
+    }
 } else {
     console.log("-- Running all tests");
     playwright().runSync();

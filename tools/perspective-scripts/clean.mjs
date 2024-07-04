@@ -10,58 +10,47 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { default as sh, clean, run_with_scope } from "./sh_perspective.mjs";
-import glob from "glob";
+import { clean, get_scope } from "./sh_perspective.mjs";
+import { execSync } from "child_process";
 
-const args = process.argv.slice(2);
+const PACKAGES = get_scope();
+const JS_PKGS = [];
+const RUST_PKGS = [];
+for (const pkg of PACKAGES) {
+    if (pkg === "perspective-cpp") {
+        console.log("-- Cleaning perspective-cpp");
+        clean("cpp/perspective/dist", "cpp/perspective/build");
+    } else if (
+        [
+            "perspective-cli",
+            "perspective-esbuild-plugin",
+            "perspective-jupyterlab",
+            "perspective-viewer-d3fc",
+            "perspective-viewer-datagrid",
+            "perspective-viewer-openlayers",
+            "perspective-webpack-plugin",
+            "perspective-workspace",
+        ].indexOf(pkg) > -1
+    ) {
+        JS_PKGS.push(pkg);
+    } else {
+        RUST_PKGS.push(pkg);
+    }
+}
 
-if (process.env.PSP_PROJECT === "python") {
-    clean(
-        "python/perspective/dist",
-        "python/perspective/build",
-        "python/perspective/docs/build",
-        "python/perspective/perspective_python.egg-info",
-        "python/perspective/.coverage",
-        "python/perspective/.pytest_cache",
-        "python/perspective/python_junit.xml",
-        "python/perspective/coverage.xml",
-        ...glob.sync("python/perspective/**/*.pyc"),
-        ...glob.sync("python/perspective/**/__pycache__")
+if (JS_PKGS.length > 0) {
+    console.log(`-- Cleaning ${JS_PKGS.join(", ")} via pnpm`);
+    execSync(
+        `pnpm run ${JS_PKGS.map((x) => `--filter ${x} --if-present`).join(
+            " "
+        )} clean`,
+        { stdio: "inherit" }
     );
-    process.exit(0);
 }
 
-if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
-    clean(
-        "cpp/perspective/dist",
-        "cpp/perspective/build",
-        "packages/perspective/build"
-    );
+if (RUST_PKGS.length > 0) {
+    console.log(`-- Cleaning ${RUST_PKGS.join(", ")} via cargo`);
+    execSync(`cargo clean ${RUST_PKGS.map((x) => `-p ${x}`).join(" ")}`);
 }
 
-const PACKAGES = process.env.PACKAGE?.split(",") || [];
-if (!process.env.PACKAGE || PACKAGES.indexOf("perspective") >= 0) {
-    const files = [
-        "CMakeFiles",
-        "build",
-        "cmake_install.cmake",
-        "CMakeCache.txt",
-        "compile_commands.json",
-        "libpsp.a",
-        "Makefile",
-    ];
-    clean(...files.map((x) => `cpp/perspective/obj/${x}`));
-}
-
-if (
-    !process.env.PACKAGE ||
-    PACKAGES.indexOf("perspective") >= 0 ||
-    PACKAGES.indexOf("perspective-viewer") >= 0
-) {
-    console.log("-- Running cargo clean\n");
-    sh`cargo clean`.runSync();
-    console.log();
-}
-
-await run_with_scope`clean`;
 clean("docs/build", "docs/python", "docs/obj");
