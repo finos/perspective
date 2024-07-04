@@ -39,6 +39,7 @@ class TestTableInfer(object):
         assert tbl.size() == 2
         assert tbl.schema() == {"a": "boolean", "b": "boolean"}
 
+    @mark.skip(reason="Unsupported python specific behavior")
     def test_table_bool_infer_str_all_formats_from_schema(self):
         bool_data = [
             {"a": "True", "b": "False"},
@@ -50,7 +51,7 @@ class TestTableInfer(object):
         tbl = Table(bool_data)
         assert tbl.schema() == {"a": "boolean", "b": "boolean"}
         assert tbl.size() == 5
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [True, True, True, True, True],
             "b": [False, False, False, False, False],
         }
@@ -65,6 +66,7 @@ class TestTableInfer(object):
         tbl = Table(data)
         assert tbl.schema() == {"a": "string"}
 
+    @mark.skip(reason="Time is not a valid JSON type")
     def test_table_infer_time_as_string(self):
         # time objects are inferred as string
         data = {
@@ -81,6 +83,7 @@ class TestTableInfer(object):
         tbl = Table(data)
         assert tbl.schema() == {"a": "string"}
 
+    @mark.skip(reason="Unsupported python specific behavior")
     def test_table_infer_date_from_datetime(self):
         # inferrence on non-pandas datasets defaults to datetime
         data = {"a": [None, None, None, None, None, None, datetime(2019, 7, 11)]}
@@ -168,6 +171,7 @@ class TestTableInfer(object):
         tbl = Table(data)
         assert tbl.schema() == {"a": "datetime"}
 
+    @mark.skip(reason="Numeric strings are not inferred as numbers")
     def test_table_strict_datetime_infer(self):
         data = {"a": ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"]}
         tbl = Table(data)

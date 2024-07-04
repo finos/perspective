@@ -10,177 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::collections::HashMap;
-
 use perspective_client::{assert_table_api, assert_view_api};
-use perspective_server::Server;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict, PyFunction, PyString};
 use pyo3_asyncio::tokio::future_into_py;
 
 use super::python::*;
-
-fn get_arrow_table_cls() -> Option<Py<PyAny>> {
-    let res: PyResult<Py<PyAny>> = Python::with_gil(|py| {
-        let pyarrow = PyModule::import(py, "pyarrow")?;
-        Ok(pyarrow.getattr("Table")?.to_object(py))
-    });
-    match res {
-        Ok(x) => Some(x),
-        Err(_) => {
-            tracing::warn!("Failed to import pyarrow.Table");
-            None
-        },
-    }
-}
-
-fn is_arrow_table(py: Python, table: &PyAny) -> PyResult<bool> {
-    if let Some(table_class) = get_arrow_table_cls() {
-        table.is_instance(table_class.as_ref(py))
-    } else {
-        Ok(false)
-    }
-}
-
-fn to_arrow_bytes(py: Python, table: &PyAny) -> PyResult<Py<PyBytes>> {
-    let pyarrow = PyModule::import(py, "pyarrow")?;
-    let table_class = get_arrow_table_cls()
-        .ok_or_else(|| PyValueError::new_err("Failed to import pyarrow.Table"))?;
-
-    if !table.is_instance(table_class.as_ref(py))? {
-        return Err(PyValueError::new_err("Input is not a pyarrow.Table"));
-    }
-
-    let sink = pyarrow.call_method0("BufferOutputStream")?;
-
-    {
-        let writer =
-            pyarrow.call_method1("RecordBatchFileWriter", (sink, table.getattr("schema")?))?;
-
-        writer.call_method1("write_table", (table,))?;
-        writer.call_method0("close")?;
-    }
-
-    // Get the value from the sink and convert it to Python bytes
-    let value = sink.call_method0("getvalue")?;
-    let pybytes = value.call_method0("to_pybytes")?.downcast::<PyBytes>()?;
-
-    Ok(pybytes.into())
-}
-
-fn get_pandas_df_cls() -> Option<Py<PyAny>> {
-    let res: PyResult<Py<PyAny>> = Python::with_gil(|py| {
-        let pandas = PyModule::import(py, "pandas")?;
-        Ok(pandas.getattr("DataFrame")?.to_object(py))
-    });
-    match res {
-        Ok(x) => Some(x),
-        Err(_) => {
-            tracing::warn!("Failed to import pandas.DataFrame");
-            None
-        },
-    }
-}
-
-fn is_pandas_df(py: Python, df: &PyAny) -> PyResult<bool> {
-    if let Some(df_class) = get_pandas_df_cls() {
-        df.is_instance(df_class.as_ref(py))
-    } else {
-        Ok(false)
-    }
-}
-
-fn pandas_to_arrow_bytes(py: Python, df: &PyAny) -> PyResult<Py<PyBytes>> {
-    let pyarrow = PyModule::import(py, "pyarrow")?;
-    let df_class = get_pandas_df_cls()
-        .ok_or_else(|| PyValueError::new_err("Failed to import pandas.DataFrame"))?;
-
-    if !df.is_instance(df_class.as_ref(py))? {
-        return Err(PyValueError::new_err("Input is not a pandas.DataFrame"));
-    }
-
-    let table = pyarrow
-        .getattr("Table")?
-        .call_method1("from_pandas", (df,))?;
-    to_arrow_bytes(py, table)
-}
-
-#[pyclass]
-#[derive(Clone)]
-pub struct PyAsyncServer {
-    pub server: Server,
-}
-
-impl Default for PyAsyncServer {
-    fn default() -> Self {
-        Self {
-            server: Server::new(),
-        }
-    }
-}
-
-#[allow(non_local_definitions)]
-#[pymethods]
-impl PyAsyncServer {
-    #[new]
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn global_session_dispatcher(&mut self, py: Python, response_cb: Py<PyFunction>) -> u32 {
-        let client_id = self
-            .server
-            .register_session_cb(Arc::new(move |client_id, resp| {
-                let cb = response_cb.clone();
-                let resp = resp.clone();
-                let res: PyResult<_> =
-                    Python::with_gil(move |py| cb.call1(py, (client_id, PyBytes::new(py, &resp))));
-                res.expect("Failed to call response callback");
-            }));
-        client_id
-    }
-
-    pub fn cleanup_session_id(&mut self, client_id: u32) {
-        self.server.unregister_session_cb(client_id);
-    }
-
-    pub fn handle_request<'a>(
-        &self,
-        py: Python<'a>,
-        client_id: u32,
-        data: Vec<u8>,
-        response_cb: Py<PyFunction>,
-    ) -> PyResult<&'a PyAny> {
-        let server = self.server.clone();
-        server.handle_request(client_id, &data);
-        Ok(())
-    }
-
-    pub fn poll<'a>(&self, py: Python<'a>, response_cb: Py<PyFunction>) -> PyResult<&'a PyAny> {
-        let server = self.server.clone();
-        future_into_py(py, async move {
-            let batch = server.poll();
-            let res: PyResult<Vec<_>> = Python::with_gil(move |py| {
-                let python_context = pyo3_asyncio::tokio::get_current_locals(py)?;
-                let mut outs = vec![];
-                for (client_id, response) in batch {
-                    let fut = response_cb.call1(py, (client_id, PyBytes::new(py, &response)))?;
-                    let rust_future =
-                        pyo3_asyncio::into_future_with_locals(&python_context, fut.as_ref(py))?;
-                    outs.push(pyo3_asyncio::tokio::get_runtime().spawn(rust_future))
-                }
-                Ok(outs)
-            });
-
-            for out in res? {
-                out.await.expect("Failed joining future")?;
-            }
-
-            Ok(())
-        })
-    }
-}
+use crate::server::PyAsyncServer;
 
 #[pyclass]
 pub struct PyAsyncClient(PyClient);
@@ -198,15 +35,8 @@ impl PyAsyncClient {
         name: Option<Py<PyString>>,
     ) -> PyResult<&'a PyAny> {
         let client = self.0.clone();
-        let input_data = if is_arrow_table(py, input.as_ref(py))? {
-            to_arrow_bytes(py, input.as_ref(py))?.to_object(py)
-        } else if is_pandas_df(py, input.as_ref(py))? {
-            pandas_to_arrow_bytes(py, input.as_ref(py))?.to_object(py)
-        } else {
-            input
-        };
         future_into_py(py, async move {
-            let table = client.table(input_data, limit, index, name).await?;
+            let table = client.table(input, limit, index, name).await?;
             Ok(PyAsyncTable(table))
         })
     }
@@ -218,13 +48,20 @@ impl PyAsyncClient {
             Ok(PyAsyncTable(table))
         })
     }
+
+    pub fn get_hosted_table_names<'a>(&self, py: Python<'a>) -> PyResult<&'a PyAny> {
+        let client = self.0.clone();
+        future_into_py(py, async move { client.get_hosted_table_names().await })
+    }
 }
 
 #[pyfunction]
-#[pyo3(name = "create_async_client", signature = (server = None))]
+#[pyo3(name = "create_async_client", signature = (loop_cb, server = None, client_id = None))]
 pub fn create_async_client(
     py: Python<'_>,
+    loop_cb: Py<PyFunction>,
     server: Option<Py<PyAsyncServer>>,
+    client_id: Option<u32>,
 ) -> PyResult<&'_ PyAny> {
     let server = server.and_then(|x| {
         x.extract::<PyAsyncServer>(py)
@@ -234,7 +71,9 @@ pub fn create_async_client(
             .ok()
     });
 
-    future_into_py(py, async move { Ok(PyAsyncClient(PyClient::new(server))) })
+    future_into_py(py, async move {
+        Ok(PyAsyncClient(PyClient::new(server, client_id, loop_cb)))
+    })
 }
 
 #[pyclass]
@@ -272,16 +111,10 @@ impl PyAsyncTable {
         port_id: Option<u32>,
     ) -> PyResult<&'a PyAny> {
         let table = self.0.clone();
-        let input_data = if is_arrow_table(py, input.as_ref(py))? {
-            to_arrow_bytes(py, input.as_ref(py))?.to_object(py)
-        } else if is_pandas_df(py, input.as_ref(py))? {
-            pandas_to_arrow_bytes(py, input.as_ref(py))?.to_object(py)
-        } else {
-            input
-        };
-        future_into_py(py, async move {
-            table.update(input_data, format, port_id).await
-        })
+        future_into_py(
+            py,
+            async move { table.update(input, format, port_id).await },
+        )
     }
 
     #[doc = include_str!("../../docs/table/delete.md")]
@@ -346,7 +179,7 @@ impl PyAsyncTable {
     pub fn validate_expressions<'a>(
         &self,
         py: Python<'a>,
-        expressions: HashMap<String, String>,
+        expressions: Py<PyAny>,
     ) -> PyResult<&'a PyAny> {
         let table = self.0.clone();
         future_into_py(

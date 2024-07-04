@@ -10,13 +10,35 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-__version__ = "2.9.0"
+__version__ = "2.10.1"
+__all__ = [
+    "PySyncClient",
+    "PerspectiveError",
+    "PerspectivePyError",
+    "PerspectiveWidget",
+    "PerspectiveViewer",
+    "PerspectiveTornadoHandler",
+    "Table",
+    "PerspectiveManager",
+    "set_threadpool_size",
+    "sync_client",
+    "create_sync_client",
+]
 
-from .perspective import *
+from .perspective import PySyncClient, PerspectivePyError
 from .core.exception import PerspectiveError
 
-
-from .legacy import PerspectiveManager, Table, PerspectiveCppError, set_threadpool_size, async_client, sync_client
+from .legacy import (
+    PerspectiveManager,
+    Table,
+    set_threadpool_size,
+    sync_client,
+    create_sync_client,
+)
 from .widget import PerspectiveWidget
 from .viewer import PerspectiveViewer
-from .handlers import PerspectiveTornadoHandler
+
+try:
+    from .handlers import PerspectiveTornadoHandler
+except ImportError:
+    ...

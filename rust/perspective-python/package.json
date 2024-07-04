@@ -9,7 +9,7 @@
     },
     "license": "Apache-2.0",
     "scripts": {
-        "build": "PSP_ROOT_DIR=../.. maturin develop -F external-cpp",
+        "build": "PSP_ROOT_DIR=../.. maturin build --features=external-cpp && PSP_ROOT_DIR=../.. maturin sdist",
         "clean": "rimraf dist && rimraf build",
         "test": "python -m pytest perspective/tests"
     }

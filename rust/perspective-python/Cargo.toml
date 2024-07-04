@@ -48,12 +48,18 @@ pyo3-build-config = "0.20.2"
 python-config-rs = "0.1.2"
 
 [dependencies]
+async-lock = "2.5.0"
 perspective-client = { version = "2.10.1", path = "../perspective-client" }
 perspective-server = { version = "2.10.1", path = "../perspective-server" }
+pollster = "0.3.0"
 extend = "1.1.2"
 futures = "0.3.28"
-pyo3 = { version = "0.20", features = ["extension-module", "serde"] }
-pyo3-asyncio = { version = "0.20", features = ["attributes", "tokio-runtime"] }
-pythonize = "0.20"
+pyo3 = { version = "0.21.2", features = [
+    "extension-module",
+    "serde",
+    # "abi3-py38",
+] }
+# pyo3-asyncio = { version = "0.20", features = ["attributes", "tokio-runtime"] }
+pythonize = "0.21.1"
 tracing = { version = ">=0.1.36" }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }

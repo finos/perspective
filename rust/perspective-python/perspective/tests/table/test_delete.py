@@ -10,7 +10,7 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from perspective.table import Table
+from perspective import Table
 
 
 class TestDelete(object):

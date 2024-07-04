@@ -10,57 +10,73 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#pragma once
+use std::sync::Arc;
 
-#include <perspective/binding.h>
+use perspective_server::{Server, Session, SessionHandler};
+use pollster::FutureExt;
+use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
+use pyo3::types::{PyBytes, PyFunction};
 
-#ifdef PSP_ENABLE_WASM
-#include <emscripten/val.h>
-// for WASM builds, typedef all data structures for binding languages to
-// emscripten::val
-typedef t_val t_data_accessor;
-typedef emscripten::val t_val;
-#endif
+#[pyclass]
+#[derive(Clone)]
+pub struct PySyncSession {
+    session: Arc<Session>,
+}
 
-namespace perspective {
-namespace binding {
-    /**
-     * @brief Helper function for creating `std::vector`s for use in Javascript.
-     *
-     * @tparam T
-     * @return std::vector<T>
-     */
-    template <typename T>
-    std::vector<T> make_vector();
+#[pyclass]
+#[derive(Clone, Default)]
+pub struct PySyncServer {
+    pub server: Server,
+}
 
-    /**
-     * @brief namespace `js_typed_array` contains utility bindings that
-     * initialize typed arrays using Emscripten.
-     *
-     */
-    namespace js_typed_array {} // namespace js_typed_array
+#[derive(Clone)]
+struct PyConnection(Py<PyFunction>);
 
-    /**
-     * @brief Given a vector of scalar data objects, write it into a typed
-     * array.
-     *
-     * @tparam T
-     * @tparam T
-     * @tparam T
-     */
-    template <typename T, typename F = T, typename O = T>
-    t_val col_to_typed_array(const std::vector<t_tscalar>& data);
+impl SessionHandler for PyConnection {
+    async fn send_response<'a>(
+        &'a mut self,
+        msg: &'a [u8],
+    ) -> Result<(), perspective_server::ServerError> {
+        Python::with_gil(|py| self.0.call1(py, (PyBytes::new_bound(py, msg),)))?;
+        Ok(())
+    }
+}
 
-    // Date parsing
-    t_date jsdate_to_t_date(t_val date);
-    t_val t_date_to_jsdate(t_date date);
+#[pymethods]
+impl PySyncServer {
+    #[new]
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-    template <>
-    t_val scalar_to(const t_tscalar& scalar);
-    t_val scalar_to_val(
-        const t_tscalar& scalar,
-        bool cast_double = false,
-        bool cast_string = false
-    );
-} // namespace binding
-} // namespace perspective
+    pub fn new_session(&self, _py: Python, response_cb: Py<PyFunction>) -> PySyncSession {
+        let session = self
+            .server
+            .new_session(PyConnection(response_cb))
+            .block_on();
+
+        let session = Arc::new(session);
+        PySyncSession { session }
+    }
+}
+
+#[allow(non_local_definitions)]
+#[pymethods]
+impl PySyncSession {
+    pub fn handle_request(&self, _py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
+        // TODO: Make this return a boolean for "should_poll" to determine whether we
+        // immediately schedule a poll after this request.
+        self.session
+            .handle_request(&data)
+            .block_on()
+            .map_err(|e| PyValueError::new_err(format!("{}", e)))
+    }
+
+    pub fn poll(&self, _py: Python<'_>) -> PyResult<()> {
+        self.session
+            .poll()
+            .block_on()
+            .map_err(|e| PyValueError::new_err(format!("{}", e)))
+    }
+}

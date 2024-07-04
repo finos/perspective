@@ -41,12 +41,12 @@ class TestThreadPoolOne:
             aggregates={"symbol": "first", "value": "sum", "value2": "sum"},
         )
 
-        assert v.to_df().to_dict("records") == [
+        assert v.to_json() == [
             {"symbol": "A", "value": 5, "value3": 20.0},
             {"symbol": "A", "value": 10, "value3": 30.0},
         ]
 
-        assert v_agg.to_df().to_dict("records") == [
+        assert v_agg.to_json() == [
             {"__ROW_PATH__": [], "symbol": "A", "value": 15, "value3": 50.0},
             {"__ROW_PATH__": ["A"], "symbol": "A", "value": 15, "value3": 50.0},
         ]

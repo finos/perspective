@@ -39,7 +39,7 @@ class TestPorts(object):
             table.update({"a": [i], "b": ["a"], "c": [True]}, port_id=i)
 
         view = table.view()
-        result = view.to_dict()
+        result = view.to_columns()
 
         assert result == {
             "a": [1, 2, 3, 4] + [i for i in range(1, 11)],
@@ -62,7 +62,7 @@ class TestPorts(object):
 
         assert table.size() == 8
 
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [1, 2, 3, 4] * 2,
             "b": ["a", "b", "c", "d"] * 2,
             "c": [True, False, True, False] * 2,

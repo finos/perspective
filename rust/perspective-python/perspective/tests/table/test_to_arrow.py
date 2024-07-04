@@ -22,7 +22,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow()
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_big_numbers_symmetric(self):
         data = {
@@ -38,7 +38,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow()
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_boolean_symmetric(self):
         data = {"a": [True, False, None, False, True, None]}
@@ -46,7 +46,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "boolean"}
         arr = tbl.view().to_arrow()
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_str_symmetric(self):
         data = {"a": ["a", "b", "c", "d", "e", None]}
@@ -54,7 +54,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "string"}
         arr = tbl.view().to_arrow()
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_str_dict(self):
         data = {
@@ -78,7 +78,7 @@ class TestToArrow(object):
 
         # assert that data is symmetrical
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_date_symmetric(self):
         # data = {"a": [date(2019, 7, 11), date(2016, 2, 29), date(2019, 12, 10)]}
@@ -92,22 +92,22 @@ class TestToArrow(object):
         tbl2 = Table(arr)
         ts = lambda x: int(datetime.timestamp(x) * 1000)
         assert tbl2.schema() == tbl.schema()
-        assert tbl2.view().to_dict() == {
+        assert tbl2.view().to_columns() == {
             "a": [ts(datetime(2019, 7, 11)), ts(datetime(2016, 2, 29)), ts(datetime(2019, 12, 10))]
         }
 
-    def test_to_arrow_date_symmetric_january(self):
+    def test_to_arrow_date_symmetric_january(self, util):
         data = {"a": [date(2019, 1, 1), date(2016, 1, 1), date(2019, 1, 1)]}
         tbl = Table(data)
         assert tbl.schema() == {"a": "date"}
         arr = tbl.view().to_arrow()
         tbl2 = Table(arr)
         assert tbl2.schema() == tbl.schema()
-        assert tbl2.view().to_dict() == {
-            "a": [datetime(2019, 1, 1), datetime(2016, 1, 1), datetime(2019, 1, 1)]
+        assert tbl2.view().to_columns() == {
+            "a": [util.to_timestamp(x) for x in [datetime(2019, 1, 1), datetime(2016, 1, 1), datetime(2019, 1, 1)]]
         }
 
-    def test_to_arrow_datetime_symmetric(self):
+    def test_to_arrow_datetime_symmetric(self, util):
         data = {
             "a": [
                 datetime(2019, 7, 11, 12, 30),
@@ -120,12 +120,12 @@ class TestToArrow(object):
         arr = tbl.view().to_arrow()
         tbl2 = Table(arr)
         assert tbl2.schema() == tbl.schema()
-        assert tbl2.view().to_dict() == {
-            "a": [
+        assert tbl2.view().to_columns() == {
+            "a": [util.to_timestamp(x) for x in [
                 datetime(2019, 7, 11, 12, 30),
                 datetime(2016, 2, 29, 11, 0),
                 datetime(2019, 12, 10, 12, 0),
-            ]
+            ]]
         }
 
     def test_to_arrow_one_symmetric(self):
@@ -144,11 +144,11 @@ class TestToArrow(object):
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {"a (Group by 1)": "integer", "a": "integer", "b": "integer", "c": "integer"}
-        d = view.to_dict()
+        d = view.to_columns()
         d["a (Group by 1)"] = [
             x[0] if len(x) > 0 else None for x in d.pop("__ROW_PATH__")
         ]
-        assert tbl2.view().to_dict() == d
+        assert tbl2.view().to_columns() == d
 
     def test_to_arrow_two_symmetric(self):
         data = {
@@ -175,11 +175,11 @@ class TestToArrow(object):
             "world2|b": "integer",
             "world2|c": "integer",
         }
-        d = view.to_dict()
+        d = view.to_columns()
         d["a (Group by 1)"] = [
             x[0] if len(x) > 0 else None for x in d.pop("__ROW_PATH__")
         ]
-        assert tbl2.view().to_dict() == d
+        assert tbl2.view().to_columns() == d
 
     def test_to_arrow_column_only_symmetric(self):
         data = {
@@ -205,8 +205,8 @@ class TestToArrow(object):
             "4|b": "string",
             "4|c": "datetime",
         }
-        d = view.to_dict()
-        assert tbl2.view().to_dict() == d
+        d = view.to_columns()
+        assert tbl2.view().to_columns() == d
 
     # start and end row
     def test_to_arrow_start_row(self):
@@ -215,7 +215,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_row=3)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {"a": data["a"][3:], "b": data["b"][3:]}
+        assert tbl2.view().to_columns() == {"a": data["a"][3:], "b": data["b"][3:]}
 
     def test_to_arrow_end_row(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -223,7 +223,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(end_row=2)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {"a": data["a"][:2], "b": data["b"][:2]}
+        assert tbl2.view().to_columns() == {"a": data["a"][:2], "b": data["b"][:2]}
 
     def test_to_arrow_start_end_row(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -231,7 +231,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_row=2, end_row=3)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {"a": data["a"][2:3], "b": data["b"][2:3]}
+        assert tbl2.view().to_columns() == {"a": data["a"][2:3], "b": data["b"][2:3]}
 
     def test_to_arrow_start_end_row_equiv(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -239,7 +239,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_row=2, end_row=2)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {"a": [], "b": []}
+        assert tbl2.view().to_columns() == {"a": [], "b": []}
 
     def test_to_arrow_start_row_invalid(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -247,7 +247,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_row=-1)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_end_row_invalid(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -255,7 +255,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(end_row=6)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_start_end_row_invalid(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -263,7 +263,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_row=-1, end_row=6)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_start_col(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -271,7 +271,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_col=1)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {"b": data["b"]}
+        assert tbl2.view().to_columns() == {"b": data["b"]}
 
     def test_to_arrow_end_col(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -279,7 +279,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(end_col=1)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {"a": data["a"]}
+        assert tbl2.view().to_columns() == {"a": data["a"]}
 
     def test_to_arrow_start_end_col(self):
         data = {
@@ -292,7 +292,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float", "c": "integer", "d": "float"}
         arr = tbl.view().to_arrow(start_col=1, end_col=3)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {"b": data["b"], "c": data["c"]}
+        assert tbl2.view().to_columns() == {"b": data["b"], "c": data["c"]}
 
     def test_to_arrow_start_col_invalid(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -300,7 +300,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_col=-1)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_end_col_invalid(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -308,7 +308,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(end_col=6)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_start_end_col_invalid(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -316,7 +316,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_col=-1, end_col=6)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == data
+        assert tbl2.view().to_columns() == data
 
     def test_to_arrow_start_end_col_equiv_row(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -325,7 +325,7 @@ class TestToArrow(object):
         arr = tbl.view().to_arrow(start_col=1, end_col=1, start_row=2, end_row=3)
         tbl2 = Table(arr)
         # start/end col is a range - thus start=end provides no columns
-        assert tbl2.view().to_dict() == {}
+        assert tbl2.view().to_columns() == {}
 
     def test_to_arrow_start_end_col_equiv(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -333,7 +333,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(start_col=1, end_col=1)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {}
+        assert tbl2.view().to_columns() == {}
 
     def test_to_arrow_start_end_row_end_col(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}
@@ -341,7 +341,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float"}
         arr = tbl.view().to_arrow(end_col=1, start_row=2, end_row=3)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == tbl.view().to_dict(
+        assert tbl2.view().to_columns() == tbl.view().to_columns(
             end_col=1, start_row=2, end_row=3
         )
 
@@ -355,7 +355,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float", "c": "float"}
         arr = tbl.view().to_arrow(start_col=1, end_col=2, start_row=2)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == tbl.view().to_dict(
+        assert tbl2.view().to_columns() == tbl.view().to_columns(
             start_col=1, end_col=2, start_row=2
         )
 
@@ -369,7 +369,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "integer", "b": "float", "c": "float"}
         arr = tbl.view().to_arrow(start_col=1, end_col=2, end_row=2)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == tbl.view().to_dict(
+        assert tbl2.view().to_columns() == tbl.view().to_columns(
             start_col=1, end_col=2, end_row=2
         )
 

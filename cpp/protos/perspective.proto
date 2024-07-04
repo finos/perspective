@@ -51,7 +51,7 @@ message MakeTableData {
 message Scalar {
     oneof scalar {
         bool bool = 1;
-        int64 date = 2;
+        int64 date = 2; // TODO these are the wrong type
         int64 datetime = 3;
         double float = 4;
         int32 int = 5;
@@ -123,7 +123,7 @@ message Request {
         ViewSchemaReq view_schema_req = 15;
         ViewToArrowReq view_to_arrow_req = 16;
 
-        // Optional (we can enable real-time/autocomplete/etc with these, but 
+        // Optional (we can enable real-time/autocomplete/etc with these, but
         // not required).
         ServerSystemInfoReq server_system_info_req = 17;
         ViewCollapseReq view_collapse_req = 18;
@@ -211,7 +211,13 @@ message GetFeaturesResp {
 // `Client::get_hosted_tables`
 message GetHostedTablesReq {}
 message GetHostedTablesResp {
-    repeated string table_names = 1;
+    repeated HostedTable table_infos = 1;
+}
+
+message HostedTable {
+    string entity_id = 1;
+    optional string index = 2;
+    optional uint32 limit = 3;
 }
 
 // `Table::size`
@@ -303,7 +309,7 @@ message TableMakePortResp {
 }
 
 // `Table::remove_delete`
-message TableRemoveDeleteReq { 
+message TableRemoveDeleteReq {
     uint32 id = 1;
 }
 message TableRemoveDeleteResp {}
@@ -341,7 +347,7 @@ message ViewOnUpdateResp {
 message ViewOnDeleteReq {}
 message ViewOnDeleteResp {}
 
-message ViewRemoveDeleteReq { 
+message ViewRemoveDeleteReq {
     uint32 id = 1;
 }
 message ViewRemoveDeleteResp {}
@@ -426,30 +432,30 @@ message ViewRemoveOnUpdateReq {
 message ViewRemoveOnUpdateResp {}
 
 message ViewCollapseReq {
-    int32 row_index = 1;
+    uint32 row_index = 1;
 }
 
 message ViewCollapseResp {
-    int64 num_changed = 1;
+    uint32 num_changed = 1;
 }
 
 message ViewExpandReq {
-    int32 row_index = 1;
+    uint32 row_index = 1;
 }
 
 message ViewExpandResp {
-    int64 num_changed = 1;
+    uint32 num_changed = 1;
 }
 
 // `View::set_depth`
 message ViewSetDepthReq {
-    int32 depth = 1;
+    uint32 depth = 1;
 }
 message ViewSetDepthResp {}
 
 message ServerSystemInfoReq {}
 message ServerSystemInfoResp {
-    uint64 heap_size = 1;
+    double heap_size = 1;
 }
 
 
@@ -462,7 +468,7 @@ message ViewConfig {
     map<string, string> expressions = 6;
     map<string, AggList> aggregates = 7;
     FilterReducer filter_op = 8;
-    optional int32 group_by_depth = 9;
+    optional uint32 group_by_depth = 9;
 
     message AggList {
         repeated string aggregations = 1;

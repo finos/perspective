@@ -44,7 +44,7 @@ def run():
 
     assert tbl.schema() == {"a": int, "b": object}
     assert tbl.size() == 1
-    assert tbl.view().to_dict() == {"a": [0], "b": [t]}
+    assert tbl.view().to_columns() == {"a": [0], "b": [t]}
 
     # Count references
     # 1 for `t`, 1 for `data`, 1 for argument to sys.getrefcount, and 1 for the table
@@ -110,8 +110,8 @@ def run():
     # 1 for `t`, 1 for `data`, 1 for argument to sys.getrefcount, and 4for the table
     print(sys.getrefcount(t), "should be", 7)
     # assert sys.getrefcount(t) == 7
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -125,7 +125,7 @@ def run():
     tbl.update([{"a": 0, "b": t}])
     # 1 for `t`, 1 for `data`, 1 for argument to sys.getrefcount, and 4 for the table
     print(sys.getrefcount(t), "should be", 7)
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -140,8 +140,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -156,8 +156,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -172,8 +172,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -188,8 +188,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -204,8 +204,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 4)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         True,
@@ -220,8 +220,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -236,8 +236,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 4)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         True,
@@ -252,8 +252,8 @@ def run():
     print(sys.getrefcount(t), "should be", 6)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -268,8 +268,8 @@ def run():
     print(sys.getrefcount(t), "should be", 5)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -284,8 +284,8 @@ def run():
     print(sys.getrefcount(t), "should be", 5)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -300,8 +300,8 @@ def run():
     print(sys.getrefcount(t), "should be", 4)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -316,8 +316,8 @@ def run():
     print(sys.getrefcount(t), "should be", 4)
     # 1 for `t2`, 1 for argument to sys.getrefcount, and 1 for the table
     print(sys.getrefcount(t2), "should be", 3)
-    print(tbl.view().to_dict()["b"])
-    assert list(_ is not None for _ in tbl.view().to_dict()["b"]) == [
+    print(tbl.view().to_columns()["b"])
+    assert list(_ is not None for _ in tbl.view().to_columns()["b"]) == [
         True,
         True,
         False,
@@ -329,7 +329,7 @@ def run():
     print()
     tbl.clear()
     assert tbl.size() == 0
-    assert tbl.view().to_dict() == {}
+    assert tbl.view().to_columns() == {}
     # 1 for `t`, one for `data`, one for argument to sys.getrefcount
     print(sys.getrefcount(t), "should be", 3)
     assert sys.getrefcount(t) == 3
@@ -348,7 +348,7 @@ def run2():
 
     assert tbl.schema() == {"a": int, "b": object}
     assert tbl.size() == 1
-    assert tbl.view().to_dict() == {"a": [0], "b": [t]}
+    assert tbl.view().to_columns() == {"a": [0], "b": [t]}
 
     # seed a few to check
     tbl.remove([1])
@@ -386,14 +386,14 @@ def run2():
             assert sys.getrefcount(t) == t_ref_count
 
         print(t_ref_count)
-        print(tbl.view().to_dict())
+        print(tbl.view().to_columns())
 
     assert sys.getrefcount(t) == t_ref_count
 
     print()
     tbl.clear()
     assert tbl.size() == 0
-    assert tbl.view().to_dict() == {}
+    assert tbl.view().to_columns() == {}
     # 1 for `t`, one for `data`, one for argument to sys.getrefcount
     print(sys.getrefcount(t), "should be", 2)
     assert sys.getrefcount(t) == 2

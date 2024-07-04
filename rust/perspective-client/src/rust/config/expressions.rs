@@ -46,11 +46,12 @@ fn upgrade_legacy_format(expressions: &[String]) -> HashMap<String, String> {
     expressions
         .iter()
         .map(|s| {
-            if let Some((name, expression)) = s.split_once('\n')
-                && !expression.is_empty()
-                && name.starts_with("//")
-            {
-                (name.split_at(2).1.trim().to_owned(), expression.to_owned())
+            if let Some((name, expression)) = s.split_once('\n') {
+                if !expression.is_empty() && name.starts_with("//") {
+                    (name.split_at(2).1.trim().to_owned(), expression.to_owned())
+                } else {
+                    (s.to_owned(), s.to_owned())
+                }
             } else {
                 (s.to_owned(), s.to_owned())
             }

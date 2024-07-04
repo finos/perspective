@@ -6,6 +6,7 @@ set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+
 # CMAKE POLICIES
 # option() should use new cmake behavior wrt variable clobbering
 cmake_policy(SET CMP0077 NEW)
@@ -108,18 +109,18 @@ if(NOT DEFINED PSP_CPP_BUILD)
     set(PSP_CPP_BUILD ON)
 endif()
 
-# if(NOT DEFINED PSP_PYTHON_BUILD)
-#     set(PSP_PYTHON_BUILD OFF)
-# elseif(PSP_PYTHON_BUILD)
-#     if(NOT DEFINED PSP_PYTHON_VERSION)
-#         set(PSP_PYTHON_VERSION 3.10)
-#     endif()
-#     if($ENV{PYODIDE})
-#         set(PSP_PYODIDE 1)
-#     else()
-#         set(PSP_PYODIDE 0)
-#     endif()
-# endif()
+if(NOT DEFINED PSP_PYTHON_BUILD)
+    set(PSP_PYTHON_BUILD OFF)
+elseif(PSP_PYTHON_BUILD)
+    if(NOT DEFINED PSP_PYTHON_VERSION)
+        set(PSP_PYTHON_VERSION 3.10)
+    endif()
+    if($ENV{PYODIDE})
+        set(PSP_PYODIDE 1)
+    else()
+        set(PSP_PYODIDE 0)
+    endif()
+endif()
 
 if(NOT DEFINED PSP_CPP_BUILD_STRICT)
     set(PSP_CPP_BUILD_STRICT OFF)
@@ -197,8 +198,20 @@ endif()
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/include")
 
 # Needs to be set early so that all translation units use it.
-if(NOT PSP_WASM_BUILD)
+if (NOT PSP_PYODIDE)
     set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fexceptions")
+endif()
+
+if(NOT DEFINED PSP_WASM_EXCEPTIONS AND NOT PSP_PYTHON_BUILD)
+    set(PSP_WASM_EXCEPTIONS ON)
+endif()
+
+if(PSP_PYODIDE)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+        -s RELOCATABLE=1 \
+        -s SIDE_MODULE=2 \
+    ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
 # if(NOT WIN32)
@@ -228,9 +241,11 @@ if(PSP_WASM_BUILD)
             -O0 \
             -g3 \
             -Wcast-align \
-            -fwasm-exceptions \
             -Wover-aligned \
             ")
+        if (PSP_WASM_EXCEPTIONS)
+            set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
+        endif()
         if(PSP_SANITIZE)
             set(OPT_FLAGS "${OPT_FLAGS} \
                 -fsanitize=undefined \
@@ -241,11 +256,10 @@ if(PSP_WASM_BUILD)
         set(OPT_FLAGS " \
             -O3 \
             -g0 \
-            -flto \
-            -mnontrapping-fptoint \
-            -s SUPPORT_LONGJMP=wasm \
-            -fwasm-exceptions \
             ")
+        if (PSP_WASM_EXCEPTIONS)
+            set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
+        endif()
     endif()
 
     set(ASYNC_MODE_FLAGS "")
@@ -280,6 +294,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                     -fexceptions \
                     -g3 \
                     ")
+                 if (PSP_WASM_EXCEPTIONS)
+                     set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
+                 endif()
             endif ()
         else()
             set(OPT_FLAGS " \
@@ -287,9 +304,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                 -fexceptions \
                 -g1 \
                 ")
-            if (PSP_PYODIDE)
-                set(OPT_FLAGS "${OPT_FLAGS} -flto")
-            endif ()
+            if (PSP_WASM_EXCEPTIONS)
+                set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
+            endif()
         endif()
     endif()
 
@@ -379,13 +396,9 @@ set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
 
 set(CMAKE_C_FLAGS "  \
 -O3 \
--flto \
--mnontrapping-fptoint \
 ")
 set(CMAKE_CXX_FLAGS " \
 -O3 \
--flto \
--mnontrapping-fptoint \
 ")
 
 
@@ -560,12 +573,14 @@ set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     -s MAXIMUM_MEMORY=4gb \
     -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
     -s NODEJS_CATCH_EXIT=0 \
-    -s EXCEPTION_STACK_TRACES=1 \
     -s NODEJS_CATCH_REJECTION=0 \
     -s USE_ES6_IMPORT_META=1 \
     -s EXPORT_ES6=1 \
-    -s EXPORTED_FUNCTIONS=_js_poll,_js_new_server,_js_free,_js_alloc,_js_handle_request \
+    -s EXPORTED_FUNCTIONS=_js_poll,_js_new_server,_js_free,_js_alloc,_js_handle_request,_js_new_session,_js_close_session \
 ")
+if (PSP_WASM_EXCEPTIONS)
+    set(PSP_WASM_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} -s EXCEPTION_STACK_TRACES=1 ")
+endif()
 
 if(PSP_SANITIZE)
     set(PSP_SANITIZE_FLAGS

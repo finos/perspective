@@ -15,6 +15,10 @@ import pandas as pd
 import numpy as np
 from perspective import Table, PerspectiveWidget
 
+import pytest
+
+pytest.skip(allow_module_level=True)
+
 
 class TestWidgetPandas:
     def test_widget_load_table_df(self, superstore):

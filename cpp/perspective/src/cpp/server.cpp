@@ -39,6 +39,8 @@
 #include <ctime>
 
 namespace perspective {
+std::uint32_t server::ProtoServer::m_client_id = 1;
+
 template <>
 std::shared_ptr<t_ctxunit>
 make_context(
@@ -378,12 +380,21 @@ ServerResources::host_table(const t_id& id, std::shared_ptr<Table> table) {
 
 void
 ServerResources::host_view(
-    const t_id& id, const t_id& table_id, std::shared_ptr<ErasedView> view
+    const std::uint32_t& client_id,
+    const t_id& id,
+    const t_id& table_id,
+    std::shared_ptr<ErasedView> view
 ) {
     PSP_WRITE_LOCK(m_write_lock);
     m_view_to_table.emplace(id, table_id);
     m_table_to_view.emplace(table_id, id);
     m_views.emplace(id, std::move(view));
+    if (!m_client_to_view.contains(client_id)) {
+        std::vector vec{id};
+        m_client_to_view.emplace(client_id, vec);
+    } else {
+        m_client_to_view[client_id].emplace_back(id);
+    }
 }
 
 std::shared_ptr<Table>
@@ -433,16 +444,20 @@ ServerResources::get_view(const t_id& id) {
 }
 
 void
-ServerResources::delete_view(const t_id& id) {
+ServerResources::delete_view(const std::uint32_t& client_id, const t_id& id) {
     {
         PSP_WRITE_LOCK(m_write_lock);
         auto table_id = m_view_to_table.at(id);
         if (m_views.find(id) != m_views.end()) {
             m_views.erase(id);
         }
+
         if (m_view_to_table.find(id) != m_view_to_table.end()) {
             m_view_to_table.erase(id);
         }
+
+        auto& vec = m_client_to_view[client_id];
+        vec.erase(std::remove(vec.begin(), vec.end(), id), vec.end());
         auto range = m_table_to_view.equal_range(table_id);
         for (auto it = range.first; it != range.second;) {
             if (it->second == id) {
@@ -452,14 +467,21 @@ ServerResources::delete_view(const t_id& id) {
             }
         }
     }
+
     drop_view_on_update_sub(id);
+    drop_view_on_delete_sub(id);
 }
 
 void
 ServerResources::delete_table(const t_id& id) {
     PSP_WRITE_LOCK(m_write_lock);
     if (m_tables.find(id) != m_tables.end()) {
-        m_tables.erase(id);
+        if (m_table_to_view.find(id) == m_table_to_view.end()) {
+            m_tables.erase(id);
+        } else {
+            std::cout << *m_table_to_view.find(id) << std::endl;
+            PSP_COMPLAIN_AND_ABORT("Cannot delete table with views");
+        }
     }
 }
 
@@ -503,7 +525,7 @@ ServerResources::get_table_on_delete_sub(const t_id& table_id) {
 }
 
 void
-ServerResources::drop_table_on_delete_sub(
+ServerResources::remove_table_on_delete_sub(
     const t_id& table_id,
     const std::uint32_t sub_id,
     const std::uint32_t client_id
@@ -550,7 +572,7 @@ ServerResources::get_view_on_delete_sub(const t_id& view_id) {
 }
 
 void
-ServerResources::drop_view_on_delete_sub(
+ServerResources::remove_view_on_delete_sub(
     const t_id& view_id,
     const std::uint32_t sub_id,
     const std::uint32_t client_id
@@ -613,6 +635,28 @@ bool
 ServerResources::is_table_dirty(const t_id& id) {
     PSP_READ_LOCK(m_write_lock);
     return m_dirty_tables.contains(id);
+}
+
+void
+ServerResources::drop_client(const std::uint32_t client_id) {
+    if (m_client_to_view.contains(client_id)) {
+
+        // Load-bearing copy
+        std::vector<t_id> remove = m_client_to_view[client_id];
+        for (const auto& view_id : remove) {
+            delete_view(client_id, view_id);
+        }
+    }
+}
+
+std::uint32_t
+ProtoServer::new_session() {
+    return m_client_id++;
+}
+
+void
+ProtoServer::close_session(const std::uint32_t client_id) {
+    m_resources.drop_client(client_id);
 }
 
 std::vector<ProtoServerResp<std::string>>
@@ -966,7 +1010,7 @@ coerce_to(const t_dtype dtype, const A& val) {
                 scalar.set(std::stoi(val));
                 return scalar;
             case DTYPE_INT64:
-                scalar.set(std::stoll(val));
+                scalar.set((std::int64_t)std::stoll(val));
                 return scalar;
             case DTYPE_TIME: {
                 std::chrono::system_clock::time_point tp;
@@ -1113,8 +1157,20 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
         case proto::Request::kGetHostedTablesReq: {
             proto::Response resp;
             const auto& tables = resp.mutable_get_hosted_tables_resp();
+            const auto& infos = tables->mutable_table_infos();
             for (const auto& name : m_resources.get_table_ids()) {
-                tables->add_table_names(name);
+                const auto& v = infos->Add();
+
+                v->set_entity_id(name);
+                const auto tbl = m_resources.get_table(name);
+
+                if (!tbl->get_index().empty()) {
+                    v->set_index(tbl->get_index());
+                }
+
+                if (tbl->get_limit() != std::numeric_limits<int>::max()) {
+                    v->set_limit(tbl->get_limit());
+                }
             }
 
             push_resp(std::move(resp));
@@ -1711,7 +1767,10 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 PSP_COMPLAIN_AND_ABORT("Invalid number of sides");
             }
 
-            m_resources.host_view(r.view_id(), req.entity_id(), erased_view);
+            m_resources.host_view(
+                client_id, r.view_id(), req.entity_id(), erased_view
+            );
+
             proto::Response resp;
             auto* make_view = resp.mutable_table_make_view_resp();
             make_view->set_view_id(r.view_id());
@@ -1725,7 +1784,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
         }
         case proto::Request::kTableRemoveDeleteReq: {
             auto sub_id = req.table_remove_delete_req().id();
-            m_resources.drop_table_on_delete_sub(
+            m_resources.remove_table_on_delete_sub(
                 req.entity_id(), sub_id, client_id
             );
             proto::Response resp;
@@ -1741,7 +1800,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
         }
         case proto::Request::kViewRemoveDeleteReq: {
             auto sub_id = req.view_remove_delete_req().id();
-            m_resources.drop_view_on_delete_sub(
+            m_resources.remove_view_on_delete_sub(
                 req.entity_id(), sub_id, client_id
             );
             proto::Response resp;
@@ -1773,9 +1832,13 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
             auto config = view->get_view_config();
             auto num_hidden = calculate_num_hidden(*view, *config);
 
-            auto num_view_columns = ncols
+            auto num_view_columns = 0;
+            const auto real_size = config->get_columns().size();
+            if (ncols > 0 && real_size > 0){
+                num_view_columns = ncols
                 - (ncols / (config->get_columns().size() + num_hidden))
                     * num_hidden;
+            }
 
             view_dims->set_num_view_columns(num_view_columns);
             view_dims->set_num_view_rows(view->num_rows());
@@ -2038,7 +2101,6 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
             break;
         }
         case proto::Request::kViewDeleteReq: {
-            m_resources.delete_view(req.entity_id());
             for (const auto& sub :
                  m_resources.get_view_on_delete_sub(req.entity_id())) {
                 proto::Response resp;
@@ -2051,6 +2113,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 proto_resp.emplace_back(std::move(resp2));
             }
 
+            m_resources.delete_view(client_id, req.entity_id());
             proto::Response resp;
             resp.mutable_view_delete_resp();
             push_resp(std::move(resp));
@@ -2058,7 +2121,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
         }
         case proto::Request::kViewRemoveOnUpdateReq: {
             auto sub_id = req.view_remove_on_update_req().id();
-            m_resources.remove_update_subscription(
+            m_resources.remove_view_on_update_sub(
                 req.entity_id(), sub_id, client_id
             );
 
@@ -2238,7 +2301,6 @@ ProtoServer::_process_table_unchecked(
             auto view = m_resources.get_view(view_id);
             auto subscriptions = m_resources.get_view_on_update_sub(view_id);
             for (auto& subscription : subscriptions) {
-
                 Response out;
                 out.set_msg_id(subscription.id);
                 out.set_entity_id(view_id);
@@ -2246,12 +2308,6 @@ ProtoServer::_process_table_unchecked(
                 r->set_port_id(port_id);
                 if (view->get_deltas_enabled()) {
                     *r->mutable_delta() = *view->get_row_delta_as_arrow();
-                } else {
-                    // If we don't do this, the delta field becomes
-                    // `undefined` on the client side and all the tests that
-                    // construct tables from deltas blow up constructing
-                    // `perspective.Table(undefined)`
-                    *r->mutable_delta() = "";
                 }
 
                 ProtoServerResp<proto::Response> resp2;
@@ -2278,7 +2334,7 @@ ProtoServer::_process_table(
 }
 
 void
-ServerResources::remove_update_subscription(
+ServerResources::remove_view_on_update_sub(
     const t_id& view_id, std::uint32_t sub_id, std::uint32_t client_id
 ) {
     if (m_view_on_update_subs.find(view_id) != m_view_on_update_subs.end()) {
@@ -2295,6 +2351,12 @@ ServerResources::remove_update_subscription(
         );
     }
 }
+
+void
+ServerResources::drop_view_on_delete_sub(const t_id& view_id) {
+    m_view_on_delete_subs.erase(view_id);
+}
+
 } // namespace perspective::server
 
 const char*

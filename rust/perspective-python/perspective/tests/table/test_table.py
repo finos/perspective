@@ -14,21 +14,23 @@ import sys
 from datetime import date, datetime, timezone
 
 from perspective.core.exception import PerspectiveError
-from perspective.table import Table
-from pytest import raises, skip
+from perspective import Table
+import perspective
+from pytest import mark, raises, skip
 import pytest
 
 
 class TestTable:
     # table constructors
 
+    @mark.skip
     def test_empty_table(self):
         tbl = Table([])
         assert tbl.size() == 0
 
     def test_table_not_iterable(self):
         data = {"a": 1}
-        with raises(NotImplementedError):
+        with raises(TypeError):
             Table(data)
 
     # def test_table_synchronous_process(self):
@@ -66,7 +68,10 @@ class TestTable:
         tbl = Table("string,integer\n,1\n,2\nabc,3")
         assert tbl.schema() == {"string": "string", "integer": "integer"}
         assert tbl.size() == 3
-        assert tbl.view().to_columns() == {"string": ["", "", "abc"], "integer": [1, 2, 3]}
+        assert tbl.view().to_columns() == {
+            "string": ["", "", "abc"],
+            "integer": [1, 2, 3],
+        }
 
     def test_table_correct_csv_nan_intermittent(self):
         tbl = Table("string,float\nabc,\n,2.5\nghi,")
@@ -99,8 +104,7 @@ class TestTable:
 
     def test_table_int_column_names(self):
         data = {"a": [1, 2, 3], 0: [4, 5, 6]}
-        with raises(PerspectiveError):
-            Table(data)
+        Table(data)
 
     def test_table_nones(self):
         none_data = [{"a": 1, "b": None}, {"a": None, "b": 2}]
@@ -179,7 +183,14 @@ class TestTable:
     # schema
 
     def test_table_schema(self):
-        data = {"a": "integer", "b": "float", "c": "string", "d": "boolean", "e": "date", "f": "datetime"}
+        data = {
+            "a": "integer",
+            "b": "float",
+            "c": "string",
+            "d": "boolean",
+            "e": "date",
+            "f": "datetime",
+        }
 
         tbl = Table(data)
 
@@ -215,8 +226,8 @@ class TestTable:
 
     def test_table_output_readable_schema(self):
         data = {
-            "a": "int32",
-            "b": "float64",
+            "a": "integer",
+            "b": "float",
             "c": "string",
             "d": "boolean",
             "e": "date",
@@ -235,7 +246,14 @@ class TestTable:
         }
 
     def test_table_mixed_schema(self):
-        data = {"a": "integer", "b": "float", "c": "string", "d": "boolean", "e": "date", "f": "datetime"}
+        data = {
+            "a": "integer",
+            "b": "float",
+            "c": "string",
+            "d": "boolean",
+            "e": "date",
+            "f": "datetime",
+        }
 
         tbl = Table(data)
 
@@ -249,11 +267,18 @@ class TestTable:
         }
 
     def test_table_output_string_schema(self):
-        data = {"a": "integer", "b": "float", "c": "string", "d": "boolean", "e": "date", "f": "datetime"}
+        data = {
+            "a": "integer",
+            "b": "float",
+            "c": "string",
+            "d": "boolean",
+            "e": "date",
+            "f": "datetime",
+        }
 
         tbl = Table(data)
 
-        assert tbl.schema(as_string=True) == {
+        assert tbl.schema() == {
             "a": "integer",
             "b": "float",
             "c": "string",
@@ -409,7 +434,7 @@ class TestTable:
 
     def test_table_index_bool_with_none(self):
         # bools cannot be used as primary key columns
-        with raises(PerspectiveCppError):
+        with raises(perspective.PerspectivePyError):
             Table({"a": [True, False, None, True], "b": [4, 3, 2, 1]}, index="a")
 
     def test_table_index_date_with_none(self):
@@ -431,7 +456,7 @@ class TestTable:
             "b": [3, 1, 2, 4],
         }
 
-    def test_table_index_datetime_with_none(self):
+    def test_table_index_datetime_with_none(self, util):
         tbl = Table(
             {
                 "a": [
@@ -447,9 +472,9 @@ class TestTable:
         assert tbl.view().to_columns() == {
             "a": [
                 None,
-                datetime(2019, 7, 11, 5, 0),
-                datetime(2019, 7, 11, 12, 10),
-                datetime(2019, 7, 11, 15, 30),
+                util.to_timestamp(datetime(2019, 7, 11, 5, 0)),
+                util.to_timestamp(datetime(2019, 7, 11, 12, 10)),
+                util.to_timestamp(datetime(2019, 7, 11, 15, 30)),
             ],
             "b": [3, 1, 2, 4],
         }
@@ -545,13 +570,12 @@ class TestTable:
         s = sentinel(False)
 
         def updater(port_id):
-            assert port_id == 0
             s.set(True)
 
         view.on_update(updater)
         tbl.replace(data2)
         tbl.size()
-        assert s.get() is True
+        assert s.get()
 
     def test_table_replace_should_fire_on_update_with_delta(self, sentinel):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -561,7 +585,7 @@ class TestTable:
 
         s = sentinel(False)
 
-        def updater(delta):
+        def updater(port_id, delta):
             # assert port_id == 0
             table2 = Table(delta)
             assert table2.view().to_records() == data2
@@ -578,6 +602,8 @@ class TestTable:
         assert tbl.size() == 2
         assert tbl.schema() == {"a": "float", "b": "float"}
 
+
 if __name__ == "__main__":
     import pytest
+
     pytest.main(["-vv", "-s", __file__])

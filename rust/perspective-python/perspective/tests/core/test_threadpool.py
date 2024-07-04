@@ -16,17 +16,18 @@ from perspective import Table, set_threadpool_size
 def compare_delta(received, expected):
     """Compare an arrow-serialized row delta by constructing a Table."""
     tbl = Table(received)
-    assert tbl.view().to_dict() == expected
+    assert tbl.view().to_columns() == expected
 
 
 class TestThreadpool(object):
     def test_set_threadpool_size(self):
-        set_threadpool_size(1)
+        set_threadpool_size(1) # XXX: This is a no-op now...
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.num_rows() == 2
-        assert view.num_columns() == 2
+        dims = view.dimensions()
+        assert dims["num_view_rows"] == 2
+        assert dims["num_view_columns"] == 2
         assert view.schema() == {"a": "integer", "b": "integer"}
         assert view.to_records() == data
 
@@ -35,7 +36,8 @@ class TestThreadpool(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.num_rows() == 2
-        assert view.num_columns() == 2
+        dims = view.dimensions()
+        assert dims["num_view_rows"] == 2
+        assert dims["num_view_columns"] == 2
         assert view.schema() == {"a": "integer", "b": "integer"}
         assert view.to_records() == data

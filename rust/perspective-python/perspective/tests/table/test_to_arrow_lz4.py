@@ -16,7 +16,7 @@ from perspective import Table
 
 class TestToArrowLZ4(object):
     def test_to_arrow_lz4_roundtrip(self, superstore):
-        original_tbl = Table(superstore)
+        original_tbl = Table(superstore.to_dict(orient="records"))
         arrow_uncompressed = original_tbl.view().to_arrow(compression=None)
 
         tbl = Table(arrow_uncompressed)

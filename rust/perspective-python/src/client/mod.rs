@@ -10,8 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-pub mod client_async;
+// pub mod client_async;
 pub mod client_sync;
+
 mod python;
 
 pub use python::PerspectivePyError;

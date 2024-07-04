@@ -11,38 +11,27 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::any::Any;
-use std::cell::OnceCell;
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use futures::lock::Mutex;
-use perspective_client::config::Expressions;
+use async_lock::RwLock;
+use futures::FutureExt;
+use perspective_client::proto::ViewOnUpdateResp;
 use perspective_client::{
-    assert_table_api, assert_view_api, clone, Client, ClientError, IntoBoxFnPinBoxFut,
-    OnUpdateArgs, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions, UpdateData,
-    UpdateOptions, View, ViewWindow,
+    assert_table_api, assert_view_api, clone, Client, ClientError, OnUpdateMode, OnUpdateOptions,
+    Table, TableData, TableInitOptions, UpdateData, UpdateOptions, View, ViewWindow,
 };
-use perspective_server::Server;
 use pyo3::create_exception;
 use pyo3::exceptions::PyValueError;
-use pyo3::ffi::PyErr_BadArgument;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict, PyFunction, PyList, PyString};
-use pythonize::depythonize;
-
-use crate::client_async::PyAsyncServer;
+use pythonize::depythonize_bound;
 
 #[derive(Clone)]
 pub struct PyClient {
     client: Client,
-}
-
-async fn process_message(server: Server, client: Client, client_id: u32, msg: Vec<u8>) {
-    let batch = server.handle_request(client_id, &msg);
-    for (_client_id, response) in batch {
-        client.handle_response(&response).await.unwrap()
-    }
+    loop_cb: Arc<RwLock<Option<Py<PyFunction>>>>,
 }
 
 #[extend::ext]
@@ -61,47 +50,30 @@ create_exception!(
     pyo3::exceptions::PyException
 );
 
-#[pyfunction]
-fn default_serializer(obj: &PyAny) -> PyResult<String> {
-    if let Ok(dt) = obj.downcast::<pyo3::types::PyDateTime>() {
-        Ok(dt.str()?.to_string())
-    } else if let Ok(d) = obj.downcast::<pyo3::types::PyDate>() {
-        Ok(d.str()?.to_string())
-    } else if let Ok(d) = obj.downcast::<pyo3::types::PyTime>() {
-        Ok(d.str()?.to_string())
-    } else {
-        Err(pyo3::exceptions::PyTypeError::new_err(
-            "Object type not serializable",
-        ))
-    }
-}
-
 #[extend::ext]
 impl UpdateData {
     fn from_py_partial(py: Python<'_>, input: &Py<PyAny>) -> Result<Option<UpdateData>, PyErr> {
-        if let Ok(pybytes) = input.downcast::<PyBytes>(py) {
-            Ok(Some(UpdateData::Arrow(pybytes.as_bytes().to_vec())))
-        } else if let Ok(pystring) = input.downcast::<PyString>(py) {
+        if let Ok(pybytes) = input.downcast_bound::<PyBytes>(py) {
+            Ok(Some(UpdateData::Arrow(pybytes.as_bytes().to_vec().into())))
+        } else if let Ok(pystring) = input.downcast_bound::<PyString>(py) {
             Ok(Some(UpdateData::Csv(pystring.extract::<String>()?)))
-        } else if let Ok(pylist) = input.downcast::<PyList>(py) {
-            let json_module = PyModule::import(py, "json")?;
-            let kwargs = PyDict::new(py);
-            kwargs.set_item("default", wrap_pyfunction!(default_serializer, py)?)?;
-            let string = json_module.call_method("dumps", (pylist,), Some(kwargs))?;
+        } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
+            let json_module = PyModule::import_bound(py, "json")?;
+            let string = json_module.call_method("dumps", (pylist,), None)?;
             Ok(Some(UpdateData::JsonRows(string.extract::<String>()?)))
-        } else if let Ok(pydict) = input.downcast::<PyDict>(py) {
-            if pydict.keys().len() == 0 {
-                return Err(PyValueError::new_err("Cannot infer type of emtpy dict"));
+        } else if let Ok(pydict) = input.downcast_bound::<PyDict>(py) {
+            if pydict.keys().is_empty() {
+                return Err(PyValueError::new_err("Cannot infer type of empty dict"));
             }
+
             let first_key = pydict.keys().get_item(0)?;
             let first_item = pydict
                 .get_item(first_key)?
                 .ok_or_else(|| PyValueError::new_err("Bad Input"))?;
+
             if first_item.downcast::<PyList>().is_ok() {
-                let json_module = PyModule::import(py, "json")?;
-                let kwargs = PyDict::new(py);
-                kwargs.set_item("default", wrap_pyfunction!(default_serializer, py)?)?;
-                let string = json_module.call_method("dumps", (pydict,), Some(kwargs))?;
+                let json_module = PyModule::import_bound(py, "json")?;
+                let string = json_module.call_method("dumps", (pydict,), None)?;
                 Ok(Some(UpdateData::JsonColumns(string.extract::<String>()?)))
             } else {
                 Ok(None)
@@ -128,27 +100,19 @@ impl TableData {
     fn from_py(py: Python<'_>, input: Py<PyAny>) -> Result<TableData, PyErr> {
         if let Some(update) = UpdateData::from_py_partial(py, &input)? {
             Ok(TableData::Update(update))
-        } else if let Ok(pylist) = input.downcast::<PyList>(py) {
-            let json_module = PyModule::import(py, "json")?;
-            let kwargs = PyDict::new(py);
-            kwargs.set_item("default", wrap_pyfunction!(default_serializer, py)?)?;
-            let string = json_module.call_method("dumps", (pylist,), Some(kwargs))?;
-            Ok(TableData::Update(UpdateData::JsonRows(
-                string.extract::<String>()?,
-            )))
-        } else if let Ok(pydict) = input.downcast::<PyDict>(py) {
+        } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
+            let json_module = PyModule::import_bound(py, "json")?;
+            let string = json_module.call_method("dumps", (pylist,), None)?;
+            Ok(UpdateData::JsonRows(string.extract::<String>()?).into())
+        } else if let Ok(pydict) = input.downcast_bound::<PyDict>(py) {
             let first_key = pydict.keys().get_item(0)?;
             let first_item = pydict
                 .get_item(first_key)?
                 .ok_or_else(|| PyValueError::new_err("Bad Input"))?;
             if first_item.downcast::<PyList>().is_ok() {
-                let json_module = PyModule::import(py, "json")?;
-                let kwargs = PyDict::new(py);
-                kwargs.set_item("default", wrap_pyfunction!(default_serializer, py)?)?;
-                let string = json_module.call_method("dumps", (pydict,), Some(kwargs))?;
-                Ok(TableData::Update(UpdateData::JsonColumns(
-                    string.extract::<String>()?,
-                )))
+                let json_module = PyModule::import_bound(py, "json")?;
+                let string = json_module.call_method("dumps", (pydict,), None)?;
+                Ok(UpdateData::JsonColumns(string.extract::<String>()?).into())
             } else {
                 let mut schema = vec![];
                 for (key, val) in pydict.into_iter() {
@@ -171,27 +135,161 @@ impl TableData {
 
 const PSP_CALLBACK_ID: &str = "__PSP_CALLBACK_ID__";
 
+fn get_arrow_table_cls() -> Option<Py<PyAny>> {
+    let res: PyResult<Py<PyAny>> = Python::with_gil(|py| {
+        let pyarrow = PyModule::import_bound(py, "pyarrow")?;
+        Ok(pyarrow.getattr("Table")?.to_object(py))
+    });
+
+    match res {
+        Ok(x) => Some(x),
+        Err(_) => {
+            tracing::warn!("Failed to import pyarrow.Table");
+            None
+        },
+    }
+}
+
+fn is_arrow_table(py: Python, table: &Bound<'_, PyAny>) -> PyResult<bool> {
+    if let Some(table_class) = get_arrow_table_cls() {
+        table.is_instance(table_class.bind(py))
+    } else {
+        Ok(false)
+    }
+}
+
+fn to_arrow_bytes<'py>(
+    py: Python<'py>,
+    table: &Bound<'py, PyAny>,
+) -> PyResult<Bound<'py, PyBytes>> {
+    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
+    let table_class = get_arrow_table_cls()
+        .ok_or_else(|| PyValueError::new_err("Failed to import pyarrow.Table"))?;
+
+    if !table.is_instance(table_class.bind(py))? {
+        return Err(PyValueError::new_err("Input is not a pyarrow.Table"));
+    }
+
+    let sink = pyarrow.call_method0("BufferOutputStream")?;
+
+    {
+        let writer = pyarrow.call_method1(
+            "RecordBatchFileWriter",
+            (sink.clone(), table.getattr("schema")?),
+        )?;
+
+        writer.call_method1("write_table", (table,))?;
+        writer.call_method0("close")?;
+    }
+
+    // Get the value from the sink and convert it to Python bytes
+    let value = sink.call_method0("getvalue")?;
+    let obj = value.call_method0("to_pybytes")?;
+    let pybytes = obj.downcast_into::<PyBytes>()?;
+    Ok(pybytes)
+}
+
+fn get_pandas_df_cls(py: Python<'_>) -> Option<Bound<'_, PyAny>> {
+    let res: PyResult<Py<PyAny>> = Python::with_gil(|py| {
+        let pandas = PyModule::import_bound(py, "pandas")?;
+        Ok(pandas.getattr("DataFrame")?.to_object(py))
+    });
+
+    match res {
+        Ok(x) => Some(x.into_bound(py)),
+        Err(_) => {
+            tracing::warn!("Failed to import pandas.DataFrame");
+            None
+        },
+    }
+}
+
+fn is_pandas_df(py: Python, df: &Bound<'_, PyAny>) -> PyResult<bool> {
+    if let Some(df_class) = get_pandas_df_cls(py) {
+        df.is_instance(&df_class)
+    } else {
+        Ok(false)
+    }
+}
+
+fn pandas_to_arrow_bytes<'py>(
+    py: Python<'py>,
+    df: &Bound<'py, PyAny>,
+) -> PyResult<Bound<'py, PyBytes>> {
+    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
+    let df_class = get_pandas_df_cls(py)
+        .ok_or_else(|| PyValueError::new_err("Failed to import pandas.DataFrame"))?;
+
+    if !df.is_instance(&df_class)? {
+        return Err(PyValueError::new_err("Input is not a pandas.DataFrame"));
+    }
+
+    let kwargs = PyDict::new_bound(py);
+    kwargs.set_item("preserve_index", true)?;
+
+    let table = pyarrow
+        .getattr("Table")?
+        .call_method("from_pandas", (df,), Some(&kwargs))?;
+
+    // rename from __index_level_0__ to index
+    let old_names: Vec<String> = table.getattr("column_names")?.extract()?;
+    let mut new_names: Vec<String> = old_names
+        .into_iter()
+        .map(|e| {
+            if e == "__index_level_0__" {
+                "index".to_string()
+            } else {
+                e
+            }
+        })
+        .collect();
+
+    let names = PyList::new_bound(py, new_names.clone());
+    let table = table.call_method1("rename_columns", (names,))?;
+
+    // move the index column to be the first column.
+    if new_names[new_names.len() - 1] == "index" {
+        new_names.rotate_right(1);
+        let order = PyList::new_bound(py, new_names);
+        let table = table.call_method1("select", (order,))?;
+        to_arrow_bytes(py, &table)
+    } else {
+        to_arrow_bytes(py, &table)
+    }
+}
+
 impl PyClient {
-    pub fn new(
-        server: Option<PyAsyncServer>,
-        client_id: Option<u32>,
-        loop_cb: Option<Py<PyFunction>>,
-    ) -> Self {
-        let server = server.map(|x| x.server).unwrap_or_default();
-        let client_id = client_id.unwrap_or_else(|| server.new_session());
-        let client = Client::new({
-            move |client, msg| {
-                clone!(server, client, msg);
-                process_message(server, client, client_id, msg)
+    pub fn new(handle_request: Py<PyFunction>) -> Self {
+        let client = Client::new_with_callback({
+            move |msg| {
+                clone!(handle_request);
+                Box::pin(async move {
+                    Python::with_gil(move |py| {
+                        handle_request.call1(py, (PyBytes::new_bound(py, msg),))
+                    })?;
+
+                    Ok(())
+                })
             }
         });
 
-        PyClient { client }
+        PyClient {
+            client,
+            loop_cb: Arc::default(),
+        }
     }
 
-    pub async fn init(&self) -> PyResult<()> {
-        self.client.init().await.into_pyerr()
+    pub async fn handle_response(&self, bytes: Py<PyBytes>) -> PyResult<()> {
+        self.client
+            .handle_response(Python::with_gil(|py| bytes.as_bytes(py)))
+            .await
+            .into_pyerr()
     }
+
+    // // TODO
+    // pub async fn init(&self) -> PyResult<()> {
+    //     self.client.init().await.into_pyerr()
+    // }
 
     pub async fn table(
         &self,
@@ -201,9 +299,13 @@ impl PyClient {
         name: Option<Py<PyString>>,
     ) -> PyResult<PyTable> {
         let client = self.client.clone();
+        let py_client = self.clone();
         let table = Python::with_gil(|py| {
-            let mut options = TableInitOptions::default();
-            options.name = name.map(|x| x.extract::<String>(py)).transpose()?;
+            let mut options = TableInitOptions {
+                name: name.map(|x| x.extract::<String>(py)).transpose()?,
+                ..TableInitOptions::default()
+            };
+
             match (limit, index) {
                 (None, None) => {},
                 (None, Some(index)) => {
@@ -215,78 +317,101 @@ impl PyClient {
                 },
             };
 
-            let table_data = TableData::from_py(py, input)?;
+            let input_data = if is_arrow_table(py, input.bind(py))? {
+                to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if is_pandas_df(py, input.bind(py))? {
+                pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else {
+                input
+            };
+
+            let table_data = TableData::from_py(py, input_data)?;
             let table = client.table(table_data, options);
             Ok::<_, PyErr>(table)
         })?;
 
         let table = table.await.into_pyerr()?;
         Ok(PyTable {
-            table: Arc::new(Mutex::new(table)),
+            table: Arc::new(table),
+            client: py_client,
         })
     }
 
     pub async fn open_table(&self, name: String) -> PyResult<PyTable> {
         let client = self.client.clone();
+        let py_client = self.clone();
         let table = client.open_table(name).await.into_pyerr()?;
         Ok(PyTable {
-            table: Arc::new(Mutex::new(table)),
+            table: Arc::new(table),
+            client: py_client,
         })
+    }
+
+    pub async fn get_hosted_table_names(&self) -> PyResult<Vec<String>> {
+        self.client.get_hosted_table_names().await.into_pyerr()
+    }
+
+    pub async fn set_loop_cb(&self, loop_cb: Py<PyFunction>) -> PyResult<()> {
+        *self.loop_cb.write().await = Some(loop_cb);
+        Ok(())
     }
 }
 
 #[derive(Clone)]
 pub struct PyTable {
-    table: Arc<Mutex<Table>>,
+    table: Arc<Table>,
+    client: PyClient,
 }
 
 assert_table_api!(PyTable);
 
 impl PyTable {
     pub async fn get_index(&self) -> Option<String> {
-        self.table.lock().await.get_index()
+        self.table.get_index()
     }
 
     pub async fn get_limit(&self) -> Option<u32> {
-        self.table.lock().await.get_limit()
+        self.table.get_limit()
     }
 
     pub async fn size(&self) -> PyResult<usize> {
-        self.table.lock().await.size().await.into_pyerr()
+        self.table.size().await.into_pyerr()
     }
 
     pub async fn columns(&self) -> PyResult<Vec<String>> {
-        self.table.lock().await.columns().await.into_pyerr()
+        self.table.columns().await.into_pyerr()
     }
 
     pub async fn clear(&self) -> PyResult<()> {
-        self.table.lock().await.clear().await.into_pyerr()
+        self.table.clear().await.into_pyerr()
     }
 
     pub async fn delete(&self) -> PyResult<()> {
-        self.table.lock().await.delete().await.into_pyerr()
+        self.table.delete().await.into_pyerr()
     }
 
     pub async fn make_port(&self) -> PyResult<i32> {
-        self.table.lock().await.make_port().await.into_pyerr()
+        self.table.make_port().await.into_pyerr()
     }
 
     pub async fn on_delete(&self, callback_py: Py<PyFunction>) -> PyResult<u32> {
+        let loop_cb = self.client.loop_cb.read().await.clone();
         let callback = {
             let callback_py = callback_py.clone();
             Box::new(move || {
-                Python::with_gil(|py| callback_py.call0(py))
-                    .expect("`on_delete()` callback failed");
+                Python::with_gil(|py| {
+                    if let Some(loop_cb) = &loop_cb {
+                        loop_cb.call1(py, (&callback_py,))?;
+                    } else {
+                        callback_py.call0(py)?;
+                    }
+                    Ok(()) as PyResult<()>
+                })
+                .expect("`on_delete()` callback failed");
             })
         };
 
-        let callback_id = self
-            .table
-            .lock()
-            .await
-            .on_delete(callback)
-            .await
-            .into_pyerr()?;
+        let callback_id = self.table.on_delete(callback).await.into_pyerr()?;
 
         Python::with_gil(move |py| callback_py.setattr(py, PSP_CALLBACK_ID, callback_id))?;
         Ok(callback_id)
@@ -295,22 +420,17 @@ impl PyTable {
     pub async fn remove_delete(&self, callback: Py<PyFunction>) -> PyResult<()> {
         let callback_id =
             Python::with_gil(|py| callback.getattr(py, PSP_CALLBACK_ID)?.extract(py))?;
-        self.table
-            .lock()
-            .await
-            .remove_delete(callback_id)
-            .await
-            .into_pyerr()
+        self.table.remove_delete(callback_id).await.into_pyerr()
     }
 
     pub async fn remove(&self, input: Py<PyAny>) -> PyResult<()> {
-        let table = self.table.lock().await;
+        let table = &self.table;
         let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input))?;
         table.remove(table_data).await.into_pyerr()
     }
 
     pub async fn replace(&self, input: Py<PyAny>) -> PyResult<()> {
-        let table = self.table.lock().await;
+        let table = &self.table;
         let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input))?;
         table.replace(table_data).await.into_pyerr()
     }
@@ -321,21 +441,30 @@ impl PyTable {
         format: Option<String>,
         port_id: Option<u32>,
     ) -> PyResult<()> {
-        let table = self.table.lock().await;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input))?;
+        let input_data: Py<PyAny> = Python::with_gil(|py| {
+            let data = if is_arrow_table(py, input.bind(py))? {
+                to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if is_pandas_df(py, input.bind(py))? {
+                pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else {
+                input
+            };
+            Ok(data) as PyResult<Py<PyAny>>
+        })?;
+
+        let table = &self.table;
+        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input_data))?;
         let options = UpdateOptions { format, port_id };
-        table.update(table_data, options).await.into_pyerr()
+        table.update(table_data, options).await.into_pyerr()?;
+        Ok(())
     }
 
-    pub async fn validate_expressions(
-        &self,
-        expressions: HashMap<String, String>,
-    ) -> PyResult<Py<PyAny>> {
+    pub async fn validate_expressions(&self, expressions: Py<PyAny>) -> PyResult<Py<PyAny>> {
+        let expressions =
+            Python::with_gil(|py| depythonize_bound(expressions.into_bound(py).into_any()))?;
         let records = self
             .table
-            .lock()
-            .await
-            .validate_expressions(Expressions(expressions))
+            .validate_expressions(expressions)
             .await
             .into_pyerr()?;
 
@@ -343,7 +472,7 @@ impl PyTable {
     }
 
     pub async fn schema(&self) -> PyResult<HashMap<String, String>> {
-        let schema = self.table.lock().await.schema().await.into_pyerr()?;
+        let schema = self.table.schema().await.into_pyerr()?;
         Ok(schema
             .into_iter()
             .map(|(x, y)| (x, format!("{}", y)))
@@ -352,41 +481,52 @@ impl PyTable {
 
     pub async fn view(&self, kwargs: Option<Py<PyDict>>) -> PyResult<PyView> {
         let config = kwargs
-            .map(|config| Python::with_gil(|py| depythonize(config.as_ref(py))))
+            .map(|config| {
+                Python::with_gil(|py| depythonize_bound(config.into_bound(py).into_any()))
+            })
             .transpose()?;
-        let view = self.table.lock().await.view(config).await.into_pyerr()?;
+
+        let view = self.table.view(config).await.into_pyerr()?;
         Ok(PyView {
-            view: Arc::new(Mutex::new(view)),
+            view: Arc::new(view),
+            client: self.client.clone(),
         })
     }
 }
 
 #[derive(Clone)]
 pub struct PyView {
-    view: Arc<Mutex<View>>,
+    view: Arc<View>,
+    client: PyClient,
 }
 
 assert_view_api!(PyView);
 
 impl PyView {
     pub async fn column_paths(&self) -> PyResult<Vec<String>> {
-        self.view.lock().await.column_paths().await.into_pyerr()
+        self.view.column_paths().await.into_pyerr()
     }
 
     pub async fn delete(&self) -> PyResult<()> {
-        self.view.lock().await.delete().await.into_pyerr()
+        self.view.delete().await.into_pyerr()
     }
 
     pub async fn dimensions(&self) -> PyResult<Py<PyAny>> {
-        let dim = self.view.lock().await.dimensions().await.into_pyerr()?;
+        let dim = self.view.dimensions().await.into_pyerr()?;
         Ok(Python::with_gil(|py| pythonize::pythonize(py, &dim))?)
+    }
+
+    pub async fn expand(&self, index: u32) -> PyResult<u32> {
+        self.view.expand(index).await.into_pyerr()
+    }
+
+    pub async fn collapse(&self, index: u32) -> PyResult<u32> {
+        self.view.collapse(index).await.into_pyerr()
     }
 
     pub async fn expression_schema(&self) -> PyResult<HashMap<String, String>> {
         Ok(self
             .view
-            .lock()
-            .await
             .expression_schema()
             .await
             .into_pyerr()?
@@ -396,23 +536,21 @@ impl PyView {
     }
 
     pub async fn get_config(&self) -> PyResult<Py<PyAny>> {
-        let config = self.view.lock().await.get_config().await.into_pyerr()?;
+        let config = self.view.get_config().await.into_pyerr()?;
         Ok(Python::with_gil(|py| pythonize::pythonize(py, &config))?)
     }
 
     pub async fn get_min_max(&self, name: String) -> PyResult<(String, String)> {
-        self.view.lock().await.get_min_max(name).await.into_pyerr()
+        self.view.get_min_max(name).await.into_pyerr()
     }
 
     pub async fn num_rows(&self) -> PyResult<u32> {
-        self.view.lock().await.num_rows().await.into_pyerr()
+        self.view.num_rows().await.into_pyerr()
     }
 
     pub async fn schema(&self) -> PyResult<HashMap<String, String>> {
         Ok(self
             .view
-            .lock()
-            .await
             .schema()
             .await
             .into_pyerr()?
@@ -424,19 +562,23 @@ impl PyView {
     pub async fn on_delete(&self, callback_py: Py<PyFunction>) -> PyResult<u32> {
         let callback = {
             let callback_py = callback_py.clone();
+            let loop_cb = self.client.loop_cb.read().await.clone();
             Box::new(move || {
-                Python::with_gil(|py| callback_py.call0(py))
-                    .expect("`on_delete()` callback failed");
+                let loop_cb = loop_cb.clone();
+                Python::with_gil(|py| {
+                    if let Some(loop_cb) = &loop_cb {
+                        loop_cb.call1(py, (&callback_py,))?;
+                    } else {
+                        callback_py.call0(py)?;
+                    }
+
+                    Ok(()) as PyResult<()>
+                })
+                .expect("`on_delete()` callback failed");
             })
         };
 
-        let callback_id = self
-            .view
-            .lock()
-            .await
-            .on_delete(callback)
-            .await
-            .into_pyerr()?;
+        let callback_id = self.view.on_delete(callback).await.into_pyerr()?;
         Python::with_gil(move |py| callback_py.setattr(py, PSP_CALLBACK_ID, callback_id))?;
         Ok(callback_id)
     }
@@ -444,34 +586,27 @@ impl PyView {
     pub async fn remove_delete(&self, callback: Py<PyFunction>) -> PyResult<()> {
         let callback_id =
             Python::with_gil(|py| callback.getattr(py, PSP_CALLBACK_ID)?.extract(py))?;
-        self.view
-            .lock()
-            .await
-            .remove_delete(callback_id)
-            .await
-            .into_pyerr()
+        self.view.remove_delete(callback_id).await.into_pyerr()
     }
 
     pub async fn on_update(&self, callback: Py<PyFunction>, mode: Option<String>) -> PyResult<u32> {
-        let loop_cb = self.client.loop_cb.clone();
-        let callback = move |x: OnUpdateArgs| {
+        let loop_cb = self.client.loop_cb.read().await.clone();
+        let callback = move |x: ViewOnUpdateResp| {
             let loop_cb = loop_cb.clone();
             let callback = callback.clone();
             async move {
                 let aggregate_errors: PyResult<()> = {
                     let callback = callback.clone();
                     Python::with_gil(|py| {
-                        if let Some(x) = &x.delta {
-                            if let Some(loop_cb) = loop_cb.as_ref() {
-                                loop_cb.call1(py, (callback, PyBytes::new(py, x)))?;
-                            } else {
-                                callback.call1(py, (PyBytes::new(py, x),))?;
-                            }
-                        } else if let Some(loop_cb) = loop_cb.as_ref() {
-                            loop_cb.call1(py, (callback,))?;
-                        } else {
-                            callback.call0(py)?;
-                        }
+                        match (&x.delta, &loop_cb) {
+                            (None, None) => callback.call1(py, (x.port_id,))?,
+                            (None, Some(loop_cb)) => loop_cb.call1(py, (&callback, x.port_id))?,
+                            (Some(delta), None) => {
+                                callback.call1(py, (x.port_id, PyBytes::new_bound(py, delta)))?
+                            },
+                            (Some(delta), Some(loop_cb)) => loop_cb
+                                .call1(py, (callback, x.port_id, PyBytes::new_bound(py, delta)))?,
+                        };
 
                         Ok(())
                     })
@@ -481,6 +616,7 @@ impl PyView {
                     tracing::warn!("Error in on_update callback: {:?}", err);
                 }
             }
+            .boxed()
         };
 
         let mode = mode
@@ -489,61 +625,48 @@ impl PyView {
             .into_pyerr()?;
 
         self.view
-            .lock()
-            .await
-            .on_update(callback.into_box_fn_pin_bix_fut(), OnUpdateOptions { mode })
+            .on_update(Box::new(callback), OnUpdateOptions { mode })
             .await
             .into_pyerr()
     }
 
     pub async fn remove_update(&self, callback_id: u32) -> PyResult<()> {
-        self.view
-            .lock()
-            .await
-            .remove_update(callback_id)
-            .await
-            .into_pyerr()
+        self.view.remove_update(callback_id).await.into_pyerr()
     }
 
     pub async fn to_arrow(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.as_ref(py))))
-            .transpose()?
-            .unwrap_or_default();
-        let arrow = self.view.lock().await.to_arrow(window).await.into_pyerr()?;
-        Ok(Python::with_gil(|py| PyBytes::new(py, &arrow).into()))
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
+        let arrow = self.view.to_arrow(window).await.into_pyerr()?;
+        Ok(Python::with_gil(|py| PyBytes::new_bound(py, &arrow).into()))
     }
 
     pub async fn to_csv(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.as_ref(py))))
-            .transpose()?
-            .unwrap_or_default();
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
 
-        self.view.lock().await.to_csv(window).await.into_pyerr()
+        self.view.to_csv(window).await.into_pyerr()
     }
 
     pub async fn to_columns_string(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.as_ref(py))))
-            .transpose()?
-            .unwrap_or_default();
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
 
-        self.view
-            .lock()
-            .await
-            .to_columns_string(window)
-            .await
-            .into_pyerr()
+        self.view.to_columns_string(window).await.into_pyerr()
     }
 
     pub async fn to_json_string(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.as_ref(py))))
-            .transpose()?
-            .unwrap_or_default();
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
 
-        self.view
-            .lock()
-            .await
-            .to_json_string(window)
-            .await
-            .into_pyerr()
+        self.view.to_json_string(window).await.into_pyerr()
     }
 }

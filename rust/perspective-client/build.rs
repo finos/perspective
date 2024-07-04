@@ -29,30 +29,18 @@ fn prost_build() -> Result<()> {
 
         println!("cargo:rerun-if-changed={}", proto_file.to_str().unwrap());
 
-        // // TODO is this even worth doing? `protobuf_src` is pretyt fast and
-        // // cached in CI
-        // // TODO always use release
-        // let profile = std::env::var("PROFILE").unwrap();
-        // let protoc_path = root_dir
-        //     .join("cpp/perspective/dist")
-        //     // .join(profile)
-        //     .join("release")
-        //     .join("protoc-release/bin/protoc");
-        // std::env::set_var("PROTOC", protoc_path);
-
         #[cfg(feature = "external-proto")]
         std::env::set_var("PROTOC", protobuf_src::protoc());
 
         prost_build::Config::new()
-            // TODO: I think we need bytes here but it causes tests to fail
-            // .bytes(["."])
+            // .bytes(["ViewToArrowResp.arrow", "from_arrow"])
+            .type_attribute("ViewOnUpdateResp", "#[derive(ts_rs::TS)]")
+            .field_attribute("ViewOnUpdateResp.delta", "#[serde(with = \"serde_bytes\")]")
+            .field_attribute("ViewToArrowResp.arrow", "#[serde(skip)]")
+            .field_attribute("from_arrow", "#[serde(skip)]")
             .type_attribute(".", "#[derive(serde::Serialize)]")
             .type_attribute("ViewDimensionsResp", "#[derive(serde::Deserialize)]")
             .type_attribute("TableValidateExprResp", "#[derive(serde::Deserialize)]")
-            // .type_attribute(
-            //     "ExprValidationResult.result",
-            //     "#[derive(serde::Serialize,serde::Deserialize)]",
-            // )
             .type_attribute(
                 "ColumnType",
                 "#[derive(serde::Deserialize)]  #[serde(rename_all = \"snake_case\")]",

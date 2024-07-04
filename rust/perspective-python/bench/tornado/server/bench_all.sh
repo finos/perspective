@@ -24,7 +24,7 @@ function start_server {
     # PYTHONPATH=$(realpath "$SCRIPT_DIR/../../..") "python" "$SCRIPT_DIR/new_api.py" &
     "python" "$SCRIPT_DIR/new_api.py" &
   else
-    ./ephemeral_venv.sh -d "perspective-python==$version" python "$SCRIPT_DIR/old_api.py" &
+    "$SCRIPT_DIR/ephemeral_venv.sh" -d "perspective-python==$version" python "$SCRIPT_DIR/old_api.py" &
   fi
 
   server_pid=$!
@@ -52,11 +52,11 @@ function stop_server {
 }
 
 start_server 2.10.0
-$npm_execpath bench_client -p 2.10.0 -o 2.10.0.arrow
+$npm_execpath bench_client -p 2.10.0 -o "$PWD/2.10.0.arrow"
 stop_server
 
 start_server 3.0.0
-$npm_execpath bench_client -p 3.0.0 -o 3.0.0.arrow
+$npm_execpath bench_client -p 3.0.0 -o "$PWD/3.0.0.arrow"
 stop_server
 
-$npm_execpath tsx "$SCRIPT_DIR/merge_arrows.mts" 2.10.0.arrow 3.0.0.arrow -o merged.arrow
+$npm_execpath tsx "$SCRIPT_DIR/merge_arrows.mts" "$PWD/2.10.0.arrow" "$PWD/3.0.0.arrow" -o "$PWD/merged.arrow"

@@ -16,9 +16,10 @@ import numpy as np
 import pandas as pd
 from perspective import PerspectiveError
 from perspective.table import Table
-from pytest import raises
+from pytest import raises, mark
 
 
+@mark.skip(reason="We do not support numpy types in the Table constructor")
 class TestTableNumpy(object):
     def test_empty_table(self):
         tbl = Table([])
@@ -28,7 +29,7 @@ class TestTableNumpy(object):
         data = {"a": np.array([1, 2, 3]), "b": np.array([4, 5, 6])}
         tbl = Table(data)
         assert tbl.size() == 3
-        assert tbl.view().to_dict() == {"a": [1, 2, 3], "b": [4, 5, 6]}
+        assert tbl.view().to_columns() == {"a": [1, 2, 3], "b": [4, 5, 6]}
 
     def test_table_int_lots_of_columns(self):
         data = {
@@ -41,7 +42,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 3
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [1, 2, 3],
             "b": [4, 5, 6],
             "c": [4, 5, 6],
@@ -57,7 +58,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 5
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [1, 2, 3, None, None],
             "b": [4, 5, 6, None, None],
         }
@@ -69,7 +70,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 3
-        assert tbl.view().to_dict() == {"a": [1, 2, 3], "b": [4, 5, 6]}
+        assert tbl.view().to_columns() == {"a": [1, 2, 3], "b": [4, 5, 6]}
 
     def test_table_int16(self):
         data = {
@@ -78,7 +79,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 3
-        assert tbl.view().to_dict() == {"a": [1, 2, 3], "b": [4, 5, 6]}
+        assert tbl.view().to_columns() == {"a": [1, 2, 3], "b": [4, 5, 6]}
 
     def test_table_int32(self):
         data = {
@@ -87,7 +88,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 3
-        assert tbl.view().to_dict() == {"a": [1, 2, 3], "b": [4, 5, 6]}
+        assert tbl.view().to_columns() == {"a": [1, 2, 3], "b": [4, 5, 6]}
 
     def test_table_int64(self):
         data = {
@@ -96,13 +97,13 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 3
-        assert tbl.view().to_dict() == {"a": [1, 2, 3], "b": [4, 5, 6]}
+        assert tbl.view().to_columns() == {"a": [1, 2, 3], "b": [4, 5, 6]}
 
     def test_table_float(self):
         data = {"a": np.array([1.1, 2.2]), "b": np.array([3.3, 4.4])}
         tbl = Table(data)
         assert tbl.size() == 2
-        assert tbl.view().to_dict() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
+        assert tbl.view().to_columns() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
 
     def test_table_float32(self):
         data = {
@@ -111,7 +112,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 2
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             # py::cast automatically upcasts to 64-bit float
             "a": [1.100000023841858, 2.200000047683716],
             "b": [3.299999952316284, 4.400000095367432],
@@ -124,7 +125,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 2
-        assert tbl.view().to_dict() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
+        assert tbl.view().to_columns() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
 
     # booleans
 
@@ -132,7 +133,7 @@ class TestTableNumpy(object):
         data = {"a": np.array([True, False]), "b": np.array([False, True])}
         tbl = Table(data)
         assert tbl.size() == 2
-        assert tbl.view().to_dict() == {"a": [True, False], "b": [False, True]}
+        assert tbl.view().to_columns() == {"a": [True, False], "b": [False, True]}
 
     def test_table_bool8(self):
         data = {
@@ -141,7 +142,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 2
-        assert tbl.view().to_dict() == {"a": [True, False], "b": [False, True]}
+        assert tbl.view().to_columns() == {"a": [True, False], "b": [False, True]}
 
     def test_table_bool_with_none(self):
         data = {
@@ -150,7 +151,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 4
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [True, False, None, False],
             "b": [False, True, None, False],
         }
@@ -162,7 +163,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 3
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [True, False, False],
             "b": [False, True, False],
         }
@@ -172,7 +173,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.size() == 2
         assert tbl.schema() == {"a": bool, "b": "boolean"}
-        assert tbl.view().to_dict() == {"a": [True, False], "b": [False, True]}
+        assert tbl.view().to_columns() == {"a": [True, False], "b": [False, True]}
 
     # strings
 
@@ -183,7 +184,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 2
-        assert tbl.view().to_dict() == {"a": ["abc", "def"], "b": ["hij", "klm"]}
+        assert tbl.view().to_columns() == {"a": ["abc", "def"], "b": ["hij", "klm"]}
 
     def test_table_str_dtype(self):
         dtype = "U3"
@@ -193,7 +194,7 @@ class TestTableNumpy(object):
         }
         tbl = Table(data)
         assert tbl.size() == 2
-        assert tbl.view().to_dict() == {"a": ["abc", "def"], "b": ["hij", "klm"]}
+        assert tbl.view().to_columns() == {"a": ["abc", "def"], "b": ["hij", "klm"]}
 
     # date and datetime
 
@@ -202,7 +203,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {"a": date, "b": "date"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [datetime(2019, 7, 11)],
             "b": [datetime(2019, 7, 12)],
         }
@@ -233,18 +234,18 @@ class TestTableNumpy(object):
             "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object),
         }
 
-    def test_table_np_datetime_default(self):
+    def test_table_np_datetime_default(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]")}
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
     def test_table_np_datetime_string_dtype(self):
         data = ["2019/07/11 15:30:05", "2019/07/11 15:30:05"]
         tbl = Table({"a": np.array(data)})
 
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [datetime(2019, 7, 11, 15, 30, 5), datetime(2019, 7, 11, 15, 30, 5)]
         }
 
@@ -254,69 +255,69 @@ class TestTableNumpy(object):
 
         tbl.update({"a": data})
 
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [datetime(2019, 7, 11, 15, 30, 5), datetime(2019, 7, 11, 15, 30, 5)]
         }
 
-    def test_table_np_datetime_ns(self):
+    def test_table_np_datetime_ns(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]")}
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
-    def test_table_np_datetime_us(self):
+    def test_table_np_datetime_us(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[us]")}
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
-    def test_table_np_datetime_ms(self):
+    def test_table_np_datetime_ms(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ms]")}
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
-    def test_table_np_datetime_s(self):
+    def test_table_np_datetime_s(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[s]")}
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
-    def test_table_np_datetime_m(self):
+    def test_table_np_datetime_m(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[m]")}
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
-    def test_table_np_datetime_h(self):
+    def test_table_np_datetime_h(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[h]")}
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
-    def test_table_np_datetime_D(self):
+    def test_table_np_datetime_D(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[D]")}
         )
 
         assert tbl.schema() == {"a": "date"}
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 0, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 0, 0))]}
 
-    def test_table_np_datetime_W(self):
+    def test_table_np_datetime_W(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[W]")}
         )
 
         assert tbl.schema() == {"a": "date"}
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 11, 0, 0).timestamp() * 1000)]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 11, 0, 0))]}
 
     def test_table_np_datetime_M(self):
         tbl = Table(
@@ -334,7 +335,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "date"}
 
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [
                 datetime(2019, 5, 1, 0, 0),
                 datetime(2019, 6, 1, 0, 0),
@@ -358,7 +359,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "date"}
 
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [
                 datetime(2017, 1, 1, 0, 0),
                 datetime(2018, 1, 1, 0, 0),
@@ -366,7 +367,7 @@ class TestTableNumpy(object):
             ]
         }
 
-    def test_table_np_datetime_ms_nat(self):
+    def test_table_np_datetime_ms_nat(self, util):
         tbl = Table(
             {
                 "a": np.array(
@@ -376,9 +377,9 @@ class TestTableNumpy(object):
             }
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000), None]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0)), None]}
 
-    def test_table_np_datetime_s_nat(self):
+    def test_table_np_datetime_s_nat(self, util):
         tbl = Table(
             {
                 "a": np.array(
@@ -388,7 +389,7 @@ class TestTableNumpy(object):
             }
         )
 
-        assert tbl.view().to_dict() == {"a": [int(datetime(2019, 7, 12, 11, 0).timestamp() * 1000), None]}
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0)), None]}
 
     def test_table_np_timedelta(self):
         tbl = Table(
@@ -400,7 +401,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": ["950400000000000 nanoseconds"]}
+        assert tbl.view().to_columns() == {"a": ["950400000000000 nanoseconds"]}
 
     def test_table_np_timedelta_us(self):
         tbl = Table(
@@ -412,7 +413,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": ["950400000000 microseconds"]}
+        assert tbl.view().to_columns() == {"a": ["950400000000 microseconds"]}
 
     def test_table_np_timedelta_ms(self):
         tbl = Table(
@@ -424,7 +425,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": ["950400000 milliseconds"]}
+        assert tbl.view().to_columns() == {"a": ["950400000 milliseconds"]}
 
     def test_table_np_timedelta_s(self):
         tbl = Table(
@@ -436,7 +437,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": ["950400 seconds"]}
+        assert tbl.view().to_columns() == {"a": ["950400 seconds"]}
 
     def test_table_np_timedelta_m(self):
         tbl = Table(
@@ -448,7 +449,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": ["15840 minutes"]}
+        assert tbl.view().to_columns() == {"a": ["15840 minutes"]}
 
     def test_table_np_timedelta_h(self):
         tbl = Table(
@@ -460,7 +461,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": ["264 hours"]}
+        assert tbl.view().to_columns() == {"a": ["264 hours"]}
 
     def test_table_np_timedelta_d(self):
         tbl = Table(
@@ -472,7 +473,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": ["11 days"]}
+        assert tbl.view().to_columns() == {"a": ["11 days"]}
 
     def test_table_np_timedelta_with_none(self):
         tbl = Table(
@@ -486,7 +487,7 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "string"}
 
-        assert tbl.view().to_dict() == {"a": [None, None]}  # two `NaT` values
+        assert tbl.view().to_columns() == {"a": [None, None]}  # two `NaT` values
 
     def test_table_np_mixed(self):
         data = {
@@ -510,7 +511,7 @@ class TestTableNumpy(object):
         assert tbl.size() == 5
         assert tbl.schema() == {"a": "integer", "b": "float", "c": "integer"}
 
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [0, 1, 2, 3, 4],
             "b": [None, None, None, None, None],
             "c": [1.0, 2.0, 3.0, 2147483648.0, 5.0],
@@ -528,7 +529,7 @@ class TestTableNumpy(object):
             "b": "string",
         }
 
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [0, 1, 2, 3],
             "b": ["1", "2", "abc", "abc"],
         }
@@ -548,7 +549,7 @@ class TestTableNumpy(object):
             }
         )
 
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": ["a", "bb", "cc", "dd", "ee"],
             "b": [1, 2, 3, 4, 5],
         }
@@ -559,28 +560,28 @@ class TestTableNumpy(object):
         df = {"a": np.array([1, None, 2, None, 3, 4])}
         table = Table({"a": "integer"})
         table.update(df)
-        assert table.view().to_dict()["a"] == [1, None, 2, None, 3, 4]
+        assert table.view().to_columns()["a"] == [1, None, 2, None, 3, 4]
 
     def test_table_numpy_from_schema_bool(self):
         data = [True, False, True, False]
         df = {"a": data}
         table = Table({"a": "boolean"})
         table.update(df)
-        assert table.view().to_dict()["a"] == data
+        assert table.view().to_columns()["a"] == data
 
     def test_table_numpy_from_schema_float(self):
         data = [1.5, None, 2.5, None, 3.5, 4.5]
         df = {"a": np.array(data)}
         table = Table({"a": "float"})
         table.update(df)
-        assert table.view().to_dict()["a"] == data
+        assert table.view().to_columns()["a"] == data
 
     def test_table_numpy_from_schema_float_all_nan(self):
         data = [np.nan, np.nan, np.nan, np.nan]
         df = {"a": np.array(data)}
         table = Table({"a": "float"})
         table.update(df)
-        assert table.view().to_dict()["a"] == [None, None, None, None]
+        assert table.view().to_columns()["a"] == [None, None, None, None]
 
     def test_table_numpy_from_schema_float_to_int(self):
         data = [None, 1.5, None, 2.5, None, 3.5, 4.5]
@@ -588,14 +589,14 @@ class TestTableNumpy(object):
         table = Table({"a": "integer"})
         table.update(df)
         # truncates decimal
-        assert table.view().to_dict()["a"] == [None, 1, None, 2, None, 3, 4]
+        assert table.view().to_columns()["a"] == [None, 1, None, 2, None, 3, 4]
 
     def test_table_numpy_from_schema_float_to_int_with_nan(self):
         df = {"a": np.array([np.nan, 1.5, np.nan, 2.5, np.nan, 3.5, 4.5])}
         table = Table({"a": "integer"})
         table.update(df)
         # truncates decimal
-        assert table.view().to_dict()["a"] == [None, 1, None, 2, None, 3, 4]
+        assert table.view().to_columns()["a"] == [None, 1, None, 2, None, 3, 4]
 
     def test_table_numpy_from_schema_float_to_int_with_nan_partial(self):
         df = {"a": np.array([np.nan, 1.5, np.nan, 2.5, np.nan, 3.5, 4.5])}
@@ -603,7 +604,7 @@ class TestTableNumpy(object):
         table.update(df)
         assert table.size() == 7
         # truncates decimal
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [None, 1, None, 2, None, 3, 4],
             "b": [None, None, None, None, None, None, None],
         }
@@ -619,14 +620,14 @@ class TestTableNumpy(object):
         table.update(df)
 
         # truncates decimal
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [None, 1, None, 2, None, 3, 4],
             "b": [1, 2, 3, 4, 5, 6, 7],
         }
 
         table.update(pd.DataFrame({"a": [10, 9, 8], "b": [2, 3, 5]}))
 
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [None, 10, 9, 2, 8, 3, 4],
             "b": [1, 2, 3, 4, 5, 6, 7],
         }
@@ -638,7 +639,7 @@ class TestTableNumpy(object):
             }
         )
 
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [100, None, 10, 9, 2, 8, None, 4],
             "b": [-1, 1, 2, 3, 4, 5, 6, 7],
         }
@@ -650,7 +651,7 @@ class TestTableNumpy(object):
             }
         )
 
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [100, None, 10, 9, 2, 8, 1000, 4, None, 100],
             "b": [-1, 1, 2, 3, 4, 5, 6, 7, 97, 100],
         }
@@ -660,14 +661,14 @@ class TestTableNumpy(object):
         df = {"a": np.array(data)}
         table = Table({"a": "float"})
         table.update(df)
-        assert table.view().to_dict()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
+        assert table.view().to_columns()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
 
     def test_table_numpy_from_schema_date(self):
         data = [date(2019, 8, 15), None, date(2019, 8, 16)]
         df = {"a": np.array(data)}
         table = Table({"a": "date"})
         table.update(df)
-        assert table.view().to_dict()["a"] == [
+        assert table.view().to_columns()["a"] == [
             datetime(2019, 8, 15),
             None,
             datetime(2019, 8, 16),
@@ -683,7 +684,7 @@ class TestTableNumpy(object):
         df = {"a": np.array(data)}
         table = Table({"a": "datetime"})
         table.update(df)
-        assert table.view().to_dict()["a"] == data
+        assert table.view().to_columns()["a"] == data
 
     def test_table_numpy_from_schema_datetime_timestamp_s(self, util):
         data = [
@@ -695,7 +696,7 @@ class TestTableNumpy(object):
         df = {"a": np.array(data)}
         table = Table({"a": "datetime"})
         table.update(df)
-        assert table.view().to_dict()["a"] == [
+        assert table.view().to_columns()["a"] == [
             datetime(2019, 7, 11, 12, 30, 5),
             None,
             datetime(2019, 7, 11, 13, 30, 5),
@@ -713,7 +714,7 @@ class TestTableNumpy(object):
         df = {"a": np.array(data)}
         table = Table({"a": "datetime"})
         table.update(df)
-        assert table.view().to_dict()["a"] == [
+        assert table.view().to_columns()["a"] == [
             datetime(2019, 7, 11, 12, 30, 5),
             None,
             datetime(2019, 7, 11, 13, 30, 5),
@@ -725,7 +726,7 @@ class TestTableNumpy(object):
         df = {"a": np.array(data)}
         table = Table({"a": "string"})
         table.update(df)
-        assert table.view().to_dict()["a"] == data
+        assert table.view().to_columns()["a"] == data
 
     # partial update
 
@@ -734,7 +735,7 @@ class TestTableNumpy(object):
         df = {"a": np.array([1, 2, 3, 4, 5]), "b": np.array(data), "c": np.array(data)}
         table = Table(df, index="a")
         table.update({"a": np.array([2, 4, 5]), "b": np.array(["x", "y", "z"])})
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [1, 2, 3, 4, 5],
             "b": ["a", "x", "b", "y", "z"],
             "c": ["a", None, "b", None, "c"],
@@ -745,7 +746,7 @@ class TestTableNumpy(object):
         df = {"a": np.array([1, 2, 3, 4, 5]), "b": np.array(data), "c": np.array(data)}
         table = Table(df)
         table.update({"__INDEX__": np.array([1, 3, 4]), "b": np.array(["x", "y", "z"])})
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [1, 2, 3, 4, 5],
             "b": ["a", "x", "b", "y", "z"],
             "c": ["a", None, "b", None, "c"],
@@ -757,7 +758,7 @@ class TestTableNumpy(object):
         d = np.array([(1.0, 2), (3.0, 4)], dtype=[("x", "<f8"), ("y", "<i8")])
         table = Table(d)
         assert table.schema() == {"x": "float", "y": "integer"}
-        assert table.view().to_dict() == {"x": [1.0, 3.0], "y": [2, 4]}
+        assert table.view().to_columns() == {"x": [1.0, 3.0], "y": [2, 4]}
 
     # recarray
 
@@ -767,7 +768,7 @@ class TestTableNumpy(object):
         )
         table = Table(d)
         assert table.schema() == {"x": "float", "y": "integer"}
-        assert table.view().to_dict() == {"x": [1.0, 3.0], "y": [2, 4]}
+        assert table.view().to_columns() == {"x": [1.0, 3.0], "y": [2, 4]}
 
     def test_table_recarray_datetime_ns(self):
         d = np.array(
@@ -779,7 +780,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "datetime", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 7, 11, 8, 30, 29), datetime(2019, 7, 11, 8, 30, 29)],
             "y": [2, 4],
         }
@@ -794,7 +795,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "datetime", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 7, 11, 8, 30, 29), datetime(2019, 7, 11, 8, 30, 29)],
             "y": [2, 4],
         }
@@ -809,7 +810,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "datetime", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 7, 11, 8, 30, 29), datetime(2019, 7, 11, 8, 30, 29)],
             "y": [2, 4],
         }
@@ -824,7 +825,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "datetime", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 7, 11, 8, 30, 29), datetime(2019, 7, 11, 8, 30, 29)],
             "y": [2, 4],
         }
@@ -839,7 +840,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "datetime", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 7, 11, 8, 30, 0), datetime(2019, 7, 11, 8, 31, 0)],
             "y": [2, 4],
         }
@@ -854,7 +855,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "datetime", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 7, 11, 8, 0, 0), datetime(2019, 7, 11, 9, 0, 0)],
             "y": [2, 4],
         }
@@ -869,7 +870,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "date", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 7, 11, 0, 0, 0), datetime(2019, 7, 12, 0, 0, 0)],
             "y": [2, 4],
         }
@@ -881,7 +882,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "date", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             # one week apart
             "x": [datetime(2019, 6, 27, 0, 0, 0), datetime(2019, 7, 4, 0, 0, 0)],
             "y": [2, 4],
@@ -897,7 +898,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "date", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2019, 6, 1, 0, 0, 0), datetime(2019, 7, 1, 0, 0, 0)],
             "y": [2, 4],
         }
@@ -912,7 +913,7 @@ class TestTableNumpy(object):
         ).view(np.recarray)
         table = Table(d)
         assert table.schema() == {"x": "date", "y": "integer"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": [datetime(2018, 1, 1, 0, 0, 0), datetime(2019, 1, 1, 0, 0, 0)],
             "y": [2, 4],
         }
@@ -925,7 +926,7 @@ class TestTableNumpy(object):
             ).view(np.recarray)
         )
         assert table.schema() == {"x": "string", "y": "string"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": ["string1", "string3"],
             "y": ["string2", "string4"],
         }
@@ -939,7 +940,7 @@ class TestTableNumpy(object):
             ).view(np.recarray)
         )
         assert table.schema() == {"x": "string", "y": "string"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "x": ["string1", "string3"],
             "y": ["string2", "string4"],
         }
@@ -953,7 +954,7 @@ class TestTableNumpy(object):
         assert table.size() == 2
         schema = table.schema()
         assert schema == {"a": "float", "b": "float"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [1.100000023841858, 2.200000047683716],
             "b": [3.299999952316284, 4.400000095367432],
         }
@@ -968,9 +969,9 @@ class TestTableNumpy(object):
         schema = table.schema()
         assert schema == {"a": "float", "b": "float"}
         view = table.view()
-        assert view.to_dict() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
+        assert view.to_columns() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
         view.schema({"a": np.float32, "b": np.float32})
-        assert view.to_dict() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
+        assert view.to_columns() == {"a": [1.1, 2.2], "b": [3.3, 4.4]}
         data["a"] = data["a"].astype(np.float32)
         data["b"] = data["b"].astype(np.float32)
         table = Table(data)
@@ -978,7 +979,7 @@ class TestTableNumpy(object):
         schema = table.schema()
         assert schema == {"a": "float", "b": "float"}
         view = table.view()
-        assert view.to_dict() == {
+        assert view.to_columns() == {
             "a": [1.100000023841858, 2.200000047683716],
             "b": [3.299999952316284, 4.400000095367432],
         }
@@ -992,7 +993,7 @@ class TestTableNumpy(object):
         assert table.size() == 3
         schema = table.schema()
         assert schema == {"a": "float", "b": "float"}
-        assert table.view().to_dict() == {
+        assert table.view().to_columns() == {
             "a": [1.100000023841858, None, 2.200000047683716],
             "b": [3.299999952316284, 4.400000095367432, None],
         }

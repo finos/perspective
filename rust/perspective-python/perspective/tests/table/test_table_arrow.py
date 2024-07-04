@@ -13,6 +13,7 @@
 import os.path
 import numpy as np
 import pandas as pd
+from perspective.tests.conftest import Util
 import pyarrow as pa
 from datetime import date, datetime
 from perspective.table import Table
@@ -27,7 +28,7 @@ names = ["a", "b", "c", "d"]
 class TestTableArrow(object):
     # files
 
-    def test_table_arrow_loads_date32_file(self):
+    def test_table_arrow_loads_date32_file(self, util: Util):
         with open(DATE32_ARROW, mode="rb") as file:  # b is important -> binary
             tbl = Table(file.read())
             assert tbl.schema() == {
@@ -39,13 +40,13 @@ class TestTableArrow(object):
             assert tbl.size() == 31
             view = tbl.view()
             assert view.to_columns() == {
-                "jan-2019": [datetime(2019, 1, i) for i in range(1, 32)],
-                "feb-2020": [datetime(2020, 2, i) for i in range(1, 30)] + [None, None],
-                "mar-2019": [datetime(2019, 3, i) for i in range(1, 32)],
-                "apr-2020": [datetime(2020, 4, i) for i in range(1, 31)] + [None],
+                "jan-2019": [util.to_timestamp(datetime(2019, 1, i)) for i in range(1, 32)],
+                "feb-2020": [util.to_timestamp(datetime(2020, 2, i)) for i in range(1, 30)] + [None, None],
+                "mar-2019": [util.to_timestamp(datetime(2019, 3, i)) for i in range(1, 32)],
+                "apr-2020": [util.to_timestamp(datetime(2020, 4, i)) for i in range(1, 31)] + [None],
             }
 
-    def test_table_arrow_loads_date64_file(self):
+    def test_table_arrow_loads_date64_file(self, util: Util):
         with open(DATE64_ARROW, mode="rb") as file:  # b is important -> binary
             tbl = Table(file.read())
             assert tbl.schema() == {
@@ -57,10 +58,10 @@ class TestTableArrow(object):
             assert tbl.size() == 31
             view = tbl.view()
             assert view.to_columns() == {
-                "jan-2019": [datetime(2019, 1, i) for i in range(1, 32)],
-                "feb-2020": [datetime(2020, 2, i) for i in range(1, 30)] + [None, None],
-                "mar-2019": [datetime(2019, 3, i) for i in range(1, 32)],
-                "apr-2020": [datetime(2020, 4, i) for i in range(1, 31)] + [None],
+                "jan-2019": [util.to_timestamp(datetime(2019, 1, i)) for i in range(1, 32)],
+                "feb-2020": [util.to_timestamp(datetime(2020, 2, i)) for i in range(1, 30)] + [None, None],
+                "mar-2019": [util.to_timestamp(datetime(2019, 3, i)) for i in range(1, 32)],
+                "apr-2020": [util.to_timestamp(datetime(2020, 4, i)) for i in range(1, 31)] + [None],
             }
 
     def test_table_arrow_loads_dict_file(self):
@@ -68,7 +69,7 @@ class TestTableArrow(object):
             tbl = Table(file.read())
             assert tbl.schema() == {"a": "string", "b": "string"}
             assert tbl.size() == 5
-            assert tbl.view().to_dict() == {
+            assert tbl.view().to_columns() == {
                 "a": ["abc", "def", "def", None, "abc"],
                 "b": ["klm", "hij", None, "hij", "klm"],
             }
@@ -81,7 +82,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "integer", "b": "integer", "c": "integer", "d": "integer"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": data[0],
             "b": data[1],
             "c": data[2],
@@ -97,7 +98,7 @@ class TestTableArrow(object):
             "a": "integer",
             "b": "float",
         }
-        assert tbl.view().to_dict() == {"a": data[0], "b": data[1]}
+        assert tbl.view().to_columns() == {"a": data[0], "b": data[1]}
 
     def test_table_arrow_loads_decimal_stream(self, util):
         data = [[i * 1000 for i in range(10)]]
@@ -107,7 +108,7 @@ class TestTableArrow(object):
         assert tbl.schema() == {
             "a": "integer",
         }
-        assert tbl.view().to_dict() == {"a": data[0]}
+        assert tbl.view().to_columns() == {"a": data[0]}
 
     def test_table_arrow_loads_bool_stream(self, util):
         data = [[True if i % 2 == 0 else False for i in range(10)]]
@@ -115,7 +116,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "boolean"}
-        assert tbl.view().to_dict() == {"a": data[0]}
+        assert tbl.view().to_columns() == {"a": data[0]}
 
     def test_table_arrow_loads_date32_stream(self, util):
         data = [[date(2019, 2, i) for i in range(1, 11)]]
@@ -123,8 +124,8 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 2, i) for i in range(1, 11)]
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
         }
 
     def test_table_arrow_loads_date64_stream(self, util):
@@ -133,8 +134,8 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 2, i) for i in range(1, 11)]
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
         }
 
     def test_table_arrow_loads_timestamp_all_formats_stream(self, util):
@@ -162,11 +163,11 @@ class TestTableArrow(object):
             "c": "datetime",
             "d": "datetime",
         }
-        assert tbl.view().to_dict() == {
-            "a": data[0],
-            "b": data[1],
-            "c": data[2],
-            "d": data[3],
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(i) for i in data[0]],
+            "b": [util.to_timestamp(i) for i in data[1]],
+            "c": [util.to_timestamp(i) for i in data[2]],
+            "d": [util.to_timestamp(i) for i in data[3]],
         }
 
     def test_table_arrow_loads_string_stream(self, util):
@@ -175,7 +176,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "string"}
-        assert tbl.view().to_dict() == {"a": data[0]}
+        assert tbl.view().to_columns() == {"a": data[0]}
 
     def test_table_arrow_loads_dictionary_stream_int8(self, util):
         data = [
@@ -188,7 +189,7 @@ class TestTableArrow(object):
 
         assert tbl.size() == 4
         assert tbl.schema() == {"a": "string", "b": "string"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": ["abc", "def", "def", None],
             "b": ["xx", "yy", None, "zz"],
         }
@@ -204,7 +205,7 @@ class TestTableArrow(object):
 
         assert tbl.size() == 4
         assert tbl.schema() == {"a": "string", "b": "string"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": ["abc", "def", "def", None],
             "b": ["xx", "yy", None, "zz"],
         }
@@ -220,7 +221,7 @@ class TestTableArrow(object):
 
         assert tbl.size() == 4
         assert tbl.schema() == {"a": "string", "b": "string"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": ["abc", "def", "def", None],
             "b": ["xx", "yy", None, "zz"],
         }
@@ -235,7 +236,7 @@ class TestTableArrow(object):
 
         assert tbl.size() == 4
         assert tbl.schema() == {"a": "string", "b": "string"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": ["abc", "def", "def", None],
             "b": ["xx", "yy", None, "zz"],
         }
@@ -247,7 +248,7 @@ class TestTableArrow(object):
 
         assert tbl.size() == 4
         assert tbl.schema() == {"a": "string"}
-        assert tbl.view().to_dict() == {"a": [None, "", "abc", "def"]}
+        assert tbl.view().to_columns() == {"a": [None, "", "abc", "def"]}
 
     def test_table_arrow_loads_dictionary_stream_nones_indexed(self, util):
         data = [
@@ -258,7 +259,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data, index="a")  # column "a" is sorted
 
         assert tbl.schema() == {"a": "string", "b": "string"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": [None, "", "abc", "def"],
             "b": ["hij", "", "klm", None],
         }
@@ -273,7 +274,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data, index="b")  # column "b" is sorted
 
         assert tbl.schema() == {"a": "string", "b": "string"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": ["def", "", None, "abc"],
             "b": [None, "", "hij", "klm"],
         }
@@ -296,7 +297,7 @@ class TestTableArrow(object):
             "a": "integer",
             "b": "float",
         }
-        assert tbl.view().to_dict() == {"a": data[0], "b": data[1]}
+        assert tbl.view().to_columns() == {"a": data[0], "b": data[1]}
 
     def test_table_arrow_loads_decimal128_legacy(self, util):
         data = [[i * 1000 for i in range(10)]]
@@ -306,7 +307,7 @@ class TestTableArrow(object):
         assert tbl.schema() == {
             "a": "integer",
         }
-        assert tbl.view().to_dict() == {"a": data[0]}
+        assert tbl.view().to_columns() == {"a": data[0]}
 
     def test_table_arrow_loads_bool_legacy(self, util):
         data = [[True if i % 2 == 0 else False for i in range(10)]]
@@ -314,7 +315,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "boolean"}
-        assert tbl.view().to_dict() == {"a": data[0]}
+        assert tbl.view().to_columns() == {"a": data[0]}
 
     def test_table_arrow_loads_date32_legacy(self, util):
         data = [[date(2019, 2, i) for i in range(1, 11)]]
@@ -322,8 +323,8 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 2, i) for i in range(1, 11)]
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
         }
 
     def test_table_arrow_loads_date64_legacy(self, util):
@@ -332,8 +333,8 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 2, i) for i in range(1, 11)]
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
         }
 
     def test_table_arrow_loads_timestamp_all_formats_legacy(self, util):
@@ -362,11 +363,11 @@ class TestTableArrow(object):
             "c": "datetime",
             "d": "datetime",
         }
-        assert tbl.view().to_dict() == {
-            "a": data[0],
-            "b": data[1],
-            "c": data[2],
-            "d": data[3],
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(i) for i in data[0]],
+            "b": [util.to_timestamp(i) for i in data[1]],
+            "c": [util.to_timestamp(i) for i in data[2]],
+            "d": [util.to_timestamp(i) for i in data[3]],
         }
 
     def test_table_arrow_loads_string_legacy(self, util):
@@ -375,7 +376,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "string"}
-        assert tbl.view().to_dict() == {"a": data[0]}
+        assert tbl.view().to_columns() == {"a": data[0]}
 
     def test_table_arrow_loads_dictionary_legacy(self, util):
         data = [([0, 1, 1, None], ["a", "b"]), ([0, 1, None, 2], ["x", "y", "z"])]
@@ -384,7 +385,7 @@ class TestTableArrow(object):
 
         assert tbl.size() == 4
         assert tbl.schema() == {"a": "string", "b": "string"}
-        assert tbl.view().to_dict() == {
+        assert tbl.view().to_columns() == {
             "a": ["a", "b", "b", None],
             "b": ["x", "y", None, "z"],
         }

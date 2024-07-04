@@ -14,7 +14,6 @@ import multiprocessing
 import asyncio
 import os
 import os.path
-import perspective
 import time
 from perspective.core.globalpsp import shared_client
 from perspective.handlers.new_tornado import PerspectiveTornadoHandler

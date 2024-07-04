@@ -27,7 +27,7 @@
         const viewerAttrs = {{ viewer_attrs | tojson }};
 
         // Create a new worker, then a new table promise on that worker.
-        const table = await perspective.shared_worker().table(data.buffer);
+        const table = await perspective.worker().table(data.buffer);
         const viewer = envelope.querySelector('perspective-viewer');
         viewer.load(table);
         viewer.restore(viewerAttrs);
