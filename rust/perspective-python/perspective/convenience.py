@@ -10,59 +10,45 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import asyncio
-import os
-import os.path
-import logging
-import threading
-
-from aiohttp import web
-
-from perspective import Table, PerspectiveManager, PerspectiveAIOHTTPHandler
+from asyncio import AbstractEventLoop, iscoroutinefunction, ensure_future
+from typing import Optional
+from .perspective import PySyncServer, PySyncClient
 
 
-here = os.path.abspath(os.path.dirname(__file__))
-file_path = os.path.join(
-    here, "..", "..", "node_modules", "superstore-arrow", "superstore.lz4.arrow"
-)
+class LocalPerspective(object):
+    def __init__(self, loop: Optional[AbstractEventLoop] = None):
+        self._server = PySyncServer()
+        self._session = self._server.new_session(
+            lambda *args, **kwargs: self._handle_new_session(*args, **kwargs)
+        )
+        self._client = PySyncClient(
+            lambda *args, **kwargs: self._handle_sync_client(*args, **kwargs)
+        )
+        self._loop = loop
 
+    def session(self, send_data):
+        if iscoroutinefunction(send_data):
 
-def perspective_thread(manager):
-    """Perspective application thread starts its own event loop, and
-    adds the table with the name "data_source_one", which will be used
-    in the front-end."""
-    psp_loop = asyncio.new_event_loop()
-    manager.set_loop_callback(psp_loop.call_soon_threadsafe)
-    with open(file_path, mode="rb") as file:
-        table = Table(file.read(), index="Row ID")
-        manager.host_table("data_source_one", table)
-    psp_loop.run_forever()
+            def _inner(data):
+                ensure_future(send_data(data), loop=self._loop)
+        else:
+            _inner = send_data
+        return self._server.new_session(_inner)
 
+    @property
+    def client(self):
+        return self._client
 
-def make_app():
-    manager = PerspectiveManager()
+    @property
+    def server(self):
+        return self._server
 
-    thread = threading.Thread(target=perspective_thread, args=(manager,))
-    thread.daemon = True
-    thread.start()
+    def poll(self):
+        self._session.poll()
 
-    async def websocket_handler(request):
-        handler = PerspectiveAIOHTTPHandler(manager=manager, request=request)
-        await handler.run()
+    def _handle_sync_client(self, bytes):
+        self._session.handle_request(bytes)
+        self._session.poll()
 
-    app = web.Application()
-    app.router.add_get("/websocket", websocket_handler)
-    app.router.add_static(
-        "/node_modules/@finos", "../../node_modules/@finos", follow_symlinks=True
-    )
-    app.router.add_static(
-        "/node_modules", "../../node_modules/@finos", follow_symlinks=True
-    )
-    app.router.add_static("/", "../python-tornado", show_index=True)
-    return app
-
-
-if __name__ == "__main__":
-    app = make_app()
-    logging.critical("Listening on http://localhost:8080")
-    web.run_app(app, host="0.0.0.0", port=8080)
+    def _handle_new_session(self, bytes):
+        self._client.handle_response(bytes)

@@ -13,32 +13,16 @@
 __version__ = "2.10.1"
 __all__ = [
     "PySyncClient",
+    "PySyncServer",
     "PerspectiveError",
     "PerspectivePyError",
     "PerspectiveWidget",
     "PerspectiveViewer",
-    "PerspectiveTornadoHandler",
-    "Table",
-    "PerspectiveManager",
-    "set_threadpool_size",
-    "sync_client",
-    "create_sync_client",
+    "LocalPerspective",
 ]
 
-from .perspective import PySyncClient, PerspectivePyError
+from .perspective import PySyncClient, PySyncServer, PerspectivePyError
 from .core.exception import PerspectiveError
-
-from .legacy import (
-    PerspectiveManager,
-    Table,
-    set_threadpool_size,
-    sync_client,
-    create_sync_client,
-)
 from .widget import PerspectiveWidget
 from .viewer import PerspectiveViewer
-
-try:
-    from .handlers import PerspectiveTornadoHandler
-except ImportError:
-    ...
+from .convenience import LocalPerspective

@@ -10,41 +10,43 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from aiohttp import web, WSMsgType, WebSocketError
+import logging
+import tornado.websocket
+import tornado.web
+import tornado.ioloop
 
-__all__ = ("PerspectiveAIOHTTPHandler",)
+from perspective import LocalPerspective
+from perspective.handlers.tornado import PerspectiveTornadoHandler
+from datagen import datagen
 
 
-class PerspectiveAIOHTTPHandler(object):
-    """PerspectiveAIOHTTPHandler is a drop-in implementation of Perspective.
+def make_app(psp):
+    return tornado.web.Application(
+        [
+            (
+                r"/websocket",
+                PerspectiveTornadoHandler,
+                {"perspective": psp},
+            ),
+            (
+                r"/node_modules/(.*)",
+                tornado.web.StaticFileHandler,
+                {"path": "../../node_modules/"},
+            ),
+            (
+                r"/(.*)",
+                tornado.web.StaticFileHandler,
+                {"path": "./", "default_filename": "index.html"},
+            ),
+        ]
+    )
 
-    Use it inside AIOHTTP routing to create a server-side Perspective that is
-    ready to receive websocket messages from the front-end `perspective-viewer`.
 
-    The Perspective client and server will automatically keep the Websocket
-    alive without timing out.
-
-    Examples:
-        >>> manager = PerspectiveManager()
-        >>> async def websocket_handler(request):
-        ...    handler = PerspectiveAIOHTTPHandler(manager=manager, request=request)
-        ...    await handler.run()
-
-        >>> app = web.Application()
-        >>> app.router.add_get("/websocket", websocket_handler)
-    """
-
-    def __init__(self, perspective, request):
-        self._request = request
-        self._websocket = web.WebSocketResponse()
-        self._session = perspective.session(self._websocket.send_bytes)
-
-    async def run(self) -> None:
-        try:
-            await self._websocket.prepare(self._request)
-
-            async for msg in self._websocket:
-                if msg.type == WSMsgType.BINARY:
-                    self._session.handle_request(msg.data)
-        finally:
-            del self._session
+if __name__ == "__main__":
+    psp = LocalPerspective()
+    app = make_app(psp)
+    app.listen(8082)
+    logging.critical("Listening on http://localhost:8080")
+    loop = tornado.ioloop.IOLoop.current()
+    loop.call_later(0, datagen, psp.client)
+    loop.start()

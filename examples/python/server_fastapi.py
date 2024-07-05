@@ -10,76 +10,54 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import os
-import os.path
 import logging
-import tornado.websocket
-import tornado.web
-import tornado.ioloop
-import threading
-import concurrent.futures
+import uvicorn
 
-from perspective.core.globalpsp import shared_client
-from perspective.handlers.new_tornado import PerspectiveTornadoHandler
+from fastapi import FastAPI, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
+from starlette.staticfiles import StaticFiles
 
+from perspective import LocalPerspective
+from perspective.handlers.starlette import PerspectiveStarletteHandler
 
-here = os.path.abspath(os.path.dirname(__file__))
-file_path = os.path.join(
-    here, "..", "..", "node_modules", "superstore-arrow", "superstore.lz4.arrow"
-)
-
-IS_MULTI_THREADED = True
+from datagen import run_datagen
 
 
-def perspective_thread(manager, table):
-    """Perspective application thread starts its own tornado IOLoop, and
-    adds the table with the name "data_source_one", which will be used
-    in the front-end."""
-    psp_loop = tornado.ioloop.IOLoop()
-    manager.host_table("data_source_one", table)
-    if IS_MULTI_THREADED:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            manager.set_loop_callback(psp_loop.run_in_executor, executor)
-            psp_loop.start()
-    else:
-        manager.set_loop_callback(psp_loop.add_callback)
-        psp_loop.start()
+def static_nodemodules_handler(rest_of_path):
+    if rest_of_path.startswith("@finos"):
+        return FileResponse("../../node_modules/{}".format(rest_of_path))
+    return FileResponse("../../node_modules/@finos/{}".format(rest_of_path))
 
-
-async def init_table():
-    client = await shared_client()
-    with open(file_path, mode="rb") as file:
-        data = file.read()
-        table = await client.table(data, name="data_source_one")
-        for _ in range(10):
-            await table.update(data)
 
 def make_app():
-    return tornado.web.Application(
-        [
-            (
-                r"/websocket",
-                PerspectiveTornadoHandler,
-                {},
-            ),
-            (
-                r"/node_modules/(.*)",
-                tornado.web.StaticFileHandler,
-                {"path": "../../node_modules/"},
-            ),
-            (
-                r"/(.*)",
-                tornado.web.StaticFileHandler,
-                {"path": "./", "default_filename": "index.html"},
-            ),
-        ]
+    psp = LocalPerspective()
+
+    async def websocket_handler(websocket: WebSocket):
+        handler = PerspectiveStarletteHandler(perspective=psp, websocket=websocket)
+        await handler.run()
+
+    # Generate random data
+    run_datagen(psp.client)
+
+    static_html_files = StaticFiles(directory=".", html=True)
+
+    app = FastAPI()
+    app.add_api_websocket_route("/websocket", websocket_handler)
+    app.get("/node_modules/{rest_of_path:path}")(static_nodemodules_handler)
+    app.mount("/", static_html_files)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
+    return app
 
 
 if __name__ == "__main__":
     app = make_app()
-    app.listen(8082)
-    logging.critical("Listening on http://localhost:8080")
-    loop = tornado.ioloop.IOLoop.current()
-    loop.call_later(0, init_table)
-    loop.start()
+    logging.critical("Listening on http://localhost:8082")
+    uvicorn.run(app, host="0.0.0.0", port=8082)

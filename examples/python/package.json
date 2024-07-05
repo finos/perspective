@@ -1,5 +1,5 @@
 {
-    "name": "python-starlette",
+    "name": "python",
     "private": true,
     "version": "2.10.1",
     "description": "An example of editing a `perspective-python` server from the browser.",

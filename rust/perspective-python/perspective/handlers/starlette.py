@@ -10,11 +10,14 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+from asyncio import ensure_future
 from starlette.websockets import WebSocketDisconnect
-from .common import PerspectiveHandlerBase
+from perspective.core.globalpsp import Session
+
+__all__ = ("PerspectiveStarletteHandler",)
 
 
-class PerspectiveStarletteHandler(PerspectiveHandlerBase):
+class PerspectiveStarletteHandler(object):
     """PerspectiveStarletteHandler is a drop-in implementation of Perspective.
 
     The Perspective client and server will automatically keep the Websocket
@@ -31,9 +34,9 @@ class PerspectiveStarletteHandler(PerspectiveHandlerBase):
         ... app.add_api_websocket_route('/websocket', endpoint)
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._websocket = kwargs["websocket"]
+    def __init__(self, perspective, websocket):
+        self._websocket = websocket
+        self._session = perspective.session(self._websocket.send_bytes)
 
     async def run(self) -> None:
         try:
@@ -41,22 +44,7 @@ class PerspectiveStarletteHandler(PerspectiveHandlerBase):
             while True:
                 message = await self._websocket.receive()
                 self._websocket._raise_on_disconnect(message)
-                if "text" in message:
-                    await self.on_message(message["text"])
                 if "bytes" in message:
-                    await self.on_message(message["bytes"])
+                    self._session.handle_request(message["bytes"])
         finally:
-            self.on_close()
-
-    async def write_message(self, message: str, binary: bool = False) -> None:
-        try:
-            if binary:
-                await self._websocket.send_bytes(message)
-            else:
-                await self._websocket.send_text(message)
-        except WebSocketDisconnect:
-            # ignore error
-            ...
-
-    # Use common docstring
-    __init__.__doc__ = PerspectiveHandlerBase.__init__.__doc__
+            del self._session
