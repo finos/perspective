@@ -259,7 +259,7 @@ fn pandas_to_arrow_bytes<'py>(
 }
 
 impl PyClient {
-    pub fn new(handle_request: Py<PyFunction>) -> Self {
+    pub fn new(handle_request: Py<PyAny>) -> Self {
         let client = Client::new_with_callback({
             move |msg| {
                 clone!(handle_request);

@@ -40,7 +40,7 @@ pub struct PySyncClient(PyClient);
 #[pymethods]
 impl PySyncClient {
     #[new]
-    pub fn new(callback: Py<PyFunction>) -> PyResult<Self> {
+    pub fn new(callback: Py<PyAny>) -> PyResult<Self> {
         let client = PyClient::new(callback);
         Ok(PySyncClient(client))
     }
