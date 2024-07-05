@@ -15,7 +15,7 @@ from functools import partial
 from types import MethodType
 
 import numpy as np
-from perspective import PerspectiveError, PerspectiveWidget, Table
+from perspective import PerspectivePythonError, PerspectiveWidget, Table
 from pytest import raises
 
 import pytest
@@ -78,12 +78,12 @@ class TestWidget:
 
     def test_widget_no_data_with_index(self):
         # should fail
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             PerspectiveWidget(None, index="a")
 
     def test_widget_no_data_with_limit(self):
         # should fail
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             PerspectiveWidget(None, limit=5)
 
     def test_widget_eventual_data(self):
@@ -91,7 +91,7 @@ class TestWidget:
         widget = PerspectiveWidget(None, plugin="X Bar")
         assert widget.plugin == "X Bar"
 
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             widget._make_load_message()
 
         widget.load(table)
@@ -178,7 +178,7 @@ class TestWidget:
 
     def test_widget_pass_options_invalid(self):
         data = {"a": np.arange(0, 50)}
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             PerspectiveWidget(data, index="index", limit=1)
 
     # server mode
@@ -195,14 +195,14 @@ class TestWidget:
     def test_widget_no_data_with_server(self):
         # should fail
         widget = PerspectiveWidget(None, server=True)
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             widget._make_load_message()
 
     def test_widget_eventual_data_with_server(self):
         # should fail
         widget = PerspectiveWidget(None, server=True)
 
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             widget._make_load_message()
 
         # then succeed

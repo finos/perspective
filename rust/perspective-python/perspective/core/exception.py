@@ -11,7 +11,7 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 
-class PerspectiveError(Exception):
+class PerspectivePythonError(Exception):
     """Raised for issues within Perspective, i.e. illegal operations."""
 
     pass

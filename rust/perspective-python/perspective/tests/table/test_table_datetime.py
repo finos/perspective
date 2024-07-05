@@ -19,7 +19,7 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 from dateutil import tz
 from pytest import mark, raises
-from perspective import Table, PerspectivePyError
+from perspective import Table, PerspectiveError
 
 LOCAL_DATETIMES = [
     datetime(2019, 1, 11, 0, 10, 20),
@@ -212,7 +212,7 @@ if os.name != "nt":
         def test_table_datetime_cant_convert_from_int(self):
             data = pd.DataFrame({"a": [0]})
             table = Table({"a": "datetime"})
-            with raises(PerspectivePyError) as ex:
+            with raises(PerspectiveError) as ex:
                 table.update(data)
             # assert str(ex.value) == "..."
 

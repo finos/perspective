@@ -19,7 +19,7 @@ use pyo3_asyncio::tokio::future_into_py;
 use super::python::*;
 use crate::server::PyAsyncServer;
 
-#[pyclass]
+#[pyclass(name="AsyncClient")]
 pub struct PyAsyncClient(PyClient);
 
 #[pymethods]
@@ -76,7 +76,7 @@ pub fn create_async_client(
     })
 }
 
-#[pyclass]
+#[pyclass(name="AsyncTable")]
 #[repr(transparent)]
 pub struct PyAsyncTable(PyTable);
 
@@ -199,7 +199,7 @@ impl PyAsyncTable {
     }
 }
 
-#[pyclass]
+#[pyclass("AsyncView")]
 pub struct PyAsyncView(PyView);
 
 assert_view_api!(PyAsyncView);

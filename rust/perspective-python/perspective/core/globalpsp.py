@@ -13,7 +13,7 @@
 from typing import Awaitable, Callable
 import perspective
 
-_psp_server = perspective.PySyncServer()
+_psp_server = perspective.Server()
 
 
 class Session:

@@ -11,14 +11,14 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from pytest import raises
-from perspective import Table, PerspectivePyError
+from perspective import Table, PerspectiveError
 
 
 class TestException(object):
     def test_exception_from_core(self):
         tbl = Table({"a": [1, 2, 3]})
 
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             # creating view with unknown column should throw
             tbl.view(group_by=["b"])
 
@@ -35,8 +35,8 @@ class TestException(object):
     def test_exception_from_core_correct_types(self):
         tbl = Table({"a": [1, 2, 3]})
 
-        # `PerspectiveError` should be raised from the Python layer
-        with raises(PerspectivePyError) as ex:
+        # `PerspectivePythonError` should be raised from the Python layer
+        with raises(PerspectiveError) as ex:
             tbl.view()
             tbl.delete()
 
@@ -45,7 +45,7 @@ class TestException(object):
             == "Abort(): Cannot delete table with views"
         )
 
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(group_by=["b"])
 
         assert str(ex.value) == "Abort(): Invalid column 'b' found in View group_by.\n"

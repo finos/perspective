@@ -16,7 +16,7 @@ import threading
 from functools import partial
 
 import tornado.ioloop
-from perspective import PerspectiveError, PerspectiveManager, Table, create_sync_client
+from perspective import PerspectivePythonError, PerspectiveManager, Table, create_sync_client
 from pytest import mark, raises
 
 
@@ -116,7 +116,7 @@ class TestAsync(object):
         )
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
 
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             # loop not set - errors
             tbl.update(data)
 

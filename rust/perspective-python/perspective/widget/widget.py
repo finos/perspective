@@ -23,7 +23,7 @@ from ipywidgets import DOMWidget
 from traitlets import Unicode, observe
 
 from ..core._version import __version__
-from ..core.exception import PerspectiveError
+from ..core.exception import PerspectivePythonError
 from ..viewer import PerspectiveViewer
 
 
@@ -45,7 +45,7 @@ def _type_to_string(t):
     elif t is bytes or t is str:
         return "string"
     else:
-        raise PerspectiveError(
+        raise PerspectivePythonError(
             "Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str` (or `unicode`).".format(
                 str(t)
             )
@@ -81,7 +81,7 @@ def _serialize(data):
         # Check if any values are `datetime.date`
         for row in data:
             if not isinstance(row, dict):
-                raise PerspectiveError(
+                raise PerspectivePythonError(
                     "Received {} in list dataset, expected `dict`!".format(type(row))
                 )
 
@@ -282,7 +282,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         self._options = {}
 
         if index is not None and limit is not None:
-            raise PerspectiveError("Index and Limit cannot be set at the same time!")
+            raise PerspectivePythonError("Index and Limit cannot be set at the same time!")
 
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
         if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
@@ -312,7 +312,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
                 from ..libpsp import Table
 
                 if isinstance(data, Table):
-                    raise PerspectiveError(
+                    raise PerspectivePythonError(
                         "Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!"
                     )
 
@@ -331,7 +331,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             # for the user to call `load()`.
             if data is None:
                 if index is not None or limit is not None:
-                    raise PerspectiveError(
+                    raise PerspectivePythonError(
                         "Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!"
                     )
             else:
@@ -533,7 +533,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if msg_data is not None:
             return _PerspectiveWidgetMessage(-2, "table", msg_data)
         else:
-            raise PerspectiveError(
+            raise PerspectivePythonError(
                 "Widget does not have any data loaded - use the `load()` method to provide it with data."
             )
 

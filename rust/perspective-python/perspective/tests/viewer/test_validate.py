@@ -12,7 +12,7 @@
 
 from pytest import raises
 
-from perspective.core import PerspectiveError
+from perspective.core import PerspectivePythonError
 
 # from perspective.core import Plugin
 # import perspective.viewer.validate as validate
@@ -30,11 +30,11 @@ from perspective.core._version import __version__
 #         assert validate.validate_plugin("X Bar") == "X Bar"
 
 #     def test_validate_plugin_invalid_string(self):
-#         with raises(PerspectiveError):
+#         with raises(PerspectivePythonError):
 #             validate.validate_plugin("invalid")
 
 #     def test_validate_plugin_invalid_string_hypergrid(self):
-#         with raises(PerspectiveError):
+#         with raises(PerspectivePythonError):
 #             validate.validate_plugin("hypergrid")
 
 #     def test_validate_filter_valid(self):
@@ -42,7 +42,7 @@ from perspective.core._version import __version__
 #         assert validate.validate_filter(filters) == filters
 
 #     def test_validate_filter_invalid(self):
-#         with raises(PerspectiveError):
+#         with raises(PerspectivePythonError):
 #             filters = [["a", ">"], ["b", "invalid" "abc"]]
 #             validate.validate_filter(filters)
 
@@ -55,12 +55,12 @@ from perspective.core._version import __version__
 #         assert validate.validate_filter(filters) == filters
 
 #     def test_validate_expressions(self):
-#         # with raises(PerspectiveError):
+#         # with raises(PerspectivePythonError):
 #         computed = {"expression1": " 'Hello'"}
 #         validate.validate_expressions(computed)
 
 #     def test_validate_expressions_invalid(self):
-#         with raises(PerspectiveError):
+#         with raises(PerspectivePythonError):
 #             assert validate.validate_expressions("test")
 
 #     def test_validate_version(self):

@@ -12,9 +12,9 @@
 
 __version__ = "2.10.1"
 __all__ = [
-    "PySyncClient",
+    "Client",
+    "PerspectivePythonError",
     "PerspectiveError",
-    "PerspectivePyError",
     "PerspectiveWidget",
     "PerspectiveViewer",
     "PerspectiveTornadoHandler",
@@ -25,8 +25,8 @@ __all__ = [
     "create_sync_client",
 ]
 
-from .perspective import PySyncClient, PerspectivePyError
-from .core.exception import PerspectiveError
+from .perspective import Client, PerspectiveError
+from .core.exception import PerspectivePythonError
 
 from .legacy import (
     PerspectiveManager,

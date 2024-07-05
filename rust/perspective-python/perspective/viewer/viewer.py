@@ -13,7 +13,7 @@
 from random import random
 from .viewer_traitlets import PerspectiveTraitlets
 
-from ..core.exception import PerspectiveError
+from ..core.exception import PerspectivePythonError
 from ..legacy import PerspectiveManager, Table
 
 
@@ -183,7 +183,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if isinstance(data, Table):
             table = data
         elif isinstance(data, View):
-            raise PerspectiveError("Only `Table` or data can be loaded.")
+            raise PerspectivePythonError("Only `Table` or data can be loaded.")
         else:
             table = Table(data, **options)
 

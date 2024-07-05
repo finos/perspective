@@ -17,7 +17,7 @@ import pyarrow as pa
 from datetime import datetime
 from functools import partial
 from pytest import raises, mark
-from perspective import Table, PerspectiveError, PerspectiveManager, create_sync_client
+from perspective import Table, PerspectivePythonError, PerspectiveManager, create_sync_client
 
 data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
 
@@ -197,7 +197,7 @@ class TestPerspectiveManager(object):
         manager.host_table("table1", table)
         for message in messages:
             manager._process(message, self.post)
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             manager.clear_views(None)
 
     # locked manager

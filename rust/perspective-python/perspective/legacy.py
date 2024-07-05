@@ -10,7 +10,7 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from .perspective import PySyncServer, PySyncClient
+from .perspective import Server, Client
 import types
 import sys
 
@@ -27,9 +27,9 @@ def create_sync_client(cb=default_loop_cb):
     def handle_new_session(bytes):
         local_sync_client.handle_response(bytes)
 
-    sync_server = PySyncServer()
+    sync_server = Server()
     sync_session = sync_server.new_session(handle_new_session)
-    local_sync_client = PySyncClient(handle_sync_client)
+    local_sync_client = Client(handle_sync_client)
     return local_sync_client
 
 

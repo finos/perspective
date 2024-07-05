@@ -14,7 +14,7 @@ from datetime import date, datetime
 
 import numpy as np
 import pandas as pd
-from perspective import PerspectiveError
+from perspective import PerspectivePythonError
 from perspective.table import Table
 from pytest import raises, mark
 
@@ -497,7 +497,7 @@ class TestTableNumpy(object):
         }
 
         # should not be able to parse mixed dicts of numpy array with list
-        with raises(PerspectiveError):
+        with raises(PerspectivePythonError):
             Table(data)
 
     def test_table_np_promote(self):

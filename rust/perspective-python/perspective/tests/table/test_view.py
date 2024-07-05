@@ -13,7 +13,7 @@
 import random
 import pandas as pd
 import numpy as np
-from perspective import PerspectivePyError, Table
+from perspective import PerspectiveError, Table
 from datetime import date, datetime
 from pytest import approx, mark, raises
 
@@ -1558,7 +1558,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        with raises(PerspectivePyError):
+        with raises(PerspectiveError):
             tbl.delete()
         view.delete()
         tbl.delete()
@@ -2113,7 +2113,7 @@ class TestView(object):
     def test_invalid_column_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(columns=["x"])
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View columns.\n"
 
@@ -2121,7 +2121,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
 
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(columns=["x"])
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View columns.\n"
 
@@ -2137,7 +2137,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
 
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(columns=["x"], aggregates={"x": "sum"})
 
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View columns.\n"
@@ -2146,7 +2146,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
 
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(columns=["x"], aggregates={"x": "sum"})
 
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View columns.\n"
@@ -2162,35 +2162,35 @@ class TestView(object):
     def test_invalid_group_by_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(group_by=["x"])
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View group_by.\n"
 
     def test_invalid_split_by_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(split_by=["x"])
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View split_by.\n"
 
     def test_invalid_filters_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(filter=[["x", "==", "abc"]])
         assert str(ex.value) == "Abort(): Filter column not in schema: x"
 
     def test_invalid_sorts_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(sort=[["x", "desc"]])
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View sorts.\n"
 
     def test_should_throw_on_first_invalid(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(
                 group_by=["a"],
                 split_by=["c"],
@@ -2203,7 +2203,7 @@ class TestView(object):
     def test_invalid_columns_not_in_expression_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             tbl.view(columns=["abc", "x"], expressions={"abc": "1 + 2"})
         assert str(ex.value) == "Abort(): Invalid column 'x' found in View columns.\n"
 

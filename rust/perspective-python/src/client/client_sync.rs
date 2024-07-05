@@ -34,7 +34,7 @@ trait PyFutureExt: Future {
 
 impl<F: Future> PyFutureExt for F {}
 
-#[pyclass]
+#[pyclass(name="Client")]
 pub struct PySyncClient(PyClient);
 
 #[pymethods]
@@ -82,7 +82,7 @@ impl PySyncClient {
     }
 }
 
-#[pyclass]
+#[pyclass(name="Table")]
 pub struct PySyncTable(PyTable);
 
 assert_table_api!(PySyncTable);
@@ -179,7 +179,7 @@ impl PySyncTable {
     }
 }
 
-#[pyclass]
+#[pyclass(name="View")]
 pub struct PySyncView(PyView);
 
 assert_view_api!(PySyncView);

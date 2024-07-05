@@ -14,7 +14,7 @@ import asyncio
 from abc import ABC, abstractmethod
 import functools
 
-from ..core.exception import PerspectiveError
+from ..core.exception import PerspectivePythonError
 
 
 class PerspectiveHandlerBase(ABC):
@@ -34,7 +34,7 @@ class PerspectiveHandlerBase(ABC):
         """
         self._manager = kwargs.pop("manager", None)
         if self._manager is None:
-            raise PerspectiveError("A `PerspectiveManager` instance must be provided to the handler!")
+            raise PerspectivePythonError("A `PerspectiveManager` instance must be provided to the handler!")
 
         self._check_origin = kwargs.pop("check_origin", False)
 
