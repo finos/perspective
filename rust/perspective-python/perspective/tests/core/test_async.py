@@ -16,7 +16,7 @@ import threading
 from functools import partial
 
 import tornado.ioloop
-from perspective import PerspectiveError, PerspectiveManager, Table, create_sync_client
+from perspective import PerspectiveError, create_sync_client
 from pytest import mark, raises
 
 
@@ -62,9 +62,7 @@ class TestAsync(object):
         return cls.loop.asyncio_loop.is_running()
 
     def test_async_queue_process(self):
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
 
         @syncify
@@ -79,9 +77,7 @@ class TestAsync(object):
 
     def test_async_queue_process_csv(self):
         """Make sure GIL release during CSV loading works"""
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         tbl = client.table("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
 
         @syncify
@@ -96,9 +92,7 @@ class TestAsync(object):
         tbl.delete()
 
     def test_async_call_loop(self):
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl.update(data)
 
@@ -111,9 +105,7 @@ class TestAsync(object):
 
     @mark.skip(reason="We take a loop to construct the client now")
     def test_async_call_loop_error_if_no_loop(self):
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
 
         with raises(PerspectiveError):
@@ -132,12 +124,8 @@ class TestAsync(object):
         tbl.delete()
 
     def test_async_multiple_managers_queue_process(self):
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
-        client2 = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
+        client2 = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
 
@@ -169,9 +157,7 @@ class TestAsync(object):
 
         _delete_task()
 
-    @mark.skip(
-        reason="This test is failing because we're not calling process after each update like before"
-    )
+    @mark.skip(reason="This test is failing because we're not calling process after each update like before")
     def test_async_multiple_managers_mixed_queue_process(self):
         sentinel = {"called": 0}
 
@@ -179,9 +165,7 @@ class TestAsync(object):
             sentinel["called"] += 1
             f(*args, **kwargs)
 
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         client2 = create_sync_client(sync_queue_process)
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
@@ -215,9 +199,7 @@ class TestAsync(object):
         view.delete()
         tbl2.delete()
 
-    @mark.skip(
-        reason="This test is failing because we're not calling process after each update like before"
-    )
+    @mark.skip(reason="This test is failing because we're not calling process after each update like before")
     def test_async_multiple_managers_delayed_process(self):
         sentinel = {"async": 0, "sync": 0}
 
@@ -226,16 +208,10 @@ class TestAsync(object):
             return f(*args, **kwargs)
 
         short_delay_queue_process = partial(_counter, "sync")
-        long_delay_queue_process = partial(
-            TestAsync.loop.add_timeout, 1, _counter, "async"
-        )
+        long_delay_queue_process = partial(TestAsync.loop.add_timeout, 1, _counter, "async")
 
-        client = create_sync_client(
-            lambda fn, *args: short_delay_queue_process(fn, *args)
-        )
-        client2 = create_sync_client(
-            lambda fn, *args: long_delay_queue_process(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: short_delay_queue_process(fn, *args))
+        client2 = create_sync_client(lambda fn, *args: long_delay_queue_process(fn, *args))
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
 
@@ -299,9 +275,7 @@ class TestAsync(object):
         tbl2.delete()
 
     def test_async_queue_process_multiple_ports(self):
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         port_ids = [0]
         port_data = [{"a": 0, "b": 0, "c": "0"}]
@@ -330,12 +304,8 @@ class TestAsync(object):
         assert _tbl_task() == 11
 
     def test_async_multiple_managers_queue_process_multiple_ports(self):
-        client = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
-        client2 = create_sync_client(
-            lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
+        client2 = create_sync_client(lambda fn, *args: TestAsync.loop.add_callback(fn, *args))
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
         port_ids = [0]
@@ -359,9 +329,7 @@ class TestAsync(object):
 
         assert _task() == (11, 11)
 
-    @mark.skip(
-        reason="This test is failing because we're not calling process after each update like before"
-    )
+    @mark.skip(reason="This test is failing because we're not calling process after each update like before")
     def test_async_multiple_managers_mixed_queue_process_multiple_ports(self):
         sentinel = {"async": 0, "sync": 0}
 

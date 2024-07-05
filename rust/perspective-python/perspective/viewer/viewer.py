@@ -13,7 +13,7 @@
 from random import random
 from .viewer_traitlets import PerspectiveTraitlets
 
-from ..core.exception import PerspectiveError
+# from ..core.exception import PerspectiveError
 from ..legacy import PerspectiveManager, Table
 
 
@@ -110,15 +110,15 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.table_name = None
 
         # Viewer configuration
-        self.plugin = plugin # validate_plugin(plugin)
-        self.columns = columns or [] # validate_columns(columns) or []
-        self.group_by = group_by or [] # validate_group_by(group_by) or []
-        self.split_by = split_by or [] # validate_split_by(split_by) or []
-        self.aggregates = aggregates or {} # validate_aggregates(aggregates) or {}
-        self.sort = sort or [] # validate_sort(sort) or []
-        self.filter = filter or [] # validate_filter(filter) or []
-        self.expressions = expressions or {} # validate_expressions(expressions) or {}
-        self.plugin_config = plugin_config or {} # validate_plugin_config(plugin_config) or {}
+        self.plugin = plugin  # validate_plugin(plugin)
+        self.columns = columns or []  # validate_columns(columns) or []
+        self.group_by = group_by or []  # validate_group_by(group_by) or []
+        self.split_by = split_by or []  # validate_split_by(split_by) or []
+        self.aggregates = aggregates or {}  # validate_aggregates(aggregates) or {}
+        self.sort = sort or []  # validate_sort(sort) or []
+        self.filter = filter or []  # validate_filter(filter) or []
+        self.expressions = expressions or {}  # validate_expressions(expressions) or {}
+        self.plugin_config = plugin_config or {}  # validate_plugin_config(plugin_config) or {}
         self.settings = settings
         self.theme = theme
         self.title = title
@@ -182,8 +182,9 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         if isinstance(data, Table):
             table = data
-        elif isinstance(data, View):
-            raise PerspectiveError("Only `Table` or data can be loaded.")
+        # TODO
+        # elif isinstance(data, View):
+        #     raise PerspectiveError("Only `Table` or data can be loaded.")
         else:
             table = Table(data, **options)
 
@@ -229,10 +230,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     def save(self):
         """Get the viewer's attribute as a dictionary, symmetric with `restore`
         so that a viewer's configuration can be reproduced."""
-        return {
-            attr: getattr(self, attr)
-            for attr in PerspectiveViewer.PERSISTENT_ATTRIBUTES
-        }
+        return {attr: getattr(self, attr) for attr in PerspectiveViewer.PERSISTENT_ATTRIBUTES}
 
     def restore(self, **kwargs):
         """Restore a given set of attributes, passed as kwargs

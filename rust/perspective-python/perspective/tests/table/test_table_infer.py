@@ -33,6 +33,11 @@ class TestTableInfer(object):
         assert tbl.size() == 2
         assert tbl.schema() == {"a": "boolean", "b": "boolean"}
 
+    def test_table_infer_bool_nones(self):
+        data = {"a": [None, None, None, None, True, True, True]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": "boolean"}
+
     def test_table_infer_bool_str(self):
         bool_data = [{"a": "True", "b": "False"}, {"a": "True", "b": "True"}]
         tbl = Table(bool_data)
@@ -55,11 +60,6 @@ class TestTableInfer(object):
             "a": [True, True, True, True, True],
             "b": [False, False, False, False, False],
         }
-
-    def test_table_infer_bool(self):
-        data = {"a": [None, None, None, None, True, True, True]}
-        tbl = Table(data)
-        assert tbl.schema() == {"a": "boolean"}
 
     def test_table_infer_str(self):
         data = {"a": [None, None, None, None, None, None, "abc"]}

@@ -40,10 +40,7 @@ class TestException(object):
             tbl.view()
             tbl.delete()
 
-        assert (
-            str(ex.value)
-            == "Abort(): Cannot delete table with views"
-        )
+        assert str(ex.value) == "Abort(): Cannot delete table with views"
 
         with raises(PerspectivePyError) as ex:
             tbl.view(group_by=["b"])

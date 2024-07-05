@@ -10,13 +10,12 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import sys
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 
 from perspective.core.exception import PerspectiveError
 from perspective import Table
 import perspective
-from pytest import mark, raises, skip
+from pytest import mark, raises
 import pytest
 
 
@@ -445,7 +444,7 @@ class TestTable:
             },
             index="a",
         )
-        ts = lambda x: int(datetime.timestamp(x) * 1000)
+        ts = lambda x: int(datetime.timestamp(x) * 1000)  # noqa: E731
         assert tbl.view().to_columns() == {
             "a": [
                 None,

@@ -48,9 +48,7 @@ class TestUpdateNumpy(object):
 
         tbl.update({"a": np.array([date(2019, 7, 12)])})
 
-        assert tbl.view().to_columns() == {
-            "a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]
-        }
+        assert tbl.view().to_columns() == {"a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]}
 
     def test_update_np_date_timestamp(self, util):
         tbl = Table({"a": [date(2019, 7, 11)]})
@@ -61,47 +59,35 @@ class TestUpdateNumpy(object):
 
         tbl.update({"a": np.array([ts])})
 
-        assert tbl.view().to_columns() == {
-            "a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]
-        }
+        assert tbl.view().to_columns() == {"a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]}
 
     def test_update_np_datetime(self):
         tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
 
         tbl.update({"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype=datetime)})
 
-        assert tbl.view().to_columns() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
+        assert tbl.view().to_columns() == {"a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]}
 
     def test_update_np_datetime_str(self):
         tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
 
         tbl.update({"a": np.array(["2019/7/12 11:00:00"])})
 
-        assert tbl.view().to_columns() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
+        assert tbl.view().to_columns() == {"a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]}
 
     def test_update_np_datetime_timestamp_s(self, util):
         tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
 
         tbl.update({"a": np.array([util.to_timestamp(datetime(2019, 7, 12, 11, 0))])})
 
-        assert tbl.view().to_columns() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
+        assert tbl.view().to_columns() == {"a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]}
 
     def test_update_np_datetime_timestamp_ms(self, util):
         tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
 
-        tbl.update(
-            {"a": np.array([util.to_timestamp(datetime(2019, 7, 12, 11, 0)) * 1000])}
-        )
+        tbl.update({"a": np.array([util.to_timestamp(datetime(2019, 7, 12, 11, 0)) * 1000])})
 
-        assert tbl.view().to_columns() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
+        assert tbl.view().to_columns() == {"a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]}
 
     def test_update_np_partial(self):
         tbl = Table({"a": [1, 2, 3, 4], "b": ["a", "b", "c", "d"]}, index="b")
@@ -147,9 +133,7 @@ class TestUpdateNumpy(object):
         assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
 
     def test_update_np_datetime_partial(self, util):
-        tbl = Table(
-            {"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))], "b": [1]}, index="b"
-        )
+        tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))], "b": [1]}, index="b")
 
         tbl.update(
             {
@@ -193,9 +177,7 @@ class TestUpdateNumpy(object):
     @pytest.mark.skip
     def test_update_np_nonseq_partial(self):
         tbl = Table({"a": [1, 2, 3, 4], "b": ["a", "b", "c", "d"]}, index="b")
-        tbl.update(
-            {"a": np.array([5, 6, 7]), "b": np.array(["a", "c", "d"], dtype=object)}
-        )
+        tbl.update({"a": np.array([5, 6, 7]), "b": np.array(["a", "c", "d"], dtype=object)})
 
         assert tbl.view().to_columns() == {"a": [5, 2, 6, 7], "b": ["a", "b", "c", "d"]}
 
@@ -211,23 +193,18 @@ class TestUpdateNumpy(object):
     @pytest.mark.skip
     def test_update_np_unset_partial(self):
         tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="b")
-        tbl.update(
-            {"a": np.array([None, None]), "b": np.array(["a", "c"], dtype=object)}
-        )
+        tbl.update({"a": np.array([None, None]), "b": np.array(["a", "c"], dtype=object)})
 
         assert tbl.view().to_columns() == {"a": [None, 2, None], "b": ["a", "b", "c"]}
 
     @pytest.mark.skip
     def test_update_np_nan_partial(self):
         tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="b")
-        tbl.update(
-            {"a": np.array([None, None]), "b": np.array(["a", "c"], dtype=object)}
-        )
+        tbl.update({"a": np.array([None, None]), "b": np.array(["a", "c"], dtype=object)})
 
         assert tbl.view().to_columns() == {"a": [None, 2, None], "b": ["a", "b", "c"]}
 
     def test_numpy_dict(self):
-        x = {"index": [1], "a": np.empty((1,), str)}
         tbl = Table({"index": "integer", "a": "string"}, index="index")
         tbl.update({"index": np.arange(5)})
         assert tbl.view().to_columns() == {

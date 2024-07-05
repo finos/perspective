@@ -10,12 +10,13 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from datetime import datetime, date
-
+import json
+import os
 import numpy as np
 import pandas as pd
 import pyarrow as pa
 from pytest import fixture
+from datetime import datetime, date
 from random import random, randint, choice
 from faker import Faker
 
@@ -24,8 +25,9 @@ fake = Faker()
 
 # Our tests construct naive datetimes everywhere
 # so setting it here is an easy way to fix it globally.
-import os
+
 os.environ["TZ"] = "UTC"
+
 
 def _make_date_time_index(size, time_unit):
     return pd.date_range("2000-01-01", periods=size, freq=time_unit)
@@ -77,9 +79,7 @@ class Util:
 
         batch = pa.RecordBatch.from_arrays(arrays, names)
         table = pa.Table.from_batches([batch])
-        writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy
-        )
+        writer = pa.RecordBatchStreamWriter(stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
         writer.close()
@@ -100,9 +100,7 @@ class Util:
         stream = pa.BufferOutputStream()
         table = pa.Table.from_pandas(df, schema=schema)
 
-        writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy
-        )
+        writer = pa.RecordBatchStreamWriter(stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
         writer.close()
@@ -142,9 +140,7 @@ class Util:
 
         batch = pa.RecordBatch.from_arrays(arrays, names)
         table = pa.Table.from_batches([batch])
-        writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy
-        )
+        writer = pa.RecordBatchStreamWriter(stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
         writer.close()
@@ -224,9 +220,7 @@ def superstore(count=100):
         dat["Row ID"] = id
         dat["Order ID"] = "{}-{}".format(fake.ein(), fake.zipcode())
         dat["Order Date"] = fake.date_this_year()
-        dat["Ship Date"] = fake.date_between_dates(dat["Order Date"]).strftime(
-            "%Y-%m-%d"
-        )
+        dat["Ship Date"] = fake.date_between_dates(dat["Order Date"]).strftime("%Y-%m-%d")
         dat["Order Date"] = dat["Order Date"].strftime("%Y-%m-%d")
         dat["Ship Mode"] = choice(["First Class", "Standard Class", "Second Class"])
         dat["Ship Mode"] = choice(["First Class", "Standard Class", "Second Class"])
@@ -254,8 +248,8 @@ def superstore(count=100):
 # as Table() constructor arguments, but now we forward the parameters
 # directly to JSON.loads. So to make sure the tests dont need to be
 # so utterly transmogrified, we have this little hack :)
-import json
 old = json.JSONEncoder.default
+
 
 def new_encoder(self, obj):
     if isinstance(obj, datetime):
@@ -264,5 +258,6 @@ def new_encoder(self, obj):
         return str(obj)
     else:
         return old(self, obj)
+
 
 json.JSONEncoder.default = new_encoder

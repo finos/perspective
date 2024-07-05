@@ -11,10 +11,8 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import json
-import time
 import numpy as np
 import pyarrow as pa
-from datetime import datetime
 from functools import partial
 from pytest import raises, mark
 from perspective import Table, PerspectiveError, PerspectiveManager, create_sync_client
@@ -35,7 +33,7 @@ class TestPerspectiveManager(object):
 
     def test_manager_host_table(self):
         manager = PerspectiveManager()
-        table = manager.table(data, name="table1")
+        _ = manager.table(data, name="table1")
         table2 = manager.open_table("table1")
         assert table2.schema() == {"a": "integer", "b": "string"}
 
@@ -62,7 +60,7 @@ class TestPerspectiveManager(object):
 
     def test_manager_get_hosted_table_names_with_cmd(self):
         manager = PerspectiveManager()
-        table = manager.table(data, name="table1")
+        _ = manager.table(data, name="table1")
         assert manager.get_hosted_table_names() == ["table1"]
 
     @mark.skip(reason="Have not implemented locking yet")
@@ -115,7 +113,7 @@ class TestPerspectiveManager(object):
         assert manager._get_view("view1").schema() == {"a": "integer", "b": "string"}
 
     def test_manager_create_view_zero(self):
-        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        # message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
         manager.table(data, name="table1")
         table = manager.open_table("table1")
@@ -367,9 +365,7 @@ class TestPerspectiveManager(object):
         assert d == {"a": [1], "b": ["a"]}
 
     def test_manager_to_dict_with_nan(self, util, sentinel):
-        data = util.make_arrow(
-            ["a"], [[1.5, np.nan, 2.5, np.nan]], types=[pa.float64()]
-        )
+        data = util.make_arrow(["a"], [[1.5, np.nan, 2.5, np.nan]], types=[pa.float64()])
         manager = PerspectiveManager()
         manager.table(data, name="table1")
         table = manager.open_table("table1")
@@ -977,9 +973,7 @@ class TestPerspectiveManager(object):
         table.update({"a": [7, 8, 9]})
         assert s.get() == 5
 
-    @mark.skip(
-        reason="This method no longer dispatches to the loop_cb because it is sync without an on_update callback"
-    )
+    @mark.skip(reason="This method no longer dispatches to the loop_cb because it is sync without an on_update callback")
     def test_manager_set_queue_process_before_host_table(self, sentinel):
         s = sentinel(0)
         manager = create_sync_client()
@@ -995,9 +989,7 @@ class TestPerspectiveManager(object):
 
         assert s.get() == 2
 
-    @mark.skip(
-        reason="This method no longer dispatches to the loop_cb because it is sync without an on_update callback"
-    )
+    @mark.skip(reason="This method no longer dispatches to the loop_cb because it is sync without an on_update callback")
     def test_manager_set_queue_process_multiple(self, sentinel):
         # manager2's queue process should not affect manager1,
         # provided they manage different tables

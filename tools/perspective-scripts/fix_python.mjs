@@ -15,12 +15,12 @@ import * as url from "url";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
-const cmd = sh`black perspective bench setup.py`;
+const cmd = sh`ruff format perspective bench`;
 
 if (process.env.PSP_DOCKER) {
-    cmd = sh`cd python/perspective`.sh(cmd);
+    cmd = sh`cd rust/perspective-python`.sh(cmd);
     sh.docker(cmd).log().runSync();
 } else {
-    const python_path = sh.path`${__dirname}/../../python/perspective`;
+    const python_path = sh.path`${__dirname}/../../rust/perspective-python`;
     cmd.cwd(python_path).log().runSync();
 }

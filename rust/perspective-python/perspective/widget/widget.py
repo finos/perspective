@@ -45,11 +45,7 @@ def _type_to_string(t):
     elif t is bytes or t is str:
         return "string"
     else:
-        raise PerspectiveError(
-            "Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str` (or `unicode`).".format(
-                str(t)
-            )
-        )
+        raise PerspectiveError("Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str` (or `unicode`).".format(str(t)))
 
 
 def _serialize_datetime(values):
@@ -81,9 +77,7 @@ def _serialize(data):
         # Check if any values are `datetime.date`
         for row in data:
             if not isinstance(row, dict):
-                raise PerspectiveError(
-                    "Received {} in list dataset, expected `dict`!".format(type(row))
-                )
+                raise PerspectiveError("Received {} in list dataset, expected `dict`!".format(type(row)))
 
             for k in row.keys():
                 if type(row[k]) is datetime:
@@ -97,15 +91,10 @@ def _serialize(data):
         for v in data.values():
             if isinstance(v, type):
                 # serialize schema values to string
-                return {
-                    column_name: _type_to_string(data[column_name])
-                    for column_name in data
-                }
+                return {column_name: _type_to_string(data[column_name]) for column_name in data}
             elif isinstance(v, numpy.ndarray):
                 # Convert dicts of numpy arrays to dicts of lists
-                formatted = {
-                    column_name: data[column_name].tolist() for column_name in data
-                }
+                formatted = {column_name: data[column_name].tolist() for column_name in data}
                 break
 
         for column_name in formatted.keys():
@@ -116,9 +105,7 @@ def _serialize(data):
     elif isinstance(data, numpy.ndarray):
         # structured or record array
         if not isinstance(data.dtype.names, tuple):
-            raise NotImplementedError(
-                "Data should be dict of numpy.ndarray or a structured array."
-            )
+            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
 
         columns = [data[col].tolist() for col in data.dtype.names]
         formatted = dict(zip(data.dtype.names, columns))
@@ -149,9 +136,7 @@ def _serialize(data):
                 d[name] = values.tolist()
         return d
     else:
-        raise NotImplementedError(
-            "Cannot serialize a dataset of `{0}`.".format(str(type(data)))
-        )
+        raise NotImplementedError("Cannot serialize a dataset of `{0}`.".format(str(type(data))))
 
 
 class _PerspectiveWidgetMessage(object):
@@ -271,7 +256,8 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         # If `self.client` is True, the front-end `<perspective-viewer>` is
         # given a copy of the data serialized to JSON, and the Python kernel
         # does not create a `perspective.Table.`
-        self.client = client
+        # TODO
+        self.client = False
 
         # If `self.server` is True, the widget runs in server-only mode where
         # the front-end `<perspective-viewer>` does not create a Table, and
@@ -286,16 +272,19 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
 
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
         if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
-            data, config = deconstruct_pandas(data)
+            # TODO
+            raise NotImplementedError()
 
-            if config.get("group_by", None) and "group_by" not in kwargs:
-                kwargs.update({"group_by": config["group_by"]})
+            # data, config = deconstruct_pandas(data)
 
-            if config.get("split_by", None) and "split_by" not in kwargs:
-                kwargs.update({"split_by": config["split_by"]})
+            # if config.get("group_by", None) and "group_by" not in kwargs:
+            #     kwargs.update({"group_by": config["group_by"]})
 
-            if config.get("columns", None) and "columns" not in kwargs:
-                kwargs.update({"columns": config["columns"]})
+            # if config.get("split_by", None) and "split_by" not in kwargs:
+            #     kwargs.update({"split_by": config["split_by"]})
+
+            # if config.get("columns", None) and "columns" not in kwargs:
+            #     kwargs.update({"columns": config["columns"]})
 
         # Initialize the viewer
         super(PerspectiveWidget, self).__init__(**kwargs)
@@ -308,32 +297,32 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         self.on_msg(self.handle_message)
 
         if self.client:
-            if is_libpsp():
-                from ..libpsp import Table
+            # TODO
+            raise NotImplementedError()
+            # if is_libpsp():
+            #     from ..libpsp import Table
 
-                if isinstance(data, Table):
-                    raise PerspectiveError(
-                        "Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!"
-                    )
+            #     if isinstance(data, Table):
+            #         raise PerspectiveError(
+            #             "Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!"
+            #         )
 
-            if index is not None:
-                self._options["index"] = index
+            # if index is not None:
+            #     self._options["index"] = index
 
-            if limit is not None:
-                self._options["limit"] = limit
+            # if limit is not None:
+            #     self._options["limit"] = limit
 
-            # cache self._data so creating multiple views don't reserialize the
-            # same data
-            if not hasattr(self, "_data") or self._data is None:
-                self._data = _serialize(data)
+            # # cache self._data so creating multiple views don't reserialize the
+            # # same data
+            # if not hasattr(self, "_data") or self._data is None:
+            #     self._data = _serialize(data)
         else:
             # If an empty dataset is provided, don't call `load()` and wait
             # for the user to call `load()`.
             if data is None:
                 if index is not None or limit is not None:
-                    raise PerspectiveError(
-                        "Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!"
-                    )
+                    raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
             else:
                 if index is not None:
                     self._options.update({"index": index})
@@ -351,7 +340,9 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if self.client is True:
             # serialize the data and send a custom message to the browser
             if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
-                data, _ = deconstruct_pandas(data)
+                # TODO
+                raise NotImplementedError()
+                # data, _ = deconstruct_pandas(data)
             d = _serialize(data)
             self._data = d
         else:
@@ -370,7 +361,9 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if self.client is True:
             # serialize the data and send a custom message to the browser
             if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
-                data, _ = deconstruct_pandas(data)
+                # TODO
+                raise NotImplementedError()
+                # data, _ = deconstruct_pandas(data)
             d = _serialize(data)
             self.post({"cmd": "update", "data": d})
         else:
@@ -394,7 +387,9 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         """
         if self.client is True:
             if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
-                data, _ = deconstruct_pandas(data)
+                # TODO
+                raise NotImplementedError()
+                # data, _ = deconstruct_pandas(data)
             d = _serialize(data)
             self.post({"cmd": "replace", "data": d})
             self._data = d
@@ -533,9 +528,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if msg_data is not None:
             return _PerspectiveWidgetMessage(-2, "table", msg_data)
         else:
-            raise PerspectiveError(
-                "Widget does not have any data loaded - use the `load()` method to provide it with data."
-            )
+            raise PerspectiveError("Widget does not have any data loaded - use the `load()` method to provide it with data.")
 
     def _repr_mimebundle_(self, **kwargs):
         super_bundle = super(DOMWidget, self)._repr_mimebundle_(**kwargs)

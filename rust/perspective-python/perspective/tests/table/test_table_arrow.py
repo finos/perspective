@@ -124,9 +124,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
-        }
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]}
 
     def test_table_arrow_loads_date64_stream(self, util):
         data = [[date(2019, 2, i) for i in range(1, 11)]]
@@ -134,9 +132,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
-        }
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]}
 
     def test_table_arrow_loads_timestamp_all_formats_stream(self, util):
         data = [
@@ -323,9 +319,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
-        }
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]}
 
     def test_table_arrow_loads_date64_legacy(self, util):
         data = [[date(2019, 2, i) for i in range(1, 11)]]
@@ -333,9 +327,7 @@ class TestTableArrow(object):
         tbl = Table(arrow_data)
         assert tbl.size() == 10
         assert tbl.schema() == {"a": "date"}
-        assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
-        }
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]}
 
     def test_table_arrow_loads_timestamp_all_formats_legacy(self, util):
         data = [
@@ -399,9 +391,7 @@ class TestTableArrow(object):
 
         # write arrow to stream
         stream = pa.BufferOutputStream()
-        writer = pa.RecordBatchStreamWriter(
-            stream, arrow_table.schema, use_legacy_format=False
-        )
+        writer = pa.RecordBatchStreamWriter(stream, arrow_table.schema, use_legacy_format=False)
         writer.write_table(arrow_table)
         writer.close()
         arrow = stream.getvalue().to_pybytes()

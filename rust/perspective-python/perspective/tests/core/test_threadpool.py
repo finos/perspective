@@ -21,7 +21,7 @@ def compare_delta(received, expected):
 
 class TestThreadpool(object):
     def test_set_threadpool_size(self):
-        set_threadpool_size(1) # XXX: This is a no-op now...
+        set_threadpool_size(1)  # XXX: This is a no-op now...
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()

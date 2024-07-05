@@ -33,3 +33,9 @@ python_classes = ["Test", "Describe"]
 python_functions = ["test_", "it_", "and_", "but_", "they_"]
 python_files = ["test_*.py"]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 200
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]

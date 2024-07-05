@@ -10,7 +10,6 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from datetime import date
 import pandas as pd
 import numpy as np
 from perspective import Table, PerspectiveWidget
@@ -287,9 +286,7 @@ class TestWidgetPandas:
         ]
         tuples = list(zip(*arrays))
         index = pd.MultiIndex.from_tuples(tuples, names=["first", "second", "third"])
-        df_both = pd.DataFrame(
-            np.random.randn(3, 16), index=["A", "B", "C"], columns=index
-        )
+        df_both = pd.DataFrame(np.random.randn(3, 16), index=["A", "B", "C"], columns=index)
         widget = PerspectiveWidget(df_both)
         assert widget.columns == ["value"]
         assert widget.split_by == ["first", "second", "third"]
@@ -360,9 +357,7 @@ class TestWidgetPandas:
         ]
         tuples = list(zip(*arrays))
         index = pd.MultiIndex.from_tuples(tuples, names=["first", "second", "third"])
-        df_both = pd.DataFrame(
-            np.random.randn(3, 16), index=["A", "B", "C"], columns=index
-        )
+        df_both = pd.DataFrame(np.random.randn(3, 16), index=["A", "B", "C"], columns=index)
         widget = PerspectiveWidget(df_both, columns=["first", "third"])
         assert widget.columns == ["first", "third"]
         assert widget.split_by == ["first", "second", "third"]
@@ -428,9 +423,7 @@ class TestWidgetPandas:
         }
 
         df = pd.DataFrame(arrays)
-        df_pivot = df.pivot_table(
-            values=["D"], index=["A"], columns=["B", "C"], aggfunc={"D": "count"}
-        )
+        df_pivot = df.pivot_table(values=["D"], index=["A"], columns=["B", "C"], aggfunc={"D": "count"})
         widget = PerspectiveWidget(df_pivot)
         assert widget.columns == ["value"]
         assert widget.split_by == ["B", "C"]

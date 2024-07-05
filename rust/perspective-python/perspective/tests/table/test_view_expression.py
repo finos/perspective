@@ -17,7 +17,6 @@ from pytest import raises
 from datetime import date, datetime
 from time import mktime
 from perspective import Table, PerspectivePyError
-import pytest
 from .test_view import compare_delta
 
 
@@ -164,12 +163,7 @@ class TestViewExpression(object):
     def test_view_expression_string_per_page(self):
         table = Table({"a": [i for i in range(100)]})
         big_strings = [randstr(6400) for _ in range(4)]
-        view = table.view(
-            expressions={
-                "computed{}".format(i): "var x := '{}'; lower(x)".format(big_strings[i])
-                for i in range(4)
-            }
-        )
+        view = table.view(expressions={"computed{}".format(i): "var x := '{}'; lower(x)".format(big_strings[i]) for i in range(4)})
 
         result = view.to_columns()
         schema = view.expression_schema()
@@ -189,13 +183,7 @@ class TestViewExpression(object):
             "".join(["d" for _ in range(640)]),
         ]
 
-        view = table.view(
-            expressions={
-                "computed": "var a := '{}'; var b := '{}'; var c := '{}'; var d := '{}'; concat(a, b, c, d)".format(
-                    *big_strings
-                )
-            }
-        )
+        view = table.view(expressions={"computed": "var a := '{}'; var b := '{}'; var c := '{}'; var d := '{}'; concat(a, b, c, d)".format(*big_strings)})
 
         result = view.to_columns()
         schema = view.expression_schema()
@@ -258,12 +246,8 @@ class TestViewExpression(object):
 
         view = table.view(
             expressions={
-                "computed": " var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(
-                    *strings[:4]
-                ),
-                "computed2": " var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(
-                    *strings[4:]
-                ),
+                "computed": " var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[:4]),
+                "computed2": " var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[4:]),
             }
         )
 
@@ -302,11 +286,7 @@ class TestViewExpression(object):
         for _ in range(5):
             exprs = [make_expression() for _ in range(5)]
             output_map = {expr["expression_name"]: expr["output"] for expr in exprs}
-            view = table.view(
-                expressions={
-                    expr["expression_name"]: expr["expression"] for expr in exprs
-                }
-            )
+            view = table.view(expressions={expr["expression_name"]: expr["expression"] for expr in exprs})
             expression_schema = view.expression_schema()
             result = view.to_columns()
             for expr in output_map.keys():
@@ -381,13 +361,9 @@ class TestViewExpression(object):
                 ]
             }
         )
-        validated = table.validate_expressions(
-            {"computed": " \"a\" == 'abcdefghijklmnopqrstuvwxyz'"}
-        )
+        validated = table.validate_expressions({"computed": " \"a\" == 'abcdefghijklmnopqrstuvwxyz'"})
         assert validated["expression_schema"] == {"computed": "boolean"}
-        view = table.view(
-            expressions={"computed": "\"a\" == 'abcdefghijklmnopqrstuvwxyz'"}
-        )
+        view = table.view(expressions={"computed": "\"a\" == 'abcdefghijklmnopqrstuvwxyz'"})
         result = view.to_columns()
         assert result["computed"] == [True, False, True, False, False]
         assert view.expression_schema() == {"computed": "boolean"}
@@ -404,15 +380,9 @@ class TestViewExpression(object):
                 ]
             }
         )
-        validated = table.validate_expressions(
-            {"computed": " var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"}
-        )
+        validated = table.validate_expressions({"computed": " var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"})
         assert validated["expression_schema"] == {"computed": "boolean"}
-        view = table.view(
-            expressions={
-                "computed": "var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"
-            }
-        )
+        view = table.view(expressions={"computed": "var xyz := 'abcdefghijklmnopqrstuvwxyz'; \"a\" == xyz"})
         result = view.to_columns()
         assert result["computed"] == [True, False, True, False, False]
         assert view.expression_schema() == {"computed": "boolean"}
@@ -433,11 +403,7 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3]})
 
         for _ in range(10):
-            view = table.view(
-                expressions=[
-                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; concat(x, y)"
-                ]
-            )
+            view = table.view(expressions=["var x := 'Eabcdefghijklmn'; var y := '0123456789'; concat(x, y)"])
             assert view.to_columns() == {
                 "a": [1, 2, 3],
                 "var x := 'Eabcdefghijklmn'; var y := '0123456789'; concat(x, y)": [
@@ -519,10 +485,7 @@ class TestViewExpression(object):
         with raises(PerspectivePyError) as ex:
             table.view(expressions={"a": 'upper("a")'})
 
-        assert (
-            str(ex.value)
-            == 'Abort(): Value Error - expression "a" cannot overwrite an existing column.'
-        )
+        assert str(ex.value) == 'Abort(): Value Error - expression "a" cannot overwrite an existing column.'
 
     def test_legacy_view_duplicate_expression_should_resolve_to_last_alias(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
@@ -611,12 +574,7 @@ class TestViewExpression(object):
         today = date.today()
 
         month_bucketed = datetime(today.year, today.month, 1).timestamp() * 1000
-        minute_bucketed = (
-            datetime(
-                now.year, now.month, now.day, now.hour, now.minute, 0, 0
-            ).timestamp()
-            * 1000
-        )
+        minute_bucketed = datetime(now.year, now.month, now.day, now.hour, now.minute, 0, 0).timestamp() * 1000
 
         table = Table(
             {
@@ -732,9 +690,7 @@ class TestViewExpression(object):
 
     def test_view_expression_multiple_dependents_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(
-            expressions={"computed": '"a" + "b"', "final": '("a" + "b") ^ 2'}
-        )
+        view = table.view(expressions={"computed": '"a" + "b"', "final": '("a" + "b") ^ 2'})
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -1114,9 +1070,7 @@ class TestViewExpression(object):
 
     def test_view_expression_with_sort(self):
         table = Table({"a": ["a", "ab", "abc", "abcd"]})
-        view = table.view(
-            sort=[["computed", "desc"]], expressions={"computed": 'length("a")'}
-        )
+        view = table.view(sort=[["computed", "desc"]], expressions={"computed": 'length("a")'})
         assert view.to_columns() == {
             "a": ["abcd", "abc", "ab", "a"],
             "computed": [4, 3, 2, 1],
@@ -1124,9 +1078,7 @@ class TestViewExpression(object):
 
     def test_view_expression_with_filter(self):
         table = Table({"a": ["a", "ab", "abc", "abcd"]})
-        view = table.view(
-            filter=[["computed", ">=", 3]], expressions={"computed": 'length("a")'}
-        )
+        view = table.view(filter=[["computed", ">=", 3]], expressions={"computed": 'length("a")'})
         assert view.to_columns() == {"a": ["abc", "abcd"], "computed": [3, 4]}
 
     def test_view_day_of_week_date(self, util):
@@ -1149,9 +1101,7 @@ class TestViewExpression(object):
         view = table.view(expressions={"bucket": 'day_of_week("a")'})
         assert view.schema() == {"a": "datetime", "bucket": "string"}
         assert view.to_columns() == {
-            "a": [
-                util.to_timestamp(datetime(2020, 3, i, 12, 30)) for i in range(9, 14)
-            ],
+            "a": [util.to_timestamp(datetime(2020, 3, i, 12, 30)) for i in range(9, 14)],
             "bucket": [
                 "2 Monday",
                 "3 Tuesday",
@@ -1458,9 +1408,7 @@ class TestViewExpression(object):
 
         dt = datetime(2018, 8, 12, 15, 32, 55)
 
-        table.update(
-            {"w": [dt], "x": [12136582], "y": [date(2020, 6, 30)], "z": [1.23456]}
-        )
+        table.update({"w": [dt], "x": [12136582], "y": [date(2020, 6, 30)], "z": [1.23456]})
 
         assert view.expression_schema() == {
             "computed": "float",
@@ -1507,18 +1455,14 @@ class TestViewExpression(object):
         view = table.view(expressions={"computed": "datetime({})".format(ms_timestamp)})
         assert view.expression_schema() == {"computed": "datetime"}
         result = view.to_columns()
-        assert result["computed"] == [
-            util.to_timestamp(datetime(2015, 11, 29, 23, 59, 59))
-        ]
+        assert result["computed"] == [util.to_timestamp(datetime(2015, 11, 29, 23, 59, 59))]
 
     def test_view_datetime_expression_roundtrip(self, util):
         table = Table({"x": [datetime(2015, 11, 29, 23, 59, 59)]})
         view = table.view(expressions={"computed": 'datetime(float("x"))'})
         assert view.expression_schema() == {"computed": "datetime"}
         result = view.to_columns()
-        assert result["computed"] == [
-            util.to_timestamp(datetime(2015, 11, 29, 23, 59, 59))
-        ]
+        assert result["computed"] == [util.to_timestamp(datetime(2015, 11, 29, 23, 59, 59))]
 
     def test_view_string_expression(self):
         table = Table(
@@ -1581,9 +1525,7 @@ class TestViewExpression(object):
     def test_view_expession_multicomment(self):
         table = Table({"a": [1, 2, 3, 4]})
         view = table.view(expressions=["var x := 1 + 2;\n// def\nx + 100 // cdefghijk"])
-        assert view.expression_schema() == {
-            "var x := 1 + 2;\n// def\nx + 100 // cdefghijk": "float"
-        }
+        assert view.expression_schema() == {"var x := 1 + 2;\n// def\nx + 100 // cdefghijk": "float"}
         assert view.to_columns() == {
             "var x := 1 + 2;\n// def\nx + 100 // cdefghijk": [103, 103, 103, 103],
             "a": [1, 2, 3, 4],
@@ -1624,8 +1566,8 @@ class TestViewExpression(object):
             expected_domain = re.search(r"@([a-zA-Z.]+)$", source).group(1)
             assert results["address"][i] == expected_address
             assert results["domain"][i] == expected_domain
-            assert results["is_email?"][i] == True
-            assert results["has_at?"][i] == True
+            assert results["is_email?"][i] is True
+            assert results["has_at?"][i] is True
 
     def test_view_expression_number(self):
         def digits():
@@ -1669,7 +1611,7 @@ class TestViewExpression(object):
             source = results["a"][i]
             expected = re.sub(r"[ -]", "", source)
             assert results["parsed"][i] == expected
-            assert results["is_number?"][i] == True
+            assert results["is_number?"][i] is True
 
     def test_view_expression_newlines(self):
         table = Table(
@@ -1837,9 +1779,7 @@ class TestViewExpression(object):
             assert results["w"][i] == "abcdef-hijk"
             assert results["x"][i] == re.sub(r"[0-9]{4}$", idx, source, 1)
             assert results["y"][i] == source
-            assert results["z"][i] == re.sub(
-                r"^[0-9]{4}", "long string, very cool!", source, 1
-            )
+            assert results["z"][i] == re.sub(r"^[0-9]{4}", "long string, very cool!", source, 1)
 
     def test_view_replace_invalid(self):
         table = Table({"a": "string", "b": "string"})
@@ -1915,11 +1855,9 @@ class TestViewExpression(object):
             assert results["w"][i] == "abcdefhijk"
             assert results["x"][i] == re.sub(r"[0-9]{4}$", idx, source)
             assert results["y"][i] == source
-            assert results["z"][i] == re.sub(
-                r"^[0-9]{4}", "long string, very cool!", source
-            )
+            assert results["z"][i] == re.sub(r"^[0-9]{4}", "long string, very cool!", source)
 
-    def test_view_replace_invalid(self):
+    def test_view_replace_invalid2(self):
         table = Table({"a": "string", "b": "string"})
         expressions = [
             """//v

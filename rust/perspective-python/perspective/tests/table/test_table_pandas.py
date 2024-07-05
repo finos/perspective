@@ -535,17 +535,13 @@ class TestTablePandas(object):
         assert table.view().to_columns()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
 
     def test_table_pandas_object_to_bool(self):
-        df = pd.DataFrame(
-            {"a": np.array([True, False, True, False, True, False], dtype=object)}
-        )
+        df = pd.DataFrame({"a": np.array([True, False, True, False, True, False], dtype=object)})
         table = Table(df)
         assert table.schema() == {"index": "integer", "a": "boolean"}
         assert table.view().to_columns()["a"] == [True, False, True, False, True, False]
 
     def test_table_pandas_object_to_date(self, util):
-        df = pd.DataFrame(
-            {"a": np.array([date(2019, 7, 11), date(2019, 7, 12), None], dtype=object)}
-        )
+        df = pd.DataFrame({"a": np.array([date(2019, 7, 11), date(2019, 7, 12), None], dtype=object)})
         table = Table(df)
         assert table.schema() == {"index": "integer", "a": "date"}
         assert table.view().to_columns()["a"] == [
@@ -622,9 +618,7 @@ class TestTablePandas(object):
 
         assert table.schema() == {"a": "date"}
 
-        assert table.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 7, 11))]
-        }
+        assert table.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 11))]}
 
     @mark.skip(reason="Not supported by pyarrow (?)")
     def test_table_pandas_update_datetime_schema_with_date(self, util):
@@ -632,9 +626,7 @@ class TestTablePandas(object):
         table = Table({"a": "datetime"})
         table.update(df)
         assert table.schema() == {"a": "datetime"}
-        assert table.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 7, 11, 0, 0))]
-        }
+        assert table.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 11, 0, 0))]}
 
     # Timestamps
 
@@ -713,9 +705,7 @@ class TestTablePandas(object):
         assert table.view().to_columns()["a"] == [None, 1.5, None, 2.5]
 
     def test_table_read_nan_int_col(self):
-        data = pd.DataFrame(
-            {"str": ["abc", float("nan"), "def"], "int": [np.nan, 1, 2]}
-        )
+        data = pd.DataFrame({"str": ["abc", float("nan"), "def"], "int": [np.nan, 1, 2]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": "integer",
@@ -730,9 +720,7 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_float_col(self):
-        data = pd.DataFrame(
-            {"str": [float("nan"), "abc", float("nan")], "float": [np.nan, 1.5, 2.5]}
-        )
+        data = pd.DataFrame({"str": [float("nan"), "abc", float("nan")], "float": [np.nan, 1.5, 2.5]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": "integer",
@@ -747,9 +735,7 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_bool_col(self):
-        data = pd.DataFrame(
-            {"bool": [np.nan, True, np.nan], "bool2": [False, np.nan, True]}
-        )
+        data = pd.DataFrame({"bool": [np.nan, True, np.nan], "bool2": [False, np.nan, True]})
         tbl = Table(data)
         # if np.nan begins a column, it is inferred as float and then can be promoted. if np.nan is in the values (but not at start), the column type is whatever is inferred.
         assert tbl.schema() == {
@@ -766,9 +752,7 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_date_col(self):
-        data = pd.DataFrame(
-            {"str": ["abc", "def"], "date": [float("nan"), date(2019, 7, 11)]}
-        )
+        data = pd.DataFrame({"str": ["abc", "def"], "date": [float("nan"), date(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": "integer",
@@ -803,9 +787,7 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nat_datetime_col(self, util):
-        data = pd.DataFrame(
-            {"str": ["abc", "def"], "datetime": ["NaT", datetime(2019, 7, 11, 11, 0)]}
-        )
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": ["NaT", datetime(2019, 7, 11, 11, 0)]})
         # datetime col is `datetime` in pandas<2, `object` in pandas>=2, so convert
         data.datetime = pd.to_datetime(data.datetime)
         tbl = Table(data)
@@ -822,9 +804,7 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_datetime_as_date_col(self, util):
-        data = pd.DataFrame(
-            {"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11)]}
-        )
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": "integer",
@@ -1009,8 +989,6 @@ class TestTablePandas(object):
         ]
         tuples = list(zip(*arrays))
         index = pd.MultiIndex.from_tuples(tuples, names=["first", "second", "third"])
-        df_both = pd.DataFrame(
-            np.random.randn(3, 16), index=["A", "B", "C"], columns=index
-        )
+        df_both = pd.DataFrame(np.random.randn(3, 16), index=["A", "B", "C"], columns=index)
         table = Table(df_both)
         assert table.size() == 48

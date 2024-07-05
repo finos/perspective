@@ -23,9 +23,7 @@ from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-file_path = os.path.join(
-    here, "..", "..", "..", "..", "..", "node_modules", "superstore-arrow", "superstore.lz4.arrow"
-)
+file_path = os.path.join(here, "..", "..", "..", "..", "..", "node_modules", "superstore-arrow", "superstore.lz4.arrow")
 
 IS_MULTI_THREADED = True
 
@@ -44,18 +42,26 @@ def perspective_thread(manager, table):
         manager.set_loop_callback(psp_loop.add_callback)
         psp_loop.start()
 
+
 old_on_message = PerspectiveTornadoHandler.on_message
+
+
 def new_on_message(*args, **kwargs):
-    print('PerspectiveTornadoHandler.on_message', args, kwargs)
+    print("PerspectiveTornadoHandler.on_message", args, kwargs)
     return old_on_message(*args, **kwargs)
 
+
 old_write_message = PerspectiveTornadoHandler.write_message
+
+
 def new_write_message(*args, **kwargs):
-    print('PerspectiveTornadoHandler.write_message', args, kwargs)
+    print("PerspectiveTornadoHandler.write_message", args, kwargs)
     return old_write_message(*args, **kwargs)
+
 
 # PerspectiveTornadoHandler.on_message = new_on_message
 # PerspectiveTornadoHandler.write_message = new_write_message
+
 
 def make_app():
     with open(file_path, mode="rb") as file:
@@ -96,6 +102,7 @@ def main():
     logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
     loop.start()
+
 
 if __name__ == "__main__":
     server = threading.Thread(target=main)

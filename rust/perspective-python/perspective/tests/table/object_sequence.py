@@ -362,9 +362,7 @@ def run2():
             while ind in indexes:
                 ind = randint(1, 100)
 
-            print(
-                "adding", ind, "refcount", t_ref_count, "should be", sys.getrefcount(t)
-            )
+            print("adding", ind, "refcount", t_ref_count, "should be", sys.getrefcount(t))
             tbl.update({"a": [ind], "b": [t]})
             t_ref_count += 1
             indexes.add(ind)

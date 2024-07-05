@@ -20,19 +20,11 @@ from datetime import date, datetime
 from pytest import mark
 from perspective import Table
 
-SOURCE_STREAM_ARROW = os.path.join(
-    os.path.dirname(__file__), "arrow", "int_float_str.arrow"
-)
-SOURCE_FILE_ARROW = os.path.join(
-    os.path.dirname(__file__), "arrow", "int_float_str.arrow"
-)
-PARTIAL_ARROW = os.path.join(
-    os.path.dirname(__file__), "arrow", "int_float_str_update.arrow"
-)
+SOURCE_STREAM_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
+SOURCE_FILE_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
+PARTIAL_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str_update.arrow")
 DICT_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "dict.arrow")
-DICT_UPDATE_ARROW = os.path.join(
-    os.path.dirname(__file__), "arrow", "dict_update.arrow"
-)
+DICT_UPDATE_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "dict_update.arrow")
 
 names = ["a", "b", "c", "d"]
 
@@ -159,9 +151,7 @@ class TestUpdateArrow(object):
         with open(DICT_UPDATE_ARROW, mode="rb") as partial:
             tbl.update(partial.read())
             assert tbl.size() == 8
-            assert tbl.view().to_columns() == {
-                "a": ["abc", "def", "def", None, "abc", None, "update1", "update2"]
-            }
+            assert tbl.view().to_columns() == {"a": ["abc", "def", "def", None, "abc", None, "update1", "update2"]}
 
     @mark.skip
     def test_update_arrow_updates_dict_more_columns_partial_file(self):
@@ -174,9 +164,7 @@ class TestUpdateArrow(object):
         with open(DICT_UPDATE_ARROW, mode="rb") as partial:
             tbl.update(partial.read())
             assert tbl.size() == 4
-            assert tbl.view().to_columns() == {
-                "a": ["abc", "def", "update1", "update2"]
-            }
+            assert tbl.view().to_columns() == {"a": ["abc", "def", "update1", "update2"]}
 
     # update with file arrow with less columns than in schema
 
@@ -440,9 +428,7 @@ class TestUpdateArrow(object):
         assert tbl.view().to_columns()["a"] == [int(x) for x in array]
 
     def test_update_arrow_update_int_schema_with_float64(self, util):
-        array = [
-            random.randint(-20000000, 20000000) * random.random() for i in range(100)
-        ]
+        array = [random.randint(-20000000, 20000000) * random.random() for i in range(100)]
         data = pd.DataFrame({"a": np.array(array, dtype=np.float64)})
 
         schema = pa.schema({"a": pa.float64()})
@@ -466,9 +452,7 @@ class TestUpdateArrow(object):
         assert tbl.view().to_columns()["a"] == array
 
     def test_update_arrow_update_float_schema_with_float64(self, util):
-        array = [
-            random.randint(-20000000, 20000000) * random.random() for i in range(100)
-        ]
+        array = [random.randint(-20000000, 20000000) * random.random() for i in range(100)]
         data = pd.DataFrame({"a": np.array(array, dtype=np.float64)})
 
         schema = pa.schema({"a": pa.float64()})
@@ -492,9 +476,7 @@ class TestUpdateArrow(object):
 
         tbl.update(arrow)
 
-        assert tbl.view().to_columns()["a"] == [
-            util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)
-        ]
+        assert tbl.view().to_columns()["a"] == [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
 
     def test_update_arrow_update_date_schema_with_date64(self, util):
         array = [date(2019, 2, i) for i in range(1, 11)]
@@ -508,9 +490,7 @@ class TestUpdateArrow(object):
 
         tbl.update(arrow)
 
-        assert tbl.view().to_columns()["a"] == [
-            util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)
-        ]
+        assert tbl.view().to_columns()["a"] == [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
 
     def test_update_arrow_update_datetime_schema_with_timestamp(self, util):
         data = [
@@ -599,9 +579,7 @@ class TestUpdateArrow(object):
         tbl = Table({"a": "date"})
         tbl.update(arrow_data)
         assert tbl.size() == 10
-        assert tbl.view().to_columns() == {
-            "a": [int(1000 * datetime(2019, 2, i).timestamp()) for i in range(1, 11)]
-        }
+        assert tbl.view().to_columns() == {"a": [int(1000 * datetime(2019, 2, i).timestamp()) for i in range(1, 11)]}
 
     def test_update_arrow_updates_date64_stream(self, util):
         data = [[date(2019, 2, i) for i in range(1, 11)]]
@@ -609,9 +587,7 @@ class TestUpdateArrow(object):
         tbl = Table({"a": "date"})
         tbl.update(arrow_data)
         assert tbl.size() == 10
-        assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]
-        }
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 2, i)) for i in range(1, 11)]}
 
     def test_update_arrow_updates_timestamp_all_formats_stream(self, util):
         data = [
@@ -630,9 +606,7 @@ class TestUpdateArrow(object):
                 pa.timestamp("ns"),
             ],
         )
-        tbl = Table(
-            {"a": "datetime", "b": "datetime", "c": "datetime", "d": "datetime"}
-        )
+        tbl = Table({"a": "datetime", "b": "datetime", "c": "datetime", "d": "datetime"})
         tbl.update(arrow_data)
         assert tbl.size() == 10
         assert tbl.view().to_columns() == {
@@ -784,9 +758,7 @@ class TestUpdateArrow(object):
         tbl = Table(arrow_data)
         tbl.update(arrow_data)
         assert tbl.size() == 20
-        assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(d) for d in out_data + out_data]
-        }
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(d) for d in out_data + out_data]}
 
     def test_update_arrow_updates_append_date64_stream(self, util):
         data = [[date(2019, 2, i) for i in range(1, 11)]]
@@ -795,9 +767,7 @@ class TestUpdateArrow(object):
         tbl = Table(arrow_data)
         tbl.update(arrow_data)
         assert tbl.size() == 20
-        assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(d) for d in out_data + out_data]
-        }
+        assert tbl.view().to_columns() == {"a": [util.to_timestamp(d) for d in out_data + out_data]}
 
     def test_update_arrow_updates_append_timestamp_all_formats_stream(self, util):
         data = [

@@ -31,9 +31,7 @@ class TestUpdate(object):
 
         # write arrow to stream
         stream = pa.BufferOutputStream()
-        writer = pa.RecordBatchStreamWriter(
-            stream, arrow_table.schema, use_legacy_format=False
-        )
+        writer = pa.RecordBatchStreamWriter(stream, arrow_table.schema, use_legacy_format=False)
         writer.write_table(arrow_table)
         writer.close()
         arrow = stream.getvalue().to_pybytes()
@@ -102,9 +100,7 @@ class TestUpdate(object):
         assert tbl.view().to_records() == [{"a": "abc", "b": 456, "c": 2}]
 
     def test_update_partial_unset(self):
-        tbl = Table(
-            [{"a": "abc", "b": 1, "c": 2}, {"a": "def", "b": 3, "c": 4}], index="a"
-        )
+        tbl = Table([{"a": "abc", "b": 1, "c": 2}, {"a": "def", "b": 3, "c": 4}], index="a")
         tbl.update([{"a": "abc"}, {"a": "def", "c": None}])
         assert tbl.view().to_records() == [
             {"a": "abc", "b": 1, "c": 2},
@@ -130,9 +126,7 @@ class TestUpdate(object):
         assert tbl.view().to_records() == [{"a": "abc", "b": 456, "c": 2}]
 
     def test_update_columnar_partial_unset(self):
-        tbl = Table(
-            [{"a": "abc", "b": 1, "c": 2}, {"a": "def", "b": 3, "c": 4}], index="a"
-        )
+        tbl = Table([{"a": "abc", "b": 1, "c": 2}, {"a": "def", "b": 3, "c": 4}], index="a")
 
         tbl.update({"a": ["abc"], "b": [None]})
 
@@ -271,7 +265,7 @@ class TestUpdate(object):
             {"a": util.to_timestamp(datetime(2019, 7, 12))},
         ]
 
-    @mark.skip # We do not support numpy.
+    @mark.skip  # We do not support numpy.
     def test_update_date_np(self, util):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": np.datetime64(date(2019, 7, 12))}])
@@ -288,7 +282,7 @@ class TestUpdate(object):
             {"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0))},
         ]
 
-    @mark.skip # We do not support numpy.
+    @mark.skip  # We do not support numpy.
     def test_update_datetime_np(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
         tbl.update([{"a": np.datetime64(datetime(2019, 7, 12, 11, 0))}])
@@ -297,7 +291,7 @@ class TestUpdate(object):
             {"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0))},
         ]
 
-    @mark.skip # We do not support numpy.
+    @mark.skip  # We do not support numpy.
     def test_update_datetime_np_ts(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
         tbl.update([{"a": np.datetime64("2019-07-12T11:00")}])
@@ -331,7 +325,7 @@ class TestUpdate(object):
         tbl.update([{"a": date(2019, 7, 12), "b": 1}])
         assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12)), "b": 1}]
 
-    @mark.skip # We do not support numpy anymore.
+    @mark.skip  # We do not support numpy anymore.
     def test_update_date_np_partial(self, util):
         tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64(date(2019, 7, 12)), "b": 1}])
@@ -342,13 +336,13 @@ class TestUpdate(object):
         tbl.update([{"a": datetime(2019, 7, 12, 11, 0), "b": 1}])
         assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0)), "b": 1}]
 
-    @mark.skip # We do not support numpy anymore.
+    @mark.skip  # We do not support numpy anymore.
     def test_update_datetime_np_partial(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64(datetime(2019, 7, 12, 11, 0)), "b": 1}])
         assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0)), "b": 1}]
 
-    @mark.skip # We do not support numpy anymore.
+    @mark.skip  # We do not support numpy anymore.
     def test_update_datetime_np_ts_partial(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64("2019-07-12T11:00"), "b": 1}])
@@ -358,17 +352,13 @@ class TestUpdate(object):
         ts = util.to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "idx": [1]}, index="idx")
         tbl.update([{"a": ts, "idx": 1}])
-        assert tbl.view().to_records() == [
-            {"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0)), "idx": 1}
-        ]
+        assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0)), "idx": 1}]
 
     def test_update_datetime_timestamp_ms_partial(self, util):
         ts = util.to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "idx": [1]}, index="idx")
         tbl.update([{"a": ts, "idx": 1}])
-        assert tbl.view().to_records() == [
-            {"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0)), "idx": 1}
-        ]
+        assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0)), "idx": 1}]
 
     # updating dates using implicit index
 
@@ -377,7 +367,7 @@ class TestUpdate(object):
         tbl.update([{"a": date(2019, 7, 12), "__INDEX__": 0}])
         assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12))}]
 
-    @mark.skip # We do not support numpy anymore.
+    @mark.skip  # We do not support numpy anymore.
     def test_update_date_np_partial_implicit(self, util):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": np.datetime64(date(2019, 7, 12)), "__INDEX__": 0}])
@@ -388,13 +378,13 @@ class TestUpdate(object):
         tbl.update([{"a": datetime(2019, 7, 12, 11, 0), "__INDEX__": 0}])
         assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0))}]
 
-    @mark.skip # We do not support numpy anymore.
+    @mark.skip  # We do not support numpy anymore.
     def test_update_datetime_np_partial_implicit(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
         tbl.update([{"a": np.datetime64(datetime(2019, 7, 12, 11, 0)), "__INDEX__": 0}])
         assert tbl.view().to_records() == [{"a": util.to_timestamp(datetime(2019, 7, 12, 11, 0))}]
 
-    @mark.skip # We do not support numpy anymore.
+    @mark.skip  # We do not support numpy anymore.
     def test_update_datetime_np_ts_partial_implicit(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
         tbl.update([{"a": np.datetime64("2019-07-12T11:00"), "__INDEX__": 0}])
@@ -456,7 +446,7 @@ class TestUpdate(object):
         tbl = Table(data)
         view = tbl.view()
         records = view.to_records(index=True)
-        idx = records[0]["__INDEX__"][0] # XXX: How should we grab this?
+        idx = records[0]["__INDEX__"][0]  # XXX: How should we grab this?
         tbl.update([{"__INDEX__": idx, "a": 3}])
         assert view.to_records() == [{"a": 3, "b": 2}, {"a": 2, "b": 3}]
 
@@ -513,7 +503,5 @@ class TestUpdate(object):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data, index="a")
         view = tbl.view()
-        tbl.update(
-            [{"__INDEX__": 1, "a": 1, "b": 3}]
-        )  # should ignore re-specification of pkey
+        tbl.update([{"__INDEX__": 1, "a": 1, "b": 3}])  # should ignore re-specification of pkey
         assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}]

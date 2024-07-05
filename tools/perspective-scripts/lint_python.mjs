@@ -15,12 +15,16 @@ import * as url from "url";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
-const cmd = sh`flake8 perspective bench setup.py`;
+const cmd_check = sh`ruff check perspective bench`;
+const cmd_format = sh`ruff format --check perspective bench`;
 
 if (process.env.PSP_DOCKER) {
-    cmd = sh`cd python/perspective`.sh(cmd);
-    sh.docker(cmd).log().runSync();
+    cmd_check = sh`cd rust/perspective-python`.sh(cmd_check);
+    sh.docker(cmd_check).log().runSync();
+    cmd_format = sh`cd rust/perspective-python`.sh(cmd_format);
+    sh.docker(cmd_format).log().runSync();
 } else {
-    const python_path = sh.path`${__dirname}/../../python/perspective`;
-    cmd.cwd(python_path).log().runSync();
+    const python_path = sh.path`${__dirname}/../../rust/perspective-python`;
+    cmd_check.cwd(python_path).log().runSync();
+    cmd_format.cwd(python_path).log().runSync();
 }

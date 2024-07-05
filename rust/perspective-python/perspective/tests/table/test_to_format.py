@@ -682,9 +682,7 @@ class TestToFormat(object):
     def test_to_records_two_sorted_start_gt_end_col_overage(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
-        view = tbl.view(
-            columns=[], group_by=["a"], split_by=["b"], sort=[["a", "desc"]]
-        )
+        view = tbl.view(columns=[], group_by=["a"], split_by=["b"], sort=[["a", "desc"]])
         records = view.to_records(end_row=12, start_col=1, end_col=3)
         assert records == [
             {"__ROW_PATH__": []},

@@ -14,9 +14,4 @@
 def validate_version(version):
     # basic semver of form \d+\.\d+\.\d+(\+.+)?
     spl = version.split(".", 2)
-    return (
-        len(spl) == 3
-        and spl[0].isdigit()
-        and spl[1].isdigit()
-        and (spl[2].split("+")[0]).isdigit()
-    )
+    return len(spl) == 3 and spl[0].isdigit() and spl[1].isdigit() and (spl[2].split("+")[0]).isdigit()

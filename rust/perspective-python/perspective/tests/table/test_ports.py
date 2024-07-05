@@ -99,9 +99,7 @@ class TestPorts(object):
 
         view = table.view()
         ports_to_update = [random.randint(0, 10) for i in range(5)]
-        unique_data = {
-            port: [{"a": port, "b": str(port), "c": True}] for port in ports_to_update
-        }
+        unique_data = {port: [{"a": port, "b": str(port), "c": True}] for port in ports_to_update}
 
         def callback(port_id, delta):
             assert port_id in ports_to_update
