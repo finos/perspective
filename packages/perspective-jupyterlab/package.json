@@ -26,8 +26,8 @@
         "clean": "npm-run-all clean:*",
         "clean:dist": "rimraf dist",
         "clean:lib": "rimraf lib",
-        "clean:labextension": "rimraf ../../python/perspective/perspective/labextension",
-        "clean:nbextension": "rimraf ../../python/perspective/perspective/nbextension/static",
+        "clean:labextension": "rimraf ../../rust/perspective-python/perspective/labextension",
+        "clean:nbextension": "rimraf ../../rust/perspective-python/perspective/nbextension/static",
         "test:build": "node build.mjs --test",
         "test:jupyter:build": "cpy \"test/arrow/*\" dist/esm",
         "test:jupyter": "__JUPYTERLAB_PORT__=6538 npx playwright test --config ../../tools/perspective-test/playwright.config.js -- --jupyter",
@@ -55,7 +55,7 @@
     "jupyterlab": {
         "webpackConfig": "./webpack.config.js",
         "extension": true,
-        "outputDir": "../../python/perspective/perspective/labextension",
+        "outputDir": "../../rust/perspective-python/perspective/labextension",
         "sharedPackages": {
             "@jupyter-widgets/base": {
                 "bundled": false,

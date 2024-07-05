@@ -113,8 +113,8 @@ cppbuild
 docsbuild
 tools/perspective-build/lib
 packages/perspective-esbuild-plugin/lib
-python/perspective/perspective/nbextension/static
-python/perspective/perspective/labextension
+rust/perspective-python/perspective/nbextension/static
+rust/perspective-python/perspective/labextension
 boost_*.tar.gz
 
 # editor, IDE, OS
