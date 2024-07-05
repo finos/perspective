@@ -15,4 +15,4 @@ pub mod client_sync;
 
 mod python;
 
-pub use python::PerspectivePyError;
+pub use python::{PyPerspectiveError, PyPerspectiveBaseException};

@@ -10,8 +10,10 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+from ..perspective import PerspectiveBaseException
 
-class PerspectivePythonError(Exception):
+
+class PerspectivePythonError(PerspectiveBaseException):
     """Raised for issues within Perspective, i.e. illegal operations."""
 
     pass

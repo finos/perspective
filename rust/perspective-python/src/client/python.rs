@@ -39,15 +39,21 @@ pub impl<T> Result<T, ClientError> {
     fn into_pyerr(self) -> PyResult<T> {
         match self {
             Ok(x) => Ok(x),
-            Err(x) => Err(PerspectivePyError::new_err(format!("{}", x))),
+            Err(x) => Err(PyPerspectiveError::new_err(format!("{}", x))),
         }
     }
 }
 
 create_exception!(
     perspective,
-    PerspectivePyError,
+    PyPerspectiveBaseException,
     pyo3::exceptions::PyException
+);
+
+create_exception!(
+    perspective,
+    PyPerspectiveError,
+    PyPerspectiveBaseException
 );
 
 #[extend::ext]
