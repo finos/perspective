@@ -10,10 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import psp, {
-    cwd_static_file_handler,
-    make_sync_session,
-} from "@finos/perspective";
+import psp, { cwd_static_file_handler, make_session } from "@finos/perspective";
 import express from "express";
 import expressWs from "express-ws";
 import * as securities from "../../datasources/index.mjs";
@@ -35,7 +32,7 @@ const _table = await securities.securities.getTable();
 // const w = await psp.worker();
 const app = expressWs(express()).app;
 app.ws("/subscribe", async (ws) => {
-    const session = await make_sync_session(async (proto) => {
+    const session = await make_session(async (proto) => {
         await ws.send(buffer_to_arraybuffer(proto));
     });
 

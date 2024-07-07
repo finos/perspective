@@ -36,14 +36,11 @@
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
             const el = document.getElementsByTagName("perspective-viewer")[0];
             el.addEventListener("perspective-config-update", async () => localStorage.setItem("layout", JSON.stringify(await el.save())));
-            // const req = await fetch("benchmark-js.arrow");
-            // const arrow = await req.arrayBuffer();
-            console.log("as");
-            const worker = await perspective.websocket("ws://localhost:8081/subscribe");
-            console.log("bs");
-            const table = await worker.open_table("benchmarks");
-            console.log("cs");
-            el.load(table);
+            const websocket = await perspective.websocket("ws://localhost:8081/subscribe");
+            const table = await websocket.open_table("benchmarks");
+            const worker = await perspective.worker();
+            const table2 = await worker.table(await table.view());
+            el.load(table2);
             el.restore(JSON.parse(localStorage.getItem("layout")));
         </script>
     </body>

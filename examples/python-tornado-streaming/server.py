@@ -88,7 +88,6 @@ def perspective_thread(manager):
         table.update(data_source())
 
     callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=50)
-
     psp_loop = tornado.ioloop.IOLoop()
     if IS_MULTI_THREADED:
         with concurrent.futures.ThreadPoolExecutor() as executor:

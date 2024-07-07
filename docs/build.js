@@ -16,9 +16,8 @@ const cp = require("child_process");
 const path = require("node:path");
 const mkdirp = require("mkdirp");
 const EXAMPLES = require("./src/components/ExampleGallery/features.js").default;
-const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
 
-const { WebSocketServer } = require("@finos/perspective");
+const perspective = import("@finos/perspective/dist/cdn/perspective.js");
 
 const DEFAULT_VIEWPORT = {
     width: 400,
@@ -64,18 +63,16 @@ async function run_with_theme(page, is_dark = false) {
     for (const idx in EXAMPLES) {
         const { config, viewport } = EXAMPLES[idx];
         await await page.setViewport(viewport || DEFAULT_VIEWPORT);
-        const new_config = convert(
-            Object.assign(
-                {
-                    plugin: "Datagrid",
-                    group_by: [],
-                    expressions: {},
-                    split_by: [],
-                    sort: [],
-                    aggregates: {},
-                },
-                config
-            )
+        const new_config = Object.assign(
+            {
+                plugin: "Datagrid",
+                group_by: [],
+                expressions: {},
+                split_by: [],
+                sort: [],
+                aggregates: {},
+            },
+            config
         );
         console.log(JSON.stringify(new_config));
 
@@ -115,6 +112,7 @@ async function run() {
     ) {
         console.log("Generating feature screenshots!");
         mkdirp(path.join(__dirname, "static/features"));
+        const { WebSocketServer } = await perspective;
         const server = new WebSocketServer({
             assets: [
                 path.join(__dirname, ".."),

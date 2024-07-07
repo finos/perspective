@@ -22,7 +22,7 @@ import "./index.css";
 
 import superstore from "superstore-arrow/superstore.lz4.arrow";
 
-const worker = perspective.shared_worker();
+const worker = perspective.worker();
 
 window.addEventListener("DOMContentLoaded", async () => {
     const viewer = document.createElement("perspective-viewer");

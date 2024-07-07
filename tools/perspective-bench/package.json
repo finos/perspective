@@ -3,7 +3,7 @@
     "version": "2.0.1",
     "description": "Benchmark utility based on perspective",
     "private": true,
-    "main": "src/js/bench.js",
+    "main": "src/js/bench.mjs",
     "files": [
         "src/**/*",
         "perspective-bench"
@@ -14,7 +14,7 @@
         "url": "https://github.com/finos/perspective/packages/perspective-bench"
     },
     "scripts": {
-        "bench": "node basic_suite.js"
+        "bench": "node basic_suite.mjs"
     },
     "author": "",
     "license": "Apache-2.0",

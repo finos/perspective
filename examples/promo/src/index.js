@@ -22,7 +22,7 @@ import "./style/index.less";
 
 import SYMBOLS from "./symbols.json";
 
-const worker = perspective.shared_worker();
+const worker = perspective.worker();
 
 var CLIENTS = [
     "Homer",

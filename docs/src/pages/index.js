@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import clsx from "clsx";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { useColorMode } from "@docusaurus/theme-common";
@@ -19,9 +19,21 @@ import BrowserOnly from "@docusaurus/BrowserOnly";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
 import styles from "./index.module.css";
+import { PerspectiveViewerDemo } from "../components/Demo";
 
 function HomepageHeader() {
     const { siteConfig } = useDocusaurusContext();
+
+    const [perspective, setPerspective] = useState(null);
+
+    useEffect(() => {
+        Promise.all([
+            import("@finos/perspective"),
+            import("@finos/perspective-viewer"),
+            import("@finos/perspective-viewer-datagrid"),
+            import("@finos/perspective-viewer-d3fc"),
+        ]).then(setPerspective);
+    }, []);
 
     // const { colorMode, setColorMode } = useColorMode();
     return (
@@ -31,10 +43,11 @@ function HomepageHeader() {
                 <div className={styles.buttons}>
                     <BrowserOnly>
                         {() => {
-                            const {
-                                PerspectiveViewerDemo,
-                            } = require("@site/src/components/Demo");
-                            return <PerspectiveViewerDemo />;
+                            return (
+                                <PerspectiveViewerDemo
+                                    perspective={perspective?.[0]}
+                                />
+                            );
                         }}
                     </BrowserOnly>
                 </div>

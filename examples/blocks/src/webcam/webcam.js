@@ -17,7 +17,7 @@ const context = canvas.getContext("2d", { willReadFrequently: true });
 const video = document.getElementById("video");
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
-const WORKER = perspective.shared_worker();
+const WORKER = perspective.worker();
 
 async function poll(table, tdata) {
     context.drawImage(video, 0, 0, WIDTH, HEIGHT);

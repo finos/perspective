@@ -18,8 +18,6 @@ import EXAMPLES from "./features.js";
 import styles from "./styles.module.css";
 import BrowserOnly from "@docusaurus/BrowserOnly";
 
-const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate");
-
 export default function ExampleGallery(props) {
     const { colorMode } = useColorMode();
     const color = colorMode === "dark" ? "_dark" : "";
@@ -81,18 +79,16 @@ function OverlayDemo(props) {
         (viewer) => {
             if (viewer !== null) {
                 viewer.load(SUPERSTORE_TABLE);
-                viewer.restore(
-                    convert({
-                        plugin: "Datagrid",
-                        group_by: [],
-                        expressions: {},
-                        split_by: [],
-                        sort: [],
-                        aggregates: {},
-                        ...EXAMPLES.default[props.index].config,
-                        settings: true,
-                    })
-                );
+                viewer.restore({
+                    plugin: "Datagrid",
+                    group_by: [],
+                    expressions: {},
+                    split_by: [],
+                    sort: [],
+                    aggregates: {},
+                    ...EXAMPLES.default[props.index].config,
+                    settings: true,
+                });
             }
         },
         [props.index]

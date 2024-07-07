@@ -30,7 +30,7 @@ const URL = "ws://localhost:8080/websocket";
  * in Javascript, see `/examples/remote-express`.
  */
 const websocket = perspective.websocket(URL);
-const worker = perspective.shared_worker();
+const worker = perspective.worker();
 
 /**
  * `open_table` allows you to call API methods on remotely hosted Perspective

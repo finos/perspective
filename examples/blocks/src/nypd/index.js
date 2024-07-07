@@ -18,8 +18,7 @@ let LAYOUTS = localStorage.getItem("layouts")
     ? JSON.parse(localStorage.getItem("layouts"))
     : undefined;
 
-const worker = perspective.worker();
-
+const worker = await perspective.worker();
 const theme_style_node = document.createElement("style");
 document.head.appendChild(theme_style_node);
 let DARK_THEME;
@@ -56,16 +55,15 @@ async function fetch_progress(url) {
     return ab;
 }
 
-window.addEventListener("load", async () => {
-    DARK_THEME = await fetch(
-        "/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css"
-    ).then((x) => x.text());
+DARK_THEME = await fetch(
+    "/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css"
+).then((x) => x.text());
 
-    LIGHT_THEME = await fetch(
-        "/node_modules/@finos/perspective-workspace/dist/css/pro.css"
-    ).then((x) => x.text());
+LIGHT_THEME = await fetch(
+    "/node_modules/@finos/perspective-workspace/dist/css/pro.css"
+).then((x) => x.text());
 
-    document.body.innerHTML = `
+document.body.innerHTML = `
         <style>
         </style>
         <div id='buttons'>
@@ -84,102 +82,101 @@ window.addEventListener("load", async () => {
         <perspective-workspace id='workspace'></perspective-workspace>
     `.trim();
 
-    toggle_theme();
+toggle_theme();
 
-    window.workspace.addEventListener(
-        "workspace-new-view",
-        ({ detail: { widget } }) => {
-            widget.viewer.setAttribute("theme", theme_style_node.dataset.theme);
-        }
-    );
-
-    window.workspace.addTable(
-        "ccrb",
-        (async () => worker.table(await fetch_progress(DATA_URL)))()
-        // worker.table(await fetch_progress(DATA_URL))
-    );
-
-    if (LAYOUTS == undefined) {
-        LAYOUTS = await (await fetch("./layout.json")).json();
+window.workspace.addEventListener(
+    "workspace-new-view",
+    ({ detail: { widget } }) => {
+        widget.viewer.setAttribute("theme", theme_style_node.dataset.theme);
     }
+);
 
+window.workspace.addTable(
+    "ccrb",
+    (async () => worker.table(await fetch_progress(DATA_URL)))()
+    // worker.table(await fetch_progress(DATA_URL))
+);
+
+if (LAYOUTS == undefined) {
+    LAYOUTS = await (await fetch("./layout.json")).json();
+}
+
+const layout_names = Object.keys(LAYOUTS);
+let selected_layout = LAYOUTS[layout_names[0]];
+await window.workspace.restore(selected_layout);
+
+function set_layout_options() {
     const layout_names = Object.keys(LAYOUTS);
-    let selected_layout = LAYOUTS[layout_names[0]];
-    await window.workspace.restore(selected_layout);
-
-    function set_layout_options() {
-        const layout_names = Object.keys(LAYOUTS);
-        window.layouts.innerHTML = "";
-        for (const layout of layout_names) {
-            console.log("LAYOUT: ", layout);
-            window.layouts.innerHTML += `<option${
-                layout === selected_layout ? " selected='true'" : ""
-            }>${layout}</option>`;
-        }
+    window.layouts.innerHTML = "";
+    for (const layout of layout_names) {
+        console.log("LAYOUT: ", layout);
+        window.layouts.innerHTML += `<option${
+            layout === selected_layout ? " selected='true'" : ""
+        }>${layout}</option>`;
     }
+}
 
-    console.log("Doing?");
-    set_layout_options();
-    console.log("Done?");
-    window.name_input.value = layout_names[0];
-    window.layouts.addEventListener("change", async () => {
-        if (window.layouts.value.trim().length === 0) {
-            return;
-        }
-        window.workspace.innerHTML = "";
-        await window.workspace.restore(LAYOUTS[window.layouts.value]);
-        window.name_input.value = window.layouts.value;
-    });
-
-    window.save_as.addEventListener("click", async () => {
-        window.save_as.style.display = "none";
-        window.save.style.display = "inline-block";
-        window.cancel.style.display = "inline-block";
-        window.name_input.style.display = "inline-block";
-        window.copy.style.display = "none";
-        window.layouts.style.display = "none";
-    });
-
-    function cancel() {
-        window.save_as.style.display = "inline-block";
-        window.save.style.display = "none";
-        window.cancel.style.display = "none";
-        window.name_input.style.display = "none";
-        window.copy.style.display = "inline-block";
-        window.layouts.style.display = "inline-block";
+console.log("Doing?");
+set_layout_options();
+console.log("Done?");
+window.name_input.value = layout_names[0];
+window.layouts.addEventListener("change", async () => {
+    if (window.layouts.value.trim().length === 0) {
+        return;
     }
-
-    window.cancel.addEventListener("click", cancel);
-
-    window.reset.addEventListener("click", () => {
-        localStorage.clear();
-        window.reset.innerText = "Reset!";
-        setTimeout(() => {
-            window.reset.innerText = "Reset LocalStorage";
-        }, 1000);
-    });
-
-    window.save.addEventListener("click", async () => {
-        const token = await window.workspace.save();
-        const new_name = window.name_input.value;
-        LAYOUTS[new_name] = token;
-        set_layout_options();
-        window.layouts.value = new_name;
-        window.save_as.innerText = "Saved!";
-        setTimeout(() => {
-            window.save_as.innerText = "Save As";
-        }, 1000);
-        localStorage.setItem("layouts", JSON.stringify(LAYOUTS));
-        cancel();
-    });
-
-    window.copy.addEventListener("click", async () => {
-        await navigator.clipboard.writeText(JSON.stringify(LAYOUTS));
-        window.copy.innerText = "Copied!";
-        setTimeout(() => {
-            window.copy.innerText = "Debug to Clipboard";
-        }, 1000);
-    });
-
-    window.theme.addEventListener("click", toggle_theme);
+    window.workspace.innerHTML = "";
+    await window.workspace.restore(LAYOUTS[window.layouts.value]);
+    window.name_input.value = window.layouts.value;
 });
+
+window.save_as.addEventListener("click", async () => {
+    window.save_as.style.display = "none";
+    window.save.style.display = "inline-block";
+    window.cancel.style.display = "inline-block";
+    window.name_input.style.display = "inline-block";
+    window.copy.style.display = "none";
+    window.layouts.style.display = "none";
+});
+
+function cancel() {
+    window.save_as.style.display = "inline-block";
+    window.save.style.display = "none";
+    window.cancel.style.display = "none";
+    window.name_input.style.display = "none";
+    window.copy.style.display = "inline-block";
+    window.layouts.style.display = "inline-block";
+}
+
+window.cancel.addEventListener("click", cancel);
+
+window.reset.addEventListener("click", () => {
+    localStorage.clear();
+    window.reset.innerText = "Reset!";
+    setTimeout(() => {
+        window.reset.innerText = "Reset LocalStorage";
+    }, 1000);
+});
+
+window.save.addEventListener("click", async () => {
+    const token = await window.workspace.save();
+    const new_name = window.name_input.value;
+    LAYOUTS[new_name] = token;
+    set_layout_options();
+    window.layouts.value = new_name;
+    window.save_as.innerText = "Saved!";
+    setTimeout(() => {
+        window.save_as.innerText = "Save As";
+    }, 1000);
+    localStorage.setItem("layouts", JSON.stringify(LAYOUTS));
+    cancel();
+});
+
+window.copy.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(JSON.stringify(LAYOUTS));
+    window.copy.innerText = "Copied!";
+    setTimeout(() => {
+        window.copy.innerText = "Debug to Clipboard";
+    }, 1000);
+});
+
+window.theme.addEventListener("click", toggle_theme);
