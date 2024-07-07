@@ -14,7 +14,7 @@ import * as _ from "lodash";
 import * as arrows from "./test_arrows.js";
 
 import { test, expect } from "@finos/perspective-test";
-import perspective from "@finos/perspective";
+import perspective from "./perspective_client";
 
 function it_old_behavior(name, capture, opts = { skip: false }) {
     let test_fn = test;

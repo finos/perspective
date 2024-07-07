@@ -10,21 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
-import perspective from "./perspective_client";
-import { test_arrow } from "./test_arrows";
+import perspective from "@finos/perspective";
 
-test("Can get hosted table name from worker", async () => {
-    const testTableName1 = Math.random().toString();
-    const _table = perspective.table(test_arrow, { name: testTableName1 });
-    const names = await perspective.get_hosted_table_names();
+// // TO run the test suite against a different server:
+// const client = await perspective.websocket("ws://localhost:8080/subscribe");
+// export default client;
 
-    expect(names).toContain(testTableName1);
-
-    const testTableName2 = Math.random().toString();
-    const _table2 = perspective.table(test_arrow, { name: testTableName2 });
-    const names2 = await perspective.get_hosted_table_names();
-
-    expect(names2).toContain(testTableName1);
-    expect(names2).toContain(testTableName2);
-});
+export default perspective;

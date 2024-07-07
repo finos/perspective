@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@finos/perspective-test";
-import perspective from "@finos/perspective";
+import perspective from "../perspective_client";
 
 /**
  * Tests the correctness of each datetime computation function in various

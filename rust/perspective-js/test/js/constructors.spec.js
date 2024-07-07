@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@finos/perspective-test";
-import perspective from "@finos/perspective";
+import perspective from "./perspective_client";
 
 import moment from "moment";
 import * as arrows from "./test_arrows.js";
