@@ -199,7 +199,10 @@ runs:
 
         - name: manylinux deps
           shell: bash
-          run: dnf install wget -y
+          run: |
+              if [ -x "$(command -v dnf)" ]; then 
+                dnf install wget -y
+              fi
           if: ${{ runner.os == 'Linux' && inputs.cpp == 'true' && inputs.javascript == 'false' }}
 
         # TODO do this earlier?

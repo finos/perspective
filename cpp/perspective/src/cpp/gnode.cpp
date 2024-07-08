@@ -186,11 +186,13 @@ t_gnode::calc_transition(
 
     if (!row_pre_existed && !cur_valid && !t_env::backout_invalid_neq_ft()) {
         trans = VALUE_TRANSITION_NEQ_FT;
-    } else if (row_pre_existed && !prev_valid && !cur_valid && !t_env::backout_eq_invalid_invalid()) {
+    } else if (row_pre_existed && !prev_valid && !cur_valid
+               && !t_env::backout_eq_invalid_invalid()) {
         trans = VALUE_TRANSITION_EQ_TT;
     } else if (!prev_existed && !exists) {
         trans = VALUE_TRANSITION_EQ_FF;
-    } else if (row_pre_existed && exists && !prev_valid && cur_valid && !t_env::backout_nveq_ft()) {
+    } else if (row_pre_existed && exists && !prev_valid && cur_valid
+               && !t_env::backout_nveq_ft()) {
         trans = VALUE_TRANSITION_NVEQ_FT;
     } else if (prev_existed && exists && prev_cur_eq) {
         trans = VALUE_TRANSITION_EQ_TT;

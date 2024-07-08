@@ -10,13 +10,13 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-fn main() {
-    pyo3_build_config::add_extension_module_link_args();
+mod psp;
 
-    // Pass the `perspective_client` links metadata flag so that the `inherit_docs`
-    // macro can find the path to the docs.
-    println!(
-        "cargo:rustc-env=PERSPECTIVE_CLIENT_DOCS_PATH={}",
-        std::env::var("DEP_PERSPECTIVE_CLIENT_DOCS_PATH").unwrap()
-    );
+fn main() -> Result<(), std::io::Error> {
+    if let Some(artifact_dir) = psp::cmake_build()? {
+        psp::cmake_link_deps(&artifact_dir)?;
+        psp::cxx_bridge_build();
+    }
+    
+    Ok(())
 }
