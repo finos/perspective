@@ -12,6 +12,7 @@
     <head>
         <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
         <script type="module">
+            await customElements.whenDefined("perspective-viewer-plugin");
             const BASE = customElements.get("perspective-viewer-plugin");
             class TestChartPluginHighPriority extends BASE {
                 get name() {

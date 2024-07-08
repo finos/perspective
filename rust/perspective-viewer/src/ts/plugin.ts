@@ -277,13 +277,3 @@ export class HTMLPerspectiveViewerPluginElement
         // Not Implemented
     }
 }
-
-if (
-    document.createElement("perspective-viewer-plugin").constructor ===
-    HTMLElement
-) {
-    window.customElements.define(
-        "perspective-viewer-plugin",
-        HTMLPerspectiveViewerPluginElement
-    );
-}

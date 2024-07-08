@@ -17,6 +17,7 @@
 
 mod browser;
 
+mod closures;
 mod custom_element;
 mod datetime;
 mod debounce;
@@ -31,6 +32,7 @@ mod weak_scope;
 mod tests;
 
 pub use browser::*;
+pub use closures::*;
 pub use custom_element::*;
 pub use datetime::*;
 pub use debounce::*;

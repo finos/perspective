@@ -39,4 +39,4 @@ export * from "./extensions";
 export type * from "./ts-rs/ViewerConfigUpdate.d.ts";
 export type * from "./ts-rs/ColumnConfigValues.d.ts";
 
-import "./bootstrap";
+import "./init";

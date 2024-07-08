@@ -250,6 +250,7 @@ class Command extends Function {
  * shell scripts. `sh` knows how to remove consecutive text from fragments when
  * arguments are "falsey", which makes mapping flags to JS expressions a breeze.
  *
+ * @type {Command & {(): Command & {(): Promise<string>}}}
  * @param {string} expression a bash command to be templated.
  * @returns {string} A command with the missing argument's flags removed.
  * @example

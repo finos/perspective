@@ -26,7 +26,7 @@ export class PerspectiveServer {
         this.clients = new Map();
         this.id_gen = 0;
         this.module = module;
-        this.server = module._js_new_server();
+        this.server = module._psp_new_server();
     }
 
     /**
@@ -35,7 +35,7 @@ export class PerspectiveServer {
     make_session(
         callback: (buffer: Uint8Array) => Promise<void>
     ): PerspectiveSession {
-        const client_id = this.module._js_new_session(this.server);
+        const client_id = this.module._psp_new_session(this.server);
         this.clients.set(client_id, callback);
         return new PerspectiveSession(
             this.module,
@@ -46,7 +46,7 @@ export class PerspectiveServer {
     }
 
     delete() {
-        this.module._js_delete_server(this.server);
+        this.module._psp_delete_server(this.server);
     }
 }
 
@@ -55,7 +55,7 @@ export class PerspectiveSession {
         private mod: EmscriptenApi,
         private server: EmscriptenServer,
         private client_id: number,
-        private client_map: Map<number, (buffer: Uint8Array) => void>
+        private client_map: Map<number, (buffer: Uint8Array) => Promise<void>>
     ) {}
 
     async handle_request(view: Uint8Array) {
@@ -63,7 +63,7 @@ export class PerspectiveSession {
             this.mod,
             view,
             async (viewPtr) => {
-                return this.mod._js_handle_request(
+                return this.mod._psp_handle_request(
                     this.server,
                     this.client_id,
                     viewPtr,
@@ -72,20 +72,20 @@ export class PerspectiveSession {
             }
         );
 
-        decode_api_responses(this.mod, ptr, async (msg: ApiResponse) => {
+        await decode_api_responses(this.mod, ptr, async (msg: ApiResponse) => {
             await this.client_map.get(msg.client_id)!(msg.data);
         });
     }
 
     poll() {
-        const polled = this.mod._js_poll(this.server);
+        const polled = this.mod._psp_poll(this.server);
         decode_api_responses(this.mod, polled, async (msg: ApiResponse) => {
             await this.client_map.get(msg.client_id)!(msg.data);
         });
     }
 
     close() {
-        this.mod._js_close_session(this.server, this.client_id);
+        this.mod._psp_close_session(this.server, this.client_id);
     }
 }
 
@@ -94,16 +94,17 @@ async function convert_typed_array_to_pointer(
     array: Uint8Array,
     callback: (_: number) => Promise<number>
 ): Promise<number> {
-    const ptr = core._js_alloc(array.byteLength);
+    const ptr = core._psp_alloc(array.byteLength);
     core.HEAPU8.set(array, ptr);
     const msg = await callback(ptr);
-    core._js_free(ptr);
+    core._psp_free(ptr);
     return msg;
 }
 
 function convert_pointer_to_u32_array(core: EmscriptenApi, ptr: number) {
     const len = core.HEAPU32[ptr >>> 2];
-    return new Uint32Array(core.HEAPU8.buffer, ptr + 4, len * 3);
+    const data_ptr = core.HEAPU32[(ptr >>> 2) + 1];
+    return new Uint32Array(core.HEAPU8.buffer, data_ptr, len * 3);
 }
 
 /**
@@ -136,15 +137,22 @@ async function decode_api_responses(
     callback: (_: ApiResponse) => Promise<void>
 ) {
     const responses = convert_pointer_to_u32_array(core, ptr);
-    for (let i = 0; i < responses.length / 3; i++) {
-        const data_ptr = responses[i * 3];
-        const length = responses[i * 3 + 1];
-        const client_id = responses[i * 3 + 2];
-        const data = new Uint8Array(core.HEAPU8.buffer, data_ptr, length);
-        const resp = { client_id, data };
-        await callback(resp);
-        core._js_free(data_ptr);
-    }
+    try {
+        for (let i = 0; i < responses.length / 3; i++) {
+            const data_ptr = responses[i * 3];
+            const length = responses[i * 3 + 1];
+            const client_id = responses[i * 3 + 2];
+            const data = new Uint8Array(core.HEAPU8.buffer, data_ptr, length);
+            const resp = { client_id, data };
+            await callback(resp);
+        }
+    } finally {
+        for (let i = 0; i < responses.length / 3; i++) {
+            const data_ptr = responses[i * 3];
+            core._psp_free(data_ptr);
+        }
 
-    core._js_free(ptr);
+        core._psp_free(responses.byteOffset);
+        core._psp_free(ptr);
+    }
 }

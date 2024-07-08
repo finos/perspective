@@ -78,7 +78,8 @@ derive_model!(Renderer, Session, Presentation for PerspectiveViewerElement);
 
 impl CustomElementMetadata for PerspectiveViewerElement {
     const CUSTOM_ELEMENT_NAME: &'static str = "perspective-viewer";
-    const STATICS: &'static [&'static str] = ["registerPlugin", "getExprTKCommands"].as_slice();
+    const STATICS: &'static [&'static str] =
+        ["registerPlugin", "getExprTKCommands", "getTypes"].as_slice();
 }
 
 #[wasm_bindgen]

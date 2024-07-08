@@ -55,7 +55,7 @@ fn main() -> Result<(), anyhow::Error> {
 
     build.compile()?.write(out_path.join("css"))?;
     let mut build = BuildCss::new("./src/themes");
-    if !cfg!(feature = "define_custom_elements_async") {
+    if !cfg!(feature = "external-bootstrap") {
         build.add_file("variables.less");
         build.add_file("intl.less");
         build.add_file("icons.less");

@@ -20,7 +20,7 @@ type WasmElement = {
     __wasm_module__: Promise<typeof psp>;
 };
 
-async function get_module() {
+export async function compile_perspective() {
     let elem = customElements.get(
         "perspective-viewer"
     ) as unknown as WasmElement;
@@ -36,12 +36,12 @@ async function get_module() {
 }
 
 export async function websocket(url: string | URL) {
-    const wasm_module = get_module();
+    const wasm_module = compile_perspective();
     return await api.websocket(wasm_module, url);
 }
 
 export async function worker() {
-    const wasm_module = get_module();
+    const wasm_module = compile_perspective();
     return await api.worker.call(undefined, wasm_module);
 }
 
