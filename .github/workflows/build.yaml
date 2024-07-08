@@ -80,6 +80,19 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
+            - name: Maximize build space
+              if: ${{ contains(matrix.os, 'ubuntu') }}
+              shell: bash
+              run: |
+                  df -h
+                  sudo rm -rf /usr/share/dotnet
+                  sudo rm -rf /usr/local/lib/android
+                  sudo rm -rf /opt/ghc
+                  sudo rm -rf /opt/hostedtoolcache/CodeQL
+                  sudo rm -rf /usr/local/share/powershell
+                  sudo rm -rf /usr/share/swift
+                  df -h
+
             - name: Config
               id: config-step
               uses: ./.github/actions/config
@@ -182,14 +195,43 @@ jobs:
 
             - name: Python Build
               run: pnpm run build
+              if: ${{ !contains(matrix.os, 'windows') }}
               env:
+                  PACKAGE: "perspective-python"
+                  PSP_ARCH: ${{ matrix.arch }}
+                  CI: 1
+
+            - name: Python Build Pyodide
+              run: pnpm install && pnpm run build
+              if: ${{ runner.os == 'Linux' && matrix.arch == 'x86_64' }}
+              env:
+                  PSP_PYODIDE: 1
+                  PACKAGE: "perspective-python"
+                  CI: 1
+
+            - name: Python Build (Windows)
+              run: |
+                  New-Item -ItemType Directory -Path $env:CARGO_TARGET_DIR -Force
+                  pnpm run build
+              if: ${{ contains(matrix.os, 'windows') }}
+              env:
+                  CARGO_TARGET_DIR: D:\psp-rust
+                  PSP_ROOT_DIR: ${{ github.workspace }}
                   VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
                   PACKAGE: "perspective-python"
                   # PSP_USE_CCACHE: 1
                   PSP_ARCH: ${{ matrix.arch }}
                   CI: 1
 
+            # Windows sucks lol
             - uses: actions/upload-artifact@v4
+              if: ${{ runner.os == 'Windows' }}
+              with:
+                  name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
+                  path: D:\psp-rust\wheels\*.whl
+
+            - uses: actions/upload-artifact@v4
+              # if: ${{ runner.os != 'Windows' }}
               with:
                   name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
                   path: rust/target/wheels/*.whl

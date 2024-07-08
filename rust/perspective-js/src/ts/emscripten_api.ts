@@ -24,19 +24,19 @@ export interface EmscriptenApi {
     HEAPU16: Uint16Array;
     HEAP32: Int32Array;
     HEAPU32: Uint32Array;
-    _js_alloc(size: number): number;
-    _js_free(ptr: number): void;
-    _js_new_server(): EmscriptenServer;
-    _js_delete_server(server: EmscriptenServer): void;
-    _js_handle_request(
+    _psp_alloc(size: number): number;
+    _psp_free(ptr: number): void;
+    _psp_new_server(): EmscriptenServer;
+    _psp_delete_server(server: EmscriptenServer): void;
+    _psp_handle_request(
         server: EmscriptenServer,
         client_id: number,
         buffer_ptr: number,
         buffer_len: number
     ): number;
-    _js_poll(server: EmscriptenServer): number;
-    _js_new_session(server: EmscriptenServer): number;
-    _js_close_session(server: EmscriptenServer, client_id: number): void;
+    _psp_poll(server: EmscriptenServer): number;
+    _psp_new_session(server: EmscriptenServer): number;
+    _psp_close_session(server: EmscriptenServer, client_id: number): void;
 }
 
 export async function compile_perspective(
@@ -57,7 +57,7 @@ export async function compile_perspective(
                     const str = Error().stack || "";
                     const textEncoder = new TextEncoder();
                     const bytes = textEncoder.encode(str);
-                    const ptr = module._js_alloc(bytes.byteLength + 1);
+                    const ptr = module._psp_js_alloc(bytes.byteLength + 1);
                     module.HEAPU8.set(bytes, ptr);
                     module.HEAPU8[ptr + bytes.byteLength] = 0;
                     return ptr;

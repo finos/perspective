@@ -32,6 +32,7 @@ include = [
 [features]
 default = []
 external-proto = ["protobuf-src"]
+external-protoc = []
 
 [lib]
 crate-type = ["rlib"]
@@ -46,12 +47,12 @@ async-lock = { version = "2.5.0" }
 futures = { version = "0.3.28" }
 itertools = { version = "0.10.1" }
 nanoid = { version = "0.4.0" }
-paste = { version = "1.0.14" }
+paste = { version = "1.0.12" }
 prost-types = { version = "0.12.3" }
 serde = { version = "1.0", features = ["derive"] }
 serde_bytes = { version = "0.11" }
 serde_json = { version = "1.0.107", features = ["raw_value"] }
-thiserror = { version = "1.0.56" }
+thiserror = { version = "1.0.55" }
 tracing = { version = ">=0.1.36" }
 tracing-unwrap = "1.0.1"
 

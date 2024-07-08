@@ -23,7 +23,7 @@ members = [
     "rust/perspective-js",
     "rust/perspective-python",
     "rust/perspective-server",
-    "examples/rust-axum",
+    "examples/rust-axum", 
 ]
 
 [profile.dev]

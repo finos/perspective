@@ -148,7 +148,7 @@ namespace details {
             // #endif
 
         } // end namespace details
-    }     // end namespace numeric
+    } // end namespace numeric
 
     inline bool is_true(const t_tscalar& v);
 
@@ -1219,7 +1219,7 @@ namespace details {
             }
 
         } // end namespace details
-    }     // end namespace numeric
+    } // end namespace numeric
 
     /**
      * Override the comparison operators to return a `t_tscalar` of DTYPE_BOOL

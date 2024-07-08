@@ -10,13 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+// DO NOT EDIT THIS WITHOUT UPDATING rust/perspective-python/build/psp.rs
+
 use std::collections::HashSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 use cmake::Config;
 
-fn copy_dir_all(
+pub fn copy_dir_all(
     src: impl AsRef<Path>,
     dst: impl AsRef<Path>,
     skip: &HashSet<&str>,
@@ -37,13 +39,14 @@ fn copy_dir_all(
     Ok(())
 }
 
-fn cmake_build() -> Result<(), std::io::Error> {
+pub fn cmake_build() -> Result<PathBuf, std::io::Error> {
     if std::env::var("CARGO_FEATURE_EXTERNAL_CPP").is_ok() {
         println!("cargo:warning=MESSAGE Building in development mode");
         let root_dir_env = std::env::var("PSP_ROOT_DIR").expect("Must set PSP_ROOT_DIR");
         let root_dir = Path::new(root_dir_env.as_str());
         copy_dir_all(Path::join(root_dir, "cpp"), "cpp", &HashSet::from(["dist"]))?;
         copy_dir_all(Path::join(root_dir, "cmake"), "cmake", &HashSet::new())?;
+
         println!(
             "cargo:rerun-if-changed={}/cpp/perspective",
             root_dir.display()
@@ -51,6 +54,10 @@ fn cmake_build() -> Result<(), std::io::Error> {
     }
 
     let mut dst = Config::new("cpp/perspective");
+    if cfg!(windows) && std::option_env!("CI").is_some() {
+        std::fs::create_dir_all("D:\\psp-build")?;
+        dst.out_dir("D:\\psp-build");
+    }
     let profile = std::env::var("PROFILE").unwrap();
     dst.always_configure(true);
     dst.define("CMAKE_BUILD_TYPE", profile.as_str());
@@ -101,7 +108,38 @@ fn cmake_build() -> Result<(), std::io::Error> {
     }
 
     println!("cargo:warning=MESSAGE Building cmake {}", profile);
-    let artifact = dst.build();
+    let artifact_dir = dst.build();
+
+    Ok(artifact_dir)
+}
+
+pub fn cmake_link_deps(cmake_build_dir: &Path) -> Result<(), std::io::Error> {
+    println!(
+        "cargo:rustc-link-search=native={}/build",
+        cmake_build_dir.display()
+    );
+
+    println!("cargo:rustc-link-lib=static=psp");
+    link_cmake_static_archives(cmake_build_dir)?;
+    println!("cargo:rerun-if-changed=cpp/perspective");
+    Ok(())
+}
+
+pub fn install_docs() {
+    if std::env::var("CARGO_FEATURE_EXTERNAL_CPP").is_ok() {
+        println!("cargo:warning=MESSAGE Copying docs");
+        let root_dir_env = std::env::var("PSP_ROOT_DIR").expect("Must set PSP_ROOT_DIR");
+        let root_dir = Path::new(root_dir_env.as_str());
+        copy_dir_all(
+            Path::join(root_dir, "rust/perspective-client/docs"),
+            "docs",
+            &HashSet::new(),
+        )
+        .expect("Error installing docs");
+    }
+}
+
+pub fn cxx_bridge_build() {
     println!("cargo:warning=MESSAGE Building cxx");
     let mut compiler = cxx_build::bridge("src/ffi.rs");
     compiler
@@ -119,22 +157,14 @@ fn cmake_build() -> Result<(), std::io::Error> {
 
     compiler.compile("perspective");
 
-    println!(
-        "cargo:rustc-link-search=native={}/build",
-        artifact.display()
-    );
-
-    link_cmake_static_archives(artifact.as_path())?;
-    println!("cargo:rerun-if-changed=cpp/perspective");
     println!("cargo:rerun-if-changed=include/server.h");
     println!("cargo:rerun-if-changed=src/server.cpp");
     println!("cargo:rerun-if-changed=src/lib.rs");
-    Ok(())
 }
 
 /// Walk the cmake output path and emit link instructions for all archives.
 /// TODO Can this be faster pls?
-fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
+pub fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
     if dir.is_dir() {
         for entry in fs::read_dir(dir)? {
             let path = entry?.path();
@@ -155,7 +185,7 @@ fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
                         stem.expect("bad")[3..].to_string()
                     };
 
-                    // println!("cargo:warning=MESSAGE static link {}", a);
+                    println!("cargo:warning=MESSAGE static link {}", a);
                     println!("cargo:rustc-link-search=native={}", dir.display());
                     println!("cargo:rustc-link-lib=static={}", a);
                 }
@@ -164,8 +194,4 @@ fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
     }
 
     Ok(())
-}
-
-fn main() -> Result<(), std::io::Error> {
-    cmake_build()
 }

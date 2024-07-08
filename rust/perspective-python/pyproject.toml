@@ -27,6 +27,10 @@ classifiers = [
 [tool.maturin]
 data = "perspective.data"
 features = ["pyo3/extension-module"]
+include = [
+    { path = "perspective/*libpsp.so", format = "wheel" },
+    { path = "perspective/*libpsp.dll", format = "wheel" },
+]
 
 [tool.pytest.ini_options]
 python_classes = ["Test", "Describe"]
