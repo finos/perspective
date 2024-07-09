@@ -16,7 +16,7 @@ use perspective_server::{Server, Session, SessionHandler};
 use pollster::FutureExt;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyFunction};
+use pyo3::types::{PyAny, PyBytes};
 
 #[pyclass]
 #[derive(Clone)]
@@ -31,7 +31,7 @@ pub struct PySyncServer {
 }
 
 #[derive(Clone)]
-struct PyConnection(Py<PyFunction>);
+struct PyConnection(Py<PyAny>);
 
 impl SessionHandler for PyConnection {
     async fn send_response<'a>(
@@ -50,7 +50,7 @@ impl PySyncServer {
         Self::default()
     }
 
-    pub fn new_session(&self, _py: Python, response_cb: Py<PyFunction>) -> PySyncSession {
+    pub fn new_session(&self, _py: Python, response_cb: Py<PyAny>) -> PySyncSession {
         let session = self
             .server
             .new_session(PyConnection(response_cb))

@@ -57,9 +57,8 @@ futures = "0.3.28"
 pyo3 = { version = "0.21.2", features = [
     "extension-module",
     "serde",
-    # "abi3-py38",
+    "abi3-py39",
 ] }
-# pyo3-asyncio = { version = "0.20", features = ["attributes", "tokio-runtime"] }
 pythonize = "0.21.1"
 tracing = { version = ">=0.1.36" }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
