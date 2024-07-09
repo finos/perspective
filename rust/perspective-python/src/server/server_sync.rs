@@ -25,7 +25,7 @@ pub struct PySyncSession {
     session: Arc<RwLock<Option<Session>>>,
 }
 
-#[pyclass]
+#[pyclass(subclass)]
 #[derive(Clone, Default)]
 pub struct PySyncServer {
     pub server: Server,
@@ -45,6 +45,7 @@ impl SessionHandler for PyConnection {
 }
 
 #[pymethods]
+
 impl PySyncServer {
     #[new]
     pub fn new() -> Self {

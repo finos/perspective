@@ -13,8 +13,11 @@
 import numpy as np
 from datetime import date, datetime
 from pytest import mark
-from perspective import Table
 import pytest
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 @mark.skip
@@ -132,7 +135,9 @@ class TestUpdateNumpy(object):
             }
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_update_np_datetime_partial_implicit_timestamp_ms(self, util):
         tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
@@ -144,7 +149,9 @@ class TestUpdateNumpy(object):
             }
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_update_np_datetime_partial(self, util):
         tbl = Table(
@@ -158,7 +165,10 @@ class TestUpdateNumpy(object):
             }
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))], "b": [1]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))],
+            "b": [1],
+        }
 
     def test_update_np_datetime_partial_timestamp_s(self, util):
         tbl = Table(
@@ -173,7 +183,10 @@ class TestUpdateNumpy(object):
             }
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))], "idx": [1]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))],
+            "idx": [1],
+        }
 
     def test_update_np_datetime_partial_timestamp_ms(self, util):
         tbl = Table(
@@ -188,7 +201,10 @@ class TestUpdateNumpy(object):
             }
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))], "idx": [1]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))],
+            "idx": [1],
+        }
 
     @pytest.mark.skip
     def test_update_np_nonseq_partial(self):

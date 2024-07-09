@@ -16,15 +16,9 @@ import logging
 import tornado.websocket
 import tornado.web
 import tornado.ioloop
-import threading
 import concurrent.futures
 
-
-from perspective import PySyncClient, PySyncServer
-
-# from perspective.core.globalpsp import shared_client
-# from perspective.handlers.new_tornado import PerspectiveTornadoHandler
-
+import perspective
 
 here = os.path.abspath(os.path.dirname(__file__))
 file_path = os.path.join(
@@ -50,7 +44,6 @@ def perspective_thread(manager, table):
 
 
 async def init_table(client):
-    # client = PySyncClient(handle_request)
     with open(file_path, mode="rb") as file:
         data = file.read()
         table = client.table(data, name="data_source_one")
@@ -58,13 +51,13 @@ async def init_table(client):
             table.update(data)
 
 
-def make_app(server):
+def make_app(perspective_server):
     return tornado.web.Application(
         [
             (
                 r"/websocket",
-                PerspectiveTornadoHandler,
-                {"psp_server": server},
+                perspective.handlers.tornado.PerspectiveTornadoHandler,
+                {"perspective_server": perspective_server},
             ),
             (
                 r"/node_modules/(.*)",
@@ -80,49 +73,12 @@ def make_app(server):
     )
 
 
-class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
-    def __init__(self, *args, **kwargs):
-        psp_server = kwargs.pop("psp_server")
-        super().__init__(*args, **kwargs)
-        self.server = psp_server
-
-    def open(self):
-        def inner(msg):
-            self.write_message(msg, binary=True)
-
-        self.session = self.server.new_session(inner)
-
-    def on_close(self) -> None:
-        self.session.close()
-        del self.session
-
-    def on_message(self, msg: bytes):
-        if not isinstance(msg, bytes):
-            return
-
-        self.session.handle_request(msg)
-        self.session.poll()
-
-
-def new_client(server):
-    def handle_sync_client(bytes):
-        sync_session.handle_request(bytes)
-        sync_session.poll()
-
-    def handle_new_session(bytes):
-        local_sync_client.handle_response(bytes)
-
-    sync_session = server.new_session(handle_new_session)
-    local_sync_client = PySyncClient(handle_sync_client)
-    return local_sync_client
-
-
 if __name__ == "__main__":
-    psp_server = PySyncServer()
-    app = make_app(psp_server)
-    app.listen(8082)
-    client = new_client(psp_server)
-    logging.critical("Listening on http://localhost:8082")
+    perspective_server = perspective.Server()
+    app = make_app(perspective_server)
+    app.listen(8080)
+    logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
+    client = perspective_server.new_client(loop_callback=loop.add_callback)
     loop.call_later(0, init_table, client)
     loop.start()

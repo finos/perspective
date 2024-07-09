@@ -31,11 +31,6 @@ function get_host() {
 }
 async function build_all() {
     // Rust compile-time metadata
-    // console.log(
-    //     `cargo build -p perspective-viewer --bin metadata --target=${get_host()} ${
-    //         IS_DEBUG ? "" : "--release"
-    //     }`
-    // );
     execSync(
         `cargo build -p perspective-viewer --bin perspective-viewer-metadata --target=${get_host()}`,
         INHERIT

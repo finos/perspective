@@ -18,7 +18,10 @@ import pandas as pd
 import numpy as np
 from datetime import date, datetime
 from pytest import mark
-from perspective import Table
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 SOURCE_STREAM_ARROW = os.path.join(
     os.path.dirname(__file__), "arrow", "int_float_str.arrow"

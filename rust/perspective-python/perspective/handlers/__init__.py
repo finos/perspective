@@ -10,19 +10,24 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from .common import PerspectiveHandlerBase
+__all__ = [
+    "PerspectiveAIOHTTPHandler",
+    "PerspectiveStarletteHandler",
+    "PerspectiveTornadoHandler",
+]
+
 
 try:
-    from .aiohttp import *
+    from .aiohttp import PerspectiveAIOHTTPHandler
 except ImportError:
     ...
 
 try:
-    from .starlette import *
+    from .starlette import PerspectiveStarletteHandler
 except ImportError:
     ...
 
 try:
-    from .tornado import *
+    from .tornado import PerspectiveTornadoHandler
 except ImportError:
     ...

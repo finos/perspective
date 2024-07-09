@@ -12,8 +12,12 @@
 
 import numpy as np
 import pandas as pd
-from perspective import PerspectiveViewer, Table
+from perspective import PerspectiveViewer
 import pytest
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 pytest.skip(allow_module_level=True)
 

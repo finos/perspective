@@ -10,15 +10,16 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from datetime import date, datetime
 from functools import partial
 from types import MethodType
-
 import numpy as np
-from perspective import PerspectiveError, PerspectiveWidget, Table
+from perspective import PerspectiveWidget
 from pytest import raises
-
 import pytest
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 pytest.skip(allow_module_level=True)
 
@@ -78,12 +79,12 @@ class TestWidget:
 
     def test_widget_no_data_with_index(self):
         # should fail
-        with raises(PerspectiveError):
+        with raises(TypeError):
             PerspectiveWidget(None, index="a")
 
     def test_widget_no_data_with_limit(self):
         # should fail
-        with raises(PerspectiveError):
+        with raises(TypeError):
             PerspectiveWidget(None, limit=5)
 
     def test_widget_eventual_data(self):
@@ -91,7 +92,7 @@ class TestWidget:
         widget = PerspectiveWidget(None, plugin="X Bar")
         assert widget.plugin == "X Bar"
 
-        with raises(PerspectiveError):
+        with raises(TypeError):
             widget._make_load_message()
 
         widget.load(table)
@@ -178,7 +179,7 @@ class TestWidget:
 
     def test_widget_pass_options_invalid(self):
         data = {"a": np.arange(0, 50)}
-        with raises(PerspectiveError):
+        with raises(TypeError):
             PerspectiveWidget(data, index="index", limit=1)
 
     # server mode
@@ -195,14 +196,14 @@ class TestWidget:
     def test_widget_no_data_with_server(self):
         # should fail
         widget = PerspectiveWidget(None, server=True)
-        with raises(PerspectiveError):
+        with raises(TypeError):
             widget._make_load_message()
 
     def test_widget_eventual_data_with_server(self):
         # should fail
         widget = PerspectiveWidget(None, server=True)
 
-        with raises(PerspectiveError):
+        with raises(TypeError):
             widget._make_load_message()
 
         # then succeed

@@ -14,8 +14,11 @@ import numpy as np
 import pandas as pd
 from datetime import date, datetime
 from pytest import mark
-from perspective import Table
 import pytest
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class TestUpdatePandas(object):
@@ -55,7 +58,9 @@ class TestUpdatePandas(object):
 
         tbl.update(update_data)
 
-        assert tbl.view().to_columns() == {"a": ["a", "b", "c", "d", "a", "b", "c", "d"]}
+        assert tbl.view().to_columns() == {
+            "a": ["a", "b", "c", "d", "a", "b", "c", "d"]
+        }
 
     def test_update_df_date(self, util):
         # set_global_serializer(serializer)
@@ -63,12 +68,14 @@ class TestUpdatePandas(object):
 
         assert tbl.schema() == {"a": "date"}
 
-
         update_data = pd.DataFrame({"a": [date(2019, 7, 12)]})
 
         tbl.update(update_data)
         assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(d) for d in [datetime(2019, 7, 11), datetime(2019, 7, 12)]]
+            "a": [
+                util.to_timestamp(d)
+                for d in [datetime(2019, 7, 11), datetime(2019, 7, 12)]
+            ]
         }
 
     @mark.skip(reason="this test relies on a lossy conversion from datetime -> date.")
@@ -77,14 +84,14 @@ class TestUpdatePandas(object):
 
         assert tbl.schema() == {"a": "date"}
 
-        update_data = pd.DataFrame(
-            {"a": [datetime(2019, 7, 12, 0, 0, 0)]}
-        )
+        update_data = pd.DataFrame({"a": [datetime(2019, 7, 12, 0, 0, 0)]})
 
         tbl.update(update_data)
         assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 7, 11)),
-                  util.to_timestamp(datetime(2019, 7, 12))]
+            "a": [
+                util.to_timestamp(datetime(2019, 7, 11)),
+                util.to_timestamp(datetime(2019, 7, 12)),
+            ]
         }
 
     def test_update_df_datetime(self, util):
@@ -94,34 +101,36 @@ class TestUpdatePandas(object):
 
         tbl.update(update_data)
         assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 7, 11, 11, 0)),
-                  util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+            "a": [
+                util.to_timestamp(datetime(2019, 7, 11, 11, 0)),
+                util.to_timestamp(datetime(2019, 7, 12, 11, 0)),
+            ]
         }
 
     def test_update_df_datetime_timestamp_seconds(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
 
-        update_data = pd.DataFrame(
-            {"a": [datetime(2019, 7, 12, 11, 0)]}
-        )
+        update_data = pd.DataFrame({"a": [datetime(2019, 7, 12, 11, 0)]})
 
         tbl.update(update_data)
         assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 7, 11, 11, 0)),
-                  util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+            "a": [
+                util.to_timestamp(datetime(2019, 7, 11, 11, 0)),
+                util.to_timestamp(datetime(2019, 7, 12, 11, 0)),
+            ]
         }
 
     def test_update_df_datetime_timestamp_ms(self, util):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
 
-        update_data = pd.DataFrame(
-            {"a": [datetime(2019, 7, 12, 11, 0)]}
-        )
+        update_data = pd.DataFrame({"a": [datetime(2019, 7, 12, 11, 0)]})
 
         tbl.update(update_data)
         assert tbl.view().to_columns() == {
-            "a": [util.to_timestamp(datetime(2019, 7, 11, 11, 0)),
-                  util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+            "a": [
+                util.to_timestamp(datetime(2019, 7, 11, 11, 0)),
+                util.to_timestamp(datetime(2019, 7, 12, 11, 0)),
+            ]
         }
 
     def test_update_df_partial(self):
@@ -137,7 +146,7 @@ class TestUpdatePandas(object):
         tbl = Table(pd.DataFrame({"a": [1, 2, 3, 4]}))
         update_data = pd.DataFrame({"a": [5, 6, 7, 8], "__INDEX__": [0, 1, 2, 3]})
         tbl.update(update_data)
-        assert tbl.view().to_columns() == {"a": [5, 6, 7, 8], "index": [0,1,2,3]}
+        assert tbl.view().to_columns() == {"a": [5, 6, 7, 8], "index": [0, 1, 2, 3]}
 
     def test_update_df_partial_implicit(self):
         tbl = Table({"a": [1, 2, 3, 4]})
@@ -149,15 +158,16 @@ class TestUpdatePandas(object):
         assert tbl.view().to_columns() == {"a": [5, 6, 7, 8]}
 
     def test_update_df_datetime_partial(self, util):
-        tbl = Table(
-            {"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b"
-        )
+        tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
 
         update_data = pd.DataFrame({"a": [datetime(2019, 7, 12, 11, 0)], "b": [1]})
 
         tbl.update(update_data)
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))], "b": [1]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))],
+            "b": [1],
+        }
 
     def test_update_df_one_col(self):
         tbl = Table({"a": [1, 2, 3, 4], "b": ["a", "b", "c", "d"]})
@@ -176,7 +186,7 @@ class TestUpdatePandas(object):
 
     @pytest.mark.skip
     def test_update_df_with_none_partial(self):
-        tbl = Table({"a": [1, float('nan'), 3], "b": ["a", None, "d"]}, index="b")
+        tbl = Table({"a": [1, float("nan"), 3], "b": ["a", None, "d"]}, index="b")
         update_data = pd.DataFrame({"a": [4, 5], "b": ["a", "d"]})
         tbl.update(update_data)
         assert tbl.view().to_columns() == {
@@ -186,12 +196,16 @@ class TestUpdatePandas(object):
 
     def test_update_df_unset_partial(self):
         tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="b")
-        update_data = pd.DataFrame({"a": pd.Series([None, None], dtype=pd.Int32Dtype()), "b": ["a", "c"]})
+        update_data = pd.DataFrame(
+            {"a": pd.Series([None, None], dtype=pd.Int32Dtype()), "b": ["a", "c"]}
+        )
         tbl.update(update_data)
         assert tbl.view().to_columns() == {"a": [None, 2, None], "b": ["a", "b", "c"]}
 
     def test_update_df_nan_partial(self):
         tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="b")
-        update_data = pd.DataFrame({"a": pd.Series([None, None], dtype=pd.Int32Dtype()), "b": ["a", "c"]})
+        update_data = pd.DataFrame(
+            {"a": pd.Series([None, None], dtype=pd.Int32Dtype()), "b": ["a", "c"]}
+        )
         tbl.update(update_data)
         assert tbl.view().to_columns() == {"a": [None, 2, None], "b": ["a", "b", "c"]}

@@ -12,7 +12,6 @@
 
 from pytest import raises
 
-from perspective.core import PerspectiveError
 
 # from perspective.core import Plugin
 # import perspective.viewer.validate as validate

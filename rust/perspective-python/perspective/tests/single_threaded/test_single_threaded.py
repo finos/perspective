@@ -10,16 +10,25 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import pandas as pd
-from perspective import Table, set_threadpool_size
 
-set_threadpool_size(1)
+import perspective as psp
+
+server = psp.Server()
+server.set_threadpool_size(1)
+client = server.new_client()
+Table = client.table
 
 
 class TestThreadPoolOne:
     def test_threadpool_one_does_not_block_view(self):
         t = Table(
-            {"id": "integer", "symbol": "string", "valid": "boolean", "value": "integer", "value2": "integer"},
+            {
+                "id": "integer",
+                "symbol": "string",
+                "valid": "boolean",
+                "value": "integer",
+                "value2": "integer",
+            },
             index="id",
         )
         t.update(

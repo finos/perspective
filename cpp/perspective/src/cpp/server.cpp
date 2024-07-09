@@ -1834,10 +1834,10 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
 
             auto num_view_columns = 0;
             const auto real_size = config->get_columns().size();
-            if (ncols > 0 && real_size > 0){
+            if (ncols > 0 && real_size > 0) {
                 num_view_columns = ncols
-                - (ncols / (config->get_columns().size() + num_hidden))
-                    * num_hidden;
+                    - (ncols / (config->get_columns().size() + num_hidden))
+                        * num_hidden;
             }
 
             view_dims->set_num_view_columns(num_view_columns);

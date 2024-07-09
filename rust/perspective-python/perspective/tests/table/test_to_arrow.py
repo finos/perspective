@@ -12,7 +12,10 @@
 
 import pyarrow as pa
 from datetime import date, datetime
-from perspective import Table
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class TestToArrow(object):
@@ -93,7 +96,11 @@ class TestToArrow(object):
         ts = lambda x: int(datetime.timestamp(x) * 1000)
         assert tbl2.schema() == tbl.schema()
         assert tbl2.view().to_columns() == {
-            "a": [ts(datetime(2019, 7, 11)), ts(datetime(2016, 2, 29)), ts(datetime(2019, 12, 10))]
+            "a": [
+                ts(datetime(2019, 7, 11)),
+                ts(datetime(2016, 2, 29)),
+                ts(datetime(2019, 12, 10)),
+            ]
         }
 
     def test_to_arrow_date_symmetric_january(self, util):
@@ -104,7 +111,14 @@ class TestToArrow(object):
         tbl2 = Table(arr)
         assert tbl2.schema() == tbl.schema()
         assert tbl2.view().to_columns() == {
-            "a": [util.to_timestamp(x) for x in [datetime(2019, 1, 1), datetime(2016, 1, 1), datetime(2019, 1, 1)]]
+            "a": [
+                util.to_timestamp(x)
+                for x in [
+                    datetime(2019, 1, 1),
+                    datetime(2016, 1, 1),
+                    datetime(2019, 1, 1),
+                ]
+            ]
         }
 
     def test_to_arrow_datetime_symmetric(self, util):
@@ -121,11 +135,14 @@ class TestToArrow(object):
         tbl2 = Table(arr)
         assert tbl2.schema() == tbl.schema()
         assert tbl2.view().to_columns() == {
-            "a": [util.to_timestamp(x) for x in [
-                datetime(2019, 7, 11, 12, 30),
-                datetime(2016, 2, 29, 11, 0),
-                datetime(2019, 12, 10, 12, 0),
-            ]]
+            "a": [
+                util.to_timestamp(x)
+                for x in [
+                    datetime(2019, 7, 11, 12, 30),
+                    datetime(2016, 2, 29, 11, 0),
+                    datetime(2019, 12, 10, 12, 0),
+                ]
+            ]
         }
 
     def test_to_arrow_one_symmetric(self):
@@ -143,7 +160,12 @@ class TestToArrow(object):
         view = tbl.view(group_by=["a"])
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
-        assert tbl2.schema() == {"a (Group by 1)": "integer", "a": "integer", "b": "integer", "c": "integer"}
+        assert tbl2.schema() == {
+            "a (Group by 1)": "integer",
+            "a": "integer",
+            "b": "integer",
+            "c": "integer",
+        }
         d = view.to_columns()
         d["a (Group by 1)"] = [
             x[0] if len(x) > 0 else None for x in d.pop("__ROW_PATH__")
@@ -289,7 +311,12 @@ class TestToArrow(object):
             "d": [1.5, 2.5, None, 3.5, None],
         }
         tbl = Table(data)
-        assert tbl.schema() == {"a": "integer", "b": "float", "c": "integer", "d": "float"}
+        assert tbl.schema() == {
+            "a": "integer",
+            "b": "float",
+            "c": "integer",
+            "d": "float",
+        }
         arr = tbl.view().to_arrow(start_col=1, end_col=3)
         tbl2 = Table(arr)
         assert tbl2.view().to_columns() == {"b": data["b"], "c": data["c"]}

@@ -11,7 +11,10 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import os
-from perspective import Table
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class TestToArrowLZ4(object):

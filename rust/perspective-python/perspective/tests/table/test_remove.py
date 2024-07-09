@@ -10,7 +10,10 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from perspective.table import Table
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class TestRemove(object):

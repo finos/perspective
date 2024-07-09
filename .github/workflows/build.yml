@@ -310,6 +310,7 @@ jobs:
               env:
                   PACKAGE: "perspective-python"
                   PSP_USE_CCACHE: 1
+                  CI: 1
 
             # - name: Docs Build
             #   run: pnpm run docs

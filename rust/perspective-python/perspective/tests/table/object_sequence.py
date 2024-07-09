@@ -12,7 +12,10 @@
 
 import sys
 from random import randint, choice
-from perspective.table import Table
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class CustomObjectStore(object):

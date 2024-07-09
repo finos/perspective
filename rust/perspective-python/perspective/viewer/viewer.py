@@ -6,15 +6,21 @@
 #  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
 #  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
 #  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
-#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms  ┃
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from random import random
 from .viewer_traitlets import PerspectiveTraitlets
+from ..perspective import Table, View
 
-from ..core.exception import PerspectiveError
-from ..legacy import PerspectiveManager, Table
+
+# ─  │  ┌ ┬ ┐
+# ┄  ┆  ├ ┼ ┤ ╲ ╱
+# ┈  ┊  └ ┴ ┘
+# ━  ┃  ┏ ┳ ┓ ┏ ┯ ┓ ┏ ┳ ┓ ┏ ┯ ┓
+# ┅  ┇  ┣ ╋ ┫ ┣ ┿ ┫ ┠ ╂ ┨ ┠ ┼ ┨
+# ┉  ┋  ┗ ┻ ┛ ┗ ┷ ┛ ┗ ┻ ┛ ┗ ┷ ┛
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -103,22 +109,24 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         # Create an instance of `PerspectiveManager`, which receives messages
         # from the `PerspectiveJupyterClient` on the front-end.
-        self.manager = PerspectiveManager()
+        self.manager = None
 
         # The string name of the Table under management by this viewer and its
         # attached PerspectiveManager
         self.table_name = None
 
         # Viewer configuration
-        self.plugin = plugin # validate_plugin(plugin)
-        self.columns = columns or [] # validate_columns(columns) or []
-        self.group_by = group_by or [] # validate_group_by(group_by) or []
-        self.split_by = split_by or [] # validate_split_by(split_by) or []
-        self.aggregates = aggregates or {} # validate_aggregates(aggregates) or {}
-        self.sort = sort or [] # validate_sort(sort) or []
-        self.filter = filter or [] # validate_filter(filter) or []
-        self.expressions = expressions or {} # validate_expressions(expressions) or {}
-        self.plugin_config = plugin_config or {} # validate_plugin_config(plugin_config) or {}
+        self.plugin = plugin  # validate_plugin(plugin)
+        self.columns = columns or []  # validate_columns(columns) or []
+        self.group_by = group_by or []  # validate_group_by(group_by) or []
+        self.split_by = split_by or []  # validate_split_by(split_by) or []
+        self.aggregates = aggregates or {}  # validate_aggregates(aggregates) or {}
+        self.sort = sort or []  # validate_sort(sort) or []
+        self.filter = filter or []  # validate_filter(filter) or []
+        self.expressions = expressions or {}  # validate_expressions(expressions) or {}
+        self.plugin_config = (
+            plugin_config or {}
+        )  # validate_plugin_config(plugin_config) or {}
         self.settings = settings
         self.theme = theme
         self.title = title
@@ -183,7 +191,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if isinstance(data, Table):
             table = data
         elif isinstance(data, View):
-            raise PerspectiveError("Only `Table` or data can be loaded.")
+            raise TypeError("Only `Table` or data can be loaded.")
         else:
             table = Table(data, **options)
 

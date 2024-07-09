@@ -11,9 +11,11 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from datetime import date, datetime
-
-from perspective.table import Table
 from pytest import mark
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class TestTableInfer(object):

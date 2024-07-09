@@ -16,7 +16,7 @@ import os
 import os.path
 import time
 from perspective.core.globalpsp import shared_client
-from perspective.handlers.new_tornado import PerspectiveTornadoHandler
+from perspective.handlers.tornado import PerspectiveTornadoHandler
 from tornado.websocket import websocket_connect
 import tornado
 import threading
@@ -55,6 +55,7 @@ async def session():
 
 # Server
 
+
 def make_app(queue: multiprocessing.Queue, port: int = 8080):
     """Make a tornado server for the thread local event loop."""
     app = tornado.web.Application(
@@ -67,8 +68,11 @@ def make_app(queue: multiprocessing.Queue, port: int = 8080):
             (
                 r"/(.*)",
                 tornado.web.StaticFileHandler,
-                {"path": os.path.join(os.path.dirname(__file__), "../client/dist"), "default_filename": "index.html"},
-            )
+                {
+                    "path": os.path.join(os.path.dirname(__file__), "../client/dist"),
+                    "default_filename": "index.html",
+                },
+            ),
         ]
     )
 
@@ -88,6 +92,7 @@ def start_server(queue: multiprocessing.Queue):
     server_process.daemon = True
     server_process.start()
     return server_process
+
 
 def main():
     """Runs an entire test scenario, server and client pool, then prints run

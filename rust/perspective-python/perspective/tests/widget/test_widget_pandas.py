@@ -10,12 +10,15 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from datetime import date
 import pandas as pd
 import numpy as np
-from perspective import Table, PerspectiveWidget
-
 import pytest
+from perspective import PerspectiveWidget
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
+
 
 pytest.skip(allow_module_level=True)
 
