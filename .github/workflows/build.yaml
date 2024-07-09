@@ -1,0 +1,346 @@
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+name: Build Status
+
+on:
+    push:
+        branches:
+            - master
+        tags:
+            - v*
+        paths-ignore:
+            - AUTHORS
+            - CHANGELOG.md
+            - CONTRIBUTING.md
+            - LICENSE
+            - README.md
+            - binder/
+            - docs/
+            - examples/
+            - rust/perspective-python/README.md
+    pull_request:
+        branches:
+            - master
+    workflow_dispatch:
+        inputs:
+            ci-full:
+                description: "Run Full CI"
+                required: false
+                type: boolean
+                default: false
+            ci-skip-cache:
+                description: "Omit Cache from CI run"
+                required: false
+                type: boolean
+                default: false
+            ci-skip-python:
+                description: "Skip Python components of CI"
+                required: false
+                type: boolean
+                default: false
+            ci-include-windows:
+                description: "Include Windows (Python) components of CI"
+                required: false
+                type: boolean
+                default: false
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
+jobs:
+    # ,-,---.       .    .   ,-_/              .---.               .
+    #  '|___/ . . . |  ,-|   '  | ,-. .  , ,-. \___  ,-. ,-. . ,-. |-
+    #  ,|   \ | | | |  | |      | ,-| | /  ,-|     \ |   |   | | | |
+    # `-^---' `-^ ' `' `-^      | `-^ `'   `-^ `---' `-' '   ' |-' `'
+    #                        /` |                              |
+    #                        `--'                              '
+    build_js:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                python-version:
+                    - 3.9
+                node-version: [20.x]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              id: init-step
+              uses: ./.github/actions/install-deps
+              with:
+                  python: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - name: WebAssembly Build
+              run: pnpm run build --ci
+              env:
+                  PACKAGE: "!perspective-python,!perspective-jupyterlab"
+                  PSP_USE_CCACHE: 1
+
+            # - name: Docs Build
+            #   run: pnpm run docs
+
+            # - name: Lint
+            #   run: pnpm run lint
+            #   env:
+            #       PACKAGE: "!perspective-python,!perspective-jupyterlab"
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: perspective-js-dist
+                  path: |
+                      rust/perspective-js/dist/
+                      rust/perspective-viewer/dist
+                      packages/perspective-jupyterlab/dist/
+                      packages/perspective-viewer-d3fc/dist
+                      packages/perspective-viewer-datagrid/dist
+                      packages/perspective-viewer-openlayers/dist
+                      packages/perspective-esbuild-plugin/dist
+                      packages/perspective-webpack-plugin/dist
+                      packages/perspective-cli/dist
+                      packages/perspective-workspace/dist
+
+    # ,-,---.       .    .  .-,--.     .  .
+    #  '|___/ . . . |  ,-|   '|__/ . . |- |-. ,-. ,-.
+    #  ,|   \ | | | |  | |   ,|    | | |  | | | | | |
+    # `-^---' `-^ ' `' `-^   `'    `-| `' ' ' `-' ' '
+    #                               /|
+    #                              `-'
+    build_python:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                    - macos-13
+                    - windows-2022
+                arch:
+                    - aarch64
+                    - x86_64
+                python-version:
+                    - 3.9
+                node-version: [20.x]
+                exclude:
+                    - os: windows-2022
+                      arch: aarch64
+
+                    - os: ubuntu-22.04
+                      arch: aarch64
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              id: init-step
+              uses: ./.github/actions/install-deps
+              with:
+                  arch: ${{ matrix.arch }}
+                  javascript: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            # https://github.com/apache/arrow/issues/38391
+            - if: ${{ runner.os == 'macOS' }}
+              run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV
+
+            - run: echo "${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}" >> $env:GITHUB_PATH
+              if: ${{ runner.os == 'Windows' }}
+
+            - name: Python Build
+              run: pnpm run build
+              env:
+                  VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
+                  PACKAGE: "perspective-python"
+                  PSP_USE_CCACHE: 1
+                  PSP_ARCH: ${{ matrix.arch }}
+                  CI: 1
+
+            - uses: actions/upload-artifact@v4
+              # if: ${{ runner.os != 'Windows' }}
+              with:
+                  name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
+                  path: rust/target/wheels/*.whl
+
+            - uses: actions/upload-artifact@v4
+              if: ${{ runner.os == 'Linux' }}
+              with:
+                  name: perspective-python-sdist
+                  path: rust/target/wheels/*.tar.gz
+
+    # ,-,---.       .    .   ,-_/             .          ,       .
+    #  '|___/ . . . |  ,-|   '  | . . ,-. . . |- ,-. ,-. )   ,-. |-.
+    #  ,|   \ | | | |  | |      | | | | | | | |  |-' |  /    ,-| | |
+    # `-^---' `-^ ' `' `-^      | `-^ |-' `-| `' `-' '  `--' `-^ ^-'
+    #                        /` |     |    /|
+    #                        `--'     '   `-'
+    build_juptyerlab_extension:
+        needs: [build_js, build_python]
+        runs-on: ${{ matrix.os }}
+        if: false
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                python-version:
+                    - 3.9
+                node-version: [20.x]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  rust: "false"
+                  boost: "false"
+                  llvm: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: nbextension-dist
+                  path: rust/perspective-python/perspective/nbextension
+                  if-no-files-found: error
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: labextension-dist
+                  path: rust/perspective-python/perspective/labextension
+                  if-no-files-found: error
+
+    #  ,--,--'      .    ,-_/              .---.               .
+    #  `- | ,-. ,-. |-   '  | ,-. .  , ,-. \___  ,-. ,-. . ,-. |-
+    #   , | |-' `-. |       | ,-| | /  ,-|     \ |   |   | | | |
+    #   `-' `-' `-' `'      | `-^ `'   `-^ `---' `-' '   ' |-' `'
+    #                   /` |                              |
+    #                   `--'                              '
+    test_js:
+        needs: [build_js]
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                python-version:
+                    - 3.9
+                node-version: [20.x]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  python: "false"
+                  rust: "false"
+                  boost: "false"
+                  llvm: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-js-dist
+                  path: .
+
+            - name: Run Tests
+              run: pnpm run test
+              env:
+                  PACKAGE: "!perspective-python,!perspective-jupyterlab"
+                  PSP_USE_CCACHE: 1
+
+    # ,--,--'      .   .-,--.     .  .
+    # `- | ,-. ,-. |-   '|__/ . . |- |-. ,-. ,-.
+    #  , | |-' `-. |    ,|    | | |  | | | | | |
+    #  `-' `-' `-' `'   `'    `-| `' ' ' `-' ' '
+    #                          /|
+    #                         `-'
+    test_python:
+        needs: [build_python]
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                    - macos-13
+                    - windows-2022
+                python-version:
+                    - 3.9
+                    # - 3.12
+                node-version: [20.x]
+                arch:
+                    - x86_64
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  rust: "false"
+                  boost: "false"
+                  llvm: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-dist-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.python-version }}
+
+            - name: Install wheel (Linux)
+              run: python -m pip install -U *manylinux*.whl --target rust/perspective-python
+              if: ${{ runner.os == 'Linux' }}
+
+            - name: Install wheel (OSX)
+              run: python -m pip install -U --no-dependencies *x86*.whl --target rust/perspective-python
+              if: ${{ runner.os == 'macOS' }}
+
+            - name: Install wheel (Windows)
+              run: python -m pip install -U --no-dependencies (Get-ChildItem .\*.whl | Select-Object -Expand FullName) --target rust/perspective-python
+              if: ${{ runner.os == 'Windows' }}
+
+            - name: Run Tests
+              run: pnpm run test
+              env:
+                  PACKAGE: "perspective-python"
+                  PSP_USE_CCACHE: 1

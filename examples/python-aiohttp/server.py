@@ -19,7 +19,7 @@ import threading
 from aiohttp import web
 
 from perspective import Server
-from perspective.handlers import PerspectiveAIOHTTPHandler
+from perspective.handlers.aiohttp import PerspectiveAIOHTTPHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))

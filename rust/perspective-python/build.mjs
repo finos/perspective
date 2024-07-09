@@ -17,15 +17,37 @@ if (!!process.env.PSP_DEBUG) {
     flags = "";
 }
 
+const opts = {
+    stdio: "inherit",
+    env: {
+        ...process.env,
+        PSP_ROOT_DIR: "../..",
+    },
+};
+
 if (!!process.env.CI) {
-    execSync(
-        `PSP_ROOT_DIR=../.. maturin build ${flags} --features=external-cpp`,
-        { stdio: "inherit" }
-    );
-    execSync(`PSP_ROOT_DIR=../.. maturin sdist`, { stdio: "inherit" });
+    let target = "";
+    if (process.env.PSP_ARCH === "x86_64" && process.platform === "darwin") {
+        target = "--target=x86_64-apple-darwin";
+    } else if (
+        process.env.PSP_ARCH === "aarch64" &&
+        process.platform === "darwin"
+    ) {
+        target = "--target=aarch64-apple-darwin";
+    } else if (
+        process.env.PSP_ARCH === "x86_64" &&
+        process.platform === "linux"
+    ) {
+        target = "--target=x86_64-unknown-linux-gnu";
+    } else if (
+        process.env.PSP_ARCH === "aarch64" &&
+        process.platform === "linux"
+    ) {
+        target = "--target=aarch64-unknown-linux-gnu";
+    }
+
+    execSync(`maturin build ${flags} --features=external-cpp ${target}`, opts);
+    execSync(`maturin sdist`, opts);
 } else {
-    execSync(
-        `PSP_ROOT_DIR=../.. maturin develop ${flags} --features=external-cpp`,
-        { stdio: "inherit" }
-    );
+    execSync(`maturin develop ${flags} --features=external-cpp`, opts);
 }

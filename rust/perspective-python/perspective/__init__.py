@@ -63,7 +63,3 @@ class Client(PySyncClient):
         session = server.new_session(handle_response)
         client = Client(handle_request)
         return client
-
-
-server = Server()
-client = Client.from_server(server)

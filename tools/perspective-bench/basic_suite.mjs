@@ -270,7 +270,8 @@ const VERSIONS = Object.keys(
 
 fs.mkdirSync(path.join(__dirname, "./dist"), { recursive: true });
 suite(
-    ["ws://localhost:8082/websocket", "@finos/perspective", ...VERSIONS],
+    // "ws://localhost:8082/websocket",
+    ["@finos/perspective", ...VERSIONS],
     path.join(__dirname, "dist/benchmark-js.arrow"),
     async function (path, version_idx) {
         let client, metadata;

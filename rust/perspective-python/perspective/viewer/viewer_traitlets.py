@@ -11,7 +11,10 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from traitlets import HasTraits, Unicode, List, Bool, Dict, validate
-from ..core._version import __version__
+
+import importlib
+
+__version__ = importlib.metadata.version("perspective-python")
 
 from .validate import (
     validate_version,

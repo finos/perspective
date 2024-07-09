@@ -16,7 +16,7 @@ build-backend = "maturin"
 
 [project]
 name = "perspective-python"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dynamic = ["version"]
 dependencies = ["maturin==1.6.0"]
 classifiers = [

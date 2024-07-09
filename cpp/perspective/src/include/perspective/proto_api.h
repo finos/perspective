@@ -12,11 +12,15 @@
 
 #pragma once
 
-#include "perspective/exports.h"
 #include <memory>
 #include <string>
-#include <string_view>
 #include <vector>
+
+#if defined(_WIN32) || defined(WIN32)
+#define PERSPECTIVE_EXPORT __declspec(dllexport)
+#else
+#define PERSPECTIVE_EXPORT __attribute__((visibility("default")))
+#endif
 
 struct ProtoApiResponse {
     std::string data;
@@ -35,10 +39,8 @@ public:
     std::uint32_t new_session();
     void close_session(const std::uint32_t& client_id);
 
-    [[nodiscard]]
     std::vector<ProtoApiResponse>
     handle_request(std::uint32_t client_id, const std::string& data) const;
 
-    [[nodiscard]]
     std::vector<ProtoApiResponse> poll();
 };

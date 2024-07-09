@@ -23,7 +23,7 @@ from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 
 from perspective import Server
-from perspective.handlers import PerspectiveStarletteHandler
+from perspective.handlers.starlette import PerspectiveStarletteHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))

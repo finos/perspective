@@ -1,0 +1,111 @@
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+name: "Parse build configuration"
+description: "Parses the build configuration into something easy to consume"
+
+outputs:
+    SKIP_CI:
+        value: ${{ steps.setuppush.outputs.SKIP_CI || steps.setuppr.outputs.SKIP_CI || steps.setupmanual.outputs.SKIP_CI }}
+    SKIP_CACHE:
+        value: ${{ steps.setuppush.outputs.SKIP_CACHE || steps.setuppr.outputs.SKIP_CACHE || steps.setupmanual.outputs.SKIP_CACHE }}
+    FULL_RUN:
+        value: ${{ steps.setuppush.outputs.FULL_RUN || steps.setuppr.outputs.FULL_RUN || steps.setupmanual.outputs.FULL_RUN }}
+    SKIP_PYTHON:
+        value: ${{ steps.setuppush.outputs.SKIP_PYTHON || steps.setuppr.outputs.SKIP_PYTHON || steps.setupmanual.outputs.SKIP_PYTHON }}
+    INCLUDE_WINDOWS:
+        value: ${{ steps.setuppush.outputs.INCLUDE_WINDOWS || steps.setuppr.outputs.INCLUDE_WINDOWS || steps.setupmanual.outputs.INCLUDE_WINDOWS }}
+
+runs:
+    using: "composite"
+    steps:
+        - name: Get Commit Message
+          shell: bash
+          run: echo "COMMIT_MSG=$(git log -1 --pretty=%B HEAD | tr '\n' ' ')" >> $GITHUB_ENV
+          if: ${{ github.event_name == 'push' }}
+
+        - name: Get Commit Message
+          shell: bash
+          run: echo "COMMIT_MSG=$(git log -1 --pretty=%B HEAD^2 | tr '\n' ' ')" >> $GITHUB_ENV
+          if: ${{ github.event_name == 'pull_request' }}
+
+        - name: Display and Setup Build Args (Push)
+          shell: bash
+          id: setuppush
+          run: |
+              echo "Commit Message: $COMMIT_MSG"
+              echo "Skip CI: $SKIP_CI"
+              echo "Skip Cache: $SKIP_CACHE"
+              echo "Full Run: $FULL_RUN"
+              echo "Skip Python: $SKIP_PYTHON"
+              echo "Include Windows: $INCLUDE_WINDOWS"
+              echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+              echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
+              echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
+              echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
+              echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
+              echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
+          env:
+              SKIP_CI: ${{ contains(github.event.head_commit.message, '[ci-skip]') }}
+              SKIP_CACHE: ${{ contains(github.event.head_commit.message, '[ci-skip-cache]') }}
+              FULL_RUN: ${{ startsWith(github.ref_name, 'v') || contains(github.event.head_commit.message, '[ci-full]') }}
+              SKIP_PYTHON: ${{ contains(github.event.head_commit.message, '[ci-skip-python]') }}
+              INCLUDE_WINDOWS: ${{ contains(github.event.head_commit.message, '[ci-include-windows]') }}
+          if: ${{ github.event_name == 'push' }}
+
+        - name: Display and Setup Build Args (PR)
+          shell: bash
+          id: setuppr
+          run: |
+              echo "Commit Message: $COMMIT_MSG"
+              echo "Skip CI: $SKIP_CI"
+              echo "Skip Cache: $SKIP_CACHE"
+              echo "Full Run: $FULL_RUN"
+              echo "Skip Python: $SKIP_PYTHON"
+              echo "Include Windows: $INCLUDE_WINDOWS"
+              echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+              echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
+              echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
+              echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
+              echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
+              echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
+          env:
+              SKIP_CI: ${{ contains(github.event.pull_request.title, '[ci-skip]') || contains(github.event.head_commit.message, '[ci-skip]') }}
+              SKIP_CACHE: ${{ contains(github.event.pull_request.title, '[ci-skip-cache]') || contains(github.event.head_commit.message, '[ci-skip-cache]') }}
+              FULL_RUN: ${{ contains(github.event.pull_request.title, '[ci-full]') || contains(github.event.head_commit.message, '[ci-full]') }}
+              SKIP_PYTHON: ${{ contains(github.event.pull_request.title, '[ci-skip-python]') || contains(github.event.head_commit.message, '[ci-skip-python]') }}
+              INCLUDE_WINDOWS: ${{ contains(github.event.pull_request.title, '[ci-include-windows]') || contains(github.event.head_commit.message, '[ci-include-windows]') }}
+          if: ${{ github.event_name == 'pull_request' }}
+
+        - name: Display and Setup Build Args (Manual)
+          id: setupmanual
+          shell: bash
+          run: |
+              echo "Commit Message: $COMMIT_MSG"
+              echo "Skip CI: $SKIP_CI"
+              echo "Skip Cache: $SKIP_CACHE"
+              echo "Full Run: $FULL_RUN"
+              echo "Skip Python: $SKIP_PYTHON"
+              echo "Include Windows: $INCLUDE_WINDOWS"
+              echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+              echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
+              echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
+              echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
+              echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
+              echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
+          env:
+              SKIP_CI: false
+              SKIP_CACHE: ${{ github.event.inputs.ci-skip-cache }}
+              FULL_RUN: ${{ github.event.inputs.ci-full }}
+              SKIP_PYTHON: ${{ github.event.inputs.ci-skip-python }}
+              INCLUDE_WINDOWS: ${{ github.event.inputs.ci-include-windows }}
+          if: ${{ github.event_name == 'workflow_dispatch' }}

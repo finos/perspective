@@ -15,8 +15,9 @@ from pytest import raises
 
 # from perspective.core import Plugin
 # import perspective.viewer.validate as validate
-from perspective.core._version import __version__
+import importlib
 
+__version__ = importlib.metadata.version("perspective-python")
 
 # class TestValidate:
 #     def test_validate_plugin_valid_instance(self):

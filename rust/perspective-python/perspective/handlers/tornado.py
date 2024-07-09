@@ -38,10 +38,8 @@ class PerspectiveTornadoHandler(WebSocketHandler):
         ... ])
     """
 
-    def __init__(self, *args, **kwargs):
-        psp_server = kwargs.pop("perspective_server")
-        super().__init__(*args, **kwargs)
-        self.server = psp_server
+    def initialize(self, perspective_server):
+        self.server = perspective_server
 
     def open(self):
         def inner(msg):

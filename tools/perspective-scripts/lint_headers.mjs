@@ -27,7 +27,6 @@ const IGNORE_PATHS = fs_sync
         "pnpm-workspace.yaml",
         "cpp/perspective/src/cpp/vendor",
         "cpp/perspective/src/include/perspective/vendor",
-        "python/perspective/perspective/core/_version.py",
     ]);
 
 const FIX_PATHS = [

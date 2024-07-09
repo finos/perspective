@@ -1,4 +1,4 @@
-set(DEFAULT_PROTOBUF_VERSION "25.1")
+set(DEFAULT_PROTOBUF_VERSION "26.1")
 
 # Function to download and extract protoc
 function(download_protoc VERSION DESTINATION)

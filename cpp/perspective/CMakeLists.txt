@@ -28,7 +28,11 @@ if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
     set(PSP_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
 endif()
 
+
+
+
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
+set(MSVC_RUNTIME_LIBRARY MultiThreaded)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(WIN32 ON)
@@ -42,6 +46,18 @@ else()
     set(WIN32 OFF)
     set(MACOS OFF)
     set(LINUX ON)
+endif()
+
+if (WIN32)
+    add_compile_options("/EHsc")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
+
+if(WIN32)
+    set(CMAKE_CXX_FLAGS " /EHsc /MP /MT /c /bigobj")
+else()
+    # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
 endif()
 
 # # Helper function
@@ -180,18 +196,19 @@ if(PSP_PYTHON_BUILD AND MACOS)
     # https://blog.tim-smith.us/2015/09/python-extension-modules-os-x/
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
 
-    # check_c_compiler_flag("-arch x86_64" x86_64Supported)
-    check_c_compiler_flag("-arch arm64" arm64Supported)
+    # # TODO This now needs to be set externally because we cross-compile.
+    # # check_c_compiler_flag("-arch x86_64" x86_64Supported)
+    # check_c_compiler_flag("-arch arm64" arm64Supported)
 
-    if(x86_64Supported AND arm64Supported)
-        set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
-    elseif(x86_64Supported)
-        set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
-        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build universal architecture for OSX" FORCE)
-    elseif(arm64Supported)
-        set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
-        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
-    endif()
+    # if(x86_64Supported AND arm64Supported)
+    #     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+    # elseif(x86_64Supported)
+    #     set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
+    #     set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build x86_64 architecture for OSX" FORCE)
+    # elseif(arm64Supported)
+    #     set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
+    #     set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build arm64 architecture for OSX" FORCE)
+    # endif()
 endif()
 
 # ######################
@@ -318,7 +335,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         find_package(Boost REQUIRED)
     else()
         set(Boost_USE_STATIC_LIBS ON)
-        find_package(Boost REQUIRED)
+        find_package(Boost REQUIRED COMPONENTS system)
     endif()
 
     if(NOT Boost_FOUND)
@@ -548,13 +565,13 @@ set(SOURCE_FILES
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES})
 set(WASM_SOURCE_FILES ${SOURCE_FILES})
 
-if(WIN32)
-    set(CMAKE_CXX_FLAGS " /EHsc /MP /bigobj")
-else()
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
-endif()
-
 message("${BUILD_MESSAGE}\n")
+
+if(WIN32)
+    set(CMAKE_CXX_FLAGS " /EHsc /MP /MT /c /bigobj")
+else()
+    # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
+endif()
 
 # Common flags for WASM/JS build and Pyodide
 set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
@@ -649,7 +666,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         # target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
 
         if(WIN32)
-            # target_compile_definitions(psppy PRIVATE WIN32=1)
+            #target_compile_definitions(psppy PRIVATE WIN32=1)
             # target_compile_definitions(psppy PRIVATE _WIN32=1)
 
             # .dll not importable

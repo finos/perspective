@@ -21,9 +21,10 @@ import numpy
 import pandas
 from ipywidgets import DOMWidget
 from traitlets import Unicode, observe
-
-from ..core._version import __version__
 from ..viewer import PerspectiveViewer
+import importlib
+
+__version__ = importlib.metadata.version("perspective-python")
 
 
 def _type_to_string(t):

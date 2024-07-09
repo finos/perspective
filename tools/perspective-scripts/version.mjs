@@ -213,6 +213,3 @@ async function update_package_jsons() {
 
 await update_changelog();
 await update_package_jsons();
-
-sh`python3 python/perspective/scripts/write_version.py \
-    && git add python/perspective/perspective/core/_version.py`.runSync();

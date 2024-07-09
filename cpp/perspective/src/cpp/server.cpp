@@ -261,7 +261,7 @@ replace_with_re2(
         previous_end = input_piece.data();
     }
 
-    output.append(previous_end, input.end().base() - previous_end);
+    output.append(previous_end, &*input.end() - previous_end);
     return output;
 }
 
@@ -1778,7 +1778,9 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
             break;
         }
         case proto::Request::kTableOnDeleteReq: {
-            Subscription sub_info{.id = req.msg_id(), .client_id = client_id};
+            Subscription sub_info;
+            sub_info.id = req.msg_id();
+            sub_info.client_id = client_id;
             m_resources.create_table_on_delete_sub(req.entity_id(), sub_info);
             break;
         }
@@ -1794,7 +1796,9 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
         }
 
         case proto::Request::kViewOnDeleteReq: {
-            Subscription sub_info{.id = req.msg_id(), .client_id = client_id};
+            Subscription sub_info;
+            sub_info.id = req.msg_id();
+            sub_info.client_id = client_id;
             m_resources.create_view_on_delete_sub(req.entity_id(), sub_info);
             break;
         }
@@ -2197,7 +2201,9 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
             break;
         }
         case proto::Request::kViewOnUpdateReq: {
-            Subscription sub_info{.id = req.msg_id(), .client_id = client_id};
+            Subscription sub_info;
+            sub_info.id = req.msg_id();
+            sub_info.client_id = client_id;
             m_resources.create_view_on_update_sub(req.entity_id(), sub_info);
             if (req.view_on_update_req().has_mode()
                 && req.view_on_update_req().mode()
