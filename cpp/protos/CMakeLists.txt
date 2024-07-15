@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18.2)
-project(perspective-protos)
+project(perspective-protos CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,16 +13,18 @@ if(NOT DEFINED psp_build_message)
 endif()
 
 # Include the FindProtobuf.cmake module
-list(APPEND CMAKE_MODULE_PATH "../../cmake/modules")
-
-find_package(Protoc REQUIRED)
-find_package(InstallDependency REQUIRED)
-
 if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
     set(PSP_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
     message(STATUS "PSP_CMAKE_MODULE_PATH not defined, using ${PSP_CMAKE_MODULE_PATH}")
 endif()
+list(APPEND CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules")
 
+find_package(Protoc REQUIRED)
+find_package(InstallDependency REQUIRED)
+
+set(protobuf_BUILD_TESTS OFF)
+set(protobuf_HAVE_BUILTIN_ATOMICS TRUE)
+# https://github.com/open-telemetry/opentelemetry-cpp/issues/2998
 psp_build_dep("protobuf" "${PSP_CMAKE_MODULE_PATH}/protobuf.txt.in")
 
 set(PROTO_FILES perspective.proto)

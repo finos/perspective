@@ -18,7 +18,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 set(ARROW_SRCS
-
     # Base
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_base.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_binary.cc
@@ -154,11 +153,11 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/expression.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc    
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/ordering.cc
 
-    
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/registry.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_basic.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_mode.cc
@@ -210,7 +209,7 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/task_util.cc
 )
 
-if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
+if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE_BUILD)
     set(ARROW_SRCS
         ${ARROW_SRCS}
         # use standard reader in Python builds.
@@ -280,6 +279,9 @@ target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
 # target_compile_definitions(arrow PUBLIC ARROW_WITH_ZSTD=ON)
 target_compile_definitions(arrow PUBLIC ARROW_WITH_LZ4)
+
+target_include_directories(arrow PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(arrow PUBLIC ${PSP_CPP_SRC}/src/include)
 
 # will need built boost filesystem and system .lib to work, even though
 # perspective itself does not use those dependencies
