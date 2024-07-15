@@ -16,7 +16,10 @@ import pandas as pd
 from perspective.tests.conftest import Util
 import pyarrow as pa
 from datetime import date, datetime
-from perspective.table import Table
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 DATE32_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date32.arrow")
 DATE64_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date64.arrow")
@@ -40,10 +43,20 @@ class TestTableArrow(object):
             assert tbl.size() == 31
             view = tbl.view()
             assert view.to_columns() == {
-                "jan-2019": [util.to_timestamp(datetime(2019, 1, i)) for i in range(1, 32)],
-                "feb-2020": [util.to_timestamp(datetime(2020, 2, i)) for i in range(1, 30)] + [None, None],
-                "mar-2019": [util.to_timestamp(datetime(2019, 3, i)) for i in range(1, 32)],
-                "apr-2020": [util.to_timestamp(datetime(2020, 4, i)) for i in range(1, 31)] + [None],
+                "jan-2019": [
+                    util.to_timestamp(datetime(2019, 1, i)) for i in range(1, 32)
+                ],
+                "feb-2020": [
+                    util.to_timestamp(datetime(2020, 2, i)) for i in range(1, 30)
+                ]
+                + [None, None],
+                "mar-2019": [
+                    util.to_timestamp(datetime(2019, 3, i)) for i in range(1, 32)
+                ],
+                "apr-2020": [
+                    util.to_timestamp(datetime(2020, 4, i)) for i in range(1, 31)
+                ]
+                + [None],
             }
 
     def test_table_arrow_loads_date64_file(self, util: Util):
@@ -58,10 +71,20 @@ class TestTableArrow(object):
             assert tbl.size() == 31
             view = tbl.view()
             assert view.to_columns() == {
-                "jan-2019": [util.to_timestamp(datetime(2019, 1, i)) for i in range(1, 32)],
-                "feb-2020": [util.to_timestamp(datetime(2020, 2, i)) for i in range(1, 30)] + [None, None],
-                "mar-2019": [util.to_timestamp(datetime(2019, 3, i)) for i in range(1, 32)],
-                "apr-2020": [util.to_timestamp(datetime(2020, 4, i)) for i in range(1, 31)] + [None],
+                "jan-2019": [
+                    util.to_timestamp(datetime(2019, 1, i)) for i in range(1, 32)
+                ],
+                "feb-2020": [
+                    util.to_timestamp(datetime(2020, 2, i)) for i in range(1, 30)
+                ]
+                + [None, None],
+                "mar-2019": [
+                    util.to_timestamp(datetime(2019, 3, i)) for i in range(1, 32)
+                ],
+                "apr-2020": [
+                    util.to_timestamp(datetime(2020, 4, i)) for i in range(1, 31)
+                ]
+                + [None],
             }
 
     def test_table_arrow_loads_dict_file(self):
@@ -81,7 +104,12 @@ class TestTableArrow(object):
         arrow_data = util.make_arrow(names, data)
         tbl = Table(arrow_data)
         assert tbl.size() == 10
-        assert tbl.schema() == {"a": "integer", "b": "integer", "c": "integer", "d": "integer"}
+        assert tbl.schema() == {
+            "a": "integer",
+            "b": "integer",
+            "c": "integer",
+            "d": "integer",
+        }
         assert tbl.view().to_columns() == {
             "a": data[0],
             "b": data[1],
@@ -286,7 +314,12 @@ class TestTableArrow(object):
         arrow_data = util.make_arrow(names, data, legacy=True)
         tbl = Table(arrow_data)
         assert tbl.size() == 10
-        assert tbl.schema() == {"a": "integer", "b": "integer", "c": "integer", "d": "integer"}
+        assert tbl.schema() == {
+            "a": "integer",
+            "b": "integer",
+            "c": "integer",
+            "d": "integer",
+        }
 
     def test_table_arrow_loads_float_legacy(self, util):
         data = [[i for i in range(10)], [i * 1.5 for i in range(10)]]

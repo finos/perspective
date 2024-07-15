@@ -16,9 +16,12 @@ from string import ascii_letters
 from pytest import raises
 from datetime import date, datetime
 from time import mktime
-from perspective import Table, PerspectivePyError
-import pytest
+from perspective import PerspectiveError
 from .test_view import compare_delta
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 def randstr(length, input=ascii_letters):
@@ -516,7 +519,7 @@ class TestViewExpression(object):
 
     def test_view_expression_should_not_overwrite_real(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        with raises(PerspectivePyError) as ex:
+        with raises(PerspectiveError) as ex:
             table.view(expressions={"a": 'upper("a")'})
 
         assert (

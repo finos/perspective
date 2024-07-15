@@ -13,7 +13,7 @@
 import * as expressions_common from "./common.js";
 
 import { test, expect } from "@finos/perspective-test";
-import perspective from "@finos/perspective";
+import perspective from "../perspective_client";
 
 /**
  * Tests the functionality of `View`-based expressions, specifically that

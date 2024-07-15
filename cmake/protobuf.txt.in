@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.7.2)
 project(protobuf-download NONE)
 
 if("" STREQUAL "${LIBPROTOBUF_VERSION}")
-  set(LIBPROTOBUF_VERSION v25.1)
+  set(LIBPROTOBUF_VERSION v26.1)
   message(FATAL_ERROR "LIBPROTOBUF_VERSION not set, using default: ${D}{LIBPROTOBUF_VERSION}")
 else()
   set(LIBPROTOBUF_VERSION ${LIBPROTOBUF_VERSION})

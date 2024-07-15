@@ -10,44 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
-const HtmlWebPackPlugin = require("html-webpack-plugin");
-const path = require("path");
+import { execSync } from "child_process";
 
-module.exports = {
-    mode: process.env.NODE_ENV || "development",
-    entry: "./src/index.js",
-    output: {
-        filename: "index.js",
+let flags = "--release";
+if (!!process.env.PSP_DEBUG) {
+    flags = "";
+}
+
+const opts = {
+    stdio: "inherit",
+    env: {
+        ...process.env,
+        PSP_ROOT_DIR: "../..",
     },
-    plugins: [
-        new HtmlWebPackPlugin({
-            title: "Workspace Example",
-            template: "./src/index.html",
-        }),
-        new PerspectivePlugin({}),
-    ],
-    module: {
-        rules: [
-            {
-                test: /\.less$/,
-                use: [
-                    { loader: "style-loader" },
-                    { loader: "css-loader" },
-                    { loader: "less-loader" },
-                ],
-            },
-            {
-                test: /\.(png|jpe?g|gif)$/i,
-                type: "asset/resource",
-            },
-        ],
-    },
-    devServer: {
-        static: [
-            path.join(__dirname, "dist"),
-            path.join(__dirname, "../../node_modules/superstore-arrow"),
-        ],
-    },
-    devtool: "source-map",
 };
+
+if (!!process.env.CI) {
+    let target = "";
+    if (process.env.PSP_ARCH === "x86_64" && process.platform === "darwin") {
+        target = "--target=x86_64-apple-darwin";
+    } else if (
+        process.env.PSP_ARCH === "aarch64" &&
+        process.platform === "darwin"
+    ) {
+        target = "--target=aarch64-apple-darwin";
+    } else if (
+        process.env.PSP_ARCH === "x86_64" &&
+        process.platform === "linux"
+    ) {
+        target = "--target=x86_64-unknown-linux-gnu";
+    } else if (
+        process.env.PSP_ARCH === "aarch64" &&
+        process.platform === "linux"
+    ) {
+        target = "--target=aarch64-unknown-linux-gnu";
+    }
+
+    execSync(`maturin build ${flags} --features=external-cpp ${target}`, opts);
+    execSync(`maturin sdist`, opts);
+} else {
+    execSync(`maturin develop ${flags} --features=external-cpp`, opts);
+}

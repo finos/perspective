@@ -18,7 +18,8 @@ import threading
 
 from aiohttp import web
 
-from perspective import Table, PerspectiveManager, PerspectiveAIOHTTPHandler
+from perspective import Server
+from perspective.handlers.aiohttp import PerspectiveAIOHTTPHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -27,37 +28,34 @@ file_path = os.path.join(
 )
 
 
-def perspective_thread(manager):
+def perspective_thread(server):
     """Perspective application thread starts its own event loop, and
     adds the table with the name "data_source_one", which will be used
     in the front-end."""
     psp_loop = asyncio.new_event_loop()
-    manager.set_loop_callback(psp_loop.call_soon_threadsafe)
-    with open(file_path, mode="rb") as file:
-        table = Table(file.read(), index="Row ID")
-        manager.host_table("data_source_one", table)
+    client = server.new_client(loop_callback=psp_loop.call_soon_threadsafe)
+
+    def init():
+        with open(file_path, mode="rb") as file:
+            client.table(file.read(), index="Row ID", name="data_source_one")
+
+    psp_loop.call_soon_threadsafe(init)
     psp_loop.run_forever()
 
 
 def make_app():
-    manager = PerspectiveManager()
-
-    thread = threading.Thread(target=perspective_thread, args=(manager,))
+    server = Server()
+    thread = threading.Thread(target=perspective_thread, args=(server,))
     thread.daemon = True
     thread.start()
 
     async def websocket_handler(request):
-        handler = PerspectiveAIOHTTPHandler(manager=manager, request=request)
+        handler = PerspectiveAIOHTTPHandler(perspective_server=server, request=request)
         await handler.run()
 
     app = web.Application()
     app.router.add_get("/websocket", websocket_handler)
-    app.router.add_static(
-        "/node_modules/@finos", "../../node_modules/@finos", follow_symlinks=True
-    )
-    app.router.add_static(
-        "/node_modules", "../../node_modules/@finos", follow_symlinks=True
-    )
+    app.router.add_static("/node_modules", "../../node_modules/", follow_symlinks=True)
     app.router.add_static("/", "../python-tornado", show_index=True)
     return app
 

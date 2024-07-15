@@ -10,24 +10,57 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-name: "Initialize"
-description: "Initialize the build environment with caching"
+name: "Install Dependencies"
+description: "Install and cache the project's myraid dependencies"
 
 inputs:
+    javascript:
+        default: "true"
+        description: "Install pnpm postinstall steps, playwright browsers and emsdk?"
+    arch:
+        default: ""
+        description: "Architecture"
+    llvm:
+        default: "true"
+        description: "Install LLVM 17?"
+    boost:
+        default: "true"
+        description: "Install Boost?"
+    rust:
+        default: "true"
+        description: "Install Rust toolchain?"
+    python:
+        default: "true"
+        description: "Install Python dependencies?"
+    clean:
+        default: "false"
+        description: "Clean unused deps. This is helpful if we run out of HD but slow!"
     skip_cache:
+        default: "false"
         description: "Don't use cache from previous builds"
+
+outputs:
+    VCPKG_INSTALLATION_ROOT:
+        description: "The output of vcpkg install path"
+        value: ${{ steps.vcpkg-step.outputs.VCPKG_INSTALLATION_ROOT }}
 
 runs:
     using: "composite"
     steps:
-        # - name: Clean System
-        #   uses: AdityaGarg8/remove-unwanted-software@v3
-        #   if: ${{ runner.os == 'Linux' }}
-        #   with:
-        #       remove-android: "true"
-        #       remove-dotnet: "true"
-        #       remove-haskell: "true"
-        #       remove-codeql: "true"
+        - name: Clean System
+          uses: AdityaGarg8/remove-unwanted-software@v3
+          if: ${{ inputs.clean == 'true' }}
+          with:
+              remove-android: "true"
+              remove-dotnet: "true"
+              remove-haskell: "true"
+              remove-codeql: "true"
+
+        # https://github.com/open-telemetry/opentelemetry-cpp/issues/2998
+        - name: Setup cmake
+          uses: jwlawson/actions-setup-cmake@v2
+          with:
+              cmake-version: "3.29.6"
 
         - name: Install pnpm
           uses: pnpm/action-setup@v3
@@ -37,7 +70,7 @@ runs:
         - name: Setup emsdk cache
           uses: actions/cache@v4
           id: emsdk-cache
-          if: ${{ inputs.skip_cache == 'false' }}
+          if: ${{ inputs.skip_cache == 'false' && inputs.javascript == 'true' }}
           with:
               path: |
                   ~/boost_1_82_0/
@@ -49,7 +82,7 @@ runs:
 
         - name: Setup pip cache
           uses: actions/cache@v4
-          if: ${{ inputs.skip_cache == 'false' }}
+          if: ${{ inputs.skip_cache == 'false' && inputs.python == 'true' }}
           with:
               path: |
                   ~/.cache/pip
@@ -60,7 +93,7 @@ runs:
 
         - name: Setup cargo cache
           uses: actions/cache@v4
-          if: ${{ inputs.skip_cache == 'false' }}
+          if: ${{ inputs.skip_cache == 'false' && inputs.rust == 'true' }}
           with:
               key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
               path: |
@@ -78,8 +111,25 @@ runs:
           with:
               key: ${{ github.job }}-${{ matrix.os }}
 
+        # TODO this should move to `install_tools.mjs`
+        - name: Windows init steps (vc143)
+          id: vcpkg-step
+          shell: pwsh
+          run: |
+              vcpkg.exe install boost-thread boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
+              vcpkg.exe integrate install
+              echo "VCPKG_INSTALLATION_ROOT=${env:VCPKG_INSTALLATION_ROOT}"
+              echo "VCPKG_INSTALLATION_ROOT=${env:VCPKG_INSTALLATION_ROOT}" >> $env:GITHUB_OUTPUT
+              dir env:
+          env:
+              PYTHON_VERSION: ${{ matrix.python-version }}
+              VCPKG_DEFAULT_TRIPLET: x64-windows
+              VCPKG_PLATFORM_TOOLSET: v143
+          if: ${{ runner.os == 'Windows' && inputs.boost == 'true' }}
+
         - name: Set up Python ${{ matrix.python-version }}
           uses: actions/setup-python@v5
+          if: ${{ inputs.python == 'true' }}
           with:
               python-version: ${{ matrix.python-version }}
               cache: "pip"
@@ -91,43 +141,74 @@ runs:
               cache: "pnpm"
               cache-dependency-path: pnpm-lock.yaml
 
-        - name: Install latest nightly rust
+        - name: Install rust
           uses: dtolnay/rust-toolchain@nightly
+          if: ${{ inputs.rust == 'true' && inputs.arch == '' }}
           with:
               toolchain: nightly-2024-05-07
               targets: wasm32-unknown-unknown
               components: rustfmt, clippy, rust-src
 
+        - name: Install rust (aarch64 OSX)
+          uses: dtolnay/rust-toolchain@nightly
+          if: ${{ inputs.rust == 'true' && inputs.arch == 'aarch64' && runner.os == 'macOS' }}
+          with:
+              toolchain: nightly-2024-05-07
+              targets: aarch64-apple-darwin
+              components: rustfmt, clippy, rust-src
+
+        - name: Install rust (aarch64 Linux)
+          uses: dtolnay/rust-toolchain@nightly
+          if: ${{ inputs.rust == 'true' && inputs.arch == 'aarch64' && runner.os == 'Linux' }}
+          with:
+              toolchain: nightly-2024-05-07
+              targets: aarch64-unknown-linux-gnu
+              components: rustfmt, clippy, rust-src
+
         - name: Install LLVM 17
+          if: ${{ inputs.llvm == 'true' }}
           uses: KyleMayes/install-llvm-action@v2
           with:
               version: "17"
               directory: "./.llvm"
               cached: true
 
-        # JS
         - name: Install JS dependencies
           shell: bash
+          if: ${{ inputs.javascript == 'true' }}
           run: pnpm install
 
-        - name: Install venv
+        - name: Install JS dependencies
           shell: bash
-          run:
+          if: ${{ inputs.javascript == 'false' }}
+          run: pnpm install --ignore-scripts
 
-        - name: Activate virtualenv
+        - name: Install Python dependencies
           shell: bash
-          run: |
-              python3 -m venv py_modules
-              . ./py_modules/bin/activate
-              echo PATH=$PATH >> $GITHUB_ENV
-              echo VIRTUAL_ENV=$VIRTUAL_ENV >> $GITHUB_ENV
-              pip3 install maturin
+          if: ${{ inputs.python == 'true' }}
+          run: python -m pip install -r rust/perspective-python/requirements.txt
 
+        # # TL;DR Do not use `python3` on windows
+        # # https://stackoverflow.com/questions/61558780/python-testing-with-github-actions-on-windows
+        # - name: Install Python dependencies
+        #   shell: pwsh
+        #   if: ${{ runner.os == 'Windows' && inputs.python == 'true' }}
+        #   run: pip install maturin
+
+        # TODO do this earlier?
         - name: Linux init steps
           shell: bash
           run: sudo node tools/perspective-scripts/install_tools.mjs
-          if: ${{ runner.os == 'Linux' }}
+          if: ${{ runner.os != 'Windows' && inputs.boost == 'true' }}
 
         - name: Install CCache
           shell: bash
           run: sudo apt install -y ccache
+          if: ${{ runner.os == 'Linux' }}
+
+        # Arrow cannot install on windows without this
+        # https://stackoverflow.com/questions/22575662/filename-too-long-in-git-for-windows
+        # https://github.com/orgs/community/discussions/26952
+        - run: git config --system core.longpaths true
+          shell: pwsh
+          if: ${{ runner.os == 'Windows' }}

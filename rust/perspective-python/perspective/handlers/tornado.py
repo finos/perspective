@@ -10,13 +10,10 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import asyncio
-from tornado.websocket import WebSocketHandler, WebSocketClosedError
-
-from .common import PerspectiveHandlerBase
+from tornado.websocket import WebSocketHandler
 
 
-class PerspectiveTornadoHandler(PerspectiveHandlerBase, WebSocketHandler):
+class PerspectiveTornadoHandler(WebSocketHandler):
     """PerspectiveTornadoHandler is a drop-in implementation of Perspective.
 
     Use it inside Tornado routing to create a server-side Perspective that is
@@ -29,35 +26,36 @@ class PerspectiveTornadoHandler(PerspectiveHandlerBase, WebSocketHandler):
     alive without timing out.
 
     Examples:
-        >>> MANAGER = PerspectiveManager()
-        >>> MANAGER.host_table("data_source_one", Table(
-        ...     pd.read_csv("superstore.csv")))
+        >>> server = psp.Server()
+        >>> client = server.new_client()
+        >>> client.table(pd.read_csv("superstore.csv"), name="data_source_one")
         >>> app = tornado.web.Application([
         ...     (r"/", MainHandler),
         ...     (r"/websocket", PerspectiveTornadoHandler, {
-        ...         "manager": MANAGER,
+        ...         "perspective_server": server,
         ...         "check_origin": True
         ...     })
         ... ])
     """
 
-    def __init__(self, *args, **kwargs):
-        PerspectiveHandlerBase.__init__(self, **kwargs)
-        WebSocketHandler.__init__(self, *args)
+    def initialize(self, perspective_server):
+        self.server = perspective_server
 
-    def on_message(self, *args, **kwargs):
-        try:
-            return asyncio.ensure_future(PerspectiveHandlerBase.on_message(self, *args, **kwargs))
-        except (WebSocketClosedError, KeyboardInterrupt):
-            # ignore error
-            self.on_close()
+    def open(self):
+        def inner(msg):
+            self.write_message(msg, binary=True)
 
-    async def write_message(self, message: str, binary: bool = False) -> None:
-        try:
-            return await WebSocketHandler.write_message(self, message=message, binary=binary)
-        except WebSocketClosedError:
-            # ignore error
-            self.on_close()
+        self.session = self.server.new_session(inner)
 
-    # Use common docstring
-    __init__.__doc__ = PerspectiveHandlerBase.__init__.__doc__
+    def on_close(self) -> None:
+        self.session.close()
+        del self.session
+
+    def on_message(self, msg: bytes):
+        if not isinstance(msg, bytes):
+            return
+
+        self.session.handle_request(msg)
+
+        # TODO schedule me
+        self.session.poll()

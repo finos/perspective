@@ -22,7 +22,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 
-from perspective import Table, PerspectiveManager, PerspectiveStarletteHandler
+from perspective import Server
+from perspective.handlers.starlette import PerspectiveStarletteHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -31,33 +32,36 @@ file_path = os.path.join(
 )
 
 
-def static_nodemodules_handler(rest_of_path):
-    if rest_of_path.startswith("@finos"):
-        return FileResponse("../../node_modules/{}".format(rest_of_path))
-    return FileResponse("../../node_modules/@finos/{}".format(rest_of_path))
+def static_node_modules_handler(rest_of_path):
+    return FileResponse("../../node_modules/{}".format(rest_of_path))
 
 
-def perspective_thread(manager):
+def perspective_thread(server):
     """Perspective application thread starts its own event loop, and
     adds the table with the name "data_source_one", which will be used
     in the front-end."""
     psp_loop = asyncio.new_event_loop()
-    manager.set_loop_callback(psp_loop.call_soon_threadsafe)
-    with open(file_path, mode="rb") as file:
-        table = Table(file.read(), index="Row ID")
-        manager.host_table("data_source_one", table)
+    client = server.new_client(loop_callback=psp_loop.call_soon_threadsafe)
+
+    def init():
+        with open(file_path, mode="rb") as file:
+            client.table(file.read(), index="Row ID", name="data_source_one")
+
+    psp_loop.call_soon_threadsafe(init)
     psp_loop.run_forever()
 
 
 def make_app():
-    manager = PerspectiveManager()
+    server = Server()
 
-    thread = threading.Thread(target=perspective_thread, args=(manager,))
+    thread = threading.Thread(target=perspective_thread, args=(server,))
     thread.daemon = True
     thread.start()
 
     async def websocket_handler(websocket: WebSocket):
-        handler = PerspectiveStarletteHandler(manager=manager, websocket=websocket)
+        handler = PerspectiveStarletteHandler(
+            perspective_server=server, websocket=websocket
+        )
         await handler.run()
 
     # static_html_files = StaticFiles(directory="../python-tornado", html=True)
@@ -65,7 +69,7 @@ def make_app():
 
     app = FastAPI()
     app.add_api_websocket_route("/websocket", websocket_handler)
-    app.get("/node_modules/{rest_of_path:path}")(static_nodemodules_handler)
+    app.get("/node_modules/{rest_of_path:path}")(static_node_modules_handler)
     app.mount("/", static_html_files)
 
     app.add_middleware(

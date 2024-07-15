@@ -10,49 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const HtmlWebPackPlugin = require("html-webpack-plugin");
-const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
+import perspective from "@finos/perspective";
 
-module.exports = {
-    context: __dirname,
-    entry: "./src/index.js",
-    mode: "development",
-    output: {
-        filename: "cdn/bundle.js",
-        publicPath: "http://localhost:5150/",
-    },
-    plugins: [
-        new HtmlWebPackPlugin({
-            title: "Perspective Webpack Cross-Origin Example",
-            template: "./src/index.html",
-            filename: "app/index.html",
-            inject: "head",
-        }),
-        new PerspectivePlugin({
-            wasmName: "cdn/test.[hash].wasm",
-            workerName: "cdn/test.[hash].worker.js",
-            inlineWorker: true,
-        }),
-    ],
-    module: {
-        rules: [
-            {
-                test: /\.css$/,
-                exclude: [/packages/, /node_modules/],
-                use: [{ loader: "style-loader" }, { loader: "css-loader" }],
-            },
-        ],
-    },
-    devtool: "source-map",
-    devServer: {
-        historyApiFallback: true,
-        watchOptions: { aggregateTimeout: 300, poll: 1000 },
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods":
-                "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-            "Access-Control-Allow-Headers":
-                "X-Requested-With, content-type, Authorization",
-        },
-    },
-};
+// // TO run the test suite against a different server:
+// const client = await perspective.websocket("ws://localhost:8080/subscribe");
+// export default client;
+
+export default perspective;

@@ -12,9 +12,9 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 
-        <script type="module" src="http://localhost:8082/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="http://localhost:8082/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="http://localhost:8082/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
 
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
 
@@ -43,11 +43,10 @@
                  * Use `perspective.websocket` to set up Perspective in server or
                  * distributed modes.
                  */
-                const websocket = await perspective.websocket("ws://localhost:8082/websocket");
+                const websocket = await perspective.websocket("ws://localhost:8080/websocket");
 
                 const server_table = await websocket.open_table("data_source_one");
 
-                
                 // const table = worker.table(server_table);
 
                 // Load the local table in the `<perspective-viewer>`.

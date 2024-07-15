@@ -19,7 +19,11 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 from dateutil import tz
 from pytest import mark, raises
-from perspective import Table, PerspectivePyError
+from perspective import PerspectiveError
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 LOCAL_DATETIMES = [
     datetime(2019, 1, 11, 0, 10, 20),
@@ -212,7 +216,7 @@ if os.name != "nt":
         def test_table_datetime_cant_convert_from_int(self):
             data = pd.DataFrame({"a": [0]})
             table = Table({"a": "datetime"})
-            with raises(PerspectivePyError) as ex:
+            with raises(PerspectiveError) as ex:
                 table.update(data)
             # assert str(ex.value) == "..."
 
@@ -238,7 +242,7 @@ if os.name != "nt":
             ]
 
         @mark.skip
-        def test_table_datetime_max_df(self):
+        def test_table_datetime_max_df(self, util):
             data = pd.DataFrame({"a": [datetime.max]})
             table = Table(data)
             assert table.view().to_columns()["a"] == [

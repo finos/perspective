@@ -100,6 +100,14 @@ pub struct Server {
     callbacks: Arc<RwLock<HashMap<u32, SessionCallback>>>,
 }
 
+impl std::fmt::Debug for Server {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let addr = std::ptr::addr_of!(self);
+        write!(f, "Server {:?}", addr)?;
+        Ok(())
+    }
+}
+
 impl Default for Server {
     fn default() -> Self {
         let server = Arc::new(ffi::new_proto_server());
@@ -208,6 +216,7 @@ impl Server {
 /// wants to connect to a [`Server`], a dedicated [`Session`] must be created.
 /// The [`Session`] handles routing messages emitted by the [`Server`], as well
 /// as owning any resources the [`Client`] may request.
+#[derive(Debug)]
 pub struct Session {
     id: u32,
     server: Server,

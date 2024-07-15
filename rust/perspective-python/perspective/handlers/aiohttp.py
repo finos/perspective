@@ -10,12 +10,11 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from aiohttp import web, WSMsgType, WebSocketError
+from aiohttp import web, WSMsgType
+import asyncio
 
-from .common import PerspectiveHandlerBase
 
-
-class PerspectiveAIOHTTPHandler(PerspectiveHandlerBase):
+class PerspectiveAIOHTTPHandler(object):
     """PerspectiveAIOHTTPHandler is a drop-in implementation of Perspective.
 
     Use it inside AIOHTTP routing to create a server-side Perspective that is
@@ -25,9 +24,9 @@ class PerspectiveAIOHTTPHandler(PerspectiveHandlerBase):
     alive without timing out.
 
     Examples:
-        >>> manager = PerspectiveManager()
+        >>> server = Server()
         >>> async def websocket_handler(request):
-        ...    handler = PerspectiveAIOHTTPHandler(manager=manager, request=request)
+        ...    handler = PerspectiveAIOHTTPHandler(perspective_server=server, request=request)
         ...    await handler.run()
 
         >>> app = web.Application()
@@ -35,31 +34,21 @@ class PerspectiveAIOHTTPHandler(PerspectiveHandlerBase):
     """
 
     def __init__(self, **kwargs):
+        self.server = kwargs.pop("perspective_server")
+        self._request = kwargs.pop("request")
         super().__init__(**kwargs)
-        self._request = kwargs.get("request")
 
     async def run(self) -> None:
+        def inner(msg):
+            asyncio.get_running_loop().create_task(self._ws.send_bytes(msg))
+
+        self.session = self.server.new_session(inner)
         try:
             self._ws = web.WebSocketResponse()
             await self._ws.prepare(self._request)
-
             async for msg in self._ws:
-                if msg.type == WSMsgType.TEXT:
-                    await self.on_message(msg.data)
                 if msg.type == WSMsgType.BINARY:
-                    await self.on_message(msg.data)
+                    self.session.handle_request(msg.data)
+
         finally:
-            self.on_close()
-
-    async def write_message(self, message: str, binary: bool = False) -> None:
-        try:
-            if binary:
-                await self._ws.send_bytes(message)
-            else:
-                await self._ws.send_str(message)
-        except WebSocketError:
-            # Ignore error
-            ...
-
-    # Use common docstring
-    __init__.__doc__ = PerspectiveHandlerBase.__init__.__doc__
+            self.session.close()

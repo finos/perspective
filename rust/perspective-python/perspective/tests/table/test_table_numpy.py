@@ -11,12 +11,13 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from datetime import date, datetime
-
 import numpy as np
 import pandas as pd
-from perspective import PerspectiveError
-from perspective.table import Table
 from pytest import raises, mark
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 @mark.skip(reason="We do not support numpy types in the Table constructor")
@@ -239,7 +240,9 @@ class TestTableNumpy(object):
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]")}
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_table_np_datetime_string_dtype(self):
         data = ["2019/07/11 15:30:05", "2019/07/11 15:30:05"]
@@ -264,42 +267,54 @@ class TestTableNumpy(object):
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]")}
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_table_np_datetime_us(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[us]")}
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_table_np_datetime_ms(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ms]")}
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_table_np_datetime_s(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[s]")}
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_table_np_datetime_m(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[m]")}
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_table_np_datetime_h(self, util):
         tbl = Table(
             {"a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[h]")}
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0))]
+        }
 
     def test_table_np_datetime_D(self, util):
         tbl = Table(
@@ -308,7 +323,9 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "date"}
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 0, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 0, 0))]
+        }
 
     def test_table_np_datetime_W(self, util):
         tbl = Table(
@@ -317,7 +334,9 @@ class TestTableNumpy(object):
 
         assert tbl.schema() == {"a": "date"}
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 11, 0, 0))]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 11, 0, 0))]
+        }
 
     def test_table_np_datetime_M(self):
         tbl = Table(
@@ -377,7 +396,9 @@ class TestTableNumpy(object):
             }
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0)), None]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0)), None]
+        }
 
     def test_table_np_datetime_s_nat(self, util):
         tbl = Table(
@@ -389,7 +410,9 @@ class TestTableNumpy(object):
             }
         )
 
-        assert tbl.view().to_columns() == {"a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0)), None]}
+        assert tbl.view().to_columns() == {
+            "a": [util.to_timestamp(datetime(2019, 7, 12, 11, 0)), None]
+        }
 
     def test_table_np_timedelta(self):
         tbl = Table(

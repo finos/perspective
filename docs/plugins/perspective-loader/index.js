@@ -16,6 +16,12 @@ module.exports = function (context, options) {
     return {
         name: "perspective",
         configureWebpack(config, isServer) {
+            if (config.optimization.minimizer) {
+                config.optimization.minimizer[0].options.minimizer.options.module = true;
+            }
+
+            config.experiments = config.experiments || {};
+            config.experiments.topLevelAwait = true;
             config.module.rules.map((x) => {
                 if (x.test.toString() === "/\\.css$/i") {
                     x.exclude = [/\.module\.css$/i, /@finos/i];

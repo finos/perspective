@@ -270,24 +270,37 @@ const VERSIONS = Object.keys(
 
 fs.mkdirSync(path.join(__dirname, "./dist"), { recursive: true });
 suite(
+    // "ws://localhost:8082/websocket",
     ["@finos/perspective", ...VERSIONS],
     path.join(__dirname, "dist/benchmark-js.arrow"),
     async function (path, version_idx) {
-        let perspective = await import(path);
-        perspective = perspective.default || perspective;
-        const pkg_json = JSON.parse(
-            fs.readFileSync(_require.resolve(`${path}/package.json`))
-        );
+        let client, metadata;
+        if (path.startsWith("ws://")) {
+            console.log(path);
+            const { default: perspective } = await import("@finos/perspective");
+            client = await perspective.websocket(path);
+            metadata = {
+                version: "3.0.0",
+                version_idx,
+            };
+        } else {
+            const perspective = await import(path);
+            const pkg_json = JSON.parse(
+                fs.readFileSync(_require.resolve(`${path}/package.json`))
+            );
 
-        let version = pkg_json.version;
-        console.log(`${path} (${pkg_json.name}@${version})`);
-        if (version_idx === 0) {
-            version = `${version} (master)`;
+            let version = pkg_json.version;
+            console.log(`${path} (${pkg_json.name}@${version})`);
+            if (version_idx === 1) {
+                version = `${version} (master)`;
+            }
+
+            client = perspective.default || perspective;
+            metadata = { version, version_idx };
         }
 
-        const metadata = { version, version_idx };
-        await table_suite(perspective, metadata);
-        await view_suite(perspective, metadata);
-        await to_data_suite(perspective, metadata);
+        await table_suite(client, metadata);
+        await view_suite(client, metadata);
+        await to_data_suite(client, metadata);
     }
 );

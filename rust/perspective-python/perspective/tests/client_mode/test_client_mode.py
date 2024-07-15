@@ -357,7 +357,14 @@ class TestClient(object):
 
         assert perspective.is_libpsp() is False
         widget = perspective.PerspectiveWidget(
-            {"a": "integer", "b": "float", "c": "boolean", "d": "date", "e": "datetime", "f": "string"}
+            {
+                "a": "integer",
+                "b": "float",
+                "c": "boolean",
+                "d": "date",
+                "e": "datetime",
+                "f": "string",
+            }
         )
         assert hasattr(widget, "table") is False
         assert widget._data == {

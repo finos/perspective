@@ -12,12 +12,13 @@
 
 import sys
 from datetime import date, datetime, timezone
-
-from perspective.core.exception import PerspectiveError
-from perspective import Table
 import perspective
 from pytest import mark, raises, skip
 import pytest
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class TestTable:
@@ -434,7 +435,7 @@ class TestTable:
 
     def test_table_index_bool_with_none(self):
         # bools cannot be used as primary key columns
-        with raises(perspective.PerspectivePyError):
+        with raises(perspective.PerspectiveError):
             Table({"a": [True, False, None, True], "b": [4, 3, 2, 1]}, index="a")
 
     def test_table_index_date_with_none(self):

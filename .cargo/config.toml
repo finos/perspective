@@ -8,6 +8,13 @@ target-dir = "rust/target"
 [target.wasm32-unknown-unknown]
 runner = 'wasm-bindgen-test-runner'
 
+[target.i686-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static", "--cfg=web_sys_unstable_apis"]
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static", "--cfg=web_sys_unstable_apis"]
+
+
 [future-incompat-report]
 frequency = 'never'
 

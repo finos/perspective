@@ -17,8 +17,11 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import pytz
-from perspective import Table
 from pytest import mark
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 IS_WIN = os.name == "nt"
 

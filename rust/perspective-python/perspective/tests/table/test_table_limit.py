@@ -11,18 +11,20 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from datetime import date, datetime
-
-import perspective
 from pytest import mark
+import perspective as psp
+
+client = psp.Server().new_client()
+Table = client.table
 
 
 class TestTableInfer(object):
     def test_table_limit_wraparound_does_not_respect_partial_none(self):
-        t = perspective.Table({"a": "float", "b": "float"}, limit=3)
+        t = Table({"a": "float", "b": "float"}, limit=3)
         t.update([{"a": 10}, {"b": 1}, {"a": 20}, {"a": None, "b": 2}])
         d1 = t.view().to_json()
 
-        t2 = perspective.Table({"a": "float", "b": "float"}, limit=3)
+        t2 = Table({"a": "float", "b": "float"}, limit=3)
         t2.update([{"a": 10}, {"b": 1}, {"a": 20}, {"b": 2}])
         d2 = t2.view().to_json()
 
@@ -30,11 +32,11 @@ class TestTableInfer(object):
         assert d1[1:] == d2[1:]
 
     def test_table_limit_wraparound_does_not_respect_partial(self):
-        t = perspective.Table({"a": "float", "b": "float"}, limit=3)
+        t = Table({"a": "float", "b": "float"}, limit=3)
         t.update([{"a": 10}, {"b": 1}, {"a": 20}, {"a": 10, "b": 2}])
         d1 = t.view().to_columns()
 
-        t2 = perspective.Table({"a": "float", "b": "float"}, limit=3)
+        t2 = Table({"a": "float", "b": "float"}, limit=3)
         t2.update([{"a": 10}, {"b": 1}, {"a": 20}, {"b": 2}])
         d2 = t2.view().to_columns()
 
