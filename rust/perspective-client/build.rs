@@ -29,7 +29,7 @@ fn prost_build() -> Result<()> {
 
         println!("cargo:rerun-if-changed={}", proto_file.to_str().unwrap());
 
-        #[cfg(feature = "external-proto")]
+        // #[cfg(feature = "external-proto")]
         std::env::set_var("PROTOC", protobuf_src::protoc());
 
         prost_build::Config::new()

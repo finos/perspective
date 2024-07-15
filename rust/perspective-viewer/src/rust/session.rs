@@ -252,7 +252,7 @@ impl Session {
             .create_replace_expression_update(&old_expr, &new_expr)
     }
 
-    /// Validate an expression strin and marshall the results.
+    /// Validate an expression string and marshall the results.
     pub async fn validate_expr(
         &self,
         expr: &str,

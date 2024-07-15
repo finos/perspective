@@ -14,6 +14,7 @@ from random import random
 from .viewer_traitlets import PerspectiveTraitlets
 from ..perspective import Table, View
 
+from ..legacy import Table, tablep, viewp, Server
 
 # ─  │  ┌ ┬ ┐
 # ┄  ┆  ├ ┼ ┤ ╲ ╱
@@ -21,6 +22,8 @@ from ..perspective import Table, View
 # ━  ┃  ┏ ┳ ┓ ┏ ┯ ┓ ┏ ┳ ┓ ┏ ┯ ┓
 # ┅  ┇  ┣ ╋ ┫ ┣ ┿ ┫ ┠ ╂ ┨ ┠ ┼ ┨
 # ┉  ┋  ┗ ┻ ┛ ┗ ┷ ┛ ┗ ┻ ┛ ┗ ┷ ┛
+
+global_server = PySyncServer()
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -111,9 +114,12 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         # from the `PerspectiveJupyterClient` on the front-end.
         self.manager = None
 
-        # The string name of the Table under management by this viewer and its
+        # self._server =
+
+        # The Table under management by this viewer and its
         # attached PerspectiveManager
-        self.table_name = None
+        self._table = None
+        self._client = None
 
         # Viewer configuration
         self.plugin = plugin  # validate_plugin(plugin)
@@ -131,19 +137,19 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.theme = theme
         self.title = title
 
+    def new_session(self, cb):
+        return self._server.new_session(cb)
+
     @property
     def table(self):
-        """Returns the ``perspective.Table`` under management by the viewer."""
-        return self.manager.get_table(self.table_name)
+        """Returns the ``perspective.PySyncTable`` under management by the viewer."""
+        return self._table
 
     def load(self, data, **options):
         """Given a ``perspective.Table``, a ``perspective.View``,
         or data that can be handled by ``perspective.Table``, pass it to the
         viewer.  Like `__init__`, load accepts a `perspective.Table`, a dataset,
-        or a schema. If running in client mode, `load` defers to the browser's
-        Perspective engine. This means that loading Python-only datasets,
-        especially ones that cannot be serialized into JSON, may cause some
-        issues.
+        or a schema.
 
         ``load()`` resets the state of the viewer :
 
@@ -188,25 +194,32 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         """
         name = options.pop("name", str(random()))
 
-        if isinstance(data, Table):
-            table = data
-        elif isinstance(data, View):
-            raise TypeError("Only `Table` or data can be loaded.")
-        else:
-            table = Table(data, **options)
-
-        self.manager.host_table(name, table)
-
         # Reset the viewer when `load()` is called multiple times.
-        if self.table_name is not None:
+        if self.table is not None:
             self.reset()
+
+        if tablep(data):
+            self._table = data
+        elif viewp(data):
+            raise PerspectiveError(
+                "Views cannot be loaded directly, load a table or raw data instead"
+            )
+        else:
+            # Construct a new table on the server from raw data
+            from ..legacy import create_sync_client
+
+            client = create_sync_client(server=self._server)
+            self._table = client.table(data, name=name, **options)
+            self._client = client
 
         # If the user does not set columns to show, synchronize viewer state
         # with dataset.
         if len(self.columns) == 0:
-            self.columns = table.columns()
+            self.columns = self.table.columns()
 
-        self.table_name = name
+        # Assigning to this traitlet signals the frontend viewer to connect to the
+        # table we're hosting.
+        self.table_name = self.table.get_name()
 
     def update(self, data):
         """Update the table under management by the viewer with new data.
@@ -235,7 +248,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             self.table.replace(data)
 
     def save(self):
-        """Get the viewer's attribute as a dictionary, symmetric with `restore`
+        """Get the viewer's attributes as a dictionary, symmetric with `restore`
         so that a viewer's configuration can be reproduced."""
         return {
             attr: getattr(self, attr)
@@ -249,6 +262,29 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         for k, v in kwargs.items():
             if k in PerspectiveViewer.PERSISTENT_ATTRIBUTES:
                 setattr(self, k, v)
+
+    def to_kwargs(self):
+        """Get the viewer's attributes as a list of kwargs, which can be passed to
+        the viewer constructor"""
+        attrs = self.save()
+        defaults = {
+            "columns": [],
+            "group_by": [],
+            "split_by": [],
+            "aggregates": {},
+            "sort": [],
+            "filter": [],
+            "expressions": {},
+            "plugin_config": {},
+            "version": "2.10.0",
+        }
+        kwargs = {}
+        for key, default in defaults.items():
+            if attrs.get(key) != default:
+                kwargs[key] = attrs[key]
+        return ", ".join(
+            ["{}={}".format(attr, repr(val)) for attr, val in kwargs.items()]
+        )
 
     def reset(self):
         """Resets the viewer's attributes and state, but does not delete or
@@ -279,16 +315,19 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 deleted. Defaults to True.
         """
         if delete_table:
+            # XXX(tom): TODO implement delete
             # Delete all created views on the widget's manager instance
-            for view in self.manager._views.values():
-                view.delete()
+            # for view in self.manager._views.values():
+            #     view.delete()
 
             # Reset view cache
-            self.manager._views = {}
+            # self.manager._views = {}
 
             # Delete table
+            raise RuntimeError("XXX(tom): delete not implemented")
             self.table.delete()
             self.manager._tables.pop(self.table_name)
+            self.table = None
             self.table_name = None
 
         self.reset()

@@ -97,6 +97,10 @@ impl PySyncTable {
         self.0.get_limit().block_on()
     }
 
+    fn get_name(&self) -> String {
+        self.0.get_name().block_on()
+    }
+
     #[doc = include_str!("../../docs/table/clear.md")]
     fn clear(&self) -> PyResult<()> {
         self.0.clear().block_on()

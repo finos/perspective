@@ -16,12 +16,17 @@ import * as fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 
-const __filename = url.fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// XXX(tom):
+// import.meta is busted when this file is imported from widget.spec.ts
+// so work around it by using fake values for API_VERSION
+//
+// const __filename = url.fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
-export const API_VERSION = JSON.parse(
-    fs.readFileSync(__dirname + "/../../package.json").toString()
-)["version"];
+// export const API_VERSION = JSON.parse(
+//     fs.readFileSync(__dirname + "/../../package.json").toString()
+// )["version"];
+export const API_VERSION = "Fake-Version-x.y.z";
 export const DEFAULT_CONFIG: PerspectiveViewerConfig = {
     aggregates: {},
     columns_config: {},

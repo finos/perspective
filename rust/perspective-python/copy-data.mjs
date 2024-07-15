@@ -10,24 +10,25 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-export * from "./model";
-export * from "./version";
-export * from "./view";
-export * from "./widget";
+import fs from "fs";
+import path from "path";
+import cpy from "cpy";
 
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
-import "@finos/perspective-viewer-openlayers";
-
-// NOTE: only expose the widget here
-import { PerspectiveJupyterPlugin } from "./plugin";
-
-let plugins = [PerspectiveJupyterPlugin];
-
-// Conditionally import renderers if running in jupyterlab only
-if (window && window._JUPYTERLAB) {
-    const { PerspectiveRenderers } = await import("./renderer");
-    plugins.push(PerspectiveRenderers);
-}
-
-export default plugins;
+const DATA_DIR = "perspective.data";
+const LABEXTENSION_DIR = path.join(
+    DATA_DIR,
+    "data",
+    "share",
+    "jupyter",
+    "labextensions",
+    "@finos",
+    "perspective"
+);
+fs.mkdirSync(LABEXTENSION_DIR, {
+    recursive: true,
+});
+cpy("perspective/labextension/**", LABEXTENSION_DIR);
+fs.copyFileSync(
+    "perspective/extension/install.json",
+    path.join(LABEXTENSION_DIR, "install.json")
+);

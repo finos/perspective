@@ -12,6 +12,7 @@
 
 __version__ = "2.10.1"
 __all__ = [
+    "_jupyter_labextension_paths",
     "PerspectiveError",
     "PerspectiveWidget",
     "PerspectiveViewer",
@@ -26,6 +27,7 @@ from .perspective import PySyncClient, PerspectiveError, PySyncServer
 
 from .widget import PerspectiveWidget
 from .viewer import PerspectiveViewer
+
 
 try:
     from .handlers import PerspectiveTornadoHandler
@@ -63,3 +65,8 @@ class Client(PySyncClient):
         session = server.new_session(handle_response)
         client = Client(handle_request)
         return client
+
+
+# read by `jupyter labextension develop`
+def _jupyter_labextension_paths():
+    return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]

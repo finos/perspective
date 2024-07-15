@@ -966,7 +966,15 @@ importers:
         specifier: ^1.13.6
         version: 1.13.6
 
-  rust/perspective-python: {}
+  rust/perspective-python:
+    dependencies:
+      '@finos/perspective-jupyterlab':
+        specifier: workspace:*
+        version: link:../../packages/perspective-jupyterlab
+    devDependencies:
+      cpy:
+        specifier: ^9.0.1
+        version: 9.0.1
 
   rust/perspective-viewer:
     dependencies:
@@ -11738,27 +11746,27 @@ snapshots:
       '@lumino/widgets': 1.37.2(crypto@1.0.1)
       ajv: 6.12.6
       commander: 6.0.0
-      css-loader: 5.2.7(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      css-loader: 5.2.7(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
       duplicate-package-checker-webpack-plugin: 3.0.0
-      file-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      file-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
       fs-extra: 9.1.0
       glob: 7.1.7
-      license-webpack-plugin: 2.3.21(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
-      mini-css-extract-plugin: 1.3.9(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      license-webpack-plugin: 2.3.21(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
+      mini-css-extract-plugin: 1.3.9(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
       path-browserify: 1.0.1
       process: 0.11.10
-      raw-loader: 4.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
-      source-map-loader: 1.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
-      style-loader: 2.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      raw-loader: 4.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
+      source-map-loader: 1.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
+      style-loader: 2.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
       supports-color: 7.2.0
-      svg-url-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
-      terser-webpack-plugin: 4.2.3(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      svg-url-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
+      terser-webpack-plugin: 4.2.3(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
       to-string-loader: 1.2.0
-      url-loader: 4.1.1(file-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      url-loader: 4.1.1(file-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
       webpack: 5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)
-      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0)
       webpack-merge: 5.10.0
-      worker-loader: 3.0.8(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      worker-loader: 3.0.8(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
     transitivePeerDependencies:
       - '@swc/core'
       - '@webpack-cli/generators'
@@ -13152,29 +13160,29 @@ snapshots:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': 4.2.2
 
-  '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))':
+  '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))':
     dependencies:
       webpack: 5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)
-      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0)
 
   '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))':
     dependencies:
       webpack: 5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)
       webpack-cli: 4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)
 
-  '@webpack-cli/info@1.5.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))':
+  '@webpack-cli/info@1.5.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0))':
     dependencies:
       envinfo: 7.13.0
-      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0)
 
   '@webpack-cli/info@1.5.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))':
     dependencies:
       envinfo: 7.13.0
       webpack-cli: 4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)
 
-  '@webpack-cli/serve@1.7.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))':
+  '@webpack-cli/serve@1.7.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0))(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))':
     dependencies:
-      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      webpack-cli: 4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0)
     optionalDependencies:
       webpack-dev-server: 4.15.2(webpack-cli@4.10.0)(webpack@5.91.0)
 
@@ -14199,7 +14207,7 @@ snapshots:
       postcss-value-parser: 3.3.1
       source-list-map: 2.0.1
 
-  css-loader@5.2.7(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  css-loader@5.2.7(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.38)
       loader-utils: 2.0.4
@@ -15361,7 +15369,7 @@ snapshots:
     dependencies:
       escape-string-regexp: 1.0.5
 
-  file-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  file-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 2.7.1
@@ -16632,7 +16640,7 @@ snapshots:
     dependencies:
       isomorphic.js: 0.2.5
 
-  license-webpack-plugin@2.3.21(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  license-webpack-plugin@2.3.21(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       '@types/webpack-sources': 0.1.12
       webpack-sources: 1.4.3
@@ -17352,7 +17360,7 @@ snapshots:
 
   min-indent@1.0.1: {}
 
-  mini-css-extract-plugin@1.3.9(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  mini-css-extract-plugin@1.3.9(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
@@ -18455,7 +18463,7 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  raw-loader@4.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  raw-loader@4.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
@@ -19210,7 +19218,7 @@ snapshots:
       async: 2.6.4
       loader-utils: 1.4.2
 
-  source-map-loader@1.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  source-map-loader@1.0.2(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       data-urls: 2.0.0
       iconv-lite: 0.6.3
@@ -19407,7 +19415,7 @@ snapshots:
       loader-utils: 1.4.2
       schema-utils: 0.3.0
 
-  style-loader@2.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  style-loader@2.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
@@ -19455,9 +19463,9 @@ snapshots:
 
   svg-parser@2.0.4: {}
 
-  svg-url-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  svg-url-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
-      file-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      file-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
       loader-utils: 2.0.4
       webpack: 5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)
 
@@ -19538,7 +19546,7 @@ snapshots:
       ansi-escapes: 4.3.2
       iterm2-version: 4.2.0
 
-  terser-webpack-plugin@4.2.3(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  terser-webpack-plugin@4.2.3(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       cacache: 15.3.0
       find-cache-dir: 3.3.2
@@ -19926,14 +19934,14 @@ snapshots:
 
   url-join@4.0.1: {}
 
-  url-loader@4.1.1(file-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  url-loader@4.1.1(file-loader@6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
     dependencies:
       loader-utils: 2.0.4
       mime-types: 2.1.35
       schema-utils: 3.3.0
       webpack: 5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)
     optionalDependencies:
-      file-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
+      file-loader: 6.0.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
 
   url-loader@4.1.1(file-loader@6.2.0(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
     dependencies:
@@ -20075,12 +20083,12 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))):
+  webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@webpack-cli/configtest': 1.2.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0)))
-      '@webpack-cli/info': 1.5.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))
-      '@webpack-cli/serve': 1.7.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))))(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))
+      '@webpack-cli/configtest': 1.2.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0))(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0))
+      '@webpack-cli/info': 1.5.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0))
+      '@webpack-cli/serve': 1.7.0(webpack-cli@4.10.0(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))(webpack@5.91.0))(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))
       colorette: 2.0.20
       commander: 7.2.0
       cross-spawn: 7.0.3
@@ -20369,6 +20377,12 @@ snapshots:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
       webpack: 5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack-dev-server@4.15.2)(webpack@5.91.0))
+
+  worker-loader@3.0.8(webpack@5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)):
+    dependencies:
+      loader-utils: 2.0.4
+      schema-utils: 3.3.0
+      webpack: 5.91.0(esbuild@0.14.54)(webpack-cli@4.10.0)
 
   wrap-ansi@5.1.0:
     dependencies:

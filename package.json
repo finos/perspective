@@ -119,7 +119,6 @@
         "prepare": "husky install",
         "lint": "node tools/perspective-scripts/lint.mjs",
         "fix": "node tools/perspective-scripts/fix.mjs",
-        "version": "node tools/perspective-scripts/version.mjs",
-        "jlab_link": "pip3 install ./python/perspective --no-build-isolation"
+        "version": "node tools/perspective-scripts/version.mjs"
     }
 }

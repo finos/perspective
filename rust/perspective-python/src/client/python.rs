@@ -374,6 +374,10 @@ impl PyTable {
         self.table.get_limit()
     }
 
+    pub async fn get_name(&self) -> String {
+        self.table.get_name().into()
+    }
+
     pub async fn size(&self) -> PyResult<usize> {
         self.table.size().await.into_pyerr()
     }

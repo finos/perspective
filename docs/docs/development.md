@@ -117,26 +117,18 @@ directory, simply install `python/perspective` with `pip` as you might normally
 do.
 
 ```bash
-(cd packages/perspective-jupyterlab && yarn run build)
-pip install -e python/perspective
-jupyter labextension develop python/perspective
+# builds labextension to the perspective-python python package root directory
+pnpm -F @finos/perspective-jupyterlab build
+# editable install of the python package
+pnpm -F @finos/perspective-python develop:maturin
+# set up symlink of our labextension to jupyter share directory
+# this directory's path is in the output of `jupyter labextension list`
+pnpm -F @finos/perspective-python develop:labextension
 ```
 
 Afterwards, you should see it listed as a "local extension" when you run
 `jupyter labextension list` and as a normal extension when you run
 `jupyter nbextension list`.
-
-As an example, your setup process might look like this:
-
-```bash
-python -m venv ./venv
-pip install -r python/perspective/requirements-311.txt
-yarn setup # choose python
-yarn build
-yarn setup # choose javascript > jupyterlab
-yarn build
-yarn jlab_link # run this whenever you need to update a local perspective package
-```
 
 ---
 

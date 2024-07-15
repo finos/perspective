@@ -10,21 +10,20 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { expect } = require("@finos/perspective-test");
-const path = require("path");
-const utils = require("@finos/perspective-test");
-const {
+import { API_VERSION, expect } from "@finos/perspective-test";
+import path from "path";
+import {
     default_body,
     add_and_execute_cell,
     assert_no_error_in_cell,
     execute_all_cells,
     test_jupyter,
     describe_jupyter,
-} = require("./utils");
+} from "./utils";
 
-const getEditable = async (viewer) => {
+const getEditMode = async (viewer) => {
     return await viewer.evaluate(async (viewer) => {
-        return (await viewer.save()).plugin_config.editable;
+        return (await viewer.save()).plugin_config.edit_mode;
     });
 };
 
@@ -125,18 +124,18 @@ describe_jupyter(
         );
 
         test_jupyter(
-            "Loads with editable=True",
+            "Loads with edit_mode=EDIT",
             [
                 [
                     "table = perspective.Table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table, plugin_config={'editable': True})",
+                    "w = perspective.PerspectiveWidget(table, plugin_config={'edit_mode': 'EDIT'})",
                 ].join("\n"),
                 "w",
             ],
             async ({ page }) => {
                 const viewer = await default_body(page);
-                const editable = await getEditable(viewer);
-                expect(editable).toEqual(true);
+                const edit_mode = await getEditMode(viewer);
+                expect(edit_mode).toEqual("EDIT");
             }
         );
 
@@ -151,16 +150,16 @@ describe_jupyter(
             ],
             async ({ page }) => {
                 const viewer = await default_body(page);
-                let editable = await getEditable(viewer);
-                expect(editable).toEqual(false);
+                let edit_mode = await getEditMode(viewer);
+                expect(edit_mode).toEqual("READ_ONLY");
 
                 await add_and_execute_cell(
                     page,
-                    'w.plugin_config = {"editable": True}'
+                    'w.plugin_config = {"edit_mode": "EDIT"}'
                 );
 
-                editable = await getEditable(viewer);
-                expect(editable).toEqual(true);
+                edit_mode = await getEditMode(viewer);
+                expect(edit_mode).toEqual("EDIT");
             }
         );
         test_jupyter(
@@ -174,8 +173,8 @@ describe_jupyter(
             ],
             async ({ page }) => {
                 const viewer = await default_body(page);
-                let editable = await getEditable(viewer);
-                expect(editable).toEqual(false);
+                let edit_mode = await getEditMode(viewer);
+                expect(edit_mode).toEqual("READ_ONLY");
 
                 await viewer.evaluate(async (viewer) => {
                     const edit =
@@ -185,8 +184,8 @@ describe_jupyter(
                     edit.click();
                 });
 
-                editable = await getEditable(viewer);
-                expect(editable).toEqual(true);
+                edit_mode = await getEditMode(viewer);
+                expect(edit_mode).toEqual("EDIT");
             }
         );
 
@@ -207,7 +206,7 @@ describe_jupyter(
 
                 // Check default config
                 expect(config).toEqual({
-                    version: utils.API_VERSION,
+                    version: API_VERSION,
                     columns_config: {},
                     aggregates: {},
                     columns: [
@@ -232,7 +231,7 @@ describe_jupyter(
                     plugin: "Datagrid",
                     plugin_config: {
                         columns: {},
-                        editable: false,
+                        edit_mode: "READ_ONLY",
                         scroll_lock: false,
                     },
                     settings: true,
@@ -261,7 +260,7 @@ w.theme = "Pro Dark"`
 
                 // and check it
                 expect(config).toEqual({
-                    version: utils.API_VERSION,
+                    version: API_VERSION,
                     columns_config: {},
                     aggregates: {},
                     columns: ["ui8"],
@@ -296,7 +295,7 @@ w.theme = "Pro Dark"`
 
                 // Check default config
                 expect(config).toEqual({
-                    version: utils.API_VERSION,
+                    version: API_VERSION,
                     columns_config: {},
                     aggregates: {},
                     columns: [
@@ -321,8 +320,8 @@ w.theme = "Pro Dark"`
                     plugin: "Datagrid",
                     plugin_config: {
                         columns: {},
-                        editable: false,
                         scroll_lock: false,
+                        edit_mode: "READ_ONLY",
                     },
                     settings: true,
                     sort: [],
@@ -346,7 +345,7 @@ w.theme = "Pro Dark"`
                     });
 
                     return "";
-                }, utils.API_VERSION);
+                }, API_VERSION);
 
                 const error_cells_dont_exist = await assert_no_error_in_cell(
                     page,
@@ -369,7 +368,7 @@ assert w.theme == "Pro Dark"
         test_jupyter(
             "Edit from frontend - end to end",
             [
-                'w = perspective.PerspectiveWidget({"a": [True, False, True], "b": ["abc", "def", "ghi"]}, index="b", plugin_config={"editable": True})',
+                'w = perspective.PerspectiveWidget({"a": [True, False, True], "b": ["abc", "def", "ghi"]}, index="b", plugin_config={"edit_mode": "EDIT"})',
                 "w",
             ],
             async ({ page }) => {
@@ -379,7 +378,7 @@ assert w.theme == "Pro Dark"
                 let error_cells_dont_exist = await assert_no_error_in_cell(
                     page,
                     [
-                        `assert w.table.view().to_df().to_dict() == {'a': {0: True, 1: False, 2: True}, 'b': {0: 'abc', 1: 'def', 2: 'ghi'}}`,
+                        `assert w.table.view().to_columns() == {'a': [True, False, True], 'b': ['abc', 'def', 'ghi']}`,
                         `"Passed"`,
                     ].join("\n")
                 );
@@ -397,7 +396,7 @@ assert w.theme == "Pro Dark"
                 error_cells_dont_exist = await assert_no_error_in_cell(
                     page,
                     [
-                        `assert w.table.view().to_df().to_dict() == {'a': {0: False, 1: True, 2: False}, 'b': {0: 'abc', 1: 'def', 2: 'ghi'}}`,
+                        `assert w.table.view().to_columns() == {'a': [False, True, False}, 'b': ['abc', 'def', 'ghi']}`,
                         `"Passed"`,
                     ].join("\n")
                 );
