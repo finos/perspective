@@ -15,22 +15,13 @@ __all__ = [
     "PerspectiveError",
     "PerspectiveWidget",
     "PerspectiveViewer",
-    "PerspectiveTornadoHandler",
-    "Table",
-    "PerspectiveManager",
-    "sync_client",
-    "create_sync_client",
+    "Server",
+    "Client",
 ]
 
-from .perspective import PySyncClient, PerspectiveError, PySyncServer
-
+from .perspective import PerspectiveError, PySyncClient, PySyncServer
 from .widget import PerspectiveWidget
 from .viewer import PerspectiveViewer
-
-try:
-    from .handlers import PerspectiveTornadoHandler
-except ImportError:
-    ...
 
 
 def default_loop_cb(fn, *args, **kwargs):
@@ -38,9 +29,6 @@ def default_loop_cb(fn, *args, **kwargs):
 
 
 class Server(PySyncServer):
-    def set_threadpool_size(self, n_cpus):
-        pass
-
     def new_client(self, loop_callback=default_loop_cb):
         return Client.from_server(self, loop_callback)
 
@@ -55,7 +43,7 @@ class Client(PySyncClient):
 
         def handle_request(bytes):
             session.handle_request(bytes)
-            loop_callback(lambda: session.poll())
+            loop_callback(session.poll)
 
         def handle_response(bytes):
             client.handle_response(bytes)

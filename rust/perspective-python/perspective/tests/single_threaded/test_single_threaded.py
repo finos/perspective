@@ -13,14 +13,13 @@
 
 import perspective as psp
 
-server = psp.Server()
-server.set_threadpool_size(1)
-client = server.new_client()
-Table = client.table
-
 
 class TestThreadPoolOne:
     def test_threadpool_one_does_not_block_view(self):
+        server = psp.Server()
+        client = server.new_client()
+        Table = client.table
+
         t = Table(
             {
                 "id": "integer",
