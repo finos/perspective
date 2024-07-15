@@ -13,7 +13,7 @@
 import psp, { cwd_static_file_handler, make_session } from "@finos/perspective";
 import express from "express";
 import expressWs from "express-ws";
-import * as securities from "../../datasources/index.mjs";
+import * as securities from "./securities.mjs";
 
 // node buffer -> JS buffer
 function buffer_to_arraybuffer(buffer) {
@@ -29,7 +29,6 @@ function buffer_to_arraybuffer(buffer) {
 // to create it so the WebSocket clients can find it.
 const _table = await securities.securities.getTable();
 
-// const w = await psp.worker();
 const app = expressWs(express()).app;
 app.ws("/subscribe", async (ws) => {
     const session = await make_session(async (proto) => {

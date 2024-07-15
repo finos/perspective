@@ -12,14 +12,26 @@
 
 import random
 import logging
-import threading
 import tornado.websocket
 import tornado.web
 import tornado.ioloop
 from datetime import date, datetime
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
-import threading
-import concurrent.futures
+import perspective
+import json
+
+old = json.JSONEncoder.default
+
+
+def new_encoder(self, obj):
+    if isinstance(obj, datetime):
+        return str(obj)
+    elif isinstance(obj, date):
+        return str(obj)
+    else:
+        return old(self, obj)
+
+
+json.JSONEncoder.default = new_encoder
 
 
 def data_source():
@@ -41,7 +53,6 @@ def data_source():
     return rows
 
 
-IS_MULTI_THREADED = True
 SECURITIES = [
     "AAPL.N",
     "AMZN.N",
@@ -61,59 +72,38 @@ SECURITIES = [
 CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"]
 
 
-def perspective_thread(manager):
-    """Perspective application thread starts its own tornado IOLoop, and
-    adds the table with the name "data_source_one", which will be used
-    in the front-end."""
-    table = Table(
+def perspective_thread(perspective_server):
+    client = perspective_server.new_client()
+    table = client.table(
         {
-            "name": str,
-            "client": str,
-            "open": float,
-            "high": float,
-            "low": float,
-            "close": float,
-            "lastUpdate": datetime,
-            "date": date,
+            "name": "string",
+            "client": "string",
+            "open": "float",
+            "high": "float",
+            "low": "float",
+            "close": "float",
+            "lastUpdate": "datetime",
+            "date": "date",
         },
         limit=2500,
+        name="data_source_one",
     )
-
-    # Track the table with the name "data_source_one", which will be used in
-    # the front-end to access the Table.
-    manager.host_table("data_source_one", table)
 
     # update with new data every 50ms
     def updater():
         table.update(data_source())
 
     callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=50)
-    psp_loop = tornado.ioloop.IOLoop()
-    if IS_MULTI_THREADED:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            manager.set_loop_callback(psp_loop.run_in_executor, executor)
-            callback.start()
-            psp_loop.start()
-    else:
-        manager.set_loop_callback(psp_loop.add_callback)
-        callback.start()
-        psp_loop.start()
+    callback.start()
 
 
-def make_app():
-    manager = PerspectiveManager()
-
-    thread = threading.Thread(target=perspective_thread, args=(manager,))
-    thread.daemon = True
-    thread.start()
-
+def make_app(perspective_server):
     return tornado.web.Application(
         [
-            # create a websocket endpoint that the client Javascript can access
             (
                 r"/websocket",
-                PerspectiveTornadoHandler,
-                {"manager": manager, "check_origin": True},
+                perspective.PerspectiveTornadoHandler,
+                {"perspective_server": perspective_server},
             ),
             (
                 r"/node_modules/(.*)",
@@ -130,8 +120,11 @@ def make_app():
 
 
 if __name__ == "__main__":
-    app = make_app()
+    perspective_server = perspective.Server()
+
+    app = make_app(perspective_server)
     app.listen(8080)
     logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
+    loop.call_later(0, perspective_thread, perspective_server)
     loop.start()
