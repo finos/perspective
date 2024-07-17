@@ -18,12 +18,19 @@ __all__ = [
     "PerspectiveViewer",
     "PerspectiveTornadoHandler",
     "Table",
+    "View",
     "PerspectiveManager",
     "sync_client",
     "create_sync_client",
 ]
 
-from .perspective import PySyncClient, PerspectiveError, PySyncServer
+from .perspective import (
+    PySyncClient,
+    PerspectiveError,
+    PySyncServer,
+    Table,
+    View,
+)
 
 from .widget import PerspectiveWidget
 from .viewer import PerspectiveViewer

@@ -12,9 +12,9 @@
 
 from random import random
 from .viewer_traitlets import PerspectiveTraitlets
-from ..perspective import Table, View
+import perspective
 
-from ..legacy import Table, tablep, viewp, Server
+# from .. import Server
 
 # ─  │  ┌ ┬ ┐
 # ┄  ┆  ├ ┼ ┤ ╲ ╱
@@ -23,7 +23,7 @@ from ..legacy import Table, tablep, viewp, Server
 # ┅  ┇  ┣ ╋ ┫ ┣ ┿ ┫ ┠ ╂ ┨ ┠ ┼ ┨
 # ┉  ┋  ┗ ┻ ┛ ┗ ┷ ┛ ┗ ┻ ┛ ┗ ┷ ┛
 
-global_server = PySyncServer()
+# global_server = PySyncServer()
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -110,16 +110,11 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             ... )
         """
 
-        # Create an instance of `PerspectiveManager`, which receives messages
-        # from the `PerspectiveJupyterClient` on the front-end.
-        self.manager = None
-
-        # self._server =
-
         # The Table under management by this viewer and its
         # attached PerspectiveManager
         self._table = None
         self._client = None
+        self._server = perspective.Server()
 
         # Viewer configuration
         self.plugin = plugin  # validate_plugin(plugin)
@@ -198,17 +193,17 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if self.table is not None:
             self.reset()
 
-        if tablep(data):
+        if isinstance(data, perspective.Table):
             self._table = data
-        elif viewp(data):
-            raise PerspectiveError(
+        elif isinstance(data, perspective.View):
+            raise TypeError(
                 "Views cannot be loaded directly, load a table or raw data instead"
             )
         else:
             # Construct a new table on the server from raw data
-            from ..legacy import create_sync_client
+            # from ..legacy import create_sync_client
 
-            client = create_sync_client(server=self._server)
+            client = self._server.new_client()
             self._table = client.table(data, name=name, **options)
             self._client = client
 

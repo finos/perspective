@@ -115,7 +115,6 @@ tools/perspective-build/lib
 packages/perspective-esbuild-plugin/lib
 rust/perspective-python/perspective/nbextension/static
 rust/perspective-python/perspective/labextension
-rust/perspective-python/perspective.data/
 boost_*.tar.gz
 
 # editor, IDE, OS
@@ -245,3 +244,5 @@ rust/perspective-js/docs
 rust/perspective-python/docs
 
 .pyodide-*/
+rust/perspective-python/perspective.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab/static
+rust/perspective-python/perspective.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab/package.json

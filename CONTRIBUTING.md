@@ -64,5 +64,5 @@ pull request. A [DCO enforcement bot](https://github.com/apps/dco) will
 automatically scan and flag any pull requests that lack a valid sign-off.
 
 If you have any general questions about contributing to Perspective, please feel
-free to open an discussion on
+free to open a discussion on
 [github](https://github.com/finos/perspective/discussions)

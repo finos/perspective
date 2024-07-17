@@ -27,7 +27,6 @@ classifiers = [
 [tool.maturin]
 data = "perspective.data"
 features = ["pyo3/extension-module"]
-include = ["perspective/labextension/**/*", "perspective/extension/**/*"]
 
 [tool.pytest.ini_options]
 python_classes = ["Test", "Describe"]

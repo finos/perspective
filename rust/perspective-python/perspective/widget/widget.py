@@ -122,17 +122,17 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             raise TypeError("Index and Limit cannot be set at the same time!")
 
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
-        if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
-            data, config = deconstruct_pandas(data)
+        # if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+        #     data, config = deconstruct_pandas(data)
 
-            if config.get("group_by", None) and "group_by" not in kwargs:
-                kwargs.update({"group_by": config["group_by"]})
+        #     if config.get("group_by", None) and "group_by" not in kwargs:
+        #         kwargs.update({"group_by": config["group_by"]})
 
-            if config.get("split_by", None) and "split_by" not in kwargs:
-                kwargs.update({"split_by": config["split_by"]})
+        #     if config.get("split_by", None) and "split_by" not in kwargs:
+        #         kwargs.update({"split_by": config["split_by"]})
 
-            if config.get("columns", None) and "columns" not in kwargs:
-                kwargs.update({"columns": config["columns"]})
+        #     if config.get("columns", None) and "columns" not in kwargs:
+        #         kwargs.update({"columns": config["columns"]})
 
         # Initialize the viewer
         super(PerspectiveWidget, self).__init__(**kwargs)
