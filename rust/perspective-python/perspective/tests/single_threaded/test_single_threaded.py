@@ -15,7 +15,7 @@ import perspective as psp
 
 server = psp.Server()
 server.set_threadpool_size(1)
-client = server.new_client()
+client = server.new_local_client()
 Table = client.table
 
 

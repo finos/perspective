@@ -15,13 +15,10 @@ import numpy as np
 import pyarrow as pa
 from functools import partial
 from pytest import raises, mark
-from perspective import (
-    Server,
-    Client,
-)
+from perspective import Server, Client, PerspectiveError
 
 
-client = Server().new_client()
+client = Server().new_local_client()
 Table = client.table
 
 

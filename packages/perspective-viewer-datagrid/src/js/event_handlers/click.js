@@ -18,7 +18,7 @@ export function is_editable(viewer, allowed = false) {
         this._config.group_by.length === 0 &&
         this._config.split_by.length === 0;
     const selectable = viewer.hasAttribute("selectable");
-    const editable = allowed || !!viewer.children[0]._is_edit_mode;
+    const editable = allowed || !!(viewer.children[0]._edit_mode === "EDIT");
     return has_pivots && !selectable && editable;
 }
 

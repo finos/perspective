@@ -42,6 +42,7 @@ fn main() {
         println!("cargo:warning=MESSAGE Building in development mode");
         let root_dir_env = std::env::var("PSP_ROOT_DIR").expect("Must set PSP_ROOT_DIR");
         let root_dir = Path::new(root_dir_env.as_str());
+
         copy_dir_all(
             Path::join(root_dir, "rust/perspective-client/docs"),
             "docs",

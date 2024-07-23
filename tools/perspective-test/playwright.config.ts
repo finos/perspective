@@ -128,8 +128,6 @@ const BROWSER_AND_PYTHON_PACKAGES = [
     },
 ];
 
-//const RUN_JUPYTERLAB = PACKAGE.includes("perspective-jupyterlab");
-
 let PROJECTS = (() => {
     const acc = new Array();
     if (RUN_JUPYTERLAB) {
@@ -201,7 +199,7 @@ export default defineConfig({
         timeout: 10_000,
     },
     forbidOnly: !!process.env.CI,
-    retries: process.env.CI ? 2 : 0,
+    retries: 0,
     quiet: !process.env.PSP_DEBUG,
     reporter: process.env.CI ? [["github"], ["html"]] : [["dot"]],
     projects: PROJECTS,

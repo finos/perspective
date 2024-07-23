@@ -282,15 +282,15 @@ impl View {
         U: Future<Output = ()> + Send + 'static,
     {
         let on_update = Arc::new(on_update);
-        let callback = move |client_resp| {
+        let callback = move |resp: Response| {
             let on_update = on_update.clone();
             async move {
-                match client_resp {
-                    ClientResp::ViewOnUpdateResp(resp) => {
+                match resp.client_resp {
+                    Some(ClientResp::ViewOnUpdateResp(resp)) => {
                         on_update(resp).await;
                         Ok(())
                     },
-                    other => Err(other.into()),
+                    resp => Err(ClientError::OptionResponseFailed(resp.into())),
                 }
             }
             .boxed()
@@ -322,7 +322,7 @@ impl View {
         &self,
         on_delete: Box<dyn Fn() + Send + Sync + 'static>,
     ) -> ClientResult<u32> {
-        let callback = move |resp| match resp {
+        let callback = move |resp: Response| match resp.client_resp.unwrap() {
             ClientResp::ViewOnDeleteResp(_) => {
                 on_delete();
                 Ok(())

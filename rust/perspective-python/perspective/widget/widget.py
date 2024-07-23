@@ -110,8 +110,6 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             ...     filter=[["a", ">", 1]],
             ...     expressions=["\"a\" + 100"])
         """
-        # Trigger special flow when receiving an ArrayBuffer/binary
-        self._pending_binary = None
 
         self.binding_mode = binding_mode
 
@@ -204,7 +202,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if content["type"] == "connect":
             client_id = content["client_id"]
             logging.debug("view {} connected", client_id)
-            self._sessions[client_id] = self.new_session(
+            self._sessions[client_id] = self.new_proxy_session(
                 lambda msg: self.send(
                     {"type": "binary_msg", "client_id": client_id}, [msg]
                 )

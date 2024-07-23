@@ -13,13 +13,57 @@
 use std::collections::HashMap;
 use std::future::Future;
 
-use perspective_client::{assert_table_api, assert_view_api};
+use perspective_client::{assert_table_api, assert_view_api, ProxySession, Session};
 use pollster::FutureExt;
 use pyo3::marker::Ungil;
 use pyo3::prelude::*;
 use pyo3::types::*;
 
 use super::python::*;
+
+#[pyclass]
+#[derive(Clone)]
+pub struct PySyncProxySession(ProxySession);
+
+#[pymethods]
+impl PySyncProxySession {
+    #[new]
+    pub fn new(
+        py: Python<'_>,
+        client: Py<PySyncClient>,
+        handle_request: Py<PyAny>,
+    ) -> PyResult<Self> {
+        let callback = {
+            move |msg: &[u8]| {
+                let msg = msg.to_vec();
+                Python::with_gil(|py| {
+                    let bytes = PyBytes::new_bound(py, &msg);
+                    handle_request.call1(py, (bytes,))?;
+                    Ok(())
+                })
+            }
+        };
+
+        Ok(PySyncProxySession(
+            ProxySession::new(client.borrow(py).0.client.clone(), callback).py_block_on(py),
+        ))
+    }
+
+    pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
+        self.0.handle_request(&data).py_block_on(py).into_pyerr()?;
+        Ok(())
+    }
+
+    pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
+        self.0.poll().py_block_on(py).into_pyerr()?;
+        Ok(())
+    }
+
+    pub fn close(&self, py: Python<'_>) -> PyResult<()> {
+        self.0.clone().close().py_block_on(py);
+        Ok(())
+    }
+}
 
 trait PyFutureExt: Future {
     fn py_block_on(self, py: Python<'_>) -> Self::Output
@@ -45,7 +89,7 @@ impl PySyncClient {
         Ok(PySyncClient(client))
     }
 
-    pub fn handle_response(&self, py: Python<'_>, response: Py<PyBytes>) -> PyResult<()> {
+    pub fn handle_response(&self, py: Python<'_>, response: Py<PyBytes>) -> PyResult<bool> {
         self.0.handle_response(response).py_block_on(py)
     }
 
@@ -93,6 +137,10 @@ impl PySyncTable {
         self.0.get_index().block_on()
     }
 
+    fn get_client(&self, loop_cb: Option<Py<PyAny>>) -> PySyncClient {
+        PySyncClient(self.0.get_client(loop_cb).block_on())
+    }
+
     fn get_limit(&self) -> Option<u32> {
         self.0.get_limit().block_on()
     }
@@ -135,9 +183,9 @@ impl PySyncTable {
     }
 
     #[doc = include_str!("../../docs/table/remove_delete.md")]
-    fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
+    fn remove_delete(&self, callback_id: u32) -> PyResult<()> {
         let table = self.0.clone();
-        table.remove_delete(callback).block_on()
+        table.remove_delete(callback_id).block_on()
     }
 
     #[doc = include_str!("../../docs/table/schema.md")]
@@ -301,8 +349,8 @@ impl PySyncView {
     }
 
     #[doc = include_str!("../../docs/view/remove_delete.md")]
-    fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
-        self.0.remove_delete(callback).block_on()
+    fn remove_delete(&self, callback_id: u32) -> PyResult<()> {
+        self.0.remove_delete(callback_id).block_on()
     }
 
     #[doc = include_str!("../../docs/view/on_update.md")]

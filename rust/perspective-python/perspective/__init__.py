@@ -19,9 +19,6 @@ __all__ = [
     "PerspectiveTornadoHandler",
     "Table",
     "View",
-    "PerspectiveManager",
-    "sync_client",
-    "create_sync_client",
 ]
 
 from .perspective import (
@@ -30,6 +27,7 @@ from .perspective import (
     PySyncServer,
     Table,
     View,
+    PySyncProxySession as ProxySession,
 )
 
 from .widget import PerspectiveWidget
@@ -50,7 +48,8 @@ class Server(PySyncServer):
     def set_threadpool_size(self, n_cpus):
         pass
 
-    def new_client(self, loop_callback=default_loop_cb):
+    def new_local_client(self, loop_callback=default_loop_cb):
+        """Create a new `Client` instance bound to this in-process `Server`."""
         return Client.from_server(self, loop_callback)
 
 

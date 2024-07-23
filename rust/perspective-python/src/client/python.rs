@@ -30,7 +30,7 @@ use pythonize::depythonize_bound;
 
 #[derive(Clone)]
 pub struct PyClient {
-    client: Client,
+    pub(crate) client: Client,
     loop_cb: Arc<RwLock<Option<Py<PyAny>>>>,
 }
 
@@ -54,7 +54,13 @@ create_exception!(
 impl UpdateData {
     fn from_py_partial(py: Python<'_>, input: &Py<PyAny>) -> Result<Option<UpdateData>, PyErr> {
         if let Ok(pybytes) = input.downcast_bound::<PyBytes>(py) {
-            Ok(Some(UpdateData::Arrow(pybytes.as_bytes().to_vec().into())))
+            Ok(Some(UpdateData::Arrow(
+                // TODO need to explicitly qualify this b/c bug in
+                // rust-analyzer - should be: just `pybytes.as_bytes()`.
+                pyo3::prelude::PyBytesMethods::as_bytes(pybytes)
+                    .to_vec()
+                    .into(),
+            )))
         } else if let Ok(pystring) = input.downcast_bound::<PyString>(py) {
             Ok(Some(UpdateData::Csv(pystring.extract::<String>()?)))
         } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
@@ -132,8 +138,6 @@ impl TableData {
         }
     }
 }
-
-const PSP_CALLBACK_ID: &str = "__PSP_CALLBACK_ID__";
 
 fn get_arrow_table_cls() -> Option<Py<PyAny>> {
     let res: PyResult<Py<PyAny>> = Python::with_gil(|py| {
@@ -279,7 +283,7 @@ impl PyClient {
         }
     }
 
-    pub async fn handle_response(&self, bytes: Py<PyBytes>) -> PyResult<()> {
+    pub async fn handle_response(&self, bytes: Py<PyBytes>) -> PyResult<bool> {
         self.client
             .handle_response(Python::with_gil(|py| bytes.as_bytes(py)))
             .await
@@ -370,6 +374,13 @@ impl PyTable {
         self.table.get_index()
     }
 
+    pub async fn get_client(&self, loop_cb: Option<Py<PyAny>>) -> PyClient {
+        PyClient {
+            client: self.table.get_client(),
+            loop_cb: Arc::new(RwLock::new(loop_cb)),
+        }
+    }
+
     pub async fn get_limit(&self) -> Option<u32> {
         self.table.get_limit()
     }
@@ -416,14 +427,10 @@ impl PyTable {
         };
 
         let callback_id = self.table.on_delete(callback).await.into_pyerr()?;
-
-        Python::with_gil(move |py| callback_py.setattr(py, PSP_CALLBACK_ID, callback_id))?;
         Ok(callback_id)
     }
 
-    pub async fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
-        let callback_id =
-            Python::with_gil(|py| callback.getattr(py, PSP_CALLBACK_ID)?.extract(py))?;
+    pub async fn remove_delete(&self, callback_id: u32) -> PyResult<()> {
         self.table.remove_delete(callback_id).await.into_pyerr()
     }
 
@@ -583,13 +590,10 @@ impl PyView {
         };
 
         let callback_id = self.view.on_delete(callback).await.into_pyerr()?;
-        Python::with_gil(move |py| callback_py.setattr(py, PSP_CALLBACK_ID, callback_id))?;
         Ok(callback_id)
     }
 
-    pub async fn remove_delete(&self, callback: Py<PyAny>) -> PyResult<()> {
-        let callback_id =
-            Python::with_gil(|py| callback.getattr(py, PSP_CALLBACK_ID)?.extract(py))?;
+    pub async fn remove_delete(&self, callback_id: u32) -> PyResult<()> {
         self.view.remove_delete(callback_id).await.into_pyerr()
     }
 

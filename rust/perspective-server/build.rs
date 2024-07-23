@@ -155,7 +155,7 @@ fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
                         stem.expect("bad")[3..].to_string()
                     };
 
-                    println!("cargo:warning=MESSAGE static link {}", a);
+                    // println!("cargo:warning=MESSAGE static link {}", a);
                     println!("cargo:rustc-link-search=native={}", dir.display());
                     println!("cargo:rustc-link-lib=static={}", a);
                 }

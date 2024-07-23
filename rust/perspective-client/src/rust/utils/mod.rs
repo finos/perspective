@@ -34,6 +34,9 @@ pub enum ClientError {
     #[error("Unwrapped option")]
     Option,
 
+    #[error("Unexpected response {0:?}")]
+    OptionResponseFailed(Box<Option<proto::response::ClientResp>>),
+
     #[error("Bad string")]
     Utf8(#[from] std::str::Utf8Error),
 
@@ -51,6 +54,9 @@ pub enum ClientError {
 
     #[error("External error: {0:?}")]
     ExternalError(#[from] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("Undecipherable proto message")]
+    ProtoError(#[from] prost::EncodeError),
 }
 
 pub type ClientResult<T> = Result<T, ClientError>;

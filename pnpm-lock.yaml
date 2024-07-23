@@ -641,7 +641,7 @@ importers:
         version: link:../../tools/perspective-test
       '@jupyterlab/builder':
         specifier: ^4
-        version: 4.2.3(esbuild@0.14.54)(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))
+        version: 4.2.4(esbuild@0.14.54)(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))
       '@prospective.co/procss':
         specifier: ^0.1.15
         version: 0.1.15
@@ -2330,8 +2330,8 @@ packages:
   '@jupyterlab/apputils@4.3.3':
     resolution: {integrity: sha512-0avRMZ1G+HL4jtEYOgJZgOlS4azyD/+t18drbhU5sUfA1yX6BlzdurChqhJtPZEYeuOQT79b4yy3JtzTwQ/uEQ==}
 
-  '@jupyterlab/builder@4.2.3':
-    resolution: {integrity: sha512-HG2J8d8OF+BoxV1FxtxGw2ZV2ulu2w7Xw6zAZB0aODH1kew/iJEqhS1CqLl1eAsItGkFXh38sX9bCEA2PuAnoQ==}
+  '@jupyterlab/builder@4.2.4':
+    resolution: {integrity: sha512-0Z7QO06cwKwoSVbw7siJoyoy7crHTdH6Zc3aHtg2uVzQahqjYFzZz/l+HZPhWzY4BXV5QKB4LcWginY6/5mVHA==}
     hasBin: true
 
   '@jupyterlab/codeeditor@4.2.3':
@@ -11380,7 +11380,7 @@ snapshots:
       - crypto
       - utf-8-validate
 
-  '@jupyterlab/builder@4.2.3(esbuild@0.14.54)(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))':
+  '@jupyterlab/builder@4.2.4(esbuild@0.14.54)(webpack-dev-server@4.15.2(webpack-cli@4.10.0)(webpack@5.91.0))':
     dependencies:
       '@lumino/algorithm': 2.0.2
       '@lumino/application': 2.4.0

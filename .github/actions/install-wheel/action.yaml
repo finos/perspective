@@ -10,24 +10,23 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import os
-import perspective as psp
+name: "Install wheel"
+description: "Installs the wheel depending on build platform, because Python"
 
-client = psp.Server().new_local_client()
-Table = client.table
+runs:
+    using: "composite"
+    steps:
+        - name: Install wheel (Linux)
+          shell: sh
+          run: python -m pip install -U --no-dependencies *.whl --target rust/perspective-python
+          if: ${{ runner.os == 'Linux' }}
 
+        - name: Install wheel (OSX)
+          shell: sh
+          run: python -m pip install -U --no-dependencies *.whl --target rust/perspective-python
+          if: ${{ runner.os == 'macOS' }}
 
-class TestToArrowLZ4(object):
-    def test_to_arrow_lz4_roundtrip(self, superstore):
-        original_tbl = Table(superstore.to_dict(orient="records"))
-        arrow_uncompressed = original_tbl.view().to_arrow(compression=None)
-
-        tbl = Table(arrow_uncompressed)
-        arr = tbl.view().to_arrow(compression="lz4")
-        assert len(arr) < len(arrow_uncompressed)
-        tbl2 = Table(arr)
-        arr2 = tbl2.view().to_arrow(compression=None)
-        assert len(arr2) > len(arr)
-        tbl3 = Table(arr)
-        arr3 = tbl3.view().to_arrow(compression="lz4")
-        assert len(arr3) == len(arr)
+        - name: Install wheel (Windows)
+          shell: pwsh
+          run: python -m pip install -U --no-dependencies (Get-ChildItem .\*.whl | Select-Object -Expand FullName) --target rust/perspective-python
+          if: ${{ runner.os == 'Windows' }}

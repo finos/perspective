@@ -14,8 +14,11 @@ import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import rimraf from "rimraf";
-import notebook_template from "./notebook_template.json";
+import notebook_template from "./notebook_template.json" assert { type: "json" };
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "esm");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
 
@@ -104,7 +107,7 @@ export function test_jupyter(name, cells, body) {
 }
 
 export async function default_body(page) {
-    await module.exports.execute_all_cells(page);
+    await execute_all_cells(page);
     const viewer = await page.waitForSelector(
         ".jp-OutputArea-output perspective-viewer",
         { visible: true }
@@ -114,16 +117,19 @@ export async function default_body(page) {
 }
 export async function execute_all_cells(page) {
     await page.waitForFunction(async () => !!document.title);
-    await page.waitForSelector(".p-Widget", { visible: true });
+    await page.waitForSelector(".lm-Widget", { visible: true });
     await page.waitForSelector(".jp-NotebookPanel-toolbar", {
         visible: true,
     });
 
     // wait for a cell to be active
-    // await page.waitForSelector(
-    //     '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])'
-    // );
-    await new Promise((x) => setTimeout(x, 2000));
+    try {
+        await page.waitForSelector(
+            '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])',
+            { timeout: 1000 }
+        );
+    } catch (e) {}
+    // await new Promise((x) => setTimeout(x, 2000));
 
     await page.waitForSelector(
         '.jp-Notebook-ExecutionIndicator[data-status="idle"]'
@@ -134,6 +140,7 @@ export async function execute_all_cells(page) {
     await page.keyboard.press("R");
     await page.evaluate(() => (document.scrollTop = 0));
 }
+
 export async function add_and_execute_cell(page, cell_content) {
     // wait for a code cell to be visible
     await page.waitForSelector(".jp-CodeCell", {
@@ -144,7 +151,7 @@ export async function add_and_execute_cell(page, cell_content) {
     await page.click(".jp-CodeCell");
     await new Promise((x) => setTimeout(x, 100));
     // find and click the "new cell" button
-    await page.click('.jp-Button[data-command="notebook:insert-cell-below"]');
+    await page.click('jp-button[data-command="notebook:insert-cell-below"]');
     await new Promise((x) => setTimeout(x, 100));
     // after clicking new cell, the document will auto
     // focus the new cell, so lets grab it
@@ -153,7 +160,9 @@ export async function add_and_execute_cell(page, cell_content) {
 
     await new Promise((x) => setTimeout(x, 100));
     // now while the element is still focused, click the run cell button
-    await page.click('.jp-Button[data-command="runmenu:run"]');
+    await page.click(
+        'jp-button[data-command="notebook:run-cell-and-select-next"]'
+    );
     await new Promise((x) => setTimeout(x, 100));
     // wait for kernel to stop running
     // await page.waitForSelector(
@@ -165,7 +174,7 @@ export async function add_and_execute_cell(page, cell_content) {
 }
 export async function assert_no_error_in_cell(page, cell_content) {
     // run the cell
-    await module.exports.add_and_execute_cell(page, cell_content);
+    await add_and_execute_cell(page, cell_content);
 
     // wait for jupyter to render any frontend exceptions
     return await Promise.race([

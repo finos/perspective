@@ -10,24 +10,20 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import type { PerspectiveViewerConfig } from "@finos/perspective-viewer";
+import type { ViewerConfigUpdate } from "@finos/perspective-viewer";
 import { expect, Locator, Page } from "@playwright/test";
 import * as fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 
-// XXX(tom):
-// import.meta is busted when this file is imported from widget.spec.ts
-// so work around it by using fake values for API_VERSION
-//
-// const __filename = url.fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// export const API_VERSION = JSON.parse(
-//     fs.readFileSync(__dirname + "/../../package.json").toString()
-// )["version"];
-export const API_VERSION = "Fake-Version-x.y.z";
-export const DEFAULT_CONFIG: PerspectiveViewerConfig = {
+export const API_VERSION = JSON.parse(
+    fs.readFileSync(__dirname + "/../../package.json").toString()
+)["version"];
+
+export const DEFAULT_CONFIG: ViewerConfigUpdate = {
     aggregates: {},
     columns_config: {},
     columns: [],

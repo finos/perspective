@@ -22,7 +22,7 @@ export function toggle_edit_mode(mode = undefined) {
     if (typeof mode === "undefined") {
         mode =
             EDIT_MODES[
-                (EDIT_MODES.indexOf(this._is_edit_mode) + 1) % EDIT_MODES.length
+                (EDIT_MODES.indexOf(this._edit_mode) + 1) % EDIT_MODES.length
             ];
     }
 
@@ -33,7 +33,7 @@ export function toggle_edit_mode(mode = undefined) {
         dirty: true,
     };
 
-    this._is_edit_mode = mode;
+    this._edit_mode = mode;
     this.dataset.editMode = mode;
     if (this._edit_button !== undefined) {
         this._edit_button.dataset.editMode = mode;

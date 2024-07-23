@@ -41,7 +41,7 @@ def perspective_thread(server):
     adds the table with the name "data_source_one", which will be used
     in the front-end."""
     psp_loop = asyncio.new_event_loop()
-    client = server.new_client(loop_callback=psp_loop.call_soon_threadsafe)
+    client = server.new_local_client(loop_callback=psp_loop.call_soon_threadsafe)
 
     def init():
         with open(file_path, mode="rb") as file:

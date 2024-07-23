@@ -19,7 +19,12 @@ import {
     execute_all_cells,
     test_jupyter,
     describe_jupyter,
-} from "./utils";
+} from "./utils.mjs";
+
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const getEditMode = async (viewer) => {
     return await viewer.evaluate(async (viewer) => {
@@ -39,14 +44,12 @@ describe_jupyter(
             ],
             async ({ page }) => {
                 await default_body(page);
-
                 const num_columns = await page
                     .locator("regular-table thead tr")
                     .first()
                     .evaluate((tr) => tr.childElementCount);
 
                 expect(num_columns).toEqual(3);
-
                 await expect(
                     page.locator("regular-table tbody tr")
                 ).toHaveCount(5);
@@ -57,7 +60,9 @@ describe_jupyter(
             "Loads updates",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
                 ].join("\n"),
                 "w",
@@ -77,11 +82,14 @@ describe_jupyter(
                 ).toHaveCount(10);
             }
         );
+
         test_jupyter(
             "Loads a table",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
                 ].join("\n"),
                 "w",
@@ -108,7 +116,9 @@ describe_jupyter(
             "Loads with settings=False",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'], settings=False)",
                 ].join("\n"),
                 "w",
@@ -127,7 +137,9 @@ describe_jupyter(
             "Loads with edit_mode=EDIT",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table, plugin_config={'edit_mode': 'EDIT'})",
                 ].join("\n"),
                 "w",
@@ -143,7 +155,9 @@ describe_jupyter(
             "Editable Toggle - from Python",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
@@ -153,20 +167,26 @@ describe_jupyter(
                 let edit_mode = await getEditMode(viewer);
                 expect(edit_mode).toEqual("READ_ONLY");
 
+                console.error("Fuck1");
                 await add_and_execute_cell(
                     page,
                     'w.plugin_config = {"edit_mode": "EDIT"}'
                 );
 
+                console.error("Fuck2");
                 edit_mode = await getEditMode(viewer);
+                console.error("Fuck3");
                 expect(edit_mode).toEqual("EDIT");
             }
         );
+
         test_jupyter(
             "Editable Toggle - from JS",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
@@ -193,7 +213,9 @@ describe_jupyter(
             "Everything Else - Toggle from Python",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
@@ -246,10 +268,10 @@ describe_jupyter(
                     `
 w.plugin = "X Bar"
 w.columns = ["ui8"]
-w.filter = ["i8", "<", 50]
+w.filter = [["i8", "<", 50]]
 w.group_by = ["date"]
 w.split_by = ["bool"]
-w.sort = ["date", "asc"]
+w.sort = [["date", "asc"]]
 w.theme = "Pro Dark"`
                 );
 
@@ -282,7 +304,9 @@ w.theme = "Pro Dark"`
             "Everything Else - Toggle from JS",
             [
                 [
-                    "table = perspective.Table(arrow_data)",
+                    "server = perspective.Server()",
+                    "client = server.new_local_client()",
+                    "table = client.table(arrow_data)",
                     "w = perspective.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
@@ -396,10 +420,11 @@ assert w.theme == "Pro Dark"
                 error_cells_dont_exist = await assert_no_error_in_cell(
                     page,
                     [
-                        `assert w.table.view().to_columns() == {'a': [False, True, False}, 'b': ['abc', 'def', 'ghi']}`,
+                        `assert w.table.view().to_columns() == {'a': [False, True, False], 'b': ['abc', 'def', 'ghi']}`,
                         `"Passed"`,
                     ].join("\n")
                 );
+
                 expect(error_cells_dont_exist).toBe(true);
             }
         );
@@ -409,11 +434,13 @@ assert w.theme == "Pro Dark"
             let errored = await assert_no_error_in_cell(
                 page,
                 `
-                table = perspective.Table(arrow_data)
-                w = perspective.PerspectiveWidget(table)
-                config = w.save()
-                perpsective.PerspectiveWidget(df, **config)
-                `
+server = perspective.Server()
+client = server.new_local_client()
+table = client.table(arrow_data)
+w = perspective.PerspectiveWidget(table)
+config = w.save()
+perpsective.PerspectiveWidget(df, **config)
+                        `
             );
             expect(errored).toBe(false);
         });

@@ -13,7 +13,7 @@
 import random
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 data = {"a": [1, 2, 3, 4], "b": ["a", "b", "c", "d"], "c": [True, False, True, False]}

@@ -17,6 +17,7 @@
 )]
 
 mod client;
+mod session;
 mod table;
 mod table_data;
 mod view;
@@ -28,6 +29,7 @@ pub mod utils;
 pub use crate::client::{Client, ClientHandler, Features};
 pub use crate::proto::table_validate_expr_resp::ExprValidationError;
 pub use crate::proto::ColumnType;
+pub use crate::session::{ProxySession, Session};
 pub use crate::table::{Schema, Table, TableInitOptions, UpdateOptions, ValidateExpressionsData};
 pub use crate::table_data::{TableData, UpdateData};
 pub use crate::utils::*;
@@ -55,6 +57,7 @@ macro_rules! assert_table_api {
                     &$x::delete,
                     &$x::get_index,
                     &$x::get_limit,
+                    &$x::get_client,
                     &$x::make_port,
                     &$x::on_delete,
                     &$x::remove_delete,

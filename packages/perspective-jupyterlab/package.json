@@ -30,7 +30,7 @@
         "clean:nbextension": "rimraf ../../rust/perspective-python/perspective/nbextension/static",
         "test:build": "node build.mjs --test",
         "test:jupyter:build": "cpy \"test/arrow/*\" dist/esm",
-        "test:jupyter": "__JUPYTERLAB_PORT__=6538 npx playwright test --config ../../tools/perspective-test/playwright.config.js -- --jupyter",
+        "test:jupyter": "__JUPYTERLAB_PORT__=6538 npx playwright test --config ../../tools/perspective-test/playwright.config.ts -- --jupyter",
         "test": "npm-run-all test:build",
         "version": "yarn build"
     },

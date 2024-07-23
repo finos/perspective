@@ -24,7 +24,7 @@ use futures::channel::mpsc::{unbounded, UnboundedReceiver, UnboundedSender};
 use futures::future::{select, Either};
 use futures::{FutureExt, SinkExt, StreamExt};
 use perspective::client::{TableInitOptions, UpdateData};
-use perspective::server::{Server, Session, SessionHandler};
+use perspective::server::{LocalSession, Server, Session, SessionHandler};
 use perspective::LocalClient;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
@@ -72,7 +72,7 @@ impl SessionHandler for PerspectiveWSConnection {
 async fn process_message_loop(
     socket: &mut WebSocket,
     receiver: &mut UnboundedReceiver<Vec<u8>>,
-    session: &mut Session,
+    session: &mut LocalSession,
 ) -> Result<(), PerspectiveWSError> {
     use Either::*;
     use Message::*;

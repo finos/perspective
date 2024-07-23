@@ -158,6 +158,12 @@ impl Table {
         }
     }
 
+    #[doc = include_str!("../../docs/table/get_client.md")]
+    pub fn get_client(&self) -> Client {
+        self.client.clone()
+    }
+
+    #[doc = include_str!("../../docs/table/get_features.md")]
     pub fn get_features(&self) -> ClientResult<Features> {
         self.client.get_features()
     }
@@ -241,12 +247,12 @@ impl Table {
         &self,
         on_delete: Box<dyn Fn() + Send + Sync + 'static>,
     ) -> ClientResult<u32> {
-        let callback = move |resp| match resp {
-            ClientResp::TableOnDeleteResp(_) => {
+        let callback = move |resp: Response| match resp.client_resp {
+            Some(ClientResp::TableOnDeleteResp(_)) => {
                 on_delete();
                 Ok(())
             },
-            resp => Err(resp.into()),
+            resp => Err(ClientError::OptionResponseFailed(resp.into())),
         };
 
         let msg = self.client_message(ClientReq::TableOnDeleteReq(TableOnDeleteReq {}));

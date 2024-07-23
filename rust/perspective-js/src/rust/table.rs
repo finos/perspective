@@ -21,6 +21,7 @@ use wasm_bindgen_futures::spawn_local;
 
 use crate::utils::{ApiError, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError};
 pub use crate::view::*;
+use crate::JsClient;
 
 #[ext]
 impl Vec<(String, ColumnType)> {
@@ -155,6 +156,14 @@ impl JsTable {
     #[wasm_bindgen]
     pub async fn get_index(&self) -> Option<String> {
         self.0.get_index()
+    }
+
+    #[wasm_bindgen]
+    pub async fn get_client(&self) -> JsClient {
+        JsClient {
+            close: None,
+            client: self.0.get_client(),
+        }
     }
 
     #[wasm_bindgen]

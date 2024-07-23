@@ -39,7 +39,7 @@ path = "src/rust/lib.rs"
 
 [build-dependencies]
 prost-build = { version = "0.12.3" }
-protobuf-src = { version = "2.0.1+26.1", optional = true }
+protobuf-src = { version = "2.0.1", optional = true }
 
 [dependencies]
 async-lock = { version = "2.5.0" }

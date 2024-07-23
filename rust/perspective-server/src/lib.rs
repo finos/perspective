@@ -60,6 +60,7 @@ use async_lock::RwLock;
 use cxx::UniquePtr;
 use futures::future::BoxFuture;
 use futures::Future;
+pub use perspective_client::Session;
 
 mod ffi;
 
@@ -126,7 +127,7 @@ impl Server {
     /// - `send_response` -  A function invoked by the [`Server`] when a
     ///   response message needs to be sent to the
     ///   [`perspective_client::Client`].
-    pub async fn new_session_with_callback<F>(&self, send_response: F) -> Session
+    pub async fn new_session_with_callback<F>(&self, send_response: F) -> LocalSession
     where
         F: for<'a> Fn(&'a [u8]) -> BoxFuture<'a, Result<(), ServerError>> + 'static + Sync + Send,
     {
@@ -137,7 +138,7 @@ impl Server {
             .await
             .insert(id, Arc::new(send_response));
 
-        Session {
+        LocalSession {
             id,
             server,
             closed: false,
@@ -156,7 +157,7 @@ impl Server {
     ///   the [`Client`]. The response itself should be passed to
     ///   [`Client::handle_response`] eventually, though it may-or-may-not be in
     ///   the same process.
-    pub async fn new_session<F>(&self, session_handler: F) -> Session
+    pub async fn new_session<F>(&self, session_handler: F) -> LocalSession
     where
         F: SessionHandler + 'static + Sync + Send + Clone,
     {
@@ -211,19 +212,18 @@ impl Server {
     }
 }
 
-/// The server-side representation of a connection to a
-/// [`perspective_client::Client`]. For each [`perspective_client::Client`] that
-/// wants to connect to a [`Server`], a dedicated [`Session`] must be created.
-/// The [`Session`] handles routing messages emitted by the [`Server`], as well
-/// as owning any resources the [`Client`] may request.
+/// A struct for implementing [`perspective_client::Session`] against an
+/// same-process [`Server`] instance. See also
+/// [`perspective_client::ProxySession`] for implement the trait against an
+/// arbitrary remote transport.
 #[derive(Debug)]
-pub struct Session {
+pub struct LocalSession {
     id: u32,
     server: Server,
     closed: bool,
 }
 
-impl Drop for Session {
+impl Drop for LocalSession {
     fn drop(&mut self) {
         if !self.closed {
             tracing::error!("`Session` dropped without `Session::close`");
@@ -231,58 +231,16 @@ impl Drop for Session {
     }
 }
 
-impl Session {
-    /// Handle an incoming request from the [`Client`]. Calling
-    /// [`Session::handle_request`] will result in the `send_response` parameter
-    /// which was used to construct this [`Session`] to fire one or more times.
-    ///
-    /// ```text
-    ///                      :
-    ///  Client              :   Session
-    /// ┏━━━━━━━━━━━━━━━━━━┓ :  ┏━━━━━━━━━━━━━━━━━━━━┓
-    /// ┃ send_request     ┃━━━>┃ handle_request (*) ┃
-    /// ┃ ..               ┃ :  ┃ ..                 ┃
-    /// ┗━━━━━━━━━━━━━━━━━━┛ :  ┗━━━━━━━━━━━━━━━━━━━━┛
-    ///                      :
-    /// ```
-    ///
-    /// # Arguments
-    ///
-    /// - `request` An incoming request message, generated from a
-    ///   [`Client::new`]'s `send_request` handler (which may-or-may-not be
-    ///   local).
-    pub async fn handle_request(&self, request: &[u8]) -> Result<(), ServerError> {
+impl Session<ServerError> for LocalSession {
+    async fn handle_request(&self, request: &[u8]) -> Result<(), ServerError> {
         self.server.handle_request(self.id, request).await
     }
 
-    /// Flush any pending messages which may have resulted from previous
-    /// [`Session::handle_request`] calls. Calling [`Session::poll`] may result
-    /// in the `send_response` parameter which was used to construct this (or
-    /// other) [`Session`] to fire. Whenever a [`Session::handle_request`]
-    /// method is invoked for a [`Server`], at least one [`Session::poll`]
-    /// should be scheduled to clear other clients message queues.
-    ///
-    /// ```text
-    ///                      :
-    ///  Client              :   Session                  Server
-    /// ┏━━━━━━━━━━━━━━━━━━┓ :  ┏━━━━━━━━━━━━━━━━━━━┓
-    /// ┃ send_request     ┃━┳━>┃ handle_request    ┃    ┏━━━━━━━━━━━━━━━━━━━┓
-    /// ┃ ..               ┃ ┗━>┃ poll (*)          ┃━━━>┃ poll (*)          ┃
-    /// ┗━━━━━━━━━━━━━━━━━━┛ :  ┃ ..                ┃    ┃ ..                ┃
-    ///                      :  ┗━━━━━━━━━━━━━━━━━━━┛    ┗━━━━━━━━━━━━━━━━━━━┛
-    /// ```
-    pub async fn poll(&self) -> Result<(), ServerError> {
+    async fn poll(&self) -> Result<(), ServerError> {
         self.server.poll().await
     }
 
-    /// Close this [`Session`], cleaning up any callbacks (e.g. arguments
-    /// provided to [`Session::handle_request`] or
-    /// [`perspective_client::View::OnUpdate`]) and resources (e.g. views
-    /// returned by a call to [`perspective_client::Table::view`]).
-    /// Dropping a [`Session`] outside of the context of [`Session::close`]
-    /// will cause a [`tracing`] error-level log to be emitted, but won't fail.
-    /// They will, however, leak.
-    pub async fn close(mut self) {
+    async fn close(mut self) {
         self.closed = true;
         self.server.close(self.id).await
     }

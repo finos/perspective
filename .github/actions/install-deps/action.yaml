@@ -20,12 +20,12 @@ inputs:
     arch:
         default: ""
         description: "Architecture"
-    llvm:
+    manylinux:
+        default: "false"
+        description: "Deal with manylinux exceptions"
+    cpp:
         default: "true"
-        description: "Install LLVM 17?"
-    boost:
-        default: "true"
-        description: "Install Boost?"
+        description: "Install Boost and LLVM?"
     rust:
         default: "true"
         description: "Install Rust toolchain?"
@@ -49,7 +49,7 @@ runs:
     steps:
         - name: Clean System
           uses: AdityaGarg8/remove-unwanted-software@v3
-          if: ${{ inputs.clean == 'true' }}
+          if: ${{ inputs.clean == 'true' && runner.os != 'Windows' }}
           with:
               remove-android: "true"
               remove-dotnet: "true"
@@ -84,9 +84,7 @@ runs:
           uses: actions/cache@v4
           if: ${{ inputs.skip_cache == 'false' && inputs.python == 'true' }}
           with:
-              path: |
-                  ~/.cache/pip
-                  ~/py_modules/
+              path: ~/.cache/pip
               key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
               restore-keys: |
                   ${{ runner.os }}-pip-
@@ -101,15 +99,14 @@ runs:
                   ~/.cargo/registry/index/
                   ~/.cargo/registry/cache/
                   ~/.cargo/git/db/
-                  rust/perspective-viewer/target/
               restore-keys: |
                   ${{ runner.os }}-cargo-
 
-        - name: ccache
-          uses: hendrikmuhs/ccache-action@v1.2
-          if: ${{ inputs.skip_cache == 'false' }}
-          with:
-              key: ${{ github.job }}-${{ matrix.os }}
+        # - name: ccache
+        #   uses: hendrikmuhs/ccache-action@v1.2
+        #   if: ${{ inputs.skip_cache == 'false' }}
+        #   with:
+        #       key: ${{ github.job }}-${{ matrix.os }}
 
         # TODO this should move to `install_tools.mjs`
         - name: Windows init steps (vc143)
@@ -125,14 +122,20 @@ runs:
               PYTHON_VERSION: ${{ matrix.python-version }}
               VCPKG_DEFAULT_TRIPLET: x64-windows
               VCPKG_PLATFORM_TOOLSET: v143
-          if: ${{ runner.os == 'Windows' && inputs.boost == 'true' }}
+          if: ${{ runner.os == 'Windows' && inputs.cpp == 'true' }}
 
         - name: Set up Python ${{ matrix.python-version }}
           uses: actions/setup-python@v5
-          if: ${{ inputs.python == 'true' }}
+          if: ${{ inputs.python == 'true' && runner.os != 'Linux' }}
           with:
               python-version: ${{ matrix.python-version }}
               cache: "pip"
+
+        # - run: |
+        #       curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        #       python get-pip.py --ignore-installed
+        #       pip debug --verbose
+        #   shell: bash
 
         - name: Use Node.js ${{ matrix.node-version }}
           uses: actions/setup-node@v4
@@ -143,7 +146,7 @@ runs:
 
         - name: Install rust
           uses: dtolnay/rust-toolchain@nightly
-          if: ${{ inputs.rust == 'true' && inputs.arch == '' }}
+          if: ${{ inputs.rust == 'true' && inputs.arch != 'aarch64' }}
           with:
               toolchain: nightly-2024-05-07
               targets: wasm32-unknown-unknown
@@ -166,7 +169,7 @@ runs:
               components: rustfmt, clippy, rust-src
 
         - name: Install LLVM 17
-          if: ${{ inputs.llvm == 'true' }}
+          if: ${{ inputs.cpp == 'true' }}
           uses: KyleMayes/install-llvm-action@v2
           with:
               version: "17"
@@ -185,26 +188,34 @@ runs:
 
         - name: Install Python dependencies
           shell: bash
-          if: ${{ inputs.python == 'true' }}
+          if: ${{ inputs.python == 'true' && inputs.manylinux == 'false'  }}
           run: python -m pip install -r rust/perspective-python/requirements.txt
 
-        # # TL;DR Do not use `python3` on windows
-        # # https://stackoverflow.com/questions/61558780/python-testing-with-github-actions-on-windows
-        # - name: Install Python dependencies
-        #   shell: pwsh
-        #   if: ${{ runner.os == 'Windows' && inputs.python == 'true' }}
-        #   run: pip install maturin
+        - name: Install Python dependencies
+          shell: bash
+          if: ${{ inputs.python == 'true' && inputs.manylinux == 'true' }}
+          run: /opt/python/cp39-cp39/bin/python -m pip install -r rust/perspective-python/requirements.txt
+
+        - name: manylinux deps
+          shell: bash
+          run: dnf install wget -y
+          if: ${{ runner.os == 'Linux' && inputs.cpp == 'true' && inputs.javascript == 'false' }}
 
         # TODO do this earlier?
         - name: Linux init steps
           shell: bash
-          run: sudo node tools/perspective-scripts/install_tools.mjs
-          if: ${{ runner.os != 'Windows' && inputs.boost == 'true' }}
+          run: node tools/perspective-scripts/install_tools.mjs
+          if: ${{ runner.os != 'Windows' && inputs.cpp == 'true' && inputs.manylinux == 'true' }}
 
-        - name: Install CCache
+        - name: Linux init steps
           shell: bash
-          run: sudo apt install -y ccache
-          if: ${{ runner.os == 'Linux' }}
+          run: sudo node tools/perspective-scripts/install_tools.mjs
+          if: ${{ runner.os != 'Windows' && inputs.cpp == 'true' && inputs.manylinux  == 'false' }}
+
+        # - name: Install CCache
+        #   shell: bash
+        #   run: sudo apt install -y ccache
+        #   if: ${{ runner.os == 'Linux' }}
 
         # Arrow cannot install on windows without this
         # https://stackoverflow.com/questions/22575662/filename-too-long-in-git-for-windows

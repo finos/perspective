@@ -73,7 +73,7 @@ CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "
 
 
 def perspective_thread(perspective_server):
-    client = perspective_server.new_client()
+    client = perspective_server.new_local_client()
     table = client.table(
         {
             "name": "string",

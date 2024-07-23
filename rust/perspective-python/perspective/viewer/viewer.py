@@ -114,7 +114,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         # attached PerspectiveManager
         self._table = None
         self._client = None
-        self._server = perspective.Server()
 
         # Viewer configuration
         self.plugin = plugin  # validate_plugin(plugin)
@@ -132,12 +131,17 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.theme = theme
         self.title = title
 
-    def new_session(self, cb):
-        return self._server.new_session(cb)
+    def new_proxy_session(self, cb):
+        return perspective.ProxySession(self._client, cb)
+
+    @property
+    def client(self):
+        """Returns the ``perspective.Client`` under management by the viewer."""
+        return self._client
 
     @property
     def table(self):
-        """Returns the ``perspective.PySyncTable`` under management by the viewer."""
+        """Returns the ``perspective.Table`` under management by the viewer."""
         return self._table
 
     def load(self, data, **options):
@@ -195,15 +199,14 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         if isinstance(data, perspective.Table):
             self._table = data
+            self._client = data.get_client()
+            name = self._table.get_name()
         elif isinstance(data, perspective.View):
             raise TypeError(
                 "Views cannot be loaded directly, load a table or raw data instead"
             )
         else:
-            # Construct a new table on the server from raw data
-            # from ..legacy import create_sync_client
-
-            client = self._server.new_client()
+            client = perspective.Server().new_local_client()
             self._table = client.table(data, name=name, **options)
             self._client = client
 

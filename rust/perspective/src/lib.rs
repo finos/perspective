@@ -21,7 +21,7 @@ pub use {perspective_client as client, perspective_server as server};
 #[derive(Clone, Default)]
 struct LocalClientState {
     client: Arc<OnceLock<Client>>,
-    session: Arc<OnceLock<RwLock<Option<Session>>>>,
+    session: Arc<OnceLock<RwLock<Option<LocalSession>>>>,
     server: Server,
 }
 
@@ -50,7 +50,7 @@ impl LocalClientState {
         self.client.get_or_init(|| Client::new(self.clone()))
     }
 
-    async fn get_session(&self) -> RwLockReadGuard<'_, Option<Session>> {
+    async fn get_session(&self) -> RwLockReadGuard<'_, Option<LocalSession>> {
         if self.session.get().is_none() {
             let session = self.server.new_session(self.clone()).await;
             self.session

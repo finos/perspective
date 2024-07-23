@@ -61,6 +61,6 @@ if __name__ == "__main__":
     app.listen(8080)
     logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
-    client = perspective_server.new_client(loop_callback=loop.add_callback)
+    client = perspective_server.new_local_client(loop_callback=loop.add_callback)
     loop.call_later(0, init_table, client)
     loop.start()

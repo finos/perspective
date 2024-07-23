@@ -26,7 +26,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         this.regular_table = document.createElement("regular-table");
         this.regular_table.part = "regular-table";
         this._is_scroll_lock = false;
-        this._is_edit_mode = "READ_ONLY";
+        this._edit_mode = "READ_ONLY";
         const Elem = HTMLPerspectiveViewerDatagridPluginElement;
         if (Elem.renderTarget == "shadow") {
             if (!Elem.#sheet) {

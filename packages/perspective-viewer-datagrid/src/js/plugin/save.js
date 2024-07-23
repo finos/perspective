@@ -23,7 +23,7 @@ export function save() {
         const token = {
             columns: {},
             scroll_lock: !!this._is_scroll_lock,
-            edit_mode: this._is_edit_mode,
+            edit_mode: this._edit_mode,
         };
 
         const column_size_overrides = save_column_size_overrides.call(this);

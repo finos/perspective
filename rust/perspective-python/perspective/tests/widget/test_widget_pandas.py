@@ -16,7 +16,7 @@ import pytest
 from perspective import PerspectiveWidget
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 
