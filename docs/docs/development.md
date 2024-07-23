@@ -40,25 +40,23 @@ you have any questions_**
 
 ## Build
 
-Make sure you have the system dependencies installed. For specifics depending on
+Make sure you have the required system dependencies installed. For specifics depending on
 your OS, check the [system-specific instructions](#system-specific-instructions)
 below.
 
-To run a build, use
+To run a build, use:
 
 ```bash
 yarn build
 ```
 
-If this is the first time you've built Perspective, you'll be asked to generate
-a `.perspectiverc` via a short survey. This can be later re-configured via
+If this is the first time you've built Perspective, you'll be asked to generate a `.perspectiverc` file via a short survey. You can reconfigure this file later by running the following command:
 
 ```bash
 yarn setup
 ```
 
-If everything is successful, you should be able to run any of the `examples/`
-packages, e.g. `examples/blocks` like so:
+If everything is successful, you should be able to run any of the `examples/` packages. For instance, to run the `examples/blocks` package, use the following command:
 
 ```bash
 yarn start blocks
@@ -70,9 +68,10 @@ To build the JavaScript library, which includes WebAssembly compilation,
 [Emscripten](https://github.com/kripken/emscripten) and its prerequisites are
 required.
 
-`Perspective.js` specifies its Emscripten version dependency in `package.json`,
-and the correct version of Emscripten will be installed with other JS
-dependencies by running `yarn`.
+`Perspective.js` specifies its Emscripten version dependency in `package.json`. The correct version of Emscripten will be installed along with other JavaScript dependencies by running the following command:
+
+```bash
+yarn
 
 #### Building via local EMSDK
 
