@@ -50,6 +50,10 @@ fn cmake_build() -> Result<(), std::io::Error> {
         );
     }
 
+    if matches!(std::env::var("DOCS_RS").as_deref(), Ok("1")) {
+        return Ok(());
+    }
+
     let mut dst = Config::new("cpp/perspective");
     let profile = std::env::var("PROFILE").unwrap();
     dst.always_configure(true);
@@ -138,7 +142,6 @@ fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
     if dir.is_dir() {
         for entry in fs::read_dir(dir)? {
             let path = entry?.path();
-            // println!("cargo:warning=MESSAGE static link {}", path.display());
             if path.is_dir() {
                 link_cmake_static_archives(&path)?;
             } else {

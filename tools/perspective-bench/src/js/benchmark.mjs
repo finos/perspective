@@ -406,7 +406,7 @@ export async function suite(
             { name: "benchmarks" }
         );
 
-        const app = start_server(psp);
+        const app = await start_server(psp);
 
         for (let i = 0; i < versions.length; i++) {
             let s;
@@ -429,9 +429,7 @@ export async function suite(
             ]);
 
             await persist_to_arrow(benchmarks_table, out_path);
-            if (s) {
-                await s.close();
-            }
+            await s?.close?.();
         }
 
         await app.close();

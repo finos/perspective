@@ -147,11 +147,17 @@ jobs:
                       arch: x86_64
                       python-version: 3.9
                       container: pagmo2/manylinux228_x86_64_with_deps
+                is-release:
+                    - ${{ startsWith(github.ref, 'refs/tags/v') }}
                 exclude:
                     - os: windows-2022
                       arch: aarch64
                     - os: ubuntu-22.04
                       arch: aarch64
+                    - os: macos-13
+                      is-release: false
+                    - os: windows-2022
+                      is-release: false
 
         steps:
             - name: Checkout
@@ -222,11 +228,17 @@ jobs:
                 python-version:
                     - 3.9
                 node-version: [20.x]
+                is-release:
+                    - ${{ startsWith(github.ref, 'refs/tags/v') }}
                 exclude:
                     - os: windows-2022
                       arch: aarch64
                     - os: ubuntu-22.04
                       arch: aarch64
+                    - os: macos-13
+                      is-release: false
+                    - os: windows-2022
+                      is-release: false
 
         steps:
             - name: Checkout
@@ -350,8 +362,15 @@ jobs:
                     - 3.9
                     # - 3.12
                 node-version: [20.x]
+                is-release:
+                    - ${{ startsWith(github.ref, 'refs/tags/v') }}
                 arch:
                     - x86_64
+                exclude:
+                    - os: macos-13
+                      is-release: false
+                    - os: windows-2022
+                      is-release: false
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -378,3 +397,156 @@ jobs:
               env:
                   PACKAGE: "perspective-python"
                   # PSP_USE_CCACHE: 1
+
+    # ,-,---.             .                 .
+    #  '|___/ ,-. ,-. ,-. |-. ,-,-. ,-. ,-. | ,
+    #  ,|   \ |-' | | |   | | | | | ,-| |   |<
+    # `-^---' `-' ' ' `-' ' ' ' ' ' `-^ '   ' `
+    #
+    # ,-_/              .---.               .
+    # '  | ,-. .  , ,-. \___  ,-. ,-. . ,-. |-
+    #    | ,-| | /  ,-|     \ |   |   | | | |
+    #    | `-^ `'   `-^ `---' `-' '   ' |-' `'
+    # /` |                              |
+    # `--'                              '
+    benchmark_js:
+        needs: [build_js]
+        if: startsWith(github.ref, 'refs/tags/v')
+        strategy:
+            matrix:
+                os: [ubuntu-22.04]
+                node-version: [20.x]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  rust: "false"
+                  cpp: "false"
+                  python: "false"
+                  javascript: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-js-dist
+                  path: .
+
+            - name: Benchmarks
+              run: pnpm run bench
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: perspective-js-benchmarks
+                  path: tools/perspective-bench/dist/benchmark-js.arrow
+
+    # .-,--.     .   .        .
+    #  '|__/ . . |-. |  . ,-. |-.
+    #  ,|    | | | | |  | `-. | |
+    #  `'    `-^ ^-' `' ' `-' ' '
+    #
+    publish:
+        needs: [build_and_test_juptyerlab, test_python, test_js, benchmark_js]
+        if: startsWith(github.ref, 'refs/tags/v')
+        strategy:
+            matrix:
+                os: [ubuntu-22.04]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  rust: "false"
+                  cpp: "false"
+                  python: "false"
+                  javascript: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-js-dist
+                  path: .
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-dist-aarch64-macos-13-3.9
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-dist-x86_64-macos-13-3.9
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-dist-x86_64-windows-2022-3.9
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-dist-x86_64-ubuntu-22.04-3.9
+
+            # - uses: actions/download-artifact@v4
+            #   with:
+            #       name: perspective-python-sdist
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-js-benchmarks
+
+            # - uses: actions/download-artifact@v4
+            #   with:
+            #       name: perspective-python-benchmarks
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./rust/perspective-js
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./rust/perspective-viewer
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-datagrid
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-d3fc
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-viewer-openlayers
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-workspace
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-cli
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-webpack-plugin
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-esbuild-plugin
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-jupyterlab
+
+            - name: Publish assets
+              uses: softprops/action-gh-release@v2
+              with:
+                  draft: true
+                  generate_release_notes: true
+                  files: |
+                      *.whl
+                      *.tar.gz
+                      *.tgz
+                      *.arrow
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

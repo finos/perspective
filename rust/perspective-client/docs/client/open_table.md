@@ -1,15 +1,16 @@
-Opens a table that is hosted on the server that is connected to the client.
+Opens a [`Table`] that is hosted on the [`perspective_server::Server`] that is
+connected to this [`Client`]. The `name` property of [`TableInitOptions`]
 
 # Examples
 
-[```]js
+```js
 const tables = await client.open_table("table_one");
-[```]
+```
 
-[```]python
-tables = await async_client.open_table("table_one");
-[```]
+```python
+tables = client.open_table("table_one");
+```
 
-[```]rust
+```rust
 let tables = client.open_table("table_one").await;
-[```]
+```

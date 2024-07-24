@@ -5,7 +5,8 @@
 
 [![npm](https://img.shields.io/npm/v/@finos/perspective.svg?style=flat)](https://www.npmjs.com/package/@finos/perspective)
 [![PyPI](https://img.shields.io/pypi/v/perspective-python.svg?style=flat)](https://pypi.python.org/pypi/perspective-python)
-[![Build Status](https://github.com/finos/perspective/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/finos/perspective/actions/workflows/build.yml)
+[![crates.io](https://img.shields.io/crates/v/perspective.svg?style=flat)](https://crates.io/crates/perspective)
+[![Build Status](https://github.com/finos/perspective/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/finos/perspective/actions/workflows/build.yml)
 
 <br/>
 

@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-js"
-version = "2.10.1"
+version = "3.0.0-rc.1"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -21,7 +21,7 @@ license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
 build = "build.rs"
-include = ["src/**/*", "Cargo.toml", "package.json", "docs/**/*"]
+include = ["src/**/*", "Cargo.toml", "./package.json", "docs/**/*"]
 
 [[bin]]
 name = "perspective-js-metadata"
@@ -45,7 +45,7 @@ anyhow = "1.0.66"
 wasm-bindgen-test = "0.3.13"
 
 [dependencies]
-perspective-client = { path = "../perspective-client", version = "2.10.1" }
+perspective-client = { path = "../perspective-client", version = "3.0.0-rc.1" }
 base64 = "0.13.0"
 chrono = "0.4"
 extend = "1.1.2"
