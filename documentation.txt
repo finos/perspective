@@ -1,0 +1,19 @@
+Aggregation Functions Documentation
+any
+Description: Returns true if any value in the group is truthy; otherwise, returns false.
+count
+Description: Counts the number of non-null values in the group.
+sum
+Description: Computes the total sum of numeric values in the group.
+average
+Description: Calculates the average (mean) of numeric values in the group.
+min
+Description: Finds and returns the smallest value in the group.
+max
+Description: Finds and returns the largest value in the group.
+median
+Description: Computes the median value (middle value) of numeric values in the group.
+stddev
+Description: Calculates the standard deviation of numeric values in the group, representing the amount of variation or dispersion.
+variance
+Description: Computes the variance of numeric values in the group, representing the average squared deviation from the mean.
