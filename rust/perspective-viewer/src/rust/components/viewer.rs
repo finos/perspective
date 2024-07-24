@@ -534,7 +534,7 @@ impl Component for PerspectiveViewer {
             <>
                 <StyleProvider>
                     <LocalStyle href={css!("viewer")} />
-                    if self.settings_open {
+                    if self.settings_open && ctx.props().session.has_table() {
                         if self.debug_open {
                             <SplitPanel
                                 id="app_panel"
@@ -571,7 +571,7 @@ impl Component for PerspectiveViewer {
                             session={&ctx.props().session}
                             renderer={&ctx.props().renderer}
                         />
-                        if ctx.props().is_title() {
+                        if ctx.props().is_title() || !ctx.props().session.has_table() {
                             <StatusBar
                                 id="status_bar"
                                 session={&ctx.props().session}

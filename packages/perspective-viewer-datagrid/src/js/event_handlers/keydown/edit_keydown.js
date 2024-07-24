@@ -82,15 +82,22 @@ const moveSelection = lock(async function (
     }
 });
 
-// Events
+function isLastCell(model, table, target) {
+    const meta = table.getMeta(target);
+    return meta.y === model._num_rows - 1;
+}
 
+// Events
 export function keydownListener(table, viewer, selected_position_map, event) {
     const target = table.getRootNode().activeElement;
     event.target.classList.remove("psp-error");
     switch (event.key) {
         case "Enter":
             event.preventDefault();
-            if (event.shiftKey) {
+            if (isLastCell(this, table, target)) {
+                target.blur();
+                selected_position_map.delete(table);
+            } else if (event.shiftKey) {
                 moveSelection.call(
                     this,
                     table,

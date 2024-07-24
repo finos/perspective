@@ -166,7 +166,6 @@ impl Component for StatusBar {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let stats = ctx.props().session.get_table_stats();
-        let class_name = self.status_class_name(&stats);
         let mut is_updating_class_name = classes!();
         if self.is_updating > 0 {
             is_updating_class_name.push("updating")
@@ -229,55 +228,87 @@ impl Component for StatusBar {
             }
         });
 
+        let is_menu = ctx.props().session.has_table()
+            && (ctx.props().presentation.is_settings_open()
+                || ctx.props().presentation.get_title().is_some());
+
         html! {
             <>
                 <LocalStyle href={css!("status-bar")} />
                 <div id={ctx.props().id.clone()} class={is_updating_class_name}>
-                    <div class="section"><span id="status" class={class_name} /></div>
-                    <label
-                        class="input-sizer"
-                        data-value={ctx.props().presentation.get_title().unwrap_or_default()}
-                    >
-                        <input
-                            placeholder=" "
-                            value={ctx.props().presentation.get_title()}
-                            size="10"
-                            {oninput}
-                        />
-                        <span id="status-bar-placeholder" />
-                    </label>
-                    <div id="rows" class="section"><StatusBarRowsCounter {stats} /></div>
-                    <div id="menu-bar" class="section">
-                        { theme_button }
-                        <div id="plugin-settings"><slot name="plugin-settings" /></div>
-                        <span class="hover-target">
-                            <span id="reset" class="button" onmousedown={reset}><span /></span>
-                        </span>
-                        <span class="hover-target" ref={&self.export_ref} onmousedown={export}>
-                            <span id="export" class="button"><span /></span>
-                        </span>
-                        <span class="hover-target" ref={&self.copy_ref} onmousedown={copy}>
-                            <span id="copy" class="button"><span /></span>
-                        </span>
-                    </div>
+                    <StatusIndicator {stats} is_updating={self.is_updating > 0}>
+                        <label
+                            class="input-sizer"
+                            data-value={ctx.props().presentation.get_title().unwrap_or_default()}
+                        >
+                            <input
+                                placeholder=" "
+                                value={ctx.props().presentation.get_title()}
+                                size="10"
+                                {oninput}
+                            />
+                            <span id="status-bar-placeholder" />
+                        </label>
+                    </StatusIndicator>
+                    <div id="spacer" />
+                    if is_menu {
+                        <div id="menu-bar" class="section">
+                            { theme_button }
+                            <div id="plugin-settings"><slot name="plugin-settings" /></div>
+                            <span class="hover-target">
+                                <span id="reset" class="button" onmousedown={reset}><span /></span>
+                            </span>
+                            <span class="hover-target" ref={&self.export_ref} onmousedown={export}>
+                                <span id="export" class="button"><span /></span>
+                            </span>
+                            <span class="hover-target" ref={&self.copy_ref} onmousedown={copy}>
+                                <span id="copy" class="button"><span /></span>
+                            </span>
+                        </div>
+                    }
                 </div>
             </>
         }
     }
 }
 
-impl StatusBar {
-    const fn status_class_name(&self, stats: &Option<ViewStats>) -> &'static str {
-        match stats {
-            Some(ViewStats {
-                num_table_cells: Some(_),
-                ..
-            }) => "connected",
-            Some(ViewStats {
-                num_table_cells: None,
-                ..
-            }) => "initializing",
-            None => "uninitialized",
-        }
+#[derive(Clone, Properties, PartialEq)]
+pub struct StatusIndicatorProps {
+    stats: Option<ViewStats>,
+    is_updating: bool,
+    children: Children,
+}
+
+/// A pure-functional indicator component which does not hook into `model`
+/// state.
+#[function_component]
+fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
+    let class_name = match &props.stats {
+        Some(ViewStats {
+            num_table_cells: Some(_),
+            ..
+        }) => {
+            if props.is_updating {
+                "updating"
+            } else {
+                "connected"
+            }
+        },
+        Some(ViewStats {
+            num_table_cells: None,
+            ..
+        }) => "loading",
+        None => "uninitialized",
+    };
+
+    html! {
+        <>
+            <div class="section">
+                <span id="status" class={class_name} />
+                <span id="status_updating" class={class_name} />
+            </div>
+            { for props.children.iter() }
+            <div id="rows" class="section"><StatusBarRowsCounter stats={props.stats.clone()} /></div>
+        </>
     }
 }

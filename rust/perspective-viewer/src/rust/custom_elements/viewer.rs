@@ -150,6 +150,7 @@ impl PerspectiveViewerElement {
             .dyn_into::<js_sys::Promise>()
             .unwrap_or_else(|_| js_sys::Promise::resolve(&table));
 
+        self.session.reset_stats();
         self.session.reset(true);
         let mut config = ViewConfigUpdate {
             columns: Some(self.session.get_view_config().columns.clone()),
@@ -172,7 +173,6 @@ impl PerspectiveViewerElement {
                 }
 
                 let jstable = JsFuture::from(promise).await?.unchecked_into::<Model>();
-
                 pub fn unsafe_set_model(ptr: *const JsTable) -> JsTable {
                     (unsafe { ptr.as_ref().unwrap() }).clone()
                 }
@@ -183,7 +183,6 @@ impl PerspectiveViewerElement {
                     table.size().await?
                 );
 
-                session.reset_stats();
                 session.set_table(table.get_table().clone()).await?;
                 session.validate().await?.create_view().await
             };
@@ -279,20 +278,18 @@ impl PerspectiveViewerElement {
         let this = self.clone();
         ApiFuture::new(async move {
             let decoded_update = ViewerConfigUpdate::decode(&update)?;
-            let settings = decoded_update.settings.clone();
             let root = this.root.clone();
-            this.restore_and_render(decoded_update, async move {
-                let result = root
-                    .borrow()
-                    .as_ref()
-                    .into_apierror()?
-                    .send_message_async(move |x| {
-                        PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
-                    });
+            let settings = decoded_update.settings.clone();
+            let result = root
+                .borrow()
+                .as_ref()
+                .into_apierror()?
+                .send_message_async(move |x| {
+                    PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
+                });
 
-                Ok(result.await?)
-            })
-            .await?;
+            this.restore_and_render(decoded_update, async move { Ok(result.await?) })
+                .await?;
             Ok(())
         })
     }
