@@ -22,6 +22,7 @@
     // When settings open ...
     #main_column #status_bar,
     #main_column #status_bar.titled {
+        padding-left: 0px;
         padding-right: 36px;
 
         input::placeholder {
@@ -39,7 +40,7 @@
         display: flex;
         align-items: center;
         background: var(--plugin--background);
-        padding-left: 4px;
+        padding: 0;
         position: absolute;
         top: 0;
         left: 0;
@@ -116,16 +117,25 @@
             align-items: center;
         }
 
-        #rows {
+        #spacer {
             flex: 1 1000 auto;
+        }
+
+        #rows {
+            flex: 0 1000 auto;
             overflow: hidden;
+            margin: 0px 14px;
             span {
                 white-space: nowrap;
+                margin: 0 !important;
+            }
+
+            span span {
+                color: var(--inactive--color);
             }
         }
 
         // Exceptions when the menu bar is visible and the settings panel is closed.
-
         #menu-bar {
             flex: 0 1000000 auto;
             .button {
@@ -147,7 +157,7 @@
 
         span {
             // font-size: var(--label--font-size, 0.75em);
-            margin: 0px 10px;
+            margin: 0px 14px;
             user-select: none;
             height: 100%;
             line-height: 36px;
@@ -172,33 +182,68 @@
         }
 
         span#status {
-            &:before {
-                top: -1px;
-                color: #ccc;
-                font-size: 8px;
-                content: var(--status-icon--content, "\2B24");
-            }
+            width: 20px;
+            height: 20px;
+            background-repeat: no-repeat;
+            background-color: var(--icon--color);
+            content: "";
+            -webkit-mask-size: cover;
+            mask-size: cover;
+            pointer-events: none;
+            image-rendering: pixelated;
+        }
 
-            &.connected,
-            &.error,
-            &.initializing {
-                opacity: 1;
-            }
+        // span#status_updating
 
-            &.connected:before {
-                color: var(--status-icon-connected--color, rgb(51, 159, 77));
-            }
+        span#status.loading {
+            image-rendering: pixelated;
+            mask-image: url("../svg/downloading.gif");
+            -webkit-mask-image: url("../svg/downloading.gif");
+        }
 
-            &.initializing:before {
-                color: var(
-                    --status-icon-initializing--color,
-                    rgb(223, 198, 57)
-                );
-            }
+        span#status.uninitialized {
+            background-color: transparent;
+        }
 
-            &.error:before {
-                color: var(--status-icon-error--color, rgb(252, 64, 52));
-            }
+        span#status.connected,
+        span#status.updating {
+            mask-image: url(../svg/status_ok.svg);
+            -webkit-mask-image: url(../svg/status_ok.svg);
+        }
+
+        // Status bar status icon animations
+        span#status_updating {
+            position: absolute;
+            opacity: 0;
+            width: 20px;
+            height: 20px;
+            background-repeat: no-repeat;
+            background-color: var(--icon--color);
+            content: "";
+            -webkit-mask-size: cover;
+            mask-size: cover;
+            pointer-events: none;
+            image-rendering: pixelated;
+            mask-image: url("../svg/updating.gif");
+            -webkit-mask-image: url("../svg/updating.gif");
+        }
+
+        // span#status.uninitialized {
+
+        // }
+
+        span#status.updating {
+            animation-name: status-bar-updating-inverse;
+            animation-fill-mode: forwards;
+            animation-iteration-count: 1;
+            animation-duration: 0.3s;
+        }
+
+        span#status_updating.updating {
+            animation-name: status-bar-updating;
+            animation-fill-mode: forwards;
+            animation-iteration-count: 1;
+            animation-duration: 0.3s;
         }
 
         .button:before {
@@ -227,9 +272,6 @@
                 -webkit-mask-image: url("../svg/free-scroll-icon.svg");
                 mask-image: url("../svg/free-scroll-icon.svg");
             }
-            // span:before {
-            //     content: var(--export-button--content, "Export");
-            // }
         }
 
         span#reset {
@@ -290,7 +332,6 @@
             cursor: pointer;
             &:hover,
             &.modal-target {
-                // outline: 4px solid var(--icon--color);
                 box-shadow: -4px 0 0 var(--icon--color),
                     4px 0 0 var(--icon--color);
                 background-color: var(--icon--color);
@@ -311,7 +352,6 @@
                 color: inherit;
                 cursor: pointer;
                 transition: none;
-                // border: 1px solid var(--inactive--color);
                 background-color: var(--icon--color);
                 color: var(--plugin--background);
 
@@ -336,24 +376,18 @@
                     background-color: var(--icon--color);
                     border-radius: 0 0 3px 3px;
                 }
+
                 & > span {
                     @include label;
                 }
 
                 & > .dropdown-width-container {
                     display: block;
-                    // position: absolute;
-                    // top: calc(100% + 3px);
-                    // left: 50%;
-                    // translate: -50%;
                     margin: 0;
-                    // padding: 5px;
                     height: auto;
                     white-space: nowrap;
                     line-height: 1;
                     background-color: var(--icon--color);
-                    // border-radius: 3px;
-                    // overflow: visible;
                     pointer-events: all;
 
                     & > select {
@@ -379,39 +413,30 @@
     }
 }
 
-// Status bar status icon animations
-:host #status_bar.updating span#status {
-    animation-name: status-bar-updating;
-    animation-duration: var(--status-icon-updating--animation-duration, 1s);
-    animation-iteration-count: infinite;
-}
-
-:host #status_bar span#status {
-    animation-name: status-bar;
-    animation-duration: var(--status-icon--animation-duration, 0.5s);
-    animation-iteration-count: 1;
-}
-
 @keyframes status-bar-updating {
     0% {
-        filter: var(--status-icon-updating-keyframes-start--filter, opacity(1));
-        transform: var(--status-icon-updating-keyframes-start--transform, none);
+        opacity: 0;
+    }
+
+    99% {
+        opacity: 0;
     }
 
     100% {
-        filter: var(--status-icon-updating-keyframes-end--filter, opacity(0.2));
-        transform: var(--status-icon-updating-keyframes-end--transform, none);
+        opacity: 1;
     }
 }
 
-@keyframes status-bar {
+@keyframes status-bar-updating-inverse {
     0% {
-        filter: var(--status-icon-keyframes-start--filter, saturate(4));
-        transform: var(--status-icon-keyframes-start--transform, none);
+        opacity: 1;
+    }
+
+    99% {
+        opacity: 1;
     }
 
     100% {
-        filter: var(--status-icon-keyframes-end--filter, saturate(1));
-        transform: var(--status-icon-keyframes-end--transform, none);
+        opacity: 0;
     }
 }

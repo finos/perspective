@@ -69,7 +69,14 @@ impl Component for StatusBarRowsCounter {
                 let nrows = tr.to_formatted_string();
                 let vcols = vc.to_formatted_string();
                 let ncols = tc.to_formatted_string();
-                html! { <span>{ format!("{} ({}) x {} ({})", vrows, nrows, vcols, ncols) }</span> }
+                html! {
+                    <span>
+                        { vrows }
+                        <span>{ format!(" ({}) x ", nrows) }</span>
+                        { vcols }
+                        <span>{ format!(" ({})", ncols) }</span>
+                    </span>
+                }
             },
 
             Some(
@@ -89,7 +96,7 @@ impl Component for StatusBarRowsCounter {
                 let vrows = vr.to_formatted_string();
                 let nrows = tr.to_formatted_string();
                 let vcols = vc.to_formatted_string();
-                html! { <span>{ format!("{} ({}) x {}", vrows, nrows, vcols) }</span> }
+                html! { <span>{ vrows }<span>{ format!(" ({}) x ", nrows) }</span>{ vcols }</span> }
             },
 
             Some(ViewStats {
@@ -100,7 +107,14 @@ impl Component for StatusBarRowsCounter {
                 let vrows = vr.to_formatted_string();
                 let vcols = vc.to_formatted_string();
                 let ncols = tc.to_formatted_string();
-                html! { <span>{ format!("{} x {} ({})", vrows, vcols, ncols) }</span> }
+                html! {
+                    <span>
+                        { vrows }
+                        <span>{ " x " }</span>
+                        { vcols }
+                        <span>{ format!(" ({})", ncols) }</span>
+                    </span>
+                }
             },
 
             Some(ViewStats {
@@ -109,7 +123,7 @@ impl Component for StatusBarRowsCounter {
             }) => {
                 let nrows = tr.to_formatted_string();
                 let ncols = tc.to_formatted_string();
-                html! { <span>{ format!("{} x {}", nrows, ncols) }</span> }
+                html! { <span>{ nrows }<span>{ " x " }</span>{ ncols }</span> }
             },
             Some(ViewStats {
                 num_table_cells: None,
