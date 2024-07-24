@@ -18,7 +18,7 @@ import minimatch from "minimatch";
 // as the Jupyter server needs to be run outside of the main Jest process.
 const IS_JUPYTER =
     getarg("--jupyter") &&
-    minimatch("perspective-jupyterlab", process.env.PACKAGE);
+    process.env.PACKAGE.indexOf("perspective-jupyterlab") > -1;
 
 if (getarg("--debug")) {
     console.log("-- Running tests in debug mode.");

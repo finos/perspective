@@ -1906,6 +1906,7 @@ dependencies = [
  "cxx-build",
  "futures",
  "num_cpus",
+ "perspective-client",
  "tracing",
 ]
 

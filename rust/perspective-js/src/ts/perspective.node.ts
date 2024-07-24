@@ -41,7 +41,7 @@ const uncompressed_client_wasm = await load_wasm_stage_0(
 );
 
 await perspective_client.default(uncompressed_client_wasm);
-await perspective_client.init();
+perspective_client.init();
 
 const SYNC_MODULE = await compile_perspective(perspective_server_wasm);
 let SYNC_CLIENT: perspective_client.JsClient;
@@ -63,7 +63,7 @@ export function make_server() {
 
 export const make_session = async (
     send_response: (buffer: Uint8Array) => Promise<void>
-) => await SYNC_SERVER.make_session(send_response);
+) => SYNC_SERVER.make_session(send_response);
 
 // Helper function to create client emitter/receiver pairs
 export function make_client(

@@ -12,7 +12,7 @@
 
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 
@@ -77,8 +77,8 @@ class TestDelete(object):
             s.set(True)
 
         tbl = Table([{"a": 1}])
-        tbl.on_delete(callback)
-        tbl.remove_delete(callback)
+        callback_id = tbl.on_delete(callback)
+        tbl.remove_delete(callback_id)
 
         tbl.delete()
 
@@ -115,8 +115,8 @@ class TestDelete(object):
         tbl = Table([{"a": 1}])
         view = tbl.view()
 
-        view.on_delete(callback)
-        view.remove_delete(callback)
+        callback_id = view.on_delete(callback)
+        view.remove_delete(callback_id)
 
         view.delete()
         tbl.delete()

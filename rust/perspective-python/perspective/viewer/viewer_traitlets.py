@@ -10,7 +10,7 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from traitlets import HasTraits, Unicode, List, Bool, Dict, validate
+from traitlets import HasTraits, Unicode, List, Bool, Dict, validate, Enum
 
 import importlib
 
@@ -47,50 +47,54 @@ class PerspectiveTraitlets(HasTraits):
     plugin_config = Dict(default_value={}).tag(sync=True)
     settings = Bool(True).tag(sync=True)
     theme = Unicode("Pro Light", allow_none=True).tag(sync=True)
+
+    # used to tell the frontend which table to connect to
+    table_name = Unicode(None, allow_none=True).tag(sync=True)
+
     server = Bool(False).tag(sync=True)
-    client = Bool(False).tag(sync=True)
+    binding_mode = Enum(("server", "client-server"), default="server").tag(sync=True)
     title = Unicode(None, allow_none=True).tag(sync=True)
     version = Unicode(__version__).tag(sync=True)
 
-    @validate("plugin")
-    def _validate_plugin(self, proposal):
-        return validate_plugin(proposal.value)
+    # @validate("plugin")
+    # def _validate_plugin(self, proposal):
+    #     return validate_plugin(proposal.value)
 
-    @validate("columns")
-    def _validate_columns(self, proposal):
-        return validate_columns(proposal.value)
+    # @validate("columns")
+    # def _validate_columns(self, proposal):
+    #     return validate_columns(proposal.value)
 
-    @validate("group_by")
-    def _validate_group_by(self, proposal):
-        return validate_group_by(proposal.value)
+    # @validate("group_by")
+    # def _validate_group_by(self, proposal):
+    #     return validate_group_by(proposal.value)
 
-    @validate("split_by")
-    def _validate_split_by(self, proposal):
-        return validate_split_by(proposal.value)
+    # @validate("split_by")
+    # def _validate_split_by(self, proposal):
+    #     return validate_split_by(proposal.value)
 
-    @validate("aggregates")
-    def _validate_aggregates(self, proposal):
-        return validate_aggregates(proposal.value)
+    # @validate("aggregates")
+    # def _validate_aggregates(self, proposal):
+    #     return validate_aggregates(proposal.value)
 
-    @validate("sort")
-    def _validate_sort(self, proposal):
-        return validate_sort(proposal.value)
+    # @validate("sort")
+    # def _validate_sort(self, proposal):
+    #     return validate_sort(proposal.value)
 
-    @validate("filter")
-    def _validate_filter(self, proposal):
-        return validate_filter(proposal.value)
+    # @validate("filter")
+    # def _validate_filter(self, proposal):
+    #     return validate_filter(proposal.value)
 
-    @validate("expressions")
-    def _validate_expressions(self, proposal):
-        return validate_expressions(proposal.value)
+    # @validate("expressions")
+    # def _validate_expressions(self, proposal):
+    #     return validate_expressions(proposal.value)
 
-    @validate("plugin_config")
-    def _validate_plugin_config(self, proposal):
-        return validate_plugin_config(proposal.value)
+    # @validate("plugin_config")
+    # def _validate_plugin_config(self, proposal):
+    #     return validate_plugin_config(proposal.value)
 
-    @validate("title")
-    def _validate_title(self, proposal):
-        return validate_title(proposal.value)
+    # @validate("title")
+    # def _validate_title(self, proposal):
+    #     return validate_title(proposal.value)
 
     @validate("version")
     def _validate_version(self, proposal):

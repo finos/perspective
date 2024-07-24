@@ -20,12 +20,10 @@ const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
 /**
  * Kill the Jupyterlab process created by the tests.
  */
-const kill_jlab = () => {
-    console.log("-- Cleaning up Jupyterlab process");
+export const kill_jlab = () => {
+    console.log("\n-- Cleaning up Jupyterlab process");
     sh`ps aux | grep -i '[j]upyter-lab --no-browser' | awk '{print $2}' | xargs kill -9 && echo "[perspective-jupyterlab] JupyterLab process terminated"`.runSync();
 };
-
-exports.kill_jlab = kill_jlab;
 
 /**
  * Block until the Jupyterlab server is ready.
@@ -60,7 +58,7 @@ const wait_for_jlab = async function () {
     }
 };
 
-exports.start_jlab = function () {
+export function start_jlab() {
     /*
      * Spawn the Jupyterlab server.
      */
@@ -100,6 +98,9 @@ exports.start_jlab = function () {
             {
                 env: {
                     ...process.env,
+
+                    // https://github.com/microsoft/playwright/issues/24516
+                    NODE_OPTIONS: undefined,
                 },
                 // stdio: "inherit",
             }
@@ -114,4 +115,4 @@ exports.start_jlab = function () {
         kill_jlab();
         process.exit(1);
     }
-};
+}

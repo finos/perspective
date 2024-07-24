@@ -22,13 +22,12 @@ let _increment = 0;
  * @class PerspectiveWidget (name) TODO: document
  */
 export class PerspectiveWidget extends Widget {
-    constructor(name = "Perspective", bindto, server, client) {
+    constructor(name = "Perspective", elem, bindingMode) {
         super({
-            node: bindto || document.createElement("div"),
+            node: elem || document.createElement("div"),
         });
 
-        this.server = server;
-        this.client = client;
+        this.bindingMode = bindingMode;
         this._viewer = PerspectiveWidget.createNode(this.node);
         this.title.label = name;
         this.title.caption = `${name}`;

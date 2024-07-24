@@ -6,3 +6,5 @@ target/
 boost*/
 py_modules/
 ts-rs/
+rust/perspective-python/perspective/labextension/
+rust/perspective-python/perspective.data/

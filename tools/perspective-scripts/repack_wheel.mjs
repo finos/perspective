@@ -10,13 +10,17 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import sh from "./sh.mjs";
+import { execSync } from "node:child_process";
+import * as fs from "node:fs";
 
-const nb_path = sh.path`${__dirname}/../../python/perspective/perspective/nbextension/static`;
-const json_path = sh.path`${__dirname}/../../python/perspective/perspective/extension/finos-perspective-nbextension.json`;
+const wheel_file = fs.readdirSync(".").filter((x) => x.endsWith(".whl"))[0];
+const pkg_name = wheel_file.split("-").slice(0, 2).join("-");
+execSync(`wheel unpack ${wheel_file}`);
 
-sh`mkdir -p ~/.jupyter/nbextensions/@finos/`.runSync();
-sh`mkdir -p ~/.jupyter/nbconfig/notebook.d/`.runSync();
-sh`ln -s ${nb_path} ~/.jupyter/nbextensions/@finos/perspective-jupyterlab`.runSync();
-sh`ln -s ${json_path} ~/.jupyter/nbconfig/notebook.d/`.runSync();
-console.log("Done");
+fs.cpSync(
+    "rust/perspective-python/perspective.data",
+    `${pkg_name}/perspective.data`,
+    { recursive: true }
+);
+
+execSync(`wheel pack ${pkg_name}`);

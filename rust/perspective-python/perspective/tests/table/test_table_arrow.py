@@ -18,7 +18,7 @@ import pyarrow as pa
 from datetime import date, datetime
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 DATE32_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date32.arrow")

@@ -12,20 +12,27 @@
 
 __version__ = "2.10.1"
 __all__ = [
+    "_jupyter_labextension_paths",
     "PerspectiveError",
     "PerspectiveWidget",
     "PerspectiveViewer",
     "PerspectiveTornadoHandler",
     "Table",
-    "PerspectiveManager",
-    "sync_client",
-    "create_sync_client",
+    "View",
 ]
 
-from .perspective import PySyncClient, PerspectiveError, PySyncServer
+from .perspective import (
+    PySyncClient,
+    PerspectiveError,
+    PySyncServer,
+    Table,
+    View,
+    PySyncProxySession as ProxySession,
+)
 
 from .widget import PerspectiveWidget
 from .viewer import PerspectiveViewer
+
 
 try:
     from .handlers import PerspectiveTornadoHandler
@@ -41,7 +48,8 @@ class Server(PySyncServer):
     def set_threadpool_size(self, n_cpus):
         pass
 
-    def new_client(self, loop_callback=default_loop_cb):
+    def new_local_client(self, loop_callback=default_loop_cb):
+        """Create a new `Client` instance bound to this in-process `Server`."""
         return Client.from_server(self, loop_callback)
 
 
@@ -63,3 +71,8 @@ class Client(PySyncClient):
         session = server.new_session(handle_response)
         client = Client(handle_request)
         return client
+
+
+# read by `jupyter labextension develop`
+def _jupyter_labextension_paths():
+    return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]

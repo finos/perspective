@@ -46,7 +46,7 @@ impl GetFeaturesResp {
 type BoxFn<I, O> = Box<dyn Fn(I) -> O + Send + Sync + 'static>;
 
 type Subscriptions<C> = Arc<RwLock<HashMap<u32, C>>>;
-type OnceCallback = Box<dyn FnOnce(ClientResp) -> ClientResult<()> + Send + Sync + 'static>;
+type OnceCallback = Box<dyn FnOnce(Response) -> ClientResult<()> + Send + Sync + 'static>;
 type SendCallback = Arc<
     dyn for<'a> Fn(&'a Request) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>>
         + Send
@@ -68,7 +68,7 @@ pub struct Client {
     send: SendCallback,
     id_gen: Arc<AtomicU32>,
     subscriptions_once: Subscriptions<OnceCallback>,
-    subscriptions: Subscriptions<BoxFn<ClientResp, BoxFuture<'static, Result<(), ClientError>>>>,
+    subscriptions: Subscriptions<BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>>,
 }
 
 impl std::fmt::Debug for Client {
@@ -123,22 +123,22 @@ impl Client {
     /// connection to a local-or-remote [`perspective_server::Server`], and
     /// doesn't generally need to be called directly by "users" of a
     /// [`Client`] once connected.
-    pub async fn handle_response<'a>(&'a self, msg: &'a [u8]) -> ClientResult<()> {
+    pub async fn handle_response<'a>(&'a self, msg: &'a [u8]) -> ClientResult<bool> {
         let msg = Response::decode(msg)?;
         tracing::debug!("RECV {}", msg);
-        let payload = msg.client_resp.ok_or(ClientError::Option)?;
         let mut wr = self.subscriptions_once.try_write().unwrap();
         if let Some(handler) = (*wr).remove(&msg.msg_id) {
             drop(wr);
-            handler(payload)?;
+            handler(msg)?;
+            return Ok(true);
         } else if let Some(handler) = self.subscriptions.try_read().unwrap().get(&msg.msg_id) {
             drop(wr);
-            handler(payload).await?;
-        } else {
-            tracing::warn!("Received unsolicited server message");
+            handler(msg).await?;
+            return Ok(true);
         }
 
-        Ok(())
+        tracing::warn!("Received unsolicited server message");
+        Ok(false)
     }
 
     pub async fn init(&self) -> ClientResult<()> {
@@ -178,7 +178,7 @@ impl Client {
     pub(crate) async fn subscribe_once(
         &self,
         msg: &Request,
-        on_update: Box<dyn FnOnce(ClientResp) -> ClientResult<()> + Send + Sync + 'static>,
+        on_update: Box<dyn FnOnce(Response) -> ClientResult<()> + Send + Sync + 'static>,
     ) -> ClientResult<()> {
         self.subscriptions_once
             .try_write()
@@ -192,7 +192,7 @@ impl Client {
     pub(crate) async fn subscribe(
         &self,
         msg: &Request,
-        on_update: BoxFn<ClientResp, BoxFuture<'static, Result<(), ClientError>>>,
+        on_update: BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>,
     ) -> ClientResult<()> {
         self.subscriptions
             .try_write()
@@ -206,14 +206,11 @@ impl Client {
     /// `send`, _and_ the `ClientResp` which is returned.
     pub(crate) async fn oneshot(&self, msg: &Request) -> ClientResult<ClientResp> {
         let (sender, receiver) = futures::channel::oneshot::channel::<ClientResp>();
-        let callback = Box::new(move |msg| sender.send(msg).map_err(|x| x.into()));
-        self.subscriptions_once
-            .try_write()
-            .unwrap()
-            .insert(msg.msg_id, callback);
+        let on_update = Box::new(move |msg: Response| {
+            sender.send(msg.client_resp.unwrap()).map_err(|x| x.into())
+        });
 
-        tracing::debug!("SEND {}", msg);
-        (self.send)(msg).await?;
+        self.subscribe_once(msg, on_update).await?;
         receiver
             .await
             .map_err(|_| ClientError::Unknown("Internal error".to_owned()))

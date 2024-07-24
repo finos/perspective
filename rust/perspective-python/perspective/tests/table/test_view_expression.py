@@ -20,7 +20,7 @@ from perspective import PerspectiveError
 from .test_view import compare_delta
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 

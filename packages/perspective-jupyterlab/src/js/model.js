@@ -26,8 +26,6 @@ export class PerspectiveModel extends DOMWidgetModel {
             _view_name: PerspectiveModel.view_name,
             _view_module: PerspectiveModel.view_module,
             _view_module_version: PerspectiveModel.view_module_version,
-            server: false,
-            client: false,
         };
     }
 }

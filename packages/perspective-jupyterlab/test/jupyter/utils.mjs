@@ -10,12 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { test, expect } = require("@playwright/test");
-const fs = require("fs");
-const path = require("path");
-const rimraf = require("rimraf");
-const notebook_template = require("./notebook_template.json");
+import { test, expect } from "@playwright/test";
+import fs from "fs";
+import path from "path";
+import rimraf from "rimraf";
+import notebook_template from "./notebook_template.json" assert { type: "json" };
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "esm");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
 
@@ -72,7 +75,7 @@ const generate_notebook = (notebook_name, cells) => {
 };
 
 // Add Jupyterlab-specific bindings to the global Jest objects
-const describe_jupyter = (body, { name, root } = {}) => {
+export function describe_jupyter(body, { name, root } = {}) {
     // Remove the automatically generated workspaces directory, as it
     // will try to redirect single-document URLs to the last URL opened.
     test.beforeEach(remove_jupyter_artifacts);
@@ -81,7 +84,7 @@ const describe_jupyter = (body, { name, root } = {}) => {
     // URL is null because each test.capture_jupyterlab will have its own
     // unique notebook generated.
     return test.describe(`Blank Notebook`, body);
-};
+}
 
 /**
  * Execute body() on a Jupyter notebook without taking any screenshots.
@@ -90,7 +93,7 @@ const describe_jupyter = (body, { name, root } = {}) => {
  * @param {*} cells
  * @param {*} body
  */
-const test_jupyter = (name, cells, body) => {
+export function test_jupyter(name, cells, body) {
     const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
     generate_notebook(notebook_name, cells);
     const url = `doc/tree/${notebook_name}`;
@@ -101,87 +104,87 @@ const test_jupyter = (name, cells, body) => {
         );
         await body({ page });
     });
-};
+}
 
-module.exports = {
-    describe_jupyter,
-    test_jupyter,
-    default_body: async (page) => {
-        await module.exports.execute_all_cells(page);
-        const viewer = await page.waitForSelector(
-            ".jp-OutputArea-output perspective-viewer",
-            { visible: true }
-        );
-        await viewer.evaluate(async (viewer) => await viewer.flush());
-        return viewer;
-    },
-    execute_all_cells: async (page) => {
-        await page.waitForFunction(async () => !!document.title);
-        await page.waitForSelector(".p-Widget", { visible: true });
-        await page.waitForSelector(".jp-NotebookPanel-toolbar", {
-            visible: true,
-        });
+export async function default_body(page) {
+    await execute_all_cells(page);
+    const viewer = await page.waitForSelector(
+        ".jp-OutputArea-output perspective-viewer",
+        { visible: true }
+    );
+    await viewer.evaluate(async (viewer) => await viewer.flush());
+    return viewer;
+}
+export async function execute_all_cells(page) {
+    await page.waitForFunction(async () => !!document.title);
+    await page.waitForSelector(".lm-Widget", { visible: true });
+    await page.waitForSelector(".jp-NotebookPanel-toolbar", {
+        visible: true,
+    });
 
-        // wait for a cell to be active
-        // await page.waitForSelector(
-        //     '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])'
-        // );
-        await new Promise((x) => setTimeout(x, 2000));
-
+    // wait for a cell to be active
+    try {
         await page.waitForSelector(
-            '.jp-Notebook-ExecutionIndicator[data-status="idle"]'
+            '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])',
+            { timeout: 1000 }
         );
+    } catch (e) {}
+    // await new Promise((x) => setTimeout(x, 2000));
 
-        // Use our custom keyboard shortcut to run all cells
-        await page.keyboard.press("R");
-        await page.keyboard.press("R");
-        await page.evaluate(() => (document.scrollTop = 0));
-    },
-    add_and_execute_cell: async (page, cell_content) => {
-        // wait for a code cell to be visible
-        await page.waitForSelector(".jp-CodeCell", {
-            visible: true,
-        });
+    await page.waitForSelector(
+        '.jp-Notebook-ExecutionIndicator[data-status="idle"]'
+    );
 
-        // find and click the a cell in the notebook
-        await page.click(".jp-CodeCell");
-        await new Promise((x) => setTimeout(x, 100));
-        // find and click the "new cell" button
-        await page.click(
-            '.jp-Button[data-command="notebook:insert-cell-below"]'
-        );
-        await new Promise((x) => setTimeout(x, 100));
-        // after clicking new cell, the document will auto
-        // focus the new cell, so lets grab it
-        const el = await page.evaluateHandle(() => document.activeElement);
-        await el.type(cell_content);
+    // Use our custom keyboard shortcut to run all cells
+    await page.keyboard.press("R");
+    await page.keyboard.press("R");
+    await page.evaluate(() => (document.scrollTop = 0));
+}
 
-        await new Promise((x) => setTimeout(x, 100));
-        // now while the element is still focused, click the run cell button
-        await page.click('.jp-Button[data-command="runmenu:run"]');
-        await new Promise((x) => setTimeout(x, 100));
-        // wait for kernel to stop running
-        // await page.waitForSelector(
-        //     "//div.jp-InputPrompt[contains(text(),'[*]:')]",
-        //     {
-        //         hidden: true,
-        //     }
-        // );
-    },
-    assert_no_error_in_cell: async (page, cell_content) => {
-        // run the cell
-        await module.exports.add_and_execute_cell(page, cell_content);
+export async function add_and_execute_cell(page, cell_content) {
+    // wait for a code cell to be visible
+    await page.waitForSelector(".jp-CodeCell", {
+        visible: true,
+    });
 
-        // wait for jupyter to render any frontend exceptions
-        return await Promise.race([
-            page
-                .waitForSelector(
-                    'div[data-mime-type="application/vnd.jupyter.stderr"]'
-                )
-                .then(() => false),
-            page
-                .waitForSelector("//div//pre[contains(text(),\"'Passed'\")]")
-                .then(() => true),
-        ]);
-    },
-};
+    // find and click the a cell in the notebook
+    await page.click(".jp-CodeCell");
+    await new Promise((x) => setTimeout(x, 100));
+    // find and click the "new cell" button
+    await page.click('jp-button[data-command="notebook:insert-cell-below"]');
+    await new Promise((x) => setTimeout(x, 100));
+    // after clicking new cell, the document will auto
+    // focus the new cell, so lets grab it
+    const el = await page.evaluateHandle(() => document.activeElement);
+    await el.type(cell_content);
+
+    await new Promise((x) => setTimeout(x, 100));
+    // now while the element is still focused, click the run cell button
+    await page.click(
+        'jp-button[data-command="notebook:run-cell-and-select-next"]'
+    );
+    await new Promise((x) => setTimeout(x, 100));
+    // wait for kernel to stop running
+    // await page.waitForSelector(
+    //     "//div.jp-InputPrompt[contains(text(),'[*]:')]",
+    //     {
+    //         hidden: true,
+    //     }
+    // );
+}
+export async function assert_no_error_in_cell(page, cell_content) {
+    // run the cell
+    await add_and_execute_cell(page, cell_content);
+
+    // wait for jupyter to render any frontend exceptions
+    return await Promise.race([
+        page
+            .waitForSelector(
+                'div[data-mime-type="application/vnd.jupyter.stderr"]'
+            )
+            .then(() => false),
+        page
+            .waitForSelector("//div//pre[contains(text(),\"'Passed'\")]")
+            .then(() => true),
+    ]);
+}

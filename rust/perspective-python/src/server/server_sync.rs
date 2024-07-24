@@ -13,7 +13,7 @@
 use std::sync::Arc;
 
 use async_lock::RwLock;
-use perspective_server::{Server, Session, SessionHandler};
+use perspective_server::{LocalSession, Server, Session, SessionHandler};
 use pollster::FutureExt;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -22,7 +22,7 @@ use pyo3::types::{PyAny, PyBytes};
 #[pyclass]
 #[derive(Clone)]
 pub struct PySyncSession {
-    session: Arc<RwLock<Option<Session>>>,
+    session: Arc<RwLock<Option<LocalSession>>>,
 }
 
 #[pyclass(subclass)]
@@ -66,7 +66,7 @@ impl PySyncServer {
 impl PySyncSession {
     fn with_session<F, G>(&self, f_ctx: F) -> PyResult<G>
     where
-        F: Fn(&Session) -> G,
+        F: Fn(&LocalSession) -> G,
     {
         let lock = self.session.read().block_on();
         let val = lock.as_ref().ok_or_else(|| {

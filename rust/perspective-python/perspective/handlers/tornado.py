@@ -27,7 +27,7 @@ class PerspectiveTornadoHandler(WebSocketHandler):
 
     Examples:
         >>> server = psp.Server()
-        >>> client = server.new_client()
+        >>> client = server.new_local_client()
         >>> client.table(pd.read_csv("superstore.csv"), name="data_source_one")
         >>> app = tornado.web.Application([
         ...     (r"/", MainHandler),

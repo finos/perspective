@@ -18,7 +18,6 @@ build-backend = "maturin"
 name = "perspective-python"
 requires-python = ">=3.9"
 dynamic = ["version"]
-dependencies = ["maturin==1.6.0"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -26,6 +25,7 @@ classifiers = [
 ]
 
 [tool.maturin]
+data = "perspective.data"
 features = ["pyo3/extension-module"]
 
 [tool.pytest.ini_options]

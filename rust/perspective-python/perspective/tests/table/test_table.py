@@ -17,7 +17,7 @@ from pytest import mark, raises, skip
 import pytest
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 
@@ -528,7 +528,7 @@ class TestTable:
         failed = False
         try:
             tbl.delete()
-        except PerspectiveError:
+        except perspective.PerspectiveError:
             failed = True
         assert failed
         v3.delete()

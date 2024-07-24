@@ -16,7 +16,7 @@ import pandas as pd
 from pytest import raises, mark
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 
@@ -520,7 +520,7 @@ class TestTableNumpy(object):
         }
 
         # should not be able to parse mixed dicts of numpy array with list
-        with raises(PerspectiveError):
+        with raises(psp.PerspectiveError):
             Table(data)
 
     def test_table_np_promote(self):

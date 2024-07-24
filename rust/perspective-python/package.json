@@ -10,7 +10,13 @@
     "license": "Apache-2.0",
     "scripts": {
         "build": "node build.mjs",
-        "clean": "rimraf dist && rimraf build",
+        "clean": "rimraf perspective.data && rimraf dist && rimraf build",
         "test": "python -m pytest perspective/tests"
+    },
+    "devDependencies": {
+        "cpy": "^9.0.1"
+    },
+    "dependencies": {
+        "@finos/perspective-jupyterlab": "workspace:*"
     }
 }

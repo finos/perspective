@@ -22,7 +22,7 @@ from pytest import mark, raises
 from perspective import PerspectiveError
 import perspective as psp
 
-client = psp.Server().new_client()
+client = psp.Server().new_local_client()
 Table = client.table
 
 LOCAL_DATETIMES = [

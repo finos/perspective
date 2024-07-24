@@ -45,6 +45,7 @@ fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<server::PySyncSession>()?;
     m.add_class::<client_sync::PySyncTable>()?;
     m.add_class::<client_sync::PySyncView>()?;
+    m.add_class::<client_sync::PySyncProxySession>()?;
     m.add(
         "PerspectiveError",
         py.get_type_bound::<client::PyPerspectiveError>(),

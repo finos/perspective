@@ -38,7 +38,8 @@ if (!!process.env.CI) {
         process.env.PSP_ARCH === "x86_64" &&
         process.platform === "linux"
     ) {
-        target = "--target=x86_64-unknown-linux-gnu";
+        target =
+            "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
     } else if (
         process.env.PSP_ARCH === "aarch64" &&
         process.platform === "linux"
