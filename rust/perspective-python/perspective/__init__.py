@@ -17,6 +17,7 @@ __all__ = [
     "PerspectiveWidget",
     "PerspectiveViewer",
     "PerspectiveTornadoHandler",
+    "ProxySession",
     "Table",
     "View",
 ]

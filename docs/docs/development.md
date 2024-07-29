@@ -199,8 +199,8 @@ pnpm run test
 
 The JavaScript test suite is composed of two sections: a Node.js test, which
 asserts behavior of the `@finos/perspective` library, and a suite of
-[Playwright](https://playwright.dev/) tests, which
-assert the behavior of the rest of the UI facing packages.
+[Playwright](https://playwright.dev/) tests, which assert the behavior of the
+rest of the UI facing packages.
 
 ```bash
 pnpm run test --update-snapshots

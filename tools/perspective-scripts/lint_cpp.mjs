@@ -63,8 +63,10 @@ function tidy(buildDir, sourceDir, flags) {
 }
 
 const CLANG_TIDY = `run-clang-tidy`;
-const CLANG_FORMAT = fs.existsSync(`${__dirname}../../.llvm/bin/clang-format`)
-    ? `${__dirname}../../.llvm/bin/clang-format`
+const CLANG_FORMAT = fs.existsSync(
+    `${__dirname}/../../.llvm/llvm-toolchain/bin/clang-format`
+)
+    ? `${__dirname}/../../.llvm/llvm-toolchain/bin/clang-format`
     : `clang-format`;
 
 function formatLint(dir) {
