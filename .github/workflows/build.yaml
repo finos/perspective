@@ -88,6 +88,7 @@ jobs:
               id: init-step
               uses: ./.github/actions/install-deps
               with:
+                  clean: "true"
                   python: "false"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
@@ -97,11 +98,12 @@ jobs:
                   PACKAGE: "!perspective-python,!perspective-jupyterlab"
                   # PSP_USE_CCACHE: 1
 
+            - name: Lint
+              run: pnpm run lint
+
             # - name: Docs Build
             #   run: pnpm run docs
 
-            # - name: Lint
-            #   run: pnpm run lint
             #   env:
             #       PACKAGE: "!perspective-python,!perspective-jupyterlab"
 
@@ -193,7 +195,7 @@ jobs:
                   PACKAGE: "perspective-python"
                   # PSP_USE_CCACHE: 1
                   PSP_ARCH: ${{ matrix.arch }}
-                  CI: 1
+                  PSP_BUILD_WHEEL: 1
 
             - uses: actions/upload-artifact@v4
               with:
@@ -273,17 +275,26 @@ jobs:
 
             - run: node tools/perspective-scripts/repack_wheel.mjs
 
+            - name: Python Build sdist
+              run: pnpm run build
+              env:
+                  PACKAGE: "perspective-python"
+                  if: ${{ runner.os == 'Linux' }}
+                  # PSP_USE_CCACHE: 1
+                  # PSP_ARCH: ${{ matrix.arch }}
+                  PSP_BUILD_SDIST: 1
+
             - uses: actions/upload-artifact@v4
               with:
                   name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
                   path: "*.whl"
                   overwrite: true
 
-            # - uses: actions/upload-artifact@v4
-            #   if: ${{ runner.os == 'Linux' }}
-            #   with:
-            #       name: perspective-python-sdist
-            #       path: rust/target/wheels/*.tar.gz
+            - uses: actions/upload-artifact@v4
+              if: ${{ runner.os == 'Linux' }}
+              with:
+                  name: perspective-python-sdist
+                  path: rust/target/wheels/*.tar.gz
 
             - uses: ./.github/actions/install-wheel
               if: ${{ runner.os == 'Linux' }}

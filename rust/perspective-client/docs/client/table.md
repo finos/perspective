@@ -36,13 +36,13 @@ client), where the data is stored and all calculation occurs.
 
 #### JavaScript
 
-```js
+```javascript
 // Load a CSV
 const table = await client.table("x,y\n1,2\n3,4");
 
 // Load an Arrow
 import * as fs from "node:fs/promises";
-const table2 = await client.table(fs.readFile("superstore.arrow"));
+const table2 = await client.table(await fs.readFile("superstore.arrow"));
 ```
 
 #### Python

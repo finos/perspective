@@ -27,12 +27,11 @@ automatically call the correct build and test tools.
 `Perspective.js` and `perspective-python` **require** the following system
 dependencies to be installed:
 
--   [CMake](https://cmake.org/) (version 3.15.4 or higher)
--   [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not
-    header-only). This can be installed from tarball with the included script
+-   [CMake](https://cmake.org/) (version 3.29.5 or higher)
+-   [Boost](https://www.boost.org/) (version 1.83 or highery). This can be
+    installed from tarball with the included script
     `node tools/perspective-scripts/install_tools.mjs`.
--   [Yarn (v1)](https://classic.yarnpkg.com/). **Important**: Yarn >v1 is not
-    supported, and will cause build errors.
+-   [pnpm](https://pnpm.io/).
 
 **_This list may be non-exhaustive depending on your OS/environment; please open
 a thread in [Discussions](https://github.com/finos/perspective/discussions) if
@@ -47,21 +46,21 @@ below.
 To run a build, use
 
 ```bash
-yarn build
+pnpm run build
 ```
 
 If this is the first time you've built Perspective, you'll be asked to generate
 a `.perspectiverc` via a short survey. This can be later re-configured via
 
 ```bash
-yarn setup
+pnpm run setup
 ```
 
 If everything is successful, you should be able to run any of the `examples/`
 packages, e.g. `examples/blocks` like so:
 
 ```bash
-yarn start blocks
+pnpm run start blocks
 ```
 
 ## `Perspective.js`
@@ -105,7 +104,7 @@ To build the Python library, first configure your project to build Python via
 python, e.g.
 
 ```bash
-pip install -r python/perspective/requirements-311.txt
+pip install -r rust/perspective-python/requirements.txt
 ```
 
 `perspective-python` supports Python 3.8 and upwards.
@@ -118,7 +117,7 @@ do.
 
 ```bash
 # builds labextension to the perspective-python python package root directory
-pnpm -F @finos/perspective-jupyterlab build
+PACKAGE=perspective-jupyterlab pnpm run build
 # editable install of the python package
 pnpm -F @finos/perspective-python develop:maturin
 # set up symlink of our labextension to jupyter share directory
@@ -193,46 +192,19 @@ You can run the test suite simply with the standard NPM command, which will both
 build the test suite for every package and run them.
 
 ```bash
-yarn test [--debug]
-```
-
-A test name regex can be passed to `jest` via the same `-t` flag:
-
-```bash
-yarn test -t 'button test (A|B)'
+pnpm run test
 ```
 
 ### JavaScript
 
 The JavaScript test suite is composed of two sections: a Node.js test, which
 asserts behavior of the `@finos/perspective` library, and a suite of
-[Puppeteer](https://developers.google.com/web/tools/puppeteer/) tests, which
+[Playwright](https://playwright.dev/) tests, which
 assert the behavior of the rest of the UI facing packages.
 
-The Puppeteer/UI tests are a form of
-[characterization tests](https://en.wikipedia.org/wiki/Characterization_test)
-which use screenshots to compare current and previous behavior of
-`<perspective-viewer>` and its plugins. The results of each comparison are
-stored in each package's `test/results/results.json` file, and the screenshots
-themselves are stored in the package's `tests/screenshots/` directory, though
-only the former should be checked into GIT. When a test in these suites fails, a
-`file.failed.png` and `file.diff.png` are also generated, showing the divergent
-screenshot and a contrast diff respectively, so you can verify that the changed
-behavior either does or does not reflect your patch. If you're confident that
-the screenshots reflect your change, you can update the new hashes manually in
-the `test/results/results.json` file, or update all hashes with the `--write`
-flag:
-
 ```bash
-yarn test --write
+pnpm run test --update-snapshots
 ```
-
-### Python
-
-The Python test suite is built on Pytest, and it asserts the correct behavior of
-the Python library.
-
-Verbosity in the tests can be enabled with the `--verbose` flag.
 
 ### Troubleshooting installation from source
 
@@ -250,33 +222,14 @@ The most common culprits are:
 -   CMake version is too old
 -   Boost headers are missing or too old
 
-#### Timezones in Python Tests
-
-Python tests are configured to use the `UTC` time zone. If running tests
-locally, you might find that datetime-related tests fail to assert the correct
-values. To correct this, run tests with the `TZ=UTC`, i.e.
-
-```bash
-TZ=UTC yarn test --verbose
-```
-
 ---
 
 ## Benchmark
 
 You can generate benchmarks specific to your machine's OS and CPU architecture
-with Perspective's benchmark suite, which will generate a `report.html` file in
-the `build/` directory of every package which supports benchmarks, as well as a
-`results.json` file in the `bench/results/`, which can be checked in to GIT with
-your changes to preserve them for future comparison.
+with Perspective's benchmark suite, which will host a live dashboard at
+http://localhost:8080 as well as output a result `benchmark.arrow` file.
 
 ```bash
-yarn bench
+pnpm run bench
 ```
-
-The benchmarks report and `results.json` show a histogram of current
-performance, as well as that of the previous `results.json`. Running this should
-probably be standard practice after making a large change which may affect
-performance, but please create a baseline `results.json` entry for your test
-machine on a commit before your changes first, such that the effects of your PR
-can be properly compared.
