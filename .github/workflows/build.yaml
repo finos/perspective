@@ -88,6 +88,7 @@ jobs:
               id: init-step
               uses: ./.github/actions/install-deps
               with:
+                  clean: "true"
                   python: "false"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 

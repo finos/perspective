@@ -100,6 +100,10 @@ export const all_types_multi_arrow = load_arrow(
     path.join(__dirname, "..", "arrow", "all_types_small_multi.arrow")
 );
 
+export const lists_arrow = load_arrow(
+    path.join(__dirname, "..", "arrow", "lists.arrow")
+);
+
 // module.exports = {
 //     chunked_arrow,
 //     test_null_arrow,
