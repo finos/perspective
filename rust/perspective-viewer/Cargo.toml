@@ -23,6 +23,14 @@ keywords = ["experimental"]
 build = "build.rs"
 include = ["build.rs", "src/**/*", "Cargo.toml", "package.json"]
 
+[package.metadata.docs.rs]
+rustdoc-args = [
+    "--cfg",
+    "web_sys_unstable_apis",
+    "--html-in-header",
+    "docs/index.html",
+]
+
 [[bin]]
 name = "perspective-viewer-metadata"
 path = "src/rust/main.rs"
@@ -32,7 +40,6 @@ crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
 [features]
-define_custom_elements_async = []
 metadata = []
 default = []
 

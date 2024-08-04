@@ -1,1 +1,1 @@
-Serializes a view to the Apache Arrow data format.
+Serializes a [`View`] to the Apache Arrow data format.

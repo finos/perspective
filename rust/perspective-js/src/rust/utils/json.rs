@@ -19,6 +19,7 @@
 //!     Repo: https://github.com/serde-rs/json
 
 #[macro_export]
+#[doc(hidden)]
 macro_rules! json {
     // Hide distracting implementation details from the generated rustdoc.
     ($($json:tt)+) => {

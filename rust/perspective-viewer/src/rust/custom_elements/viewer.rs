@@ -17,7 +17,7 @@ use std::rc::Rc;
 use std::str::FromStr;
 
 use ::perspective_js::utils::global;
-use ::perspective_js::{JsTable, JsView};
+use ::perspective_js::{Table, View};
 use js_sys::*;
 use perspective_client::config::ViewConfigUpdate;
 use perspective_js::JsViewWindow;
@@ -39,27 +39,16 @@ use crate::session::Session;
 use crate::utils::*;
 use crate::*;
 
-/// A `customElements` class which encapsulates both the `<perspective-viewer>`
-/// public API, as well as the Rust component state.
+/// The `<perspective-viewer>` custom element.
 ///
-/// ┌───────────────────────────────────────────┐
-/// │ Custom Element                            │
-/// │┌──────────────┐┌─────────────────────────┐│
-/// ││ yew::app     ││ Model                   ││
-/// ││┌────────────┐││┌─────────┐┌────────────┐││
-/// │││ Components ││││ Session ││ Renderer   │││
-/// ││└────────────┘│││┌───────┐││┌──────────┐│││
-/// │└──────────────┘│││ Table ││││ Plugin   ││││
-/// │┌──────────────┐││└───────┘││└──────────┘│││
-/// ││ HtmlElement  │││┌───────┐│└────────────┘││
-/// │└──────────────┘│││ View  ││┌────────────┐││
-/// │                ││└───────┘││ DragDrop   │││
-/// │                │└─────────┘└────────────┘││
-/// │                │┌──────────────┐┌───────┐││
-/// │                ││ CustomEvents ││ Theme │││
-/// │                │└──────────────┘└───────┘││
-/// │                └─────────────────────────┘│
-/// └───────────────────────────────────────────┘
+/// # JavaScript Examples
+///
+/// Create a new `<perspective-viewer>`:
+///
+/// ```javascript
+/// const viewer = document.createElement("perspective-viewer");
+/// window.body.appendChild(viewer);
+/// ```
 #[derive(Clone)]
 #[wasm_bindgen]
 pub struct PerspectiveViewerElement {
@@ -83,6 +72,7 @@ impl CustomElementMetadata for PerspectiveViewerElement {
 
 #[wasm_bindgen]
 impl PerspectiveViewerElement {
+    #[doc(hidden)]
     #[wasm_bindgen(constructor)]
     pub fn new(elem: web_sys::HtmlElement) -> Self {
         tracing::debug!("Creating <perspective-viewer>");
@@ -134,15 +124,33 @@ impl PerspectiveViewerElement {
         }
     }
 
+    #[doc(hidden)]
     #[wasm_bindgen(js_name = "connectedCallback")]
     pub fn connected_callback(&self) {
         tracing::debug!("Connected <perspective-viewer>");
     }
 
-    /// Loads a promise to a `JsPerspectiveTable` in this viewer.  Historically,
-    /// `<perspective-viewer>` has accepted either a `Promise` or `Table` as an
-    /// argument, so we preserve that behavior here with some loss of type
-    /// precision.
+    /// Loads a [`Table`] (or rather, a Javascript `Promise` which returns a
+    /// [`Table`]) in this viewer.
+    ///
+    /// When [`PerspectiveViewerElement::load`] resolves, the first frame of the
+    /// UI + visualization is guaranteed to have been drawn. Awaiting the result
+    /// of this method in a `try`/`catch` block will capture any errors
+    /// thrown during the loading process, or from the [`Table`] `Promise`
+    /// itself.
+    ///
+    /// A [`Table`] can be created using the
+    /// [`@finos/perspective`](https://www.npmjs.com/package/@finos/perspective)
+    /// library from NPM (see [`perspective_js`] documentation for details).
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// import perspective from "@finos/perspective";
+    ///
+    /// const worker = await perspective.worker();
+    /// viewer.load(worker.table("x,y\n1,2"));
+    /// ```
     pub fn load(&self, table: JsValue) -> ApiFuture<()> {
         tracing::info!("Loading Table");
         let promise = table
@@ -169,11 +177,11 @@ impl PerspectiveViewerElement {
                     pub type Model;
 
                     #[wasm_bindgen(method)]
-                    pub fn unsafe_get_model(this: &Model) -> *const JsTable;
+                    pub fn unsafe_get_model(this: &Model) -> *const Table;
                 }
 
                 let jstable = JsFuture::from(promise).await?.unchecked_into::<Model>();
-                pub fn unsafe_set_model(ptr: *const JsTable) -> JsTable {
+                pub fn unsafe_set_model(ptr: *const Table) -> Table {
                     (unsafe { ptr.as_ref().unwrap() }).clone()
                 }
 
@@ -192,11 +200,24 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Delete the `View` and all associated state, rendering this
+    /// Delete the internal [`View`] and all associated state, rendering this
     /// `<perspective-viewer>` unusable and freeing all associated resources.
-    /// Does not delete the supplied `Table` (as this is constructed by the
-    /// callee).  Allowing a `<perspective-viewer>` to be garbage-collected
-    /// without calling `delete()` will leak WASM memory.
+    /// Does not delete the supplied [`Table`] (as this is constructed by the
+    /// callee).
+    ///
+    /// <div class="warning">
+    ///
+    /// Allowing a `<perspective-viewer>` to be garbage-collected
+    /// without calling [`PerspectiveViewerElement::delete`] will leak WASM
+    /// memory!
+    ///
+    /// </div>
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// await viewer.delete();
+    /// ```
     pub fn delete(&mut self) -> ApiFuture<bool> {
         clone!(self.renderer, self.session, self.root);
         ApiFuture::new(self.renderer.clone().with_lock(async move {
@@ -212,20 +233,40 @@ impl PerspectiveViewerElement {
         }))
     }
 
-    /// Get the underlying `View` for thie viewer.
-    #[wasm_bindgen(js_name = "getView")]
-    pub fn get_view(&self) -> ApiFuture<JsView> {
+    /// Get the underlying [`View`] for this viewer.
+    ///
+    /// Use this method to get promgrammatic access to the [`View`] as currently
+    /// configured by the user, for e.g. serializing as an
+    /// [Apache Arrow](https://arrow.apache.org/) before passing to another
+    /// library.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const view = await viewer.getView();
+    /// ```
+    #[wasm_bindgen]
+    pub fn getView(&self) -> ApiFuture<View> {
         let session = self.session.clone();
         ApiFuture::new(async move { Ok(session.get_view().ok_or("No table set")?.as_jsview()) })
     }
 
-    /// Get the underlying `Table` for this viewer.
+    /// Get the underlying [`Table`] for this viewer (as passed to
+    /// [`PerspectiveViewerElement::load`]).
     ///
     /// # Arguments
-    /// - `wait_for_table` whether to wait for `load()` to be called, or fail
-    ///   immediately if `load()` has not yet been called.
-    #[wasm_bindgen(js_name = "getTable")]
-    pub fn get_table(&self, wait_for_table: Option<bool>) -> ApiFuture<JsTable> {
+    ///
+    /// - `wait_for_table` - whether to wait for
+    ///   [`PerspectiveViewerElement::load`] to be called, or fail immediately
+    ///   if [`PerspectiveViewerElement::load`] has not yet been called.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const table = await viewer.getTable();
+    /// ```
+    #[wasm_bindgen]
+    pub fn getTable(&self, wait_for_table: Option<bool>) -> ApiFuture<Table> {
         let session = self.session.clone();
         ApiFuture::new(async move {
             match session.get_table() {
@@ -240,10 +281,16 @@ impl PerspectiveViewerElement {
     }
 
     /// Get render statistics. Some fields of the returned stats object are
-    /// relative to the last time `getRenderStats()` was called, ergo calling
-    /// this method resets these fields.
-    #[wasm_bindgen(js_name = "getRenderStats")]
-    pub fn get_render_stats(&self) -> ApiResult<JsValue> {
+    /// relative to the last time [`PerspectiveViewerElement::getRenderStats`]
+    /// was called, ergo calling this method resets these fields.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const {virtual_fps, actual_fps} = await viewer.getRenderStats();
+    /// ```
+    #[wasm_bindgen]
+    pub fn getRenderStats(&self) -> ApiResult<JsValue> {
         Ok(JsValue::from_serde_ext(
             &self.renderer.render_timer().get_stats(),
         )?)
@@ -251,10 +298,20 @@ impl PerspectiveViewerElement {
 
     /// Flush any pending modifications to this `<perspective-viewer>`.  Since
     /// `<perspective-viewer>`'s API is almost entirely `async`, it may take
-    /// some milliseconds before any method call such as `restore()` affects
-    /// the rendered element.  If you want to make sure any invoked method which
-    /// affects the rendered has had its results rendered, call and await
-    /// `flush()`
+    /// some milliseconds before any user-initiated changes to the [`View`]
+    /// affects the rendered element.  If you want to make sure all pending
+    /// actions have been rendered, call and await [`Self::flush`].
+    ///
+    /// # JavaScript Examples
+    ///
+    /// In this example, [`Self::restore`] is called without `await`, but the
+    /// eventual render which results from this call can still be awaited by
+    /// immediately awaiting [`Self::flush`] instead.
+    ///
+    /// ```javascript
+    /// viewer.restore(config);
+    /// await viewer.flush();
+    /// ```
     pub fn flush(&self) -> ApiFuture<()> {
         clone!(self.renderer, self.session);
         ApiFuture::new(async move {
@@ -267,11 +324,27 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Restores this element from a full/partial `JsPerspectiveViewConfig`.
+    /// Restores this element from a full/partial
+    /// [`perspective_js::JsViewConfig`].
+    ///
+    /// One of the best ways to use [`Self::restore`] is by first configuring
+    /// a `<perspective-viewer>` as you wish, then using either the `Debug`
+    /// panel or "Copy" -> "config.json" from the toolbar menu to snapshot
+    /// the [`Self::restore`] argument as JSON.
     ///
     /// # Arguments
-    /// - `update` The config to restore to, as returned by `.save()` in either
-    ///   "json", "string" or "arraybuffer" format.
+    ///
+    /// - `update` - The config to restore to, as returned by [`Self::save`] in
+    ///   either "json", "string" or "arraybuffer" format.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Apply a `group_by` to the current [`View`], without modifying/resetting
+    /// other fields:
+    ///
+    /// ```javascript
+    /// await viewer.restore({group_by: ["State"]});
+    /// ```
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
         global::document().blur_active_element();
@@ -295,10 +368,28 @@ impl PerspectiveViewerElement {
     }
 
     /// Save this element to serialized state object, one which can be restored
-    /// via the `.restore()` method.
+    /// via the [`Self::restore`] method.
     ///
     /// # Arguments
-    /// - `format` Supports "json" (default), "arraybuffer" or "string".
+    ///
+    /// - `format` - Supports "json" (default), "arraybuffer" or "string".
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Get the current `group_by` setting:
+    ///
+    /// ```javascript
+    /// const {group_by} = await viewer.restore();
+    /// ```
+    ///
+    /// Reset workflow attached to an external button `myResetButton`:
+    ///
+    /// ```javascript
+    /// const token = await viewer.save();
+    /// myResetButton.addEventListener("clien", async () => {
+    ///     await viewer.restore(token);
+    /// });
+    /// ```
     pub fn save(&self, format: Option<String>) -> ApiFuture<JsValue> {
         let viewer_config_task = self.get_viewer_config();
         ApiFuture::new(async move {
@@ -312,11 +403,20 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Download this viewer's `View` or `Table` data as a `.csv` file.
+    /// Download this viewer's internal [`View`] data as a `.csv` file.
     ///
     /// # Arguments
-    /// - `flat` Whether to use the current `ViewConfig` to generate this data,
-    ///   or use the default.
+    ///
+    /// - `flat` - Whether to use the current [`perspective_js::JsViewConfig`]
+    ///   to generate this data, or use the default.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// myDownloadButton.addEventListener("click", async () => {
+    ///     await viewer.download();
+    /// })
+    /// ```
     pub fn download(&self, flat: Option<bool>) -> ApiFuture<()> {
         let session = self.session.clone();
         ApiFuture::new(async move {
@@ -324,6 +424,8 @@ impl PerspectiveViewerElement {
                 .csv_as_jsvalue(flat.unwrap_or_default(), None)
                 .await?
                 .as_blob()?;
+
+            // TODO name.as_deref().unwrap_or("untitled.csv")
             download("untitled.csv", &val)
         })
     }
@@ -332,8 +434,17 @@ impl PerspectiveViewerElement {
     /// clipboard.
     ///
     /// # Arguments
-    /// - `flat` Whether to use the current `ViewConfig` to generate this data,
-    ///   or use the default.
+    ///
+    /// - `flat` - Whether to use the current [`perspective_js::JsViewConfig`]
+    ///   to generate this data, or use the default.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// myDownloadButton.addEventListener("click", async () => {
+    ///     await viewer.copy();
+    /// })
+    /// ```
     pub fn copy(&self, flat: Option<bool>) -> ApiFuture<()> {
         let method = if flat.unwrap_or_default() {
             ExportMethod::CsvAll
@@ -349,12 +460,19 @@ impl PerspectiveViewerElement {
     /// Reset the viewer's `ViewerConfig` to the default.
     ///
     /// # Arguments
-    /// - `all` If set, will clear expressions and column settings as well.
-    // TODO: We should replace the boolean value here with an options object.
-    pub fn reset(&self, reset_expressions: Option<bool>) -> ApiFuture<()> {
+    ///
+    /// - `reset_all` - If set, will clear expressions and column settings as
+    ///   well.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// await viewer.reset();
+    /// ```
+    pub fn reset(&self, reset_all: Option<bool>) -> ApiFuture<()> {
         tracing::info!("Resetting config");
         let root = self.root.clone();
-        let all = reset_expressions.unwrap_or_default();
+        let all = reset_all.unwrap_or_default();
         ApiFuture::new(async move {
             let task = root
                 .borrow()
@@ -367,10 +485,27 @@ impl PerspectiveViewerElement {
     }
 
     /// Recalculate the viewer's dimensions and redraw.
-    #[wasm_bindgen(js_name = "notifyResize")]
+    ///
+    /// Use this method to tell `<perspective-viewer>` its dimensions have
+    /// changed when auto-size mode has been disabled via [`Self::setAutoSize`].
+    /// [`Self::resize`] resolves when the resize-initiated redraw of this
+    /// element has completed.
+    ///
+    /// # Arguments
+    ///
+    /// - `force` - If [`Self::resize`] is called with `false` or without an
+    ///   argument, and _auto-size_ mode is enabled via [`Self::setAutoSize`],
+    ///   [`Self::resize`] will log a warning and auto-disable auto-size mode.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// await viewer.resize(true)
+    /// ```
+    #[wasm_bindgen]
     pub fn resize(&self, force: Option<bool>) -> ApiFuture<()> {
         if !force.unwrap_or_default() && self.resize_handle.borrow().is_some() {
-            let msg: JsValue = "`notifyResize(false)` called, disabling auto-size.  It can be \
+            let msg: JsValue = "`resize(false)` called, disabling auto-size.  It can be \
                                 re-enabled with `setAutoSize(true)`."
                 .into();
             web_sys::console::warn_1(&msg);
@@ -381,14 +516,28 @@ impl PerspectiveViewerElement {
         ApiFuture::new(async move { renderer.resize().await })
     }
 
-    /// Sets the auto-size behavior of this component. When `true`, this
-    /// `<perspective-viewer>` will register a `ResizeObserver` on itself and
-    /// call `resize()` whenever its own dimensions change.
+    /// Sets the auto-size behavior of this component.
+    ///
+    /// When `true`, this `<perspective-viewer>` will register a
+    /// `ResizeObserver` on itself and call [`Self::resize`] whenever its own
+    /// dimensions change. However, when embedded in a larger application
+    /// context, you may want to call [`Self::resize`] manually to avoid
+    /// over-rendering; in this case auto-sizing can be disabled via this
+    /// method. Auto-size behavior is enabled by default.
     ///
     /// # Arguments
-    /// - `autosize` Whether to enable `auto-size` behavior or not.
-    #[wasm_bindgen(js_name = "setAutoSize")]
-    pub fn set_auto_size(&mut self, autosize: bool) {
+    ///
+    /// - `autosize` - Whether to enable `auto-size` behavior or not.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Disable auto-size behavior:
+    ///
+    /// ```javascript
+    /// viewer.setAutoSize(false);
+    /// ```
+    #[wasm_bindgen]
+    pub fn setAutoSize(&mut self, autosize: bool) {
         if autosize {
             let handle = Some(ResizeObserverHandle::new(
                 &self.elem,
@@ -401,14 +550,26 @@ impl PerspectiveViewerElement {
         }
     }
 
-    /// Sets the auto-pause behavior of this component. When `true`, this
-    /// `<perspective-viewer>` will register an `IntersectionObserver` on
-    /// itself and call `pause()` whenever its viewport visibility changes.
+    /// Sets the auto-pause behavior of this component.
+    ///
+    /// When `true`, this `<perspective-viewer>` will register an
+    /// `IntersectionObserver` on itself and subsequently skip rendering
+    /// whenever its viewport visibility changes. Auto-pause is enabled by
+    /// default.
     ///
     /// # Arguments
+    ///
     /// - `autopause` Whether to enable `auto-pause` behavior or not.
-    #[wasm_bindgen(js_name = "setAutoPause")]
-    pub fn set_auto_pause(&mut self, autopause: bool) {
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Disable auto-size behavior:
+    ///
+    /// ```javascript
+    /// viewer.setAutoPause(false);
+    /// ```
+    #[wasm_bindgen]
+    pub fn setAutoPause(&mut self, autopause: bool) {
         if autopause {
             let handle = Some(IntersectionObserverHandle::new(
                 &self.elem,
@@ -421,21 +582,25 @@ impl PerspectiveViewerElement {
         }
     }
 
-    #[wasm_bindgen(js_name = "getSelection")]
-    pub fn get_selection(&self) -> Option<JsViewWindow> {
+    /// Return a [`perspective_js::JsViewWindow`] for the currently selected
+    /// region.
+    #[wasm_bindgen]
+    pub fn getSelection(&self) -> Option<JsViewWindow> {
         self.renderer.get_selection().map(|x| x.into())
     }
 
-    #[wasm_bindgen(js_name = "setSelection")]
-    pub fn set_selection(&self, window: Option<JsViewWindow>) -> ApiResult<()> {
+    /// Set the selection [`perspective_js::JsViewWindow`] for this element.
+    #[wasm_bindgen]
+    pub fn setSelection(&self, window: Option<JsViewWindow>) -> ApiResult<()> {
         let window = window.map(|x| x.into_serde_ext()).transpose()?;
         self.renderer.set_selection(window);
         Ok(())
     }
 
-    /// Get this viewer's edit port for the currently loaded `Table`.
-    #[wasm_bindgen(js_name = "getEditPort")]
-    pub fn get_edit_port(&self) -> Result<f64, JsValue> {
+    /// Get this viewer's edit port for the currently loaded [`Table`] (see
+    /// [`Table::update`] for details on ports).
+    #[wasm_bindgen]
+    pub fn getEditPort(&self) -> Result<f64, JsValue> {
         self.session
             .metadata()
             .get_edit_port()
@@ -443,8 +608,23 @@ impl PerspectiveViewerElement {
     }
 
     /// Restyle all plugins from current document.
-    #[wasm_bindgen(js_name = "restyleElement")]
-    pub fn restyle_element(&self) -> ApiFuture<JsValue> {
+    ///
+    /// <div class="warning">
+    ///
+    /// [`Self::restyleElement`] _must_ be called for many runtime changes to
+    /// CSS properties to be reflected in an already-rendered
+    /// `<perspective-viewer>`.
+    ///
+    /// </div>
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// viewer.style = "--icon--color: red";
+    /// await viewer.restyleElement();
+    /// ```
+    #[wasm_bindgen]
+    pub fn restyleElement(&self) -> ApiFuture<JsValue> {
         clone!(self.renderer, self.session);
         ApiFuture::new(async move {
             let view = session.get_view().into_apierror()?;
@@ -453,8 +633,21 @@ impl PerspectiveViewerElement {
     }
 
     /// Set the available theme names available in the status bar UI.
-    #[wasm_bindgen(js_name = "resetThemes")]
-    pub fn reset_themes(&self, themes: Option<Box<[JsValue]>>) -> ApiFuture<JsValue> {
+    ///
+    /// Calling [`Self::resetThemes`] may cause the current theme to switch,
+    /// if e.g. the new theme set does not contain the current theme.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Restrict `<perspective-viewer>` theme options to _only_ default light
+    /// and dark themes, regardless of what is auto-detected from the page's
+    /// CSS:
+    ///
+    /// ```javascript
+    /// viewer.resetThemes(["Pro Light", "Pro Dark"])
+    /// ```
+    #[wasm_bindgen]
+    pub fn resetThemes(&self, themes: Option<Box<[JsValue]>>) -> ApiFuture<JsValue> {
         clone!(self.renderer, self.session, self.presentation);
         ApiFuture::new(async move {
             let themes: Option<Vec<String>> = themes
@@ -483,25 +676,37 @@ impl PerspectiveViewerElement {
     /// throttling will be calculated from the measured render time of the
     /// last 5 frames.
     ///
-    /// # Examples
-    /// // Only draws at most 1 frame/sec.
-    /// viewer.js_set_throttle(Some(1000_f64));
-    ///
     /// # Arguments
-    /// - `throttle` The throttle rate - milliseconds (f64), or `None` for
+    ///
+    /// - `throttle` - The throttle rate in milliseconds (f64), or `None` for
     ///   adaptive throttling.
-    #[wasm_bindgen(js_name = "setThrottle")]
-    pub fn set_throttle(&mut self, val: Option<f64>) {
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Only draws at most 1 frame/sec:
+    ///
+    /// ```rust
+    /// viewer.setThrottle(1000);
+    /// ```
+    #[wasm_bindgen]
+    pub fn setThrottle(&mut self, val: Option<f64>) {
         self.renderer.set_throttle(val);
     }
 
     /// Toggle (or force) the config panel open/closed.
     ///
     /// # Arguments
-    /// - `force` Force the state of the panel open or closed, or `None` to
+    ///
+    /// - `force` - Force the state of the panel open or closed, or `None` to
     ///   toggle.
-    #[wasm_bindgen(js_name = "toggleConfig")]
-    pub fn toggle_config(&self, force: Option<bool>) -> ApiFuture<JsValue> {
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// await viewer.toggleConfig();
+    /// ```
+    #[wasm_bindgen]
+    pub fn toggleConfig(&self, force: Option<bool>) -> ApiFuture<JsValue> {
         global::document().blur_active_element();
         let root = self.root.clone();
         ApiFuture::new(async move {
@@ -518,9 +723,9 @@ impl PerspectiveViewerElement {
 
     /// Get an `Array` of all of the plugin custom elements registered for this
     /// element. This may not include plugins which called
-    /// `registerPlugin()` after the host has rendered for the first time.
-    #[wasm_bindgen(js_name = "getAllPlugins")]
-    pub fn get_all_plugins(&self) -> Array {
+    /// [`registerPlugin`] after the host has rendered for the first time.
+    #[wasm_bindgen]
+    pub fn getAllPlugins(&self) -> Array {
         self.renderer.get_all_plugins().iter().collect::<Array>()
     }
 
@@ -528,21 +733,20 @@ impl PerspectiveViewerElement {
     /// plugin if no `name` is provided.
     ///
     /// # Arguments
-    /// - `name` The `name` property of a perspective plugin Custom Element, or
-    ///   `None` for the active plugin's Custom Element.
-    #[wasm_bindgen(js_name = "getPlugin")]
-    pub fn get_plugin(&self, name: Option<String>) -> ApiResult<JsPerspectiveViewerPlugin> {
+    ///
+    /// - `name` - The `name` property of a perspective plugin Custom Element,
+    ///   or `None` for the active plugin's Custom Element.
+    #[wasm_bindgen]
+    pub fn getPlugin(&self, name: Option<String>) -> ApiResult<JsPerspectiveViewerPlugin> {
         match name {
             None => self.renderer.get_active_plugin(),
             Some(name) => self.renderer.get_plugin(&name),
         }
     }
 
-    /// Internal Only.
-    ///
-    /// Get this custom element model's raw pointer.
+    #[doc(hidden)]
     #[allow(clippy::use_self)]
-    #[wasm_bindgen(js_name = "unsafeGetModel")]
+    #[wasm_bindgen]
     pub fn unsafe_get_model(&self) -> *const PerspectiveViewerElement {
         std::ptr::addr_of!(*self)
     }
@@ -553,8 +757,8 @@ impl PerspectiveViewerElement {
     /// The event's details property has two fields: `{open: bool, column_name?:
     /// string}`. The CustomEvent is also fired whenever the user toggles the
     /// sidebar manually.
-    #[wasm_bindgen(js_name = "toggleColumnSettings")]
-    pub fn toggle_column_settings(&self, column_name: String) -> ApiFuture<()> {
+    #[wasm_bindgen]
+    pub fn toggleColumnSettings(&self, column_name: String) -> ApiFuture<()> {
         clone!(self.session, self.root);
         ApiFuture::new(async move {
             let locator = session.metadata().get_column_locator(Some(column_name));
@@ -572,9 +776,9 @@ impl PerspectiveViewerElement {
     }
 
     /// Force open the settings for a particular column. Pass `null` to close
-    /// the column settings panel. See `toggleColumnSettings` for more.
-    #[wasm_bindgen(js_name = "openColumnSettings")]
-    pub fn open_column_settings(
+    /// the column settings panel. See [`Self::toggleColumnSettings`] for more.
+    #[wasm_bindgen]
+    pub fn openColumnSettings(
         &self,
         column_name: Option<String>,
         toggle: Option<bool>,

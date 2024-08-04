@@ -61,6 +61,6 @@
         "@types/d3": "^7.0.0",
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-test": "workspace:^",
-        "@prospective.co/procss": "^0.1.15"
+        "@prospective.co/procss": "^0.1.16"
     }
 }

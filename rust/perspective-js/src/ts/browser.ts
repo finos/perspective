@@ -45,7 +45,7 @@ async function _init(ws: Worker, wasm: ArrayBuffer) {
  * @returns
  */
 export async function worker(module: Promise<typeof psp>) {
-    const { JsClient } = await module;
+    const { Client } = await module;
     const [wasm, webworker]: [ArrayBuffer, Worker] = await Promise.all([
         perspective_wasm().then((x: Response | ArrayBuffer) => {
             if (x instanceof Response) {
@@ -57,7 +57,7 @@ export async function worker(module: Promise<typeof psp>) {
         perspective_wasm_worker(),
     ]);
 
-    const client = new JsClient(
+    const client = new Client(
         (proto: Uint8Array) => {
             const f = proto.slice().buffer;
             webworker.postMessage(f, { transfer: [f] });
@@ -88,13 +88,13 @@ export async function websocket(
     module: Promise<typeof psp>,
     url: string | URL
 ) {
-    const { JsClient } = await module;
+    const { Client } = await module;
     const ws = new WebSocket(url);
     let [sender, receiver] = invert_promise();
     ws.onopen = sender;
     ws.binaryType = "arraybuffer";
     await receiver;
-    const client = new JsClient(
+    const client = new Client(
         (proto: Uint8Array) => {
             const buffer = proto.slice().buffer;
             ws.send(buffer);

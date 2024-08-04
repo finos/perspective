@@ -22,6 +22,7 @@
 /// clone!(my_struct.option_method(), alias = my_struct.prop1.my_rc);
 /// println!("These bindings exist: {:?} {:?}", option_method, alias);
 /// ```
+#[doc(hidden)]
 #[macro_export]
 macro_rules! clone {
     (impl @bind $i:tt { $($orig:tt)* } { }) => {

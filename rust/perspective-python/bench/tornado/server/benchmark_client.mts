@@ -1,4 +1,4 @@
-import new_perspective, { JsClient, JsTable } from "@finos/perspective";
+import new_perspective, { Client, JsTable } from "@finos/perspective";
 import fs from "node:fs";
 // @ts-ignore
 import psp_2_10_0 from "perspective-2-10-0/dist/cjs/perspective.node.js";
@@ -18,13 +18,13 @@ interface BenchCtx {
 //     await table.delete();
 // }
 
-async function createEmptyView(_psp: JsClient, ctx: BenchCtx) {
+async function createEmptyView(_psp: Client, ctx: BenchCtx) {
     const view = await ctx.smallTable.view();
     view.delete();
     await ctx.smallTable.size();
 }
 
-async function rowPivotHighCardinality(_psp: JsClient, ctx: BenchCtx) {
+async function rowPivotHighCardinality(_psp: Client, ctx: BenchCtx) {
     const view = await ctx.largeTable.view({
         group_by: ["x"],
     });
@@ -32,7 +32,7 @@ async function rowPivotHighCardinality(_psp: JsClient, ctx: BenchCtx) {
     await ctx.largeTable.size();
 }
 
-async function orderingRandomDataset(_psp: JsClient, ctx: BenchCtx) {
+async function orderingRandomDataset(_psp: Client, ctx: BenchCtx) {
     const view = await ctx.largeTable.view({
         sort: [["x", "desc"]],
     });
@@ -40,7 +40,7 @@ async function orderingRandomDataset(_psp: JsClient, ctx: BenchCtx) {
     await ctx.largeTable.size();
 }
 
-async function groupAndSplit(_psp: JsClient, ctx: BenchCtx) {
+async function groupAndSplit(_psp: Client, ctx: BenchCtx) {
     const view = await ctx.mediumTable.view({
         group_by: ["x"],
         split_by: ["x"],
@@ -70,10 +70,10 @@ const START_DATE = new Date();
 START_DATE.setHours(0, 0, 0, 0);
 
 async function runBenchmark(
-    psp: JsClient,
+    psp: Client,
     pspVersion: string,
     benchStart: bigint,
-    benchmark: (_: JsClient) => Promise<void>
+    benchmark: (_: Client) => Promise<void>
 ) {
     const start = process.hrtime.bigint();
     await benchmark(psp);
@@ -87,7 +87,7 @@ async function runBenchmark(
 }
 
 const PSP_VERSIONS = ["3.0.0", "2.10.0"] as const;
-type PspVersion = typeof PSP_VERSIONS[number];
+type PspVersion = (typeof PSP_VERSIONS)[number];
 const PspVersion: Type<string, PspVersion> = {
     ...string,
     from: (s) => {
@@ -127,7 +127,7 @@ const app = command({
 type FirstArgType<T> = T extends (arg1: infer U, ...args: any[]) => any
     ? U
     : never;
-type AppOutput = FirstArgType<typeof app["handler"]>;
+type AppOutput = FirstArgType<(typeof app)["handler"]>;
 // Wtf? Is there not a builtin way to do this?
 
 async function main({ pspVersion, output }: AppOutput) {
@@ -151,7 +151,7 @@ async function main({ pspVersion, output }: AppOutput) {
         // { name: "Benchmarks" }
     );
     console.log("Running benchmarks...");
-    const createCtx = async (psp: JsClient) => {
+    const createCtx = async (psp: Client) => {
         const smallTable = await psp.table({ x: [1, 2, 3] });
         await smallTable.size();
         const mediumTable = await psp.table({
@@ -196,7 +196,7 @@ async function main({ pspVersion, output }: AppOutput) {
             return acc;
         },
         Promise.resolve({}) as Promise<
-            Record<string, { ctx: BenchCtx; client: JsClient }[]>
+            Record<string, { ctx: BenchCtx; client: Client }[]>
         >
     );
     const startDate = process.hrtime.bigint();

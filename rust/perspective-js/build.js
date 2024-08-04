@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { exec, execSync } from "child_process";
+import { execSync } from "child_process";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
 import * as fs from "node:fs";
@@ -82,8 +82,6 @@ function build_metadata() {
     execSync(
         `TS_RS_EXPORT_DIR='./src/ts/ts-rs' ../target/${get_host()}/debug/perspective-js-metadata`
     );
-
-    // fs.writeFileSync("./dist/pkg/rust_types.d.ts", types.toString());
 }
 
 function build_rust() {

@@ -10,6 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#[cfg(feature = "axum-ws")]
+pub mod axum;
+
 use std::ops::Deref;
 use std::sync::{Arc, OnceLock};
 

@@ -64,11 +64,11 @@ impl PerspectiveDebugPluginElement {
         JsValue::UNDEFINED
     }
 
-    pub fn update(&self, view: perspective_js::JsView) -> ApiFuture<()> {
+    pub fn update(&self, view: perspective_js::View) -> ApiFuture<()> {
         self.draw(view)
     }
 
-    pub fn draw(&self, view: perspective_js::JsView) -> ApiFuture<()> {
+    pub fn draw(&self, view: perspective_js::View) -> ApiFuture<()> {
         let css = "margin:0;overflow:scroll;position:absolute;width:100%;height:100%";
         clone!(self.elem);
         ApiFuture::new(async move {

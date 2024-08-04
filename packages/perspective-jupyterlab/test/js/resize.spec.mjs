@@ -63,14 +63,14 @@ test.describe("JupyterLab resize", () => {
                     "position:absolute;top:0;left:0;width:300px;height:300px"
                 );
 
-            await document.querySelector("perspective-viewer").notifyResize();
+            await document.querySelector("perspective-viewer").resize();
         });
 
         // Snapshot is viewer contents
         const contents = await page.evaluate(async () => {
             document.querySelector(".PSPContainer").style =
                 "position:absolute;top:0;left:0;width:800px;height:600px";
-            await document.querySelector("perspective-viewer").notifyResize();
+            await document.querySelector("perspective-viewer").resize();
 
             for (const elem of document.querySelectorAll(
                 "perspective-viewer *"

@@ -25,6 +25,8 @@ use crate::client::Client;
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::*;
+#[cfg(doc)]
+use crate::table::Table;
 pub use crate::utils::*;
 
 #[derive(Default, Debug, Deserialize, TS)]

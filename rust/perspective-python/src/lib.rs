@@ -15,11 +15,19 @@
 mod client;
 mod server;
 
-use client::*;
+pub use client::client_sync::{PySyncClient, PySyncProxySession, PySyncTable, PySyncView};
 use pyo3::prelude::*;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{fmt, EnvFilter};
+
+macro_rules! inherit_docs {
+    ($x:literal) => {
+        include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $x))
+    };
+}
+
+pub(crate) use inherit_docs;
 
 /// Create a tracing filter which mimics the default behavior of reading from
 /// env, customized to exclude timestamp.
@@ -40,12 +48,12 @@ fn init_tracing() {
 #[pymodule]
 fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     init_tracing();
-    m.add_class::<client_sync::PySyncClient>()?;
+    m.add_class::<client::client_sync::PySyncClient>()?;
     m.add_class::<server::PySyncServer>()?;
     m.add_class::<server::PySyncSession>()?;
-    m.add_class::<client_sync::PySyncTable>()?;
-    m.add_class::<client_sync::PySyncView>()?;
-    m.add_class::<client_sync::PySyncProxySession>()?;
+    m.add_class::<client::client_sync::PySyncTable>()?;
+    m.add_class::<client::client_sync::PySyncView>()?;
+    m.add_class::<client::client_sync::PySyncProxySession>()?;
     m.add(
         "PerspectiveError",
         py.get_type_bound::<client::PyPerspectiveError>(),

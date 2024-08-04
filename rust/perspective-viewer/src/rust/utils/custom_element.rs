@@ -25,7 +25,7 @@ pub trait CustomElementMetadata {
     }
 }
 
-#[wasm_bindgen(inline_js = "
+#[wasm_bindgen(inline_js = r#"
     export function bootstrap(psp, name, clsname, statics) {
         const cls = psp[clsname];
         const proto = cls.prototype;
@@ -61,9 +61,15 @@ pub trait CustomElementMetadata {
             });
         }
 
+        Object.defineProperty(x, '__wasm_module__', {
+            get() {
+                return psp;
+            },
+        });
+
         customElements.define(name, x);
     }
-")]
+"#)]
 extern "C" {
     #[wasm_bindgen(js_name = "bootstrap")]
     fn js_bootstrap(psp: &JsValue, name: &str, cls: &str, statics: js_sys::Array) -> JsValue;

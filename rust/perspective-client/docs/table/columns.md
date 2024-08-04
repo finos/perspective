@@ -1,10 +1,30 @@
 Returns the column names of this [`Table`] in "natural" order (the ordering
 implied by the input format).
 
-```javascript
-const table = await worker.table("x,y\n1,2");
-const columns = await table.columns();
+<div class="javascript">
 
-// Prints [`["x", "y"]`]
-console.log(columns);
+# JavaScript Examples
+
+```javascript
+const columns = await table.columns();
 ```
+
+</div>
+<div class="python">
+
+# Python Examples
+
+```python
+columns = table.columns()
+```
+
+</div>
+<div class="rust">
+
+# Examples
+
+```rust
+let columns = table.columns().await;
+```
+
+</div>

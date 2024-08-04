@@ -38,7 +38,6 @@ use wasm_opt::OptimizationOptions;
 /// script's parameters also, and there is no way to reset e.g. the `target`
 /// field to the host platform.
 fn build(pkg: Option<&str>, is_release: bool, features: Vec<String>) {
-
     let features = format!("tracing/release_max_level_warn,{}", features.join(","));
     let mut cmd = Command::new("cargo");
     cmd.args(["build"])

@@ -1,11 +1,11 @@
 Validates the given expressions.
 
-# Examples
+<div class="python">
 
-Python:
-
-(XXX: does this need to be awaited)
+# Python Examples
 
 ```python
-table = await async_client.validate_expressions({"computed": '"Quantity" + 4'})
+exprs = client.validate_expressions({"computed": '"Quantity" + 4'})
 ```
+
+</div>

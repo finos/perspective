@@ -169,7 +169,7 @@ impl Session {
     }
 
     pub fn js_get_table(&self) -> Option<JsValue> {
-        Some(perspective_js::JsTable::from(self.borrow().table.clone()?).into())
+        Some(perspective_js::Table::from(self.borrow().table.clone()?).into())
     }
 
     pub fn js_get_view(&self) -> Option<JsValue> {

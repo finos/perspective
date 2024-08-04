@@ -10,43 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import init from "./init";
-import { PerspectiveViewerElement } from "../../dist/pkg/perspective-viewer.js";
+import * as wasm_module from "../../dist/pkg/perspective-viewer.js";
+import wasm_binary from "../../dist/pkg/perspective-viewer.wasm";
+import { load_wasm_stage_0 } from "@finos/perspective/src/ts/decompress.ts";
 
-// This can be done automatically by enabling the `defin_web_components_async`
-// feature, but due to async loading, `<perspective-viewer>` methods will not be
-// available synchronously - this can be mitigated with
-// `customElements.whenDefined()`, but this is a breaking change.
-class HTMLPerspectiveViewerElement extends HTMLElement {
-    _instance: PerspectiveViewerElement;
-    constructor() {
-        super();
-        this._instance = new PerspectiveViewerElement(this);
-    }
-}
-
-const proto = PerspectiveViewerElement.prototype;
-const names = Object.getOwnPropertyNames(proto);
-for (const key of names) {
-    Object.defineProperty(HTMLPerspectiveViewerElement.prototype, key, {
-        value: async function (...args: any[]) {
-            return await this._instance[key].call(this._instance, ...args);
-        },
-    });
-}
-
-for (const key of ["registerPlugin", "getExprTKCommands", "getTypes"]) {
-    Object.defineProperty(HTMLPerspectiveViewerElement, key, {
-        value: async function (...args: any[]) {
-            return (init as any)[key].call(init, ...args);
-        },
-    });
-}
-
-Object.defineProperty(HTMLPerspectiveViewerElement, "__wasm_module__", {
-    get() {
-        return init;
-    },
-});
-
-customElements.define("perspective-viewer", HTMLPerspectiveViewerElement);
+const module = await load_wasm_stage_0(wasm_binary as unknown as ArrayBuffer);
+await wasm_module.default(module);
+await wasm_module.init();

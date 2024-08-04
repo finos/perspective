@@ -15,6 +15,7 @@ import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import * as fs from "node:fs";
+import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
 
 import cpy from "cpy";
 
@@ -45,7 +46,7 @@ async function build_all() {
         `TS_RS_EXPORT_DIR='./src/ts/ts-rs' ../target/${get_host()}/debug/perspective-viewer-metadata`
     );
 
-    fs.writeFileSync("./exprtk.md", docs.toString());
+    fs.writeFileSync("./docs/exprtk.md", docs.toString());
     if (!fs.existsSync("./dist/pkg")) {
         fs.mkdirSync("./dist/pkg", { recursive: true });
     }
@@ -105,8 +106,41 @@ async function build_all() {
     // Typecheck
     execSync("npx tsc --project tsconfig.json", INHERIT);
 
-    // legacy compat
-    await cpy("target/themes/*", "dist/css");
+    // Generate themes. `cargo` is not a great tool for this as there's no
+    // simple way to find the output artifact.
+    function add(builder, path) {
+        builder.add(path, fs.readFileSync(`./src/themes/${path}`).toString());
+    }
+
+    fs.mkdirSync("./dist/css/intl", { recursive: true });
+    const builder = new BuildCss("./src/themes");
+    add(builder, "variables.less");
+    add(builder, "intl.less");
+    add(builder, "icons.less");
+    add(builder, "pro.less");
+    add(builder, "pro-dark.less");
+    add(builder, "monokai.less");
+    add(builder, "solarized.less");
+    add(builder, "solarized-dark.less");
+    add(builder, "vaporwave.less");
+    add(builder, "gruvbox.less");
+    add(builder, "gruvbox-dark.less");
+    add(builder, "dracula.less");
+    add(builder, "themes.less");
+    for (const [name, css] of builder.compile()) {
+        fs.writeFileSync(`dist/css/${name}`, css);
+    }
+
+    const intl_builder = new BuildCss("./src/themes/intl");
+    add(intl_builder, "intl/de.less");
+    add(intl_builder, "intl/es.less");
+    add(intl_builder, "intl/fr.less");
+    add(intl_builder, "intl/ja.less");
+    add(intl_builder, "intl/pt.less");
+    add(intl_builder, "intl/zh.less");
+    for (const [name, css] of intl_builder.compile()) {
+        fs.writeFileSync(`dist/css/intl/${name}`, css);
+    }
 }
 
 build_all();

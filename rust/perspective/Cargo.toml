@@ -27,7 +27,8 @@ crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
 
 [features]
-default = []
+default = ["axum-ws"]
+axum-ws = ["tokio", "axum", "futures"]
 external-cpp = [
     "perspective-server/external-cpp",
     "perspective-client/external-proto",
@@ -39,5 +40,6 @@ perspective-client = { version = "3.0.0-rc.2", path = "../perspective-client" }
 perspective-server = { version = "3.0.0-rc.2", path = "../perspective-server" }
 tracing = { version = ">=0.1.36" }
 
-[dev-dependencies]
-tokio = { version = "1.0", features = ["full"] }
+axum = { version = "~0", optional = true }
+tokio = { version = "~1", features = ["full"], optional = true }
+futures = { version = "~0", optional = true }

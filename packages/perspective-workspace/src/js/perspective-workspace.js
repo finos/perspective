@@ -189,7 +189,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
     /**
      * Invalidate this component's dimensions and recalculate.
      */
-    notifyResize() {
+    resize() {
         this.workspace.update();
     }
 

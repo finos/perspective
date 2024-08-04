@@ -240,9 +240,8 @@ rust/perspective-js/build
 rust/perspective-js/src/ts/ts-rs
 rust/perspective-server/cpp
 rust/perspective-server/cmake
-rust/perspective-js/docs
-rust/perspective-python/docs
 
 .pyodide-*/
 rust/perspective-python/*.data
 # rust/perspective-python/perspective.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab/package.json
+rust/perspective-viewer/docs/exprtk.md

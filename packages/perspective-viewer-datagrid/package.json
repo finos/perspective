@@ -36,7 +36,7 @@
         "regular-table": "=0.6.4"
     },
     "devDependencies": {
-        "@prospective.co/procss": "^0.1.15",
+        "@prospective.co/procss": "^0.1.16",
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-test": "workspace:^"
     }

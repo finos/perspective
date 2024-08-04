@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { JsView } from "@finos/perspective";
+import { View } from "@finos/perspective";
 
 // import type * as perspective from "@finos/perspective";
 
@@ -242,11 +242,11 @@ export class HTMLPerspectiveViewerPluginElement
         }
     }
 
-    async update(view: JsView): Promise<void> {
+    async update(view: View): Promise<void> {
         return this.draw(view);
     }
 
-    async draw(view: JsView): Promise<void> {
+    async draw(view: View): Promise<void> {
         this.style.backgroundColor = "#fff";
         const csv = await view.to_csv();
         const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
@@ -276,14 +276,4 @@ export class HTMLPerspectiveViewerPluginElement
     async delete(): Promise<void> {
         // Not Implemented
     }
-}
-
-if (
-    document.createElement("perspective-viewer-plugin").constructor ===
-    HTMLElement
-) {
-    window.customElements.define(
-        "perspective-viewer-plugin",
-        HTMLPerspectiveViewerPluginElement
-    );
 }

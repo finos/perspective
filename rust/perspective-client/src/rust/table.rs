@@ -17,6 +17,7 @@ use nanoid::*;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::assert_table_api;
 use crate::client::{Client, Features};
 use crate::config::{Expressions, ViewConfigUpdate};
 use crate::proto::make_table_req::make_table_options::MakeTableType;
@@ -27,7 +28,6 @@ use crate::proto::*;
 use crate::table_data::UpdateData;
 use crate::utils::*;
 use crate::view::View;
-use crate::{assert_table_api, proto};
 
 pub type Schema = HashMap<String, ColumnType>;
 
@@ -123,19 +123,6 @@ pub struct Table {
     /// is wired into this table. So, we store the token to clean it up properly
     /// on destruction.
     pub(crate) view_update_token: Option<u32>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SystemInfo {
-    pub heap_size: f64,
-}
-
-impl From<proto::ServerSystemInfoResp> for SystemInfo {
-    fn from(value: proto::ServerSystemInfoResp) -> Self {
-        SystemInfo {
-            heap_size: value.heap_size,
-        }
-    }
 }
 
 assert_table_api!(Table);

@@ -32,6 +32,12 @@ pub enum Scalar {
     // Int(u32)
 }
 
+impl From<&str> for Scalar {
+    fn from(value: &str) -> Self {
+        Self::String(value.into())
+    }
+}
+
 impl Default for Scalar {
     fn default() -> Self {
         Self::Null
@@ -55,6 +61,15 @@ impl Display for Scalar {
 pub enum FilterTerm {
     Array(Vec<Scalar>),
     Scalar(#[serde(default)] Scalar),
+}
+
+impl<'a, T> From<T> for FilterTerm
+where
+    T: AsRef<[&'a str]>,
+{
+    fn from(value: T) -> Self {
+        Self::Array(value.as_ref().iter().map(|x| (*x).into()).collect())
+    }
 }
 
 impl Default for FilterTerm {
@@ -86,8 +101,11 @@ impl Display for FilterTerm {
 pub struct Filter(String, String, #[serde(default)] FilterTerm);
 
 impl Filter {
-    pub fn new(column: String, op: String, term: FilterTerm) -> Self {
-        Filter(column, op, term)
+    pub fn new<T>(column: &str, op: &str, term: T) -> Self
+    where
+        FilterTerm: From<T>,
+    {
+        Filter(column.to_string(), op.to_string(), term.into())
     }
 
     pub fn column(&self) -> &str {

@@ -48,7 +48,7 @@
         "@finos/perspective-test": "workspace:^",
         "@jupyterlab/builder": "^4",
         "copy-webpack-plugin": "~12",
-        "@prospective.co/procss": "^0.1.15",
+        "@prospective.co/procss": "^0.1.16",
         "cpy": "^9.0.1"
     },
     "jupyterlab": {

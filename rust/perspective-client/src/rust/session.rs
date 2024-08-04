@@ -19,12 +19,15 @@ use prost::Message;
 use crate::proto::request::ClientReq;
 use crate::proto::{Request, Response};
 use crate::{Client, ClientError};
+#[cfg(doc)]
+use crate::{Table, View};
 
 /// The server-side representation of a connection to a
-/// [`perspective_client::Client`]. For each [`perspective_client::Client`] that
-/// wants to connect to a [`Server`], a dedicated [`Session`] must be created.
-/// The [`Session`] handles routing messages emitted by the [`Server`], as well
-/// as owning any resources the [`Client`] may request.
+/// [`Client`]. For each [`Client`] that
+/// wants to connect to a `perspective_server::Server`, a dedicated [`Session`]
+/// must be created. The [`Session`] handles routing messages emitted by the
+/// `perspective_server::Server`ve_server::Server`, as well as owning any
+/// resources the [`Client`] may request.
 pub trait Session<E> {
     /// Handle an incoming request from the [`Client`]. Calling
     /// [`Session::handle_request`] will result in the `send_response` parameter
@@ -51,8 +54,9 @@ pub trait Session<E> {
     /// [`Session::handle_request`] calls. Calling [`Session::poll`] may result
     /// in the `send_response` parameter which was used to construct this (or
     /// other) [`Session`] to fire. Whenever a [`Session::handle_request`]
-    /// method is invoked for a [`Server`], at least one [`Session::poll`]
-    /// should be scheduled to clear other clients message queues.
+    /// method is invoked for a `perspective_server::Server`, at least one
+    /// [`Session::poll`] should be scheduled to clear other clients message
+    /// queues.
     ///
     /// ```text
     ///                      :
@@ -66,9 +70,9 @@ pub trait Session<E> {
     fn poll(&self) -> impl Future<Output = Result<(), E>>;
 
     /// Close this [`Session`], cleaning up any callbacks (e.g. arguments
-    /// provided to [`Session::handle_request`] or
-    /// [`perspective_client::View::OnUpdate`]) and resources (e.g. views
-    /// returned by a call to [`perspective_client::Table::view`]).
+    /// provided to [`Session::handle_request`]) and resources (e.g. views
+    /// returned by a call to [`Table::view`]).
+    ///
     /// Dropping a [`Session`] outside of the context of [`Session::close`]
     /// will cause a [`tracing`] error-level log to be emitted, but won't fail.
     /// They will, however, leak.

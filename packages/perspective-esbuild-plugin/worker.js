@@ -78,16 +78,22 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                                 a.push(callback);
                             }
 
+                            function removeEventListener(callback) {
+                                const idx = a.indexOf(callback);
+                                if (idx > -1) {
+                                    a.splice(idx, 1);
+                                }
+                            }
+
                             function postMessage(msg) {
-                                if (Object.keys(msg).length > 0) {
-                                    for (const listener of b) {
-                                        listener({data: msg});
-                                    }
+                                for (const listener of b) {
+                                    listener({data: msg});
                                 }
                             }
 
                             return {
                                 addEventListener,
+                                removeEventListener,
                                 postMessage,
                                 location: {href: ""}
                             }
@@ -139,16 +145,22 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                             a.push(callback);
                         }
 
+                        function removeEventListener(callback) {
+                            const idx = a.indexOf(callback);
+                            if (idx > -1) {
+                                a.splice(idx, 1);
+                            }
+                        }
+
                         function postMessage(msg) {
-                            if (Object.keys(msg).length > 0) {
-                                for (const listener of b) {
-                                    listener({data: msg});
-                                }
+                            for (const listener of b) {
+                                listener({data: msg});
                             }
                         }
 
                         return {
                             addEventListener,
+                            removeEventListener,
                             postMessage,
                             location: {href: ""}
                         }

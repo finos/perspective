@@ -1,8 +1,8 @@
-Unregister a previously registered update callback with this view.
+Unregister a previously registered update callback with this [`View`].
 
 # Example
 
-```js
+```javascript
 // remove an `on_update` callback
 const callback = () => console.log("Updated!");
 view.remove_update(callback);

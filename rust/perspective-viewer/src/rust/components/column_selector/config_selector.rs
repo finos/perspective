@@ -373,9 +373,11 @@ impl Component for ConfigSelector {
             ConfigSelectorMsg::New(DragTarget::Filter, InPlaceColumn::Column(column)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 let op = ctx.props().default_op(column.as_str()).unwrap_or_default();
-                view_config
-                    .filter
-                    .push(Filter::new(column, op, FilterTerm::Scalar(Scalar::Null)));
+                view_config.filter.push(Filter::new(
+                    &column,
+                    &op,
+                    FilterTerm::Scalar(Scalar::Null),
+                ));
 
                 let update = ViewConfigUpdate {
                     filter: Some(view_config.filter),
@@ -428,10 +430,10 @@ impl Component for ConfigSelector {
             },
             ConfigSelectorMsg::New(DragTarget::Filter, InPlaceColumn::Expression(col)) => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
-                let column = col.name.as_ref().to_owned();
+                let column = col.name.as_ref();
                 view_config.filter.push(Filter::new(
                     column,
-                    ctx.props()
+                    &ctx.props()
                         .default_op(col.name.as_ref())
                         .unwrap_or_default(),
                     FilterTerm::Scalar(Scalar::Null),
@@ -575,7 +577,7 @@ impl Component for ConfigSelector {
                     exclude={config.filter.iter().map(|x| x.column().to_string()).collect::<HashSet<_>>()}
                     dragdrop={&ctx.props().dragdrop}
                     is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::Filter).map(|(index, name)| {
-                        (index, Filter::new(name, "".to_string(),  FilterTerm::Scalar(Scalar::Null )))
+                        (index, Filter::new(&name, "", FilterTerm::Scalar(Scalar::Null)))
                     })}
                 >
                     { for config.filter.iter().enumerate().map(|(idx, filter)| {
