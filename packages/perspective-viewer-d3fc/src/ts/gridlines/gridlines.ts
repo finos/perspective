@@ -13,23 +13,34 @@
 import * as fc from "d3fc";
 import { D3Scale, Orientation } from "../types";
 
-const mainGridSvg = (settings) => (x) =>
+const mainGridSvg = (settings) => (x, xTick) =>
     x
-        .style("stroke-width", "1.0")
-        .style(
-            "stroke",
-            settings ? settings.colorStyles.grid.gridLineColor : "#bbb"
-        );
+        .style("stroke-width", (xTick) => "1.0")
+        .style("stroke", (xTick) => axis_color(xTick, settings));
 
-const mainGridCanvas = (settings) => (c) => {
-    c.strokeStyle = settings ? settings.colorStyles.grid.gridLineColor : "#bbb";
+function axis_color(xTick, settings) {
+    if (xTick === 0) {
+        if (settings) {
+            return settings.textStyles.color;
+        } else {
+            return "#666";
+        }
+    } else if (settings) {
+        return settings.colorStyles.grid.gridLineColor;
+    } else {
+        return "#bbb";
+    }
+}
+
+const mainGridCanvas = (settings) => (c, xTick) => {
+    c.strokeStyle = axis_color(xTick, settings);
     c.lineWidth = 1;
 };
 
-const crossGridSvg = (x) => x.style("display", "none");
-const crossGridCanvas = (settings) => (c) => {
+const crossGridSvg = (x, _) => x.style("display", "none");
+const crossGridCanvas = (settings) => (c, xTick) => {
     c.lineWidth = 1;
-    c.strokeStyle = settings ? settings.colorStyles.grid.gridLineColor : "#bbb";
+    c.strokeStyle = axis_color(xTick, settings);
 };
 
 export interface WithGridLines {
