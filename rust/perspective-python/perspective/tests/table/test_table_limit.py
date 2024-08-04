@@ -10,8 +10,6 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from datetime import date, datetime
-from pytest import mark
 import perspective as psp
 
 client = psp.Server().new_local_client()

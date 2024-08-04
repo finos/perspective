@@ -20,7 +20,7 @@ from perspective import (
     Server,
     Client,
 )
-from pytest import mark, raises
+from pytest import mark
 
 
 def syncify(f):
@@ -117,29 +117,6 @@ class TestAsync(object):
             return tbl.size()
 
         assert _task() == 10
-        tbl.delete()
-
-    @mark.skip(reason="We take a loop to construct the client now")
-    def test_async_call_loop_error_if_no_loop(self):
-        server = Server()
-        client = Client.from_server(
-            server, lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
-        tbl = client.table({"a": "integer", "b": "float", "c": "string"})
-
-        with raises(PerspectiveError):
-            # loop not set - errors
-            tbl.update(data)
-
-        tbl.update(data)
-
-        @syncify
-        def _task():
-            return tbl.size()
-
-        # subsequent calls to call_loop will work if loop_callback is set.
-        assert _task() == 10
-
         tbl.delete()
 
     def test_async_multiple_managers_queue_process(self):

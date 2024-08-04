@@ -93,7 +93,10 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": "date"}
         arr = tbl.view().to_arrow()
         tbl2 = Table(arr)
-        ts = lambda x: int(datetime.timestamp(x) * 1000)
+
+        def ts(x):
+            return int(datetime.timestamp(x) * 1000)
+
         assert tbl2.schema() == tbl.schema()
         assert tbl2.view().to_columns() == {
             "a": [

@@ -59,7 +59,7 @@ struct PerspectiveWSConnection(UnboundedSender<Vec<u8>>);
 /// The [`SessionHandler`] implementation provides a method for a [`Session`] to
 /// send messages to this [`axum::extract::ws::WebSocket`], which may (or may
 /// not) be solicited (e.g. within the async call stack of
-/// [`perspective::Session::handle_request`]).
+/// [`perspective::client::Session::handle_request`]).
 impl SessionHandler for PerspectiveWSConnection {
     async fn send_response<'a>(&'a mut self, resp: &'a [u8]) -> Result<(), PerspectiveWSError> {
         Ok(self.0.send(resp.to_vec()).await?)
@@ -67,8 +67,8 @@ impl SessionHandler for PerspectiveWSConnection {
 }
 
 /// The inner message loop handles the full-duplex stream of messages between
-/// the [`perspective::Client`] and [`Session`]. When this funciton returns,
-/// messages are no longer processed.
+/// the [`perspective::client::Client`] and [`Session`]. When this funciton
+/// returns, messages are no longer processed.
 async fn process_message_loop(
     socket: &mut WebSocket,
     receiver: &mut UnboundedReceiver<Vec<u8>>,
@@ -103,10 +103,10 @@ async fn process_message_loop(
 /// This handler is responsible for the beginning-to-end lifecycle of a single
 /// WebSocket connection to the Axum server. Messages will come in from the
 /// [`axum::extract::ws::WebSocket`] in binary form via [`Message::Binary`],
-/// where they'll be routed to [`perspective::Session::handle_request`]. The
-/// server may generate one or more responses, which it will then send back to
-/// the [`axum::extract::ws::WebSocket::send`] method via its [`SessionHandler`]
-/// impl.
+/// where they'll be routed to [`perspective::client::Session::handle_request`].
+/// The server may generate one or more responses, which it will then send back
+/// to the [`axum::extract::ws::WebSocket::send`] method via its
+/// [`SessionHandler`] impl.
 async fn websocket_handler(
     ws: WebSocketUpgrade,
     State(server): State<Server>,
@@ -125,7 +125,7 @@ async fn websocket_handler(
 }
 
 /// Load the example Apache Arrow file from disk and create a
-/// [`perspective::Table`] named "my_data_source".
+/// [`perspective::client::Table`] named "my_data_source".
 async fn load_server_arrow(server: &Server) -> Result<(), PerspectiveWSError> {
     let client = LocalClient::new(server);
     let mut file = File::open(std::path::Path::new(ROOT_PATH).join(ARROW_FILE_PATH))?;
@@ -141,8 +141,9 @@ async fn load_server_arrow(server: &Server) -> Result<(), PerspectiveWSError> {
 
 /// Host a combination HTTP file server + WebSocket server, which serves a
 /// simple Perspective application. The app's HTML, etc., assets are served
-/// from the root, while the app's embedded WebAssembly [`perspective::Client`]
-/// will connect to this server over a WebSocket via the path `/ws`.
+/// from the root, while the app's embedded WebAssembly
+/// [`perspective::client::Client`] will connect to this server over a WebSocket
+/// via the path `/ws`.
 async fn start_web_server_and_block(server: Server) -> Result<(), PerspectiveWSError> {
     let app = Router::new()
         .route("/", get_service(ServeFile::new("src/index.html")))

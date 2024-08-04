@@ -168,13 +168,14 @@ runs:
               targets: aarch64-unknown-linux-gnu
               components: rustfmt, clippy, rust-src
 
-        - name: Install LLVM 17
-          if: ${{ inputs.cpp == 'true' }}
-          uses: KyleMayes/install-llvm-action@v2
-          with:
-              version: "17"
-              directory: "./.llvm"
-              cached: true
+        # # TODO doesn't work.
+        # - name: Install LLVM 17
+        #   if: ${{ inputs.cpp == 'true' }}
+        #   uses: KyleMayes/install-llvm-action@v2
+        #   with:
+        #       version: "17"
+        #       directory: "./.llvm"
+        #       cached: true
 
         - name: Install JS dependencies
           shell: bash

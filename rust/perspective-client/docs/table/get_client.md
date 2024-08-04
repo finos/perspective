@@ -1,1 +1,1 @@
-get the client associated with this table.
+Get a copy of the [`Client`] this [`Table`] came from.

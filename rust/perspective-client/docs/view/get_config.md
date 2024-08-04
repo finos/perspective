@@ -1,1 +1,1 @@
-A copy of the config object passed to the [`Table::view`] method which created this [`View`].
+A copy of the config object passed to the [`perspective_client::Table::view`] method which created this [`perspective_client::View`].

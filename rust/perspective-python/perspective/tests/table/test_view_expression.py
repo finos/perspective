@@ -1627,8 +1627,8 @@ class TestViewExpression(object):
             expected_domain = re.search(r"@([a-zA-Z.]+)$", source).group(1)
             assert results["address"][i] == expected_address
             assert results["domain"][i] == expected_domain
-            assert results["is_email?"][i] == True
-            assert results["has_at?"][i] == True
+            assert results["is_email?"][i]
+            assert results["has_at?"][i]
 
     def test_view_expression_number(self):
         def digits():
@@ -1672,7 +1672,7 @@ class TestViewExpression(object):
             source = results["a"][i]
             expected = re.sub(r"[ -]", "", source)
             assert results["parsed"][i] == expected
-            assert results["is_number?"][i] == True
+            assert results["is_number?"][i]
 
     def test_view_expression_newlines(self):
         table = Table(
@@ -1922,7 +1922,7 @@ class TestViewExpression(object):
                 r"^[0-9]{4}", "long string, very cool!", source
             )
 
-    def test_view_replace_invalid(self):
+    def test_view_replace_invalid_variation(self):
         table = Table({"a": "string", "b": "string"})
         expressions = [
             """//v

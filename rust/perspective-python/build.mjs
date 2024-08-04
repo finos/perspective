@@ -25,7 +25,10 @@ const opts = {
     },
 };
 
-if (!!process.env.CI) {
+const build_wheel = !!process.env.PSP_BUILD_WHEEL;
+const build_sdist = !!process.env.PSP_BUILD_SDIST;
+
+if (build_wheel) {
     let target = "";
     if (process.env.PSP_ARCH === "x86_64" && process.platform === "darwin") {
         target = "--target=x86_64-apple-darwin";
@@ -48,7 +51,12 @@ if (!!process.env.CI) {
     }
 
     execSync(`maturin build ${flags} --features=external-cpp ${target}`, opts);
+}
+
+if (build_sdist) {
     execSync(`maturin sdist`, opts);
-} else {
+}
+
+if (!build_wheel && !build_sdist) {
     execSync(`maturin develop ${flags} --features=external-cpp`, opts);
 }

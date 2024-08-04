@@ -12,18 +12,18 @@
 
 import base64
 import jinja2
-import json
 import logging
 import os
-from datetime import date, datetime
-from functools import partial
+import re
 
 from ipywidgets import DOMWidget
 from traitlets import Unicode, observe
 from ..viewer import PerspectiveViewer
 import importlib
 
-__version__ = importlib.metadata.version("perspective-python")
+__version__ = re.sub(
+    "(rc|alpha|beta)", "-\\1.", importlib.metadata.version("perspective-python")
+)
 
 
 class PerspectiveWidget(DOMWidget, PerspectiveViewer):

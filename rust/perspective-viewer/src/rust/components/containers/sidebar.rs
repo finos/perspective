@@ -32,7 +32,8 @@ pub struct SidebarProps {
     pub header_props: EditableHeaderProps,
 }
 
-/// Sidebars are designed to live in a [SplitPanel]
+/// Sidebars are designed to live in a
+/// [`super::split_panel::SplitPanel`]
 #[function_component]
 pub fn Sidebar(p: &SidebarProps) -> Html {
     let id = &p.id_prefix;
