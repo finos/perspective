@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import sh from "./sh.mjs";
+import { get_scope, default as sh } from "./sh_perspective.mjs";
 import * as url from "url";
 import * as dotenv from "dotenv";
 import * as cppLint from "./lint_cpp.mjs";
@@ -35,6 +35,16 @@ export function lint_js(is_fix = false) {
     cmd.runSync();
 }
 
+export function lint_python(is_fix = false) {
+    if (get_scope().indexOf("perspective-python") > -1) {
+        if (is_fix) {
+            sh`ruff check --fix`.runSync();
+        } else {
+            sh`ruff check`.runSync();
+        }
+    }
+}
+
 if (import.meta.url.startsWith("file:")) {
     if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
         dotenv.config({ path: "./.perspectiverc" });
@@ -44,6 +54,7 @@ if (import.meta.url.startsWith("file:")) {
         // await import("./lint_python.mjs");
         // } else {
         lint_js();
+        lint_python();
         // }
 
         cppLint.checkFormatting();

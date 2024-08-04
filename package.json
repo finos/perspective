@@ -108,7 +108,7 @@
         "_wheel_python": "node tools/perspective-scripts/_wheel_python.mjs",
         "_requires_python": "node tools/perspective-scripts/_requires_python.mjs",
         "setup": "node tools/perspective-scripts/setup.mjs",
-        "docs": "node tools/perspective-scripts/docs.mjs",
+        "docs": "cargo doc --no-deps",
         "test": "node tools/perspective-scripts/test.mjs",
         "test:jupyter": "pnpm run --recursive --filter @finos/perspective-jupyterlab test:jupyter",
         "test_js": "node tools/perspective-scripts/test_js.mjs",

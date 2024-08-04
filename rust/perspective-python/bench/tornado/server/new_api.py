@@ -11,13 +11,11 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import multiprocessing
-import asyncio
 import os
 import os.path
 import time
 from perspective.core.globalpsp import shared_client
 from perspective.handlers.tornado import PerspectiveTornadoHandler
-from tornado.websocket import websocket_connect
 import tornado
 import threading
 import numpy

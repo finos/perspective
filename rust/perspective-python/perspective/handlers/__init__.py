@@ -11,16 +11,16 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 try:
-    from .aiohttp import PerspectiveAIOHTTPHandler
+    from .aiohttp import PerspectiveAIOHTTPHandler  # noqa: F401
 except ImportError:
     ...
 
 try:
-    from .starlette import PerspectiveStarletteHandler
+    from .starlette import PerspectiveStarletteHandler  # noqa: F401
 except ImportError:
     ...
 
 try:
-    from .tornado import PerspectiveTornadoHandler
+    from .tornado import PerspectiveTornadoHandler  # noqa: F401
 except ImportError:
     ...

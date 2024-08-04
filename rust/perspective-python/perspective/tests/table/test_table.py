@@ -10,10 +10,9 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import sys
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 import perspective
-from pytest import mark, raises, skip
+from pytest import mark, raises
 import pytest
 import perspective as psp
 
@@ -446,7 +445,10 @@ class TestTable:
             },
             index="a",
         )
-        ts = lambda x: int(datetime.timestamp(x) * 1000)
+
+        def ts(x):
+            return int(datetime.timestamp(x) * 1000)
+
         assert tbl.view().to_columns() == {
             "a": [
                 None,

@@ -58,7 +58,7 @@ class TestTableInfer(object):
             "b": [False, False, False, False, False],
         }
 
-    def test_table_infer_bool(self):
+    def test_table_infer_bool_variant(self):
         data = {"a": [None, None, None, None, True, True, True]}
         tbl = Table(data)
         assert tbl.schema() == {"a": "boolean"}

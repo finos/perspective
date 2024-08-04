@@ -1,1 +1,1 @@
-Provides the [`SystemInfo`] struct.
+Provides the [`perspective_client::SystemInfo`] struct.

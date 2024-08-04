@@ -30,11 +30,6 @@
     "scripts": {
         "build": "node ./build.js",
         "clean": "rimraf dist && rimraf build",
-        "docs": "npm-run-all docs:build docs:concat docs:deploy:*",
-        "docs:build": "typedoc --plugin typedoc-plugin-markdown --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/perspective-viewer.ts",
-        "docs:concat": "node ./docs.js",
-        "docs:deploy:api": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective-viewer.md",
-        "docs:deploy:exprtk": "cat exprtk.md > ../../docs/docs/obj/perspective-viewer-exprtk.md",
         "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless"
     },
     "publishConfig": {

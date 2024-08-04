@@ -17,6 +17,7 @@ __all__ = [
     "PerspectiveWidget",
     "PerspectiveViewer",
     "PerspectiveTornadoHandler",
+    "ProxySession",
     "Table",
     "View",
 ]
@@ -73,6 +74,6 @@ class Client(PySyncClient):
         return client
 
 
-# read by `jupyter labextension develop`
+# Read by `jupyter labextension develop`
 def _jupyter_labextension_paths():
     return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]

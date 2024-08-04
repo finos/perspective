@@ -20,12 +20,34 @@ from random import random, randint, choice
 from faker import Faker
 
 
-fake = Faker()
-
 # Our tests construct naive datetimes everywhere
 # so setting it here is an easy way to fix it globally.
 import os
+
+# Perspective used to support datetime.date and datetime.datetime
+# as Table() constructor arguments, but now we forward the parameters
+# directly to JSON.loads. So to make sure the tests dont need to be
+# so utterly transmogrified, we have this little hack :)
+import json
+
+
 os.environ["TZ"] = "UTC"
+
+
+def new_encoder(self, obj):
+    if isinstance(obj, datetime):
+        return str(obj)
+    elif isinstance(obj, date):
+        return str(obj)
+    else:
+        return old(self, obj)
+
+
+old = json.JSONEncoder.default
+json.JSONEncoder.default = new_encoder
+
+fake = Faker()
+
 
 def _make_date_time_index(size, time_unit):
     return pd.date_range("2000-01-01", periods=size, freq=time_unit)
@@ -248,21 +270,3 @@ def superstore(count=100):
         dat["Profit"] = round(random() * 1000, 2)
         data.append(dat)
     return pd.DataFrame(data)
-
-
-# Perspective used to support datetime.date and datetime.datetime
-# as Table() constructor arguments, but now we forward the parameters
-# directly to JSON.loads. So to make sure the tests dont need to be
-# so utterly transmogrified, we have this little hack :)
-import json
-old = json.JSONEncoder.default
-
-def new_encoder(self, obj):
-    if isinstance(obj, datetime):
-        return str(obj)
-    elif isinstance(obj, date):
-        return str(obj)
-    else:
-        return old(self, obj)
-
-json.JSONEncoder.default = new_encoder

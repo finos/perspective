@@ -273,9 +273,9 @@ impl View {
         }
     }
 
-    /// This is used when constructing a [`Table`] from a [`View`].
-    /// The callback needs to be async to wire up the views on_update to the
-    /// tables.
+    /// This is used when constructing a [`super::table::Table`] from a
+    /// [`View`]. The callback needs to be async to wire up the views
+    /// on_update to the tables.
     pub async fn on_update<T, U>(&self, on_update: T, options: OnUpdateOptions) -> ClientResult<u32>
     where
         T: Fn(ViewOnUpdateResp) -> U + Send + Sync + 'static,

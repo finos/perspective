@@ -40,7 +40,6 @@ external-cpp = [
 ]
 
 [lib]
-name = "perspective"
 crate-type = ["cdylib"]
 
 [build-dependencies]

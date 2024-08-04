@@ -25,7 +25,7 @@ libraries if you want to achieve optimal initial load-time performance.
 To use Perspective from a Node.js server, simply install via NPM.
 
 ```bash
-$ yarn add @finos/perspective
+$ npm add @finos/perspective
 ```
 
 ### From NPM (Browser)
@@ -36,7 +36,7 @@ Perspective's WebAssembly data engine is available via NPM in the same package,
 packages are required:
 
 ```bash
-$ yarn add @finos/perspective @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
+$ npm add @finos/perspective @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
 ```
 
 Perspective requires the browser to have access to Perspective's `.worker.js`
@@ -100,9 +100,6 @@ esbuild.build({
     plugins: [PerspectiveEsbuildPlugin()],
     format: "esm",
     bundle: true,
-    loader: {
-        ".ttf": "file",
-    },
 });
 ```
 
@@ -162,9 +159,8 @@ import the `@finos/perspective` module in a `type="module"` script as well:
 ```html
 <script type="module">
     import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.js";
-
-    const worker = perspective.worker();
-    const table = agent.table({ x: [1, 2, 3, 4, 5] });
+    const worker = await perspective.worker();
+    const table = worker.table({ x: [1, 2, 3, 4, 5] });
     document.querySelector("perspective-viewer").load(table);
 </script>
 ```
@@ -261,26 +257,6 @@ using a bundler such as Webpack (and the `@finos/perspective-webpack-plugin`):
 import perspective from "@finos/perspective";
 ```
 
-or
-
-```javascript
-const perspective = require("@finos/perspective");
-```
-
-`@finos/perspective` also comes with a pre-built bundle which exports the global
-`perspective` module name in vanilla JavaScript, when e.g. importing
-[via a CDN](#from-cdn):
-
-```html
-<script src="@finos/perspective"></script>
-```
-
-... or as a module:
-
-```html
-<script type="module" src="@finos/perspective/dist/cdn/perspective.js"></script>
-```
-
 #### Instantiating a new `worker()`
 
 Once imported, you'll need to instantiate a `perspective` engine via the
@@ -289,7 +265,7 @@ Once imported, you'll need to instantiate a `perspective` engine via the
 will occur in this separate process.
 
 ```javascript
-const worker = perspective.worker();
+const worker = await perspective.worker();
 ```
 
 The `worker` symbol will expose the full `perspective` API for one managed Web
@@ -371,7 +347,7 @@ await table.delete();
 `perspective` library and formatting its output to the provided visualization
 plugins.
 
-If you are using `webpack` or another bundler which supports ES6 modules, you
+If you are using `esbuild` or another bundler which supports ES6 modules, you
 only need to import the `perspective-viewer` libraries somewhere in your
 application - these modules export nothing, but rather register the components
 for use within your site's regular HTML:
@@ -460,7 +436,7 @@ or
 
 ```javascript
 const viewer = document.querySelector("perspective-viewer");
-viewer.restore({ theme: "Pro Dark" });
+await viewer.restore({ theme: "Pro Dark" });
 ```
 
 ### Loading data into `<perspective-viewer>`
@@ -470,10 +446,11 @@ Data can be loaded into `<perspective-viewer>` in the form of a `Table()` or a
 
 ```javascript
 // Create a new worker, then a new table promise on that worker.
-const table = await perspective.worker().table(data);
+const worker = await perspective.worker();
+const table = await worker.table(data);
 
 // Bind a viewer element to this table.
-viewer.load(table);
+await viewer.load(table);
 ```
 
 ### Sharing a `table()` between multiple `perspective-viewer`s
@@ -488,17 +465,17 @@ const viewer1 = document.getElementById("viewer1");
 const viewer2 = document.getElementById("viewer2");
 
 // Create a new WebWorker
-const worker = perspective.worker();
+const worker = await perspective.worker();
 
 // Create a table in this worker
 const table = await worker.table(data);
 
 // Load the same table in 2 different <perspective-viewer> elements
-viewer1.load(table);
-viewer2.load(table);
+await viewer1.load(table);
+await viewer2.load(table);
 
 // Both `viewer1` and `viewer2` will reflect this update
-table.update([{ x: 5, y: "e", z: true }]);
+await table.update([{ x: 5, y: "e", z: true }]);
 ```
 
 ### Server-only via `WebSocketServer()` and Node.js
@@ -522,9 +499,7 @@ const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
 
 // Read an arrow file from the file system and host it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.lz4.arrow");
-table(arr).then((table) => {
-    host.host_table("table_one", table);
-});
+await table(arr, { name: "table_one" });
 ```
 
 In the browser:
@@ -533,22 +508,22 @@ In the browser:
 const elem = document.getElementsByTagName("perspective-viewer")[0];
 
 // Bind to the server's worker instead of instantiating a Web Worker.
-const websocket = perspective.websocket(
+const websocket = await perspective.websocket(
     window.location.origin.replace("http", "ws")
 );
 
 // Bind the viewer to the preloaded data source.  `table` and `view` objects
 // live on the server.
 const server_table = await websocket.open_table("table_one");
-elem.load(server_table);
+await elem.load(server_table);
 
 // Or load data from a table using a view. The browser now also has a copy of
 // this view in its own `table`, as well as its updates transferred to the
 // browser using Apache Arrow.
-const worker = perspective.worker();
+const worker = await perspective.worker();
 const server_view = await server_table.view();
 const client_table = worker.table(server_view);
-elem.load(client_table);
+await elem.load(client_table);
 ```
 
 `<perspective-viewer>` instances bound in this way are otherwise no different
@@ -556,76 +531,6 @@ than `<perspective-viewer>`s which rely on a Web Worker, and can even share a
 host application with Web Worker-bound `table()`s. The same `promise`-based API
 is used to communicate with the server-instantiated `view()`, only in this case
 it is over a websocket.
-
-### Server-only via `perspective-python` and Tornado
-
-`perspective-python` is designed to be cross-compatible with the `perspective`
-and `perspective-viewer` libraries. Similar to `WebsocketServer` in Node.js,
-`perspective-python` runs on the server without any memory limits, reducing
-resource usage in the browser. For more detailed documentation on the Python
-API, see the [Python user guide](python.md) or the
-[Python API documentation](obj/perspective-python.md).
-
-The simplest implementation uses Tornado as a websocket server in Python,
-hosting an endpoint at which a `table()` can be accessed:
-
-_*server.py*_
-
-```python
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
-
-# Create an instance of PerspectiveManager, and host a Table
-MANAGER = PerspectiveManager()
-TABLE = Table(large_dataset)
-
-# The Table is exposed at `localhost:8888/websocket` with the name `data_source`
-MANAGER.host_table("data_source", TABLE)
-
-app = tornado.web.Application([
-    (r"/", MainHandler),
-    # create a websocket endpoint that the client JavaScript can access
-    (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
-])
-
-# Start the Tornado server
-app.listen(8888)
-loop = tornado.ioloop.IOLoop.current()
-loop.start()
-```
-
-The JavaScript implementation of this does not require Webpack or any bundler,
-and can be achieved in a single HTML file:
-
-_*index.html*_
-
-```html
-<perspective-viewer id="viewer" editable></perspective-viewer>
-
-<script>
-    window.addEventListener("DOMContentLoaded", async function () {
-        // Create a client that expects a Perspective server
-        // to accept connections at the specified URL.
-        const websocket = perspective.websocket(
-            "ws://localhost:8888/websocket"
-        );
-
-        /* `table` is a proxy for the `Table` we created on the server.
-
-        All operations that are possible through the JavaScript API are possible
-        on the Python API as well, thus calling `view()`, `schema()`, `update()`
-        etc. on `const table` will pass those operations to the Python `Table`,
-        execute the commands, and return the result back to JavaScript.*/
-        const table = websocket.open_table("data_source_one");
-
-        // Load this in the `<perspective-viewer>`.
-        document.getElementById("viewer").load(table);
-    });
-</script>
-```
-
-Any operation performed on the `<perspective-viewer>` instance or on `table`
-will be forwarded to Python, which will execute the operation and return the
-results back to JavaScript.
 
 ### Persistent `<perspective-viewer>` configuration via `save()`/`restore()`.
 

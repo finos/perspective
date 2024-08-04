@@ -216,7 +216,7 @@ if os.name != "nt":
         def test_table_datetime_cant_convert_from_int(self):
             data = pd.DataFrame({"a": [0]})
             table = Table({"a": "datetime"})
-            with raises(PerspectiveError) as ex:
+            with raises(PerspectiveError):
                 table.update(data)
             # assert str(ex.value) == "..."
 

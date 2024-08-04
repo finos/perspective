@@ -39,7 +39,7 @@ class TestServer(object):
     def test_server_host_table(self):
         server = Server()
         client = Client.from_server(server)
-        table = client.table(data, name="table1")
+        client.table(data, name="table1")
         table2 = client.open_table("table1")
         assert table2.schema() == {"a": "integer", "b": "string"}
 
@@ -126,15 +126,11 @@ class TestServer(object):
         assert client._get_view("view1").schema() == {"a": "integer", "b": "string"}
 
     def test_server_create_view_zero(self):
-        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         server = Server()
         client = Client.from_server(server)
         client.table(data, name="table1")
         table = client.open_table("table1")
-        print(f"XXX: {dir(table)}")
         assert table.view().dimensions()["num_view_rows"] == 3
-        # client._process(message, self.post)
-        # assert client._views["view1"].num_rows() == 3
 
     def test_server_create_view_one(self):
         server = Server()
