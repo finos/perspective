@@ -13,13 +13,14 @@
 import cpy from "cpy";
 import { WasmPlugin } from "@finos/perspective-esbuild-plugin/wasm.js";
 import { WorkerPlugin } from "@finos/perspective-esbuild-plugin/worker.js";
-import { AMDLoader } from "@finos/perspective-esbuild-plugin/amd.js";
+// import { AMDLoader } from "@finos/perspective-esbuild-plugin/amd.js";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import * as path from "node:path";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
-import fs from "node:fs";
+import * as fs from "node:fs";
 import * as url from "node:url";
 import { createRequire } from "node:module";
+import { execSync } from "node:child_process";
 
 const _require = createRequire(import.meta.url);
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
@@ -130,6 +131,18 @@ async function build_all() {
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     cpy(["src/less/*"], "dist/less");
+    execSync("jupyter labextension build .", { stdio: "inherit" });
+
+    const pkg = JSON.parse(fs.readFileSync("../../package.json").toString());
+    const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>
+        x.replace("-", "").replace(".", "")
+    );
+
+    const psp_dir = `perspective_python-${version}.data`;
+    await cpy(
+        ["dist/cjs/**/*"],
+        `../../rust/perspective-python/${psp_dir}/data/share/jupyter/labextensions/@finos/perspective-jupyterlab`
+    );
 }
 
 build_all();

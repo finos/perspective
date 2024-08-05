@@ -16,7 +16,6 @@ build-backend = "maturin"
 
 [project]
 name = "perspective-python"
-version = "3.0.0-rc1"
 requires-python = ">=3.9"
 dynamic = ["version"]
 classifiers = [
@@ -26,7 +25,7 @@ classifiers = [
 
 [tool.maturin]
 module-name = "perspective"
-data = "perspective.data"
+data = "perspective_python-3.0.0rc1.data"
 features = ["pyo3/extension-module"]
 
 [tool.pytest.ini_options]

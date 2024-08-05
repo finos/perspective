@@ -20,9 +20,7 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build": "npm-run-all build:js build:labextension",
-        "build:js": "node build.mjs",
-        "build:labextension": "jupyter labextension build .",
+        "build": "node build.mjs",
         "clean": "npm-run-all clean:*",
         "clean:dist": "rimraf dist",
         "clean:lib": "rimraf lib",
@@ -49,13 +47,14 @@
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-test": "workspace:^",
         "@jupyterlab/builder": "^4",
+        "copy-webpack-plugin": "~12",
         "@prospective.co/procss": "^0.1.15",
         "cpy": "^9.0.1"
     },
     "jupyterlab": {
         "webpackConfig": "./webpack.config.js",
         "extension": true,
-        "outputDir": "../../rust/perspective-python/perspective.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab",
+        "outputDir": "./dist/cjs",
         "sharedPackages": {
             "@jupyter-widgets/base": {
                 "bundled": false,

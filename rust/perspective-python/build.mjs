@@ -11,6 +11,8 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { execSync } from "child_process";
+import * as fs from "node:fs";
+import pkg from "./package.json" assert { type: "json" };
 
 let flags = "--release";
 if (!!process.env.PSP_DEBUG) {
@@ -24,6 +26,12 @@ const opts = {
         PSP_ROOT_DIR: "../..",
     },
 };
+
+const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>
+    x.replace("-", "").replace(".", "")
+);
+
+fs.mkdirSync(`./perspective_python-${version}.data`, { recursive: true });
 
 const build_wheel = !!process.env.PSP_BUILD_WHEEL;
 const build_sdist = !!process.env.PSP_BUILD_SDIST;

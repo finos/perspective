@@ -18,10 +18,7 @@ module.exports = {
     },
     plugins: [
         new CopyPlugin({
-            patterns: [
-                { from: "./install.json", to: "../install.json" },
-                // { from: "other", to: "public" },
-            ],
+            patterns: [{ from: "./install.json", to: "../install.json" }],
         }),
     ],
 };
