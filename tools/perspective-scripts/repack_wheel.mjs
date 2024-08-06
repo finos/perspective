@@ -12,21 +12,21 @@
 
 import { execSync } from "node:child_process";
 import * as fs from "node:fs";
-import * as path from "node:path";
 import pkg from "../../package.json" assert { type: "json" };
 
-const __dirname = new URL(".", import.meta.url).pathname;
-
 const wheel_file = fs.readdirSync(".").filter((x) => x.endsWith(".whl"))[0];
-const pkg_name = wheel_file.split("-").slice(0, 2).join("-");
 execSync(`wheel unpack ${wheel_file}`);
-
-fs.cpSync(
-    path.join(__dirname, "../../rust/perspective-python/perspective.data"),
-    `${pkg_name}/perspective_python-${pkg.version.replace(/-rc\.\d+/, (x) =>
-        x.replace("-", "").replace(".", "")
-    )}.data`,
-    { recursive: true }
+const pkg_name = wheel_file.split("-").slice(0, 2).join("-");
+const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>
+    x.replace("-", "").replace(".", "")
 );
 
+const dest = `${pkg_name}/perspective_python-${version}.data`;
+const src = `rust/perspective-python/perspective_python-${version}.data`;
+fs.cpSync(src, dest, {
+    recursive: true,
+});
+
 execSync(`wheel pack ${pkg_name}`);
+
+// what kind of customers
