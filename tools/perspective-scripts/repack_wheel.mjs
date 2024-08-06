@@ -28,5 +28,3 @@ fs.cpSync(src, dest, {
 });
 
 execSync(`wheel pack ${pkg_name}`);
-
-// what kind of customers
