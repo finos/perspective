@@ -27,6 +27,10 @@ classifiers = [
 module-name = "perspective"
 data = "perspective_python-3.0.0rc2.data"
 features = ["pyo3/extension-module"]
+include = [
+    { path = "perspective/*libpsp.so", format = "wheel" },
+    { path = "perspective/*libpsp.dll", format = "wheel" },
+]
 
 [tool.pytest.ini_options]
 python_classes = ["Test", "Describe"]

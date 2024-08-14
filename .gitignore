@@ -238,6 +238,8 @@ rust/perspective/src/ts/ts-rs
 rust/perspective-viewer/src/ts/ts-rs
 rust/perspective-js/build
 rust/perspective-js/src/ts/ts-rs
+rust/perspective-python/cpp
+rust/perspective-python/cmake
 rust/perspective-server/cpp
 rust/perspective-server/cmake
 

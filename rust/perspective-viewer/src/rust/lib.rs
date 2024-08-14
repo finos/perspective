@@ -31,7 +31,9 @@ mod custom_events;
 mod dragdrop;
 pub mod exprtk;
 mod js;
-mod model;
+
+#[doc(hidden)]
+pub mod model;
 mod presentation;
 mod renderer;
 mod session;
@@ -122,6 +124,7 @@ pub fn registerPlugin(name: &str) {
 /// Elements from JavaScript, as the methods themselves won't be defined yet.
 /// By default, this crate does not register `PerspectiveViewerElement` (as to
 /// preserve backwards-compatible synchronous API).
+#[cfg(not(feature = "external-bootstrap"))]
 #[wasm_bindgen(js_name = "init")]
 pub fn js_init() {
     perspective_js::utils::set_global_logging();
@@ -136,6 +139,7 @@ pub fn js_init() {
 pub fn bootstrap_web_components(psp: &JsValue) {
     define_web_component::<PerspectiveViewerElement>(psp);
     define_web_component::<PerspectiveDebugPluginElement>(psp);
+
     define_web_component::<ExportDropDownMenuElement>(psp);
     define_web_component::<CopyDropDownMenuElement>(psp);
 }

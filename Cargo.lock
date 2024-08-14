@@ -1885,10 +1885,12 @@ name = "perspective-python"
 version = "3.0.0-rc.2"
 dependencies = [
  "async-lock",
+ "cmake",
+ "cxx-build",
  "extend",
  "futures",
+ "num_cpus",
  "perspective-client",
- "perspective-server",
  "pollster",
  "pyo3",
  "pyo3-build-config 0.20.3",

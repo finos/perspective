@@ -131,7 +131,7 @@ elseif(PSP_PYTHON_BUILD)
     if(NOT DEFINED PSP_PYTHON_VERSION)
         set(PSP_PYTHON_VERSION 3.10)
     endif()
-    if($ENV{PYODIDE})
+    if(PSP_WASM_BUILD)
         set(PSP_PYODIDE 1)
     else()
         set(PSP_PYODIDE 0)
@@ -221,14 +221,6 @@ endif()
 
 if(NOT DEFINED PSP_WASM_EXCEPTIONS AND NOT PSP_PYTHON_BUILD)
     set(PSP_WASM_EXCEPTIONS ON)
-endif()
-
-if(PSP_PYODIDE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-        -s RELOCATABLE=1 \
-        -s SIDE_MODULE=2 \
-    ")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
 # if(NOT WIN32)
@@ -418,6 +410,14 @@ set(CMAKE_CXX_FLAGS " \
 -O3 \
 ")
 
+if(PSP_PYODIDE)
+    set(RELOCATABLE_FLAGS "-sRELOCATABLE=1 -sSIDE_MODULE=2 -sWASM_BIGINT=1")
+
+    string(APPEND CMAKE_EXE_LINKER_FLAGS "${RELOCATABLE_FLAGS}")
+    string(APPEND CMAKE_C_FLAGS "${RELOCATABLE_FLAGS}")
+    string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
+endif()
+
 
 # Build header-only dependencies from external source
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
@@ -559,7 +559,7 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/vocab.cpp
     ${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
     ${PSP_CPP_SRC}/src/cpp/server.cpp
-    ${PSP_CPP_SRC}/src/cpp/proto_api.cpp
+    ${PSP_CPP_SRC}/src/cpp/binding_api.cpp
 )
 
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES})
@@ -574,27 +574,36 @@ else()
 endif()
 
 # Common flags for WASM/JS build and Pyodide
-set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-    --no-entry \
-    --closure=1 \
-    -s NO_FILESYSTEM=1 \
-    -s ALLOW_MEMORY_GROWTH=1 \
-    -s MODULARIZE=1 \
-    -s WASM_BIGINT=1 \
-    -s INCOMING_MODULE_JS_API=locateFile,psp_heap_size,psp_stack_trace,HEAPU8,HEAPU32,instantiateWasm \
-    -s TEXTDECODER=2 \
-    -s STANDALONE_WASM=1 \
-    -s DYNAMIC_EXECUTION=0 \
-    -s BINARYEN_EXTRA_PASSES=--one-caller-inline-max-function-size=19306 \
-    -s EXPORT_NAME=\"load_perspective\" \
-    -s MAXIMUM_MEMORY=4gb \
-    -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
-    -s NODEJS_CATCH_EXIT=0 \
-    -s NODEJS_CATCH_REJECTION=0 \
-    -s USE_ES6_IMPORT_META=1 \
-    -s EXPORT_ES6=1 \
-    -s EXPORTED_FUNCTIONS=_js_poll,_js_new_server,_js_free,_js_alloc,_js_handle_request,_js_new_session,_js_close_session \
-")
+if(PSP_PYODIDE)
+    set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+        --no-entry \
+        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server \
+        -s SIDE_MODULE=2 \
+    ")
+else()
+    set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+        --no-entry \
+        --closure=1 \
+        -s NO_FILESYSTEM=1 \
+        -s ALLOW_MEMORY_GROWTH=1 \
+        -s MODULARIZE=1 \
+        -s WASM_BIGINT=1 \
+        -s INCOMING_MODULE_JS_API=locateFile,psp_heap_size,psp_stack_trace,HEAPU8,HEAPU32,instantiateWasm \
+        -s TEXTDECODER=2 \
+        -s STANDALONE_WASM=1 \
+        -s DYNAMIC_EXECUTION=0 \
+        -s BINARYEN_EXTRA_PASSES=--one-caller-inline-max-function-size=19306 \
+        -s EXPORT_NAME=\"load_perspective\" \
+        -s MAXIMUM_MEMORY=4gb \
+        -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
+        -s NODEJS_CATCH_EXIT=0 \
+        -s NODEJS_CATCH_REJECTION=0 \
+        -s USE_ES6_IMPORT_META=1 \
+        -s EXPORT_ES6=1 \
+        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server \
+    ")
+endif()
+
 if (PSP_WASM_EXCEPTIONS)
     set(PSP_WASM_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} -s EXCEPTION_STACK_TRACES=1 ")
 endif()
@@ -609,7 +618,7 @@ else()
     set(PSP_SANITIZE_FLAGS)
 endif()
 
-if(PSP_WASM_BUILD)
+if(PSP_WASM_BUILD AND NOT PSP_PYTHON_BUILD)
     set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} --pre-js \"${PSP_CPP_SRC}/env.js\" ")
 
     add_library(psp ${WASM_SOURCE_FILES})
@@ -617,7 +626,7 @@ if(PSP_WASM_BUILD)
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
     target_link_libraries(psp PRIVATE arrow re2 protos)
 
-    add_executable(perspective_esm src/cpp/emscripten_api.cpp)
+    add_executable(perspective_esm src/cpp/binding_api.cpp)
     target_link_libraries(perspective_esm psp protos)
     target_compile_definitions(perspective_esm PRIVATE PSP_ENABLE_WASM=1)
     target_link_options(perspective_esm PUBLIC -sENVIRONMENT="web"  ${PSP_SANITIZE_FLAGS})
@@ -644,25 +653,25 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         set(CMAKE_SHARED_LIBRARY_PREFIX lib)
     endif()
 
-    if(PSP_PYODIDE)
-        add_library(psppy SHARED)
-        set(PSP_PYTHON_DEFS PSP_ENABLE_WASM=1)
-        target_compile_definitions(psppy PRIVATE ${PSP_PYTHON_DEFS})
-        include_directories(${PSP_PYTHON_SRC}/include)
-        target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1)
-        target_compile_options(psppy PRIVATE -fvisibility=hidden)
-        target_link_libraries(psppy arrow re2)
-        add_custom_command(TARGET psppy POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psppy> ${PSP_PYTHON_SRC}/table/)
-    elseif(PSP_PYTHON_BUILD)
+    if(PSP_PYTHON_BUILD)
         # #######################
         # Python extra targets #
         # #######################
-        add_library(psp STATIC ${PYTHON_SOURCE_FILES})
+        if(PSP_WASM_BUILD)
+            set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
+            set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} --pre-js \"${PSP_CPP_SRC}/env.js\" ")
+            add_library(psp ${PYTHON_SOURCE_FILES})
+            add_executable(psppy ${PSP_CPP_SRC}/src/cpp/binding_api.cpp)
+            target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1 PSP_ENABLE_WASM=1)
+            target_link_libraries(psppy PRIVATE psp protos)
+        else()
+            add_library(psp SHARED ${PYTHON_SOURCE_FILES})
+            target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
+        endif()
         # add_library(psppy SHARED ${PYTHON_BINDING_SOURCE_FILES})
 
         include_directories(${PSP_PYTHON_SRC}/include)
 
-        target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
         # target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
 
         if(WIN32)
@@ -678,7 +687,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
             target_compile_options(psp PRIVATE -fvisibility=hidden)
             # target_compile_options(psppy PRIVATE -fvisibility=hidden)
+        elseif(MANYLINUX)
         else()
+            target_compile_options(psp PRIVATE -fvisibility=hidden)
             # target_compile_options(psppy PRIVATE -Wdeprecated-declarations)
         endif()
 

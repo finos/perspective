@@ -190,16 +190,80 @@ jobs:
 
             - name: Python Build
               run: pnpm run build
+              if: ${{ !contains(matrix.os, 'windows') }}
               env:
+                  PACKAGE: "perspective-python"
+                  PSP_ARCH: ${{ matrix.arch }}
+                  PSP_ROOT_DIR: ${{ github.workspace }}
+                  PSP_BUILD_WHEEL: 1
+
+            - name: Python Build (Windows)
+              run: |
+                  New-Item -ItemType Directory -Path $env:CARGO_TARGET_DIR -Force
+                  pnpm run build
+              if: ${{ contains(matrix.os, 'windows') }}
+              env:
+                  CARGO_TARGET_DIR: D:\psp-rust
+                  PSP_ROOT_DIR: ${{ github.workspace }}
                   VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
                   PACKAGE: "perspective-python"
-                  # PSP_USE_CCACHE: 1
                   PSP_ARCH: ${{ matrix.arch }}
                   PSP_BUILD_WHEEL: 1
 
+            # Windows sucks lol
             - uses: actions/upload-artifact@v4
+              if: ${{ runner.os == 'Windows' }}
               with:
                   name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
+                  path: D:\psp-rust\wheels\*.whl
+
+            - uses: actions/upload-artifact@v4
+              # if: ${{ runner.os != 'Windows' }}
+              with:
+                  name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
+                  path: rust/target/wheels/*.whl
+
+    build_emscripten_wheel:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                arch:
+                    - x86_64
+                python-version:
+                    - 3.9
+                node-version: [20.x]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              id: init-step
+              uses: ./.github/actions/install-deps
+              with:
+                  javascript: "false"
+                  arch: ${{ matrix.arch }}
+                  manylinux: ${{ matrix.container && 'true' || 'false' }}
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - name: Python Build Pyodide
+              run: pnpm install && pnpm run build
+              if: ${{ runner.os == 'Linux' && matrix.arch == 'x86_64' }}
+              env:
+                  PSP_PYODIDE: 1
+                  PACKAGE: "perspective-python"
+                  CI: 1
+
+            - uses: actions/upload-artifact@v4
+              # if: ${{ runner.os != 'Windows' }}
+              with:
+                  name: perspective-python-dist-wasm32-emscripten-${{ matrix.python-version }}
                   path: rust/target/wheels/*.whl
 
     # ,-,---.       .    .             .   ,--,--'      .
