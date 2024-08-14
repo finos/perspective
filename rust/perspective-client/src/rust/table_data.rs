@@ -15,6 +15,8 @@ use prost::bytes::Bytes;
 use crate::proto;
 use crate::proto::*;
 use crate::view::View;
+#[cfg(doc)]
+use crate::{Client, Table};
 
 /// The possible formats of input data which [`Client::table`] may take as an
 /// argument.

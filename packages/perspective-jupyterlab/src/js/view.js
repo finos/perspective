@@ -68,9 +68,9 @@ export class PerspectiveView extends DOMWidgetView {
                 client_id: this.psp_client_id,
             });
 
-            const { JsClient } = wasm_module;
+            const { Client } = wasm_module;
             // Responses are fed to the client in the widget's msg:custom handler
-            this.perspective_client = new JsClient(
+            this.perspective_client = new Client(
                 (binary_msg) => {
                     const buffer = binary_msg.slice().buffer;
                     this.send(

@@ -73,13 +73,13 @@ extern "C" {
     #[wasm_bindgen(method, catch)]
     pub async fn restyle(
         this: &JsPerspectiveViewerPlugin,
-        view: perspective_js::JsView
+        view: perspective_js::View
     ) -> ApiResult<JsValue>;
 
     #[wasm_bindgen(method, catch)]
     pub async fn draw(
         this: &JsPerspectiveViewerPlugin,
-        view: perspective_js::JsView,
+        view: perspective_js::View,
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool
@@ -88,7 +88,7 @@ extern "C" {
     #[wasm_bindgen(method, catch)]
     pub async fn update(
         this: &JsPerspectiveViewerPlugin,
-        view: perspective_js::JsView,
+        view: perspective_js::View,
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool

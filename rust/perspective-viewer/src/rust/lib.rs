@@ -52,8 +52,9 @@ import type * as perspective from "../../dist/pkg/ViewConfigUpdate.ts";
 "#;
 
 /// Register a plugin globally.
-#[wasm_bindgen(js_name = "registerPlugin")]
-pub fn js_register_plugin(name: &str) {
+#[wasm_bindgen]
+#[allow(non_snake_case)]
+pub fn registerPlugin(name: &str) {
     use crate::renderer::*;
     PLUGIN_REGISTRY.register_plugin(name);
 }
@@ -121,7 +122,6 @@ pub fn js_register_plugin(name: &str) {
 /// Elements from JavaScript, as the methods themselves won't be defined yet.
 /// By default, this crate does not register `PerspectiveViewerElement` (as to
 /// preserve backwards-compatible synchronous API).
-#[cfg(not(feature = "define_custom_elements_async"))]
 #[wasm_bindgen(js_name = "init")]
 pub fn js_init() {
     perspective_js::utils::set_global_logging();
@@ -134,11 +134,8 @@ pub fn js_init() {
 /// `define_web_components!` macro to both call this method and hook the
 /// wasm_bindgen module object.
 pub fn bootstrap_web_components(psp: &JsValue) {
-    if cfg!(feature = "define_custom_elements_async") {
-        define_web_component::<PerspectiveViewerElement>(psp);
-        define_web_component::<PerspectiveDebugPluginElement>(psp);
-    }
-
+    define_web_component::<PerspectiveViewerElement>(psp);
+    define_web_component::<PerspectiveDebugPluginElement>(psp);
     define_web_component::<ExportDropDownMenuElement>(psp);
     define_web_component::<CopyDropDownMenuElement>(psp);
 }

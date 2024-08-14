@@ -1,1 +1,1 @@
-perspective-python[jupyter]==2.5.0
+perspective-python==2.10.1

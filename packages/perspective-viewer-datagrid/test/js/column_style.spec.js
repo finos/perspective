@@ -161,7 +161,7 @@ test.describe("Column Style Tests", () => {
 
             const table = await viewer.getTable();
             await table.update([{ "Row ID": 1, Sales: 2 }]);
-            await viewer.notifyResize();
+            await viewer.resize();
             await table.update([{ "Row ID": 1, Sales: 3 }]);
         });
 
@@ -198,7 +198,7 @@ test.describe("Column Style Tests", () => {
 
             const table = await viewer.getTable();
             await table.update([{ "Row ID": 1, Sales: 2 }]);
-            await viewer.notifyResize();
+            await viewer.resize();
             await table.update([{ "Row ID": 1, Sales: 3 }]);
         });
 

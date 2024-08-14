@@ -12,7 +12,7 @@
 
 use itertools::Itertools;
 
-static VERSION: &str = env!("PKG_VERSION");
+static VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn render_plugin(tag_name: impl AsRef<str>) -> String {
     format!(
@@ -36,7 +36,7 @@ pub fn render(data: &str, layout: &str, plugins: &[String]) -> String {
 import perspective from \"https://cdn.jsdelivr.net/npm/@finos/perspective@{0}/dist/cdn/perspective.js\";
 import \"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{0}/dist/cdn/perspective-viewer.js\";
 {3}
-const worker = perspective.worker();
+const worker = await perspective.worker();
 const binary_string = window.atob(window.data.textContent);
 const len = binary_string.length;
 const bytes = new Uint8Array(len);

@@ -44,13 +44,13 @@ await perspective_client.default(uncompressed_client_wasm);
 perspective_client.init();
 
 const SYNC_MODULE = await compile_perspective(perspective_server_wasm);
-let SYNC_CLIENT: perspective_client.JsClient;
+let SYNC_CLIENT: perspective_client.Client;
 const SYNC_SERVER = new PerspectiveServer(SYNC_MODULE);
 const SYNC_SESSION = SYNC_SERVER.make_session(
     async (resp) => await SYNC_CLIENT.handle_response(resp)
 );
 
-SYNC_CLIENT = new perspective_client.JsClient(async (req: Uint8Array) => {
+SYNC_CLIENT = new perspective_client.Client(async (req: Uint8Array) => {
     await SYNC_SESSION.handle_request(req);
     setTimeout(() => SYNC_SESSION.poll());
 });
@@ -70,7 +70,7 @@ export function make_client(
     send_request: (buffer: Uint8Array) => void,
     close?: Function
 ) {
-    return new perspective_client.JsClient(send_request, close);
+    return new perspective_client.Client(send_request, close);
 }
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -257,7 +257,7 @@ export function table(
  */
 export async function websocket(
     url: string
-): Promise<perspective_client.JsClient> {
+): Promise<perspective_client.Client> {
     const ws = new WebSocket(url);
     let [sender, receiver] = invert_promise();
     ws.onopen = sender;

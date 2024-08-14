@@ -32,6 +32,9 @@ include = [
     "docs/**/*",
 ]
 
+[package.metadata.docs.rs]
+rustdoc-args = ["--html-in-header", "docs/index.html"]
+
 [features]
 default = []
 external-cpp = [

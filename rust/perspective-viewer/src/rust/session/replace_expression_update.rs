@@ -109,11 +109,7 @@ pub impl ViewConfig {
             .into_iter()
             .map(|x| {
                 if x.column() == old_expr.name {
-                    Filter::new(
-                        new_expr.name.as_ref().to_owned(),
-                        x.op().to_string(),
-                        x.term().clone(),
-                    )
+                    Filter::new(new_expr.name.as_ref(), x.op(), x.term().clone())
                 } else {
                     x
                 }

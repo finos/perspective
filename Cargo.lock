@@ -1786,6 +1786,8 @@ name = "perspective"
 version = "3.0.0-rc.2"
 dependencies = [
  "async-lock",
+ "axum",
+ "futures",
  "perspective-client",
  "perspective-server",
  "tokio",

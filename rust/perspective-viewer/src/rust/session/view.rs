@@ -52,10 +52,10 @@ impl PerspectiveOwned<perspective_client::View> {
     /// Get a reference to the owned object as a `JsValue`, which is necessary
     /// to pass it back to other JavaScript APIs.
     pub fn as_jsvalue(&self) -> JsValue {
-        perspective_js::JsView::from(self.0 .0.clone()).into()
+        perspective_js::View::from(self.0 .0.clone()).into()
     }
 
-    pub fn as_jsview(&self) -> perspective_js::JsView {
+    pub fn as_jsview(&self) -> perspective_js::View {
         self.0 .0.clone().into()
     }
 }
@@ -64,10 +64,10 @@ impl PerspectiveOwned<perspective_client::Table> {
     /// Get a reference to the owned object as a `JsValue`, which is necessary
     /// to pass it back to other JavaScript APIs.
     pub fn as_jsvalue(&self) -> JsValue {
-        perspective_js::JsTable::from(self.0 .0.clone()).into()
+        perspective_js::Table::from(self.0 .0.clone()).into()
     }
 
-    pub fn as_jstable(&self) -> perspective_js::JsTable {
+    pub fn as_jstable(&self) -> perspective_js::Table {
         self.0 .0.clone().into()
     }
 }

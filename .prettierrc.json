@@ -7,6 +7,12 @@
                 "printWidth": 200,
                 "tabWidth": 4
             }
+        },
+        {
+            "files": ["*.md"],
+            "options": {
+                "proseWrap": "always"
+            }
         }
     ]
 }

@@ -165,8 +165,8 @@ pub impl ViewConfig {
                 config.filter.insert(
                     index,
                     Filter::new(
-                        column,
-                        features.default_op(col_type).cloned().unwrap_or_default(),
+                        &column,
+                        features.default_op(col_type).unwrap_or(""),
                         FilterTerm::Scalar(Scalar::Null),
                     ),
                 );

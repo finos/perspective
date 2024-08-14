@@ -1,1 +1,1 @@
-Serializes this view to CSV data in a standard format.
+Serializes this [`View`] to CSV data in a standard format.

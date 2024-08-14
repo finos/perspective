@@ -14,6 +14,13 @@ use std::io::Result;
 use std::path::Path;
 
 fn prost_build() -> Result<()> {
+    // Output the path to docs files so they can be shared by `perspective-js` and
+    // `perspective-python`.
+    println!(
+        "cargo::metadata=DOCS_PATH={}/docs/",
+        env!("CARGO_MANIFEST_DIR")
+    );
+
     // This source file is included at `publish` time, but not `sbuild` time
     // because it is initially generated from the `perspective.proto` definition
     // in the C++ source.

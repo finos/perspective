@@ -14,14 +14,16 @@ use extend::ext;
 use js_sys::{Array, ArrayBuffer, Function, Object, Reflect, Uint8Array, JSON};
 use perspective_client::config::*;
 use perspective_client::proto::*;
-use perspective_client::*;
+use perspective_client::{assert_table_api, TableData, UpdateData, UpdateOptions};
 use wasm_bindgen::convert::TryFromJsValue;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
-use crate::utils::{ApiError, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError};
+use crate::client::Client;
+use crate::utils::{
+    inherit_docs, ApiError, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError,
+};
 pub use crate::view::*;
-use crate::JsClient;
 
 #[ext]
 impl Vec<(String, ColumnType)> {
@@ -52,7 +54,7 @@ pub(crate) impl TableData {
                 .dyn_into::<Function>()?
                 .call0(value)?;
 
-            let view = JsView::try_from_js_value(val)?;
+            let view = View::try_from_js_value(val)?;
             Ok(TableData::View(view.0))
         } else if value.is_instance_of::<Object>() {
             let all_strings = || {
@@ -119,20 +121,21 @@ pub(crate) impl UpdateData {
     }
 }
 
+#[doc = inherit_docs!("table.md")]
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsTable(pub(crate) Table);
+pub struct Table(pub(crate) perspective_client::Table);
 
-assert_table_api!(JsTable);
+assert_table_api!(Table);
 
-impl From<Table> for JsTable {
-    fn from(value: Table) -> Self {
-        JsTable(value)
+impl From<perspective_client::Table> for Table {
+    fn from(value: perspective_client::Table) -> Self {
+        Table(value)
     }
 }
 
-impl JsTable {
-    pub fn get_table(&self) -> &'_ Table {
+impl Table {
+    pub fn get_table(&self) -> &'_ perspective_client::Table {
         &self.0
     }
 }
@@ -152,66 +155,69 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-impl JsTable {
+impl Table {
+    #[doc = inherit_docs!("table/get_index.md")]
     #[wasm_bindgen]
     pub async fn get_index(&self) -> Option<String> {
         self.0.get_index()
     }
 
+    #[doc = inherit_docs!("table/get_client.md")]
     #[wasm_bindgen]
-    pub async fn get_client(&self) -> JsClient {
-        JsClient {
+    pub async fn get_client(&self) -> Client {
+        Client {
             close: None,
             client: self.0.get_client(),
         }
     }
 
+    #[doc = inherit_docs!("table/get_limit.md")]
     #[wasm_bindgen]
     pub async fn get_limit(&self) -> Option<u32> {
         self.0.get_limit()
     }
 
-    #[doc = include_str!("../../docs/table/clear.md")]
+    #[doc = inherit_docs!("table/clear.md")]
     #[wasm_bindgen]
     pub async fn clear(&self) -> ApiResult<()> {
         self.0.clear().await?;
         Ok(())
     }
 
-    #[doc = include_str!("../../docs/table/delete.md")]
+    #[doc = inherit_docs!("table/delete.md")]
     #[wasm_bindgen]
     pub async fn delete(self) -> ApiResult<()> {
         self.0.delete().await?;
         Ok(())
     }
 
-    #[doc = include_str!("../../docs/table/size.md")]
+    #[doc = inherit_docs!("table/size.md")]
     #[wasm_bindgen]
     pub async fn size(&self) -> ApiResult<f64> {
         Ok(self.0.size().await? as f64)
     }
 
-    #[doc = include_str!("../../docs/table/schema.md")]
+    #[doc = inherit_docs!("table/schema.md")]
     #[wasm_bindgen]
     pub async fn schema(&self) -> ApiResult<JsValue> {
         let schema = self.0.schema().await?;
         Ok(JsValue::from_serde_ext(&schema)?)
     }
 
-    #[doc = include_str!("../../docs/table/columns.md")]
+    #[doc = inherit_docs!("table/columns.md")]
     #[wasm_bindgen]
     pub async fn columns(&self) -> ApiResult<JsValue> {
         let columns = self.0.columns().await?;
         Ok(JsValue::from_serde_ext(&columns)?)
     }
 
-    #[doc = include_str!("../../docs/table/make_port.md")]
+    #[doc = inherit_docs!("table/make_port.md")]
     #[wasm_bindgen]
     pub async fn make_port(&self) -> ApiResult<i32> {
         Ok(self.0.make_port().await?)
     }
 
-    #[doc = include_str!("../../docs/table/on_delete.md")]
+    #[doc = inherit_docs!("table/on_delete.md")]
     #[wasm_bindgen]
     pub async fn on_delete(&self, on_delete: Function) -> ApiResult<u32> {
         let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
@@ -219,7 +225,7 @@ impl JsTable {
         Ok(self.0.on_delete(on_delete).await?)
     }
 
-    #[doc = include_str!("../../docs/table/remove_delete.md")]
+    #[doc = inherit_docs!("table/remove_delete.md")]
     #[wasm_bindgen]
     pub fn remove_delete(&self, callback_id: u32) -> ApiFuture<()> {
         let client = self.0.clone();
@@ -229,7 +235,7 @@ impl JsTable {
         })
     }
 
-    #[doc = include_str!("../../docs/table/replace.md")]
+    #[doc = inherit_docs!("table/replace.md")]
     #[wasm_bindgen]
     pub async fn remove(&self, value: &JsValue) -> ApiResult<()> {
         let input = UpdateData::from_js_value(value)?;
@@ -237,7 +243,7 @@ impl JsTable {
         Ok(())
     }
 
-    #[doc = include_str!("../../docs/table/replace.md")]
+    #[doc = inherit_docs!("table/replace.md")]
     #[wasm_bindgen]
     pub async fn replace(&self, input: &JsValue) -> ApiResult<()> {
         let input = UpdateData::from_js_value(input)?;
@@ -245,7 +251,7 @@ impl JsTable {
         Ok(())
     }
 
-    #[doc = include_str!("../../docs/table/update.md")]
+    #[doc = inherit_docs!("table/update.md")]
     #[wasm_bindgen]
     pub async fn update(
         &self,
@@ -261,9 +267,9 @@ impl JsTable {
         Ok(())
     }
 
-    #[doc = include_str!("../../docs/table/view.md")]
+    #[doc = inherit_docs!("table/view.md")]
     #[wasm_bindgen]
-    pub async fn view(&self, config: Option<JsViewConfig>) -> ApiResult<JsView> {
+    pub async fn view(&self, config: Option<JsViewConfig>) -> ApiResult<View> {
         let config = config
             .map(|config| js_sys::JSON::stringify(&config))
             .transpose()?
@@ -272,10 +278,10 @@ impl JsTable {
             .transpose()?;
 
         let view = self.0.view(config).await?;
-        Ok(JsView(view))
+        Ok(View(view))
     }
 
-    #[doc = include_str!("../../docs/table/validate_expressions.md")]
+    #[doc = inherit_docs!("table/validate_expressions.md")]
     #[wasm_bindgen]
     pub async fn validate_expressions(&self, exprs: &JsValue) -> ApiResult<JsValue> {
         let exprs = JsValue::into_serde_ext::<Expressions>(exprs.clone())?;
@@ -285,7 +291,7 @@ impl JsTable {
 
     #[allow(clippy::use_self)]
     #[doc(hidden)]
-    pub fn unsafe_get_model(&self) -> *const JsTable {
+    pub fn unsafe_get_model(&self) -> *const Table {
         std::ptr::addr_of!(*self)
     }
 }

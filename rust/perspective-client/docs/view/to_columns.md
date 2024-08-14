@@ -1,1 +1,1 @@
-Serializes this view to JSON data in a column-oriented format.
+Serializes this [`View`] to JSON data in a column-oriented format.

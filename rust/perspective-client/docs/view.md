@@ -1,7 +1,6 @@
 The [`View`] struct is Perspective's query and serialization interface. It
 represents a query on the `Table`'s dataset and is always created from an
-existing `Table` instance via the `view()` method.
-.
+existing `Table` instance via the [`Table::view`] method. .
 
 ```javascript
 const table = await perspective.table({
@@ -11,8 +10,7 @@ const table = await perspective.table({
 
 const view = await table.view({ columns: ["name"] });
 const json = await view.to_json();
-
-view.delete();
+await view.delete();
 ```
 
 ```python
@@ -21,25 +19,37 @@ table = perspective.Table({
   "name": ["a", "b", "c", "d"]
 });
 
-view = table.view(columns=["name"]);
-arrow = view.to_arrow();
+view = table.view(columns=["name"])
+arrow = view.to_arrow()
+view.delete()
 ```
 
-`View`s are immutable with respect to the arguments provided to the
-`view()` method; to change these parameters, you must create a new `View` on the
-same `Table`. However, each `View` is _live_ with respect to the `Table`'s data,
-and will (within a conflation window) update with the latest state as its parent
-`Table` updates, including incrementally recalculating all aggregates, pivots,
-filters, etc. `View` query parameters are composable, in that each parameter
-works independently _and_ in conjunction with each other, and there is no limit
-to the number of pivots, filters, etc. which can be applied.
+```rust
+let opts = TableInitOptions::default();
+let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+let table = client.table(data, opts).await?;
 
-### Querying data with `view()`
+let view = table.view(None).await?;
+let arrow = view.to_arrow().await?;
+view.delete().await?;
+```
 
-To query the table, create a `view()` on the table instance with an optional
-configuration object. A `table()` can have as many `view()`s associated with it
-as you need - Perspective conserves memory by relying on a single `table()` to
-power multiple `view()`s concurrently:
+[`View`]s are immutable with respect to the arguments provided to the
+[`Table::view`] method; to change these parameters, you must create a new
+[`View`] on the same [`Table`]. However, each [`View`] is _live_ with respect to
+the [`Table`]'s data, and will (within a conflation window) update with the
+latest state as its parent [`Table`] updates, including incrementally
+recalculating all aggregates, pivots, filters, etc. [`View`] query parameters
+are composable, in that each parameter works independently _and_ in conjunction
+with each other, and there is no limit to the number of pivots, filters, etc.
+which can be applied.
+
+# Querying data with [`Table::view`]
+
+To query the table, create a [`Table::view`] on the table instance with an
+optional configuration object. A [`Table`] can have as many [`View`]s associated
+with it as you need - Perspective conserves memory by relying on a single
+[`Table`] to power multiple [`View`]s concurrently:
 
 ```javascript
 const view = await table.view({
@@ -59,6 +69,22 @@ view = table.view(
 )
 ```
 
+```rust
+use crate::config::*;
+let view = table
+    .view(Some(ViewConfigUpdate {
+        columns: Some(vec![Some("Sales".into())]),
+        aggregates: Some(HashMap::from_iter(vec![("Sales".into(), "sum".into())])),
+        group_by: Some(vec!["Region".into(), "Country".into()]),
+        filter: Some(vec![Filter::new("Category", "in", &[
+            "Furniture",
+            "Technology",
+        ])]),
+        ..ViewConfigUpdate::default()
+    }))
+    .await?;
+```
+
 ## Group By
 
 A group by _groups_ the dataset by the unique values of each column used as a
@@ -72,6 +98,8 @@ string column names to pivot, are applied in the order provided; For example, a
 group by of `["State", "City", "Postal Code"]` shows the values for each Postal
 Code, which are grouped by City, which are in turn grouped by State.
 
+#### Example
+
 ```javascript
 const view = await table.view({ group_by: ["a", "c"] });
 ```
@@ -80,24 +108,15 @@ const view = await table.view({ group_by: ["a", "c"] });
 view = table.view(group_by=["a", "c"])
 ```
 
-#### Example
-
-```javascript
-const elem = document.querySelector("perspective-viewer");
-await elem.restore({
-    group_by: ["State", "City"],
-});
+```rust
+let view = table.view(Some(ViewConfigUpdate {
+    group_by: Some(vec!["a".into(), "c".into()]),
+    ..ViewConfigUpdate::default()
+})).await?;
 ```
 
-```python
-widget = PerspectiveWidget()
-widget.restore(
-  group_by=["State", "City"]
-)
-```
-
-<perspective-viewer group_by='["State", "City"]' columns='["Sales", "Profit"]'>
-</perspective-viewer>
+<!-- <perspective-viewer group_by='["State", "City"]' columns='["Sales", "Profit"]'>
+</perspective-viewer> -->
 
 ## Split By
 
@@ -109,6 +128,8 @@ has `["State"]` as its split by will have a new column for each state. In
 Perspective, Split By are represented as an array of string column names to
 pivot:
 
+#### Example
+
 ```javascript
 const view = await table.view({ split_by: ["a", "c"] });
 ```
@@ -117,28 +138,15 @@ const view = await table.view({ split_by: ["a", "c"] });
 view = table.view(split_by=["a", "c"])
 ```
 
-#### Example
-
-```javascript
-const elem = document.querySelector("perspective-viewer");
-await elem.restore({
-    group_by: ["Category"],
-    split_by: ["Region"],
-    columns: ["Sales", "Profit"],
-});
+```rust
+let view = table.view(Some(ViewConfigUpdate {
+    split_by: Some(vec!["a".into(), "c".into()]),
+    ..ViewConfigUpdate::default()
+})).await?;
 ```
 
-```python
-widget = PerspectiveWidget()
-widget.restore(
-  group_by=["Category"],
-  split_by=["Region"],
-  columns=["Sales", "Profit"]
-)
-```
-
-<perspective-viewer group_by='["Category"]' split_by='["Region"]' columns='["Sales", "Profit"]'>
-</perspective-viewer>
+<!-- <perspective-viewer group_by='["Category"]' split_by='["Region"]' columns='["Sales", "Profit"]'>
+</perspective-viewer> -->
 
 ## Aggregates
 
@@ -152,7 +160,9 @@ aggregates based on column type:
 
 Perspective provides a selection of aggregate functions that can be applied to
 columns in the `View` constructor using a dictionary of column name to aggregate
-function name:
+function name.
+
+#### Example
 
 ```javascript
 const view = await table.view({
@@ -172,28 +182,8 @@ view = table.view(
 )
 ```
 
-#### Example
-
-```javascript
-const elem = document.querySelector("perspective-viewer");
-await elem.restore({
-  aggregates: {"Sales": "avg", "Profit", "median"},
-  group_by: ["State", "City"],
-  columns: ["Sales", "Profit"]
-});
-```
-
-```python
-widget = PerspectiveWidget()
-widget.restore(
-  aggregates={"Sales": "avg", "Profit", "median"},
-  group_by=["State", "City"],
-  columns=["Sales", "Profit"]
-)
-```
-
-<perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' group_by='["State", "City"]' columns='["Sales", "Profit"]'>
-</perspective-viewer>
+<!-- <perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' group_by='["State", "City"]' columns='["Sales", "Profit"]'>
+</perspective-viewer> -->
 
 ## Columns
 
@@ -201,6 +191,8 @@ The `columns` property specifies which columns should be included in the
 `View`'s output. This allows users to show or hide a specific subset of columns,
 as well as control the order in which columns appear to the user. This is
 represented in Perspective as an array of string column names:
+
+#### Example
 
 ```javascript
 const view = await table.view({
@@ -212,24 +204,9 @@ const view = await table.view({
 view = table.view(columns=["a"])
 ```
 
-#### Example
-
-```javascript
-const elem = document.querySelector("perspective-viewer");
-await elem.restore({
-    columns: ["Sales", "Profit", "Segment"],
-});
-```
-
-```python
-widget = PerspectiveWidget()
-widget.restore(
-  columns=["Sales", "Profit", "Segment"]
-)
-```
-
+<!--
 <perspective-viewer columns='["Sales", "Profit"]'>
-</perspective-viewer>
+</perspective-viewer> -->
 
 ## Sort
 
@@ -241,6 +218,8 @@ being a string column name and a string sort direction. When `column-pivots` are
 applied, the additional sort directions `"col asc"` and `"col desc"` will
 determine the order of pivot columns groups.
 
+#### Example
+
 ```javascript
 const view = await table.view({
     sort: [["a", "asc"]],
@@ -251,26 +230,8 @@ const view = await table.view({
 view = table.view(sort=[["a", "asc"]])
 ```
 
-#### Example
-
-```javascript
-const elem = document.querySelector("perspective-viewer");
-await elem.restore({
-    sort: [["Sales", "desc"]],
-    columns: ["Sales", "Profit"],
-});
-```
-
-```python
-widget = PerspectiveWidget()
-widget.restore(
-  sort=[["Sales", "desc"]],
-  columns=["Sales", "Profit"]
-)
-```
-
-<perspective-viewer columns='["Sales", "Profit"]' sort='[["Sales", "desc"]]'>
-</perspective-viewer>
+<!-- <perspective-viewer columns='["Sales", "Profit"]' sort='[["Sales", "desc"]]'> -->
+<!-- </perspective-viewer> -->
 
 ## Filter
 
@@ -284,6 +245,8 @@ Perspective represents `filter` as an array of arrays, with the values of each
 inner array being a string column name, a string filter operator, and a filter
 operand in the type of the column:
 
+#### Example
+
 ```javascript
 const view = await table.view({
     filter: [["a", "<", 100]],
@@ -294,26 +257,8 @@ const view = await table.view({
 view = table.view(filter=[["a", "<", 100]])
 ```
 
-#### Example
-
-```javascript
-const elem = document.querySelector("perspective-viewer");
-await elem.restore({
-    columns: ["State", "Sales", "Profit"],
-    filter: [["State", "==", "Texas"]],
-});
-```
-
-```python
-widget = PerspectiveWidget()
-widget.restore(
-  columns=["Sales", "Profit"],
-  filter=[["State", "==", "Texas"]]
-)
-```
-
-<perspective-viewer columns='["State", "Sales", "Profit"]' filter='[["State","==","Texas"]]'>
-</perspective-viewer>
+<!-- <perspective-viewer columns='["State", "Sales", "Profit"]' filter='[["State","==","Texas"]]'>
+</perspective-viewer> -->
 
 ## Expressions
 
@@ -323,6 +268,8 @@ the expression. In `<perspective-viewer>`, expressions are added using the "New
 Column" button in the side panel.
 
 A custom name can be added to an expression by making the first line a comment:
+
+#### Example
 
 ```javascript
 const view = await table.view({
@@ -334,37 +281,20 @@ const view = await table.view({
 view = table.view(expressions=['"a" + "b"'])
 ```
 
-#### Example
-
-```javascript
-const elem = document.querySelector("perspective-viewer");
-await elem.restore({
-    columns: ["new expression"],
-    expressions: {
-        "new expression": '"Sales" + "Profit" * 50 / sqrt("Sales")',
-    },
-});
-```
-
-```python
-widget = PerspectiveWidget()
-widget.restore(
-  columns=["new_expression"],
-  expressions={"new expression": "\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"}
-)
-```
-
+<!--
 <perspective-viewer columns='["new expression"]' expressions='{"new expression": "\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"}'>
-</perspective-viewer>
+</perspective-viewer> -->
 
-## Flattening a `view()` into a `table()`
+## Flattening a [`Table::view`] into a [`Table`]
 
-In Javascript, a `table()` can be constructed on a `view()` instance, which will
-return a new `table()` based on the `view()`'s dataset, and all future updates
-that affect the `view()` will be forwarded to the new `table()`. This is
-particularly useful for implementing a
+In Javascript, a [`Table`] can be constructed on a [`Table::view`] instance,
+which will return a new [`Table`] based on the [`Table::view`]'s dataset, and
+all future updates that affect the [`Table::view`] will be forwarded to the new
+[`Table`]. This is particularly useful for implementing a
 [Client/Server Replicated](server.md#clientserver-replicated) design, by
-serializing the `View` to an arrow and setting up an `on_update` callback:
+serializing the `View` to an arrow and setting up an `on_update` callback.
+
+# Example
 
 ```javascript
 const worker1 = perspective.worker();
@@ -384,4 +314,13 @@ def updater(port, delta):
 
 view.on_update(updater, mode="Row")
 table.update([{"State": "Texas", "City": "Austin"}])
+```
+
+```rust
+let opts = TableInitOptions::default();
+let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+let table = client.table(data, opts).await?;
+let view = table.view(None).await?;
+let table2 = client.table(TableData::View(view)).await?;
+table.update(data).await?;
 ```

@@ -20,26 +20,44 @@ use futures::future::BoxFuture;
 use futures::Future;
 use nanoid::*;
 use prost::Message;
+use serde::{Deserialize, Serialize};
 use tracing_unwrap::{OptionExt, ResultExt};
 
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::{
-    ColumnType, GetFeaturesReq, GetFeaturesResp, GetHostedTablesReq, GetHostedTablesResp,
+    self, ColumnType, GetFeaturesReq, GetFeaturesResp, GetHostedTablesReq, GetHostedTablesResp,
     HostedTable, MakeTableReq, Request, Response, ServerSystemInfoReq,
 };
-use crate::table::{SystemInfo, Table, TableInitOptions, TableOptions};
+use crate::table::{Table, TableInitOptions, TableOptions};
 use crate::table_data::{TableData, UpdateData};
 use crate::utils::*;
 use crate::view::ViewWindow;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SystemInfo {
+    pub heap_size: f64,
+}
+
+impl From<proto::ServerSystemInfoResp> for SystemInfo {
+    fn from(value: proto::ServerSystemInfoResp) -> Self {
+        SystemInfo {
+            heap_size: value.heap_size,
+        }
+    }
+}
 
 /// Metadata about what features are supported by the `Server` this `Client`
 /// is connected to.
 pub type Features = Arc<GetFeaturesResp>;
 
 impl GetFeaturesResp {
-    pub fn default_op(&self, col_type: ColumnType) -> Option<&String> {
-        self.filter_ops.get(&(col_type as u32))?.options.first()
+    pub fn default_op(&self, col_type: ColumnType) -> Option<&str> {
+        self.filter_ops
+            .get(&(col_type as u32))?
+            .options
+            .first()
+            .map(|x| x.as_str())
     }
 }
 
@@ -120,7 +138,7 @@ impl Client {
     /// Handle a message from the external message queue.
     /// [`Client::handle_response`] is part of the low-level message-handling
     /// API necessary to implement new transports for a [`Client`]
-    /// connection to a local-or-remote [`perspective_server::Server`], and
+    /// connection to a local-or-remote `perspective_server::Server`, and
     /// doesn't generally need to be called directly by "users" of a
     /// [`Client`] once connected.
     pub async fn handle_response<'a>(&'a self, msg: &'a [u8]) -> ClientResult<bool> {

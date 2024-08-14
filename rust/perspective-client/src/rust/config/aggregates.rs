@@ -199,6 +199,12 @@ pub enum Aggregate {
     MultiAggregate(MultiAggregate, String),
 }
 
+impl From<&'static str> for Aggregate {
+    fn from(value: &'static str) -> Self {
+        Self::from_str(value).expect("Unknown aggregate")
+    }
+}
+
 impl Display for Aggregate {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {

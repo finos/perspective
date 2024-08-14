@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { execSync } from "child_process";
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import { WasmPlugin } from "@finos/perspective-esbuild-plugin/wasm.js";
 import { WorkerPlugin } from "@finos/perspective-esbuild-plugin/worker.js";

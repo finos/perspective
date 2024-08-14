@@ -26,15 +26,17 @@ pub mod config;
 pub mod proto;
 pub mod utils;
 
-pub use crate::client::{Client, ClientHandler, Features};
-pub use crate::proto::table_validate_expr_resp::ExprValidationError;
-pub use crate::proto::ColumnType;
+pub use crate::client::{Client, ClientHandler, Features, SystemInfo};
 pub use crate::session::{ProxySession, Session};
 pub use crate::table::{Schema, Table, TableInitOptions, UpdateOptions, ValidateExpressionsData};
 pub use crate::table_data::{TableData, UpdateData};
-pub use crate::utils::*;
 pub use crate::view::{OnUpdateMode, OnUpdateOptions, View, ViewWindow};
 
+pub type ClientError = utils::ClientError;
+pub type ColumnType = proto::ColumnType;
+pub type ExprValidationError = crate::proto::table_validate_expr_resp::ExprValidationError;
+
+#[doc(hidden)]
 pub mod vendor {
     pub use paste;
 }
@@ -45,6 +47,7 @@ pub mod vendor {
 /// because the signatures will not match exactly (unless every method is
 /// made heavily generic). Instead, this macro complains when a method name
 /// is missing.
+#[doc(hidden)]
 #[macro_export]
 macro_rules! assert_table_api {
     ($x:ty) => {
@@ -74,6 +77,7 @@ macro_rules! assert_table_api {
 }
 
 /// Similar to [`assert_table_api`], but for [`View`]. See [`assert_table_api`].
+#[doc(hidden)]
 #[macro_export]
 macro_rules! assert_view_api {
     ($x:ty) => {
