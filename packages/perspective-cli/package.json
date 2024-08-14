@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-cli",
-    "version": "3.0.0-rc.2",
+    "version": "3.0.0-rc.3",
     "description": "Perspective.js CLI",
     "main": "src/js/index.js",
     "publishConfig": {
