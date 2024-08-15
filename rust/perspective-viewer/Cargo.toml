@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-viewer"
-version = "3.0.0-rc.3"
+version = "3.0.0-rc.6"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -24,12 +24,8 @@ build = "build.rs"
 include = ["build.rs", "src/**/*", "Cargo.toml", "package.json"]
 
 [package.metadata.docs.rs]
-rustdoc-args = [
-    "--cfg",
-    "web_sys_unstable_apis",
-    "--html-in-header",
-    "docs/index.html",
-]
+rustc-args = ["--cfg", "web_sys_unstable_apis"]
+rustdoc-args = ["--html-in-header", "docs/index.html"]
 
 [[bin]]
 name = "perspective-viewer-metadata"
@@ -54,8 +50,8 @@ anyhow = "1.0.66"
 wasm-bindgen-test = "0.3.13"
 
 [dependencies]
-perspective-client = { path = "../perspective-client", version = "3.0.0-rc.3" }
-perspective-js = { path = "../perspective-js", version = "3.0.0-rc.3" }
+perspective-client = { path = "../perspective-client", version = "3.0.0-rc.6" }
+perspective-js = { path = "../perspective-js", version = "3.0.0-rc.6" }
 
 # Provides async `Mutex` for locked sections such as `render`
 async-lock = "2.5.0"

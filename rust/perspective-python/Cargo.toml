@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-python"
-version = "3.0.0-rc.3"
+version = "3.0.0-rc.6"
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
 repository = "https://github.com/finos/perspective"
@@ -54,8 +54,8 @@ python-config-rs = "0.1.2"
 
 [dependencies]
 async-lock = "2.5.0"
-perspective-client = { version = "3.0.0-rc.3", path = "../perspective-client" }
-# perspective-server = { version = "3.0.0-rc.3", path = "../perspective-server" }
+perspective-client = { version = "3.0.0-rc.6", path = "../perspective-client" }
+# perspective-server = { version = "3.0.0-rc.6", path = "../perspective-server" }
 pollster = "0.3.0"
 extend = "1.1.2"
 futures = "0.3.28"

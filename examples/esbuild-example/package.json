@@ -1,7 +1,7 @@
 {
     "name": "esbuild-example",
     "private": true,
-    "version": "3.0.0-rc.3",
+    "version": "3.0.0-rc.6",
     "description": "An esbuild example app built using `@finos/perspective-viewer`.",
     "scripts": {
         "build": "node build.js",

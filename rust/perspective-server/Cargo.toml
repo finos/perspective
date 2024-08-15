@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-server"
-version = "3.0.0-rc.3"
+version = "3.0.0-rc.6"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -43,7 +43,7 @@ cmake = "0.1.50"
 num_cpus = "^1.15.0"
 
 [dependencies]
-perspective-client = { version = "3.0.0-rc.3", path = "../perspective-client" }
+perspective-client = { version = "3.0.0-rc.6", path = "../perspective-client" }
 async-lock = "2.5.0"
 cxx = { version = "1.0.92", features = ["c++17"] }
 tracing = { version = ">=0.1.36" }

@@ -51,12 +51,12 @@ compatible format (JSON, CSV or Apache Arrow).
 #### Javascript client
 
 ```javascript
-const worker = perspective.worker();
+const worker = await perspective.worker();
 const table = await worker.table(csv);
 
 const viewer = document.createElement("perspective-viewer");
 document.body.appendChild(viewer);
-viewer.load(table);
+await viewer.load(table);
 ```
 
 ## Client/Server Replicated
@@ -75,23 +75,23 @@ deltas, while operations like scrolling, pivots, sorting, etc. are performed on
 the client.
 
 Python servers can make especially good use of additional threads, as
-Perspective will [release the GIL](python.md#async-mode) for almost all
-operations. Interactive performance on the client is very good and identical to
-client-only architecture. Updates and edits are seamlessly synchonized across
-clients via their virtual server counterparts using websockets and Apache Arrow.
+Perspective will release the GIL for almost all operations. Interactive
+performance on the client is very good and identical to client-only
+architecture. Updates and edits are seamlessly synchonized across clients via
+their virtual server counterparts using websockets and Apache Arrow.
 
 #### Python and Tornado server
 
 ```python
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
+from perspective import Server, PerspectiveTornadoHandler
 
-table = Table(csv)
-manager = PerspectiveManager()
-manager.host("my_table", table)
+server = Server()
+client = server.new_local_client()
+client.table(csv, name="my_table")
 routes = [(
     r"/websocket",
-    PerspectiveTornadoHandler,
-    {"manager": manager, "check_origin": True},
+    perspective.handlers.tornado.PerspectiveTornadoHandler,
+    {"perspective_server": server},
 )]
 
 app = tornado.web.Application(routes)
@@ -106,16 +106,16 @@ Perspective's websocket client interfaces with the Python server. then
 _replicates_ the server-side Table.
 
 ```javascript
-const websocket = perspective.websocket("ws://localhost:8080");
-const server_table = websocket.open("my_table");
+const websocket = await perspective.websocket("ws://localhost:8080");
+const server_table = await websocket.open_table("my_table");
 const server_view = await server_table.view();
 
-const worker = perspective.worker();
+const worker = await perspective.worker();
 const client_table = await worker.table(server_view);
 
 const viewer = document.createElement("perspective-viewer");
 document.body.appendChild(viewer);
-viewer.load(client_table);
+await viewer.load(client_table);
 ```
 
 ## Server-only
@@ -144,10 +144,10 @@ Using the same Python server as the previous design, we can simply skip the
 intermediate WebAssembly `Table` and pass the virtual table directly to `load()`
 
 ```javascript
-const websocket = perspective.websocket("ws://localhost:8080");
-const server_table = websocket.open("my_table");
+const websocket = await perspective.websocket("ws://localhost:8080");
+const server_table = await websocket.open_table("my_table");
 
 const viewer = document.createElement("perspective-viewer");
 document.body.appendChild(viewer);
-viewer.load(server_table);
+await viewer.load(server_table);
 ```

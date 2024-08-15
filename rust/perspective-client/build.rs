@@ -18,7 +18,7 @@ fn prost_build() -> Result<()> {
     // `perspective-python`.
     println!(
         "cargo::metadata=DOCS_PATH={}/docs/",
-        env!("CARGO_MANIFEST_DIR")
+        std::env::var("CARGO_MANIFEST_DIR").unwrap()
     );
 
     // This source file is included at `publish` time, but not `sbuild` time
