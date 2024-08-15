@@ -20,14 +20,16 @@ __all__ = [
     "ProxySession",
     "Table",
     "View",
+    "Server",
+    "Client",
 ]
 
 from .perspective import (
-    PySyncClient,
+    Client as PySyncClient,
     PerspectiveError,
     Table,
     View,
-    PySyncProxySession as ProxySession,
+    ProxySession,
 )
 
 from .widget import PerspectiveWidget

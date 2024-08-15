@@ -65,7 +65,7 @@
 
             const datasource = async () => {
                 const request = fetch(MOVIES_URL);
-                const worker = perspective.worker();
+                const worker = await perspective.worker();
                 const response = await request;
                 const json = await response.json();
                 for (const row of json) {
@@ -76,14 +76,12 @@
                 return table;
             };
 
-            window.addEventListener("load", async () => {
-                let req = await fetch("layout.json");
-                let layout = await req.json();
+            await customElements.whenDefined("perspective-viewer");
+            let req = await fetch("layout.json");
+            let layout = await req.json();
 
-                window.workspace.tables.set("movies", datasource());
-
-                window.workspace.restore(layout);
-            });
+            window.workspace.tables.set("movies", datasource());
+            window.workspace.restore(layout);
         </script>
     </body>
 </html>

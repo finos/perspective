@@ -24,17 +24,30 @@ const sidebars = {
         },
         {
             type: "category",
-            label: "Concepts",
-            items: ["table", "view", "expressions", "server"],
-        },
-        {
-            type: "category",
             label: "API",
             items: [
-                "obj/perspective",
-                "obj/perspective-viewer",
-                "obj/perspective-viewer-exprtk",
-                "obj/perspective-python",
+                "expressions",
+                "server",
+                {
+                    type: "link",
+                    label: "`perspective` Rust API",
+                    href: "https://docs.rs/perspective/latest/perspective/",
+                },
+                {
+                    type: "link",
+                    label: "`perspective-js` JavaScript API",
+                    href: "https://docs.rs/perspective-js/latest/perspective_js/",
+                },
+                {
+                    type: "link",
+                    label: "`perspective-viewer` JavaScript API",
+                    href: "https://docs.rs/perspective-viewer/latest/perspective_viewer/",
+                },
+                {
+                    type: "link",
+                    label: "`perspective-python` Python API",
+                    href: "https://docs.rs/perspective-python/latest/perspective_python/",
+                },
             ],
         },
         "development",

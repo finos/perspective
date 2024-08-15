@@ -41,17 +41,12 @@ bucket(date(year, month, day), \'W\')`,
                 aggregates: {},
             };
 
-            async function load() {
-                const resp = await REQ;
-                const csv = await resp.text();
-                const el = document.getElementsByTagName("perspective-viewer")[0];
-                const table = WORKER.table(csv);
-                el.load(table);
-                el.restore(LAYOUT);
-                el.toggleConfig();
-            }
-
-            window.addEventListener("DOMContentLoaded", load);
+            const resp = await REQ;
+            const csv = await resp.text();
+            const el = document.getElementsByTagName("perspective-viewer")[0];
+            const table = WORKER.table(csv);
+            el.load(table);
+            el.restore(LAYOUT);
         </script>
 
         <style>
