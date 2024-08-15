@@ -102,7 +102,6 @@ impl From<TableInitOptions> for TableOptions {
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 pub struct UpdateOptions {
-    pub format: Option<String>,
     pub port_id: Option<u32>,
 }
 
@@ -119,6 +118,7 @@ pub struct Table {
     name: String,
     client: Client,
     options: TableOptions,
+
     /// If this table is constructed from a View, the view's on_update callback
     /// is wired into this table. So, we store the token to clean it up properly
     /// on destruction.

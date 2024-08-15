@@ -33,64 +33,63 @@
         <perspective-workspace id="workspace"></perspective-workspace>
 
         <script type="module">
+            await customElements.whenDefined("perspective-viewer");
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
             const datasource = async () => {
                 const request = fetch("./olympics.arrow");
-                const worker = perspective.worker();
+                const worker = await perspective.worker();
                 const response = await request;
                 const arrow = await response.arrayBuffer();
                 const table = await worker.table(arrow);
                 return table;
             };
 
-            window.addEventListener("load", () => {
-                window.workspace.tables.set("olympics", datasource());
-                window.workspace.restore({
-                    sizes: [1],
-                    detail: {
-                        main: {
-                            type: "tab-area",
-                            widgets: ["PERSPECTIVE_GENERATED_ID_1", "PERSPECTIVE_GENERATED_ID_0"],
-                            currentIndex: 1,
-                        },
+            window.workspace.tables.set("olympics", datasource());
+            window.workspace.restore({
+                sizes: [1],
+                detail: {
+                    main: {
+                        type: "tab-area",
+                        widgets: ["PERSPECTIVE_GENERATED_ID_1", "PERSPECTIVE_GENERATED_ID_0"],
+                        currentIndex: 1,
                     },
-                    mode: "globalFilters",
-                    viewers: {
-                        PERSPECTIVE_GENERATED_ID_1: {
-                            plugin: "X/Y Scatter",
-                            title: "Avg Height vs Weight by Sport",
-                            group_by: ["Sport"],
-                            columns: ["Height", "Weight", null, "City", null, "Sport", null],
-                            filter: [["Height", "==", null]],
-                            sort: [["Name", "desc"]],
-                            expressions: {},
-                            aggregates: {
-                                Name: "distinct count",
-                                Weight: "avg",
-                                Sport: "dominant",
-                                Height: "avg",
-                            },
-                            table: "olympics",
+                },
+                mode: "globalFilters",
+                viewers: {
+                    PERSPECTIVE_GENERATED_ID_1: {
+                        plugin: "X/Y Scatter",
+                        title: "Avg Height vs Weight by Sport",
+                        group_by: ["Sport"],
+                        columns: ["Height", "Weight", null, "City", null, "Sport", null],
+                        filter: [["Height", "==", null]],
+                        sort: [["Name", "desc"]],
+                        expressions: {},
+                        aggregates: {
+                            Name: "distinct count",
+                            Weight: "avg",
+                            Sport: "dominant",
+                            Height: "avg",
                         },
-                        PERSPECTIVE_GENERATED_ID_0: {
-                            plugin: "Heatmap",
-                            title: "Age Distribution by Sport",
-                            group_by: ["Age"],
-                            split_by: ["Sport"],
-                            columns: ["Name"],
-                            filter: [
-                                ["Medal", "!=", "NA"],
-                                ["Age", "is not null", null],
-                            ],
-                            sort: [["Name", "col asc"]],
-                            expressions: {},
-                            aggregates: {
-                                Age: "avg",
-                            },
-                            table: "olympics",
-                        },
+                        table: "olympics",
                     },
-                });
+                    PERSPECTIVE_GENERATED_ID_0: {
+                        plugin: "Heatmap",
+                        title: "Age Distribution by Sport",
+                        group_by: ["Age"],
+                        split_by: ["Sport"],
+                        columns: ["Name"],
+                        filter: [
+                            ["Medal", "!=", "NA"],
+                            ["Age", "is not null", null],
+                        ],
+                        sort: [["Name", "col asc"]],
+                        expressions: {},
+                        aggregates: {
+                            Age: "avg",
+                        },
+                        table: "olympics",
+                    },
+                },
             });
         </script>
     </body>

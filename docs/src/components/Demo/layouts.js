@@ -33,7 +33,6 @@ export const LAYOUTS = {
             },
         },
         settings: true,
-        theme: "Pro Light",
         title: "Market Monitor",
         group_by: ["name"],
         split_by: ["client"],

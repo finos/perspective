@@ -43,9 +43,13 @@ const worker = await perspective.worker();
 
 // Use Perspective WebWorker's table to infer the feed's schema.
 async function get_schema(feed) {
-    const table = await worker.table(feed);
+    const feed2 = feed.slice(0, 1);
+    delete feed2[0]["rental_methods"];
+    delete feed2[0]["rental_uris"];
+    delete feed2[0]["eightd_station_services"];
+    const table = await worker.table(feed2);
     const schema = await table.schema();
-    table.delete();
+    await table.delete();
     return schema;
 }
 
@@ -82,4 +86,5 @@ async function main() {
     window.workspace.restore(layout);
 }
 
+console.log("test");
 main();

@@ -235,6 +235,7 @@ function progress(x) {
 
 async function reset_tables(market, market_table, gui_table) {
     await market.stop();
+    await gui_table.size();
     await market_table.clear();
     await gui_table.clear();
     await market.poll(progress);
@@ -274,9 +275,9 @@ window.addEventListener("DOMContentLoaded", async function () {
     }
 
     button.addEventListener("click", () => {
-        viewer.load(gui_table);
         reset_tables(market, market_table, gui_table);
     });
+
     select.addEventListener("change", async (event) => {
         const layout = layouts.find((x) => x.title === event.target.value);
         await viewer.restore(layout);

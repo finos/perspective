@@ -446,12 +446,7 @@ impl PyTable {
         table.replace(table_data).await.into_pyerr()
     }
 
-    pub async fn update(
-        &self,
-        input: Py<PyAny>,
-        format: Option<String>,
-        port_id: Option<u32>,
-    ) -> PyResult<()> {
+    pub async fn update(&self, input: Py<PyAny>, port_id: Option<u32>) -> PyResult<()> {
         let input_data: Py<PyAny> = Python::with_gil(|py| {
             let data = if is_arrow_table(py, input.bind(py))? {
                 to_arrow_bytes(py, input.bind(py))?.to_object(py)
@@ -465,7 +460,7 @@ impl PyTable {
 
         let table = &self.table;
         let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input_data))?;
-        let options = UpdateOptions { format, port_id };
+        let options = UpdateOptions { port_id };
         table.update(table_data, options).await.into_pyerr()?;
         Ok(())
     }

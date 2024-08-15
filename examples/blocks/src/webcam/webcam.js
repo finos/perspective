@@ -17,7 +17,7 @@ const context = canvas.getContext("2d", { willReadFrequently: true });
 const video = document.getElementById("video");
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
-const WORKER = perspective.worker();
+const WORKER = await perspective.worker();
 
 async function poll(table, tdata) {
     context.drawImage(video, 0, 0, WIDTH, HEIGHT);
@@ -62,32 +62,30 @@ async function init_layouts() {
 
 const INIT_TASK = [init_tables(), init_layouts()];
 
-window.addEventListener("DOMContentLoaded", async function () {
-    const [table, layouts] = await Promise.all(INIT_TASK);
-    const settings = !/(iPad|iPhone|iPod)/g.test(navigator.userAgent);
-    const select = document.querySelector("select");
-    const viewer = document.querySelector("perspective-viewer");
-    viewer.load(table);
-    await viewer.restore({ settings, ...layouts[0] });
-    const regular_table = document
-        .querySelector("perspective-viewer-datagrid")
-        .shadowRoot.querySelector("regular-table");
+const [table, layouts] = await Promise.all(INIT_TASK);
+const settings = !/(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+const select = document.querySelector("select");
+const viewer = document.querySelector("perspective-viewer");
+viewer.load(table);
+await viewer.restore({ settings, ...layouts[0] });
+const regular_table = document
+    .querySelector("perspective-viewer-datagrid")
+    .shadowRoot.querySelector("regular-table");
 
-    regular_table.scrollTop =
-        regular_table.scrollHeight / 2 - regular_table.clientHeight / 2;
+regular_table.scrollTop =
+    regular_table.scrollHeight / 2 - regular_table.clientHeight / 2;
 
-    regular_table.scrollLeft =
-        regular_table.scrollWidth / 2 - regular_table.clientWidth / 2;
+regular_table.scrollLeft =
+    regular_table.scrollWidth / 2 - regular_table.clientWidth / 2;
 
-    for (const layout of layouts) {
-        const option = document.createElement("option");
-        option.value = layout.title;
-        option.textContent = layout.title;
-        select.appendChild(option);
-    }
+for (const layout of layouts) {
+    const option = document.createElement("option");
+    option.value = layout.title;
+    option.textContent = layout.title;
+    select.appendChild(option);
+}
 
-    select.addEventListener("change", async (event) => {
-        const layout = layouts.find((x) => x.title === event.target.value);
-        await viewer.restore(layout);
-    });
+select.addEventListener("change", async (event) => {
+    const layout = layouts.find((x) => x.title === event.target.value);
+    await viewer.restore(layout);
 });

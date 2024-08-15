@@ -35,7 +35,6 @@ fn glob_with_wd(indir: &str, input: &str) -> Vec<String> {
 fn main() -> Result<(), anyhow::Error> {
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let out_path = std::path::Path::new(&out_dir);
-
     let mut build = BuildCss::new("./src/less");
     let files = glob_with_wd("./src/less", "**/*.less");
     for src in files.iter() {

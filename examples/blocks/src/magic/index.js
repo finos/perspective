@@ -15,7 +15,7 @@ import { manaStyleListener } from "./mana_cost_utils.js";
 
 import "./upload_dialog.js";
 
-const WORKER = perspective.worker();
+const WORKER = await perspective.worker();
 
 const LAYOUT = (async function () {
     const req = await fetch("./layouts.json");

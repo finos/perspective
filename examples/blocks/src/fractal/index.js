@@ -140,6 +140,7 @@ function set_runnable() {
 }
 
 window.addEventListener("DOMContentLoaded", async function () {
+    await customElements.whenDefined("perspective-viewer");
     const heatmap_plugin = await window.viewer.getPlugin("Heatmap");
     heatmap_plugin.max_cells = 100000;
     make_range(xmin, xmax, "X");
@@ -149,7 +150,7 @@ window.addEventListener("DOMContentLoaded", async function () {
 
     run.addEventListener(
         "click",
-        make_run_click_callback(perspective.worker(), {})
+        make_run_click_callback(await perspective.worker(), {})
     );
     run.dispatchEvent(new Event("click"));
 });

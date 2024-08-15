@@ -58,9 +58,9 @@ const config = {
     customFields: {
         examples,
     },
-    markdown: {
-        format: "md",
-    },
+    // markdown: {
+    //     format: "md",
+    // },
 
     // Even if you don't use internalization, you can use this field to set useful
     // metadata like html lang. For example, if your site is Chinese, you may want
@@ -157,10 +157,6 @@ const config = {
                             {
                                 label: "GitHub",
                                 href: "https://github.com/finos/perspective",
-                            },
-                            {
-                                label: "FINOS",
-                                to: "https://finos.org",
                             },
                             {
                                 href: "https://www.prospective.co/blog",

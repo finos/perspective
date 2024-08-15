@@ -2259,8 +2259,7 @@ t_stree::get_aggregates_for_sorting(
         auto which_agg = agg_indices[idx];
         if (which_agg < 0) {
             aggregates[idx] = get_sortby_value(nidx);
-        } else if ((ctx2 != nullptr)
-                   || (size_t(which_agg) >= m_aggcols.size())) {
+        } else if ((ctx2 != nullptr) || (size_t(which_agg) >= m_aggcols.size())) {
             aggregates[idx].set(t_none());
             if (ctx2 != nullptr) {
                 if ((ctx2->get_config().get_totals() == TOTALS_BEFORE)

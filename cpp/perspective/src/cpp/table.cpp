@@ -522,9 +522,7 @@ PROMOTE_IMPL(DTYPE_INT32, DTYPE_INT64, DTYPE_INT64)
 template <typename A>
 static A
 json_into(const rapidjson::Value& value) {
-    if constexpr (std::is_same_v<A, std::int32_t>
-                  || std::is_same_v<A, std::int64_t>
-                  || std::is_same_v<A, double>) {
+    if constexpr (std::is_same_v<A, std::int32_t> || std::is_same_v<A, std::int64_t> || std::is_same_v<A, double>) {
         if (value.IsInt()) {
             return value.GetInt();
         }
@@ -542,8 +540,7 @@ json_into(const rapidjson::Value& value) {
                 return std::atoi(value.GetString());
             } else if constexpr (std::is_same_v<A, std::int64_t>) {
                 return std::atoll(value.GetString());
-            } else if constexpr (std::is_same_v<A, double>
-                                 || std::is_same_v<A, float>) {
+            } else if constexpr (std::is_same_v<A, double> || std::is_same_v<A, float>) {
                 return std::atof(value.GetString());
             } else {
                 static_assert(!std::is_same_v<A, A>, "No coercion for type");
@@ -765,11 +762,9 @@ fill_column_json(
         case t_dtype::DTYPE_BOOL: {
             if (value.IsBool()) [[likely]] {
                 col->set_nth<bool>(i, value.GetBool());
-            } else if (value.IsString()
-                       && istrequals(value.GetString(), "true")) {
+            } else if (value.IsString() && istrequals(value.GetString(), "true")) {
                 col->set_nth<bool>(i, true);
-            } else if (value.IsString()
-                       && istrequals(value.GetString(), "false")) {
+            } else if (value.IsString() && istrequals(value.GetString(), "false")) {
                 col->set_nth<bool>(i, false);
             } else if (value.IsInt()) {
                 col->set_nth<bool>(i, value.GetInt() != 0);

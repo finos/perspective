@@ -15,7 +15,7 @@
 mod client;
 // mod server;
 
-pub use client::client_sync::{PySyncClient, PySyncProxySession, PySyncTable, PySyncView};
+pub use client::client_sync::{Client, ProxySession, Table, View};
 use pyo3::prelude::*;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -48,12 +48,12 @@ fn init_tracing() {
 #[pymodule]
 fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     init_tracing();
-    m.add_class::<client::client_sync::PySyncClient>()?;
+    m.add_class::<client::client_sync::Client>()?;
     // m.add_class::<server::PySyncServer>()?;
     // m.add_class::<server::PySyncSession>()?;
-    m.add_class::<client::client_sync::PySyncTable>()?;
-    m.add_class::<client::client_sync::PySyncView>()?;
-    m.add_class::<client::client_sync::PySyncProxySession>()?;
+    m.add_class::<client::client_sync::Table>()?;
+    m.add_class::<client::client_sync::View>()?;
+    m.add_class::<client::client_sync::ProxySession>()?;
     m.add(
         "PerspectiveError",
         py.get_type_bound::<client::PyPerspectiveError>(),

@@ -807,7 +807,7 @@ parse_format_options(
         viewport.has_end_row()
             ? viewport.end_row()
             : (viewport_height != 0 ? out.start_row + viewport_height : max_rows
-              )
+            )
     );
     out.end_col = std::min(
         max_cols,
