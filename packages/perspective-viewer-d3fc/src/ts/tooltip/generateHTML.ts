@@ -29,9 +29,9 @@ function addDataValues(tooltipDiv, values) {
         .join("li")
         .each(function (d) {
             select(this)
-                .text(`${d.name}: `) // Use .html() instead of .text()
+                .text(`${d.name}: `)
                 .append("b")
-                .text(formatNumber(d.value)); // Use .html() instead of .text()
+                .text(formatNumber(d.value));
         });
 }
 
