@@ -29,17 +29,23 @@ function addDataValues(tooltipDiv, values) {
         .join("li")
         .each(function (d) {
             select(this)
-                .text(`${d.name}: `)
+                .html(`${d.name}: `) // Use .html() instead of .text()
                 .append("b")
-                .text(formatNumber(d.value));
+                .html(formatNumber(d.value)); // Use .html() instead of .text()
         });
 }
 
 const formatNumber = (value) =>
     value === null || value === undefined
         ? "-"
-        : value.toLocaleString(undefined, {
-              style: "decimal",
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-          });
+        : highlightDecimal(
+              value.toLocaleString(undefined, {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+              })
+          );
+
+function highlightDecimal(value: string) {
+    return value.replace(".", "<span class='highlight-decimal'>.</span>");
+}
