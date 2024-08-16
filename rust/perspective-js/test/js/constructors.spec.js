@@ -1286,6 +1286,43 @@ function validate_typed_array(typed_array, column_data) {
             table.delete();
         });
 
+
+        test("CSV Reader parses milliseconds", async function () {
+            const a = '"start"\n2024-08-14T14:06:07.826Z';
+            const table = await perspective.table(a);
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"start"\n2024-08-14 14:06:07.826\n');
+            view.delete();
+            table.delete();
+        });
+
+        test("CSV Reader update parses milliseconds", async function () {
+            const a = '"d"\n2024-08-14T14:06:07.826Z';
+            const table = await perspective.table({
+                d: "datetime",
+            });
+            await table.update(a);
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"d"\n2024-08-14 14:06:07.826\n');
+            view.delete();
+            table.delete();
+        });
+
+        test("JSON Reader parses milliseconds", async function () {
+            const a = "2024-08-14T14:06:07.826Z";
+            const table = await perspective.table({
+                d: "datetime",
+            });
+            await table.update({ d: [a] });
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"d"\n2024-08-14 14:06:07.826\n');
+            view.delete();
+            table.delete();
+        });
+
         test("Handles utf16 column names", async function () {
             var table = await perspective.table({ š: [1, 2, 3] });
             let view = await table.view({});

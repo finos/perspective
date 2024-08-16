@@ -57,7 +57,7 @@ export async function compile_perspective(
                     const str = Error().stack || "";
                     const textEncoder = new TextEncoder();
                     const bytes = textEncoder.encode(str);
-                    const ptr = module._psp_js_alloc(bytes.byteLength + 1);
+                    const ptr = module._psp_alloc(bytes.byteLength + 1);
                     module.HEAPU8.set(bytes, ptr);
                     module.HEAPU8[ptr + bytes.byteLength] = 0;
                     return ptr;

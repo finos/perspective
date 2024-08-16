@@ -261,6 +261,13 @@ public:
             }
             if (length == 23) {
                 // "YYYY-MM-DD[ T]hh:mm:ss.sss"
+
+                // if we are trying to parse this with seconds, fail
+                // and we think it will try to parse this again but as
+                // nanoseconds :) then it wont truncate the fractional bits.
+                if (unit == arrow::TimeUnit::SECOND) {
+                    return false;
+                }
                 arrow_vendored::date::year_month_day ymd;
                 if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
                     return false;
