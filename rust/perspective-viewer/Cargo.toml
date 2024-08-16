@@ -21,7 +21,7 @@ license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
 build = "build.rs"
-include = ["build.rs", "src/**/*", "Cargo.toml", "package.json"]
+include = ["build.rs", "src/**/*", "Cargo.toml", "package.json", "docs/**/*"]
 
 [package.metadata.docs.rs]
 rustc-args = ["--cfg", "web_sys_unstable_apis"]
