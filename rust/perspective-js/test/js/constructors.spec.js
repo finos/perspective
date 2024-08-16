@@ -1286,6 +1286,137 @@ function validate_typed_array(typed_array, column_data) {
             table.delete();
         });
 
+        test("CSV Parses an ISO-8601 formatted string with milliseconds and timezone", async function () {
+            let table = await perspective.table(
+                "d\n2008-09-15T10:00:00.123+05:45"
+            );
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 04:15:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("JSON Parses an ISO-8601 formatted string with milliseconds and timezone", async function () {
+            let table = await perspective.table({
+                d: ["2008-09-15T10:00:00.123+05:45"],
+            });
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 04:15:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("CSV Updates an ISO-8601 formatted string with milliseconds and timezone", async function () {
+            let table = await perspective.table({ d: "datetime" });
+            await table.update("d\n2008-09-15T10:00:00.123+05:45");
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 04:15:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("JSON Updates an ISO-8601 formatted string with milliseconds and timezone", async function () {
+            let table = await perspective.table({ d: "datetime" });
+            await table.update({
+                d: ["2008-09-15T10:00:00.123+05:45"],
+            });
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 04:15:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("CSV Parses an ISO-8601 formatted string with microseconds and timezone", async function () {
+            let table = await perspective.table(
+                "d\n2008-09-15T15:30:00.123456+05:30"
+            );
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 10:00:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("JSON Parses an ISO-8601 formatted string with microseconds and timezone", async function () {
+            let table = await perspective.table({
+                d: ["2008-09-15T15:30:00.123456+05:30"],
+            });
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 10:00:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("CSV Updates an ISO-8601 formatted string with microseconds and timezone", async function () {
+            let table = await perspective.table({ d: "datetime" });
+            await table.update("d\n2008-09-15T15:30:00.123456+05:30");
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 10:00:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("JSON Updates an ISO-8601 formatted string with microseconds and timezone", async function () {
+            let table = await perspective.table({ d: "datetime" });
+            await table.update({
+                d: ["2008-09-15T15:30:00.123456+05:30"],
+            });
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 10:00:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("CSV Parses an ISO-8601 formatted string with nanoseconds and timezone", async function () {
+            let table = await perspective.table(
+                "d\n2008-09-15T15:15:00.123456789-05:15"
+            );
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 20:30:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("JSON Parses an ISO-8601 formatted string with nanoseconds and timezone", async function () {
+            let table = await perspective.table({
+                d: ["2008-09-15T15:15:00.123456789-05:15"],
+            });
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 20:30:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("CSV Updates an ISO-8601 formatted string with nanoseconds and timezone", async function () {
+            let table = await perspective.table({ d: "datetime" });
+            await table.update("d\n2008-09-15T15:15:00.123456789-05:15");
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 20:30:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
+
+        test("JSON Updates an ISO-8601 formatted string with nanoseconds and timezone", async function () {
+            let table = await perspective.table({ d: "datetime" });
+            await table.update({
+                d: ["2008-09-15T15:15:00.123456789-05:15"],
+            });
+            let view = await table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual('"d"\n2008-09-15 20:30:00.123\n');
+            await view.delete();
+            await table.delete();
+        });
 
         test("CSV Reader parses milliseconds", async function () {
             const a = '"start"\n2024-08-14T14:06:07.826Z';
@@ -1303,6 +1434,52 @@ function validate_typed_array(typed_array, column_data) {
                 d: "datetime",
             });
             await table.update(a);
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"d"\n2024-08-14 14:06:07.826\n');
+            view.delete();
+            table.delete();
+        });
+
+        test("CSV Reader update updates microseconds", async function () {
+            const a = '"d"\n2024-08-14T14:06:07.826789Z';
+            const table = await perspective.table({
+                d: "datetime",
+            });
+            await table.update(a);
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"d"\n2024-08-14 14:06:07.826\n');
+            view.delete();
+            table.delete();
+        });
+
+        test("CSV Reader update updates nanoseconds", async function () {
+            const a = '"d"\n2024-08-14T14:06:07.826789789Z';
+            const table = await perspective.table({
+                d: "datetime",
+            });
+            await table.update(a);
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"d"\n2024-08-14 14:06:07.826\n');
+            view.delete();
+            table.delete();
+        });
+
+        test("CSV Reader update parses microseconds", async function () {
+            const a = '"d"\n2024-08-14T14:06:07.826789Z';
+            const table = await perspective.table(a);
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"d"\n2024-08-14 14:06:07.826\n');
+            view.delete();
+            table.delete();
+        });
+
+        test("CSV Reader update parses nanoseconds", async function () {
+            const a = '"d"\n2024-08-14T14:06:07.826789789Z';
+            const table = await perspective.table(a);
             const view = await table.view();
             const csv1 = await view.to_csv();
             expect(csv1).toEqual('"d"\n2024-08-14 14:06:07.826\n');
