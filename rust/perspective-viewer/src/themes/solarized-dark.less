@@ -48,7 +48,9 @@ perspective-string-column-style[theme="Solarized Dark"] {
     --inactive--border-color: var(--inactive--color);
     --plugin--background: #073642;
 
-    --select-arrow--background-image: url("../svg/dropdown-selector.svg");
+    --select-arrow--background-image: var(
+        --select-arrow-light--background-image
+    );
 }
 
 // @mixin perspective-viewer-solarized-dark--datagrid {}
@@ -61,9 +63,11 @@ perspective-string-column-style[theme="Solarized Dark"] {
     --d3fc-gridline--color: #002b36;
     --d3fc-legend--text: #93a1a1;
 
-    --d3fc-full--gradient: linear-gradient(#cb4b16 0%,
-            #073642 50%,
-            #268bd2 100%);
+    --d3fc-full--gradient: linear-gradient(
+        #cb4b16 0%,
+        #073642 50%,
+        #268bd2 100%
+    );
 
     // --d3fc-positive--gradient: linear-gradient(#073642 0%, #268bd2 100%);
     --d3fc-negative--gradient: linear-gradient(#cb4b16 0%, #073642 100%);

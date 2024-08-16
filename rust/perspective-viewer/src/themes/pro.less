@@ -94,7 +94,9 @@ perspective-string-column-style[theme="Pro Light"] {
     --warning--background: #042121;
     --warning--color: #fdfffd;
 
-    --select-arrow--background-image: url("../svg/dropdown-selector-light.svg");
+    --select-arrow--background-image: var(
+        --select-arrow-dark--background-image
+    );
 
     // TODO deprecate me
     --overflow-hint-icon--color: #fdfffd;

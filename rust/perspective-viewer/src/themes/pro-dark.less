@@ -68,7 +68,9 @@ perspective-string-column-style[theme="Pro Dark"] {
     --warning--color: #242526;
     --warning--background: var(--icon--color);
 
-    --select-arrow--background-image: url("../svg/dropdown-selector.svg");
+    --select-arrow--background-image: var(
+        --select-arrow-light--background-image
+    );
 
     // Column type indicators
     --float--column-type--color: #7dc3f0;

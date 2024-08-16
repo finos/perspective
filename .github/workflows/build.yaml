@@ -223,6 +223,12 @@ jobs:
                   name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
                   path: rust/target/wheels/*.whl
 
+    # ,-,---.       .    .   .-,--.           .     .
+    #  '|___/ . . . |  ,-|    '|__/ . . ,-. ,-| . ,-| ,-.
+    #  ,|   \ | | | |  | |    .|    | | | | | | | | | |-'
+    # `-^---' `-' ' `' `-'    `'    `-| `-' `-' ' `-' `-'
+    #                                /|
+    #                               `-'
     build_emscripten_wheel:
         runs-on: ${{ matrix.os }}
         strategy:
@@ -249,7 +255,7 @@ jobs:
               with:
                   javascript: "false"
                   arch: ${{ matrix.arch }}
-                  manylinux: ${{ matrix.container && 'true' || 'false' }}
+                  manylinux: "false"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
             - name: Python Build Pyodide
@@ -570,6 +576,10 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-dist-x86_64-ubuntu-22.04-3.9
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-dist-wasm32-emscripten-3.9
 
             - uses: actions/download-artifact@v4
               with:

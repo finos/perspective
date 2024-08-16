@@ -61,8 +61,8 @@ performance, as the plugin-assisted bundle version of Perspective:
 
 Perspective comes with bundler plugins for:
 
--   Webpack via `@finos/perspective-webpack-plugin`
 -   `esbuild` via `@finos/perspective-esbuild-plugin`
+-   Webpack via `@finos/perspective-webpack-plugin`
 
 ##### Webpack
 
@@ -243,15 +243,16 @@ It exports Perspective's data interfaces:
 
 `@finos/perspective` also exports process management functions, such as
 `worker()` and `websocket()` (in the browser) and `WebSocketServer()` (in
-Node.js). See the [API documentation](/obj/perspective.md) for a complete
-reference on all exported methods. This module is a dependency of
+Node.js). See the
+[API documentation](<[/obj/perspective.md](https://docs.rs/perspective-js/latest/perspective_js/)>)
+for a complete reference on all exported methods. This module is a dependency of
 `@finos/perspective-viewer`, and is not needed if you only intend to use
 `<perspective-viewer>` to visualize simple data.
 
 ### Importing in the browser
 
 `perspective` can be imported as an ES6 module and/or `require` syntax if you're
-using a bundler such as Webpack (and the `@finos/perspective-webpack-plugin`):
+using a bundler such as ESBuild (and the `@finos/perspective-esbuild-plugin`):
 
 ```javascript
 import perspective from "@finos/perspective";
@@ -311,7 +312,7 @@ view.to_csv().then((csv) => console.log(csv));
 view.to_arrow().then((arrow) => console.log(arrow));
 ```
 
-Via ES6 `await`/`async`
+Via `await`/`async`
 
 ```javascript
 async function print_data() {
