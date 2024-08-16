@@ -19,13 +19,25 @@ name = "perspective-python"
 requires-python = ">=3.9"
 dynamic = ["version"]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 3",
+    "Framework :: Jupyter :: JupyterLab :: Extensions",
+    # "Framework :: Jupyter :: JupyterLab :: Extensions :: Mime Renderers",
+    "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
 ]
+dependencies = ["Jinja2>=2.0,<4", "ipywidgets>=7.5.1,<9"]
 
 [tool.maturin]
 module-name = "perspective"
-data = "perspective_python-3.0.0rc6.data"
+data = "perspective_python-3.0.0.data"
 features = ["pyo3/extension-module"]
 include = [
     { path = "perspective/*libpsp.so", format = "wheel" },
