@@ -12,7 +12,7 @@ function(psp_build_dep name cmake_file)
     else()
         configure_file(${cmake_file} ${CMAKE_BINARY_DIR}/${name}-download/CMakeLists.txt)
         set(_cwd ${CMAKE_BINARY_DIR}/${name}-download)
-        
+
         message(STATUS "Configuring ${name} in ${_cwd}")
 
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -24,7 +24,7 @@ function(psp_build_dep name cmake_file)
         if(result)
             message(FATAL_ERROR "CMake step for ${name} failed:\nSTDOUT:${cmd_output}\nSTDERR: ${cmd_error}")
         endif()
-        
+
         message("${cmd_output}")
 
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
