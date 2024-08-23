@@ -5,10 +5,10 @@
         <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro.css" />
         <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-workspace/dist/css/pro.css" />
 
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@2.10.0/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-workspace@2.10.0/dist/cdn/perspective-workspace.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@2.10.0/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@2.10.0/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.0.0/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-workspace@3.0.0/dist/cdn/perspective-workspace.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.0.0/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.0.0/dist/cdn/perspective-viewer-d3fc.js"></script>
 
         <style>
             body {
@@ -33,64 +33,63 @@
         <perspective-workspace id="workspace"></perspective-workspace>
 
         <script type="module">
-            import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.10.0/dist/cdn/perspective.js";
+            await customElements.whenDefined("perspective-viewer");
+            import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.0.0/dist/cdn/perspective.js";
             const datasource = async () => {
                 const request = fetch("./olympics.arrow");
-                const worker = perspective.worker();
+                const worker = await perspective.worker();
                 const response = await request;
                 const arrow = await response.arrayBuffer();
                 const table = await worker.table(arrow);
                 return table;
             };
 
-            window.addEventListener("load", () => {
-                window.workspace.tables.set("olympics", datasource());
-                window.workspace.restore({
-                    sizes: [1],
-                    detail: {
-                        main: {
-                            type: "tab-area",
-                            widgets: ["PERSPECTIVE_GENERATED_ID_1", "PERSPECTIVE_GENERATED_ID_0"],
-                            currentIndex: 1,
-                        },
+            window.workspace.tables.set("olympics", datasource());
+            window.workspace.restore({
+                sizes: [1],
+                detail: {
+                    main: {
+                        type: "tab-area",
+                        widgets: ["PERSPECTIVE_GENERATED_ID_1", "PERSPECTIVE_GENERATED_ID_0"],
+                        currentIndex: 1,
                     },
-                    mode: "globalFilters",
-                    viewers: {
-                        PERSPECTIVE_GENERATED_ID_1: {
-                            plugin: "X/Y Scatter",
-                            title: "Avg Height vs Weight by Sport",
-                            group_by: ["Sport"],
-                            columns: ["Height", "Weight", null, "City", null, "Sport", null],
-                            filter: [["Height", "==", null]],
-                            sort: [["Name", "desc"]],
-                            expressions: {},
-                            aggregates: {
-                                Name: "distinct count",
-                                Weight: "avg",
-                                Sport: "dominant",
-                                Height: "avg",
-                            },
-                            table: "olympics",
+                },
+                mode: "globalFilters",
+                viewers: {
+                    PERSPECTIVE_GENERATED_ID_1: {
+                        plugin: "X/Y Scatter",
+                        title: "Avg Height vs Weight by Sport",
+                        group_by: ["Sport"],
+                        columns: ["Height", "Weight", null, "City", null, "Sport", null],
+                        filter: [["Height", "==", null]],
+                        sort: [["Name", "desc"]],
+                        expressions: {},
+                        aggregates: {
+                            Name: "distinct count",
+                            Weight: "avg",
+                            Sport: "dominant",
+                            Height: "avg",
                         },
-                        PERSPECTIVE_GENERATED_ID_0: {
-                            plugin: "Heatmap",
-                            title: "Age Distribution by Sport",
-                            group_by: ["Age"],
-                            split_by: ["Sport"],
-                            columns: ["Name"],
-                            filter: [
-                                ["Medal", "!=", "NA"],
-                                ["Age", "is not null", null],
-                            ],
-                            sort: [["Name", "col asc"]],
-                            expressions: {},
-                            aggregates: {
-                                Age: "avg",
-                            },
-                            table: "olympics",
-                        },
+                        table: "olympics",
                     },
-                });
+                    PERSPECTIVE_GENERATED_ID_0: {
+                        plugin: "Heatmap",
+                        title: "Age Distribution by Sport",
+                        group_by: ["Age"],
+                        split_by: ["Sport"],
+                        columns: ["Name"],
+                        filter: [
+                            ["Medal", "!=", "NA"],
+                            ["Age", "is not null", null],
+                        ],
+                        sort: [["Name", "col asc"]],
+                        expressions: {},
+                        aggregates: {
+                            Age: "avg",
+                        },
+                        table: "olympics",
+                    },
+                },
             });
         </script>
     </body>

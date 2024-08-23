@@ -1,28 +1,19 @@
-<!--
-   
-   Copyright (c) 2017, the Perspective Authors.
-   
-   This file is part of the Perspective library, distributed under the terms of
-   the Apache License 2.0.  The full license can be found in the LICENSE file.
-
--->
-
 <!DOCTYPE html>
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
 
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective@2.10.0/dist/cdn/perspective.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@2.10.0/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@2.10.0/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@2.10.0/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective@3.0.0/dist/cdn/perspective.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.0.0/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.0.0/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.0.0/dist/cdn/perspective-viewer-d3fc.js"></script>
 
         <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/themes.css" />
 
         <script type="module">
-            import { worker } from "https://cdn.jsdelivr.net/npm/@finos/perspective@2.10.0/dist/cdn/perspective.js";
+            import { worker } from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.0.0/dist/cdn/perspective.js";
 
-            const WORKER = worker();
+            const WORKER = await worker();
             const REQ = fetch("https://api.covidtracking.com/v1/states/daily.csv");
 
             const LAYOUT = {
@@ -50,17 +41,12 @@ bucket(date(year, month, day), \'W\')`,
                 aggregates: {},
             };
 
-            async function load() {
-                const resp = await REQ;
-                const csv = await resp.text();
-                const el = document.getElementsByTagName("perspective-viewer")[0];
-                const table = WORKER.table(csv);
-                el.load(table);
-                el.restore(LAYOUT);
-                el.toggleConfig();
-            }
-
-            window.addEventListener("DOMContentLoaded", load);
+            const resp = await REQ;
+            const csv = await resp.text();
+            const el = document.getElementsByTagName("perspective-viewer")[0];
+            const table = WORKER.table(csv);
+            el.load(table);
+            el.restore(LAYOUT);
         </script>
 
         <style>
