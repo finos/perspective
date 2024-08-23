@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#include <chrono>
 #include <perspective/base.h>
 #include <perspective/arrow_csv.h>
 #include <arrow/util/value_parsing.h>
@@ -223,24 +224,67 @@ ParseSSS(const char* s, std::chrono::milliseconds* out) {
 }
 
 static inline bool
-ParseTZ(const char* s, std::chrono::hours* out) {
-    uint8_t hours = 0;
+ParseSSSSSS(const char* s, std::chrono::microseconds* out) {
+    uint32_t nanos = 0;
+    if (ARROW_PREDICT_FALSE(s[0] != '.')) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 1, 6, &nanos)
+        )) {
+        return false;
+    }
 
-    if (ARROW_PREDICT_FALSE(s[0] != '+') && ARROW_PREDICT_FALSE(s[0] != '-')) {
+    if (ARROW_PREDICT_FALSE(nanos >= 999999)) {
+        return false;
+    }
+    *out = std::chrono::microseconds(nanos);
+    return true;
+}
+
+static inline bool
+ParseSSSSSSSSS(const char* s, std::chrono::nanoseconds* out) {
+    uint32_t nanos = 0;
+    if (ARROW_PREDICT_FALSE(s[0] != '.')) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 1, 9, &nanos)
+        )) {
+        return false;
+    }
+
+    if (ARROW_PREDICT_FALSE(nanos >= 999999999)) {
+        return false;
+    }
+    *out = std::chrono::nanoseconds(nanos);
+    return true;
+}
+
+static inline bool
+ParseTZ(const char* s, std::chrono::minutes* out) {
+    uint8_t hours = 0;
+    uint8_t minutes = 0;
+    if ((ARROW_PREDICT_FALSE(s[0] != '+') && ARROW_PREDICT_FALSE(s[0] != '-'))
+        || ARROW_PREDICT_FALSE(s[3] != ':')) {
         return false;
     }
     if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 1, 2, &hours)
         )) {
         return false;
     }
-
-    if (ARROW_PREDICT_FALSE(hours >= 12)) {
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 4, 2, &minutes)
+        )) {
         return false;
     }
-    if (s[0] == '-') {
-        hours = -hours;
+
+    if (ARROW_PREDICT_FALSE(hours >= 12)
+        || ARROW_PREDICT_FALSE(minutes >= 59)) {
+        return false;
     }
-    *out = std::chrono::hours(hours);
+    int32_t total = hours * 60 + minutes;
+    if (s[0] == '+') {
+        total = -total;
+    }
+    *out = std::chrono::minutes(total);
     return true;
 }
 
@@ -254,13 +298,20 @@ public:
         int64_t* out,
         bool* out_zone_offset_present = NULLPTR
     ) const override {
+        // if we are trying to parse this with seconds, fail
+        // and it will try to parse this again but as
+        // nanoseconds :) then it wont truncate the fractional bits.
+        if (unit == arrow::TimeUnit::SECOND) {
+            return false;
+        }
 
         if (!arrow::internal::ParseTimestampISO8601(s, length, unit, out)) {
             if (s[length - 1] == 'Z') {
                 --length;
             }
             if (length == 23) {
-                // "YYYY-MM-DD[ T]hh:mm:ss.sss"
+                // "YYYY-MM-DD[ T]hh:mm:ss.sss" -- millis
+
                 arrow_vendored::date::year_month_day ymd;
                 if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
                     return false;
@@ -281,8 +332,9 @@ public:
                 );
                 return true;
             }
+
             if (length == 25) {
-                // "2008-09-15[ T]15:53:00+05:00"
+                // "2008-09-15[ T]15:53:00+05:00" -- seconds with TZ
                 arrow_vendored::date::year_month_day ymd;
                 if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
                     return false;
@@ -293,7 +345,7 @@ public:
                     ))) {
                     return false;
                 }
-                std::chrono::hours tz;
+                std::chrono::minutes tz;
                 if (ARROW_PREDICT_FALSE(!ParseTZ(s + 19, &tz))) {
                     return false;
                 }
@@ -301,6 +353,137 @@ public:
                 *out = ConvertTimePoint(
                     arrow_vendored::date::sys_days(ymd) + tz + seconds, unit
                 );
+                return true;
+            }
+            if (length == 26) {
+                // YYYY-MM-DD[ T]hh:mm:ss.ssssss  -- micros
+
+                arrow_vendored::date::year_month_day ymd;
+                if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
+                    return false;
+                }
+                std::chrono::seconds seconds;
+                if (ARROW_PREDICT_FALSE(!arrow::internal::detail::ParseHH_MM_SS(
+                        s + 11, &seconds
+                    ))) {
+                    return false;
+                }
+                std::chrono::microseconds micros;
+                if (ARROW_PREDICT_FALSE(!ParseSSSSSS(s + 19, &micros))) {
+                    return false;
+                }
+                // round the micros into millis as Perspective does not support
+                // nano precision.
+                auto millis =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(micros
+                    );
+                *out = ConvertTimePoint(
+                    arrow_vendored::date::sys_days(ymd) + seconds + millis, unit
+                );
+
+                return true;
+            }
+
+            if (length == 29) {
+                // YYYY-MM-DD[ T]hh:mm:ss.sssssssss  -- nanos
+                // arrow handles YYYY-MM-DD[ T]hh:mm:ss.sss[+-]HH:MM
+                std::cout << "DDD WOOHOOOOO!\n";
+                arrow_vendored::date::year_month_day ymd;
+                if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
+                    return false;
+                }
+                std::chrono::seconds seconds;
+                if (ARROW_PREDICT_FALSE(!arrow::internal::detail::ParseHH_MM_SS(
+                        s + 11, &seconds
+                    ))) {
+                    return false;
+                }
+                // we can now be at sss[+-]HH:MM  -- millis and TZ
+                // or sssssssss -- nanos
+                std::chrono::nanoseconds nanos;
+                if (ARROW_PREDICT_FALSE(!ParseSSSSSSSSS(s + 19, &nanos))) {
+                    return false;
+                }
+                // Truncate the nanos into millis as Perspective does not
+                // support nano precision.
+                auto millis =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(nanos
+                    );
+
+                *out = ConvertTimePoint(
+                    arrow_vendored::date::sys_days(ymd) + seconds + millis, unit
+                );
+
+                return true;
+            }
+            if (length == 32) {
+                // YYYY-MM-DD[ T]hh:mm:ss.ssssss[+-]HH:MM  -- micros with TZ
+
+                arrow_vendored::date::year_month_day ymd;
+                if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
+                    return false;
+                }
+                std::chrono::seconds seconds;
+                if (ARROW_PREDICT_FALSE(!arrow::internal::detail::ParseHH_MM_SS(
+                        s + 11, &seconds
+                    ))) {
+                    return false;
+                }
+                std::chrono::microseconds micros;
+                if (ARROW_PREDICT_FALSE(!ParseSSSSSS(s + 19, &micros))) {
+                    return false;
+                }
+                // round the micros into millis as Perspective does not support
+                // nano precision.
+                auto millis =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(micros
+                    );
+
+                std::chrono::minutes tz;
+                if (ARROW_PREDICT_FALSE(!ParseTZ(s + 26, &tz))) {
+                    return false;
+                }
+                *out = ConvertTimePoint(
+                    arrow_vendored::date::sys_days(ymd) + seconds + millis + tz,
+                    unit
+                );
+
+                return true;
+            }
+
+            if (length == 35) {
+                // YYYY-MM-DD[ T]hh:mm:ss.sssssssss[+-]HH:MM -- nanos with TZ
+
+                arrow_vendored::date::year_month_day ymd;
+                if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
+                    return false;
+                }
+                std::chrono::seconds seconds;
+                if (ARROW_PREDICT_FALSE(!arrow::internal::detail::ParseHH_MM_SS(
+                        s + 11, &seconds
+                    ))) {
+                    return false;
+                }
+                std::chrono::nanoseconds nanos;
+                if (ARROW_PREDICT_FALSE(!ParseSSSSSSSSS(s + 19, &nanos))) {
+                    return false;
+                }
+                // round the nanos into millis as Perspective does not support
+                // nano precision.
+                auto millis =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(nanos
+                    );
+
+                std::chrono::minutes tz;
+                if (ARROW_PREDICT_FALSE(!ParseTZ(s + 29, &tz))) {
+                    return false;
+                }
+
+                *out = ConvertTimePoint(
+                    arrow_vendored::date::sys_days(ymd) + seconds + millis + tz,
+                    unit
+                );
+
                 return true;
             }
             return false;
@@ -387,8 +570,8 @@ std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_PARSERS{
     std::make_shared<CustomISO8601Parser>(),
     std::make_shared<USTimestampParser>(),
     arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
-    arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"
-    ), // US locale string
+    arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"),
+    // US locale string
     arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
     arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
     arrow::TimestampParser::MakeStrptime("%d %m %Y"),
@@ -401,8 +584,8 @@ std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{
     std::make_shared<CustomISO8601Parser>(),
     std::make_shared<USTimestampParser>(),
     arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
-    arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"
-    ), // US locale string
+    arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"),
+    // US locale
     arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
     arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
     arrow::TimestampParser::MakeStrptime("%d %m %Y"),

@@ -56,10 +56,25 @@ import type * as psp_types from "@finos/perspective";
                 { x: 1, y: 2 },
                 { x: 3, y: 4 },
             ]);
-            table.replace([{ x: 5, y: 6 }]);
+            await table.replace([{ x: 5, y: 6 }]);
             json = await view.to_json();
             expect(json).toHaveLength(1);
             expect(json).toEqual([{ x: 5, y: 6 }]);
+            view.delete();
+            table.delete();
+        });
+
+        test("Replaces CSV Table with high precision datetimes", async function () {
+            const a = '"start"\n2024-08-14T14:06:07.826Z';
+            const b = '"start"\n2024-08-14T14:06:09.876667543Z';
+            const table = await perspective.table(a);
+            const view = await table.view();
+            const csv1 = await view.to_csv();
+            expect(csv1).toEqual('"start"\n2024-08-14 14:06:07.826\n');
+
+            await table.replace(b);
+            const csv2 = await view.to_csv();
+            expect(csv2).toEqual('"start"\n2024-08-14 14:06:09.876\n');
             view.delete();
             table.delete();
         });
@@ -95,7 +110,7 @@ import type * as psp_types from "@finos/perspective";
                 { x: 3, y: 4 },
             ]);
 
-            table.replace([{ x: 5, y: 6 }]);
+            await table.replace([{ x: 5, y: 6 }]);
             await result;
         });
 
@@ -139,7 +154,7 @@ import type * as psp_types from "@finos/perspective";
                 { x: 3, y: 4 },
             ]);
 
-            table.replace([{ x: 5, y: 6 }]);
+            await table.replace([{ x: 5, y: 6 }]);
             await result;
         });
 
