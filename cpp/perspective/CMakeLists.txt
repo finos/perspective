@@ -424,6 +424,22 @@ psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
+# ExternalProject_Add was not working for zstd, SOURCE_SUBDIR was not being honored.
+include(FetchContent)
+
+set(ZSTD_BUILD_STATIC ON)
+set(ZSTD_BUILD_SHARED OFF)
+set(ZSTD_BUILD_COMPRESSION OFF)
+
+FetchContent_Declare(
+    zstd
+    URL "https://github.com/facebook/zstd/releases/download/v1.5.5/zstd-1.5.5.tar.gz"
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    SOURCE_SUBDIR build/cmake
+)
+
+FetchContent_MakeAvailable(zstd)
+
 # Build minimal arrow for both Emscripten and Python
 psp_build_message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 

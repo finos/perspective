@@ -90,7 +90,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/byte_size.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cancel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_zstd.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_zstd.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_lz4.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/counting_semaphore.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/debug.cc
@@ -154,11 +154,11 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/expression.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc    
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/ordering.cc
 
-    
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/registry.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_basic.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_mode.cc
@@ -278,8 +278,10 @@ add_library(arrow STATIC ${ARROW_SRCS})
 
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
-# target_compile_definitions(arrow PUBLIC ARROW_WITH_ZSTD=ON)
+target_compile_definitions(arrow PUBLIC ARROW_WITH_ZSTD=ON)
 target_compile_definitions(arrow PUBLIC ARROW_WITH_LZ4)
+
+target_include_directories(arrow SYSTEM PRIVATE ${zstd_SOURCE_DIR}/lib)
 
 # will need built boost filesystem and system .lib to work, even though
 # perspective itself does not use those dependencies
@@ -288,6 +290,7 @@ target_link_libraries(arrow
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     lz4_static
+    libzstd_static
     ${ARROW_TEST_LINK_TOOLCHAIN})
 
 # find_package(Flatbuffers)
