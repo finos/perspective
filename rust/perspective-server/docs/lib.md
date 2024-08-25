@@ -1,16 +1,17 @@
----
-id: server
-title: Data Binding
----
+<style>{"svg{width:100%;height:100%"}</style>
 
-import Arch1Svg from "@site/static/svg/architecture.svg"; import Arch2Svg from
-"@site/static/svg/architecture.sub1.svg"; import Arch3Svg from
-"@site/static/svg/architecture.sub2.svg"; import Arch4Svg from
-"@site/static/svg/architecture.sub3.svg";
+This crate contains the server/engine components of the
+[Perspective](https://perspective.finos.org) data visualization suite. It is
+meant to be used in conjunction with the other crates of this project, e.g.
+`perspective-client` to create client connections to a server.
 
-<style>{".markdown svg{width:100%;height:100%"}</style>
+The [`perspective`] crate provides a convenient frontend for Rust developers,
+including both [`perspective_client`] and [`perspective_server`] as well as
+other convenient integration helpers.
 
-<Arch1Svg />
+# Data Binding Options
+
+<img src="./architecture.svg" />
 
 Application developers can choose from [Client (WebAssembly)](#client-only),
 [Server (Python/Node)](#server-only) or
@@ -19,9 +20,13 @@ web application can use one or a mix of these designs as needed. By serializing
 to Apache Arrow, tables are duplicated and synchronized across runtimes
 efficiently.
 
+Perspective is a multi-language platform. The examples in this section use
+Python and JavaScript as an example, but the same general principles apply to
+any `Client`/`Server` combination.
+
 ## Client-only
 
-<Arch2Svg />
+<img src="./architecture.sub1.svg" />
 
 _For static datasets, datasets provided by the user, and simple server-less and
 read-only web applications._
@@ -61,7 +66,7 @@ await viewer.load(table);
 
 ## Client/Server Replicated
 
-<Arch4Svg />
+<img src="./architecture.sub2.svg" />
 
 _For medium-sized, real-time, synchronized and/or editable data sets with many
 concurrent users._
@@ -120,7 +125,7 @@ await viewer.load(client_table);
 
 ## Server-only
 
-<Arch3Svg />
+<img src="./architecture.sub3.svg" />
 
 _For extremely large datasets with a small number of concurrent users._
 
@@ -151,3 +156,12 @@ const viewer = document.createElement("perspective-viewer");
 document.body.appendChild(viewer);
 await viewer.load(server_table);
 ```
+
+# Feature Flags
+
+The following feature flags are available to enable in your `Cargo.toml`:
+
+-   `external-cpp` Set this flag to configure this crate's compile process to
+    look for Perspective C++ source code in the environment rather than locally,
+    e.g. for when you build this crate in-place in the Perspective repo source
+    tree.

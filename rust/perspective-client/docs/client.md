@@ -4,6 +4,10 @@ transport like a WebSocket.
 
 <div class="javascript">
 
+<div class="warning">
+The examples in this module are in JavaScript. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
+
 The browser and node.js libraries both support the `websocket(url)` constructor,
 which connects to a remote `perspective_server::Server` instance over a
 WebSocket transport.
@@ -39,6 +43,10 @@ import { default as client } from "@finos/perspective";
 
 </div>
 <div class="python">
+
+<div class="warning">
+The examples in this module are in Python. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
 
 # Python Examples
 

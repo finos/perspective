@@ -75,6 +75,10 @@
     -webkit-mask-image: var(--toolbar-edit-mode--edit--content);
 }
 
+:host(.aggregated) #toolbar #edit_mode[data-edit-mode="EDIT"]:before {
+    -webkit-mask-image: var(--toolbar-edit-mode--read-only--content);
+}
+
 #edit_mode[data-edit-mode="SELECT_ROW"]:before {
     -webkit-mask-image: var(--toolbar-edit-mode--select-row--content);
 }
@@ -117,10 +121,6 @@
 
 #scroll_lock.lock-scroll span:before {
     content: var(--scroll-lock-alt-toggle--content, "Align Scroll");
-}
-
-:host(.aggregated) #toolbar #edit_mode {
-    display: none;
 }
 
 // The icon.

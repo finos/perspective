@@ -1,6 +1,11 @@
 The [`View`] struct is Perspective's query and serialization interface. It
 represents a query on the `Table`'s dataset and is always created from an
-existing `Table` instance via the [`Table::view`] method. .
+existing `Table` instance via the [`Table::view`] method.
+
+<div class="javascript">
+<div class="warning">
+The examples in this module are in JavaScript. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
 
 ```javascript
 const table = await perspective.table({
@@ -13,6 +18,12 @@ const json = await view.to_json();
 await view.delete();
 ```
 
+</div>
+<div class="python">
+<div class="warning">
+The examples in this module are in Python. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
+
 ```python
 table = perspective.Table({
   "id": [1, 2, 3, 4],
@@ -24,6 +35,9 @@ arrow = view.to_arrow()
 view.delete()
 ```
 
+</div>
+<div class="rust">
+
 ```rust
 let opts = TableInitOptions::default();
 let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
@@ -33,6 +47,8 @@ let view = table.view(None).await?;
 let arrow = view.to_arrow().await?;
 view.delete().await?;
 ```
+
+</div>
 
 [`View`]s are immutable with respect to the arguments provided to the
 [`Table::view`] method; to change these parameters, you must create a new
@@ -51,6 +67,8 @@ optional configuration object. A [`Table`] can have as many [`View`]s associated
 with it as you need - Perspective conserves memory by relying on a single
 [`Table`] to power multiple [`View`]s concurrently:
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({
     columns: ["Sales"],
@@ -60,6 +78,9 @@ const view = await table.view({
 });
 ```
 
+</div>
+<div class="python">
+
 ```python
 view = table.view(
   columns=["Sales"],
@@ -68,6 +89,9 @@ view = table.view(
   filter=[["Category", "in", ["Furniture", "Technology"]]]
 )
 ```
+
+</div>
+<div class="rust">
 
 ```rust
 use crate::config::*;
@@ -85,6 +109,8 @@ let view = table
     .await?;
 ```
 
+</div>
+
 ## Group By
 
 A group by _groups_ the dataset by the unique values of each column used as a
@@ -100,13 +126,21 @@ Code, which are grouped by City, which are in turn grouped by State.
 
 #### Example
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({ group_by: ["a", "c"] });
 ```
 
+</div>
+<div class="python">
+
 ```python
 view = table.view(group_by=["a", "c"])
 ```
+
+</div>
+<div class="rust">
 
 ```rust
 let view = table.view(Some(ViewConfigUpdate {
@@ -115,8 +149,7 @@ let view = table.view(Some(ViewConfigUpdate {
 })).await?;
 ```
 
-<!-- <perspective-viewer group_by='["State", "City"]' columns='["Sales", "Profit"]'>
-</perspective-viewer> -->
+</div>
 
 ## Split By
 
@@ -130,13 +163,21 @@ pivot:
 
 #### Example
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({ split_by: ["a", "c"] });
 ```
 
+</div>
+<div class="python">
+
 ```python
 view = table.view(split_by=["a", "c"])
 ```
+
+</div>
+<div class="rust">
 
 ```rust
 let view = table.view(Some(ViewConfigUpdate {
@@ -145,8 +186,7 @@ let view = table.view(Some(ViewConfigUpdate {
 })).await?;
 ```
 
-<!-- <perspective-viewer group_by='["Category"]' split_by='["Region"]' columns='["Sales", "Profit"]'>
-</perspective-viewer> -->
+</div>
 
 ## Aggregates
 
@@ -164,6 +204,8 @@ function name.
 
 #### Example
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({
     aggregates: {
@@ -172,6 +214,9 @@ const view = await table.view({
     },
 });
 ```
+
+</div>
+<div class="python">
 
 ```python
 view = table.view(
@@ -182,8 +227,10 @@ view = table.view(
 )
 ```
 
-<!-- <perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' group_by='["State", "City"]' columns='["Sales", "Profit"]'>
-</perspective-viewer> -->
+</div>
+<div class="rust">
+
+</div>
 
 ## Columns
 
@@ -194,19 +241,25 @@ represented in Perspective as an array of string column names:
 
 #### Example
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({
     columns: ["a"],
 });
 ```
 
+</div>
+<div class="python">
+
 ```python
 view = table.view(columns=["a"])
 ```
 
-<!--
-<perspective-viewer columns='["Sales", "Profit"]'>
-</perspective-viewer> -->
+</div>
+<div class="rust">
+
+</div>
 
 ## Sort
 
@@ -220,18 +273,22 @@ determine the order of pivot columns groups.
 
 #### Example
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({
     sort: [["a", "asc"]],
 });
 ```
 
+</div>
+<div class="python">
+
 ```python
 view = table.view(sort=[["a", "asc"]])
 ```
 
-<!-- <perspective-viewer columns='["Sales", "Profit"]' sort='[["Sales", "desc"]]'> -->
-<!-- </perspective-viewer> -->
+</div>
 
 ## Filter
 
@@ -247,18 +304,25 @@ operand in the type of the column:
 
 #### Example
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({
     filter: [["a", "<", 100]],
 });
 ```
 
+</div>
+<div class="python">
+
 ```python
 view = table.view(filter=[["a", "<", 100]])
 ```
 
-<!-- <perspective-viewer columns='["State", "Sales", "Profit"]' filter='[["State","==","Texas"]]'>
-</perspective-viewer> -->
+</div>
+<div class="rust">
+
+</div>
 
 ## Expressions
 
@@ -271,19 +335,25 @@ A custom name can be added to an expression by making the first line a comment:
 
 #### Example
 
+<div class="javascript">
+
 ```javascript
 const view = await table.view({
     expressions: { '"a" + "b"': '"a" + "b"' },
 });
 ```
 
+</div>
+<div class="python">
+
 ```python
 view = table.view(expressions=['"a" + "b"'])
 ```
 
-<!--
-<perspective-viewer columns='["new expression"]' expressions='{"new expression": "\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"}'>
-</perspective-viewer> -->
+</div>
+<div class="rust">
+
+</div>
 
 ## Flattening a [`Table::view`] into a [`Table`]
 
@@ -296,6 +366,8 @@ serializing the `View` to an arrow and setting up an `on_update` callback.
 
 # Example
 
+<div class="javascript">
+
 ```javascript
 const worker1 = perspective.worker();
 const table = await worker.table(data);
@@ -303,6 +375,9 @@ const view = await table.view({ filter: [["State", "==", "Texas"]] });
 const table2 = await worker.table(view);
 table.update([{ State: "Texas", City: "Austin" }]);
 ```
+
+</div>
+<div class="python">
 
 ```python
 table = perspective.Table(data);
@@ -316,6 +391,9 @@ view.on_update(updater, mode="Row")
 table.update([{"State": "Texas", "City": "Austin"}])
 ```
 
+</div>
+<div class="rust">
+
 ```rust
 let opts = TableInitOptions::default();
 let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
@@ -324,3 +402,5 @@ let view = table.view(None).await?;
 let table2 = client.table(TableData::View(view)).await?;
 table.update(data).await?;
 ```
+
+</div>

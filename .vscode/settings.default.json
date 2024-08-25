@@ -7,6 +7,8 @@
     },
     "python.formatting.provider": "black",
     "rust-analyzer.server.extraEnv": {
+        "PSP_ROOT_DIR": "../..",
+        "PSP_DISABLE_CPP": "1",
         "RA_LOG": "rust_analyzer::reload=info",
         "CARGO_TARGET_DIR": "${workspaceFolder}/perspective-viewer/dist/analyzer"
     },
@@ -27,6 +29,9 @@
         "rust/target"
     ],
     "rust-analyzer.checkOnSave": true,
+    "rust-analyzer.check.extraEnv": {
+        "PSP_DISABLE_CPP": "1"
+    },
     "rust-analyzer.check.overrideCommand": [
         "cargo",
         "clippy",

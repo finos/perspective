@@ -247,3 +247,4 @@ rust/perspective-server/cmake
 rust/perspective-python/*.data
 # rust/perspective-python/perspective.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab/package.json
 rust/perspective-viewer/docs/exprtk.md
+rust/perspective-server/docs/lib_gen.md

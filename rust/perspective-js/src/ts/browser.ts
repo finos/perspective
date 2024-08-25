@@ -45,7 +45,6 @@ async function _init(ws: Worker, wasm: ArrayBuffer) {
  * @returns
  */
 export async function worker(module: Promise<typeof psp>) {
-    const { Client } = await module;
     const [wasm, webworker]: [ArrayBuffer, Worker] = await Promise.all([
         perspective_wasm().then((x: Response | ArrayBuffer) => {
             if (x instanceof Response) {
@@ -57,6 +56,7 @@ export async function worker(module: Promise<typeof psp>) {
         perspective_wasm_worker(),
     ]);
 
+    const { Client } = await module;
     const client = new Client(
         (proto: Uint8Array) => {
             const f = proto.slice().buffer;

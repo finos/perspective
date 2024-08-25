@@ -36,6 +36,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
+    if std::option_env!("PSP_DISABLE_CPP").is_some() {
+        return Ok(());
+    }
+
     std::env::set_var("CARGO_FEATURE_PYTHON", "1"); // Not a relevant feature for this crate, but required for consistency
     if let Some(artifact_dir) = psp::cmake_build()? {
         let source_name = match std::env::var("CARGO_CFG_TARGET_OS")?

@@ -48,6 +48,11 @@ const sidebars = {
                     label: "`perspective-python` Python API",
                     href: "https://docs.rs/perspective-python/latest/perspective_python/",
                 },
+                {
+                    type: "link",
+                    label: "`perspective-server` Server API",
+                    href: "https://docs.rs/perspective-server/latest/perspective_server/",
+                },
             ],
         },
         "development",

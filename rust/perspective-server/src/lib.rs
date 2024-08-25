@@ -10,47 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! This crate contains the server/engine components of the
-//! [Perspective](https://perspective.finos.org) data visualization suite. It is
-//! meant to be used in conjunction with the other crates of this project,
-//! e.g. `perspective-client` to create client connections to a server.
-//!
-//! The [`perspective`] crate provides a convenient frontend for Rust
-//! developers, including both [`perspective_client`] and [`perspective_server`]
-//! as well as other convenient integration helpers.
-//!
-//! # Architecture
-//!
-//! The basic dataflow of a Perspective applications looks something like this:
-//!                                                                             
-//! ```text
-//!                      : Network or sync boundary
-//!                      :
-//!  Client 1            :   Session 1                      Server
-//! ┏━━━━━━━━━━━━━━━━━━┓ :  ┏━━━━━━━━━━━━━━━━━━┓           ┏━━━━━━━━━━━━━━━━━━┓
-//! ┃ handle_response  ┃<━━━┃ send_response    ┃<━┳━━━━━━━━┃ send_response    ┃
-//! ┃ send_request     ┃━┳━>┃ handle_request   ┃━━━━━┳━━━━>┃ handle_request   ┃
-//! ┗━━━━━━━━━━━━━━━━━━┛ ┗━>┃ poll             ┃━━━━━━━━┳━>┃ poll             ┃
-//!                      :  ┃ session_id       ┃  ┃  ┃  ┃  ┃ generate_id      ┃
-//!                      :  ┗━━━━━━━━━━━━━━━━━━┛  ┃  ┃  ┃  ┃ cleanup_id       ┃
-//!                      :                        ┃  ┃  ┃  ┗━━━━━━━━━━━━━━━━━━┛
-//!  Client 2            :   Session 2            ┃  ┃  ┃
-//! ┏━━━━━━━━━━━━━━━━━━┓ :  ┏━━━━━━━━━━━━━━━━━━┓  ┃  ┃  ┃  
-//! ┃ handle_response  ┃<━━━┃ send_response    ┃<━┛  ┃  ┃                         
-//! ┃ send_request     ┃━┳━>┃ handle_request   ┃━━━━━┛  ┃                                        
-//! ┗━━━━━━━━━━━━━━━━━━┛ ┗━>┃ poll             ┃━━━━━━━━┛
-//!                      :  ┃ session_id       ┃                                                 
-//!                      :  ┗━━━━━━━━━━━━━━━━━━┛
-//! ```
-//!
-//! # Feature Flags
-//!
-//! The following feature flags are available to enable in your `Cargo.toml`:
-//!
-//! - `external-cpp` Set this flag to configure this crate's compile process to
-//!   look for Perspective C++ source code in the environment rather than
-//!   locally, e.g. for when you build this crate in-place in the Perspective
-//!   repo source tree.
+#![doc = include_str!("../docs/lib_gen.md")]
 
 use std::collections::HashMap;
 use std::error::Error;
