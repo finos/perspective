@@ -27,8 +27,8 @@ pub fn render(data: &str, layout: &str, plugins: &[String]) -> String {
     let imports = Itertools::intersperse(stmts, " ".to_owned()).collect::<String>();
 
     format!("
-<!DOCTYPE html lang=\"en\">
-<html>
+<!DOCTYPE html>
+<html lang=\"en\">
 <head>
 <meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no\"/>
 <link rel=\"stylesheet\" crossorigin=\"anonymous\" href=\"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{0}/dist/css/themes.css\"/>
