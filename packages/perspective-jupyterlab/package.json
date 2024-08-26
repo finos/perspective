@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-jupyterlab",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "description": "A Jupyterlab extension for the Perspective library, designed to be used with perspective-python.",
     "files": [
         "dist/**/*",

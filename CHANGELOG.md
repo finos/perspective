@@ -1,12 +1,37 @@
+# [v3.0.1](https://github.com/finos/perspective/releases/tag/v3.0.1)
+
+_26 August 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.0...v3.0.1))
+
+Features
+
+- Stringify Arrow lists [#2700](https://github.com/finos/perspective/pull/2700)
+- Zstd decompression for arrows [#2717](https://github.com/finos/perspective/pull/2717)
+- Better Timestamp Parsing [#2713](https://github.com/finos/perspective/pull/2713)
+
+Misc
+
+- Fix docs site serialized loading, docs.rs gen [#2718](https://github.com/finos/perspective/pull/2718)
+
 # [v3.0.0](https://github.com/finos/perspective/releases/tag/v3.0.0)
 
-_16 August 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.10.1...v3.0.0))
+_23 August 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v2.10.1...v3.0.0))
+
+**Breaking**
+
+- Perspective Virtual API (Python) [#2625](https://github.com/finos/perspective/pull/2625)
+- Perspective Virtual API (JavaScript) [#2615](https://github.com/finos/perspective/pull/2615)
+
+Features
+
+- Add Pyodide support and split Rust/C++ builds for Python wheel [#2707](https://github.com/finos/perspective/pull/2707)
+- Draw 0 axis prominently [#2698](https://github.com/finos/perspective/pull/2698)
+- Calculate `group_by` in parallel [#2701](https://github.com/finos/perspective/pull/2701)
+- `PerspectiveWidget` support for new Python API [#2658](https://github.com/finos/perspective/pull/2658)
+- Use ABI3 for `perspective-python` shared library [#2661](https://github.com/finos/perspective/pull/2661)
+- Add region, column and row selection modes to Perspective Datagrid [#2618](https://github.com/finos/perspective/pull/2618)
 
 Fixes
 
-- Add region, column and row selection modes to Perspective Datagrid [#2618](https://github.com/finos/perspective/pull/2618)
-- Use ABI3 for `perspective-python` shared library [#2661](https://github.com/finos/perspective/pull/2661)
-- `PerspectiveWidget` support for new Python API [#2658](https://github.com/finos/perspective/pull/2658)
 - Fix missing icons [#2712](https://github.com/finos/perspective/pull/2712)
 - Fix Windows JupyterLab packaging [#2705](https://github.com/finos/perspective/pull/2705)
 - Fix Python `sdist`, update docs, add `lint` to CI [#2702](https://github.com/finos/perspective/pull/2702)
@@ -17,17 +42,6 @@ Misc
 - Update docs [#2706](https://github.com/finos/perspective/pull/2706)
 - New status indicator [#2692](https://github.com/finos/perspective/pull/2692)
 - Docs and examples update for new API [#2659](https://github.com/finos/perspective/pull/2659)
-
-Features
-
-- Add Pyodide support and split Rust/C++ builds for Python wheel [#2707](https://github.com/finos/perspective/pull/2707)
-- Draw 0 axis prominently [#2698](https://github.com/finos/perspective/pull/2698)
-- Calculate `group_by` in parallel [#2701](https://github.com/finos/perspective/pull/2701)
-
-**Breaking**
-
-- Perspective Virtual API (Python) [#2625](https://github.com/finos/perspective/pull/2625)
-- Perspective Virtual API (JavaScript) [#2615](https://github.com/finos/perspective/pull/2615)
 
 # [v2.10.1](https://github.com/finos/perspective/releases/tag/v2.10.1)
 
