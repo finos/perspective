@@ -10,12 +10,22 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#include "perspective/base.h"
 #include "perspective/raw_types.h"
+#include <arrow/array/array_binary.h>
+#include <arrow/array/array_nested.h>
+#include <arrow/array/array_primitive.h>
+#include <arrow/type.h>
+#include <arrow/type_fwd.h>
+#include <cstdint>
 #include <exception>
 #include <memory>
 #include <mutex>
 #include <perspective/arrow_loader.h>
 #include "perspective/exception.h"
+#include <sstream>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 namespace perspective::apachearrow {
 
@@ -32,7 +42,7 @@ load_stream(
     if (!status.ok()) {
         std::stringstream ss;
         ss << "Failed to open RecordBatchStreamReader: "
-           << status.status().ToString() << std::endl;
+           << status.status().ToString() << "\n";
         PSP_COMPLAIN_AND_ABORT(ss.str());
     } else {
         auto batch_reader = *status;
@@ -40,7 +50,7 @@ load_stream(
         if (!status5.ok()) {
             std::stringstream ss;
             ss << "Failed to read stream record batch: "
-               << status5.status().ToString() << std::endl;
+               << status5.status().ToString() << "\n";
             PSP_COMPLAIN_AND_ABORT(ss.str());
         };
 
@@ -62,7 +72,7 @@ load_file(
     if (!status.ok()) {
         std::stringstream ss;
         ss << "Failed to open RecordBatchFileReader: "
-           << status.status().ToString() << std::endl;
+           << status.status().ToString() << "\n";
         PSP_COMPLAIN_AND_ABORT(ss.str());
     } else {
         std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader =
@@ -85,7 +95,7 @@ load_file(
         if (!status3.ok()) {
             std::stringstream ss;
             ss << "Failed to create Table from RecordBatches: "
-               << status3.status().ToString() << std::endl;
+               << status3.status().ToString() << "\n";
             PSP_COMPLAIN_AND_ABORT(ss.str());
         };
         table = *status3;
@@ -145,8 +155,11 @@ convert_type(const std::string& src) {
     if (src == "null") {
         return DTYPE_STR;
     }
+    if (src == "list") {
+        return DTYPE_STR;
+    }
     std::stringstream ss;
-    ss << "Could not load arrow column of type `" << src << "`" << std::endl;
+    ss << "Could not load arrow column of type `" << src << "`\n";
     PSP_COMPLAIN_AND_ABORT(ss.str());
     return DTYPE_STR;
 }
@@ -243,8 +256,7 @@ ArrowLoader::fill_table(
             if (!input_schema.has_column(index)) {
                 std::stringstream ss;
                 ss << "Specified index `" << index
-                   << "` is invalid as it does not appear in the Table."
-                   << std::endl;
+                   << "` is invalid as it does not appear in the Table.\n";
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             }
 
@@ -270,6 +282,115 @@ iter_col_copy(
 }
 
 void
+copy_string_list(
+    std::shared_ptr<arrow::ListArray>& list,
+    const std::shared_ptr<t_column>& dest,
+    const int64_t num_rows
+) {
+    const auto typed_data =
+        std::static_pointer_cast<::arrow::StringArray>(list->values());
+
+    // the raw bytes of the strings.
+    const uint8_t* raw_data = typed_data->value_data()->data();
+    // col_offsets are the column level offsets, so each element is the boundary
+    // of a row.
+    const auto* col_offsets = list->raw_value_offsets();
+    // these are the offset locations of the strings within the raw data.
+    // each element is the boundary of a string.
+    const auto* string_offsets = typed_data->raw_value_offsets();
+
+    for (uint32_t i = 0; i < num_rows; i++) {
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+        writer.StartArray();
+        auto row_array_length = col_offsets[i + 1] - col_offsets[i];
+        for (uint32_t j = 0; j < row_array_length; j++) {
+            const auto elem_location = col_offsets[i] + j;
+            const auto start_loc = string_offsets[elem_location];
+            const auto string_len =
+                string_offsets[elem_location + 1] - start_loc;
+            writer.String((const char*)raw_data + start_loc, string_len);
+        }
+        writer.EndArray();
+        dest->set_nth(i, s.GetString());
+    }
+}
+
+template <typename T>
+void
+copy_integer_list(
+    std::shared_ptr<arrow::ListArray>& list,
+    const std::shared_ptr<t_column>& dest,
+    const int64_t num_rows
+) {
+    const auto typed_data = std::static_pointer_cast<T>(list->values());
+    const auto* array_offsets = list->raw_value_offsets();
+    const auto* raw_values = typed_data->raw_values();
+    for (uint32_t i = 0; i < num_rows; i++) {
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+        writer.StartArray();
+        const auto row_array_length = array_offsets[i + 1] - array_offsets[i];
+        for (uint32_t j = 0; j < row_array_length; j++) {
+            const auto elem_location = array_offsets[i] + j;
+            const auto elem = raw_values[elem_location];
+            writer.Int64(elem);
+        }
+        writer.EndArray();
+        dest->set_nth(i, s.GetString());
+    }
+}
+
+void
+copy_bool_list(
+    std::shared_ptr<arrow::ListArray>& list,
+    const std::shared_ptr<t_column>& dest,
+    const int64_t num_rows
+) {
+    const auto typed_data =
+        std::static_pointer_cast<arrow::BooleanArray>(list->values());
+    const auto* array_offsets = list->raw_value_offsets();
+    for (uint32_t i = 0; i < num_rows; i++) {
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+        writer.StartArray();
+        const auto row_array_length = array_offsets[i + 1] - array_offsets[i];
+        for (uint32_t j = 0; j < row_array_length; j++) {
+            const auto elem_location = array_offsets[i] + j;
+            const auto elem = typed_data->Value(elem_location);
+            writer.Bool(elem);
+        }
+        writer.EndArray();
+        dest->set_nth(i, s.GetString());
+    }
+}
+
+template <typename T>
+void
+copy_float_list(
+    std::shared_ptr<arrow::ListArray>& list,
+    const std::shared_ptr<t_column>& dest,
+    const int64_t num_rows
+) {
+    const auto typed_data = std::static_pointer_cast<T>(list->values());
+    const auto* array_offsets = list->raw_value_offsets();
+    const auto* raw_values = typed_data->raw_values();
+    for (uint32_t i = 0; i < num_rows; i++) {
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+        writer.StartArray();
+        const auto row_array_length = array_offsets[i + 1] - array_offsets[i];
+        for (uint32_t j = 0; j < row_array_length; j++) {
+            const auto elem_location = array_offsets[i] + j;
+            const auto elem = raw_values[elem_location];
+            writer.Double(elem);
+        }
+        writer.EndArray();
+        dest->set_nth(i, s.GetString());
+    }
+}
+
+void
 copy_array(
     const std::shared_ptr<t_column>& dest,
     const std::shared_ptr<arrow::Array>& src,
@@ -277,11 +398,51 @@ copy_array(
     const int64_t len
 ) {
     switch (src->type()->id()) {
+        case arrow::ListType::type_id: {
+            auto list = std::static_pointer_cast<::arrow::ListArray>(src);
+
+            switch (list->value_type()->id()) {
+                case arrow::BooleanType::type_id: {
+                    copy_bool_list(list, dest, len);
+                } break;
+                case arrow::HalfFloatType::type_id: {
+                    copy_float_list<arrow::HalfFloatArray>(list, dest, len);
+                } break;
+                case arrow::FloatType::type_id: {
+                    copy_float_list<arrow::FloatArray>(list, dest, len);
+                } break;
+                case arrow::DoubleType::type_id: {
+                    copy_float_list<arrow::DoubleArray>(list, dest, len);
+                } break;
+                case ::arrow::Int8Type::type_id: {
+                    copy_integer_list<arrow::Int8Array>(list, dest, len);
+                } break;
+                case ::arrow::Int16Type::type_id: {
+                    copy_integer_list<arrow::Int16Array>(list, dest, len);
+                } break;
+                case ::arrow::Int32Type::type_id: {
+                    copy_integer_list<arrow::Int32Array>(list, dest, len);
+                } break;
+                case ::arrow::UInt32Type::type_id: {
+                    copy_integer_list<arrow::UInt32Array>(list, dest, len);
+                } break;
+                case ::arrow::StringType::type_id: {
+                    copy_string_list(list, dest, len);
+                } break;
+                default:
+                    auto val = list->value_type();
+                    std::stringstream ss;
+                    ss << "Given Unsupported type '" << *val << "'.\n";
+                    auto cc = ss.str();
+                    PSP_COMPLAIN_AND_ABORT(cc);
+            }
+        } break;
         case arrow::DictionaryType::type_id: {
-            // If there are duplicate values in the dictionary at different
-            // indices, i.e. [0 => a, 1 => b, 2 => a], tables with
-            // explicit indexes on a string column created from a dictionary
-            // array may have duplicate primary keys.
+            // If there are duplicate values in the dictionary
+            // at different indices, i.e. [0 => a, 1 => b, 2 =>
+            // a], tables with explicit indexes on a string
+            // column created from a dictionary array may have
+            // duplicate primary keys.
             auto scol = std::static_pointer_cast<arrow::DictionaryArray>(src);
             std::shared_ptr<arrow::StringArray> dict =
                 std::static_pointer_cast<arrow::StringArray>(scol->dictionary()
@@ -343,8 +504,9 @@ copy_array(
                 } break;
                 default: {
                     std::stringstream ss;
-                    ss << "Could not copy dictionary array indices of type'"
-                       << indices->type()->name() << "'" << std::endl;
+                    ss << "Could not copy dictionary array "
+                          "indices of type'"
+                       << indices->type()->name() << "'\n";
                     PSP_COMPLAIN_AND_ABORT(ss.str());
                 }
             }
@@ -489,8 +651,8 @@ copy_array(
                 std::int32_t year = static_cast<std::int32_t>(ymd.year());
                 std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
                 std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
-                // Decrement month by 1, as date::month is [1-12] but
-                // t_date::month() is [0-11]
+                // Decrement month by 1, as date::month is
+                // [1-12] but t_date::month() is [0-11]
                 dest->set_nth(offset + i, t_date(year, month - 1, day));
             }
         } break;
@@ -506,8 +668,8 @@ copy_array(
                 std::int32_t year = static_cast<std::int32_t>(ymd.year());
                 std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
                 std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
-                // Decrement month by 1, as date::month is [1-12] but
-                // t_date::month() is [0-11]
+                // Decrement month by 1, as date::month is
+                // [1-12] but t_date::month() is [0-11]
                 dest->set_nth(offset + i, t_date(year, month - 1, day));
             }
         } break;
@@ -557,8 +719,8 @@ copy_array(
         default: {
             std::stringstream ss;
             std::string arrow_type = src->type()->ToString();
-            ss << "Could not load Arrow column of type `" << arrow_type << "`."
-               << std::endl;
+            ss << "Could not load Arrow column of type `" << arrow_type
+               << "`.\n";
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -631,8 +793,8 @@ ArrowLoader::fill_column(
         std::shared_ptr<arrow::Array> array = carray->chunk(i);
         int64_t len = array->length();
 
-        // If the Arrow array schema is different from the data table
-        // schema, iteratively fill.
+        // If the Arrow array schema is different from the data
+        // table schema, iteratively fill.
         t_dtype column_dtype = col->get_dtype();
 
         // `type`: arrow array dtype converted to `t_dtype`
@@ -677,8 +839,7 @@ ArrowLoader::fill_column(
                     std::stringstream ss;
                     ss << "Could not fill column `" << name << "` with "
                        << "t_dtype: `" << get_dtype_descr(column_dtype) << "`, "
-                       << "array type: `" << get_dtype_descr(type) << "`"
-                       << std::endl;
+                       << "array type: `" << get_dtype_descr(type) << "`\n";
                     PSP_COMPLAIN_AND_ABORT(ss.str());
                 };
             }
@@ -694,12 +855,14 @@ ArrowLoader::fill_column(
         } else {
             const uint8_t* null_bitmap = array->null_bitmap_data();
 
-            // If the arrow column is of null type, the null bitmap is
-            // a nullptr - so just mark everything as invalid and move on.
+            // If the arrow column is of null type, the null
+            // bitmap is a nullptr - so just mark everything as
+            // invalid and move on.
             if (null_bitmap == nullptr) {
                 col->invalid_raw_fill();
             } else {
-                // Read the null bitmap and set the correct rows as valid
+                // Read the null bitmap and set the correct rows
+                // as valid
                 for (uint32_t i = 0; i < len; ++i) {
                     std::uint8_t elem = null_bitmap[i / 8];
                     bool v = (elem & (1 << (i % 8))) != 0;

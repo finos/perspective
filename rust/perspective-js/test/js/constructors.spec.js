@@ -133,6 +133,28 @@ const arrow_result = [
     },
 ];
 
+let arrow_lists_data = {
+    uint32_arr: ["[1,2,3,4]", "[5]", "[43215]", "[]"],
+    string_arr: [
+        `["#1","second","third","fourth"]`,
+        `["fifth"]`,
+        `[]`,
+        `["Last!"]`,
+    ],
+    bool_arr: [
+        "[true,false,false,true,true,false,false,true,true]",
+        "[]",
+        "[true]",
+        "[false]",
+    ],
+    float_arr: [
+        "[]",
+        "[3.14,3.141592653589793,6.283185307179586,1.4142135623730952]",
+        "[12.00001]",
+        "[100000000.0,100000000.0,100000000.0,100000000.0]",
+    ],
+};
+
 let arrow_date_data = {
     "jan-2019": [
         "2019-01-01",
@@ -885,6 +907,15 @@ function validate_typed_array(typed_array, column_data) {
             const view = await table.view();
             const result = await view.to_columns();
             expect(result).toEqual(arrow_date_data);
+            view.delete();
+            table.delete();
+        });
+
+        test("Arrow Lists constructor", async function () {
+            const table = await perspective.table(arrows.lists_arrow.slice());
+            const view = await table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual(arrow_lists_data);
             view.delete();
             table.delete();
         });
