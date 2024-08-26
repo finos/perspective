@@ -12,3 +12,14 @@ The schema of a [`Table`] is _immutable after creation_, which means the column
 names and data types cannot be changed after the [`Table`] has been created.
 Columns cannot be added or deleted after creation either, but a [`View`] can be
 used to select an arbitrary set of columns from the [`Table`].
+
+<div class="javascript">
+<div class="warning">
+The examples in this module are in JavaScript. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
+</div>
+<div class="python">
+<div class="warning">
+The examples in this module are in Python. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
+</div>

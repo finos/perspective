@@ -10,6 +10,34 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+//! The Rust language bindings for [Perspective](https://perspective.finos.org),
+//! a high performance data-visualization and analytics component for the web
+//! browser.
+//!
+//! # Examples
+//!
+//! A simple example which loads an [Apache Arrow](https://arrow.apache.org/) and
+//! computes a "Group By" operation, returning a new Arrow.
+//!
+//! ```rust
+//! use perspective::client::config::ViewConfigUpdate;
+//! use perspective::client::{TableInitOptions, UpdateData, ViewWindow};
+//! use perspective::server::Server;
+//! use perspective::LocalClient;
+//!
+//! let data = UpdateData::Arrow(arrow_vec_data);
+//! let options = TableInitOptions::default();
+//! let table = client.table(data.into(), options).await?;
+//! let mut view_config = ViewConfigUpdate::default();
+//! view_config.group_by = ["CounterParty", "Security"]
+//!     .iter()
+//!     .map(|x| Some(x.to_string()))
+//!     .collect();
+
+//! let view = table.view(Some(view_config)).await?;
+//! let arrow = view.to_arrow(ViewWindow::default()).await?;
+//! ```
+
 #[cfg(feature = "axum-ws")]
 pub mod axum;
 

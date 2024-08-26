@@ -12,7 +12,9 @@ which is the new data that was updated for each cell or each row.
     `OnUpdateOptions { mode: Some(OnUpdateMode::Row) }`, then `delta` is an
     Arrow of the updated rows. Otherwise `delta` will be [`Option::None`].
 
-# Examples
+<div class="javascript">
+
+# JavaScript Examples
 
 ```javascript
 // Attach an `on_update` callback
@@ -23,3 +25,5 @@ view.on_update((updated) => console.log(updated.port_id));
 // `on_update` with row deltas
 view.on_update((updated) => console.log(updated.delta), { mode: "row" });
 ```
+
+</div>

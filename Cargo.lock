@@ -1905,12 +1905,14 @@ name = "perspective-server"
 version = "3.0.0"
 dependencies = [
  "async-lock",
+ "base64 0.22.1",
  "cmake",
  "cxx",
  "cxx-build",
  "futures",
  "num_cpus",
  "perspective-client",
+ "regex",
  "tracing",
 ]
 

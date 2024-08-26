@@ -17,7 +17,7 @@ const path = require("node:path");
 const mkdirp = require("mkdirp");
 const EXAMPLES = require("./src/components/ExampleGallery/features.js").default;
 
-const perspective = import("@finos/perspective/dist/cdn/perspective.js");
+const perspective = import("@finos/perspective/dist/esm/perspective.node.js");
 
 const DEFAULT_VIEWPORT = {
     width: 400,
@@ -111,11 +111,13 @@ async function run() {
         fs.readdirSync("static/features").length === 0
     ) {
         console.log("Generating feature screenshots!");
-        mkdirp(path.join(__dirname, "static/features"));
-        const { WebSocketServer } = await perspective;
-        const server = new WebSocketServer({
+        fs.mkdirSync(path.join(__dirname, "static/features"), {
+            recursive: true,
+        });
+        const x = await perspective;
+        const server = new x.WebSocketServer({
             assets: [
-                path.join(__dirname, ".."),
+                path.join(__dirname, "."),
                 path.join(__dirname, "../node_modules"),
             ],
         });

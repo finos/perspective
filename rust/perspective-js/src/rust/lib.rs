@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#![doc = include_str!("../../docs/javascript.md")]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -17,7 +18,6 @@
     unstable_features
 )]
 #![allow(non_snake_case)]
-#![doc = include_str!("../../docs/javascript.md")]
 
 mod client;
 mod table;

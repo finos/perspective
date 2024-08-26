@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "@finos/perspective";
+import * as perspective from "@site/src/data/worker.js";
 import SUPERSTORE_URL from "superstore-arrow/superstore.lz4.arrow";
 
 export const SUPERSTORE_TABLE = (async function () {
