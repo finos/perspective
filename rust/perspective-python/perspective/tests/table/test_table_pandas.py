@@ -117,7 +117,7 @@ class TestTablePandas(object):
 
     @mark.skip(reason="pyarrow dataframe does not support date inference")
     def test_table_dataframe_infer_date(self, util):
-        data = util.make_dataframe(freq="M")
+        data = util.make_dataframe(freq="ME")
 
         tbl = Table(data)
         assert tbl.size() == 10
@@ -143,7 +143,7 @@ class TestTablePandas(object):
         ]
 
     def test_table_dataframe_infer_date_fixed(self, util):
-        data = util.make_dataframe(freq="M")
+        data = util.make_dataframe(freq="ME")
 
         tbl = Table(data)
         assert tbl.size() == 10
@@ -169,7 +169,7 @@ class TestTablePandas(object):
         ]
 
     def test_table_dataframe_infer_time(self, util):
-        data = util.make_dataframe(freq="H")
+        data = util.make_dataframe(freq="h")
 
         tbl = Table(data)
         assert tbl.size() == 10
@@ -196,7 +196,7 @@ class TestTablePandas(object):
 
     @mark.skip(reason="pyarrow dataframe does not support date inference")
     def test_table_dataframe_year_start_index(self, util):
-        data = util.make_dataframe(freq="AS")
+        data = util.make_dataframe(freq="YS")
 
         tbl = Table(data)
         assert tbl.size() == 10
@@ -222,7 +222,7 @@ class TestTablePandas(object):
         ]
 
     def test_table_dataframe_year_start_index_fixed(self, util):
-        data = util.make_dataframe(freq="AS")
+        data = util.make_dataframe(freq="YS")
 
         tbl = Table(data)
         assert tbl.size() == 10
@@ -249,7 +249,7 @@ class TestTablePandas(object):
 
     @mark.skip(reason="pyarrow dataframe does not support date inference")
     def test_table_dataframe_quarter_index(self, util):
-        data = util.make_dataframe(size=4, freq="Q")
+        data = util.make_dataframe(size=4, freq="QE")
 
         tbl = Table(data)
         assert tbl.size() == 4
@@ -269,7 +269,7 @@ class TestTablePandas(object):
         ]
 
     def test_table_dataframe_quarter_index_fixed(self, util):
-        data = util.make_dataframe(size=4, freq="Q")
+        data = util.make_dataframe(size=4, freq="QE")
 
         tbl = Table(data)
         assert tbl.size() == 4

@@ -77,7 +77,7 @@ class Session:
         self._server: "ServerBase" = server
         self._session_id = lib.psp_new_session(server._server)
 
-    def __del__(self):
+    def close(self):
         lib.psp_close_session(self._server._server, self._session_id)
 
     def handle_request(self, bytes_msg):

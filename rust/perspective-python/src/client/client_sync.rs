@@ -84,8 +84,8 @@ pub struct Client(PyClient);
 #[pymethods]
 impl Client {
     #[new]
-    pub fn new(callback: Py<PyAny>) -> PyResult<Self> {
-        let client = PyClient::new(callback);
+    pub fn new(handle_request: Py<PyAny>, close_cb: Py<PyAny>) -> PyResult<Self> {
+        let client = PyClient::new(handle_request, close_cb);
         Ok(Client(client))
     }
 
@@ -124,6 +124,11 @@ impl Client {
     pub fn set_loop_callback(&self, loop_cb: Py<PyAny>) -> PyResult<()> {
         self.0.set_loop_cb(loop_cb).block_on()
     }
+
+    #[doc = crate::inherit_docs!("client/terminate.md")]
+    pub fn terminate(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        self.0.terminate(py).block_on()
+    }
 }
 
 #[doc = crate::inherit_docs!("table.md")]
@@ -140,8 +145,8 @@ impl Table {
     }
 
     #[doc = crate::inherit_docs!("table/get_client.md")]
-    pub fn get_client(&self, loop_cb: Option<Py<PyAny>>) -> Client {
-        Client(self.0.get_client(loop_cb).block_on())
+    pub fn get_client(&self) -> Client {
+        Client(self.0.get_client().block_on())
     }
 
     #[doc = crate::inherit_docs!("table/get_client.md")]

@@ -48,7 +48,6 @@ class TestAsync(object):
     @classmethod
     def setup_class(cls):
         cls.loop = tornado.ioloop.IOLoop()
-        cls.loop.make_current()
         cls.thread = threading.Thread(target=cls.loop.start)
         cls.thread.daemon = True
         cls.thread.start()
@@ -56,7 +55,6 @@ class TestAsync(object):
     @classmethod
     def teardown_class(cls):
         cls.loop.add_callback(lambda: tornado.ioloop.IOLoop.current().stop())
-        cls.loop.clear_current()
         cls.thread.join()
         cls.loop.close(all_fds=True)
 

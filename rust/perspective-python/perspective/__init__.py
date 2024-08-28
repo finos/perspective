@@ -71,8 +71,11 @@ class Client(PySyncClient):
         def handle_response(bytes):
             client.handle_response(bytes)
 
+        def handle_close():
+            session.close()
+
         session = server.new_session(handle_response)
-        client = Client(handle_request)
+        client = Client(handle_request, handle_close)
         return client
 
 
