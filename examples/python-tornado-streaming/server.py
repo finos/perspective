@@ -21,7 +21,6 @@ import json
 
 old = json.JSONEncoder.default
 
-
 def new_encoder(self, obj):
     if isinstance(obj, datetime):
         return str(obj)
@@ -30,9 +29,7 @@ def new_encoder(self, obj):
     else:
         return old(self, obj)
 
-
 json.JSONEncoder.default = new_encoder
-
 
 def data_source():
     rows = []
@@ -52,25 +49,13 @@ def data_source():
         )
     return rows
 
-
 SECURITIES = [
-    "AAPL.N",
-    "AMZN.N",
-    "QQQ.N",
-    "NVDA.N",
-    "TSLA.N",
-    "FB.N",
-    "MSFT.N",
-    "TLT.N",
-    "XIV.N",
-    "YY.N",
-    "CSCO.N",
-    "GOOGL.N",
-    "PCLN.N",
+    "AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N",
+    "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N",
+    "CSCO.N", "GOOGL.N", "PCLN.N"
 ]
 
 CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"]
-
 
 def perspective_thread(perspective_server):
     client = perspective_server.new_local_client()
@@ -89,13 +74,14 @@ def perspective_thread(perspective_server):
         name="data_source_one",
     )
 
-    # update with new data every 50ms
     def updater():
-        table.update(data_source())
+        try:
+            table.update(data_source())
+        except tornado.websocket.WebSocketClosedError as e:
+            logging.error(f"WebSocket closed error: {e}")
 
     callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=50)
     callback.start()
-
 
 def make_app(perspective_server):
     return tornado.web.Application(
@@ -117,7 +103,6 @@ def make_app(perspective_server):
             ),
         ]
     )
-
 
 if __name__ == "__main__":
     perspective_server = perspective.Server()
