@@ -43,6 +43,12 @@ class TestServer(object):
         table2 = client.open_table("table1")
         assert table2.schema() == {"a": "integer", "b": "string"}
 
+    def test_session_close(self):
+        server = Server()
+        client = Client.from_server(server)
+        client.table(data)
+        client.terminate()
+
     def test_server_host(self):
         server = Server()
         client = Client.from_server(server)

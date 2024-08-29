@@ -32,6 +32,7 @@ use pythonize::depythonize_bound;
 pub struct PyClient {
     pub(crate) client: Client,
     loop_cb: Arc<RwLock<Option<Py<PyAny>>>>,
+    close_cb: Py<PyAny>,
 }
 
 #[extend::ext]
@@ -263,7 +264,7 @@ fn pandas_to_arrow_bytes<'py>(
 }
 
 impl PyClient {
-    pub fn new(handle_request: Py<PyAny>) -> Self {
+    pub fn new(handle_request: Py<PyAny>, handle_close: Py<PyAny>) -> Self {
         let client = Client::new_with_callback({
             move |msg| {
                 clone!(handle_request);
@@ -280,6 +281,7 @@ impl PyClient {
         PyClient {
             client,
             loop_cb: Arc::default(),
+            close_cb: handle_close,
         }
     }
 
@@ -359,6 +361,10 @@ impl PyClient {
         *self.loop_cb.write().await = Some(loop_cb);
         Ok(())
     }
+
+    pub async fn terminate(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        self.close_cb.call0(py)
+    }
 }
 
 #[derive(Clone)]
@@ -374,10 +380,11 @@ impl PyTable {
         self.table.get_index()
     }
 
-    pub async fn get_client(&self, loop_cb: Option<Py<PyAny>>) -> PyClient {
+    pub async fn get_client(&self) -> PyClient {
         PyClient {
             client: self.table.get_client(),
-            loop_cb: Arc::new(RwLock::new(loop_cb)),
+            loop_cb: self.client.loop_cb.clone(),
+            close_cb: self.client.close_cb.clone(),
         }
     }
 

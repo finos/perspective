@@ -52,7 +52,7 @@ class PerspectiveTraitlets(HasTraits):
     table_name = Unicode(None, allow_none=True).tag(sync=True)
 
     server = Bool(False).tag(sync=True)
-    binding_mode = Enum(("server", "client-server"), default="server").tag(sync=True)
+    binding_mode = Enum(("server", "client-server")).tag(default="server", sync=True)
     title = Unicode(None, allow_none=True).tag(sync=True)
     version = Unicode(__version__).tag(sync=True)
 

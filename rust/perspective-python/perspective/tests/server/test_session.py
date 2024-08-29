@@ -32,7 +32,7 @@ class TestProxySession(object):
             sub_client.handle_response(bytes)
 
         sub_session = ProxySession(client, handle_response)
-        sub_client = Client(handle_request)
+        sub_client = Client(handle_request, sub_session.close)
         table = sub_client.table(data, name="table1")
         assert table.schema() == {"a": "integer", "b": "string"}
 
@@ -47,7 +47,7 @@ class TestProxySession(object):
             sub_client.handle_response(bytes)
 
         sub_session = ProxySession(client, handle_response)
-        sub_client = Client(handle_request)
+        sub_client = Client(handle_request, sub_session.close)
         table = sub_client.table(data, name="table1")
         table2 = client.open_table("table1")
         assert table.size() == 3

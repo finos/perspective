@@ -33,10 +33,23 @@
 //!     .iter()
 //!     .map(|x| Some(x.to_string()))
 //!     .collect();
-
+//!
 //! let view = table.view(Some(view_config)).await?;
 //! let arrow = view.to_arrow(ViewWindow::default()).await?;
 //! ```
+//!
+//! # See also
+//!
+//! - [`perspective-js`](https://docs.rs/perspective-js/latest/) for the
+//!   JavaScript API.
+//! - [`perspective-python`](https://docs.rs/perspective-python/latest/) for the
+//!   Python API.
+//! - [`perspective-server`](https://docs.rs/perspective-python/latest/) for
+//!   Data Binding details.
+//! - [`perspective-client`](https://docs.rs/perspective-python/latest/) for the
+//!   Rust Client API
+//! - [`perspective-viewer`](https://docs.rs/perspective-viewer/latest/) for the
+//!   WebAssembly `<perspective-viewer>` Custom Element API.
 
 #[cfg(feature = "axum-ws")]
 pub mod axum;
