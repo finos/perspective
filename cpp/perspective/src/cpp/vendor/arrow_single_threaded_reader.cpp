@@ -998,8 +998,8 @@ namespace csv {
 
     Result<std::shared_ptr<TableReader>>
     TableReader::Make(
-        const io::IOContext& io_context,
-        const std::shared_ptr<io::InputStream>& input,
+        const io::IOContext io_context,
+        const std::shared_ptr<io::InputStream> input,
         const ReadOptions& read_options,
         const ParseOptions& parse_options,
         const ConvertOptions& convert_options

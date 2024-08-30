@@ -59,7 +59,7 @@ namespace csv {
 
         /// Create a TableReader instance
         static Result<std::shared_ptr<TableReader>>
-        Make(const io::IOContext& io_context, const std::shared_ptr<io::InputStream>& input, const ReadOptions&, const ParseOptions&, const ConvertOptions&);
+        Make(io::IOContext io_context, std::shared_ptr<io::InputStream> input, const ReadOptions&, const ParseOptions&, const ConvertOptions&);
 
         ARROW_DEPRECATED(
             "Use MemoryPool-less variant (the IOContext holds a pool already)"
