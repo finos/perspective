@@ -167,15 +167,12 @@ describe_jupyter(
                 let edit_mode = await getEditMode(viewer);
                 expect(edit_mode).toEqual("READ_ONLY");
 
-                console.error("Fuck1");
                 await add_and_execute_cell(
                     page,
                     'w.plugin_config = {"edit_mode": "EDIT"}'
                 );
 
-                console.error("Fuck2");
                 edit_mode = await getEditMode(viewer);
-                console.error("Fuck3");
                 expect(edit_mode).toEqual("EDIT");
             }
         );
