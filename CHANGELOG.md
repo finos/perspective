@@ -1,6 +1,16 @@
+# [v3.0.2](https://github.com/finos/perspective/releases/tag/v3.0.2)
+
+_30 August 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.1...v3.0.2))
+
+Fixes
+
+- Fix link error in emscripten wheel [#2726](https://github.com/finos/perspective/pull/2726)
+- Fix `PerspectiveTornadoHandler` misnamed `close()` [#2720](https://github.com/finos/perspective/pull/2720)
+- fix: Doctype in html export [#2690](https://github.com/finos/perspective/pull/2690)
+
 # [v3.0.1](https://github.com/finos/perspective/releases/tag/v3.0.1)
 
-_26 August 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.0...v3.0.1))
+_25 August 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.0...v3.0.1))
 
 Features
 
