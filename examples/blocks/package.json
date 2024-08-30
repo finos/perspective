@@ -1,7 +1,7 @@
 {
     "name": "blocks",
     "private": true,
-    "version": "3.0.1",
+    "version": "3.0.2",
     "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
     "scripts": {
         "start": "mkdirp dist && node --experimental-modules server.mjs",
