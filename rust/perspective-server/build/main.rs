@@ -32,7 +32,6 @@ fn main() -> Result<(), std::io::Error> {
 
     std::fs::write("docs/lib_gen.md", markdown.as_ref())?;
     if std::option_env!("PSP_DISABLE_CPP").is_none() {
-        println!("cargo:warning=MESSAGE FUCKED");
         if let Some(artifact_dir) = psp::cmake_build()? {
             psp::cmake_link_deps(&artifact_dir)?;
             psp::cxx_bridge_build();
