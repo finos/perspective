@@ -88,8 +88,13 @@ t_fterm::get_expr() const {
         } break;
         case FILTER_OP_BEGINS_WITH:
         case FILTER_OP_ENDS_WITH: {
-            ss << "." << filter_op_to_str(m_op) << "( "
-               << m_threshold.to_string(true) << " )";
+            if (m_negated) {
+                ss << "!" << filter_op_to_str(m_op) << "( "
+                   << m_threshold.to_string(true) << " )";
+            } else {
+                ss << "." << filter_op_to_str(m_op) << "( "
+                   << m_threshold.to_string(true) << " )";
+            }
         } break;
         default: {
             ss << " is failed_compilation";
