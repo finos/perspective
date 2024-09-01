@@ -11,6 +11,33 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 #include <perspective/computed_expression.h>
+parser_t parser;
+parser.set_max_stack_depth(100);
+parser.set_max_node_depth(200);#include <perspective/computed_expression.h>
+#include <exprtk.hpp>
+#include <utility>
+
+namespace perspective {
+
+// Define exprtk runtime checks before including exprtk headers
+#define exprtk_enable_runtimechecks
+#include <exprtk.hpp>
+
+// Instantiate the parser with stack and node depth protections
+parser_t parser;
+parser.set_max_stack_depth(100);
+parser.set_max_node_depth(200);
+
+// Setting up loop runtime protection
+using loop_runtime_check_t = exprtk::loop_runtime_check;
+loop_runtime_check_t loop_runtime_check;
+loop_runtime_check.loop_set = loop_runtime_check_t::e_all_loops;
+loop_runtime_check.max_loop_iterations = 100000;
+
+parser.register_loop_runtime_check(loop_runtime_check);
+
+// Continue with the rest of your implementation as required
+}
 
 #include <utility>
 
