@@ -30,12 +30,13 @@ from .perspective import (
     Table,
     View,
     ProxySession,
+    PySyncServer,
 )
 
 from .widget import PerspectiveWidget
 from .viewer import PerspectiveViewer
 
-from .psp_cffi import ServerBase
+# from .psp_cffi import ServerBase
 
 try:
     from .handlers import PerspectiveTornadoHandler
@@ -47,7 +48,7 @@ def default_loop_cb(fn, *args, **kwargs):
     return fn(*args, **kwargs)
 
 
-class Server(ServerBase):
+class Server(PySyncServer):
     def set_threadpool_size(self, n_cpus):
         pass
 

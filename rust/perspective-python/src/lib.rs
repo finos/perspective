@@ -14,7 +14,7 @@
 #![warn(unstable_features)]
 
 mod client;
-// mod server;
+mod server;
 
 pub use client::client_sync::{Client, ProxySession, Table, View};
 use pyo3::prelude::*;
@@ -50,8 +50,8 @@ fn init_tracing() {
 fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     init_tracing();
     m.add_class::<client::client_sync::Client>()?;
-    // m.add_class::<server::PySyncServer>()?;
-    // m.add_class::<server::PySyncSession>()?;
+    m.add_class::<server::PySyncServer>()?;
+    m.add_class::<server::PySyncSession>()?;
     m.add_class::<client::client_sync::Table>()?;
     m.add_class::<client::client_sync::View>()?;
     m.add_class::<client::client_sync::ProxySession>()?;

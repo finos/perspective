@@ -20,18 +20,16 @@ license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 keywords = []
-build = "build/main.rs"
+build = "build.rs"
 include = [
     "bench/**/*.py",
-    "build/**/*",
+    "build.rs",
     "./Cargo.toml",
     "./package.json",
     "perspective/**/*.py",
     "./pyproject.toml",
     "src/**/*.rs",
     "docs/**/*",
-    "cpp/**/*",
-    "cmake/**/*",
 ]
 
 [package.metadata.docs.rs]
@@ -39,14 +37,15 @@ rustdoc-args = ["--html-in-header", "docs/index.html"]
 
 [features]
 default = []
-sdist = []
-external-cpp = ["perspective-client/external-proto"]
+external-cpp = [
+    "perspective-client/external-proto",
+    "perspective-server/external-cpp",
+]
 
 [lib]
 crate-type = ["cdylib"]
 
 [build-dependencies]
-cxx-build = "1.0.115"
 cmake = "0.1.50"
 num_cpus = "^1.16.0"
 pyo3-build-config = "0.20.2"
@@ -55,7 +54,7 @@ python-config-rs = "0.1.2"
 [dependencies]
 async-lock = "2.5.0"
 perspective-client = { version = "3.0.2", path = "../perspective-client" }
-# perspective-server = { version = "3.0.2", path = "../perspective-server" }
+perspective-server = { version = "3.0.2", path = "../perspective-server" }
 pollster = "0.3.0"
 extend = "1.1.2"
 futures = "0.3.28"

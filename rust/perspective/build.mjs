@@ -10,23 +10,35 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#pragma once
+import sh from "../../tools/perspective-scripts/sh.mjs";
 
-#include "perspective/proto_api.h"
-#include <memory>
-#include "rust/cxx.h"
+let flags = "--release";
+if (!!process.env.PSP_DEBUG) {
+    flags = "";
+}
 
-struct ResponseBatch;
+const cmd = sh();
 
-std::unique_ptr<ProtoApiServer> new_proto_server();
+// if not windows
+if (process.platform !== "win32") {
+    cmd.env({
+        PSP_ROOT_DIR: "../..",
+    });
+}
 
-std::uint32_t new_session(const ProtoApiServer& self);
-void close_session(const ProtoApiServer& server, std::uint32_t client_id);
+let target = "";
+if (process.env.PSP_ARCH === "x86_64" && process.platform === "darwin") {
+    target = "--target=x86_64-apple-darwin";
+} else if (
+    process.env.PSP_ARCH === "aarch64" &&
+    process.platform === "darwin"
+) {
+    target = "--target=aarch64-apple-darwin";
+} else if (process.env.PSP_ARCH === "x86_64" && process.platform === "linux") {
+    target = "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
+} else if (process.env.PSP_ARCH === "aarch64" && process.platform === "linux") {
+    target = "--target=aarch64-unknown-linux-gnu";
+}
 
-rust::Box<ResponseBatch> handle_request(
-    const ProtoApiServer& self,
-    std::uint32_t client_id,
-    rust::Slice<const std::uint8_t> message
-);
-
-rust::Box<ResponseBatch> poll(const ProtoApiServer& self);
+cmd.sh(`cargo build ${flags} ${target} --features=external-cpp`);
+cmd.runSync();

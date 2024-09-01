@@ -217,7 +217,6 @@ impl Table {
 
     #[doc = crate::inherit_docs!("table/size.md")]
     pub fn size(&self, py: Python<'_>) -> PyResult<usize> {
-        tracing::error!("WIP");
         self.0.size().py_block_on(py)
     }
 

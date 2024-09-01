@@ -321,7 +321,6 @@ suite(
 
         // // Legacy compat
         if (server.host_table) {
-            console.log("WIP");
             server.host_table("superstore", table);
         }
 

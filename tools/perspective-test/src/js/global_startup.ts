@@ -19,7 +19,7 @@ const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default async function run() {
-    const RESULTS_PATH = path.join(__dirname, "./results.tar.gz");
+    const RESULTS_PATH = path.join(__dirname, "../../results.tar.gz");
     if (fs.existsSync(RESULTS_PATH)) {
         console.log("Using results.tar.gz");
         await tar.extract({ file: RESULTS_PATH, gzip: true });

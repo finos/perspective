@@ -20,11 +20,12 @@ repository = "https://github.com/finos/perspective"
 license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = []
-include = ["src/**/*", "Cargo.toml"]
+include = ["src/**/*", "tests/**/*", "Cargo.toml"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
+
 
 [features]
 default = ["axum-ws"]

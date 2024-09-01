@@ -42,9 +42,8 @@ t_pool::t_pool() : m_sleep(0) { m_run.clear(); }
 t_pool::t_pool() :
 // : m_update_delegate(empty_callback())
 #ifdef PSP_PARALLEL_FOR
-    m_lock(new std::shared_mutex())
+    m_lock(new std::shared_mutex()),
 #endif
-    ,
     m_sleep(0) {
     m_run.clear();
 }

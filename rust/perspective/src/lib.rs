@@ -25,6 +25,7 @@
 //! use perspective::server::Server;
 //! use perspective::LocalClient;
 //!
+//! # let arow_vec_data: Vec<u8> = vec![];
 //! let data = UpdateData::Arrow(arrow_vec_data);
 //! let options = TableInitOptions::default();
 //! let table = client.table(data.into(), options).await?;
