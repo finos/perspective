@@ -223,6 +223,65 @@ jobs:
                   name: perspective-python-dist-${{ matrix.arch}}-${{ matrix.os }}-${{ matrix.python-version }}
                   path: rust/target/wheels/*.whl
 
+    # ,-,---.       .    .             .   ,--,--'      .
+    #  '|___/ . . . |  ,-|   ,-. ,-. ,-|   `- | ,-. ,-. |-
+    #  ,|   \ | | | |  | |   ,-| | | | |    , | |-' `-. |
+    # `-^---' `-^ ' `' `-^   `-^ ' ' `-^    `-' `-' `-' `'
+    #
+    # .-,--.         .
+    #  `|__/ . . ,-. |-
+    #  )| \  | | `-. |
+    #  `'  ` `-^ `-' `'
+    #
+    build_and_test_rust:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                arch:
+                    - x86_64
+                node-version: [20.x]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              id: init-step
+              uses: ./.github/actions/install-deps
+              with:
+                  javascript: "false"
+                  arch: ${{ matrix.arch }}
+                  manylinux: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - name: Rust Build
+              run: pnpm run build
+              env:
+                  PACKAGE: "perspective-rs"
+                  PSP_ROOT_DIR: ${{ github.workspace }}
+
+            - name: Rust Test
+              run: pnpm run test
+              env:
+                  PACKAGE: "perspective-rs"
+                  PSP_ROOT_DIR: ${{ github.workspace }}
+
+            - name: Package
+              if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+              run: cargo package --allow-dirty -p perspective -p perspective-viewer -p perspective-js -p perspective-client -p perspective-server -p perspective-python
+
+            - uses: actions/upload-artifact@v4
+              if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+              with:
+                  name: perspective-rust
+                  path: rust/target/package/*.crate
+
     # ,-,---.       .    .   .-,--.           .     .
     #  '|___/ . . . |  ,-|    '|__/ . . ,-. ,-| . ,-| ,-.
     #  ,|   \ | | | |  | |    .|    | | | | | | | | | |-'
@@ -231,6 +290,7 @@ jobs:
     #                               `-'
     build_emscripten_wheel:
         runs-on: ${{ matrix.os }}
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         strategy:
             fail-fast: false
             matrix:
@@ -534,7 +594,15 @@ jobs:
     #  `'    `-^ ^-' `' ' `-' ' '
     #
     publish:
-        needs: [build_and_test_juptyerlab, test_python, test_js, benchmark_js]
+        needs:
+            [
+                build_and_test_juptyerlab,
+                test_python,
+                test_js,
+                benchmark_js,
+                build_emscripten_wheel,
+                build_and_test_rust,
+            ]
         if: startsWith(github.ref, 'refs/tags/v')
         strategy:
             matrix:
@@ -589,6 +657,10 @@ jobs:
               with:
                   name: perspective-js-benchmarks
 
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-rust
+
             # - uses: actions/download-artifact@v4
             #   with:
             #       name: perspective-python-benchmarks
@@ -633,5 +705,6 @@ jobs:
                       *.tar.gz
                       *.tgz
                       *.arrow
+                      *.crate
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

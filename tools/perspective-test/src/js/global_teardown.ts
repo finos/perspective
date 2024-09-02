@@ -18,7 +18,7 @@ import url from "node:url";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const RESULTS_PATH = path.join(__dirname, "./results.tar.gz");
+const RESULTS_PATH = path.join(__dirname, "../../results.tar.gz");
 
 export default async function run() {
     if (fs.existsSync(RESULTS_PATH)) {
@@ -44,8 +44,18 @@ export default async function run() {
                 },
             },
             [
-                ...glob.sync("tools/perspective-test/dist/snapshots/**/*.txt"),
-                ...glob.sync("tools/perspective-test/dist/snapshots/**/*.html"),
+                ...glob.sync(
+                    path.join(
+                        __dirname,
+                        "../../../../tools/perspective-test/dist/snapshots/**/*.txt"
+                    )
+                ),
+                ...glob.sync(
+                    path.join(
+                        __dirname,
+                        "../../../../tools/perspective-test/dist/snapshots/**/*.html"
+                    )
+                ),
             ],
             x
         )

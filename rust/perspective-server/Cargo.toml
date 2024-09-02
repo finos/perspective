@@ -40,16 +40,15 @@ export-cpp-only = []
 no-build-cpp = []
 
 [build-dependencies]
-cxx-build = "1.0.92"
 cmake = "0.1.50"
 num_cpus = "^1.15.0"
 regex = "~1"
 base64 = ">=0.22.1"
 
 [dependencies]
+link-cplusplus = "1.0.9"
 perspective-client = { version = "3.0.2", path = "../perspective-client" }
 async-lock = "2.5.0"
-cxx = { version = "1.0.92", features = ["c++17"] }
 tracing = { version = ">=0.1.36" }
 futures = "0.3"
 

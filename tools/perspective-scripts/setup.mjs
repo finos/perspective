@@ -121,6 +121,11 @@ async function focus_package() {
                     value: "perspective-python",
                 },
                 {
+                    key: "r",
+                    name: "perspective-rs",
+                    value: "perspective-rs",
+                },
+                {
                     key: "v",
                     name: "perspective-viewer",
                     value: "perspective-viewer",

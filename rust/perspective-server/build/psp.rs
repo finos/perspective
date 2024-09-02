@@ -44,7 +44,6 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
         let root_dir = Path::new(root_dir_env.as_str());
         copy_dir_all(Path::join(root_dir, "cpp"), "cpp", &HashSet::from(["dist"]))?;
         copy_dir_all(Path::join(root_dir, "cmake"), "cmake", &HashSet::new())?;
-
         println!(
             "cargo:rerun-if-changed={}/cpp/perspective",
             root_dir.display()
@@ -116,46 +115,22 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     Ok(Some(artifact_dir))
 }
 
-#[allow(dead_code)]
 pub fn cmake_link_deps(cmake_build_dir: &Path) -> Result<(), std::io::Error> {
     println!(
         "cargo:rustc-link-search=native={}/build",
         cmake_build_dir.display()
     );
 
+    // println!("cargo:warning=MESSAGE {}/build", cmake_build_dir.display());
     println!("cargo:rustc-link-lib=static=psp");
     link_cmake_static_archives(cmake_build_dir)?;
     println!("cargo:rerun-if-changed=cpp/perspective");
     Ok(())
 }
 
-#[allow(dead_code)]
-pub fn cxx_bridge_build() {
-    println!("cargo:warning=MESSAGE Building cxx");
-    let mut compiler = cxx_build::bridge("src/ffi.rs");
-    compiler
-        .file("src/server.cpp")
-        .include("include")
-        .include("cpp/perspective/src/include")
-        .std("c++17");
-    // .flag("-fexceptions") // TODO not needed?
-
-    if cfg!(windows) {
-        compiler.flag_if_supported("/c");
-    } else {
-        compiler.static_flag(true);
-    }
-
-    compiler.compile("perspective");
-
-    println!("cargo:rerun-if-changed=include/server.h");
-    println!("cargo:rerun-if-changed=src/server.cpp");
-    println!("cargo:rerun-if-changed=src/lib.rs");
-}
-
 /// Walk the cmake output path and emit link instructions for all archives.
 /// TODO Can this be faster pls?
-#[allow(dead_code)]
+/// TODO update apparently not https://github.com/rust-lang/cmake-rs/issues/149
 pub fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
     if dir.is_dir() {
         for entry in fs::read_dir(dir)? {
@@ -176,7 +151,7 @@ pub fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
                         stem.expect("bad")[3..].to_string()
                     };
 
-                    // println!("cargo:warning=MESSAGE static link {}", a);
+                    // println!("cargo:warning=MESSAGE static link {} {}", a, dir.display());
                     println!("cargo:rustc-link-search=native={}", dir.display());
                     println!("cargo:rustc-link-lib=static={}", a);
                 }

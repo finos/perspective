@@ -24,6 +24,27 @@ if (getarg("--debug")) {
     console.log("-- Running tests in debug mode.");
 }
 
+const IS_PLAYWRIGHT = process.env.PACKAGE.split(",").reduce(
+    (is_playwright, pkg) =>
+        is_playwright ||
+        [
+            "perspective-cli",
+            "perspective-js",
+            "perspective-viewer",
+            "perspective-viewer-datagrid",
+            "perspective-viewer-d3fc",
+            "perspective-viewer-openlayers",
+            "perspective-viewer-workspace",
+            "perspective-jupyter",
+        ].includes(pkg),
+    false
+);
+
+const IS_RUST = process.env.PACKAGE.split(",").reduce(
+    (is_playwright, pkg) => is_playwright || ["perspective-rs"].includes(pkg),
+    false
+);
+
 const IS_CI = process.env.CI || getarg("--ci") ? "CI=1" : "";
 if (IS_CI) {
     console.log("-- Running tests in CI mode.");
@@ -72,7 +93,7 @@ if (process.env.PACKAGE) {
         process.exit(0);
     }
 
-    if (process.env.PACKAGE !== "perspective-python") {
+    if (IS_PLAYWRIGHT) {
         playwright(process.env.PACKAGE).runSync();
     }
 
@@ -81,6 +102,39 @@ if (process.env.PACKAGE) {
         process.env.PACKAGE.indexOf("!perspective-python") === -1
     ) {
         sh`pnpm run --recursive --filter @finos/perspective-python test`.runSync();
+    }
+
+    if (IS_RUST) {
+        let target = "";
+        let flags = "--release";
+        if (!!process.env.PSP_DEBUG) {
+            flags = "";
+        }
+
+        if (
+            process.env.PSP_ARCH === "x86_64" &&
+            process.platform === "darwin"
+        ) {
+            target = "--target=x86_64-apple-darwin";
+        } else if (
+            process.env.PSP_ARCH === "aarch64" &&
+            process.platform === "darwin"
+        ) {
+            target = "--target=aarch64-apple-darwin";
+        } else if (
+            process.env.PSP_ARCH === "x86_64" &&
+            process.platform === "linux"
+        ) {
+            target =
+                "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
+        } else if (
+            process.env.PSP_ARCH === "aarch64" &&
+            process.platform === "linux"
+        ) {
+            target = "--target=aarch64-unknown-linux-gnu";
+        }
+
+        sh`cargo test ${flags} ${target} -p perspective`.runSync();
     }
 } else {
     console.log("-- Running all tests");

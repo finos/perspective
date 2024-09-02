@@ -34,7 +34,6 @@ fn main() -> Result<(), std::io::Error> {
     if std::option_env!("PSP_DISABLE_CPP").is_none() {
         if let Some(artifact_dir) = psp::cmake_build()? {
             psp::cmake_link_deps(&artifact_dir)?;
-            psp::cxx_bridge_build();
         }
     }
 

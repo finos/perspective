@@ -12,12 +12,14 @@
 
 #![doc = include_str!("../docs/lib_gen.md")]
 
+extern crate link_cplusplus;
+
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
 
 use async_lock::RwLock;
-use cxx::UniquePtr;
+use ffi::Request;
 use futures::future::BoxFuture;
 use futures::Future;
 pub use perspective_client::Session;
@@ -33,16 +35,6 @@ type SessionCallback =
 /// a [`Session`], to be passed to the [`Server::new_session`] constructor.
 /// Alternatively, a [`Session`] can be created from a closure instead via
 /// [`Server::new_session_with_callback`].
-///                                                                         
-/// ```text
-///                      :
-///  Client              :   Session
-/// ┏━━━━━━━━━━━━━━━━━━┓ :  ┏━━━━━━━━━━━━━━━━━━━┓
-/// ┃ handle_response  ┃<━━━┃ send_response (*) ┃
-/// ┃ ..               ┃ :  ┃ ..                ┃
-/// ┗━━━━━━━━━━━━━━━━━━┛ :  ┗━━━━━━━━━━━━━━━━━━━┛
-///                      :
-/// ```
 pub trait SessionHandler: Send + Sync {
     /// Dispatch a message from a [`Server`] for a the [`Session`] that took
     /// this `SessionHandler` instance as a constructor argument.
@@ -57,9 +49,12 @@ pub trait SessionHandler: Send + Sync {
 /// [`Server`]s.
 #[derive(Clone)]
 pub struct Server {
-    server: Arc<UniquePtr<ffi::ProtoApiServer>>,
+    server: Arc<ffi::Server>,
     callbacks: Arc<RwLock<HashMap<u32, SessionCallback>>>,
 }
+
+unsafe impl Send for Server {}
+unsafe impl Sync for Server {}
 
 impl std::fmt::Debug for Server {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -71,7 +66,7 @@ impl std::fmt::Debug for Server {
 
 impl Default for Server {
     fn default() -> Self {
-        let server = Arc::new(ffi::new_proto_server());
+        let server = Arc::new(ffi::Server::new());
         let callbacks = Arc::default();
         Self { server, callbacks }
     }
@@ -91,7 +86,7 @@ impl Server {
     where
         F: for<'a> Fn(&'a [u8]) -> BoxFuture<'a, Result<(), ServerError>> + 'static + Sync + Send,
     {
-        let id = ffi::new_session(&self.server);
+        let id = self.server.new_session();
         let server = self.clone();
         self.callbacks
             .write()
@@ -127,49 +122,6 @@ impl Server {
         })
         .await
     }
-
-    async fn handle_request(&self, client_id: u32, val: &[u8]) -> Result<(), ServerError> {
-        for response in ffi::handle_request(&self.server, client_id, val).0 {
-            let cb = self
-                .callbacks
-                .read()
-                .await
-                .get(&response.client_id)
-                .cloned();
-
-            if let Some(f) = cb {
-                f(&response.resp).await?
-            }
-        }
-
-        Ok(())
-    }
-
-    async fn poll(&self) -> Result<(), ServerError> {
-        for response in ffi::poll(&self.server).0 {
-            let cb = self
-                .callbacks
-                .read()
-                .await
-                .get(&response.client_id)
-                .cloned();
-
-            if let Some(f) = cb {
-                f(&response.resp).await?
-            }
-        }
-
-        Ok(())
-    }
-
-    async fn close(&self, client_id: u32) {
-        ffi::close_session(&self.server, client_id);
-        self.callbacks
-            .write()
-            .await
-            .remove(&client_id)
-            .expect("Already closed");
-    }
 }
 
 /// A struct for implementing [`perspective_client::Session`] against an
@@ -183,6 +135,9 @@ pub struct LocalSession {
     closed: bool,
 }
 
+unsafe impl Send for LocalSession {}
+unsafe impl Sync for LocalSession {}
+
 impl Drop for LocalSession {
     fn drop(&mut self) {
         if !self.closed {
@@ -193,15 +148,52 @@ impl Drop for LocalSession {
 
 impl Session<ServerError> for LocalSession {
     async fn handle_request(&self, request: &[u8]) -> Result<(), ServerError> {
-        self.server.handle_request(self.id, request).await
+        let request = Request::from(request);
+        let responses = self.server.server.handle_request(self.id, &request);
+        for response in responses.iter_responses() {
+            let cb = self
+                .server
+                .callbacks
+                .read()
+                .await
+                .get(&response.client_id())
+                .cloned();
+
+            if let Some(f) = cb {
+                f(response.msg()).await?;
+            }
+        }
+
+        Ok(())
     }
 
     async fn poll(&self) -> Result<(), ServerError> {
-        self.server.poll().await
+        let responses = self.server.server.poll();
+        for response in responses.iter_responses() {
+            let cb = self
+                .server
+                .callbacks
+                .read()
+                .await
+                .get(&response.client_id())
+                .cloned();
+
+            if let Some(f) = cb {
+                f(response.msg()).await?;
+            }
+        }
+
+        Ok(())
     }
 
     async fn close(mut self) {
         self.closed = true;
-        self.server.close(self.id).await
+        self.server.server.close_session(self.id);
+        self.server
+            .callbacks
+            .write()
+            .await
+            .remove(&self.id)
+            .expect("Already closed");
     }
 }
