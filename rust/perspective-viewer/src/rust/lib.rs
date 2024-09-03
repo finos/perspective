@@ -13,7 +13,6 @@
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
-#![feature(lazy_cell)]
 #![feature(let_chains)]
 #![feature(macro_metavar_expr)]
 #![feature(iter_intersperse)]
@@ -120,6 +119,7 @@ pub fn registerPlugin(name: &str) {
 // }
 
 /// Register this crate's Custom Elements in the browser's current session.
+///
 /// This must occur before calling any public API methods on these Custom
 /// Elements from JavaScript, as the methods themselves won't be defined yet.
 /// By default, this crate does not register `PerspectiveViewerElement` (as to
@@ -133,7 +133,9 @@ pub fn js_init() {
 }
 
 /// Register Web Components with the global registry, given a Perspective
-/// module.  This function shouldn't be called directly;  instead, use the
+/// module.
+///
+/// This function shouldn't be called directly;  instead, use the
 /// `define_web_components!` macro to both call this method and hook the
 /// wasm_bindgen module object.
 pub fn bootstrap_web_components(psp: &JsValue) {

@@ -46,9 +46,11 @@ pub struct DefaultStyleAttributes {
     pub bool: serde_json::Value,
 }
 
-/// The data needed to populate a column's settings. These are typically default
-/// values, a listing of possible values, or other basic configuration settings
-/// for the plugin. This is the result of calling plugin.plugin_attributes
+/// The data needed to populate a column's settings.
+///
+/// These are typically default values, a listing of possible values, or other
+/// basic configuration settings for the plugin. This is the result of calling
+/// plugin.plugin_attributes
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct PluginAttributes {
     pub symbol: Option<SymbolAttributes>,

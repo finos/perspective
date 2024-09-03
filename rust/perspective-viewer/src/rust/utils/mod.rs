@@ -11,9 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 //! A catch all for project-wide macros and general-purpose functions that are
-//! not directly related to Perspective.  Modules below `crate::utils` strive
-//! to be single-responsibility, but some reference other `crate::utils`
-//! modules when it helps reduce boiler-plate.
+//! not directly related to Perspective.
+//!
+//! Modules below `crate::utils` strive to be single-responsibility, but some
+//! reference other `crate::utils` modules when it helps reduce boiler-plate.
 
 mod browser;
 

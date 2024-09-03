@@ -58,6 +58,8 @@ impl ActiveColumnState {
 
 type Label = Option<String>;
 
+/// An iterator for columns state.
+///
 /// Encapsulates the logic of determining which columns go in the "Active" and
 /// "Inactive" column sections of the `ColumnSelector` component, via the
 /// iterator returning functions `active()`, `inactive()` and `expression()`.

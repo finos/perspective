@@ -118,10 +118,11 @@ pub struct NumberColumnStyleConfig {
 
 derive_wasm_abi!(NumberColumnStyleConfig, FromWasmAbi, IntoWasmAbi);
 
-/// Exactly like a `ColumnStyleConfig`, except without `Option<>` fields, as
-/// this struct represents the default values we should use in the GUI when they
-/// are `None` in the real config.  It is also used to decide when to omit a
-/// field when serialized a `ColumnStyleConfig` to JSON.
+/// Exactly like a `ColumnStyleConfig`, except without `Option<>` fields.
+///
+/// Necessary because this struct represents the default values we should use in
+/// the GUI when they are `None` in the real config.  It is also used to decide
+/// when to omit a field when serialized a `ColumnStyleConfig` to JSON.
 #[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 pub struct NumberColumnStyleDefaultConfig {
     pub fg_gradient: f64,

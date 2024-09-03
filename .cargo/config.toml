@@ -20,6 +20,7 @@ frequency = 'never'
 
 [unstable]
 bindeps = true
+package-workspace = true
 
 [term]
 quiet = false

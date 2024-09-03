@@ -200,11 +200,12 @@ impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for WasmLogger {
     }
 }
 
-/// Configure `WasmLogger` as a global default for tracing. This operation will
-/// conflict with any other library which sets a global default
-/// `tracing::Subscriber`, so it should not be called when `perspective` is used
-/// as a library from a larger app; in this case the app itself should configure
-/// `tracing` explicitly.
+/// Configure `WasmLogger` as a global default for tracing.
+///
+/// This operation will conflict with any other library which sets a global
+/// default `tracing::Subscriber`, so it should not be called when `perspective`
+/// is used as a library from a larger app; in this case the app itself should
+/// configure `tracing` explicitly.
 pub fn set_global_logging() {
     static INIT_LOGGING: OnceLock<()> = OnceLock::new();
     INIT_LOGGING.get_or_init(|| {

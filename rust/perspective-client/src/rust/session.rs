@@ -22,12 +22,12 @@ use crate::{Client, ClientError};
 #[cfg(doc)]
 use crate::{Table, View};
 
-/// The server-side representation of a connection to a
-/// [`Client`]. For each [`Client`] that
-/// wants to connect to a `perspective_server::Server`, a dedicated [`Session`]
-/// must be created. The [`Session`] handles routing messages emitted by the
-/// `perspective_server::Server`ve_server::Server`, as well as owning any
-/// resources the [`Client`] may request.
+/// The server-side representation of a connection to a [`Client`].
+///
+/// For each [`Client`] that wants to connect to a `perspective_server::Server`,
+/// a dedicated [`Session`] must be created. The [`Session`] handles routing
+/// messages emitted by the `perspective_server::Server`ve_server::Server`, as
+/// well as owning any resources the [`Client`] may request.
 pub trait Session<E> {
     /// Handle an incoming request from the [`Client`]. Calling
     /// [`Session::handle_request`] will result in the `send_response` parameter

@@ -24,9 +24,10 @@ pub struct StyleProviderProps {
 }
 
 /// A context which injects any CSS snippet registered within its tree, doing
-/// so only once for each unqiue snippet name.  CSS can be registered within
-/// sub-components via the `<LocalStyle>` component and `css!()` resource
-/// inlining macro.
+/// so only once for each unqiue snippet name.
+///
+/// CSS can be registered within sub-components via the `<LocalStyle>` component
+/// and `css!()` resource inlining macro.
 pub struct StyleProvider {
     cache: StyleCache,
 }

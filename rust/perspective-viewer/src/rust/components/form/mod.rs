@@ -11,9 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 //! A module for form controls (though form controls like `<Select>` which are
-//! also container elements should go in the `containers` module).  Components
-//! in this module should not be imported from the `components` parent module
-//! directly.
+//! also container elements should go in the `containers` module).
+//!
+//! Components in this module should not be imported from the `components`
+//! parent module directly.
 
 pub mod code_editor;
 pub mod color_range_selector;

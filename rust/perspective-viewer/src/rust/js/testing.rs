@@ -60,8 +60,10 @@ extern "C" {
 
 /// A macro which set a property called `weak_link` on the container
 /// `Properties` when `cfg(test)`, such that unit tests may send messages to a
-/// component. This macro needs to be called in `create()` on any Component
-/// which needs to receive messages in a test.
+/// component.
+///
+/// This macro needs to be called in `create()` on any Component which needs to
+/// receive messages in a test.
 #[macro_export]
 macro_rules! enable_weak_link_test {
     ($props:expr, $link:expr) => {

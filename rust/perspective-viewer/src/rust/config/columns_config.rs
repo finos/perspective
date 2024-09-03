@@ -86,6 +86,7 @@ impl ColumnConfigValues {
 }
 
 /// The controls returned by plugin.column_style_controls.
+///
 /// This is a way to fill out default values for the given controls.
 /// If a control is not given, it will not be rendered. I would like to
 /// eventually show these as inactive values.

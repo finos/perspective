@@ -25,7 +25,9 @@ use wasm_bindgen_futures::{future_to_promise, JsFuture};
 use super::errors::*;
 
 /// A newtype wrapper for a `Future` trait object which supports being
-/// marshalled to a `JsPromise`, avoiding an API which requires type casting to
+/// marshalled to a `JsPromise`.
+///
+/// This avoids implementing an API which requires type casting to
 /// and from `JsValue` and the associated loss of type safety.
 #[must_use]
 pub struct ApiFuture<T>(Pin<Box<dyn Future<Output = ApiResult<T>>>>)

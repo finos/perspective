@@ -140,10 +140,6 @@
             flex: 0 1000000 auto;
             .button {
                 height: 22px;
-                select {
-                    height: 20px;
-                    font-size: var(--label--font-size, 0.75em);
-                }
             }
         }
 
@@ -295,10 +291,15 @@
         }
 
         #theme {
+            height: 48px;
             &:before {
                 -webkit-mask-image: url("../svg/theme-icon.svg");
                 mask-image: url("../svg/theme-icon.svg");
             }
+        }
+
+        #menu-bar .button select#theme_selector {
+            height: 48px;
         }
 
         .button {

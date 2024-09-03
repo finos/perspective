@@ -28,10 +28,11 @@ use self::number::*;
 use self::string::*;
 use self::symbol::*;
 
-/// Syntax-highlightable ExprTK tokens. We had the option of implemnting this
-/// alternatively as `pub struct Token(TokenType, &'a str);`, but I felt this
-/// was less ergonomic for the frequent pattern matching necessary when handling
-/// enum tokens.
+/// Syntax-highlightable ExprTK tokens.
+///
+///  We had the option of implemnting this alternatively as `pub struct
+/// Token(TokenType, &'a str);`, but I felt this was less ergonomic for the
+/// frequent pattern matching necessary when handling enum tokens.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Token<'a> {
     Comment(&'a str),

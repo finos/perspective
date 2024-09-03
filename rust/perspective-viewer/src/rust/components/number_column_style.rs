@@ -43,8 +43,10 @@ pub enum NumberColumnStyleMsg {
 }
 
 /// A `ColumnStyle` component is mounted to the window anchored at the screen
-/// position of `elem`.  It needs two input configs, the current configuration
-/// object and a default version without `Option<>`
+/// position of `elem`.
+///
+/// It needs two input configs, the current configuration object and a default
+/// version without `Option<>`
 #[derive(Properties)]
 pub struct NumberColumnStyleProps {
     #[cfg_attr(test, prop_or_default)]
@@ -97,9 +99,7 @@ impl NumberColumnStyleProps {
     }
 }
 
-/// The `ColumnStyle` component stores its UI state privately in its own struct,
-/// rather than its props (which has two version of this data itself, the
-/// JSON serializable config record and the defaults record).
+/// A column style form control for `number` columns.
 pub struct NumberColumnStyle {
     config: NumberColumnStyleConfig,
     default_config: NumberColumnStyleDefaultConfig,
