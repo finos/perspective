@@ -38,8 +38,9 @@ function addDataValues(tooltipDiv, values) {
 const formatNumber = (value) =>
     value === null || value === undefined
         ? "-"
-        : value.toLocaleString(undefined, {
+        : (value.toLocaleString(undefined, {
               style: "decimal",
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-          });
+            // allow for decimal character decoration 
+          })).replace(".","<span class='decimal-spacing'>.</span>");
