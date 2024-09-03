@@ -11,12 +11,14 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 //! A micro-framework for associating local CSS snippets with `yew::Component`s
-//! in a Custom Element's `ShadowRoot`.  Embedding a `<LocalStyle>` element
-//! will only create the underlying `<style>` tag once (when `Component::view()`
-//! is called the first time), even if multiple copies of the `Component`
-//! exist in the tree.
+//! in a Custom Element's `ShadowRoot`.
+//!
+//! Embedding a `<LocalStyle>` element will only create the underlying `<style>`
+//! tag once (when `Component::view()` is called the first time), even if
+//! multiple copies of the `Component` exist in the tree.
 //!
 //! # Example
+//!
 //! ```
 //! html! {
 //!     <StyleProvider>

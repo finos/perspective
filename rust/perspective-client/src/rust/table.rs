@@ -32,9 +32,7 @@ use crate::view::View;
 pub type Schema = HashMap<String, ColumnType>;
 
 /// Options which impact the behavior of [`Client::table`], as well as
-/// subsequent calls to [`Table::update`], even though this latter method
-/// itself does not take [`TableInitOptions`] as an argument, since this
-/// parameter is fixed at creation.
+/// subsequent calls to [`Table::update`].
 #[derive(Clone, Debug, Default, Serialize, Deserialize, TS)]
 pub struct TableInitOptions {
     #[serde(default)]

@@ -19,19 +19,20 @@ use crate::derive_model;
 use crate::renderer::Renderer;
 use crate::session::Session;
 
-/// TODO: This pattern of creating query objects to pass around would be
-/// redundant if we had a grab-bag of models to clone around.
-/// We could easily generate all the needed types for this in a proc_macro
-/// crate. e.g. create structs like `SessionAndRendererModel {session,
-/// renderer}` which are then called through a proc_macro like
-/// `get_model!(Session, Renderer for self)` where the function is defined as
-/// `get_model! => {($($name:ty),+ for $owner:ident)}`
-///
-/// Or, we could just lump
-/// all the state into a single object where all these model functions are
-/// defined. Generally, we could keep the hub-and-spoke architecture "under the
-/// hood", but just not expose it to the yew framework, since it requires a lot
-/// of unecessary prop-drilling and complexity.
+// TODO: This pattern of creating query objects to pass around would be
+// redundant if we had a grab-bag of models to clone around.
+// We could easily generate all the needed types for this in a proc_macro
+// crate. e.g. create structs like `SessionAndRendererModel {session,
+// renderer}` which are then called through a proc_macro like
+// `get_model!(Session, Renderer for self)` where the function is defined as
+// `get_model! => {($($name:ty),+ for $owner:ident)}`
+//
+// Or, we could just lump
+// all the state into a single object where all these model functions are
+// defined. Generally, we could keep the hub-and-spoke architecture "under the
+// hood", but just not expose it to the yew framework, since it requires a lot
+// of unecessary prop-drilling and complexity.
+
 #[derive(Clone)]
 pub struct PluginColumnStylesQuery {
     session: Session,

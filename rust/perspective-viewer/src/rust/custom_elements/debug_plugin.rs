@@ -15,12 +15,13 @@ use wasm_bindgen::prelude::*;
 use crate::utils::*;
 use crate::*;
 
-/// The `<perspective-viewer-plugin>` element, the default perspective plugin
-/// which is registered and activated automcatically when a
-/// `<perspective-viewer>` is loaded without plugins.  While you will not
-/// typically instantiate this class directly, it is simple enough to function
-/// as a good "default" plugin implementation which can be extended to create
-/// custom plugins.
+/// The `<perspective-viewer-plugin>` element.
+///
+/// The default perspective plugin which is registered and activated
+/// automcatically when a `<perspective-viewer>` is loaded without plugins.
+/// While you will not typically instantiate this class directly, it is simple
+/// enough to function as a good "default" plugin implementation which can be
+/// extended to create custom plugins.
 ///
 /// # Example
 /// ```javascript

@@ -32,6 +32,8 @@ fn tag_name_to_package(plugin: &JsPerspectiveViewerPlugin) -> String {
     Itertools::intersperse(tag_parts, "-".to_owned()).collect::<String>()
 }
 
+/// A model trait for Copy/Export UI task behavior,
+///
 /// Export functionality, for downloads and copy-to-clipboard, are mostly shared
 /// behavior, but require access to a few state objects depending on which
 /// format is desired.  The `CopyExportModel` groups this functionality in a

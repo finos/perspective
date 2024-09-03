@@ -19,6 +19,8 @@ use crate::session::Session;
 use crate::utils::*;
 use crate::*;
 
+/// A model trait for updating both `View` state and completing a render.
+///
 /// While `Renderer` manages the plugin and thus the render call itself, the
 /// current `View` is handled by the `Session` which must be validated and
 /// locked while drawing is in progress.  `UpdateAndRender` provides methods

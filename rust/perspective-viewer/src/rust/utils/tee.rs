@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 /// Trait for polymorphic return value via turbofish-const-generic syntax.
+///
 /// The associated type `Output` is a functional dependency of the const generic
 /// parameter `N`, so there's typically no need to specify this parameter when
 /// invoking, which is what we want - this parameter is quite verbose and
@@ -21,15 +22,17 @@ pub trait TeeInternal<const N: usize> {
 }
 
 pub trait Tee {
-    /// Extension method to add `tee()` method to all `T: Clone`. This can't be
-    /// done directly as part of `TeeInternal` because it makes specifying the
-    /// const param at the `tee()` invocation site cumbersome:
-    /// `TeeInternal::<N>::tee(&obj)` as opposed to `obj.tee::<N>()`. The
-    /// constraint `Self: TeeInternal<N>` collapses the potential `impl` matches
-    /// to exactly 1, which makes the call to `tee_internal()` unambiguous.
-    /// This constraint is also allowed to contain the generic parameter `N`
-    /// because it is specified as a constraint to the method (as opposed to
-    /// a constraint on the trait). I'm honestly quite surprised this works ...
+    /// Extension method to add `tee()` method to all `T: Clone`.
+    ///
+    /// This can't be done directly as part of `TeeInternal` because it makes
+    /// specifying the const param at the `tee()` invocation site
+    /// cumbersome: `TeeInternal::<N>::tee(&obj)` as opposed to
+    /// `obj.tee::<N>()`. The constraint `Self: TeeInternal<N>` collapses
+    /// the potential `impl` matches to exactly 1, which makes the call to
+    /// `tee_internal()` unambiguous. This constraint is also allowed to
+    /// contain the generic parameter `N` because it is specified as a
+    /// constraint to the method (as opposed to a constraint on the trait).
+    /// I'm honestly quite surprised this works ...
     ///
     /// # Examples
     ///

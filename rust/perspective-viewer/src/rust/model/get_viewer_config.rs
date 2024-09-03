@@ -25,12 +25,15 @@ use crate::session::*;
 use crate::*;
 
 /// A `ViewerConfig` is constructed from various properties acrosss the
-/// application state, including the current `Plugin`, `ViewConfig`, and
-/// `Theme`.  `GetViewerConfigModel` provides methods which should be used to
-/// get the applications `ViewerConfig` from across these state objects.
+/// application state
+///
+/// For example, the current `Plugin`, `ViewConfig`, and `Theme`.
+/// `GetViewerConfigModel` provides methods which should be used to get the
+/// applications `ViewerConfig` from across these state objects.
 pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
     /// As these methods are asynchronous, it is commonly useful to be able to
     /// discretely `.clone()` the state objects for dispatching to `async`.
+    ///
     /// Calling `.cloned()` yields just the state object clones of
     /// `GetViewerConfigModel` which itself implements this trait and other
     /// `crate::model` traits.

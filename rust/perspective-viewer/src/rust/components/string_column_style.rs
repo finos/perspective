@@ -52,9 +52,7 @@ impl PartialEq for StringColumnStyleProps {
     }
 }
 
-/// The `ColumnStyle` component stores its UI state privately in its own struct,
-/// rather than its props (which has two version of this data itself, the
-/// JSON serializable config record and the defaults record).
+/// A component for the style form control for [`String`] columns.
 pub struct StringColumnStyle {
     config: StringColumnStyleConfig,
     default_config: StringColumnStyleDefaultConfig,

@@ -79,8 +79,10 @@ impl<T: Clone> PubSubInternal<T> {
 }
 
 /// A pub/sub struct which allows many listeners to subscribe to many
-/// publishers, without leaking callbacks as listeners are dropped. Unlike
-/// `mpsc` etc., `PubSub` has no internal queue and is completely synchronous.
+/// publishers, without leaking callbacks as listeners are dropped.
+///
+/// Unlike `mpsc` etc., `PubSub` has no internal queue and is completely
+/// synchronous.
 #[derive(Derivative)]
 #[derivative(Default(bound = ""))]
 pub struct PubSub<T: Clone>(Rc<PubSubInternal<T>>);
@@ -198,9 +200,10 @@ impl<T: Clone> PartialEq for Subscriber<T> {
 }
 
 /// Manages the lifetime of a listener registered to a `PubSub<T>` by
-/// deregistering the associated listener when dropped.  The wrapped `Fn` of
-/// `Subscriptions` is the deregister closure provided by the issuing
-/// `PubSub<T>`.
+/// deregistering the associated listener when dropped.
+///
+/// The wrapped `Fn` of `Subscriptions` is the deregister closure provided by
+/// the issuing `PubSub<T>`.
 #[must_use]
 pub struct Subscription(Box<dyn Fn()>);
 

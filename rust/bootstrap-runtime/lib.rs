@@ -37,6 +37,7 @@ use alloc::vec::Vec;
 
 use zune_inflate::DeflateDecoder;
 
+#[allow(unused_unsafe)]
 #[global_allocator]
 static ALLOCATOR: talc::Talck<talc::locking::AssumeUnlockable, talc::ClaimOnOom> = {
     static mut MEMORY: [u8; 64000000] = [0; 64000000];

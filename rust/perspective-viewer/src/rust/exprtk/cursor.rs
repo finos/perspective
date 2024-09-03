@@ -13,6 +13,8 @@
 use perspective_client::ExprValidationError;
 use yew::prelude::*;
 
+/// A tokenizer cursor for ExprTK parsing.
+///
 /// Because ExprTK reports errors in column/row coordinates and visually needs
 /// to be applied to an entire token rather than a single character, we need
 /// fairly obnoxious counter logic to figure out how to generate the resulting

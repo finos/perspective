@@ -15,7 +15,9 @@ use std::fmt::Display;
 use wasm_bindgen::prelude::*;
 
 /// A bespoke error class for chaining a litany of various error types with the
-/// `?` operator.  `anyhow`, `web_sys::JsError` are candidates for replacing
+/// `?` operator.  
+///
+/// `anyhow`, `web_sys::JsError` are candidates for replacing
 /// this, but we'd need a way to get around syntacitc conveniences we get
 /// from avoiding orphan instance issues (e.g. converting `JsValue` to an error
 /// in `anyhow`).
@@ -23,6 +25,7 @@ use wasm_bindgen::prelude::*;
 /// We'd still like to implement this, but instead must independently implement
 /// the instance for each error, as otherwise `rustc` will complain that the
 /// `wasm_bindgen` authors may themselves implement `Error` for `JsValue`.
+///
 /// ```
 /// impl<T> From<T> for ApiError
 /// where

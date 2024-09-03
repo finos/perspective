@@ -81,7 +81,9 @@ pub enum DragDropListMsg {
 }
 
 /// A sub-selector for a list-like component of a `JsViewConfig`, such as
-/// `filters` and `sort`.  `DragDropList` is parameterized by two `Component`
+/// `filters` and `sort`.  
+///
+/// `DragDropList` is parameterized by two `Component`
 /// types, the parent component `T` and the inner item compnent `U`, which must
 /// additionally implement `DragDropListItemProps` trait on its own `Properties`
 /// associated type.
