@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-server"
-version = "3.0.2"
+version = "3.0.3"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -23,12 +23,12 @@ keywords = []
 build = "build/main.rs"
 include = [
     "src/**/*",
+    "build/**/*",
     "include/**/*",
     "cpp/**/*",
     "docs/**/*",
     "cmake/**/*",
     "Cargo.toml",
-    "build.rs",
 ]
 
 [features]
@@ -47,7 +47,7 @@ base64 = ">=0.22.1"
 
 [dependencies]
 link-cplusplus = "1.0.9"
-perspective-client = { version = "3.0.2", path = "../perspective-client" }
+perspective-client = { version = "3.0.3", path = "../perspective-client" }
 async-lock = "2.5.0"
 tracing = { version = ">=0.1.36" }
 futures = "0.3"

@@ -1,3 +1,15 @@
+# [v3.0.3](https://github.com/finos/perspective/releases/tag/v3.0.3)
+
+_3 September 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.2...v3.0.3))
+
+Fixes
+
+- Fix `perspective` crate, link `perspective-server` as static lib [#2734](https://github.com/finos/perspective/pull/2734)
+
+Misc
+
+- Support packaging in CI [#2735](https://github.com/finos/perspective/pull/2735)
+
 # [v3.0.2](https://github.com/finos/perspective/releases/tag/v3.0.2)
 
 _30 August 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.1...v3.0.2))
