@@ -110,6 +110,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     }
 
     println!("cargo:warning=MESSAGE Building cmake {}", profile);
+    dst.very_verbose(true);
     let artifact_dir = dst.build();
 
     Ok(Some(artifact_dir))
