@@ -388,6 +388,15 @@ jobs:
                   cpp: "false"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
+            - name: Python Build sdist
+              run: pnpm run build
+              env:
+                  PACKAGE: "perspective-python"
+                  if: ${{ runner.os == 'Linux' }}
+                  # PSP_USE_CCACHE: 1
+                  # PSP_ARCH: ${{ matrix.arch }}
+                  PSP_BUILD_SDIST: 1
+
             - uses: actions/download-artifact@v4
               with:
                   name: perspective-js-dist
@@ -404,15 +413,6 @@ jobs:
                   PACKAGE: "perspective-jupyterlab"
 
             - run: node tools/perspective-scripts/repack_wheel.mjs
-
-            - name: Python Build sdist
-              run: pnpm run build
-              env:
-                  PACKAGE: "perspective-python"
-                  if: ${{ runner.os == 'Linux' }}
-                  # PSP_USE_CCACHE: 1
-                  # PSP_ARCH: ${{ matrix.arch }}
-                  PSP_BUILD_SDIST: 1
 
             - uses: actions/upload-artifact@v4
               with:
