@@ -540,7 +540,7 @@ endif()
 if(PSP_PYODIDE)
     set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
         --no-entry \
-        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server,_psp_stack_trace,_psp_heap_size \
+        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server \
         -s SIDE_MODULE=2 \
     ")
 else()

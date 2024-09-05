@@ -2262,7 +2262,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
         case proto::Request::kServerSystemInfoReq: {
             proto::Response resp;
             auto* sys_info = resp.mutable_server_system_info_resp();
-#ifdef PSP_ENABLE_WASM
+#if defined(PSP_ENABLE_WASM) && !defined(PSP_ENABLE_PYTHON)
             auto heap_size = psp_heap_size();
             sys_info->set_heap_size(heap_size);
 #else
