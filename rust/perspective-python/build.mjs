@@ -80,7 +80,11 @@ if (build_wheel) {
         target = "--target=aarch64-unknown-linux-gnu";
     }
 
-    cmd.sh(`maturin build ${flags} -vv --features=external-cpp ${target}`);
+    if (!!process.env.PSP_BUILD_VERBOSE) {
+        flags += " -vv";
+    }
+
+    cmd.sh(`maturin build ${flags} --features=external-cpp ${target}`);
 }
 
 if (build_sdist) {
