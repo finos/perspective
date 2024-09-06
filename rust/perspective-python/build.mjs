@@ -11,11 +11,13 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as fs from "node:fs";
-import pkg from "./package.json" assert { type: "json" };
 import sh from "../../tools/perspective-scripts/sh.mjs";
 import * as url from "url";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
+const pkg = JSON.parse(
+    fs.readFileSync(__dirname + "/package.json", { encoding: "utf-8" })
+);
 
 let flags = "--release";
 if (!!process.env.PSP_DEBUG) {
