@@ -636,11 +636,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             add_library(psp STATIC ${PYTHON_SOURCE_FILES})
             target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
         endif()
-        # add_library(psppy SHARED ${PYTHON_BINDING_SOURCE_FILES})
 
         include_directories(${PSP_PYTHON_SRC}/include)
-
-        # target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
 
         if(MACOS OR NOT MANYLINUX)
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
