@@ -33,8 +33,14 @@ from .perspective import (
     PySyncServer,
 )
 
-from .widget import PerspectiveWidget
-from .viewer import PerspectiveViewer
+try:
+    from .widget import PerspectiveWidget
+except ImportError:
+    ...
+try:
+    from .viewer import PerspectiveViewer
+except ImportError:
+    ...
 
 # from .psp_cffi import ServerBase
 

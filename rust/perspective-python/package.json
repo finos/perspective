@@ -12,9 +12,10 @@
     "scripts": {
         "build": "node build.mjs",
         "clean": "rimraf perspective.data && rimraf dist && rimraf build",
-        "test": "python -m pytest perspective/tests"
+        "test": "node test.mjs"
     },
     "devDependencies": {
+        "@finos/perspective-scripts": "workspace:*",
         "cpy": "^9.0.1"
     },
     "dependencies": {

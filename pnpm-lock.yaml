@@ -876,6 +876,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/perspective-jupyterlab
     devDependencies:
+      '@finos/perspective-scripts':
+        specifier: workspace:*
+        version: link:../../tools/perspective-scripts
       cpy:
         specifier: ^9.0.1
         version: 9.0.1
