@@ -30,6 +30,12 @@ const CONFIG = new Proxy(
                 ).replace(/\|/g, ",");
             }
         }
+        remove(keyname) {
+            const idx = this.config.find((x) => s.startsWith(keyname));
+            if (idx >= 0) {
+                this.config.splice(idx);
+            }
+        }
         add(new_config) {
             for (const key in new_config) {
                 const val = new_config[key];
@@ -121,6 +127,11 @@ async function focus_package() {
                     value: "perspective-python",
                 },
                 {
+                    key: "q",
+                    name: "perspective-pyodide (Python)",
+                    value: "perspective-pyodide",
+                },
+                {
                     key: "r",
                     name: "perspective-rs",
                     value: "perspective-rs",
@@ -166,6 +177,17 @@ async function focus_package() {
 
     if (Array.isArray(new_config.PACKAGE)) {
         if (new_config.PACKAGE.length > 0) {
+            let pyodide = new_config.PACKAGE.indexOf("perspective-pyodide");
+            if (pyodide >= 0) {
+                new_config.PACKAGE.splice(pyodide, 1);
+                new_config.PSP_PYODIDE = 1;
+                new_config.CI = 1;
+                new_config.PACKAGE.push("perspective-python");
+            } else {
+                CONFIG.remove("PSP_PYODIDE");
+                CONFIG.remove("CI");
+            }
+
             new_config.PACKAGE = `${new_config.PACKAGE.join(",")}`;
         } else {
             new_config.PACKAGE = undefined;
