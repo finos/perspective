@@ -189,7 +189,17 @@ jobs:
               if: ${{ runner.os == 'Windows' }}
 
             - name: Python Build
-              run: pnpm run build
+              run: |
+                  sudo debootstrap                                     \
+                    --include=ca-certificates,curl,file,libc6-dev,make \
+                    --no-merged-usr --variant=minbase xenial /sysroot  \
+                    http://azure.archive.ubuntu.com/ubuntu
+
+                  export RUSTFLAGS="link-arg=--sysroot=/sysroot"
+                  export RUSTDOCFLAGS="link-arg=--sysroot=/sysroot"
+                  export CFLAGS="--sysroot=/sysroot"
+
+                  pnpm run build
               if: ${{ !contains(matrix.os, 'windows') }}
               env:
                   PACKAGE: "perspective-python"
