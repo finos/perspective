@@ -130,7 +130,7 @@ jobs:
     #                              `-'
     build_python:
         runs-on: ${{ matrix.os }}
-        container: ${{ matrix.container }}
+        # container: ${{ matrix.container }}
         strategy:
             fail-fast: false
             matrix:
@@ -148,7 +148,7 @@ jobs:
                     - os: ubuntu-22.04
                       arch: x86_64
                       python-version: 3.9
-                      container: pagmo2/manylinux228_x86_64_with_deps
+                      # container: pagmo2/manylinux228_x86_64_with_deps
                 is-release:
                     - ${{ startsWith(github.ref, 'refs/tags/v') }}
                 exclude:
