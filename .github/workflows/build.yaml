@@ -198,7 +198,7 @@ jobs:
 
                   export RUSTFLAGS="-C link-arg=--sysroot=/sysroot"
                   export RUSTDOCFLAGS="-C link-arg=--sysroot=/sysroot"
-                  export CFLAGS="--sysroot=/sysroot"
+                  export CFLAGS="--sysroot=/sysroot -fuse-ld=lld"
 
                   pnpm run build
               if: ${{ !contains(matrix.os, 'windows') }}
