@@ -188,6 +188,11 @@ jobs:
             - run: echo "${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}" >> $env:GITHUB_PATH
               if: ${{ runner.os == 'Windows' }}
 
+            - name: Install LLVM and Clang
+              uses: KyleMayes/install-llvm-action@v2
+              with:
+                  version: "18"
+
             - name: Python Build
               run: |
                   sudo apt update && sudo apt install debootstrap
