@@ -190,7 +190,7 @@ jobs:
 
             - name: Python Build
               run: |
-                  sudo debootstrap                                     \
+                  debootstrap                                     \
                     --include=ca-certificates,curl,file,libc6-dev,make \
                     --no-merged-usr --variant=minbase xenial /sysroot  \
                     http://azure.archive.ubuntu.com/ubuntu
