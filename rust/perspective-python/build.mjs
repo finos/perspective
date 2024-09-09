@@ -72,7 +72,7 @@ if (build_wheel) {
         process.platform === "linux"
     ) {
         target =
-            "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
+            "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_27";
     } else if (
         process.env.PSP_ARCH === "aarch64" &&
         process.platform === "linux"
