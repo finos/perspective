@@ -193,6 +193,9 @@ jobs:
               with:
                   version: "18"
 
+            - name: Install libtinfo5
+              run: sudo apt-get install -y libtinfo5
+
             - name: Python Build
               run: |
                   sudo apt update && sudo apt install debootstrap
