@@ -196,8 +196,8 @@ jobs:
                     --no-merged-usr --variant=minbase xenial /sysroot  \
                     http://azure.archive.ubuntu.com/ubuntu
 
-                  export RUSTFLAGS="link-arg=--sysroot=/sysroot"
-                  export RUSTDOCFLAGS="link-arg=--sysroot=/sysroot"
+                  export RUSTFLAGS="-C link-arg=--sysroot=/sysroot"
+                  export RUSTDOCFLAGS="-C link-arg=--sysroot=/sysroot"
                   export CFLAGS="--sysroot=/sysroot"
 
                   pnpm run build
