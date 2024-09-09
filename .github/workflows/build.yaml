@@ -148,7 +148,7 @@ jobs:
                     - os: ubuntu-22.04
                       arch: x86_64
                       python-version: 3.9
-                      container: pagmo2/manylinux2014_x86_64_with_deps
+                      container: pagmo2/manylinux228_x86_64_with_deps
                 is-release:
                     - ${{ startsWith(github.ref, 'refs/tags/v') }}
                 exclude:
@@ -189,7 +189,17 @@ jobs:
               if: ${{ runner.os == 'Windows' }}
 
             - name: Python Build
-              run: pnpm run build
+              run: |
+                  sudo debootstrap                                     \
+                    --include=ca-certificates,curl,file,libc6-dev,make \
+                    --no-merged-usr --variant=minbase xenial /sysroot  \
+                    http://azure.archive.ubuntu.com/ubuntu
+
+                  export RUSTFLAGS="link-arg=--sysroot=/sysroot"
+                  export RUSTDOCFLAGS="link-arg=--sysroot=/sysroot"
+                  export CFLAGS="--sysroot=/sysroot"
+
+                  pnpm run build
               if: ${{ !contains(matrix.os, 'windows') }}
               env:
                   PACKAGE: "perspective-python"
