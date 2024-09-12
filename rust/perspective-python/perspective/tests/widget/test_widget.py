@@ -13,7 +13,7 @@
 from functools import partial
 from types import MethodType
 import numpy as np
-from perspective import PerspectiveWidget
+from perspective.widget import PerspectiveWidget
 from pytest import raises
 import pytest
 import perspective as psp

@@ -16,6 +16,7 @@
     },
     "devDependencies": {
         "@finos/perspective-scripts": "workspace:*",
+        "@iarna/toml": "^1.0.0-rc.1",
         "cpy": "^9.0.1"
     },
     "dependencies": {

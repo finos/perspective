@@ -137,6 +137,9 @@ impl Drop for Server {
     }
 }
 
+unsafe impl Send for Server {}
+unsafe impl Sync for Server {}
+
 unsafe impl Send for Request {}
 unsafe impl Sync for Request {}
 

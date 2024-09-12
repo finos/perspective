@@ -879,6 +879,9 @@ importers:
       '@finos/perspective-scripts':
         specifier: workspace:*
         version: link:../../tools/perspective-scripts
+      '@iarna/toml':
+        specifier: ^1.0.0-rc.1
+        version: 1.7.1
       cpy:
         specifier: ^9.0.1
         version: 9.0.1
@@ -2308,6 +2311,9 @@ packages:
 
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
+
+  '@iarna/toml@1.7.1':
+    resolution: {integrity: sha512-X55PCmaErh7Tk4tg6F0xDxG7wHuomyFTZIeUyTtvZqIGnxF/qLZf5Gvvzp8SL3F/37gb3sZ4z4PVFWQxBOM26w==}
 
   '@jest/schemas@29.6.3':
     resolution: {integrity: sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA==}
@@ -11389,6 +11395,8 @@ snapshots:
   '@hapi/topo@5.1.0':
     dependencies:
       '@hapi/hoek': 9.3.0
+
+  '@iarna/toml@1.7.1': {}
 
   '@jest/schemas@29.6.3':
     dependencies:

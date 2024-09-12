@@ -11,10 +11,14 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from tornado.websocket import WebSocketHandler
+from tornado.ioloop import IOLoop
+
+import perspective
 
 
 class PerspectiveTornadoHandler(WebSocketHandler):
-    """PerspectiveTornadoHandler is a drop-in implementation of Perspective.
+    """`PerspectiveTornadoHandler` is a drop-in implementation of Perspective as
+    a `tornado` handler.
 
     Use it inside Tornado routing to create a server-side Perspective that is
     ready to receive websocket messages from the front-end `perspective-viewer`.
@@ -38,7 +42,7 @@ class PerspectiveTornadoHandler(WebSocketHandler):
         ... ])
     """
 
-    def initialize(self, perspective_server):
+    def initialize(self, perspective_server=perspective.GLOBAL_SERVER):
         self.server = perspective_server
 
     def open(self):
@@ -56,6 +60,4 @@ class PerspectiveTornadoHandler(WebSocketHandler):
             return
 
         self.session.handle_request(msg)
-
-        # TODO schedule me
-        self.session.poll()
+        IOLoop.current().call_later(0, self.session.poll)

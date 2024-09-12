@@ -13,77 +13,40 @@
 __version__ = "3.0.3"
 __all__ = [
     "_jupyter_labextension_paths",
-    "PerspectiveError",
-    "PerspectiveWidget",
-    "PerspectiveViewer",
-    "PerspectiveTornadoHandler",
-    "ProxySession",
-    "Table",
-    "View",
     "Server",
     "Client",
+    "PerspectiveError",
+    "PerspectiveWidget",
+    "ProxySession",
 ]
 
+import functools
+
 from .perspective import (
-    Client as PySyncClient,
+    Client,
     PerspectiveError,
-    Table,
-    View,
     ProxySession,
-    PySyncServer,
+    PySyncServer as Server,
 )
 
-try:
-    from .widget import PerspectiveWidget
-except ImportError:
-    ...
-try:
-    from .viewer import PerspectiveViewer
-except ImportError:
-    ...
 
-# from .psp_cffi import ServerBase
-
-try:
-    from .handlers import PerspectiveTornadoHandler
-except ImportError:
-    ...
+GLOBAL_SERVER = Server()
+GLOBAL_CLIENT = GLOBAL_SERVER.new_local_client()
 
 
-def default_loop_cb(fn, *args, **kwargs):
-    return fn(*args, **kwargs)
+@functools.wraps(Client.table)
+def table(*args, **kwargs):
+    return GLOBAL_CLIENT.table(*args, **kwargs)
 
 
-class Server(PySyncServer):
-    def set_threadpool_size(self, n_cpus):
-        pass
-
-    def new_local_client(self, loop_callback=default_loop_cb):
-        """Create a new `Client` instance bound to this in-process `Server`."""
-        return Client.from_server(self, loop_callback)
+@functools.wraps(Client.open_table)
+def open_table(*args, **kwargs):
+    return GLOBAL_CLIENT.table(*args, **kwargs)
 
 
-class Client(PySyncClient):
-    def from_server(
-        server: Server,
-        loop_callback=default_loop_cb,
-    ):
-        """Create a new `Client` instance bound synchronously to an Python
-        instance of `PerspectiveServer`."""
-
-        def handle_request(bytes):
-            session.handle_request(bytes)
-            loop_callback(lambda: session.poll())
-
-        def handle_response(bytes):
-            client.handle_response(bytes)
-
-        def handle_close():
-            session.close()
-
-        session = server.new_session(handle_response)
-        client = Client(handle_request, handle_close)
-        return client
+@functools.wraps(Client.get_hosted_table_names)
+def get_hosted_table_names(*args, **kwargs):
+    return GLOBAL_CLIENT.get_hosted_table_names(*args, **kwargs)
 
 
 # Read by `jupyter labextension develop`

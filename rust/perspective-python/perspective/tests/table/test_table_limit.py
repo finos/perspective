@@ -39,3 +39,7 @@ class TestTableInfer(object):
         d2 = t2.view().to_columns()
 
         assert d1 == d2
+
+    def test_table_limit_with_json(self):
+        t = Table({"a": [1, 2, 3]}, limit=1)
+        assert t.size() == 1

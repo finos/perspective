@@ -18,7 +18,6 @@ use axum::routing::get_service;
 use axum::Router;
 use perspective::client::{TableInitOptions, UpdateData};
 use perspective::server::Server;
-use perspective::LocalClient;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::filter::LevelFilter;
@@ -36,7 +35,7 @@ type AppError = Box<dyn std::error::Error + Send + Sync>;
 /// Load the example Apache Arrow file from disk and create a
 /// [`perspective::Table`] named "my_data_source".
 async fn load_server_arrow(server: &Server) -> Result<(), AppError> {
-    let client = LocalClient::new(server);
+    let client = server.new_local_client();
     let mut file = File::open(std::path::Path::new(ROOT_PATH).join(ARROW_FILE_PATH))?;
     let mut feather = Vec::with_capacity(file.metadata()?.len() as usize);
     file.read_to_end(&mut feather)?;
