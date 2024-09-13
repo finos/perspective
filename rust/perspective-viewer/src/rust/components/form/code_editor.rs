@@ -73,8 +73,8 @@ fn on_keydown(event: KeyboardEvent, deps: &(UseStateSetter<u32>, Callback<()>)) 
     deps.0.set(elem.get_caret_position().unwrap_or_default());
     if event.shift_key() && event.key_code() == 13 {
         event.prevent_default();
-        deps.1.emit(())
-    }    
+        deps.1.emit(());
+    }
 
     // handle the tab key press
     if event.key() == "Tab" {
@@ -85,14 +85,13 @@ fn on_keydown(event: KeyboardEvent, deps: &(UseStateSetter<u32>, Callback<()>)) 
         let mut initial_text = elem.value();
 
         // insert "\t" at the caret_pos
-        initial_text.insert_str(caret_pos, "\t");
+        initial_text.insert(caret_pos, '\t');
 
         elem.set_value(&initial_text);
 
         // place caret after inserted tab
-        let new_caret_pos = Some((caret_pos + 1) as u32).unwrap_or_default();
+        let new_caret_pos = (caret_pos + 1) as u32;
         let _ = elem.set_selection_range(new_caret_pos, new_caret_pos);
-        
     }
 }
 
