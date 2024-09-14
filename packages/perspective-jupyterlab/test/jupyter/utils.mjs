@@ -14,11 +14,16 @@ import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import rimraf from "rimraf";
-import notebook_template from "./notebook_template.json" assert { type: "json" };
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const notebook_template = JSON.parse(
+    fs.readFileSync(__dirname + "/notebook_template.json", {
+        encoding: "utf-8",
+    })
+);
+
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "esm");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
 

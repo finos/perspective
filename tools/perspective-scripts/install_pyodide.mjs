@@ -10,59 +10,48 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { execSync } = require("child_process");
-const os = require("os");
-const path = require("path");
+// Download a full Pyodide distribution from github and extract it to rust/target dir for
+// use in integration tests
 
-const stdio = "inherit";
-const rust_env = process.env.PSP_DEBUG ? "" : "--release";
-const env = process.env.PSP_DEBUG ? "debug" : "release";
-const cwd = path.join(process.cwd(), "dist", env);
+import { getPyodideVersion, getPyodideDownloadDir } from "./pyodide.mjs";
 
-delete process.env.NODE;
+import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 
-function bootstrap(file) {
-    execSync(`cargo run -p perspective-bootstrap -- ${rust_env} ${file}`, {
-        cwd: path.join(process.cwd(), "..", "..", "rust", "perspective-js"),
-        stdio,
-    });
+import { execFileSync } from "node:child_process";
+const pyodideVersion = getPyodideVersion();
+
+function downloadPyodide() {
+    const pyodideUrl = `https://github.com/pyodide/pyodide/releases/download/${pyodideVersion}/pyodide-${pyodideVersion}.tar.bz2`;
+    const downloadDir = getPyodideDownloadDir(); // the download dir is versioned
+    const tarball = path.join(downloadDir, `pyodide-${pyodideVersion}.tar.bz2`);
+    const buildStamp = path.join(downloadDir, "psp-build-stamp.txt");
+    const pyodideLock = path.join(downloadDir, "pyodide", "pyodide-lock.json");
+    if (fs.existsSync(buildStamp) && fs.existsSync(pyodideLock)) {
+        console.log(
+            `Pyodide ${pyodideVersion} already extracted to ${downloadDir}`
+        );
+    } else {
+        fs.rmSync(buildStamp, { force: true });
+        console.log(
+            `Downloading Pyodide ${pyodideVersion} from ${pyodideUrl}...`
+        );
+        fs.mkdirSync(downloadDir, { recursive: true });
+        execFileSync("wget", ["-O", tarball, pyodideUrl], {
+            stdio: "inherit",
+        });
+        console.log(`Extracting ${tarball}...`);
+        execFileSync("tar", ["-xvf", tarball, "-C", downloadDir], {
+            stdio: "inherit",
+        });
+        console.log(`Removing ${tarball}...`);
+        fs.rmSync(tarball);
+        // assert presence of a known file
+        assert(fs.existsSync(pyodideLock), `${pyodideLock} not found`);
+        console.log(`Extracted to ${downloadDir}`);
+        fs.writeFileSync(buildStamp, ""); // prevent re-download/extract
+    }
 }
 
-let cmake_flags = "";
-let make_flags = "";
-
-if (!!process.env.PSP_BUILD_VERBOSE) {
-    cmake_flags += "-Wdev --debug-output ";
-    make_flags += "VERBOSE=1 ";
-} else {
-    cmake_flags = "-Wno-dev "; // suppress developer warnings
-}
-
-try {
-    execSync(`mkdirp ${cwd}`, { stdio });
-    process.env.CLICOLOR_FORCE = 1;
-    execSync(
-        `emcmake cmake ${__dirname} ${cmake_flags} -DCMAKE_BUILD_TYPE=${env}`,
-        {
-            cwd,
-            stdio,
-        }
-    );
-
-    execSync(
-        `emmake make -j${
-            process.env.PSP_NUM_CPUS || os.cpus().length
-        } ${make_flags}`,
-        {
-            cwd,
-            stdio,
-        }
-    );
-
-    execSync(`cpy web/**/* ../web`, { cwd, stdio });
-    execSync(`cpy node/**/* ../node`, { cwd, stdio });
-    bootstrap(`../../cpp/perspective/dist/web/perspective-server.wasm`);
-} catch (e) {
-    console.error(e);
-    process.exit(1);
-}
+downloadPyodide();

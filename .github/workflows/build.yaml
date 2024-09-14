@@ -290,7 +290,7 @@ jobs:
     #                               `-'
     build_emscripten_wheel:
         runs-on: ${{ matrix.os }}
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        # if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         strategy:
             fail-fast: false
             matrix:
@@ -313,6 +313,7 @@ jobs:
               id: init-step
               uses: ./.github/actions/install-deps
               with:
+                  pyodide: "true"
                   javascript: "false"
                   arch: ${{ matrix.arch }}
                   manylinux: "false"
@@ -320,14 +321,19 @@ jobs:
 
             - name: Python Build Pyodide
               run: pnpm install && pnpm run build
-              if: ${{ runner.os == 'Linux' && matrix.arch == 'x86_64' }}
+              env:
+                  PSP_PYODIDE: 1
+                  PACKAGE: "perspective-python"
+                  CI: 1
+
+            - name: "Test Pyodide"
+              run: pnpm run test
               env:
                   PSP_PYODIDE: 1
                   PACKAGE: "perspective-python"
                   CI: 1
 
             - uses: actions/upload-artifact@v4
-              # if: ${{ runner.os != 'Windows' }}
               with:
                   name: perspective-python-dist-wasm32-emscripten-${{ matrix.python-version }}
                   path: rust/target/wheels/*.whl

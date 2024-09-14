@@ -200,7 +200,7 @@ runs:
         - name: manylinux deps
           shell: bash
           run: |
-              if [ -x "$(command -v dnf)" ]; then 
+              if [ -x "$(command -v dnf)" ]; then
                 dnf install wget -y
               fi
           if: ${{ runner.os == 'Linux' && inputs.cpp == 'true' && inputs.javascript == 'false' }}
@@ -215,6 +215,21 @@ runs:
           shell: bash
           run: sudo node tools/perspective-scripts/install_tools.mjs
           if: ${{ runner.os != 'Windows' && inputs.cpp == 'true' && inputs.manylinux  == 'false' }}
+
+        - name: Install Python Pyodide dependencies
+          shell: bash
+          run: python -m pip install -r rust/perspective-python/requirements-pyodide.txt
+          if: ${{ inputs.pyodide == 'true' }}
+
+        - name: Install Pyodide distribution
+          shell: bash
+          run: pnpm run install_pyodide
+          if: ${{ inputs.pyodide == 'true' }}
+
+        - name: Install Python Playwright browsers
+          shell: bash
+          run: python -m playwright install
+          if: ${{ inputs.pyodide == 'true' }}
 
         # - name: Install CCache
         #   shell: bash

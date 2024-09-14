@@ -10,59 +10,40 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { execSync } = require("child_process");
-const os = require("os");
-const path = require("path");
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import { getPyodideDistDir } from "@finos/perspective-scripts/pyodide.mjs";
+import { getEmscriptenWheelPath } from "@finos/perspective-scripts/workspace.mjs";
 
-const stdio = "inherit";
-const rust_env = process.env.PSP_DEBUG ? "" : "--release";
-const env = process.env.PSP_DEBUG ? "debug" : "release";
-const cwd = path.join(process.cwd(), "dist", env);
+// avoid executing this script directly, instead run `pnpm run test` from the workspace root
 
-delete process.env.NODE;
-
-function bootstrap(file) {
-    execSync(`cargo run -p perspective-bootstrap -- ${rust_env} ${file}`, {
-        cwd: path.join(process.cwd(), "..", "..", "rust", "perspective-js"),
-        stdio,
-    });
-}
-
-let cmake_flags = "";
-let make_flags = "";
-
-if (!!process.env.PSP_BUILD_VERBOSE) {
-    cmake_flags += "-Wdev --debug-output ";
-    make_flags += "VERBOSE=1 ";
+const execOpts = { stdio: "inherit" };
+if (process.env.PSP_PYODIDE) {
+    const pyodideDistDir = getPyodideDistDir();
+    if (!fs.existsSync(pyodideDistDir)) {
+        console.error(
+            `Error: Pyodide distribution not found at ${pyodideDistDir}\n\nRun: pnpm -w run install_pyodide\n\n`
+        );
+        process.exit(1);
+    }
+    const emscriptenWheel = getEmscriptenWheelPath();
+    if (!fs.existsSync(emscriptenWheel)) {
+        console.error(
+            `Error: Emscripten wheel not found at ${emscriptenWheel}\n\nRun: pnpm run build\n\n`
+        );
+        process.exit(1);
+    }
+    execFileSync(
+        "pytest",
+        [
+            "pyodide-tests/",
+            "--runner=playwright",
+            "--runtime=chrome",
+            `--dist-dir=${pyodideDistDir}`,
+            `--perspective-emscripten-wheel=${emscriptenWheel}`,
+        ],
+        execOpts
+    );
 } else {
-    cmake_flags = "-Wno-dev "; // suppress developer warnings
-}
-
-try {
-    execSync(`mkdirp ${cwd}`, { stdio });
-    process.env.CLICOLOR_FORCE = 1;
-    execSync(
-        `emcmake cmake ${__dirname} ${cmake_flags} -DCMAKE_BUILD_TYPE=${env}`,
-        {
-            cwd,
-            stdio,
-        }
-    );
-
-    execSync(
-        `emmake make -j${
-            process.env.PSP_NUM_CPUS || os.cpus().length
-        } ${make_flags}`,
-        {
-            cwd,
-            stdio,
-        }
-    );
-
-    execSync(`cpy web/**/* ../web`, { cwd, stdio });
-    execSync(`cpy node/**/* ../node`, { cwd, stdio });
-    bootstrap(`../../cpp/perspective/dist/web/perspective-server.wasm`);
-} catch (e) {
-    console.error(e);
-    process.exit(1);
+    execFileSync("pytest", ["perspective/tests"], execOpts);
 }

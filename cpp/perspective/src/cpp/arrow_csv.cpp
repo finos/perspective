@@ -387,7 +387,6 @@ public:
             if (length == 29) {
                 // YYYY-MM-DD[ T]hh:mm:ss.sssssssss  -- nanos
                 // arrow handles YYYY-MM-DD[ T]hh:mm:ss.sss[+-]HH:MM
-                std::cout << "DDD WOOHOOOOO!\n";
                 arrow_vendored::date::year_month_day ymd;
                 if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
                     return false;

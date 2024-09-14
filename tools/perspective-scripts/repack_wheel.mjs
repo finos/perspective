@@ -12,7 +12,9 @@
 
 import { execSync } from "node:child_process";
 import * as fs from "node:fs";
-import pkg from "../../package.json" assert { type: "json" };
+import { getWorkspacePackageJson } from "./workspace.mjs";
+
+const pkg = getWorkspacePackageJson();
 
 const wheel_file = fs.readdirSync(".").filter((x) => x.endsWith(".whl"))[0];
 execSync(`wheel unpack ${wheel_file}`);

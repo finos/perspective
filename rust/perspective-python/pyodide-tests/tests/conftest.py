@@ -10,9 +10,10 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-try:
-    from .widget import PerspectiveWidget, set_jupyter_html_export
 
-    __all__ = ["PerspectiveWidget", "set_jupyter_html_export"]
-except ImportError:
-    pass
+def pytest_addoption(parser):
+    parser.addoption(
+        "--perspective-emscripten-wheel",
+        action="store",
+        help="path to emscripten wheel",
+    )
