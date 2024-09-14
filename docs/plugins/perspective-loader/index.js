@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 const PerspectiveWebpackPlugin = require("@finos/perspective-webpack-plugin");
-
 module.exports = function (context, options) {
     return {
         name: "perspective",
@@ -19,7 +18,6 @@ module.exports = function (context, options) {
             if (config.optimization.minimizer) {
                 config.optimization.minimizer[0].options.minimizer.options.module = true;
             }
-
             config.experiments = config.experiments || {};
             config.experiments.topLevelAwait = true;
             config.module.rules.map((x) => {
@@ -27,12 +25,10 @@ module.exports = function (context, options) {
                     x.exclude = [/\.module\.css$/i, /@finos/i];
                 }
             });
-
             config.module.rules.push({
                 test: /arrow$/i,
                 type: "asset/resource",
             });
-
             return {
                 node: {
                     __filename: false,
