@@ -26,6 +26,7 @@
         "express-ws": "^5.0.2"
     },
     "dependencies": {
+        "perspective-3-0-0": "npm:@finos/perspective@3.0.0",
         "perspective-2-10-0": "npm:@finos/perspective@2.10.0",
         "perspective-2-9-0": "npm:@finos/perspective@2.9.0",
         "perspective-2-8-0": "npm:@finos/perspective@2.8.0",
