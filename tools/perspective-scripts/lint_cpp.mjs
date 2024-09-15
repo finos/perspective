@@ -89,33 +89,12 @@ function clangFormatFix(dir) {
 
 export function checkFormatting() {
     formatLint(sh.path`./cpp/perspective/src/cpp/*.cpp`);
-    formatLint(sh.path`./cpp/perspective/src/cpp/vendor/*.cpp`);
     formatLint(sh.path`./cpp/perspective/src/include/perspective/*.h`);
-    formatLint(sh.path`./cpp/perspective/src/include/perspective/vendor/*.h`);
-    // formatLint(sh.path`./python/perspective/perspective/src/*.cpp`);
-    // formatLint(
-    //     sh.path`./python/perspective/perspective/include/perspective/*.h`
-    // );
-    // formatLint(
-    //     sh.path`./python/perspective/perspective/include/perspective/python/*.h`
-    // );
-
     // tidyLint();
 }
 
 export function fixFormatting() {
     // tidyLint("-fix");
     clangFormatFix(sh.path`./cpp/perspective/src/cpp/*.cpp`);
-    clangFormatFix(sh.path`./cpp/perspective/src/cpp/vendor/*.cpp`);
     clangFormatFix(sh.path`./cpp/perspective/src/include/perspective/*.h`);
-    clangFormatFix(
-        sh.path`./cpp/perspective/src/include/perspective/vendor/*.h`
-    );
-    // clangFormatFix(sh.path`./python/perspective/perspective/src/*.cpp`);
-    // clangFormatFix(
-    //     sh.path`./python/perspective/perspective/include/perspective/*.h`
-    // );
-    // clangFormatFix(
-    //     sh.path`./python/perspective/perspective/include/perspective/python/*.h`
-    // );
 }

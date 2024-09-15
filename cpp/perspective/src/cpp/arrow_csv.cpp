@@ -15,14 +15,7 @@
 #include <perspective/arrow_csv.h>
 #include <arrow/util/value_parsing.h>
 #include <arrow/io/memory.h>
-
-#ifdef PSP_ENABLE_WASM
-// This causes build warnings
-// https://github.com/emscripten-core/emscripten/issues/8574
-#include <perspective/vendor/arrow_single_threaded_reader.h>
-#else
 #include <arrow/csv/reader.h>
-#endif
 
 template <class TimePoint>
 static inline arrow::TimestampType::c_type

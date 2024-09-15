@@ -991,6 +991,9 @@ importers:
       perspective-2-9-0:
         specifier: npm:@finos/perspective@2.9.0
         version: '@finos/perspective@2.9.0'
+      perspective-3-0-0:
+        specifier: npm:@finos/perspective@3.0.0
+        version: '@finos/perspective@3.0.0'
     devDependencies:
       '@finos/perspective':
         specifier: workspace:^
@@ -2289,6 +2292,9 @@ packages:
   '@finos/perspective@2.9.0':
     resolution: {integrity: sha512-O40EzleYRpmX2k8xwbcJfWlgi4QDJ2cUJlmEA0wG1LLVmSOQD7vFeQK9H2v6xQBwn6+/andpDLglrzDYCEBOHg==}
     engines: {node: '>=14'}
+
+  '@finos/perspective@3.0.0':
+    resolution: {integrity: sha512-myWGlfxN97vV3qvv34QAxCH389Oo2SH0EGN4eyrGdZSb+UlFjv9HR1TYM18GRhdM1ASg7jFwnIvGDcw7oM+qNA==}
 
   '@fontsource/roboto-mono@4.5.10':
     resolution: {integrity: sha512-KrJdmkqz6DszT2wV/bbhXef4r0hV3B0vw2mAqei8A2kRnvq+gcJLmmIeQ94vu9VEXrUQzos5M9lH1TAAXpRphw==}
@@ -11362,6 +11368,14 @@ snapshots:
     dependencies:
       stoppable: 1.1.0
       ws: 6.2.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@finos/perspective@3.0.0':
+    dependencies:
+      stoppable: 1.1.0
+      ws: 8.17.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate

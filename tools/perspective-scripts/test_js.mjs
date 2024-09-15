@@ -30,6 +30,7 @@ const IS_PLAYWRIGHT = process.env.PACKAGE.split(",").reduce(
         [
             "perspective-cli",
             "perspective-js",
+            "perspective",
             "perspective-viewer",
             "perspective-viewer-datagrid",
             "perspective-viewer-d3fc",
