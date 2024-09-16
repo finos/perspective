@@ -70,7 +70,7 @@ export function getDataValues(data, settings) {
         }
         return settings.mainValues.map((main) => ({
             name: main.name,
-            value: toValue(main.type, data.row[main.name]),
+            value: toValue(main.type, data.row[getDataRowKey(data.key, main)]),
         }));
     }
     return [
@@ -85,4 +85,19 @@ export function getDataValues(data, settings) {
             ),
         },
     ];
+}
+
+function getDataRowKey(key, main) {
+    if (!key) {
+        return main.name;
+    }
+
+    let splitValues = key.split("|");
+    splitValues =
+        splitValues.length === 1
+            ? splitValues
+            : splitValues.slice(0, splitValues.length - 1);
+    const prefix = splitValues.join("|");
+
+    return `${prefix}|${main.name}`;
 }
