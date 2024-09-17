@@ -65,13 +65,18 @@ impl PerspectiveDebugPluginElement {
         JsValue::UNDEFINED
     }
 
-    pub fn update(&self, view: perspective_js::View) -> ApiFuture<()> {
+    pub fn update(&self, view: &perspective_js::View) -> ApiFuture<()> {
         self.draw(view)
     }
 
-    pub fn draw(&self, view: perspective_js::View) -> ApiFuture<()> {
+    /// # Notes
+    ///
+    /// When you pass a `wasm_bindgen` wrapped type _into_ Rust, it acts like a
+    /// move. Ergo, if you replace the `&` in the `view` argument, the JS copy
+    /// of the `View` will be invalid
+    pub fn draw(&self, view: &perspective_js::View) -> ApiFuture<()> {
         let css = "margin:0;overflow:scroll;position:absolute;width:100%;height:100%";
-        clone!(self.elem);
+        clone!(self.elem, view);
         ApiFuture::new(async move {
             let csv = view.to_csv(None).await?;
             elem.style().set_property("background-color", "#fff")?;
