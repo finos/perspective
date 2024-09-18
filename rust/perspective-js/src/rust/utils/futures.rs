@@ -84,9 +84,11 @@ where
 {
     fn from(fut: ApiFuture<T>) -> Self {
         future_to_promise(async move {
-            let x = Ok(fut.0.await?);
-            let y = Ok(x.into_js_result()?);
-            Ok(y.ignore_view_delete()?)
+            fut.0
+                .await
+                .map_err(|x| x.into())
+                .into_js_result()
+                .ignore_view_delete()
         })
     }
 }
@@ -146,7 +148,7 @@ where
 static CANCELLED_MSG: &str = "View method cancelled";
 
 #[extend::ext]
-pub impl Result<JsValue, ApiError> {
+pub impl Result<JsValue, JsValue> {
     /// Wraps an error `JsValue` return from a caught JavaScript exception,
     /// checking for the explicit error type indicating that a
     /// `JsPerspectiveView` call has been cancelled due to it already being
@@ -160,35 +162,22 @@ pub impl Result<JsValue, ApiError> {
     /// silently be replaced with `Ok`.  The message itself is returned in this
     /// case (instead of whatever the `async` returns), which is helpful for
     /// detecting this condition when debugging.
+    fn ignore_view_delete(self) -> Result<JsValue, JsValue> {
+        self.or_else(|x| match x.dyn_ref::<PerspectiveViewNotFoundError>() {
+            Some(_) => Ok(js_intern::js_intern!(CANCELLED_MSG).clone()),
+            None => Err(x),
+        })
+    }
+}
+
+#[extend::ext]
+pub impl Result<JsValue, ApiError> {
     fn ignore_view_delete(self) -> Result<JsValue, ApiError> {
         self.or_else(|x| {
             let f: JsValue = x.clone().into();
-            match f.dyn_ref::<js_sys::Error>() {
-                Some(err) => {
-                    if err.message() != CANCELLED_MSG {
-                        Err(x)
-                    } else {
-                        Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
-                    }
-                },
-                _ => match f.as_string() {
-                    Some(x) if x == CANCELLED_MSG => {
-                        Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
-                    },
-                    Some(_) => Err(x),
-                    _ => {
-                        if js_sys::Reflect::get(&f, js_intern::js_intern!("message"))
-                            .unwrap()
-                            .as_string()
-                            .unwrap_or_else(|| "".to_owned())
-                            == CANCELLED_MSG
-                        {
-                            Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
-                        } else {
-                            Err(x)
-                        }
-                    },
-                },
+            match f.dyn_ref::<PerspectiveViewNotFoundError>() {
+                Some(_) => Ok(js_intern::js_intern!(CANCELLED_MSG).clone()),
+                None => Err(x),
             }
         })
     }

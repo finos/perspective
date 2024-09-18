@@ -122,7 +122,7 @@ export interface IPerspectiveViewerPlugin {
      * }
      * ```
      */
-    // draw(view: perspective.View): Promise<void>;
+    draw(view: View): Promise<void>;
 
     /**
      * Draw under the assumption that the `ViewConfig` has not changed since
@@ -136,7 +136,7 @@ export interface IPerspectiveViewerPlugin {
      * }
      * ```
      */
-    // update(view: perspective.View): Promise<void>;
+    update(view: View): Promise<void>;
 
     /**
      * Clear this plugin, though it is up to the discretion of the plugin

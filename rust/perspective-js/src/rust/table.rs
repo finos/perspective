@@ -186,7 +186,7 @@ impl Table {
 
     #[doc = inherit_docs!("table/delete.md")]
     #[wasm_bindgen]
-    pub async fn delete(self) -> ApiResult<()> {
+    pub async fn delete(&self) -> ApiResult<()> {
         self.0.delete().await?;
         Ok(())
     }

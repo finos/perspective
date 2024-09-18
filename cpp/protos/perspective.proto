@@ -22,9 +22,15 @@ option optimize_for = LITE_RUNTIME;
 //
 // Common
 
+enum StatusCode {
+    SERVER_ERROR = 0;
+    VIEW_NOT_FOUND = 1;
+}
+
 // Recoverable, user-readable error reporting from the engine.
 message ServerError {
     string message = 1;
+    StatusCode status_code = 2;
 }
 
 message Schema {
