@@ -9,3 +9,4 @@ ts-rs/
 rust/perspective-python/perspective/labextension/
 rust/perspective-python/perspective.data/
 rust/perspective-python/*/data
+venv/

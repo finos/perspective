@@ -61,7 +61,7 @@ class Client(PySyncClient):
         server: Server,
         loop_callback=default_loop_cb,
     ):
-        """Create a new `Client` instance bound synchronously to an Python
+        """Create a new `Client` instance bound synchronously to a Python
         instance of `PerspectiveServer`."""
 
         def handle_request(bytes):

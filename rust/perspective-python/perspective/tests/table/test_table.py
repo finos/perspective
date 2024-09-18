@@ -605,6 +605,24 @@ class TestTable:
         assert tbl.size() == 2
         assert tbl.schema() == {"a": "float", "b": "float"}
 
+    def test_constructor_and_update_congruence(self):
+        input_data = [{"a": 0}, {"a": 1}, {"a": 2}, {"a": 3} ,{"a": None}]
+        # a table constructed with a schema then update()
+        # ends up different than a table with data given on construction
+        # in respect to how it interacts with `index`.
+        # This test shows that through using the `limit`
+
+        # will show [3,1,2]
+        t1 = Table(input_data, limit=3)
+        j1 = t1.view().to_json()
+        # as of right now, second row is 1
+        assert j1 == [{"a": 3}, {"a": None}, {"a": 2}]
+
+        t2 = Table({"a": "integer"}, limit=3)
+        t2.update(input_data)
+        j2 = t2.view().to_json()
+        assert j2 == [{"a": 3}, {"a": None}, {"a": 2}]
+
 
 if __name__ == "__main__":
     import pytest
