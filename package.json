@@ -15,6 +15,7 @@
     "type": "module",
     "emscripten": "3.1.58",
     "llvm": "17.0.6",
+    "pyodide": "0.26.2",
     "engines": {
         "node": ">=16"
     },
@@ -100,6 +101,7 @@
         "postinstall:playwright": "npx playwright install --with-deps",
         "postinstall:vscode": "cp -n ./.vscode/settings.default.json ./.vscode/settings.json || true",
         "install_llvm": "node tools/perspective-scripts/install_llvm.mjs",
+        "install_pyodide": "node tools/perspective-scripts/install_pyodide.mjs",
         "build,test": "npm run --silent build && npm run --silent test",
         "build_js": "node tools/perspective-scripts/build_js.mjs",
         "build": "node tools/perspective-scripts/build.mjs",

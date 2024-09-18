@@ -15,14 +15,7 @@
 #include <perspective/arrow_csv.h>
 #include <arrow/util/value_parsing.h>
 #include <arrow/io/memory.h>
-
-#ifdef PSP_ENABLE_WASM
-// This causes build warnings
-// https://github.com/emscripten-core/emscripten/issues/8574
-#include <perspective/vendor/arrow_single_threaded_reader.h>
-#else
 #include <arrow/csv/reader.h>
-#endif
 
 template <class TimePoint>
 static inline arrow::TimestampType::c_type
@@ -387,7 +380,6 @@ public:
             if (length == 29) {
                 // YYYY-MM-DD[ T]hh:mm:ss.sssssssss  -- nanos
                 // arrow handles YYYY-MM-DD[ T]hh:mm:ss.sss[+-]HH:MM
-                std::cout << "DDD WOOHOOOOO!\n";
                 arrow_vendored::date::year_month_day ymd;
                 if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
                     return false;

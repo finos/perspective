@@ -11,7 +11,6 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import base64
-import jinja2
 import logging
 import os
 import re
@@ -233,6 +232,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         viewer_attrs = self.save()
         data = self.table.view().to_arrow()
         b64_data = base64.encodebytes(data)
+        import jinja2
 
         jinja_env = jinja2.Environment(
             loader=jinja2.PackageLoader("perspective"),

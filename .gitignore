@@ -126,6 +126,7 @@ target.vscode
 !.vscode/extensions.json
 !.vscode/settings.default.json
 !.vscode/tasks.json
+!.vscode/perspective.code-snippets
 
 .llvm
 
