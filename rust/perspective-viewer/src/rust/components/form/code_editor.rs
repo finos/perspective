@@ -1,15 +1,4 @@
-// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
-// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
-// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
-// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
-// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
-// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
-// ┃ This file is part of the Perspective library, distributed under the terms ┃
-// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
-// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
+g
 use std::rc::Rc;
 
 use perspective_client::ExprValidationError;
@@ -84,14 +73,20 @@ fn on_keydown(event: KeyboardEvent, deps: &(UseStateSetter<u32>, Callback<()>)) 
 
         let mut initial_text = elem.value();
 
-        // insert "\t" at the caret_pos
+        // insert a tab '\t' not working so testing with unicode number.
         initial_text.insert(caret_pos, '\t');
 
         elem.set_value(&initial_text);
 
+
+        let input_event = web_sys::InputEvent::new("input").unwrap();
+        let _ = elem.dispatch_event(&input_event).unwrap();
+
         // place caret after inserted tab
         let new_caret_pos = (caret_pos + 1) as u32;
         let _ = elem.set_selection_range(new_caret_pos, new_caret_pos);
+
+        let _ = elem.focus().unwrap();
     }
 }
 
