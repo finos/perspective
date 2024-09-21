@@ -11,59 +11,60 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as fs from "node:fs";
-import * as path from "node:path";
-import * as all_benchmarks from "./cross_platform_suite.mjs";
-import * as perspective_bench from "./src/js/benchmark.mjs";
-
 import { createRequire } from "node:module";
-import * as url from "node:url";
-
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
-
-const _require = createRequire(import.meta.url);
+import "zx/globals";
 
 /**
- * We use the `dependencies` of this package for the benchmark candidate
- * module list, so that we only need specify the dependencies and benchmark
- * candidates in one place.
+ * Load a file as an `ArrayBuffer`, which is useful for loading Apache Arrow
+ * Feather files.
+ * @param {*} path
+ * @returns
  */
-const VERSIONS = Object.keys(
-    JSON.parse(fs.readFileSync(_require.resolve(`./package.json`))).dependencies
-);
+function get_buffer(path) {
+    const _require = createRequire(import.meta.url);
+    return fs.readFileSync(_require.resolve(path)).buffer;
+}
 
-fs.mkdirSync(path.join(__dirname, "./dist"), { recursive: true });
-perspective_bench.suite(
-    // "ws://localhost:8082/websocket",
-    ["@finos/perspective", ...VERSIONS],
-    path.join(__dirname, "dist/benchmark-js.arrow"),
-    async function (path, version_idx) {
-        let client, metadata;
-        if (path.startsWith("ws://")) {
-            console.log(path);
-            const { default: perspective } = await import("@finos/perspective");
-            client = await perspective.websocket(path);
-            metadata = {
-                version: "3.0.3",
-                version_idx,
-            };
-        } else {
-            const perspective = await import(path);
-            const pkg_json = JSON.parse(
-                fs.readFileSync(_require.resolve(`${path}/package.json`))
-            );
+const SUPERSTORE_ARROW = get_buffer("superstore-arrow/superstore.arrow");
+const SUPERSTORE_FEATHER = get_buffer("superstore-arrow/superstore.lz4.arrow");
 
-            let version = pkg_json.version;
-            console.log(`${path} (${pkg_json.name}@${version})`);
-            if (version === "@finos/perspective") {
-                version = `${version} (master)`;
-            }
-
-            client = perspective.default || perspective;
-            metadata = { version, version_idx };
-        }
-
-        await all_benchmarks.table_suite(client, metadata);
-        await all_benchmarks.view_suite(client, metadata);
-        await all_benchmarks.to_data_suite(client, metadata);
+/**
+ * Load the Superstore example data set as either a Feather (LZ4) or
+ * uncompressed `Arrow`, depending on whether Perspective supports Feather.
+ * @param {*} metadata
+ * @returns
+ */
+export function new_superstore_table(metadata) {
+    if (check_version_gte(metadata.version, "2.5.0")) {
+        return SUPERSTORE_FEATHER.slice();
+    } else {
+        return SUPERSTORE_ARROW.slice();
     }
-);
+}
+
+/**
+ * Check whether a version string e.g. "v1.2.3" is greater or equal to another
+ * version string, which must be of the same length/have the same number of
+ * minor version levels.
+ * @param {*} a
+ * @param {*} b
+ * @returns
+ */
+export function check_version_gte(a, b) {
+    a = a.split(".").map((x) => parseInt(x));
+    b = b.split(".").map((x) => parseInt(x));
+
+    if (a.length === 1) {
+        return true;
+    }
+
+    for (const i in a) {
+        if (a[i] > b[i]) {
+            return true;
+        } else if (a[i] < b[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}

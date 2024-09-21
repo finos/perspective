@@ -550,6 +550,64 @@ jobs:
     #  ,|   \ |-' | | |   | | | | | ,-| |   |<
     # `-^---' `-' ' ' `-' ' ' ' ' ' `-^ '   ' `
     #
+    # .-,--.     .  .
+    #  '|__/ . . |- |-. ,-. ,-.
+    #  ,|    | | |  | | | | | |
+    #  `'    `-| `' ' ' `-' ' '
+    #         /|
+    #        `-'
+    benchmark_python:
+        needs: [build_python, build_js]
+        if: startsWith(github.ref, 'refs/tags/v')
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-22.04]
+                python-version: [3.9]
+                node-version: [20.x]
+                arch: [x86_64]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  rust: "false"
+                  cpp: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-js-dist
+                  path: .
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-dist-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.python-version }}
+
+            - uses: ./.github/actions/install-wheel
+
+            - name: Benchmarks
+              run: pnpm run bench
+              env:
+                  PACKAGE: "perspective-python"
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: perspective-python-benchmarks
+                  path: tools/perspective-bench/dist/benchmark-python.arrow
+
+    # ,-,---.             .                 .
+    #  '|___/ ,-. ,-. ,-. |-. ,-,-. ,-. ,-. | ,
+    #  ,|   \ |-' | | |   | | | | | ,-| |   |<
+    # `-^---' `-' ' ' `-' ' ' ' ' ' `-^ '   ' `
+    #
     # ,-_/              .---.               .
     # '  | ,-. .  , ,-. \___  ,-. ,-. . ,-. |-
     #    | ,-| | /  ,-|     \ |   |   | | | |
@@ -588,6 +646,8 @@ jobs:
 
             - name: Benchmarks
               run: pnpm run bench
+              env:
+                  PACKAGE: "perspective"
 
             - uses: actions/upload-artifact@v4
               with:
@@ -606,6 +666,7 @@ jobs:
                 test_python,
                 test_js,
                 benchmark_js,
+                benchmark_python,
                 build_emscripten_wheel,
                 build_and_test_rust,
             ]
@@ -662,6 +723,10 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                   name: perspective-js-benchmarks
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-benchmarks
 
             - uses: actions/download-artifact@v4
               with:
