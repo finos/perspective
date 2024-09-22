@@ -240,9 +240,15 @@ jobs:
             matrix:
                 os:
                     - ubuntu-22.04
+                    - windows-2022
                 arch:
                     - x86_64
                 node-version: [20.x]
+                is-release:
+                    - ${{ startsWith(github.ref, 'refs/tags/v') }}
+                exclude:
+                    - os: windows-2022
+                      is-release: false
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -260,24 +266,51 @@ jobs:
                   manylinux: "false"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
+            - run: echo "${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}" >> $env:GITHUB_PATH
+              if: ${{ runner.os == 'Windows' }}
+
             - name: Rust Build
               run: pnpm run build
+              if: ${{ !contains(matrix.os, 'windows') }}
               env:
                   PACKAGE: "perspective-rs"
                   PSP_ROOT_DIR: ${{ github.workspace }}
 
+            - name: Python Build (Windows)
+              run: |
+                  New-Item -ItemType Directory -Path $env:CARGO_TARGET_DIR -Force
+                  pnpm run build
+              if: ${{ contains(matrix.os, 'windows') }}
+              env:
+                  CARGO_TARGET_DIR: D:\psp-rust
+                  PSP_ROOT_DIR: ${{ github.workspace }}
+                  VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
+                  PACKAGE: "perspective-rs"
+
             - name: Rust Test
+              if: ${{ !contains(matrix.os, 'windows') }}
               run: pnpm run test
               env:
                   PACKAGE: "perspective-rs"
                   PSP_ROOT_DIR: ${{ github.workspace }}
 
+            - name: Rust Test (Windows)
+              run: |
+                  New-Item -ItemType Directory -Path $env:CARGO_TARGET_DIR -Force
+                  pnpm run test
+              if: ${{ contains(matrix.os, 'windows') }}
+              env:
+                  CARGO_TARGET_DIR: D:\psp-rust
+                  PSP_ROOT_DIR: ${{ github.workspace }}
+                  VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
+                  PACKAGE: "perspective-rs"
+
             - name: Package
-              if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+              if: ${{ startsWith(github.ref, 'refs/tags/v') && !contains(matrix.os, 'windows') }}
               run: cargo package --allow-dirty -p perspective -p perspective-viewer -p perspective-js -p perspective-client -p perspective-server -p perspective-python
 
             - uses: actions/upload-artifact@v4
-              if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+              if: ${{ startsWith(github.ref, 'refs/tags/v') && !contains(matrix.os, 'windows') }}
               with:
                   name: perspective-rust
                   path: rust/target/package/*.crate
