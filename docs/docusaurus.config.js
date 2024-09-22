@@ -76,7 +76,7 @@ const config = {
             /** @type {import('@docusaurus/preset-classic').Options} */
             ({
                 docs: {
-                    sidebarPath: require.resolve("./sidebars.js"),
+                    //  sidebarPath: require.resolve("./sidebars.js"),
                     docItemComponent: require.resolve(
                         "./src/components/DocItem"
                     ),
@@ -112,13 +112,13 @@ const config = {
                     src: "svg/perspective-logo-light.svg",
                 },
                 items: [
-                    // {to: "/blog", label: "News", position: "right"},
-                    {
-                        type: "doc",
-                        docId: "js",
-                        position: "right",
-                        label: "Docs",
-                    },
+                    { to: "/blog", label: "News", position: "right" },
+                    // {
+                    //     type: "doc",
+                    //     docId: "js",
+                    //     position: "right",
+                    //     label: "Docs",
+                    // },
                     {
                         to: "/examples",
                         position: "right",
@@ -138,33 +138,33 @@ const config = {
             },
             footer: {
                 links: [
-                    {
-                        title: "Docs",
-                        items: [
-                            {
-                                label: "JavaScript User Guide",
-                                to: "/docs/js",
-                            },
-                            {
-                                label: "Python User Guide",
-                                to: "/docs/python",
-                            },
-                        ],
-                    },
-                    {
-                        title: "More",
-                        items: [
-                            {
-                                label: "GitHub",
-                                href: "https://github.com/finos/perspective",
-                            },
-                            {
-                                href: "https://www.prospective.co/blog",
-                                label: "Blog",
-                                position: "right",
-                            },
-                        ],
-                    },
+                    // {
+                    //     title: "Docs",
+                    //     items: [
+                    //         {
+                    //             label: "JavaScript User Guide",
+                    //             to: "/docs/js",
+                    //         },
+                    //         {
+                    //             label: "Python User Guide",
+                    //             to: "/docs/python",
+                    //         },
+                    //     ],
+                    // },
+                    // {
+                    //     title: "More",
+                    //     items: [
+                    //         {
+                    //             label: "GitHub",
+                    //             href: "https://github.com/finos/perspective",
+                    //         },
+                    //         {
+                    //             href: "https://www.prospective.co/blog",
+                    //             label: "Blog",
+                    //             position: "right",
+                    //         },
+                    //     ],
+                    // },
                 ],
                 copyright: `Copyright © ${new Date().getFullYear()} The Perspective Authors`,
             },

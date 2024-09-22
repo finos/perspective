@@ -18,7 +18,6 @@ const LOCAL_EXAMPLES = [
     "raycasting",
     "evictions",
     "nypd",
-    "magic",
     "streaming",
     "covid",
     "webcam",

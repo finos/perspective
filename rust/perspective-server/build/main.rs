@@ -18,7 +18,7 @@ use base64::prelude::*;
 use regex::{Captures, Regex};
 
 fn main() -> Result<(), std::io::Error> {
-    if matches!(std::env::var("DOCS_RS").as_deref(), Ok("1")) {
+    if std::env::var("DOCS_RS").is_ok() {
         return Ok(());
     }
 
