@@ -194,11 +194,9 @@ async function benchmark_puppeteer_version(version, benchmarks_table) {
 
             <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
 
-            <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.js" as="fetch" type="application/javascript" crossorigin="anonymous" />
             <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
             <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
             <link rel="preload" href="/node_modules/superstore-arrow/superstore.lz4.arrow" as="fetch" type="arraybuffer" crossorigin="anonymous" />
-
         </head>
     </html>`);
 
