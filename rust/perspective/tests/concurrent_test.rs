@@ -14,8 +14,8 @@
 use std::error::Error;
 use std::sync::Arc;
 
-use perspective::LocalClient;
 use perspective_client::{OnUpdateOptions, TableInitOptions, UpdateData, UpdateOptions};
+use perspective_server::LocalClient;
 use tokio::sync::Mutex;
 
 #[tokio::test]

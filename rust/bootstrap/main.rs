@@ -62,7 +62,7 @@ fn main() {
         .args(debug_flags)
         .env(
             "BOOTSTRAP_TARGET",
-            &fs::canonicalize(args.input.clone()).unwrap(),
+            fs::canonicalize(args.input.clone()).unwrap(),
         )
         .execute();
 

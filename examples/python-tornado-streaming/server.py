@@ -102,7 +102,7 @@ def make_app(perspective_server):
         [
             (
                 r"/websocket",
-                perspective.PerspectiveTornadoHandler,
+                perspective.handlers.tornado.PerspectiveTornadoHandler,
                 {"perspective_server": perspective_server},
             ),
             (

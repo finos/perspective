@@ -22,6 +22,7 @@ use pyo3::prelude::*;
 use pyo3::types::*;
 
 use super::python::*;
+use crate::server::PySyncServer;
 
 #[pyclass]
 #[derive(Clone)]
@@ -79,14 +80,23 @@ impl<F: Future> PyFutureExt for F {}
 
 #[doc = crate::inherit_docs!("client.md")]
 #[pyclass(subclass)]
-pub struct Client(PyClient);
+pub struct Client(pub(crate) PyClient);
 
 #[pymethods]
 impl Client {
     #[new]
-    pub fn new(handle_request: Py<PyAny>, close_cb: Py<PyAny>) -> PyResult<Self> {
+    pub fn new(handle_request: Py<PyAny>, close_cb: Option<Py<PyAny>>) -> PyResult<Self> {
         let client = PyClient::new(handle_request, close_cb);
         Ok(Client(client))
+    }
+
+    #[staticmethod]
+    pub fn from_server(
+        py: Python<'_>,
+        server: Py<PySyncServer>,
+        loop_callback: Option<Py<PyAny>>,
+    ) -> PyResult<Self> {
+        server.borrow(py).new_local_client(loop_callback)
     }
 
     pub fn handle_response(&self, py: Python<'_>, response: Py<PyBytes>) -> PyResult<bool> {
@@ -126,7 +136,7 @@ impl Client {
     }
 
     #[doc = crate::inherit_docs!("client/terminate.md")]
-    pub fn terminate(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+    pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {
         self.0.terminate(py).block_on()
     }
 }
@@ -295,6 +305,11 @@ impl View {
     #[pyo3(signature = (**window))]
     pub fn to_csv(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         self.0.to_csv(window).block_on()
+    }
+
+    #[pyo3(signature = (**window))]
+    pub fn to_dataframe(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        self.0.to_dataframe(window).block_on()
     }
 
     #[doc = crate::inherit_docs!("view/to_arrow.md")]

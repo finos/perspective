@@ -18,6 +18,7 @@ import tornado.web
 import tornado.ioloop
 
 import perspective
+import perspective.handlers.tornado
 
 here = os.path.abspath(os.path.dirname(__file__))
 file_path = os.path.join(

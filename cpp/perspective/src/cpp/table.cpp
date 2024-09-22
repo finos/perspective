@@ -1082,8 +1082,8 @@ Table::from_cols(
 
     if (is_implicit) {
         for (t_uindex ii = 0; ii < nrows; ii++) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
         }
     }
 

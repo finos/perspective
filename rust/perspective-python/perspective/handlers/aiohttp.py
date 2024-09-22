@@ -11,6 +11,7 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from aiohttp import web, WSMsgType
+import perspective
 import asyncio
 
 
@@ -34,7 +35,7 @@ class PerspectiveAIOHTTPHandler(object):
     """
 
     def __init__(self, **kwargs):
-        self.server = kwargs.pop("perspective_server")
+        self.server = kwargs.pop("perspective_server", perspective.GLOBAL_SERVER)
         self._request = kwargs.pop("request")
         super().__init__(**kwargs)
 

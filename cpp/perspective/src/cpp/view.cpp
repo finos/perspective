@@ -1211,12 +1211,12 @@ View<CTX_T>::data_slice_to_arrow(
         options.codec = std::move(codec).ValueUnsafe();
     }
 
-    // #ifdef PSP_PARALLEL_FOR
-    //     options.use_threads = false;
-    // #else
-    //     options.use_threads = false;
-    // #endif
-    options.use_threads = false;
+    #ifdef PSP_PARALLEL_FOR
+        options.use_threads = true;
+    #else
+        options.use_threads = false;
+    #endif
+
     auto res = arrow::ipc::MakeStreamWriter(&sink, arrow_schema, options);
     std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *res;
     PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));

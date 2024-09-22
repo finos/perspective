@@ -10,56 +10,55 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#![doc = include_str!("../docs/lib.md")]
-#![warn(unstable_features)]
-
-mod client;
-mod server;
-
-pub use client::client_sync::{Client, ProxySession, Table, View};
-use client::python::PyPerspectiveError;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{fmt, EnvFilter};
+use pyo3::types::{PyAny, PyBytes};
 
-macro_rules! inherit_docs {
-    ($x:literal) => {
-        include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $x))
-    };
+fn get_pyarrow_table_cls(py: Python<'_>) -> PyResult<Option<Py<PyAny>>> {
+    let sys = PyModule::import_bound(py, "sys")?;
+    if sys.getattr("modules")?.contains("pyarrow")? {
+        let pandas = PyModule::import_bound(py, "pyarrow")?;
+        Ok(Some(pandas.getattr("Table")?.to_object(py)))
+    } else {
+        Ok(None)
+    }
 }
 
-pub(crate) use inherit_docs;
-
-/// Create a tracing filter which mimics the default behavior of reading from
-/// env, customized to exclude timestamp.
-/// [`tracing` filter docs](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/index.html#per-layer-filtering)
-fn init_tracing() {
-    let fmt_layer = fmt::layer().without_time().with_target(true);
-    let filter_layer = EnvFilter::try_from_default_env()
-        .or_else(|_| EnvFilter::try_new("info"))
-        .unwrap();
-
-    tracing_subscriber::registry()
-        .with(filter_layer)
-        .with(fmt_layer)
-        .init();
+pub fn is_arrow_table(py: Python, table: &Bound<'_, PyAny>) -> PyResult<bool> {
+    if let Some(table_class) = get_pyarrow_table_cls(py)? {
+        table.is_instance(table_class.bind(py))
+    } else {
+        Ok(false)
+    }
 }
 
-/// A Python module implemented in Rust.
-#[pymodule]
-fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
-    init_tracing();
-    m.add_class::<client::client_sync::Client>()?;
-    m.add_class::<server::PySyncServer>()?;
-    m.add_class::<server::PySyncSession>()?;
-    m.add_class::<client::client_sync::Table>()?;
-    m.add_class::<client::client_sync::View>()?;
-    m.add_class::<client::client_sync::ProxySession>()?;
-    m.add(
-        "PerspectiveError",
-        py.get_type_bound::<PyPerspectiveError>(),
-    )?;
+pub fn to_arrow_bytes<'py>(
+    py: Python<'py>,
+    table: &Bound<'py, PyAny>,
+) -> PyResult<Bound<'py, PyBytes>> {
+    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
+    let table_class = get_pyarrow_table_cls(py)?
+        .ok_or_else(|| PyValueError::new_err("Failed to import pyarrow.Table"))?;
 
-    Ok(())
+    if !table.is_instance(table_class.bind(py))? {
+        return Err(PyValueError::new_err("Input is not a pyarrow.Table"));
+    }
+
+    let sink = pyarrow.call_method0("BufferOutputStream")?;
+
+    {
+        let writer = pyarrow.call_method1(
+            "RecordBatchFileWriter",
+            (sink.clone(), table.getattr("schema")?),
+        )?;
+
+        writer.call_method1("write_table", (table,))?;
+        writer.call_method0("close")?;
+    }
+
+    // Get the value from the sink and convert it to Python bytes
+    let value = sink.call_method0("getvalue")?;
+    let obj = value.call_method0("to_pybytes")?;
+    let pybytes = obj.downcast_into::<PyBytes>()?;
+    Ok(pybytes)
 }

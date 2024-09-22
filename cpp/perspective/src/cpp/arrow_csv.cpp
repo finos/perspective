@@ -609,12 +609,11 @@ csvToTable(
     auto read_options = arrow::csv::ReadOptions::Defaults();
     auto parse_options = arrow::csv::ParseOptions::Defaults();
     auto convert_options = arrow::csv::ConvertOptions::Defaults();
-    // #ifdef PSP_PARALLEL_FOR
-    //         read_options.use_threads = true;
-    // #else
-    //         read_options.use_threads = false;
-    // #endif
-    read_options.use_threads = false;
+    #ifdef PSP_PARALLEL_FOR
+        read_options.use_threads = true;
+    #else
+        read_options.use_threads = false;
+    #endif
     parse_options.newlines_in_values = true;
 
     if (is_update) {

@@ -13,7 +13,7 @@
 import pandas as pd
 import numpy as np
 import pytest
-from perspective import PerspectiveWidget
+from perspective.widget import PerspectiveWidget
 import perspective as psp
 
 client = psp.Server().new_local_client()

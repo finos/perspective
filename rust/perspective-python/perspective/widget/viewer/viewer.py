@@ -180,16 +180,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 Cannot be set at the same time as `index`. Ignored if a
                 ``Table`` or ``View`` is supplied.
 
-        Examples:
-            >>> from perspective import Table, PerspectiveViewer
-            >>> data = {"a": [1, 2, 3]}
-            >>> tbl = Table(data)
-            >>> viewer = PerspectiveViewer()
-            >>> viewer.load(tbl)
-            >>> viewer.load(data, index="a") # viewer state is reset
-            >>> viewer2 = PerspectiveViewer()
-            >>> viewer2.load(tbl.view())
-
         """
         name = options.pop("name", str(random()))
 
@@ -197,18 +187,17 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if self.table is not None:
             self.reset()
 
-        if isinstance(data, perspective.Table):
+        if isinstance(data, perspective.perspective.Table):
             self._table = data
             self._client = data.get_client()
             name = self._table.get_name()
-        elif isinstance(data, perspective.View):
+        elif isinstance(data, perspective.perspective.View):
             raise TypeError(
                 "Views cannot be loaded directly, load a table or raw data instead"
             )
         else:
-            client = perspective.Server().new_local_client()
-            self._table = client.table(data, name=name, **options)
-            self._client = client
+            self._table = perspective.table(data, name=name, **options)
+            self._client = perspective.GLOBAL_CLIENT
 
         # If the user does not set columns to show, synchronize viewer state
         # with dataset.
@@ -313,19 +302,9 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 deleted. Defaults to True.
         """
         if delete_table:
-            # XXX(tom): TODO implement delete
-            # Delete all created views on the widget's manager instance
-            # for view in self.manager._views.values():
-            #     view.delete()
-
-            # Reset view cache
-            # self.manager._views = {}
-
             # Delete table
-            raise RuntimeError("XXX(tom): delete not implemented")
             self.table.delete()
-            self.manager._tables.pop(self.table_name)
-            self.table = None
             self.table_name = None
+            self._table = None
 
         self.reset()
