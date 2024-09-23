@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import fs from "fs";
-import glob from "glob";
+import * as glob from "glob";
 import { Octokit } from "octokit";
 import { parseReleases } from "auto-changelog/src/releases.js";
 import { fetchTags } from "auto-changelog/src/tags.js";

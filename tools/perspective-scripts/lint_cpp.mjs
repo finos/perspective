@@ -14,7 +14,7 @@ import sh from "./sh.mjs";
 import * as fs from "fs";
 import * as url from "url";
 import * as os from "os";
-import glob from "glob";
+import * as glob from "glob";
 import { execSync } from "child_process";
 import * as dotenv from "dotenv";
 

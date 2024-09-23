@@ -15,7 +15,6 @@ const path = require("path");
 const esbuild = require("esbuild");
 
 exports.WorkerPlugin = function WorkerPlugin(options = {}) {
-    const inline = !!options.inline;
     const targetdir = options.targetdir || "build/worker";
     function setup(build) {
         const options = build.initialOptions;
@@ -34,16 +33,17 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                 const subbuild = esbuild.build({
                     target: ["es2021"],
                     entryPoints: [entryPoint],
-                    outfile,
+                    // outfile,
                     define: {
                         global: "self",
                     },
                     entryNames: "[name]",
                     chunkNames: "[name]",
                     assetNames: "[name]",
-                    minify: !process.env.PSP_DEBUG,
+                    minify: true,
                     bundle: true,
-                    sourcemap: true,
+                    sourcemap: false,
+                    write: false,
                 });
 
                 return {
@@ -68,10 +68,9 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
         build.onLoad(
             { filter: /.*/, namespace: "worker-stub" },
             async (args) => {
-                if (inline) {
-                    return {
-                        pluginData: args.pluginData,
-                        contents: `
+                return {
+                    pluginData: args.pluginData,
+                    contents: `
                         import worker from ${JSON.stringify(args.path)};
                         function make_host(a, b) {
                             function addEventListener(type, callback) {
@@ -126,82 +125,14 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
 
                         export default initialize;
                     `,
-                    };
-                }
-
-                return {
-                    pluginData: args.pluginData,
-                    contents: `
-                    import worker from ${JSON.stringify(args.path)};
-                    async function get_worker_code() {
-                        const url = new URL(__PSP_INLINE_WORKER__(worker), import.meta.url);
-                        const req = await fetch(url);
-                        const code = await req.text();
-                        return code;
-                    };
-
-                    function make_host(a, b) {
-                        function addEventListener(type, callback) {
-                            a.push(callback);
-                        }
-
-                        function removeEventListener(callback) {
-                            const idx = a.indexOf(callback);
-                            if (idx > -1) {
-                                a.splice(idx, 1);
-                            }
-                        }
-
-                        function postMessage(msg) {
-                            for (const listener of b) {
-                                listener({data: msg});
-                            }
-                        }
-
-                        return {
-                            addEventListener,
-                            removeEventListener,
-                            postMessage,
-                            location: {href: ""}
-                        }
-                    }
-
-                    function run_single_threaded(code) {
-                        let f = Function("const self = arguments[0];" + code);
-                        const workers = [];
-                        const mains = [];
-                        f(make_host(workers, mains));
-                        return make_host(mains, workers);
-                    }
-
-                    export const initialize = async function () {
-                        const code = await get_worker_code();
-                        if (window.location.protocol.startsWith("file") && !window.isElectron) {
-                            console.warn("file:// protocol does not support Web Workers");
-                            return run_single_threaded(code);
-                        }
-
-                        try {
-                            const blob = new Blob([code], {type: 'application/javascript'});
-                            const url = URL.createObjectURL(blob);
-                            return new Worker(url, {type: "module"});
-                        } catch (e) {
-                            console.warn("Failed to instantiate worker, falling back to single-threaded runtime", e);
-                            return run_single_threaded(code);
-                        }
-                    };
-
-                    export default initialize;
-                `,
                 };
             }
         );
 
         build.onLoad({ filter: /.*/, namespace: "worker" }, async (args) => {
             // Get the subbuild output and delete the temp file
-            await args.pluginData.subbuild;
-            contents = await fs.promises.readFile(args.pluginData.outfile);
-
+            const result = await args.pluginData.subbuild;
+            const contents = result.outputFiles[0].contents;
             // // Copy the sourcemaps also
             // const mapfile = args.pluginData.outfile + ".map";
             // sourcemap = await fs.promises.readFile(mapfile);
@@ -221,7 +152,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
 
             return {
                 contents,
-                loader: inline ? "text" : "file",
+                loader: "text",
             };
         });
 

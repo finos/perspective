@@ -18,6 +18,10 @@ use base64::prelude::*;
 use regex::{Captures, Regex};
 
 fn main() -> Result<(), std::io::Error> {
+    if std::env::var("DOCS_RS").is_ok() {
+        return Ok(());
+    }
+
     let markdown = fs::read_to_string("./docs/lib.md")?;
     let markdown = Regex::new("<img src=\"(.+?)\"")
         .expect("regex")

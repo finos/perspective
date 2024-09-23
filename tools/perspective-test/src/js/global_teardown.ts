@@ -12,7 +12,7 @@
 
 import tar from "tar";
 import fs from "fs";
-import glob from "glob";
+import * as glob from "glob";
 import path from "path";
 import url from "node:url";
 
