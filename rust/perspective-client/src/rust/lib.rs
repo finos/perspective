@@ -28,7 +28,9 @@ pub mod utils;
 
 pub use crate::client::{Client, ClientHandler, Features, SystemInfo};
 pub use crate::session::{ProxySession, Session};
-pub use crate::table::{Schema, Table, TableInitOptions, UpdateOptions, ValidateExpressionsData};
+pub use crate::table::{
+    Schema, Table, TableInitOptions, TableReadFormat, UpdateOptions, ValidateExpressionsData,
+};
 pub use crate::table_data::{TableData, UpdateData};
 pub use crate::view::{OnUpdateMode, OnUpdateOptions, View, ViewWindow};
 
