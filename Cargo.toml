@@ -23,7 +23,7 @@ members = [
     "rust/perspective-js",
     "rust/perspective-python",
     "rust/perspective-server",
-    "examples/rust-axum", 
+    "examples/rust-axum",
 ]
 
 [profile.dev]
@@ -36,3 +36,6 @@ opt-level = "z"
 codegen-units = 1
 lto = true
 strip = true
+
+[patch.crates-io]
+simd-adler32 = { git = "https://github.com/mcountryman/simd-adler32.git", rev = "140cde033e8b9a12d4de840648c65ccd5320bcc5" }

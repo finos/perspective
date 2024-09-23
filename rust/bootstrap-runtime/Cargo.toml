@@ -23,11 +23,16 @@ test = false
 
 [dependencies]
 talc = "4.4.1"
-simd-adler32 = { version = "0.3.7", default-features = false }
-zune-inflate = { version = "0.2", default-features = false, features = [
-    "zlib",
-] }
+
+[dependencies.zune-inflate]
+version = "0.2"
+default-features = false
+features = ["zlib"]
 
 [features]
 env_target = []
 default_features = []
+
+# This crate needs a patch for wasm32 
+[patch.crates-io]
+simd-adler32 = { git = "https://github.com/mcountryman/simd-adler32.git", rev = "140cde033e8b9a12d4de840648c65ccd5320bcc5" }
