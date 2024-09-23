@@ -18,7 +18,6 @@ exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
 ) {
     const wasm_plugin = WasmPlugin(!!options.wasm?.inline);
     const worker_plugin = WorkerPlugin({
-        inline: !!options.worker?.inline,
         targetdir: options.worker?.targetdir,
     });
 

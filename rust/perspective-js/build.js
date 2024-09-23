@@ -27,7 +27,6 @@ const BUILD = [
         plugins: [
             PerspectiveEsbuildPlugin({
                 wasm: { inline: true },
-                worker: { inline: true },
             }),
         ],
         outfile: "dist/esm/perspective.inline.js",

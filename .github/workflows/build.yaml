@@ -625,6 +625,8 @@ jobs:
                   name: perspective-python-dist-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.python-version }}
 
             - uses: ./.github/actions/install-wheel
+              with:
+                  inplace: "false"
 
             - name: Benchmarks
               run: pnpm run bench
