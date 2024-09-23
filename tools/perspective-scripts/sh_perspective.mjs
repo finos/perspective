@@ -14,7 +14,7 @@ import * as dotenv from "dotenv";
 import * as _path from "path";
 import * as fs from "fs";
 import fse from "fs-extra";
-import rimraf from "rimraf";
+import * as rimraf from "rimraf";
 import { createRequire } from "node:module";
 import sh from "./sh.mjs";
 import * as url from "url";

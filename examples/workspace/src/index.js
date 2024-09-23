@@ -16,13 +16,15 @@ import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
-import "./index.less";
+import "./index.css";
+import "@finos/perspective-workspace/dist/css/pro.css";
+import "@finos/perspective-viewer/dist/css/themes.css";
 
 const datasource = async () => {
     const req = fetch("./superstore.lz4.arrow");
     const resp = await req;
     const buffer = await resp.arrayBuffer();
-    const worker = perspective.worker();
+    const worker = await perspective.worker();
     return await worker.table(buffer);
 };
 

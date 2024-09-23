@@ -32,6 +32,6 @@
         "@finos/perspective-viewer-openlayers": "workspace:^",
         "@finos/perspective-workspace": "workspace:^",
         "commander": "^2.19.0",
-        "puppeteer": "^13.1.3"
+        "puppeteer": "^23"
     }
 }
