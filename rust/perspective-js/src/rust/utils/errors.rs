@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::fmt::Display;
+use std::string::FromUtf8Error;
 
 use perspective_client::ClientError;
 use wasm_bindgen::prelude::*;
@@ -84,7 +85,8 @@ define_api_error!(
     futures::channel::oneshot::Canceled,
     base64::DecodeError,
     chrono::ParseError,
-    prost::DecodeError
+    prost::DecodeError,
+    FromUtf8Error
 );
 
 #[wasm_bindgen(inline_js = r#"

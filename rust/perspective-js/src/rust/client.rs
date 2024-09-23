@@ -76,11 +76,11 @@ impl Client {
         value: &JsTableInitData,
         options: Option<JsTableInitOptions>,
     ) -> ApiResult<Table> {
-        let args = TableData::from_js_value(value)?;
         let options = options
             .into_serde_ext::<Option<TableInitOptions>>()?
             .unwrap_or_default();
 
+        let args = TableData::from_js_value(value, options.format)?;
         Ok(Table(self.client.table(args, options).await?))
     }
 

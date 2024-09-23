@@ -31,6 +31,34 @@ use crate::view::View;
 
 pub type Schema = HashMap<String, ColumnType>;
 
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, TS)]
+pub enum TableReadFormat {
+    #[serde(rename = "csv")]
+    Csv,
+
+    #[serde(rename = "json")]
+    JsonString,
+
+    #[serde(rename = "columns")]
+    ColumnsString,
+
+    #[serde(rename = "arrow")]
+    Arrow,
+}
+
+impl TableReadFormat {
+    pub fn parse(value: Option<String>) -> Result<Option<Self>, String> {
+        Ok(match value.as_deref() {
+            Some("csv") => Some(TableReadFormat::Csv),
+            Some("json") => Some(TableReadFormat::JsonString),
+            Some("columns") => Some(TableReadFormat::ColumnsString),
+            Some("arrow") => Some(TableReadFormat::Arrow),
+            None => None,
+            Some(x) => return Err(format!("Unknown format \"{}\"", x)),
+        })
+    }
+}
+
 /// Options which impact the behavior of [`Client::table`], as well as
 /// subsequent calls to [`Table::update`].
 #[derive(Clone, Debug, Default, Serialize, Deserialize, TS)]
@@ -38,6 +66,10 @@ pub struct TableInitOptions {
     #[serde(default)]
     #[ts(optional)]
     pub name: Option<String>,
+
+    #[serde(default)]
+    #[ts(optional)]
+    pub format: Option<TableReadFormat>,
 
     /// This [`Table`] should use the column named by the `index` parameter as
     /// the `index`, which causes [`Table::update`] and [`Client::table`] input
@@ -101,6 +133,7 @@ impl From<TableInitOptions> for TableOptions {
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 pub struct UpdateOptions {
     pub port_id: Option<u32>,
+    pub format: Option<TableReadFormat>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

@@ -20,7 +20,8 @@ use futures::FutureExt;
 use perspective_client::proto::ViewOnUpdateResp;
 use perspective_client::{
     assert_table_api, assert_view_api, clone, Client, ClientError, OnUpdateMode, OnUpdateOptions,
-    Table, TableData, TableInitOptions, UpdateData, UpdateOptions, View, ViewWindow,
+    Table, TableData, TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View,
+    ViewWindow,
 };
 use pyo3::create_exception;
 use pyo3::exceptions::PyValueError;
@@ -56,17 +57,36 @@ create_exception!(
 
 #[extend::ext]
 impl UpdateData {
-    fn from_py_partial(py: Python<'_>, input: &Py<PyAny>) -> Result<Option<UpdateData>, PyErr> {
+    fn from_py_partial(
+        py: Python<'_>,
+        input: &Py<PyAny>,
+        format: Option<TableReadFormat>,
+    ) -> Result<Option<UpdateData>, PyErr> {
         if let Ok(pybytes) = input.downcast_bound::<PyBytes>(py) {
-            Ok(Some(UpdateData::Arrow(
-                // TODO need to explicitly qualify this b/c bug in
-                // rust-analyzer - should be: just `pybytes.as_bytes()`.
-                pyo3::prelude::PyBytesMethods::as_bytes(pybytes)
-                    .to_vec()
-                    .into(),
-            )))
+            // TODO need to explicitly qualify this b/c bug in
+            // rust-analyzer - should be: just `pybytes.as_bytes()`.
+            let vec = pyo3::prelude::PyBytesMethods::as_bytes(pybytes).to_vec();
+
+            match format {
+                Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(String::from_utf8(vec)?))),
+                Some(TableReadFormat::JsonString) => {
+                    Ok(Some(UpdateData::JsonRows(String::from_utf8(vec)?)))
+                },
+                Some(TableReadFormat::ColumnsString) => {
+                    Ok(Some(UpdateData::JsonColumns(String::from_utf8(vec)?)))
+                },
+                None | Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(vec.into()))),
+            }
         } else if let Ok(pystring) = input.downcast_bound::<PyString>(py) {
-            Ok(Some(UpdateData::Csv(pystring.extract::<String>()?)))
+            let string = pystring.extract::<String>()?;
+            match format {
+                None | Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(string))),
+                Some(TableReadFormat::JsonString) => Ok(Some(UpdateData::JsonRows(string))),
+                Some(TableReadFormat::ColumnsString) => Ok(Some(UpdateData::JsonColumns(string))),
+                Some(TableReadFormat::Arrow) => {
+                    Ok(Some(UpdateData::Arrow(string.into_bytes().into())))
+                },
+            }
         } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
             let json_module = PyModule::import_bound(py, "json")?;
             let string = json_module.call_method("dumps", (pylist,), None)?;
@@ -93,8 +113,12 @@ impl UpdateData {
         }
     }
 
-    fn from_py(py: Python<'_>, input: &Py<PyAny>) -> Result<UpdateData, PyErr> {
-        if let Some(x) = Self::from_py_partial(py, input)? {
+    fn from_py(
+        py: Python<'_>,
+        input: &Py<PyAny>,
+        format: Option<TableReadFormat>,
+    ) -> Result<UpdateData, PyErr> {
+        if let Some(x) = Self::from_py_partial(py, input, format)? {
             Ok(x)
         } else {
             Err(PyValueError::new_err(format!(
@@ -107,8 +131,12 @@ impl UpdateData {
 
 #[extend::ext]
 impl TableData {
-    fn from_py(py: Python<'_>, input: Py<PyAny>) -> Result<TableData, PyErr> {
-        if let Some(update) = UpdateData::from_py_partial(py, &input)? {
+    fn from_py(
+        py: Python<'_>,
+        input: Py<PyAny>,
+        format: Option<TableReadFormat>,
+    ) -> Result<TableData, PyErr> {
+        if let Some(update) = UpdateData::from_py_partial(py, &input, format)? {
             Ok(TableData::Update(update))
         } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
             let json_module = PyModule::import_bound(py, "json")?;
@@ -186,6 +214,7 @@ impl PyClient {
         limit: Option<u32>,
         index: Option<Py<PyString>>,
         name: Option<Py<PyString>>,
+        format: Option<Py<PyString>>,
     ) -> PyResult<PyTable> {
         let client = self.client.clone();
         let py_client = self.clone();
@@ -194,6 +223,9 @@ impl PyClient {
                 name: name.map(|x| x.extract::<String>(py)).transpose()?,
                 ..TableInitOptions::default()
             };
+
+            let format = TableReadFormat::parse(format.map(|x| x.to_string()))
+                .map_err(PyPerspectiveError::new_err)?;
 
             match (limit, index) {
                 (None, None) => {},
@@ -214,7 +246,7 @@ impl PyClient {
                 input
             };
 
-            let table_data = TableData::from_py(py, input_data)?;
+            let table_data = TableData::from_py(py, input_data, format)?;
             let table = client.table(table_data, options);
             Ok::<_, PyErr>(table)
         })?;
@@ -328,19 +360,26 @@ impl PyTable {
         self.table.remove_delete(callback_id).await.into_pyerr()
     }
 
-    pub async fn remove(&self, input: Py<PyAny>) -> PyResult<()> {
+    pub async fn remove(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input))?;
+        let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
+        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input, format))?;
         table.remove(table_data).await.into_pyerr()
     }
 
-    pub async fn replace(&self, input: Py<PyAny>) -> PyResult<()> {
+    pub async fn replace(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input))?;
+        let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
+        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input, format))?;
         table.replace(table_data).await.into_pyerr()
     }
 
-    pub async fn update(&self, input: Py<PyAny>, port_id: Option<u32>) -> PyResult<()> {
+    pub async fn update(
+        &self,
+        input: Py<PyAny>,
+        port_id: Option<u32>,
+        format: Option<String>,
+    ) -> PyResult<()> {
         let input_data: Py<PyAny> = Python::with_gil(|py| {
             let data = if pyarrow::is_arrow_table(py, input.bind(py))? {
                 pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
@@ -353,8 +392,9 @@ impl PyTable {
         })?;
 
         let table = &self.table;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input_data))?;
-        let options = UpdateOptions { port_id };
+        let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
+        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input_data, format))?;
+        let options = UpdateOptions { port_id, format };
         table.update(table_data, options).await.into_pyerr()?;
         Ok(())
     }
