@@ -30,6 +30,7 @@ async fn test_two_sync_clients_receive_messages_on_update() -> Result<(), Box<dy
                 name: Some("Table1".to_owned()),
                 index: None,
                 limit: None,
+                format: None,
             },
         )
         .await?;

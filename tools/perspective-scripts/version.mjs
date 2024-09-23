@@ -177,7 +177,7 @@ async function update_package_jsons() {
     fs.writeFileSync("../package.json", pkg_json);
     const packages = {};
     for (const ws of pkg.workspaces) {
-        for (const path of glob(`${ws}/package.json`, {
+        for (const path of glob.sync(`${ws}/package.json`, {
             sync: true,
         })) {
             const pkg = JSON.parse(fs.readFileSync(path));
