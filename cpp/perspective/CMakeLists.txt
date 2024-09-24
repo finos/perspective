@@ -206,11 +206,11 @@ if(PSP_WASM_BUILD)
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
-    # Assumes that Boost includes will be in this folder.
-    include_directories(SYSTEM "/usr/local/include")
+    # # Assumes that Boost includes will be in this folder.
+    # include_directories(SYSTEM "/usr/local/include")
 
-    # Include this docker-only directory.
-    include_directories(SYSTEM "/boost_includes")
+    # # Include this docker-only directory.
+    # include_directories(SYSTEM "/boost_includes")
 
     set(EXTENDED_FLAGS " \
         -Wall \
@@ -349,6 +349,7 @@ if(PSP_PYODIDE)
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
 endif()
 
+psp_build_dep("boost" "${PSP_CMAKE_MODULE_PATH}/boost.txt.in")
 
 # Build header-only dependencies from external source
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")

@@ -65,6 +65,11 @@ function(psp_build_dep name cmake_file)
         )
 
         include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/cpp/src/)
+    elseif(${name} STREQUAL boost)
+        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
+            ${CMAKE_BINARY_DIR}/${name}-build
+            EXCLUDE_FROM_ALL)
+        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/src)
     elseif(${name} STREQUAL exprtk)
         # no cmakelists - just include the header
         include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src)

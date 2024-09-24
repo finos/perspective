@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(arrow-download NONE)
 
-# *******************************************************************
-# NOTE: this depedency's CMakeLists.txt is overloaded, make sure to
-# adjust if you update the tag
-# *******************************************************************
-
 include(ExternalProject)
 ExternalProject_Add(apachearrow
   GIT_REPOSITORY    https://github.com/apache/arrow.git

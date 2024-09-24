@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.7.2)
+
+project(boost-download NONE)
+
+include(ExternalProject)
+
+if (WIN32)
+    set(BOOST_BOOTSTRAP_CMD ${CMAKE_CURRENT_BINARY_DIR}/boost-prefix/src/boost/bootstrap.bat)
+    set(BOOST_BUILD_CMD ${CMAKE_CURRENT_BINARY_DIR}/boost-prefix/src/boost/b2.exe)
+else()
+    set(BOOST_BOOTSTRAP_CMD ${CMAKE_CURRENT_BINARY_DIR}/boost-prefix/src/boost/bootstrap.sh)
+    set(BOOST_BUILD_CMD ${CMAKE_CURRENT_BINARY_DIR}/boost-prefix/src/boost/b2)
+endif ()
+
+ExternalProject_Add(boost
+    GIT_REPOSITORY https://github.com/boostorg/boost.git
+    SOURCE_DIR        "${CMAKE_BINARY_DIR}/boost-src"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/boost-build"
+    GIT_TAG boost-1.82.0
+    GIT_SHALLOW 1
+    GIT_PROGRESS 1
+    CONFIGURE_COMMAND ${BOOST_BOOTSTRAP_CMD}
+    BUILD_COMMAND "${BOOST_BUILD_CMD} --prefix=${CMAKE_INSTALL_PREFIX} --without-python --without-mpi --disable-icu variant=release link=static runtime-link=static threading=single,multi install"
+    INSTALL_COMMAND ""
+)
+
+set(Boost_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
+set(Boost_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/libboost_regex.a)
