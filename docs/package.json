@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-docs",
-    "version": "3.0.3",
+    "version": "3.1.0",
     "private": true,
     "scripts": {
         "docusaurus": "docusaurus",
@@ -26,7 +26,7 @@
         "clsx": "^2.0.0",
         "mkdirp": "3",
         "prism-react-renderer": "^1.3.3",
-        "puppeteer": "22.10.0",
+        "puppeteer": "^23",
         "react": "^18.0.0",
         "react-dom": "^18.0.0",
         "superstore-arrow": "3.0.0"

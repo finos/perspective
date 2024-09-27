@@ -10,6 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+/**
+ * @module perspective_bench
+ * The main entrypoint of `perspective_bench` is a CLI node.js application which
+ * may star
+ */
+
 const MAX_ITERATIONS = 100;
 const MIN_ITERATIONS = 5;
 const WARM_UP_ITERATIONS = 10;
@@ -188,11 +194,9 @@ async function benchmark_puppeteer_version(version, benchmarks_table) {
 
             <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
 
-            <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.js" as="fetch" type="application/javascript" crossorigin="anonymous" />
             <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
             <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
             <link rel="preload" href="/node_modules/superstore-arrow/superstore.lz4.arrow" as="fetch" type="arraybuffer" crossorigin="anonymous" />
-
         </head>
     </html>`);
 
@@ -382,7 +386,8 @@ export async function suite(
     versions,
     out_path,
     run_version_callback,
-    start_server_callback
+    start_server_callback,
+    stop_server_callback
 ) {
     if (!!process.env.BENCH_FLAG) {
         const { default: process } = await import("node:process");
@@ -411,7 +416,7 @@ export async function suite(
         for (let i = 0; i < versions.length; i++) {
             let s;
             if (start_server_callback) {
-                s = await start_server_callback(versions[i]);
+                s = await start_server_callback(versions[i], i);
             }
 
             await Promise.all([
@@ -429,9 +434,13 @@ export async function suite(
             ]);
 
             await persist_to_arrow(benchmarks_table, out_path);
-            await s?.close?.();
+
+            if (stop_server_callback) {
+                await stop_server_callback(s, versions[i], i);
+            }
         }
 
         await app.close();
+        process.exit(0);
     }
 }

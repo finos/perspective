@@ -12,14 +12,12 @@
 
 import numpy as np
 import pandas as pd
-from perspective import PerspectiveViewer
 import pytest
+from perspective.widget.viewer import PerspectiveViewer
 import perspective as psp
 
 client = psp.Server().new_local_client()
 Table = client.table
-
-pytest.skip(allow_module_level=True)
 
 
 class TestViewer:
@@ -38,9 +36,9 @@ class TestViewer:
         assert viewer.columns == ["a"]
 
     def test_viewer_load_named_table(self):
-        table = Table({"a": [1, 2, 3]})
+        table = Table({"a": [1, 2, 3]}, name="data_1")
         viewer = PerspectiveViewer()
-        viewer.load(table, name="data_1")
+        viewer.load(table)
         assert viewer.columns == ["a"]
         assert viewer.table_name == "data_1"
         assert viewer.table == table
@@ -86,18 +84,21 @@ class TestViewer:
         assert viewer.group_by == []
         assert viewer.theme == "Pro Dark"  # should not break UI
 
+    @pytest.mark.skip
     def test_viewer_load_np(self):
         table = Table({"a": np.arange(1, 100)})
         viewer = PerspectiveViewer()
         viewer.load(table)
         assert viewer.columns == ["a"]
 
+    @pytest.mark.skip
     def test_viewer_load_np_data(self):
         viewer = PerspectiveViewer()
         viewer.load({"a": np.arange(1, 100)})
         assert viewer.columns == ["a"]
         assert viewer.table.size() == 99
 
+    @pytest.mark.skip
     def test_viewer_load_df(self):
         table = Table(pd.DataFrame({"a": np.arange(1, 100)}))
         viewer = PerspectiveViewer()

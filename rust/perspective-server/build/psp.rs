@@ -50,9 +50,6 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
         );
     }
 
-    if matches!(std::env::var("DOCS_RS").as_deref(), Ok("1")) {
-        return Ok(None);
-    }
 
     let mut dst = Config::new("cpp/perspective");
     if cfg!(windows) && std::option_env!("CI").is_some() {

@@ -1,3 +1,32 @@
+# [v3.1.0](https://github.com/finos/perspective/releases/tag/v3.1.0)
+
+_23 September 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.0...v3.1.0))
+
+
+# [v3.1.0](https://github.com/finos/perspective/releases/tag/v3.1.0)
+
+_23 September 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.3...v3.1.0))
+
+**Breaking**
+
+- Python API changes from community [#2754](https://github.com/finos/perspective/pull/2754)
+
+Features
+
+- Allow `bytes` and `string` for JSON/CSV input data with `format` option [#2763](https://github.com/finos/perspective/pull/2763)
+
+Fixes
+
+- Fix cancellable methods in `perspective-viewer` [#2755](https://github.com/finos/perspective/pull/2755)
+
+Misc
+
+- Update `README.md`, examples and build dependencies [#2762](https://github.com/finos/perspective/pull/2762)
+- Add Windows build for `perspective-rs` to CI [#2759](https://github.com/finos/perspective/pull/2759)
+- Add Python benchmark suite for `3.x` [#2761](https://github.com/finos/perspective/pull/2761)
+- Upgrade Apache Arrow C++ to 17.0.0 [#2749](https://github.com/finos/perspective/pull/2749)
+- Emscripten wheel fixes [#2739](https://github.com/finos/perspective/pull/2739)
+
 # [v3.0.3](https://github.com/finos/perspective/releases/tag/v3.0.3)
 
 _3 September 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.0.2...v3.0.3))

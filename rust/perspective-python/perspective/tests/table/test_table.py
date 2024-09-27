@@ -82,6 +82,15 @@ class TestTable:
             "float": [None, 2.5, None],
         }
 
+    def test_table_records_from_string_with_format_override(self):
+        data = '{"x": [1,2,3], "y": [4,5,6]}'
+        tbl = Table(data, format="columns")
+        view = tbl.view()
+        assert view.to_columns() == {
+            "x": [1, 2, 3],
+            "y": [4, 5, 6],
+        }
+
     def test_table_string_column_with_nulls_update_and_filter(self):
         tbl = Table(
             [

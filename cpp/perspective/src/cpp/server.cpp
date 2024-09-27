@@ -423,6 +423,10 @@ ServerResources::get_table_for_view(const t_id& view_id) {
 ServerResources::t_id
 ServerResources::get_table_id_for_view(const t_id& view_id) {
     PSP_READ_LOCK(m_write_lock);
+    if (!m_view_to_table.contains(view_id)) {
+        throw PerspectiveViewNotFoundException();
+    }
+
     return m_view_to_table.at(view_id);
 }
 
@@ -440,6 +444,10 @@ ServerResources::get_view_ids(const t_id& table_id) {
 std::shared_ptr<ErasedView>
 ServerResources::get_view(const t_id& id) {
     PSP_READ_LOCK(m_write_lock);
+    if (!m_views.contains(id)) {
+        throw PerspectiveViewNotFoundException();
+    }
+
     return m_views.at(id);
 }
 
@@ -679,6 +687,13 @@ ProtoServer::handle_request(
         proto::Response resp;
         auto* err = resp.mutable_server_error()->mutable_message();
         *err = std::string(e.what());
+        responses.emplace_back(std::move(resp));
+    } catch (const PerspectiveViewNotFoundException& e) {
+        proto::Response resp;
+        auto* err = resp.mutable_server_error();
+        err->set_status_code(proto::StatusCode::VIEW_NOT_FOUND);
+        auto* msg = err->mutable_message();
+        *msg = std::string(e.what());
         responses.emplace_back(std::move(resp));
     } catch (const std::exception& e) {
         proto::Response resp;

@@ -21,7 +21,8 @@ use futures::channel::mpsc::{unbounded, UnboundedReceiver, UnboundedSender};
 use futures::future::{select, Either};
 use futures::{FutureExt, SinkExt, StreamExt};
 
-use crate::server::{LocalSession, Server, Session, SessionHandler};
+use crate::client::Session;
+use crate::server::{LocalSession, Server, SessionHandler};
 
 /// A local error synonym for this module only.
 type PerspectiveWSError = Box<dyn std::error::Error + Send + Sync>;
@@ -88,9 +89,10 @@ async fn process_message_loop(
 }
 
 /// This handler is responsible for the beginning-to-end lifecycle of a
-/// single WebSocket connection to an [`axum`] server. Messages will come
-/// in from the [`axum::extract::ws::WebSocket`] in binary form via
-/// [`Message::Binary`], where they'll be routed to
+/// single WebSocket connection to an [`axum`] server.
+///
+/// Messages will come in from the [`axum::extract::ws::WebSocket`] in binary
+/// form via [`Message::Binary`], where they'll be routed to
 /// [`perspective::Session::handle_request`]. The server may generate
 /// one or more responses, which it will then send back to
 /// the [`axum::extract::ws::WebSocket::send`] method via its

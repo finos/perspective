@@ -51,25 +51,22 @@ makes it simple to extend a Tornado server with virtual Perspective support.
 
 The `perspective` module exports several tools:
 
--   `PerspectiveWidget` the JupyterLab widget for interactive visualization.
--   Perspective webserver handlers that interface seamlessly with
-    `<perspective-viewer>` in JavaScript.
-    -   `PerspectiveTornadoHandler` for [Tornado](https://www.tornadoweb.org/)
-    -   `PerspectiveStarletteHandler` for [Starlette](https://www.starlette.io/)
-        and [FastAPI](https://fastapi.tiangolo.com)
-    -   `PerspectiveAIOHTTPHandler` for [AIOHTTP](https://docs.aiohttp.org),
-    -   `tornado_websocket`, a Tornado-based websocket client
-    -   `aiohttp_websocket` an AIOHTTP-based websocket client
--   `Server` the session manager for a shared server deployment of
-    `perspective-python`.
+-   `Server` the constructor for a new isntance of the Perspective data engine.
+-   The `perspective.widget` module exports `PerspectiveWidget`, the JupyterLab
+    widget for interactive visualization in a notebook cell.
+-   The `perspective.handlers` modules exports web frameworks handlers that
+    interface with a `perspective-client` in JavaScript.
+    -   `perspective.handlers.tornado.PerspectiveTornadoHandler` for
+        [Tornado](https://www.tornadoweb.org/)
+    -   `perspective.handlers.starlette.PerspectiveStarletteHandler` for
+        [Starlette](https://www.starlette.io/) and
+        [FastAPI](https://fastapi.tiangolo.com)
+    -   `perspective.handlers.aiohttp.PerspectiveAIOHTTPHandler` for
+        [AIOHTTP](https://docs.aiohttp.org),
 
 This user's guide provides an overview of the most common ways to use
 Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
 handler.
-
-For an understanding of Perspective's core concepts, see the [Table](table.md),
-[View](view.md), and [Data Binding](server.md) documentation. For API
-documentation, see the [Python API](obj/perspective-python.md).
 
 [More Examples](https://github.com/finos/perspective/tree/master/examples) are
 available on GitHub.
@@ -79,10 +76,6 @@ available on GitHub.
 `perspective-python` contains full bindings to the Perspective API, a JupyterLab
 widget, and a WebSocket handlers for several webserver libraries that allow you
 to host Perspective using server-side Python.
-
-In addition to supporting row/columnar formats of data using `dict` and `list`,
-`pandas.DataFrame`, dictionaries of NumPy arrays, NumPy structured arrays, and
-NumPy record arrays are all supported in `perspective-python`.
 
 ### PyPI
 
@@ -146,15 +139,15 @@ data = pd.DataFrame({
     "string": [str(i) for i in range(100)]
 })
 
-table = perspective.Table(data, index="float")
+table = perspective.table(data, index="float")
 ```
 
 Likewise, a `View` can be created via the `view()` method:
 
 ```python
 view = table.view(group_by=["float"], filter=[["bool", "==", True]])
-column_data = view.to_dict()
-row_data = view.to_records()
+column_data = view.to_columns()
+row_data = view.to_json()
 ```
 
 ### Pandas Support
@@ -198,14 +191,14 @@ def update_callback():
     print("Updated!")
 
 # set the update callback
-view.on_update(update_callback)
+on_update_id = view.on_update(update_callback)
 
 
 def delete_callback():
     print("Deleted!")
 
 # set the delete callback
-view.on_delete(delete_callback)
+on_delete_id = view.on_delete(delete_callback)
 
 # set a lambda as a callback
 view.on_delete(lambda: print("Deleted x2!"))
@@ -215,8 +208,8 @@ If the callback is a named reference to a function, it can be removed with
 `remove_update` or `remove_delete`:
 
 ```python
-view.remove_update(update_callback)
-view.remove_delete(delete_callback)
+view.remove_update(on_update_id)
+view.remove_delete(on_delete_id)
 ```
 
 Callbacks defined with a lambda function cannot be removed, as lambda functions
@@ -224,7 +217,7 @@ have no identifier.
 
 #### Multi-threading
 
-Perspective's server is completely releases the GIL (though it may be retained
+Perspective's server API releases the GIL when called (though it may be retained
 for some portion of the `Client` call to encode RPC messages). It also
 dispatches to an internal thread pool for some operations, enabling better
 parallelism and overall better server performance. However, Perspective's Python

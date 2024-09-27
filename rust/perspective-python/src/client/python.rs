@@ -20,7 +20,8 @@ use futures::FutureExt;
 use perspective_client::proto::ViewOnUpdateResp;
 use perspective_client::{
     assert_table_api, assert_view_api, clone, Client, ClientError, OnUpdateMode, OnUpdateOptions,
-    Table, TableData, TableInitOptions, UpdateData, UpdateOptions, View, ViewWindow,
+    Table, TableData, TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View,
+    ViewWindow,
 };
 use pyo3::create_exception;
 use pyo3::exceptions::PyValueError;
@@ -28,11 +29,14 @@ use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyBytes, PyDict, PyList, PyString};
 use pythonize::depythonize_bound;
 
+use super::pandas::arrow_to_pandas;
+use super::{pandas, pyarrow};
+
 #[derive(Clone)]
 pub struct PyClient {
     pub(crate) client: Client,
     loop_cb: Arc<RwLock<Option<Py<PyAny>>>>,
-    close_cb: Py<PyAny>,
+    close_cb: Option<Py<PyAny>>,
 }
 
 #[extend::ext]
@@ -53,17 +57,36 @@ create_exception!(
 
 #[extend::ext]
 impl UpdateData {
-    fn from_py_partial(py: Python<'_>, input: &Py<PyAny>) -> Result<Option<UpdateData>, PyErr> {
+    fn from_py_partial(
+        py: Python<'_>,
+        input: &Py<PyAny>,
+        format: Option<TableReadFormat>,
+    ) -> Result<Option<UpdateData>, PyErr> {
         if let Ok(pybytes) = input.downcast_bound::<PyBytes>(py) {
-            Ok(Some(UpdateData::Arrow(
-                // TODO need to explicitly qualify this b/c bug in
-                // rust-analyzer - should be: just `pybytes.as_bytes()`.
-                pyo3::prelude::PyBytesMethods::as_bytes(pybytes)
-                    .to_vec()
-                    .into(),
-            )))
+            // TODO need to explicitly qualify this b/c bug in
+            // rust-analyzer - should be: just `pybytes.as_bytes()`.
+            let vec = pyo3::prelude::PyBytesMethods::as_bytes(pybytes).to_vec();
+
+            match format {
+                Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(String::from_utf8(vec)?))),
+                Some(TableReadFormat::JsonString) => {
+                    Ok(Some(UpdateData::JsonRows(String::from_utf8(vec)?)))
+                },
+                Some(TableReadFormat::ColumnsString) => {
+                    Ok(Some(UpdateData::JsonColumns(String::from_utf8(vec)?)))
+                },
+                None | Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(vec.into()))),
+            }
         } else if let Ok(pystring) = input.downcast_bound::<PyString>(py) {
-            Ok(Some(UpdateData::Csv(pystring.extract::<String>()?)))
+            let string = pystring.extract::<String>()?;
+            match format {
+                None | Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(string))),
+                Some(TableReadFormat::JsonString) => Ok(Some(UpdateData::JsonRows(string))),
+                Some(TableReadFormat::ColumnsString) => Ok(Some(UpdateData::JsonColumns(string))),
+                Some(TableReadFormat::Arrow) => {
+                    Ok(Some(UpdateData::Arrow(string.into_bytes().into())))
+                },
+            }
         } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
             let json_module = PyModule::import_bound(py, "json")?;
             let string = json_module.call_method("dumps", (pylist,), None)?;
@@ -90,8 +113,12 @@ impl UpdateData {
         }
     }
 
-    fn from_py(py: Python<'_>, input: &Py<PyAny>) -> Result<UpdateData, PyErr> {
-        if let Some(x) = Self::from_py_partial(py, input)? {
+    fn from_py(
+        py: Python<'_>,
+        input: &Py<PyAny>,
+        format: Option<TableReadFormat>,
+    ) -> Result<UpdateData, PyErr> {
+        if let Some(x) = Self::from_py_partial(py, input, format)? {
             Ok(x)
         } else {
             Err(PyValueError::new_err(format!(
@@ -104,8 +131,12 @@ impl UpdateData {
 
 #[extend::ext]
 impl TableData {
-    fn from_py(py: Python<'_>, input: Py<PyAny>) -> Result<TableData, PyErr> {
-        if let Some(update) = UpdateData::from_py_partial(py, &input)? {
+    fn from_py(
+        py: Python<'_>,
+        input: Py<PyAny>,
+        format: Option<TableReadFormat>,
+    ) -> Result<TableData, PyErr> {
+        if let Some(update) = UpdateData::from_py_partial(py, &input, format)? {
             Ok(TableData::Update(update))
         } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
             let json_module = PyModule::import_bound(py, "json")?;
@@ -140,131 +171,8 @@ impl TableData {
     }
 }
 
-fn get_arrow_table_cls() -> Option<Py<PyAny>> {
-    let res: PyResult<Py<PyAny>> = Python::with_gil(|py| {
-        let pyarrow = PyModule::import_bound(py, "pyarrow")?;
-        Ok(pyarrow.getattr("Table")?.to_object(py))
-    });
-
-    match res {
-        Ok(x) => Some(x),
-        Err(_) => {
-            tracing::warn!("Failed to import pyarrow.Table");
-            None
-        },
-    }
-}
-
-fn is_arrow_table(py: Python, table: &Bound<'_, PyAny>) -> PyResult<bool> {
-    if let Some(table_class) = get_arrow_table_cls() {
-        table.is_instance(table_class.bind(py))
-    } else {
-        Ok(false)
-    }
-}
-
-fn to_arrow_bytes<'py>(
-    py: Python<'py>,
-    table: &Bound<'py, PyAny>,
-) -> PyResult<Bound<'py, PyBytes>> {
-    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
-    let table_class = get_arrow_table_cls()
-        .ok_or_else(|| PyValueError::new_err("Failed to import pyarrow.Table"))?;
-
-    if !table.is_instance(table_class.bind(py))? {
-        return Err(PyValueError::new_err("Input is not a pyarrow.Table"));
-    }
-
-    let sink = pyarrow.call_method0("BufferOutputStream")?;
-
-    {
-        let writer = pyarrow.call_method1(
-            "RecordBatchFileWriter",
-            (sink.clone(), table.getattr("schema")?),
-        )?;
-
-        writer.call_method1("write_table", (table,))?;
-        writer.call_method0("close")?;
-    }
-
-    // Get the value from the sink and convert it to Python bytes
-    let value = sink.call_method0("getvalue")?;
-    let obj = value.call_method0("to_pybytes")?;
-    let pybytes = obj.downcast_into::<PyBytes>()?;
-    Ok(pybytes)
-}
-
-fn get_pandas_df_cls(py: Python<'_>) -> Option<Bound<'_, PyAny>> {
-    let res: PyResult<Py<PyAny>> = Python::with_gil(|py| {
-        let pandas = PyModule::import_bound(py, "pandas")?;
-        Ok(pandas.getattr("DataFrame")?.to_object(py))
-    });
-
-    match res {
-        Ok(x) => Some(x.into_bound(py)),
-        Err(_) => {
-            tracing::warn!("Failed to import pandas.DataFrame");
-            None
-        },
-    }
-}
-
-fn is_pandas_df(py: Python, df: &Bound<'_, PyAny>) -> PyResult<bool> {
-    if let Some(df_class) = get_pandas_df_cls(py) {
-        df.is_instance(&df_class)
-    } else {
-        Ok(false)
-    }
-}
-
-fn pandas_to_arrow_bytes<'py>(
-    py: Python<'py>,
-    df: &Bound<'py, PyAny>,
-) -> PyResult<Bound<'py, PyBytes>> {
-    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
-    let df_class = get_pandas_df_cls(py)
-        .ok_or_else(|| PyValueError::new_err("Failed to import pandas.DataFrame"))?;
-
-    if !df.is_instance(&df_class)? {
-        return Err(PyValueError::new_err("Input is not a pandas.DataFrame"));
-    }
-
-    let kwargs = PyDict::new_bound(py);
-    kwargs.set_item("preserve_index", true)?;
-
-    let table = pyarrow
-        .getattr("Table")?
-        .call_method("from_pandas", (df,), Some(&kwargs))?;
-
-    // rename from __index_level_0__ to index
-    let old_names: Vec<String> = table.getattr("column_names")?.extract()?;
-    let mut new_names: Vec<String> = old_names
-        .into_iter()
-        .map(|e| {
-            if e == "__index_level_0__" {
-                "index".to_string()
-            } else {
-                e
-            }
-        })
-        .collect();
-
-    let names = PyList::new_bound(py, new_names.clone());
-    let table = table.call_method1("rename_columns", (names,))?;
-
-    // move the index column to be the first column.
-    if new_names[new_names.len() - 1] == "index" {
-        new_names.rotate_right(1);
-        let order = PyList::new_bound(py, new_names);
-        let table = table.call_method1("select", (order,))?;
-        to_arrow_bytes(py, &table)
-    } else {
-        to_arrow_bytes(py, &table)
-    }
-}
-
 impl PyClient {
-    pub fn new(handle_request: Py<PyAny>, handle_close: Py<PyAny>) -> Self {
+    pub fn new(handle_request: Py<PyAny>, handle_close: Option<Py<PyAny>>) -> Self {
         let client = Client::new_with_callback({
             move |msg| {
                 clone!(handle_request);
@@ -285,6 +193,14 @@ impl PyClient {
         }
     }
 
+    pub fn new_from_client(client: Client) -> Self {
+        PyClient {
+            client,
+            loop_cb: Arc::default(),
+            close_cb: None,
+        }
+    }
+
     pub async fn handle_response(&self, bytes: Py<PyBytes>) -> PyResult<bool> {
         self.client
             .handle_response(Python::with_gil(|py| bytes.as_bytes(py)))
@@ -292,17 +208,13 @@ impl PyClient {
             .into_pyerr()
     }
 
-    // // TODO
-    // pub async fn init(&self) -> PyResult<()> {
-    //     self.client.init().await.into_pyerr()
-    // }
-
     pub async fn table(
         &self,
         input: Py<PyAny>,
         limit: Option<u32>,
         index: Option<Py<PyString>>,
         name: Option<Py<PyString>>,
+        format: Option<Py<PyString>>,
     ) -> PyResult<PyTable> {
         let client = self.client.clone();
         let py_client = self.clone();
@@ -311,6 +223,9 @@ impl PyClient {
                 name: name.map(|x| x.extract::<String>(py)).transpose()?,
                 ..TableInitOptions::default()
             };
+
+            let format = TableReadFormat::parse(format.map(|x| x.to_string()))
+                .map_err(PyPerspectiveError::new_err)?;
 
             match (limit, index) {
                 (None, None) => {},
@@ -323,15 +238,15 @@ impl PyClient {
                 },
             };
 
-            let input_data = if is_arrow_table(py, input.bind(py))? {
-                to_arrow_bytes(py, input.bind(py))?.to_object(py)
-            } else if is_pandas_df(py, input.bind(py))? {
-                pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            let input_data = if pyarrow::is_arrow_table(py, input.bind(py))? {
+                pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if pandas::is_pandas_df(py, input.bind(py))? {
+                pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input
             };
 
-            let table_data = TableData::from_py(py, input_data)?;
+            let table_data = TableData::from_py(py, input_data, format)?;
             let table = client.table(table_data, options);
             Ok::<_, PyErr>(table)
         })?;
@@ -362,8 +277,12 @@ impl PyClient {
         Ok(())
     }
 
-    pub async fn terminate(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        self.close_cb.call0(py)
+    pub async fn terminate(&self, py: Python<'_>) -> PyResult<()> {
+        if let Some(cb) = &self.close_cb {
+            cb.call0(py)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -441,24 +360,31 @@ impl PyTable {
         self.table.remove_delete(callback_id).await.into_pyerr()
     }
 
-    pub async fn remove(&self, input: Py<PyAny>) -> PyResult<()> {
+    pub async fn remove(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input))?;
+        let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
+        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input, format))?;
         table.remove(table_data).await.into_pyerr()
     }
 
-    pub async fn replace(&self, input: Py<PyAny>) -> PyResult<()> {
+    pub async fn replace(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input))?;
+        let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
+        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input, format))?;
         table.replace(table_data).await.into_pyerr()
     }
 
-    pub async fn update(&self, input: Py<PyAny>, port_id: Option<u32>) -> PyResult<()> {
+    pub async fn update(
+        &self,
+        input: Py<PyAny>,
+        port_id: Option<u32>,
+        format: Option<String>,
+    ) -> PyResult<()> {
         let input_data: Py<PyAny> = Python::with_gil(|py| {
-            let data = if is_arrow_table(py, input.bind(py))? {
-                to_arrow_bytes(py, input.bind(py))?.to_object(py)
-            } else if is_pandas_df(py, input.bind(py))? {
-                pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            let data = if pyarrow::is_arrow_table(py, input.bind(py))? {
+                pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if pandas::is_pandas_df(py, input.bind(py))? {
+                pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input
             };
@@ -466,8 +392,9 @@ impl PyTable {
         })?;
 
         let table = &self.table;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input_data))?;
-        let options = UpdateOptions { port_id };
+        let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
+        let table_data = Python::with_gil(|py| UpdateData::from_py(py, &input_data, format))?;
+        let options = UpdateOptions { port_id, format };
         table.update(table_data, options).await.into_pyerr()?;
         Ok(())
     }
@@ -642,6 +569,15 @@ impl PyView {
 
     pub async fn remove_update(&self, callback_id: u32) -> PyResult<()> {
         self.view.remove_update(callback_id).await.into_pyerr()
+    }
+
+    pub async fn to_dataframe(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
+        let arrow = self.view.to_arrow(window).await.into_pyerr()?;
+        Python::with_gil(|py| arrow_to_pandas(py, &arrow))
     }
 
     pub async fn to_arrow(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {

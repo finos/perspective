@@ -10,39 +10,37 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-
-import perspective as psp
-
-server = psp.Server()
-client = server.new_local_client()
-Table = client.table
+import pytest
 
 
-def compare_delta(received, expected):
-    """Compare an arrow-serialized row delta by constructing a Table."""
-    tbl = Table(received)
-    assert tbl.view().to_columns() == expected
+# test that loading perspective and calling a common constructor code path does
+# not load various "expensive" modules. "Expensive" is in quotes because this is
+# utter nonsense.
+@pytest.mark.skip(reason="https://github.com/pyca/bcrypt/issues/694")
+def test_lazy_modules():
+    import sys
 
+    cache = {}
+    for key in list(sys.modules.keys()):
+        if (
+            key.startswith("perspective")
+            or key.startswith("test")
+            or key.startswith("pandas")
+            or key.startswith("pyarrow")
+            or key.startswith("tornado")
+        ):
+            cache[key] = sys.modules[key]
+            del sys.modules[key]
 
-class TestThreadpool(object):
-    def test_set_threadpool_size(self):
-        server.set_threadpool_size(1)  # XXX: This is a no-op now...
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        view = tbl.view()
-        dims = view.dimensions()
-        assert dims["num_view_rows"] == 2
-        assert dims["num_view_columns"] == 2
-        assert view.schema() == {"a": "integer", "b": "integer"}
-        assert view.to_records() == data
+    import perspective
 
-    def test_set_threadpool_size_max(self):
-        server.set_threadpool_size(None)
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        view = tbl.view()
-        dims = view.dimensions()
-        assert dims["num_view_rows"] == 2
-        assert dims["num_view_columns"] == 2
-        assert view.schema() == {"a": "integer", "b": "integer"}
-        assert view.to_records() == data
+    t1 = perspective.table("x\n1")
+    t1.delete()
+
+    assert "perspective" in sys.modules
+    assert "pandas" not in sys.modules
+    assert "pyarrow" not in sys.modules
+    assert "tornado" not in sys.modules
+
+    for k, v in cache.items():
+        sys.modules[k] = v

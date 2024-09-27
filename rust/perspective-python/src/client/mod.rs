@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 pub mod client_sync;
-
-mod python;
-
-pub use python::PyPerspectiveError;
+mod pandas;
+mod pyarrow;
+pub mod python;

@@ -1007,11 +1007,13 @@ class TestServer(object):
         server = Server()
         client = Client.from_server(server, loop_callback=fake_queue_process)
         table = client.table({"a": [1, 2, 3]}, name="tbl")
+        view = table.view()
+        view.on_update(lambda *args: print(args))
         table.update({"a": [4, 5, 6]})
         assert table.view().to_columns() == {"a": [1, 2, 3, 4, 5, 6]}
 
         table.update({"a": [7, 8, 9]})
-        assert s.get() == 5
+        assert s.get() == 2
 
     @mark.skip(
         reason="This method no longer dispatches to the loop_cb because it is sync without an on_update callback"

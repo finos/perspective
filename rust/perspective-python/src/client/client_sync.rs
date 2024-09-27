@@ -22,6 +22,7 @@ use pyo3::prelude::*;
 use pyo3::types::*;
 
 use super::python::*;
+use crate::server::PySyncServer;
 
 #[pyclass]
 #[derive(Clone)]
@@ -79,14 +80,23 @@ impl<F: Future> PyFutureExt for F {}
 
 #[doc = crate::inherit_docs!("client.md")]
 #[pyclass(subclass)]
-pub struct Client(PyClient);
+pub struct Client(pub(crate) PyClient);
 
 #[pymethods]
 impl Client {
     #[new]
-    pub fn new(handle_request: Py<PyAny>, close_cb: Py<PyAny>) -> PyResult<Self> {
+    pub fn new(handle_request: Py<PyAny>, close_cb: Option<Py<PyAny>>) -> PyResult<Self> {
         let client = PyClient::new(handle_request, close_cb);
         Ok(Client(client))
+    }
+
+    #[staticmethod]
+    pub fn from_server(
+        py: Python<'_>,
+        server: Py<PySyncServer>,
+        loop_callback: Option<Py<PyAny>>,
+    ) -> PyResult<Self> {
+        server.borrow(py).new_local_client(loop_callback)
     }
 
     pub fn handle_response(&self, py: Python<'_>, response: Py<PyBytes>) -> PyResult<bool> {
@@ -94,7 +104,7 @@ impl Client {
     }
 
     #[doc = crate::inherit_docs!("client/table.md")]
-    #[pyo3(signature = (input, limit=None, index=None, name=None))]
+    #[pyo3(signature = (input, limit=None, index=None, name=None, format=None))]
     pub fn table(
         &self,
         py: Python<'_>,
@@ -102,9 +112,12 @@ impl Client {
         limit: Option<u32>,
         index: Option<Py<PyString>>,
         name: Option<Py<PyString>>,
+        format: Option<Py<PyString>>,
     ) -> PyResult<Table> {
         Ok(Table(
-            self.0.table(input, limit, index, name).py_block_on(py)?,
+            self.0
+                .table(input, limit, index, name, format)
+                .py_block_on(py)?,
         ))
     }
 
@@ -126,7 +139,7 @@ impl Client {
     }
 
     #[doc = crate::inherit_docs!("client/terminate.md")]
-    pub fn terminate(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+    pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {
         self.0.terminate(py).block_on()
     }
 }
@@ -186,9 +199,10 @@ impl Table {
     }
 
     #[doc = crate::inherit_docs!("table/remove.md")]
-    pub fn remove(&self, input: Py<PyAny>) -> PyResult<()> {
+    #[pyo3(signature = (input, format=None))]
+    pub fn remove(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = self.0.clone();
-        table.remove(input).block_on()
+        table.remove(input, format).block_on()
     }
 
     #[doc = crate::inherit_docs!("table/remove_delete.md")]
@@ -221,15 +235,21 @@ impl Table {
     }
 
     #[doc = crate::inherit_docs!("table/update.md")]
-    #[pyo3(signature = (input))]
-    pub fn replace(&self, input: Py<PyAny>) -> PyResult<()> {
-        self.0.replace(input).block_on()
+    #[pyo3(signature = (input, format=None))]
+    pub fn replace(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
+        self.0.replace(input, format).block_on()
     }
 
     #[doc = crate::inherit_docs!("table/update.md")]
-    #[pyo3(signature = (input, port_id=None))]
-    pub fn update(&self, py: Python<'_>, input: Py<PyAny>, port_id: Option<u32>) -> PyResult<()> {
-        self.0.update(input, port_id).py_block_on(py)
+    #[pyo3(signature = (input, port_id=None, format=None))]
+    pub fn update(
+        &self,
+        py: Python<'_>,
+        input: Py<PyAny>,
+        port_id: Option<u32>,
+        format: Option<String>,
+    ) -> PyResult<()> {
+        self.0.update(input, port_id, format).py_block_on(py)
     }
 }
 
@@ -295,6 +315,11 @@ impl View {
     #[pyo3(signature = (**window))]
     pub fn to_csv(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         self.0.to_csv(window).block_on()
+    }
+
+    #[pyo3(signature = (**window))]
+    pub fn to_dataframe(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        self.0.to_dataframe(window).block_on()
     }
 
     #[doc = crate::inherit_docs!("view/to_arrow.md")]

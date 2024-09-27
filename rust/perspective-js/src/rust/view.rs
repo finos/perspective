@@ -70,7 +70,7 @@ impl View {
 
     #[doc = inherit_docs!("view/delete.md")]
     #[wasm_bindgen]
-    pub async fn delete(self) -> ApiResult<()> {
+    pub async fn delete(&self) -> ApiResult<()> {
         self.0.delete().await?;
         Ok(())
     }

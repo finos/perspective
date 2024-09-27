@@ -13,11 +13,14 @@
 use std::sync::Arc;
 
 use async_lock::RwLock;
-use perspective_server::{LocalSession, Server, Session, SessionHandler};
+use perspective_client::Session;
+use perspective_server::{LocalSession, Server, SessionHandler};
 use pollster::FutureExt;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyBytes};
+
+use crate::client::python::PyClient;
 
 #[pyclass]
 #[derive(Clone)]
@@ -45,7 +48,6 @@ impl SessionHandler for PyConnection {
 }
 
 #[pymethods]
-
 impl PySyncServer {
     #[new]
     pub fn new() -> Self {
@@ -60,6 +62,21 @@ impl PySyncServer {
 
         let session = Arc::new(RwLock::new(Some(session)));
         PySyncSession { session }
+    }
+
+    pub fn new_local_client(
+        &self,
+        loop_callback: Option<Py<PyAny>>,
+    ) -> PyResult<crate::client::client_sync::Client> {
+        let client = crate::client::client_sync::Client(PyClient::new_from_client(
+            self.server.new_local_client().clone(),
+        ));
+
+        if let Some(loop_cb) = loop_callback {
+            client.set_loop_callback(loop_cb)?;
+        }
+
+        Ok(client)
     }
 }
 

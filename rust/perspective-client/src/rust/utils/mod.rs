@@ -22,6 +22,9 @@ use crate::proto;
 
 #[derive(Error, Debug)]
 pub enum ClientError {
+    #[error("View not found")]
+    ViewNotFound,
+
     #[error("Abort(): {0}")]
     Internal(String),
 
@@ -64,7 +67,10 @@ pub type ClientResult<T> = Result<T, ClientError>;
 impl From<proto::response::ClientResp> for ClientError {
     fn from(value: proto::response::ClientResp) -> Self {
         match value {
-            proto::response::ClientResp::ServerError(x) => ClientError::Internal(x.message),
+            proto::response::ClientResp::ServerError(x) => match x.status_code() {
+                proto::StatusCode::ServerError => ClientError::Internal(x.message),
+                proto::StatusCode::ViewNotFound => ClientError::ViewNotFound,
+            },
             x => ClientError::ResponseFailed(Box::new(x)),
         }
     }

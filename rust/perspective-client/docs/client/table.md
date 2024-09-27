@@ -33,6 +33,10 @@ is stored and all calculation occurs.
         data.
     -   `name` - The name of the table. This will be generated if it is not
         provided.
+    -   `format` - The explicit format of the input data, can be one of
+        `"json"`, `"columns"`, `"csv"` or `"arrow"`. This overrides
+        language-specific type dispatch behavior, which allows stringified and
+        byte array alternative inputs.
 
 <div class="javascript">
 
@@ -49,6 +53,16 @@ Load an Arrow from an `ArrayBuffer`:
 ```javascript
 import * as fs from "node:fs/promises";
 const table2 = await client.table(await fs.readFile("superstore.arrow"));
+```
+
+Load a CSV from a `UInt8Array` (the default for this type is Arrow) using a
+format override:
+
+```javascript
+const enc = new TextEncoder();
+const table = await client.table(enc.encode("x,y\n1,2\n3,4"), {
+    format: "csv",
+});
 ```
 
 Create a table with an `index`:

@@ -14,8 +14,8 @@
 use std::error::Error;
 use std::sync::Arc;
 
-use perspective::LocalClient;
 use perspective_client::{OnUpdateOptions, TableInitOptions, UpdateData, UpdateOptions};
+use perspective_server::LocalClient;
 use tokio::sync::Mutex;
 
 #[tokio::test]
@@ -30,6 +30,7 @@ async fn test_two_sync_clients_receive_messages_on_update() -> Result<(), Box<dy
                 name: Some("Table1".to_owned()),
                 index: None,
                 limit: None,
+                format: None,
             },
         )
         .await?;
