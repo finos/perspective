@@ -84,8 +84,9 @@ fn on_keydown(event: KeyboardEvent, deps: &(UseStateSetter<u32>, Callback<()>)) 
 
         let mut initial_text = elem.value();
 
-        // insert a tab '\t' not working so testing with unicode number.
-        initial_text.insert(caret_pos, '\t');
+        // insert the tab as 4 spaces. \t character = 8 spaces.
+        let tab = "    ";
+        initial_text.insert_str(caret_pos, tab);
 
         elem.set_value(&initial_text);
 
@@ -93,11 +94,11 @@ fn on_keydown(event: KeyboardEvent, deps: &(UseStateSetter<u32>, Callback<()>)) 
         let input_event = web_sys::InputEvent::new("input").unwrap();
         let _ = elem.dispatch_event(&input_event).unwrap();
 
-        // place caret after inserted tab
-        let new_caret_pos = (caret_pos + 1) as u32;
+        // place caret after inserted tabgit 
+        let new_caret_pos = (caret_pos + 4) as u32;
         let _ = elem.set_selection_range(new_caret_pos, new_caret_pos);
 
-        let _ = elem.focus().unwrap();
+        elem.focus().unwrap();
     }
 }
 
