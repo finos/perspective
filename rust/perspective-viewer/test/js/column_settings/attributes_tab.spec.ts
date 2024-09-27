@@ -95,6 +95,32 @@ test.describe("Attributes Tab", () => {
             view.columnSettingsSidebar.attributesTab.saveBtn
         ).toBeDisabled();
     });
+    test("Tab Button Click enters 4 spaces.", async ({ page }) => {
+        let view = new PageView(page);
+        await view.restore({
+            expressions: { expr: "12345" },
+            columns: ["expr", "Row ID"],
+            settings: true,
+        });
+        let expr = await view.settingsPanel.activeColumns.getColumnByName(
+            "expr"
+        );
+        await expr.editBtn.click();
+        await view.columnSettingsSidebar.openTab("Attributes");
+
+        let sidebar = view.columnSettingsSidebar;
+        let attributesTab = sidebar.attributesTab;
+
+        let textarea = attributesTab.expressionEditor.textarea;
+        await textarea.type("foo", {
+            delay: 100,
+        });
+        await textarea.type("\t", { delay: 100 }); // the idea is to type a tab.
+        console.log("here");
+        expect(await textarea.evaluate((input) => input!.value)).toContain(
+            "    "
+        ); // 4 spaces has been entered
+    });
     test("Reset button", async ({ page }) => {
         let view = new PageView(page);
         await view.restore({
