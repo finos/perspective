@@ -165,7 +165,7 @@ treat the index as a primary key:
 
 ```python
 data.set_index("datetime")
-table = perspective.Table(data, index="index")
+table = perspective.table(data, index="index")
 ```
 
 #### Time Zone Handling
@@ -281,7 +281,8 @@ of clients and large datasets.
 _*server.py*_
 
 ```python
-from perspective import Server, PerspectiveTornadoHandler
+from perspective import Server
+from perspective.handlers.tornado import PerspectiveTornadoHandler
 
 # Create an instance of Server, and host a Table
 SERVER = Server()
@@ -371,21 +372,16 @@ Building on top of the API provided by `perspective.Table`, the
 of Perspective within the Jupyter environment. It supports the same API
 semantics of `<perspective-viewer>`, along with the additional data types
 supported by `perspective.Table`. `PerspectiveWidget` takes keyword arguments
-for the managed `View`; additioanl arguments `index` and `limit` will be passed
-to the `Table`. For convenience are the
-[`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py),
-[`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py),
-and
-[`Plugin`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py)
-enums, which can be used as replacements to string values in the API:
+for the managed `View`; additional arguments `index` and `limit` will be passed
+to the `Table`.
 
 ```python
-from perspective import PerspectiveWidget, Aggregate, Sort, Plugin
+from perspective.widget import PerspectiveWidget
 w = perspective.PerspectiveWidget(
     data,
-    plugin=Plugin.XBAR,
-    aggregates={"datetime": Aggregate.ANY},
-    sort=[["date", Sort.DESC]]
+    plugin="X Bar",
+    aggregates={"datetime": "any"},
+    sort=[["date", "desc"]]
 )
 ```
 
@@ -400,7 +396,7 @@ if the intention is to await data for loading later on. A widget can be
 constructed from a dataset:
 
 ```python
-from perspective import PerspectiveWidget
+from perspective.widget import PerspectiveWidget
 PerspectiveWidget(data, group_by=["date"])
 ```
 
