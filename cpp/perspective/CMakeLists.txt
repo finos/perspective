@@ -22,6 +22,14 @@ cmake_policy(SET CMP0074 NEW)
 # instead of the latest version installed.
 cmake_policy(SET CMP0094 NEW)
 
+# https://cmake.org/cmake/help/latest/policy/CMP0167.html
+# cmake deprecated their built-in FindBoost module in favor of one provided by Boost.
+# The OLD behavior of this policy is for find_package(Boost) to load CMake's FindBoost module.
+# The NEW behavior is for find_package(Boost) to search for the upstream BoostConfig.cmake.
+if (POLICY CMP0167)
+    cmake_policy(SET CMP0167 OLD)
+endif()
+
 if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
     set(PSP_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
 endif()
