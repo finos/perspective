@@ -10,18 +10,20 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use perspective_client::ColumnType;
+// use perspective_client::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::containers::dragdrop_list::*;
 use crate::components::type_icon::TypeIcon;
 use crate::dragdrop::*;
+use crate::session::*;
 
 pub struct PivotColumn {}
 
 #[derive(Properties)]
 pub struct PivotColumnProps {
+    pub session: Session,
     pub column: String,
     pub dragdrop: DragDrop,
     pub action: DragTarget,
@@ -61,6 +63,13 @@ impl Component for PivotColumn {
             move |_event| dragdrop.notify_drag_end()
         });
 
+        let col_type = ctx
+        .props()
+        .session
+        .metadata()
+        .get_column_table_type(&ctx.props().column)
+        .expect("Unknown column");
+
         html! {
             <div
                 class="pivot-column-draggable"
@@ -69,7 +78,8 @@ impl Component for PivotColumn {
                 ondragend={dragend}
             >
                 <div class="pivot-column-border">
-                    <TypeIcon ty={ColumnType::String} />
+                    <TypeIcon ty={col_type} />
+                    // <TypeIcon ty={ColumnType::String} />
                     <span class="column_name">{ ctx.props().column.clone() }</span>
                 </div>
             </div>

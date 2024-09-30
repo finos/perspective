@@ -514,6 +514,7 @@ impl Component for ConfigSelector {
                             html_nested! {
                                 <PivotColumn
                                     dragdrop={ &ctx.props().dragdrop }
+                                    session={ &ctx.props().session }
                                     action={ DragTarget::GroupBy }
                                     column={ group_by.clone() }>
                                 </PivotColumn>
@@ -540,6 +541,7 @@ impl Component for ConfigSelector {
                             html_nested! {
                                 <PivotColumn
                                     dragdrop={ &ctx.props().dragdrop }
+                                    session={ &ctx.props().session }
                                     action={ DragTarget::SplitBy }
                                     column={ split_by.clone() }>
                                 </PivotColumn>
