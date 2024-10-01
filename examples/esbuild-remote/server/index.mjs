@@ -27,7 +27,7 @@ function buffer_to_arraybuffer(buffer) {
 
 // Don't need this table since it won't be read from node itself, just need
 // to create it so the WebSocket clients can find it.
-const _table = await securities.securities.getTable();
+const _table = await securities.getTable();
 
 const app = expressWs(express()).app;
 app.ws("/subscribe", async (ws) => {

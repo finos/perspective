@@ -11,7 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::fmt::Display;
+use std::string::FromUtf8Error;
 
+use perspective_client::ClientError;
 use wasm_bindgen::prelude::*;
 
 /// A bespoke error class for chaining a litany of various error types with the
@@ -78,14 +80,24 @@ define_api_error!(
     serde_json::Error,
     rmp_serde::encode::Error,
     rmp_serde::decode::Error,
-    perspective_client::ClientError,
     &str,
     String,
     futures::channel::oneshot::Canceled,
     base64::DecodeError,
     chrono::ParseError,
-    prost::DecodeError
+    prost::DecodeError,
+    FromUtf8Error
 );
+
+#[wasm_bindgen(inline_js = r#"
+export class PerspectiveViewNotFoundError extends Error {}
+"#)]
+extern "C" {
+    pub type PerspectiveViewNotFoundError;
+
+    #[wasm_bindgen(constructor)]
+    fn new() -> PerspectiveViewNotFoundError;
+}
 
 /// Explicit conversion methods for `ApiResult<T>`, for situations where
 /// error-casting through the `?` operator is insufficient.
@@ -103,5 +115,14 @@ impl<T> ToApiError<T> for Option<T> {
 impl ToApiError<JsValue> for Result<(), ApiResult<JsValue>> {
     fn into_apierror(self) -> ApiResult<JsValue> {
         self.map_or_else(|x| x, |()| Ok(JsValue::UNDEFINED))
+    }
+}
+
+impl From<perspective_client::ClientError> for ApiError {
+    fn from(value: ClientError) -> Self {
+        match value {
+            ClientError::ViewNotFound => ApiError(PerspectiveViewNotFoundError::new().into()),
+            err => ApiError(JsError::new(format!("{}", err).as_str()).into()),
+        }
     }
 }

@@ -50,9 +50,6 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
         );
     }
 
-    if matches!(std::env::var("DOCS_RS").as_deref(), Ok("1")) {
-        return Ok(None);
-    }
 
     let mut dst = Config::new("cpp/perspective");
     if cfg!(windows) && std::option_env!("CI").is_some() {
@@ -110,6 +107,9 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     }
 
     println!("cargo:warning=MESSAGE Building cmake {}", profile);
+    if std::env::var("PSP_BUILD_VERBOSE").unwrap_or_default() != "" { // checks non-empty env var
+        dst.very_verbose(true);
+    }
     let artifact_dir = dst.build();
 
     Ok(Some(artifact_dir))

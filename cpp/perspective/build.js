@@ -28,18 +28,36 @@ function bootstrap(file) {
     });
 }
 
+let cmake_flags = "";
+let make_flags = "";
+
+if (!!process.env.PSP_BUILD_VERBOSE) {
+    cmake_flags += "-Wdev --debug-output ";
+    make_flags += "VERBOSE=1 ";
+} else {
+    cmake_flags = "-Wno-dev "; // suppress developer warnings
+}
+
 try {
     execSync(`mkdirp ${cwd}`, { stdio });
     process.env.CLICOLOR_FORCE = 1;
-    execSync(`emcmake cmake ${__dirname} -Wno-dev -DCMAKE_BUILD_TYPE=${env}`, {
-        cwd,
-        stdio,
-    });
+    execSync(
+        `emcmake cmake ${__dirname} ${cmake_flags} -DCMAKE_BUILD_TYPE=${env}`,
+        {
+            cwd,
+            stdio,
+        }
+    );
 
-    execSync(`emmake make -j${process.env.PSP_NUM_CPUS || os.cpus().length}`, {
-        cwd,
-        stdio,
-    });
+    execSync(
+        `emmake make -j${
+            process.env.PSP_NUM_CPUS || os.cpus().length
+        } ${make_flags}`,
+        {
+            cwd,
+            stdio,
+        }
+    );
 
     execSync(`cpy web/**/* ../web`, { cwd, stdio });
     execSync(`cpy node/**/* ../node`, { cwd, stdio });

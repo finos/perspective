@@ -11,11 +11,14 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as fs from "node:fs";
-import pkg from "./package.json" assert { type: "json" };
 import sh from "../../tools/perspective-scripts/sh.mjs";
 import * as url from "url";
+import * as TOML from "@iarna/toml";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
+const pkg = JSON.parse(
+    fs.readFileSync(__dirname + "/package.json", { encoding: "utf-8" })
+);
 
 let flags = "--release";
 if (!!process.env.PSP_DEBUG) {
@@ -80,10 +83,20 @@ if (build_wheel) {
         target = "--target=aarch64-unknown-linux-gnu";
     }
 
+    if (!!process.env.PSP_BUILD_VERBOSE) {
+        flags += " -vv";
+    }
+
     cmd.sh(`maturin build ${flags} --features=external-cpp ${target}`);
 }
 
+const old = fs.readFileSync("./pyproject.toml");
+
 if (build_sdist) {
+    const toml = TOML.parse(old);
+    console.log(toml);
+    delete toml.tool.maturin["data"];
+    fs.writeFileSync("./pyproject.toml", TOML.stringify(toml));
     cmd.sh(`maturin sdist`);
 }
 
@@ -92,3 +105,7 @@ if (!build_wheel && !build_sdist) {
 }
 
 cmd.runSync();
+
+if (build_sdist) {
+    fs.writeFileSync("./pyproject.toml", old);
+}

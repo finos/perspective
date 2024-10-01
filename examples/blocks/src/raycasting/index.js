@@ -11,6 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
+import "/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js";
+import "/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js";
 
 const RESOLUTION = 100;
 

@@ -16,7 +16,6 @@
 #include "perspective/data_table.h"
 #include "perspective/raw_types.h"
 #include "perspective/schema.h"
-// #include "arrow/vendored/datetime/date.h"
 #include "rapidjson/document.h"
 #include <chrono>
 #include <ctime>
@@ -448,18 +447,6 @@ rapidjson_type_to_dtype(const rapidjson::Value& value) {
             std::chrono::system_clock::time_point tp;
 
             if (parse_all_date_time(tm, tp, str)) {
-                LOG_DEBUG(
-                    "Parsed date: " << tm.tm_year + 1900 << "-" << tm.tm_mon + 1
-                                    << "-" << tm.tm_mday << " " << tm.tm_hour
-                                    << ":" << tm.tm_min << ":" << tm.tm_sec
-                );
-                auto tpm =
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        tp.time_since_epoch()
-                    )
-                        .count();
-                LOG_DEBUG("TP: " << tpm << '\n');
-
                 if (tm.tm_hour == 0 && tm.tm_min == 0 && tm.tm_sec == 0) {
                     return t_dtype::DTYPE_DATE;
                 }
@@ -1095,8 +1082,8 @@ Table::from_cols(
 
     if (is_implicit) {
         for (t_uindex ii = 0; ii < nrows; ii++) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
         }
     }
 

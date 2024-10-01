@@ -47,7 +47,10 @@ data = [{"a": i, "b": i * 0.5, "c": str(i)} for i in range(10)]
 class TestAsync(object):
     @classmethod
     def setup_class(cls):
-        cls.loop = tornado.ioloop.IOLoop()
+        import asyncio
+
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        cls.loop = tornado.ioloop.IOLoop.current()
         cls.thread = threading.Thread(target=cls.loop.start)
         cls.thread.daemon = True
         cls.thread.start()

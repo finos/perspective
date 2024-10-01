@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import fs from "fs";
-import glob from "glob";
+import * as glob from "glob";
 import { Octokit } from "octokit";
 import { parseReleases } from "auto-changelog/src/releases.js";
 import { fetchTags } from "auto-changelog/src/tags.js";
@@ -177,7 +177,7 @@ async function update_package_jsons() {
     fs.writeFileSync("../package.json", pkg_json);
     const packages = {};
     for (const ws of pkg.workspaces) {
-        for (const path of glob(`${ws}/package.json`, {
+        for (const path of glob.sync(`${ws}/package.json`, {
             sync: true,
         })) {
             const pkg = JSON.parse(fs.readFileSync(path));

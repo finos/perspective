@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module">
+            await customElements.whenDefined("perspective-viewer-plugin");
+            const BASE = customElements.get("perspective-viewer-plugin");
+
+            class TestPluginImplementsResize extends BASE {
+                get name() {
+                    return "Resizing Plugin";
+                }
+
+                async draw(view) {
+                    this._view = view;
+                    console.log(await this._view.num_rows());
+                    return await super.draw(view);
+                }
+
+                async update(view) {
+                    this._view = view;
+                    console.log(await this._view.num_rows());
+                    return await super.update(view);
+                }
+
+                async resize(view) {
+                    console.log(await this._view.num_rows());
+                    await this._view.to_csv();
+                }
+            }
+
+            customElements.define("resize-plugin", TestPluginImplementsResize);
+            await customElements.whenDefined("perspective-viewer").then((viewer) => {
+                viewer.registerPlugin("resize-plugin");
+            });
+        </script>
+
+        <script type="module" src="/node_modules/@finos/perspective-test/load-viewer-csv.js"></script>
+        <link rel="stylesheet" href="../css/demo.css" />
+        <link rel="stylesheet" href="/node_modules/@finos/perspective-viewer/dist/css/pro.css" />
+    </head>
+    <body>
+        <perspective-viewer></perspective-viewer>
+    </body>
+</html>

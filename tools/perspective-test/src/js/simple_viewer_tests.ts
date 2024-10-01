@@ -10,8 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test } from "@playwright/test";
-import { getSvgContentString, compareContentsToSnapshot } from "./utils";
+import { getSvgContentString, compareContentsToSnapshot } from "./utils.ts";
+import { test } from "./index.js";
 import type { PerspectiveViewerConfig } from "@finos/perspective-viewer";
 
 export type ContentExtractor = (page: any) => Promise<string>;

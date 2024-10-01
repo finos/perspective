@@ -17,6 +17,7 @@ mod client;
 mod server;
 
 pub use client::client_sync::{Client, ProxySession, Table, View};
+use client::python::PyPerspectiveError;
 use pyo3::prelude::*;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -57,7 +58,7 @@ fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<client::client_sync::ProxySession>()?;
     m.add(
         "PerspectiveError",
-        py.get_type_bound::<client::PyPerspectiveError>(),
+        py.get_type_bound::<PyPerspectiveError>(),
     )?;
 
     Ok(())

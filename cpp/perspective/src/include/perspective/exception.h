@@ -28,4 +28,16 @@ private:
     std::string message;
 };
 
+class PERSPECTIVE_EXPORT PerspectiveViewNotFoundException
+    : public std::exception {
+public:
+    explicit PerspectiveViewNotFoundException() {}
+
+    [[nodiscard]]
+    const char*
+    what() const noexcept override {
+        return "View not found";
+    }
+};
+
 } // namespace perspective

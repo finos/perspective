@@ -13,11 +13,8 @@
 import { execSync } from "child_process";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
-import * as fs from "node:fs";
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import cpy from "cpy";
-
-const cpy_mod = import("cpy");
 
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
@@ -30,7 +27,6 @@ const BUILD = [
         plugins: [
             PerspectiveEsbuildPlugin({
                 wasm: { inline: true },
-                worker: { inline: true },
             }),
         ],
         outfile: "dist/esm/perspective.inline.js",

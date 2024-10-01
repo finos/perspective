@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-python",
-    "version": "3.0.3",
+    "version": "3.1.0",
     "description": "",
     "private": true,
     "repository": {
@@ -12,9 +12,11 @@
     "scripts": {
         "build": "node build.mjs",
         "clean": "rimraf perspective.data && rimraf dist && rimraf build",
-        "test": "python -m pytest perspective/tests"
+        "test": "node test.mjs"
     },
     "devDependencies": {
+        "@finos/perspective-scripts": "workspace:*",
+        "@iarna/toml": "^1.0.0-rc.1",
         "cpy": "^9.0.1"
     },
     "dependencies": {

@@ -20,14 +20,7 @@ const IGNORE_PATHS = fs_sync
     .split("\n")
     .map((x) => x.trim())
     .filter((x) => x.length > 0 && !x.startsWith("#"))
-    .concat([
-        "llvm/*",
-        "cmake/*",
-        "pnpm-lock.yaml",
-        "pnpm-workspace.yaml",
-        "cpp/perspective/src/cpp/vendor",
-        "cpp/perspective/src/include/perspective/vendor",
-    ]);
+    .concat(["llvm/*", "cmake/*", "pnpm-lock.yaml", "pnpm-workspace.yaml"]);
 
 const FIX_PATHS = [
     ["**/*.rs", ["//", "/*", " *", " */"]],
