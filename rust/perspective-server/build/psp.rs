@@ -62,7 +62,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     dst.define("CMAKE_BUILD_TYPE", profile.as_str());
     if std::env::var("PSP_ARCH").as_deref() == Ok("x86_64") {
         dst.define("CMAKE_OSX_ARCHITECTURES", "x86_64");
-    } else if std::env::var("PSP_ARCH").as_deref() == Ok("arm64") {
+    } else if std::env::var("PSP_ARCH").as_deref() == Ok("aarch64") {
         dst.define("CMAKE_OSX_ARCHITECTURES", "arm64");
     }
 
