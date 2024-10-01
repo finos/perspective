@@ -17,11 +17,10 @@ use std::sync::Arc;
 
 use async_lock::RwLock;
 use futures::FutureExt;
-use perspective_client::proto::ViewOnUpdateResp;
 use perspective_client::{
     assert_table_api, assert_view_api, clone, Client, ClientError, OnUpdateMode, OnUpdateOptions,
     Table, TableData, TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View,
-    ViewWindow,
+    ViewOnUpdateResp, ViewWindow,
 };
 use pyo3::create_exception;
 use pyo3::exceptions::PyValueError;

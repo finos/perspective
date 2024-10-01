@@ -85,6 +85,7 @@ to host Perspective using server-side Python.
 pip install perspective-python
 ```
 
+<!--
 ### Anaconda
 
 `perspective-python` can also be installed for [Anaconda](https://anaconda.org/)
@@ -92,7 +93,7 @@ via [Conda Forge](https://conda-forge.org)
 
 ```bash
 conda install -c conda-forge perspective
-```
+``` -->
 
 ### Jupyterlab
 
@@ -165,7 +166,7 @@ treat the index as a primary key:
 
 ```python
 data.set_index("datetime")
-table = perspective.Table(data, index="index")
+table = perspective.table(data, index="index")
 ```
 
 #### Time Zone Handling
@@ -281,7 +282,8 @@ of clients and large datasets.
 _*server.py*_
 
 ```python
-from perspective import Server, PerspectiveTornadoHandler
+from perspective import Server
+from perspective.hadnlers.tornado import PerspectiveTornadoHandler
 
 # Create an instance of Server, and host a Table
 SERVER = Server()
@@ -371,21 +373,15 @@ Building on top of the API provided by `perspective.Table`, the
 of Perspective within the Jupyter environment. It supports the same API
 semantics of `<perspective-viewer>`, along with the additional data types
 supported by `perspective.Table`. `PerspectiveWidget` takes keyword arguments
-for the managed `View`; additioanl arguments `index` and `limit` will be passed
-to the `Table`. For convenience are the
-[`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py),
-[`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py),
-and
-[`Plugin`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py)
-enums, which can be used as replacements to string values in the API:
+for the managed `View`:
 
 ```python
-from perspective import PerspectiveWidget, Aggregate, Sort, Plugin
+from perspective import PerspectiveWidget
 w = perspective.PerspectiveWidget(
     data,
-    plugin=Plugin.XBAR,
-    aggregates={"datetime": Aggregate.ANY},
-    sort=[["date", Sort.DESC]]
+    plugin="X Bar",
+    aggregates={"datetime": "any"},
+    sort=[["date", "desc"]]
 )
 ```
 
@@ -413,8 +409,7 @@ PerspectiveWidget({"a": int, "b": str})
 .. or an instance of a `perspective.Table`:
 
 ```python
-client = perspective.Server().new_local_client()
-table = client.table(data)
+table = perspective.table(data)
 PerspectiveWidget(table)
 ```
 

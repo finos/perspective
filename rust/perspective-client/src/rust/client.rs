@@ -34,6 +34,7 @@ use crate::table_data::{TableData, UpdateData};
 use crate::utils::*;
 use crate::view::ViewWindow;
 
+/// Metadata about the engine runtime (such as total heap utilization).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SystemInfo {
     pub heap_size: f64,
