@@ -36,6 +36,7 @@ const IS_PLAYWRIGHT = process.env.PACKAGE.split(",").reduce(
             "perspective-viewer-d3fc",
             "perspective-viewer-openlayers",
             "perspective-viewer-workspace",
+            "perspective-workspace",
             "perspective-jupyter",
         ].includes(pkg),
     false

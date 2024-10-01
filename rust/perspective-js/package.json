@@ -37,7 +37,7 @@
     "types": "./dist/esm/perspective.d.ts",
     "scripts": {
         "build": "node ./build.js",
-        "clean": "rimraf dist && rimraf build",
+        "clean": "rimraf dist && rimraf build && rimraf src/ts/ts-rs",
         "docs": "cargo doc"
     },
     "publishConfig": {

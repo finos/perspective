@@ -3,6 +3,7 @@ packages:
     - "tools/perspective-scripts"
     - "tools/perspective-bench"
     - "cpp/perspective"
+    - "packages/perspective-client"
     - "packages/perspective-esbuild-plugin"
     - "packages/perspective-viewer-datagrid"
     - "packages/perspective-viewer-d3fc"

@@ -94,7 +94,7 @@ export function get_scope() {
         (acc, x) => {
             if (x.startsWith("!")) {
                 acc.exclude.push(x);
-            } else {
+            } else if (x != "") {
                 acc.include.push(x);
             }
 
