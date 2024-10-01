@@ -25,7 +25,7 @@ mod view;
 pub mod config;
 
 #[allow(unknown_lints)]
-#[allow(clippy)]
+#[allow(clippy::all)]
 mod proto;
 pub mod utils;
 
