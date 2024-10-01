@@ -22,6 +22,14 @@ cmake_policy(SET CMP0074 NEW)
 # instead of the latest version installed.
 cmake_policy(SET CMP0094 NEW)
 
+# https://cmake.org/cmake/help/latest/policy/CMP0167.html
+# cmake deprecated their built-in FindBoost module in favor of one provided by Boost.
+# The OLD behavior of this policy is for find_package(Boost) to load CMake's FindBoost module.
+# The NEW behavior is for find_package(Boost) to search for the upstream BoostConfig.cmake.
+if (POLICY CMP0167)
+    cmake_policy(SET CMP0167 OLD)
+endif()
+
 if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
     set(PSP_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
 endif()
@@ -301,7 +309,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         find_package(Boost REQUIRED)
     elseif(NOT WIN32)
         set(Boost_USE_STATIC_LIBS ON)
-        find_package(Boost REQUIRED COMPONENTS system)
+        find_package(Boost REQUIRED)
     endif()
 
     if(WIN32)
@@ -387,7 +395,7 @@ if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
     # Boost must be added after arrow to prevent linking bug on Windows.
     if(WIN32)
         set(Boost_USE_STATIC_LIBS ON)
-        find_package(Boost REQUIRED COMPONENTS system)
+        find_package(Boost REQUIRED)
     endif()
     if(NOT Boost_FOUND)
         message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
@@ -395,7 +403,7 @@ if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
         psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
         if(WIN32)
             include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-            add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
+            # add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
         endif()
     endif()
 endif()
