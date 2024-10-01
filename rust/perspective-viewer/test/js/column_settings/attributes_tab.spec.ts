@@ -112,14 +112,21 @@ test.describe("Attributes Tab", () => {
         let attributesTab = sidebar.attributesTab;
 
         let textarea = attributesTab.expressionEditor.textarea;
-        await textarea.type("foo", {
-            delay: 100,
-        });
-        await textarea.type("\t", { delay: 100 }); // the idea is to type a tab.
-        console.log("here");
-        expect(await textarea.evaluate((input) => input!.value)).toContain(
-            "    "
-        ); // 4 spaces has been entered
+
+        await textarea.type("foo", { delay: 100 });
+        expect(await textarea.evaluate((input) => input!.value)).toStrictEqual(
+            "foo12345"
+        );
+
+        await textarea.type("\t", { delay: 100 });
+        const expected = await textarea.evaluate((input) => input!.value);
+
+        expect(expected).toContain("\t");
+
+        const caretPosition = await textarea.evaluate(
+            (input) => input!.selectionStart
+        );
+        expect(caretPosition).toBe(4); // length of foo + length of '\t' = 4;
     });
     test("Reset button", async ({ page }) => {
         let view = new PageView(page);
