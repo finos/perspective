@@ -64,11 +64,11 @@ impl Component for PivotColumn {
         });
 
         let col_type = ctx
-        .props()
-        .session
-        .metadata()
-        .get_column_table_type(&ctx.props().column)
-        .expect("Unknown column");
+            .props()
+            .session
+            .metadata()
+            .get_column_table_type(&ctx.props().column)
+            .expect("Unknown column");
 
         html! {
             <div

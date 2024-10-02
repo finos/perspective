@@ -468,7 +468,7 @@ impl Component for FilterColumn {
                 <LocalStyle href={css!("filter-item")} />
                 <div class="pivot-column-border">
                     // <TypeIcon ty={ColumnType::String} />
-                    <TypeIcon ty={final_col_type}/>
+                    <TypeIcon ty={final_col_type} />
                     <span class="column_name">{ filter.column().to_owned() }</span>
                     <FilterOpSelector
                         class="filterop-selector"
