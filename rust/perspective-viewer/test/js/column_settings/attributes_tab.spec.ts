@@ -118,7 +118,7 @@ test.describe("Attributes Tab", () => {
             "foo12345"
         );
 
-        await textarea.type("\t", { delay: 100 });
+        await page.keyboard.press("Tab");
         const expected = await textarea.evaluate((input) => input!.value);
 
         expect(expected).toContain("\t");
