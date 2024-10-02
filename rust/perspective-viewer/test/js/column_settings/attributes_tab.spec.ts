@@ -95,6 +95,39 @@ test.describe("Attributes Tab", () => {
             view.columnSettingsSidebar.attributesTab.saveBtn
         ).toBeDisabled();
     });
+    test("Tab Button Click enters 4 spaces.", async ({ page }) => {
+        let view = new PageView(page);
+        await view.restore({
+            expressions: { expr: "12345" },
+            columns: ["expr", "Row ID"],
+            settings: true,
+        });
+        let expr = await view.settingsPanel.activeColumns.getColumnByName(
+            "expr"
+        );
+        await expr.editBtn.click();
+        await view.columnSettingsSidebar.openTab("Attributes");
+
+        let sidebar = view.columnSettingsSidebar;
+        let attributesTab = sidebar.attributesTab;
+
+        let textarea = attributesTab.expressionEditor.textarea;
+
+        await textarea.type("foo", { delay: 100 });
+        expect(await textarea.evaluate((input) => input!.value)).toStrictEqual(
+            "foo12345"
+        );
+
+        await textarea.type("\t", { delay: 100 });
+        const expected = await textarea.evaluate((input) => input!.value);
+
+        expect(expected).toContain("\t");
+
+        const caretPosition = await textarea.evaluate(
+            (input) => input!.selectionStart
+        );
+        expect(caretPosition).toBe(4); // length of foo + length of '\t' = 4;
+    });
     test("Reset button", async ({ page }) => {
         let view = new PageView(page);
         await view.restore({
