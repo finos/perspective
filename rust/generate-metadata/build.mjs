@@ -21,8 +21,4 @@ function get_host() {
     return /host\: (.+?)$/gm.exec(execSync(`rustc -vV`).toString())[1];
 }
 
-async function build_all() {
-    execSync(`PSP_ROOT_DIR=../.. cargo run --target=${get_host()}`, INHERIT);
-}
-
-build_all();
+execSync(`PSP_ROOT_DIR=../.. cargo run --target=${get_host()}`, INHERIT);

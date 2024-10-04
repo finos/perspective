@@ -1,3 +1,6 @@
+@import "~@finos/perspective-workspace/dist/css/pro-dark.css";
+@import "~@finos/perspective-viewer/dist/css/themes.css";
+
 body {
     display: flex;
     flex-direction: column;

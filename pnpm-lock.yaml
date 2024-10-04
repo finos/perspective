@@ -961,10 +961,17 @@ importers:
         specifier: 8.1.8
         version: 8.1.8
 
-  tools/perspective-scripts: {}
+  tools/perspective-scripts:
+    devDependencies:
+      zx:
+        specifier: 8.1.8
+        version: 8.1.8
 
   tools/perspective-test:
     dependencies:
+      glob:
+        specifier: ^11
+        version: 11.0.0
       xml-formatter:
         specifier: 2.4.0
         version: 2.4.0

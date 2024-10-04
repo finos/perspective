@@ -154,7 +154,6 @@ jobs:
                   PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli"
                   # PSP_USE_CCACHE: 1
 
-
             # - name: Docs Build
             #   run: pnpm run docs
 
@@ -591,7 +590,7 @@ jobs:
             - name: Run Tests
               run: pnpm run test
               env:
-                  PACKAGE: "!perspective-python,!perspective-jupyterlab"
+                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli"
                   # PSP_USE_CCACHE: 1
 
     # ,--,--'      .   .-,--.     .  .
