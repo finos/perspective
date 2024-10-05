@@ -1002,12 +1002,12 @@ calculate_num_hidden(const ErasedView& view, const t_view_config& config) {
 template <typename A>
 static t_tscalar
 coerce_to(const t_dtype dtype, const A& val) {
-    if constexpr (std::is_same_v<A, std::string>) {
+    if constexpr (std::is_same_v<A, const char*>) {
         t_tscalar scalar;
         scalar.clear();
         switch (dtype) {
             case DTYPE_STR:
-                scalar.set(val.c_str());
+                scalar.set(val);
                 return scalar;
             case DTYPE_BOOL:
                 scalar.set(val == "true");
@@ -1585,6 +1585,8 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 ));
             }
 
+            t_vocab vocab;
+            vocab.init(false);
             std::vector<
                 std::tuple<std::string, std::string, std::vector<t_tscalar>>>
                 filter;
@@ -1617,9 +1619,24 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                                     "Filter column not in schema: " + f.column()
                                 );
                             }
-                            a = coerce_to(
-                                schema->get_dtype(f.column()), arg.string()
-                            );
+
+                            if (!t_tscalar::can_store_inplace(
+                                    arg.string().c_str()
+                                )) {
+
+                                a = coerce_to(
+                                    schema->get_dtype(f.column()),
+                                    vocab.unintern_c(
+                                        vocab.get_interned(arg.string())
+                                    )
+                                );
+                            } else {
+
+                                a = coerce_to(
+                                    schema->get_dtype(f.column()),
+                                    arg.string().c_str()
+                                );
+                            }
                             args.push_back(a);
                             break;
                         }
@@ -1715,6 +1732,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
             LOG_DEBUG("FILTER_OP: " << filter_op);
 
             auto config = std::make_shared<t_view_config>(
+                vocab,
                 row_pivots,
                 column_pivots,
                 aggregates,
@@ -1906,7 +1924,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 auto* f = proto_filter->Add();
                 f->set_column(filter.m_colname);
                 f->set_op(filter_op_to_str(filter.m_op));
-                auto vals = std::vector<t_tscalar>(filter.m_bag.size() + 1);
+                auto vals = std::vector<t_tscalar>(filter.m_bag.size());
                 if (filter.m_op != FILTER_OP_NOT_IN
                     && filter.m_op != FILTER_OP_IN) {
                     vals.push_back(filter.m_threshold);
@@ -1915,6 +1933,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                         vals.push_back(scalar);
                     }
                 }
+
                 for (const auto& scalar : vals) {
                     auto* s = f->mutable_value()->Add();
                     switch (scalar.get_dtype()) {

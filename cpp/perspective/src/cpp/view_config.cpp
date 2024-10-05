@@ -17,6 +17,7 @@
 namespace perspective {
 
 t_view_config::t_view_config(
+    t_vocab vocab,
     const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& column_pivots,
     const tsl::ordered_map<std::string, std::vector<std::string>>& aggregates,
@@ -29,6 +30,7 @@ t_view_config::t_view_config(
     bool column_only
 ) :
     m_init(false),
+    m_vocab(std::move(vocab)),
     m_row_pivots(row_pivots),
     m_column_pivots(column_pivots),
     m_aggregates(aggregates),
