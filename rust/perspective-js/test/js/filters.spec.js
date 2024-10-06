@@ -314,6 +314,29 @@ const datetime_data_local = [
                 table.delete();
             });
 
+            test("y == 'abcdefghijklmnopqrstuvwxyz' (interned)", async function () {
+                const data = [
+                    { x: 1, y: "a", z: true },
+                    { x: 2, y: "b", z: false },
+                    { x: 3, y: "c", z: true },
+                    {
+                        x: 4,
+                        y: "abcdefghijklmnopqrstuvwxyz",
+                        z: false,
+                    },
+                ];
+
+                const table = await perspective.table(data);
+                const view = await table.view({
+                    filter: [["y", "==", "abcdefghijklmnopqrstuvwxyz"]],
+                });
+
+                const json = await view.to_json();
+                expect(json).toEqual([data[3]]);
+                view.delete();
+                table.delete();
+            });
+
             test("z == true", async function () {
                 var table = await perspective.table(data);
                 var view = await table.view({

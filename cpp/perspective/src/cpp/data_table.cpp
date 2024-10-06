@@ -512,6 +512,9 @@ t_data_table::filter_cpp(
                         break;
                     }
 
+                    // TODO we can make this faster by not constructing these on
+                    // every iteration?
+
                     const auto& ft = fterms[cidx];
                     bool tval;
 

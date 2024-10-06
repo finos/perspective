@@ -37,10 +37,16 @@ use alloc::vec::Vec;
 
 use zune_inflate::DeflateDecoder;
 
+const HEAP_SIZE: usize = if cfg!(debug_assertions) {
+    512_000_000
+} else {
+    64_000_000
+};
+
 #[allow(unused_unsafe)]
 #[global_allocator]
 static ALLOCATOR: talc::Talck<talc::locking::AssumeUnlockable, talc::ClaimOnOom> = {
-    static mut MEMORY: [u8; 64000000] = [0; 64000000];
+    static mut MEMORY: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
     let span = unsafe { talc::Span::from_const_array(core::ptr::addr_of!(MEMORY)) };
     talc::Talc::new(unsafe { talc::ClaimOnOom::new(span) }).lock()
 };

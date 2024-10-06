@@ -45,6 +45,7 @@ public:
      * @param sort
      */
     t_view_config(
+        t_vocab vocab,
         const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& column_pivots,
         const tsl::ordered_map<std::string, std::vector<std::string>>&
@@ -178,8 +179,12 @@ private:
         t_dtype dtype
     );
 
+    // Global dictionary for `t_tscalar` in filter terms.
+    t_vocab m_vocab;
+
     // containers for primitive data that does not need transformation into
     // abstractions
+
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
     tsl::ordered_map<std::string, std::vector<std::string>> m_aggregates;
