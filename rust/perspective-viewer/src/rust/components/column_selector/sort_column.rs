@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use perspective_client::config::*;
-use perspective_client::ColumnType;
+// use perspective_client::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -101,6 +101,13 @@ impl Component for SortColumn {
             move |_event| dragdrop.notify_drag_end()
         });
 
+        let col_type = ctx
+            .props()
+            .session
+            .metadata()
+            .get_column_table_type(&ctx.props().sort.0.to_owned())
+            .expect("Unknown column");
+
         html! {
             <div
                 class="pivot-column-draggable"
@@ -109,7 +116,8 @@ impl Component for SortColumn {
                 ondragend={dragend}
             >
                 <div class="pivot-column-border">
-                    <TypeIcon ty={ColumnType::String} />
+                    <TypeIcon ty={col_type} />
+                    // <TypeIcon ty={ColumnType::String} />
                     <span class="column_name">{ ctx.props().sort.0.to_owned() }</span>
                     <span
                         class={format!("sort-icon {}", ctx.props().sort.1)}
