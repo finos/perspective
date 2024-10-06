@@ -10,48 +10,46 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import React, { useRef, useEffect } from "react";
+import { createRoot } from "react-dom/client";
 import * as perspective from "@finos/perspective";
-
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import {
-    PerspectiveViewerConfig,
-    HTMLPerspectiveViewerElement,
-} from "@finos/perspective-viewer";
-
+import type { PerspectiveViewerConfig, HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 import "./index.css";
 
-const worker = perspective.default.worker();
+const worker = perspective.worker();
 
 const getTable = async (): Promise<perspective.Table> => {
-    const req = fetch("./superstore.lz4.arrow");
-    const resp = await req;
-    const buffer = await resp.arrayBuffer();
-    return await worker.table(buffer as any);
+    const response = await fetch("./superstore.lz4.arrow");
+    const buffer = await response.arrayBuffer();
+    return worker.table(buffer);
 };
 
 const config: PerspectiveViewerConfig = {
     group_by: ["State"],
 };
 
-const App = (): React.ReactElement => {
-    const viewer = React.useRef<HTMLPerspectiveViewerElement>(null);
+const App: React.FC = () => {
+    const viewer = useRef<HTMLPerspectiveViewerElement>(null);
 
-    React.useEffect(() => {
-        getTable().then((table) => {
+    useEffect(() => {
+        const loadTable = async () => {
             if (viewer.current) {
-                viewer.current.load(Promise.resolve(table));
-                viewer.current.restore(config);
+                const table = await getTable();
+                await viewer.current.load(table);
+                await viewer.current.restore(config);
             }
-        });
+        };
+
+        loadTable();
     }, []);
 
-    return <perspective-viewer ref={viewer}></perspective-viewer>;
+    return <perspective-viewer ref={viewer} />;
 };
 
 window.addEventListener("load", () => {
-    ReactDOM.render(<App />, document.getElementById("root"));
+    const root = createRoot(document.getElementById("root")!);
+    root.render(<App />);
 });
