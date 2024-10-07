@@ -75,6 +75,28 @@ fn on_keydown(event: KeyboardEvent, deps: &(UseStateSetter<u32>, Callback<()>)) 
         event.prevent_default();
         deps.1.emit(())
     }
+
+    // handle the tab key press
+    if event.key() == "Tab" {
+        event.prevent_default();
+
+        let caret_pos = elem.selection_start().unwrap().unwrap_or_default() as usize;
+
+        let mut initial_text = elem.value();
+
+        initial_text.insert(caret_pos, '\t');
+
+        elem.set_value(&initial_text);
+
+        let input_event = web_sys::InputEvent::new("input").unwrap();
+        let _ = elem.dispatch_event(&input_event).unwrap();
+
+        // place caret after inserted tab
+        let new_caret_pos = (caret_pos + 1) as u32;
+        let _ = elem.set_selection_range(new_caret_pos, new_caret_pos);
+
+        elem.focus().unwrap();
+    }
 }
 
 /// Scrolling callback
