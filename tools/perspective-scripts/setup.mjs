@@ -89,6 +89,78 @@ async function choose_docker() {
 }
 
 async function focus_package() {
+    const choices = [
+        {
+            key: "r",
+            name: "perspective-docs",
+            value: "perspective-docs",
+        },
+        {
+            key: "c",
+            name: "perspective-cpp",
+            value: "perspective-cpp",
+        },
+        {
+            key: "p",
+            name: "perspective (perspective-js)",
+            value: "perspective",
+        },
+        {
+            key: "m",
+            name: "perspective-metadata",
+            value: "perspective-metadata",
+        },
+        {
+            key: "y",
+            name: "perspective-python",
+            value: "perspective-python",
+        },
+        {
+            key: "q",
+            name: "perspective-pyodide",
+            value: "perspective-pyodide",
+        },
+        {
+            key: "r",
+            name: "perspective-rs",
+            value: "perspective-rs",
+        },
+        {
+            key: "v",
+            name: "perspective-viewer",
+            value: "perspective-viewer",
+        },
+        {
+            key: "e",
+            name: "perspective-viewer-datagrid",
+            value: "perspective-viewer-datagrid",
+        },
+        {
+            key: "d",
+            name: "perspective-viewer-d3fc",
+            value: "perspective-viewer-d3fc",
+        },
+        {
+            key: "i",
+            name: "perspective-jupyterlab",
+            value: "perspective-jupyterlab",
+        },
+        {
+            key: "o",
+            name: "perspective-viewer-openlayers",
+            value: "perspective-viewer-openlayers",
+        },
+        {
+            key: "w",
+            name: "perspective-workspace",
+            value: "perspective-workspace",
+        },
+        {
+            key: "l",
+            name: "perspective-cli",
+            value: "perspective-cli",
+        },
+    ];
     const new_config = await inquirer.prompt([
         {
             type: "checkbox",
@@ -102,76 +174,15 @@ async function focus_package() {
                 }
             },
             filter: (answer) => {
-                if (!answer || answer.length === 9) {
+                if (!answer || answer.length === choices.length) {
                     return "";
                 } else {
                     return answer;
                 }
             },
             loop: false,
-            pageSize: 12,
-            choices: [
-                {
-                    key: "c",
-                    name: "perspective-cpp",
-                    value: "perspective-cpp",
-                },
-                {
-                    key: "p",
-                    name: "perspective (perspective-js)",
-                    value: "perspective",
-                },
-                {
-                    key: "y",
-                    name: "perspective-python",
-                    value: "perspective-python",
-                },
-                {
-                    key: "q",
-                    name: "perspective-pyodide (Python)",
-                    value: "perspective-pyodide",
-                },
-                {
-                    key: "r",
-                    name: "perspective-rs",
-                    value: "perspective-rs",
-                },
-                {
-                    key: "v",
-                    name: "perspective-viewer",
-                    value: "perspective-viewer",
-                },
-                {
-                    key: "e",
-                    name: "perspective-viewer-datagrid",
-                    value: "perspective-viewer-datagrid",
-                },
-                {
-                    key: "d",
-                    name: "perspective-viewer-d3fc",
-                    value: "perspective-viewer-d3fc",
-                },
-                {
-                    key: "i",
-                    name: "perspective-jupyterlab",
-                    value: "perspective-jupyterlab",
-                },
-                {
-                    key: "m",
-                    name: "perspective-viewer-openlayers",
-                    value: "perspective-viewer-openlayers",
-                },
-                {
-                    key: "w",
-                    name: "perspective-workspace",
-                    value: "perspective-workspace",
-                },
-                {
-                    key: "l",
-                    name: "perspective-cli",
-                    value: "perspective-cli",
-                },
-            ],
+            pageSize: 20,
+            choices,
         },
     ]);
 

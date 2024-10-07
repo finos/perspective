@@ -48,7 +48,7 @@ runs:
     using: "composite"
     steps:
         - name: Clean System
-          uses: AdityaGarg8/remove-unwanted-software@v3
+          uses: AdityaGarg8/remove-unwanted-software@v4.1
           if: ${{ inputs.clean == 'true' && runner.os != 'Windows' }}
           with:
               remove-android: "true"

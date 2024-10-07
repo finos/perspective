@@ -102,6 +102,7 @@ impl From<ViewWindow> for ViewPort {
     }
 }
 
+#[doc = include_str!("../../docs/view.md")]
 #[derive(Clone, Debug)]
 pub struct View {
     pub name: String,

@@ -16,6 +16,7 @@ import * as dotenv from "dotenv";
 import { createRequire } from "node:module";
 import url from "node:url";
 import { execSync } from "child_process";
+import { get_scope } from "../perspective-scripts/sh_perspective.mjs";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,7 +32,7 @@ const TEST_SERVER_PORT = 6598;
 const RUN_JUPYTERLAB = !!process.env.PSP_JUPYTERLAB_TESTS;
 
 // TODO use this from core
-const package_venn = (process.env.PACKAGE || "").split(",").reduce(
+const package_venn = get_scope().reduce(
     (acc, x) => {
         if (x.startsWith("!")) {
             acc.exclude.push(x);
@@ -103,6 +104,10 @@ const BROWSER_PACKAGES = [
     {
         packageName: "perspective-cli",
         testDir: "packages/perspective-cli/test/js",
+    },
+    {
+        packageName: "perspective-docs",
+        testDir: "docs/test/js",
     },
     {
         packageName: "docs",
@@ -211,6 +216,7 @@ export default defineConfig({
         // screenshot: "only-on-failure",
         // video: "retain-on-failure",
     },
+    updateSnapshots: "none",
     globalSetup: RUN_JUPYTERLAB
         ? GLOBAL_SETUP_PATH
         : path.join(__dirname, "src/js/global_startup.ts"),

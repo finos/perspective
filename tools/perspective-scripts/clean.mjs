@@ -12,45 +12,42 @@
 
 import { clean, get_scope } from "./sh_perspective.mjs";
 import { execSync } from "child_process";
+import * as fs from "node:fs";
 
 const PACKAGES = get_scope();
 const JS_PKGS = [];
 const RUST_PKGS = [];
+
+const CRATE_NAMES = fs.readdirSync("rust");
+
 for (const pkg of PACKAGES) {
     if (pkg === "perspective-cpp") {
         console.log("-- Cleaning perspective-cpp");
         clean("cpp/perspective/dist", "cpp/perspective/build");
-    } else if (
-        [
-            "perspective-cli",
-            "perspective-esbuild-plugin",
-            "perspective-jupyterlab",
-            "perspective-viewer-d3fc",
-            "perspective-viewer-datagrid",
-            "perspective-viewer-openlayers",
-            "perspective-webpack-plugin",
-            "perspective-workspace",
-        ].indexOf(pkg) > -1
-    ) {
-        JS_PKGS.push(pkg);
-    } else {
+    } else if (CRATE_NAMES.indexOf(pkg) > -1) {
         RUST_PKGS.push(pkg);
+    } else {
+        JS_PKGS.push(pkg);
     }
 }
 
-if (JS_PKGS.length > 0) {
+if (JS_PKGS.length > 0 || RUST_PKGS.length > 0) {
     console.log(`-- Cleaning ${JS_PKGS.join(", ")} via pnpm`);
-    execSync(
-        `pnpm run ${JS_PKGS.map((x) => `--filter ${x} --if-present`).join(
-            " "
-        )} clean`,
-        { stdio: "inherit" }
-    );
+    const flags = JS_PKGS.concat(RUST_PKGS)
+        .map((x) => `--filter @finos/${x} --if-present`)
+        .join(" ");
+
+    execSync(`pnpm run ${flags} clean`, { stdio: "inherit" });
 }
 
 if (RUST_PKGS.length > 0) {
-    console.log(`-- Cleaning ${RUST_PKGS.join(", ")} via cargo`);
-    execSync(`cargo clean ${RUST_PKGS.map((x) => `-p ${x}`).join(" ")}`);
+    if (process.env.PACKAGE?.length > 1) {
+        console.log(`-- Cleaning ${RUST_PKGS.join(", ")} via cargo`);
+        execSync(`cargo clean ${RUST_PKGS.map((x) => `-p ${x}`).join(" ")}`);
+    } else {
+        console.log(`-- Cleaning all crates via cargo`);
+        execSync(`cargo clean`);
+    }
 }
 
 clean("docs/build", "docs/python", "docs/obj");

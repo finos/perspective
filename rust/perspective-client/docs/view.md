@@ -2,10 +2,30 @@ The [`View`] struct is Perspective's query and serialization interface. It
 represents a query on the `Table`'s dataset and is always created from an
 existing `Table` instance via the [`Table::view`] method.
 
+[`View`]s are immutable with respect to the arguments provided to the
+[`Table::view`] method; to change these parameters, you must create a new
+[`View`] on the same [`Table`]. However, each [`View`] is _live_ with respect to
+the [`Table`]'s data, and will (within a conflation window) update with the
+latest state as its parent [`Table`] updates, including incrementally
+recalculating all aggregates, pivots, filters, etc. [`View`] query parameters
+are composable, in that each parameter works independently _and_ in conjunction
+with each other, and there is no limit to the number of pivots, filters, etc.
+which can be applied.
+
 <div class="javascript">
 <div class="warning">
 The examples in this module are in JavaScript. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
 </div>
+</div>
+<div class="python">
+<div class="warning">
+The examples in this module are in Python. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
+</div>
+
+# Examples
+
+<div class="javascript">
 
 ```javascript
 const table = await perspective.table({
@@ -20,9 +40,6 @@ await view.delete();
 
 </div>
 <div class="python">
-<div class="warning">
-The examples in this module are in Python. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
-</div>
 
 ```python
 table = perspective.Table({
@@ -50,17 +67,7 @@ view.delete().await?;
 
 </div>
 
-[`View`]s are immutable with respect to the arguments provided to the
-[`Table::view`] method; to change these parameters, you must create a new
-[`View`] on the same [`Table`]. However, each [`View`] is _live_ with respect to
-the [`Table`]'s data, and will (within a conflation window) update with the
-latest state as its parent [`Table`] updates, including incrementally
-recalculating all aggregates, pivots, filters, etc. [`View`] query parameters
-are composable, in that each parameter works independently _and_ in conjunction
-with each other, and there is no limit to the number of pivots, filters, etc.
-which can be applied.
-
-# Querying data with [`Table::view`]
+## Querying data with [`Table::view`]
 
 To query the table, create a [`Table::view`] on the table instance with an
 optional configuration object. A [`Table`] can have as many [`View`]s associated
@@ -111,7 +118,7 @@ let view = table
 
 </div>
 
-## Group By
+### Group By
 
 A group by _groups_ the dataset by the unique values of each column used as a
 group by - a close analogue in SQL to the `GROUP BY` statement. The underlying
@@ -123,8 +130,6 @@ based on State and City. In Perspective, group by are represented as an array of
 string column names to pivot, are applied in the order provided; For example, a
 group by of `["State", "City", "Postal Code"]` shows the values for each Postal
 Code, which are grouped by City, which are in turn grouped by State.
-
-#### Example
 
 <div class="javascript">
 
@@ -151,7 +156,7 @@ let view = table.view(Some(ViewConfigUpdate {
 
 </div>
 
-## Split By
+### Split By
 
 A split by _splits_ the dataset by the unique values of each column used as a
 split by. The underlying dataset is not aggregated, and a new column is created
@@ -160,8 +165,6 @@ parts of the dataset that correspond to the column header, i.e. a `View` that
 has `["State"]` as its split by will have a new column for each state. In
 Perspective, Split By are represented as an array of string column names to
 pivot:
-
-#### Example
 
 <div class="javascript">
 
@@ -188,7 +191,7 @@ let view = table.view(Some(ViewConfigUpdate {
 
 </div>
 
-## Aggregates
+### Aggregates
 
 Aggregates perform a calculation over an entire column, and are displayed when
 one or more [Group By](#group-by) are applied to the `View`. Aggregates can be
@@ -201,8 +204,6 @@ aggregates based on column type:
 Perspective provides a selection of aggregate functions that can be applied to
 columns in the `View` constructor using a dictionary of column name to aggregate
 function name.
-
-#### Example
 
 <div class="javascript">
 
@@ -232,14 +233,12 @@ view = table.view(
 
 </div>
 
-## Columns
+### Columns
 
 The `columns` property specifies which columns should be included in the
 `View`'s output. This allows users to show or hide a specific subset of columns,
 as well as control the order in which columns appear to the user. This is
 represented in Perspective as an array of string column names:
-
-#### Example
 
 <div class="javascript">
 
@@ -261,7 +260,7 @@ view = table.view(columns=["a"])
 
 </div>
 
-## Sort
+### Sort
 
 The `sort` property specifies columns on which the query should be sorted,
 analogous to `ORDER BY` in SQL. A column can be sorted regardless of its data
@@ -270,8 +269,6 @@ represents `sort` as an array of arrays, with the values of each inner array
 being a string column name and a string sort direction. When `column-pivots` are
 applied, the additional sort directions `"col asc"` and `"col desc"` will
 determine the order of pivot columns groups.
-
-#### Example
 
 <div class="javascript">
 
@@ -290,7 +287,7 @@ view = table.view(sort=[["a", "asc"]])
 
 </div>
 
-## Filter
+### Filter
 
 The `filter` property specifies columns on which the query can be filtered,
 returning rows that pass the specified filter condition. This is analogous to
@@ -301,8 +298,6 @@ conditions, i.e. the filters are joined with an `AND` condition.
 Perspective represents `filter` as an array of arrays, with the values of each
 inner array being a string column name, a string filter operator, and a filter
 operand in the type of the column:
-
-#### Example
 
 <div class="javascript">
 
@@ -324,7 +319,7 @@ view = table.view(filter=[["a", "<", 100]])
 
 </div>
 
-## Expressions
+### Expressions
 
 The `expressions` property specifies _new_ columns in Perspective that are
 created using existing column values or arbitary scalar values defined within
@@ -332,8 +327,6 @@ the expression. In `<perspective-viewer>`, expressions are added using the "New
 Column" button in the side panel.
 
 A custom name can be added to an expression by making the first line a comment:
-
-#### Example
 
 <div class="javascript">
 
@@ -363,8 +356,6 @@ all future updates that affect the [`Table::view`] will be forwarded to the new
 [`Table`]. This is particularly useful for implementing a
 [Client/Server Replicated](server.md#clientserver-replicated) design, by
 serializing the `View` to an arrow and setting up an `on_update` callback.
-
-# Example
 
 <div class="javascript">
 

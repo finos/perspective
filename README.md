@@ -37,19 +37,23 @@ and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 ### Documentation
 
 -   [Project Site](https://perspective.finos.org/)
--   User Guides
-    -   [Javascript User Guide](https://perspective.finos.org/docs/js.html)
-    -   [Python User Guide](https://perspective.finos.org/docs/python.html)
-    -   [Developer Guide](https://perspective.finos.org/docs/development.html)
--   Concepts
-    -   [Table](https://perspective.finos.org/docs/table.html)
-    -   [View](https://perspective.finos.org/docs/view.html)
-    -   [Expression Columns](https://perspective.finos.org/docs/expressions.html)
-    -   [Data Binding](https://perspective.finos.org/docs/table.html)
--   API
-    -   [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
-    -   [Perspective Viewer API](https://perspective.finos.org/docs/obj/perspective-viewer/)
-    -   [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
+-   Language Guides and API Docs
+    -   [`<perspective-viewer>`](https://perspective.finos.org/docs/obj/perspective-viewer/)
+    -   [Javascript](https://docs.rs/perspective-js/latest/perspective_js/)
+    -   [Python](https://docs.rs/perspective-python/latest/perspective_python/)
+    -   [Rust](https://docs.rs/perspective-rs/latest/perspective_rs)
+-   `Table` Guide
+    -   [JavaScript](https://docs.rs/perspective-js/latest/perspective_js/struct.Table.html)
+    -   [Python](https://docs.rs/perspective-python/latest/perspective_python/struct.Table.html)
+    -   [Rust](https://docs.rs/perspective-client/latest/perspective_client/struct.Table.html)
+-   `View` Guide
+    -   [JavaScript](https://docs.rs/perspective-js/latest/perspective_js/struct.View.html)
+    -   [Python](https://docs.rs/perspective-python/latest/perspective_python/struct.View.html)
+    -   [Rust](https://docs.rs/perspective-client/latest/perspective_client/struct.View.html)
+-   Appendix
+
+    -   [Data Binding](https://docs.rs/perspective-server/latest/perspective_server/)
+    -   [Expression Columns](https://docs.rs/perspective-client/latest/perspective_client/config/expressions/index.html)
 
 ### Examples
 
@@ -65,22 +69,19 @@ and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 <td><a href="https://github.com/timbess"><code>@timbess</code></a></td>
 <td><a href="https://github.com/sc1f"><code>@sc1f</code></a></td>
 </tr>
-<tr><td>
-<a href="https://www.youtube.com/watch?v=s6n9vEyM1gY"><img width="240" src="https://img.youtube.com/vi/s6n9vEyM1gY/0.jpg" /></a>
-</td><td>
-<a href="https://www.youtube.com/watch?v=lDpIu4dnp78"><img width="240" src="https://img.youtube.com/vi/lDpIu4dnp78/0.jpg" /></a>
-</td><td>
-<a href="https://www.youtube.com/watch?v=IO-HJsGdleE"><img width="240"  src="https://img.youtube.com/vi/IO-HJsGdleE/0.jpg" /></a>
-</td></tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=v5Y5ftlGNhU"><img width="240" src="https://img.youtube.com/vi/v5Y5ftlGNhU/0.jpg" /></a></td>
+<td><a href="https://www.youtube.com/watch?v=lDpIu4dnp78"><img width="240" src="https://img.youtube.com/vi/lDpIu4dnp78/0.jpg" /></a></td>
+<td><a href="https://www.youtube.com/watch?v=0ut-ynvBpGI"><img width="240" src="https://img.youtube.com/vi/0ut-ynvBpGI/0.jpg" /></a></td>
+</tr>
 <tr>
 <td><a href="https://github.com/texodus"><code>@texodus</code></a></td>
 <td><a href="https://github.com/texodus"><code>@texodus</code></a></td>
 <td></td>
 </tr>
-<tr><td>
-<a href="https://www.youtube.com/watch?v=0ut-ynvBpGI"><img width="240" src="https://img.youtube.com/vi/0ut-ynvBpGI/0.jpg" /></a>
-</td><td>
-<a href="https://www.youtube.com/watch?v=no0qChjvdgQ"><img width="240" src="https://img.youtube.com/vi/no0qChjvdgQ/0.jpg" /></a>
-</td><td>
-</td></tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=no0qChjvdgQ"><img width="240" src="https://img.youtube.com/vi/no0qChjvdgQ/0.jpg" /></a></td>
+<td><a href="https://www.youtube.com/watch?v=IO-HJsGdleE"><img width="240"  src="https://img.youtube.com/vi/IO-HJsGdleE/0.jpg" /></a></td>
+<td></td>
+</tr>
 </tbody></table>

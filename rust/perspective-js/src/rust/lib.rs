@@ -24,10 +24,6 @@ mod table;
 pub mod utils;
 mod view;
 
-use perspective_client::config::*;
-use perspective_client::proto::ViewOnUpdateResp;
-use perspective_client::{OnUpdateOptions, TableInitOptions, UpdateOptions, ViewWindow};
-use ts_rs::TS;
 use wasm_bindgen::prelude::*;
 
 pub use crate::client::Client;
@@ -49,16 +45,6 @@ import type * as on_update_args from "../../src/ts/ts-rs/OnUpdateArgs.d.ts";
 import type * as on_update_options from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 import type * as update_options from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 "#;
-
-#[doc(hidden)]
-pub fn generate_type_bindings() {
-    ViewWindow::export_all().unwrap();
-    TableInitOptions::export_all().unwrap();
-    ViewConfigUpdate::export_all().unwrap();
-    ViewOnUpdateResp::export_all().unwrap();
-    OnUpdateOptions::export_all().unwrap();
-    UpdateOptions::export_all().unwrap()
-}
 
 #[cfg(feature = "export-init")]
 #[wasm_bindgen]

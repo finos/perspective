@@ -12,4 +12,3 @@ For examples pertaining to `perspective-python` Tornado servers, check out:
 
 - [tornado-python](https://github.com/finos/perspective/tree/master/examples/tornado-python): a simple Tornado server that delivers a static dataset to the user using `perspective-python` and `<perspective-viewer>`.
 - [tornado-streaming-python](https://github.com/finos/perspective/tree/master/examples/tornado-streaming-python): a streaming Tornado server that demonstrates `perspective-python`'s high throughput and performance in streaming scenarios.
-- [workspace-editing-python](https://github.com/finos/perspective/tree/master/examples/workspace-editing-python): a full-featured example using `<perspective-workspace>` that illustrates a deep and powerful integration between `<perspective-workspace>` and `perspective-python`.

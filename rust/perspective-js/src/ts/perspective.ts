@@ -42,7 +42,7 @@ export async function websocket(url: string | URL) {
 
 export async function worker() {
     const wasm_module = compile_perspective();
-    return await api.worker.call(undefined, wasm_module);
+    return await api.worker(wasm_module);
 }
 
 export default { websocket, worker };

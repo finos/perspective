@@ -10,11 +10,55 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#![warn(clippy::all)]
+#![recursion_limit = "1024"]
 
-use perspective_js::generate_type_bindings;
+use std::error::Error;
+use std::fmt::Write;
+use std::fs;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    generate_type_bindings();
+use perspective_client::config::*;
+use perspective_client::{
+    OnUpdateOptions, TableInitOptions, UpdateOptions, ViewOnUpdateResp, ViewWindow,
+};
+use perspective_viewer::config::ViewerConfigUpdate;
+use ts_rs::TS;
+
+pub fn generate_type_bindings_viewer() -> Result<(), Box<dyn Error>> {
+    Ok(ViewerConfigUpdate::export_all_to(
+        std::env::current_dir()?.join("../perspective-viewer/src/ts/ts-rs"),
+    )?)
+}
+
+fn generate_exprtk_docs() -> Result<(), Box<dyn Error>> {
+    let mut txt = "<br/>\n\n# Perspective ExprTK Extensions\n\n".to_string();
+    for rec in perspective_client::config::COMPLETIONS {
+        writeln!(
+            txt,
+            "- `{}` {}",
+            rec.insert_text,
+            rec.documentation.replace("\n", " "),
+        )?;
+    }
+
+    fs::write("../perspective-client/docs/expression_gen.md", txt)?;
+    Ok(())
+}
+
+#[doc(hidden)]
+pub fn generate_type_bindings_js() -> Result<(), Box<dyn Error>> {
+    let path = std::env::current_dir()?.join("../perspective-js/src/ts/ts-rs");
+    ViewWindow::export_all_to(&path)?;
+    TableInitOptions::export_all_to(&path)?;
+    ViewConfigUpdate::export_all_to(&path)?;
+    ViewOnUpdateResp::export_all_to(&path)?;
+    OnUpdateOptions::export_all_to(&path)?;
+    UpdateOptions::export_all_to(&path)?;
+    Ok(())
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    generate_type_bindings_js()?;
+    generate_type_bindings_viewer()?;
+    generate_exprtk_docs()?;
     Ok(())
 }

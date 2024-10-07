@@ -14,12 +14,19 @@ When submitting or commenting on an Issue, please respect the following
 guidelines. Github Issues are Perspective's project record of bugs and feature
 development, e.g. for publishing a release's Changelog, and as such it is
 important to keep them informative and on-topic. As such, please understand that
-we may remove or reclassify comments or Issues which violate the guidelines.
+we may remove or reclassify comments, Issues or PRs which violate the
+guidelines.
+
+Please note that due to the we may close your Issue or Pull Request for one of
+the reasons listed here or in the associated contribution template. If you find
+your contribution closed with a link to this document or a contribution
+template, please make sure you've followed the instructions closely before
+re-submitting.
 
 -   Be respectful and civil!
--   Use the provided Issue templates. If the templates don't fit your need,
-    please open a [discussion](https://github.com/finos/perspective/discussions)
-    instead.
+-   Use the provided Issue and Pull Request templates. If the templates don't
+    fit your need, please open a
+    [discussion](https://github.com/finos/perspective/discussions) instead.
 -   Don't ask for issues to be assigned to you if you're a first-time
     contributor. If you need help picking an issue to work on, please open a
     [discussion](https://github.com/finos/perspective/discussions).
@@ -27,17 +34,25 @@ we may remove or reclassify comments or Issues which violate the guidelines.
     issue fixed. The Issue will link any in-progress draft PRs or Milestones (if
     known).
 
-When submitting Pull Request (PR), please respect the following coding
+When submitting a Pull Request (PR), please respect the following coding
 guidelines:
 
+-   Don't open a PR without an associated
+    [Open Issue](https://github.com/finos/perspective/issues) which has been
+    tagged by a project maintainer.
+-   Make sure your PR passes _build_, _test_ and _lint_ steps _completely_
+    before opening a PR. Make _sure_ you've run these locally, even if you think
+    your change will not impact this step!
+-   Don't open a PR for auto-generated, AI-assisted or otherwise inauthentic
+    contributions.
 -   Sign commits (e.g. with `-s`) in accordance with the DCO policy detailed
     below, _before_ opening a PR.
--   Please make sure PRs include:
+-   Please make sure PRs include the following _not optional_ components:
 
     -   Tests asserting behavior of any new or modified features.
     -   Docs for any new or modified public APIs.
     -   [Benchmarks](https://perspective.finos.org/docs/development/#benchmark)
-        for any C++ changes.
+        for any performance-critical changes.
 
 -   Keep PRs clean, simple and to-the-point:
     -   Squash "WIP", "Reverting ..", etc., commits.
@@ -45,9 +60,6 @@ guidelines:
         conflicts with the `master` branch.
     -   Try to organize commits as functional components (as opposed to
         timeline-of-development).
-
-Please note that non substantive changes, large changes without prior
-discussion, etc, are not accepted and pull requests may be closed.
 
 ## DCO
 
