@@ -47,6 +47,14 @@ impl ApiError {
     }
 }
 
+impl Display for ApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for ApiError {}
+
 /// A common Rust error handling idion (see e.g. `anyhow::Result`)
 pub type ApiResult<T> = Result<T, ApiError>;
 

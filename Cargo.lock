@@ -2044,6 +2044,7 @@ dependencies = [
  "base64 0.13.1",
  "chrono",
  "console_error_panic_hook",
+ "derivative",
  "extend",
  "futures",
  "getrandom",

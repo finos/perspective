@@ -220,7 +220,7 @@ impl PerspectiveViewerElement {
     /// ```javascript
     /// await viewer.delete();
     /// ```
-    pub fn delete(&mut self) -> ApiFuture<()> {
+    pub fn delete(&self) -> ApiFuture<()> {
         clone!(self.renderer, self.session, self.root);
         ApiFuture::new(self.renderer.clone().with_lock(async move {
             renderer.delete()?;
@@ -370,6 +370,15 @@ impl PerspectiveViewerElement {
 
             this.restore_and_render(decoded_update, async move { Ok(result.await?) })
                 .await?;
+            Ok(())
+        })
+    }
+
+    pub fn invalidate(&self) -> ApiFuture<()> {
+        self.session.invalidate();
+        let this = self.clone();
+        ApiFuture::new(async move {
+            this.update_and_render(ViewConfigUpdate::default()).await?;
             Ok(())
         })
     }
