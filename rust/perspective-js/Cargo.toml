@@ -54,6 +54,7 @@ base64 = "0.13.0"
 chrono = "0.4"
 extend = "1.1.2"
 futures = "0.3.28"
+derivative = "2.2.0"
 getrandom = { version = "0.2", features = ["js"] }
 js-intern = "0.3.1"
 js-sys = "0.3.64"

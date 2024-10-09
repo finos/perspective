@@ -16,6 +16,15 @@
             const socket = await perspective.websocket("/ws");
             const table = await socket.open_table("my_data_source");
             const viewer = document.getElementsByTagName("perspective-viewer")[0];
+
+            // socket.on_error(async (message, reconnect) => {
+            //     console.warn(`${message}, reconnecting ...`);
+            //     setTimeout(async () => {
+            //         await reconnect();
+            //         await viewer.invalidate();
+            //     }, 5000);
+            // });
+
             viewer.load(table);
             viewer.restore({ settings: true, plugin_config: { edit_mode: "EDIT" } });
         </script>

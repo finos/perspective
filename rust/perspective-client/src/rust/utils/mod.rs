@@ -57,7 +57,7 @@ pub enum ClientError {
     #[error("Can't use both `limit` and `index` arguments")]
     BadTableOptions,
 
-    #[error("External error: {0:?}")]
+    #[error("External error: {0}")]
     ExternalError(#[from] Box<dyn std::error::Error + Send + Sync>),
 
     #[error("Undecipherable proto message")]

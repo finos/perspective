@@ -17,6 +17,7 @@ use wasm_bindgen_futures::spawn_local;
 
 /// A useful abstraction for connecting `!Sync + !Send` callbacks (like
 /// `js_sys::Function`) to `Send + Sync` contexts (like the client loop).
+#[derive(Clone)]
 pub struct LocalPollLoop<R: Send + Sync + Clone + 'static>(UnboundedSender<R>);
 
 impl<R: Send + Sync + Clone + 'static> LocalPollLoop<R> {
@@ -27,6 +28,24 @@ impl<R: Send + Sync + Clone + 'static> LocalPollLoop<R> {
         spawn_local(async move {
             while let Some(resp) = receive.next().await {
                 let resp = send(resp);
+                if let Err(err) = resp {
+                    web_sys::console::error_2(&"Failed to serialize".into(), &err);
+                }
+            }
+        });
+
+        Self(emit)
+    }
+
+    /// Create a new loop which accepts a `R: Send + Sync` intermediate state
+    /// argument and calls the `!Send + !Sync` callback.
+    pub fn new_async<F: Fn(R) -> FUT + 'static, FUT: Future<Output = Result<JsValue, JsValue>>>(
+        send: F,
+    ) -> Self {
+        let (emit, mut receive) = unbounded::<R>();
+        spawn_local(async move {
+            while let Some(resp) = receive.next().await {
+                let resp = send(resp).await;
                 if let Err(err) = resp {
                     web_sys::console::error_2(&"Failed to serialize".into(), &err);
                 }
