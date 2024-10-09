@@ -47,6 +47,14 @@ impl ApiError {
     }
 }
 
+impl Display for ApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for ApiError {}
+
 /// A common Rust error handling idion (see e.g. `anyhow::Result`)
 pub type ApiResult<T> = Result<T, ApiError>;
 
@@ -75,6 +83,7 @@ macro_rules! define_api_error {
 }
 
 define_api_error!(
+    Box<dyn std::error::Error>,
     serde_wasm_bindgen::Error,
     std::io::Error,
     serde_json::Error,

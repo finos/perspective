@@ -21,9 +21,10 @@ use std::collections::HashSet;
 use std::future::Future;
 use std::ops::Deref;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use perspective_client::config::*;
-use perspective_client::{View, ViewWindow};
+use perspective_client::{ReconnectCallback, View, ViewWindow};
 use perspective_js::utils::*;
 use wasm_bindgen::prelude::*;
 use yew::html::ImplicitClone;
@@ -41,7 +42,7 @@ use crate::utils::*;
 /// the `Table` and `View` objects for this viewer, and all associated state
 /// including the `ViewConfig`.
 #[derive(Clone, Default)]
-pub struct Session(Rc<SessionHandle>);
+pub struct Session(Arc<SessionHandle>);
 
 impl ImplicitClone for Session {}
 
@@ -54,6 +55,7 @@ pub struct SessionHandle {
     pub view_created: PubSub<()>,
     pub view_config_changed: PubSub<()>,
     pub stats_changed: PubSub<()>,
+    pub table_errored: PubSub<(Option<String>, Option<ReconnectCallback>)>,
 }
 
 /// Mutable state for `Session`.
@@ -79,7 +81,7 @@ impl Deref for Session {
 
 impl PartialEq for Session {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.0, &other.0)
+        Arc::ptr_eq(&self.0, &other.0)
     }
 }
 
@@ -101,6 +103,11 @@ impl Session {
 
     pub fn metadata_mut(&self) -> MetadataMutRef<'_> {
         std::cell::RefMut::map(self.borrow_mut(), |x| &mut x.metadata)
+    }
+
+    pub fn invalidate(&self) {
+        self.borrow_mut().is_clean = false;
+        self.borrow_mut().view_sub = None;
     }
 
     /// Reset this `Session`'s `View` state, but preserve the `Table`.
@@ -143,6 +150,15 @@ impl Session {
     /// `create_view()`.
     pub async fn set_table(&self, table: perspective_client::Table) -> ApiResult<JsValue> {
         let metadata = SessionMetadata::from_table(&table).await?;
+        let client = table.get_client();
+        let set_error = self.table_errored.as_boxfn();
+        let _callback_id = client
+            .on_error(Box::new(move |message, reconnect| {
+                set_error((message, reconnect));
+                Box::pin(async move { Ok(()) })
+            }))
+            .await?;
+
         let sub = self.borrow_mut().view_sub.take();
         self.borrow_mut().metadata = metadata;
         self.borrow_mut().table = Some(table);
