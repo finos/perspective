@@ -250,6 +250,7 @@ jobs:
               if: ${{ contains(matrix.os, 'windows') }}
               env:
                   CARGO_TARGET_DIR: D:\psp-rust
+                  PSP_CPP_BUILD_DIR: D:\psp-build
                   PSP_ROOT_DIR: ${{ github.workspace }}
                   PACKAGE: "perspective-python"
                   PSP_ARCH: ${{ matrix.arch }}

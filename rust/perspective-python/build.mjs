@@ -21,6 +21,7 @@ const pkg = JSON.parse(
 );
 
 let flags = "--release";
+let features = [];
 if (!!process.env.PSP_DEBUG) {
     flags = "";
 }
@@ -87,7 +88,22 @@ if (build_wheel) {
         flags += " -vv";
     }
 
-    cmd.sh(`maturin build ${flags} ${target}`);
+    if (process.env.CONDA_BUILD === "1") {
+        console.log("Building with Conda flags for maturin");
+        if (process.env.PYTHON) {
+            console.log(`interpreter: ${process.env.PYTHON}`);
+            flags += ` --interpreter=${process.env.PYTHON}`;
+        } else {
+            console.warn(
+                "Expected PYTHON to be set in CONDA_BUILD environment, but it isn't.  maturin will likely detect the wrong Python."
+            );
+        }
+    } else {
+        console.log("Building with regular flags for maturin");
+        features.push("abi3");
+    }
+
+    cmd.sh(`maturin build ${flags} --features=${features.join(",")} ${target}`);
 }
 
 const old = fs.readFileSync("./pyproject.toml");

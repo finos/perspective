@@ -3,6 +3,7 @@ build/
 node_modules/
 target/
 .emsdk/
+.venv*/
 boost*/
 py_modules/
 ts-rs/

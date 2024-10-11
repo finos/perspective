@@ -14,12 +14,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use cmake::Config;
+use shlex::Shlex;
 
 pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     let mut dst = Config::new("cpp/perspective");
-    if cfg!(windows) && std::option_env!("CI").is_some() {
-        std::fs::create_dir_all("D:\\psp-build")?;
-        dst.out_dir("D:\\psp-build");
+    if let Some(cpp_build_dir) = std::option_env!("PSP_CPP_BUILD_DIR") {
+        std::fs::create_dir_all(cpp_build_dir)?;
+        dst.out_dir(cpp_build_dir);
     }
 
     let profile = std::env::var("PROFILE").unwrap();
@@ -41,13 +42,20 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     }
 
     if cfg!(windows) {
-        dst.define(
-            "CMAKE_TOOLCHAIN_FILE",
-            format!(
-                "{}/scripts/buildsystems/vcpkg.cmake",
-                std::env::var("VCPKG_ROOT").unwrap().replace("\\", "/")
-            ),
-        );
+        match std::env::var("VCPKG_ROOT") {
+            Ok(vcpkg_root) => {
+                dst.define(
+                    "CMAKE_TOOLCHAIN_FILE",
+                    format!(
+                        "{}/scripts/buildsystems/vcpkg.cmake",
+                        vcpkg_root.replace("\\", "/")
+                    ),
+                );
+            }
+            Err(_) => {
+                println!("cargo:warning=MESSAGE VCPKG_ROOT not set in environment, not setting CMAKE_TOOLCHAIN_FILE")
+            }
+        }
     }
 
     if std::env::var("CARGO_FEATURE_PYTHON").is_ok() {
@@ -69,6 +77,16 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
 
     if !cfg!(windows) {
         dst.build_arg(format!("-j{}", num_cpus::get()));
+    }
+
+    // Conda sets CMAKE_ARGS for e.g. cross-compiling toolchain in the environment - normally they
+    // are passed directly to a cmake invocation in the recipe, but our conda recipe doesn't
+    // directly invoke cmake
+    if let Ok(cmake_args) = std::env::var("CMAKE_ARGS") {
+        println!("cargo:warning=MESSAGE Setting CMAKE_ARGS from enviornment {:?}", cmake_args);
+        for arg in Shlex::new(&cmake_args) {
+            dst.configure_arg(arg);
+        }
     }
 
     println!("cargo:warning=MESSAGE Building cmake {}", profile);

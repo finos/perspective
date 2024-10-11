@@ -111,7 +111,6 @@ runs:
         #   with:
         #       key: ${{ github.job }}-${{ matrix.os }}
 
-        # TODO this should move to `install_tools.mjs`
         - name: Windows init steps (vc143)
           id: vcpkg-step
           shell: pwsh
@@ -219,17 +218,6 @@ runs:
                 dnf install wget -y
               fi
           if: ${{ runner.os == 'Linux' && inputs.cpp == 'true' && inputs.javascript == 'false' }}
-
-        # TODO do this earlier?
-        - name: Linux init steps
-          shell: bash
-          run: node tools/perspective-scripts/install_tools.mjs
-          if: ${{ runner.os != 'Windows' && inputs.cpp == 'true' && inputs.manylinux == 'true' }}
-
-        - name: Linux init steps
-          shell: bash
-          run: sudo node tools/perspective-scripts/install_tools.mjs
-          if: ${{ runner.os != 'Windows' && inputs.cpp == 'true' && inputs.manylinux  == 'false' }}
 
         - name: Install Python Pyodide dependencies
           shell: bash

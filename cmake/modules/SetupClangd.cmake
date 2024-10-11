@@ -36,7 +36,3 @@ if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/.clangd.in)
 else()
     message("${Yellow}No .clangd.in found, skipping IDE setup${ColorReset}")
 endif()
-
-if(NOT WIN32)
-    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-endif()
