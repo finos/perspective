@@ -1,0 +1,30 @@
+diff --git a/cpp/cmake_modules/BuildUtils.cmake b/cpp/cmake_modules/BuildUtils.cmake
+index e7523add27223..f137eafa7d7f3 100644
+--- a/cpp/cmake_modules/BuildUtils.cmake
++++ b/cpp/cmake_modules/BuildUtils.cmake
+@@ -105,16 +105,19 @@ function(arrow_create_merged_static_lib output_target)
+     # HINTS is used before system paths and before PATHS, so we use that
+     # even though hard coded paths should go in PATHS
+     # TODO: use a VALIDATOR when we require cmake >= 3.25
+-    find_program(LIBTOOL_MACOS libtool HINTS /usr/bin
+-                                             /Library/Developer/CommandLineTools/usr/bin)
+-
+-    # confirm that the libtool we found is not GNU libtool
++    if (DEFINED ENV{LIBTOOL})
++      message(STATUS "Using LIBTOOL from environment: $ENV{LIBTOOL}")
++      set(LIBTOOL_MACOS $ENV{LIBTOOL} CACHE FILEPATH "path to Apple libtool")
++    else
++      find_program(LIBTOOL_MACOS libtool HINTS /usr/bin
++                                               /Library/Developer/CommandLineTools/usr/bin)
++    endif()
++    # confirm that the libtool we found is Apple libtool
+     execute_process(COMMAND ${LIBTOOL_MACOS} -V
+                     OUTPUT_VARIABLE LIBTOOL_V_OUTPUT
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+     if(NOT "${LIBTOOL_V_OUTPUT}" MATCHES ".*cctools-([0-9.]+).*")
+-      message(FATAL_ERROR "libtool found appears to be the incompatible GNU libtool: ${LIBTOOL_MACOS}"
+-      )
++      message(FATAL_ERROR "libtool found appears not to be the Apple libtool: ${LIBTOOL_MACOS}")
+     endif()
+
+     set(BUNDLE_COMMAND ${LIBTOOL_MACOS} "-no_warning_for_no_symbols" "-static" "-o"
