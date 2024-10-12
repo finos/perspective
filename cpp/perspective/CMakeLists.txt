@@ -349,11 +349,14 @@ if(PSP_PYODIDE)
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
 endif()
 
+psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
+psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
 # Build header-only dependencies from external source
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
+psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 
 # ExternalProject_Add was not working for zstd, SOURCE_SUBDIR was not being honored.
 include(FetchContent)
@@ -370,12 +373,6 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(zstd)
-
-# Build minimal arrow for both Emscripten and Python
-psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
-
-# Build arrow
-psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
 if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
     # Boost must be added after arrow to prevent linking bug on Windows.
@@ -645,8 +642,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             target_compile_options(psp PRIVATE -fvisibility=hidden)
         endif()
 
-        # Link against minimal arrow static library
-        target_link_libraries(psp PRIVATE arrow_static re2 protos lz4_static libzstd_static)
+        # Link against arrow static library
+        # Linking against arrow_static also links against its bundled dependencies
+        target_link_libraries(psp PRIVATE arrow_static re2 protos libzstd_static)
     else()
         add_library(psp STATIC ${WASM_SOURCE_FILES})
         target_compile_options(psp PRIVATE -fvisibility=hidden)
