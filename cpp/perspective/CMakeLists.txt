@@ -349,9 +349,6 @@ if(PSP_PYODIDE)
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
 endif()
 
-psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
-psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
-
 # Build header-only dependencies from external source
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
@@ -373,6 +370,9 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(zstd)
+
+psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
+psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
 if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
     # Boost must be added after arrow to prevent linking bug on Windows.
