@@ -40,5 +40,9 @@ if (process.env.PSP_ARCH === "x86_64" && process.platform === "darwin") {
     target = "--target=aarch64-unknown-linux-gnu";
 }
 
-cmd.sh(`cargo build ${flags} ${target} --features=external-cpp`);
+cmd.sh(
+    `cargo build ${flags} ${target} ${
+        !process.env.CI ? "--features=external-cpp" : ""
+    }`
+);
 cmd.runSync();

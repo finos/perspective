@@ -101,7 +101,11 @@ if (build_sdist) {
 }
 
 if (!build_wheel && !build_sdist) {
-    cmd.sh(`maturin develop ${flags} --features=external-cpp`);
+    cmd.sh(
+        `maturin develop ${flags} ${
+            !process.env.CI ? "--features=external-cpp" : ""
+        }`
+    );
 }
 
 cmd.runSync();

@@ -152,9 +152,10 @@ jobs:
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
             - name: WebAssembly Build
-              run: pnpm run build --ci
+              run: pnpm run build
               env:
                   PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli"
+                  CI: 1
                   # PSP_USE_CCACHE: 1
 
             - uses: actions/upload-artifact@v4
@@ -242,6 +243,7 @@ jobs:
                   PSP_ARCH: ${{ matrix.arch }}
                   PSP_ROOT_DIR: ${{ github.workspace }}
                   PSP_BUILD_WHEEL: 1
+                  CI: 1
 
             - name: Python Build (Windows)
               run: |
@@ -254,6 +256,7 @@ jobs:
                   PACKAGE: "perspective-python"
                   PSP_ARCH: ${{ matrix.arch }}
                   PSP_BUILD_WHEEL: 1
+                  CI: 1
 
             # Windows sucks lol
             - uses: actions/upload-artifact@v4
@@ -323,6 +326,7 @@ jobs:
               env:
                   PACKAGE: "perspective-rs"
                   PSP_ROOT_DIR: ${{ github.workspace }}
+                  CI: 1
 
             - name: Rust Build (Windows)
               run: |
@@ -493,6 +497,7 @@ jobs:
               run: pnpm run build
               env:
                   PACKAGE: "perspective-jupyterlab"
+                  CI: 1
 
             - run: node tools/perspective-scripts/repack_wheel.mjs
 
