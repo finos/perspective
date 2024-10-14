@@ -25,6 +25,10 @@ bench = false
 version = "10.0.0"
 features = ["serde-json-impl", "no-serde-warnings"]
 
+[dependencies.perspective-server]
+path = "../perspective-server"
+features = ["external-cpp", "disable-cpp"]
+
 [dependencies.perspective-client]
 path = "../perspective-client"
 features = ["external-proto", "omit_metadata"]

@@ -13,7 +13,7 @@
 import * as path from "path";
 import { get } from "http";
 import { spawn } from "child_process";
-import sh from "@finos/perspective-scripts/sh.mjs";
+import "zx/globals";
 
 const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
 
@@ -22,7 +22,7 @@ const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
  */
 export const kill_jlab = () => {
     console.log("\n-- Cleaning up Jupyterlab process");
-    sh`ps aux | grep -i '[j]upyter-lab --no-browser' | awk '{print $2}' | xargs kill -9 && echo "[perspective-jupyterlab] JupyterLab process terminated"`.runSync();
+    $`ps aux | grep -i '[j]upyter-lab --no-browser' | awk '{print $2}' | xargs kill -9 && echo "[perspective-jupyterlab] JupyterLab process terminated"`;
 };
 
 /**

@@ -104,6 +104,8 @@ jobs:
               with:
                   name: perspective-metadata
                   path: |
+                      rust/perspective-server/cpp/
+                      rust/perspective-server/cmake/
                       rust/perspective-client/src/
                       rust/perspective-client/docs/
                       rust/perspective-js/src/ts/
@@ -146,6 +148,7 @@ jobs:
               with:
                   clean: "true"
                   python: "false"
+                  playwright: "true"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
             - name: WebAssembly Build
@@ -153,13 +156,6 @@ jobs:
               env:
                   PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli"
                   # PSP_USE_CCACHE: 1
-
-
-            # - name: Docs Build
-            #   run: pnpm run docs
-
-            #   env:
-            #       PACKAGE: "!perspective-python,!perspective-jupyterlab"
 
             - uses: actions/upload-artifact@v4
               with:
@@ -238,16 +234,6 @@ jobs:
                   manylinux: ${{ matrix.container && 'true' || 'false' }}
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
-            - run: echo "/opt/python/cp39-cp39/bin" >> $GITHUB_PATH
-              if: ${{  runner.os == 'Linux' }}
-
-            # https://github.com/apache/arrow/issues/38391
-            - if: ${{ runner.os == 'macOS' }}
-              run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV
-
-            - run: echo "${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}" >> $env:GITHUB_PATH
-              if: ${{ runner.os == 'Windows' }}
-
             - name: Python Build
               run: pnpm run build
               if: ${{ !contains(matrix.os, 'windows') }}
@@ -265,7 +251,6 @@ jobs:
               env:
                   CARGO_TARGET_DIR: D:\psp-rust
                   PSP_ROOT_DIR: ${{ github.workspace }}
-                  VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
                   PACKAGE: "perspective-python"
                   PSP_ARCH: ${{ matrix.arch }}
                   PSP_BUILD_WHEEL: 1
@@ -332,9 +317,6 @@ jobs:
                   manylinux: "false"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
-            - run: echo "${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}" >> $env:GITHUB_PATH
-              if: ${{ runner.os == 'Windows' }}
-
             - name: Rust Build
               run: pnpm run build
               if: ${{ !contains(matrix.os, 'windows') }}
@@ -342,7 +324,7 @@ jobs:
                   PACKAGE: "perspective-rs"
                   PSP_ROOT_DIR: ${{ github.workspace }}
 
-            - name: Python Build (Windows)
+            - name: Rust Build (Windows)
               run: |
                   New-Item -ItemType Directory -Path $env:CARGO_TARGET_DIR -Force
                   pnpm run build
@@ -350,7 +332,6 @@ jobs:
               env:
                   CARGO_TARGET_DIR: D:\psp-rust
                   PSP_ROOT_DIR: ${{ github.workspace }}
-                  VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
                   PACKAGE: "perspective-rs"
 
             - name: Rust Test
@@ -368,7 +349,6 @@ jobs:
               env:
                   CARGO_TARGET_DIR: D:\psp-rust
                   PSP_ROOT_DIR: ${{ github.workspace }}
-                  VCPKG_ROOT: ${{ steps.init-step.outputs.VCPKG_INSTALLATION_ROOT }}
                   PACKAGE: "perspective-rs"
 
             - name: Package
@@ -542,6 +522,7 @@ jobs:
 
             - name: Run Jupyter Tests
               if: ${{ false }}
+              # if: ${{ runner.os == 'Linux' }}
               run: |
                   jupyter lab --generate-config
                   pnpm run test --jupyter
@@ -581,6 +562,7 @@ jobs:
                   python: "false"
                   rust: "false"
                   cpp: "false"
+                  playwright: "true"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
             - uses: actions/download-artifact@v4
@@ -591,7 +573,7 @@ jobs:
             - name: Run Tests
               run: pnpm run test
               env:
-                  PACKAGE: "!perspective-python,!perspective-jupyterlab"
+                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli"
                   # PSP_USE_CCACHE: 1
 
     # ,--,--'      .   .-,--.     .  .

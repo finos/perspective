@@ -22,6 +22,7 @@
     clippy::panic_in_result_fn,
     clippy::await_holding_refcell_ref
 )]
+#![doc = include_str!("../../docs/viewer.md")]
 
 pub mod components;
 pub mod config;

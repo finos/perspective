@@ -313,7 +313,7 @@ impl View {
             id: update_id,
         }));
 
-        self.client.unsubscribe(update_id)?;
+        self.client.unsubscribe(update_id).await?;
         match self.client.oneshot(&msg).await? {
             ClientResp::ViewRemoveOnUpdateResp(_) => Ok(()),
             resp => Err(resp.into()),

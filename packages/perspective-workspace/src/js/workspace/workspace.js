@@ -464,14 +464,20 @@ export class PerspectiveWorkspace extends SplitPanel {
 
     async duplicate(widget) {
         if (this.dockpanel.mode === "single-document") {
-            this.toggleSingleDocument(widget);
+            const _task = await this._maximizedWidget.viewer.toggleConfig(
+                false
+            );
+            this._unmaximize();
         }
+
         const config = await widget.save();
+        config.settings = false;
         config.title = config.title ? `${config.title} (*)` : "";
         const duplicate = this._createWidgetAndNode({ config });
         if (config.linked) {
             this._linkWidget(duplicate);
         }
+
         if (widget.master) {
             const index = this.masterPanel.widgets.indexOf(widget) + 1;
             this.masterPanel.insertWidget(index, duplicate);

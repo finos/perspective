@@ -537,7 +537,7 @@ impl PerspectiveViewerElement {
     /// viewer.setAutoSize(false);
     /// ```
     #[wasm_bindgen]
-    pub fn setAutoSize(&mut self, autosize: bool) {
+    pub fn setAutoSize(&self, autosize: bool) {
         if autosize {
             let handle = Some(ResizeObserverHandle::new(
                 &self.elem,
@@ -569,7 +569,7 @@ impl PerspectiveViewerElement {
     /// viewer.setAutoPause(false);
     /// ```
     #[wasm_bindgen]
-    pub fn setAutoPause(&mut self, autopause: bool) {
+    pub fn setAutoPause(&self, autopause: bool) {
         if autopause {
             let handle = Some(IntersectionObserverHandle::new(
                 &self.elem,
@@ -689,7 +689,7 @@ impl PerspectiveViewerElement {
     /// viewer.setThrottle(1000);
     /// ```
     #[wasm_bindgen]
-    pub fn setThrottle(&mut self, val: Option<f64>) {
+    pub fn setThrottle(&self, val: Option<f64>) {
         self.renderer.set_throttle(val);
     }
 

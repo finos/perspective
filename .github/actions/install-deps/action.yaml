@@ -32,6 +32,9 @@ inputs:
     python:
         default: "true"
         description: "Install Python dependencies?"
+    playwright:
+        default: "false"
+        description: "Install browsers for playwright testing"
     clean:
         default: "false"
         description: "Clean unused deps. This is helpful if we run out of HD but slow!"
@@ -117,12 +120,24 @@ runs:
               vcpkg.exe integrate install
               echo "VCPKG_INSTALLATION_ROOT=${env:VCPKG_INSTALLATION_ROOT}"
               echo "VCPKG_INSTALLATION_ROOT=${env:VCPKG_INSTALLATION_ROOT}" >> $env:GITHUB_OUTPUT
+              echo "${env:VCPKG_INSTALLATION_ROOT}" >> $env:GITHUB_PATH
+              echo "VCPKG_ROOT=${env:VCPKG_INSTALLATION_ROOT}" >> $env:GITHUB_ENV
               dir env:
           env:
               PYTHON_VERSION: ${{ matrix.python-version }}
               VCPKG_DEFAULT_TRIPLET: x64-windows
               VCPKG_PLATFORM_TOOLSET: v143
           if: ${{ runner.os == 'Windows' && inputs.cpp == 'true' }}
+
+        # https://github.com/apache/arrow/issues/38391
+        - if: ${{ runner.os == 'macOS' }}
+          shell: bash
+          run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV
+
+        # Use python 3.9 from manylinu
+        - run: echo "/opt/python/cp39-cp39/bin" >> $GITHUB_PATH
+          shell: bash
+          if: ${{ runner.os == 'Linux' }}
 
         - name: Set up Python ${{ matrix.python-version }}
           uses: actions/setup-python@v5
@@ -179,12 +194,12 @@ runs:
 
         - name: Install JS dependencies
           shell: bash
-          if: ${{ inputs.javascript == 'true' }}
+          if: ${{ inputs.javascript == 'true' && inputs.playwright == 'true' }}
           run: pnpm install
 
         - name: Install JS dependencies
           shell: bash
-          if: ${{ inputs.javascript == 'false' }}
+          if: ${{ inputs.javascript == 'false' || inputs.playwright == 'false'}}
           run: pnpm install --ignore-scripts
 
         - name: Install Python dependencies

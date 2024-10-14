@@ -39,7 +39,7 @@ describe_jupyter(
         test_jupyter(
             "Loads data",
             [
-                "w = perspective.PerspectiveWidget(arrow_data, columns=['f64', 'str', 'datetime'])",
+                "w = perspective.widget.PerspectiveWidget(arrow_data, columns=['f64', 'str', 'datetime'])",
                 "w",
             ],
             async ({ page }) => {
@@ -63,7 +63,7 @@ describe_jupyter(
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
+                    "w = perspective.widget.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
                 ].join("\n"),
                 "w",
                 "table.update(arrow_data)",
@@ -90,7 +90,7 @@ describe_jupyter(
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
+                    "w = perspective.widget.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
                 ].join("\n"),
                 "w",
             ],
@@ -119,7 +119,7 @@ describe_jupyter(
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'], settings=False)",
+                    "w = perspective.widget.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'], settings=False)",
                 ].join("\n"),
                 "w",
             ],
@@ -140,7 +140,7 @@ describe_jupyter(
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table, plugin_config={'edit_mode': 'EDIT'})",
+                    "w = perspective.widget.PerspectiveWidget(table, plugin_config={'edit_mode': 'EDIT'})",
                 ].join("\n"),
                 "w",
             ],
@@ -158,7 +158,7 @@ describe_jupyter(
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table)",
+                    "w = perspective.widget.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
             ],
@@ -184,7 +184,7 @@ describe_jupyter(
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table)",
+                    "w = perspective.widget.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
             ],
@@ -213,7 +213,7 @@ describe_jupyter(
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table)",
+                    "w = perspective.widget.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
             ],
@@ -304,7 +304,7 @@ w.theme = "Pro Dark"`
                     "server = perspective.Server()",
                     "client = server.new_local_client()",
                     "table = client.table(arrow_data)",
-                    "w = perspective.PerspectiveWidget(table)",
+                    "w = perspective.widget.PerspectiveWidget(table)",
                 ].join("\n"),
                 "w",
             ],
@@ -389,7 +389,7 @@ assert w.theme == "Pro Dark"
         test_jupyter(
             "Edit from frontend - end to end",
             [
-                'w = perspective.PerspectiveWidget({"a": [True, False, True], "b": ["abc", "def", "ghi"]}, index="b", plugin_config={"edit_mode": "EDIT"})',
+                'w = perspective.widget.PerspectiveWidget({"a": [True, False, True], "b": ["abc", "def", "ghi"]}, index="b", plugin_config={"edit_mode": "EDIT"})',
                 "w",
             ],
             async ({ page }) => {
@@ -434,7 +434,7 @@ assert w.theme == "Pro Dark"
 server = perspective.Server()
 client = server.new_local_client()
 table = client.table(arrow_data)
-w = perspective.PerspectiveWidget(table)
+w = perspective.widget.PerspectiveWidget(table)
 config = w.save()
 perpsective.PerspectiveWidget(df, **config)
                         `

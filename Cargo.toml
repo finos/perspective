@@ -12,18 +12,26 @@
 
 [workspace]
 resolver = "2"
+default-members = [
+    "rust/perspective",
+    "rust/perspective-client",
+    "rust/perspective-js",
+    "rust/perspective-python",
+    "rust/perspective-server",
+    "rust/perspective-viewer",
+]
 members = [
     "rust/lint",
     "rust/generate-metadata",
     "rust/bootstrap",
     "rust/bootstrap-runtime",
-    "rust/perspective-viewer",
     "rust/bundle",
     "rust/perspective",
     "rust/perspective-client",
     "rust/perspective-js",
     "rust/perspective-python",
     "rust/perspective-server",
+    "rust/perspective-viewer",
     "examples/rust-axum",
 ]
 

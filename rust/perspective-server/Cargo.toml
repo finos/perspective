@@ -36,8 +36,7 @@ default = ["python"]
 external-cpp = []
 wasm-exceptions = []
 python = []
-export-cpp-only = []
-no-build-cpp = []
+disable-cpp = []
 
 [build-dependencies]
 cmake = "0.1.50"

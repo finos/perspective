@@ -91,6 +91,11 @@ async function choose_docker() {
 async function focus_package() {
     const choices = [
         {
+            key: "r",
+            name: "perspective-docs",
+            value: "perspective-docs",
+        },
+        {
             key: "c",
             name: "perspective-cpp",
             value: "perspective-cpp",
@@ -176,7 +181,7 @@ async function focus_package() {
                 }
             },
             loop: false,
-            pageSize: 12,
+            pageSize: 20,
             choices,
         },
     ]);

@@ -111,6 +111,7 @@ pub fn websocket_handler() -> MethodRouter<Server> {
                 tracing::error!("Internal error {}", msg);
             }
 
+            tracing::info!("{addr} Disconnected.");
             session.close().await;
         })
     }
