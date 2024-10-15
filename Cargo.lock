@@ -1807,7 +1807,6 @@ dependencies = [
 name = "perspective-bootstrap-runtime"
 version = "0.0.0"
 dependencies = [
- "simd-adler32",
  "talc",
  "zune-inflate",
 ]
@@ -2678,8 +2677,7 @@ dependencies = [
 [[package]]
 name = "simd-adler32"
 version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
+source = "git+https://github.com/mcountryman/simd-adler32.git?rev=140cde033e8b9a12d4de840648c65ccd5320bcc5#140cde033e8b9a12d4de840648c65ccd5320bcc5"
 
 [[package]]
 name = "slab"

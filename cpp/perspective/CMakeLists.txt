@@ -235,17 +235,20 @@ if(PSP_WASM_BUILD)
             ")
         endif()
     else()
-        # Pyodide RELEASE block
-        set(OPT_FLAGS " \
-            -O3 \
-            -g0 \
+        set(OPT_FLAGS " -O3 -g0 ")
+        if(NOT PSP_PYODIDE)
+            set(OPT_FLAGS " \
+                ${OPT_FLAGS} \
+                -mbulk-memory \
+                -msimd128 \
+                -msse4.2 \
             ")
+        endif()
+
         if (PSP_WASM_EXCEPTIONS)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
         endif()
     endif()
-
-    set(ASYNC_MODE_FLAGS "")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(WIN32)
         if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
@@ -272,7 +275,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                     -Wover-aligned \
                     ")
             else ()
-                 set(OPT_FLAGS " \
+                set(OPT_FLAGS " \
                     -O0 \
                     -fexceptions \
                     -g3 \
@@ -292,8 +295,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             endif()
         endif()
     endif()
-
-    set(ASYNC_MODE_FLAGS "")
 
     # Boost is a system dependency and must be present and built on the system.
     if(PSP_PYODIDE)
@@ -323,27 +324,18 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 endif()
 
+set(RAPIDJSON_SSE42 ON CACHE BOOL "Enable RapidJSON SIMD")
 set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
 
-
-set(CMAKE_C_FLAGS "  \
--O3 \
-")
+set(CMAKE_C_FLAGS " -O3 ${OPT_FLAGS} ")
 if (PSP_WASM_EXCEPTIONS)
-set(CMAKE_CXX_FLAGS " -fwasm-exceptions \
--O3 \
--g0 \
-")
+    set(CMAKE_CXX_FLAGS " -fwasm-exceptions ${OPT_FLAGS} ")
 else()
-set(CMAKE_CXX_FLAGS " \
--O3 \
-")
-
+    set(CMAKE_CXX_FLAGS " -O3 ")
 endif()
 
 if(PSP_PYODIDE)
     set(RELOCATABLE_FLAGS "-sRELOCATABLE=1 -sSIDE_MODULE=2 -sWASM_BIGINT=1")
-
     string(APPEND CMAKE_EXE_LINKER_FLAGS "${RELOCATABLE_FLAGS}")
     string(APPEND CMAKE_C_FLAGS "${RELOCATABLE_FLAGS}")
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
@@ -557,7 +549,6 @@ else()
         -s TEXTDECODER=2 \
         -s STANDALONE_WASM=1 \
         -s DYNAMIC_EXECUTION=0 \
-        -s BINARYEN_EXTRA_PASSES=--one-caller-inline-max-function-size=19306 \
         -s EXPORT_NAME=\"load_perspective\" \
         -s MAXIMUM_MEMORY=4gb \
         -s ERROR_ON_UNDEFINED_SYMBOLS=0 \

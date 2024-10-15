@@ -30,8 +30,8 @@ struct BundleArgs {
     features: Option<String>,
 }
 
-use wasm_bindgen_cli_support::Bindgen;
-use wasm_opt::OptimizationOptions;
+use wasm_bindgen_cli_support::{Bindgen, EncodeInto};
+use wasm_opt::{Feature, OptimizationOptions};
 
 /// Run the packages `build` task with the appropriate flags. These can't be
 /// defined in the `/.cargo/config.toml` because they would define this build
@@ -68,7 +68,9 @@ fn bindgen(outdir: &Path, artifact: &str, is_release: bool) {
         .web(true)
         .unwrap()
         .input_path(input)
+        .encode_into(EncodeInto::Always)
         .typescript(true)
+        .reference_types(true)
         .out_name(&format!("{}.wasm", artifact.replace('_', "-")))
         .generate(outdir)
         .unwrap();
@@ -78,7 +80,9 @@ fn bindgen(outdir: &Path, artifact: &str, is_release: bool) {
 fn opt(outpath: &Path, is_release: bool) {
     if is_release {
         OptimizationOptions::new_optimize_for_size_aggressively()
-            .one_caller_inline_max_size(19306)
+            .enable_feature(Feature::BulkMemory)
+            .enable_feature(Feature::ReferenceTypes)
+            .enable_feature(Feature::Simd)
             .run(outpath, outpath)
             .unwrap();
     }
