@@ -1,4 +1,4 @@
-From d00ff7f47916279555776930a4796ae7abb11b70 Mon Sep 17 00:00:00 2001
+From f2b12a311d1a14ab5d9f67428201e1389748a9c1 Mon Sep 17 00:00:00 2001
 From: Tom Jakubowski <tom@prospective.dev>
 Date: Fri, 11 Oct 2024 12:23:29 -0700
 Subject: [PATCH] GH-44384: [C++] Use CMAKE_LIBTOOL on macOS
@@ -13,7 +13,7 @@ libtool is detected.
  1 file changed, 17 insertions(+), 13 deletions(-)
 
 diff --git a/cpp/cmake_modules/BuildUtils.cmake b/cpp/cmake_modules/BuildUtils.cmake
-index 692efa78376f4..12550bae24578 100644
+index 692efa78376f4..eb94563afcf77 100644
 --- a/cpp/cmake_modules/BuildUtils.cmake
 +++ b/cpp/cmake_modules/BuildUtils.cmake
 @@ -97,23 +97,27 @@ function(arrow_create_merged_static_lib output_target)
@@ -43,8 +43,8 @@ index 692efa78376f4..12550bae24578 100644
 +      # HINTS is used before system paths and before PATHS, so we use that
 +      # even though hard coded paths should go in PATHS
 +      # TODO: use a VALIDATOR when we require cmake >= 3.25
-+      find_program(LIBTOOL_MACOS libtool HINTS /usr/bin
-+                                               /Library/Developer/CommandLineTools/usr/bin)
++      find_program(LIBTOOL_MACOS libtool
++                   HINTS /usr/bin /Library/Developer/CommandLineTools/usr/bin)
 +    endif()
 +
 +    # confirm that the libtool we found is Apple's libtool
