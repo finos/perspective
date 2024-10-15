@@ -193,7 +193,7 @@ if(PSP_PYTHON_BUILD AND MACOS)
 endif()
 
 # ######################
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/include")
+set(psp_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
 
 if(NOT DEFINED PSP_WASM_EXCEPTIONS AND NOT PSP_PYTHON_BUILD)
     set(PSP_WASM_EXCEPTIONS ON)
@@ -205,12 +205,6 @@ if(PSP_WASM_BUILD)
     # ###################
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     list(APPEND CMAKE_PREFIX_PATH /usr/local)
-
-    # Assumes that Boost includes will be in this folder.
-    include_directories(SYSTEM "/usr/local/include")
-
-    # Include this docker-only directory.
-    include_directories(SYSTEM "/boost_includes")
 
     set(EXTENDED_FLAGS " \
         -Wall \
@@ -298,28 +292,20 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     # Boost is a system dependency and must be present and built on the system.
     if(PSP_PYODIDE)
         set(CMAKE_FIND_ROOT_PATH "${CMAKE_FIND_ROOT_PATH};/usr/local/")
+    endif()
+    if(NOT WIN32)
         find_package(Boost REQUIRED)
-    elseif(NOT WIN32)
-        set(Boost_USE_STATIC_LIBS ON)
-        find_package(Boost REQUIRED COMPONENTS system)
     endif()
 
     if(WIN32)
         foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
             SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
         endforeach(warning)
-
-    # When linking against Boost on Azure, bcrypt fails to link:
-    # - https://github.com/microsoft/vcpkg/issues/4481
-    # - https://github.com/boostorg/uuid/issues/68
-    # add_definitions("-DBOOST_UUID_FORCE_AUTO_LINK")
     else()
-        include_directories("/usr/local/include")
     endif()
 
     if(PSP_PYTHON_BUILD)
         set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-        include_directories("${PSP_PYTHON_SRC}/perspective/include")
     endif()
 endif()
 
@@ -350,43 +336,48 @@ if(PSP_PYODIDE)
 endif()
 
 # Build header-only dependencies from external source
+set(all_deps_INCLUDE_DIRS "")
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
+list(APPEND all_deps_INCLUDE_DIRS
+    ${date_INCLUDE_DIRS}
+    ${hopscotch_INCLUDE_DIRS}
+    ${ordered-map_INCLUDE_DIRS}
+    ${rapidjson_INCLUDE_DIRS})
 
 # Arrow builds its own dependencies
 psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
-
-if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
-    # Boost must be added after arrow to prevent linking bug on Windows.
-    if(WIN32)
-        set(Boost_USE_STATIC_LIBS ON)
-        find_package(Boost REQUIRED COMPONENTS system)
-    endif()
-    if(NOT Boost_FOUND)
-        message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
-    else()
-        psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-        if(WIN32)
-            include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-            add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
-        endif()
-    endif()
-endif()
-
+list(APPEND all_deps_INCLUDE_DIRS
+    ${arrow_INCLUDE_DIRS})
 
 # Build re2 as our regex library
 # this is a workaround for some re2-specific weirdness
 add_definitions(-DTARGET_OS_OSX=1)
 psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
+list(APPEND all_deps_INCLUDE_DIRS
+    ${re2_INCLUDE_DIRS})
 
 # Build exprtk for expression parsing
 psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
+list(APPEND all_deps_INCLUDE_DIRS
+    ${exprtk_INCLUDE_DIRS})
 
 # Protobuf setup
 add_subdirectory(${PSP_CMAKE_MODULE_PATH}/../cpp/protos "${CMAKE_BINARY_DIR}/protos-build")
+
+# Boost is likely to be installed on a system path, like /usr/local, which may
+# also contain conflicting versions of our own dependencies.  So be sure and
+# add it last to the include path.
+find_package(Boost REQUIRED)
+if(NOT Boost_FOUND)
+    message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
+else()
+    psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
+endif()
+list(APPEND all_deps_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
 # ####################
 set(CMAKE_C_FLAGS_DEBUG "")
@@ -563,6 +554,7 @@ if(PSP_WASM_BUILD AND NOT PSP_PYTHON_BUILD)
     set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} --pre-js \"${PSP_CPP_SRC}/env.js\" ")
 
     add_library(psp ${WASM_SOURCE_FILES})
+    target_include_directories(psp SYSTEM PRIVATE ${psp_INCLUDE_DIRS} ${all_deps_INCLUDE_DIRS})
     target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
     target_link_libraries(psp PRIVATE arrow_static re2 protos)
@@ -603,6 +595,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
             set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} --pre-js \"${PSP_CPP_SRC}/env.js\" ")
             add_library(psp STATIC ${PYTHON_SOURCE_FILES})
+            target_include_directories(psp SYSTEM PRIVATE ${psp_INCLUDE_DIRS} ${all_deps_INCLUDE_DIRS})
             target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1 PSP_ENABLE_WASM=1)
             # support for emscripten exceptions https://emscripten.org/docs/porting/exceptions.html#emscripten-javascript-based-exception-support
             target_compile_options(psp PUBLIC -fexceptions -fvisibility=hidden)
@@ -612,10 +605,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         else()
             # Cpython
             add_library(psp STATIC ${PYTHON_SOURCE_FILES})
+            target_include_directories(psp SYSTEM PRIVATE ${psp_INCLUDE_DIRS} ${all_deps_INCLUDE_DIRS})
             target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
         endif()
-
-        include_directories(${PSP_PYTHON_SRC}/include)
 
         if(MACOS OR NOT MANYLINUX)
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
@@ -632,6 +624,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_link_libraries(psp PRIVATE arrow_static re2 protos)
     else()
         add_library(psp STATIC ${WASM_SOURCE_FILES})
+        target_include_directories(psp SYSTEM PRIVATE ${psp_INCLUDE_DIRS} ${all_deps_INCLUDE_DIRS})
         target_compile_options(psp PRIVATE -fvisibility=hidden)
         target_link_libraries(psp PRIVATE arrow_static re2 protos)
     endif()
@@ -654,8 +647,4 @@ endif()
 # root dir instead of teh `target` dir.
 if(NOT DEFINED ENV{PSP_DISABLE_CLANGD})
     include(SetupClangd)
-endif()
-
-if(NOT WIN32)
-    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 endif()
