@@ -355,22 +355,7 @@ psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 
-# ExternalProject_Add was not working for zstd, SOURCE_SUBDIR was not being honored.
-include(FetchContent)
-
-set(ZSTD_BUILD_STATIC ON)
-set(ZSTD_BUILD_SHARED OFF)
-set(ZSTD_BUILD_COMPRESSION OFF)
-
-FetchContent_Declare(
-    zstd
-    URL "https://github.com/facebook/zstd/releases/download/v1.5.5/zstd-1.5.5.tar.gz"
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    SOURCE_SUBDIR build/cmake
-)
-
-FetchContent_MakeAvailable(zstd)
-
+# Arrow builds its own dependencies
 psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
@@ -644,7 +629,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
         # Link against arrow static library
         # Linking against arrow_static also links against its bundled dependencies
-        target_link_libraries(psp PRIVATE arrow_static re2 protos libzstd_static)
+        target_link_libraries(psp PRIVATE arrow_static re2 protos)
     else()
         add_library(psp STATIC ${WASM_SOURCE_FILES})
         target_compile_options(psp PRIVATE -fvisibility=hidden)
