@@ -293,9 +293,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(PSP_PYODIDE)
         set(CMAKE_FIND_ROOT_PATH "${CMAKE_FIND_ROOT_PATH};/usr/local/")
     endif()
-    if(NOT WIN32)
-        find_package(Boost REQUIRED)
-    endif()
 
     if(WIN32)
         foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
@@ -371,7 +368,7 @@ add_subdirectory(${PSP_CMAKE_MODULE_PATH}/../cpp/protos "${CMAKE_BINARY_DIR}/pro
 # Boost is likely to be installed on a system path, like /usr/local, which may
 # also contain conflicting versions of our own dependencies.  So be sure and
 # add it last to the include path.
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS headers)
 if(NOT Boost_FOUND)
     message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
 else()
