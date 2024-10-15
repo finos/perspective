@@ -7,7 +7,7 @@ set(D "$")
 # Helper to grab dependencies from remote sources #
 # ##################################################
 function(psp_build_dep name cmake_file)
-    if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build AND NOT name STREQUAL "lz4")
+    if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
         psp_build_message("${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
     else()
         configure_file(${cmake_file} ${CMAKE_BINARY_DIR}/${name}-download/CMakeLists.txt)
@@ -73,12 +73,6 @@ function(psp_build_dep name cmake_file)
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
-    elseif(${name} STREQUAL lz4)
-        # lz4's CMakeLists.txt is in a subdir, build/cmake
-        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src/build/cmake
-            ${CMAKE_BINARY_DIR}/${name}-build
-            EXCLUDE_FROM_ALL)
-        include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/lib)
     elseif(${name} STREQUAL protobuf)
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
@@ -93,12 +87,4 @@ function(psp_build_dep name cmake_file)
         include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src/include)
         include_directories(SYSTEM ${CMAKE_BINARY_DIR}/${name}-src)
     endif()
-
-    if(NOT PSP_WASM_BUILD AND (MACOS OR NOT MANYLINUX))
-        if(${name} STREQUAL arrow_static OR ${name} STREQUAL flatbuffers OR ${name} STREQUAL double-conversion OR ${name} STREQUAL re2)
-            target_compile_options(${name} PRIVATE -fvisibility=hidden)
-        endif()
-    endif()
 endfunction()
-
-# #############################
