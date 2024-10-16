@@ -15,6 +15,7 @@ use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 use cmake::Config;
+use shlex::Shlex;
 
 pub fn copy_dir_all(
     src: impl AsRef<Path>,
@@ -104,6 +105,12 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
 
     if !cfg!(windows) {
         dst.build_arg(format!("-j{}", num_cpus::get()));
+    }
+
+    if let Ok(cmake_args) = std::env::var("CMAKE_ARGS") {
+        for arg in Shlex::new(&cmake_args) {
+            dst.configure_arg(arg);
+        }
     }
 
     println!("cargo:warning=MESSAGE Building cmake {}", profile);
