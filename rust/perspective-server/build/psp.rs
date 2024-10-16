@@ -77,13 +77,19 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     }
 
     if cfg!(windows) {
-        dst.define(
-            "CMAKE_TOOLCHAIN_FILE",
-            format!(
-                "{}/scripts/buildsystems/vcpkg.cmake",
-                std::env::var("VCPKG_ROOT").unwrap().replace("\\", "/")
-            ),
-        );
+        match std::env::var("VCPKG_ROOT") {
+            Ok(vcpkg_root) => {
+                dst.define(
+                    "CMAKE_TOOLCHAIN_FILE",
+                    format!(
+                        "{}/scripts/buildsystems/vcpkg.cmake",
+                        vcpkg_root.replace("\\", "/")
+                    ),
+                );
+            Err(_) => {
+                println!("cargo:warning=VCPKG_ROOT not set in environment, not setting CMAKE_TOOLCHAIN_FILE")
+            }
+        }
     }
 
     if std::env::var("CARGO_FEATURE_PYTHON").is_ok() {
