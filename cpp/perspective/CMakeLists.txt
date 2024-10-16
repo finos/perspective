@@ -339,6 +339,9 @@ list(APPEND all_deps_INCLUDE_DIRS
     ${ordered-map_INCLUDE_DIRS}
     ${rapidjson_INCLUDE_DIRS})
 
+psp_build_dep("boost" "${PSP_CMAKE_MODULE_PATH}/boost.txt.in")
+list(APPEND all_deps_INCLUDE_DIRS ${boost_INCLUDE_DIRS})
+
 # Arrow builds its own dependencies
 psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
@@ -359,18 +362,6 @@ list(APPEND all_deps_INCLUDE_DIRS
 
 # Protobuf setup
 add_subdirectory(${PSP_CMAKE_MODULE_PATH}/../cpp/protos "${CMAKE_BINARY_DIR}/protos-build")
-
-# Boost is likely to be installed on a system path, like /usr/local, which may
-# also contain conflicting versions of our own dependencies.  So be sure and
-# add it last to the include path.
-#
-# The PATHS are required for the emscripten build, which sets
-# (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY) and thus ignores host system
-# directories. Header-only boost is safe to use when cross-compiling, even if
-# it's in a host system directory.
-find_package(Boost REQUIRED PATHS "/usr/local" "/opt/homebrew")
-psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-list(APPEND all_deps_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
 # ####################
 set(CMAKE_C_FLAGS_DEBUG "")
