@@ -86,6 +86,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
                         vcpkg_root.replace("\\", "/")
                     ),
                 );
+            }
             Err(_) => {
                 println!("cargo:warning=VCPKG_ROOT not set in environment, not setting CMAKE_TOOLCHAIN_FILE")
             }
