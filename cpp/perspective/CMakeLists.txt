@@ -289,11 +289,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
     set(ASYNC_MODE_FLAGS "")
 
-    # Boost is a system dependency and must be present and built on the system.
-    if(PSP_PYODIDE)
-        set(CMAKE_FIND_ROOT_PATH "${CMAKE_FIND_ROOT_PATH};/usr/local/")
-    endif()
-
     if(WIN32)
         foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
             SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
@@ -368,12 +363,13 @@ add_subdirectory(${PSP_CMAKE_MODULE_PATH}/../cpp/protos "${CMAKE_BINARY_DIR}/pro
 # Boost is likely to be installed on a system path, like /usr/local, which may
 # also contain conflicting versions of our own dependencies.  So be sure and
 # add it last to the include path.
-find_package(Boost REQUIRED COMPONENTS headers)
-if(NOT Boost_FOUND)
-    message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
-else()
-    psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-endif()
+#
+# The PATHS are required for the emscripten build, which sets
+# (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY) and thus ignores host system
+# directories. Header-only boost is safe to use when cross-compiling, even if
+# it's in a host system directory.
+find_package(Boost REQUIRED PATHS "/usr/local" "/opt/homebrew")
+psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
 list(APPEND all_deps_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
 # ####################
