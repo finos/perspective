@@ -161,7 +161,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                 if (file.endsWith(".js")) {
                     let contents = fs.readFileSync(file).toString();
                     const symbol = contents.match(
-                        /__PSP_INLINE_WORKER__\(([a-zA-Z0-9_]+?)\)/
+                        /__PSP_INLINE_WORKER__\(([a-zA-Z0-9_\$]+?)\)/
                     );
                     if (symbol?.[1]) {
                         const filename = contents.match(
@@ -169,7 +169,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                         );
 
                         contents = contents.replace(
-                            /__PSP_INLINE_WORKER__\([a-zA-Z0-9_]+?\)/,
+                            /__PSP_INLINE_WORKER__\([a-zA-Z0-9_\$]+?\)/,
                             `"${filename[1]}"`
                         );
 

@@ -176,6 +176,18 @@ const datetime_data_local = [
                     table.delete();
                 });
 
+                test("w > date as number", async function () {
+                    var table = await perspective.table(schema);
+                    table.update(date_results);
+                    var view = await table.view({
+                        filter: [["w", ">", 1538352000000]],
+                    });
+                    let json = await view.to_json();
+                    expect(json).toEqual(date_results.slice(2, 4));
+                    view.delete();
+                    table.delete();
+                });
+
                 test("w < date as string", async function () {
                     var table = await perspective.table(schema);
                     table.update(date_results);

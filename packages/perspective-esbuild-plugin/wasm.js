@@ -90,7 +90,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
                     let updated = false;
                     for (const key of KEYSET) {
                         const symbol = contents.match(
-                            new RegExp(`${key}\\(([a-zA-Z0-9_]+?)\\)`)
+                            new RegExp(`${key}\\(([a-zA-Z0-9_\$]+?)\\)`)
                         );
 
                         if (symbol?.[1]) {
@@ -100,7 +100,10 @@ exports.WasmPlugin = function WasmPlugin(inline) {
                             );
 
                             contents = contents.replace(
-                                new RegExp(`${key}\\(([a-zA-Z0-9_]+?)\\)`, "g"),
+                                new RegExp(
+                                    `${key}\\(([a-zA-Z0-9_\$]+?)\\)`,
+                                    "g"
+                                ),
                                 `"${filename[1]}"`
                             );
                         }

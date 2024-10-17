@@ -33,11 +33,11 @@ exports.get_examples = function get_examples(
     root = "https://perspective.finos.org/"
 ) {
     const standalone = [
-        {
-            img: "https://perspective.finos.org/img/jupyterlab.png?",
-            url: "http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks",
-            name: "jupyterlab",
-        },
+        // {
+        //     img: "https://perspective.finos.org/img/jupyterlab.png?",
+        //     url: "http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks",
+        //     name: "jupyterlab",
+        // },
     ];
 
     const hashes = LOCAL_EXAMPLES.map((x) => ({

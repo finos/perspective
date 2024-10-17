@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { start_jlab, kill_jlab } from "./jlab_start.mjs";
+import { start_jlab, kill_jlab } from "./jlab_start.ts";
 
 async function globalSetup() {
     // Start Jupyterlab in the background

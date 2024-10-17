@@ -49,7 +49,8 @@
         "@jupyterlab/builder": "^4",
         "copy-webpack-plugin": "~12",
         "@prospective.co/procss": "^0.1.16",
-        "cpy": "^9.0.1"
+        "cpy": "^9.0.1",
+        "zx": "^8.1.8"
     },
     "jupyterlab": {
         "webpackConfig": "./webpack.config.js",

@@ -12,7 +12,6 @@
 
 import * as fs from "node:fs";
 import { createRequire } from "node:module";
-import "zx/globals";
 
 /**
  * Load a file as an `ArrayBuffer`, which is useful for loading Apache Arrow

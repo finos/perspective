@@ -10,12 +10,13 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! A collection of (de-)serializable structs which capture the application
-//! state, suitable for persistence, history, etc. features.
+//! A collection of [`serde::Serialize`]/[`serde::Deserialize`] structs which
+//! capture the application state, suitable for persistence, history, etc.
+//! features.
 
 mod aggregates;
 mod column_type;
-mod expressions;
+pub mod expressions;
 mod filters;
 mod plugin;
 mod sort;

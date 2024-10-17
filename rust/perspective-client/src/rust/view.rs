@@ -102,6 +102,7 @@ impl From<ViewWindow> for ViewPort {
     }
 }
 
+#[doc = include_str!("../../docs/view.md")]
 #[derive(Clone, Debug)]
 pub struct View {
     pub name: String,
@@ -312,7 +313,7 @@ impl View {
             id: update_id,
         }));
 
-        self.client.unsubscribe(update_id)?;
+        self.client.unsubscribe(update_id).await?;
         match self.client.oneshot(&msg).await? {
             ClientResp::ViewRemoveOnUpdateResp(_) => Ok(()),
             resp => Err(resp.into()),

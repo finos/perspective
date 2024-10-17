@@ -10,38 +10,32 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-[workspace]
-resolver = "2"
-default-members = [
-    "rust/perspective",
-    "rust/perspective-client",
-    "rust/perspective-js",
-    "rust/perspective-python",
-    "rust/perspective-server",
-    "rust/perspective-viewer",
-]
-members = [
-    "rust/lint",
-    "rust/generate-metadata",
-    "rust/bootstrap",
-    "rust/bootstrap-runtime",
-    "rust/bundle",
-    "rust/perspective",
-    "rust/perspective-client",
-    "rust/perspective-js",
-    "rust/perspective-python",
-    "rust/perspective-server",
-    "rust/perspective-viewer",
-    "examples/rust-axum",
-]
+[package]
+name = "perspective-metadata"
+description = "A CLI utility for generating Perspective project metadata like TypeScript definitions."
+edition = "2021"
+publish = false
 
-[profile.dev]
-panic = "abort"
-opt-level = "s"
+[[bin]]
+name = "perspective_metadata"
+path = "main.rs"
+bench = false
 
-[profile.release]
-panic = "abort"
-opt-level = "z"
-codegen-units = 1
-lto = true
-strip = true
+[dependencies.ts-rs]
+version = "10.0.0"
+features = ["serde-json-impl", "no-serde-warnings"]
+
+[dependencies.perspective-server]
+path = "../perspective-server"
+features = ["external-cpp", "disable-cpp"]
+
+[dependencies.perspective-client]
+path = "../perspective-client"
+features = ["external-proto", "omit_metadata"]
+
+[dependencies.perspective-js]
+path = "../perspective-js"
+features = ["external-cpp"]
+
+[dependencies.perspective-viewer]
+path = "../perspective-viewer"

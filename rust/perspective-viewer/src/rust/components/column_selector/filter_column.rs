@@ -12,7 +12,7 @@
 
 use std::collections::HashSet;
 
-use chrono::{NaiveDate, TimeZone, Utc};
+use chrono::{Datelike, NaiveDate, TimeZone, Utc};
 use perspective_client::config::*;
 use perspective_client::ColumnType;
 use wasm_bindgen::JsCast;
@@ -96,8 +96,7 @@ impl FilterColumnProps {
     fn get_filter_input(&self) -> Option<String> {
         let filter_type = self.get_filter_type()?;
         match (&filter_type, &self.filter.term()) {
-            (ColumnType::Date, FilterTerm::Scalar(Scalar::Float(x)))
-            | (ColumnType::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => {
+            (ColumnType::Date, FilterTerm::Scalar(Scalar::Float(x))) => {
                 if *x > 0_f64 {
                     Some(
                         Utc.timestamp_opt(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
@@ -109,7 +108,7 @@ impl FilterColumnProps {
                     None
                 }
             },
-            (ColumnType::Datetime, FilterTerm::Scalar(Scalar::Float(x) | Scalar::DateTime(x))) => {
+            (ColumnType::Datetime, FilterTerm::Scalar(Scalar::Float(x))) => {
                 posix_to_utc_str(*x).ok()
             },
             (ColumnType::Boolean, FilterTerm::Scalar(Scalar::Bool(x))) => {
@@ -181,13 +180,16 @@ impl FilterColumnProps {
                     }
                 },
                 Some(ColumnType::Date) => match NaiveDate::parse_from_str(&val, "%Y-%m-%d") {
-                    Ok(ref posix) => posix.and_hms_opt(0, 0, 0).map(|x| {
-                        FilterTerm::Scalar(Scalar::DateTime(x.and_utc().timestamp_millis() as f64))
-                    }),
+                    Ok(ref posix) => Some(FilterTerm::Scalar(Scalar::String(format!(
+                        "{:0>4}-{:0>2}-{:0>2}",
+                        posix.year(),
+                        posix.month(),
+                        posix.day(),
+                    )))),
                     _ => None,
                 },
                 Some(ColumnType::Datetime) => match str_to_utc_posix(&val) {
-                    Ok(x) => Some(FilterTerm::Scalar(Scalar::DateTime(x))),
+                    Ok(x) => Some(FilterTerm::Scalar(Scalar::Float(x))),
                     _ => None,
                 },
                 Some(ColumnType::Boolean) => Some(FilterTerm::Scalar(match val.as_str() {

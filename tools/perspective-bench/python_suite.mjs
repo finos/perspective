@@ -20,8 +20,6 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as url from "node:url";
 
-import "zx/globals";
-
 import * as python from "./src/js/servers/python.mjs";
 import * as all_benchmarks from "./cross_platform_suite.mjs";
 import * as perspective_bench from "./src/js/benchmark.mjs";

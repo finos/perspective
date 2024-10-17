@@ -9,3 +9,5 @@ ts-rs/
 rust/perspective-python/perspective/labextension/
 rust/perspective-python/perspective.data/
 rust/perspective-python/*/data
+expression_gen.md
+rust/perspective-viewer/docs/exprtk.md

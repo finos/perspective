@@ -1881,6 +1881,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "perspective-metadata"
+version = "0.0.0"
+dependencies = [
+ "perspective-client",
+ "perspective-js",
+ "perspective-server",
+ "perspective-viewer",
+ "ts-rs",
+]
+
+[[package]]
 name = "perspective-python"
 version = "3.1.0"
 dependencies = [
@@ -3125,10 +3136,11 @@ dependencies = [
 
 [[package]]
 name = "ts-rs"
-version = "9.0.1"
+version = "10.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b44017f9f875786e543595076374b9ef7d13465a518dd93d6ccdbf5b432dde8c"
+checksum = "3a2f31991cee3dce1ca4f929a8a04fdd11fd8801aac0f2030b0fa8a0a3fef6b9"
 dependencies = [
+ "lazy_static",
  "serde_json",
  "thiserror",
  "ts-rs-macros",
@@ -3136,9 +3148,9 @@ dependencies = [
 
 [[package]]
 name = "ts-rs-macros"
-version = "9.0.1"
+version = "10.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c88cc88fd23b5a04528f3a8436024f20010a16ec18eb23c164b1242f65860130"
+checksum = "0ea0b99e8ec44abd6f94a18f28f7934437809dd062820797c52401298116f70e"
 dependencies = [
  "proc-macro2 1.0.83",
  "quote 1.0.36",

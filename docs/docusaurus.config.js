@@ -75,16 +75,17 @@ const config = {
             "classic",
             /** @type {import('@docusaurus/preset-classic').Options} */
             ({
-                docs: {
-                    sidebarPath: require.resolve("./sidebars.js"),
-                    docItemComponent: require.resolve(
-                        "./src/components/DocItem"
-                    ),
-                    // Please change this to your repo.
-                    // Remove this to remove the "edit this page" links.
-                    // editUrl:
-                    //     "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
-                },
+                docs: false,
+                // docs: {
+                //     //  sidebarPath: require.resolve("./sidebars.js"),
+                //     docItemComponent: require.resolve(
+                //         "./src/components/DocItem"
+                //     ),
+                //     // Please change this to your repo.
+                //     // Remove this to remove the "edit this page" links.
+                //     // editUrl:
+                //     //     "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+                // },
                 // blog: {
                 //     showReadingTime: true,
                 //     // Please change this to your repo.
@@ -112,12 +113,84 @@ const config = {
                     src: "svg/perspective-logo-light.svg",
                 },
                 items: [
-                    // {to: "/blog", label: "News", position: "right"},
                     {
-                        type: "doc",
-                        docId: "js",
+                        type: "dropdown",
                         position: "right",
                         label: "Docs",
+                        items: [
+                            {
+                                type: "html",
+                                value: "<span>JavaScript</span>",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-viewer/latest/perspective_viewer/",
+                                label: "`@finos/perspective-viewer` JavaScript UI API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-js/latest/perspective_js/",
+                                label: "`@finos/perspective` JavaScript Client/Server API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-js/latest/perspective_js/struct.Table.html",
+                                label: "`Table` API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-js/latest/perspective_js/struct.View.html",
+                                label: "`View` API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-js/latest/perspective_js/#installation",
+                                label: "Installation Guide",
+                            },
+                            {
+                                type: "html",
+                                value: "<span>Python</span>",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-python/latest/perspective_python/",
+                                label: "`perspective-python` Python Client/Server API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-python/3.1.0/perspective_python/#perspectivewidget",
+                                label: "`PerspectiveWidget` Jupyter Plugin",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-python/latest/perspective_python/struct.Table.html",
+                                label: "`Table` API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-python/latest/perspective_python/struct.View.html",
+                                label: "`View` API",
+                            },
+                            {
+                                type: "html",
+                                value: "<span>Rust</span>",
+                            },
+                            {
+                                href: "https://docs.rs/perspective/latest/perspective/",
+                                label: "`perspective`, Rust API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-client/latest/perspective_client/struct.Table.html",
+                                label: "`Table` API",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-client/latest/perspective_client/struct.View.html",
+                                label: "`View` API",
+                            },
+                            {
+                                type: "html",
+                                value: "<span>Appendix</span>",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-server/latest/perspective_server/",
+                                label: "Data Binding",
+                            },
+                            {
+                                href: "https://docs.rs/perspective-client/latest/perspective_client/config/expressions/",
+                                label: "Expression Columns",
+                            },
+                        ],
                     },
                     {
                         to: "/examples",
@@ -138,33 +211,33 @@ const config = {
             },
             footer: {
                 links: [
-                    {
-                        title: "Docs",
-                        items: [
-                            {
-                                label: "JavaScript User Guide",
-                                to: "/docs/js",
-                            },
-                            {
-                                label: "Python User Guide",
-                                to: "/docs/python",
-                            },
-                        ],
-                    },
-                    {
-                        title: "More",
-                        items: [
-                            {
-                                label: "GitHub",
-                                href: "https://github.com/finos/perspective",
-                            },
-                            {
-                                href: "https://www.prospective.co/blog",
-                                label: "Blog",
-                                position: "right",
-                            },
-                        ],
-                    },
+                    // {
+                    //     title: "Docs",
+                    //     items: [
+                    //         {
+                    //             label: "JavaScript User Guide",
+                    //             to: "/docs/js",
+                    //         },
+                    //         {
+                    //             label: "Python User Guide",
+                    //             to: "/docs/python",
+                    //         },
+                    //     ],
+                    // },
+                    // {
+                    //     title: "More",
+                    //     items: [
+                    //         {
+                    //             label: "GitHub",
+                    //             href: "https://github.com/finos/perspective",
+                    //         },
+                    //         {
+                    //             href: "https://www.prospective.co/blog",
+                    //             label: "Blog",
+                    //             position: "right",
+                    //         },
+                    //     ],
+                    // },
                 ],
                 copyright: `Copyright © ${new Date().getFullYear()} The Perspective Authors`,
             },

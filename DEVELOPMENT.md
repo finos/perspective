@@ -1,11 +1,6 @@
----
-id: development
-title: Developer Guide
----
-
-Thank you for your interest in contributing to Perspective! This guide will
-teach you everything you need to know to get started hacking on the Perspective
-codebase.
+This guide will teach you everything you need to know to get started hacking on
+the Perspective codebase. Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for
+contribution guidelines.
 
 If you're coming to this project as principally a JavaScript developer, please
 be aware that Perspective is quite a bit more complex than a typical NPM package

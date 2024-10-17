@@ -26,10 +26,6 @@ include = ["src/**/*", "Cargo.toml", "./package.json", "docs/**/*", "build.rs"]
 rustc-args = ["--cfg", "web_sys_unstable_apis"]
 rustdoc-args = ["--html-in-header", "docs/index.html"]
 
-[[bin]]
-name = "perspective-js-metadata"
-path = "src/rust/main.rs"
-
 [lib]
 crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
@@ -65,7 +61,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_bytes = "0.11"
 serde_json = { version = "1.0.107", features = ["raw_value"] }
 serde-wasm-bindgen = "0.6.0"
-ts-rs = { version = "9.0.1", features = [
+ts-rs = { version = "10.0.0", features = [
     "serde-json-impl",
     "no-serde-warnings",
 ] }

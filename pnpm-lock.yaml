@@ -316,8 +316,8 @@ importers:
         specifier: ^4.1.3
         version: 4.1.5
       rimraf:
-        specifier: ^2.5.2
-        version: 2.7.1
+        specifier: ^6
+        version: 6.0.1
 
   examples/python-starlette:
     dependencies:
@@ -347,8 +347,8 @@ importers:
         specifier: ^4.1.3
         version: 4.1.5
       rimraf:
-        specifier: ^2.5.2
-        version: 2.7.1
+        specifier: ^6
+        version: 6.0.1
 
   examples/python-tornado:
     dependencies:
@@ -378,8 +378,8 @@ importers:
         specifier: ^4.1.3
         version: 4.1.5
       rimraf:
-        specifier: ^2.5.2
-        version: 2.7.1
+        specifier: ^6
+        version: 6.0.1
 
   examples/python-tornado-streaming:
     dependencies:
@@ -409,8 +409,8 @@ importers:
         specifier: ^4.1.3
         version: 4.1.5
       rimraf:
-        specifier: ^2.5.2
-        version: 2.7.1
+        specifier: ^6
+        version: 6.0.1
 
   examples/react-example:
     dependencies:
@@ -516,8 +516,8 @@ importers:
         specifier: ^4.1.3
         version: 4.1.5
       rimraf:
-        specifier: ^2.5.2
-        version: 2.7.1
+        specifier: ^6
+        version: 6.0.1
 
   packages/perspective-cli:
     dependencies:
@@ -603,6 +603,9 @@ importers:
       cpy:
         specifier: ^9.0.1
         version: 9.0.1
+      zx:
+        specifier: ^8.1.8
+        version: 8.1.9
 
   packages/perspective-viewer-d3fc:
     dependencies:
@@ -767,6 +770,8 @@ importers:
         specifier: ^0.1.16
         version: 0.1.16
 
+  rust/generate-metadata: {}
+
   rust/perspective: {}
 
   rust/perspective-js:
@@ -784,6 +789,9 @@ importers:
       '@finos/perspective-esbuild-plugin':
         specifier: workspace:^
         version: link:../../packages/perspective-esbuild-plugin
+      '@finos/perspective-metadata':
+        specifier: workspace:^
+        version: link:../generate-metadata
       '@finos/perspective-test':
         specifier: workspace:^
         version: link:../../tools/perspective-test
@@ -831,6 +839,9 @@ importers:
       '@finos/perspective-esbuild-plugin':
         specifier: workspace:^
         version: link:../../packages/perspective-esbuild-plugin
+      '@finos/perspective-metadata':
+        specifier: workspace:^
+        version: link:../generate-metadata
       '@finos/perspective-test':
         specifier: workspace:^
         version: link:../../tools/perspective-test
@@ -950,13 +961,20 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       zx:
-        specifier: 8.1.8
-        version: 8.1.8
+        specifier: ^8.1.8
+        version: 8.1.9
 
-  tools/perspective-scripts: {}
+  tools/perspective-scripts:
+    devDependencies:
+      zx:
+        specifier: ^8.1.8
+        version: 8.1.9
 
   tools/perspective-test:
     dependencies:
+      glob:
+        specifier: ^11
+        version: 11.0.0
       xml-formatter:
         specifier: 2.4.0
         version: 2.4.0
@@ -7547,11 +7565,6 @@ packages:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  rimraf@2.7.1:
-    resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
-    hasBin: true
-
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
     deprecated: Rimraf versions prior to v4 are no longer supported
@@ -8710,8 +8723,8 @@ packages:
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
-  zx@8.1.8:
-    resolution: {integrity: sha512-m8s48skYQ8EcRz9KXfc7rZCjqlZevOGiNxq5tNhDiGnhOvXKRGxVr+ajUma9B6zxMdHGSSbnjV/R/r7Ue2xd+A==}
+  zx@8.1.9:
+    resolution: {integrity: sha512-UHuLHphHmsBYKkAchkSrEN4nzDyagafqC9HUxtc1J7eopaScW6H9dsLJ1lmkAntnLtDTGoM8fa+jrJrXiIfKFA==}
     engines: {node: '>= 12.17.0'}
     hasBin: true
 
@@ -17642,10 +17655,6 @@ snapshots:
 
   reusify@1.0.4: {}
 
-  rimraf@2.7.1:
-    dependencies:
-      glob: 7.2.3
-
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
@@ -19029,7 +19038,7 @@ snapshots:
 
   zwitch@2.0.4: {}
 
-  zx@8.1.8:
+  zx@8.1.9:
     optionalDependencies:
       '@types/fs-extra': 11.0.4
       '@types/node': 22.5.5
