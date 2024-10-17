@@ -2,15 +2,15 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(arrow-download NONE)
 
-# *******************************************************************
-# NOTE: this depedency's CMakeLists.txt is overloaded, make sure to
-# adjust if you update the tag
-# *******************************************************************
+# Makes GIT_SUBMODULES "" in ExternalProject_Add skip initializing submodules
+cmake_policy(SET CMP0097 NEW)
 
 include(ExternalProject)
 ExternalProject_Add(apachearrow
   GIT_REPOSITORY    https://github.com/apache/arrow.git
   GIT_TAG           apache-arrow-17.0.0
+  GIT_SUBMODULES    ""
+  GIT_SHALLOW       TRUE
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/arrow-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/arrow-build"
   SOURCE_SUBDIR     "cpp"
@@ -18,5 +18,7 @@ ExternalProject_Add(apachearrow
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""
-  CMAKE_ARGS        "-DFLATBUFFERS_BUILD_TESTS=OFF -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+  # This patch is to work around https://github.com/apache/arrow/issues/44384
+  # It can be removed when a version of Arrow is released with https://github.com/apache/arrow/pull/44385
+  PATCH_COMMAND     ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> git apply ${CMAKE_SOURCE_DIR}/patches/fix_arrow_libtool.patch
 )
