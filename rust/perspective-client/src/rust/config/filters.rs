@@ -19,17 +19,18 @@ use ts_rs::TS;
 use crate::proto;
 use crate::proto::scalar;
 
+/// This type represents the ViewConfig serializable type, which must be JSON
+/// safe.
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize, TS)]
 #[serde(untagged)]
 pub enum Scalar {
     Float(f64),
     String(String),
     Bool(bool),
-    DateTime(f64),
+    // DateTime(i64),
+    // Date(String),
+    // Int(i32),
     Null,
-    // // Can only have one u64 representation ...
-    // Date(u64)
-    // Int(u32)
 }
 
 impl From<&str> for Scalar {
@@ -50,7 +51,6 @@ impl Display for Scalar {
             Self::Float(x) => write!(fmt, "{}", x),
             Self::String(x) => write!(fmt, "{}", x),
             Self::Bool(x) => write!(fmt, "{}", x),
-            Self::DateTime(x) => write!(fmt, "{}", x),
             Self::Null => write!(fmt, ""),
         }
     }
@@ -159,10 +159,6 @@ impl From<Scalar> for proto::Scalar {
             Scalar::Bool(x) => proto::Scalar {
                 scalar: Some(scalar::Scalar::Bool(x)),
             },
-            // Scalar::Date(_) => todo!(),
-            Scalar::DateTime(x) => proto::Scalar {
-                scalar: Some(scalar::Scalar::Datetime(x as i64)),
-            },
             Scalar::Null => proto::Scalar {
                 scalar: Some(scalar::Scalar::Null(0)),
             },
@@ -175,10 +171,7 @@ impl From<proto::Scalar> for Scalar {
         match value.scalar {
             Some(scalar::Scalar::Bool(x)) => Scalar::Bool(x),
             Some(scalar::Scalar::String(x)) => Scalar::String(x),
-            Some(scalar::Scalar::Int(x)) => Scalar::Float(x as f64),
-            Some(scalar::Scalar::Date(x)) => Scalar::DateTime(x as f64),
             Some(scalar::Scalar::Float(x)) => Scalar::Float(x),
-            Some(scalar::Scalar::Datetime(x)) => Scalar::DateTime(x as f64),
             Some(scalar::Scalar::Null(_)) => Scalar::Null,
             None => Scalar::Null,
         }

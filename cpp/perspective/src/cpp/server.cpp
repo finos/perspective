@@ -1068,22 +1068,49 @@ coerce_to(const t_dtype dtype, const A& val) {
                 );
         }
     } else if constexpr (std::is_same_v<A, double>) {
+        t_tscalar scalar;
+        scalar.clear();
         switch (dtype) {
+            case DTYPE_BOOL:
+                scalar.set(val == 1);
+                return scalar;
+            case DTYPE_UINT32:
+                scalar.set((std::uint32_t)val);
+                return scalar;
+            case DTYPE_UINT64:
+                scalar.set((std::uint64_t)val);
+                return scalar;
+            case DTYPE_INT32:
+                scalar.set(val);
+                return scalar;
+            case DTYPE_INT64:
+                scalar.set((std::int64_t)val);
+                return scalar;
             case DTYPE_FLOAT32:
-                return t_tscalar(static_cast<float>(val));
+                scalar.set(static_cast<float>(val));
+                return scalar;
             case DTYPE_FLOAT64:
-                return t_tscalar(val);
+                scalar.set(val);
+                return scalar;
+            case DTYPE_DATE: {
+                const auto time = static_cast<time_t>(val / 1000);
+                std::tm* tm = std::gmtime(&time);
+                t_date date{
+                    static_cast<std::int16_t>(tm->tm_year + 1900),
+                    static_cast<std::int8_t>(tm->tm_mon),
+                    static_cast<std::int8_t>(tm->tm_mday)
+                };
+
+                scalar.set(date);
+                return scalar;
+            }
+            case DTYPE_TIME: {
+                t_time time{std::chrono::milliseconds((long)val).count()};
+                scalar.set(time);
+                return scalar;
+            }
             default:
-                PSP_COMPLAIN_AND_ABORT("Unsupported type");
-        }
-    } else if constexpr (std::is_same_v<A, float>) {
-        switch (dtype) {
-            case DTYPE_FLOAT32:
-                return t_tscalar(val);
-            case DTYPE_FLOAT64:
-                return t_tscalar(static_cast<double>(val));
-            default:
-                PSP_COMPLAIN_AND_ABORT("Unsupported type");
+                PSP_COMPLAIN_AND_ABORT("Unsupported double type");
         }
     } else if constexpr (std::is_same_v<A, std::int32_t>) {
         return t_tscalar(val);
@@ -1593,7 +1620,6 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 for (const auto& arg : f.value()) {
                     t_tscalar a;
                     a.clear();
-
                     switch (arg.scalar_case()) {
                         case proto::Scalar::kBool: {
                             a.set(arg.bool_());
@@ -1601,16 +1627,13 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                             break;
                         }
                         case proto::Scalar::kFloat: {
-                            a.set(arg.float_());
-                            args.push_back(a);
-                            break;
-                        }
-                        case proto::Scalar::kInt: {
-                            a.set(arg.int_());
-                            args.push_back(a);
-                            break;
-                        }
+                            a = coerce_to(
+                                schema->get_dtype(f.column()), arg.float_()
+                            );
 
+                            args.push_back(a);
+                            break;
+                        }
                         case proto::Scalar::kString: {
                             if (!schema->has_column(f.column())) {
                                 PSP_COMPLAIN_AND_ABORT(
@@ -1623,38 +1646,6 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                             args.push_back(a);
                             break;
                         }
-
-                        case proto::Scalar::kDate: {
-                            auto date_ts = arg.date();
-                            // convert ts to date
-                            auto tt = std::chrono::system_clock::to_time_t(
-                                std::chrono::system_clock::time_point(
-                                    std::chrono::seconds(date_ts)
-                                )
-                            );
-
-                            auto* date = std::localtime(&tt);
-
-                            t_date d{
-                                static_cast<std::int16_t>(date->tm_year + 1900),
-                                static_cast<std::int8_t>(date->tm_mon),
-                                static_cast<std::int8_t>(date->tm_mday)
-                            };
-                            a.set(d);
-                            args.push_back(a);
-                            break;
-                        }
-                        case proto::Scalar::kDatetime: {
-                            auto datetime_ts = arg.datetime();
-                            // convert ts to date
-                            auto tt = t_time(datetime_ts);
-
-                            a.set(tt);
-                            args.push_back(a);
-
-                            break;
-                        }
-
                         case proto::Scalar::kNull:
                             a.set(t_none());
                             args.push_back(a);
@@ -1915,6 +1906,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                         vals.push_back(scalar);
                     }
                 }
+
                 for (const auto& scalar : vals) {
                     auto* s = f->mutable_value()->Add();
                     switch (scalar.get_dtype()) {
@@ -1925,20 +1917,25 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                             s->set_float_(scalar.get<double>());
                             break;
                         case DTYPE_INT64:
-                            s->set_int_(static_cast<std::int32_t>(
-                                scalar.get<std::int64_t>()
-                            ));
+                            s->set_float_((double)scalar.get<std::int64_t>());
                             break;
                         case DTYPE_STR:
                             s->set_string(scalar.get<const char*>());
                             break;
                         case DTYPE_DATE: {
-                            auto tm = scalar.get<t_date>().get_tm();
-                            s->set_date(std::mktime(&tm));
+                            auto tm = scalar.get<t_date>();
+                            std::stringstream ss;
+                            ss << std::setfill('0') << std::setw(4) << tm.year()
+                               << "-" << std::setfill('0') << std::setw(2)
+                               << tm.month() << "-" << std::setfill('0')
+                               << std::setw(2) << tm.day();
+                            s->set_string(ss.str());
                             break;
                         }
                         case DTYPE_TIME:
-                            s->set_datetime(scalar.get<t_time>().raw_value());
+                            s->set_float_(
+                                (double)scalar.get<t_time>().raw_value()
+                            );
                             break;
                         case DTYPE_NONE:
                             s->set_null(

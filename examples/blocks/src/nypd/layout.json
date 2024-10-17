@@ -87,7 +87,10 @@
                 "group_by": ["bucket(\"IncidentDate\", 'M')"],
                 "split_by": [],
                 "columns": ["ComplaintID"],
-                "filter": [["IncidentDate", ">", 473385600000]],
+                "filter": [
+                    ["IncidentDate", ">", "1985-01-01"],
+                    ["IncidentDate", "<", "2025-01-01"]
+                ],
                 "sort": [],
                 "expressions": {
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
@@ -130,7 +133,10 @@
                 "group_by": ["bucket(\"IncidentDate\", 'M')"],
                 "split_by": ["FADOType"],
                 "columns": ["AllegationID"],
-                "filter": [["IncidentDate", ">", 473385600000]],
+                "filter": [
+                    ["IncidentDate", ">", "1985-01-01"],
+                    ["IncidentDate", "<", "2025-01-01"]
+                ],
                 "sort": [["AllegationID", "col asc"]],
                 "expressions": {
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
@@ -148,7 +154,10 @@
                 "group_by": ["bucket(\"IncidentDate\", 'M')"],
                 "split_by": ["FADOType"],
                 "columns": ["AllegationID"],
-                "filter": [["IncidentDate", ">", 473385600000]],
+                "filter": [
+                    ["IncidentDate", ">", "1985-01-01"],
+                    ["IncidentDate", "<", "2025-01-01"]
+                ],
                 "sort": [["AllegationID", "col asc"]],
                 "expressions": {
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
@@ -264,7 +273,10 @@
                 "group_by": ["bucket(\"IncidentDate\", 'M')"],
                 "split_by": ["FADOType"],
                 "columns": ["ComplaintID"],
-                "filter": [["IncidentDate", ">", 473385600000]],
+                "filter": [
+                    ["IncidentDate", ">", "1985-01-01"],
+                    ["IncidentDate", "<", "2025-01-01"]
+                ],
                 "sort": [],
                 "expressions": {
                     "bucket(\"IncidentDate\", 'M')": "bucket(\"IncidentDate\", 'M')"
@@ -301,7 +313,10 @@
                 "group_by": ["bucket(\"IncidentDate\", '3M')"],
                 "split_by": ["Allegation"],
                 "columns": ["AllegationID"],
-                "filter": [["IncidentDate", ">", 473385600000]],
+                "filter": [
+                    ["IncidentDate", ">", "1985-01-01"],
+                    ["IncidentDate", "<", "2025-01-01"]
+                ],
                 "sort": [["IncidentDate", "col asc"]],
                 "expressions": {
                     "bucket(\"IncidentDate\", '3M')": "bucket(\"IncidentDate\", '3M')"
@@ -369,7 +384,10 @@
                 "group_by": ["bucket(\"IncidentDate\", 'Y')"],
                 "split_by": ["month_of_year(\"IncidentDate\")"],
                 "columns": ["ComplaintID"],
-                "filter": [["IncidentDate", ">", 473385600000]],
+                "filter": [
+                    ["IncidentDate", ">", "1985-01-01"],
+                    ["IncidentDate", "<", "2025-01-01"]
+                ],
                 "sort": [],
                 "expressions": {
                     "bucket(\"IncidentDate\", 'Y')": "bucket(\"IncidentDate\", 'Y')",
@@ -388,7 +406,10 @@
                 "group_by": ["month_of_year(\"IncidentDate\")"],
                 "split_by": ["day_of_week(\"IncidentDate\")"],
                 "columns": ["ComplaintID"],
-                "filter": [["IncidentDate", ">", 473385600000]],
+                "filter": [
+                    ["IncidentDate", ">", "1985-01-01"],
+                    ["IncidentDate", "<", "2025-01-01"]
+                ],
                 "sort": [],
                 "expressions": {
                     "bucket(\"IncidentDate\", 'Y')": "bucket(\"IncidentDate\", 'Y')",

@@ -53,14 +53,15 @@ message MakeTableData {
     };
 }
 
-// View type scalars
+// Filter type scalars - this is _not_ the same as a Columns scalar, as this
+// value is used in the view config and must be JSON safe!
 message Scalar {
     oneof scalar {
         bool bool = 1;
-        int64 date = 2; // TODO these are the wrong type
-        int64 datetime = 3;
+        // int64 date = 2; // TODO these are the wrong type
+        // int64 datetime = 3;
         double float = 4;
-        int32 int = 5;
+        // int32 int = 5;
         string string = 6;
         google.protobuf.NullValue null = 7;
     }

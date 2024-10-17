@@ -109,21 +109,20 @@ function set_layout_options() {
     const layout_names = Object.keys(LAYOUTS);
     window.layouts.innerHTML = "";
     for (const layout of layout_names) {
-        console.log("LAYOUT: ", layout);
         window.layouts.innerHTML += `<option${
             layout === selected_layout ? " selected='true'" : ""
         }>${layout}</option>`;
     }
 }
 
-console.log("Doing?");
 set_layout_options();
-console.log("Done?");
+
 window.name_input.value = layout_names[0];
 window.layouts.addEventListener("change", async () => {
     if (window.layouts.value.trim().length === 0) {
         return;
     }
+
     window.workspace.innerHTML = "";
     await window.workspace.restore(LAYOUTS[window.layouts.value]);
     window.name_input.value = window.layouts.value;
