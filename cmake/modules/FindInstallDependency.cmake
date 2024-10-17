@@ -72,7 +72,7 @@ function(psp_build_dep name cmake_file)
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
-        set(${name}_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/${name}-src/src PARENT_SCOPE)
+        set(${name}_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/${name}-src PARENT_SCOPE)
     elseif(${name} STREQUAL protobuf)
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
