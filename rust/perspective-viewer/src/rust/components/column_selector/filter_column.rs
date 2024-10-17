@@ -458,6 +458,8 @@ impl Component for FilterColumn {
         }
         .unwrap_or_default();
 
+        let final_col_type = col_type.expect("Unknown column");
+
         html! {
             <div
                 class="pivot-column-draggable"
@@ -467,7 +469,8 @@ impl Component for FilterColumn {
             >
                 <LocalStyle href={css!("filter-item")} />
                 <div class="pivot-column-border">
-                    <TypeIcon ty={ColumnType::String} />
+                    // <TypeIcon ty={ColumnType::String} />
+                    <TypeIcon ty={final_col_type} />
                     <span class="column_name">{ filter.column().to_owned() }</span>
                     <FilterOpSelector
                         class="filterop-selector"
