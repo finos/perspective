@@ -102,7 +102,7 @@ pub struct ViewConfigUpdate {
     #[ts(optional)]
     pub aggregates: Option<HashMap<String, Aggregate>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing)]
     #[serde(default)]
     #[ts(optional)]
     pub group_by_depth: Option<u32>,

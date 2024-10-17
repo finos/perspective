@@ -68,22 +68,10 @@ function get_host() {
     return /host\: (.+?)$/gm.exec(execSync(`rustc -vV`).toString())[1];
 }
 
-// Rust compile-time metadata
-function build_metadata() {
-    execSync(
-        `PSP_ROOT_DIR=../.. cargo build -p perspective-js --bin perspective-js-metadata --target=${get_host()} --features=external-cpp`,
-        INHERIT
-    );
-
-    execSync(
-        `TS_RS_EXPORT_DIR='./src/ts/ts-rs' ../target/${get_host()}/debug/perspective-js-metadata`
-    );
-}
-
 function build_rust() {
     const release_flag = IS_DEBUG ? "" : "--release";
     execSync(
-        `PSP_ROOT_DIR=../.. cargo bundle --target=${get_host()} -- perspective_js ${release_flag} --features=export-init,external-cpp`,
+        `PSP_ROOT_DIR=../.. cargo bundle --target=${get_host()} -- perspective_js ${release_flag} --features=export-init`,
         INHERIT
     );
 }
@@ -96,7 +84,6 @@ async function build_web_assets() {
 async function build_all() {
     build_rust();
     await build_web_assets();
-    build_metadata();
 
     // "files": ["./src/ts/perspective.node.ts", "./src/ts/perspective.ts"]
     // Typecheck

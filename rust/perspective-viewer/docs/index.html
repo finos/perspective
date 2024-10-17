@@ -1,6 +1,26 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/monokai.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/javascript.min.js"></script>
-<script>
-    hljs.highlightAll();
+<script type="module">
+    document.querySelectorAll("pre:not(.rust) code:not(.rust)").forEach((block) => {
+        hljs.highlightElement(block);
+    });
 </script>
+<style>
+    code.language-python,
+    code.language-bash,
+    code.language-xml,
+    code.language-javascript,
+    pre {
+        background-color: #2e2e2e;
+    }
+    pre code.hljs {
+        padding: 0;
+    }
+    pre.rust,
+    pre.language-python,
+    div.rust,
+    div.python {
+        display: none;
+    }
+</style>

@@ -1,0 +1,20 @@
+{
+    "name": "@finos/perspective-metadata",
+    "version": "2.0.1",
+    "description": "Benchmark utility based on perspective",
+    "private": true,
+    "files": [
+        "src/**/*",
+        "perspective-metadata"
+    ],
+    "bin": "perspective-metadata",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective/packages/perspective-metadata"
+    },
+    "scripts": {
+        "build": "node build.mjs"
+    },
+    "author": "",
+    "license": "Apache-2.0"
+}

@@ -10,47 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::collections::HashSet;
+use std::fs;
 use std::path::{Path, PathBuf};
-use std::{fs, io};
 
 use cmake::Config;
 
-pub fn copy_dir_all(
-    src: impl AsRef<Path>,
-    dst: impl AsRef<Path>,
-    skip: &HashSet<&str>,
-) -> io::Result<()> {
-    fs::create_dir_all(&dst)?;
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let ty = entry.file_type()?;
-        if ty.is_dir() {
-            if !skip.contains(&*entry.file_name().to_string_lossy()) {
-                copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()), skip)?;
-            }
-        } else {
-            fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
-        }
-    }
-
-    Ok(())
-}
-
 pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
-    if std::env::var("CARGO_FEATURE_EXTERNAL_CPP").is_ok() {
-        println!("cargo:warning=MESSAGE Building in development mode");
-        let root_dir_env = std::env::var("PSP_ROOT_DIR").expect("Must set PSP_ROOT_DIR");
-        let root_dir = Path::new(root_dir_env.as_str());
-        copy_dir_all(Path::join(root_dir, "cpp"), "cpp", &HashSet::from(["dist"]))?;
-        copy_dir_all(Path::join(root_dir, "cmake"), "cmake", &HashSet::new())?;
-        println!(
-            "cargo:rerun-if-changed={}/cpp/perspective",
-            root_dir.display()
-        );
-    }
-
-
     let mut dst = Config::new("cpp/perspective");
     if cfg!(windows) && std::option_env!("CI").is_some() {
         std::fs::create_dir_all("D:\\psp-build")?;
@@ -107,7 +72,8 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     }
 
     println!("cargo:warning=MESSAGE Building cmake {}", profile);
-    if std::env::var("PSP_BUILD_VERBOSE").unwrap_or_default() != "" { // checks non-empty env var
+    if std::env::var("PSP_BUILD_VERBOSE").unwrap_or_default() != "" {
+        // checks non-empty env var
         dst.very_verbose(true);
     }
     let artifact_dir = dst.build();

@@ -27,14 +27,17 @@ export default async function run() {
         console.log("\nCreating results.tar.gz");
     }
 
+    const cwd = path.join(__dirname, "..", "..");
     await new Promise((x) =>
         tar.create(
             {
+                cwd,
                 gzip: true,
                 file: RESULTS_PATH,
                 sync: false,
                 portable: true,
                 noMtime: true,
+                strip: 2,
                 filter: (path, stat) => {
                     stat.mtime = null;
                     stat.atime = null;
@@ -44,18 +47,8 @@ export default async function run() {
                 },
             },
             [
-                ...glob.sync(
-                    path.join(
-                        __dirname,
-                        "../../../../tools/perspective-test/dist/snapshots/**/*.txt"
-                    )
-                ),
-                ...glob.sync(
-                    path.join(
-                        __dirname,
-                        "../../../../tools/perspective-test/dist/snapshots/**/*.html"
-                    )
-                ),
+                ...glob.sync("dist/snapshots/**/*.txt", { cwd }),
+                ...glob.sync("dist/snapshots/**/*.html", { cwd }),
             ],
             x
         )

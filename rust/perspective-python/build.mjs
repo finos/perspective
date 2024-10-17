@@ -87,7 +87,7 @@ if (build_wheel) {
         flags += " -vv";
     }
 
-    cmd.sh(`maturin build ${flags} --features=external-cpp ${target}`);
+    cmd.sh(`maturin build ${flags} ${target}`);
 }
 
 const old = fs.readFileSync("./pyproject.toml");
@@ -101,7 +101,7 @@ if (build_sdist) {
 }
 
 if (!build_wheel && !build_sdist) {
-    cmd.sh(`maturin develop ${flags} --features=external-cpp`);
+    cmd.sh(`maturin develop ${flags}`);
 }
 
 cmd.runSync();

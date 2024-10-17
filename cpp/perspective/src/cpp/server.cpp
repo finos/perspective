@@ -453,6 +453,10 @@ ServerResources::get_view(const t_id& id) {
 
 void
 ServerResources::delete_view(const std::uint32_t& client_id, const t_id& id) {
+    if (!m_view_to_table.contains(id)) {
+        throw PerspectiveViewNotFoundException();
+    }
+
     {
         PSP_WRITE_LOCK(m_write_lock);
         auto table_id = m_view_to_table.at(id);

@@ -20,6 +20,7 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
+        "glob": "^11",
         "xml-formatter": "2.4.0"
     }
 }

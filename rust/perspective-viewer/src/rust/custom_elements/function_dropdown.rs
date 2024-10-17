@@ -13,6 +13,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use perspective_client::config::{CompletionItemSuggestion, COMPLETIONS};
 use perspective_js::utils::global;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -22,7 +23,6 @@ use yew::*;
 
 use crate::components::function_dropdown::*;
 use crate::custom_elements::modal::*;
-use crate::exprtk::{CompletionItemSuggestion, COMPLETIONS};
 use crate::*;
 
 #[wasm_bindgen]
@@ -107,10 +107,9 @@ impl Default for FunctionDropDownElement {
 
 fn filter_values(input: &str) -> Vec<CompletionItemSuggestion> {
     let input = input.to_lowercase();
-    COMPLETIONS.with(|x| {
-        x.iter()
-            .filter(|x| x.label.to_lowercase().starts_with(&input))
-            .cloned()
-            .collect::<Vec<_>>()
-    })
+    COMPLETIONS
+        .iter()
+        .filter(|x| x.label.to_lowercase().starts_with(&input))
+        .cloned()
+        .collect::<Vec<_>>()
 }

@@ -13,7 +13,7 @@
 import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
-import rimraf from "rimraf";
+import * as rimraf from "rimraf";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
@@ -54,6 +54,7 @@ const generate_notebook = (notebook_name, cells) => {
             outputs: [],
             source: [
                 "import perspective\n",
+                "import perspective.widget\n",
                 "import pandas as pd\n",
                 "import numpy as np\n",
                 "arrow_data = None\n",

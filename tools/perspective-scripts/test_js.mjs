@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import sh from "./sh.mjs";
-import { getarg, run_with_scope } from "./sh_perspective.mjs";
+import { getarg, run_with_scope, get_scope } from "./sh_perspective.mjs";
 import minimatch from "minimatch";
 
 // Unfortunately we have to handle parts of the Jupyter test case here,
@@ -24,10 +24,11 @@ if (getarg("--debug")) {
     console.log("-- Running tests in debug mode.");
 }
 
-const IS_PLAYWRIGHT = process.env.PACKAGE.split(",").reduce(
+const IS_PLAYWRIGHT = get_scope().reduce(
     (is_playwright, pkg) =>
         is_playwright ||
         [
+            "perspective-docs",
             "perspective-cli",
             "perspective-js",
             "perspective",
@@ -42,7 +43,7 @@ const IS_PLAYWRIGHT = process.env.PACKAGE.split(",").reduce(
     false
 );
 
-const IS_RUST = process.env.PACKAGE.split(",").reduce(
+const IS_RUST = get_scope().reduce(
     (is_playwright, pkg) => is_playwright || ["perspective-rs"].includes(pkg),
     false
 );

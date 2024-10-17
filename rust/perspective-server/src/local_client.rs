@@ -82,7 +82,7 @@ impl Drop for LocalClient {
                 tracing::error!("`Client` dropped without `Client::close`");
             }
         } else {
-            tracing::warn!("`Session` dropped before init");
+            tracing::debug!("`Session` dropped before init");
         }
     }
 }
@@ -106,7 +106,7 @@ impl LocalClient {
         if let Some(session) = self.0.session.get() {
             session.write().await.take().unwrap().close().await
         } else {
-            tracing::warn!("`Session` dropped before init");
+            tracing::debug!("`Session` dropped before init");
         }
     }
 }

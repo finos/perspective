@@ -10,11 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use perspective_client::config::CompletionItemSuggestion;
 use web_sys::*;
 use yew::prelude::*;
 
 use super::modal::*;
-use crate::exprtk::CompletionItemSuggestion;
 use crate::utils::WeakScope;
 
 static CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/css/function-dropdown.css"));

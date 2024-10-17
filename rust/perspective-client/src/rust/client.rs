@@ -34,6 +34,7 @@ use crate::table_data::{TableData, UpdateData};
 use crate::utils::*;
 use crate::view::ViewWindow;
 
+/// Metadata about the engine runtime (such as total heap utilization).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SystemInfo {
     pub heap_size: f64,
@@ -144,7 +145,7 @@ impl Client {
     pub async fn handle_response<'a>(&'a self, msg: &'a [u8]) -> ClientResult<bool> {
         let msg = Response::decode(msg)?;
         tracing::debug!("RECV {}", msg);
-        let mut wr = self.subscriptions_once.try_write().unwrap();
+        let mut wr = self.subscriptions_once.write().await;
         if let Some(handler) = (*wr).remove(&msg.msg_id) {
             drop(wr);
             handler(msg)?;
@@ -180,11 +181,11 @@ impl Client {
             .fetch_add(1, std::sync::atomic::Ordering::Acquire)
     }
 
-    pub(crate) fn unsubscribe(&self, update_id: u32) -> ClientResult<()> {
+    pub(crate) async fn unsubscribe(&self, update_id: u32) -> ClientResult<()> {
         let callback = self
             .subscriptions
-            .try_write()
-            .unwrap()
+            .write()
+            .await
             .remove(&update_id)
             .ok_or(ClientError::Unknown("remove_update".to_string()))?;
 
@@ -199,12 +200,17 @@ impl Client {
         on_update: Box<dyn FnOnce(Response) -> ClientResult<()> + Send + Sync + 'static>,
     ) -> ClientResult<()> {
         self.subscriptions_once
-            .try_write()
-            .unwrap()
+            .write()
+            .await
             .insert(msg.msg_id, on_update);
 
         tracing::debug!("SEND {}", msg);
-        Ok((self.send)(msg).await?)
+        if let Err(e) = (self.send)(msg).await {
+            self.subscriptions_once.write().await.remove(&msg.msg_id);
+            Err(e.into())
+        } else {
+            Ok(())
+        }
     }
 
     pub(crate) async fn subscribe(
@@ -213,11 +219,16 @@ impl Client {
         on_update: BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>,
     ) -> ClientResult<()> {
         self.subscriptions
-            .try_write()
-            .unwrap()
+            .write()
+            .await
             .insert(msg.msg_id, on_update);
         tracing::debug!("SEND {}", msg);
-        Ok((self.send)(msg).await?)
+        if let Err(e) = (self.send)(msg).await {
+            self.subscriptions.write().await.remove(&msg.msg_id);
+            Err(e.into())
+        } else {
+            Ok(())
+        }
     }
 
     /// Send a `ClientReq` and await both the successful completion of the

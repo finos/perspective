@@ -23,10 +23,14 @@ mod table_data;
 mod view;
 
 pub mod config;
-pub mod proto;
+
+#[allow(unknown_lints)]
+#[allow(clippy::all)]
+mod proto;
 pub mod utils;
 
 pub use crate::client::{Client, ClientHandler, Features, SystemInfo};
+pub use crate::proto::{ColumnType, SortOp, ViewOnUpdateResp};
 pub use crate::session::{ProxySession, Session};
 pub use crate::table::{
     Schema, Table, TableInitOptions, TableReadFormat, UpdateOptions, ValidateExpressionsData,
@@ -35,7 +39,6 @@ pub use crate::table_data::{TableData, UpdateData};
 pub use crate::view::{OnUpdateMode, OnUpdateOptions, View, ViewWindow};
 
 pub type ClientError = utils::ClientError;
-pub type ColumnType = proto::ColumnType;
 pub type ExprValidationError = crate::proto::table_validate_expr_resp::ExprValidationError;
 
 #[doc(hidden)]

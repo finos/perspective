@@ -31,27 +31,6 @@ function get_host() {
     return /host\: (.+?)$/gm.exec(execSync(`rustc -vV`).toString())[1];
 }
 async function build_all() {
-    // Rust compile-time metadata
-    execSync(
-        `cargo build -p perspective-viewer --bin perspective-viewer-metadata --target=${get_host()}`,
-        INHERIT
-    );
-
-    // TODO Fix this shit
-    const docs = execSync(
-        `../target/${get_host()}/debug/perspective-viewer-metadata --docs`
-    );
-
-    execSync(
-        `TS_RS_EXPORT_DIR='./src/ts/ts-rs' ../target/${get_host()}/debug/perspective-viewer-metadata`
-    );
-
-    fs.writeFileSync("./docs/exprtk.md", docs.toString());
-    if (!fs.existsSync("./dist/pkg")) {
-        fs.mkdirSync("./dist/pkg", { recursive: true });
-    }
-
-    // fs.writeFileSync("./dist/pkg/rust_types.d.ts", types.toString());
     execSync(
         `cargo bundle --target=${get_host()} -- perspective_viewer ${
             IS_DEBUG ? "" : "--release"

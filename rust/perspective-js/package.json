@@ -51,6 +51,7 @@
         "@finos/perspective-cpp": "workspace:^",
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-test": "workspace:^",
+        "@finos/perspective-metadata": "workspace:^",
         "@types/stoppable": "^1.1.0",
         "@types/ws": "^8.5.10",
         "cpy": "^9.0.1",

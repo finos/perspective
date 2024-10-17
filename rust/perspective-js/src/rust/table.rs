@@ -13,8 +13,9 @@
 use extend::ext;
 use js_sys::{Array, ArrayBuffer, Function, Object, Reflect, Uint8Array, JSON};
 use perspective_client::config::*;
-use perspective_client::proto::*;
-use perspective_client::{assert_table_api, TableData, TableReadFormat, UpdateData, UpdateOptions};
+use perspective_client::{
+    assert_table_api, ColumnType, TableData, TableReadFormat, UpdateData, UpdateOptions,
+};
 use wasm_bindgen::convert::TryFromJsValue;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
