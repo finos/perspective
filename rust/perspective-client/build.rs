@@ -24,7 +24,7 @@ fn prost_build() -> Result<()> {
     // This source file is included at `publish` time, but not `sbuild` time
     // because it is initially generated from the `perspective.proto` definition
     // in the C++ source.
-    if std::env::var("CARGO_FEATURE_EXTERNAL_PROTO").is_ok() {
+    if std::env::var("CARGO_FEATURE_GENERATE_PROTO").is_ok() {
         println!("cargo:warning=MESSAGE Building in development mode");
         let root_dir_env = std::env::var("PSP_ROOT_DIR").expect("Must set PSP_ROOT_DIR");
         let root_dir = Path::new(root_dir_env.as_str());
@@ -36,8 +36,19 @@ fn prost_build() -> Result<()> {
 
         println!("cargo:rerun-if-changed={}", proto_file.to_str().unwrap());
 
-        #[cfg(feature = "external-proto")]
+        // prost_build reads PROTOC from the environment.  When the `protobuf-src`
+        // feature is enabled, the build script sets PROTOC to the one built by
+        // that crate. When protobuf-src is disabled, builders must set PROTOC
+        // in the environment to a protocol buffer compiler.
+        #[cfg(feature = "protobuf-src")]
         std::env::set_var("PROTOC", protobuf_src::protoc());
+        #[cfg(not(feature = "protobuf-src"))]
+        if std::env::var("PROTOC").is_err() {
+            panic!(
+                "generate-proto is enabled and protobuf-src is disabled.  PROTOC must be set in \
+                 the environment to the path of a protocol buffer compiler"
+            )
+        }
 
         prost_build::Config::new()
             // .bytes(["ViewToArrowResp.arrow", "from_arrow"])

@@ -37,10 +37,10 @@ rustdoc-args = ["--html-in-header", "docs/index.html"]
 
 [features]
 default = []
-external-cpp = [
-    "perspective-client/external-proto",
-    "perspective-server/external-cpp",
-]
+abi3 = ["pyo3/abi3-py39"]
+external-cpp = ["perspective-server/external-cpp"]
+generate-proto = ["perspective-client/generate-proto"]
+protobuf-src = ["perspective-client/protobuf-src"]
 
 [lib]
 crate-type = ["cdylib"]
@@ -58,11 +58,7 @@ perspective-server = { version = "3.1.0", path = "../perspective-server" }
 pollster = "0.3.0"
 extend = "1.1.2"
 futures = "0.3.28"
-pyo3 = { version = "0.21.2", features = [
-    "extension-module",
-    "serde",
-    "abi3-py39",
-] }
+pyo3 = { version = "0.21.2", features = ["extension-module", "serde"] }
 pythonize = "0.21.1"
 tracing = { version = ">=0.1.36" }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }

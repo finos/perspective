@@ -21,6 +21,7 @@ const pkg = JSON.parse(
 );
 
 let flags = "--release";
+let features = [];
 if (!!process.env.PSP_DEBUG) {
     flags = "";
 }
@@ -87,7 +88,27 @@ if (build_wheel) {
         flags += " -vv";
     }
 
-    cmd.sh(`maturin build ${flags} ${target}`);
+    if (process.env.CONDA_BUILD === "1") {
+        console.log("Building with Conda flags and features");
+        if (process.env.PYTHON) {
+            console.log(`interpreter: ${process.env.PYTHON}`);
+            flags += ` --interpreter=${process.env.PYTHON}`;
+        } else {
+            console.warn(
+                "Expected PYTHON to be set in CONDA_BUILD environment, but it isn't.  maturin will likely detect the wrong Python."
+            );
+        }
+        // we need to generate proto.rs using conda's protoc, which is set in
+        // the environment.  we use the unstable "versioned" python abi
+        features.push(["generate-proto"]);
+    } else {
+        // standard for in-repo builds.  a different set will be standard in the sdist
+        const standard_features = ["abi3", "generate-proto", "protobuf-src"];
+        console.log("Building with standard flags and features");
+        features.push(...standard_features);
+    }
+
+    cmd.sh(`maturin build ${flags} --features=${features.join(",")} ${target}`);
 }
 
 const old = fs.readFileSync("./pyproject.toml");

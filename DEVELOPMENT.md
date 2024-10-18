@@ -23,9 +23,6 @@ automatically call the correct build and test tools.
 dependencies to be installed:
 
 -   [CMake](https://cmake.org/) (version 3.29.5 or higher)
--   [Boost](https://www.boost.org/) (version 1.83 or highery). This can be
-    installed from tarball with the included script
-    `node tools/perspective-scripts/install_tools.mjs`.
 -   [pnpm](https://pnpm.io/).
 
 **_This list may be non-exhaustive depending on your OS/environment; please open

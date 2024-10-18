@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.7.2)
+
+project(Boost-download NONE)
+
+# Makes GIT_SUBMODULES "" in ExternalProject_Add skip initializing submodules
+cmake_policy(SET CMP0097 NEW)
+
+include(ExternalProject)
+ExternalProject_Add(Boost
+  URL               "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz"
+  SOURCE_DIR        "${CMAKE_BINARY_DIR}/Boost-src"
+  BINARY_DIR        "${CMAKE_BINARY_DIR}/Boost-build"
+  SOURCE_SUBDIR     ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+)
