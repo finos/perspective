@@ -34,7 +34,10 @@ path = "src/rust/lib.rs"
 export-init = []
 metadata = []
 default = []
-external-cpp = ["perspective-client/external-proto"]
+external-cpp = [
+    "perspective-client/generate-proto",
+    "perspective-client/protobuf-src",
+]
 
 [build-dependencies]
 serde_json = { version = "1.0.107", features = ["raw_value"] }

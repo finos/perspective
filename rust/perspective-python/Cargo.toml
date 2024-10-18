@@ -37,11 +37,10 @@ rustdoc-args = ["--html-in-header", "docs/index.html"]
 
 [features]
 default = []
-external-cpp = [
-    "perspective-client/external-proto",
-    "perspective-server/external-cpp",
-]
 abi3 = ["pyo3/abi3-py39"]
+external-cpp = ["perspective-server/external-cpp"]
+generate-proto = ["perspective-client/generate-proto"]
+protobuf-src = ["perspective-client/protobuf-src"]
 
 [lib]
 crate-type = ["cdylib"]

@@ -38,7 +38,10 @@ default = []
 
 # Should the project build the `proto.rs` via protoc from source or assume it
 # already exists?
-external-proto = ["protobuf-src"]
+generate-proto = []
+# Should the project build protobuf from source? If not, building this crate
+# requires PROTOC be set in the environment
+protobuf-src = ["dep:protobuf-src"]
 
 # When generating metadata, we can't rely on its existence - so enable this
 # to skip metadata generation. This currently only affects docs.

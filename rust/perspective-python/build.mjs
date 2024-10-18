@@ -89,7 +89,7 @@ if (build_wheel) {
     }
 
     if (process.env.CONDA_BUILD === "1") {
-        console.log("Building with Conda flags for maturin");
+        console.log("Building with Conda flags and features");
         if (process.env.PYTHON) {
             console.log(`interpreter: ${process.env.PYTHON}`);
             flags += ` --interpreter=${process.env.PYTHON}`;
@@ -98,9 +98,14 @@ if (build_wheel) {
                 "Expected PYTHON to be set in CONDA_BUILD environment, but it isn't.  maturin will likely detect the wrong Python."
             );
         }
+        // we need to generate proto.rs using conda's protoc, which is set in
+        // the environment.  we use the unstable "versioned" python abi
+        features.push(["generate-proto"]);
     } else {
-        console.log("Building with regular flags for maturin");
-        features.push("abi3");
+        // standard for in-repo builds.  a different set will be standard in the sdist
+        const standard_features = ["abi3", "generate-proto", "protobuf-src"];
+        console.log("Building with standard flags and features");
+        features.push(...standard_features);
     }
 
     cmd.sh(`maturin build ${flags} --features=${features.join(",")} ${target}`);

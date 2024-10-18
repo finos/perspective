@@ -32,7 +32,8 @@ default = ["axum-ws"]
 axum-ws = ["tokio", "axum", "futures"]
 external-cpp = [
     "perspective-server/external-cpp",
-    "perspective-client/external-proto",
+    "perspective-client/generate-proto",
+    "perspective-client/protobuf-src",
 ]
 
 [dependencies]

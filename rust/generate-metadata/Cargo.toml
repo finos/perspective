@@ -30,8 +30,8 @@ path = "../perspective-server"
 features = ["external-cpp", "disable-cpp"]
 
 [dependencies.perspective-client]
+features = ["generate-proto", "omit_metadata", "protobuf-src"]
 path = "../perspective-client"
-features = ["external-proto", "omit_metadata"]
 
 [dependencies.perspective-js]
 path = "../perspective-js"
