@@ -151,7 +151,7 @@ const config = {
                                 label: "`perspective-python` Python Client/Server API",
                             },
                             {
-                                href: "https://docs.rs/perspective-python/3.1.0/perspective_python/#perspectivewidget",
+                                href: "https://docs.rs/perspective-python/latest/perspective_python/#perspectivewidget",
                                 label: "`PerspectiveWidget` Jupyter Plugin",
                             },
                             {

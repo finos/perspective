@@ -1,7 +1,17 @@
-# [v3.1.0](https://github.com/finos/perspective/releases/tag/v3.1.0)
+# [v3.1.1](https://github.com/finos/perspective/releases/tag/v3.1.1)
 
-_23 September 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.0...v3.1.0))
+_18 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.0...v3.1.1))
 
+Fixes
+
+- &lt;TAB&gt; key press inserts '\t' character in code editor as indentation. [#2779](https://github.com/finos/perspective/pull/2779)
+- Column type icon matches the datatype type of the field in column selectors (where, group by, sortby, filter) [#2780](https://github.com/finos/perspective/pull/2780)
+- Fix filter values for non-interned strings [#2784](https://github.com/finos/perspective/pull/2784)
+
+Misc
+
+- Port Conda patches, use vendored boost [#2793](https://github.com/finos/perspective/pull/2793)
+- Update documentation for `3.x` [#2778](https://github.com/finos/perspective/pull/2778)
 
 # [v3.1.0](https://github.com/finos/perspective/releases/tag/v3.1.0)
 

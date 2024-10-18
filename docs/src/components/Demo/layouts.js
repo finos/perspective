@@ -12,7 +12,6 @@
 
 export const LAYOUTS = {
     sparkgrid: {
-        version: "3.1.0",
         plugin: "Datagrid",
         plugin_config: {
             columns: {},

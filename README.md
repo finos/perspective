@@ -45,7 +45,7 @@ and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
     -   [Installation Guide](https://docs.rs/perspective-js/latest/perspective_js/#installation)
 -   Python (PyPI)
     -   [`perspective-python`, Python Client/Server API](https://docs.rs/perspective-python/latest/perspective_python/)
-    -   [`PerspectiveWidget` Jupyter Plugin](https://docs.rs/perspective-python/3.1.0/perspective_python/#perspectivewidget)
+    -   [`PerspectiveWidget` Jupyter Plugin](https://docs.rs/perspective-python/latest/perspective_python/#perspectivewidget)
     -   [`Table` API](https://docs.rs/perspective-python/latest/perspective_python/struct.Table.html)
     -   [`View` API](https://docs.rs/perspective-python/latest/perspective_python/struct.View.html)
 -   Rust (Crates.io)
