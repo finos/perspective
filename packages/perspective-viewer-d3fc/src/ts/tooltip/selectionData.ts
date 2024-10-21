@@ -70,7 +70,10 @@ export function getDataValues(data, settings) {
         }
         return settings.mainValues.map((main) => ({
             name: main.name,
-            value: toValue(main.type, data.row[getDataRowKey(data.key, main)]),
+            value: toValue(
+                main.type,
+                data.row[getDataRowKey(data.key, main, settings.realValues)]
+            ),
         }));
     }
     return [
@@ -87,17 +90,32 @@ export function getDataValues(data, settings) {
     ];
 }
 
-function getDataRowKey(key, main) {
+function getDataRowKey(key, main, realValues) {
     if (!key) {
         return main.name;
     }
 
-    let splitValues = key.split("|");
-    splitValues =
-        splitValues.length === 1
-            ? splitValues
-            : splitValues.slice(0, splitValues.length - 1);
-    const prefix = splitValues.join("|");
+    if (key.includes("|")) {
+        const splitKey = key.split("|");
+        const keyIncludesValidValueName =
+            splitKey[splitKey.length - 1] === main.name;
 
-    return `${prefix}|${main.name}`;
+        if (keyIncludesValidValueName) {
+            return key;
+        }
+
+        const keyIncludesInvalidValueName = realValues.includes(
+            splitKey[splitKey.length - 1]
+        );
+
+        const validKeyPrefix = keyIncludesInvalidValueName
+            ? splitKey.slice(0, splitKey.length - 1).join("|")
+            : key;
+
+        return `${validKeyPrefix}|${main.name}`;
+    }
+
+    const keyIsRealValue = realValues.includes(key);
+
+    return keyIsRealValue ? main.name : `${key}|${main.name}`;
 }
