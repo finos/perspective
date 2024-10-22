@@ -21,14 +21,12 @@ perspective-indicator[theme="Pro Light"] {
 perspective-workspace {
     @include perspective-workspace-pro-base;
     @include perspective-viewer-pro--colors;
-    background-color: #DADADA;
-    --column-drag-handle--mask-image: url("../../../../rust/perspective-viewer/src/svg/drag-handle.svg");
-    --bookmarks--mask-image: url("../../../../rust/perspective-viewer/src/svg/bookmark-icon.svg");
+    background-color: #dadada;
 }
 
 .p-Menu {
     @include perspective-viewer-pro--colors;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
 }
 
 perspective-workspace perspective-viewer[settings] {
@@ -49,14 +47,16 @@ perspective-viewer[theme="Pro Light"].workspace-master-widget {
     background-color: #f2f4f6;
     --plugin--background: #f2f4f6;
     regular-table {
-        td, th {
+        td,
+        th {
             border-color: #e0e4e9;
         }
     }
 }
 
 @mixin perspective-workspace-pro-base {
-    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     --open-settings-button--content: "expand_more";
     --close-settings-button--content: "expand_less";
     --close-button--content: "\2715";
@@ -84,7 +84,8 @@ perspective-viewer[theme="Pro Light"].workspace-master-widget {
 }
 
 .p-Menu {
-    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
     font-weight: 300;
     color: #161616;
 }

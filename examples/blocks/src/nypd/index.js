@@ -12,7 +12,7 @@
 
 import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-let DATA_URL = "nypdccrb.arrow";
+let DATA_URL = "../../dist/nypd/nypdccrb.arrow";
 
 let LAYOUTS = localStorage.getItem("layouts")
     ? JSON.parse(localStorage.getItem("layouts"))
