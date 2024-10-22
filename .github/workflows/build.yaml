@@ -207,8 +207,8 @@ jobs:
                       arch: aarch64
                     - os: ubuntu-22.04
                       arch: aarch64
-                    - os: macos-13
-                      is-release: false
+                    # - os: macos-13
+                    #   is-release: false
                     - os: windows-2022
                       is-release: false
 
@@ -459,8 +459,8 @@ jobs:
                       arch: aarch64
                     - os: ubuntu-22.04
                       arch: aarch64
-                    - os: macos-13
-                      is-release: false
+                    # - os: macos-13
+                    #   is-release: false
                     - os: windows-2022
                       is-release: false
 
@@ -602,8 +602,8 @@ jobs:
                 arch:
                     - x86_64
                 exclude:
-                    - os: macos-13
-                      is-release: false
+                    # - os: macos-13
+                    #   is-release: false
                     - os: windows-2022
                       is-release: false
         steps:
