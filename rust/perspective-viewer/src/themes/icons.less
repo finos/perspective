@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 perspective-viewer,
+perspective-workspace,
 perspective-copy-menu,
 perspective-export-menu,
 perspective-dropdown,
@@ -77,6 +78,10 @@ perspective-string-column-style {
     --overflow-hint-icon--content: "!";
     --reset-button-icon--content: "refresh";
     --save-button-icon--content: "save";
+
+    // Workspace
+    --column-drag-handle--mask-image: url("../svg/drag-handle.svg");
+    --bookmarks--mask-image: url("../svg/bookmark-icon.svg");
 }
 
 @mixin perspective-viewer-base--datagrid {

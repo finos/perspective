@@ -107,36 +107,37 @@ async function build_all() {
         builder3.compile().get("injected.css")
     );
 
-    const builder = new BuildCss("./src/themes");
-    add(
-        builder,
-        "icons.less",
-        "@finos/perspective-viewer/src/themes/icons.less"
-    );
-    add(builder, "intl.less", "@finos/perspective-viewer/src/themes/intl.less");
-    add(builder, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
-    add(builder, "output.scss", "./src/themes/pro.less");
-    fs.writeFileSync("dist/css/pro.css", builder.compile().get("output.css"));
+    const pro = new BuildCss("./src/themes");
+    add(pro, "icons.less", "@finos/perspective-viewer/src/themes/icons.less");
+    add(pro, "intl.less", "@finos/perspective-viewer/src/themes/intl.less");
+    add(pro, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
+    add(pro, "output.scss", "./src/themes/pro.less");
+    fs.writeFileSync("dist/css/pro.css", pro.compile().get("output.css"));
 
-    const builder2 = new BuildCss("./src/themes");
+    const pro_dark = new BuildCss("./src/themes");
     add(
-        builder2,
+        pro_dark,
         "icons.less",
         "@finos/perspective-viewer/src/themes/icons.less"
     );
     add(
-        builder2,
+        pro_dark,
         "intl.less",
         "@finos/perspective-viewer/src/themes/intl.less"
     );
-    add(builder2, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
-    add(builder2, "@finos/perspective-viewer/src/themes/pro-dark.less");
-    add(builder2, "pro-workspace.less", "./src/themes/pro.less");
-    add(builder2, "@finos/perspective-viewer/src/themes/variables.less");
-    add(builder2, "output.scss", "./src/themes/pro-dark.less");
+    add(pro_dark, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
+    add(
+        pro_dark,
+        "pro-dark.less",
+        "@finos/perspective-viewer/src/themes/pro-dark.less"
+    );
+    // add(builder2, "@finos/perspective-viewer/src/themes/pro-dark.less");
+    // add(builder2, "pro-workspace.less", "./src/themes/pro.less");
+    // add(builder2, "@finos/perspective-viewer/src/themes/variables.less");
+    add(pro_dark, "output.scss", "./src/themes/pro-dark.less");
     fs.writeFileSync(
         "dist/css/pro-dark.css",
-        builder2.compile().get("output.css")
+        pro_dark.compile().get("output.css")
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
