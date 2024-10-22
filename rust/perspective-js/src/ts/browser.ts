@@ -88,12 +88,12 @@ export async function websocket(
     module: Promise<typeof psp>,
     url: string | URL
 ) {
-    const { Client } = await module;
     const ws = new WebSocket(url);
     let [sender, receiver] = invert_promise();
     ws.onopen = sender;
     ws.binaryType = "arraybuffer";
     await receiver;
+    const { Client } = await module;
     const client = new Client(
         (proto: Uint8Array) => {
             const buffer = proto.slice().buffer;

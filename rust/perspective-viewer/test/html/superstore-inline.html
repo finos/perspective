@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module">
+            import "/node_modules/@finos/perspective-viewer/dist/esm/perspective-viewer.inline.js";
+            import perspective from "/node_modules/@finos/perspective/dist/esm/perspective.inline.js";
+
+            async function load() {
+                let resp = await fetch("/node_modules/@finos/perspective-test/assets/superstore.csv");
+                let csv = await resp.text();
+                const viewer = document.querySelector("perspective-viewer");
+                const worker = await perspective.worker();
+                const table = worker.table(csv, { index: "Row ID" });
+                await viewer.load(table);
+                window.__TEST_WORKER__ = worker;
+            }
+
+            await load();
+            window.__TEST_PERSPECTIVE_READY__ = true;
+        </script>
+        <link rel="stylesheet" href="../css/demo.css" />
+        <link rel="stylesheet" href="/node_modules/@finos/perspective-viewer/dist/css/pro.css" />
+        <link rel="stylesheet" href="/node_modules/@fontsource/roboto-mono/400.css" />
+    </head>
+    <body>
+        <perspective-viewer></perspective-viewer>
+    </body>
+</html>
