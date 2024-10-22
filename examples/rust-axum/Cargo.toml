@@ -17,7 +17,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-perspective = { version = "3.1.1", path = "../../rust/perspective" }
+perspective = { version = "3.1.2", path = "../../rust/perspective" }
 axum = { version = ">=0.7,<2", features = ["ws"] }
 futures = "0.3"
 tokio = { version = "1.0", features = ["full"] }
