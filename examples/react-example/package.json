@@ -1,7 +1,7 @@
 {
     "name": "react-example",
     "private": true,
-    "version": "3.1.1",
+    "version": "3.1.2",
     "description": "An example app built using `@finos/perspective-viewer`.",
     "scripts": {
         "start": "webpack serve --open",
