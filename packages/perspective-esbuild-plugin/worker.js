@@ -98,8 +98,8 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                             }
                         }
 
-                        function run_single_threaded(code, e) {
-                            console.error("Running perspective in single-threaded mode due to error initializing Web Worker:", e);
+                        function run_single_threaded(code) {
+                            console.error("Running perspective in single-threaded mode");
                             let f = Function("const self = arguments[0];" + code);
                             const workers = [];
                             const mains = [];
@@ -109,17 +109,16 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
 
                         export const initialize = async function () {
                             try {
-                                const blob = new Blob([worker], {type: 'application/javascript'});
-                                const url = URL.createObjectURL(blob);
-                                return new Worker(url, {type: "module"});
-                            } catch (e) {
                                 if (window.location.protocol.startsWith("file")) {
                                     console.warn("file:// protocol does not support Web Workers");
+                                    return run_single_threaded(worker);
                                 } else {
-                                    console.error("Error instantiating Web Worker");
+                                    const blob = new Blob([worker], {type: 'application/javascript'});
+                                    const url = URL.createObjectURL(blob);
+                                    return new Worker(url, {type: "module"});
                                 }
-    
-                                return run_single_threaded(worker, e);
+                            } catch (e) {
+                                console.error("Error instantiating engine", e);
                             }
                         };
 
