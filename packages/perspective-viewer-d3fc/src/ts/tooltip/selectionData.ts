@@ -70,7 +70,10 @@ export function getDataValues(data, settings) {
         }
         return settings.mainValues.map((main) => ({
             name: main.name,
-            value: toValue(main.type, data.row[main.name]),
+            value: toValue(
+                main.type,
+                data.row[getDataRowKey(data.key, main, settings.realValues)]
+            ),
         }));
     }
     return [
@@ -85,4 +88,34 @@ export function getDataValues(data, settings) {
             ),
         },
     ];
+}
+
+function getDataRowKey(key, main, realValues) {
+    if (!key) {
+        return main.name;
+    }
+
+    if (key.includes("|")) {
+        const splitKey = key.split("|");
+        const keyIncludesValidValueName =
+            splitKey[splitKey.length - 1] === main.name;
+
+        if (keyIncludesValidValueName) {
+            return key;
+        }
+
+        const keyIncludesInvalidValueName = realValues.includes(
+            splitKey[splitKey.length - 1]
+        );
+
+        const validKeyPrefix = keyIncludesInvalidValueName
+            ? splitKey.slice(0, splitKey.length - 1).join("|")
+            : key;
+
+        return `${validKeyPrefix}|${main.name}`;
+    }
+
+    const keyIsRealValue = realValues.includes(key);
+
+    return keyIsRealValue ? main.name : `${key}|${main.name}`;
 }
