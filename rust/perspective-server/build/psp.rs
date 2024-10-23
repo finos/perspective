@@ -29,21 +29,24 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
 
     if cfg!(target_os = "macos") {
         // Set CMAKE_OSX_ARCHITECTURES et al. for Mac builds.  Arrow does not forward on
-        // CMAKE_OSX_ARCHITECTURES and but it does forward on a
-        // CMAKE_TOOLCHAIN_FILE. In Conda builds, the environment sets
-        // `CMAKE_ARGS` up with various toolchain arguments. This block may need
-        // to be patched out or adjusted for Conda.
+        // CMAKE_OSX_ARCHITECTURES but it does forward on a CMAKE_TOOLCHAIN_FILE. In
+        // Conda builds, the environment sets `CMAKE_ARGS` up with various
+        // toolchain arguments. This block may need to be patched out or
+        // adjusted for Conda.
         let toolchain_file = match std::env::var("PSP_ARCH").as_deref() {
-            Ok("x86_64") => "./cmake/toolchains/darwin-x86_64.cmake",
-            Ok("aarch64") => "./cmake/toolchains/darwin-arm64.cmake",
+            Ok("x86_64") => Some("./cmake/toolchains/darwin-x86_64.cmake"),
+            Ok("aarch64") => Some("./cmake/toolchains/darwin-arm64.cmake"),
+            Err(std::env::VarError::NotPresent) => None,
             arch @ Ok(_) | arch @ Err(_) => {
                 panic!("Unknown PSP_ARCH value: {:?}", arch)
             },
         };
-        dst.define(
-            "CMAKE_TOOLCHAIN_FILE",
-            std::fs::canonicalize(toolchain_file).expect("Failed to canonicalize toolchain file."),
-        );
+        if let Some(path) = toolchain_file {
+            dst.define(
+                "CMAKE_TOOLCHAIN_FILE",
+                std::fs::canonicalize(path).expect("Failed to canonicalize toolchain file."),
+            );
+        }
     }
 
     if std::env::var("TARGET")
