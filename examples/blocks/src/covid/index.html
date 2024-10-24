@@ -2,20 +2,18 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
-
-        <script type="module" src="/node_modules/@finos/perspective/dist/cdn/perspective.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
-
+        <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+        <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
-
         <script type="module">
+            import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
+            import "/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js";
+            import "/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js";
+
             import { worker } from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
             const WORKER = await worker();
             const REQ = fetch("https://api.covidtracking.com/v1/states/daily.csv");
-
             const LAYOUT = {
                 plugin: "Y Area",
                 plugin_config: {
@@ -48,7 +46,6 @@ bucket(date(year, month, day), \'W\')`,
             el.load(table);
             el.restore(LAYOUT);
         </script>
-
         <style>
             perspective-viewer {
                 position: absolute;
@@ -59,7 +56,6 @@ bucket(date(year, month, day), \'W\')`,
             }
         </style>
     </head>
-
     <body>
         <perspective-viewer editable> </perspective-viewer>
     </body>

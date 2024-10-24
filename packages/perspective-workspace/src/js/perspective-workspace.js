@@ -75,6 +75,11 @@ import injectedStyles from "../../build/css/injected.css";
  */
 
 class PerspectiveWorkspaceElement extends HTMLElement {
+    constructor() {
+        super();
+        this.setAutoSize(true);
+    }
+
     /***************************************************************************
      *
      * Public
@@ -193,6 +198,18 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         this.workspace.update();
     }
 
+    setAutoSize(is_auto_size) {
+        this._resize_observer?.unobserve(this);
+        this._resize_observer = undefined;
+        if (is_auto_size) {
+            this._resize_observer = new ResizeObserver((...args) =>
+                this.workspace?.update(...args)
+            );
+
+            this._resize_observer.observe(this);
+        }
+    }
+
     _light_dom_changed() {
         const viewers = Array.from(this.childNodes);
         for (const viewer of viewers) {
@@ -226,8 +243,6 @@ class PerspectiveWorkspaceElement extends HTMLElement {
             MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
             container.insertBefore(this.workspace.node, null);
             MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
-
-            window.onresize = this.workspace.update.bind(this.workspace);
         }
     }
 }
