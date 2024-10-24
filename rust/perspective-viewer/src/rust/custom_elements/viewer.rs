@@ -666,8 +666,11 @@ impl PerspectiveViewerElement {
                 .cloned();
 
             presentation.set_theme_name(reset_theme.as_deref()).await?;
-            let view = session.get_view().into_apierror()?;
-            renderer.restyle_all(&view).await
+            if let Some(view) = session.get_view() {
+                renderer.restyle_all(&view).await
+            } else {
+                Ok(JsValue::UNDEFINED)
+            }
         })
     }
 
