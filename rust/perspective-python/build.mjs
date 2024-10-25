@@ -14,6 +14,9 @@ import * as fs from "node:fs";
 import sh from "../../tools/perspective-scripts/sh.mjs";
 import * as url from "url";
 import * as TOML from "@iarna/toml";
+import * as tar from "tar";
+import * as glob from "glob";
+import * as path from "path";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 const pkg = JSON.parse(
@@ -111,22 +114,96 @@ if (build_wheel) {
     cmd.sh(`maturin build ${flags} --features=${features.join(",")} ${target}`);
 }
 
-const old = fs.readFileSync("./pyproject.toml");
-
 if (build_sdist) {
-    const toml = TOML.parse(old);
-    console.log(toml);
-    delete toml.tool.maturin["data"];
-    fs.writeFileSync("./pyproject.toml", TOML.stringify(toml));
-    cmd.sh(`maturin sdist`);
+    // `maturin sdist` has some issues with Cargo workspaces, so we assemble the sdist by hand here
+    // Note that the resulting sdist is _not_ a Cargo workspace, it is rooted in this package.
+    const cargo_toml = fs.readFileSync("./Cargo.toml");
+    const pyproject_toml = fs.readFileSync("./pyproject.toml");
+    const cargo = TOML.parse(cargo_toml);
+    const pyproject = TOML.parse(pyproject_toml);
+
+    const version = cargo["package"]["version"];
+    const data_dir = `perspective_python-${version}.data`;
+    const testfile = path.join(
+        data_dir,
+        "data/share/jupyter/labextensions/@finos/perspective-jupyterlab/package.json"
+    );
+    if (!fs.existsSync(testfile)) {
+        throw new Error(
+            "labextension is not present in data directory, please build `perspective-jupyterlab`"
+        );
+    }
+    const readme_md = fs.readFileSync("./README.md");
+    const pkg_info = generatePkgInfo(pyproject, cargo, readme_md);
+    fs.writeFileSync("./PKG-INFO", pkg_info);
+    const include_paths = Array.from(cargo["package"]["include"]).concat([
+        data_dir,
+        "./PKG-INFO",
+    ]);
+    const files = glob.globSync(include_paths);
+    const wheel_dir = `../target/wheels`;
+    fs.mkdirSync(wheel_dir, { recursive: true });
+    await tar.create(
+        {
+            gzip: true,
+            file: path.join(wheel_dir, `perspective_python-${version}.tar.gz`),
+            prefix: `perspective_python-${version}`,
+        },
+        files
+    );
 }
 
 if (!build_wheel && !build_sdist) {
     cmd.sh(`maturin develop ${flags}`);
 }
 
-cmd.runSync();
+if (!cmd.isEmpty()) {
+    cmd.runSync();
+}
 
-if (build_sdist) {
-    fs.writeFileSync("./pyproject.toml", old);
+// Generates version 2.3 according to https://packaging.python.org/en/latest/specifications/core-metadata/
+// Takes parsed pyproject.toml, Cargo.toml, and contents of README.md.
+function generatePkgInfo(pyproject, cargo, readme_md) {
+    const project = pyproject["project"];
+    const field = (name, value) => {
+        if (typeof value !== "string") {
+            throw new Error(
+                `PKG-INFO value for field ${name} was not a string:\n${value}`
+            );
+        }
+        return `${name}: ${value}`;
+    };
+    const lines = [];
+    const addField = (key, value) => lines.push(field(key, value));
+    addField("Metadata-Version", "2.3");
+    addField("Name", project.name);
+    addField("Version", cargo.package.version);
+    for (const c of project["classifiers"]) {
+        addField("Classifier", c);
+    }
+    for (const [extra, deps] of Object.entries(
+        project["optional-dependencies"]
+    )) {
+        for (const dep of deps) {
+            addField("Requires-Dist", `${dep} ; extra == '${extra}'`);
+        }
+    }
+    for (const extra of Object.keys(project["optional-dependencies"])) {
+        addField("Provides-Extra", extra);
+    }
+    addField("Summary", cargo.package.description);
+    addField("Home-page", cargo.package.homepage);
+    addField("Author", cargo.package.authors[0]);
+    addField("Author-email", cargo.package.authors[0]);
+    addField("License", cargo.package.license);
+    addField("Requires-Python", project["requires-python"]);
+    addField(
+        "Description-Content-Type",
+        "text/markdown; charset=UTF-8; variant=GFM"
+    );
+    addField("Project-URL", `Source Code, ${cargo.package.repository}`);
+    lines.push("");
+    lines.push(readme_md);
+
+    return lines.join("\n");
 }
