@@ -138,11 +138,8 @@ async function build_all() {
         x.replace("-", "").replace(".", "")
     );
 
-    const psp_dir = `perspective_python-${version}.data`;
-    await cpy(
-        ["dist/cjs/**/*"],
-        `../../rust/perspective-python/${psp_dir}/data/share/jupyter/labextensions/@finos/perspective-jupyterlab`
-    );
+    const labext_dest = `../../rust/perspective-python/perspective_python-${version}.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab`;
+    await cpy(["dist/cjs/**/*"], labext_dest);
 }
 
 build_all();
