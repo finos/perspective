@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-.p-DockPanel {
+.lm-DockPanel {
     overflow: var(--dock-panel--overflow, hidden);
     position: absolute;
     background-color: var(--detail--background-color, transparent);
@@ -25,21 +25,21 @@
 }
 
 .lm-Widget,
-.p-Widget {
+.lm-Widget {
     cursor: inherit;
 }
 
-.p-DockPanel.ew,
-.p-DockPanel.ew .p-Widget,
-.p-SplitPanel.ew,
-.p-SplitPanel.ew .p-Widget {
+.lm-DockPanel.ew,
+.lm-DockPanel.ew .lm-Widget,
+.lm-SplitPanel.ew,
+.lm-SplitPanel.ew .lm-Widget {
     cursor: ew-resize !important;
 }
 
-.p-DockPanel.ns,
-.p-DockPanel.ns .p-Widget,
-.p-SplitPanel.ns,
-.p-SplitPanel.ns .p-Widget {
+.lm-DockPanel.ns,
+.lm-DockPanel.ns .lm-Widget,
+.lm-SplitPanel.ns,
+.lm-SplitPanel.ns .lm-Widget {
     cursor: ns-resize !important;
 }
 
@@ -47,8 +47,8 @@
     min-width: 100px !important;
 }
 
-.p-DockPanel.resizing ::slotted(perspective-viewer),
-.p-SplitPanel.resizing ::slotted(perspective-viewer) {
+.lm-DockPanel.resizing ::slotted(perspective-viewer),
+.lm-SplitPanel.resizing ::slotted(perspective-viewer) {
     pointer-events: none;
 }
 
@@ -56,7 +56,7 @@
     opacity: 0.5;
 }
 
-.p-DockPanel-handle.resizing {
+.lm-DockPanel-handle.resizing {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -64,23 +64,27 @@
     overflow: auto !important;
 }
 
-.p-Panel {
+.lm-Panel {
     min-height: 100%;
 }
 
-.p-DockPanel-handle {
+.lm-DockPanel-handle {
     background-color: none;
 }
 
-.p-SplitPanel-handle,
-.p-DockPanel-handle {
+.lm-SplitPanel-handle {
+    background-color: var(--workspace-split-panel-handle--background-color);
+}
+
+.lm-SplitPanel-handle,
+.lm-DockPanel-handle {
     transition: background-color 0.3s ease-out;
     &:hover {
         background-color: rgba(0, 0, 0, 0.05);
     }
 }
 
-.p-DockPanel-overlay {
+.lm-DockPanel-overlay {
     background: rgba(75, 75, 75, 0.2);
     border: 1px dashed #666;
     border-radius: 6px;

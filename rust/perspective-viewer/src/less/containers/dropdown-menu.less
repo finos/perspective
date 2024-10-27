@@ -19,7 +19,7 @@
     box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
     background-color: white;
-    padding: 6px;
+    padding: 8px;
 
     display: flex;
     flex-direction: column;
@@ -30,8 +30,7 @@
     }
 
     input {
-        margin-left: 12px;
-        margin-right: 12px;
+        margin: 0;
         padding: 0;
         border: none;
         border-bottom: 1px solid var(--inactive--color, #ccc);
@@ -51,20 +50,25 @@
     }
 
     .dropdown-group-label {
-        font-size: var(--label--font-size, 0.75em);
+        color: var(--inactive--color);
+
+        &:not(:first-of-type) {
+            margin-top: 16px;
+        }
     }
 
     .dropdown-group-container {
         display: flex;
         flex-direction: column;
-        margin-left: 12px;
-        margin-right: 12px;
+        margin: 0;
     }
 
     span {
-        min-height: 21px;
+        min-height: 22px;
         display: inline-flex;
         align-items: center;
+        margin: 0 -8px;
+        padding: 0 8px;
     }
 
     .dropdown-group-container span {
@@ -84,6 +88,7 @@
     }
 
     .dropdown-group-container span:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: var(--icon--color);
+        color: var(--plugin--background);
     }
 }

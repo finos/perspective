@@ -175,17 +175,22 @@ impl Table {
     }
 }
 
+#[wasm_bindgen(typescript_custom_section)]
+const TS_APPEND_CONTENT: &'static str = r#"
+import type {UpdateOptions, ViewConfigUpdate} from "@finos/perspective";
+"#;
+
 #[wasm_bindgen]
 extern "C" {
     // TODO Fix me
     #[wasm_bindgen(typescript_type = "\
-        string | ArrayBuffer | Record<string, Array> | Record<string, unknown>[]")]
+        string | ArrayBuffer | Record<string, unknown[]> | Record<string, unknown>[]")]
     pub type JsTableInitData;
 
-    #[wasm_bindgen(typescript_type = "view_config_update.ViewConfigUpdate")]
+    #[wasm_bindgen(typescript_type = "ViewConfigUpdate")]
     pub type JsViewConfig;
 
-    #[wasm_bindgen(typescript_type = "update_options.UpdateOptions")]
+    #[wasm_bindgen(typescript_type = "UpdateOptions")]
     pub type JsUpdateOptions;
 }
 

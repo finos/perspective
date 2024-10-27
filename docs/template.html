@@ -22,14 +22,12 @@
     </head>
 
     <body>
-        <perspective-viewer editable> </perspective-viewer>
+        <perspective-viewer> </perspective-viewer>
         <script type="module">
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
             const WORKER = await perspective.worker();
             async function on_load() {
-                console.log("ON LOAD");
                 var el = document.getElementsByTagName("perspective-viewer")[0];
-                console.log("VIEWR ELEMENT:", el);
                 const plugin = await el.getPlugin("Heatmap");
                 plugin.render_warning = false;
                 const table = WORKER.table(this.response);
@@ -37,14 +35,12 @@
                 await el.toggleConfig();
                 window.__TEST_PERSPECTIVE_READY__ = true;
             }
-            // window.addEventListener("DOMContentLoaded", function () {
-            // console.log("DOM CONTENT LOADED");
+
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/node_modules/superstore-arrow/superstore.lz4.arrow", true);
             xhr.responseType = "arraybuffer";
             xhr.onload = on_load.bind(xhr);
             xhr.send(null);
-            // });
         </script>
     </body>
 </html>

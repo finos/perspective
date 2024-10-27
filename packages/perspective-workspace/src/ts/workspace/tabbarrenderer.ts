@@ -10,59 +10,82 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "@lumino/widgets/style/widget.css";
-@import "@lumino/widgets/style/accordionpanel.css";
-@import "@lumino/widgets/style/commandpalette.css";
-@import "@lumino/widgets/style/dockpanel.css";
-@import "@lumino/widgets/style/menu.css";
-@import "@lumino/widgets/style/menubar.css";
-@import "@lumino/widgets/style/scrollbar.css";
-@import "@lumino/widgets/style/splitpanel.css";
-@import "@lumino/widgets/style/tabbar.css";
-@import "@lumino/widgets/style/tabpanel.css";
+import { h } from "@lumino/virtualdom";
+import { TabBar } from "@lumino/widgets";
 
-:host {
-    @import "./tabbar.less";
-    @import "./dockpanel.less";
-    @import "./widget.less";
+export const TabBarItems = {
+    Config: "config",
+    Label: "label",
+};
 
-    background-color: hsl(210deg 18% 90%);
+export const DEFAULT_TITLE = "untitled";
 
-    width: 100%;
-    height: 100%;
+export class PerspectiveTabBarRenderer extends TabBar.Renderer {
+    maximized: boolean;
 
-    .workspace {
-        width: 100%;
-        height: 100%;
+    constructor(maximized: boolean) {
+        super();
+        this.maximized = maximized;
     }
 
-    .lm-SplitPanel {
-        height: 100%;
-        width: 100%;
+    renderLabel(data: { title: { label?: string } }) {
+        return h.span(
+            {
+                className: "lm-TabBar-tabLabel",
+                id: TabBarItems.Label,
+            },
+            data.title.label || DEFAULT_TITLE
+        );
     }
 
-    div.lm-SplitPanel-handle {
-        background-color: var(--workspace-split-panel-handle--background-color);
+    renderInert() {
+        return h.div();
     }
 
-    .master-panel {
-        background-color: var(--workspace-master--background-color, inherit);
-        padding: 0px 0px 0px 0px;
-
-        .viewer-container {
-            border-width: 0px;
+    renderTab(
+        data: TabBar.IRenderData<any>,
+        onclick?: (this: HTMLElement, event: MouseEvent) => any
+    ) {
+        const title = data.title.caption;
+        const key = this.createTabKey(data);
+        const style = this.createTabStyle(data);
+        let className = this.createTabClass(data);
+        const dataset = this.createTabDataset(data);
+        const more: h.Child[] = [];
+        if (onclick) {
+            more.push(
+                h.div(
+                    { onclick, className: "bookmarks-button" },
+                    h.div({ className: "bookmarks" })
+                )
+            );
         }
+
+        return h.li(
+            { key, className, title, style, dataset },
+            this.renderDragHandle(),
+            ...more,
+            this.renderLabel(data),
+            this.renderCloseIcon()
+        );
     }
 
-    .perspective-workspace.context-menu * .lm-SplitPanel-handle {
-        opacity: 0.2;
+    renderDragHandle() {
+        return h.div({
+            className: "drag-handle",
+        });
     }
 
-    .perspective-workspace.context-menu > .lm-SplitPanel-handle {
-        opacity: 0.2;
-    }
+    // renderConfigIcon() {
+    //     return h.div({
+    //         className: "lm-TabBar-tabConfigIcon",
+    //         id: TabBarItems.Config,
+    //     });
+    // }
 
-    .context-menu .lm-TabBar:not(.context-focus) {
-        pointer-events: none;
+    renderCloseIcon() {
+        return h.div({
+            className: "lm-TabBar-tabCloseIcon" + " p-TabBar-tabCloseIcon",
+        });
     }
 }

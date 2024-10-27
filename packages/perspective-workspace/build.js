@@ -18,12 +18,14 @@ import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
 import * as fs from "fs";
 import { createRequire } from "node:module";
+import { execSync } from "child_process";
+import "zx/globals";
 
 const _require = createRequire(import.meta.url);
 
 const BUILD = [
     {
-        entryPoints: ["src/js/perspective-workspace.js"],
+        entryPoints: ["src/ts/perspective-workspace.ts"],
         define: {
             global: "window",
         },
@@ -40,7 +42,7 @@ const BUILD = [
         outfile: "dist/esm/perspective-workspace.js",
     },
     {
-        entryPoints: ["src/js/perspective-workspace.js"],
+        entryPoints: ["src/ts/perspective-workspace.ts"],
         define: {
             global: "window",
         },
@@ -63,6 +65,7 @@ const BUILD = [
         outdir: "dist/cdn",
     },
 ];
+
 function add(builder, path, path2) {
     builder.add(
         path,
@@ -139,6 +142,16 @@ async function build_all() {
         "dist/css/pro-dark.css",
         pro_dark.compile().get("output.css")
     );
+
+    try {
+        await $`npx tsc --project ./tsconfig.json`.stdio(
+            "inherit",
+            "inherit",
+            "inherit"
+        );
+    } catch (e) {
+        process.exit(1);
+    }
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }

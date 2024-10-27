@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-.p-TabBar-tabLabel {
+.lm-TabBar-tabLabel {
     background-color: transparent;
     border: none;
     color: var(--icon--color, #666);
@@ -31,75 +31,75 @@
 //     color: #ddd !important;
 // }
 
-.p-TabBar-tabLabel:focus {
+.lm-TabBar-tabLabel:focus {
     outline: none;
     color: var(--workspace-secondary--color, #666) !important;
     cursor: text;
 }
 
-.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
+.lm-TabBar-tab.lm-mod-closable > .lm-TabBar-tabCloseIcon:before {
     content: var(--close-button--content, "\2715");
 }
 
-.p-TabBar-tab > .p-TabBar-tabConfigIcon:before {
+.lm-TabBar-tab > .lm-TabBar-tabConfigIcon:before {
     content: var(--open-settings-button--content, "\1F527");
     font-family: var(--settings--font-family, "Arial");
     transition: color 0.5s ease;
 }
 
-.p-TabBar-tab.p-mod-current.settings_open > .p-TabBar-tabConfigIcon:before {
+.lm-TabBar-tab.lm-mod-current.settings_open > .lm-TabBar-tabConfigIcon:before {
     content: var(--close-settings-button--content, "\1F527");
 }
 
-.p-TabBar-tab.p-mod-current.linked > .p-TabBar-tabConfigIcon:before {
+.lm-TabBar-tab.lm-mod-current.linked > .lm-TabBar-tabConfigIcon:before {
     color: #22a0ce;
 }
 
-.p-TabBar-tab > .p-TabBar-tabConfigIcon {
+.lm-TabBar-tab > .lm-TabBar-tabConfigIcon {
     opacity: 0;
     pointer-events: none;
 }
 
-.p-TabBar-tab.p-mod-current > .p-TabBar-tabConfigIcon {
+.lm-TabBar-tab.lm-mod-current > .lm-TabBar-tabConfigIcon {
     opacity: 1;
     pointer-events: all;
 }
 
-.p-mod-current {
-    .p-TabBar-tabConfigIcon,
-    .p-TabBar-tabCloseIcon {
+.lm-mod-current {
+    .lm-TabBar-tabConfigIcon,
+    .lm-TabBar-tabCloseIcon {
         color: inherit;
         transition: color 0.2s ease-out;
     }
 
-    .p-TabBar-tabConfigIcon:hover,
-    .p-TabBar-tabCloseIcon:hover {
+    .lm-TabBar-tabConfigIcon:hover,
+    .lm-TabBar-tabCloseIcon:hover {
         color: #1a7da1;
         transition: color 0.2s ease-out;
     }
 }
 
-.p-BoxPanel {
+.lm-BoxPanel {
     overflow: scroll !important;
 }
 
-.p-TabBar,
-.p-TabBar-tab {
+.lm-TabBar,
+.lm-TabBar-tab {
     position: relative;
 
     overflow: visible !important;
 }
 
-.p-TabBar-tabLabel:empty::after {
+.lm-TabBar-tabLabel:empty::after {
     content: "untitled";
     color: #aaa;
 }
 
-.p-mod-current .p-TabBar-tabLabel:empty::after {
+.lm-mod-current .lm-TabBar-tabLabel:empty::after {
     color: #ddd;
 }
 
-.p-TabBar-tabLabel:empty::after {
+.lm-TabBar-tabLabel:empty::after {
     content: "untitled";
 }
 
@@ -114,7 +114,7 @@
     margin-bottom: 0px;
 }
 
-.p-TabBar-tab .drag-handle {
+.lm-TabBar-tab .drag-handle {
     height: 12px;
     width: 5px;
     -webkit-mask-image: var(--column-drag-handle--mask-image);
@@ -128,20 +128,20 @@
     mask-size: cover;
 }
 
-.p-TabBar-tab.p-mod-hidden {
+.lm-TabBar-tab.lm-mod-hidden {
     display: flex !important;
     opacity: 0.5;
 }
 
-.p-TabBar-tab.p-mod-current .divider {
+.lm-TabBar-tab.lm-mod-current .divider {
     display: block;
 }
 
-// .p-TabBar-tabLabel input {
+// .lm-TabBar-tabLabel input {
 //     height: 18px;
 // }
 
-.p-TabBar {
+.lm-TabBar {
     min-height: 40px !important;
 }
 
@@ -156,14 +156,14 @@
     background: #016bc6 !important;
 }
 
-.p-TabBar-content {
+.lm-TabBar-content {
     padding: 0px;
     border-bottom: 0px solid #fff !important;
     border-left: #eaeaea;
     border-right: #eaeaea;
 }
 
-.p-TabBar-tab.p-mod-current {
+.lm-TabBar-tab.lm-mod-current {
     .shadow {
         margin: -1px;
         position: absolute;
@@ -178,36 +178,36 @@
     }
 }
 
-.p-TabBar-tab {
+.lm-TabBar-tab {
     // margin: 0px 4px;
     border-color: #eaeaea;
     align-items: center;
 }
 
-.p-TabBar-content.inactive-blur > .p-TabBar-tab {
+.lm-TabBar-content.inactive-blur > .lm-TabBar-tab {
     background-color: var(
         --workspace-inactive-blur--background-color,
         transparent
     );
 }
 
-.condensed .p-TabBar-content {
-    & > .p-TabBar-tab.p-mod-current .p-TabBar-tabConfigIcon {
+.condensed .lm-TabBar-content {
+    & > .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabConfigIcon {
         display: block;
     }
 
-    & > .p-TabBar-tab.p-mod-current.settings_open {
-        .p-TabBar-tabLabel {
+    & > .lm-TabBar-tab.lm-mod-current.settings_open {
+        .lm-TabBar-tabLabel {
             margin-left: 0px;
         }
     }
 }
 
-.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
+.lm-TabBar-content > .lm-TabBar-tab.lm-mod-current.settings_open {
     border-width: 1px 1px 0px 1px !important;
     border-color: var(--workspace-tabbar--border-color, #ddd);
 
-    .p-TabBar-tabToolbar {
+    .lm-TabBar-tabToolbar {
         display: flex;
     }
 
@@ -222,17 +222,17 @@
     }
 }
 
-.p-TabBar-content > .p-TabBar-tab.p-mod-current.perspective_updating {
-    .p-TabBar-tabConfigIcon {
+.lm-TabBar-content > .lm-TabBar-tab.lm-mod-current.perspective_updating {
+    .lm-TabBar-tabConfigIcon {
         display: none;
     }
 
-    .p-TabBar-tabLoadingIcon {
+    .lm-TabBar-tabLoadingIcon {
         display: block;
     }
 }
 
-.p-TabBar-content > .p-TabBar-tab {
+.lm-TabBar-content > .lm-TabBar-tab {
     max-width: 100000px !important;
     flex: 0 1 100000px !important;
     background: none;
@@ -243,27 +243,27 @@
     transition: color 0.2s ease-out;
 }
 
-.p-TabBar-content > .p-TabBar-tab {
+.lm-TabBar-content > .lm-TabBar-tab {
     color: #ccc;
 }
 
-.p-TabBar-content > .p-TabBar-tab {
+.lm-TabBar-content > .lm-TabBar-tab {
     color: #ccc;
 }
 
-.p-TabBar-content > .p-TabBar-tab:hover {
+.lm-TabBar-content > .lm-TabBar-tab:hover {
     color: #ccc;
 }
 
-.p-TabBar-content > .p-TabBar-tab.p-mod-current {
+.lm-TabBar-content > .lm-TabBar-tab.lm-mod-current {
     color: var(--workspace-secondary--color, #666);
 }
 
-.p-TabBar-tab.p-mod-current .p-TabBar-tabLabel {
+.lm-TabBar-tab.lm-mod-current .lm-TabBar-tabLabel {
     white-space: nowrap !important;
 }
 
-.p-TabBar-tabLabel {
+.lm-TabBar-tabLabel {
     font-family: inherit;
     font-size: 12px;
     line-height: 22px;
@@ -272,29 +272,29 @@
     word-break: break-all;
 }
 
-.p-TabBar-tabCloseIcon,
-.p-TabBar-tabConfigIcon {
+.lm-TabBar-tabCloseIcon,
+.lm-TabBar-tabConfigIcon {
     cursor: pointer !important;
     line-height: 22px !important;
     padding-right: 16.5px !important;
 }
 
-.p-TabBar-tabConfigIcon {
+.lm-TabBar-tabConfigIcon {
     padding-left: 8px;
     padding-right: 8px !important;
 }
 
-.p-TabBar-tabLoadingIcon {
+.lm-TabBar-tabLoadingIcon {
     padding-left: 11px;
     padding-right: 12px;
 }
 
-.bottom .p-TabBar-tab {
+.bottom .lm-TabBar-tab {
     flex-basis: 10000px !important;
     max-width: 10000px !important;
 }
 
-.p-TabBar-content > .p-TabBar-tab.p-mod-current {
+.lm-TabBar-content > .lm-TabBar-tab.lm-mod-current {
     color: var(--workspace-tabbar--color, #666) !important;
     border: var(--workspace-tabbar--border, 1px solid #ddd);
     border-width: var(--workspace-tabbar-tab--border-width);
@@ -305,7 +305,7 @@
     max-height: 40px !important;
 }
 
-.bottom .p-TabBar-tab.p-mod-current {
+.bottom .lm-TabBar-tab.lm-mod-current {
     border: none;
 }
 
@@ -313,13 +313,13 @@
     background-color: #ccc;
 }
 
-.perspective-workspace.context-menu * .p-TabBar.context-focus {
+.perspective-workspace.context-menu * .lm-TabBar.context-focus {
     opacity: 1;
 }
 
-.perspective-workspace.context-menu * .p-TabBar,
+.perspective-workspace.context-menu * .lm-TabBar,
 .perspective-workspace.context-menu
-    .p-Widget.workspace-widget:not(.context-focus)
+    .lm-Widget.workspace-widget:not(.context-focus)
     .viewer-container {
     opacity: 0.2;
 }

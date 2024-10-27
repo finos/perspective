@@ -10,69 +10,60 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// import "@finos/perspective-viewer";
-import { Widget } from "@lumino/widgets/src/widget";
+import { Widget } from "@lumino/widgets";
+import { Message } from "@lumino/messaging";
+
+import type * as psp_viewer from "@finos/perspective-viewer";
+import type * as psp from "@finos/perspective";
+
+interface IPerspectiveViewerWidgetOptions {
+    node: HTMLElement;
+    viewer: psp_viewer.HTMLPerspectiveViewerElement;
+}
 
 export class PerspectiveViewerWidget extends Widget {
-    constructor({ viewer, node }) {
+    viewer: psp_viewer.HTMLPerspectiveViewerElement;
+    _master: boolean;
+    _title: string;
+    _is_table_loaded: boolean;
+    _restore_config?: () => Promise<void>;
+    task?: Promise<void>;
+
+    constructor({ viewer, node }: IPerspectiveViewerWidgetOptions) {
         super({ node });
         this.viewer = viewer;
-        this.master = false;
+        this._master = false;
+        this._title = "";
+        this._is_table_loaded = false;
     }
 
-    set master(value) {
-        if (value !== undefined && this._master !== value) {
+    set master(value: boolean) {
+        if (this._master !== value) {
             if (value) {
                 this.viewer.classList.add("workspace-master-widget");
-                this.viewer.classList.remove("workspace-detail-widget");
-
-                // TODO jsdom lacks `toggleAttribute` until 12.2.0
-                // https://github.com/jsdom/jsdom/blob/master/Changelog.md#1220
                 this.viewer.toggleAttribute?.("selectable", true);
             } else {
-                this.viewer.classList.add("workspace-detail-widget");
                 this.viewer.classList.remove("workspace-master-widget");
                 this.viewer.removeAttribute("selectable");
             }
+
             this._master = value;
         }
     }
 
-    get master() {
+    get master(): boolean {
         return this._master;
     }
 
-    // set name(value) {
-    //     if (value != null) {
-    //         this.viewer.setAttribute("name", value);
-    //         this.title.label = value;
-    //         this._name = value;
-    //     }
-    // }
-
-    get name() {
-        console.error("Test");
+    get name(): string {
         return this._title;
     }
 
-    set linked(value) {
-        if (value !== undefined) {
-            if (value) {
-                this.viewer.setAttribute("linked", "");
-            } else {
-                this.viewer.removeAttribute("linked");
-            }
-        }
-    }
-    get linked() {
-        return this.viewer.hasAttribute("linked");
-    }
-
-    toggleConfig() {
+    toggleConfig(): Promise<void> {
         return this.viewer.toggleConfig();
     }
 
-    async load(table) {
+    async load(table: psp.Table | Promise<psp.Table>) {
         this._is_table_loaded = true;
         let promises = [this.viewer.load(table)];
         if (this._restore_config) {
@@ -82,31 +73,27 @@ export class PerspectiveViewerWidget extends Widget {
         await Promise.all(promises);
     }
 
-    restore(config) {
-        const {
-            master,
-            table,
-            linked,
-            name,
-            editable,
-            selectable,
-            ...viewerConfig
-        } = config;
+    restore(
+        config: psp_viewer.ViewerConfigUpdate & {
+            master: boolean;
+            table: string;
+        }
+    ) {
+        const { master, table, ...viewerConfig } = config;
         this.master = master;
-        this.linked = linked;
-        this._title = config.title;
-        this.title.label = config.title;
+        this._title = config.title as string;
+        this.title.label = config.title as string;
         if (table) {
             this.viewer.setAttribute("table", table);
         }
 
-        if (selectable) {
-            this.viewer.setAttribute("selectable", selectable);
-        }
+        // if (selectable) {
+        //     this.viewer.setAttribute("selectable", selectable);
+        // }
 
-        if (editable) {
-            this.viewer.setAttribute("editable", editable);
-        }
+        // if (editable) {
+        //     this.viewer.setAttribute("editable", editable);
+        // }
 
         const restore_config = () => this.viewer.restore({ ...viewerConfig });
 
@@ -122,7 +109,6 @@ export class PerspectiveViewerWidget extends Widget {
             ...(await this.viewer.save()),
             master: this.master,
             table: this.viewer.getAttribute("table"),
-            linked: this.linked,
         };
 
         if (this.viewer.hasAttribute("selectable")) {
@@ -136,12 +122,12 @@ export class PerspectiveViewerWidget extends Widget {
         return config;
     }
 
-    removeClass(name) {
+    removeClass(name: string) {
         super.removeClass(name);
         this.viewer && this.viewer.classList.remove(name);
     }
 
-    async onCloseRequest(msg) {
+    async onCloseRequest(msg: Message) {
         super.onCloseRequest(msg);
         if (this.viewer.parentElement) {
             this.viewer.parentElement.removeChild(this.viewer);

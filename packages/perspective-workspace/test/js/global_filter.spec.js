@@ -58,7 +58,15 @@ function tests(context, compare) {
                 .querySelector("perspective-viewer-d3fc-treemap")
                 .shadowRoot.querySelector("g.treemap > g")
                 .dispatchEvent(new Event("click"));
-            await workspace.flush();
+
+            let resolve;
+            const timer = new Promise((x) => {
+                resolve = x;
+            });
+
+            workspace.addEventListener("workspace-layout-update", resolve);
+            await timer;
+
             return await workspace.save();
         }, config);
 

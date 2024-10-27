@@ -10,35 +10,56 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { ArrayExt } from "@lumino/algorithm/src";
-import { ElementExt } from "@lumino/domutils/src";
-import { TabBar } from "@lumino/widgets/src/tabbar";
-import { TabBarItems, DEFAULT_TITLE } from "./tabbarrenderer";
+import { ArrayExt } from "@lumino/algorithm";
+import { ElementExt } from "@lumino/domutils";
+import { TabBar } from "@lumino/widgets";
+import {
+    TabBarItems,
+    DEFAULT_TITLE,
+    PerspectiveTabBarRenderer,
+} from "./tabbarrenderer";
 import { VirtualDOM, VirtualElement } from "@lumino/virtualdom";
-import { CommandRegistry } from "@lumino/commands/src";
+import { CommandRegistry } from "@lumino/commands";
 import { MenuRenderer } from "./menu";
-import { Menu } from "@lumino/widgets/src/menu";
+import { Menu } from "@lumino/widgets";
+import { PerspectiveWorkspace } from "./workspace";
+import { Message } from "@lumino/messaging";
+import { Title } from "@lumino/widgets";
+import { Signal } from "@lumino/signaling";
+import { ReadonlyJSONObject, ReadonlyJSONValue } from "@lumino/coreutils";
 
-export class PerspectiveTabBar extends TabBar {
-    constructor(workspace, options = {}) {
+export class PerspectiveTabBar extends TabBar<any> {
+    _workspace: PerspectiveWorkspace;
+    __content_node__?: HTMLElement;
+    _menu?: Menu;
+    __titles: string[];
+
+    constructor(workspace: PerspectiveWorkspace, options = {}) {
         super(options);
         this._addEventListeners();
-        this.__content_node__;
+        this.__content_node__ = undefined;
         this._workspace = workspace;
+        this.__titles = [];
     }
 
-    onUpdateRequest(msg) {
+    get private_titles(): Title<any>[] {
+        let titles: Title<any>[] = (this as any)._titles;
+        return titles;
+    }
+
+    onUpdateRequest(msg: Message) {
         // NOT INERT!  This is a lumino bug fix.
         // lumino/virtualdom keeps a weakmap on contentNode which is later
         // reset - this causes the diff to double some elements.  Memoizing
         // prevent collection from the weakmap.
         this.__content_node__ = this.contentNode;
+        this.node.style.contain = "";
 
         // super.onUpdateRequest(msg);
 
-        let titles = this._titles;
+        let titles: Title<any>[] = (this as any)._titles;
         let renderer = this.renderer;
-        let currentTitle = this.currentTitle;
+        let currentTitle = this.currentTitle!;
 
         // Another hack. `TabBar` selects by index and I don't want to fork this
         // logic, so insert empty divs until the indices match.
@@ -53,14 +74,20 @@ export class PerspectiveTabBar extends TabBar {
             }
 
             if (current) {
-                content[i] = renderer.renderTab({
-                    title,
-                    zIndex: titles.length + 1,
-                    current,
-                    onClick,
-                });
+                content[i] = (
+                    renderer as unknown as PerspectiveTabBarRenderer
+                ).renderTab(
+                    {
+                        title,
+                        zIndex: titles.length + 1,
+                        current,
+                    } as TabBar.IRenderData<any>,
+                    onClick
+                );
             } else {
-                content[i] = renderer.renderInert();
+                content[i] = (
+                    renderer as unknown as PerspectiveTabBarRenderer
+                ).renderInert();
             }
         }
 
@@ -68,30 +95,42 @@ export class PerspectiveTabBar extends TabBar {
         this._check_shade();
     }
 
-    onClick(otherTitles, index, event) {
+    onClick(otherTitles: Title<any>[], index: number, event: MouseEvent) {
         const commands = new CommandRegistry();
-        const renderer = new MenuRenderer(null);
+        const renderer = new MenuRenderer();
         this._menu = new Menu({ commands, renderer });
         this._menu.addClass("perspective-workspace-menu");
-        this._menu.dataset.minwidth = this._titles[index];
+        this._menu.dataset.minwidth = this.__titles[index];
         for (const title of otherTitles) {
             this._menu.addItem({
                 command: "tabbar:switch",
-                args: { title },
+                args: { title } as unknown as ReadonlyJSONObject,
             });
         }
 
         commands.addCommand("tabbar:switch", {
             execute: async ({ title }) => {
-                const index = this._titles.findIndex((t) => t === title);
-                this.currentTitle = title;
-                this.tabActivateRequested.emit({ index, title });
+                const psp_title = title as any as Title<any>;
+                const index = this.__titles.findIndex((t) => t === title);
+                this.currentTitle = psp_title;
+                (
+                    this.tabActivateRequested as unknown as Signal<
+                        TabBar<any>,
+                        TabBar.ITabActivateRequestedArgs<any>
+                    >
+                ).emit({
+                    index,
+                    title: psp_title,
+                });
             },
-            label: ({ title }) => title.label || "untitled",
+            label: ({ title }) => {
+                const psp_title = title as any as Title<any>;
+                return psp_title.label || "untitled";
+            },
             mnemonic: 0,
         });
 
-        const box = event.target.getBoundingClientRect();
+        const box = (event.target as HTMLElement).getBoundingClientRect();
         this._menu.open(box.x, box.y + box.height);
         this._menu.aboutToClose.connect(() => {
             this._menu = undefined;
@@ -105,7 +144,7 @@ export class PerspectiveTabBar extends TabBar {
             Array.from(this.contentNode.children).filter(
                 (x) =>
                     x.classList.contains("settings_open") &&
-                    x.classList.contains("p-mod-current")
+                    x.classList.contains("lm-mod-current")
             ).length > 0
         ) {
             this.contentNode.classList.add("inactive-blur");
@@ -114,22 +153,34 @@ export class PerspectiveTabBar extends TabBar {
         }
     }
 
-    handleEvent(event) {
+    handleEvent(event: MouseEvent) {
         this._menu?.close();
         this.retargetEvent(event);
         switch (event.type) {
             case "contextmenu":
-                const widget = this.currentTitle.owner;
-                this.parent.parent.parent.showContextMenu(widget, event);
+                const widget = this.currentTitle?.owner;
+                let parent = widget.parent;
+
+                // TODO There is probably a better way to find the workspace
+                // relative to a widget command
+                while (parent && !(parent instanceof PerspectiveWorkspace)) {
+                    parent = parent.parent;
+                }
+
+                (parent as unknown as PerspectiveWorkspace).showContextMenu(
+                    widget,
+                    event
+                );
+
                 event.preventDefault();
                 break;
             case "mousedown":
-                if (event.target.id === TabBarItems.Label) {
+                if ((event.target as HTMLElement).id === TabBarItems.Label) {
                     return;
                 }
                 break;
             case "pointerdown":
-                if (event.target.id === TabBarItems.Label) {
+                if ((event.target as HTMLElement).id === TabBarItems.Label) {
                     const tabs = this.contentNode.children;
 
                     // Find the index of the released tab.
@@ -164,7 +215,7 @@ export class PerspectiveTabBar extends TabBar {
      * the ShadowDom boundary.
      *
      */
-    retargetEvent(event) {
+    retargetEvent(event: MouseEvent) {
         Object.defineProperty(event, "target", {
             value: event.composedPath()[0],
             enumerable: true,
