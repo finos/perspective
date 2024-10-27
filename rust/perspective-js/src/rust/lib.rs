@@ -24,24 +24,26 @@ mod table;
 pub mod utils;
 mod view;
 
+#[cfg(feature = "export-init")]
 use wasm_bindgen::prelude::*;
 
 pub use crate::client::Client;
 pub use crate::table::*;
 
+#[cfg(feature = "export-init")]
 #[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_CONTENT: &'static str = r#"
 export type * from "../../src/ts/ts-rs/ViewWindow.d.ts";
 export type * from "../../src/ts/ts-rs/TableInitOptions.d.ts";
 export type * from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
-export type * from "../../src/ts/ts-rs/OnUpdateArgs.d.ts";
+export type * from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
 export type * from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 export type * from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 
-import type * as table_init_options from "../../src/ts/ts-rs/ViewWindow.d.ts";
+import type * as view_window from "../../src/ts/ts-rs/ViewWindow.d.ts";
 import type * as table_init_options from "../../src/ts/ts-rs/TableInitOptions.d.ts";
 import type * as view_config_update from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
-import type * as on_update_args from "../../src/ts/ts-rs/OnUpdateArgs.d.ts";
+import type * as on_update_args from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
 import type * as on_update_options from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 import type * as update_options from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 "#;

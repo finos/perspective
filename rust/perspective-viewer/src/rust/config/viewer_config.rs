@@ -184,24 +184,38 @@ impl Deref for PluginConfig {
 // #[serde(deny_unknown_fields)]
 pub struct ViewerConfigUpdate {
     #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub version: VersionUpdate,
 
     #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub plugin: PluginUpdate,
 
     #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub title: TitleUpdate,
 
     #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub theme: ThemeUpdate,
 
     #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub settings: SettingsUpdate,
 
     #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub plugin_config: Option<PluginConfig>,
 
     #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub columns_config: ColumnConfigUpdate,
 
     #[serde(flatten)]
@@ -257,11 +271,31 @@ impl ViewerConfigUpdate {
 
 #[derive(Clone, Debug, Serialize, TS)]
 #[serde(untagged)]
+// #[ts(untagged)]
 pub enum OptionalUpdate<T: Clone> {
+    #[ts(skip)]
     SetDefault,
+
+    // #[ts(skip)]
+    // #[ts(type = "undefined")]
     Missing,
+
+    // #[ts(type = "_")]
+    // #[ts(untagged)]
     Update(T),
 }
+
+// #[derive(Clone, Debug, Serialize, TS)]
+// #[serde(flatten)]
+// pub struct OptionalUpdate<T: Clone> {
+//     #[ts(optional)]
+//     inner: Option<OptionalUpdateInner<T>>,
+// }
+
+// // #[ts(optional = nullable)]
+
+// #[derive(Clone, Debug, Serialize, TS)]
+// pub struct OptionalUpdateInner<T: Clone>(Option<T>);
 
 pub type PluginUpdate = OptionalUpdate<String>;
 pub type SettingsUpdate = OptionalUpdate<bool>;

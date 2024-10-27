@@ -15,6 +15,7 @@ import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import cpy from "cpy";
+import "zx/globals";
 
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
@@ -85,10 +86,12 @@ async function build_all() {
     build_rust();
     await build_web_assets();
 
-    // "files": ["./src/ts/perspective.node.ts", "./src/ts/perspective.ts"]
     // Typecheck
-    execSync("npx tsc --project ./tsconfig.browser.json", INHERIT);
-    // execSync("npx tsc --project ./tsconfig.browser.json", INHERIT);
+    await $`npx tsc --project ./tsconfig.browser.json`.stdio(
+        "inherit",
+        "inherit",
+        "inherit"
+    );
     await cpy("target/themes/*", "dist/css");
     await cpy("target/themes/*", "dist/css");
 }

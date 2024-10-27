@@ -38,9 +38,10 @@ use perspective_viewer::config::ViewerConfigUpdate;
 use ts_rs::TS;
 
 pub fn generate_type_bindings_viewer() -> Result<(), Box<dyn Error>> {
-    Ok(ViewerConfigUpdate::export_all_to(
-        std::env::current_dir()?.join("../perspective-viewer/src/ts/ts-rs"),
-    )?)
+    let path = std::env::current_dir()?.join("../perspective-viewer/src/ts/ts-rs");
+    ViewerConfigUpdate::export_all_to(&path)?;
+    ViewOnUpdateResp::export_all_to(&path)?;
+    Ok(())
 }
 
 fn generate_exprtk_docs() -> Result<(), Box<dyn Error>> {
@@ -67,6 +68,7 @@ pub fn generate_type_bindings_js() -> Result<(), Box<dyn Error>> {
     ViewOnUpdateResp::export_all_to(&path)?;
     OnUpdateOptions::export_all_to(&path)?;
     UpdateOptions::export_all_to(&path)?;
+    ViewWindow::export_all_to(&path)?;
     Ok(())
 }
 

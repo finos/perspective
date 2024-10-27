@@ -19,6 +19,7 @@ async function load() {
 
     let arrow = await resp.arrayBuffer();
     const worker = await perspective.worker();
+    window.__WORKER__ = worker;
     const table = await worker.table(arrow);
     let workspace = document.getElementById("workspace");
     window.__TABLE__ = table;

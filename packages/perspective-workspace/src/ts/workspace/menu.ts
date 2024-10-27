@@ -10,48 +10,60 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- * Module for the `<perspective-viewer>` custom element.  This module has no
- * (real) exports, but importing it has a side effect: the
- * `PerspectiveViewerElement`class is registered as a custom element, after
- * which it can be used as a standard DOM element.
- *
- * Though `<perspective-viewer>` is written mostly in Rust, the nature
- * of WebAssembly's compilation makes it a dynamic module;  in order to
- * guarantee that the Custom Elements extension methods are registered
- * synchronously with this package's import, we need perform said registration
- * within this wrapper module.  As a result, the API methods of the Custom
- * Elements are all `async` (as they must await the wasm module instance).
- *
- * The documentation in this module defines the instance structure of a
- * `<perspective-viewer>` DOM object instantiated typically, through HTML or any
- * relevent DOM method e.g. `document.createElement("perspective-viewer")` or
- * `document.getElementsByTagName("perspective-viewer")`.
- *
- * @module perspective-viewer
- */
+import { h } from "@lumino/virtualdom";
+import { Menu } from "@lumino/widgets";
 
-export { IPerspectiveViewerPlugin } from "./plugin";
-export { HTMLPerspectiveViewerPluginElement } from "./plugin";
-import {
-    ExportDropDownMenuElement,
-    CopyDropDownMenuElement,
-} from "../../dist/pkg/perspective-viewer";
+export class MenuRenderer extends Menu.Renderer {
+    formatLabel(data: Menu.IRenderData) {
+        let { label, mnemonic } = data.item;
+        if (mnemonic < 0 || mnemonic >= label.length) {
+            return label;
+        }
 
-export interface HTMLPerspectiveViewerExportMenu
-    extends HTMLElement,
-        ExportDropDownMenuElement {}
+        let prefix = label.slice(0, mnemonic);
+        let suffix = label.slice(mnemonic + 1);
+        let char = label[mnemonic];
+        let span = h.span(
+            {
+                className: "lm-Menu-itemMnemonic p-Menu-itemMnemonic",
+            },
+            char
+        );
 
-export interface HTMLPerspectiveViewerCopyMenu
-    extends HTMLElement,
-        CopyDropDownMenuElement {}
+        return [prefix, span, suffix];
+    }
 
-export * from "./extensions";
-export type * from "./ts-rs/ViewerConfigUpdate.d.ts";
-export type * from "./ts-rs/ColumnConfigValues.d.ts";
-export type * from "./ts-rs/Filter.d.ts";
-export type * from "./ts-rs/FilterTerm.d.ts";
-export type * from "./ts-rs/FilterReducer.d.ts";
-// export type * from "./ts-rs/Vi"
+    renderLabel(data: Menu.IRenderData) {
+        let content = this.formatLabel(data);
+        return h.div(
+            {
+                className: "lm-Menu-itemLabel p-Menu-itemLabel",
+            },
+            content
+        );
+    }
 
-import "./bootstrap";
+    renderSubmenu(data: Menu.IRenderData) {
+        return h.div({
+            className: "lm-Menu-itemSubmenuIcon" + " p-Menu-itemSubmenuIcon",
+        });
+    }
+
+    renderItem(data: Menu.IRenderData) {
+        let className = this.createItemClass(data);
+        let dataset = this.createItemDataset(data);
+        let aria = this.createItemARIA(data);
+        return h.li(
+            {
+                className,
+                dataset,
+                tabindex: "0",
+                onfocus: data.onfocus,
+                ...aria,
+            },
+            this.renderLabel(data),
+            this.renderShortcut(data),
+            this.renderSubmenu(data)
+        );
+    }
+}

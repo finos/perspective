@@ -10,15 +10,23 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import style from "../../build/css/workspace.css";
-import template from "../html/workspace.html";
-import { PerspectiveWorkspace, SIDE } from "./workspace";
+import { MessageLoop } from "@lumino/messaging";
+import { Widget } from "@lumino/widgets";
+import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
+import type * as psp from "@finos/perspective";
+
 export { PerspectiveWorkspace } from "./workspace";
-import { MessageLoop } from "@lumino/messaging/src";
-import { Widget } from "@lumino/widgets/src/widget";
-import { bindTemplate } from "./workspace/utils.js";
 export { PerspectiveViewerWidget } from "./workspace/widget";
 
+import "./external";
+import {
+    PerspectiveWorkspace,
+    PerspectiveWorkspaceConfig,
+    ViewerConfigUpdateExt,
+} from "./workspace";
+import { bindTemplate, CustomElementProto } from "./utils/custom_elements";
+import style from "../../build/css/workspace.css";
+import template from "../html/workspace.html";
 import injectedStyles from "../../build/css/injected.css";
 
 /**
@@ -73,8 +81,10 @@ import injectedStyles from "../../build/css/injected.css";
  *
  *
  */
+export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
+    private workspace?: PerspectiveWorkspace;
+    private _resize_observer?: ResizeObserver;
 
-class PerspectiveWorkspaceElement extends HTMLElement {
     constructor() {
         super();
         this.setAutoSize(true);
@@ -85,22 +95,6 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * Public
      *
      */
-
-    /**
-     * The side the Global Filter sidebar is placed relative to the main panel.
-     *
-     * @param {('left'|'right')} value
-     */
-    set side(value) {
-        this.setAttribute("side", value);
-        if (this.workspace) {
-            this.workspace.side = value;
-        }
-    }
-
-    get side() {
-        return this.getAttribute("side");
-    }
 
     /**
      * Persists this `<perspective-workspace>` to a token `Object`.  This object
@@ -124,7 +118,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * localStorage.set("CONFIG", JSON.stringify(workspace.save()));
      */
     save() {
-        return this.workspace.save();
+        return this.workspace!.save();
     }
 
     /**
@@ -147,32 +141,69 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * // Add `Table` separately.
      * workspace.tables.set("superstore", await worker.table(data));
      */
-    async restore(layout) {
-        await this.workspace.restore(layout);
+    async restore(layout: PerspectiveWorkspaceConfig<string>) {
+        await this.workspace!.restore(layout);
     }
 
+    /**
+     * Await all asynchronous tasks for all viewers in this workspace. This is
+     * useful to make sure asynchonous side effects of synchronous methods calls
+     * are applied.
+     */
     async flush() {
         await Promise.all(
-            Array.from(this.querySelectorAll("perspective-viewer")).map((x) =>
-                x.flush()
-            )
+            Array.from(this.querySelectorAll("perspective-viewer")).map((x) => {
+                const psp_widget = x as HTMLPerspectiveViewerElement;
+                return psp_widget.flush();
+            })
         );
     }
 
-    addViewer(config) {
-        this.workspace.addViewer(config);
+    /**
+     * Add a new viewer to the workspace for a given `ViewerConfigUpdateExt`.
+     * @param config
+     */
+    async addViewer(config: ViewerConfigUpdateExt) {
+        this.workspace!.addViewer(config);
+        await this.flush();
     }
 
-    addTable(name, table) {
-        this.workspace.addTable(name, table);
+    /**
+     * Add a new `Table` to the workspace, so that it can be bound by viewers.
+     * Each `Table` is identified by a unique `name`.
+     */
+    async addTable(name: string, table: Promise<psp.Table>) {
+        this.workspace!.addTable(name, table);
+        await this.flush();
     }
 
-    getTable(name) {
-        return this.workspace.getTable(name);
+    /**
+     * Deleta a table by name from this workspace
+     * @param name
+     * @returns
+     */
+    getTable(name: string) {
+        return this.workspace!.getTable(name);
     }
 
-    removeTable(name) {
-        return this.workspace.removeTable(name);
+    /**
+     * Replace a `Table` by name. As `Table` doe snot guarantee the same
+     * structure, this will wipe the viewer's state.
+     * @param name
+     * @param table
+     */
+    async replaceTable(name: string, table: Promise<psp.Table>) {
+        this.workspace!.replaceTable(name, table);
+        await this.flush();
+    }
+
+    /**
+     * Remove a `Table` by name.
+     * @param name
+     * @returns
+     */
+    removeTable(name: string) {
+        return this.workspace!.removeTable(name);
     }
 
     /**
@@ -185,65 +216,82 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * set with a name matching an existing child `perspective-viewer`.
      *
      * @readonly
-     * @memberof PerspectiveWorkspaceElement
+     * @memberof HTMLPerspectiveWorkspaceElement
      */
     get tables() {
-        return this.workspace.tables;
+        return this.workspace!.tables;
     }
 
     /**
      * Invalidate this component's dimensions and recalculate.
      */
-    resize() {
-        this.workspace.update();
+    async resize() {
+        this.workspace!.update();
+        await this.flush();
     }
 
-    setAutoSize(is_auto_size) {
+    /**
+     * Set whether this workspace element should auto-size itself via a
+     * `ResizeObserver`.
+     */
+    setAutoSize(is_auto_size: boolean) {
         this._resize_observer?.unobserve(this);
         this._resize_observer = undefined;
         if (is_auto_size) {
             this._resize_observer = new ResizeObserver((...args) =>
-                this.workspace?.update(...args)
+                this.workspace?.update()
             );
 
             this._resize_observer.observe(this);
         }
     }
 
-    _light_dom_changed() {
-        const viewers = Array.from(this.childNodes);
-        for (const viewer of viewers) {
-            if (viewer.tagName === "PERSPECTIVE-VIEWER") {
-                this.workspace.update_widget_for_viewer(viewer);
-            }
-        }
-
-        this.workspace.remove_unslotted_widgets(viewers);
-        this.workspace.update_details_panel(viewers);
-    }
-
-    _register_light_dom_listener() {
-        let observer = new MutationObserver(this._light_dom_changed.bind(this));
-        let config = { attributes: false, childList: true, subtree: false };
-        observer.observe(this, config);
-        this._light_dom_changed();
-    }
-
     connectedCallback() {
-        if (!this.side) {
-            this.side = this.side || SIDE.LEFT;
-
-            const container = this.shadowRoot.querySelector("#container");
-            this.workspace = new PerspectiveWorkspace(this, {
-                side: this.side,
-            });
-
+        if (!this.workspace) {
+            const container = this.shadowRoot!.querySelector("#container")!;
+            this.workspace = new PerspectiveWorkspace(this);
             this._register_light_dom_listener();
-
             MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
             container.insertBefore(this.workspace.node, null);
             MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
         }
+    }
+
+    /***************************************************************************
+     *
+     * Private
+     *
+     */
+
+    private _light_dom_changed() {
+        const viewers = Array.from(
+            this.childNodes
+        ) as HTMLPerspectiveViewerElement[];
+
+        for (const viewer of viewers) {
+            if (viewer.nodeType !== Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            if (viewer.tagName !== "PERSPECTIVE-VIEWER") {
+                console.warn("Not a <perspective-viewer>");
+                continue;
+            }
+
+            this.workspace!.update_widget_for_viewer(
+                viewer as HTMLPerspectiveViewerElement
+            );
+        }
+
+        this.workspace!.remove_unslotted_widgets(viewers);
+        this.workspace!.update_details_panel(viewers);
+    }
+
+    private _register_light_dom_listener() {
+        let observer = new MutationObserver(this._light_dom_changed.bind(this));
+        let config = { attributes: false, childList: true, subtree: false };
+        observer.observe(this, config);
+        this._light_dom_changed();
     }
 }
 
@@ -252,4 +300,7 @@ _injectStyle.toggleAttribute("injected", true);
 _injectStyle.innerHTML = injectedStyles;
 document.head.appendChild(_injectStyle);
 
-bindTemplate(template, style)(PerspectiveWorkspaceElement);
+bindTemplate(
+    template,
+    style
+)(HTMLPerspectiveWorkspaceElement as unknown as CustomElementProto);

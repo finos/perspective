@@ -10,81 +10,34 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { h } from "@lumino/virtualdom/src";
-import { TabBar } from "@lumino/widgets/src/tabbar";
+export class ObservableMap<K, V> extends Map<K, V> {
+    _set_listener?: (name: K, val: V) => void;
+    _delete_listener?: (name: K) => void;
 
-export const TabBarItems = {
-    Config: "config",
-    Label: "label",
-};
-
-export const DEFAULT_TITLE = "untitled";
-
-export class PerspectiveTabBarRenderer extends TabBar.Renderer {
-    constructor(maximized) {
-        super();
-        this.maximized = maximized;
+    set(name: K, item: V) {
+        this._set_listener?.(name, item);
+        super.set(name, item);
+        return this;
     }
 
-    renderLabel(data) {
-        return h.span(
-            {
-                className: "p-TabBar-tabLabel",
-                id: TabBarItems.Label,
-            },
-            data.title.label || DEFAULT_TITLE
-        );
+    get(name: K): V {
+        return super.get(name)!;
     }
 
-    renderOther(data, title) {
-        return h.span({}, title.label || "untitled");
-    }
-
-    renderInert() {
-        return h.div();
-    }
-
-    renderTab(data) {
-        const title = data.title.caption;
-        const key = this.createTabKey(data);
-        const style = this.createTabStyle(data);
-        let className = this.createTabClass(data);
-        const dataset = this.createTabDataset(data);
-        const more = [];
-        if (data.onClick) {
-            more.push(
-                h.div(
-                    { onclick: data.onClick, class: "bookmarks-button" },
-                    h.div({ class: "bookmarks" })
-                )
-            );
+    delete(name: K) {
+        const result = this._delete_listener?.(name);
+        if (result) {
+            return super.delete(name);
+        } else {
+            return false;
         }
-
-        return h.li(
-            { key, className, title, style, dataset },
-            this.renderDragHandle(),
-            ...more,
-            this.renderLabel(data),
-            this.renderCloseIcon()
-        );
     }
 
-    renderDragHandle() {
-        return h.div({
-            className: "drag-handle",
-        });
+    addSetListener(listener: (name: K, val: V) => void) {
+        this._set_listener = listener;
     }
 
-    // renderConfigIcon() {
-    //     return h.div({
-    //         className: "p-TabBar-tabConfigIcon",
-    //         id: TabBarItems.Config,
-    //     });
-    // }
-
-    renderCloseIcon() {
-        return h.div({
-            className: "lm-TabBar-tabCloseIcon" + " p-TabBar-tabCloseIcon",
-        });
+    addDeleteListener(listener: (name: K) => void) {
+        this._delete_listener = listener;
     }
 }

@@ -10,48 +10,62 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- * Module for the `<perspective-viewer>` custom element.  This module has no
- * (real) exports, but importing it has a side effect: the
- * `PerspectiveViewerElement`class is registered as a custom element, after
- * which it can be used as a standard DOM element.
- *
- * Though `<perspective-viewer>` is written mostly in Rust, the nature
- * of WebAssembly's compilation makes it a dynamic module;  in order to
- * guarantee that the Custom Elements extension methods are registered
- * synchronously with this package's import, we need perform said registration
- * within this wrapper module.  As a result, the API methods of the Custom
- * Elements are all `async` (as they must await the wasm module instance).
- *
- * The documentation in this module defines the instance structure of a
- * `<perspective-viewer>` DOM object instantiated typically, through HTML or any
- * relevent DOM method e.g. `document.createElement("perspective-viewer")` or
- * `document.getElementsByTagName("perspective-viewer")`.
- *
- * @module perspective-viewer
- */
-
-export { IPerspectiveViewerPlugin } from "./plugin";
-export { HTMLPerspectiveViewerPluginElement } from "./plugin";
+import { test, expect } from "@finos/perspective-test";
 import {
-    ExportDropDownMenuElement,
-    CopyDropDownMenuElement,
-} from "../../dist/pkg/perspective-viewer";
+    compareLightDOMContents,
+    compareShadowDOMContents,
+} from "@finos/perspective-test";
 
-export interface HTMLPerspectiveViewerExportMenu
-    extends HTMLElement,
-        ExportDropDownMenuElement {}
+test.beforeEach(async ({ page }) => {
+    await page.goto("/tools/perspective-test/src/html/workspace-test.html");
+    await page.evaluate(async () => {
+        while (!window["__TEST_PERSPECTIVE_READY__"]) {
+            await new Promise((x) => setTimeout(x, 10));
+        }
+    });
+});
 
-export interface HTMLPerspectiveViewerCopyMenu
-    extends HTMLElement,
-        CopyDropDownMenuElement {}
+function tests(context, compare) {
+    test("replaceTable() frees the `Table` before resolution", async ({
+        page,
+    }) => {
+        const config = {
+            viewers: {
+                One: { table: "superstore", name: "One" },
+            },
+            detail: {
+                main: {
+                    currentIndex: 0,
+                    type: "tab-area",
+                    widgets: ["One"],
+                },
+            },
+        };
 
-export * from "./extensions";
-export type * from "./ts-rs/ViewerConfigUpdate.d.ts";
-export type * from "./ts-rs/ColumnConfigValues.d.ts";
-export type * from "./ts-rs/Filter.d.ts";
-export type * from "./ts-rs/FilterTerm.d.ts";
-export type * from "./ts-rs/FilterReducer.d.ts";
-// export type * from "./ts-rs/Vi"
+        await page.evaluate(async (config) => {
+            const workspace = document.getElementById("workspace");
+            await workspace.restore(config);
+            await workspace.replaceTable(
+                "superstore",
+                window.__WORKER__.table("x\n1")
+            );
+            await window.__TABLE__.delete();
+        }, config);
 
-import "./bootstrap";
+        await page.evaluate(async () => {
+            await workspace.flush();
+        });
+
+        return compare(page, `${context}-replace-table-frees-table.txt`);
+    });
+}
+
+test.describe("Workspace table functions", () => {
+    test.describe("Light DOM", () => {
+        tests("light-dom", compareLightDOMContents);
+    });
+
+    test.describe("Shadow DOM", () => {
+        tests("shadow-dom", compareShadowDOMContents);
+    });
+});

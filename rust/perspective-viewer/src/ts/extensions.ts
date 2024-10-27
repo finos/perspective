@@ -80,4 +80,29 @@ export interface PerspectiveViewerElementExt {
      * ```
      */
     registerPlugin(name: string): Promise<void>;
+
+    addEventListener(
+        name: "perspective-click",
+        cb: (e: CustomEvent) => void
+    ): void;
+
+    addEventListener(
+        name: "perspective-select",
+        cb: (e: CustomEvent) => void
+    ): void;
+
+    addEventListener(
+        name: "perspective-toggle-settings",
+        cb: (e: CustomEvent) => void
+    ): void;
+
+    addEventListener(
+        name: "perspective-config-update",
+        cb: (e: CustomEvent) => void
+    ): void;
+
+    removeEventListener(name: "perspective-click", cb: any): void;
+    removeEventListener(name: "perspective-select", cb: any): void;
+    removeEventListener(name: "perspective-toggle-settings", cb: any): void;
+    removeEventListener(name: "perspective-config-update", cb: any): void;
 }

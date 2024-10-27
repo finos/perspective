@@ -9,5 +9,5 @@
         "rootDir": "./src/ts",
         "moduleResolution": "bundler"
     },
-    "files": ["src/ts/perspective-viewer.ts"]
+    "files": ["src/ts/perspective-workspace.ts"]
 }

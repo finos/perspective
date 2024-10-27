@@ -22,7 +22,7 @@ perspective-indicator[theme="Pro Dark"] {
     --theme-name: "Pro Dark";
 }
 
-.p-Menu {
+.lm-Menu {
     @include perspective-viewer-pro-dark--colors;
 }
 
@@ -62,7 +62,7 @@ perspective-viewer[theme="Pro Dark"].workspace-master-widget {
     --plugin--background: @grey800;
 }
 
-.p-Menu {
+.lm-Menu {
     font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
         "Consolas", "Liberation Mono", monospace;
     font-weight: 300;
@@ -102,6 +102,7 @@ perspective-viewer[theme="Pro Dark"].workspace-master-widget {
 
 @mixin perspective-viewer-pro-dark--colors {
     background-color: #242526;
+    --workspace-split-panel-handle--background-color: @grey800;
     color: white;
     --icon--color: white;
     --active--color: #2770a9;

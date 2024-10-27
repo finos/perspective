@@ -26,28 +26,28 @@
     ) !important;
 }
 
-.workspace-detail-widget.widget-maximize {
+:not(.workspace-master-widget).widget-maximize {
     --config-button-icon--content: var(
         --open-settings-button--content,
         "\1F527"
     ) !important;
 }
 
-.workspace-detail-widget.widget-maximize[settings] {
+:not(.workspace-master-widget).widget-maximize[settings] {
     --config-button-icon--content: var(
         --close-settings-button--content,
         "\1F527"
     ) !important;
 }
 
-.p-DockPanel-widget {
+.lm-DockPanel-widget {
     border: @border-color;
     border-width: 0px !important;
     min-width: 300px;
     min-height: 200px;
 }
 
-.workspace-detail-widget {
+:not.workspace-master-widget {
     --config-button-icon--content: "" !important;
 }
 
