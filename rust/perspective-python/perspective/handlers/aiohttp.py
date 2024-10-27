@@ -39,7 +39,7 @@ class PerspectiveAIOHTTPHandler(object):
         self._request = kwargs.pop("request")
         super().__init__(**kwargs)
 
-    async def run(self) -> None:
+    async def run(self) -> web.WebSocketResponse:
         def inner(msg):
             asyncio.get_running_loop().create_task(self._ws.send_bytes(msg))
 
@@ -53,3 +53,4 @@ class PerspectiveAIOHTTPHandler(object):
 
         finally:
             self.session.close()
+        return self._ws
