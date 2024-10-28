@@ -95,8 +95,14 @@ exports.WasmPlugin = function WasmPlugin(inline) {
 
                         if (symbol?.[1]) {
                             updated = true;
+                            const escapedSymbol = symbol[1].replace(
+                                /\$/g,
+                                "\\$"
+                            );
                             const filename = contents.match(
-                                new RegExp(`${symbol[1]}\\s*?=\\s*?\\"(.+?)\\"`)
+                                new RegExp(
+                                    `${escapedSymbol}\\s*?=\\s*?\\"(.+?)\\"`
+                                )
                             );
 
                             contents = contents.replace(
