@@ -133,6 +133,6 @@ export class PerspectiveViewerWidget extends Widget {
             this.viewer.parentElement.removeChild(this.viewer);
         }
 
-        await this.viewer.delete();
+        await this.viewer.delete().then(() => this.viewer.free());
     }
 }

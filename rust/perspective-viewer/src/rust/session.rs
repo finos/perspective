@@ -14,16 +14,16 @@ mod column_defaults_update;
 mod drag_drop_update;
 mod metadata;
 mod replace_expression_update;
-mod view;
 mod view_subscription;
 
 use std::cell::{Ref, RefCell};
 use std::collections::HashSet;
+use std::future::Future;
 use std::ops::Deref;
 use std::rc::Rc;
 
 use perspective_client::config::*;
-use perspective_client::ViewWindow;
+use perspective_client::{View, ViewWindow};
 use perspective_js::utils::*;
 use wasm_bindgen::prelude::*;
 use yew::html::ImplicitClone;
@@ -31,7 +31,6 @@ use yew::prelude::*;
 
 use self::metadata::*;
 use self::replace_expression_update::*;
-use self::view::{OwnedView, PerspectiveOwned};
 pub use self::view_subscription::ViewStats;
 use self::view_subscription::*;
 use crate::dragdrop::*;
@@ -108,21 +107,26 @@ impl Session {
     ///
     /// # Arguments
     /// - `reset_expressions` Whether to reset the `expressions` property.
-    pub fn reset(&self, reset_expressions: bool) {
+    pub fn reset(&self, reset_expressions: bool) -> impl Future<Output = ApiResult<()>> {
         self.borrow_mut().is_clean = false;
+        let view = self.0.borrow_mut().view_sub.take();
         self.borrow_mut().view_sub = None;
         self.borrow_mut().config.reset(reset_expressions);
+        view.delete()
     }
 
     /// Reset this (presumably shared) `Session` to its initial state, returning
     /// a bool indicating whether this `Session` had a table which was
     /// deleted. TODO Table should be an immutable constructor parameter to
     /// `Session`.
-    pub fn delete(&self) -> bool {
-        self.reset(false);
+    pub async fn delete(&self) -> ApiResult<()> {
+        self.borrow_mut().is_clean = false;
+        self.borrow_mut().config.reset(true);
         self.borrow_mut().metadata = SessionMetadata::default();
         self.borrow_mut().table = None;
-        false
+        let view = self.borrow_mut().view_sub.take();
+        view.delete().await?;
+        Ok(())
     }
 
     pub fn has_table(&self) -> bool {
@@ -138,9 +142,10 @@ impl Session {
     /// `create_view()`.
     pub async fn set_table(&self, table: perspective_client::Table) -> ApiResult<JsValue> {
         let metadata = SessionMetadata::from_table(&table).await?;
-        self.borrow_mut().view_sub = None;
+        let sub = self.borrow_mut().view_sub.take();
         self.borrow_mut().metadata = metadata;
         self.borrow_mut().table = Some(table);
+        sub.delete().await?;
         self.table_loaded.emit(());
         Ok(JsValue::UNDEFINED)
     }
@@ -150,7 +155,7 @@ impl Session {
         if pause == self.borrow().is_paused {
             false
         } else if pause {
-            self.borrow_mut().view_sub = None;
+            ApiFuture::spawn(self.borrow_mut().view_sub.take().delete());
             self.borrow_mut().is_paused = true;
             true
         } else {
@@ -173,7 +178,8 @@ impl Session {
     }
 
     pub fn js_get_view(&self) -> Option<JsValue> {
-        Some(self.borrow().view_sub.as_ref()?.get_view().as_jsvalue())
+        let view = self.borrow().view_sub.as_ref()?.get_view().clone();
+        Some(perspective_js::View::from(view).into())
     }
 
     pub fn is_column_expression_in_use(&self, name: &str) -> bool {
@@ -306,7 +312,7 @@ impl Session {
         flat: bool,
         window: Option<ViewWindow>,
     ) -> Result<js_sys::Object, ApiError> {
-        let json = self
+        let json: String = self
             .flat_view(flat)
             .await?
             .to_columns_string(window.unwrap_or_default())
@@ -325,7 +331,7 @@ impl Session {
         Ok(csv.map(js_sys::JsString::from)?)
     }
 
-    pub fn get_view(&self) -> Option<OwnedView> {
+    pub fn get_view(&self) -> Option<View> {
         self.borrow()
             .view_sub
             .as_ref()
@@ -404,7 +410,7 @@ impl Session {
         }
 
         if self.borrow_mut().config.apply_update(config_update) {
-            self.borrow_mut().view_sub = None;
+            ApiFuture::spawn(self.borrow_mut().view_sub.take().delete());
             self.0.borrow_mut().is_clean = false;
             self.view_config_changed.emit(());
         }
@@ -433,7 +439,7 @@ impl Session {
             if let Some(config) = old {
                 self.borrow_mut().config = config;
             } else {
-                self.reset(true);
+                self.reset(true).await?;
             }
 
             self.0.view_created.emit(());
@@ -444,10 +450,10 @@ impl Session {
         Ok(ValidSession(self))
     }
 
-    async fn flat_view(&self, flat: bool) -> ApiResult<OwnedView> {
+    async fn flat_view(&self, flat: bool) -> ApiResult<View> {
         if flat {
             let table = self.borrow().table.clone().into_apierror()?;
-            Ok(table.view(None).await.map(PerspectiveOwned::new)?)
+            Ok(table.view(None).await?)
         } else {
             self.borrow()
                 .view_sub
@@ -570,7 +576,6 @@ impl<'a> ValidSession<'a> {
             let view = table.view(Some(view_config.into())).await?;
             let view_schema = view.schema().await?;
             self.0.metadata_mut().update_view_schema(&view_schema)?;
-
             let on_stats = Callback::from({
                 let this = self.0.clone();
                 move |stats| this.update_stats(stats)
@@ -582,6 +587,8 @@ impl<'a> ValidSession<'a> {
                 ViewSubscription::new(view, config, on_stats, on_update)
             };
 
+            let view = self.0.borrow_mut().view_sub.take();
+            view.delete().await?;
             self.0.borrow_mut().view_sub = Some(sub);
         }
 
