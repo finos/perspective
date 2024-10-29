@@ -35,6 +35,7 @@ import { MenuRenderer } from "./menu";
 import { createCommands } from "./commands";
 import { PerspectiveViewerWidget } from "./widget";
 import { ObservableMap } from "../utils/observable_map";
+import { ReadonlyJSONObject } from "@lumino/coreutils";
 
 const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
@@ -96,7 +97,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.commands = createCommands(this, this.indicator);
         this.menuRenderer = new MenuRenderer();
         element.addEventListener("contextmenu", (event) =>
-            this.showContextMenu(undefined, event)
+            this.showContextMenu(null, event)
         );
     }
 
@@ -301,6 +302,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             ) {
                 this.element.removeChild(viewer);
                 viewer.delete();
+                viewer.free();
             }
         }
     }
@@ -637,7 +639,7 @@ export class PerspectiveWorkspace extends SplitPanel {
      *
      */
 
-    createContextMenu(widget?: PerspectiveViewerWidget) {
+    createContextMenu(widget: PerspectiveViewerWidget | null) {
         const contextMenu: Menu & { init_overlay?: () => void } = new Menu({
             commands: this.commands,
             renderer: this.menuRenderer,
@@ -679,9 +681,16 @@ export class PerspectiveWorkspace extends SplitPanel {
                     });
 
                     for (const table of this.tables.keys()) {
+                        let args;
+                        if (widget !== null) {
+                            args = { table, widget_name: widget.name };
+                        } else {
+                            args = { table };
+                        }
+
                         submenu.addItem({
                             command: "workspace:new",
-                            args: { table, widget_name: widget.name },
+                            args,
                         });
                     }
 
@@ -696,12 +705,21 @@ export class PerspectiveWorkspace extends SplitPanel {
                     let seen = new Set();
                     for (const target_widget of widgets) {
                         if (!seen.has(target_widget.title.label)) {
+                            let args;
+                            if (widget !== null) {
+                                args = {
+                                    target_widget_name: target_widget.name,
+                                    widget_name: widget.name,
+                                };
+                            } else {
+                                args = {
+                                    target_widget_name: target_widget.name,
+                                };
+                            }
+
                             submenu.addItem({
                                 command: "workspace:newview",
-                                args: {
-                                    widget_name: widget.name,
-                                    target_widget_name: target_widget.name,
-                                },
+                                args,
                             });
 
                             seen.add(target_widget.title.label);
@@ -773,10 +791,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         return contextMenu;
     }
 
-    showContextMenu(
-        widget: PerspectiveViewerWidget | undefined,
-        event: MouseEvent
-    ) {
+    showContextMenu(widget: PerspectiveViewerWidget | null, event: MouseEvent) {
         if (!event.shiftKey) {
             const menu = this.createContextMenu(widget);
             menu.init_overlay?.();
