@@ -436,7 +436,7 @@ jobs:
     # /` |     |    /|
     # `--'     '   `-'
     #
-    build_and_test_juptyerlab:
+    build_and_test_jupyterlab:
         needs: [build_js, build_python]
         runs-on: ${{ matrix.os }}
         strategy:
@@ -646,6 +646,51 @@ jobs:
                   PACKAGE: "perspective-python"
                   # PSP_USE_CCACHE: 1
 
+    test_python_sdist:
+        needs: [build_and_test_jupyterlab]
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                arch:
+                    - x86_64
+                python-version:
+                    - 3.9
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  rust: "true"
+                  cpp: "true"
+                  python: "true"
+                  javascript: "false"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-python-sdist
+
+            - name: Install perspective-python sdist
+              run: python -m pip install -vv ./perspective*.tar.gz
+
+            - name: Verify labextension
+              run: jupyter labextension list 2>&1 | grep '@finos/perspective-python'
+
+            - name: Run import test
+              run: python -c 'import perspective'
+
+            - name: Run pytests
+              run: pytest -v --pyargs 'perspective.tests'
+
     # ,-,---.             .                 .
     #  '|___/ ,-. ,-. ,-. |-. ,-,-. ,-. ,-. | ,
     #  ,|   \ |-' | | |   | | | | | ,-| |   |<
@@ -765,7 +810,7 @@ jobs:
     publish:
         needs:
             [
-                build_and_test_juptyerlab,
+                build_and_test_jupyterlab,
                 test_python,
                 test_js,
                 benchmark_js,
