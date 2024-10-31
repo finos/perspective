@@ -94,7 +94,7 @@ importers:
         version: 2.8.8
       puppeteer:
         specifier: ^23
-        version: 23.4.0(typescript@5.1.6)
+        version: 23.4.0(typescript@5.2.2)
       rimraf:
         specifier: ^6
         version: 6.0.1
@@ -112,16 +112,16 @@ importers:
         version: 6.2.1
       ts-loader:
         specifier: ^6.2.0
-        version: 6.2.2(typescript@5.1.6)
+        version: 6.2.2(typescript@5.2.2)
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@22.5.5)(typescript@5.1.6)
+        version: 10.9.2(@types/node@22.5.5)(typescript@5.2.2)
       tsx:
         specifier: ^4.7.1
         version: 4.19.1
       typescript:
-        specifier: 5.1.6
-        version: 5.1.6
+        specifier: ~5.2.2
+        version: 5.2.2
       webpack:
         specifier: ^5.60.0
         version: 5.94.0(esbuild@0.14.54)(webpack-cli@4.10.0)
@@ -577,7 +577,7 @@ importers:
         version: 4.1.6(crypto@1.0.1)
       '@jupyterlab/application':
         specifier: '>2 <5'
-        version: 4.2.5(crypto@1.0.1)(react@18.3.1)
+        version: 4.2.5(react@18.3.1)
       '@lumino/application':
         specifier: <3
         version: 2.4.1
@@ -739,23 +739,29 @@ importers:
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
       '@lumino/algorithm':
-        specifier: ^1.9.1
-        version: 1.9.2
+        specifier: '>=2 <3'
+        version: 2.0.2
       '@lumino/commands':
-        specifier: ^1.20.0
-        version: 1.21.1(crypto@1.0.1)
+        specifier: '>=2 <3'
+        version: 2.3.1
+      '@lumino/coreutils':
+        specifier: '>=2 <3'
+        version: 2.2.0
       '@lumino/domutils':
-        specifier: ^1.8.1
-        version: 1.8.2
+        specifier: '>=2 <3'
+        version: 2.0.2
       '@lumino/messaging':
-        specifier: ^1.10.1
-        version: 1.10.3
+        specifier: '>=2 <3'
+        version: 2.0.2
+      '@lumino/signaling':
+        specifier: '>=2 <3'
+        version: 2.1.3
       '@lumino/virtualdom':
-        specifier: ^1.14.1
-        version: 1.14.3
+        specifier: '>=2 <3'
+        version: 2.0.2
       '@lumino/widgets':
-        specifier: ^1.37.0
-        version: 1.37.2(crypto@1.0.1)
+        specifier: '>=2 <3'
+        version: 2.5.0
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -769,6 +775,12 @@ importers:
       '@prospective.co/procss':
         specifier: ^0.1.16
         version: 0.1.16
+      '@types/lodash':
+        specifier: ^4.17.12
+        version: 4.17.12
+      zx:
+        specifier: ^8.1.9
+        version: 8.1.9
 
   rust/generate-metadata: {}
 
@@ -813,6 +825,9 @@ importers:
       underscore:
         specifier: ^1.13.6
         version: 1.13.7
+      zx:
+        specifier: 8.1.9
+        version: 8.1.9
 
   rust/perspective-python:
     dependencies:
@@ -829,6 +844,12 @@ importers:
       cpy:
         specifier: ^9.0.1
         version: 9.0.1
+      glob:
+        specifier: ^11
+        version: 11.0.0
+      tar:
+        specifier: ^7.4.3
+        version: 7.4.3
 
   rust/perspective-viewer:
     dependencies:
@@ -854,6 +875,9 @@ importers:
       cpy:
         specifier: ^9.0.1
         version: 9.0.1
+      zx:
+        specifier: 8.1.9
+        version: 8.1.9
 
   tools/perspective-bench:
     dependencies:
@@ -2281,6 +2305,10 @@ packages:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
 
+  '@isaacs/fs-minipass@4.0.1':
+    resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
+    engines: {node: '>=18.0.0'}
+
   '@jest/schemas@29.6.3':
     resolution: {integrity: sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -2994,6 +3022,9 @@ packages:
   '@types/jsonwebtoken@9.0.7':
     resolution: {integrity: sha512-ugo316mmTYBl2g81zDFnZ7cfxlut3o+/EQdaP7J8QN2kY6lJ22hmQYCK5EHcJHbrW+dkCGSCPgbG8JtYj6qSrg==}
 
+  '@types/lodash@4.17.12':
+    resolution: {integrity: sha512-sviUmCE8AYdaF/KIHLDJBQgeYzPBI0vf/17NaYehBJfYD1j6/L95Slh07NlyK2iNyBNaEkb3En2jRt+a8y3xZQ==}
+
   '@types/lodash@4.17.7':
     resolution: {integrity: sha512-8wTvZawATi/lsmNu10/j2hk1KEP0IvjubqPE3cu1Xz7xfXXt5oCq3SNUz4fMIP4XGF9Ky+Ue2tBA3hcS7LSBlA==}
 
@@ -3673,6 +3704,10 @@ packages:
   chownr@2.0.0:
     resolution: {integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==}
     engines: {node: '>=10'}
+
+  chownr@3.0.0:
+    resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
+    engines: {node: '>=18'}
 
   chroma-js@1.4.1:
     resolution: {integrity: sha512-jTwQiT859RTFN/vIf7s+Vl/Z2LcMrvMv3WUFmd/4u76AdlFC0NTNgqEEFPcRiHmAswPsMiQEDZLM8vX8qXpZNQ==}
@@ -5083,6 +5118,10 @@ packages:
   glob-to-regexp@0.4.1:
     resolution: {integrity: sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==}
 
+  glob@10.4.5:
+    resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    hasBin: true
+
   glob@11.0.0:
     resolution: {integrity: sha512-9UiX/Bl6J2yaBbxKoEBRm4Cipxgok8kQYcOPEhScPwebu2I0HoQOuYdIO6S3hLuWoZgpDpwQZMzTFxgpkyT76g==}
     engines: {node: 20 || >=22}
@@ -5718,6 +5757,9 @@ packages:
   isomorphic.js@0.2.5:
     resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
 
+  jackspeak@3.4.3:
+    resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
+
   jackspeak@4.0.1:
     resolution: {integrity: sha512-cub8rahkh0Q/bw1+GxP7aeSe29hHHn2V4m29nnDlvCdlgU+3UGxkZp7Z53jLUdpX3jdTO0nJZUDl3xvbWc2Xog==}
     engines: {node: 20 || >=22}
@@ -5991,6 +6033,9 @@ packages:
   lowercase-keys@3.0.0:
     resolution: {integrity: sha512-ozCC6gdQ+glXOQsveKD0YsDy8DSQFjDTz4zyzEHNV5+JP5D62LmfDZ6o1cycFx9ouG940M5dE8C8CTewdj2YWQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  lru-cache@10.4.3:
+    resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
   lru-cache@11.0.1:
     resolution: {integrity: sha512-CgeuL5uom6j/ZVrg7G/+1IXqRY8JXX4Hghfy5YE0EhoYQWvndP1kufu58cmZLNIDKnRhZrXfdS9urVWx98AipQ==}
@@ -6336,6 +6381,10 @@ packages:
     resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
 
+  minimatch@9.0.5:
+    resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
+    engines: {node: '>=16 || 14 >=14.17'}
+
   minimist-options@4.1.0:
     resolution: {integrity: sha512-Q4r8ghd80yhO/0j1O3B2BjweX3fiHg9cdOwjJd2J76Q135c+NDxGCqdYKQ1SKBuFfgWbAUzBfvYjPUEeNgqN1A==}
     engines: {node: '>= 6'}
@@ -6358,6 +6407,10 @@ packages:
   minizlib@2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
     engines: {node: '>= 8'}
+
+  minizlib@3.0.1:
+    resolution: {integrity: sha512-umcy022ILvb5/3Djuu8LWeqUa8D68JaBzlttKeMWen48SjabqS3iY5w/vzeMzMUNhLDifyhbOwKDSznB1vvrwg==}
+    engines: {node: '>= 18'}
 
   mitt@3.0.1:
     resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
@@ -6709,6 +6762,10 @@ packages:
 
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
+
+  path-scurry@1.11.1:
+    resolution: {integrity: sha512-Xa4Nw17FS9ApQFJ9umLiJS4orGjm7ZzwUrwamcGQuHSzDyth9boKDaycYdDcZDuqYATXw4HFXgaqWTctW/v1HA==}
+    engines: {node: '>=16 || 14 >=14.18'}
 
   path-scurry@2.0.0:
     resolution: {integrity: sha512-ypGJsmGtdXUOeM5u93TyeIEfEhM6s+ljAhrk5vAvSx8uyY/02OvrZnA0YNGUrPXfpJMgI1ODd3nwz8Npx4O4cg==}
@@ -7570,6 +7627,10 @@ packages:
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
+  rimraf@5.0.10:
+    resolution: {integrity: sha512-l0OE8wL34P4nJH/H2ffoaniAokM2qSmrtXHmlpvYr5AVVX8msAyW0l8NVJFDxlSK4u3Uh/f41cQheDVdnYijwQ==}
+    hasBin: true
+
   rimraf@6.0.1:
     resolution: {integrity: sha512-9dkvaxAsk/xNXSJzMgFqqMCuFgt2+KsOFek3TMLfo8NCPfWpBmqwyNn5Y+NX56QUYfCtsyhF3ayiboEoUmJk/A==}
     engines: {node: 20 || >=22}
@@ -8064,6 +8125,10 @@ packages:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
 
+  tar@7.4.3:
+    resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
+    engines: {node: '>=18'}
+
   terser-webpack-plugin@5.3.10:
     resolution: {integrity: sha512-BKFPWlPDndPs+NGGCr1U59t0XScL5317Y0UReNrHaw9/FwhPENlq6bfgs+4yPfyP51vqC1bQ4rp1EfXW5ZSH9w==}
     engines: {node: '>= 10.13.0'}
@@ -8214,11 +8279,6 @@ packages:
 
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
-
-  typescript@5.1.6:
-    resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
-    engines: {node: '>=14.17'}
-    hasBin: true
 
   typescript@5.2.2:
     resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
@@ -8681,6 +8741,10 @@ packages:
 
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+
+  yallist@5.0.0:
+    resolution: {integrity: sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==}
+    engines: {node: '>=18'}
 
   yaml@1.10.2:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
@@ -10905,6 +10969,10 @@ snapshots:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
+  '@isaacs/fs-minipass@4.0.1':
+    dependencies:
+      minipass: 7.1.2
+
   '@jest/schemas@29.6.3':
     dependencies:
       '@sinclair/typebox': 0.27.8
@@ -10985,18 +11053,18 @@ snapshots:
       y-protocols: 1.0.6(yjs@13.6.19)
       yjs: 13.6.19
 
-  '@jupyterlab/application@4.2.5(crypto@1.0.1)(react@18.3.1)':
+  '@jupyterlab/application@4.2.5(react@18.3.1)':
     dependencies:
       '@fortawesome/fontawesome-free': 5.15.4
-      '@jupyterlab/apputils': 4.3.5(crypto@1.0.1)
+      '@jupyterlab/apputils': 4.3.5
       '@jupyterlab/coreutils': 6.2.5
-      '@jupyterlab/docregistry': 4.2.5(crypto@1.0.1)
-      '@jupyterlab/rendermime': 4.2.5(crypto@1.0.1)(react@18.3.1)
-      '@jupyterlab/rendermime-interfaces': 3.10.5(crypto@1.0.1)
+      '@jupyterlab/docregistry': 4.2.5
+      '@jupyterlab/rendermime': 4.2.5(react@18.3.1)
+      '@jupyterlab/rendermime-interfaces': 3.10.5
       '@jupyterlab/services': 7.2.5(react@18.3.1)
       '@jupyterlab/statedb': 4.2.5
-      '@jupyterlab/translation': 4.2.5(crypto@1.0.1)(react@18.3.1)
-      '@jupyterlab/ui-components': 4.2.5(crypto@1.0.1)(react@18.3.1)
+      '@jupyterlab/translation': 4.2.5(react@18.3.1)
+      '@jupyterlab/ui-components': 4.2.5(react@18.3.1)
       '@lumino/algorithm': 2.0.2
       '@lumino/application': 2.4.1
       '@lumino/commands': 2.3.1
@@ -11009,21 +11077,20 @@ snapshots:
       '@lumino/widgets': 2.5.0
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - react
       - utf-8-validate
 
-  '@jupyterlab/apputils@4.3.5(crypto@1.0.1)':
+  '@jupyterlab/apputils@4.3.5':
     dependencies:
       '@jupyterlab/coreutils': 6.2.5
       '@jupyterlab/observables': 5.2.5
-      '@jupyterlab/rendermime-interfaces': 3.10.5(crypto@1.0.1)
+      '@jupyterlab/rendermime-interfaces': 3.10.5
       '@jupyterlab/services': 7.2.5(react@18.3.1)
       '@jupyterlab/settingregistry': 4.2.5(react@18.3.1)
       '@jupyterlab/statedb': 4.2.5
-      '@jupyterlab/statusbar': 4.2.5(crypto@1.0.1)
-      '@jupyterlab/translation': 4.2.5(crypto@1.0.1)(react@18.3.1)
-      '@jupyterlab/ui-components': 4.2.5(crypto@1.0.1)(react@18.3.1)
+      '@jupyterlab/statusbar': 4.2.5
+      '@jupyterlab/translation': 4.2.5(react@18.3.1)
+      '@jupyterlab/ui-components': 4.2.5(react@18.3.1)
       '@lumino/algorithm': 2.0.2
       '@lumino/commands': 2.3.1
       '@lumino/coreutils': 2.2.0
@@ -11038,7 +11105,6 @@ snapshots:
       sanitize-html: 2.12.1
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - utf-8-validate
 
   '@jupyterlab/builder@4.2.5(esbuild@0.14.54)':
@@ -11083,17 +11149,17 @@ snapshots:
       - webpack-bundle-analyzer
       - webpack-dev-server
 
-  '@jupyterlab/codeeditor@4.2.5(crypto@1.0.1)':
+  '@jupyterlab/codeeditor@4.2.5':
     dependencies:
       '@codemirror/state': 6.4.1
       '@jupyter/ydoc': 2.1.1
-      '@jupyterlab/apputils': 4.3.5(crypto@1.0.1)
+      '@jupyterlab/apputils': 4.3.5
       '@jupyterlab/coreutils': 6.2.5
       '@jupyterlab/nbformat': 4.2.5
       '@jupyterlab/observables': 5.2.5
-      '@jupyterlab/statusbar': 4.2.5(crypto@1.0.1)
-      '@jupyterlab/translation': 4.2.5(crypto@1.0.1)(react@18.3.1)
-      '@jupyterlab/ui-components': 4.2.5(crypto@1.0.1)(react@18.3.1)
+      '@jupyterlab/statusbar': 4.2.5
+      '@jupyterlab/translation': 4.2.5(react@18.3.1)
+      '@jupyterlab/ui-components': 4.2.5(react@18.3.1)
       '@lumino/coreutils': 2.2.0
       '@lumino/disposable': 2.1.3
       '@lumino/dragdrop': 2.1.5
@@ -11103,7 +11169,6 @@ snapshots:
       react: 18.3.1
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - utf-8-validate
 
   '@jupyterlab/coreutils@5.6.8(crypto@1.0.1)':
@@ -11127,18 +11192,18 @@ snapshots:
       path-browserify: 1.0.1
       url-parse: 1.5.10
 
-  '@jupyterlab/docregistry@4.2.5(crypto@1.0.1)':
+  '@jupyterlab/docregistry@4.2.5':
     dependencies:
       '@jupyter/ydoc': 2.1.1
-      '@jupyterlab/apputils': 4.3.5(crypto@1.0.1)
-      '@jupyterlab/codeeditor': 4.2.5(crypto@1.0.1)
+      '@jupyterlab/apputils': 4.3.5
+      '@jupyterlab/codeeditor': 4.2.5
       '@jupyterlab/coreutils': 6.2.5
       '@jupyterlab/observables': 5.2.5
-      '@jupyterlab/rendermime': 4.2.5(crypto@1.0.1)(react@18.3.1)
-      '@jupyterlab/rendermime-interfaces': 3.10.5(crypto@1.0.1)
+      '@jupyterlab/rendermime': 4.2.5(react@18.3.1)
+      '@jupyterlab/rendermime-interfaces': 3.10.5
       '@jupyterlab/services': 7.2.5(react@18.3.1)
-      '@jupyterlab/translation': 4.2.5(crypto@1.0.1)(react@18.3.1)
-      '@jupyterlab/ui-components': 4.2.5(crypto@1.0.1)(react@18.3.1)
+      '@jupyterlab/translation': 4.2.5(react@18.3.1)
+      '@jupyterlab/ui-components': 4.2.5(react@18.3.1)
       '@lumino/algorithm': 2.0.2
       '@lumino/coreutils': 2.2.0
       '@lumino/disposable': 2.1.3
@@ -11149,7 +11214,6 @@ snapshots:
       react: 18.3.1
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - utf-8-validate
 
   '@jupyterlab/nbformat@3.6.8(crypto@1.0.1)':
@@ -11180,22 +11244,20 @@ snapshots:
       '@lumino/messaging': 2.0.2
       '@lumino/signaling': 2.1.3
 
-  '@jupyterlab/rendermime-interfaces@3.10.5(crypto@1.0.1)':
+  '@jupyterlab/rendermime-interfaces@3.10.5':
     dependencies:
       '@lumino/coreutils': 2.2.0
-      '@lumino/widgets': 1.37.2(crypto@1.0.1)
-    transitivePeerDependencies:
-      - crypto
+      '@lumino/widgets': 2.5.0
 
-  '@jupyterlab/rendermime@4.2.5(crypto@1.0.1)(react@18.3.1)':
+  '@jupyterlab/rendermime@4.2.5(react@18.3.1)':
     dependencies:
-      '@jupyterlab/apputils': 4.3.5(crypto@1.0.1)
+      '@jupyterlab/apputils': 4.3.5
       '@jupyterlab/coreutils': 6.2.5
       '@jupyterlab/nbformat': 4.2.5
       '@jupyterlab/observables': 5.2.5
-      '@jupyterlab/rendermime-interfaces': 3.10.5(crypto@1.0.1)
+      '@jupyterlab/rendermime-interfaces': 3.10.5
       '@jupyterlab/services': 7.2.5(react@18.3.1)
-      '@jupyterlab/translation': 4.2.5(crypto@1.0.1)(react@18.3.1)
+      '@jupyterlab/translation': 4.2.5(react@18.3.1)
       '@lumino/coreutils': 2.2.0
       '@lumino/messaging': 2.0.2
       '@lumino/signaling': 2.1.3
@@ -11203,7 +11265,6 @@ snapshots:
       lodash.escape: 4.0.1
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - react
       - utf-8-validate
 
@@ -11288,9 +11349,9 @@ snapshots:
       '@lumino/properties': 2.0.2
       '@lumino/signaling': 2.1.3
 
-  '@jupyterlab/statusbar@4.2.5(crypto@1.0.1)':
+  '@jupyterlab/statusbar@4.2.5':
     dependencies:
-      '@jupyterlab/ui-components': 4.2.5(crypto@1.0.1)(react@18.3.1)
+      '@jupyterlab/ui-components': 4.2.5(react@18.3.1)
       '@lumino/algorithm': 2.0.2
       '@lumino/coreutils': 2.2.0
       '@lumino/disposable': 2.1.3
@@ -11300,30 +11361,28 @@ snapshots:
       react: 18.3.1
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - utf-8-validate
 
-  '@jupyterlab/translation@4.2.5(crypto@1.0.1)(react@18.3.1)':
+  '@jupyterlab/translation@4.2.5(react@18.3.1)':
     dependencies:
       '@jupyterlab/coreutils': 6.2.5
-      '@jupyterlab/rendermime-interfaces': 3.10.5(crypto@1.0.1)
+      '@jupyterlab/rendermime-interfaces': 3.10.5
       '@jupyterlab/services': 7.2.5(react@18.3.1)
       '@jupyterlab/statedb': 4.2.5
       '@lumino/coreutils': 2.2.0
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - react
       - utf-8-validate
 
-  '@jupyterlab/ui-components@4.2.5(crypto@1.0.1)(react@18.3.1)':
+  '@jupyterlab/ui-components@4.2.5(react@18.3.1)':
     dependencies:
       '@jupyter/react-components': 0.15.3
       '@jupyter/web-components': 0.15.3
       '@jupyterlab/coreutils': 6.2.5
       '@jupyterlab/observables': 5.2.5
-      '@jupyterlab/rendermime-interfaces': 3.10.5(crypto@1.0.1)
-      '@jupyterlab/translation': 4.2.5(crypto@1.0.1)(react@18.3.1)
+      '@jupyterlab/rendermime-interfaces': 3.10.5
+      '@jupyterlab/translation': 4.2.5(react@18.3.1)
       '@lumino/algorithm': 2.0.2
       '@lumino/commands': 2.3.1
       '@lumino/coreutils': 2.2.0
@@ -11341,7 +11400,6 @@ snapshots:
       typestyle: 2.4.0
     transitivePeerDependencies:
       - bufferutil
-      - crypto
       - utf-8-validate
 
   '@leichtgewicht/ip-codec@2.0.5': {}
@@ -12216,6 +12274,8 @@ snapshots:
     dependencies:
       '@types/node': 22.5.5
 
+  '@types/lodash@4.17.12': {}
+
   '@types/lodash@4.17.7': {}
 
   '@types/lru-cache@5.1.1': {}
@@ -13018,6 +13078,8 @@ snapshots:
 
   chownr@2.0.0: {}
 
+  chownr@3.0.0: {}
+
   chroma-js@1.4.1: {}
 
   chrome-trace-event@1.0.4: {}
@@ -13256,15 +13318,6 @@ snapshots:
       path-type: 4.0.0
     optionalDependencies:
       typescript: 5.2.2
-
-  cosmiconfig@9.0.0(typescript@5.1.6):
-    dependencies:
-      env-paths: 2.2.1
-      import-fresh: 3.3.0
-      js-yaml: 4.1.0
-      parse-json: 5.2.0
-    optionalDependencies:
-      typescript: 5.1.6
 
   cosmiconfig@9.0.0(typescript@5.2.2):
     dependencies:
@@ -14654,6 +14707,15 @@ snapshots:
 
   glob-to-regexp@0.4.1: {}
 
+  glob@10.4.5:
+    dependencies:
+      foreground-child: 3.3.0
+      jackspeak: 3.4.3
+      minimatch: 9.0.5
+      minipass: 7.1.2
+      package-json-from-dist: 1.0.0
+      path-scurry: 1.11.1
+
   glob@11.0.0:
     dependencies:
       foreground-child: 3.3.0
@@ -15375,6 +15437,12 @@ snapshots:
 
   isomorphic.js@0.2.5: {}
 
+  jackspeak@3.4.3:
+    dependencies:
+      '@isaacs/cliui': 8.0.2
+    optionalDependencies:
+      '@pkgjs/parseargs': 0.11.0
+
   jackspeak@4.0.1:
     dependencies:
       '@isaacs/cliui': 8.0.2
@@ -15650,6 +15718,8 @@ snapshots:
       tslib: 2.7.0
 
   lowercase-keys@3.0.0: {}
+
+  lru-cache@10.4.3: {}
 
   lru-cache@11.0.1: {}
 
@@ -16276,6 +16346,10 @@ snapshots:
     dependencies:
       brace-expansion: 2.0.1
 
+  minimatch@9.0.5:
+    dependencies:
+      brace-expansion: 2.0.1
+
   minimist-options@4.1.0:
     dependencies:
       arrify: 1.0.1
@@ -16296,6 +16370,11 @@ snapshots:
     dependencies:
       minipass: 3.3.6
       yallist: 4.0.0
+
+  minizlib@3.0.1:
+    dependencies:
+      minipass: 7.1.2
+      rimraf: 5.0.10
 
   mitt@3.0.1: {}
 
@@ -16636,6 +16715,11 @@ snapshots:
   path-key@3.1.1: {}
 
   path-parse@1.0.7: {}
+
+  path-scurry@1.11.1:
+    dependencies:
+      lru-cache: 10.4.3
+      minipass: 7.1.2
 
   path-scurry@2.0.0:
     dependencies:
@@ -17204,20 +17288,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  puppeteer@23.4.0(typescript@5.1.6):
-    dependencies:
-      '@puppeteer/browsers': 2.4.0
-      chromium-bidi: 0.6.5(devtools-protocol@0.0.1342118)
-      cosmiconfig: 9.0.0(typescript@5.1.6)
-      devtools-protocol: 0.0.1342118
-      puppeteer-core: 23.4.0
-      typed-query-selector: 2.12.0
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-
   puppeteer@23.4.0(typescript@5.2.2):
     dependencies:
       '@puppeteer/browsers': 2.4.0
@@ -17658,6 +17728,10 @@ snapshots:
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
+
+  rimraf@5.0.10:
+    dependencies:
+      glob: 10.4.5
 
   rimraf@6.0.1:
     dependencies:
@@ -18233,6 +18307,15 @@ snapshots:
       mkdirp: 1.0.4
       yallist: 4.0.0
 
+  tar@7.4.3:
+    dependencies:
+      '@isaacs/fs-minipass': 4.0.1
+      chownr: 3.0.0
+      minipass: 7.1.2
+      minizlib: 3.0.1
+      mkdirp: 3.0.1
+      yallist: 5.0.0
+
   terser-webpack-plugin@5.3.10(esbuild@0.14.54)(webpack@5.94.0(esbuild@0.14.54)(webpack-cli@4.10.0(webpack@5.94.0))):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -18317,15 +18400,6 @@ snapshots:
 
   trough@2.2.0: {}
 
-  ts-loader@6.2.2(typescript@5.1.6):
-    dependencies:
-      chalk: 2.4.2
-      enhanced-resolve: 4.5.0
-      loader-utils: 1.4.2
-      micromatch: 4.0.8
-      semver: 6.3.1
-      typescript: 5.1.6
-
   ts-loader@6.2.2(typescript@5.2.2):
     dependencies:
       chalk: 2.4.2
@@ -18335,7 +18409,7 @@ snapshots:
       semver: 6.3.1
       typescript: 5.2.2
 
-  ts-node@10.9.2(@types/node@22.5.5)(typescript@5.1.6):
+  ts-node@10.9.2(@types/node@22.5.5)(typescript@5.2.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -18349,7 +18423,7 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 5.1.6
+      typescript: 5.2.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
@@ -18412,8 +18486,6 @@ snapshots:
   typedarray-to-buffer@3.1.5:
     dependencies:
       is-typedarray: 1.0.0
-
-  typescript@5.1.6: {}
 
   typescript@5.2.2: {}
 
@@ -19002,6 +19074,8 @@ snapshots:
   yallist@3.1.1: {}
 
   yallist@4.0.0: {}
+
+  yallist@5.0.0: {}
 
   yaml@1.10.2: {}
 

@@ -10,81 +10,56 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { h } from "@lumino/virtualdom/src";
-import { TabBar } from "@lumino/widgets/src/tabbar";
+import { test } from "@finos/perspective-test";
 
-export const TabBarItems = {
-    Config: "config",
-    Label: "label",
-};
-
-export const DEFAULT_TITLE = "untitled";
-
-export class PerspectiveTabBarRenderer extends TabBar.Renderer {
-    constructor(maximized) {
-        super();
-        this.maximized = maximized;
-    }
-
-    renderLabel(data) {
-        return h.span(
-            {
-                className: "p-TabBar-tabLabel",
-                id: TabBarItems.Label,
-            },
-            data.title.label || DEFAULT_TITLE
-        );
-    }
-
-    renderOther(data, title) {
-        return h.span({}, title.label || "untitled");
-    }
-
-    renderInert() {
-        return h.div();
-    }
-
-    renderTab(data) {
-        const title = data.title.caption;
-        const key = this.createTabKey(data);
-        const style = this.createTabStyle(data);
-        let className = this.createTabClass(data);
-        const dataset = this.createTabDataset(data);
-        const more = [];
-        if (data.onClick) {
-            more.push(
-                h.div(
-                    { onclick: data.onClick, class: "bookmarks-button" },
-                    h.div({ class: "bookmarks" })
-                )
-            );
+test.beforeEach(async ({ page }) => {
+    await page.goto("/rust/perspective-viewer/test/html/superstore.html");
+    await page.evaluate(async () => {
+        while (!window["__TEST_PERSPECTIVE_READY__"]) {
+            await new Promise((x) => setTimeout(x, 10));
         }
+    });
 
-        return h.li(
-            { key, className, title, style, dataset },
-            this.renderDragHandle(),
-            ...more,
-            this.renderLabel(data),
-            this.renderCloseIcon()
-        );
-    }
-
-    renderDragHandle() {
-        return h.div({
-            className: "drag-handle",
+    await page.evaluate(async () => {
+        await document.querySelector("perspective-viewer").restore({
+            plugin: "Debug",
         });
-    }
+    });
+});
 
-    // renderConfigIcon() {
-    //     return h.div({
-    //         className: "p-TabBar-tabConfigIcon",
-    //         id: TabBarItems.Config,
-    //     });
-    // }
+test.describe("Save/Restore", async () => {
+    test("Delete shouldn't return until underlying view is deleted", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.restore({
+                settings: true,
+                group_by: ["State"],
+                columns: ["Profit", "Sales"],
+            });
 
-    renderCloseIcon() {
-        return h.div({
-            className: "lm-TabBar-tabCloseIcon" + " p-TabBar-tabCloseIcon",
+            const table = await viewer.getTable();
+            await viewer.delete();
+            await table.delete();
         });
-    }
-}
+    });
+
+    test("Flush after delete should wait for underlying view to be deleted", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.restore({
+                settings: true,
+                group_by: ["State"],
+                columns: ["Profit", "Sales"],
+            });
+
+            const table = await viewer.getTable();
+            viewer.delete();
+            await viewer.flush();
+            await table.delete();
+        });
+    });
+});

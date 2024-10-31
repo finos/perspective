@@ -12,6 +12,7 @@
 
 use std::rc::Rc;
 
+use presentation::Presentation;
 use yew::prelude::*;
 
 use super::containers::dropdown_menu::*;
@@ -27,6 +28,7 @@ pub type ExportDropDownMenuItem = DropDownMenuItem<ExportFile>;
 #[derive(Properties, PartialEq)]
 pub struct ExportDropDownMenuProps {
     pub renderer: Renderer,
+    pub presentation: Presentation,
     pub callback: Callback<ExportFile>,
 
     #[prop_or_default]
@@ -133,7 +135,11 @@ impl Component for ExportDropDownMenu {
         );
 
         Self {
-            title: "untitled".to_owned(),
+            title: ctx
+                .props()
+                .presentation
+                .get_title()
+                .unwrap_or_else(|| "untitled".to_owned()),
             _sub,
             ..Default::default()
         }

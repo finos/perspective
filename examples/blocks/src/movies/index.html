@@ -1,16 +1,10 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
-
+        <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+        <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/pro-dark.css" />
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css" />
-
-        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-workspace/dist/cdn/perspective-workspace.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective/dist/cdn/perspective.js"></script>
-
         <style>
             body {
                 display: flex;
@@ -27,9 +21,7 @@
 
             perspective-viewer {
                 --d3fc-positive--gradient: linear-gradient(#94d0ff, #8795e8, #966bff, #ad8cff, #c774e8, #c774a9, #ff6ad5, #ff6a8b, #ff8b8b, #ffa58b, #ffde8b, #cdde8b, #8bde8b, #20de8b) !important;
-
                 --d3fc-negative--gradient: linear-gradient(#94d0ff, #8795e8, #966bff, #ad8cff, #c774e8, #c774a9, #ff6ad5, #ff6a8b, #ff8b8b, #ffa58b, #ffde8b, #cdde8b, #8bde8b, #20de8b) !important;
-
                 --d3fc-full--gradient: linear-gradient(#94d0ff, #8795e8, #966bff, #ad8cff, #c774e8, #c774a9, #ff6ad5, #ff6a8b, #ff8b8b, #ffa58b, #ffde8b, #cdde8b, #8bde8b, #20de8b) !important;
             }
         </style>
@@ -38,8 +30,12 @@
         <perspective-workspace id="workspace">
             <perspective-viewer table="movies"></perspective-viewer>
         </perspective-workspace>
-
         <script type="module">
+            import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
+            import "/node_modules/@finos/perspective-workspace/dist/cdn/perspective-workspace.js";
+            import "/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js";
+            import "/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js";
+
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
             const SCHEMA = {
@@ -76,7 +72,6 @@
                 return table;
             };
 
-            await customElements.whenDefined("perspective-viewer");
             let req = await fetch("layout.json");
             let layout = await req.json();
 

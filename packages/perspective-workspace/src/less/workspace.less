@@ -36,13 +36,13 @@
         height: 100%;
     }
 
-    .p-SplitPanel {
+    .lm-SplitPanel {
         height: 100%;
         width: 100%;
     }
 
-    div.p-SplitPanel-handle {
-        background-color: inherit; //var(--master-divider--background-color);
+    div.lm-SplitPanel-handle {
+        background-color: var(--workspace-split-panel-handle--background-color);
     }
 
     .master-panel {
@@ -54,11 +54,15 @@
         }
     }
 
-    .perspective-workspace.context-menu * .p-SplitPanel-handle {
+    .perspective-workspace.context-menu * .lm-SplitPanel-handle {
         opacity: 0.2;
     }
 
-    .perspective-workspace.context-menu > .p-SplitPanel-handle {
+    .perspective-workspace.context-menu > .lm-SplitPanel-handle {
         opacity: 0.2;
+    }
+
+    .context-menu .lm-TabBar:not(.context-focus) {
+        pointer-events: none;
     }
 }

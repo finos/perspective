@@ -42,6 +42,9 @@ class PerspectiveTornadoHandler(WebSocketHandler):
         ... ])
     """
 
+    def check_origin(self, origin):
+        return True
+
     def initialize(self, perspective_server=perspective.GLOBAL_SERVER):
         self.server = perspective_server
 

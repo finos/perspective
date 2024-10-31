@@ -27,7 +27,6 @@ import { promises as fs } from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import type * as net from "node:net";
-import type { TableInitOptions } from "./ts-rs/TableInitOptions.js";
 import { PerspectiveServer } from "./engine.js";
 import { compile_perspective } from "./emscripten_api.js";
 import { webcrypto } from "node:crypto";
@@ -243,7 +242,7 @@ export function table(
         | ArrayBuffer
         | Record<string, any>
         | Record<string, unknown>[],
-    options?: TableInitOptions
+    options?: perspective_client.TableInitOptions
 ) {
     return SYNC_CLIENT.table(init_data, options);
 }

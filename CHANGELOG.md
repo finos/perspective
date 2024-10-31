@@ -1,3 +1,12 @@
+# [v3.1.2](https://github.com/finos/perspective/releases/tag/v3.1.2)
+
+_22 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.1...v3.1.2))
+
+Fixes
+
+- Fix docs, inline builds, export, and workspace CSS [#2800](https://github.com/finos/perspective/pull/2800)
+- arrow: Fix cross-compiling errors on macos [#2798](https://github.com/finos/perspective/pull/2798)
+
 # [v3.1.1](https://github.com/finos/perspective/releases/tag/v3.1.1)
 
 _18 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.0...v3.1.1))

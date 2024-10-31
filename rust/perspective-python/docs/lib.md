@@ -376,7 +376,7 @@ supported by `perspective.Table`. `PerspectiveWidget` takes keyword arguments
 for the managed `View`:
 
 ```python
-from perspective import PerspectiveWidget
+from perspective.widget import PerspectiveWidget
 w = perspective.PerspectiveWidget(
     data,
     plugin="X Bar",
@@ -396,7 +396,7 @@ if the intention is to await data for loading later on. A widget can be
 constructed from a dataset:
 
 ```python
-from perspective import PerspectiveWidget
+from perspective.widget import PerspectiveWidget
 PerspectiveWidget(data, group_by=["date"])
 ```
 
@@ -456,6 +456,8 @@ configuration object in the route tuple, and it must contain
 `"perspective_server"`, which is a reference to the `Server` you just created.
 
 ```python
+from perspective.handlers.tornado import PerspectiveTornadoHandler
+
 app = tornado.web.Application([
 
     # ... other handlers ...

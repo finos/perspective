@@ -27,6 +27,7 @@ test.describe("Superstore", () => {
         await page.goto(
             "/node_modules/@finos/perspective-viewer/test/html/superstore.html"
         );
+
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {
                 await new Promise((x) => setTimeout(x, 10));
@@ -41,4 +42,26 @@ test.describe("Superstore", () => {
     });
 
     run_standard_tests("superstore", get_contents);
+});
+
+test.describe("Superstore inline", () => {
+    test.beforeEach(async function init({ page }) {
+        await page.goto(
+            "/node_modules/@finos/perspective-viewer/test/html/superstore-inline.html"
+        );
+
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Debug",
+            });
+        });
+    });
+
+    run_standard_tests("superstore inline", get_contents);
 });

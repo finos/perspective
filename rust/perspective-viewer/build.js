@@ -43,6 +43,16 @@ async function build_all() {
         {
             entryPoints: ["src/ts/perspective-viewer.ts"],
             format: "esm",
+            plugins: [
+                PerspectiveEsbuildPlugin({
+                    wasm: { inline: true },
+                }),
+            ],
+            outfile: "dist/esm/perspective-viewer.inline.js",
+        },
+        {
+            entryPoints: ["src/ts/perspective-viewer.ts"],
+            format: "esm",
             plugins: [NodeModulesExternal()],
             external: ["*.wasm"],
             outdir: "dist/esm",

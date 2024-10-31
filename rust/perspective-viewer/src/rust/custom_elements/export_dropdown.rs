@@ -99,7 +99,13 @@ impl ExportDropDownMenuElement {
         });
 
         let renderer = model.renderer().clone();
-        let props = props!(ExportDropDownMenuProps { renderer, callback });
+        let presentation = model.presentation().clone();
+        let props = props!(ExportDropDownMenuProps {
+            renderer,
+            presentation,
+            callback
+        });
+
         let modal = ModalElement::new(self.elem.clone(), props, true, None);
         *self.modal.borrow_mut() = Some(modal);
     }

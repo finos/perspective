@@ -12,7 +12,6 @@
 
 import * as api from "./browser.ts";
 export type * from "../../dist/pkg/perspective-js.d.ts";
-export type * from "./ts-rs/ViewConfigUpdate.d.ts";
 
 import type * as psp from "../../dist/pkg/perspective-js.d.ts";
 

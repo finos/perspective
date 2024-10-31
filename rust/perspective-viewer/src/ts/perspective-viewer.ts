@@ -33,9 +33,25 @@
 
 export { IPerspectiveViewerPlugin } from "./plugin";
 export { HTMLPerspectiveViewerPluginElement } from "./plugin";
+import {
+    ExportDropDownMenuElement,
+    CopyDropDownMenuElement,
+} from "../../dist/pkg/perspective-viewer";
+
+export interface HTMLPerspectiveViewerExportMenu
+    extends HTMLElement,
+        ExportDropDownMenuElement {}
+
+export interface HTMLPerspectiveViewerCopyMenu
+    extends HTMLElement,
+        CopyDropDownMenuElement {}
 
 export * from "./extensions";
 export type * from "./ts-rs/ViewerConfigUpdate.d.ts";
 export type * from "./ts-rs/ColumnConfigValues.d.ts";
+export type * from "./ts-rs/Filter.d.ts";
+export type * from "./ts-rs/FilterTerm.d.ts";
+export type * from "./ts-rs/FilterReducer.d.ts";
+// export type * from "./ts-rs/Vi"
 
 import "./bootstrap";

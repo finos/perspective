@@ -10,6 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
+import "/node_modules/@finos/perspective-workspace/dist/cdn/perspective-workspace.js";
+import "/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js";
+import "/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js";
+import "/node_modules/@finos/perspective-viewer-openlayers/dist/cdn/perspective-viewer-openlayers.js";
+
 import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
 // Quick wrapper function for making a GET call.
@@ -86,5 +92,4 @@ async function main() {
     window.workspace.restore(layout);
 }
 
-console.log("test");
 main();

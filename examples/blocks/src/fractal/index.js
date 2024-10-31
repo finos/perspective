@@ -10,6 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
+import "/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js";
+import "/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js";
+
 import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
 function generate_mandelbrot(params) {
@@ -139,18 +143,15 @@ function set_runnable() {
     window.run.disabled = false;
 }
 
-window.addEventListener("DOMContentLoaded", async function () {
-    await customElements.whenDefined("perspective-viewer");
-    const heatmap_plugin = await window.viewer.getPlugin("Heatmap");
-    heatmap_plugin.max_cells = 100000;
-    make_range(xmin, xmax, "X");
-    make_range(ymin, ymax, "Y");
-    window.resolution.addEventListener("input", set_runnable);
-    window.iterations.addEventListener("input", set_runnable);
+const heatmap_plugin = await window.viewer.getPlugin("Heatmap");
+heatmap_plugin.max_cells = 100000;
+make_range(xmin, xmax, "X");
+make_range(ymin, ymax, "Y");
+window.resolution.addEventListener("input", set_runnable);
+window.iterations.addEventListener("input", set_runnable);
 
-    run.addEventListener(
-        "click",
-        make_run_click_callback(await perspective.worker(), {})
-    );
-    run.dispatchEvent(new Event("click"));
-});
+run.addEventListener(
+    "click",
+    make_run_click_callback(await perspective.worker(), {})
+);
+run.dispatchEvent(new Event("click"));

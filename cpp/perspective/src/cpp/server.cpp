@@ -491,7 +491,6 @@ ServerResources::delete_table(const t_id& id) {
         if (m_table_to_view.find(id) == m_table_to_view.end()) {
             m_tables.erase(id);
         } else {
-            std::cout << *m_table_to_view.find(id) << std::endl;
             PSP_COMPLAIN_AND_ABORT("Cannot delete table with views");
         }
     }

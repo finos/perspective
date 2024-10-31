@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "module": "ESNext",
+        "target": "ESNext",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "./dist/esm",
+        "rootDir": "./src/ts",
+        "moduleResolution": "bundler"
+    },
+    "files": ["src/ts/perspective-workspace.ts"]
+}

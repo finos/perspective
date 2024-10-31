@@ -24,9 +24,8 @@ async function createOneWorkspace(page) {
         `;
 
         const workspace = document.body.querySelector("perspective-workspace");
-
         workspace.tables.set("superstore", window.__TABLE__);
-
+        await Promise.all(workspace.tables.values());
         await workspace.flush();
     });
 }
@@ -39,9 +38,7 @@ async function createMultipleViewers(page) {
         `;
 
         const workspace = document.body.querySelector("perspective-workspace");
-
-        // workspace.tables.set("superstore", window.__TABLE__);
-
+        await Promise.all(workspace.tables.values());
         await workspace.flush();
     });
 }
@@ -54,9 +51,7 @@ async function createMultipleViewersWithNames(page) {
         `;
 
         const workspace = document.body.querySelector("perspective-workspace");
-
-        // workspace.tables.set("superstore", window.__TABLE__);
-
+        await Promise.all(workspace.tables.values());
         await workspace.flush();
     });
 }
@@ -74,7 +69,6 @@ test.describe("Workspace HTML", () => {
     test.describe("Light DOM", () => {
         test("Create One", async ({ page }) => {
             await createOneWorkspace(page);
-
             await compareLightDOMContents(
                 page,
                 "workspace-html-light-create-one.txt"
@@ -83,7 +77,6 @@ test.describe("Workspace HTML", () => {
 
         test("Create Multiple", async ({ page }) => {
             await createMultipleViewers(page);
-
             await compareLightDOMContents(
                 page,
                 "workspace-html-light-create-multiple.txt"
@@ -92,7 +85,6 @@ test.describe("Workspace HTML", () => {
 
         test("Create Multiple with names", async ({ page }) => {
             await createMultipleViewersWithNames(page);
-
             await compareLightDOMContents(
                 page,
                 "workspace-html-light-create-multiple-with-names.txt"
@@ -103,7 +95,6 @@ test.describe("Workspace HTML", () => {
     test.describe("Shadow DOM", () => {
         test("Create One", async ({ page }) => {
             await createOneWorkspace(page);
-
             await compareShadowDOMContents(
                 page,
                 "workspace-html-shadow-create-one.txt"
@@ -112,7 +103,6 @@ test.describe("Workspace HTML", () => {
 
         test("Create Multiple", async ({ page }) => {
             await createMultipleViewers(page);
-
             await compareShadowDOMContents(
                 page,
                 "workspace-html-shadow-create-multiple.txt"
@@ -121,7 +111,6 @@ test.describe("Workspace HTML", () => {
 
         test("Create Multiple with names", async ({ page }) => {
             await createMultipleViewersWithNames(page);
-
             await compareShadowDOMContents(
                 page,
                 "workspace-html-shadow-create-multiple-with-names.txt"

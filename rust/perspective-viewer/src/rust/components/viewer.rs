@@ -250,7 +250,7 @@ impl Component for PerspectiveViewer {
                 );
 
                 ApiFuture::spawn(async move {
-                    session.reset(all);
+                    session.reset(all).await?;
                     let columns_config = if all {
                         presentation.reset_columns_configs();
                         None

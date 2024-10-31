@@ -14,11 +14,10 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 use perspective_client::config::*;
-use perspective_client::OnUpdateOptions;
+use perspective_client::{OnUpdateOptions, View};
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-use super::view::*;
 use crate::utils::*;
 use crate::*;
 
@@ -35,18 +34,18 @@ pub struct ViewStats {
 
 #[derive(Clone)]
 struct ViewSubscriptionData {
-    view: OwnedView,
+    view: View,
     config: Rc<ViewConfig>,
     callback_id: Rc<Cell<u32>>,
     on_stats: Callback<ViewStats>,
     on_update: Callback<()>,
+    is_deleted: Rc<Cell<bool>>,
 }
 
 /// A subscription to `on_update()` events from a Perspective `View()`, managing
 /// the `Closure` state as well as cleanup via `on_delete()`.
 pub struct ViewSubscription {
     data: ViewSubscriptionData,
-    // closure: Closure<dyn Fn(JsValue) -> js_sys::Promise>,
 }
 
 impl ViewSubscriptionData {
@@ -76,6 +75,14 @@ impl ViewSubscriptionData {
         self.on_stats.emit(stats);
         Ok(JsValue::UNDEFINED)
     }
+
+    async fn internal_delete(&self) -> ApiResult<()> {
+        let view = &self.view;
+        view.remove_update(self.callback_id.get()).await?;
+        view.delete().await?;
+        self.is_deleted.set(true);
+        Ok(())
+    }
 }
 
 impl ViewSubscription {
@@ -96,11 +103,12 @@ impl ViewSubscription {
         on_update: Callback<()>,
     ) -> Self {
         let data = ViewSubscriptionData {
-            view: OwnedView::new(view),
+            view,
             config: config.into(),
             on_stats,
             callback_id: Rc::default(),
             on_update,
+            is_deleted: Rc::default(),
         };
 
         let emit = perspective_js::utils::LocalPollLoop::new({
@@ -130,16 +138,37 @@ impl ViewSubscription {
     }
 
     /// Getter for the underlying `View()`.
-    pub const fn get_view(&self) -> &OwnedView {
+    pub const fn get_view(&self) -> &View {
         &self.data.view
+    }
+
+    /// Delete this `View`. Neglecting to call this method before a
+    /// `ViewSubscription` is dropped will result in a log warning, but the
+    /// `View` will not leak.
+    pub async fn delete(self) -> ApiResult<()> {
+        self.data.internal_delete().await
+    }
+}
+
+// Conveniently lift [`ViewSubscription::delete`] to a commonly used storage
+// container.
+#[extend::ext]
+pub impl Option<ViewSubscription> {
+    async fn delete(self) -> ApiResult<()> {
+        if let Some(x) = self {
+            x.delete().await?;
+        }
+
+        Ok(())
     }
 }
 
 impl Drop for ViewSubscription {
     fn drop(&mut self) {
-        ApiFuture::spawn({
-            clone!(self.data.view, self.data.callback_id);
-            async move { Ok(view.remove_update(callback_id.get()).await?) }
-        });
+        if !self.data.is_deleted.get() {
+            tracing::warn!("View dropped without calling `delete()`");
+            let view = self.data.clone();
+            ApiFuture::spawn(async move { view.internal_delete().await })
+        }
     }
 }
