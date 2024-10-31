@@ -68,6 +68,7 @@ export function getDataValues(data, settings) {
                 value: toValue(main.type, data.mainValues[i]),
             }));
         }
+
         return settings.mainValues.map((main) => ({
             name: main.name,
             value: toValue(
@@ -76,6 +77,7 @@ export function getDataValues(data, settings) {
             ),
         }));
     }
+
     return [
         {
             name: settings.mainValues[0].name,

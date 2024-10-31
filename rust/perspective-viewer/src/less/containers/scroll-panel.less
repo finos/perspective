@@ -23,5 +23,9 @@
 
     .scroll-panel-content {
         position: relative;
+
+        // firefox doesn't support zero-sized containers;
+        width: 1px;
+        margin-left: -1px;
     }
 }

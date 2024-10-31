@@ -29,7 +29,7 @@ test.beforeEach(async ({ page }) => {
 
 test.describe("leaks", () => {
     // This originally has a timeout of 120000
-    test("doesn't leak elements", async ({ page }) => {
+    test("doesn't leak elements", async ({ page, browserName }) => {
         let viewer = await page.$("perspective-viewer");
         await page.evaluate(async (viewer) => {
             window.__TABLE__ = await viewer.getTable();
@@ -38,9 +38,12 @@ test.describe("leaks", () => {
 
         // From a helpful blog
         // https://media-codings.com/articles/automatically-detect-memory-leaks-with-puppeteer
-        await page.evaluate(() => window.gc());
-        const heap1 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+        if (browserName !== "firefox") {
+            await page.evaluate(() => window.gc());
+        }
+
+        const heap1 = await page.evaluate(() =>
+            window.chrome ? performance.memory.usedJSHeapSize : 1
         );
 
         for (var i = 0; i < 500; i++) {
@@ -61,9 +64,12 @@ test.describe("leaks", () => {
         // TODO this is very generous memory allowance suggests we
         // leak ~0.1% per instance.
         // TODO: Not yet sure how to access window.gc() in Playwright
-        await page.evaluate(() => window.gc());
-        const heap2 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+        if (browserName !== "firefox") {
+            await page.evaluate(() => window.gc());
+        }
+
+        const heap2 = await page.evaluate(() =>
+            window.chrome ? performance.memory.usedJSHeapSize : 1
         );
 
         expect((heap2 - heap1) / heap1).toBeLessThan(1);
@@ -77,16 +83,22 @@ test.describe("leaks", () => {
         await compareContentsToSnapshot(contents, ["does-not-leak.txt"]);
     });
 
-    test("doesn't leak views when setting group by", async ({ page }) => {
+    test("doesn't leak views when setting group by", async ({
+        page,
+        browserName,
+    }) => {
         let viewer = await page.$("perspective-viewer");
         await page.evaluate(async (viewer) => {
             window.__TABLE__ = await viewer.getTable();
             await viewer.reset();
         }, viewer);
 
-        await page.evaluate(() => window.gc());
-        const heap1 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+        if (browserName !== "firefox") {
+            await page.evaluate(() => window.gc());
+        }
+
+        const heap1 = await page.evaluate(() =>
+            window.chrome ? performance.memory.usedJSHeapSize : 1
         );
 
         for (var i = 0; i < 500; i++) {
@@ -108,9 +120,12 @@ test.describe("leaks", () => {
             }, viewer);
         }
 
-        await page.evaluate(() => window.gc());
-        const heap2 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+        if (browserName !== "firefox") {
+            await page.evaluate(() => window.gc());
+        }
+
+        const heap2 = await page.evaluate(() =>
+            window.chrome ? performance.memory.usedJSHeapSize : 1
         );
         expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
 
@@ -125,16 +140,22 @@ test.describe("leaks", () => {
         ]);
     });
 
-    test("doesn't leak views when setting filters", async ({ page }) => {
+    test("doesn't leak views when setting filters", async ({
+        page,
+        browserName,
+    }) => {
         let viewer = await page.$("perspective-viewer");
         await page.evaluate(async (viewer) => {
             window.__TABLE__ = await viewer.getTable();
             await viewer.reset();
         }, viewer);
 
-        await page.evaluate(() => window.gc());
-        const heap1 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+        if (browserName !== "firefox") {
+            await page.evaluate(() => window.gc());
+        }
+
+        const heap1 = await page.evaluate(() =>
+            window.chrome ? performance.memory.usedJSHeapSize : 1
         );
 
         for (var i = 0; i < 500; i++) {
@@ -146,12 +167,15 @@ test.describe("leaks", () => {
             }, viewer);
         }
 
-        await page.evaluate(() => window.gc());
-        const heap2 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
-        );
-        expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
+        if (browserName !== "firefox") {
+            await page.evaluate(() => window.gc());
+        }
 
+        const heap2 = await page.evaluate(() =>
+            window.chrome ? performance.memory.usedJSHeapSize : 1
+        );
+
+        expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
         const contents = await page.evaluate(async (viewer) => {
             await viewer.restore({
                 filter: [["Sales", "<", 10]],

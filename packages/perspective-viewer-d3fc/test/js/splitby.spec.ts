@@ -52,6 +52,7 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
         expect(tooltip_row_id_value).toBeTruthy();
         expect(tooltip_row_id_value).toMatch(/^(?!NaN$|-$).+$/);
     });
+
     test("Show valid tooltip data with one 'Split By' configuration", async ({
         page,
     }) => {
@@ -78,8 +79,8 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
                 force: true,
             }
         );
-        await page.waitForSelector("#tooltip-values > li:nth-child(2)");
 
+        await page.waitForSelector("#tooltip-values > li:nth-child(2)");
         let tooltip_row_id_value = await page.evaluate(async () => {
             return document
                 .querySelector("perspective-viewer-d3fc-xyline")
@@ -88,9 +89,12 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
                 )?.textContent;
         });
 
+        await page.pause();
+
         expect(tooltip_row_id_value).toBeTruthy();
         expect(tooltip_row_id_value).toMatch(/^(?!NaN$|-$).+$/);
     });
+
     test("Show valid tooltip data with multiple 'Split By' configuration", async ({
         page,
     }) => {

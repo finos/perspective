@@ -23,11 +23,10 @@ async function test_column(page, selector, selector2) {
             window.__events__.push(evt);
         });
 
-        const header_button = viewer
-            .querySelector("perspective-viewer-datagrid")
-            .shadowRoot.querySelector(
-                "regular-table thead tr:last-child th" + selector
-            );
+        const elem = viewer.querySelector("perspective-viewer-datagrid");
+        const header_button = (
+            window.chrome ? elem.shadowRoot : elem
+        ).querySelector("regular-table thead tr:last-child th" + selector);
 
         const rect = header_button.getBoundingClientRect();
         return {
@@ -87,11 +86,10 @@ test.describe("Column Style Tests", () => {
             );
 
             // Find the column config menu button
-            const header_button = viewer
-                .querySelector("perspective-viewer-datagrid")
-                .shadowRoot.querySelector(
-                    "regular-table thead tr:last-child th"
-                );
+            const elem = viewer.querySelector("perspective-viewer-datagrid");
+            const header_button = (
+                window.chrome ? elem.shadowRoot : elem
+            ).querySelector("regular-table thead tr:last-child th");
 
             // Get the button coords (slightly lower than center
             // because of the location of the menu button within

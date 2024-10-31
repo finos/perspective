@@ -24,7 +24,9 @@ async function getDatagridContents(page) {
         if (!datagrid) {
             return "MISSING DATAGRID";
         }
-        const regularTable = datagrid.shadowRoot.querySelector("regular-table");
+        const regularTable = (
+            window.chrome ? datagrid.shadowRoot : datagrid
+        ).querySelector("regular-table");
         return regularTable?.innerHTML || "MISSING";
     });
 }

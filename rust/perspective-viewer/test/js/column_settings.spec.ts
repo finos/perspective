@@ -141,11 +141,10 @@ test.describe("Plugin Styles", () => {
         });
 
         await page.waitForFunction(() => {
-            return (
-                document
-                    .querySelector("perspective-viewer-datagrid")
-                    ?.shadowRoot?.querySelectorAll("tbody tr").length! >= 1
-            );
+            const elem = document.querySelector("perspective-viewer-datagrid");
+            return (window as any).chrome
+                ? elem?.shadowRoot?.querySelectorAll("tbody tr").length! >= 1
+                : elem?.querySelectorAll("tbody tr").length! >= 1;
         });
 
         await expect(view.columnSettingsSidebar.container).toBeVisible();
