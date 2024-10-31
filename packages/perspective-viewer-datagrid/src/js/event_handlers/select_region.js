@@ -143,7 +143,6 @@ const getMouseupListener = (datagrid, table, className) => (event) => {
         datagrid.model._edit_mode === "SELECT_COLUMN"
     ) {
         const meta = table.getMeta(event.target);
-        console.log("A");
         if (datagrid.model._selection_state.old_selected_areas.length > 0) {
             const selected =
                 datagrid.model._selection_state.old_selected_areas[0];

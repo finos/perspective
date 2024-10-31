@@ -10,80 +10,130 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { DockPanel } from "@lumino/widgets/src/dockpanel";
+import { DockLayout, DockPanel, TabBar, Widget } from "@lumino/widgets";
+import { toArray } from "@lumino/algorithm";
 import { PerspectiveTabBar } from "./tabbar";
 import { PerspectiveTabBarRenderer } from "./tabbarrenderer";
-import { toArray } from "@lumino/algorithm/src";
+import { PerspectiveWorkspace } from "./workspace";
+import { PerspectiveViewerWidget } from "./widget";
 
 class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
-    constructor(workspace) {
+    _workspace: PerspectiveWorkspace;
+
+    constructor(workspace: PerspectiveWorkspace) {
         super();
         this._workspace = workspace;
     }
 
     createTabBar() {
         const tabbar = new PerspectiveTabBar(this._workspace, {
-            renderer: new PerspectiveTabBarRenderer(),
+            renderer: new PerspectiveTabBarRenderer(false),
         });
 
-        tabbar.addClass("p-DockPanel-tabBar");
+        tabbar.addClass("lm-DockPanel-tabBar");
         return tabbar;
     }
 }
 
+// @ts-ignore: extending a private member `_onTabDetachRequested`
 export class PerspectiveDockPanel extends DockPanel {
-    constructor(workspace) {
+    constructor(workspace: PerspectiveWorkspace) {
         super({ renderer: new PerspectiveDockPanelRenderer(workspace) });
+
+        // @ts-ignore: accessing a private member `_renderer`
         this._renderer.dock = this;
     }
 
-    _onTabDetachRequested(sender, args) {
+    _onTabDetachRequested(
+        sender: TabBar<Widget>,
+        args: TabBar.ITabDetachRequestedArgs<Widget>
+    ) {
+        // @ts-ignore: accessing a private member `_onTabDetachRequested`
         super._onTabDetachRequested(sender, args);
+
         // blur widget on when it's being moved
         const widget = sender.titles[args.index].owner;
-        const old = this.layout.saveLayout();
-        if (toArray(this.layout.widgets()).length > 1) {
-            this.layout.removeWidget(widget);
+        const layout = this.layout as DockLayout;
+        const old = layout.saveLayout();
+        if (toArray(layout.widgets()).length > 1) {
+            layout.removeWidget(widget);
         }
 
         widget.addClass("widget-blur");
-        if (this._drag) {
-            this._drag._promise.then(() => {
+        document.body.classList.add("lm-mod-override-cursor");
+
+        // @ts-ignore: accessing a private member `_drag`
+        const drag = this._drag;
+        if (drag) {
+            drag._promise.then(() => {
                 if (!widget.node.isConnected) {
-                    this.layout.restoreLayout(old);
+                    layout.restoreLayout(old);
                 }
 
+                document.body.classList.remove("lm-mod-override-cursor");
                 widget.removeClass("widget-blur");
             });
         }
     }
 
-    static getWidgets(layout) {
-        if (layout?.hasOwnProperty("main")) {
-            return PerspectiveDockPanel.getWidgets(layout.main);
-        } else if (layout?.children) {
-            return layout.children.flatMap((widget) =>
-                PerspectiveDockPanel.getWidgets(widget)
-            );
-        } else if (layout?.widgets) {
-            return layout.widgets;
+    static getWidgets(
+        layout: DockPanel.ILayoutConfig
+    ): PerspectiveViewerWidget[] {
+        if (!!layout.main) {
+            return PerspectiveDockPanel.getAreaWidgets(layout.main);
+        } else {
+            return [];
         }
+    }
+
+    static getAreaWidgets(
+        layout: DockLayout.AreaConfig
+    ): PerspectiveViewerWidget[] {
+        if (layout?.hasOwnProperty("children")) {
+            const split_panel = layout as DockLayout.ISplitAreaConfig;
+            return split_panel.children.flatMap((widget) =>
+                PerspectiveDockPanel.getAreaWidgets(widget)
+            );
+        } else if (layout?.hasOwnProperty("widgets")) {
+            const tab_panel = layout as DockLayout.ITabAreaConfig;
+            return tab_panel.widgets as PerspectiveViewerWidget[];
+        }
+
         return [];
     }
 
-    static mapWidgets(widgetFunc, layout) {
-        if (layout.main) {
-            layout.main = PerspectiveDockPanel.mapWidgets(
+    widgets(): IterableIterator<PerspectiveViewerWidget> {
+        return super.widgets() as IterableIterator<PerspectiveViewerWidget>;
+    }
+
+    static mapWidgets(
+        widgetFunc: (widget: any) => any,
+        layout: any
+    ): DockPanel.ILayoutConfig {
+        if (!!layout.main) {
+            layout.main = PerspectiveDockPanel.mapAreaWidgets(
                 widgetFunc,
                 layout.main
             );
-        } else if (layout.children) {
-            layout.children = layout.children.map((widget) =>
-                PerspectiveDockPanel.mapWidgets(widgetFunc, widget)
-            );
-        } else if (layout.widgets) {
-            layout.widgets = layout.widgets.map((widget) => widgetFunc(widget));
         }
+
+        return layout;
+    }
+
+    static mapAreaWidgets(
+        widgetFunc: (widget: any) => any,
+        layout: DockLayout.AreaConfig
+    ): DockLayout.AreaConfig {
+        if (layout.hasOwnProperty("children")) {
+            const split_panel = layout as DockLayout.ISplitAreaConfig;
+            split_panel.children = split_panel.children.map((widget) =>
+                PerspectiveDockPanel.mapAreaWidgets(widgetFunc, widget)
+            );
+        } else if (layout.hasOwnProperty("widgets")) {
+            const tab_panel = layout as DockLayout.ITabAreaConfig;
+            tab_panel.widgets = tab_panel.widgets.map(widgetFunc);
+        }
+
         return layout;
     }
 

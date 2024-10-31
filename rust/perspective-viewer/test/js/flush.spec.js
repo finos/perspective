@@ -10,77 +10,73 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@playwright/test";
-import {
-    compareLightDOMContents,
-    compareShadowDOMContents,
-} from "@finos/perspective-test";
+import { test, expect } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
-    await page.goto("/tools/perspective-test/src/html/workspace-test.html");
+    await page.goto("/rust/perspective-viewer/test/html/superstore.html");
     await page.evaluate(async () => {
         while (!window["__TEST_PERSPECTIVE_READY__"]) {
             await new Promise((x) => setTimeout(x, 10));
         }
     });
+
+    await page.evaluate(async () => {
+        await document.querySelector("perspective-viewer").restore({
+            plugin: "Debug",
+        });
+    });
 });
 
-function tests(context, compare) {
-    test("treemap filters work", async ({ page }) => {
-        const config = {
-            viewers: {
-                One: {
-                    table: "superstore",
-                    name: "Test",
-                    group_by: ["State"],
-                    columns: ["Sales"],
-                    plugin: "Treemap",
-                },
-                Two: { table: "superstore", name: "One" },
-            },
-            master: {
-                widgets: ["One"],
-            },
-            detail: {
-                main: {
-                    currentIndex: 0,
-                    type: "tab-area",
-                    widgets: ["Two"],
-                },
-            },
-        };
+test.describe("Flush method", async () => {
+    test("flush awaits settings view config field", async ({ page }) => {
+        const old_config = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            return await viewer.save();
+        });
 
-        const cfg = await page.evaluate(async (config) => {
-            const workspace = document.getElementById("workspace");
-            await workspace.restore(config);
-            await workspace.flush();
-            document
-                .querySelector("perspective-viewer-d3fc-treemap")
-                .shadowRoot.querySelector("g.treemap > g")
-                .dispatchEvent(new Event("click"));
-
-            let resolve;
-            const timer = new Promise((x) => {
-                resolve = x;
+        expect(old_config.settings).toBeFalsy();
+        const config = await page.evaluate(async (columns) => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.getTable();
+            viewer.restore({
+                settings: true,
             });
 
-            workspace.addEventListener("workspace-layout-update", resolve);
-            await timer;
+            await viewer.flush();
+            return await viewer.save();
+        });
 
-            return await workspace.save();
-        }, config);
-
-        expect(cfg.viewers.Two.filter).toEqual([["State", "==", "Alabama"]]);
-        return compare(page, `${context}-treemap-filters-work.txt`);
-    });
-}
-
-test.describe("Workspace global filters", () => {
-    test.describe("Light DOM", () => {
-        tests("light-dom", compareLightDOMContents);
+        expect(config).toEqual({
+            ...old_config,
+            settings: true,
+        });
     });
 
-    test.describe("Shadow DOM", () => {
-        tests("shadow-dom", compareShadowDOMContents);
+    test("flush awaits view query fields", async ({ page }) => {
+        const old_config = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            return await viewer.save();
+        });
+
+        expect(old_config.settings).toBeFalsy();
+        const config = await page.evaluate(async (columns) => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.getTable();
+            viewer.restore({
+                settings: true,
+                group_by: ["State", "City"],
+                split_by: ["Category"],
+            });
+
+            await viewer.flush();
+            return await viewer.save();
+        });
+
+        expect(config).toEqual({
+            ...old_config,
+            group_by: ["State", "City"],
+            split_by: ["Category"],
+            settings: true,
+        });
     });
 });

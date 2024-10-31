@@ -12,7 +12,6 @@
 
 import * as api from "./browser.ts";
 export type * from "../../dist/pkg/perspective-js.d.ts";
-export type * from "./ts-rs/ViewConfigUpdate.d.ts";
 
 import * as wasm_module from "../../dist/pkg/perspective-js.js";
 import wasm_binary from "../../dist/pkg/perspective-js.wasm";

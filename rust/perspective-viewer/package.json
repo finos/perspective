@@ -44,6 +44,7 @@
         "@finos/perspective-metadata": "workspace:^",
         "@types/react": "^17.0.2",
         "cpy": "^9.0.1",
-        "@prospective.co/procss": "0.1.16"
+        "@prospective.co/procss": "0.1.16",
+        "zx": "8.1.9"
     }
 }

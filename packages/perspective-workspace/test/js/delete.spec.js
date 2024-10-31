@@ -10,11 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@playwright/test";
-import {
-    compareLightDOMContents,
-    compareShadowDOMContents,
-} from "@finos/perspective-test";
+import { test } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
     await page.goto("/tools/perspective-test/src/html/workspace-test.html");
@@ -25,62 +21,61 @@ test.beforeEach(async ({ page }) => {
     });
 });
 
-function tests(context, compare) {
-    test("treemap filters work", async ({ page }) => {
+test.describe("Workspace table functions", () => {
+    test("flush() waits until delete is resolved", async ({ page }) => {
         const config = {
             viewers: {
-                One: {
-                    table: "superstore",
-                    name: "Test",
-                    group_by: ["State"],
-                    columns: ["Sales"],
-                    plugin: "Treemap",
-                },
-                Two: { table: "superstore", name: "One" },
-            },
-            master: {
-                widgets: ["One"],
+                One: { table: "superstore", name: "One" },
             },
             detail: {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: ["Two"],
+                    widgets: ["One"],
                 },
             },
         };
 
-        const cfg = await page.evaluate(async (config) => {
+        await page.evaluate(async (config) => {
             const workspace = document.getElementById("workspace");
+            const table = await workspace.getTable("superstore");
             await workspace.restore(config);
-            await workspace.flush();
-            document
-                .querySelector("perspective-viewer-d3fc-treemap")
-                .shadowRoot.querySelector("g.treemap > g")
-                .dispatchEvent(new Event("click"));
+            const viewer_removed =
+                workspace.querySelector("perspective-viewer");
 
-            let resolve;
-            const timer = new Promise((x) => {
-                resolve = x;
-            });
-
-            workspace.addEventListener("workspace-layout-update", resolve);
-            await timer;
-
-            return await workspace.save();
+            workspace.removeChild(viewer_removed);
+            await viewer_removed.flush();
+            await table.delete();
         }, config);
-
-        expect(cfg.viewers.Two.filter).toEqual([["State", "==", "Alabama"]]);
-        return compare(page, `${context}-treemap-filters-work.txt`);
-    });
-}
-
-test.describe("Workspace global filters", () => {
-    test.describe("Light DOM", () => {
-        tests("light-dom", compareLightDOMContents);
     });
 
-    test.describe("Shadow DOM", () => {
-        tests("shadow-dom", compareShadowDOMContents);
+    test("flush() waits until restore is applied and delete is resolved", async ({
+        page,
+    }) => {
+        const config = {
+            viewers: {
+                One: { table: "superstore", name: "One" },
+            },
+            detail: {
+                main: {
+                    currentIndex: 0,
+                    type: "tab-area",
+                    widgets: ["One"],
+                },
+            },
+        };
+
+        await page.evaluate(async (config) => {
+            const workspace = document.getElementById("workspace");
+            const table = await workspace.getTable("superstore");
+            workspace.restore(config); // no await
+            await workspace.flush();
+            const viewer_removed =
+                workspace.querySelector("perspective-viewer");
+
+            workspace.removeChild(viewer_removed);
+            await viewer_removed.flush();
+            await table.delete();
+        }, config);
     });
 });

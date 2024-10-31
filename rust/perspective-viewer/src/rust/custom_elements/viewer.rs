@@ -18,6 +18,7 @@ use std::str::FromStr;
 
 use ::perspective_js::utils::global;
 use ::perspective_js::{Table, View};
+use futures::future::join;
 use js_sys::*;
 use perspective_client::config::ViewConfigUpdate;
 use perspective_js::JsViewWindow;
@@ -159,7 +160,7 @@ impl PerspectiveViewerElement {
             .unwrap_or_else(|_| js_sys::Promise::resolve(&table));
 
         self.session.reset_stats();
-        self.session.reset(true);
+        let delete_task = self.session.reset(true);
         let mut config = ViewConfigUpdate {
             columns: Some(self.session.get_view_config().columns.clone()),
             ..ViewConfigUpdate::default()
@@ -196,7 +197,8 @@ impl PerspectiveViewerElement {
             };
 
             renderer.set_throttle(None);
-            renderer.draw(task).await
+            let (draw, delete) = join(renderer.draw(task), delete_task).await;
+            draw.and(delete)
         })
     }
 
@@ -218,18 +220,18 @@ impl PerspectiveViewerElement {
     /// ```javascript
     /// await viewer.delete();
     /// ```
-    pub fn delete(&mut self) -> ApiFuture<bool> {
+    pub fn delete(&mut self) -> ApiFuture<()> {
         clone!(self.renderer, self.session, self.root);
         ApiFuture::new(self.renderer.clone().with_lock(async move {
             renderer.delete()?;
-            let result = session.delete();
+            session.delete().await?;
             root.borrow_mut()
                 .take()
                 .ok_or("Already deleted!")?
                 .destroy();
 
-            tracing::info!(table_deleted = result, "Deleted <perspective-viewer>");
-            Ok(result)
+            tracing::info!("Deleted <perspective-viewer>");
+            Ok(())
         }))
     }
 
@@ -240,6 +242,13 @@ impl PerspectiveViewerElement {
     /// [Apache Arrow](https://arrow.apache.org/) before passing to another
     /// library.
     ///
+    /// The [`View`] returned by this method is owned by the
+    /// [`PerspectiveViewerElement`] and may be _invalidated_ by
+    /// [`View::delete`] at any time. Plugins which rely on this [`View`] for
+    /// their [`HTMLPerspectiveViewerPluginElement::draw`] implementations
+    /// should treat this condition as a _cancellation_ by silently aborting on
+    /// "View already deleted" errors from method calls.
+    ///
     /// # JavaScript Examples
     ///
     /// ```javascript
@@ -248,7 +257,7 @@ impl PerspectiveViewerElement {
     #[wasm_bindgen]
     pub fn getView(&self) -> ApiFuture<View> {
         let session = self.session.clone();
-        ApiFuture::new(async move { Ok(session.get_view().ok_or("No table set")?.as_jsview()) })
+        ApiFuture::new(async move { Ok(session.get_view().ok_or("No table set")?.into()) })
     }
 
     /// Get the underlying [`Table`] for this viewer (as passed to
@@ -302,6 +311,8 @@ impl PerspectiveViewerElement {
     /// affects the rendered element.  If you want to make sure all pending
     /// actions have been rendered, call and await [`Self::flush`].
     ///
+    /// [`Self::flush`] will resolve immediately if there is no [`Table`] set.
+    ///
     /// # JavaScript Examples
     ///
     /// In this example, [`Self::restore`] is called without `await`, but the
@@ -313,14 +324,10 @@ impl PerspectiveViewerElement {
     /// await viewer.flush();
     /// ```
     pub fn flush(&self) -> ApiFuture<()> {
-        clone!(self.renderer, self.session);
+        clone!(self.renderer);
         ApiFuture::new(async move {
-            if session.js_get_table().is_none() {
-                session.table_loaded.listen_once().await?;
-                let _ = session.js_get_table().ok_or("No table set")?;
-            };
-
-            renderer.draw(async { Ok(&session) }).await
+            request_animation_frame().await;
+            renderer.with_lock(async { Ok(()) }).await
         })
     }
 
@@ -666,8 +673,11 @@ impl PerspectiveViewerElement {
                 .cloned();
 
             presentation.set_theme_name(reset_theme.as_deref()).await?;
-            let view = session.get_view().into_apierror()?;
-            renderer.restyle_all(&view).await
+            if let Some(view) = session.get_view() {
+                renderer.restyle_all(&view).await
+            } else {
+                Ok(JsValue::UNDEFINED)
+            }
         })
     }
 
