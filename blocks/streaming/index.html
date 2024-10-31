@@ -2,17 +2,12 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
-
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.1.1/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.1.1/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.1.1/dist/cdn/perspective-viewer-d3fc.js"></script>
-
-        <script type="module" src="streaming.js"></script>
-
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
         <link rel="stylesheet" href="index.css" />
         <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/themes.css" />
+        <script type="module" src="streaming.js"></script>
     </head>
-
     <body>
         <perspective-viewer></perspective-viewer>
     </body>
