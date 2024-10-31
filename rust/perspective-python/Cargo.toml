@@ -25,8 +25,12 @@ include = [
     "bench/**/*.py",
     "build.rs",
     "./Cargo.toml",
+    "README.md",
     "./package.json",
     "perspective/**/*.py",
+    "perspective/extension",
+    "perspective/templates",
+    "perspective/tests/**/*.arrow",
     "./pyproject.toml",
     "src/**/*.rs",
     "docs/**/*",
@@ -52,9 +56,12 @@ pyo3-build-config = "0.20.2"
 python-config-rs = "0.1.2"
 
 [dependencies]
+# NOTE: when building from the git repo, these perspective-* dependencies are
+# overridden with path dependencies in .cargo/config.toml.  This is done to
+# support the sdist, which doesn't include these packages.
+perspective-client = { version = "3.1.2" }
+perspective-server = { version = "3.1.2" }
 async-lock = "2.5.0"
-perspective-client = { version = "3.1.2", path = "../perspective-client" }
-perspective-server = { version = "3.1.2", path = "../perspective-server" }
 pollster = "0.3.0"
 extend = "1.1.2"
 futures = "0.3.28"
