@@ -1,3 +1,16 @@
+# [v3.1.3](https://github.com/finos/perspective/releases/tag/v3.1.3)
+
+_31 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.2...v3.1.3))
+
+Fixes
+
+- Fix `perspective-python` sdist and add sdist tests to CI [#2817](https://github.com/finos/perspective/pull/2817)
+- Fix workspace resize and related bugs [#2808](https://github.com/finos/perspective/pull/2808)
+- fix aiohttp disconnect error on websockets [#2806](https://github.com/finos/perspective/pull/2806)
+- Missing tooltip data [#2753](https://github.com/finos/perspective/pull/2753)
+- Escape esbuild plugin's symbol replacement. [#2807](https://github.com/finos/perspective/pull/2807)
+- Add aarch64 Mac runners to test_python, restore PSP_ARCH dev behavior [#2802](https://github.com/finos/perspective/pull/2802)
+
 # [v3.1.2](https://github.com/finos/perspective/releases/tag/v3.1.2)
 
 _22 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.1...v3.1.2))
