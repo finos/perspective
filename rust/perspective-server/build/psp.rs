@@ -58,26 +58,6 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
         dst.define("PSP_WASM_BUILD", "0");
     }
 
-    if cfg!(windows) {
-        match std::env::var("VCPKG_ROOT") {
-            Ok(vcpkg_root) => {
-                dst.define(
-                    "CMAKE_TOOLCHAIN_FILE",
-                    format!(
-                        "{}/scripts/buildsystems/vcpkg.cmake",
-                        vcpkg_root.replace("\\", "/")
-                    ),
-                );
-            },
-            Err(_) => {
-                println!(
-                    "cargo:warning=MESSAGE VCPKG_ROOT not set in environment, not setting \
-                     CMAKE_TOOLCHAIN_FILE"
-                )
-            },
-        }
-    }
-
     if std::env::var("CARGO_FEATURE_PYTHON").is_ok() {
         dst.define("CMAKE_POSITION_INDEPENDENT_CODE", "ON");
         dst.define("PSP_PYTHON_BUILD", "1");

@@ -42,11 +42,6 @@ inputs:
         default: "false"
         description: "Don't use cache from previous builds"
 
-outputs:
-    VCPKG_INSTALLATION_ROOT:
-        description: "The output of vcpkg install path"
-        value: ${{ steps.vcpkg-step.outputs.VCPKG_INSTALLATION_ROOT }}
-
 runs:
     using: "composite"
     steps:
@@ -110,23 +105,6 @@ runs:
         #   if: ${{ inputs.skip_cache == 'false' }}
         #   with:
         #       key: ${{ github.job }}-${{ matrix.os }}
-
-        - name: Windows init steps (vc143)
-          id: vcpkg-step
-          shell: pwsh
-          run: |
-              vcpkg.exe install boost-thread boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
-              vcpkg.exe integrate install
-              echo "VCPKG_INSTALLATION_ROOT=${env:VCPKG_INSTALLATION_ROOT}"
-              echo "VCPKG_INSTALLATION_ROOT=${env:VCPKG_INSTALLATION_ROOT}" >> $env:GITHUB_OUTPUT
-              echo "${env:VCPKG_INSTALLATION_ROOT}" >> $env:GITHUB_PATH
-              echo "VCPKG_ROOT=${env:VCPKG_INSTALLATION_ROOT}" >> $env:GITHUB_ENV
-              dir env:
-          env:
-              PYTHON_VERSION: ${{ matrix.python-version }}
-              VCPKG_DEFAULT_TRIPLET: x64-windows
-              VCPKG_PLATFORM_TOOLSET: v143
-          if: ${{ runner.os == 'Windows' && inputs.cpp == 'true' }}
 
         # https://github.com/apache/arrow/issues/38391
         - if: ${{ runner.os == 'macOS' }}
