@@ -211,4 +211,79 @@ test.describe("Plugin Styles", () => {
         await view.columnSettingsSidebar.attributesTab.saveBtn.click();
         expect(await selectedTab()).toBe("Attributes");
     });
+
+    test("Color range component updates when switching columns to edit different number column without closing sidebar", async ({
+        page,
+    }) => {
+        const view = new PageView(page);
+        await view.restore({
+            plugin: "Datagrid",
+            columns: ["Row ID", "Postal Code"],
+            settings: true,
+        });
+
+        const defaultNegColor = "#ff471e";
+
+        let settingsPanel = await view.openSettingsPanel();
+
+        let activeColumns = settingsPanel.activeColumns;
+        let firstCol = await activeColumns.getColumnByName("Row ID");
+        let secondCol = await activeColumns.getColumnByName("Postal Code");
+
+        // edit first number column
+        await firstCol.editBtn.waitFor();
+        await firstCol.editBtn.click();
+        await checkTab(view.columnSettingsSidebar, true, false, false);
+
+        // expect style tab is selected
+        const selectedTab = async () => {
+            return await view.columnSettingsSidebar.selectedTab
+                .locator(".tab-title")
+                .getAttribute("id");
+        };
+        expect(await selectedTab()).toBe("Style");
+
+        // expect -ve color input on color range is present and has valid default value
+        const getFgColorNeg = async () => {
+            return view.columnSettingsSidebar.styleTab.container.locator("#fg-color-neg");
+        };
+        let fgColorNeg = await getFgColorNeg();
+
+        expect(fgColorNeg).toBeTruthy();
+        expect(fgColorNeg).toBeVisible();
+        expect(fgColorNeg).toBeEditable();
+        expect(fgColorNeg).toHaveValue(defaultNegColor);
+
+        // change -ve color from default
+        await fgColorNeg.fill("#ffff00");
+
+        let negColorValue = await fgColorNeg.inputValue();
+        expect(negColorValue).toBe("#ffff00");
+
+        // edit second number column
+        await secondCol.editBtn.waitFor();
+        await secondCol.editBtn.click();
+
+        // expect -ve color input on color range is present 
+        fgColorNeg = await getFgColorNeg();
+
+        expect(fgColorNeg).toBeVisible();
+
+        // expect -ve color input updates and switches back to default
+        negColorValue = await fgColorNeg.inputValue();
+        expect(negColorValue).toBe(defaultNegColor);
+
+        // edit first number column
+        await firstCol.editBtn.waitFor();
+        await firstCol.editBtn.click();
+
+        // expect -ve color input on color range is present 
+        fgColorNeg = await getFgColorNeg();
+
+        expect(fgColorNeg).toBeVisible();
+
+        // expect -ve color input updates and switches back to the changed value
+        negColorValue = await fgColorNeg.inputValue();
+        expect(negColorValue).toBe("#ffff00");
+    });
 });
