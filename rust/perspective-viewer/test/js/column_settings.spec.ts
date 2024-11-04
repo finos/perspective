@@ -245,7 +245,9 @@ test.describe("Plugin Styles", () => {
 
         // expect -ve color input on color range is present and has valid default value
         const getFgColorNeg = async () => {
-            return view.columnSettingsSidebar.styleTab.container.locator("#fg-color-neg");
+            return view.columnSettingsSidebar.styleTab.container.locator(
+                "#fg-color-neg"
+            );
         };
         let fgColorNeg = await getFgColorNeg();
 
@@ -264,7 +266,7 @@ test.describe("Plugin Styles", () => {
         await secondCol.editBtn.waitFor();
         await secondCol.editBtn.click();
 
-        // expect -ve color input on color range is present 
+        // expect -ve color input on color range is present
         fgColorNeg = await getFgColorNeg();
 
         expect(fgColorNeg).toBeVisible();
@@ -277,7 +279,7 @@ test.describe("Plugin Styles", () => {
         await firstCol.editBtn.waitFor();
         await firstCol.editBtn.click();
 
-        // expect -ve color input on color range is present 
+        // expect -ve color input on color range is present
         fgColorNeg = await getFgColorNeg();
 
         expect(fgColorNeg).toBeVisible();
