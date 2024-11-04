@@ -44,6 +44,22 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
             false,
         )
     });
+
+    {
+        let gradient = gradient.clone();
+
+        use_effect_with(
+            (props.neg_color.clone(), props.pos_color.clone()),
+            move |(neg_color, pos_color)| {
+                let current_gradient = gradient.clone();
+                if &current_gradient.0 != pos_color || &current_gradient.1 != neg_color {
+                    gradient.set((pos_color.clone(), neg_color.clone(), true));
+                }
+                || ()
+            },
+        );
+    }
+
     let on_pos_color = use_callback(
         (gradient.clone(), props.on_pos_color.clone()),
         |event: InputEvent, (gradient, on_pos_color)| {
