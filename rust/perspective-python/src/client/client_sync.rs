@@ -17,6 +17,7 @@ use perspective_client::{assert_table_api, assert_view_api, Session};
 #[cfg(doc)]
 use perspective_client::{config::ViewConfigUpdate, Schema, TableInitOptions, UpdateOptions};
 use pollster::FutureExt;
+use pyo3::exceptions::PyTypeError;
 use pyo3::marker::Ungil;
 use pyo3::prelude::*;
 use pyo3::types::*;
@@ -152,6 +153,11 @@ assert_table_api!(Table);
 
 #[pymethods]
 impl Table {
+    #[new]
+    fn new() -> PyResult<Self> {
+        Err(PyTypeError::new_err("Do not call Table's constructor directly, construct from a Client instance."))
+    }
+
     #[doc = crate::inherit_docs!("table/get_index.md")]
     pub fn get_index(&self) -> Option<String> {
         self.0.get_index().block_on()
@@ -261,6 +267,11 @@ assert_view_api!(View);
 
 #[pymethods]
 impl View {
+    #[new]
+    fn new() -> PyResult<Self> {
+        Err(PyTypeError::new_err("Do not call View's constructor directly, construct from a Table instance."))
+    }
+
     #[doc = crate::inherit_docs!("view/column_paths.md")]
     pub fn column_paths(&self) -> PyResult<Vec<String>> {
         self.0.column_paths().block_on()
