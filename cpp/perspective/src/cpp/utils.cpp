@@ -126,12 +126,6 @@ parse_all_date_time(
 }
 
 bool
-parse_all_date_time(std::tm& tm, std::string_view date_time_str) {
-    std::chrono::system_clock::time_point tp;
-    return parse_all_date_time(tm, tp, date_time_str);
-}
-
-bool
 parse_all_date_time(
     std::chrono::system_clock::time_point& tp, std::string_view date_time_str
 ) {

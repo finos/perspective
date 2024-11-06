@@ -20,5 +20,5 @@ ExternalProject_Add(apachearrow
   TEST_COMMAND      ""
   # This patch is to work around https://github.com/apache/arrow/issues/44384
   # It can be removed when a version of Arrow is released with https://github.com/apache/arrow/pull/44385
-  PATCH_COMMAND     ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> git apply ${CMAKE_SOURCE_DIR}/patches/fix_arrow_libtool.patch
+  PATCH_COMMAND     "${CMAKE_COMMAND}" -E chdir <SOURCE_DIR> git apply "${CMAKE_SOURCE_DIR}/patches/fix_arrow_libtool.patch"
 )
