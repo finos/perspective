@@ -442,6 +442,52 @@ perpsective.PerspectiveWidget(df, **config)
             expect(errored).toBe(false);
         });
 
+        test_jupyter(
+            "Toggles to datagrid and back regression",
+            [
+                "w = perspective.widget.PerspectiveWidget(arrow_data, columns=['f64', 'str', 'datetime'])",
+                "w",
+            ],
+            async ({ page }) => {
+                await default_body(page);
+                const num_columns = await page
+                    .locator("regular-table thead tr")
+                    .first()
+                    .evaluate((tr) => tr.childElementCount);
+
+                async function toggle(plugin) {
+                    await page.locator(".plugin-select-item").click();
+                    await page
+                        .locator("#plugin_selector_container.open")
+                        .waitFor();
+
+                    await page
+                        .locator(`[data-plugin=${plugin}].plugin-select-item`)
+                        .click();
+
+                    await page
+                        .locator("#plugin_selector_container:not(.open)")
+                        .waitFor();
+
+                    await page.evaluate(async () => {
+                        await document
+                            .querySelector("perspective-viewer")!
+                            .flush();
+                    });
+                }
+
+                await toggle('"X/Y Line"');
+                await toggle("Datagrid");
+                await toggle('"X/Y Line"');
+                await toggle("Datagrid");
+
+                // expect(num_columns).toEqual(3);
+                await expect(
+                    page.locator("regular-table tbody tr")
+                ).toHaveCount(5);
+            }
+        );
+
         // *************************
         // UTILS
         // *************************

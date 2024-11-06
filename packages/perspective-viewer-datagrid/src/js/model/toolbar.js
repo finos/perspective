@@ -27,7 +27,7 @@ export function toggle_edit_mode(mode = undefined) {
     }
 
     this.model._edit_mode = mode;
-    this.parentElement.setSelection();
+    this.parentElement?.setSelection();
     this.model._selection_state = {
         selected_areas: [],
         dirty: true,
