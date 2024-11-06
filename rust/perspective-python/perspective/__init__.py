@@ -27,6 +27,10 @@ from .perspective import (
     PerspectiveError,
     ProxySession,
     PySyncServer as Server,
+    # NOTE: these are classes without constructors,
+    # so we import them just for type hinting
+    Table as TableType,  # noqa: F401
+    View as ViewType,  # noqa: F401
 )
 
 
