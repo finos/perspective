@@ -203,7 +203,7 @@ impl Component for NumberColumnStyle {
                 }
 
                 self.dispatch_config(ctx);
-                false
+                true
             },
             NumberColumnStyleMsg::NegColorChanged(side, val) => {
                 if side == Fg {
@@ -215,7 +215,7 @@ impl Component for NumberColumnStyle {
                 }
 
                 self.dispatch_config(ctx);
-                false
+                true
             },
             NumberColumnStyleMsg::NumberForeModeChanged(val) => {
                 self.fg_mode = val;
