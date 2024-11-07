@@ -20,6 +20,18 @@ Table = client.table
 
 
 class TestException(object):
+    def test_instantiation_exception_table(self):
+        from perspective import Table
+        with raises(TypeError) as ex:
+            Table()
+        assert "Do not call Table's constructor directly" in str(ex.value)
+
+    def test_instantiation_exception_view(self):
+        from perspective import View
+        with raises(TypeError) as ex:
+            View()
+        assert "Do not call View's constructor directly" in str(ex.value)
+
     def test_exception_from_core(self):
         tbl = Table({"a": [1, 2, 3]})
 
