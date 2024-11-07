@@ -118,12 +118,7 @@ private:
 #ifdef PSP_PARALLEL_FOR
     std::shared_mutex* m_lock;
 #endif
-    std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;
-
-    // #if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
-    //   t_val m_update_delegate;
-    // #endif
     std::atomic_flag m_run;
     std::atomic<bool> m_data_remaining;
     std::atomic<t_uindex> m_sleep;
