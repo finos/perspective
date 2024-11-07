@@ -483,6 +483,9 @@ rapidjson_type_to_dtype(const rapidjson::Value& value) {
         case rapidjson::kArrayType:
             PSP_COMPLAIN_AND_ABORT("Unknown JSON type");
             return t_dtype::DTYPE_NONE;
+        default:
+            PSP_COMPLAIN_AND_ABORT("Unknown JSON type");
+            return t_dtype::DTYPE_NONE;
     }
 }
 

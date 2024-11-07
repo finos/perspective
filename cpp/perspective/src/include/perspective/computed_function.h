@@ -42,23 +42,23 @@ namespace computed_function {
 
 // A regex function that caches its parsed regex objects.
 #define REGEX_FUNCTION_HEADER(NAME)                                            \
-    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+    struct NAME final : public exprtk::igeneric_function<t_tscalar> {          \
         NAME(t_regex_mapping& regex_mapping);                                  \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list parameters) override;            \
         t_regex_mapping& m_regex_mapping;                                      \
     };
 
 // A regex function that returns a string stored in the expression vocab.
 #define REGEX_STRING_FUNCTION_HEADER(NAME)                                     \
-    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+    struct NAME final : public exprtk::igeneric_function<t_tscalar> {          \
         NAME(                                                                  \
             t_expression_vocab& expression_vocab,                              \
             t_regex_mapping& regex_mapping,                                    \
             bool is_type_validator                                             \
         );                                                                     \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list parameters) override;            \
         t_expression_vocab& m_expression_vocab;                                \
         t_regex_mapping& m_regex_mapping;                                      \
         bool m_is_type_validator;                                              \
@@ -74,10 +74,10 @@ namespace computed_function {
 // get_dtype, and because the gnode is guaranteed to be valid for all of
 // those invocations, we can store a reference to the vocab.
 #define STRING_FUNCTION_HEADER(NAME)                                           \
-    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+    struct NAME final : public exprtk::igeneric_function<t_tscalar> {          \
         NAME(t_expression_vocab& expression_vocab, bool is_type_validator);    \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list parameters) override;            \
         t_expression_vocab& m_expression_vocab;                                \
         t_tscalar m_sentinel;                                                  \
         bool m_is_type_validator;                                              \
@@ -111,11 +111,11 @@ namespace computed_function {
      * Strings in the column not provided to `order()` will by default appear at
      * the end.
      */
-    struct order : public exprtk::igeneric_function<t_tscalar> {
+    struct order final : public exprtk::igeneric_function<t_tscalar> {
         order(bool is_type_validator);
         ~order();
 
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list parameters) override;
         void clear_order_map();
 
         tsl::hopscotch_map<std::string, double> m_order_map;
@@ -179,23 +179,23 @@ namespace computed_function {
     REGEX_STRING_FUNCTION_HEADER(replace_all)
 
 #define FUNCTION_HEADER(NAME)                                                  \
-    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+    struct NAME final : public exprtk::igeneric_function<t_tscalar> {          \
         NAME();                                                                \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list parameters) override;            \
     };
 
     // Length of the string
     FUNCTION_HEADER(length)
 
-    struct index : public exprtk::igeneric_function<t_tscalar> {
+    struct index final : public exprtk::igeneric_function<t_tscalar> {
         index(
             const t_pkey_mapping& pkey_map,
             std::shared_ptr<t_data_table> source_table,
             t_uindex& row_idx
         );
         ~index();
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list parameters) override;
 
     private:
         const t_pkey_mapping& m_pkey_map;
@@ -203,13 +203,13 @@ namespace computed_function {
         t_uindex& m_row_idx;
     };
 
-    struct col : public exprtk::igeneric_function<t_tscalar> {
+    struct col final : public exprtk::igeneric_function<t_tscalar> {
         col(t_expression_vocab& expression_vocab,
             bool is_type_validator,
             std::shared_ptr<t_data_table> source_table,
             t_uindex& row_idx);
         ~col();
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list parameters) override;
 
     private:
         t_expression_vocab& m_expression_vocab;
@@ -218,7 +218,7 @@ namespace computed_function {
         t_uindex& m_row_idx;
     };
 
-    struct vlookup : public exprtk::igeneric_function<t_tscalar> {
+    struct vlookup final : public exprtk::igeneric_function<t_tscalar> {
         vlookup(
             t_expression_vocab& expression_vocab,
             bool is_type_validator,
@@ -226,7 +226,7 @@ namespace computed_function {
             t_uindex& row_idx
         );
         ~vlookup();
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list parameters) override;
 
     private:
         t_expression_vocab& m_expression_vocab;
@@ -272,11 +272,11 @@ namespace computed_function {
      *
      * Any other inputs are invalid.
      */
-    struct bucket : public exprtk::igeneric_function<t_tscalar> {
+    struct bucket final : public exprtk::igeneric_function<t_tscalar> {
         bucket();
         ~bucket();
 
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list parameters) final;
 
         // faster unit lookups, since we are calling this lookup in a tight
         // loop.

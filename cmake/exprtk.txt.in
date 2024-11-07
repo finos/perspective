@@ -5,7 +5,7 @@ project(exprtk-download NONE)
 include(ExternalProject)
 ExternalProject_Add(exprtk
   GIT_REPOSITORY    https://github.com/ArashPartow/exprtk.git
-  GIT_TAG           0.0.2
+  GIT_TAG           0.0.3
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/exprtk-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/exprtk-build"
   CONFIGURE_COMMAND ""
