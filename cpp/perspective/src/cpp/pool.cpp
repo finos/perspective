@@ -71,7 +71,9 @@ t_pool::init() {
 
 t_uindex
 t_pool::register_gnode(t_gnode* node) {
-    std::lock_guard<std::mutex> lg(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_WRITE_LOCK(*m_lock)
+#endif
 
     m_gnodes.push_back(node);
     t_uindex id = m_gnodes.size() - 1;
@@ -91,7 +93,9 @@ t_pool::register_gnode(t_gnode* node) {
 
 void
 t_pool::unregister_gnode(t_uindex idx) {
-    std::lock_guard<std::mutex> lgxo(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_WRITE_LOCK(*m_lock)
+#endif
 
     if (t_env::log_progress()) {
         std::cout << "t_pool.unregister_gnode idx => " << idx << std::endl;
@@ -186,7 +190,7 @@ t_pool::register_context(
     t_ctx_type type,
     std::int32_t ptr
 ) {
-    std::lock_guard<std::mutex> lg(m_mtx);
+
     if (!validate_gnode_id(gnode_id)) {
         return;
     }
@@ -201,7 +205,10 @@ t_pool::register_context(
     t_ctx_type type,
     std::int64_t ptr
 ) {
-    std::lock_guard<std::mutex> lg(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_WRITE_LOCK(*m_lock)
+#endif
+
     if (!validate_gnode_id(gnode_id)) {
         return;
     }
@@ -222,7 +229,9 @@ t_pool::notify_userspace(t_uindex port_id) {
 
 void
 t_pool::unregister_context(t_uindex gnode_id, const std::string& name) {
-    std::lock_guard<std::mutex> lg(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_WRITE_LOCK(*m_lock)
+#endif
 
     if (t_env::log_progress()) {
         std::cout << repr() << " << t_pool.unregister_context: "
@@ -246,7 +255,9 @@ std::vector<t_tscalar>
 t_pool::get_row_data_pkeys(
     t_uindex gnode_id, const std::vector<t_tscalar>& pkeys
 ) {
-    std::lock_guard<std::mutex> lg(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_READ_LOCK(*m_lock)
+#endif
 
     if (!validate_gnode_id(gnode_id)) {
         return {};
@@ -265,7 +276,10 @@ t_pool::get_row_data_pkeys(
 
 std::vector<t_updctx>
 t_pool::get_contexts_last_updated() {
-    std::lock_guard<std::mutex> lg(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_READ_LOCK(*m_lock)
+#endif
+
     std::vector<t_updctx> rval;
 
     for (auto& m_gnode : m_gnodes) {
@@ -330,7 +344,10 @@ t_pool::inc_epoch() {
 
 std::vector<t_uindex>
 t_pool::get_gnodes_last_updated() {
-    std::lock_guard<std::mutex> lg(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_READ_LOCK(*m_lock)
+#endif
+
     std::vector<t_uindex> rv;
 
     for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx) {
@@ -346,10 +363,14 @@ t_pool::get_gnodes_last_updated() {
 
 t_gnode*
 t_pool::get_gnode(t_uindex idx) {
-    std::lock_guard<std::mutex> lg(m_mtx);
+#ifdef PSP_PARALLEL_FOR
+    PSP_READ_LOCK(*m_lock)
+#endif
+
     PSP_VERBOSE_ASSERT(
         idx < m_gnodes.size() && m_gnodes[idx], "Bad gnode encountered"
     );
+
     return m_gnodes[idx];
 }
 
