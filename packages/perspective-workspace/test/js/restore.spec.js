@@ -92,6 +92,29 @@ function tests(context, compare) {
             `${context}-restore-workspace-with-master-and-detail.txt`
         );
     });
+
+    test("restore workspace is symmetric with addViewer", async ({ page }) => {
+        const initial = await page.evaluate(async (config) => {
+            const workspace = document.getElementById("workspace");
+            await workspace.addViewer({ table: "superstore" });
+            await workspace.flush();
+            return await workspace.save();
+        });
+
+        const second = await page.evaluate(async (initial) => {
+            const workspace = document.getElementById("workspace");
+            await workspace.restore(initial);
+            await workspace.flush();
+            return await workspace.save();
+        }, initial);
+
+        expect(initial).toEqual(second);
+
+        return compare(
+            page,
+            `${context}-restore-workspace-is-symmetric-with-addviewer.txt`
+        );
+    });
 }
 
 test.describe("Workspace restore", () => {

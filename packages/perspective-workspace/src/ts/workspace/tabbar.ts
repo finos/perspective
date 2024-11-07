@@ -172,7 +172,10 @@ export class PerspectiveTabBar extends TabBar<any> {
                     event
                 );
 
-                event.preventDefault();
+                if (!event.shiftKey) {
+                    event.preventDefault();
+                }
+
                 break;
             case "mousedown":
                 if ((event.target as HTMLElement).id === TabBarItems.Label) {

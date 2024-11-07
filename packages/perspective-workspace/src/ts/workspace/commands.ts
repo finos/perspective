@@ -110,7 +110,7 @@ export const createCommands = (
     commands.addCommand("workspace:new", {
         execute: (args) => {
             const widget = workspace._createWidgetAndNode({
-                config: { table: args.table as string, master: false },
+                config: { table: args.table as string },
                 slot: undefined,
             });
 
@@ -255,7 +255,7 @@ export const createCommands = (
 
     commands.addCommand("workspace:help", {
         // iconClass: "menu-close",
-        execute: () => undefined,
+        execute: () => {},
         label: "Shift+Click for Browser Menu",
         isEnabled: () => false,
         // mnemonic: 0,
