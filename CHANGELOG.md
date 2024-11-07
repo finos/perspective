@@ -1,3 +1,22 @@
+# [v3.1.4](https://github.com/finos/perspective/releases/tag/v3.1.4)
+
+_7 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test8...v3.1.4))
+
+Features
+
+- Add back Table and View exports, make constructors throw like pyarrow.Table [#2831](https://github.com/finos/perspective/pull/2831)
+
+Fixes
+
+- Fixed workspace persistence structure symmetry [#2833](https://github.com/finos/perspective/pull/2833)
+- Fix concurrent update segfault [#2835](https://github.com/finos/perspective/pull/2835)
+- Fix `plugin` switch  [#2828](https://github.com/finos/perspective/pull/2828)
+
+Misc
+
+- Fix failed color range update [#2823](https://github.com/finos/perspective/pull/2823)
+- CI sdist fixes, port conda patch, fix ODR violation [#2826](https://github.com/finos/perspective/pull/2826)
+
 # [v3.1.3](https://github.com/finos/perspective/releases/tag/v3.1.3)
 
 _31 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.2...v3.1.3))
