@@ -23,7 +23,6 @@ interface IPerspectiveViewerWidgetOptions {
 
 export class PerspectiveViewerWidget extends Widget {
     viewer: psp_viewer.HTMLPerspectiveViewerElement;
-    _master: boolean;
     _title: string;
     _is_table_loaded: boolean;
     _restore_config?: () => Promise<void>;
@@ -32,27 +31,8 @@ export class PerspectiveViewerWidget extends Widget {
     constructor({ viewer, node }: IPerspectiveViewerWidgetOptions) {
         super({ node });
         this.viewer = viewer;
-        this._master = false;
         this._title = "";
         this._is_table_loaded = false;
-    }
-
-    set master(value: boolean) {
-        if (this._master !== value) {
-            if (value) {
-                this.viewer.classList.add("workspace-master-widget");
-                this.viewer.toggleAttribute?.("selectable", true);
-            } else {
-                this.viewer.classList.remove("workspace-master-widget");
-                this.viewer.removeAttribute("selectable");
-            }
-
-            this._master = value;
-        }
-    }
-
-    get master(): boolean {
-        return this._master;
     }
 
     get name(): string {
@@ -75,12 +55,10 @@ export class PerspectiveViewerWidget extends Widget {
 
     restore(
         config: psp_viewer.ViewerConfigUpdate & {
-            master: boolean;
             table: string;
         }
     ) {
-        const { master, table, ...viewerConfig } = config;
-        this.master = master;
+        const { table, ...viewerConfig } = config;
         this._title = config.title as string;
         this.title.label = config.title as string;
         if (table) {
@@ -107,7 +85,6 @@ export class PerspectiveViewerWidget extends Widget {
     async save() {
         let config = {
             ...(await this.viewer.save()),
-            master: this.master,
             table: this.viewer.getAttribute("table"),
         };
 

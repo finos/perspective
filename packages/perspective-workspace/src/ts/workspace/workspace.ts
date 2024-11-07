@@ -49,7 +49,6 @@ export interface PerspectiveLayout<T> {
 
 export interface ViewerConfigUpdateExt extends ViewerConfigUpdate {
     table: string;
-    master: boolean;
 }
 
 export interface PerspectiveWorkspaceConfig<T> {
@@ -326,16 +325,16 @@ export class PerspectiveWorkspace extends SplitPanel {
             widget = starting_widgets.find((x) => x.viewer === viewer);
             if (widget) {
                 widget.load(this.tables.get(viewer_config.table));
-                widget.restore({ ...viewer_config, master });
+                widget.restore({ ...viewer_config });
             } else {
                 widget = this._createWidget({
-                    config: { ...viewer_config, master },
+                    config: { ...viewer_config },
                     viewer,
                 });
             }
         } else if (viewer_config) {
             widget = this._createWidgetAndNode({
-                config: { ...viewer_config, master },
+                config: { ...viewer_config },
                 slot: widgetName,
             });
         } else {
@@ -345,10 +344,13 @@ export class PerspectiveWorkspace extends SplitPanel {
         }
 
         if (master) {
+            widget.viewer.classList.add("workspace-master-widget");
+            widget.viewer.toggleAttribute("selectable", true);
             widget.viewer.addEventListener(
                 "perspective-select",
                 this.onPerspectiveSelect.bind(this)
             );
+
             widget.viewer.addEventListener(
                 "perspective-click",
                 this.onPerspectiveSelect.bind(this)
@@ -419,7 +421,6 @@ export class PerspectiveWorkspace extends SplitPanel {
 
                 const widget = this._createWidget({
                     config: {
-                        master: false,
                         table: viewer.getAttribute("table")!,
                     },
                     viewer,
@@ -473,15 +474,10 @@ export class PerspectiveWorkspace extends SplitPanel {
             slot: undefined,
         });
 
-        if (widget.master) {
-            const index = this.masterPanel.widgets.indexOf(widget) + 1;
-            this.masterPanel.insertWidget(index, duplicate);
-        } else {
-            this.dockpanel.addWidget(duplicate, {
-                mode: "split-right",
-                ref: widget,
-            });
-        }
+        this.dockpanel.addWidget(duplicate, {
+            mode: "split-right",
+            ref: widget,
+        });
 
         await duplicate.task;
     }
@@ -587,11 +583,12 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     async makeMaster(widget: PerspectiveViewerWidget) {
-        widget.master = true;
         if (widget.viewer.hasAttribute("settings")) {
             await widget.toggleConfig();
         }
 
+        widget.viewer.classList.add("workspace-master-widget");
+        widget.viewer.toggleAttribute("selectable", true);
         if (!this.masterPanel.isAttached) {
             this.detailPanel.close();
             this.setupMasterPanel(DEFAULT_WORKSPACE_SIZE);
@@ -612,7 +609,8 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     makeDetail(widget: PerspectiveViewerWidget) {
-        widget.master = false;
+        widget.viewer.classList.remove("workspace-master-widget");
+        widget.viewer.toggleAttribute("selectable", false);
         this.dockpanel.addWidget(widget, { mode: `split-left` });
         if (this.masterPanel.widgets.length === 0) {
             this.detailPanel.close();
@@ -824,16 +822,17 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.setRelativeSizes(sizes);
     }
 
-    addViewer(config: ViewerConfigUpdateExt) {
+    addViewer(config: ViewerConfigUpdateExt, is_global_filter?: boolean) {
         const widget = this._createWidgetAndNode({ config });
         if (this.dockpanel.mode === "single-document") {
             this._unmaximize();
         }
 
-        if (config.master) {
+        if (is_global_filter) {
             if (!this.masterPanel.isAttached) {
                 this.setupMasterPanel(DEFAULT_WORKSPACE_SIZE);
             }
+
             this.masterPanel.addWidget(widget);
         } else {
             if (!this.detailPanel.isAttached) {
