@@ -193,6 +193,10 @@ struct PERSPECTIVE_EXPORT t_tscalar {
 
     t_tscalar coerce_numeric_dtype(t_dtype dtype) const;
 
+    operator std::uint64_t() const {
+        return (std::uint64_t)to_double();
+    }
+
     t_scalar_u m_data;
     unsigned char m_type;
     t_status m_status;

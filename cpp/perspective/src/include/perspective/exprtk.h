@@ -42,8 +42,7 @@ namespace details {
             inline long long int to_int64_impl(const T& v, t_tscalar_type_tag);
 
             template <typename T>
-            inline unsigned long long int to_uint64_impl(const T& v, t_tscalar_type_tag);
-
+            inline std::uint64_t to_uint64_impl(const T& v, t_tscalar_type_tag);
 
 #define define_unary_function_impl_header(FunctionName)                        \
     template <typename T>                                                      \
@@ -296,80 +295,76 @@ namespace details {
             }
 
             template <>
-            inline long long int
+            inline std::int64_t
             to_int64_impl(const t_tscalar& v, t_tscalar_type_tag) {
                 if (!v.is_valid()) {
-                    return std::numeric_limits<long long int>::quiet_NaN();
+                    return std::numeric_limits<std::int64_t>::quiet_NaN();
                 }
                 switch (v.get_dtype()) {
                     case perspective::t_dtype::DTYPE_INT64:
-                        return static_cast<long long int>(v.get<std::int64_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::int64_t>());
                     case perspective::t_dtype::DTYPE_INT32:
-                        return static_cast<long long int>(v.get<std::int32_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::int32_t>());
                     case perspective::t_dtype::DTYPE_INT16:
-                        return static_cast<long long int>(v.get<std::int16_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::int16_t>());
                     case perspective::t_dtype::DTYPE_INT8:
-                        return static_cast<long long int>(v.get<std::int8_t>());
+                        return static_cast<std::int64_t>(v.get<std::int8_t>());
                     case perspective::t_dtype::DTYPE_UINT64:
-                        return static_cast<long long int>(v.get<std::uint64_t>()
+                        return static_cast<std::int64_t>(v.get<std::uint64_t>()
                         );
                     case perspective::t_dtype::DTYPE_UINT32:
-                        return static_cast<long long int>(v.get<std::uint32_t>()
+                        return static_cast<std::int64_t>(v.get<std::uint32_t>()
                         );
                     case perspective::t_dtype::DTYPE_UINT16:
-                        return static_cast<long long int>(v.get<std::uint16_t>()
+                        return static_cast<std::int64_t>(v.get<std::uint16_t>()
                         );
                     case perspective::t_dtype::DTYPE_UINT8:
-                        return static_cast<long long int>(v.get<std::uint8_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::uint8_t>());
                     case perspective::t_dtype::DTYPE_FLOAT64:
-                        return static_cast<long long int>(v.get<double>());
+                        return static_cast<std::int64_t>(v.get<double>());
                     case perspective::t_dtype::DTYPE_FLOAT32:
-                        return static_cast<long long int>(v.get<float>());
+                        return static_cast<std::int64_t>(v.get<float>());
                     default:
-                        return std::numeric_limits<long long int>::quiet_NaN();
+                        return std::numeric_limits<std::int64_t>::quiet_NaN();
                 }
             }
 
             template <>
-            inline long long int
+            inline std::uint64_t
             to_uint64_impl(const t_tscalar& v, t_tscalar_type_tag) {
                 if (!v.is_valid()) {
-                    return std::numeric_limits<long long int>::quiet_NaN();
+                    return std::numeric_limits<std::uint64_t>::quiet_NaN();
                 }
                 switch (v.get_dtype()) {
                     case perspective::t_dtype::DTYPE_INT64:
-                        return static_cast<unsigned long long int>(v.get<std::int64_t>()
+                        return static_cast<std::uint64_t>(v.get<std::int64_t>()
                         );
                     case perspective::t_dtype::DTYPE_INT32:
-                        return static_cast<unsigned long long int>(v.get<std::int32_t>()
+                        return static_cast<std::uint64_t>(v.get<std::int32_t>()
                         );
                     case perspective::t_dtype::DTYPE_INT16:
-                        return static_cast<unsigned long long int>(v.get<std::int16_t>()
+                        return static_cast<std::uint64_t>(v.get<std::int16_t>()
                         );
                     case perspective::t_dtype::DTYPE_INT8:
-                        return static_cast<unsigned long long int>(v.get<std::int8_t>());
+                        return static_cast<std::uint64_t>(v.get<std::int8_t>());
                     case perspective::t_dtype::DTYPE_UINT64:
-                        return static_cast<unsigned long long int>(v.get<std::uint64_t>()
+                        return static_cast<std::uint64_t>(v.get<std::uint64_t>()
                         );
                     case perspective::t_dtype::DTYPE_UINT32:
-                        return static_cast<unsigned long long int>(v.get<std::uint32_t>()
+                        return static_cast<std::uint64_t>(v.get<std::uint32_t>()
                         );
                     case perspective::t_dtype::DTYPE_UINT16:
-                        return static_cast<unsigned long long int>(v.get<std::uint16_t>()
+                        return static_cast<std::uint64_t>(v.get<std::uint16_t>()
                         );
                     case perspective::t_dtype::DTYPE_UINT8:
-                        return static_cast<unsigned long long int>(v.get<std::uint8_t>()
+                        return static_cast<std::uint64_t>(v.get<std::uint8_t>()
                         );
                     case perspective::t_dtype::DTYPE_FLOAT64:
-                        return static_cast<unsigned long long int>(v.get<double>());
+                        return static_cast<std::uint64_t>(v.get<double>());
                     case perspective::t_dtype::DTYPE_FLOAT32:
-                        return static_cast<unsigned long long int>(v.get<float>());
+                        return static_cast<std::uint64_t>(v.get<float>());
                     default:
-                        return std::numeric_limits<unsigned long long int>::quiet_NaN();
+                        return std::numeric_limits<std::uint64_t>::quiet_NaN();
                 }
             }
 
