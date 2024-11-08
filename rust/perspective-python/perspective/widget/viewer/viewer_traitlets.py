@@ -12,7 +12,7 @@
 
 from traitlets import HasTraits, Unicode, List, Bool, Dict, validate, Enum
 
-import importlib
+import importlib.metadata
 
 __version__ = importlib.metadata.version("perspective-python")
 
