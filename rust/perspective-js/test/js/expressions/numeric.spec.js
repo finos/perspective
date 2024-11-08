@@ -706,6 +706,44 @@ function validate_binary_operations(output, expressions, operator) {
             });
         });
 
+        test.describe("Integers", function () {
+            test("Integer outputs with negative values dont overflow", async function () {
+                var data = [
+                    { x: -1, y: "a", z: true },
+                    { x: -2, y: "b", z: false },
+                    { x: -3, y: "c", z: true },
+                    { x: -4, y: "d", z: false },
+                ];
+
+                var table = await perspective.table({
+                    x: "integer",
+                    y: "string",
+                    z: "boolean",
+                });
+
+                await table.update(data);
+
+                var view = await table.view({
+                    group_by: ["z"],
+                    columns: ["x", "w"],
+                    expressions: {
+                        w: 'integer("x")',
+                    },
+                });
+
+                var answer = [
+                    { __ROW_PATH__: [], x: -10, w: -10 },
+                    { __ROW_PATH__: [false], x: -6, w: -6 },
+                    { __ROW_PATH__: [true], x: -4, w: -4 },
+                ];
+
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+        });
+
         test.describe("Functions", function () {
             test("min", async function () {
                 const table = await perspective.table({

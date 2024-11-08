@@ -735,6 +735,9 @@ importers:
 
   packages/perspective-workspace:
     dependencies:
+      '@finos/perspective':
+        specifier: workspace:^
+        version: link:../../rust/perspective-js
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
