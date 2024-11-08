@@ -247,7 +247,7 @@ rust/perspective-server/cmake
 .pyodide-*/
 rust/perspective-python/*.data
 rust/perspective-python/PKG-INFO
-# rust/perspective-python/perspective.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab/package.json
+rust/perspective-python/LICENSE.md
 rust/perspective-viewer/docs/exprtk.md
 rust/perspective-server/docs/lib_gen.md
 rust/perspective-client/docs/expression_gen.md

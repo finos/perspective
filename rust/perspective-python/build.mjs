@@ -134,10 +134,12 @@ if (build_sdist) {
         );
     }
     const readme_md = fs.readFileSync("./README.md");
+    fs.copyFileSync("../../LICENSE.md", "./LICENSE.md");
     const pkg_info = generatePkgInfo(pyproject, cargo, readme_md);
     fs.writeFileSync("./PKG-INFO", pkg_info);
     const include_paths = Array.from(cargo["package"]["include"]).concat([
         data_dir,
+        "./LICENSE.md",
         "./PKG-INFO",
     ]);
     const files = glob.globSync(include_paths);
