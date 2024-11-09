@@ -110,6 +110,7 @@ jobs:
                       rust/perspective-client/docs/
                       rust/perspective-js/src/ts/
                       rust/perspective-viewer/src/ts/
+                      rust/perspective-python/LICENSE_THIRDPARTY_cargo.yml
 
     # ,-,---.       .    .   ,-_/              .---.               .
     #  '|___/ . . . |  ,-|   '  | ,-. .  , ,-. \___  ,-. ,-. . ,-. |-
@@ -487,6 +488,11 @@ jobs:
 
             - uses: actions/download-artifact@v4
               with:
+                  name: perspective-metadata
+                  path: rust/
+
+            - uses: actions/download-artifact@v4
+              with:
                   name: perspective-python-dist-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.python-version }}
                   path: .
 
@@ -706,6 +712,13 @@ jobs:
             - name: Install perspective-python sdist
               shell: bash
               run: python -m pip install -vv ./perspective*.tar.gz
+
+            - name: Verify licenses are installed
+              shell: bash
+              run: |
+                  pip show -f perspective-python > wheel_installed_files.txt
+                  grep licenses/LICENSE.md wheel_installed_files.txt
+                  grep licenses/LICENSE_THIRDPARTY_cargo.yml wheel_installed_files.txt
 
             - name: Verify labextension
               shell: bash

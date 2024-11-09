@@ -21,6 +21,10 @@ name = "perspective_metadata"
 path = "main.rs"
 bench = false
 
+[dependencies.cargo-bundle-licenses]
+version = "2.0.0"
+artifact = ["bin"]
+
 [dependencies.ts-rs]
 version = "10.0.0"
 features = ["serde-json-impl", "no-serde-warnings"]
