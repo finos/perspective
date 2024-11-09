@@ -248,6 +248,7 @@ rust/perspective-server/cmake
 rust/perspective-python/*.data
 rust/perspective-python/PKG-INFO
 rust/perspective-python/LICENSE.md
+rust/perspective-python/LICENSE_*
 rust/perspective-viewer/docs/exprtk.md
 rust/perspective-server/docs/lib_gen.md
 rust/perspective-client/docs/expression_gen.md

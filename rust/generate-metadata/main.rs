@@ -72,9 +72,26 @@ pub fn generate_type_bindings_js() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[doc(hidden)]
+pub fn generate_python_cargo_licenses() -> Result<(), Box<dyn Error>> {
+    use std::fs::File;
+    use std::process::{Command, Stdio};
+    let python_dir = std::env::current_dir()?.join("../perspective-python");
+    let bundler = env!("CARGO_BIN_FILE_CARGO_BUNDLE_LICENSES_cargo-bundle-licenses");
+    let license_file = File::create(python_dir.join("LICENSE_THIRDPARTY_cargo.yml"))?;
+    Command::new(bundler)
+        .arg("--format=yaml")
+        .current_dir(python_dir)
+        .stdout(Stdio::from(license_file))
+        .spawn()?
+        .wait()?;
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     generate_type_bindings_js()?;
     generate_type_bindings_viewer()?;
     generate_exprtk_docs()?;
+    generate_python_cargo_licenses()?;
     Ok(())
 }

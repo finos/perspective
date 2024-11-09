@@ -25,6 +25,8 @@ include = [
     "bench/**/*.py",
     "build.rs",
     "./Cargo.toml",
+    "LICENSE.md",
+    "LICENSE_*",
     "README.md",
     "./package.json",
     "perspective/**/*.py",
