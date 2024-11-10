@@ -32,6 +32,7 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
+        "@finos/perspective": "workspace:^",
         "@finos/perspective-viewer": "workspace:^",
         "@lumino/algorithm": ">=2 <3",
         "@lumino/commands": ">=2 <3",

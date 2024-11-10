@@ -1165,6 +1165,10 @@ t_tscalar::to_double() const {
 
 t_tscalar
 t_tscalar::coerce_numeric_dtype(t_dtype dtype) const {
+    if (dtype == m_type) {
+        return *this;
+    }
+
     switch (dtype) {
         case DTYPE_INT64: {
             return coerce_numeric<std::int64_t>();
