@@ -19,6 +19,7 @@ name = "perspective-python"
 requires-python = ">=3.9"
 dynamic = ["version"]
 dependencies = []
+license = { file = "LICENSE.md" }
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Rust",
