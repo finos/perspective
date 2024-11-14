@@ -36,55 +36,60 @@ namespace details {
             inline T const_e_impl(t_tscalar_type_tag);
 
             template <typename T>
-            inline int to_int32_impl(const T& v, t_tscalar_type_tag);
+            inline std::int32_t to_int32_impl(const T& v, t_tscalar_type_tag);
 
             template <typename T>
-            inline long long int to_int64_impl(const T& v, t_tscalar_type_tag);
+            inline std::int64_t to_int64_impl(const T& v, t_tscalar_type_tag);
+
+            template <typename T>
+            inline std::uint64_t to_uint64_impl(const T& v, t_tscalar_type_tag);
+
 
 #define define_unary_function_impl_header(FunctionName)                        \
     template <typename T>                                                      \
     inline T FunctionName##_impl(const T v, t_tscalar_type_tag);
-
-            define_unary_function_impl_header(abs
-            ) define_unary_function_impl_header(acos
-            ) define_unary_function_impl_header(acosh
-            ) define_unary_function_impl_header(asin
-            ) define_unary_function_impl_header(asinh
-            ) define_unary_function_impl_header(atan
-            ) define_unary_function_impl_header(atanh
-            ) define_unary_function_impl_header(ceil
-            ) define_unary_function_impl_header(cos
-            ) define_unary_function_impl_header(cosh
-            ) define_unary_function_impl_header(exp
-            ) define_unary_function_impl_header(expm1
-            ) define_unary_function_impl_header(floor
-            ) define_unary_function_impl_header(log
-            ) define_unary_function_impl_header(log10
-            ) define_unary_function_impl_header(log2
-            ) define_unary_function_impl_header(log1p
-            ) define_unary_function_impl_header(neg
-            ) define_unary_function_impl_header(pos
-            ) define_unary_function_impl_header(round
-            ) define_unary_function_impl_header(sin
-            ) define_unary_function_impl_header(sinc
-            ) define_unary_function_impl_header(sinh
-            ) define_unary_function_impl_header(sqrt
-            ) define_unary_function_impl_header(tan
-            ) define_unary_function_impl_header(tanh
-            ) define_unary_function_impl_header(cot
-            ) define_unary_function_impl_header(sec
-            ) define_unary_function_impl_header(csc
-            ) define_unary_function_impl_header(r2d
-            ) define_unary_function_impl_header(d2r
-            ) define_unary_function_impl_header(d2g
-            ) define_unary_function_impl_header(g2d)
-                define_unary_function_impl_header(notl)
-                    define_unary_function_impl_header(sgn)
-                        define_unary_function_impl_header(erf)
-                            define_unary_function_impl_header(erfc)
-                                define_unary_function_impl_header(ncdf)
-                                    define_unary_function_impl_header(frac)
-                                        define_unary_function_impl_header(trunc)
+            // clang-format off
+            define_unary_function_impl_header(abs  )
+            define_unary_function_impl_header(acos )
+            define_unary_function_impl_header(acosh)
+            define_unary_function_impl_header(asin )
+            define_unary_function_impl_header(asinh)
+            define_unary_function_impl_header(atan )
+            define_unary_function_impl_header(atanh)
+            define_unary_function_impl_header(ceil )
+            define_unary_function_impl_header(cos  )
+            define_unary_function_impl_header(cosh )
+            define_unary_function_impl_header(exp  )
+            define_unary_function_impl_header(expm1)
+            define_unary_function_impl_header(floor)
+            define_unary_function_impl_header(log  )
+            define_unary_function_impl_header(log10)
+            define_unary_function_impl_header(log2 )
+            define_unary_function_impl_header(log1p)
+            define_unary_function_impl_header(neg  )
+            define_unary_function_impl_header(pos  )
+            define_unary_function_impl_header(round)
+            define_unary_function_impl_header(sin  )
+            define_unary_function_impl_header(sinc )
+            define_unary_function_impl_header(sinh )
+            define_unary_function_impl_header(sqrt )
+            define_unary_function_impl_header(tan  )
+            define_unary_function_impl_header(tanh )
+            define_unary_function_impl_header(cot  )
+            define_unary_function_impl_header(sec  )
+            define_unary_function_impl_header(csc  )
+            define_unary_function_impl_header(r2d  )
+            define_unary_function_impl_header(d2r  )
+            define_unary_function_impl_header(d2g  )
+            define_unary_function_impl_header(g2d  )
+            define_unary_function_impl_header(notl )
+            define_unary_function_impl_header(sgn  )
+            define_unary_function_impl_header(erf  )
+            define_unary_function_impl_header(erfc )
+            define_unary_function_impl_header(ncdf )
+            define_unary_function_impl_header(frac )
+            define_unary_function_impl_header(trunc)
+            // clang-format on
 
 #undef define_unary_function_impl_header
 
@@ -93,28 +98,29 @@ namespace details {
     inline T FunctionName##_impl(const T v0, const T v1, t_tscalar_type_tag);
 
                 // except reserved words: and, or, xor
-                define_binary_function_impl_header(min
-                ) define_binary_function_impl_header(max
-                ) define_binary_function_impl_header(equal
-                ) define_binary_function_impl_header(nequal
-                ) define_binary_function_impl_header(modulus
-                ) define_binary_function_impl_header(pow
-                ) define_binary_function_impl_header(logn
-                ) define_binary_function_impl_header(root
-                ) define_binary_function_impl_header(roundn
-                ) define_binary_function_impl_header(hypot)
-                    define_binary_function_impl_header(atan2)
-                        define_binary_function_impl_header(shr)
-                            define_binary_function_impl_header(shl)
-                                define_binary_function_impl_header(nand)
-                                    define_binary_function_impl_header(nor)
-                                        define_binary_function_impl_header(xnor)
+                // clang-format off
+                define_binary_function_impl_header(min    )
+                define_binary_function_impl_header(max    )
+                define_binary_function_impl_header(equal  )
+                define_binary_function_impl_header(nequal )
+                define_binary_function_impl_header(modulus)
+                define_binary_function_impl_header(pow    )
+                define_binary_function_impl_header(logn   )
+                define_binary_function_impl_header(root   )
+                define_binary_function_impl_header(roundn )
+                define_binary_function_impl_header(hypot  )
+                define_binary_function_impl_header(atan2  )
+                define_binary_function_impl_header(shr    )
+                define_binary_function_impl_header(shl    )
+                define_binary_function_impl_header(nand   )
+                define_binary_function_impl_header(nor    )
+                define_binary_function_impl_header(xnor   )
+                // clang-format on
 
 #undef define_binary_function_impl_header
 
-                                            template <typename T>
-                                            inline T
-                and_impl(const T v0, const T v1, t_tscalar_type_tag);
+            template <typename T>
+            inline T and_impl(const T v0, const T v1, t_tscalar_type_tag);
 
             template <typename T>
             inline T or_impl(const T v0, const T v1, t_tscalar_type_tag);
@@ -128,7 +134,7 @@ namespace details {
             // #if (defined(_MSC_VER) && (_MSC_VER >= 1900)) ||
             // !defined(_MSC_VER)
             // #define exprtk_define_erf(TT,impl)           \
-// inline TT erf_impl(TT v) { return impl(v); } \
+            // inline TT erf_impl(TT v) { return impl(v); } \
 
             // exprtk_define_erf(      float,::erff)
             // exprtk_define_erf(     double,::erf )
@@ -139,7 +145,7 @@ namespace details {
             // #if (defined(_MSC_VER) && (_MSC_VER >= 1900)) ||
             // !defined(_MSC_VER)
             // #define exprtk_define_erfc(TT,impl)           \
-// inline TT erfc_impl(TT v) { return impl(v); } \
+            // inline TT erfc_impl(TT v) { return impl(v); } \
 
             // exprtk_define_erfc(      float,::erfcf)
             // exprtk_define_erfc(     double,::erfc )
@@ -260,73 +266,98 @@ namespace details {
             }
 
             template <>
-            inline int
+            inline std::int32_t
             to_int32_impl(const t_tscalar& v, t_tscalar_type_tag) {
                 if (!v.is_valid()) {
-                    return std::numeric_limits<int>::quiet_NaN();
+                    return std::numeric_limits<std::int32_t>::quiet_NaN();
                 }
                 switch (v.get_dtype()) {
                     case perspective::t_dtype::DTYPE_INT64:
-                        return static_cast<int>(v.get<std::int64_t>());
+                        return static_cast<std::int32_t>(v.get<std::int64_t>());
                     case perspective::t_dtype::DTYPE_INT32:
-                        return static_cast<int>(v.get<std::int32_t>());
+                        return static_cast<std::int32_t>(v.get<std::int32_t>());
                     case perspective::t_dtype::DTYPE_INT16:
-                        return static_cast<int>(v.get<std::int16_t>());
+                        return static_cast<std::int32_t>(v.get<std::int16_t>());
                     case perspective::t_dtype::DTYPE_INT8:
-                        return static_cast<int>(v.get<std::int8_t>());
+                        return static_cast<std::int32_t>(v.get<std::int8_t>());
                     case perspective::t_dtype::DTYPE_UINT64:
-                        return static_cast<int>(v.get<std::uint64_t>());
+                        return static_cast<std::int32_t>(v.get<std::uint64_t>());
                     case perspective::t_dtype::DTYPE_UINT32:
-                        return static_cast<int>(v.get<std::uint32_t>());
+                        return static_cast<std::int32_t>(v.get<std::uint32_t>());
                     case perspective::t_dtype::DTYPE_UINT16:
-                        return static_cast<int>(v.get<std::uint16_t>());
+                        return static_cast<std::int32_t>(v.get<std::uint16_t>());
                     case perspective::t_dtype::DTYPE_UINT8:
-                        return static_cast<int>(v.get<std::uint8_t>());
+                        return static_cast<std::int32_t>(v.get<std::uint8_t>());
                     case perspective::t_dtype::DTYPE_FLOAT64:
-                        return static_cast<int>(v.get<double>());
+                        return static_cast<std::int32_t>(v.get<double>());
                     case perspective::t_dtype::DTYPE_FLOAT32:
-                        return static_cast<int>(v.get<float>());
+                        return static_cast<std::int32_t>(v.get<float>());
                     default:
-                        return std::numeric_limits<int>::quiet_NaN();
+                        return std::numeric_limits<std::int32_t>::quiet_NaN();
                 }
             }
 
             template <>
-            inline long long int
+            inline std::int64_t
             to_int64_impl(const t_tscalar& v, t_tscalar_type_tag) {
                 if (!v.is_valid()) {
-                    return std::numeric_limits<long long int>::quiet_NaN();
+                    return std::numeric_limits<std::int64_t>::quiet_NaN();
                 }
                 switch (v.get_dtype()) {
                     case perspective::t_dtype::DTYPE_INT64:
-                        return static_cast<long long int>(v.get<std::int64_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::int64_t>());
                     case perspective::t_dtype::DTYPE_INT32:
-                        return static_cast<long long int>(v.get<std::int32_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::int32_t>());
                     case perspective::t_dtype::DTYPE_INT16:
-                        return static_cast<long long int>(v.get<std::int16_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::int16_t>());
                     case perspective::t_dtype::DTYPE_INT8:
-                        return static_cast<long long int>(v.get<std::int8_t>());
+                        return static_cast<std::int64_t>(v.get<std::int8_t>());
                     case perspective::t_dtype::DTYPE_UINT64:
-                        return static_cast<long long int>(v.get<std::uint64_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::uint64_t>());
                     case perspective::t_dtype::DTYPE_UINT32:
-                        return static_cast<long long int>(v.get<std::uint32_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::uint32_t>());
                     case perspective::t_dtype::DTYPE_UINT16:
-                        return static_cast<long long int>(v.get<std::uint16_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::uint16_t>());
                     case perspective::t_dtype::DTYPE_UINT8:
-                        return static_cast<long long int>(v.get<std::uint8_t>()
-                        );
+                        return static_cast<std::int64_t>(v.get<std::uint8_t>());
                     case perspective::t_dtype::DTYPE_FLOAT64:
-                        return static_cast<long long int>(v.get<double>());
+                        return static_cast<std::int64_t>(v.get<double>());
                     case perspective::t_dtype::DTYPE_FLOAT32:
-                        return static_cast<long long int>(v.get<float>());
+                        return static_cast<std::int64_t>(v.get<float>());
                     default:
-                        return std::numeric_limits<long long int>::quiet_NaN();
+                        return std::numeric_limits<std::int64_t>::quiet_NaN();
+                }
+            }
+
+            template <>
+            inline std::uint64_t
+            to_uint64_impl(const t_tscalar& v, t_tscalar_type_tag) {
+                if (!v.is_valid()) {
+                    return std::numeric_limits<std::uint64_t>::quiet_NaN();
+                }
+                switch (v.get_dtype()) {
+                    case perspective::t_dtype::DTYPE_INT64:
+                        return static_cast<std::uint64_t>(v.get<std::int64_t>());
+                    case perspective::t_dtype::DTYPE_INT32:
+                        return static_cast<std::uint64_t>(v.get<std::int32_t>());
+                    case perspective::t_dtype::DTYPE_INT16:
+                        return static_cast<std::uint64_t>(v.get<std::int16_t>());
+                    case perspective::t_dtype::DTYPE_INT8:
+                        return static_cast<std::uint64_t>(v.get<std::int8_t>());
+                    case perspective::t_dtype::DTYPE_UINT64:
+                        return static_cast<std::uint64_t>(v.get<std::uint64_t>());
+                    case perspective::t_dtype::DTYPE_UINT32:
+                        return static_cast<std::uint64_t>(v.get<std::uint32_t>());
+                    case perspective::t_dtype::DTYPE_UINT16:
+                        return static_cast<std::uint64_t>(v.get<std::uint16_t>());
+                    case perspective::t_dtype::DTYPE_UINT8:
+                        return static_cast<std::uint64_t>(v.get<std::uint8_t>());
+                    case perspective::t_dtype::DTYPE_FLOAT64:
+                        return static_cast<std::uint64_t>(v.get<double>());
+                    case perspective::t_dtype::DTYPE_FLOAT32:
+                        return static_cast<std::uint64_t>(v.get<float>());
+                    default:
+                        return std::numeric_limits<std::uint64_t>::quiet_NaN();
                 }
             }
 
@@ -702,7 +733,7 @@ namespace details {
                 }
 
                 // degrees to gradians
-                rval.set(v.to_double() * (20.0 / 9.0));
+                rval.set(v.to_double() * (10.0 / 9.0));
                 return rval;
             }
 
@@ -722,7 +753,7 @@ namespace details {
                 }
 
                 // gradians to degrees
-                rval.set(v.to_double() * (9.0 / 20.0));
+                rval.set(v.to_double() * (9.0 / 10.0));
                 return rval;
             }
             template <>

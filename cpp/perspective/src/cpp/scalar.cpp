@@ -409,6 +409,35 @@ t_tscalar::operator%=(const t_tscalar& rhs) {
     return *this;
 }
 
+t_tscalar::operator std::size_t () const {
+    switch (get_dtype()) {
+        case perspective::t_dtype::DTYPE_INT64:
+            return static_cast<std::size_t>(get<std::int64_t>());
+        case perspective::t_dtype::DTYPE_INT32:
+            return static_cast<std::size_t>(get<std::int32_t>());
+        case perspective::t_dtype::DTYPE_INT16:
+            return static_cast<std::size_t>(get<std::int16_t>());
+        case perspective::t_dtype::DTYPE_INT8:
+            return static_cast<std::size_t>(get<std::int8_t>());
+        case perspective::t_dtype::DTYPE_UINT64:
+            return static_cast<std::size_t>(get<std::uint64_t>());
+        case perspective::t_dtype::DTYPE_UINT32:
+            return static_cast<std::size_t>(get<std::uint32_t>());
+        case perspective::t_dtype::DTYPE_UINT16:
+            return static_cast<std::size_t>(get<std::uint16_t>());
+        case perspective::t_dtype::DTYPE_UINT8:
+            return static_cast<std::size_t>(get<std::uint8_t>());
+        case perspective::t_dtype::DTYPE_FLOAT64:
+            return static_cast<std::size_t>(get<double>());
+        case perspective::t_dtype::DTYPE_FLOAT32:
+            return static_cast<std::size_t>(get<float>());
+        default:
+            return std::numeric_limits<std::size_t>::max();
+    }
+
+    return std::numeric_limits<std::size_t>::max();
+}
+
 t_tscalar
 t_tscalar::add_typesafe(const t_tscalar& rhs) const {
     t_tscalar rval;
