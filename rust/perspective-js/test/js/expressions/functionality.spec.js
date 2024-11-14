@@ -512,7 +512,8 @@ import perspective from "../perspective_client";
                 expect(schema.errors["expr"]).toEqual({
                     column: 62,
                     line: 0,
-                    error_message: "Invalid expression encountered",
+                    error_message:
+                        "Invalid syntax 'x' possible missing operator or context",
                 });
 
                 await table.delete();
