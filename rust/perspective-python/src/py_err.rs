@@ -10,9 +10,22 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-pub mod client_sync;
-mod pandas;
-mod pyarrow;
-pub mod python;
-pub mod table_data;
-pub mod update_data;
+use perspective_client::ClientError;
+use pyo3::create_exception;
+use pyo3::prelude::*;
+
+#[extend::ext]
+pub impl<T> Result<T, ClientError> {
+    fn into_pyerr(self) -> PyResult<T> {
+        match self {
+            Ok(x) => Ok(x),
+            Err(x) => Err(PyPerspectiveError::new_err(format!("{}", x))),
+        }
+    }
+}
+
+create_exception!(
+    perspective,
+    PyPerspectiveError,
+    pyo3::exceptions::PyException
+);
