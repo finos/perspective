@@ -716,9 +716,12 @@ jobs:
             - name: Verify licenses are installed
               shell: bash
               run: |
-                  pip show -f perspective-python > wheel_installed_files.txt
-                  grep licenses/LICENSE.md wheel_installed_files.txt
-                  grep licenses/LICENSE_THIRDPARTY_cargo.yml wheel_installed_files.txt
+                  pip show -f perspective-python | tee wheel_installed_files.txt
+                  # Maturin got this wrong: the packages should be in .dist-info/licenses/
+                  # Newer versions of Maturin will fix it, so search for either location.
+                  # https://github.com/PyO3/maturin/pull/862 https://github.com/PyO3/maturin/pull/2181
+                  grep -E '.dist-info/(license|license_files)/LICENSE.md' wheel_installed_files.txt
+                  grep -E '.dist-info/(license|license_files)/LICENSE_THIRDPARTY_cargo.yml' wheel_installed_files.txt
 
             - name: Verify labextension
               shell: bash
