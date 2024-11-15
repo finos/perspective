@@ -146,7 +146,7 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar& operator/=(const t_tscalar& rhs);
     t_tscalar& operator%=(const t_tscalar& rhs);
 
-    operator std::size_t () const;
+    operator std::size_t() const;
 
     t_tscalar add_typesafe(const t_tscalar& rhs) const;
     t_tscalar sub_typesafe(const t_tscalar& rhs) const;

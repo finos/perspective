@@ -152,7 +152,7 @@ if (build_sdist) {
             prefix: `perspective_python-${version}`,
             strict: true,
         },
-        crate_files.concat(["PKG-INFO"])
+        crate_files.concat(["PKG-INFO", data_dir])
     );
 }
 

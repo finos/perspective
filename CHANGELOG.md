@@ -1,3 +1,22 @@
+# [v3.1.5](https://github.com/finos/perspective/releases/tag/v3.1.5)
+
+_15 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.5-test1...v3.1.5))
+
+Features
+
+- Relax `Table` schema constructor [#2850](https://github.com/finos/perspective/pull/2850)
+
+Fixes
+
+- Fix `perspective-workspace` restore call on errored table [#2851](https://github.com/finos/perspective/pull/2851)
+- Fix `integer` cast expression function [#2842](https://github.com/finos/perspective/pull/2842)
+- Import importlib metadata submodule [#2841](https://github.com/finos/perspective/pull/2841)
+
+Misc
+
+- Update ExprTk [#2825](https://github.com/finos/perspective/pull/2825)
+- sdist licensing follow ups [#2843](https://github.com/finos/perspective/pull/2843)
+
 # [v3.1.4](https://github.com/finos/perspective/releases/tag/v3.1.4)
 
 _7 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test8...v3.1.4))

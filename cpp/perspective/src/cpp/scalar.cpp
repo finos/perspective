@@ -409,7 +409,7 @@ t_tscalar::operator%=(const t_tscalar& rhs) {
     return *this;
 }
 
-t_tscalar::operator std::size_t () const {
+t_tscalar::operator std::size_t() const {
     switch (get_dtype()) {
         case perspective::t_dtype::DTYPE_INT64:
             return static_cast<std::size_t>(get<std::int64_t>());
