@@ -81,12 +81,12 @@ pub trait RestoreAndRender: HasRenderer + HasSession + HasPresentation {
                 let plugin_update = if let Some(x) = plugin_config {
                     wasm_bindgen::JsValue::from_serde_ext(&*x).unwrap()
                 } else {
-                    plugin.save()
+                    plugin.save()?
                 };
 
                 presentation.update_columns_configs(columns_config);
                 let columns_config = presentation.all_columns_configs();
-                plugin.restore(&plugin_update, Some(&columns_config));
+                plugin.restore(&plugin_update, Some(&columns_config))?;
                 session.validate().await?.create_view().await
             });
 

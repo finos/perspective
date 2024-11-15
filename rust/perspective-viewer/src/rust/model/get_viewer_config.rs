@@ -54,7 +54,7 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
             let js_plugin = renderer.get_active_plugin()?;
             let settings = presentation.is_settings_open();
             let plugin = js_plugin.name();
-            let plugin_config: serde_json::Value = js_plugin.save().into_serde_ext()?;
+            let plugin_config: serde_json::Value = js_plugin.save()?.into_serde_ext()?;
             let theme = presentation.get_selected_theme_name().await;
             let title = presentation.get_title();
             let columns_config = presentation.all_columns_configs();

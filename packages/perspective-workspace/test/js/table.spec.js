@@ -58,6 +58,57 @@ function tests(context, compare) {
 
         return compare(page, `${context}-replace-table-frees-table.txt`);
     });
+
+    test("replaceTable() works when previous table errored", async ({
+        page,
+    }) => {
+        const config = {
+            viewers: {
+                One: { table: "errored", name: "One" },
+            },
+            detail: {
+                main: {
+                    currentIndex: 0,
+                    type: "tab-area",
+                    widgets: ["One"],
+                },
+            },
+        };
+
+        const result = await page.evaluate(async (config) => {
+            const workspace = document.getElementById("workspace");
+            await workspace.addTable(
+                "errored",
+                new Promise((_, reject) => setTimeout(reject, 50))
+            );
+
+            try {
+                await workspace.restore(config);
+            } catch (e) {
+                console.error(e);
+                return e.toString();
+            }
+        }, config);
+
+        // NOTE This is the error message we expect when `restore()` is called
+        // without a `Table`, subject to change.
+        expect(result).toEqual("Error: `restore()` called before `load()`");
+        await page.evaluate(async () => {
+            await workspace.replaceTable(
+                "errored",
+                window.__WORKER__.table("x\n1")
+            );
+        });
+
+        await page.evaluate(async () => {
+            await workspace.flush();
+        });
+
+        return compare(
+            page,
+            `${context}-replace-table-works-with-errored-table.txt`
+        );
+    });
 }
 
 test.describe("Workspace table functions", () => {
