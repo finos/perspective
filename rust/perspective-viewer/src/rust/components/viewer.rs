@@ -258,7 +258,7 @@ impl Component for PerspectiveViewer {
                         Some(presentation.all_columns_configs())
                     };
 
-                    renderer.reset(columns_config.as_ref()).await;
+                    renderer.reset(columns_config.as_ref()).await?;
                     presentation.reset_available_themes(None).await;
                     let result = renderer.draw(session.validate().await?.create_view()).await;
                     if let Some(sender) = sender {

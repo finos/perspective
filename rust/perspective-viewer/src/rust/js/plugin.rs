@@ -61,11 +61,11 @@ extern "C" {
     #[wasm_bindgen(method, catch)]
     pub fn column_style_controls(this: &JsPerspectiveViewerPlugin, view_type: &str, group: Option<&str>) -> ApiResult<JsValue>;
 
-    #[wasm_bindgen(method)]
-    pub fn save(this: &JsPerspectiveViewerPlugin) -> JsValue;
+    #[wasm_bindgen(method, catch)]
+    pub fn save(this: &JsPerspectiveViewerPlugin) -> ApiResult<JsValue>;
 
-    #[wasm_bindgen(method, js_name=restore)]
-    pub fn _restore(this: &JsPerspectiveViewerPlugin, token: &JsValue, columns_config: &JsValue);
+    #[wasm_bindgen(method, js_name=restore, catch)]
+    pub fn _restore(this: &JsPerspectiveViewerPlugin, token: &JsValue, columns_config: &JsValue) -> ApiResult<()>;
 
     #[wasm_bindgen(method)]
     pub fn delete(this: &JsPerspectiveViewerPlugin);
@@ -103,7 +103,11 @@ extern "C" {
 }
 
 impl JsPerspectiveViewerPlugin {
-    pub fn restore(&self, token: &JsValue, columns_config: Option<&ColumnConfigMap>) {
+    pub fn restore(
+        &self,
+        token: &JsValue,
+        columns_config: Option<&ColumnConfigMap>,
+    ) -> ApiResult<()> {
         let columns_config = JsValue::from_serde_ext(&columns_config).unwrap();
         self._restore(token, &columns_config)
     }
