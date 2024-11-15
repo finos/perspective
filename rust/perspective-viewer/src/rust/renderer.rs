@@ -123,11 +123,13 @@ impl Renderer {
         }))
     }
 
-    pub async fn reset(&self, columns_config: Option<&ColumnConfigMap>) {
+    pub async fn reset(&self, columns_config: Option<&ColumnConfigMap>) -> ApiResult<()> {
         self.0.borrow_mut().plugins_idx = None;
         if let Ok(plugin) = self.get_active_plugin() {
-            plugin.restore(&json!({}), columns_config);
+            plugin.restore(&json!({}), columns_config)?;
         }
+
+        Ok(())
     }
 
     pub fn delete(&self) -> ApiResult<()> {
