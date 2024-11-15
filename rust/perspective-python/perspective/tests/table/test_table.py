@@ -348,6 +348,26 @@ class TestTable:
 
         assert tbl2.schema() == schema
 
+    def test_table_python_schema(self):
+        data = {
+            "a": int,
+            "b": float,
+            "c": str,
+            "d": bool,
+            "e": date,
+            "f": datetime,
+        }
+
+        tbl = Table(data)
+        assert tbl.schema() == {
+            "a": "integer",
+            "b": "float",
+            "c": "string",
+            "d": "boolean",
+            "e": "date",
+            "f": "datetime",
+        }
+
     # is_valid_filter
 
     # def test_table_is_valid_filter_str(self):

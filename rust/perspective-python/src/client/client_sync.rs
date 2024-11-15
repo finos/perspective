@@ -23,6 +23,7 @@ use pyo3::prelude::*;
 use pyo3::types::*;
 
 use super::python::*;
+use crate::py_err::ResultTClientErrorExt;
 use crate::server::PySyncServer;
 
 #[pyclass]

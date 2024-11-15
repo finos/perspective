@@ -16,7 +16,6 @@ __all__ = [
     "Server",
     "Client",
     "PerspectiveError",
-    "PerspectiveWidget",
     "ProxySession",
 ]
 

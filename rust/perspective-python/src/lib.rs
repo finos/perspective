@@ -14,10 +14,11 @@
 #![warn(unstable_features)]
 
 mod client;
+mod py_err;
 mod server;
 
 pub use client::client_sync::{Client, ProxySession, Table, View};
-use client::python::PyPerspectiveError;
+use py_err::PyPerspectiveError;
 use pyo3::prelude::*;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
