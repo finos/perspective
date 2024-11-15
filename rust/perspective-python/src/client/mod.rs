@@ -12,6 +12,7 @@
 
 pub mod client_sync;
 mod pandas;
+mod polars;
 mod pyarrow;
 pub mod python;
 pub mod table_data;

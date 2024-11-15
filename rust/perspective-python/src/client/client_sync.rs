@@ -351,6 +351,11 @@ impl View {
         self.0.to_dataframe(window).py_block_on(py)
     }
 
+    #[pyo3(signature = (**window))]
+    pub fn to_polars(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        self.0.to_polars(window).py_block_on(py)
+    }
+
     #[doc = crate::inherit_docs!("view/to_arrow.md")]
     #[pyo3(signature = (**window))]
     pub fn to_arrow(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {
