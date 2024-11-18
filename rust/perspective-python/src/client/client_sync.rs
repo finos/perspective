@@ -346,11 +346,20 @@ impl View {
         self.0.to_csv(window).py_block_on(py)
     }
 
+    #[doc = include_str!("../../docs/client/to_pandas.md")]
     #[pyo3(signature = (**window))]
+    // #[deprecated(since="3.2.0", note="Please use `View::to_pandas`")]
     pub fn to_dataframe(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         self.0.to_dataframe(window).py_block_on(py)
     }
 
+    #[doc = include_str!("../../docs/client/to_pandas.md")]
+    #[pyo3(signature = (**window))]
+    pub fn to_pandas(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        self.0.to_dataframe(window).py_block_on(py)
+    }
+
+    #[doc = include_str!("../../docs/client/to_polars.md")]
     #[pyo3(signature = (**window))]
     pub fn to_polars(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         self.0.to_polars(window).py_block_on(py)

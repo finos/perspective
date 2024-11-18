@@ -111,7 +111,9 @@ impl PyClient {
                 pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else if pandas::is_pandas_df(py, input.bind(py))? {
                 pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
-            } else if polars::is_polars_df(py, input.bind(py))? || polars::is_polars_df(py, input.bind(py))? {
+            } else if polars::is_polars_df(py, input.bind(py))?
+                || polars::is_polars_lf(py, input.bind(py))?
+            {
                 polars::polars_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input
@@ -256,7 +258,9 @@ impl PyTable {
                 pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else if pandas::is_pandas_df(py, input.bind(py))? {
                 pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
-            } else if polars::is_polars_df(py, input.bind(py))? || polars::is_polars_lf(py, input.bind(py))?{ 
+            } else if polars::is_polars_df(py, input.bind(py))?
+                || polars::is_polars_lf(py, input.bind(py))?
+            {
                 polars::polars_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input

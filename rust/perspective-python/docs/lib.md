@@ -119,6 +119,7 @@ guide. In Python, however, Perspective supports additional data types that are
 commonly used when processing data:
 
 -   `pandas.DataFrame`
+-   `polars.DataFrame`
 -   `bytes` (encoding an Apache Arrow)
 -   `objects` (either extracting a repr or via reference)
 -   `str` (encoding as a CSV)

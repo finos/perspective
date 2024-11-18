@@ -44,6 +44,17 @@ class TestTablePolars(object):
             {"a": 3, "b": 4},
         ]
 
+    def test_table_lazyframe(self):
+        d = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data = pl.DataFrame(d).lazy()
+        tbl = Table(data)
+        assert tbl.size() == 2
+        assert tbl.schema() == {"a": "integer", "b": "integer"}
+        assert tbl.view().to_records() == [
+            {"a": 1, "b": 2},
+            {"a": 3, "b": 4},
+        ]
+
     def test_table_dataframe_column_order(self):
         d = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
         data = pl.DataFrame(d).select(["b", "c", "a", "d"])
@@ -58,13 +69,12 @@ class TestTablePolars(object):
         assert tbl.size() == 2
         assert tbl.columns() == ["b", "c", "a"]
 
-    @mark.skip(reason="Not supported, polars converts to fixed_size_binary")
     def test_table_dataframe_does_not_mutate(self):
         # make sure we don't mutate the dataframe that a user passes in
         data = pl.DataFrame(
             {
-                "a": np.array([None, 1, None, 2], dtype=object),
-                "b": np.array([1.5, None, 2.5, None], dtype=object),
+                "a": [None, 1, None, 2],
+                "b": [1.5, None, 2.5, None],
             }
         )
         assert data["a"].to_list() == [None, 1, None, 2]
@@ -197,49 +207,40 @@ class TestTablePolars(object):
 
     # dtype=object should have correct inferred types
 
-    @mark.skip(reason="Not supported, polars converts to fixed_size_binary")
     def test_table_polars_object_to_int(self):
-        df = pl.DataFrame({"a": np.array([1, 2, None, 2, None, 3, 4], dtype=object)})
+        df = pl.DataFrame({"a": [1, 2, None, 2, None, 3, 4]})
         table = Table(df)
         assert table.schema() == {"a": "integer"}
         assert table.view().to_columns()["a"] == [1, 2, None, 2, None, 3, 4]
 
-    @mark.skip(reason="Not supported, polars converts to fixed_size_binary")
     def test_table_polars_object_to_float(self):
-        df = pl.DataFrame({"a": np.array([None, 1, None, 2, None, 3, 4], dtype=object)})
+        df = pl.DataFrame({"a": [None, 1, None, 2, None, 3, 4]})
         table = Table(df)
         assert table.schema() == {"a": "integer"}
         assert table.view().to_columns()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
 
-    @mark.skip(reason="Not supported, polars converts to fixed_size_binary")
     def test_table_polars_object_to_bool(self):
-        df = pl.DataFrame(
-            {"a": np.array([True, False, True, False, True, False], dtype=object)}
-        )
+        df = pl.DataFrame({"a": [True, False, True, False, True, False]})
         table = Table(df)
         assert table.schema() == {"a": "boolean"}
         assert table.view().to_columns()["a"] == [True, False, True, False, True, False]
 
-    
-    @mark.skip(reason="Not supported, polars converts to fixed_size_binary")
     def test_table_polars_object_to_datetime(self):
         df = pl.DataFrame(
             {
-                "a": np.array(
-                    [
-                        datetime(2019, 7, 11, 1, 2, 3),
-                        datetime(2019, 7, 12, 1, 2, 3),
-                        None,
-                    ],
-                    dtype=object,
-                )
+                "a": [
+                    datetime(2019, 7, 11, 1, 2, 3),
+                    datetime(2019, 7, 12, 1, 2, 3),
+                    None,
+                ]
             }
         )
+
         table = Table(df)
         assert table.schema() == {"a": "datetime"}
         assert table.view().to_columns()["a"] == [
-            datetime(2019, 7, 11, 1, 2, 3),
-            datetime(2019, 7, 12, 1, 2, 3),
+            datetime(2019, 7, 11, 1, 2, 3).timestamp() * 1000,
+            datetime(2019, 7, 12, 1, 2, 3).timestamp() * 1000,
             None,
         ]
 

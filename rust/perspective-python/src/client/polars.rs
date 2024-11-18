@@ -56,12 +56,6 @@ pub fn is_polars_lf(py: Python, df: &Bound<'_, PyAny>) -> PyResult<bool> {
     }
 }
 
-// ipc_bytes = self.to_arrow()
-// table = pa.ipc.open_stream(ipc_bytes).read_all()
-// x = pd.DataFrame(table.to_pandas())
-// print("AAA", x)
-// return x
-
 pub fn arrow_to_polars(py: Python<'_>, arrow: &[u8]) -> PyResult<Py<PyAny>> {
     let polars = PyModule::import_bound(py, "polars")?;
     let bytes = PyBytes::new_bound(py, arrow);
@@ -79,18 +73,17 @@ pub fn polars_to_arrow_bytes<'py>(
 ) -> PyResult<Bound<'py, PyBytes>> {
     let df_class = get_polars_df_cls(py)?
         .ok_or_else(|| PyValueError::new_err("Failed to import polars.DataFrame"))?;
+
     let lf_class = get_polars_lf_cls(py)?
         .ok_or_else(|| PyValueError::new_err("Failed to import polars.LazyFrame"))?;
 
     if !df.is_instance(&df_class)? && !df.is_instance(&lf_class)? {
-        return Err(PyValueError::new_err("Input is not a polars.DataFrame or polars.LazyFrame"));
+        return Err(PyValueError::new_err(
+            "Input is not a polars.DataFrame or polars.LazyFrame",
+        ));
     }
 
     let is_lazyframe = df.is_instance(&lf_class)?;
-
-    // let kwargs = PyDict::new_bound(py);
-    // kwargs.set_item("preserve_index", true)?;
-
     let table = if is_lazyframe {
         df.call_method0("collect")?.call_method0("to_arrow")?
     } else {
