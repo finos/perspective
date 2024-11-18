@@ -110,6 +110,7 @@ jobs:
                       rust/perspective-client/docs/
                       rust/perspective-js/src/ts/
                       rust/perspective-viewer/src/ts/
+                      rust/perspective-python/LICENSE_THIRDPARTY_cargo.yml
 
     # ,-,---.       .    .   ,-_/              .---.               .
     #  '|___/ . . . |  ,-|   '  | ,-. .  , ,-. \___  ,-. ,-. . ,-. |-
@@ -487,6 +488,11 @@ jobs:
 
             - uses: actions/download-artifact@v4
               with:
+                  name: perspective-metadata
+                  path: rust/
+
+            - uses: actions/download-artifact@v4
+              with:
                   name: perspective-python-dist-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.python-version }}
                   path: .
 
@@ -649,6 +655,8 @@ jobs:
     test_python_sdist:
         needs: [build_and_test_jupyterlab]
         runs-on: ${{ matrix.os }}
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
         strategy:
             fail-fast: false
             matrix:
@@ -677,28 +685,46 @@ jobs:
 
             - uses: actions/download-artifact@v4
               with:
-                  name: perspective-metadata
-                  path: rust/
+                  name: perspective-rust
+                  path: crates/
 
             - uses: actions/download-artifact@v4
               with:
                   name: perspective-python-sdist
 
-            - name: Set up global perspective-server and perspective-client path overrides
-              # this makes it so the sdist is tested against unreleased changes
-              # made to perspective-client and perspective-server
+            # The sdist depends on perspective-{client,server} crates published to
+            # crates.io.  Patch the build to instead use .crate artifacts built
+            # previously in the workflow
+            - name: Set up path overrides for perspective .crate contents
+              shell: bash
               run: |
+                  (cd crates && tar xvf perspective-client-*.crate && tar xvf perspective-server-*.crate)
+                  CLIENT_CRATE_ROOT=$(ls -d "$PWD"/crates/perspective-client-*/ | head -n 1)
+                  SERVER_CRATE_ROOT=$(ls -d "$PWD"/crates/perspective-server-*/ | head -n 1)
+
                   mkdir -p $HOME/.cargo
                   cat > $HOME/.cargo/config.toml <<EOF
                   [patch.crates-io]
-                  perspective-client = { path = "$PWD/rust/perspective-client" }
-                  perspective-server = { path = "$PWD/rust/perspective-server" }
+                  perspective-client = { path = "$CLIENT_CRATE_ROOT" }
+                  perspective-server = { path = "$SERVER_CRATE_ROOT" }
                   EOF
 
             - name: Install perspective-python sdist
+              shell: bash
               run: python -m pip install -vv ./perspective*.tar.gz
 
+            - name: Verify licenses are installed
+              shell: bash
+              run: |
+                  pip show -f perspective-python | tee wheel_installed_files.txt
+                  # Maturin got this wrong: the packages should be in .dist-info/licenses/
+                  # Newer versions of Maturin will fix it, so search for either location.
+                  # https://github.com/PyO3/maturin/pull/862 https://github.com/PyO3/maturin/pull/2181
+                  grep -E '.dist-info/(license|license_files)/LICENSE.md' wheel_installed_files.txt
+                  grep -E '.dist-info/(license|license_files)/LICENSE_THIRDPARTY_cargo.yml' wheel_installed_files.txt
+
             - name: Verify labextension
+              shell: bash
               run: |
                   jupyter labextension list --debug
                   jupyter labextension list 2>&1 | grep '@finos/perspective-jupyterlab'
@@ -830,6 +856,7 @@ jobs:
             [
                 build_and_test_jupyterlab,
                 test_python,
+                test_python_sdist,
                 test_js,
                 benchmark_js,
                 benchmark_python,

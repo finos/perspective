@@ -1146,6 +1146,7 @@ t_stree::update_agg_table(
 
                 // is_nan returns false for non-float types
                 if (is_expr || old_value.is_nan()) {
+
                     // if we previously had a NaN, add can't make it finite
                     // again; recalculate entire sum in case it is now finite
                     auto pkeys = get_pkeys(nidx);
@@ -1156,27 +1157,28 @@ t_stree::update_agg_table(
                             expression_master_table,
                             spec.get_dependencies()[0].name(),
                             pkeys,
-                            [](std::vector<t_tscalar>& values) {
+                            [&](std::vector<t_tscalar>& values) {
                                 if (values.empty()) {
                                     return mknone();
                                 }
 
                                 t_tscalar rval;
                                 rval.set(std::uint64_t(0));
-                                rval.m_type = values[0].m_type;
-
+                                rval.m_type = dst->get_dtype();
                                 for (const auto& v : values) {
                                     if (v.is_nan()) {
                                         continue;
                                     }
-                                    rval = rval.add(v);
+
+                                    rval = rval.add(
+                                        v.coerce_numeric_dtype(dst->get_dtype())
+                                    );
                                 }
 
                                 return rval;
                             }
                         )
                     );
-                    dst->set_scalar(dst_ridx, new_value);
                 } else {
                     new_value.set(dst_scalar.add(src_scalar));
                 }

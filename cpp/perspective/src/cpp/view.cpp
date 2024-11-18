@@ -88,7 +88,7 @@ View<CTX_T>::~View() {
     auto pool = m_table->get_pool();
     auto gnode = m_table->get_gnode();
     PSP_GIL_UNLOCK();
-    PSP_WRITE_LOCK(*pool->get_lock());
+
     // TODO: need to invalidate memory used by previous computed columns
     // without affecting views that depend on those computed columns.
     pool->unregister_context(gnode->get_id(), m_name);

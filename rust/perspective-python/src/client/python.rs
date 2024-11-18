@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::any::Any;
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -18,156 +17,27 @@ use std::sync::Arc;
 use async_lock::RwLock;
 use futures::FutureExt;
 use perspective_client::{
-    assert_table_api, assert_view_api, clone, Client, ClientError, OnUpdateMode, OnUpdateOptions,
-    Table, TableData, TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View,
+    assert_table_api, assert_view_api, clone, Client, OnUpdateMode, OnUpdateOptions, Table,
+    TableData, TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View,
     ViewOnUpdateResp, ViewWindow,
 };
-use pyo3::create_exception;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyAny, PyBytes, PyDict, PyList, PyString};
+use pyo3::types::{PyAny, PyBytes, PyDict, PyString};
 use pythonize::depythonize_bound;
 
 use super::pandas::arrow_to_pandas;
-use super::{pandas, pyarrow};
+use super::polars::arrow_to_polars;
+use super::table_data::TableDataExt;
+use super::update_data::UpdateDataExt;
+use super::{pandas, polars, pyarrow};
+use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 
 #[derive(Clone)]
 pub struct PyClient {
     pub(crate) client: Client,
     loop_cb: Arc<RwLock<Option<Py<PyAny>>>>,
     close_cb: Option<Py<PyAny>>,
-}
-
-#[extend::ext]
-pub impl<T> Result<T, ClientError> {
-    fn into_pyerr(self) -> PyResult<T> {
-        match self {
-            Ok(x) => Ok(x),
-            Err(x) => Err(PyPerspectiveError::new_err(format!("{}", x))),
-        }
-    }
-}
-
-create_exception!(
-    perspective,
-    PyPerspectiveError,
-    pyo3::exceptions::PyException
-);
-
-#[extend::ext]
-impl UpdateData {
-    fn from_py_partial(
-        py: Python<'_>,
-        input: &Py<PyAny>,
-        format: Option<TableReadFormat>,
-    ) -> Result<Option<UpdateData>, PyErr> {
-        if let Ok(pybytes) = input.downcast_bound::<PyBytes>(py) {
-            // TODO need to explicitly qualify this b/c bug in
-            // rust-analyzer - should be: just `pybytes.as_bytes()`.
-            let vec = pyo3::prelude::PyBytesMethods::as_bytes(pybytes).to_vec();
-
-            match format {
-                Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(String::from_utf8(vec)?))),
-                Some(TableReadFormat::JsonString) => {
-                    Ok(Some(UpdateData::JsonRows(String::from_utf8(vec)?)))
-                },
-                Some(TableReadFormat::ColumnsString) => {
-                    Ok(Some(UpdateData::JsonColumns(String::from_utf8(vec)?)))
-                },
-                None | Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(vec.into()))),
-            }
-        } else if let Ok(pystring) = input.downcast_bound::<PyString>(py) {
-            let string = pystring.extract::<String>()?;
-            match format {
-                None | Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(string))),
-                Some(TableReadFormat::JsonString) => Ok(Some(UpdateData::JsonRows(string))),
-                Some(TableReadFormat::ColumnsString) => Ok(Some(UpdateData::JsonColumns(string))),
-                Some(TableReadFormat::Arrow) => {
-                    Ok(Some(UpdateData::Arrow(string.into_bytes().into())))
-                },
-            }
-        } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
-            let json_module = PyModule::import_bound(py, "json")?;
-            let string = json_module.call_method("dumps", (pylist,), None)?;
-            Ok(Some(UpdateData::JsonRows(string.extract::<String>()?)))
-        } else if let Ok(pydict) = input.downcast_bound::<PyDict>(py) {
-            if pydict.keys().is_empty() {
-                return Err(PyValueError::new_err("Cannot infer type of empty dict"));
-            }
-
-            let first_key = pydict.keys().get_item(0)?;
-            let first_item = pydict
-                .get_item(first_key)?
-                .ok_or_else(|| PyValueError::new_err("Bad Input"))?;
-
-            if first_item.downcast::<PyList>().is_ok() {
-                let json_module = PyModule::import_bound(py, "json")?;
-                let string = json_module.call_method("dumps", (pydict,), None)?;
-                Ok(Some(UpdateData::JsonColumns(string.extract::<String>()?)))
-            } else {
-                Ok(None)
-            }
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn from_py(
-        py: Python<'_>,
-        input: &Py<PyAny>,
-        format: Option<TableReadFormat>,
-    ) -> Result<UpdateData, PyErr> {
-        if let Some(x) = Self::from_py_partial(py, input, format)? {
-            Ok(x)
-        } else {
-            Err(PyValueError::new_err(format!(
-                "Unknown input type {:?}",
-                input.type_id()
-            )))
-        }
-    }
-}
-
-#[extend::ext]
-impl TableData {
-    fn from_py(
-        py: Python<'_>,
-        input: Py<PyAny>,
-        format: Option<TableReadFormat>,
-    ) -> Result<TableData, PyErr> {
-        if let Some(update) = UpdateData::from_py_partial(py, &input, format)? {
-            Ok(TableData::Update(update))
-        } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
-            let json_module = PyModule::import_bound(py, "json")?;
-            let string = json_module.call_method("dumps", (pylist,), None)?;
-            Ok(UpdateData::JsonRows(string.extract::<String>()?).into())
-        } else if let Ok(pydict) = input.downcast_bound::<PyDict>(py) {
-            let first_key = pydict.keys().get_item(0)?;
-            let first_item = pydict
-                .get_item(first_key)?
-                .ok_or_else(|| PyValueError::new_err("Bad Input"))?;
-            if first_item.downcast::<PyList>().is_ok() {
-                let json_module = PyModule::import_bound(py, "json")?;
-                let string = json_module.call_method("dumps", (pydict,), None)?;
-                Ok(UpdateData::JsonColumns(string.extract::<String>()?).into())
-            } else {
-                let mut schema = vec![];
-                for (key, val) in pydict.into_iter() {
-                    schema.push((
-                        key.extract::<String>()?,
-                        val.extract::<String>()?.as_str().try_into().into_pyerr()?,
-                    ));
-                }
-
-                Ok(TableData::Schema(schema))
-            }
-        } else {
-            Err(PyValueError::new_err(format!(
-                "Unknown input type {:?}",
-                input.type_id()
-            )))
-        }
-    }
 }
 
 impl PyClient {
@@ -241,6 +111,10 @@ impl PyClient {
                 pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else if pandas::is_pandas_df(py, input.bind(py))? {
                 pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if polars::is_polars_df(py, input.bind(py))?
+                || polars::is_polars_lf(py, input.bind(py))?
+            {
+                polars::polars_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input
             };
@@ -384,6 +258,10 @@ impl PyTable {
                 pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else if pandas::is_pandas_df(py, input.bind(py))? {
                 pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if polars::is_polars_df(py, input.bind(py))?
+                || polars::is_polars_lf(py, input.bind(py))?
+            {
+                polars::polars_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input
             };
@@ -577,6 +455,15 @@ impl PyView {
                 .unwrap_or_default();
         let arrow = self.view.to_arrow(window).await.into_pyerr()?;
         Python::with_gil(|py| arrow_to_pandas(py, &arrow))
+    }
+
+    pub async fn to_polars(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
+        let arrow = self.view.to_arrow(window).await.into_pyerr()?;
+        Python::with_gil(|py| arrow_to_polars(py, &arrow))
     }
 
     pub async fn to_arrow(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {

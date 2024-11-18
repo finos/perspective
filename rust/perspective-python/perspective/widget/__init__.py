@@ -14,7 +14,7 @@ import base64
 import logging
 import os
 import re
-import importlib
+import importlib.metadata
 
 from string import Template
 from ipywidgets import DOMWidget

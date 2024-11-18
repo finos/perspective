@@ -22,13 +22,13 @@ use pyo3::types::{PyAny, PyBytes};
 
 use crate::client::python::PyClient;
 
-#[pyclass]
+#[pyclass(module = "perspective")]
 #[derive(Clone)]
 pub struct PySyncSession {
     session: Arc<RwLock<Option<LocalSession>>>,
 }
 
-#[pyclass(subclass)]
+#[pyclass(subclass, module = "perspective")]
 #[derive(Clone, Default)]
 pub struct PySyncServer {
     pub server: Server,
@@ -66,6 +66,7 @@ impl PySyncServer {
 
     pub fn new_local_client(
         &self,
+        py: Python<'_>,
         loop_callback: Option<Py<PyAny>>,
     ) -> PyResult<crate::client::client_sync::Client> {
         let client = crate::client::client_sync::Client(PyClient::new_from_client(
@@ -73,7 +74,7 @@ impl PySyncServer {
         ));
 
         if let Some(loop_cb) = loop_callback {
-            client.set_loop_callback(loop_cb)?;
+            client.set_loop_callback(py, loop_cb)?;
         }
 
         Ok(client)

@@ -50,7 +50,7 @@ endif()
 
 
 if(WIN32)
-    set(CMAKE_CXX_FLAGS " /EHsc /MP /MT /c /bigobj")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP /MT /c /bigobj")
 else()
     # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
 endif()
@@ -301,23 +301,23 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 endif()
 
-set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
-
-
-set(CMAKE_C_FLAGS "  \
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
 -O3 \
 ")
+
 if (PSP_WASM_EXCEPTIONS)
-set(CMAKE_CXX_FLAGS " -fwasm-exceptions \
--O3 \
--g0 \
-")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+    -fwasm-exceptions \
+    -O3 \
+    -g0 \
+    ")
 else()
-set(CMAKE_CXX_FLAGS " \
--O3 \
-")
-
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+    -O3 \
+    ")
 endif()
+
+set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
 
 if(PSP_PYODIDE)
     set(RELOCATABLE_FLAGS "-sRELOCATABLE=1 -sSIDE_MODULE=2 -sWASM_BIGINT=1")
@@ -327,7 +327,7 @@ if(PSP_PYODIDE)
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
 endif()
 
-# Build header-only dependencies from external source
+# Build (read: download and extract) header-only dependencies from external sources
 set(all_deps_INCLUDE_DIRS "")
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
@@ -341,6 +341,10 @@ list(APPEND all_deps_INCLUDE_DIRS
 
 psp_build_dep("Boost" "${PSP_CMAKE_MODULE_PATH}/Boost.txt.in")
 list(APPEND all_deps_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+
+# Build dependencies as static libraries with add_subdirectory()
+# Note that values set above for CMAKE_C_FLAGS, CMAKE_CXX_FLAGS, etc. will
+# apply to dependency cmake builds
 
 # Arrow builds its own dependencies
 psp_build_message("${Cyan}Building Apache Arrow${ColorReset}")
@@ -364,20 +368,16 @@ list(APPEND all_deps_INCLUDE_DIRS
 add_subdirectory(${PSP_CMAKE_MODULE_PATH}/../cpp/protos "${CMAKE_BINARY_DIR}/protos-build")
 
 # ####################
-set(CMAKE_C_FLAGS_DEBUG "")
-set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_C_FLAGS " \
     ${CMAKE_C_FLAGS} \
+    ${CMAKE_C_FLAGS_RELEASE} \
     ${EXTENDED_FLAGS} \
     ${OPT_FLAGS} \
     ")
 
-# prevents the default debug flags from overriding the debug flags we
-# set in OPT_FLAGS
-set(CMAKE_CXX_FLAGS_DEBUG "")
-set(CMAKE_CXX_FLAGS_RELEASE "")
 set(CMAKE_CXX_FLAGS " \
     ${CMAKE_CXX_FLAGS} \
+    ${CMAKE_CXX_FLAGS_RELEASE} \
     ${EXTENDED_FLAGS} \
     ${OPT_FLAGS} \
     ")
@@ -484,7 +484,7 @@ set(WASM_SOURCE_FILES ${SOURCE_FILES})
 message("${BUILD_MESSAGE}\n")
 
 if(WIN32)
-    set(CMAKE_CXX_FLAGS " /EHsc /MP /MT /c /bigobj")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP /MT /c /bigobj")
 else()
     # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
 endif()

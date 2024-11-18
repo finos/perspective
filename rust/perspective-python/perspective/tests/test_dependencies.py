@@ -44,3 +44,10 @@ def test_lazy_modules():
 
     for k, v in cache.items():
         sys.modules[k] = v
+
+
+def test_all():
+    import perspective
+
+    for key in perspective.__all__:
+        assert hasattr(perspective, key)

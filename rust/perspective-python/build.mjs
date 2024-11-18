@@ -37,6 +37,7 @@ const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>
 );
 
 fs.mkdirSync(`./perspective_python-${version}.data`, { recursive: true });
+fs.copyFileSync("../../LICENSE.md", "./LICENSE.md");
 
 const cwd = process.cwd();
 const cmd = sh();
@@ -136,11 +137,12 @@ if (build_sdist) {
     const readme_md = fs.readFileSync("./README.md");
     const pkg_info = generatePkgInfo(pyproject, cargo, readme_md);
     fs.writeFileSync("./PKG-INFO", pkg_info);
-    const include_paths = Array.from(cargo["package"]["include"]).concat([
-        data_dir,
-        "./PKG-INFO",
-    ]);
-    const files = glob.globSync(include_paths);
+    // Maturin finds extra license files in the root of the source directory,
+    // then packages them into .dist-info in the wheel.  As of Nov 2024,
+    // Maturin does not yet support explicitly declaring `license-files` in
+    // pyproject.toml.  See https://github.com/PyO3/maturin/pull/862
+    // https://github.com/PyO3/maturin/issues/861
+    const crate_files = glob.globSync(Array.from(cargo["package"]["include"]));
     const wheel_dir = `../target/wheels`;
     fs.mkdirSync(wheel_dir, { recursive: true });
     await tar.create(
@@ -148,8 +150,9 @@ if (build_sdist) {
             gzip: true,
             file: path.join(wheel_dir, `perspective_python-${version}.tar.gz`),
             prefix: `perspective_python-${version}`,
+            strict: true,
         },
-        files
+        crate_files.concat(["PKG-INFO", data_dir])
     );
 }
 

@@ -1,3 +1,54 @@
+# [v3.1.5](https://github.com/finos/perspective/releases/tag/v3.1.5)
+
+_15 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.5-test1...v3.1.5))
+
+Features
+
+- Relax `Table` schema constructor [#2850](https://github.com/finos/perspective/pull/2850)
+
+Fixes
+
+- Fix `perspective-workspace` restore call on errored table [#2851](https://github.com/finos/perspective/pull/2851)
+- Fix `integer` cast expression function [#2842](https://github.com/finos/perspective/pull/2842)
+- Import importlib metadata submodule [#2841](https://github.com/finos/perspective/pull/2841)
+
+Misc
+
+- Update ExprTk [#2825](https://github.com/finos/perspective/pull/2825)
+- sdist licensing follow ups [#2843](https://github.com/finos/perspective/pull/2843)
+
+# [v3.1.4](https://github.com/finos/perspective/releases/tag/v3.1.4)
+
+_7 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test8...v3.1.4))
+
+Features
+
+- Add back Table and View exports, make constructors throw like pyarrow.Table [#2831](https://github.com/finos/perspective/pull/2831)
+
+Fixes
+
+- Fixed workspace persistence structure symmetry [#2833](https://github.com/finos/perspective/pull/2833)
+- Fix concurrent update segfault [#2835](https://github.com/finos/perspective/pull/2835)
+- Fix `plugin` switch  [#2828](https://github.com/finos/perspective/pull/2828)
+
+Misc
+
+- Fix failed color range update [#2823](https://github.com/finos/perspective/pull/2823)
+- CI sdist fixes, port conda patch, fix ODR violation [#2826](https://github.com/finos/perspective/pull/2826)
+
+# [v3.1.3](https://github.com/finos/perspective/releases/tag/v3.1.3)
+
+_31 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.2...v3.1.3))
+
+Fixes
+
+- Fix `perspective-python` sdist and add sdist tests to CI [#2817](https://github.com/finos/perspective/pull/2817)
+- Fix workspace resize and related bugs [#2808](https://github.com/finos/perspective/pull/2808)
+- fix aiohttp disconnect error on websockets [#2806](https://github.com/finos/perspective/pull/2806)
+- Missing tooltip data [#2753](https://github.com/finos/perspective/pull/2753)
+- Escape esbuild plugin's symbol replacement. [#2807](https://github.com/finos/perspective/pull/2807)
+- Add aarch64 Mac runners to test_python, restore PSP_ARCH dev behavior [#2802](https://github.com/finos/perspective/pull/2802)
+
 # [v3.1.2](https://github.com/finos/perspective/releases/tag/v3.1.2)
 
 _22 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.1...v3.1.2))

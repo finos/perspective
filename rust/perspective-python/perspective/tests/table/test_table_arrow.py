@@ -117,6 +117,27 @@ class TestTableArrow(object):
             "d": data[3],
         }
 
+    def test_empty_arrow(self, util):
+        table = pa.table(
+            {
+                "col1": [1, 2, 3],
+                "col2": ["abc", "foo", "bar"],
+            }
+        )
+
+        empty_table = table.schema.empty_table()
+        assert client.table(table, name="table").size() == 3
+        assert client.table(empty_table, name="table_empty_bad").size() == 0
+        assert client.table(table, name="table").schema() == {
+            "col1": "integer",
+            "col2": "string",
+        }
+
+        assert client.table(empty_table, name="table").schema() == {
+            "col1": "integer",
+            "col2": "string",
+        }
+
     def test_table_arrow_loads_float_stream(self, util):
         data = [[i for i in range(10)], [i * 1.5 for i in range(10)]]
         arrow_data = util.make_arrow(["a", "b"], data)

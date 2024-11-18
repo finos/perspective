@@ -58,26 +58,6 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
         dst.define("PSP_WASM_BUILD", "0");
     }
 
-    if cfg!(windows) {
-        match std::env::var("VCPKG_ROOT") {
-            Ok(vcpkg_root) => {
-                dst.define(
-                    "CMAKE_TOOLCHAIN_FILE",
-                    format!(
-                        "{}/scripts/buildsystems/vcpkg.cmake",
-                        vcpkg_root.replace("\\", "/")
-                    ),
-                );
-            },
-            Err(_) => {
-                println!(
-                    "cargo:warning=MESSAGE VCPKG_ROOT not set in environment, not setting \
-                     CMAKE_TOOLCHAIN_FILE"
-                )
-            },
-        }
-    }
-
     if std::env::var("CARGO_FEATURE_PYTHON").is_ok() {
         dst.define("CMAKE_POSITION_INDEPENDENT_CODE", "ON");
         dst.define("PSP_PYTHON_BUILD", "1");
@@ -104,7 +84,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     // but our conda recipe doesn't directly invoke cmake
     if let Ok(cmake_args) = std::env::var("CMAKE_ARGS") {
         println!(
-            "cargo:warning=MESSAGE Setting CMAKE_ARGS from enviornment {:?}",
+            "cargo:warning=Setting CMAKE_ARGS from environment {:?}",
             cmake_args
         );
         for arg in Shlex::new(&cmake_args) {
@@ -112,7 +92,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
         }
     }
 
-    println!("cargo:warning=MESSAGE Building cmake {}", profile);
+    println!("cargo:warning=Building cmake {}", profile);
     if std::env::var("PSP_BUILD_VERBOSE").unwrap_or_default() != "" {
         // checks non-empty env var
         dst.very_verbose(true);
@@ -158,7 +138,7 @@ pub fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
                         stem.expect("bad")[3..].to_string()
                     };
 
-                    // println!("cargo:warning=MESSAGE static link {} {}", a, dir.display());
+                    // println!("cargo:warning=static link {} {}", a, dir.display());
                     println!("cargo:rustc-link-search=native={}", dir.display());
                     println!("cargo:rustc-link-lib=static={}", a);
                 }

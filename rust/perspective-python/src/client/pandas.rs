@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyImportError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyBytes, PyDict, PyList};
 
@@ -61,7 +61,15 @@ pub fn pandas_to_arrow_bytes<'py>(
     py: Python<'py>,
     df: &Bound<'py, PyAny>,
 ) -> PyResult<Bound<'py, PyBytes>> {
-    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
+    let pyarrow = match PyModule::import_bound(py, "pyarrow") {
+        Ok(pyarrow) => pyarrow,
+        Err(_) => {
+            return Err(PyImportError::new_err(
+                "Perspective requires pyarrow to convert pandas DataFrames. Please install pyarrow.",
+            ))
+        }
+    };
+
     let df_class = get_pandas_df_cls(py)?
         .ok_or_else(|| PyValueError::new_err("Failed to import pandas.DataFrame"))?;
 

@@ -16,7 +16,11 @@ const { WorkerPlugin } = require("./worker.js");
 exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
     options = {}
 ) {
-    const wasm_plugin = WasmPlugin(!!options.wasm?.inline);
+    const wasm_plugin = WasmPlugin(
+        !!options.wasm?.inline,
+        !options.wasm?.webpack_hack
+    );
+
     const worker_plugin = WorkerPlugin({
         targetdir: options.worker?.targetdir,
     });

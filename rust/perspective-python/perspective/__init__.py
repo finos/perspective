@@ -10,13 +10,12 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-__version__ = "3.1.2"
+__version__ = "3.1.5"
 __all__ = [
     "_jupyter_labextension_paths",
     "Server",
     "Client",
     "PerspectiveError",
-    "PerspectiveWidget",
     "ProxySession",
 ]
 
@@ -27,6 +26,10 @@ from .perspective import (
     PerspectiveError,
     ProxySession,
     PySyncServer as Server,
+    # NOTE: these are classes without constructors,
+    # so we import them just for type hinting
+    Table,  # noqa: F401
+    View,  # noqa: F401
 )
 
 
