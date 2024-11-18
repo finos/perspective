@@ -13,11 +13,41 @@
 import { groupFromKey } from "../series/seriesKey";
 import { DataRowsWithKey, Settings } from "../types";
 
+function refineDateData(
+    settings: Settings,
+    data: any[] | undefined = undefined
+) {
+    let dataToRefine = data !== undefined ? data : settings.data;
+
+    settings.crossValues.forEach((value, index) => {
+        if (
+            value.type === "date" ||
+            value.type === "timestamp" ||
+            value.type === "datetime"
+        ) {
+            dataToRefine.forEach((row: { __ROW_PATH__: any[] }) => {
+                row.__ROW_PATH__[index] = new Date(
+                    row.__ROW_PATH__[index]
+                ).toLocaleDateString();
+            });
+        }
+        if (value.type === "time") {
+            dataToRefine.forEach((row: { __ROW_PATH__: any[] }) => {
+                row.__ROW_PATH__[index] = new Date(
+                    row.__ROW_PATH__[index]
+                ).toLocaleTimeString();
+            });
+        }
+    });
+
+    return dataToRefine;
+}
+
 export function filterData(
     settings: Settings,
     data: any[] | undefined = undefined
 ) {
-    const useData = data || settings.data;
+    const useData = data || refineDateData(settings, settings.data);
     const len = settings.hideKeys?.length ?? 0;
     return len > 0
         ? useData.map((col) => {
@@ -31,7 +61,7 @@ export function filterData(
 }
 
 export function filterDataByGroup(settings: Settings): DataRowsWithKey {
-    const newData = settings.data;
+    const newData = refineDateData(settings);
     const hideKeysLen = settings.hideKeys?.length ?? 0;
     const splitValsLen = settings.splitValues.length;
     return hideKeysLen > 0
