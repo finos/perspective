@@ -10,11 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-datagrid";
 import { SUPERSTORE_TABLE } from "@site/src/data/superstore.js";
 
 export async function main(colorMode) {
+    await import("@finos/perspective-viewer", { type: "module" });
+    await import("@finos/perspective-viewer-datagrid");
+
     await customElements.whenDefined("perspective-viewer");
     const viewers = document.querySelectorAll(
         "perspective-viewer:not(.nosuperstore)"
