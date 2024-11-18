@@ -77,10 +77,10 @@ load_file(
     } else {
         std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader =
             *status;
+
         std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
         auto num_batches = batch_reader->num_record_batches();
         for (int i = 0; i < num_batches; ++i) {
-
             auto status2 = batch_reader->ReadRecordBatch(i);
             if (!status2.ok()) {
                 PSP_COMPLAIN_AND_ABORT(
@@ -91,7 +91,10 @@ load_file(
             std::shared_ptr<arrow::RecordBatch> chunk = *status2;
             batches.push_back(chunk);
         }
-        auto status3 = arrow::Table::FromRecordBatches(batches);
+
+        auto status3 =
+            arrow::Table::FromRecordBatches(batch_reader->schema(), batches);
+
         if (!status3.ok()) {
             std::stringstream ss;
             ss << "Failed to create Table from RecordBatches: "
