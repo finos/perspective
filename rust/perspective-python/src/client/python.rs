@@ -27,9 +27,10 @@ use pyo3::types::{PyAny, PyBytes, PyDict, PyString};
 use pythonize::depythonize_bound;
 
 use super::pandas::arrow_to_pandas;
+use super::polars::arrow_to_polars;
 use super::table_data::TableDataExt;
 use super::update_data::UpdateDataExt;
-use super::{pandas, pyarrow};
+use super::{pandas, polars, pyarrow};
 use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 
 #[derive(Clone)]
@@ -110,6 +111,10 @@ impl PyClient {
                 pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else if pandas::is_pandas_df(py, input.bind(py))? {
                 pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if polars::is_polars_df(py, input.bind(py))?
+                || polars::is_polars_lf(py, input.bind(py))?
+            {
+                polars::polars_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input
             };
@@ -253,6 +258,10 @@ impl PyTable {
                 pyarrow::to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else if pandas::is_pandas_df(py, input.bind(py))? {
                 pandas::pandas_to_arrow_bytes(py, input.bind(py))?.to_object(py)
+            } else if polars::is_polars_df(py, input.bind(py))?
+                || polars::is_polars_lf(py, input.bind(py))?
+            {
+                polars::polars_to_arrow_bytes(py, input.bind(py))?.to_object(py)
             } else {
                 input
             };
@@ -446,6 +455,15 @@ impl PyView {
                 .unwrap_or_default();
         let arrow = self.view.to_arrow(window).await.into_pyerr()?;
         Python::with_gil(|py| arrow_to_pandas(py, &arrow))
+    }
+
+    pub async fn to_polars(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
+        let arrow = self.view.to_arrow(window).await.into_pyerr()?;
+        Python::with_gil(|py| arrow_to_polars(py, &arrow))
     }
 
     pub async fn to_arrow(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {
