@@ -26,7 +26,7 @@ use super::python::*;
 use crate::py_err::ResultTClientErrorExt;
 use crate::server::PySyncServer;
 
-#[pyclass]
+#[pyclass(module = "perspective")]
 #[derive(Clone)]
 pub struct ProxySession(perspective_client::ProxySession);
 
@@ -81,7 +81,7 @@ trait PyFutureExt: Future {
 impl<F: Future> PyFutureExt for F {}
 
 #[doc = crate::inherit_docs!("client.md")]
-#[pyclass(subclass)]
+#[pyclass(subclass, module = "perspective")]
 pub struct Client(pub(crate) PyClient);
 
 #[pymethods]
@@ -147,7 +147,7 @@ impl Client {
 }
 
 #[doc = crate::inherit_docs!("table.md")]
-#[pyclass(subclass, name = "Table")]
+#[pyclass(subclass, name = "Table", module = "perspective")]
 pub struct Table(PyTable);
 
 assert_table_api!(Table);
@@ -272,7 +272,7 @@ impl Table {
 }
 
 #[doc = crate::inherit_docs!("view.md")]
-#[pyclass(subclass, name = "View")]
+#[pyclass(subclass, name = "View", module = "perspective")]
 pub struct View(PyView);
 
 assert_view_api!(View);
