@@ -22,13 +22,13 @@ use pyo3::types::{PyAny, PyBytes};
 
 use crate::client::python::PyClient;
 
-#[pyclass]
+#[pyclass(module = "perspective")]
 #[derive(Clone)]
 pub struct PySyncSession {
     session: Arc<RwLock<Option<LocalSession>>>,
 }
 
-#[pyclass(subclass)]
+#[pyclass(subclass, module = "perspective")]
 #[derive(Clone, Default)]
 pub struct PySyncServer {
     pub server: Server,
