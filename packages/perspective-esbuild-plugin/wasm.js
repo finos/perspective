@@ -13,7 +13,7 @@
 const fs = require("fs");
 const path = require("path");
 
-exports.WasmPlugin = function WasmPlugin(inline) {
+exports.WasmPlugin = function WasmPlugin(inline, webpack_hack) {
     function setup(build) {
         const options = build.initialOptions;
         options.metafile = true;
@@ -62,12 +62,14 @@ exports.WasmPlugin = function WasmPlugin(inline) {
                 .toString()
                 .slice(2)}__`;
             KEYSET.push(key);
+            const url = webpack_hack ? `${key}(wasm)` : `wasm`;
+
             return {
                 pluginData: args.pluginData,
                 contents: `
                 import wasm from ${JSON.stringify(args.path)};
                 export default function() { 
-                    return fetch(new URL(${key}(wasm), import.meta.url));
+                    return fetch(new URL(${url}, import.meta.url));
                 };
             `,
             };
@@ -84,39 +86,42 @@ exports.WasmPlugin = function WasmPlugin(inline) {
         });
 
         build.onEnd(({ metafile }) => {
-            for (const file of Object.keys(metafile.outputs)) {
-                if (file.endsWith(".js")) {
-                    let contents = fs.readFileSync(file).toString();
-                    let updated = false;
-                    for (const key of KEYSET) {
-                        const symbol = contents.match(
-                            new RegExp(`${key}\\(([a-zA-Z0-9_\$]+?)\\)`)
-                        );
-
-                        if (symbol?.[1]) {
-                            updated = true;
-                            const escapedSymbol = symbol[1].replace(
-                                /\$/g,
-                                "\\$"
-                            );
-                            const filename = contents.match(
-                                new RegExp(
-                                    `${escapedSymbol}\\s*?=\\s*?\\"(.+?)\\"`
-                                )
+            if (webpack_hack) {
+                for (const file of Object.keys(metafile.outputs)) {
+                    if (file.endsWith(".js")) {
+                        let contents = fs.readFileSync(file).toString();
+                        let updated = false;
+                        for (const key of KEYSET) {
+                            const symbol = contents.match(
+                                new RegExp(`${key}\\(([a-zA-Z0-9_\$]+?)\\)`)
                             );
 
-                            contents = contents.replace(
-                                new RegExp(
-                                    `${key}\\(([a-zA-Z0-9_\$]+?)\\)`,
-                                    "g"
-                                ),
-                                `"${filename[1]}"`
-                            );
+                            if (symbol?.[1]) {
+                                updated = true;
+                                const escapedSymbol = symbol[1].replace(
+                                    /\$/g,
+                                    "\\$"
+                                );
+
+                                const filename = contents.match(
+                                    new RegExp(
+                                        `(?<![a-zA-Z0-9_\$])${escapedSymbol}\\s*?=\\s*?\\"(.+?)\\"`
+                                    )
+                                );
+
+                                contents = contents.replace(
+                                    new RegExp(
+                                        `${key}\\(([a-zA-Z0-9_\$]+?)\\)`,
+                                        "g"
+                                    ),
+                                    `"${filename[1]}"`
+                                );
+                            }
                         }
-                    }
 
-                    if (updated) {
-                        fs.writeFileSync(file, contents);
+                        if (updated) {
+                            fs.writeFileSync(file, contents);
+                        }
                     }
                 }
             }

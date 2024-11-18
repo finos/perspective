@@ -55,7 +55,7 @@ for (var j := 0; j <= radialSegments; j += 1) {
         vs[i0] := vs[i0] * bcos - vs[i0 + 2] * bsin;
         vs[i0 + 2] := b * bsin + vs[i0 + 2] * bcos;
     }
-}
+};
 
 // Render scene
 var scale := resolution / (tan(fov / 2) * 400);

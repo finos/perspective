@@ -154,29 +154,6 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                 loader: "text",
             };
         });
-
-        build.onEnd(({ metafile }) => {
-            for (const file of Object.keys(metafile.outputs)) {
-                if (file.endsWith(".js")) {
-                    let contents = fs.readFileSync(file).toString();
-                    const symbol = contents.match(
-                        /__PSP_INLINE_WORKER__\(([a-zA-Z0-9_\$]+?)\)/
-                    );
-                    if (symbol?.[1]) {
-                        const filename = contents.match(
-                            new RegExp(`${symbol[1]}\\s*?=\\s*?\\"(.+?)\\"`)
-                        );
-
-                        contents = contents.replace(
-                            /__PSP_INLINE_WORKER__\([a-zA-Z0-9_\$]+?\)/,
-                            `"${filename[1]}"`
-                        );
-
-                        fs.writeFileSync(file, contents);
-                    }
-                }
-            }
-        });
     }
 
     return {
