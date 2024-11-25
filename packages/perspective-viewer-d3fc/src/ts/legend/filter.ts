@@ -18,24 +18,18 @@ function refineDateData(
     data: any[] | undefined = undefined
 ) {
     let dataToRefine = data ?? settings.data;
+    const { crossValues } = settings;
 
-    settings.crossValues.forEach((value, index) => {
-        if (
-            value.type === "date" ||
-            value.type === "timestamp" ||
-            value.type === "datetime"
-        ) {
+    crossValues.forEach(({ type }, index) => {
+        const formatType =
+            (type === "date" || type === "timestamp" || type === "datetime")
+             ? (value: any) => new Date(value).toLocaleDateString()
+            : ((type === "time") ? (value: any) => new Date(value).toLocaleTimeString()
+            : null);
+
+        if (formatType) {
             dataToRefine.forEach((row: { __ROW_PATH__: any[] }) => {
-                row.__ROW_PATH__[index] = new Date(
-                    row.__ROW_PATH__[index]
-                ).toLocaleDateString();
-            });
-        }
-        if (value.type === "time") {
-            dataToRefine.forEach((row: { __ROW_PATH__: any[] }) => {
-                row.__ROW_PATH__[index] = new Date(
-                    row.__ROW_PATH__[index]
-                ).toLocaleTimeString();
+                row.__ROW_PATH__[index] = formatType(row.__ROW_PATH__[index])
             });
         }
     });
