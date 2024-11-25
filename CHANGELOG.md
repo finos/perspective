@@ -1,3 +1,19 @@
+# [v3.1.6](https://github.com/finos/perspective/releases/tag/v3.1.6)
+
+_18 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.5...v3.1.6))
+
+Features
+
+- Support input/output to/from polars via python (not native rust) [#2849](https://github.com/finos/perspective/pull/2849)
+
+Fixes
+
+- Fix empty Arrow `Table` constructor [#2854](https://github.com/finos/perspective/pull/2854)
+
+Misc
+
+- Check pyarrow import and make clear(er) error message [#2848](https://github.com/finos/perspective/pull/2848)
+
 # [v3.1.5](https://github.com/finos/perspective/releases/tag/v3.1.5)
 
 _15 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.5-test1...v3.1.5))
