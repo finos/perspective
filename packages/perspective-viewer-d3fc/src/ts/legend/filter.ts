@@ -17,7 +17,7 @@ function refineDateData(
     settings: Settings,
     data: any[] | undefined = undefined
 ) {
-    let dataToRefine = data !== undefined ? data : settings.data;
+    let dataToRefine = data ?? settings.data;
 
     settings.crossValues.forEach((value, index) => {
         if (
