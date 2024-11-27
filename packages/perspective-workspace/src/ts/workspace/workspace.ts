@@ -71,7 +71,7 @@ export class PerspectiveWorkspace extends SplitPanel {
     private _minimizedLayoutSlots?: DockPanel.ILayoutConfig;
     private _minimizedLayout?: DockPanel.ILayoutConfig;
     private _maximizedWidget?: PerspectiveViewerWidget;
-    private _save?: DebouncedFunc<() => false | Promise<void>>;
+    private _save?: () => false | Promise<void>;
     private _context_menu?: Menu & { init_overlay?: () => void };
 
     constructor(element: HTMLElement, options = {}) {
@@ -1028,12 +1028,9 @@ export class PerspectiveWorkspace extends SplitPanel {
 
     async workspaceUpdated() {
         if (!this._save) {
-            this._save = debounce(
-                () =>
-                    this.dockpanel.mode !== "single-document" &&
-                    this._fireUpdateEvent(),
-                500
-            );
+            this._save = () =>
+                this.dockpanel.mode !== "single-document" &&
+                this._fireUpdateEvent();
         }
 
         this._save();
