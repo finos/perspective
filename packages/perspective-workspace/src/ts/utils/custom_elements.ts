@@ -51,14 +51,9 @@ export function registerElement(
             `<style>${styleString.toString()}</style>` + template.innerHTML;
     }
 
-    template.innerHTML =
-        `<style id="psp_styles" scope="${template.getAttribute(
-            "id"
-        )}">test{}</style>` + template.innerHTML;
-
     const _perspective_element = class extends proto {
-        _initialized: boolean;
-        _initializing: boolean;
+        private _initialized: boolean;
+        private _initializing: boolean;
 
         constructor() {
             super();

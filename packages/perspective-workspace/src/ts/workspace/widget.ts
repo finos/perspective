@@ -88,14 +88,8 @@ export class PerspectiveViewerWidget extends Widget {
             table: this.viewer.getAttribute("table"),
         };
 
-        if (this.viewer.hasAttribute("selectable")) {
-            config.selectable = this.viewer.getAttribute("selectable");
-        }
-
-        if (this.viewer.hasAttribute("editable")) {
-            config.editable = this.viewer.getAttribute("editable");
-        }
-
+        delete config["theme"];
+        delete config["settings"];
         return config;
     }
 
