@@ -84,6 +84,7 @@ function tests(context, compare) {
         }, config);
 
         await page.evaluate(async () => {
+            const workspace = document.getElementById("workspace");
             await workspace.flush();
         });
 
