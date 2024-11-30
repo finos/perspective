@@ -76,6 +76,7 @@ test.describe("Settings", () => {
         test("load and restore with settings called at the same time does not throw", async ({
             page,
             consoleLogs,
+            browserName,
         }) => {
             const errors = [];
             page.on("pageerror", async (msg) => {
@@ -107,18 +108,25 @@ test.describe("Settings", () => {
             });
 
             const contents = await get_contents(page);
-            expect(errors).toEqual([
-                "::Intentional Load Error",
+            expect(errors[0]).toContain(
+                "::Intentional Load Error"
                 //   "RuntimeError::unreachable",
-            ]);
+            );
+
+            // await page.pause();
 
             consoleLogs.expectedLogs.push(
                 "error",
-                /Invalid config: Error: `restore\(\)` called before `load\(\)`.*/
+                browserName === "firefox"
+                    ? /Invalid config: Error.*/
+                    : /Invalid config: Error: `restore\(\)` called before `load\(\)`.*/
             );
+
             consoleLogs.expectedLogs.push(
                 "error",
-                /Caught error: Error: `restore\(\)` called before `load\(\)`.*/
+                browserName === "firefox"
+                    ? /Caught error: Error.*/
+                    : /Caught error: Error: `restore\(\)` called before `load\(\)`.*/
             );
         });
     });

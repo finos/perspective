@@ -58,6 +58,7 @@ if (package_venn.include.length === 0) {
 }
 
 const DEVICE_OPTIONS = {
+    "Desktop Firefox": {},
     "Desktop Chrome": {
         launchOptions: {
             args: [
@@ -199,9 +200,9 @@ const GLOBAL_TEARDOWN_PATH = __require.resolve(
 
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-    timeout: 360_000,
+    timeout: 30_000,
     expect: {
-        timeout: 360_000,
+        timeout: 30_000,
     },
     forbidOnly: !!process.env.CI,
     retries: 0,

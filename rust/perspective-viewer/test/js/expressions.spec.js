@@ -361,6 +361,7 @@ test.describe("Expressions", () => {
         await addExprButton.click();
         await page.evaluate(openSidebarAndScrollToBottom);
         let clicked = await addExprButton.getAttribute("class");
+
         expect(clicked).toBe("dragdrop-hover");
     });
 
