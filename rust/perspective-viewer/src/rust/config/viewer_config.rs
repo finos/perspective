@@ -120,14 +120,14 @@ impl ViewerConfig {
         match format {
             Some(ViewerConfigEncoding::String) => {
                 let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
-                let bytes = rmp_serde::to_vec(&self.token())?;
+                let bytes = rmp_serde::to_vec_named(&self.token())?;
                 encoder.write_all(&bytes)?;
                 let encoded = encoder.finish()?;
                 Ok(JsValue::from(base64::encode(encoded)))
             },
             Some(ViewerConfigEncoding::ArrayBuffer) => {
                 let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
-                let bytes = rmp_serde::to_vec(&self.token())?;
+                let bytes = rmp_serde::to_vec_named(&self.token())?;
                 encoder.write_all(&bytes)?;
                 let encoded = encoder.finish()?;
                 let array = js_sys::Uint8Array::from(&encoded[..]);

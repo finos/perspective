@@ -64,7 +64,7 @@
     }
 }
 
-perspective-viewer {
+::slotted(perspective-viewer) {
     flex: 1;
     position: relative;
     display: block;
@@ -76,10 +76,11 @@ perspective-viewer {
     overflow: visible !important;
 }
 
-.lm-mod-override-cursor {
+:host-context(.lm-mod-override-cursor) {
     cursor: grabbing !important;
 }
 
-.lm-mod-override-cursor perspective-viewer > * {
-    pointer-events: none;
+:host-context(.lm-mod-override-cursor) ::slotted(perspective-viewer),
+.context-menu ::slotted(perspective-viewer) {
+    --override-content-pointer-events: none;
 }
