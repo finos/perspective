@@ -234,11 +234,11 @@ export const createCommands = (
             workspace.toggleMasterDetail(
                 workspace.getWidgetByName(args.widget_name as string)!
             ),
-        isVisible: () => true,
-        // iconClass: (args) =>
-        //     args.widget.parent === workspace.dockpanel
-        //         ? "menu-master"
-        //         : "menu-detail",
+        isVisible: (args) => {
+            return !!workspace.getWidgetByName(args.widget_name as string)
+                ?._is_pivoted;
+        },
+
         label: (args) => {
             return workspace.getWidgetByName(args.widget_name as string)!
                 .parent === workspace.get_dock_panel()

@@ -53,7 +53,7 @@ export class PerspectiveWorkspace extends SplitPanel {
     private dockpanel: PerspectiveDockPanel;
     private detailPanel: Panel;
     private masterPanel: SplitPanel;
-    private element: HTMLElement;
+    element: HTMLElement;
     menu_elem: HTMLElement;
     private _tables: ObservableMap<string, psp.Table | Promise<psp.Table>>;
     private listeners: WeakMap<PerspectiveViewerWidget, () => void>;
@@ -91,6 +91,8 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.commands = createCommands(this, this.indicator);
         this.menu_elem = document.createElement("perspective-workspace-menu");
         this.menu_elem.attachShadow({ mode: "open" });
+        this.menu_elem.shadowRoot!.innerHTML = `<style>${injectedStyles}</style>`;
+
         this.element.shadowRoot!.insertBefore(
             this.menu_elem,
             this.element.shadowRoot!.lastElementChild!
@@ -789,8 +791,6 @@ export class PerspectiveWorkspace extends SplitPanel {
 
     showContextMenu(widget: PerspectiveViewerWidget | null, event: MouseEvent) {
         if (!event.shiftKey) {
-            this.menu_elem.shadowRoot!.innerHTML = `<style>${injectedStyles}</style>`;
-
             const menu = this.createContextMenu(widget);
             menu.init_overlay?.();
             const rect = this.element.getBoundingClientRect();
@@ -798,7 +798,6 @@ export class PerspectiveWorkspace extends SplitPanel {
                 host: this.menu_elem.shadowRoot as unknown as HTMLElement,
             });
 
-            // this.menu_elem = menu_elem;
             event.preventDefault();
             event.stopPropagation();
         }
@@ -828,11 +827,12 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     addViewer(config: ViewerConfigUpdateExt, is_global_filter?: boolean) {
-        const widget = this._createWidgetAndNode({ config });
         if (this.dockpanel.mode === "single-document") {
+            const _task = this._maximizedWidget!.viewer.toggleConfig(false);
             this._unmaximize();
         }
 
+        const widget = this._createWidgetAndNode({ config });
         if (is_global_filter) {
             if (!this.masterPanel.isAttached) {
                 this.setupMasterPanel(DEFAULT_WORKSPACE_SIZE);
@@ -966,6 +966,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         const updated = async (event: CustomEvent) => {
             this.workspaceUpdated();
             widget.title.label = event.detail.title;
+            widget._is_pivoted = event.detail.group_by?.length > 0;
         };
 
         widget.node.addEventListener("contextmenu", contextMenu);
