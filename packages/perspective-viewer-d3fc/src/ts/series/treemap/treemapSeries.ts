@@ -70,10 +70,10 @@ export function treemapSeries() {
         const rects = nodesMerge
             .select("rect")
             .attr("class", (d) => `treerect ${nodeLevelHelper(maxDepth, d)}`)
-            .style("x", (d) => d.x0)
-            .style("y", (d) => d.y0)
-            .style("width", (d) => calcWidth(d))
-            .style("height", (d) => calcHeight(d));
+            .style("x", (d) => `${d.x0}px`)
+            .style("y", (d) => `${d.y0}px`)
+            .style("width", (d) => `${calcWidth(d)}px`)
+            .style("height", (d) => `${calcHeight(d)}px`);
 
         rects.style("fill", (d) => {
             if (nodeLevelHelper(maxDepth, d) === nodeLevel.leaf) {
