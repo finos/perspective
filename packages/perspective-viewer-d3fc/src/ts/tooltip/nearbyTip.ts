@@ -63,6 +63,8 @@ interface NearbyTip {
 
     altDataWithScale(): AltDataWithScale;
     altDataWithScale(altDataWithScale: AltDataWithScale): NearbyTip;
+
+    getClosestDataPoint(val: any): any;
 }
 
 export default (): NearbyTip => {
@@ -147,10 +149,15 @@ export default (): NearbyTip => {
                 )
                     return null;
 
-                return Math.sqrt(
-                    Math.pow((xScale(v[xValueName]) as number) - pos.x, 2) +
-                        Math.pow(scale(v[yValueName]) - pos.y, 2)
-                );
+                const xDist = (xScale(v[xValueName]) as number) - pos.x;
+                const yDist = scale(v[yValueName]) - pos.y;
+
+                if (xDist <= 0 && yDist <= 0) {
+                    return Math.sqrt(
+                        Math.pow(xDist, 2) +
+                        Math.pow(yDist, 2)
+                    );
+                }
             };
         };
 
