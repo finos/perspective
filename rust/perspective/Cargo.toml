@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective"
-version = "3.1.7"
+version = "3.1.8"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -38,8 +38,8 @@ external-cpp = [
 
 [dependencies]
 async-lock = "2.5.0"
-perspective-client = { version = "3.1.7", path = "../perspective-client" }
-perspective-server = { version = "3.1.7", path = "../perspective-server" }
+perspective-client = { version = "3.1.8", path = "../perspective-client" }
+perspective-server = { version = "3.1.8", path = "../perspective-server" }
 tracing = { version = ">=0.1.36" }
 
 axum = { version = ">=0.7,<2", features = ["ws"], optional = true }
