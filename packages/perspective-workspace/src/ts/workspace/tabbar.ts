@@ -129,11 +129,12 @@ export class PerspectiveTabBar extends TabBar<any> {
         });
 
         const box = (event.target as HTMLElement).getBoundingClientRect();
-        this._menu.open(box.x, box.y + box.height);
-
+        const outer_box = this._workspace.element.getBoundingClientRect();
+        this._menu.open(box.x - outer_box.x, box.y + box.height - outer_box.y);
         this._menu.aboutToClose.connect(() => {
             this._menu = undefined;
         });
+
         event.preventDefault();
         event.stopPropagation();
     }
