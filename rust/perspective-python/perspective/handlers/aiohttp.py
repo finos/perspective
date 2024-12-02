@@ -37,11 +37,12 @@ class PerspectiveAIOHTTPHandler(object):
     def __init__(self, **kwargs):
         self.server = kwargs.pop("perspective_server", perspective.GLOBAL_SERVER)
         self._request = kwargs.pop("request")
+        self._loop = kwargs.pop("loop", asyncio.get_event_loop())
         super().__init__(**kwargs)
 
     async def run(self) -> web.WebSocketResponse:
         def inner(msg):
-            asyncio.get_running_loop().create_task(self._ws.send_bytes(msg))
+            self._loop.create_task(self._ws.send_bytes(msg))
 
         self.session = self.server.new_session(inner)
         try:

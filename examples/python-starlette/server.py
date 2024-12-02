@@ -18,7 +18,6 @@ import threading
 import uvicorn
 
 from fastapi import FastAPI, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 
@@ -64,21 +63,12 @@ def make_app():
         )
         await handler.run()
 
-    # static_html_files = StaticFiles(directory="../python-tornado", html=True)
     static_html_files = StaticFiles(directory="../python-tornado", html=True)
 
     app = FastAPI()
     app.add_api_websocket_route("/websocket", websocket_handler)
     app.get("/node_modules/{rest_of_path:path}")(static_node_modules_handler)
     app.mount("/", static_html_files)
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
     return app
 
 
