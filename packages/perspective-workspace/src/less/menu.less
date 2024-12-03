@@ -12,11 +12,15 @@
 
 @import "@lumino/widgets/style/menu.css";
 
+:host {
+    position: absolute;
+}
+
 .lm-Menu {
     font-size: 12px;
     padding: 8px;
-    background: white;
-    color: #666;
+    background-color: var(--plugin--background);
+    color: var(--icon--color);
     border: 1px solid var(--inactive--color);
     border-radius: 3px;
     max-width: 350px;

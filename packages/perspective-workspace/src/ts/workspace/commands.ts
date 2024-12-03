@@ -20,6 +20,7 @@ import type {
 } from "@finos/perspective-viewer";
 
 import type { PerspectiveWorkspace } from "./workspace";
+import { WorkspaceMenu } from "./menu";
 
 export const createCommands = (
     workspace: PerspectiveWorkspace,
@@ -43,7 +44,10 @@ export const createCommands = (
             workspace.get_context_menu()?.init_overlay?.();
             menu.addEventListener("blur", () => {
                 const context_menu = workspace.get_context_menu()!;
-                const signal = context_menu.aboutToClose as Signal<Menu, any>;
+                const signal = context_menu.aboutToClose as Signal<
+                    WorkspaceMenu,
+                    any
+                >;
                 signal.emit({});
             });
         },
@@ -83,7 +87,7 @@ export const createCommands = (
             menu.addEventListener("blur", () => {
                 (
                     workspace.get_context_menu()?.aboutToClose as
-                        | Signal<Menu, any>
+                        | Signal<WorkspaceMenu, any>
                         | undefined
                 )?.emit({});
             });
@@ -230,11 +234,11 @@ export const createCommands = (
             workspace.toggleMasterDetail(
                 workspace.getWidgetByName(args.widget_name as string)!
             ),
-        isVisible: () => true,
-        // iconClass: (args) =>
-        //     args.widget.parent === workspace.dockpanel
-        //         ? "menu-master"
-        //         : "menu-detail",
+        isVisible: (args) => {
+            return !!workspace.getWidgetByName(args.widget_name as string)
+                ?._is_pivoted;
+        },
+
         label: (args) => {
             return workspace.getWidgetByName(args.widget_name as string)!
                 .parent === workspace.get_dock_panel()

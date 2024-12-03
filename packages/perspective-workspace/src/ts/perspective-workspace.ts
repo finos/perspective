@@ -27,7 +27,6 @@ import {
 import { bindTemplate, CustomElementProto } from "./utils/custom_elements";
 import style from "../../build/css/workspace.css";
 import template from "../html/workspace.html";
-import injectedStyles from "../../build/css/injected.css";
 
 /**
  * A Custom Element for coordinating a set of `<perspective-viewer>` light DOM
@@ -52,13 +51,10 @@ import injectedStyles from "../../build/css/injected.css";
  *         name="View One"
  *         table="superstore">
  *     </perspective-viewer>
- *
  *     <perspective-viewer
- *         row-pivots='["State"]'
  *         name="View Two"
  *         table="superstore">
  *     </perspective-viewer>
- *
  * </perspective-workspace>
  * ```
  *
@@ -294,11 +290,6 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
         this._light_dom_changed();
     }
 }
-
-const _injectStyle = document.createElement("style");
-_injectStyle.toggleAttribute("injected", true);
-_injectStyle.innerHTML = injectedStyles;
-document.head.appendChild(_injectStyle);
 
 bindTemplate(
     template,

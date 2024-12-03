@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { DockLayout, DockPanel, TabBar, Widget } from "@lumino/widgets";
-import { toArray } from "@lumino/algorithm";
 import { PerspectiveTabBar } from "./tabbar";
 import { PerspectiveTabBarRenderer } from "./tabbarrenderer";
 import { PerspectiveWorkspace } from "./workspace";
@@ -55,7 +54,7 @@ export class PerspectiveDockPanel extends DockPanel {
         const widget = sender.titles[args.index].owner;
         const layout = this.layout as DockLayout;
         const old = layout.saveLayout();
-        if (toArray(layout.widgets()).length > 1) {
+        if (Array.from(layout.widgets()).length > 1) {
             layout.removeWidget(widget);
         }
 
@@ -65,6 +64,8 @@ export class PerspectiveDockPanel extends DockPanel {
         // @ts-ignore: accessing a private member `_drag`
         const drag = this._drag;
         if (drag) {
+            drag.dragImage?.parentElement.removeChild(drag.dragImage);
+            drag.dragImage = null;
             drag._promise.then(() => {
                 if (!widget.node.isConnected) {
                     layout.restoreLayout(old);

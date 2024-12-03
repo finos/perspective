@@ -1,3 +1,25 @@
+# [v3.1.8](https://github.com/finos/perspective/releases/tag/v3.1.8)
+
+_2 December 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.7...v3.1.8))
+
+Fixes
+
+- fix treemap rendering issue in firefox [#2813](https://github.com/finos/perspective/pull/2813)
+- Allow for passthrough of event loop in psp webserver handlers [#2829](https://github.com/finos/perspective/pull/2829)
+- Fix workspace dark theme, theme render bug [#2864](https://github.com/finos/perspective/pull/2864)
+
+# [v3.1.7](https://github.com/finos/perspective/releases/tag/v3.1.7)
+
+_30 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.6...v3.1.7))
+
+Fixes
+
+- Remove `workspace-layout-update` event debounce [#2862](https://github.com/finos/perspective/pull/2862)
+
+Misc
+
+- Add some information on JSON input formats [#2856](https://github.com/finos/perspective/pull/2856)
+
 # [v3.1.6](https://github.com/finos/perspective/releases/tag/v3.1.6)
 
 _18 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.5...v3.1.6))

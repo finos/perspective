@@ -664,7 +664,7 @@ impl PerspectiveViewerElement {
                 .collect();
 
             let theme_name = presentation.get_selected_theme_name().await;
-            presentation.reset_available_themes(themes).await;
+            let mut changed = presentation.reset_available_themes(themes).await;
             let reset_theme = presentation
                 .get_available_themes()
                 .await?
@@ -672,12 +672,14 @@ impl PerspectiveViewerElement {
                 .find(|y| theme_name.as_ref() == Some(y))
                 .cloned();
 
-            presentation.set_theme_name(reset_theme.as_deref()).await?;
-            if let Some(view) = session.get_view() {
-                renderer.restyle_all(&view).await
-            } else {
-                Ok(JsValue::UNDEFINED)
+            changed = presentation.set_theme_name(reset_theme.as_deref()).await? || changed;
+            if changed {
+                if let Some(view) = session.get_view() {
+                    return renderer.restyle_all(&view).await;
+                }
             }
+
+            Ok(JsValue::UNDEFINED)
         })
     }
 

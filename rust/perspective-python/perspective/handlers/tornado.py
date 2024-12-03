@@ -45,8 +45,9 @@ class PerspectiveTornadoHandler(WebSocketHandler):
     def check_origin(self, origin):
         return True
 
-    def initialize(self, perspective_server=perspective.GLOBAL_SERVER):
+    def initialize(self, perspective_server=perspective.GLOBAL_SERVER, loop=None):
         self.server = perspective_server
+        self.loop = loop or IOLoop.current()
 
     def open(self):
         def inner(msg):
@@ -63,4 +64,4 @@ class PerspectiveTornadoHandler(WebSocketHandler):
             return
 
         self.session.handle_request(msg)
-        IOLoop.current().call_later(0, self.session.poll)
+        self.loop.call_later(0, self.session.poll)

@@ -12,30 +12,21 @@
 
 import { find, toArray } from "@lumino/algorithm";
 import { CommandRegistry } from "@lumino/commands";
-import {
-    SplitPanel,
-    Panel,
-    Menu,
-    DockPanel,
-    Title,
-    Widget,
-} from "@lumino/widgets";
-import { Slot } from "@lumino/signaling";
+import { SplitPanel, Panel, DockPanel } from "@lumino/widgets";
 import uniqBy from "lodash/uniqBy";
-import { DebouncedFunc } from "lodash";
+import { DebouncedFunc, isEqual } from "lodash";
 import debounce from "lodash/debounce";
 import type {
     HTMLPerspectiveViewerElement,
     ViewerConfigUpdate,
 } from "@finos/perspective-viewer";
 import type * as psp from "@finos/perspective";
-
+import injectedStyles from "../../../build/css/injected.css";
 import { PerspectiveDockPanel } from "./dockpanel";
-import { MenuRenderer } from "./menu";
+import { WorkspaceMenu } from "./menu";
 import { createCommands } from "./commands";
 import { PerspectiveViewerWidget } from "./widget";
 import { ObservableMap } from "../utils/observable_map";
-import { ReadonlyJSONObject } from "@lumino/coreutils";
 
 const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
@@ -62,19 +53,20 @@ export class PerspectiveWorkspace extends SplitPanel {
     private dockpanel: PerspectiveDockPanel;
     private detailPanel: Panel;
     private masterPanel: SplitPanel;
-    private element: HTMLElement;
+    element: HTMLElement;
+    menu_elem: HTMLElement;
     private _tables: ObservableMap<string, psp.Table | Promise<psp.Table>>;
     private listeners: WeakMap<PerspectiveViewerWidget, () => void>;
     private indicator: HTMLElement;
     private commands: CommandRegistry;
-    private menuRenderer: MenuRenderer;
+    private _menu?: WorkspaceMenu;
     private _minimizedLayoutSlots?: DockPanel.ILayoutConfig;
     private _minimizedLayout?: DockPanel.ILayoutConfig;
     private _maximizedWidget?: PerspectiveViewerWidget;
-    private _save?: DebouncedFunc<() => false | Promise<void>>;
-    private _context_menu?: Menu & { init_overlay?: () => void };
+    private _last_updated_state?: PerspectiveWorkspaceConfig<string>;
+    // private _context_menu?: Menu & { init_overlay?: () => void };
 
-    constructor(element: HTMLElement, options = {}) {
+    constructor(element: HTMLElement) {
         super({ orientation: "horizontal" });
         this.addClass("perspective-workspace");
         this.dockpanel = new PerspectiveDockPanel(this);
@@ -84,7 +76,10 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.detailPanel.addWidget(this.dockpanel);
         this.masterPanel = new SplitPanel({ orientation: "vertical" });
         this.masterPanel.addClass("master-panel");
-        this.dockpanel.layoutModified.connect(() => this.workspaceUpdated());
+        this.dockpanel.layoutModified.connect(() => {
+            this.workspaceUpdated();
+        });
+
         this.addWidget(this.detailPanel);
         this.spacing = 6;
         this.element = element;
@@ -94,14 +89,22 @@ export class PerspectiveWorkspace extends SplitPanel {
         this._tables.addDeleteListener(this._delete_listener.bind(this));
         this.indicator = this.init_indicator();
         this.commands = createCommands(this, this.indicator);
-        this.menuRenderer = new MenuRenderer();
+        this.menu_elem = document.createElement("perspective-workspace-menu");
+        this.menu_elem.attachShadow({ mode: "open" });
+        this.menu_elem.shadowRoot!.innerHTML = `<style>${injectedStyles}</style>`;
+
+        this.element.shadowRoot!.insertBefore(
+            this.menu_elem,
+            this.element.shadowRoot!.lastElementChild!
+        );
+
         element.addEventListener("contextmenu", (event) =>
             this.showContextMenu(null, event)
         );
     }
 
-    get_context_menu(): (Menu & { init_overlay?: () => void }) | undefined {
-        return this._context_menu;
+    get_context_menu(): WorkspaceMenu | undefined {
+        return this._menu;
     }
 
     get_dock_panel(): PerspectiveDockPanel {
@@ -638,19 +641,16 @@ export class PerspectiveWorkspace extends SplitPanel {
      */
 
     createContextMenu(widget: PerspectiveViewerWidget | null) {
-        const contextMenu: Menu & { init_overlay?: () => void } = new Menu({
+        this._menu = new WorkspaceMenu(this.menu_elem.shadowRoot!, {
             commands: this.commands,
-            renderer: this.menuRenderer,
         });
-
-        this._context_menu = contextMenu;
 
         const tabbar = find(
             this.dockpanel.tabBars(),
             (bar) => bar.currentTitle?.owner === widget
         );
 
-        const init_overlay = () => {
+        this._menu.init_overlay = () => {
             if (widget) {
                 widget.addClass("context-focus");
                 widget.viewer.classList.add("context-focus");
@@ -660,23 +660,24 @@ export class PerspectiveWorkspace extends SplitPanel {
                 if (
                     widget.viewer.classList.contains("workspace-master-widget")
                 ) {
-                    contextMenu.node.classList.add("workspace-master-menu");
+                    this._menu!.node.classList.add("workspace-master-menu");
                 } else {
-                    contextMenu.node.classList.remove("workspace-master-menu");
+                    this._menu!.node.classList.remove("workspace-master-menu");
                 }
             }
         };
 
-        contextMenu.init_overlay = init_overlay;
         if (widget?.parent === this.dockpanel || widget === null) {
-            contextMenu.addItem({
+            this._menu.addItem({
                 type: "submenu",
                 command: "workspace:newmenu",
                 submenu: (() => {
-                    const submenu = new Menu({
-                        commands: this.commands,
-                        renderer: this.menuRenderer,
-                    });
+                    const submenu = new WorkspaceMenu(
+                        this.menu_elem.shadowRoot!,
+                        {
+                            commands: this.commands,
+                        }
+                    );
 
                     for (const table of this.tables.keys()) {
                         let args;
@@ -725,7 +726,6 @@ export class PerspectiveWorkspace extends SplitPanel {
                     }
 
                     submenu.title.label = "New Table";
-
                     return submenu;
                 })(),
             });
@@ -733,51 +733,51 @@ export class PerspectiveWorkspace extends SplitPanel {
 
         if (widget) {
             if (widget?.parent === this.dockpanel) {
-                contextMenu.addItem({ type: "separator" });
+                this._menu.addItem({ type: "separator" });
             }
 
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:duplicate",
                 args: { widget_name: widget.name },
             });
 
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:master",
                 args: { widget_name: widget.name },
             });
 
-            contextMenu.addItem({ type: "separator" });
+            this._menu.addItem({ type: "separator" });
 
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:settings",
                 args: { widget_name: widget.name },
             });
 
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:reset",
                 args: { widget_name: widget.name },
             });
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:export",
                 args: { widget_name: widget.name },
             });
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:copy",
                 args: { widget_name: widget.name },
             });
 
-            contextMenu.addItem({ type: "separator" });
+            this._menu.addItem({ type: "separator" });
 
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:close",
                 args: { widget_name: widget.name },
             });
-            contextMenu.addItem({
+            this._menu.addItem({
                 command: "workspace:help",
             });
         }
 
-        contextMenu.aboutToClose.connect(() => {
+        this._menu.aboutToClose.connect(() => {
             if (widget) {
                 this.element.classList.remove("context-menu");
                 this.removeClass("context-menu");
@@ -786,14 +786,18 @@ export class PerspectiveWorkspace extends SplitPanel {
             }
         });
 
-        return contextMenu;
+        return this._menu;
     }
 
     showContextMenu(widget: PerspectiveViewerWidget | null, event: MouseEvent) {
         if (!event.shiftKey) {
             const menu = this.createContextMenu(widget);
             menu.init_overlay?.();
-            menu.open(event.clientX, event.clientY);
+            const rect = this.element.getBoundingClientRect();
+            menu.open(event.clientX - rect.x, event.clientY - rect.y, {
+                host: this.menu_elem.shadowRoot as unknown as HTMLElement,
+            });
+
             event.preventDefault();
             event.stopPropagation();
         }
@@ -823,11 +827,12 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     addViewer(config: ViewerConfigUpdateExt, is_global_filter?: boolean) {
-        const widget = this._createWidgetAndNode({ config });
         if (this.dockpanel.mode === "single-document") {
+            const _task = this._maximizedWidget!.viewer.toggleConfig(false);
             this._unmaximize();
         }
 
+        const widget = this._createWidgetAndNode({ config });
         if (is_global_filter) {
             if (!this.masterPanel.isAttached) {
                 this.setupMasterPanel(DEFAULT_WORKSPACE_SIZE);
@@ -961,6 +966,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         const updated = async (event: CustomEvent) => {
             this.workspaceUpdated();
             widget.title.label = event.detail.title;
+            widget._is_pivoted = event.detail.group_by?.length > 0;
         };
 
         widget.node.addEventListener("contextmenu", contextMenu);
@@ -968,10 +974,6 @@ export class PerspectiveWorkspace extends SplitPanel {
 
         // @ts-ignore
         widget.viewer.addEventListener("perspective-config-update", updated);
-        widget.viewer.addEventListener(
-            "perspective-plugin-update",
-            this.workspaceUpdated.bind(this)
-        );
 
         this.listeners.set(widget, () => {
             widget.node.removeEventListener("contextmenu", contextMenu);
@@ -984,11 +986,6 @@ export class PerspectiveWorkspace extends SplitPanel {
             widget.viewer.removeEventListener(
                 "perspective-config-update",
                 updated
-            );
-
-            widget.viewer.removeEventListener(
-                "perspective-plugin-update",
-                this.workspaceUpdated.bind(this)
             );
         });
     }
@@ -1010,9 +1007,18 @@ export class PerspectiveWorkspace extends SplitPanel {
      *
      */
 
-    async _fireUpdateEvent() {
+    async workspaceUpdated() {
         const layout = await this.save();
         if (layout) {
+            if (this._last_updated_state) {
+                if (isEqual(this._last_updated_state, layout)) {
+                    return;
+                }
+            }
+
+            this._last_updated_state =
+                layout as any as PerspectiveWorkspaceConfig<string>;
+
             const tables: Record<string, psp.Table | Promise<psp.Table>> = {};
             this.tables.forEach((value, key) => {
                 tables[key] = value;
@@ -1024,18 +1030,5 @@ export class PerspectiveWorkspace extends SplitPanel {
                 })
             );
         }
-    }
-
-    async workspaceUpdated() {
-        if (!this._save) {
-            this._save = debounce(
-                () =>
-                    this.dockpanel.mode !== "single-document" &&
-                    this._fireUpdateEvent(),
-                500
-            );
-        }
-
-        this._save();
     }
 }
