@@ -22,14 +22,15 @@ function refineDateData(
 
     crossValues.forEach(({ type }, index) => {
         const formatType =
-            (type === "date" || type === "timestamp" || type === "datetime")
-             ? (value: any) => new Date(value).toLocaleDateString()
-            : ((type === "time") ? (value: any) => new Date(value).toLocaleTimeString()
-            : null);
+            type === "date" || type === "timestamp" || type === "datetime"
+                ? (value: any) => new Date(value).toLocaleDateString()
+                : type === "time"
+                ? (value: any) => new Date(value).toLocaleTimeString()
+                : null;
 
         if (formatType) {
             dataToRefine.forEach((row: { __ROW_PATH__: any[] }) => {
-                row.__ROW_PATH__[index] = formatType(row.__ROW_PATH__[index])
+                row.__ROW_PATH__[index] = formatType(row.__ROW_PATH__[index]);
             });
         }
     });
