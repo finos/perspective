@@ -13,20 +13,16 @@
 import { ArrayExt } from "@lumino/algorithm";
 import { ElementExt } from "@lumino/domutils";
 import { TabBar } from "@lumino/widgets";
-import {
-    TabBarItems,
-    DEFAULT_TITLE,
-    PerspectiveTabBarRenderer,
-} from "./tabbarrenderer";
-import { VirtualDOM, VirtualElement } from "@lumino/virtualdom";
+import { TabBarItems, PerspectiveTabBarRenderer } from "./tabbarrenderer";
+import { VirtualDOM } from "@lumino/virtualdom";
 import { CommandRegistry } from "@lumino/commands";
-import { MenuRenderer } from "./menu";
 import { Menu } from "@lumino/widgets";
 import { PerspectiveWorkspace } from "./workspace";
 import { Message } from "@lumino/messaging";
 import { Title } from "@lumino/widgets";
 import { Signal } from "@lumino/signaling";
 import { ReadonlyJSONObject, ReadonlyJSONValue } from "@lumino/coreutils";
+import { WorkspaceMenu } from "./menu";
 
 export class PerspectiveTabBar extends TabBar<any> {
     _workspace: PerspectiveWorkspace;
@@ -97,8 +93,10 @@ export class PerspectiveTabBar extends TabBar<any> {
 
     onClick(otherTitles: Title<any>[], index: number, event: MouseEvent) {
         const commands = new CommandRegistry();
-        const renderer = new MenuRenderer();
-        this._menu = new Menu({ commands, renderer });
+        this._menu = new WorkspaceMenu(this._workspace.menu_elem.shadowRoot!, {
+            commands,
+        });
+
         this._menu.addClass("perspective-workspace-menu");
         this._menu.dataset.minwidth = this.__titles[index];
         for (const title of otherTitles) {
@@ -131,10 +129,12 @@ export class PerspectiveTabBar extends TabBar<any> {
         });
 
         const box = (event.target as HTMLElement).getBoundingClientRect();
-        this._menu.open(box.x, box.y + box.height);
+        const outer_box = this._workspace.element.getBoundingClientRect();
+        this._menu.open(box.x - outer_box.x, box.y + box.height - outer_box.y);
         this._menu.aboutToClose.connect(() => {
             this._menu = undefined;
         });
+
         event.preventDefault();
         event.stopPropagation();
     }

@@ -34,11 +34,12 @@ class PerspectiveStarletteHandler(object):
     def __init__(self, **kwargs):
         self._server = kwargs.pop("perspective_server", perspective.GLOBAL_SERVER)
         self._websocket = kwargs.pop("websocket")
+        self._loop = kwargs.pop("loop", asyncio.get_event_loop())
         super().__init__(**kwargs)
 
     async def run(self) -> None:
         def inner(msg):
-            asyncio.get_running_loop().create_task(self._websocket.send_bytes(msg))
+            self._loop.create_task(self._websocket.send_bytes(msg))
 
         self.session = self._server.new_session(inner)
 

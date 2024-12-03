@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -186,9 +186,20 @@ impl Presentation {
 
     /// Reset the state.  `styleSheets` will be re-parsed next time
     /// `get_themes()` is called if the `themes` argument is `None`.
-    pub async fn reset_available_themes(&self, themes: Option<Vec<String>>) {
+    ///
+    /// # Returns
+    /// A `bool` indicating whether the internal state changed.
+    pub async fn reset_available_themes(&self, themes: Option<Vec<String>>) -> bool {
+        fn as_set(x: &Option<Vec<String>>) -> HashSet<&'_ String> {
+            x.as_ref()
+                .map(|x| x.iter().collect::<HashSet<_>>())
+                .unwrap_or_default()
+        }
+
         let mut mutex = self.0.theme_data.lock().await;
+        let changed = as_set(&mutex.themes) != as_set(&themes);
         mutex.themes = themes;
+        changed
     }
 
     pub async fn get_selected_theme_config(&self) -> ApiResult<(Vec<String>, Option<usize>)> {
@@ -218,8 +229,17 @@ impl Presentation {
     }
 
     /// Set the theme by name, or `None` for the default theme.
-    pub async fn set_theme_name(&self, theme: Option<&str>) -> ApiResult<()> {
-        let (themes, _) = self.get_selected_theme_config().await?;
+    ///
+    /// # Returns
+    /// A `bool` indicating whether the internal state changed.
+    pub async fn set_theme_name(&self, theme: Option<&str>) -> ApiResult<bool> {
+        let (themes, selected) = self.get_selected_theme_config().await?;
+        if let Some(x) = selected {
+            if themes.get(x).map(|x| x.as_str()) == theme {
+                return Ok(false);
+            }
+        }
+
         let index = if let Some(theme) = theme {
             self.set_theme_attribute(Some(theme))?;
             themes.iter().position(|x| x == theme)
@@ -232,7 +252,7 @@ impl Presentation {
         };
 
         self.theme_config_updated.emit((themes, index));
-        Ok(())
+        Ok(true)
     }
 
     /// Returns an owned copy of the curent column configuration map.
