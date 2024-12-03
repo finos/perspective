@@ -63,8 +63,6 @@ interface NearbyTip {
 
     altDataWithScale(): AltDataWithScale;
     altDataWithScale(altDataWithScale: AltDataWithScale): NearbyTip;
-
-    getClosestDataPoint(val: any): any;
 }
 
 export default (): NearbyTip => {
