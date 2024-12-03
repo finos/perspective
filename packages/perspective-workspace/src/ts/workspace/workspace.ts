@@ -158,13 +158,13 @@ export class PerspectiveWorkspace extends SplitPanel {
         let detail = is_settings
             ? this._minimizedLayoutSlots
             : PerspectiveDockPanel.mapWidgets(
-                  (widget) =>
-                      // this.getWidgetByName(widget)!.viewer.getAttribute("slot")
-                      (widget as PerspectiveViewerWidget).viewer.getAttribute(
-                          "slot"
-                      ),
-                  this.dockpanel.saveLayout()
-              );
+                (widget) =>
+                    // this.getWidgetByName(widget)!.viewer.getAttribute("slot")
+                    (widget as PerspectiveViewerWidget).viewer.getAttribute(
+                        "slot"
+                    ),
+                this.dockpanel.saveLayout()
+            );
 
         const layout = {
             sizes: [...this.relativeSizes()],

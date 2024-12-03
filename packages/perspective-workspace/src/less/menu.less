@@ -12,11 +12,15 @@
 
 @import "@lumino/widgets/style/menu.css";
 
+:host {
+    position: absolute;
+}
+
 .lm-Menu {
     font-size: 12px;
     padding: 8px;
-    background: white;
-    color: #666;
+    background-color: var(--plugin--background);
+    color: var(--icon--color);
     border: 1px solid var(--inactive--color);
     border-radius: 3px;
     max-width: 350px;
@@ -71,12 +75,12 @@
     padding: 0 8px;
 }
 
-.lm-Menu-item[data-type="separator"] > div {
+.lm-Menu-item[data-type="separator"]>div {
     padding: 0;
     height: 9px;
 }
 
-.lm-Menu-item[data-type="separator"] > div::after {
+.lm-Menu-item[data-type="separator"]>div::after {
     content: "";
     display: block;
     position: relative;

@@ -154,6 +154,16 @@ async function build_all() {
     }
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
+
+    try {
+        await $`npx tsc --project ./tsconfig.json`.stdio(
+            "inherit",
+            "inherit",
+            "inherit"
+        );
+    } catch (e) {
+        process.exit(1);
+    }
 }
 
 build_all();

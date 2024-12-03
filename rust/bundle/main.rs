@@ -67,6 +67,7 @@ fn bindgen(outdir: &Path, artifact: &str, is_release: bool) {
     Bindgen::new()
         .web(true)
         .unwrap()
+        .keep_debug(!is_release)
         .input_path(input)
         .typescript(true)
         .out_name(&format!("{}.wasm", artifact.replace('_', "-")))
