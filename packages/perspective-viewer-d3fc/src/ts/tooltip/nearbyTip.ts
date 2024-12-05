@@ -101,7 +101,7 @@ export default (): NearbyTip => {
                         raiseEvent(
                             selection.node(),
                             tooltipData[0],
-                            base.settings()
+                            base.settings(),
                         );
                     }
                 })
@@ -121,14 +121,14 @@ export default (): NearbyTip => {
             .attr("class", "nearbyTip")
             .merge(tips)
             .attr("r", (d) =>
-                size ? scale_factor * Math.sqrt(size(d.size)) : 10
+                size ? scale_factor * Math.sqrt(size(d.size)) : 10,
             )
             .attr(
                 "transform",
                 (d) =>
                     `translate(${xScale(d[xValueName])},${useYScale(
-                        d[yValueName]
-                    )})`
+                        d[yValueName],
+                    )})`,
             )
             .style("stroke", "none")
             .style("fill", (d) => color && d.key && withOpacity(color(d.key)));
@@ -150,12 +150,8 @@ export default (): NearbyTip => {
                 const xDist = (xScale(v[xValueName]) as number) - pos.x;
                 const yDist = scale(v[yValueName]) - pos.y;
 
-
                 if (xDist <= 0 && yDist <= 0) {
-                    return Math.sqrt(
-                        Math.pow(xDist, 2) +
-                        Math.pow(yDist, 2)
-                    );
+                    return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
                 }
             };
         };
@@ -170,7 +166,7 @@ export default (): NearbyTip => {
             const best2 = findBestFromData(
                 altDataWithScale.data,
                 dist2,
-                Math.min
+                Math.min,
             );
             return dist1(best1) <= dist2(best2)
                 ? { data: best1, scale: yScale }
