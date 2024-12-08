@@ -91,7 +91,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.commands = createCommands(this, this.indicator);
         this.menu_elem = document.createElement("perspective-workspace-menu");
         this.menu_elem.attachShadow({ mode: "open" });
-        this.menu_elem.shadowRoot!.innerHTML = `<style>${injectedStyles}</style>`;
+        this.menu_elem.shadowRoot!.innerHTML = `<style>:host{position:absolute;}${injectedStyles}</style>`;
 
         this.element.shadowRoot!.insertBefore(
             this.menu_elem,

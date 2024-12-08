@@ -17,6 +17,7 @@ import tornado.web
 import tornado.ioloop
 from datetime import date, datetime
 import perspective
+import perspective.handlers.tornado
 import json
 
 old = json.JSONEncoder.default
