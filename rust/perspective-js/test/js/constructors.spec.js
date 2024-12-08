@@ -804,6 +804,26 @@ function validate_typed_array(typed_array, column_data) {
             table.delete();
         });
 
+        test("Handles duplicate column names with different types", async function () {
+            const csv = "A,A\ntest,1";
+            let table = await perspective.table(csv);
+            let view = await table.view();
+            let csv2 = await view.to_json();
+            expect(csv2).toEqual([{ A: "test", "A*": 1 }]);
+            view.delete();
+            table.delete();
+        });
+
+        test("Handles duplicate column names with rename collisions", async function () {
+            const csv = "A,A,A*\ntest,1,2";
+            let table = await perspective.table(csv);
+            let view = await table.view();
+            let csv2 = await view.to_json();
+            expect(csv2).toEqual([{ A: "test", "A*": 1, "A**": 2 }]);
+            view.delete();
+            table.delete();
+        });
+
         test("Handles strings with quotation characters and commas", async function () {
             let table = await perspective.table({ x: "string", y: "integer" });
             table.update([

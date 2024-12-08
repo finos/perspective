@@ -29,6 +29,33 @@
 
 namespace perspective::apachearrow {
 
+std::shared_ptr<::arrow::Table>
+deduplicate_table(std::shared_ptr<::arrow::Table> input) {
+    auto columns = input->ColumnNames();
+    std::set<std::string> columns_seen;
+    bool is_changed;
+    for (auto& column : columns) {
+        std::stringstream ss;
+        ss << column;
+        while (columns_seen.find(ss.str()) != columns_seen.end()) {
+            ss << "*";
+            is_changed = true;
+        }
+
+        if (is_changed) {
+            column = ss.str();
+        }
+
+        columns_seen.insert(column);
+    }
+
+    if (is_changed) {
+        input = *input->RenameColumns(columns);
+    }
+
+    return input;
+}
+
 void
 load_stream(
     const std::uint8_t* ptr,
@@ -38,6 +65,7 @@ load_stream(
     arrow::io::BufferReader buffer_reader(
         reinterpret_cast<const std::uint8_t*>(ptr), length
     );
+
     auto status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader);
     if (!status.ok()) {
         std::stringstream ss;
@@ -54,7 +82,7 @@ load_stream(
             PSP_COMPLAIN_AND_ABORT(ss.str());
         };
 
-        table = *status5;
+        table = deduplicate_table(*status5);
     }
 }
 
@@ -101,7 +129,7 @@ load_file(
                << status3.status().ToString() << "\n";
             PSP_COMPLAIN_AND_ABORT(ss.str());
         };
-        table = *status3;
+        table = deduplicate_table(std::move(*status3));
     };
 }
 
@@ -191,11 +219,9 @@ ArrowLoader::init_csv(
     std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
         psp_schema
 ) {
-    m_table = csvToTable(csv, is_update, psp_schema);
-
+    m_table = deduplicate_table(csvToTable(csv, is_update, psp_schema));
     std::shared_ptr<arrow::Schema> schema = m_table->schema();
     std::vector<std::shared_ptr<arrow::Field>> fields = schema->fields();
-
     for (const auto& field : fields) {
         m_names.push_back(field->name());
         m_types.push_back(convert_type(field->type()->name()));
