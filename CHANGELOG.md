@@ -1,3 +1,15 @@
+# [v3.2.0](https://github.com/finos/perspective/releases/tag/v3.2.0)
+
+_9 December 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.8...v3.2.0))
+
+Features
+
+- Support ndjson [#2873](https://github.com/finos/perspective/pull/2873)
+
+Fixes
+
+- Fix duplicate columns [#2872](https://github.com/finos/perspective/pull/2872)
+
 # [v3.1.8](https://github.com/finos/perspective/releases/tag/v3.1.8)
 
 _2 December 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.7...v3.1.8))
@@ -55,6 +67,11 @@ Misc
 - Update ExprTk [#2825](https://github.com/finos/perspective/pull/2825)
 - sdist licensing follow ups [#2843](https://github.com/finos/perspective/pull/2843)
 
+# [v3.1.5-test1](https://github.com/finos/perspective/releases/tag/v3.1.5-test1)
+
+_11 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4...v3.1.5-test1))
+
+
 # [v3.1.4](https://github.com/finos/perspective/releases/tag/v3.1.4)
 
 _7 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test8...v3.1.4))
@@ -73,6 +90,56 @@ Misc
 
 - Fix failed color range update [#2823](https://github.com/finos/perspective/pull/2823)
 - CI sdist fixes, port conda patch, fix ODR violation [#2826](https://github.com/finos/perspective/pull/2826)
+
+# [v3.1.4-test8](https://github.com/finos/perspective/releases/tag/v3.1.4-test8)
+
+_4 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test7...v3.1.4-test8))
+
+
+# [v3.1.4-test7](https://github.com/finos/perspective/releases/tag/v3.1.4-test7)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test6...v3.1.4-test7))
+
+
+# [v3.1.4-test6](https://github.com/finos/perspective/releases/tag/v3.1.4-test6)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test5...v3.1.4-test6))
+
+
+# [v3.1.4-test5](https://github.com/finos/perspective/releases/tag/v3.1.4-test5)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test4...v3.1.4-test5))
+
+
+# [v3.1.4-test4](https://github.com/finos/perspective/releases/tag/v3.1.4-test4)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test3...v3.1.4-test4))
+
+
+# [v3.1.4-test3](https://github.com/finos/perspective/releases/tag/v3.1.4-test3)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test2...v3.1.4-test3))
+
+
+# [v3.1.4-test2](https://github.com/finos/perspective/releases/tag/v3.1.4-test2)
+
+_31 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test12...v3.1.4-test2))
+
+
+# [v3.1.4-test12](https://github.com/finos/perspective/releases/tag/v3.1.4-test12)
+
+_4 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test11...v3.1.4-test12))
+
+
+# [v3.1.4-test11](https://github.com/finos/perspective/releases/tag/v3.1.4-test11)
+
+_4 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test1...v3.1.4-test11))
+
+
+# [v3.1.4-test1](https://github.com/finos/perspective/releases/tag/v3.1.4-test1)
+
+_31 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.3...v3.1.4-test1))
+
 
 # [v3.1.3](https://github.com/finos/perspective/releases/tag/v3.1.3)
 

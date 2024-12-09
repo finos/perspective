@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-datagrid",
-    "version": "3.1.8",
+    "version": "3.2.0",
     "description": "Perspective datagrid plugin based on `regular-table`",
     "unpkg": "dist/cdn/perspective-viewer-datagrid.js",
     "jsdelivr": "dist/cdn/perspective-viewer-datagrid.js",
