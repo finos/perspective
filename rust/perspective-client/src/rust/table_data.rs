@@ -35,6 +35,7 @@ pub enum UpdateData {
     Arrow(Bytes),
     JsonRows(String),
     JsonColumns(String),
+    Ndjson(String),
 }
 
 impl From<UpdateData> for TableData {
@@ -70,6 +71,7 @@ impl From<UpdateData> for proto::MakeTableData {
             UpdateData::Arrow(x) => make_table_data::Data::FromArrow(x.into()),
             UpdateData::JsonRows(x) => make_table_data::Data::FromRows(x),
             UpdateData::JsonColumns(x) => make_table_data::Data::FromCols(x),
+            UpdateData::Ndjson(x) => make_table_data::Data::FromNdjson(x),
         };
 
         MakeTableData { data: Some(data) }

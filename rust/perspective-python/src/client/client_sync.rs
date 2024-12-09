@@ -307,6 +307,12 @@ impl View {
         self.0.to_json_string(window).py_block_on(py)
     }
 
+    #[doc = crate::inherit_docs!("view/to_ndjson.md")]
+    #[pyo3(signature = (**window))]
+    pub fn to_ndjson(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<String> {
+        self.0.to_ndjson(window).py_block_on(py)
+    }
+
     #[pyo3(signature = (**window))]
     pub fn to_records<'a>(
         &self,

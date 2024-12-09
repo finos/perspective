@@ -165,6 +165,14 @@ impl View {
         Ok(js_sys::JSON::parse(&json)?.unchecked_into())
     }
 
+    #[doc = inherit_docs!("view/to_ndjson.md")]
+    #[wasm_bindgen]
+    pub async fn to_ndjson(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
+        let window = window.into_serde_ext::<Option<ViewWindow>>()?;
+        let ndjson = self.0.to_ndjson(window.unwrap_or_default()).await?;
+        Ok(ndjson)
+    }
+
     #[doc = inherit_docs!("view/to_csv.md")]
     #[wasm_bindgen]
     pub async fn to_csv(&self, window: Option<JsViewWindow>) -> ApiResult<String> {

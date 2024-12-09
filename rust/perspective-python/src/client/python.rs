@@ -501,4 +501,13 @@ impl PyView {
 
         self.view.to_json_string(window).await.into_pyerr()
     }
+
+    pub async fn to_ndjson(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
+        let window: ViewWindow =
+            Python::with_gil(|py| window.map(|x| depythonize_bound(x.into_bound(py).into_any())))
+                .transpose()?
+                .unwrap_or_default();
+
+        self.view.to_ndjson(window).await.into_pyerr()
+    }
 }

@@ -114,6 +114,41 @@ reader may _coerce_ a `date` or `datetime` from these native JSON types:
 For CSV input types, Perspective relies on Apache Arrow's CSV parser, and as
 such uses the same column-type inference logic as Arrow itself.
 
+### Row Oriented JSON
+
+Row-oriented JSON is in the form of a list of objects. Each object in the list
+corresponds to a row in the table. For example:
+
+```json
+[
+    { "a": 86, "b": false, "c": "words" },
+    { "a": 0, "b": true, "c": "" },
+    { "a": 12345, "b": false, "c": "here" }
+]
+```
+
+### Column Oriented JSON
+
+Column-Oriented JSON comes in the form of an object of lists. Each key of the
+object is a column name, and each element of the list is the corresponding value
+in the row.
+
+```json
+{
+    "a": [86, 0, 12345],
+    "b": [false, true, false],
+    "c": ["words", "", "here"]
+}
+```
+
+### [NDJSON](https://github.com/ndjson/ndjson-spec)
+
+```json
+{ "a": 86, "b": false, "c": "words" }
+{ "a": 0, "b": true, "c": "" }
+{ "a": 12345, "b": false, "c": "here" }
+```
+
 ## Index and Limit
 
 Initializing a [`Table`] with an `index` tells Perspective to treat a column as
@@ -279,35 +314,3 @@ table.replace(df)
 </div>
 
 <div class="warning">`limit` cannot be used in conjunction with `index`.</div>
-
-# JSON Input Data
-
-Perspective supports many kinds of input data, including two formats of JSON
-data: row-oriented and column-oriented data.
-
-## Row Oriented JSON
-
-Row-oriented JSON is in the form of a list of objects. Each object in the list
-corresponds to a row in the table. For example:
-
-```json
-[
-    { "a": 86, "b": false, "c": "words" },
-    { "a": 0, "b": true, "c": "" },
-    { "a": 12345, "b": false, "c": "here" }
-]
-```
-
-## Column Oriented JSON
-
-Column-Oriented JSON comes in the form of an object of lists. Each key of the
-object is a column name, and each element of the list is the corresponding value
-in the row.
-
-```json
-{
-    "a": [86, 0, 12345],
-    "b": [false, true, false],
-    "c": ["words", "", "here"]
-}
-```

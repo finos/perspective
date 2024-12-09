@@ -198,6 +198,7 @@ public:
     void update_csv(const std::string_view& data, std::uint32_t port_id);
     void update_rows(const std::string_view& data, std::uint32_t port_id);
     void update_cols(const std::string_view& data, std::uint32_t port_id);
+    void update_ndjson(const std::string_view& data, std::uint32_t port_id);
     // void update_cols(const std::string_view& data) const;
 
     static std::shared_ptr<Table> from_csv(
@@ -213,6 +214,12 @@ public:
     );
 
     static std::shared_ptr<Table> from_rows(
+        const std::string& index,
+        const std::string_view& data,
+        std::uint32_t limit = std::numeric_limits<std::uint32_t>::max()
+    );
+
+    static std::shared_ptr<Table> from_ndjson(
         const std::string& index,
         const std::string_view& data,
         std::uint32_t limit = std::numeric_limits<std::uint32_t>::max()

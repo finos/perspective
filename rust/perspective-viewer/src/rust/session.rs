@@ -307,6 +307,20 @@ impl Session {
             .unchecked_into())
     }
 
+    pub async fn ndjson_as_jsvalue(
+        self,
+        flat: bool,
+        window: Option<ViewWindow>,
+    ) -> Result<js_sys::JsString, ApiError> {
+        let json: String = self
+            .flat_view(flat)
+            .await?
+            .to_ndjson(window.unwrap_or_default())
+            .await?;
+
+        Ok(json.into())
+    }
+
     pub async fn json_as_jsvalue(
         self,
         flat: bool,

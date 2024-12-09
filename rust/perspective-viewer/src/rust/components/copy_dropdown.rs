@@ -82,14 +82,20 @@ fn get_menu_items(has_render: bool, has_selection: bool) -> Vec<CopyDropDownMenu
         CopyDropDownMenuItem::OptGroup(
             "Current View".into(),
             if has_render {
-                vec![ExportMethod::Csv, ExportMethod::Json, ExportMethod::Png]
+                vec![
+                    ExportMethod::Csv,
+                    ExportMethod::Json,
+                    ExportMethod::Ndjson,
+                    ExportMethod::Png,
+                ]
             } else {
-                vec![ExportMethod::Csv, ExportMethod::Json]
+                vec![ExportMethod::Csv, ExportMethod::Json, ExportMethod::Ndjson]
             },
         ),
         CopyDropDownMenuItem::OptGroup("All".into(), vec![
             ExportMethod::CsvAll,
             ExportMethod::JsonAll,
+            ExportMethod::NdjsonAll,
         ]),
         CopyDropDownMenuItem::OptGroup("Config".into(), vec![ExportMethod::JsonConfig]),
     ];
@@ -100,6 +106,7 @@ fn get_menu_items(has_render: bool, has_selection: bool) -> Vec<CopyDropDownMenu
             CopyDropDownMenuItem::OptGroup("Current Selection".into(), vec![
                 ExportMethod::CsvSelected,
                 ExportMethod::JsonSelected,
+                ExportMethod::NdjsonSelected,
             ]),
         )
     }

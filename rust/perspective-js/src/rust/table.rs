@@ -109,6 +109,9 @@ pub(crate) impl UpdateData {
                 Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(
                     value.as_string().into_apierror()?.into_bytes().into(),
                 ))),
+                Some(TableReadFormat::Ndjson) => {
+                    Ok(Some(UpdateData::Ndjson(value.as_string().into_apierror()?)))
+                },
             }
         } else if value.is_instance_of::<ArrayBuffer>() {
             let uint8array = Uint8Array::new(value);
@@ -121,6 +124,9 @@ pub(crate) impl UpdateData {
                 Some(TableReadFormat::ColumnsString) => {
                     Ok(Some(UpdateData::JsonColumns(String::from_utf8(slice)?)))
                 },
+                Some(TableReadFormat::Ndjson) => {
+                    Ok(Some(UpdateData::Ndjson(String::from_utf8(slice)?)))
+                },
                 None | Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(slice.into()))),
             }
         } else if let Some(uint8array) = value.dyn_ref::<Uint8Array>() {
@@ -132,6 +138,9 @@ pub(crate) impl UpdateData {
                 },
                 Some(TableReadFormat::ColumnsString) => {
                     Ok(Some(UpdateData::JsonColumns(String::from_utf8(slice)?)))
+                },
+                Some(TableReadFormat::Ndjson) => {
+                    Ok(Some(UpdateData::Ndjson(String::from_utf8(slice)?)))
                 },
                 None | Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(slice.into()))),
             }

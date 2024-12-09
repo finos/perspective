@@ -30,6 +30,7 @@ fn from_arrow(
         Some(TableReadFormat::JsonString) => {
             Ok(Some(UpdateData::JsonRows(String::from_utf8(vec)?)))
         },
+        Some(TableReadFormat::Ndjson) => Ok(Some(UpdateData::Ndjson(String::from_utf8(vec)?))),
         Some(TableReadFormat::ColumnsString) => {
             Ok(Some(UpdateData::JsonColumns(String::from_utf8(vec)?)))
         },
@@ -45,6 +46,7 @@ fn from_string(
     match format {
         None | Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(string))),
         Some(TableReadFormat::JsonString) => Ok(Some(UpdateData::JsonRows(string))),
+        Some(TableReadFormat::Ndjson) => Ok(Some(UpdateData::Ndjson(string))),
         Some(TableReadFormat::ColumnsString) => Ok(Some(UpdateData::JsonColumns(string))),
         Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(string.into_bytes().into()))),
     }

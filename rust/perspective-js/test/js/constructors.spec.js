@@ -876,6 +876,50 @@ function validate_typed_array(typed_array, column_data) {
         });
     });
 
+    test.describe("ndjson", function () {
+        test("basic constructor", async function () {
+            var table = await perspective.table(`{"x":1}\n{"x":2}`, {
+                format: "ndjson",
+            });
+            var view = await table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([{ x: 1 }, { x: 2 }]);
+            view.delete();
+            table.delete();
+        });
+
+        test("date types", async function () {
+            const ndjson = [];
+            for (const row of data_4) {
+                ndjson.push(row);
+            }
+            var table = await perspective.table(
+                ndjson.map(JSON.stringify).join("\n"),
+                {
+                    format: "ndjson",
+                }
+            );
+            var view = await table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([{ v: +data_4[0]["v"] }]);
+            view.delete();
+            table.delete();
+        });
+
+        test("Handles dates when provided a schema", async function () {
+            var table = await perspective.table(meta_4);
+            await table.update(data_4.map(JSON.stringify).join("\n"), {
+                format: "ndjson",
+            });
+
+            let view = await table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([{ v: +data_4[0]["v"] }]);
+            view.delete();
+            table.delete();
+        });
+    });
+
     test.describe("Constructors", function () {
         test("JSON constructor", async function () {
             var table = await perspective.table(data);

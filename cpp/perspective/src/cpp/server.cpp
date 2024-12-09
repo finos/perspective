@@ -852,6 +852,7 @@ needs_poll(const proto::Request::ClientReqCase proto_case) {
         case ReqCase::kViewToColumnsStringReq:
         case ReqCase::kViewToCsvReq:
         case ReqCase::kViewToRowsStringReq:
+        case ReqCase::kViewToNdjsonStringReq:
         case ReqCase::kViewToArrowReq:
         case ReqCase::kViewSchemaReq:
         case ReqCase::kViewGetMinMaxReq:
@@ -910,6 +911,7 @@ entity_type_is_table(const proto::Request::ClientReqCase proto_case) {
         case ReqCase::kViewDimensionsReq:
         case ReqCase::kViewToColumnsStringReq:
         case ReqCase::kViewToCsvReq:
+        case ReqCase::kViewToNdjsonStringReq:
         case ReqCase::kViewToRowsStringReq:
         case ReqCase::kViewToArrowReq:
         case ReqCase::kViewSchemaReq:
@@ -1281,6 +1283,12 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                         Table::from_rows(index, r.data().from_rows(), limit);
                     break;
                 }
+                case proto::MakeTableData::kFromNdjson: {
+                    table = Table::from_ndjson(
+                        index, r.data().from_ndjson(), limit
+                    );
+                    break;
+                }
                 case proto::MakeTableData::kFromSchema: {
                     std::vector<std::string> columns;
                     std::vector<t_dtype> types;
@@ -1487,6 +1495,10 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 }
                 case proto::MakeTableData::kFromCols: {
                     table->update_cols(r.data().from_cols(), r.port_id());
+                    break;
+                }
+                case proto::MakeTableData::kFromNdjson: {
+                    table->update_ndjson(r.data().from_ndjson(), r.port_id());
                     break;
                 }
                 case proto::MakeTableData::kFromSchema:
@@ -2035,6 +2047,45 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 *view_col_paths->Add() = col;
             }
 
+            push_resp(std::move(resp));
+            break;
+        }
+        case proto::Request::kViewToNdjsonStringReq: {
+            auto view = m_resources.get_view(req.entity_id());
+            const auto& r = req.view_to_rows_string_req();
+            auto config = view->get_view_config();
+            std::string nidx{view_sides_to_string(*view)};
+            auto num_hidden = calculate_num_hidden(*view, *config);
+
+            auto dims = parse_format_options(
+                r.viewport(),
+                view->num_columns(),
+                view->num_rows(),
+                view->sides(),
+                config->is_column_only(),
+                num_hidden
+            );
+
+            auto json_str = view->to_ndjson(
+                dims.start_row,
+                dims.end_row,
+                dims.start_col,
+                dims.end_col,
+                num_hidden,
+                r.formatted(),
+                r.index(),
+                r.id(),
+                r.leaves_only(),
+                view->sides(),
+                view->sides() > 0 && !config->is_column_only(),
+                nidx,
+                config->get_columns().size(),
+                view->get_view_config()->get_row_pivots().size()
+            );
+
+            proto::Response resp;
+            auto* view_cols_str = resp.mutable_view_to_ndjson_string_resp();
+            view_cols_str->set_ndjson_string(json_str);
             push_resp(std::move(resp));
             break;
         }
