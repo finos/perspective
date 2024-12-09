@@ -243,6 +243,31 @@ impl View {
         }
     }
 
+    #[doc = include_str!("../../docs/view/to_ndjson.md")]
+    pub async fn to_ndjson(&self, window: ViewWindow) -> ClientResult<String> {
+        let viewport = ViewPort {
+            start_row: window.start_row.map(|x| x.floor() as u32),
+            start_col: window.start_col.map(|x| x.floor() as u32),
+            end_row: window.end_row.map(|x| x.ceil() as u32),
+            end_col: window.end_col.map(|x| x.ceil() as u32),
+        };
+
+        let msg = self.client_message(ClientReq::ViewToNdjsonStringReq(ViewToNdjsonStringReq {
+            viewport: Some(viewport),
+            id: window.id,
+            index: window.index,
+            formatted: window.formatted,
+            leaves_only: window.leaves_only,
+        }));
+
+        match self.client.oneshot(&msg).await? {
+            ClientResp::ViewToNdjsonStringResp(ViewToNdjsonStringResp { ndjson_string }) => {
+                Ok(ndjson_string)
+            },
+            resp => Err(resp.into()),
+        }
+    }
+
     #[doc = include_str!("../../docs/view/to_csv.md")]
     pub async fn to_csv(&self, window: ViewWindow) -> ClientResult<String> {
         let msg = self.client_message(ClientReq::ViewToCsvReq(ViewToCsvReq {

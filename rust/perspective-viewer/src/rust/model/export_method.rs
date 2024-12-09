@@ -24,6 +24,9 @@ pub enum ExportMethod {
     Json,
     JsonAll,
     JsonSelected,
+    Ndjson,
+    NdjsonAll,
+    NdjsonSelected,
     Html,
     Png,
     Arrow,
@@ -47,6 +50,9 @@ impl ExportMethod {
             Self::CsvSelected => ".selected.csv",
             Self::JsonSelected => ".selected.json",
             Self::ArrowSelected => ".selected.arrow",
+            Self::Ndjson => ".ndjson",
+            Self::NdjsonAll => ".all.ndjson",
+            Self::NdjsonSelected => ".selected.ndjson",
         }
     }
 

@@ -50,6 +50,7 @@ message MakeTableData {
         string from_rows = 4;
         string from_cols = 5;
         string from_view = 6;
+        string from_ndjson = 7;
     };
 }
 
@@ -142,6 +143,7 @@ message Request {
         ViewToColumnsStringReq view_to_columns_string_req = 24;
         ViewToCSVReq view_to_csv_req = 25;
         ViewToRowsStringReq view_to_rows_string_req = 26;
+        ViewToNdjsonStringReq view_to_ndjson_string_req = 36;
 
         // External (we don't need these for viewer, but the developer may).
         MakeTableReq make_table_req = 27;
@@ -184,6 +186,7 @@ message Response {
         ViewToColumnsStringResp view_to_columns_string_resp = 24;
         ViewToCSVResp view_to_csv_resp = 25;
         ViewToRowsStringResp view_to_rows_string_resp = 26;
+        ViewToNdjsonStringResp view_to_ndjson_string_resp = 36;
         MakeTableResp make_table_resp = 27;
         TableDeleteResp table_delete_resp = 28;
         TableOnDeleteResp table_on_delete_resp = 29;
@@ -371,7 +374,6 @@ message ViewToColumnsStringResp {
     string json_string = 1;
 }
 
-
 message ViewToRowsStringReq {
     ViewPort viewport = 1;
     optional bool id = 2;
@@ -382,6 +384,18 @@ message ViewToRowsStringReq {
 
 message ViewToRowsStringResp {
     string json_string = 1;
+}
+
+message ViewToNdjsonStringReq {
+    ViewPort viewport = 1;
+    optional bool id = 2;
+    optional bool index = 3;
+    optional bool formatted = 4;
+    optional bool leaves_only = 5;
+}
+
+message ViewToNdjsonStringResp {
+    string ndjson_string = 1;
 }
 
 message ViewToArrowReq {

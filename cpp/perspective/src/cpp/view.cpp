@@ -2089,6 +2089,315 @@ View<t_ctx2>::to_rows(
 
 template <typename T>
 std::string
+View<T>::to_ndjson(
+    t_uindex start_row,
+    t_uindex end_row,
+    t_uindex start_col,
+    t_uindex end_col,
+    t_uindex hidden,
+    bool is_formatted,
+    bool get_pkeys,
+    bool get_ids,
+    bool leaves_only,
+    t_uindex num_sides,
+    bool has_row_path,
+    const std::string& nidx,
+    t_uindex columns_length,
+    t_uindex group_by_length
+) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(*get_lock());
+    auto slice = get_data(start_row, end_row, start_col, end_col);
+    const auto& col_names = slice->get_column_names();
+    if (start_row == end_row || (start_col == end_col && !has_row_path)) {
+        return "";
+    }
+
+    std::vector<std::string> column_names;
+    for (auto c = start_col; c < end_col; ++c) {
+        column_names.emplace_back(
+            col_names[c][col_names[c].size() - 1].template get<const char*>()
+        );
+    }
+
+    t_uindex depth = m_row_pivots.size();
+
+    // These columns don't exist as far as the view/table is concerned. They're
+    // scoped to the serialization of the view itself.
+    //
+    // The issue is that if the viewport is past the
+    // end of all the view's columns, we still want to run this loop if __ID__
+    // and __INDEX__ are within the viewport. At the same time, we want to never
+    // return a list of empty objects when all of the physical and "virtual"
+    // columns are out of bounds.
+    auto num_virtual_columns = (int)get_pkeys + (int)get_ids;
+    std::stringstream ndjson;
+    if (start_col <= (end_col + num_virtual_columns)) {
+        for (auto r = start_row; r < end_row; ++r) {
+            if (r != start_row) {
+                ndjson << "\n";
+            }
+
+            rapidjson::StringBuffer s;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+            if (has_row_path && leaves_only) {
+                if (m_ctx->unity_get_row_depth(r) < depth) {
+                    continue;
+                }
+            }
+
+            writer.StartObject();
+            if (get_ids) {
+                std::pair<t_uindex, t_uindex> pair{r, 0};
+                std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
+                const auto keys = m_ctx->get_pkeys(vec);
+                const t_tscalar& scalar = keys[0];
+                writer.Key("__ID__");
+                writer.StartArray();
+                write_scalar(scalar, is_formatted, writer);
+                writer.EndArray();
+            }
+
+            if (get_pkeys) {
+                std::vector<t_tscalar> keys = slice->get_pkeys(r, 0);
+                writer.Key("__INDEX__");
+                writer.StartArray();
+                for (auto i = keys.size(); i > 0; --i) {
+                    auto scalar = keys[i - 1];
+                    write_scalar(scalar, is_formatted, writer);
+                }
+
+                writer.EndArray();
+            }
+
+            for (auto c = start_col; c < end_col; ++c) {
+                writer.Key(column_names[c - start_col].c_str());
+                auto scalar = slice->get(r, c);
+                write_scalar(scalar, is_formatted, writer);
+            }
+
+            writer.EndObject();
+            ndjson << s.GetString();
+        }
+    }
+
+    return ndjson.str();
+}
+
+template <>
+std::string
+View<t_ctx1>::to_ndjson(
+    t_uindex start_row,
+    t_uindex end_row,
+    t_uindex start_col,
+    t_uindex end_col,
+    t_uindex hidden,
+    bool is_formatted,
+    bool get_pkeys,
+    bool get_ids,
+    bool leaves_only,
+    t_uindex num_sides,
+    bool has_row_path,
+    const std::string& nidx,
+    t_uindex columns_length,
+    t_uindex group_by_length
+) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(*get_lock());
+    auto slice = get_data(start_row, end_row, start_col, end_col);
+    const auto& col_names = slice->get_column_names();
+    if (start_row == end_row || (start_col == end_col && !has_row_path)) {
+        return "";
+    }
+
+    t_uindex depth = m_row_pivots.size();
+    std::vector<std::string> column_names;
+    for (auto c = start_col + 1; c < end_col; ++c) {
+        if (c > columns_length) {
+            continue;
+        }
+
+        column_names.emplace_back(
+            col_names[c][col_names[c].size() - 1].template get<const char*>()
+        );
+    }
+
+    std::stringstream ndjson;
+    for (auto r = start_row; r < end_row; ++r) {
+        if (r != start_row) {
+            ndjson << "\n";
+        }
+
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+        if (has_row_path && leaves_only) {
+            if (m_ctx->unity_get_row_depth(r) < depth) {
+                continue;
+            }
+        }
+
+        // Row
+        writer.StartObject();
+
+        // `__ROW_PATH__`
+        writer.Key("__ROW_PATH__");
+        writer.StartArray();
+        const auto row_path = get_row_path(r);
+        for (auto entry = row_path.size(); entry > 0; entry--) {
+            const t_tscalar& scalar = row_path[entry - 1];
+            write_scalar(scalar, is_formatted, writer);
+        }
+
+        writer.EndArray();
+
+        if (get_ids) {
+            writer.Key("__ID__");
+            writer.StartArray();
+            for (auto entry = row_path.size(); entry > 0; entry--) {
+                const t_tscalar& scalar = row_path[entry - 1];
+                write_scalar(scalar, is_formatted, writer);
+            }
+
+            writer.EndArray();
+        }
+
+        if (get_pkeys) {
+            std::vector<t_tscalar> keys = slice->get_pkeys(r, 0);
+            writer.Key("__INDEX__");
+            writer.StartArray();
+            for (auto i = keys.size(); i > 0; --i) {
+                auto scalar = keys[i - 1];
+                write_scalar(scalar, is_formatted, writer);
+            }
+
+            writer.EndArray();
+        }
+
+        // Columns
+        for (auto c = start_col + 1; c < end_col; ++c) {
+            if (c >= columns_length + 1) {
+                continue;
+            }
+
+            writer.Key(column_names[c - (start_col + 1)].c_str());
+            auto scalar = slice->get(r, c);
+            write_scalar(scalar, is_formatted, writer);
+        }
+
+        writer.EndObject();
+        ndjson << s.GetString();
+    }
+
+    // writer.EndArray();
+    return ndjson.str();
+}
+
+template <>
+std::string
+View<t_ctx2>::to_ndjson(
+    t_uindex start_row,
+    t_uindex end_row,
+    t_uindex start_col,
+    t_uindex end_col,
+    t_uindex hidden,
+    bool is_formatted,
+    bool get_pkeys,
+    bool get_ids,
+    bool leaves_only,
+    t_uindex num_sides,
+    bool has_row_path,
+    const std::string& nidx,
+    t_uindex columns_length,
+    t_uindex group_by_length
+) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(*get_lock());
+    auto slice = get_data(start_row, end_row, start_col, end_col);
+    const auto& col_names = slice->get_column_names();
+    if (start_row == end_row || (start_col == end_col && !has_row_path)) {
+        return "";
+    }
+
+    std::vector<std::string> column_names;
+    for (auto c = start_col + 1; c < end_col; ++c) {
+        column_names.emplace_back(col_path_to_legacy(col_names.at(c)));
+    }
+
+    t_uindex depth = m_row_pivots.size();
+    bool column_only = is_column_only();
+    std::stringstream ndjson;
+    for (auto r = start_row; r < end_row; ++r) {
+        if (r != start_row) {
+            ndjson << "\n";
+        }
+
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+        if (has_row_path && leaves_only) {
+            if (m_ctx->unity_get_row_depth(r) < depth) {
+                continue;
+            }
+        }
+
+        // Row
+        writer.StartObject();
+
+        // `__ROW_PATH__`
+        const auto row_path = get_row_path(r);
+        if (!column_only) {
+            writer.Key("__ROW_PATH__");
+            writer.StartArray();
+            for (auto entry = row_path.size(); entry > 0; entry--) {
+                const t_tscalar& scalar = row_path[entry - 1];
+                write_scalar(scalar, is_formatted, writer);
+            }
+
+            writer.EndArray();
+        }
+
+        if (get_ids) {
+            writer.Key("__ID__");
+            writer.StartArray();
+            for (auto entry = row_path.size(); entry > 0; entry--) {
+                const t_tscalar& scalar = row_path[entry - 1];
+                write_scalar(scalar, is_formatted, writer);
+            }
+
+            writer.EndArray();
+        }
+
+        if (get_pkeys) {
+            std::vector<t_tscalar> keys = slice->get_pkeys(r, 0);
+            writer.Key("__INDEX__");
+            writer.StartArray();
+            for (auto i = keys.size(); i > 0; --i) {
+                auto scalar = keys[i - 1];
+                write_scalar(scalar, is_formatted, writer);
+            }
+
+            writer.EndArray();
+        }
+
+        // Columns
+        for (auto c = start_col + 1; c < end_col; ++c) {
+            if (((c - 1) % (columns_length + hidden)) >= columns_length) {
+                continue;
+            }
+
+            writer.Key(column_names[c - (start_col + 1)].c_str());
+            auto scalar = slice->get(r, c);
+            write_scalar(scalar, is_formatted, writer);
+        }
+
+        writer.EndObject();
+        ndjson << s.GetString();
+    }
+
+    return ndjson.str();
+}
+
+template <typename T>
+std::string
 View<T>::to_columns(
     t_uindex start_row,
     t_uindex end_row,

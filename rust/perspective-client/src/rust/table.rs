@@ -44,6 +44,9 @@ pub enum TableReadFormat {
 
     #[serde(rename = "arrow")]
     Arrow,
+
+    #[serde(rename = "ndjson")]
+    Ndjson,
 }
 
 impl TableReadFormat {
@@ -53,6 +56,7 @@ impl TableReadFormat {
             Some("json") => Some(TableReadFormat::JsonString),
             Some("columns") => Some(TableReadFormat::ColumnsString),
             Some("arrow") => Some(TableReadFormat::Arrow),
+            Some("ndjson") => Some(TableReadFormat::Ndjson),
             None => None,
             Some(x) => return Err(format!("Unknown format \"{}\"", x)),
         })

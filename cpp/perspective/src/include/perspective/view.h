@@ -222,6 +222,23 @@ public:
         t_uindex group_by_length
     ) const;
 
+    std::string to_ndjson(
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col,
+        t_uindex hidden,
+        bool is_formatted,
+        bool get_pkeys,
+        bool get_ids,
+        bool leaves_only,
+        t_uindex num_sides,
+        bool has_row_path,
+        const std::string& nidx,
+        t_uindex columns_length,
+        t_uindex group_by_length
+    ) const;
+
     std::string to_columns(
         t_uindex start_row,
         t_uindex end_row,

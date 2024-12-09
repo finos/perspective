@@ -61,6 +61,7 @@ fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
                 vec![
                     ExportMethod::Csv.new_file(name),
                     ExportMethod::Json.new_file(name),
+                    ExportMethod::Ndjson.new_file(name),
                     ExportMethod::Arrow.new_file(name),
                     ExportMethod::Html.new_file(name),
                     ExportMethod::Png.new_file(name),
@@ -69,6 +70,7 @@ fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
                 vec![
                     ExportMethod::Csv.new_file(name),
                     ExportMethod::Json.new_file(name),
+                    ExportMethod::Ndjson.new_file(name),
                     ExportMethod::Arrow.new_file(name),
                     ExportMethod::Html.new_file(name),
                 ]
@@ -77,6 +79,7 @@ fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
         ExportDropDownMenuItem::OptGroup("All".into(), vec![
             ExportMethod::CsvAll.new_file(name),
             ExportMethod::JsonAll.new_file(name),
+            ExportMethod::NdjsonAll.new_file(name),
             ExportMethod::ArrowAll.new_file(name),
         ]),
         ExportDropDownMenuItem::OptGroup("Config".into(), vec![

@@ -119,6 +119,24 @@ pub trait CopyExportModel:
                 let session = self.session().clone();
                 ApiFuture::new(async move { session.json_as_jsvalue(true, None).await?.as_blob() })
             },
+            ExportMethod::Ndjson => {
+                let session = self.session().clone();
+                ApiFuture::new(
+                    async move { session.ndjson_as_jsvalue(false, None).await?.as_blob() },
+                )
+            },
+            ExportMethod::NdjsonSelected => {
+                let session = self.session().clone();
+                ApiFuture::new(async move {
+                    session.ndjson_as_jsvalue(false, viewport).await?.as_blob()
+                })
+            },
+            ExportMethod::NdjsonAll => {
+                let session = self.session().clone();
+                ApiFuture::new(
+                    async move { session.ndjson_as_jsvalue(true, None).await?.as_blob() },
+                )
+            },
             ExportMethod::Arrow => {
                 let session = self.session().clone();
                 ApiFuture::new(

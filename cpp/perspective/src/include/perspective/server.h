@@ -180,6 +180,24 @@ namespace server {
         ) const = 0;
 
         [[nodiscard]]
+        virtual std::string to_ndjson(
+            t_uindex start_row,
+            t_uindex end_row,
+            t_uindex start_col,
+            t_uindex end_col,
+            t_uindex hidden,
+            bool is_formatted,
+            bool get_pkeys,
+            bool get_ids,
+            bool leaves_only,
+            t_uindex num_sides,
+            bool has_row_path,
+            std::string nidx,
+            t_uindex columns_length,
+            t_uindex group_by_length
+        ) const = 0;
+
+        [[nodiscard]]
         virtual std::string to_columns(
             t_uindex start_row,
             t_uindex end_row,
@@ -297,6 +315,42 @@ namespace server {
             t_uindex group_by_length
         ) const override {
             return m_view->to_rows(
+                start_row,
+                end_row,
+                start_col,
+                end_col,
+                hidden,
+                is_formatted,
+                get_pkeys,
+                get_ids,
+                leaves_only,
+                num_sides,
+                has_row_path,
+                nidx,
+                columns_length,
+                group_by_length
+            );
+        }
+
+        [[nodiscard]]
+        std::string
+        to_ndjson(
+            t_uindex start_row,
+            t_uindex end_row,
+            t_uindex start_col,
+            t_uindex end_col,
+            t_uindex hidden,
+            bool is_formatted,
+            bool get_pkeys,
+            bool get_ids,
+            bool leaves_only,
+            t_uindex num_sides,
+            bool has_row_path,
+            std::string nidx,
+            t_uindex columns_length,
+            t_uindex group_by_length
+        ) const override {
+            return m_view->to_ndjson(
                 start_row,
                 end_row,
                 start_col,
