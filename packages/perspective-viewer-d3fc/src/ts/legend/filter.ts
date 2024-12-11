@@ -13,11 +13,36 @@
 import { groupFromKey } from "../series/seriesKey";
 import { DataRowsWithKey, Settings } from "../types";
 
+function refineDateData(
+    settings: Settings,
+    data: any[] | undefined = undefined
+) {
+    let dataToRefine = data ?? settings.data;
+    const { crossValues } = settings;
+
+    crossValues.forEach(({ type }, index) => {
+        const formatType =
+            type === "date" || type === "timestamp" || type === "datetime"
+                ? (value: any) => new Date(value).toLocaleDateString()
+                : type === "time"
+                ? (value: any) => new Date(value).toLocaleTimeString()
+                : null;
+
+        if (formatType) {
+            dataToRefine.forEach((row: { __ROW_PATH__: any[] }) => {
+                row.__ROW_PATH__[index] = formatType(row.__ROW_PATH__[index]);
+            });
+        }
+    });
+
+    return dataToRefine;
+}
+
 export function filterData(
     settings: Settings,
     data: any[] | undefined = undefined
 ) {
-    const useData = data || settings.data;
+    const useData = data || refineDateData(settings, settings.data);
     const len = settings.hideKeys?.length ?? 0;
     return len > 0
         ? useData.map((col) => {
@@ -31,7 +56,7 @@ export function filterData(
 }
 
 export function filterDataByGroup(settings: Settings): DataRowsWithKey {
-    const newData = settings.data;
+    const newData = refineDateData(settings);
     const hideKeysLen = settings.hideKeys?.length ?? 0;
     const splitValsLen = settings.splitValues.length;
     return hideKeysLen > 0
