@@ -1629,6 +1629,11 @@ t_tscalar::can_store_inplace(const char* s) {
 }
 
 bool
+t_tscalar::can_store_inplace(const std::string& s) {
+    return s.size() + 1 <= static_cast<size_t>(SCALAR_INPLACE_LEN);
+}
+
+bool
 t_tscalar::is_nan() const {
     if (m_type == DTYPE_FLOAT64) {
         return std::isnan(get<double>()) || std::isinf(get<double>());

@@ -503,6 +503,104 @@ const datetime_data_local = [
             });
         });
 
+        test.describe("long strings", function () {
+            test("", async function () {
+                const data = [
+                    {
+                        field: 100,
+                        index: "1",
+                        title: "s15",
+                        ts: "2024-11-30T06:50:10.214Z",
+                    },
+                    {
+                        field: 100,
+                        index: "2",
+                        title: "sys_c_c 15min",
+                        ts: "2024-11-30T07:06:00.763Z",
+                    },
+                    {
+                        field: 100,
+                        index: "3",
+                        title: "s15",
+                        ts: "2024-12-01T06:50:15.596Z",
+                    },
+                    {
+                        field: 100,
+                        index: "4",
+                        title: "sys_c_c 15min",
+                        ts: "2024-12-01T07:06:04.909Z",
+                    },
+                    {
+                        field: 100,
+                        index: "5",
+                        title: "s15",
+                        ts: "2024-12-02T06:50:24.712Z",
+                    },
+                    {
+                        field: 100,
+                        index: "6",
+                        title: "sys_c_c 15min",
+                        ts: "2024-12-02T07:06:15.339Z",
+                    },
+                    {
+                        field: 100,
+                        index: "7",
+                        title: "s15",
+                        ts: "2024-12-03T06:50:22.144Z",
+                    },
+                    {
+                        field: 100,
+                        index: "8",
+                        title: "sys_c_c 15min",
+                        ts: "2024-12-03T07:06:20.146Z",
+                    },
+                ];
+
+                const config = {
+                    group_by: ["ts"],
+                    split_by: [],
+                    columns: ["field"],
+                    filter: [
+                        ["title", "in", ["sys_c_c 15min"]],
+                        ["ts", ">=", "2024-12-01T00:00:00.000Z"],
+                        ["ts", "<=", "2024-12-02T23:59:59.999Z"],
+                    ],
+                    expressions: {},
+                    aggregates: {},
+                };
+
+                const table = await perspective.table(
+                    {
+                        title: "string",
+                        field: "float",
+                        ts: "datetime",
+                        index: "string",
+                    },
+                    { index: "index" }
+                );
+
+                let x, y;
+                let xx = new Promise((xxx) => {
+                    x = xxx;
+                });
+                let yy = new Promise((yyy) => {
+                    y = yyy;
+                });
+
+                await table.view(config).then((view) => {
+                    view.on_update(() => view.to_json().then(x));
+                });
+
+                await table.view(config).then((view) => {
+                    view.on_update(() => view.to_json().then(y));
+                });
+
+                await table.update(data);
+                const [xxx, yyy] = await Promise.all([xx, yy]);
+                expect(xxx).toEqual(yyy);
+            });
+        });
+
         test.describe("is null", function () {
             test("returns the correct null cells for string column", async function () {
                 const table = await perspective.table([
