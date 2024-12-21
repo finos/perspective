@@ -524,6 +524,80 @@ const std = (nums) => {
             await table.delete();
         });
 
+        test("min", async () => {
+            const data = {
+                w: [1.5, 2.5, 3.5, 4.5],
+                x: [1, 2, 3, 4],
+                y: ["a", "b", "a", "b"],
+                z: [
+                    new Date(1555126035065),
+                    new Date(1555126035065),
+                    new Date(1555026035065),
+                    new Date(1555026035065),
+                ],
+            };
+
+            const table = await perspective.table(data);
+            const view = await table.view({
+                aggregates: {
+                    w: "min",
+                    x: "min",
+                    y: "min",
+                    z: "min",
+                },
+                group_by: ["y"],
+            });
+
+            const cols = await view.to_columns();
+            expect(cols).toEqual({
+                __ROW_PATH__: [[], ["a"], ["b"]],
+                w: [1.5, 1.5, 2.5],
+                x: [1, 1, 2],
+                y: ["a", "a", "b"],
+                z: [1555026035065, 1555026035065, 1555026035065],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        test("max", async () => {
+            const data = {
+                w: [1.5, 2.5, 3.5, 4.5],
+                x: [1, 2, 3, 4],
+                y: ["a", "b", "a", "b"],
+                z: [
+                    new Date(1555126035065),
+                    new Date(1555126035065),
+                    new Date(1555026035065),
+                    new Date(1555026035065),
+                ],
+            };
+
+            const table = await perspective.table(data);
+            const view = await table.view({
+                aggregates: {
+                    w: "max",
+                    x: "max",
+                    y: "max",
+                    z: "max",
+                },
+                group_by: ["y"],
+            });
+
+            const cols = await view.to_columns();
+            expect(cols).toEqual({
+                __ROW_PATH__: [[], ["a"], ["b"]],
+                w: [4.5, 3.5, 4.5],
+                x: [4, 3, 4],
+                y: ["b", "a", "b"],
+                z: [1555126035065, 1555126035065, 1555126035065],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
         test("high with count and partial update", async () => {
             const table = await perspective.table(
                 {
