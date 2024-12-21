@@ -1544,15 +1544,15 @@ t_stree::update_agg_table(
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
-                std::vector<double> values;
+                std::vector<t_tscalar> values;
                 read_column_from_gstate(
                     gstate,
                     expression_master_table,
                     spec.get_dependencies()[0].name(),
                     pkeys,
-                    values,
-                    true
+                    values
                 );
+
                 new_value.set(*std::max_element(values.begin(), values.end()));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
@@ -1560,15 +1560,15 @@ t_stree::update_agg_table(
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
-                std::vector<double> values;
+                std::vector<t_tscalar> values;
                 read_column_from_gstate(
                     gstate,
                     expression_master_table,
                     spec.get_dependencies()[0].name(),
                     pkeys,
-                    values,
-                    true
+                    values
                 );
+
                 new_value.set(*std::min_element(values.begin(), values.end()));
                 dst->set_scalar(dst_ridx, new_value);
             } break;

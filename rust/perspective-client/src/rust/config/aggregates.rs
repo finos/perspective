@@ -272,10 +272,32 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::Var,
 ];
 
+const DATETIME_AGGREGATES: &[SingleAggregate] = &[
+    SingleAggregate::Any,
+    SingleAggregate::Avg,
+    SingleAggregate::Count,
+    SingleAggregate::DistinctCount,
+    SingleAggregate::Dominant,
+    SingleAggregate::First,
+    SingleAggregate::High,
+    SingleAggregate::Low,
+    SingleAggregate::Max,
+    SingleAggregate::Min,
+    SingleAggregate::LastByIndex,
+    SingleAggregate::Last,
+    SingleAggregate::Median,
+    SingleAggregate::Unique,
+];
+
 impl proto::ColumnType {
     pub fn aggregates_iter(&self) -> Box<dyn Iterator<Item = Aggregate>> {
         match self {
-            Self::Boolean | Self::Date | Self::Datetime | Self::String => Box::new(
+            Self::Date | Self::Datetime => Box::new(
+                DATETIME_AGGREGATES
+                    .iter()
+                    .map(|x| Aggregate::SingleAggregate(*x)),
+            ),
+            Self::Boolean | Self::String => Box::new(
                 STRING_AGGREGATES
                     .iter()
                     .map(|x| Aggregate::SingleAggregate(*x)),
