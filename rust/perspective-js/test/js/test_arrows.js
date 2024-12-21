@@ -71,6 +71,10 @@ export const int_float_str_file_arrow = load_arrow(
     path.join(__dirname, "..", "arrow", "int_float_str_file.arrow")
 );
 
+export const float32_arrow = load_arrow(
+    path.join(__dirname, "..", "arrow", "float32.arrow")
+);
+
 export const date32_arrow = load_arrow(
     path.join(__dirname, "..", "arrow", "date32.arrow")
 );

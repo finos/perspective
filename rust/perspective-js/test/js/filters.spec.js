@@ -12,6 +12,7 @@
 
 import { test, expect } from "@finos/perspective-test";
 import perspective from "./perspective_client";
+import * as arrows from "./test_arrows.js";
 
 var yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
@@ -466,6 +467,37 @@ const datetime_data_local = [
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 1)).toEqual(json);
+                view.delete();
+                table.delete();
+            });
+        });
+
+        test.describe("Arrow types", function () {
+            // https://github.com/finos/perspective/issues/2881
+            test("Arrow float32 filters", async function () {
+                const table = await perspective.table(
+                    arrows.float32_arrow.slice()
+                );
+
+                const view = await table.view({ filter: [["score", "<", 93]] });
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    id: [1, 2],
+                    name: ["Alice", "Bob"],
+                    score: [92.5, 87.30000305175781],
+                });
+
+                const cfg = await view.get_config();
+                expect(cfg).toEqual({
+                    aggregates: {},
+                    columns: ["id", "name", "score"],
+                    expressions: {},
+                    filter: [["score", "<", 93]],
+                    group_by: [],
+                    sort: [],
+                    split_by: [],
+                });
+
                 view.delete();
                 table.delete();
             });

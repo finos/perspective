@@ -1017,8 +1017,17 @@ coerce_to(const t_dtype dtype, const A& val) {
             case DTYPE_BOOL:
                 scalar.set(val == "true");
                 return scalar;
+            case DTYPE_FLOAT32:
+                scalar.set(std::stof(val));
+                return scalar;
             case DTYPE_FLOAT64:
                 scalar.set(std::stod(val));
+                return scalar;
+            case DTYPE_UINT8:
+                scalar.set((std::uint8_t)std::stoul(val));
+                return scalar;
+            case DTYPE_UINT16:
+                scalar.set((std::uint16_t)std::stoul(val));
                 return scalar;
             case DTYPE_UINT32:
                 scalar.set((std::uint32_t)std::stoul(val));
@@ -1026,8 +1035,14 @@ coerce_to(const t_dtype dtype, const A& val) {
             case DTYPE_UINT64:
                 scalar.set((std::uint64_t)std::stoull(val));
                 return scalar;
+            case DTYPE_INT8:
+                scalar.set((std::int8_t)std::stoi(val));
+                return scalar;
+            case DTYPE_INT16:
+                scalar.set((std::int16_t)std::stoi(val));
+                return scalar;
             case DTYPE_INT32:
-                scalar.set(std::stoi(val));
+                scalar.set((std::int32_t)std::stoi(val));
                 return scalar;
             case DTYPE_INT64:
                 scalar.set((std::int64_t)std::stoll(val));
@@ -1946,11 +1961,35 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                         case DTYPE_BOOL:
                             s->set_bool_(scalar.get<bool>());
                             break;
+                        case DTYPE_FLOAT32:
+                            s->set_float_(scalar.get<float>());
+                            break;
                         case DTYPE_FLOAT64:
                             s->set_float_(scalar.get<double>());
                             break;
+                        case DTYPE_INT8:
+                            s->set_float_((double)scalar.get<std::int8_t>());
+                            break;
+                        case DTYPE_INT16:
+                            s->set_float_((double)scalar.get<std::int16_t>());
+                            break;
+                        case DTYPE_INT32:
+                            s->set_float_((double)scalar.get<std::int32_t>());
+                            break;
                         case DTYPE_INT64:
                             s->set_float_((double)scalar.get<std::int64_t>());
+                            break;
+                        case DTYPE_UINT8:
+                            s->set_float_((double)scalar.get<std::uint8_t>());
+                            break;
+                        case DTYPE_UINT16:
+                            s->set_float_((double)scalar.get<std::uint16_t>());
+                            break;
+                        case DTYPE_UINT32:
+                            s->set_float_((double)scalar.get<std::uint32_t>());
+                            break;
+                        case DTYPE_UINT64:
+                            s->set_float_((double)scalar.get<std::uint64_t>());
                             break;
                         case DTYPE_STR:
                             s->set_string(scalar.get<const char*>());

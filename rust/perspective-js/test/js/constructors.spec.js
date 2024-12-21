@@ -966,6 +966,19 @@ function validate_typed_array(typed_array, column_data) {
             table.delete();
         });
 
+        test("Arrow float32 constructor", async function () {
+            const table = await perspective.table(arrows.float32_arrow.slice());
+            const view = await table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                id: [1, 2, 3],
+                name: ["Alice", "Bob", "Charlie"],
+                score: [92.5, 87.30000305175781, 95.80000305175781],
+            });
+            view.delete();
+            table.delete();
+        });
+
         test("Arrow date64 constructor", async function () {
             const table = await perspective.table(arrows.date64_arrow.slice());
             const view = await table.view();
