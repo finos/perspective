@@ -189,6 +189,7 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     const char* get_char_ptr() const;
     bool is_inplace() const;
     static bool can_store_inplace(const char* s);
+    static bool can_store_inplace(const std::string& s);
 
     template <typename DATA_T>
     t_tscalar coerce_numeric() const;

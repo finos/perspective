@@ -1632,8 +1632,29 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
             std::vector<
                 std::tuple<std::string, std::string, std::vector<t_tscalar>>>
                 filter;
+            filter.reserve(cfg.filter().size());
+
+            for (const auto& f : cfg.filter()) {
+                for (const auto& arg : f.value()) {
+                    switch (arg.scalar_case()) {
+                        case proto::Scalar::kString: {
+                            if (!t_tscalar::can_store_inplace(arg.string())) {
+                                vocab.get_interned(arg.string());
+                            }
+                            break;
+                        }
+                        case proto::Scalar::kBool:
+                        case proto::Scalar::kFloat:
+                        case proto::Scalar::kNull:
+                        case proto::Scalar::SCALAR_NOT_SET:
+                            break;
+                    }
+                }
+            }
+
             for (const auto& f : cfg.filter()) {
                 std::vector<t_tscalar> args;
+                args.reserve(f.value().size());
                 for (const auto& arg : f.value()) {
                     t_tscalar a;
                     a.clear();
@@ -1658,10 +1679,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                                 );
                             }
 
-                            if (!t_tscalar::can_store_inplace(
-                                    arg.string().c_str()
-                                )) {
-
+                            if (!t_tscalar::can_store_inplace(arg.string())) {
                                 a = coerce_to(
                                     schema->get_dtype(f.column()),
                                     vocab.unintern_c(
