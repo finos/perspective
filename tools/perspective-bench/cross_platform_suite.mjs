@@ -158,8 +158,10 @@ export async function table_suite(perspective, metadata) {
             const table = await perspective.table(
                 new_superstore_table(metadata)
             );
+
             const view = await table.view();
             const csv = await view.to_csv();
+            const arrow = await view.to_arrow();
             const json = await view.to_json();
             const columns = await view.to_columns();
             if (check_version_gte(metadata.version, "2.10.9")) {
@@ -169,7 +171,8 @@ export async function table_suite(perspective, metadata) {
             if (check_version_gte(metadata.version, "3.0.0")) {
                 await table.delete();
             }
-            return { csv, columns, json };
+
+            return { csv, arrow, table, json, columns };
         } catch (e) {
             console.error(e);
         }
@@ -184,8 +187,8 @@ export async function table_suite(perspective, metadata) {
                 await table.delete();
             }
         },
-        async test() {
-            return await perspective.table(new_superstore_table(metadata));
+        async test({ table, arrow }) {
+            return await perspective.table(arrow.slice());
         },
     });
 
@@ -198,7 +201,7 @@ export async function table_suite(perspective, metadata) {
                 await table.delete();
             }
         },
-        async test({ table, csv }) {
+        async test({ csv }) {
             return await perspective.table(csv);
         },
     });

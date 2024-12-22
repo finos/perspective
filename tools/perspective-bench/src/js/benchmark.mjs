@@ -65,16 +65,16 @@ function stddev(array, key) {
 function markOutliers(someArray) {
     var values = someArray.concat();
     values.sort(function (a, b) {
-        return a.cpu_time - b.cpu_time;
+        return a.real_time - b.real_time;
     });
 
-    var q1 = values[Math.floor(values.length / 4)].cpu_time;
-    var q3 = values[Math.ceil(values.length * (3 / 4))].cpu_time;
+    var q1 = values[Math.floor(values.length / 4)].real_time;
+    var q3 = values[Math.ceil(values.length * (3 / 4))].real_time;
     var iqr = q3 - q1;
     var maxValue = q3 + iqr * 1.5;
     var minValue = q1 - iqr * 1.5;
     return someArray.map(function (x) {
-        x.outlier = !(x.cpu_time <= maxValue && x.cpu_time >= minValue);
+        x.outlier = !(x.real_time <= maxValue && x.real_time >= minValue);
         return x;
     });
 }
@@ -109,27 +109,42 @@ async function benchmark_case({
     after,
     i,
 }) {
-    const { default: microtime } = await import("microtime");
     const args2 = args.slice();
     push_if(args2, await before?.(...args2));
-    global.gc(false);
-    await new Promise(setTimeout);
-    const start_time = microtime.now();
-    const start_cpu = process.cpuUsage();
-    const x = await test(...args2);
-    const end = process.cpuUsage(start_cpu);
-    const end_time = microtime.now() - start_time;
-    push_if(args2, x);
-    await after?.(...args2);
-    return {
-        cpu_time: end.user + end.system,
-        real_time: end_time,
-        user_time: end.user,
-        system_time: end.system,
-        benchmark,
-        iteration: i,
-        ...structuredClone(metadata),
-    };
+    if (typeof window === "undefined") {
+        const { default: process } = await import("node:process");
+        const { default: microtime } = await import("microtime");
+        globalThis?.gc?.(false);
+        await new Promise((x) => setTimeout(x, 0));
+        const start_time = microtime.now();
+        const start_cpu = process.cpuUsage();
+        const x = await test(...args2);
+        const end = process.cpuUsage(start_cpu);
+        const end_time = microtime.now() - start_time;
+        push_if(args2, x);
+        await after?.(...args2);
+        return {
+            cpu_time: end.user + end.system,
+            real_time: end_time,
+            user_time: end.user,
+            system_time: end.system,
+            benchmark,
+            iteration: i,
+            ...structuredClone(metadata),
+        };
+    } else {
+        const start_time = performance.now();
+        const x = await test(...args2);
+        const end_time = performance.now() - start_time;
+        push_if(args2, x);
+        await after?.(...args2);
+        return {
+            real_time: end_time * 1000,
+            benchmark,
+            iteration: i,
+            ...structuredClone(metadata),
+        };
+    }
 }
 
 /**
@@ -154,6 +169,12 @@ async function benchmark_node_version(version, benchmarks_table) {
         if (details.finished) {
             cont();
         } else {
+            let msg = " - ";
+            if (!isNaN(details.stats.filtered_avg_cpu)) {
+                msg += `${details.stats.filtered_avg_cpu}ms +/-${details.stats.stddev_percent}% (CPU), `;
+            }
+            msg += `${details.stats.filtered_avg_time}ms (Real) ${details.stats.non_outliers}/${details.stats.iterations} iterations - ${details.stats.benchmark}`;
+            console.log(msg);
             benchmarks_table.update(details.obs_records);
             stats.push(details.stats);
         }
@@ -173,88 +194,6 @@ async function benchmark_node_version(version, benchmarks_table) {
 }
 
 /**
- * Run the benchmarks in a forked process and colelct the observations.
- * @param {{version: string, i: number}} version the versions spec to send to
- * the child process.
- * @returns an array of observation records for this version.
- */
-async function benchmark_puppeteer_version(version, benchmarks_table) {
-    const process = await import("node:process");
-    const path = await import("node:path");
-    const { default: puppeteer } = await import("puppeteer");
-    const suite_path = path.join(process.argv[1]);
-    let stats = [];
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
-    await page.goto("http://localhost:8081/empty.html");
-    await page.setContent(`
-    <html>
-        <head>
-            <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
-
-            <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
-
-            <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
-            <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
-            <link rel="preload" href="/node_modules/superstore-arrow/superstore.lz4.arrow" as="fetch" type="arraybuffer" crossorigin="anonymous" />
-        </head>
-    </html>`);
-
-    await page.evaluate(async function () {
-        // const bench = await import("/tools/perspective-bench/basic_suite.mjs");
-        // console.log(bench);
-        // <script type="module">
-        //     import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
-        //     const worker = await perspective.worker();
-        //     const resp = await fetch("/node_modules/superstore-arrow/superstore.lz4.arrow");
-        //     const arrow = await resp.arrayBuffer();
-        //     const viewer = document.getElementsByTagName("perspective-viewer")[0];
-        //     const table = worker.table(arrow);
-        //     viewer.load(table);
-        //     viewer.restore({ settings: true, plugin_config: { edit_mode: "EDIT" } });
-        // </script>
-        // <style>
-        //     perspective-viewer {
-        //         position: absolute;
-        //         top: 0;
-        //         left: 0;
-        //         bottom: 0;
-        //         right: 0;
-        //     }
-        // </style>
-    });
-
-    await page.waitForTimeout(100_000);
-
-    // const worker = cp.fork(suite_path, {
-    //     execArgv: ["--expose-gc"],
-    //     env: { BENCH_FLAG: "1" },
-    // });
-
-    // let cont;
-    // worker.on("message", (details) => {
-    //     if (details.finished) {
-    //         cont();
-    //     } else {
-    //         benchmarks_table.update(details.obs_records);
-    //         stats.push(details.stats);
-    //     }
-    // });
-
-    // worker.send({
-    //     ...version,
-    //     stats,
-    // });
-
-    // await new Promise((r) => {
-    //     cont = r;
-    // });
-
-    // worker.kill();
-    // return { stats };
-}
-
-/**
  * Register a benchmark for a test case.
  * @param {*} param0
  */
@@ -270,14 +209,11 @@ export async function benchmark({
     warm_up_iterations = WARM_UP_ITERATIONS,
     max_iterations = MAX_ITERATIONS,
     min_iterations = MIN_ITERATIONS,
-    max_time = 3_000_000,
+    max_time = 3_000,
 } = {}) {
-    const { default: process } = await import("node:process");
-    const { default: microtime } = await import("microtime");
-
     let obs_records = [];
     push_if(args, await before_all?.(...args));
-    const start_time = microtime.now();
+    const start_time = performance.now();
     for (let i = 0; i < warm_up_iterations; i++) {
         await benchmark_case({
             args,
@@ -292,7 +228,7 @@ export async function benchmark({
 
     let i;
     for (i = 0; i < max_iterations; i++) {
-        if (microtime.now() - start_time > max_time && i >= min_iterations) {
+        if (performance.now() - start_time > max_time && i >= min_iterations) {
             break;
         }
 
@@ -327,12 +263,9 @@ export async function benchmark({
         non_outliers: i - n_outliers,
     };
 
-    console.log(
-        ` - ${stats.filtered_avg_cpu}ms +/-${stats.stddev_percent}% (CPU), ${stats.filtered_avg_time}ms (Real) ${stats.non_outliers}/${stats.iterations} iterations - ${benchmark}`
-    );
 
     await after_all?.(...args);
-    process.send({ obs_records, stats });
+    globalThis.__SEND__({ obs_records, stats });
 }
 
 function buffer_to_arraybuffer(buffer) {
@@ -365,7 +298,7 @@ async function start_server({ cwd_static_file_handler, make_session }) {
     });
 
     app.use("/", (x, y) =>
-        cwd_static_file_handler(x, y, ["src/html/", "../.."])
+        cwd_static_file_handler(x, y, ["src/html/", "../.."], { debug: false })
     );
 
     const server = app.listen(8081, () => {

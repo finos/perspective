@@ -10,62 +10,78 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as fs from "node:fs";
-import * as path from "node:path";
 import * as all_benchmarks from "./cross_platform_suite.mjs";
 import * as perspective_bench from "./src/js/benchmark.mjs";
+import * as puppeteer from "puppeteer";
 
-import { createRequire } from "node:module";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as url from "node:url";
+import * as process from "node:process";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
-
-const _require = createRequire(import.meta.url);
 
 /**
  * We use the `dependencies` of this package for the benchmark candidate
  * module list, so that we only need specify the dependencies and benchmark
  * candidates in one place.
  */
-const VERSIONS = Object.keys(
-    JSON.parse(fs.readFileSync(_require.resolve(`./package.json`))).dependencies
-);
+const VERSIONS = [
+    "@finos/perspective",
+    "perspective-3-0-0",
+    "perspective-2-10-0",
+];
 
-fs.mkdirSync(path.join(__dirname, "./dist"), { recursive: true });
 perspective_bench.suite(
-    // "ws://localhost:8082/websocket",
-    ["@finos/perspective", ...VERSIONS],
+    [...VERSIONS],
     path.join(__dirname, "dist/benchmark-js.arrow"),
     async function (path, version_idx) {
         let client, metadata;
-        if (path.startsWith("ws://")) {
-            console.log(path);
-            const { default: perspective } = await import("@finos/perspective");
-            client = await perspective.websocket(path);
-            metadata = {
-                version: "3.2.0",
-                version_idx,
-            };
-        } else {
-            const perspective = await import(path);
-            const pkg_json = JSON.parse(
-                fs.readFileSync(_require.resolve(`${path}/package.json`))
+        console.log(path);
+        const browser = await puppeteer.launch({
+            headless: true,
+            protocolTimeout: 100_000_000,
+        });
+        const page = await browser.newPage();
+
+        await page.goto("http://localhost:8081/empty.html");
+
+        async function test_suite(suite) {
+            const items = await page.evaluate(
+                async ([version, suite]) => {
+                    const { default: perspective } = await import(
+                        `/tools/perspective-bench/node_modules/${version}/dist/esm/perspective.inline.js`
+                    );
+                    const benchmarks = await import(
+                        "/tools/perspective-bench/cross_platform_suite.mjs"
+                    );
+
+                    const metadata = {
+                        version: "3.2.0",
+                        version_idx: 0,
+                    };
+                    const total = [];
+                    window.__SEND__ = (x) => {
+                        total.push(x);
+                    };
+
+                    await benchmarks[suite](
+                        await perspective.worker(),
+                        metadata
+                    );
+
+                    return total;
+                },
+                [path, suite]
             );
 
-            let version = pkg_json.version;
-            console.log(`${path} (${pkg_json.name}@${version})`);
-            if (version === "@finos/perspective") {
-                version = `${version} (master)`;
+            for (const { obs_records, stats } of items) {
+                process.send({ obs_records, stats });
             }
-
-            client = perspective.default || perspective;
-            metadata = { version, version_idx };
         }
 
-        globalThis.__SEND__ = (x) => process.send(x);
-
-        await all_benchmarks.table_suite(client, metadata);
-        await all_benchmarks.view_suite(client, metadata);
-        await all_benchmarks.to_data_suite(client, metadata);
+        await test_suite("table_suite");
+        await test_suite("view_suite");
+        await test_suite("to_data_suite");
     }
 );

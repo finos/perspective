@@ -1,0 +1,13 @@
+diff --git a/cpp/src/arrow/util/value_parsing.h b/cpp/src/arrow/util/value_parsing.h
+index 609906052..1e3dfae7c 100644
+--- a/cpp/src/arrow/util/value_parsing.h
++++ b/cpp/src/arrow/util/value_parsing.h
+@@ -804,7 +804,7 @@ static inline bool ParseTimestampStrptime(const char* buf, size_t length,
+   std::string clean_copy(buf, length);
+   struct tm result;
+   memset(&result, 0, sizeof(struct tm));
+-#ifdef _WIN32
++#if defined(_WIN32) || defined(__EMSCRIPTEN__)
+   char* ret = arrow_strptime(clean_copy.c_str(), format, &result);
+ #else
+   char* ret = strptime(clean_copy.c_str(), format, &result);
