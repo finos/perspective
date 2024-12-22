@@ -10,8 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as fs from "node:fs";
-import { createRequire } from "node:module";
 
 /**
  * Load a file as an `ArrayBuffer`, which is useful for loading Apache Arrow
@@ -19,13 +17,25 @@ import { createRequire } from "node:module";
  * @param {*} path
  * @returns
  */
-function get_buffer(path) {
-    const _require = createRequire(import.meta.url);
-    return fs.readFileSync(_require.resolve(path)).buffer;
+async function get_buffer(path) {
+    if (typeof window !== "undefined") {
+        const resp = await fetch(
+            "http://localhost:8080/node_modules/superstore-arrow/superstore.lz4.arrow"
+        );
+
+        return await resp.arrayBuffer();
+    } else {
+        const fs = await import("node:fs");
+        const { createRequire } = await import("node:module");
+        const _require = createRequire(import.meta.url);
+        return fs.readFileSync(_require.resolve(path)).buffer;
+    }
 }
 
-const SUPERSTORE_ARROW = get_buffer("superstore-arrow/superstore.arrow");
-const SUPERSTORE_FEATHER = get_buffer("superstore-arrow/superstore.lz4.arrow");
+const SUPERSTORE_ARROW = await get_buffer("superstore-arrow/superstore.arrow");
+const SUPERSTORE_FEATHER = await get_buffer(
+    "superstore-arrow/superstore.lz4.arrow"
+);
 
 /**
  * Load the Superstore example data set as either a Feather (LZ4) or
