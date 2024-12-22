@@ -22,7 +22,6 @@ perspective-indicator[theme="Pro Dark"] {
     --theme-name: "Pro Dark";
 }
 
-
 perspective-workspace perspective-viewer {
     --status-bar--height: 38px;
 }
@@ -95,6 +94,10 @@ perspective-workspace-menu {
     --workspace-tabbar--border-radius: 0px 0px 6px 6px;
     --workspace-tabbar--border-color: var(--inactive--color);
     --workspace-tabbar-tab--border-width: 1px 1px 0px 1px;
+
+    // Workspace
+    --column-drag-handle--mask-image: url("../svg/drag-handle.svg");
+    --bookmarks--mask-image: url("../svg/bookmark-icon.svg");
 }
 
 @mixin perspective-viewer-pro-dark--colors {

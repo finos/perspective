@@ -261,29 +261,27 @@ async function init_layouts() {
 
 const INIT_TASK = [init_tables(), init_layouts()];
 
-window.addEventListener("DOMContentLoaded", async function () {
-    const [{ market_table, gui_table }, layouts] = await Promise.all(INIT_TASK);
-    const market = new Market(market_table, skew_model);
-    const settings = !/(iPad|iPhone|iPod)/g.test(navigator.userAgent);
-    const select = document.querySelector("select");
-    const button = document.querySelector("button");
-    const viewer = document.querySelector("perspective-viewer");
-    viewer.load(gui_table);
-    viewer.restore({ theme: "Pro Dark", settings, ...layouts[0] });
-    await market.poll(progress);
-    for (const layout of layouts) {
-        const option = document.createElement("option");
-        option.value = layout.title;
-        option.textContent = layout.title;
-        select.appendChild(option);
-    }
+const [{ market_table, gui_table }, layouts] = await Promise.all(INIT_TASK);
+const market = new Market(market_table, skew_model);
+const settings = !/(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+const select = document.querySelector("select");
+const button = document.querySelector("button");
+const viewer = document.querySelector("perspective-viewer");
+viewer.load(gui_table);
+viewer.restore({ theme: "Pro Dark", settings, ...layouts[0] });
+await market.poll(progress);
+for (const layout of layouts) {
+    const option = document.createElement("option");
+    option.value = layout.title;
+    option.textContent = layout.title;
+    select.appendChild(option);
+}
 
-    button.addEventListener("click", () => {
-        reset_tables(market, market_table, gui_table);
-    });
+button.addEventListener("click", () => {
+    reset_tables(market, market_table, gui_table);
+});
 
-    select.addEventListener("change", async (event) => {
-        const layout = layouts.find((x) => x.title === event.target.value);
-        await viewer.restore(layout);
-    });
+select.addEventListener("change", async (event) => {
+    const layout = layouts.find((x) => x.title === event.target.value);
+    await viewer.restore(layout);
 });

@@ -12,6 +12,7 @@
 
 :host {
     --settings-panel-z-index: 10;
+    --icon--color: #ff0000;
 }
 
 ::slotted(*) {
@@ -44,13 +45,13 @@
         -webkit-mask-size: cover;
         background-repeat: no-repeat;
         background-color: var(--icon--color);
-        mask-image: url(../svg/drawer-tab.svg);
-        -webkit-mask-image: url(../svg/drawer-tab.svg);
+        mask-image: var(--drawer-tab-icon--mask-image);
+        -webkit-mask-image: var(--drawer-tab-icon--mask-image);
     }
 
     &:hover .sidebar_close_button_inner:before {
-        mask-image: url(../svg/drawer-tab-hover.svg);
-        -webkit-mask-image: url(../svg/drawer-tab-hover.svg);
+        mask-image: var(--drawer-tab-icon--hover--mask-image);
+        -webkit-mask-image: var(--drawer-tab-icon--hover--mask-image);
     }
 }
 
@@ -61,21 +62,20 @@
 
 :host #debug_close_button.sidebar_close_button .sidebar_close_button_inner {
     background-attachment: fixed;
-    background-color: var(--plugin--background);
-    background-image: url(../svg/bg-pattern.png);
+    background: var(--sidebar--background);
     background-size: 4px;
 
     &:before {
-        mask-image: url(../svg/drawer-tab-hover.svg);
-        -webkit-mask-image: url(../svg/drawer-tab-hover.svg);
+        mask-image: var(--drawer-tab-icon--hover--mask-image);
+        -webkit-mask-image: var(--drawer-tab-icon--hover--mask-image);
     }
 }
 
 :host
     #debug_close_button.sidebar_close_button:hover
     .sidebar_close_button_inner:before {
-    mask-image: url(../svg/drawer-tab.svg);
-    -webkit-mask-image: url(../svg/drawer-tab.svg);
+    mask-image: var(--drawer-tab-icon--mask-image);
+    -webkit-mask-image: var(--drawer-tab-icon--mask-image);
 }
 
 :host #debug_open_button.sidebar_close_button {
@@ -88,13 +88,13 @@
 
 :host #debug_open_button.sidebar_close_button .sidebar_close_button_inner {
     &:before {
-        mask-image: url(../svg/drawer-tab-invert.svg);
-        -webkit-mask-image: url(../svg/drawer-tab-invert.svg);
+        mask-image: var(--drawer-tab-inverted-icon--mask-image);
+        -webkit-mask-image: var(--drawer-tab-inverted-icon--mask-image);
     }
 
     &:hover:before {
-        mask-image: url(../svg/drawer-tab-invert-hover.svg);
-        -webkit-mask-image: url(../svg/drawer-tab-invert-hover.svg);
+        mask-image: var(--drawer-tab-inverted-icon--hover--mask-image);
+        -webkit-mask-image: var(--drawer-tab-inverted-icon--hover--mask-image);
     }
 }
 
@@ -197,7 +197,7 @@
     #settings_panel {
         position: relative;
         flex: 0 0 auto;
-        padding: var(--side-panel--padding, 10px 2px 0px 11px);
+        padding: 0pc;
         padding-left: 8px;
         box-sizing: border-box;
         width: 100%;
@@ -240,9 +240,8 @@
     }
 
     .sidebar_column {
-        background: url(../svg/bg-pattern.png);
+        background: var(--sidebar--background);
         background-size: 4px;
-        background-color: var(--plugin--background);
         background-attachment: fixed;
 
         display: flex;
@@ -320,8 +319,8 @@
             -webkit-mask-size: cover; //40px 35px;
             background-repeat: no-repeat;
             background-color: var(--icon--color);
-            mask-image: url(../svg/drawer-tab.svg);
-            -webkit-mask-image: url(../svg/drawer-tab.svg);
+            mask-image: var(--drawer-tab-icon--mask-image);
+            -webkit-mask-image: var(--drawer-tab-icon--mask-image);
         }
     }
 

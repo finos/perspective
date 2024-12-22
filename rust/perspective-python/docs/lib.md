@@ -313,27 +313,25 @@ _*index.html*_
 ```html
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
-<script>
-    window.addEventListener("DOMContentLoaded", async function () {
-        // Create a client that expects a Perspective server
-        // to accept connections at the specified URL.
-        const websocket = await perspective.websocket(
-            "ws://localhost:8888/websocket"
-        );
+<script type="module">
+    // Create a client that expects a Perspective server
+    // to accept connections at the specified URL.
+    const websocket = await perspective.websocket(
+        "ws://localhost:8888/websocket"
+    );
 
-        // Get a handle to the Table on the server
-        const server_table = await websocket.open_table("data_source_one");
+    // Get a handle to the Table on the server
+    const server_table = await websocket.open_table("data_source_one");
 
-        // Create a new view
-        const server_view = await table.view();
+    // Create a new view
+    const server_view = await table.view();
 
-        // Create a Table on the client using `perspective.worker()`
-        const worker = await perspective.worker();
-        const client_table = await worker.table(view);
+    // Create a Table on the client using `perspective.worker()`
+    const worker = await perspective.worker();
+    const client_table = await worker.table(view);
 
-        // Load the client table in the `<perspective-viewer>`.
-        document.getElementById("viewer").load(client_table);
-    });
+    // Load the client table in the `<perspective-viewer>`.
+    document.getElementById("viewer").load(client_table);
 </script>
 ```
 

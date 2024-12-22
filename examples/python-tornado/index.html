@@ -26,23 +26,19 @@
         <script type="module">
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-            window.addEventListener("DOMContentLoaded", async function () {
-                /**
-                 * `perspective.websocket` connects to a remote Perspective server
-                 * that accepts WebSocket connections at the specified URL.
-                 *
-                 * Use `perspective.websocket` to set up Perspective in server or
-                 * distributed modes.
-                 */
-                const websocket = await perspective.websocket("ws://localhost:8080/websocket");
+            /**
+             * `perspective.websocket` connects to a remote Perspective server
+             * that accepts WebSocket connections at the specified URL.
+             *
+             * Use `perspective.websocket` to set up Perspective in server or
+             * distributed modes.
+             */
+            const websocket = await perspective.websocket("ws://localhost:8080/websocket");
+            const server_table = await websocket.open_table("data_source_one");
+            // const table = worker.table(server_table);
 
-                const server_table = await websocket.open_table("data_source_one");
-
-                // const table = worker.table(server_table);
-
-                // Load the local table in the `<perspective-viewer>`.
-                document.getElementById("viewer").load(server_table);
-            });
+            // Load the local table in the `<perspective-viewer>`.
+            document.getElementById("viewer").load(server_table);
         </script>
     </body>
 </html>

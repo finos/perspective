@@ -25,14 +25,13 @@
 
         <script type="module">
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
-            window.addEventListener("DOMContentLoaded", async function () {
-                const viewer = document.getElementById("viewer");
+            const viewer = document.getElementById("viewer");
 
-                // Create a client that expects a Perspective server to accept
-                // Websocket connections at the specified URL.
-                const websocket = await perspective.websocket("ws://localhost:8080/websocket");
+            // Create a client that expects a Perspective server to accept
+            // Websocket connections at the specified URL.
+            const websocket = await perspective.websocket("ws://localhost:8080/websocket");
 
-                /* This shows Perspective running in "server mode": the `table`
+            /* This shows Perspective running in "server mode": the `table`
                 variable is a proxy for the `Table` we created on the server.
                 
                 All operations that are possible through the Javascript API are
@@ -41,22 +40,22 @@
                 operations to the Python `Table`, execute the commands,
                 and return the result back to Javascript.
                 */
-                const table = await websocket.open_table("data_source_one");
+            const table = await websocket.open_table("data_source_one");
 
-                // Load this in the `<perspective-viewer>`.
-                viewer.load(table);
-                viewer.restore({
-                    plugin: "X/Y Scatter",
-                    aggregates: {
-                        high: "avg",
-                        low: "avg",
-                    },
-                    columns: ["high", "low"],
-                    group_by: ["client"],
-                    split_by: ["name"],
-                });
-                viewer.toggleConfig();
+            // Load this in the `<perspective-viewer>`.
+            viewer.load(table);
+            viewer.restore({
+                plugin: "X/Y Scatter",
+                aggregates: {
+                    high: "avg",
+                    low: "avg",
+                },
+                columns: ["high", "low"],
+                group_by: ["client"],
+                split_by: ["name"],
             });
+
+            viewer.toggleConfig();
         </script>
     </body>
 </html>

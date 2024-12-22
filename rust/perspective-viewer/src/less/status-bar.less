@@ -193,8 +193,8 @@
 
         span#status.loading {
             image-rendering: pixelated;
-            mask-image: url("../svg/downloading.gif");
-            -webkit-mask-image: url("../svg/downloading.gif");
+            mask-image: var(--downloading-icon--mask-image);
+            -webkit-mask-image: var(--downloading-icon--mask-image);
         }
 
         span#status.uninitialized {
@@ -203,8 +203,8 @@
 
         span#status.connected,
         span#status.updating {
-            mask-image: url(../svg/status_ok.svg);
-            -webkit-mask-image: url(../svg/status_ok.svg);
+            mask-image: var(--status-ok-icon--mask-image);
+            -webkit-mask-image: var(--status-ok-icon--mask-image);
         }
 
         // Status bar status icon animations
@@ -220,8 +220,8 @@
             mask-size: cover;
             pointer-events: none;
             image-rendering: pixelated;
-            mask-image: url("../svg/updating.gif");
-            -webkit-mask-image: url("../svg/updating.gif");
+            mask-image: var(--updating-icon--mask-image);
+            -webkit-mask-image: var(--updating-icon--mask-image);
         }
 
         // span#status.uninitialized {
@@ -255,8 +255,8 @@
 
         span#export {
             &:before {
-                -webkit-mask-image: url("../svg/export-icon.svg");
-                mask-image: url("../svg/export-icon.svg");
+                -webkit-mask-image: var(--export-icon--mask-image);
+                mask-image: var(--export-icon--mask-image);
             }
             span:before {
                 content: var(--export-button--content, "Export");
@@ -265,36 +265,36 @@
 
         span#lock {
             &:before {
-                -webkit-mask-image: url("../svg/free-scroll-icon.svg");
-                mask-image: url("../svg/free-scroll-icon.svg");
+                -webkit-mask-image: var(--free-scroll-icon--mask-image);
+                mask-image: var(--free-scroll-icon--mask-image);
             }
         }
 
         span#reset {
             &:before {
-                -webkit-mask-image: url("../svg/revert-icon.svg");
-                mask-image: url("../svg/revert-icon.svg");
+                -webkit-mask-image: var(--reset-icon--mask-image);
+                mask-image: var(--reset-icon--mask-image);
             }
             span:before {
-                content: var(--reset-button--content, "Reset");
+                content: var(--reset-button--content);
             }
         }
 
         span#copy {
             &:before {
-                -webkit-mask-image: url("../svg/duplicate-icon.svg");
-                mask-image: url("../svg/duplicate-icon.svg");
+                -webkit-mask-image: var(--copy-icon--mask-image);
+                mask-image: var(--copy-icon--mask-image);
             }
             span:before {
-                content: var(--copy-button--content, "Copy");
+                content: var(--copy-button--content);
             }
         }
 
         #theme {
             height: 48px;
             &:before {
-                -webkit-mask-image: url("../svg/theme-icon.svg");
-                mask-image: url("../svg/theme-icon.svg");
+                -webkit-mask-image: var(--theme-icon--mask-image);
+                mask-image: var(--theme-icon--mask-image);
             }
         }
 

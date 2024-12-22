@@ -25,9 +25,9 @@ pub struct ColorRangeProps {
 }
 
 fn infer_fg(color: &str) -> &'static str {
-    let r = i32::from_str_radix(&color[1..3], 16).unwrap() as f64;
-    let g = i32::from_str_radix(&color[3..5], 16).unwrap() as f64;
-    let b = i32::from_str_radix(&color[5..7], 16).unwrap() as f64;
+    let r = i32::from_str_radix(&color[1..3], 16).unwrap_or(255) as f64;
+    let g = i32::from_str_radix(&color[3..5], 16).unwrap_or(0) as f64;
+    let b = i32::from_str_radix(&color[5..7], 16).unwrap_or(0) as f64;
     if (r * r * 0.299 + g * g * 0.587 + b * b * 0.114).sqrt() > 130.0 {
         "--sign--color:#161616"
     } else {

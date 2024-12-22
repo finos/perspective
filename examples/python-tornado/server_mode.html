@@ -27,16 +27,15 @@
         <script type="module">
             import perspective from "http://localhost:8080/node_modules/@finos/perspective-viewer@2.7.1/dist/cdn/perspective-viewer.js";
             const REQ = fetch("/node_modules/superstore-arrow/superstore.lz4.arrow");
-            window.addEventListener("DOMContentLoaded", async function () {
-                // Create a client that expects a Perspective server to accept
-                // Websocket connections at the specified URL.
-                const websocket = await perspective.websocket("ws://localhost:8082/websocket");
-                const resp = await REQ;
-                const arrow = await resp.arrayBuffer();
-                const table = websocket.table(arrow);
 
-                document.getElementById("viewer").load(table);
-            });
+            // Create a client that expects a Perspective server to accept
+            // Websocket connections at the specified URL.
+            const websocket = await perspective.websocket("ws://localhost:8082/websocket");
+            const resp = await REQ;
+            const arrow = await resp.arrayBuffer();
+            const table = websocket.table(arrow);
+
+            document.getElementById("viewer").load(table);
         </script>
     </body>
 </html>
