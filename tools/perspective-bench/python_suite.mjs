@@ -55,6 +55,7 @@ perspective_bench.suite(
         );
 
         const metadata = { version, version_idx };
+        globalThis.__SEND__ = (x) => process.send(x);
         await all_benchmarks.table_suite(client, metadata);
         await all_benchmarks.view_suite(client, metadata);
         await all_benchmarks.to_data_suite(client, metadata);
