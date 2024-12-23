@@ -74,6 +74,7 @@ export function make_client(
 
 const CONTENT_TYPES: Record<string, string> = {
     ".js": "text/javascript",
+    ".mjs": "text/javascript",
     ".css": "text/css",
     ".json": "application/json",
     ".arrow": "arraybuffer",
@@ -90,7 +91,8 @@ const CONTENT_TYPES: Record<string, string> = {
 export async function cwd_static_file_handler(
     request: http.IncomingMessage,
     response: http.ServerResponse<http.IncomingMessage>,
-    assets = ["./"]
+    assets = ["./"],
+    { debug = true } = {}
 ) {
     let url =
         request.url
@@ -109,8 +111,13 @@ export async function cwd_static_file_handler(
             try {
                 let content = await fs.readFile(filePath);
                 if (typeof content !== "undefined") {
-                    console.log(`200 ${url}`);
-                    response.writeHead(200, { "Content-Type": contentType });
+                    if (debug) {
+                        console.log(`200 ${url}`);
+                    }
+                    response.writeHead(200, {
+                        "Content-Type": contentType,
+                        "Access-Control-Allow-Origin": "*",
+                    });
                     if (extname === ".arrow" || extname === ".feather") {
                         response.end(content, "utf-8");
                     } else {
@@ -122,11 +129,17 @@ export async function cwd_static_file_handler(
             } catch (e) {}
         }
 
-        console.error(`404 ${url}`);
+        if (debug) {
+            console.error(`404 ${url}`);
+        }
+
         response.writeHead(404);
         response.end("", "utf-8");
     } catch (error) {
-        console.error(`500 ${url} ${error}`);
+        if (debug) {
+            console.error(`500 ${url} ${error}`);
+        }
+
         response.writeHead(500);
         response.end("", "utf-8");
     }

@@ -24,11 +24,9 @@ import superstore from "superstore-arrow/superstore.lz4.arrow";
 
 const worker = perspective.worker();
 
-window.addEventListener("DOMContentLoaded", async () => {
-    const viewer = document.createElement("perspective-viewer");
-    document.body.append(viewer);
+const viewer = document.createElement("perspective-viewer");
+document.body.append(viewer);
 
-    const table = worker.table(superstore);
-    viewer.load(table);
-    window.viewer = viewer;
-});
+const table = worker.table(superstore);
+viewer.load(table);
+window.viewer = viewer;

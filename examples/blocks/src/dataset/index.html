@@ -229,11 +229,8 @@
             }
 
             // Main
-
-            window.addEventListener("DOMContentLoaded", async function () {
-                run.addEventListener("click", make_run_click_callback({}));
-                run.dispatchEvent(new Event("click"));
-            });
+            run.addEventListener("click", make_run_click_callback({}));
+            run.dispatchEvent(new Event("click"));
 
         </script>
     </body>

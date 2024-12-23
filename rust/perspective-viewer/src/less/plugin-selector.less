@@ -18,7 +18,7 @@
 
         #plugin_selector_container {
             min-height: 48px;
-            overflow: hidden;
+            overflow: scroll;
             display: flex;
             white-space: nowrap;
             flex-direction: column;
@@ -32,6 +32,7 @@
 
             #plugin_selector_border {
                 height: 2px;
+                min-height: 2px;
                 width: 100%;
                 background-color: var(--inactive--color, #6e6e6e);
                 margin-top: 1px;
@@ -70,6 +71,7 @@
                 // width: 48px;
                 padding-left: 9px;
                 height: 48px;
+                min-height: 48px;
                 display: flex;
                 align-items: center;
                 border-bottom: 1px solid var(--inactive--color, #6e6e6e);
@@ -101,59 +103,60 @@
             }
 
             .plugin-select-item[data-plugin="Candlestick"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-candlestick.svg);
+                // mask-image: var(--plugin-selector-candlestick--content);
+                -webkit-mask-image: var(--plugin-selector-candlestick--content);
             }
 
             .plugin-select-item[data-plugin="Heatmap"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-heatmap.svg);
+                -webkit-mask-image: var(--plugin-selector-heatmap--content);
             }
 
             .plugin-select-item[data-plugin="Map Scatter"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-map-scatter.svg);
+                -webkit-mask-image: var(--plugin-selector-map-scatter--content);
             }
 
             .plugin-select-item[data-plugin="OHLC"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-ohlc.svg);
+                -webkit-mask-image: var(--plugin-selector-ohlc--content);
             }
 
             .plugin-select-item[data-plugin="Sunburst"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-sunburst.svg);
+                -webkit-mask-image: var(--plugin-selector-sunburst--content);
             }
 
             .plugin-select-item[data-plugin="Treemap"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-treemap.svg);
+                -webkit-mask-image: var(--plugin-selector-treemap--content);
             }
 
             .plugin-select-item[data-plugin="X Bar"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-x-bar.svg);
+                -webkit-mask-image: var(--plugin-selector-x-bar--content);
             }
 
             .plugin-select-item[data-plugin="X/Y Line"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-x-y-line.svg);
+                -webkit-mask-image: var(--plugin-selector-x-y-line--content);
             }
 
             .plugin-select-item[data-plugin="X/Y Scatter"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-x-y-scatter.svg);
+                -webkit-mask-image: var(--plugin-selector-x-y-scatter--content);
             }
 
             .plugin-select-item[data-plugin="Y Area"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-y-area.svg);
+                -webkit-mask-image: var(--plugin-selector-y-area--content);
             }
 
             .plugin-select-item[data-plugin="Y Bar"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-y-bar.svg);
+                -webkit-mask-image: var(--plugin-selector-y-bar--content);
             }
 
             .plugin-select-item[data-plugin="Y Line"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-y-line.svg);
+                -webkit-mask-image: var(--plugin-selector-y-line--content);
             }
 
             .plugin-select-item[data-plugin="Y Scatter"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-y-scatter.svg);
+                -webkit-mask-image: var(--plugin-selector-y-scatter--content);
             }
 
             .plugin-select-item[data-plugin="Datagrid"]:before {
-                -webkit-mask-image: url(../svg/mega-menu-icons-datagrid.svg);
+                -webkit-mask-image: var(--plugin-selector-datagrid--content);
             }
         }
 
