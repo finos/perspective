@@ -238,8 +238,6 @@ if(PSP_WASM_BUILD)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
         endif()
     endif()
-
-    set(ASYNC_MODE_FLAGS "")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(WIN32)
         if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
@@ -266,7 +264,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                     -Wover-aligned \
                     ")
             else ()
-                 set(OPT_FLAGS " \
+                set(OPT_FLAGS " \
                     -O0 \
                     -fexceptions \
                     -g3 \
@@ -321,7 +319,6 @@ set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
 
 if(PSP_PYODIDE)
     set(RELOCATABLE_FLAGS "-sRELOCATABLE=1 -sSIDE_MODULE=2 -sWASM_BIGINT=1")
-
     string(APPEND CMAKE_EXE_LINKER_FLAGS "${RELOCATABLE_FLAGS}")
     string(APPEND CMAKE_C_FLAGS "${RELOCATABLE_FLAGS}")
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")

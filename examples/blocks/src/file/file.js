@@ -97,13 +97,13 @@ function uploadFile(file) {
         parent.appendChild(psp);
 
         // Load the file data into `<perspective-viewer>`.
-        psp.load(worker.table(data));
+        if (file.name.endsWith(".feather") || file.name.endsWith(".arrow")) {
+            psp.load(worker.table(data));
+        } else {
+            psp.load(worker.table(data, { format: "csv" }));
+        }
     };
 
     // Read the contents of the file - triggering the onload when finished.
-    if (file.name.endsWith(".feather") || file.name.endsWith(".arrow")) {
-        reader.readAsArrayBuffer(file);
-    } else {
-        reader.readAsText(file);
-    }
+    reader.readAsArrayBuffer(file);
 }

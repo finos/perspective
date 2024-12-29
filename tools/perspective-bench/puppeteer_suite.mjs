@@ -48,7 +48,7 @@ perspective_bench.suite(
 
         async function test_suite(suite) {
             const items = await page.evaluate(
-                async ([version, suite]) => {
+                async ([version, suite, version_idx]) => {
                     const { default: perspective } = await import(
                         `/tools/perspective-bench/node_modules/${version}/dist/esm/perspective.inline.js`
                     );
@@ -57,22 +57,19 @@ perspective_bench.suite(
                     );
 
                     const metadata = {
-                        version: "3.2.1",
-                        version_idx: 0,
+                        version,
+                        version_idx,
                     };
                     const total = [];
                     window.__SEND__ = (x) => {
                         total.push(x);
                     };
 
-                    await benchmarks[suite](
-                        await perspective.worker(),
-                        metadata
-                    );
-
+                    const client = await perspective.worker();
+                    await benchmarks[suite](client, metadata);
                     return total;
                 },
-                [path, suite]
+                [path, suite, version_idx]
             );
 
             for (const { obs_records, stats } of items) {

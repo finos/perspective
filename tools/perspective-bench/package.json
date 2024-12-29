@@ -28,6 +28,8 @@
         "zx": "^8.1.8"
     },
     "dependencies": {
+        "perspective-3-2-0": "npm:@finos/perspective@3.2.0",
+        "perspective-3-1-0": "npm:@finos/perspective@3.1.0",
         "perspective-3-0-0": "npm:@finos/perspective@3.0.0",
         "perspective-2-10-0": "npm:@finos/perspective@2.10.0",
         "perspective-2-9-0": "npm:@finos/perspective@2.9.0",

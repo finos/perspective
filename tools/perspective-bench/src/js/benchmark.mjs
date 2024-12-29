@@ -111,10 +111,10 @@ async function benchmark_case({
 }) {
     const args2 = args.slice();
     push_if(args2, await before?.(...args2));
-    if (typeof window === "undefined") {
+    if (typeof process !== "undefined") {
         const { default: process } = await import("node:process");
         const { default: microtime } = await import("microtime");
-        globalThis?.gc?.(false);
+        globalThis.gc(false);
         await new Promise((x) => setTimeout(x, 0));
         const start_time = microtime.now();
         const start_cpu = process.cpuUsage();

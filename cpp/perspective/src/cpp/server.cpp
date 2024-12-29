@@ -2406,10 +2406,10 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
 #if defined(PSP_ENABLE_WASM) && !defined(PSP_ENABLE_PYTHON)
             auto heap_size = psp_heap_size();
             sys_info->set_heap_size(heap_size);
-#else
-            PSP_COMPLAIN_AND_ABORT(
-                "ServerSystemInfoReq not implemented for non-emscripten targets"
-            );
+#elif !defined(WIN32)
+            rusage out;
+            getrusage(RUSAGE_SELF, &out);
+            sys_info->set_heap_size(out.ru_maxrss);
 #endif
             push_resp(std::move(resp));
             break;
