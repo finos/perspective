@@ -1653,9 +1653,13 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 for (const auto& arg : f.value()) {
                     switch (arg.scalar_case()) {
                         case proto::Scalar::kString: {
+#ifdef PSP_SSO_SCALAR
                             if (!t_tscalar::can_store_inplace(arg.string())) {
                                 vocab.get_interned(arg.string());
                             }
+#else
+                            vocab.get_interned(arg.string());
+#endif
                             break;
                         }
                         case proto::Scalar::kBool:
@@ -1694,13 +1698,16 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                                 );
                             }
 
+#ifdef PSP_SSO_SCALAR
                             if (!t_tscalar::can_store_inplace(arg.string())) {
+#endif
                                 a = coerce_to(
                                     schema->get_dtype(f.column()),
                                     vocab.unintern_c(
                                         vocab.get_interned(arg.string())
                                     )
                                 );
+#ifdef PSP_SSO_SCALAR
                             } else {
 
                                 a = coerce_to(
@@ -1708,6 +1715,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                                     arg.string().c_str()
                                 );
                             }
+#endif
                             args.push_back(a);
                             break;
                         }

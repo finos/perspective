@@ -645,7 +645,7 @@ t_tscalar::set(bool v) {
 void
 t_tscalar::set(const char* v) {
     m_type = DTYPE_STR;
-
+#ifdef PSP_SSO_SCALAR
     if (can_store_inplace(v)) {
         strncpy(reinterpret_cast<char*>(&m_data), v, SCALAR_INPLACE_LEN);
         m_inplace = true;
@@ -653,7 +653,9 @@ t_tscalar::set(const char* v) {
         m_data.m_charptr = v;
         m_inplace = false;
     }
-
+#else
+    m_data.m_charptr = v;
+#endif
     m_status = STATUS_VALID;
 }
 
@@ -682,9 +684,11 @@ t_tscalar::set(const t_none v) {
 void
 t_tscalar::set(const t_tscalar v) {
     m_type = v.m_type;
-    memcpy(&m_data, &(v.m_data), SCALAR_INPLACE_LEN);
+    memcpy(&m_data, &(v.m_data), sizeof(t_scalar_u));
     m_status = v.m_status;
+#ifdef PSP_SSO_SCALAR
     m_inplace = v.m_inplace;
+#endif
 }
 
 void
@@ -1612,12 +1616,15 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const {
 
 const char*
 t_tscalar::get_char_ptr() const {
+#ifdef PSP_SSO_SCALAR
     if (is_inplace()) {
         return m_data.m_inplace_char;
     }
+#endif
     return m_data.m_charptr;
 }
 
+#ifdef PSP_SSO_SCALAR
 bool
 t_tscalar::is_inplace() const {
     return m_inplace;
@@ -1632,6 +1639,7 @@ bool
 t_tscalar::can_store_inplace(const std::string& s) {
     return s.size() + 1 <= static_cast<size_t>(SCALAR_INPLACE_LEN);
 }
+#endif
 
 bool
 t_tscalar::is_nan() const {
@@ -1657,9 +1665,11 @@ mknull(t_dtype dtype) {
     rval.m_data.m_uint64 = 0;
     rval.m_status = STATUS_INVALID;
     rval.m_type = dtype;
+#ifdef PSP_SSO_SCALAR
     if (dtype == DTYPE_STR) {
         rval.m_inplace = true;
     }
+#endif
     return rval;
 }
 

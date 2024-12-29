@@ -43,7 +43,9 @@ struct PERSPECTIVE_EXPORT t_const_char_comparator {
     }
 };
 
+#ifdef PSP_SSO_SCALAR
 const int SCALAR_INPLACE_LEN = 13;
+#endif
 
 union t_scalar_u {
     std::int64_t m_int64;
@@ -62,7 +64,9 @@ union t_scalar_u {
     bool m_bool;
 
     const char* m_charptr;
+#ifdef PSP_SSO_SCALAR
     char m_inplace_char[SCALAR_INPLACE_LEN];
+#endif
 };
 
 // t_scalar should remain a POD type.
@@ -187,10 +191,11 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     void clear();
     t_dtype get_dtype() const;
     const char* get_char_ptr() const;
+#ifdef PSP_SSO_SCALAR
     bool is_inplace() const;
     static bool can_store_inplace(const char* s);
     static bool can_store_inplace(const std::string& s);
-
+#endif
     template <typename DATA_T>
     t_tscalar coerce_numeric() const;
 
@@ -199,7 +204,9 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_scalar_u m_data;
     unsigned char m_type;
     t_status m_status;
+#ifdef PSP_SSO_SCALAR
     bool m_inplace;
+#endif
 };
 
 // inline t_tscalar operator"" _ts(long double v) {
