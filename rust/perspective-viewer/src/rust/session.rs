@@ -112,6 +112,7 @@ impl Session {
         let view = self.0.borrow_mut().view_sub.take();
         self.borrow_mut().view_sub = None;
         self.borrow_mut().config.reset(reset_expressions);
+
         view.delete()
     }
 
@@ -418,13 +419,7 @@ impl Session {
     /// Update the config, setting the `columns` property to the plugin defaults
     /// if provided.
     pub fn update_view_config(&self, config_update: ViewConfigUpdate) {
-        if self.borrow().old_config.is_none() {
-            let config = self.borrow().config.clone();
-            self.borrow_mut().old_config = Some(config);
-        }
-
         if self.borrow_mut().config.apply_update(config_update) {
-            ApiFuture::spawn(self.borrow_mut().view_sub.take().delete());
             self.0.borrow_mut().is_clean = false;
             self.view_config_changed.emit(());
         }
@@ -442,6 +437,12 @@ impl Session {
     /// In order to create a new view in this session, the session must first be
     /// validated to create a `ValidSession<'_>` guard.
     pub async fn validate(&self) -> Result<ValidSession<'_>, JsValue> {
+        let old = self.borrow_mut().old_config.take();
+        let is_diff = match old.as_ref() {
+            Some(old) => !old.is_equivalent(&self.borrow().config),
+            None => true,
+        };
+
         if let Err(err) = self.validate_view_config().await {
             web_sys::console::error_3(
                 &"Invalid config:".into(),
@@ -449,7 +450,6 @@ impl Session {
                 &JsValue::from_serde_ext(&self.borrow().config).unwrap(),
             );
 
-            let old = self.borrow_mut().old_config.take();
             if let Some(config) = old {
                 self.borrow_mut().config = config;
             } else {
@@ -457,11 +457,13 @@ impl Session {
             }
 
             self.0.view_created.emit(());
-            Err(err)?;
+            return Err(err)?;
+        } else {
+            let old_config = Some(self.borrow().config.clone());
+            self.borrow_mut().old_config = old_config;
         }
 
-        self.borrow_mut().old_config = None;
-        Ok(ValidSession(self))
+        Ok(ValidSession(self, is_diff))
     }
 
     async fn flat_view(&self, flat: bool) -> ApiResult<View> {
@@ -571,7 +573,7 @@ impl Session {
 }
 
 /// A newtype wrapper which only provides `create_view()`
-pub struct ValidSession<'a>(&'a Session);
+pub struct ValidSession<'a>(&'a Session, bool);
 
 impl<'a> ValidSession<'a> {
     /// Set a new `View` (derived from this `Session`'s `Table`), and create the
@@ -579,6 +581,14 @@ impl<'a> ValidSession<'a> {
     /// the original `&Session`.
     pub async fn create_view(&self) -> Result<&'a Session, ApiError> {
         if !self.0.reset_clean() && !self.0.borrow().is_paused {
+            if !self.1 {
+                let config = self.0.borrow().config.clone();
+                if let Some(sub) = &mut self.0.borrow_mut().view_sub.as_mut() {
+                    sub.update_view_config(Rc::new(config));
+                    return Ok(self.0);
+                }
+            }
+
             let table = self
                 .0
                 .borrow()
@@ -602,7 +612,7 @@ impl<'a> ValidSession<'a> {
             };
 
             let view = self.0.borrow_mut().view_sub.take();
-            view.delete().await?;
+            ApiFuture::spawn(view.delete());
             self.0.borrow_mut().view_sub = Some(sub);
         }
 
