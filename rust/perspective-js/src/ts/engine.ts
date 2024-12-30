@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { EmscriptenApi, EmscriptenServer } from "./emscripten_api.ts";
+import { EmscriptenApi, EmscriptenServer, PspPtr } from "./emscripten_api.ts";
 
 export type ApiResponse = {
     client_id: number;
@@ -67,7 +67,9 @@ export class PerspectiveSession {
                     this.server,
                     this.client_id,
                     viewPtr,
-                    view.byteLength
+                    this.mod._psp_is_memory64()
+                        ? BigInt(view.byteLength)
+                        : view.byteLength
                 );
             }
         );
@@ -92,19 +94,16 @@ export class PerspectiveSession {
 async function convert_typed_array_to_pointer(
     core: EmscriptenApi,
     array: Uint8Array,
-    callback: (_: number) => Promise<number>
-): Promise<number> {
-    const ptr = core._psp_alloc(array.byteLength);
-    core.HEAPU8.set(array, ptr);
+    callback: (_: PspPtr) => Promise<PspPtr>
+): Promise<PspPtr> {
+    const ptr = core._psp_alloc(
+        core._psp_is_memory64() ? BigInt(array.byteLength) : array.byteLength
+    );
+
+    core.HEAPU8.set(array, Number(ptr));
     const msg = await callback(ptr);
     core._psp_free(ptr);
     return msg;
-}
-
-function convert_pointer_to_u32_array(core: EmscriptenApi, ptr: number) {
-    const len = core.HEAPU32[ptr >>> 2];
-    const data_ptr = core.HEAPU32[(ptr >>> 2) + 1];
-    return new Uint32Array(core.HEAPU8.buffer, data_ptr, len * 3);
 }
 
 /**
@@ -114,7 +113,7 @@ function convert_pointer_to_u32_array(core: EmscriptenApi, ptr: number) {
  * @param core The emscripten API
  * @param ptr A pointer to a fixed-sized struct representing a set of
  * `proto::Resp` payloads, encoded as a length-prefixed array of
- * (char* data, size_t len, size_t client_id) tuples:
+ * (char* data, u32_t len, u32_t client_id) tuples:
  *
  * ```text
  *   N   data    length   client_id   data    length   client_id
@@ -133,26 +132,64 @@ function convert_pointer_to_u32_array(core: EmscriptenApi, ptr: number) {
  */
 async function decode_api_responses(
     core: EmscriptenApi,
-    ptr: number,
+    ptr: PspPtr,
     callback: (_: ApiResponse) => Promise<void>
 ) {
-    const responses = convert_pointer_to_u32_array(core, ptr);
+    const is_64 = core._psp_is_memory64();
+    const response = new DataView(
+        core.HEAPU8.buffer,
+        Number(ptr),
+        is_64 ? 12 : 8
+    );
+
+    const num_msgs = response.getUint32(0, true);
+    const msgs_ptr = is_64
+        ? response.getBigInt64(4, true)
+        : response.getUint32(4, true);
+
+    const messages = new DataView(
+        core.HEAPU8.buffer,
+        Number(msgs_ptr),
+        num_msgs * (is_64 ? 16 : 12)
+    );
+
     try {
-        for (let i = 0; i < responses.length / 3; i++) {
-            const data_ptr = responses[i * 3];
-            const length = responses[i * 3 + 1];
-            const client_id = responses[i * 3 + 2];
-            const data = new Uint8Array(core.HEAPU8.buffer, data_ptr, length);
+        for (let i = 0; i < num_msgs; i++) {
+            const [data_ptr, data_len, client_id] = is_64
+                ? [
+                      messages.getBigInt64(i * 16, true),
+                      messages.getInt32(i * 16 + 8, true),
+                      messages.getInt32(i * 16 + 12, true),
+                  ]
+                : [
+                      messages.getInt32(i * 12, true),
+                      messages.getInt32(i * 12 + 4, true),
+                      messages.getInt32(i * 12 + 8, true),
+                  ];
+
+            const data = new Uint8Array(
+                core.HEAPU8.buffer,
+                Number(data_ptr),
+                data_len
+            );
+
             const resp = { client_id, data };
             await callback(resp);
         }
     } finally {
-        for (let i = 0; i < responses.length / 3; i++) {
-            const data_ptr = responses[i * 3];
+        for (let i = 0; i < num_msgs; i++) {
+            const data_ptr = is_64
+                ? messages.getBigInt64(i * 16, true)
+                : messages.getInt32(i * 12, true);
+
             core._psp_free(data_ptr);
         }
 
-        core._psp_free(responses.byteOffset);
-        core._psp_free(ptr);
+        core._psp_free(
+            is_64 ? BigInt(messages.byteOffset) : messages.byteOffset
+        );
+        core._psp_free(
+            is_64 ? BigInt(response.byteOffset) : response.byteOffset
+        );
     }
 }

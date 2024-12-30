@@ -14,8 +14,8 @@
         "url": "https://github.com/finos/perspective/packages/perspective-bench"
     },
     "scripts": {
-        "bench_js": "node basic_suite.mjs",
-        "bench_python": "node python_suite.mjs"
+        "bench_js": "node --experimental-wasm-memory64 basic_suite.mjs",
+        "bench_python": "node --experimental-wasm-memory64 python_suite.mjs"
     },
     "author": "",
     "license": "Apache-2.0",

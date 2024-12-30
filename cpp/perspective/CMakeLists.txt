@@ -29,6 +29,8 @@ endif()
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 set(MSVC_RUNTIME_LIBRARY MultiThreaded)
 
+option(PSP_WASM64 "Enable WASM Memory64 support" OFF)
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(WIN32 ON)
     set(MACOS OFF)
@@ -229,11 +231,13 @@ if(PSP_WASM_BUILD)
             ")
         endif()
     else()
-        # Pyodide RELEASE block
-        set(OPT_FLAGS " \
-            -O3 \
-            -g0 \
+        set(OPT_FLAGS " -O3 -g0 ")
+        if(NOT PSP_PYODIDE)
+            set(OPT_FLAGS " \
+                ${OPT_FLAGS} \
             ")
+        endif()
+
         if (PSP_WASM_EXCEPTIONS)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
         endif()
@@ -299,15 +303,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
--O3 \
-")
 
 if (PSP_WASM_EXCEPTIONS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
+        -O3 \
+        -g0 \
+    ")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-    -fwasm-exceptions \
-    -O3 \
-    -g0 \
+        -fwasm-exceptions \
+        -O3 \
+        -g0 \
     ")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
@@ -315,11 +320,26 @@ else()
     ")
 endif()
 
+if (PSP_WASM64)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
+        -mbulk-memory \
+        -msimd128 \
+        -mrelaxed-simd \
+        -s MEMORY64=1 \
+    ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+        -mbulk-memory \
+        -msimd128 \
+        -mrelaxed-simd \
+        -s MEMORY64=1 \
+    ")
+endif()
+
 set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
 
 if(PSP_PYODIDE)
-    set(RELOCATABLE_FLAGS "-sRELOCATABLE=1 -sSIDE_MODULE=2 -sWASM_BIGINT=1")
-    string(APPEND CMAKE_EXE_LINKER_FLAGS "${RELOCATABLE_FLAGS}")
+    set(RELOCATABLE_FLAGS " -sRELOCATABLE=1 -sSIDE_MODULE=2 ")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS "${RELOCATABLE_FLAGS} -sWASM_BIGINT=1 ")
     string(APPEND CMAKE_C_FLAGS "${RELOCATABLE_FLAGS}")
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
 endif()
@@ -490,10 +510,12 @@ endif()
 if(PSP_PYODIDE)
     set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
         --no-entry \
-        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server \
+        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server,_psp_is_memory64 \
         -s SIDE_MODULE=2 \
     ")
 else()
+# -s MEMORY_GROWTH_GEOMETRIC_STEP=1.0 \
+# -s MEMORY_GROWTH_GEOMETRIC_CAP=536870912 \
     set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
         --no-entry \
         --closure=1 \
@@ -505,16 +527,26 @@ else()
         -s TEXTDECODER=2 \
         -s STANDALONE_WASM=1 \
         -s DYNAMIC_EXECUTION=0 \
-        -s BINARYEN_EXTRA_PASSES=--one-caller-inline-max-function-size=19306 \
+        -s POLYFILL=0 \
         -s EXPORT_NAME=\"load_perspective\" \
-        -s MAXIMUM_MEMORY=4gb \
+        -s MAXIMUM_MEMORY=16gb \
         -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
         -s NODEJS_CATCH_EXIT=0 \
         -s NODEJS_CATCH_REJECTION=0 \
         -s USE_ES6_IMPORT_META=1 \
         -s EXPORT_ES6=1 \
-        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server \
+        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server,_psp_is_memory64 \
     ")
+
+    if(PSP_WASM64)
+        set(PSP_WASM_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} \
+            -s MAXIMUM_MEMORY=16gb \
+        ")
+    else()
+        set(PSP_WASM_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS} \
+            -s MAXIMUM_MEMORY=4gb \
+        ")
+    endif()
 endif()
 
 if (PSP_WASM_EXCEPTIONS)

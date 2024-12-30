@@ -38,6 +38,10 @@
 #include <vector>
 #include <ctime>
 
+#if !defined(WIN32) && !defined(PSP_ENABLE_WASM)
+#include <sys/resource.h>
+#endif
+
 namespace perspective {
 std::uint32_t server::ProtoServer::m_client_id = 1;
 
@@ -2414,7 +2418,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
 #if defined(PSP_ENABLE_WASM) && !defined(PSP_ENABLE_PYTHON)
             auto heap_size = psp_heap_size();
             sys_info->set_heap_size(heap_size);
-#elif !defined(WIN32)
+#elif !defined(WIN32) && !defined(PSP_ENABLE_WASM)
             rusage out;
             getrusage(RUSAGE_SELF, &out);
             sys_info->set_heap_size(out.ru_maxrss);

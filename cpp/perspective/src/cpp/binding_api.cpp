@@ -119,4 +119,14 @@ psp_delete_server(void* proto_server) {
     delete server;
 }
 
+PERSPECTIVE_EXPORT
+bool
+psp_is_memory64() {
+#if UINTPTR_MAX == 0xffffffff
+    return false;
+#elif UINTPTR_MAX == 0xffffffffffffffff
+    return true;
+#endif
+}
+
 } // end extern "C"

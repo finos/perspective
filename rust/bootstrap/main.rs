@@ -71,7 +71,9 @@ fn main() {
         .join("perspective_bootstrap_runtime.wasm");
 
     OptimizationOptions::new_optimize_for_size()
-        .one_caller_inline_max_size(19306)
+        // .one_caller_inline_max_size(19306)
+        .enable_feature(wasm_opt::Feature::BulkMemory)
+        .enable_feature(wasm_opt::Feature::Simd)
         .run(inpath.clone(), args.output.unwrap_or(args.input))
         .unwrap();
 }

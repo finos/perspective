@@ -127,3 +127,6 @@ features = [
     "VisibilityState",
     "Window",
 ]
+
+[patch.crates-io]
+simd-adler32 = { git = "https://github.com/mcountryman/simd-adler32.git", rev = "140cde033e8b9a12d4de840648c65ccd5320bcc5" }

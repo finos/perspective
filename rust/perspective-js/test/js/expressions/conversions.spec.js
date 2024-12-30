@@ -561,7 +561,7 @@ import perspective from "../perspective_client";
 
             expect(await view.to_columns()).toEqual({
                 x: ["abcd", "", null, "abc"],
-                'boolean("x")': [true, false, false, true],
+                'boolean("x")': [true, true, false, true],
             });
 
             await view.delete();
