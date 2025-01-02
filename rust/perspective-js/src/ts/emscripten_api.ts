@@ -16,6 +16,8 @@ import { load_wasm_stage_0 } from "./decompress.ts";
 
 export type * from "../../dist/pkg/perspective-js.d.ts";
 
+export type PspPtr = bigint | number;
+
 export interface EmscriptenServer {}
 export interface EmscriptenApi {
     HEAP8: Int8Array;
@@ -24,17 +26,19 @@ export interface EmscriptenApi {
     HEAPU16: Uint16Array;
     HEAP32: Int32Array;
     HEAPU32: Uint32Array;
-    _psp_alloc(size: number): number;
-    _psp_free(ptr: number): void;
+    HEAPU64: BigUint64Array;
+    _psp_alloc(size: PspPtr): PspPtr;
+    _psp_free(ptr: PspPtr): void;
     _psp_new_server(): EmscriptenServer;
     _psp_delete_server(server: EmscriptenServer): void;
+    _psp_is_memory64(): boolean;
     _psp_handle_request(
         server: EmscriptenServer,
         client_id: number,
-        buffer_ptr: number,
-        buffer_len: number
-    ): number;
-    _psp_poll(server: EmscriptenServer): number;
+        buffer_ptr: PspPtr,
+        buffer_len: PspPtr
+    ): PspPtr;
+    _psp_poll(server: EmscriptenServer): PspPtr;
     _psp_new_session(server: EmscriptenServer): number;
     _psp_close_session(server: EmscriptenServer, client_id: number): void;
 }
@@ -42,7 +46,7 @@ export interface EmscriptenApi {
 export async function compile_perspective(
     compressed_binary: ArrayBuffer
 ): Promise<EmscriptenApi> {
-    const module = await perspective_server.default({
+    const module: EmscriptenApi = await perspective_server.default({
         locateFile(x: any) {
             return x;
         },
@@ -57,9 +61,14 @@ export async function compile_perspective(
                     const str = Error().stack || "";
                     const textEncoder = new TextEncoder();
                     const bytes = textEncoder.encode(str);
-                    const ptr = module._psp_alloc(bytes.byteLength + 1);
-                    module.HEAPU8.set(bytes, ptr);
-                    module.HEAPU8[ptr + bytes.byteLength] = 0;
+                    const ptr = module._psp_alloc(
+                        module._psp_is_memory64()
+                            ? BigInt(bytes.byteLength + 1)
+                            : bytes.byteLength + 1
+                    );
+
+                    module.HEAPU8.set(bytes, Number(ptr));
+                    module.HEAPU8[Number(ptr) + bytes.byteLength] = 0;
                     return ptr;
                 },
                 psp_heap_size() {

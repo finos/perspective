@@ -28,6 +28,8 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
 const CLIENT_VERSION = {
     master: "@finos/perspective",
+    "3.2.0": "perspective-3-2-0",
+    "3.1.0": "perspective-3-1-0",
     "3.0.3": "perspective-3-0-0",
     "2.10.1": "perspective-2-10-0",
     "2.9.0": "perspective-2-9-0",

@@ -256,4 +256,24 @@ impl ViewConfig {
             || self.filter.iter().any(|x| x.column() == name)
             || self.columns.contains(&Some(name))
     }
+
+    /// `ViewConfig` carries additional metadata in the form of `None` columns
+    /// which are filtered befor ebeing passed to the engine, but whose position
+    /// is a placeholder for Viewer functionality. `is_equivalent` tests
+    /// equivalency from the perspective of the engine.
+    pub fn is_equivalent(&self, other: &Self) -> bool {
+        let _self = self.clone();
+        let _self = ViewConfig {
+            columns: _self.columns.into_iter().filter(|x| x.is_some()).collect(),
+            .._self
+        };
+
+        let _other = other.clone();
+        let _other = ViewConfig {
+            columns: _other.columns.into_iter().filter(|x| x.is_some()).collect(),
+            ..other.clone()
+        };
+
+        _self == _other
+    }
 }

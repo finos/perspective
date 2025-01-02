@@ -137,6 +137,13 @@ impl ViewSubscription {
         Self { data }
     }
 
+    /// It is possible to re-use a `ViewSubscription` without a costly
+    /// resubscribe under certain conditions, which still need an updated
+    /// `ViewConfig`.
+    pub fn update_view_config(&mut self, config: Rc<ViewConfig>) {
+        self.data.config = config
+    }
+
     /// Getter for the underlying `View()`.
     pub const fn get_view(&self) -> &View {
         &self.data.view

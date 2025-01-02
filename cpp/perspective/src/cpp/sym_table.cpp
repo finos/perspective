@@ -44,12 +44,13 @@ t_symtable::get_interned_cstr(const char* s) {
 
 t_tscalar
 t_symtable::get_interned_tscalar(const char* s) {
+#ifdef PSP_SSO_SCALAR
     if (t_tscalar::can_store_inplace(s)) {
         t_tscalar rval;
         rval.set(s);
         return rval;
     }
-
+#endif
     t_tscalar rval;
     rval.set(get_interned_cstr(s));
     return rval;
@@ -57,10 +58,15 @@ t_symtable::get_interned_tscalar(const char* s) {
 
 t_tscalar
 t_symtable::get_interned_tscalar(const t_tscalar& s) {
+#ifdef PSP_SSO_SCALAR
     if (!s.is_str() || s.is_inplace()) {
         return s;
     }
-
+#else
+    if (!s.is_str()) {
+        return s;
+    }
+#endif
     t_tscalar rval;
     rval.set(get_interned_cstr(s.get_char_ptr()));
     rval.m_status = s.m_status;
@@ -91,11 +97,13 @@ get_interned_cstr(const char* s) {
 
 t_tscalar
 get_interned_tscalar(const char* s) {
+#ifdef PSP_SSO_SCALAR
     if (t_tscalar::can_store_inplace(s)) {
         t_tscalar rval;
         rval.set(s);
         return rval;
     }
+#endif
     t_tscalar rval;
     rval.set(get_interned_cstr(s));
     return rval;
@@ -103,10 +111,15 @@ get_interned_tscalar(const char* s) {
 
 t_tscalar
 get_interned_tscalar(const t_tscalar& s) {
+#ifdef PSP_SSO_SCALAR
     if (!s.is_str() || s.is_inplace()) {
         return s;
     }
-
+#else
+    if (!s.is_str()) {
+        return s;
+    }
+#endif
     t_tscalar rval;
     rval.set(get_interned_cstr(s.get_char_ptr()));
     return rval;

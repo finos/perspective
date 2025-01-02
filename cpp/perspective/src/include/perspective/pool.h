@@ -48,21 +48,12 @@ public:
     //   void set_update_delegate(t_val ud);
     // #endif
 
-#if defined PSP_ENABLE_WASM and !defined PSP_ENABLE_PYTHON
     void register_context(
         t_uindex gnode_id,
         const std::string& name,
         t_ctx_type type,
-        std::int32_t ptr
+        std::uintptr_t ptr
     );
-#else
-    void register_context(
-        t_uindex gnode_id,
-        const std::string& name,
-        t_ctx_type type,
-        std::int64_t ptr
-    );
-#endif
 
 #ifdef PSP_PARALLEL_FOR
     std::shared_mutex* get_lock() const;

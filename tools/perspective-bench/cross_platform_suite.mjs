@@ -77,9 +77,6 @@ export async function to_data_suite(perspective, metadata) {
 export async function view_suite(perspective, metadata) {
     async function before_all() {
         const table = await perspective.table(new_superstore_table(metadata));
-        for (let i = 0; i < 4; i++) {
-            await table.update(new_superstore_table(metadata));
-        }
 
         const schema = await table.schema();
         return { table, schema };
@@ -119,6 +116,29 @@ export async function view_suite(perspective, metadata) {
                 return await table.view({ group_by: ["Product Name"] });
             } else {
                 return await table.view({ row_pivots: ["Product Name"] });
+            }
+        },
+    });
+
+    await benchmark({
+        name: `.view({expressions})`,
+        before_all,
+        after_all,
+        after,
+        metadata,
+        async test({ table }) {
+            if (check_version_gte(metadata.version, "2.7.0")) {
+                return await table.view({
+                    columns: ["AAA"],
+                    expressions: {
+                        AAA: `("Sales" + "Profit") / 2`,
+                    },
+                });
+            } else {
+                return await table.view({
+                    columns: ["AAA"],
+                    expressions: [`//AAA\n("Sales" + "Profit") / 2`],
+                });
             }
         },
     });

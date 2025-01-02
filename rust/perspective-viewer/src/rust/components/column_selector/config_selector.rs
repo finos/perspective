@@ -49,13 +49,10 @@ impl PartialEq for ConfigSelectorProps {
 
 impl ConfigSelectorProps {
     fn default_op(&self, column: &str) -> Option<String> {
-        tracing::error!("Calcing filter default");
         let metadata = self.session.metadata();
         let features = metadata.get_features()?;
         let col_type = metadata.get_column_table_type(column)?;
         let first = features.default_op(col_type)?;
-
-        tracing::error!("Found op {first} for {column}");
         Some(first.to_string())
     }
 }

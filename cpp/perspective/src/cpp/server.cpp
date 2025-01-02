@@ -38,6 +38,10 @@
 #include <vector>
 #include <ctime>
 
+#if !defined(WIN32) && !defined(PSP_ENABLE_WASM)
+#include <sys/resource.h>
+#endif
+
 namespace perspective {
 std::uint32_t server::ProtoServer::m_client_id = 1;
 
@@ -1653,9 +1657,13 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 for (const auto& arg : f.value()) {
                     switch (arg.scalar_case()) {
                         case proto::Scalar::kString: {
+#ifdef PSP_SSO_SCALAR
                             if (!t_tscalar::can_store_inplace(arg.string())) {
                                 vocab.get_interned(arg.string());
                             }
+#else
+                            vocab.get_interned(arg.string());
+#endif
                             break;
                         }
                         case proto::Scalar::kBool:
@@ -1694,13 +1702,16 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                                 );
                             }
 
+#ifdef PSP_SSO_SCALAR
                             if (!t_tscalar::can_store_inplace(arg.string())) {
+#endif
                                 a = coerce_to(
                                     schema->get_dtype(f.column()),
                                     vocab.unintern_c(
                                         vocab.get_interned(arg.string())
                                     )
                                 );
+#ifdef PSP_SSO_SCALAR
                             } else {
 
                                 a = coerce_to(
@@ -1708,6 +1719,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                                     arg.string().c_str()
                                 );
                             }
+#endif
                             args.push_back(a);
                             break;
                         }
@@ -2406,10 +2418,10 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
 #if defined(PSP_ENABLE_WASM) && !defined(PSP_ENABLE_PYTHON)
             auto heap_size = psp_heap_size();
             sys_info->set_heap_size(heap_size);
-#else
-            PSP_COMPLAIN_AND_ABORT(
-                "ServerSystemInfoReq not implemented for non-emscripten targets"
-            );
+#elif !defined(WIN32) && !defined(PSP_ENABLE_WASM)
+            rusage out;
+            getrusage(RUSAGE_SELF, &out);
+            sys_info->set_heap_size(out.ru_maxrss);
 #endif
             push_resp(std::move(resp));
             break;

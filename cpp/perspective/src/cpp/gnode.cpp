@@ -997,7 +997,7 @@ t_gnode::get_registered_contexts() const {
 
 void
 t_gnode::_register_context(
-    const std::string& name, t_ctx_type type, std::int64_t ptr
+    const std::string& name, t_ctx_type type, std::uintptr_t ptr
 ) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");

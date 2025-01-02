@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#include <cstdint>
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/pool.h>
@@ -182,39 +183,21 @@ t_pool::get_trees() {
     return rval;
 }
 
-#if defined PSP_ENABLE_WASM and !defined(PSP_ENABLE_PYTHON)
 void
 t_pool::register_context(
     t_uindex gnode_id,
     const std::string& name,
     t_ctx_type type,
-    std::int32_t ptr
-) {
-
-    if (!validate_gnode_id(gnode_id)) {
-        return;
-    }
-    m_gnodes[gnode_id]->_register_context(name, type, ptr);
-}
-
-#else
-void
-t_pool::register_context(
-    t_uindex gnode_id,
-    const std::string& name,
-    t_ctx_type type,
-    std::int64_t ptr
+    std::uintptr_t ptr
 ) {
 #ifdef PSP_PARALLEL_FOR
     PSP_WRITE_LOCK(*m_lock)
 #endif
-
     if (!validate_gnode_id(gnode_id)) {
         return;
     }
     m_gnodes[gnode_id]->_register_context(name, type, ptr);
 }
-#endif
 
 void
 t_pool::notify_userspace(t_uindex port_id) {

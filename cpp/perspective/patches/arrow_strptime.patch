@@ -1,3 +1,19 @@
+diff --git a/cpp/src/arrow/util/decimal.cc b/cpp/src/arrow/util/decimal.cc
+index c8457eae8..aa2b41cc9 100644
+--- a/cpp/src/arrow/util/decimal.cc
++++ b/cpp/src/arrow/util/decimal.cc
+@@ -111,7 +111,11 @@ struct DecimalRealConversion : public BaseDecimalRealConversion {
+ 
+     // 2. Losslessly convert `real` to `mant * 2**k`
+     int binary_exp = 0;
++#ifdef __EMSCRIPTEN__
++    const Real real_mant = std::frexpf(real, &binary_exp);
++#else
+     const Real real_mant = std::frexp(real, &binary_exp);
++#endif
+     // `real_mant` is within 0.5 and 1 and has M bits of precision.
+     // Multiply it by 2^M to get an exact integer.
+     const uint64_t mant = static_cast<uint64_t>(std::ldexp(real_mant, kMantissaBits));
 diff --git a/cpp/src/arrow/util/value_parsing.h b/cpp/src/arrow/util/value_parsing.h
 index 609906052..1e3dfae7c 100644
 --- a/cpp/src/arrow/util/value_parsing.h
@@ -11,3 +27,27 @@ index 609906052..1e3dfae7c 100644
    char* ret = arrow_strptime(clean_copy.c_str(), format, &result);
  #else
    char* ret = strptime(clean_copy.c_str(), format, &result);
+diff --git a/cpp/src/arrow/vendored/xxhash/xxhash.h b/cpp/src/arrow/vendored/xxhash/xxhash.h
+index a18e8c762..235590b19 100644
+--- a/cpp/src/arrow/vendored/xxhash/xxhash.h
++++ b/cpp/src/arrow/vendored/xxhash/xxhash.h
+@@ -169,6 +169,11 @@
+  * xxHash prototypes and implementation
+  */
+ 
++
++#ifdef __EMSCRIPTEN__
++#include <emscripten.h>
++#endif
++
+ #if defined (__cplusplus)
+ extern "C" {
+ #endif
+@@ -3422,6 +3427,7 @@ XXH_PUBLIC_API XXH64_hash_t XXH64_hashFromCanonical(XXH_NOESCAPE const XXH64_can
+ #  endif
+ #endif
+ 
++
+ #if defined(__GNUC__) || defined(__clang__)
+ #  if defined(__ARM_FEATURE_SVE)
+ #    include <arm_sve.h>

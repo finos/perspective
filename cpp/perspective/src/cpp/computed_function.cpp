@@ -1233,9 +1233,9 @@ bucket::operator()(t_parameter_list parameters) {
     }
     std::string allowed_units = "smhDWMY";
     if (allowed_units.find(temp_unit) == std::string::npos) {
-        std::cerr << "[bucket] unknown unit in bucket - the valid units "
-                     "are 's', 'm', 'h', 'D', 'W', 'M', and 'Y'."
-                  << '\n';
+        // std::cerr << "[bucket] unknown unit in bucket - the valid units "
+        //              "are 's', 'm', 'h', 'D', 'W', 'M', and 'Y'."
+        //           << '\n';
         rval.m_type = DTYPE_TIME;
         rval.m_status = STATUS_CLEAR;
         return rval;
