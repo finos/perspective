@@ -33,18 +33,18 @@ const BUILD = [
         outfile: "dist/esm/perspective.inline.js",
     },
     {
-        entryPoints: ["src/ts/perspective.ts"],
+        entryPoints: ["src/ts/perspective.cdn.ts"],
         format: "esm",
         target: "es2022",
-        plugins: [PerspectiveEsbuildPlugin()],
-        outdir: "dist/cdn",
+        plugins: [PerspectiveEsbuildPlugin({ wasm: false })],
+        outfile: "dist/cdn/perspective.js",
     },
     {
-        entryPoints: ["src/ts/perspective.ts"],
+        entryPoints: ["src/ts/perspective.browser.ts"],
         format: "esm",
         target: "es2022",
-        external: ["*.wasm", "*.worker.js"],
-        outdir: "dist/esm",
+        plugins: [PerspectiveEsbuildPlugin({ wasm: false })],
+        outfile: "dist/esm/perspective.js",
     },
     {
         entryPoints: ["src/ts/perspective.node.ts"],
@@ -78,7 +78,7 @@ function build_rust() {
 }
 
 async function build_web_assets() {
-    await cpy(["../../cpp/perspective/dist/web/*"], "dist/pkg/web");
+    await cpy(["../../cpp/perspective/dist/web/*"], "dist/pkg");
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 

@@ -26,8 +26,13 @@ exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
     });
 
     function setup(build) {
-        wasm_plugin.setup(build);
-        worker_plugin.setup(build);
+        if (options.wasm !== false) {
+            wasm_plugin.setup(build);
+        }
+
+        if (options.worker !== false) {
+            worker_plugin.setup(build);
+        }
     }
 
     return {

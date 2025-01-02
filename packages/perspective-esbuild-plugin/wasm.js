@@ -24,10 +24,13 @@ exports.WasmPlugin = function WasmPlugin(inline, webpack_hack) {
                 args.namespace === "wasm-stub" ||
                 args.namespace === "wasm-inline"
             ) {
-                const entryPoint = path.join(
-                    args.pluginData.resolveDir,
-                    args.path
-                );
+                let entryPoint = args.path;
+                if (args.path.startsWith(".")) {
+                    entryPoint = path.join(
+                        args.pluginData.resolveDir,
+                        entryPoint
+                    );
+                }
 
                 return {
                     path: entryPoint,

@@ -16,7 +16,7 @@
                 "types": "./dist/esm/perspective.node.d.ts",
                 "default": "./dist/esm/perspective.node.js"
             },
-            "types": "./dist/esm/perspective.d.ts",
+            "types": "./dist/esm/perspective.browser.d.ts",
             "default": "./dist/esm/perspective.js"
         },
         "./node": {
@@ -34,7 +34,6 @@
         "src/**/*",
         "tsconfig.json"
     ],
-    "types": "./dist/esm/perspective.d.ts",
     "scripts": {
         "build": "node ./build.js",
         "clean": "rimraf dist && rimraf build && rimraf src/ts/ts-rs",

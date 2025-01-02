@@ -11,10 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 // @ts-ignore
-import * as perspective_server from "../../dist/pkg/web/perspective-server.js";
-import { load_wasm_stage_0 } from "./decompress.ts";
+import * as perspective_server from "../../../dist/pkg/perspective-server.js";
 
-export type * from "../../dist/pkg/perspective-js.d.ts";
+export type * from "../../../dist/pkg/perspective-js.js";
 
 export type PspPtr = bigint | number;
 
@@ -44,7 +43,7 @@ export interface EmscriptenApi {
 }
 
 export async function compile_perspective(
-    compressed_binary: ArrayBuffer
+    wasmBinary: ArrayBuffer
 ): Promise<EmscriptenApi> {
     const module: EmscriptenApi = await perspective_server.default({
         locateFile(x: any) {
@@ -54,7 +53,6 @@ export async function compile_perspective(
             imports: any,
             receive: (_: WebAssembly.Instance) => void
         ) => {
-            const wasmBinary = await load_wasm_stage_0(compressed_binary);
             imports["env"] = {
                 ...imports["env"],
                 psp_stack_trace() {

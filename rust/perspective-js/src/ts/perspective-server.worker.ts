@@ -10,8 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { PerspectiveSession, PerspectiveServer } from "./engine.ts";
-import { compile_perspective } from "./emscripten_api.ts";
+import { PerspectiveSession, PerspectiveServer } from "./wasm/engine.ts";
+import { compile_perspective } from "./wasm/emscripten_api.ts";
 
 let server: PerspectiveServer;
 let session: PerspectiveSession;
