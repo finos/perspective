@@ -24,26 +24,31 @@ type Module = {
 // load binary, as this may either be an `ArrayBuffer` or `URL` depending
 // on whether `inline` option was specified to `perspective-esbuild-plugin`.
 async function compile(
-    buffer: ArrayBuffer | Response | (() => ArrayBuffer)
-): Promise<WebAssembly.WebAssemblyInstantiatedSource> {
-    if (buffer instanceof Function) {
-        buffer = await buffer();
-    }
-
+    buffer: ArrayBuffer | Response
+): Promise<WebAssembly.Instance> {
     if (buffer instanceof Response) {
-        return await WebAssembly.instantiateStreaming(buffer);
+        return (await WebAssembly.instantiateStreaming(buffer)).instance;
     } else {
-        return await WebAssembly.instantiate(buffer);
+        return (await WebAssembly.instantiate(buffer as BufferSource)).instance;
     }
 }
 
 export async function load_wasm_stage_0(
-    wasm: ArrayBuffer | Response | (() => ArrayBuffer)
-) {
+    wasm: ArrayBuffer | Response | (() => Promise<ArrayBuffer>)
+): Promise<Uint8Array> {
+    if (wasm instanceof Function) {
+        wasm = await wasm();
+    }
+
     const mod = await compile(wasm);
-    const exports = mod.instance.exports as Module;
-    const size = exports.size();
-    const offset = exports.offset();
-    const array = new Uint8Array(exports.memory.buffer);
-    return array.slice(offset, offset + size);
+    try {
+        const exports = mod.exports as Module;
+        const size = exports.size();
+        const offset = exports.offset();
+        const array = new Uint8Array(exports.memory.buffer);
+        return array.slice(offset, offset + size);
+    } catch (e) {
+        console.warn("Stage 0 wasm loading failed, skipping");
+        return new Uint8Array(wasm as ArrayBuffer);
+    }
 }

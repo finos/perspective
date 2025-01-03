@@ -11,12 +11,11 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 // @ts-ignore
-import perspective_wasm from "../../dist/pkg/web/perspective-server.wasm";
+import perspective_wasm_worker from "../../../src/ts/perspective-server.worker.js";
 
-// @ts-ignore
-import perspective_wasm_worker from "../../src/ts/perspective-server.worker.js";
+import { load_wasm_stage_0 } from "./decompress.ts";
 
-import type * as psp from "../../dist/pkg/perspective-js.d.ts";
+import type * as psp from "../../../dist/pkg/perspective-js.d.ts";
 
 function invert_promise<T>(): [(t: T) => void, Promise<T>] {
     let sender;
@@ -44,15 +43,12 @@ async function _init(ws: Worker, wasm: ArrayBuffer) {
  * @param module
  * @returns
  */
-export async function worker(module: Promise<typeof psp>) {
+export async function worker(
+    module: Promise<typeof psp>,
+    server_wasm: Promise<ArrayBuffer>
+) {
     const [wasm, webworker]: [ArrayBuffer, Worker] = await Promise.all([
-        perspective_wasm().then((x: Response | ArrayBuffer) => {
-            if (x instanceof Response) {
-                return x.arrayBuffer();
-            } else {
-                return x.slice(0);
-            }
-        }),
+        server_wasm,
         perspective_wasm_worker(),
     ]);
 
