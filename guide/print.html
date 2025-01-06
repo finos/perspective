@@ -158,7 +158,229 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="table"><a class="header" href="#table">Table</a></h1>
+                        <br />
+<a href="https://perspective.finos.org">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://github.com/finos/perspective/raw/master/docs/static/svg/perspective-logo-dark.svg?raw=true">
+<img width="260" src="https://github.com/finos/perspective/raw/master/docs/static/svg/perspective-logo-light.svg?raw=true">
+</picture>
+</a>
+<br/><br/>
+<p><a href="https://github.com/finos/perspective/actions/workflows/build.yaml"><img src="https://img.shields.io/github/actions/workflow/status/finos/perspective/build.yaml?event=push&amp;style=for-the-badge" alt="Build Status" /></a>
+<a href="https://www.npmjs.com/package/@finos/perspective"><img src="https://img.shields.io/npm/v/@finos/perspective.svg?style=for-the-badge" alt="npm" /></a>
+<a href="https://pypi.python.org/pypi/perspective-python"><img src="https://img.shields.io/pypi/v/perspective-python.svg?style=for-the-badge" alt="PyPI" /></a>
+<a href="https://crates.io/crates/perspective"><img src="https://img.shields.io/crates/v/perspective?style=for-the-badge" alt="crates.io" /></a></p>
+<br/>
+<p>Perspective is an <i>interactive</i> analytics and data visualization component,
+which is especially well-suited for <i>large</i> and/or <i>streaming</i>
+datasets. Use it to create user-configurable reports, dashboards, notebooks and
+applications, then deploy stand-alone in the browser, or in concert with Python
+and/or <a href="https://jupyterlab.readthedocs.io/en/stable/">Jupyterlab</a>.</p>
+<h3 id="features"><a class="header" href="#features">Features</a></h3>
+<ul>
+<li>
+<p>A fast, memory efficient streaming query engine, written in C++ and compiled
+for <a href="https://webassembly.org/">WebAssembly</a>,
+<a href="https://www.python.org/">Python</a> and <a href="https://www.rust-lang.org/">Rust</a>,
+with read/write/streaming for <a href="https://arrow.apache.org/">Apache Arrow</a>, and
+a high-performance columnar expression language based on
+<a href="https://github.com/ArashPartow/exprtk">ExprTK</a>.</p>
+</li>
+<li>
+<p>A framework-agnostic User Interface packaged as a
+<a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements">Custom Element</a>,
+powered either in-browser via WebAssembly or virtually via WebSocket server
+(Python/Node).</p>
+</li>
+<li>
+<p>A <a href="https://jupyter.org/">JupyterLab</a> widget and Python client library, for
+interactive data analysis in a notebook, as well as <em>scalable</em> production
+<a href="https://github.com/voila-dashboards/voila">Voila</a> applications.</p>
+</li>
+</ul>
+<h3 id="documentation"><a class="header" href="#documentation">Documentation</a></h3>
+<ul>
+<li><a href="https://perspective.finos.org/">Project Site</a></li>
+<li>JavaScript (NPM)
+<ul>
+<li><a href="https://docs.rs/perspective-viewer/latest/perspective_viewer/"><code>@finos/perspective-viewer</code>, JavaScript UI API</a></li>
+<li><a href="https://docs.rs/perspective-js/latest/perspective_js/"><code>@finos/perspective</code>, JavaScript Client/Server API</a></li>
+<li><a href="https://docs.rs/perspective-js/latest/perspective_js/struct.Table.html"><code>Table</code> API</a></li>
+<li><a href="https://docs.rs/perspective-js/latest/perspective_js/struct.View.html"><code>View</code> API</a></li>
+<li><a href="https://docs.rs/perspective-js/latest/perspective_js/#installation">Installation Guide</a></li>
+</ul>
+</li>
+<li>Python (PyPI)
+<ul>
+<li><a href="https://docs.rs/perspective-python/latest/perspective_python/"><code>perspective-python</code>, Python Client/Server API</a></li>
+<li><a href="https://docs.rs/perspective-python/latest/perspective_python/#perspectivewidget"><code>PerspectiveWidget</code> Jupyter Plugin</a></li>
+<li><a href="https://docs.rs/perspective-python/latest/perspective_python/struct.Table.html"><code>Table</code> API</a></li>
+<li><a href="https://docs.rs/perspective-python/latest/perspective_python/struct.View.html"><code>View</code> API</a></li>
+</ul>
+</li>
+<li>Rust (Crates.io)
+<ul>
+<li><a href="https://docs.rs/perspective-rs/latest/perspective_rs/"><code>perspective</code>, Rust API</a>
+<ul>
+<li><a href="https://docs.rs/perspective-client/latest/perspective_client/"><code>perspective-client</code>, Rust Client API</a></li>
+<li><a href="https://docs.rs/perspective-server/latest/perspective_server/"><code>perspective-server</code>, Rust Server API</a></li>
+</ul>
+</li>
+<li><a href="https://docs.rs/perspective-client/latest/perspective_client/struct.Table.html"><code>Table</code> API</a></li>
+<li><a href="https://docs.rs/perspective-client/latest/perspective_client/struct.View.html"><code>View</code> API</a></li>
+</ul>
+</li>
+<li>Appendix
+<ul>
+<li><a href="https://docs.rs/perspective-server/latest/perspective_server/">Data Binding</a></li>
+<li><a href="https://docs.rs/perspective-client/latest/perspective_client/config/expressions/">Expression Columns</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
+<!-- Examples -->
+<table><tbody><tr><td>editable</td><td>file</td><td>fractal</td></tr><tr><td><a href="https://perspective.finos.org/block?example=editable"><img height="125" src="https://perspective.finos.org/blocks/editable/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=file"><img height="125" src="https://perspective.finos.org/blocks/file/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=fractal"><img height="125" src="https://perspective.finos.org/blocks/fractal/preview.png?"></img></a></td></tr><tr><td>market</td><td>raycasting</td><td>evictions</td></tr><tr><td><a href="https://perspective.finos.org/block?example=market"><img height="125" src="https://perspective.finos.org/blocks/market/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=raycasting"><img height="125" src="https://perspective.finos.org/blocks/raycasting/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=evictions"><img height="125" src="https://perspective.finos.org/blocks/evictions/preview.png?"></img></a></td></tr><tr><td>nypd</td><td>streaming</td><td>covid</td></tr><tr><td><a href="https://perspective.finos.org/block?example=nypd"><img height="125" src="https://perspective.finos.org/blocks/nypd/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=streaming"><img height="125" src="https://perspective.finos.org/blocks/streaming/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=covid"><img height="125" src="https://perspective.finos.org/blocks/covid/preview.png?"></img></a></td></tr><tr><td>webcam</td><td>movies</td><td>superstore</td></tr><tr><td><a href="https://perspective.finos.org/block?example=webcam"><img height="125" src="https://perspective.finos.org/blocks/webcam/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=movies"><img height="125" src="https://perspective.finos.org/blocks/movies/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=superstore"><img height="125" src="https://perspective.finos.org/blocks/superstore/preview.png?"></img></a></td></tr><tr><td>citibike</td><td>olympics</td></tr><tr><td><a href="https://perspective.finos.org/block?example=citibike"><img height="125" src="https://perspective.finos.org/blocks/citibike/preview.png?"></img></a></td><td><a href="https://perspective.finos.org/block?example=olympics"><img height="125" src="https://perspective.finos.org/blocks/olympics/preview.png?"></img></a></td></tr></tbody></table>
+<!-- Examples -->
+<h3 id="media"><a class="header" href="#media">Media</a></h3>
+<table><tbody>
+<tr>
+<td><a href="https://github.com/timkpaine"><code>@timkpaine</code></a></td>
+<td><a href="https://github.com/timbess"><code>@timbess</code></a></td>
+<td><a href="https://github.com/sc1f"><code>@sc1f</code></a></td>
+</tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=v5Y5ftlGNhU"><img width="240" src="https://img.youtube.com/vi/v5Y5ftlGNhU/0.jpg" /></a></td>
+<td><a href="https://www.youtube.com/watch?v=lDpIu4dnp78"><img width="240" src="https://img.youtube.com/vi/lDpIu4dnp78/0.jpg" /></a></td>
+<td><a href="https://www.youtube.com/watch?v=IO-HJsGdleE"><img width="240"  src="https://img.youtube.com/vi/IO-HJsGdleE/0.jpg" /></a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/texodus"><code>@texodus</code></a></td>
+<td><a href="https://github.com/texodus"><code>@texodus</code></a></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://www.youtube.com/watch?v=no0qChjvdgQ"><img width="240" src="https://img.youtube.com/vi/no0qChjvdgQ/0.jpg" /></a></td>
+<td><a href="https://www.youtube.com/watch?v=0ut-ynvBpGI"><img width="240" src="https://img.youtube.com/vi/0ut-ynvBpGI/0.jpg" /></a></td>
+<td></td>
+</tr>
+</tbody></table>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="data-architecture"><a class="header" href="#data-architecture">Data Architecture</a></h1>
+<p>Application developers can choose from
+<a href="explanation/./architecture/client_only.html">Client (WebAssembly)</a>,
+<a href="explanation/./architecture/server_only.html">Server (Python/Node)</a> or
+<a href="explanation/./architecture/client_server.html">Client/Server Replicated</a> designs to bind
+data, and a web application can use one or a mix of these designs as needed. By
+serializing to Apache Arrow, tables are duplicated and synchronized across
+runtimes efficiently.</p>
+<p>Perspective is a multi-language platform. The examples in this section use
+Python and JavaScript as an example, but the same general principles apply to
+any <code>Client</code>/<code>Server</code> combination.</p>
+<img src="explanation/./architecture/architecture.svg" />
+<div style="break-before: page; page-break-before: always;"></div><h1 id="client-only"><a class="header" href="#client-only">Client-only</a></h1>
+<img src="explanation/architecture/./architecture.sub1.svg" />
+<p><em>For static datasets, datasets provided by the user, and simple server-less and
+read-only web applications.</em></p>
+<p>In this design, Perspective is run as a client Browser WebAssembly library, the
+dataset is downloaded entirely to the client and all calculations and UI
+interactions are performed locally. Interactive performance is very good, using
+WebAssembly engine for near-native runtime plus WebWorker isolation for parallel
+rendering within the browser. Operations like scrolling and creating new views
+are responsive. However, the entire dataset must be downloaded to the client.
+Perspective is not a typical browser component, and datset sizes of 1gb+ in
+Apache Arrow format will load fine with good interactive performance!</p>
+<p>Horizontal scaling is a non-issue, since here is no concurrent state to scale,
+and only uses client-side computation via WebAssembly client. Client-only
+perspective can support as many concurrent users as can download the web
+application itself. Once the data is loaded, no server connection is needed and
+all operations occur in the client browser, imparting no additional runtime cost
+on the server beyond initial load. This also means updates and edits are local
+to the browser client and will be lost when the page is refreshed, unless
+otherwise persisted by your application.</p>
+<p>As the client-only design starts with creating a client-side Perspective
+<code>Table</code>, data can be provided by any standard web service in any Perspective
+compatible format (JSON, CSV or Apache Arrow).</p>
+<h4 id="javascript-client"><a class="header" href="#javascript-client">Javascript client</a></h4>
+<pre><code class="language-javascript">const worker = await perspective.worker();
+const table = await worker.table(csv);
+
+const viewer = document.createElement("perspective-viewer");
+document.body.appendChild(viewer);
+await viewer.load(table);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="clientserver-replicated"><a class="header" href="#clientserver-replicated">Client/Server replicated</a></h1>
+<img src="explanation/architecture/./architecture.sub2.svg" />
+<p><em>For medium-sized, real-time, synchronized and/or editable data sets with many
+concurrent users.</em></p>
+<p>The dataset is instantiated in-memory with a Python or Node.js Perspective
+server, and web applications create duplicates of these tables in a local
+WebAssembly client in the browser, synchonized efficiently to the server via
+Apache Arrow. This design scales well with additional concurrent users, as
+browsers only need to download the initial data set and subsequent update
+deltas, while operations like scrolling, pivots, sorting, etc. are performed on
+the client.</p>
+<p>Python servers can make especially good use of additional threads, as
+Perspective will release the GIL for almost all operations. Interactive
+performance on the client is very good and identical to client-only
+architecture. Updates and edits are seamlessly synchonized across clients via
+their virtual server counterparts using websockets and Apache Arrow.</p>
+<h4 id="python-and-tornado-server"><a class="header" href="#python-and-tornado-server">Python and Tornado server</a></h4>
+<pre><code class="language-python">from perspective import Server, PerspectiveTornadoHandler
+
+server = Server()
+client = server.new_local_client()
+client.table(csv, name="my_table")
+routes = [(
+    r"/websocket",
+    perspective.handlers.tornado.PerspectiveTornadoHandler,
+    {"perspective_server": server},
+)]
+
+app = tornado.web.Application(routes)
+app.listen(8080)
+loop = tornado.ioloop.IOLoop.current()
+loop.start()
+</code></pre>
+<h4 id="javascript-client-1"><a class="header" href="#javascript-client-1">Javascript client</a></h4>
+<p>Perspective's websocket client interfaces with the Python server. then
+<em>replicates</em> the server-side Table.</p>
+<pre><code class="language-javascript">const websocket = await perspective.websocket("ws://localhost:8080");
+const server_table = await websocket.open_table("my_table");
+const server_view = await server_table.view();
+
+const worker = await perspective.worker();
+const client_table = await worker.table(server_view);
+
+const viewer = document.createElement("perspective-viewer");
+document.body.appendChild(viewer);
+await viewer.load(client_table);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="server-only"><a class="header" href="#server-only">Server-only</a></h1>
+<img src="explanation/architecture/./architecture.sub3.svg" />
+<p><em>For extremely large datasets with a small number of concurrent users.</em></p>
+<p>The dataset is instantiated in-memory with a Python or Node.js server, and web
+applications connect virtually. Has very good initial load performance, since no
+data is downloaded. Group-by and other operations will run column-parallel if
+configured.</p>
+<p>But interactive performance is poor, as every user interaction must page the
+server to render. Operations like scrolling are not as responsive and can be
+impacted by network latency. Web applications must be "always connected" to the
+server via WebSocket. Disconnecting will prevent any interaction, scrolling,
+etc. of the UI. Does not use WebAssembly.</p>
+<p>Each connected browser will impact server performance as long as the connection
+is open, which in turn impacts interactive performance of every client. This
+ultimately limits the horizontal scalabity of this architecture. Since each
+client reads the perspective <code>Table</code> virtually, changes like edits and updates
+are automatically reflected to all clients and persist across browser refresh.
+Using the same Python server as the previous design, we can simply skip the
+intermediate WebAssembly <code>Table</code> and pass the virtual table directly to <code>load()</code></p>
+<pre><code class="language-javascript">const websocket = await perspective.websocket("ws://localhost:8080");
+const server_table = await websocket.open_table("my_table");
+
+const viewer = document.createElement("perspective-viewer");
+document.body.appendChild(viewer);
+await viewer.load(server_table);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="table"><a class="header" href="#table">Table</a></h1>
 <p><code>Table</code> is Perspective's columnar data frame, analogous to a Pandas <code>DataFrame</code>
 or Apache Arrow, supporting append &amp; in-place updates, removal by index, and
 update notifications.</p>
@@ -428,7 +650,7 @@ The examples in this module are in JavaScript. See <a href="https://docs.rs/crat
 The examples in this module are in Python. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
 </div>
 </div>
-<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <div class="javascript">
 <pre><code class="language-javascript">const table = await perspective.table({
     id: [1, 2, 3, 4],
@@ -663,7 +885,7 @@ Column" button in the side panel.</p>
 </div>
 <div class="rust">
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="flattening-a-tableview-into-a-table"><a class="header" href="#flattening-a-tableview-into-a-table">Flattening a [<code>Table::view</code>] into a [<code>Table</code>]</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="flattening-a-tableview-into-a-table"><a class="header" href="#flattening-a-tableview-into-a-table">Flattening a [<code>Table::view</code>] into a [<code>Table</code>]</a></h1>
 <p>In Javascript, a [<code>Table</code>] can be constructed on a [<code>Table::view</code>] instance,
 which will return a new [<code>Table</code>] based on the [<code>Table::view</code>]'s dataset, and
 all future updates that affect the [<code>Table::view</code>] will be forwarded to the new

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Flattening a View into a Table - Perspective</title>
+        <title>Client/Server replicated - Perspective</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../../../favicon.svg">
-        <link rel="shortcut icon" href="../../../favicon.png">
-        <link rel="stylesheet" href="../../../css/variables.css">
-        <link rel="stylesheet" href="../../../css/general.css">
-        <link rel="stylesheet" href="../../../css/chrome.css">
-        <link rel="stylesheet" href="../../../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../../../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../../../highlight.css">
-        <link rel="stylesheet" href="../../../tomorrow-night.css">
-        <link rel="stylesheet" href="../../../ayu-highlight.css">
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../../../md/perspective.css">
-        <link rel="stylesheet" href="../../../node_modules/@finos/perspective-viewer/dist/css/themes.css">
+        <link rel="stylesheet" href="../../md/perspective.css">
+        <link rel="stylesheet" href="../../node_modules/@finos/perspective-viewer/dist/css/themes.css">
 
 
         <!-- Provide site root to javascript -->
         <script>
-            var path_to_root = "../../../";
+            var path_to_root = "../../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -91,7 +91,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../../../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -125,7 +125,7 @@
                     <h1 class="menu-title">Perspective</h1>
 
                     <div class="right-buttons">
-                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
                         <a href="https://github.com/finos/perspective" title="Git repository" aria-label="Git repository">
@@ -157,54 +157,63 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="flattening-a-tableview-into-a-table"><a class="header" href="#flattening-a-tableview-into-a-table">Flattening a [<code>Table::view</code>] into a [<code>Table</code>]</a></h1>
-<p>In Javascript, a [<code>Table</code>] can be constructed on a [<code>Table::view</code>] instance,
-which will return a new [<code>Table</code>] based on the [<code>Table::view</code>]'s dataset, and
-all future updates that affect the [<code>Table::view</code>] will be forwarded to the new
-[<code>Table</code>]. This is particularly useful for implementing a
-<a href="server.html#clientserver-replicated">Client/Server Replicated</a> design, by
-serializing the <code>View</code> to an arrow and setting up an <code>on_update</code> callback.</p>
-<div class="javascript">
-<pre><code class="language-javascript">const worker1 = perspective.worker();
-const table = await worker.table(data);
-const view = await table.view({ filter: [["State", "==", "Texas"]] });
-const table2 = await worker.table(view);
-table.update([{ State: "Texas", City: "Austin" }]);
-</code></pre>
-</div>
-<div class="python">
-<pre><code class="language-python">table = perspective.Table(data);
-view = table.view(filter=[["State", "==", "Texas"]])
-table2 = perspective.Table(view.to_arrow());
+                        <h1 id="clientserver-replicated"><a class="header" href="#clientserver-replicated">Client/Server replicated</a></h1>
+<img src="./architecture.sub2.svg" />
+<p><em>For medium-sized, real-time, synchronized and/or editable data sets with many
+concurrent users.</em></p>
+<p>The dataset is instantiated in-memory with a Python or Node.js Perspective
+server, and web applications create duplicates of these tables in a local
+WebAssembly client in the browser, synchonized efficiently to the server via
+Apache Arrow. This design scales well with additional concurrent users, as
+browsers only need to download the initial data set and subsequent update
+deltas, while operations like scrolling, pivots, sorting, etc. are performed on
+the client.</p>
+<p>Python servers can make especially good use of additional threads, as
+Perspective will release the GIL for almost all operations. Interactive
+performance on the client is very good and identical to client-only
+architecture. Updates and edits are seamlessly synchonized across clients via
+their virtual server counterparts using websockets and Apache Arrow.</p>
+<h4 id="python-and-tornado-server"><a class="header" href="#python-and-tornado-server">Python and Tornado server</a></h4>
+<pre><code class="language-python">from perspective import Server, PerspectiveTornadoHandler
 
-def updater(port, delta):
-    table2.update(delta)
+server = Server()
+client = server.new_local_client()
+client.table(csv, name="my_table")
+routes = [(
+    r"/websocket",
+    perspective.handlers.tornado.PerspectiveTornadoHandler,
+    {"perspective_server": server},
+)]
 
-view.on_update(updater, mode="Row")
-table.update([{"State": "Texas", "City": "Austin"}])
+app = tornado.web.Application(routes)
+app.listen(8080)
+loop = tornado.ioloop.IOLoop.current()
+loop.start()
 </code></pre>
-</div>
-<div class="rust">
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let opts = TableInitOptions::default();
-let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
-let table = client.table(data, opts).await?;
-let view = table.view(None).await?;
-let table2 = client.table(TableData::View(view)).await?;
-table.update(data).await?;
-<span class="boring">}</span></code></pre></pre>
-</div>
+<h4 id="javascript-client"><a class="header" href="#javascript-client">Javascript client</a></h4>
+<p>Perspective's websocket client interfaces with the Python server. then
+<em>replicates</em> the server-side Table.</p>
+<pre><code class="language-javascript">const websocket = await perspective.websocket("ws://localhost:8080");
+const server_table = await websocket.open_table("my_table");
+const server_view = await server_table.view();
+
+const worker = await perspective.worker();
+const client_table = await worker.table(server_view);
+
+const viewer = document.createElement("perspective-viewer");
+document.body.appendChild(viewer);
+await viewer.load(client_table);
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../../explanation/view/config/expressions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../explanation/architecture/client_only.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../../explanation/javascript.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../explanation/architecture/server_only.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -214,11 +223,11 @@ table.update(data).await?;
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../../explanation/view/config/expressions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../explanation/architecture/client_only.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../../explanation/javascript.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../explanation/architecture/server_only.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -233,13 +242,13 @@ table.update(data).await?;
         </script>
 
 
-        <script src="../../../elasticlunr.min.js"></script>
-        <script src="../../../mark.min.js"></script>
-        <script src="../../../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../../../clipboard.min.js"></script>
-        <script src="../../../highlight.js"></script>
-        <script src="../../../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 
