@@ -1,0 +1,1775 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Perspective</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="md/perspective.css">
+        <link rel="stylesheet" href="node_modules/@finos/perspective-viewer/dist/css/themes.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Perspective</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/finos/perspective" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="table"><a class="header" href="#table">Table</a></h1>
+<p><code>Table</code> is Perspective's columnar data frame, analogous to a Pandas <code>DataFrame</code>
+or Apache Arrow, supporting append &amp; in-place updates, removal by index, and
+update notifications.</p>
+<p>A <code>Table</code> contains columns, each of which have a unique name, are strongly and
+consistently typed, and contains rows of data conforming to the column's type.
+Each column in a <code>Table</code> must have the same number of rows, though not every row
+must contain data; null-values are used to indicate missing values in the
+dataset. The schema of a <code>Table</code> is <em>immutable after creation</em>, which means the
+column names and data types cannot be changed after the <code>Table</code> has been
+created. Columns cannot be added or deleted after creation either, but a <code>View</code>
+can be used to select an arbitrary set of columns from the <code>Table</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="construct-a-table"><a class="header" href="#construct-a-table">Construct a Table</a></h1>
+<p>Examples of constructing an empty <code>Table</code> from a schema.</p>
+<div class="javascript">
+<p>JavaScript:</p>
+<pre><code class="language-javascript">var schema = {
+    x: "integer",
+    y: "string",
+    z: "boolean",
+};
+
+const table2 = await worker.table(schema);
+</code></pre>
+</div>
+<div class="python">
+<p>Python:</p>
+<pre><code class="language-python">from datetime import date, datetime
+
+schema = {
+    "x": "integer",
+    "y": "string",
+    "z": "boolean",
+}
+
+table2 = perspective.table(schema)
+</code></pre>
+</div>
+<div class="rust">
+<p>Rust:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let data = TableData::Schema(vec![(" a".to_string(), ColumnType::FLOAT)]);
+let options = TableInitOptions::default();
+let table = client.table(data.into(), options).await?;
+<span class="boring">}</span></code></pre></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="schema-and-column-types"><a class="header" href="#schema-and-column-types">Schema and column types</a></h1>
+<p>The mapping of a <code>Table</code>'s column names to data types is referred to as a
+<code>schema</code>. Each column has a unique name and a single data type, one of</p>
+<ul>
+<li><code>float</code></li>
+<li><code>integer</code></li>
+<li><code>boolean</code></li>
+<li><code>date</code></li>
+<li><code>datetime</code></li>
+<li><code>string</code></li>
+</ul>
+<p>A <code>Table</code> schema is fixed at construction, either by explicitly passing a schema
+dictionary to the <code>Client::table</code> method, or by passing <em>data</em> to this method
+from which the schema is <em>inferred</em> (if CSV or JSON format) or inherited (if
+Arrow).</p>
+<h2 id="type-inference"><a class="header" href="#type-inference">Type inference</a></h2>
+<p>When passing data directly to the <code>crate::Client::table</code> constructor, the type
+of each column is inferred automatically. In some cases, the inference algorithm
+may not return exactly what you'd like. For example, a column may be interpreted
+as a <code>datetime</code> when you intended it to be a <code>string</code>, or a column may have no
+values at all (yet), as it will be updated with values from a real-time data
+source later on. In these cases, create a <code>table()</code> with a <em>schema</em>.</p>
+<p>Once the <code>Table</code> has been created with a schema, further <code>update()</code> calls will
+no longer perform type inference, so columns must only include values supported
+by the column's <code>ColumnType</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="loading-data"><a class="header" href="#loading-data">Loading data</a></h1>
+<p>A <code>Table</code> may also be created-or-updated by data in CSV,
+<a href="https://arrow.apache.org/">Apache Arrow</a>, JSON row-oriented or JSON
+column-oriented formats. In addition to these, <code>perspective-python</code> additionally
+supports <code>pyarrow.Table</code>, <code>polars.DataFrame</code> and <code>pandas.DataFrame</code> objects
+directly. These formats are otherwise identical to the built-in formats and
+don't exhibit any additional support or type-awareness; e.g., <code>pandas.DataFrame</code>
+support is <em>just</em> <code>pyarrow.Table.from_pandas</code> piped into Perspective's Arrow
+reader.</p>
+<p><code>Client::table</code> and <code>Table::update</code> perform <em>coercion</em> on their input for all
+input formats <em>except</em> Arrow (which comes with its own schema and has no need
+for coercion). <code>"date"</code> and <code>"datetime"</code> column types do not have native JSON
+representations, so these column types <em>cannot</em> be inferred from JSON input.
+Instead, for columns of these types for JSON input, a <code>Table</code> must first be
+constructed with a <em>schema</em>. Next, call <code>Table::update</code> with the JSON input -
+Perspective's JSON reader may <em>coerce</em> a <code>date</code> or <code>datetime</code> from these native
+JSON types:</p>
+<ul>
+<li><code>integer</code> as milliseconds-since-epoch.</li>
+<li><code>string</code> as a any of Perspective's built-in date format formats.</li>
+<li>JavaScript <code>Date</code> and Python <code>datetime.date</code> and <code>datetime.datetime</code> are
+<em>not</em> supported directly. However, in JavaScript <code>Date</code> types are
+automatically coerced to correct <code>integer</code> timestamps by default when
+converted to JSON.</li>
+</ul>
+<h2 id="apache-arrow"><a class="header" href="#apache-arrow">Apache Arrow</a></h2>
+<p>The most efficient way to load data into Perspective, encoded as
+<a href="https://arrow.apache.org/docs/python/ipc.html">Apache Arrow IPC format</a>. In
+JavaScript:</p>
+<pre><code class="language-javascript">const resp = await fetch(
+    "https://cdn.jsdelivr.net/npm/superstore-arrow/superstore.lz4.arrow"
+);
+
+const arrow = await resp.arrayBuffer();
+</code></pre>
+<p>Apache Arrow input do not support type coercion, preferring Arrow's internal
+self-describing schema.</p>
+<h2 id="csv"><a class="header" href="#csv">CSV</a></h2>
+<p>Perspective relies on Apache Arrow's CSV parser, and as such uses mostly the
+same column-type inference logic as Arrow itself would use for parsing CSV.</p>
+<h2 id="row-oriented-json"><a class="header" href="#row-oriented-json">Row Oriented JSON</a></h2>
+<p>Row-oriented JSON is in the form of a list of objects. Each object in the list
+corresponds to a row in the table. For example:</p>
+<pre><code class="language-json">[
+    { "a": 86, "b": false, "c": "words" },
+    { "a": 0, "b": true, "c": "" },
+    { "a": 12345, "b": false, "c": "here" }
+]
+</code></pre>
+<h2 id="column-oriented-json"><a class="header" href="#column-oriented-json">Column Oriented JSON</a></h2>
+<p>Column-Oriented JSON comes in the form of an object of lists. Each key of the
+object is a column name, and each element of the list is the corresponding value
+in the row.</p>
+<pre><code class="language-json">{
+    "a": [86, 0, 12345],
+    "b": [false, true, false],
+    "c": ["words", "", "here"]
+}
+</code></pre>
+<h2 id="ndjson"><a class="header" href="#ndjson">NDJSON</a></h2>
+<p><a href="https://github.com/ndjson/ndjson-spec">NDJSON</a> is a format.</p>
+<pre><code class="language-json">{ "a": 86, "b": false, "c": "words" }
+{ "a": 0, "b": true, "c": "" }
+{ "a": 12345, "b": false, "c": "here" }
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="index-and-limit"><a class="header" href="#index-and-limit">Index and Limit</a></h2>
+<div class="warning">`limit` cannot be used in conjunction with `index`.</div>
+<p>Initializing a <code>Table</code> with an <code>index</code> tells Perspective to treat a column as
+the primary key, allowing in-place updates of rows. Only a single column (of any
+type) can be used as an <code>index</code>. Indexed <code>Table</code> instances allow:</p>
+<ul>
+<li>In-place <em>updates</em> whenever a new row shares an <code>index</code> values with an
+existing row</li>
+<li><em>Partial updates</em> when a data batch omits some column.</li>
+<li><em>Removes</em> to delete a row by <code>index</code>.</li>
+</ul>
+<p>To create an indexed <code>Table</code>, provide the <code>index</code> property with a string column
+name to be used as an index:</p>
+<div class="javascript">
+<p>JavaScript:</p>
+<pre><code class="language-javascript">const indexed_table = await perspective.table(data, { index: "a" });
+</code></pre>
+</div>
+<div class="python">
+<p>Python</p>
+<pre><code class="language-python">indexed_table = perspective.Table(data, index="a");
+</code></pre>
+</div>
+<p>Initializing a <code>Table</code> with a <code>limit</code> sets the total number of rows the <code>Table</code>
+is allowed to have. When the <code>Table</code> is updated, and the resulting size of the
+<code>Table</code> would exceed its <code>limit</code>, rows that exceed <code>limit</code> overwrite the oldest
+rows in the <code>Table</code>. To create a <code>Table</code> with a <code>limit</code>, provide the <code>limit</code>
+property with an integer indicating the maximum rows:</p>
+<div class="javascript">
+<p>JavaScript:</p>
+<pre><code class="language-javascript">const limit_table = await perspective.table(data, { limit: 1000 });
+</code></pre>
+</div>
+<div class="python">
+<p>Python:</p>
+<pre><code class="language-python">limit_table = perspective.Table(data, limit=1000);
+</code></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tableupdate-and-tableremove"><a class="header" href="#tableupdate-and-tableremove"><code>Table::update</code> and <code>Table::remove</code></a></h1>
+<p>Once a <code>Table</code> has been created, it can be updated with new data conforming to
+the <code>Table</code>'s schema. <code>Table::update</code> supports the same data formats as
+<code>Client::table</code>, minus <em>schema</em>.</p>
+<div class="javascript">
+<pre><code class="language-javascript">const schema = {
+    a: "integer",
+    b: "float",
+};
+
+const table = await perspective.table(schema);
+table.update(new_data);
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">schema = {"a": "integer", "b": "float"}
+
+table = perspective.Table(schema)
+table.update(new_data)
+</code></pre>
+</div>
+<p>Without an <code>index</code> set, calls to <code>update()</code> <em>append</em> new data to the end of the
+<code>Table</code>. Otherwise, Perspective allows
+<a href="explanation/table/update_and_remove.html#index-and-limit"><em>partial updates</em> (in-place)</a> using the <code>index</code> to determine
+which rows to update:</p>
+<div class="javascript">
+<pre><code class="language-javascript">indexed_table.update({ id: [1, 4], name: ["x", "y"] });
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">indexed_table.update({"id": [1, 4], "name": ["x", "y"]})
+</code></pre>
+</div>
+<p>Any value on a <code>Client::table</code> can be unset using the value <code>null</code> in JSON or
+Arrow input formats. Values may be unset on construction, as any <code>null</code> in the
+dataset will be treated as an unset value. <code>Table::update</code> calls do not need to
+provide <em>all columns</em> in the <code>Table</code>'s schema; missing columns will be omitted
+from the <code>Table</code>'s updated rows.</p>
+<div class="javascript">
+<pre><code class="language-javascript">table.update([{ x: 3, y: null }]); // `z` missing
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">table.update([{"x": 3, "y": None}]) // `z` missing
+</code></pre>
+</div>
+<p>Rows can also be removed from an indexed <code>Table</code>, by calling <code>Table::remove</code>
+with an array of index values:</p>
+<div class="javascript">
+<pre><code class="language-javascript">indexed_table.remove([1, 4]);
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">// Python
+
+indexed_table.remove([1, 4])
+</code></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tableclear-and-tablereplace"><a class="header" href="#tableclear-and-tablereplace"><code>Table::clear</code> and <code>Table::replace</code></a></h1>
+<p>Calling <code>Table::clear</code> will remove all data from the underlying <code>Table</code>. Calling
+<code>Table::replace</code> with new data will clear the <code>Table</code>, and update it with a new
+dataset that conforms to Perspective's data types and the existing schema on the
+<code>Table</code>.</p>
+<div class="javascript">
+<pre><code class="language-javascript">table.clear();
+table.replace(json);
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">table.clear()
+table.replace(df)
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="view"><a class="header" href="#view">View</a></h1>
+<p>The [<code>View</code>] struct is Perspective's query and serialization interface. It
+represents a query on the <code>Table</code>'s dataset and is always created from an
+existing <code>Table</code> instance via the [<code>Table::view</code>] method.</p>
+<p>[<code>View</code>]s are immutable with respect to the arguments provided to the
+[<code>Table::view</code>] method; to change these parameters, you must create a new
+[<code>View</code>] on the same [<code>Table</code>]. However, each [<code>View</code>] is <em>live</em> with respect to
+the [<code>Table</code>]'s data, and will (within a conflation window) update with the
+latest state as its parent [<code>Table</code>] updates, including incrementally
+recalculating all aggregates, pivots, filters, etc. [<code>View</code>] query parameters
+are composable, in that each parameter works independently <em>and</em> in conjunction
+with each other, and there is no limit to the number of pivots, filters, etc.
+which can be applied.</p>
+<div class="javascript">
+<div class="warning">
+The examples in this module are in JavaScript. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
+</div>
+<div class="python">
+<div class="warning">
+The examples in this module are in Python. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+</div>
+</div>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<div class="javascript">
+<pre><code class="language-javascript">const table = await perspective.table({
+    id: [1, 2, 3, 4],
+    name: ["a", "b", "c", "d"],
+});
+
+const view = await table.view({ columns: ["name"] });
+const json = await view.to_json();
+await view.delete();
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">table = perspective.Table({
+  "id": [1, 2, 3, 4],
+  "name": ["a", "b", "c", "d"]
+});
+
+view = table.view(columns=["name"])
+arrow = view.to_arrow()
+view.delete()
+</code></pre>
+</div>
+<div class="rust">
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let opts = TableInitOptions::default();
+let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+let table = client.table(data, opts).await?;
+
+let view = table.view(None).await?;
+let arrow = view.to_arrow().await?;
+view.delete().await?;
+<span class="boring">}</span></code></pre></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="querying-data"><a class="header" href="#querying-data">Querying data</a></h1>
+<p>To query the table, create a [<code>Table::view</code>] on the table instance with an
+optional configuration object. A [<code>Table</code>] can have as many [<code>View</code>]s associated
+with it as you need - Perspective conserves memory by relying on a single
+[<code>Table</code>] to power multiple [<code>View</code>]s concurrently:</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({
+    columns: ["Sales"],
+    aggregates: { Sales: "sum" },
+    group_by: ["Region", "Country"],
+    filter: [["Category", "in", ["Furniture", "Technology"]]],
+});
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(
+  columns=["Sales"],
+  aggregates={"Sales": "sum"},
+  group_by=["Region", "Country"],
+  filter=[["Category", "in", ["Furniture", "Technology"]]]
+)
+</code></pre>
+</div>
+<div class="rust">
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use crate::config::*;
+let view = table
+    .view(Some(ViewConfigUpdate {
+        columns: Some(vec![Some("Sales".into())]),
+        aggregates: Some(HashMap::from_iter(vec![("Sales".into(), "sum".into())])),
+        group_by: Some(vec!["Region".into(), "Country".into()]),
+        filter: Some(vec![Filter::new("Category", "in", &amp;[
+            "Furniture",
+            "Technology",
+        ])]),
+        ..ViewConfigUpdate::default()
+    }))
+    .await?;
+<span class="boring">}</span></code></pre></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="group-by"><a class="header" href="#group-by">Group By</a></h1>
+<p>A group by <em>groups</em> the dataset by the unique values of each column used as a
+group by - a close analogue in SQL to the <code>GROUP BY</code> statement. The underlying
+dataset is aggregated to show the values belonging to each group, and a total
+row is calculated for each group, showing the currently selected aggregated
+value (e.g. <code>sum</code>) of the column. Group by are useful for hierarchies,
+categorizing data and attributing values, i.e. showing the number of units sold
+based on State and City. In Perspective, group by are represented as an array of
+string column names to pivot, are applied in the order provided; For example, a
+group by of <code>["State", "City", "Postal Code"]</code> shows the values for each Postal
+Code, which are grouped by City, which are in turn grouped by State.</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({ group_by: ["a", "c"] });
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(group_by=["a", "c"])
+</code></pre>
+</div>
+<div class="rust">
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let view = table.view(Some(ViewConfigUpdate {
+    group_by: Some(vec!["a".into(), "c".into()]),
+    ..ViewConfigUpdate::default()
+})).await?;
+<span class="boring">}</span></code></pre></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="split-by"><a class="header" href="#split-by">Split By</a></h1>
+<p>A split by <em>splits</em> the dataset by the unique values of each column used as a
+split by. The underlying dataset is not aggregated, and a new column is created
+for each unique value of the split by. Each newly created column contains the
+parts of the dataset that correspond to the column header, i.e. a <code>View</code> that
+has <code>["State"]</code> as its split by will have a new column for each state. In
+Perspective, Split By are represented as an array of string column names to
+pivot:</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({ split_by: ["a", "c"] });
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(split_by=["a", "c"])
+</code></pre>
+</div>
+<div class="rust">
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let view = table.view(Some(ViewConfigUpdate {
+    split_by: Some(vec!["a".into(), "c".into()]),
+    ..ViewConfigUpdate::default()
+})).await?;
+<span class="boring">}</span></code></pre></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="aggregates"><a class="header" href="#aggregates">Aggregates</a></h1>
+<p>Aggregates perform a calculation over an entire column, and are displayed when
+one or more <a href="explanation/view/config/aggregates.html#group-by">Group By</a> are applied to the <code>View</code>. Aggregates can be
+specified by the user, or Perspective will use the following sensible default
+aggregates based on column type:</p>
+<ul>
+<li>"sum" for <code>integer</code> and <code>float</code> columns</li>
+<li>"count" for all other columns</li>
+</ul>
+<p>Perspective provides a selection of aggregate functions that can be applied to
+columns in the <code>View</code> constructor using a dictionary of column name to aggregate
+function name.</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({
+    aggregates: {
+        a: "avg",
+        b: "distinct count",
+    },
+});
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(
+  aggregates={
+    "a": "avg",
+    "b": "distinct count"
+  }
+)
+</code></pre>
+</div>
+<div class="rust">
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="columns"><a class="header" href="#columns">Columns</a></h1>
+<p>The <code>columns</code> property specifies which columns should be included in the
+<code>View</code>'s output. This allows users to show or hide a specific subset of columns,
+as well as control the order in which columns appear to the user. This is
+represented in Perspective as an array of string column names:</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({
+    columns: ["a"],
+});
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(columns=["a"])
+</code></pre>
+</div>
+<div class="rust">
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sort"><a class="header" href="#sort">Sort</a></h1>
+<p>The <code>sort</code> property specifies columns on which the query should be sorted,
+analogous to <code>ORDER BY</code> in SQL. A column can be sorted regardless of its data
+type, and sorts can be applied in ascending or descending order. Perspective
+represents <code>sort</code> as an array of arrays, with the values of each inner array
+being a string column name and a string sort direction. When <code>column-pivots</code> are
+applied, the additional sort directions <code>"col asc"</code> and <code>"col desc"</code> will
+determine the order of pivot columns groups.</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({
+    sort: [["a", "asc"]],
+});
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(sort=[["a", "asc"]])
+</code></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="filter"><a class="header" href="#filter">Filter</a></h1>
+<p>The <code>filter</code> property specifies columns on which the query can be filtered,
+returning rows that pass the specified filter condition. This is analogous to
+the <code>WHERE</code> clause in SQL. There is no limit on the number of columns where
+<code>filter</code> is applied, but the resulting dataset is one that passes all the filter
+conditions, i.e. the filters are joined with an <code>AND</code> condition.</p>
+<p>Perspective represents <code>filter</code> as an array of arrays, with the values of each
+inner array being a string column name, a string filter operator, and a filter
+operand in the type of the column:</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({
+    filter: [["a", "&lt;", 100]],
+});
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(filter=[["a", "&lt;", 100]])
+</code></pre>
+</div>
+<div class="rust">
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="expressions"><a class="header" href="#expressions">Expressions</a></h1>
+<p>The <code>expressions</code> property specifies <em>new</em> columns in Perspective that are
+created using existing column values or arbitary scalar values defined within
+the expression. In <code>&lt;perspective-viewer&gt;</code>, expressions are added using the "New
+Column" button in the side panel.</p>
+<p>A custom name can be added to an expression by making the first line a comment:</p>
+<div class="javascript">
+<pre><code class="language-javascript">const view = await table.view({
+    expressions: { '"a" + "b"': '"a" + "b"' },
+});
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">view = table.view(expressions=['"a" + "b"'])
+</code></pre>
+</div>
+<div class="rust">
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="flattening-a-tableview-into-a-table"><a class="header" href="#flattening-a-tableview-into-a-table">Flattening a [<code>Table::view</code>] into a [<code>Table</code>]</a></h2>
+<p>In Javascript, a [<code>Table</code>] can be constructed on a [<code>Table::view</code>] instance,
+which will return a new [<code>Table</code>] based on the [<code>Table::view</code>]'s dataset, and
+all future updates that affect the [<code>Table::view</code>] will be forwarded to the new
+[<code>Table</code>]. This is particularly useful for implementing a
+<a href="explanation/view/config/server.html#clientserver-replicated">Client/Server Replicated</a> design, by
+serializing the <code>View</code> to an arrow and setting up an <code>on_update</code> callback.</p>
+<div class="javascript">
+<pre><code class="language-javascript">const worker1 = perspective.worker();
+const table = await worker.table(data);
+const view = await table.view({ filter: [["State", "==", "Texas"]] });
+const table2 = await worker.table(view);
+table.update([{ State: "Texas", City: "Austin" }]);
+</code></pre>
+</div>
+<div class="python">
+<pre><code class="language-python">table = perspective.Table(data);
+view = table.view(filter=[["State", "==", "Texas"]])
+table2 = perspective.Table(view.to_arrow());
+
+def updater(port, delta):
+    table2.update(delta)
+
+view.on_update(updater, mode="Row")
+table.update([{"State": "Texas", "City": "Austin"}])
+</code></pre>
+</div>
+<div class="rust">
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let opts = TableInitOptions::default();
+let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+let table = client.table(data, opts).await?;
+let view = table.view(None).await?;
+let table2 = client.table(TableData::View(view)).await?;
+table.update(data).await?;
+<span class="boring">}</span></code></pre></pre>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><p>Perspective's JavaScript library offers a configurable UI powered by the same
+fast streaming data engine, just re-compiled to WebAssembly. A simple example
+which loads an <a href="https://arrow.apache.org/">Apache Arrow</a> and computes a "Group
+By" operation, returning a new Arrow:</p>
+<pre><code class="language-javascript">import perspective from "@finos/perspective";
+
+const table = await perspective.table(apache_arrow_data);
+const view = await table.view({ group_by: ["CounterParty", "Security"] });
+const arrow = await view.to_arrow();
+</code></pre>
+<p><a href="https://github.com/finos/perspective/tree/master/examples">More Examples</a> are
+available on GitHub.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="module-structure"><a class="header" href="#module-structure">Module Structure</a></h1>
+<p>Perspective is designed for flexibility, allowing developers to pick and choose
+which modules they need for their specific use case. The main modules are:</p>
+<ul>
+<li>
+<p><code>@finos/perspective</code><br />
+The data engine library, as both a browser ES6 and Node.js module. Provides
+a WebAssembly, WebWorker (browser) and Process (node.js) runtime.</p>
+</li>
+<li>
+<p><code>@finos/perspective-viewer</code><br />
+A user-configurable visualization widget, bundled as a
+<a href="https://www.webcomponents.org/introduction">Web Component</a>. This module
+includes the core data engine module as a dependency.</p>
+</li>
+</ul>
+<p><code>&lt;perspective-viewer&gt;</code> by itself only implements a trivial debug renderer, which
+prints the currently configured <code>view()</code> as a CSV. Plugin modules for popular
+JavaScript libraries, such as <a href="https://d3fc.io/">d3fc</a>, are packaged separately
+and must be imported individually.</p>
+<p>Perspective offers these plugin modules:</p>
+<ul>
+<li>
+<p><code>@finos/perspective-viewer-datagrid</code><br />
+A custom high-performance data-grid component based on HTML <code>&lt;table&gt;</code>.</p>
+</li>
+<li>
+<p><code>@finos/perspective-viewer-d3fc</code><br />
+A <code>&lt;perspective-viewer&gt;</code> plugin for the <a href="https://d3fc.io">d3fc</a> charting
+library.</p>
+</li>
+</ul>
+<p>When imported after <code>@finos/perspective-viewer</code>, the plugin modules will
+register themselves automatically, and the renderers they export will be
+available in the <code>plugin</code> dropdown in the <code>&lt;perspective-viewer&gt;</code> UI.</p>
+<h2 id="which-modules-should-i-import"><a class="header" href="#which-modules-should-i-import">Which modules should I import?</a></h2>
+<p>Depending on your requirements, you may need just one, or all, Perspective
+modules. Here are some basic guidelines to help you decide what is most
+appropriate for your project:</p>
+<ul>
+<li>
+<p>For Perspective's high-performance streaming data engine (in WebAssembly),
+or for a purely Node.js based application, import:</p>
+<ul>
+<li><code>@finos/perspective</code>, as detailed <a href="explanation/javascript_module_structure.html#perspective-library">here</a></li>
+</ul>
+</li>
+<li>
+<p>For Perspective as a simple, browser-based data visualization widget, you
+will need to import:</p>
+<ul>
+<li><code>@finos/perspective</code>, detailed <a href="explanation/javascript_module_structure.html#perspective-library">here</a></li>
+<li><code>@finos/perspective-viewer</code>, detailed
+<a href="explanation/javascript_module_structure.html#perspective-viewer-web-component">here</a></li>
+<li><code>@finos/perspective-viewer-datagrid</code> for data grids</li>
+<li><code>@finos/perspective-viewer-d3fc</code> for charting</li>
+</ul>
+</li>
+<li>
+<p>For more complex cases, such as
+<a href="explanation/javascript_module_structure.html#sharing-a-table-between-multiple-perspective-viewers">sharing tables between viewers</a>
+and
+<a href="explanation/javascript_module_structure.html#remote-perspective-via-workerhost">binding a viewer to a remote view in Node.js</a>,
+you will likely need all Perspective modules.</p>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="javascript-builds"><a class="header" href="#javascript-builds">JavaScript Builds</a></h1>
+<p>Perspective requires the browser to have access to Perspective's <code>.wasm</code>
+binaries <em>in addition</em> to the bundled <code>.js</code> files, and as a result the build
+process requires a few extra steps. To ease integration, Perspective's NPM
+releases come with multiple prebuilt configurations.</p>
+<h2 id="browser"><a class="header" href="#browser">Browser</a></h2>
+<h3 id="esm-builds"><a class="header" href="#esm-builds">ESM Builds</a></h3>
+<p>The recommended builds for production use are packaged as ES Modules and require
+a <em>bootstrapping</em> step in order to acquire the <code>.wasm</code> binaries and initialize
+Perspective's JavaScript with them. However, because they have no hard-coded
+dependencies on the <code>.wasm</code> paths, they are ideal for use with JavaScript
+bundlers such as ESBuild, Rollup, Vite or Webpack.</p>
+<h3 id="cdn-builds"><a class="header" href="#cdn-builds">CDN Builds <!-- Explanation --></a></h3>
+<p>Perspective's CDN builds are good for non-bundled scenarios, such as importing
+directly from a <code>&lt;script&gt;</code> tag with a browser-side <code>import</code>. CDN builds <em>do not</em>
+require <em>bootstrapping</em> the WebAssembly binaries, but they also generally <em>do
+not</em> work with bundlers such as <code>WebPack</code>.</p>
+<h3 id="inline-builds"><a class="header" href="#inline-builds">Inline Builds <!-- Explanation --></a></h3>
+<p><span class="warning">Inline builds are deprecated and will be removed in a
+future release.</span></p>
+<p>Perspective's <em>Inline</em> Builds are a last-ditch effort at compatibility. They
+work by <em>inlining</em> WebAssembly binary content as a base64-encoded string. While
+inline builds work with most bundlers and <em>do not</em> require bootstrapping, there
+is an inherent file-size and boot-performance penalty when using this
+inefficient build method.</p>
+<p>Prefer your bundler's inlining features and Perspective ESM builds to this one
+where possible.</p>
+<h2 id="nodejs"><a class="header" href="#nodejs">Node.js</a></h2>
+<p>There is a Node.js build as well for <code>@finos/perspective</code> data engine, which
+shouldn't require any special instructions to use.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="what-is-perspective-python"><a class="header" href="#what-is-perspective-python">What is <code>perspective-python</code></a></h1>
+<p>Perspective for Python uses the exact same C++ data engine used by the
+<a href="https://docs.rs/perspective-js/latest/perspective_js/">WebAssembly version</a> and
+<a href="https://docs.rs/crate/perspective/latest">Rust version</a>. The library consists
+of many of the same abstractions and API as in JavaScript, as well as
+Python-specific data loading support for <a href="https://numpy.org/">NumPy</a>,
+<a href="https://pandas.pydata.org/">Pandas</a> (and
+<a href="https://arrow.apache.org/">Apache Arrow</a>, as in JavaScript).</p>
+<p>Additionally, <code>perspective-python</code> provides a session manager suitable for
+integration into server systems such as
+<a href="https://www.tornadoweb.org/en/stable/websocket.html">Tornado websockets</a>,
+<a href="https://docs.aiohttp.org/en/stable/web_quickstart.html#websockets">AIOHTTP</a>, or
+<a href="https://www.starlette.io/websockets/">Starlette</a>/<a href="https://fastapi.tiangolo.com/advanced/websockets/">FastAPI</a>,
+which allows fully <em>virtual</em> Perspective tables to be interacted with by
+multiple <code>&lt;perspective-viewer&gt;</code> in a web browser. You can also interact with a
+Perspective table from python clients, and to that end client libraries are
+implemented for both Tornado and AIOHTTP.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>A simple example which loads an <a href="https://arrow.apache.org/">Apache Arrow</a> and
+computes a "Group By" operation, returning a new Arrow.</p>
+<pre><code class="language-python">from perspective import Server
+
+client = Server().new_local_client()
+table = client.table(arrow_bytes_data)
+view = table.view(group_by = ["CounterParty", "Security"])
+arrow = view.to_arrow()
+</code></pre>
+<p><a href="https://github.com/finos/perspective/tree/master/examples">More Examples</a> are
+available on GitHub.</p>
+<h2 id="whats-included"><a class="header" href="#whats-included">What's included</a></h2>
+<p>The <code>perspective</code> module exports several tools:</p>
+<ul>
+<li><code>Server</code> the constructor for a new isntance of the Perspective data engine.</li>
+<li>The <code>perspective.widget</code> module exports <code>PerspectiveWidget</code>, the JupyterLab
+widget for interactive visualization in a notebook cell.</li>
+<li>The <code>perspective.handlers</code> modules exports web frameworks handlers that
+interface with a <code>perspective-client</code> in JavaScript.
+<ul>
+<li><code>perspective.handlers.tornado.PerspectiveTornadoHandler</code> for
+<a href="https://www.tornadoweb.org/">Tornado</a></li>
+<li><code>perspective.handlers.starlette.PerspectiveStarletteHandler</code> for
+<a href="https://www.starlette.io/">Starlette</a> and
+<a href="https://fastapi.tiangolo.com">FastAPI</a></li>
+<li><code>perspective.handlers.aiohttp.PerspectiveAIOHTTPHandler</code> for
+<a href="https://docs.aiohttp.org">AIOHTTP</a>,</li>
+</ul>
+</li>
+</ul>
+<h3 id="virtual-ui-server"><a class="header" href="#virtual-ui-server">Virtual UI server</a></h3>
+<p>As <code>&lt;perspective-viewer&gt;</code> or any other Perspective <code>Client</code> will only consume
+the data necessary to render the current screen (or wahtever else was requested
+via the API), this runtime mode allows large datasets without the need to copy
+them entirely to the Browser, at the expense of network latency on UI
+interaction/API calls.</p>
+<h3 id="jupyterlab"><a class="header" href="#jupyterlab">Jupyterlab</a></h3>
+<p><code>PerspectiveWidget</code> is a JupyterLab widget that implements the same API as
+<code>&lt;perspective-viewer&gt;</code>, allows running such a viewer in
+<a href="https://jupyterlab.readthedocs.io/en/stable/">JupyterLab</a> in either server or
+client (via WebAssembly) mode. <code>PerspectiveWidget</code> is compatible with Jupyterlab
+3 and Jupyter Notebook 6 via a
+<a href="https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#prebuilt-extensions">prebuilt extension</a>.
+To use it, simply install <code>perspective-python</code> and the extensions should be
+available.</p>
+<p><code>perspective-python</code>'s JupyterLab extension also provides convenient builtin
+viewers for <code>csv</code>, <code>json</code>, or <code>arrow</code> files. Simply right-click on a file with
+this extension and choose the appropriate <code>Perpective</code> option from the context
+menu.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust"><a class="header" href="#rust">Rust</a></h1>
+<p>Install via <code>cargo</code>:</p>
+<pre><code class="language-bash">cargo add perspective
+</code></pre>
+<h1 id="example-1"><a class="header" href="#example-1">Example</a></h1>
+<p>Initialize a server and client</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let server = Server::default();
+let client = server.new_local_client();
+<span class="boring">}</span></code></pre></pre>
+<p>Load an Arrow</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut file = File::open(std::path::Path::new(ROOT_PATH).join(ARROW_FILE_PATH))?;
+let mut feather = Vec::with_capacity(file.metadata()?.len() as usize);
+file.read_to_end(&amp;mut feather)?;
+let data = UpdateData::Arrow(feather.into());
+let mut options = TableInitOptions::default();
+options.set_name("my_data_source");
+client.table(data.into(), options).await?;
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="javascript"><a class="header" href="#javascript">JavaScript</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="javascript-npm-installation"><a class="header" href="#javascript-npm-installation">JavaScript NPM Installation</a></h1>
+<p>Perspective releases contain several different builds for use in most
+environments.</p>
+<h2 id="browser-1"><a class="header" href="#browser-1">Browser</a></h2>
+<p>Perspective's WebAssembly data engine is available via NPM in the same package
+as its Node.js counterpart, <code>@finos/perspective</code>. The Perspective Viewer UI
+(which has no Node.js component) must be installed separately:</p>
+<pre><code class="language-bash">$ npm add @finos/perspective @finos/perspective-viewer
+</code></pre>
+<p>By itself, <code>@finos/perspective-viewer</code> does not provide any visualizations, only
+the UI framework. Perspective <em>Plugins</em> provide visualizations and must be
+installed separately. All Plugins are optional - but a <code>&lt;perspective-viewer&gt;</code>
+without Plugins would be rather boring!</p>
+<pre><code class="language-bash">$ npm add @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid @finos/perspective-viewer-openlayers
+</code></pre>
+<h2 id="nodejs-1"><a class="header" href="#nodejs-1">Node.js</a></h2>
+<p>To use Perspective from a Node.js server, simply install via NPM.</p>
+<pre><code class="language-bash">$ npm add @finos/perspective
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="javascript---importing-with-or-without-a-bundler"><a class="header" href="#javascript---importing-with-or-without-a-bundler">JavaScript - Importing with or without a bundler</a></h1>
+<h2 id="esm-builds-with-a-bundler"><a class="header" href="#esm-builds-with-a-bundler">ESM builds with a bundler</a></h2>
+<p>ESM builds must be <em>bootstrapped</em> with their <code>.wasm</code> binaries to initialize. The
+<code>wasm</code> binaries can be found in their respective <code>dist/wasm</code> directories.</p>
+<pre><code class="language-javascript">import perspective_viewer from "@finos/perspective-viewer";
+import perspective from "@finos/perspective";
+
+// TODO These paths must be provided by the bundler!
+const SERVER_WASM = ... // "@finos/perspective/dist/wasm/perspective-server.wasm"
+const CLIENT_WASM = ... // "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm"
+
+await Promise.all([
+    perspective.init_server(SERVER_WASM),
+    perspective_viewer.init_client(CLIENT_WASM),
+]);
+
+// Now Perspective API will work!
+const worker = await perspective.worker();
+const viewer = document.createElement("perspective-viewer");
+</code></pre>
+<p>The exact syntax will vary slightly depending on the bundler.</p>
+<h3 id="vite"><a class="header" href="#vite">Vite</a></h3>
+<pre><code class="language-javascript">import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm?url";
+import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm?url";
+
+await Promise.all([
+    perspective.init_server(fetch(SERVER_WASM)),
+    perspective_viewer.init_client(fetch(CLIENT_WASM)),
+]);
+</code></pre>
+<h3 id="esbuild"><a class="header" href="#esbuild">ESBuild</a></h3>
+<pre><code class="language-javascript">import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
+import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
+
+await Promise.all([
+    perspective.init_server(fetch(SERVER_WASM)),
+    perspective_viewer.init_client(fetch(CLIENT_WASM)),
+]);
+</code></pre>
+<p>ESBuild config JSON to encode this asset as a <code>file</code>:</p>
+<pre><code class="language-javascript">{
+    // ...
+    "loader": {
+        // ...
+        ".wasm": "file"
+    }
+}
+</code></pre>
+<h3 id="webpack"><a class="header" href="#webpack">Webpack</a></h3>
+<pre><code class="language-javascript">import * as SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
+import * as CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
+
+await Promise.all([
+    perspective.init_server(SERVER_WASM),
+    perspective_viewer.init_client(CLIENT_WASM),
+]);
+</code></pre>
+<p>Webpack config:</p>
+<pre><code class="language-javascript">{
+    // ...
+    experiments: {
+        asyncWebAssembly: true,
+        syncWebAssembly: false,
+    },
+}
+</code></pre>
+<h2 id="inline-builds-with-a-bundler"><a class="header" href="#inline-builds-with-a-bundler">Inline builds with a bundler <!-- How to --></a></h2>
+<pre><code class="language-javascript">import "@finos/perspective-viewer/dist/esm/perspective-viewer.inline.js";
+import psp from "@finos/perspective/dist/esm/perspective.inline.js";
+</code></pre>
+<h2 id="cdn-builds-1"><a class="header" href="#cdn-builds-1">CDN builds <!-- How to --></a></h2>
+<p>Perspective CDN builds are in ES Module format, thus to include them via a CDN
+they must be imported from a <code>&lt;script type="module"&gt;</code>. While this will work fine
+downloading Perspective's assets directly as a <code>src</code> attribute, as you'll
+generally want to <em>do</em> something with the library its best to use an <code>import</code>
+statement:</p>
+<pre><code class="language-html">&lt;script type="module"&gt;
+    import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
+    import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js";
+    import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js";
+    import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.js";
+
+    // .. Do stuff here ..
+&lt;/script&gt;
+</code></pre>
+<h2 id="nodejs-builds"><a class="header" href="#nodejs-builds">Node.js builds</a></h2>
+<p>The Node.js runtime for the <code>@finos/perspective</code> module runs in-process by
+default and does not implement a <code>child_process</code> interface. Hence, there is no
+<code>worker()</code> method, and the module object itself directly exports the full
+<code>perspective</code> API.</p>
+<pre><code class="language-javascript">const perspective = require("@finos/perspective");
+</code></pre>
+<p>In Node.js, perspective does not run in a WebWorker (as this API does not exist
+in Node.js), so no need to call the <code>.worker()</code> factory function - the
+<code>perspective</code> library exports the functions directly and run synchronously in
+the main process.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="accessing-the-perspective-engine-via-a-client-instance"><a class="header" href="#accessing-the-perspective-engine-via-a-client-instance">Accessing the Perspective engine via a <code>Client</code> instance</a></h1>
+<p>An instance of a <code>Client</code> is needed to talk to a Perspective <code>Server</code>, of which
+there are a few varieties available in JavaScript.</p>
+<h2 id="web-worker-browser"><a class="header" href="#web-worker-browser">Web Worker (Browser)</a></h2>
+<p>Perspective's Web Worker client is actually a <code>Client</code> and <code>Server</code> rolled into
+one. Instantiating this <code>Client</code> will also create a <em>dedicated</em> Perspective
+<code>Server</code> in a Web Worker process.</p>
+<p>To use it, you'll need to instantiate a Web Worker <code>perspective</code> engine via the
+<code>worker()</code> method. This will create a new Web Worker (browser) and load the
+WebAssembly binary. All calculation and data accumulation will occur in this
+separate process.</p>
+<pre><code class="language-javascript">const client = await perspective.worker();
+</code></pre>
+<p>The <code>worker</code> symbol will expose the full <code>perspective</code> API for one managed Web
+Worker process. You are free to create as many as your browser supports, but be
+sure to keep track of the <code>worker</code> instances themselves, as you'll need them to
+interact with your data in each instance.</p>
+<h2 id="websocket-browser"><a class="header" href="#websocket-browser">Websocket (Browser)</a></h2>
+<p>Alternatively, with a Perspective server running in Node.js, Python or Rust, you
+can create a <em>virtual</em> <code>Client</code> via the <code>websocket()</code> method.</p>
+<pre><code class="language-javascript">const client = perspective.websocket("http://localhost:8080/");
+</code></pre>
+<h2 id="nodejs-2"><a class="header" href="#nodejs-2">Node.js</a></h2>
+<p>The Node.js runtime for the <code>@finos/perspective</code> module runs in-process by
+default and does not implement a <code>child_process</code> interface, so no need to call
+the <code>.worker()</code> factory function. Instead, the <code>perspective</code> library exports the
+functions directly and run synchronously in the main process.</p>
+<pre><code class="language-javascript">const client = require("@finos/perspective");
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="serializing-data"><a class="header" href="#serializing-data">Serializing data</a></h3>
+<p>The <code>view()</code> allows for serialization of data to JavaScript through the
+<code>to_json()</code>, <code>to_ndjson()</code>, <code>to_columns()</code>, <code>to_csv()</code>, and <code>to_arrow()</code> methods
+(the same data formats supported by the <code>Client::table</code> factory function). These
+methods return a <code>promise</code> for the calculated data:</p>
+<pre><code class="language-javascript">const view = await table.view({ group_by: ["State"], columns: ["Sales"] });
+
+// JavaScript Objects
+console.log(await view.to_json());
+console.log(await view.to_columns());
+
+// String
+console.log(await view.to_csv());
+console.log(await view.to_ndjson());
+
+// ArrayBuffer
+console.log(await view.to_arrow());
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="deleting-a-table-or-view"><a class="header" href="#deleting-a-table-or-view">Deleting a <code>table()</code> or <code>view()</code></a></h1>
+<p>Unlike standard JavaScript objects, Perspective objects such as <code>table()</code> and
+<code>view()</code> store their associated data in the WebAssembly heap. Because of this,
+as well as the current lack of a hook into the JavaScript runtime's garbage
+collector from WebAssembly, the memory allocated to these Perspective objects
+does not automatically get cleaned up when the object falls out of scope.</p>
+<p>In order to prevent memory leaks and reclaim the memory associated with a
+Perspective <code>table()</code> or <code>view()</code>, you must call the <code>delete()</code> method:</p>
+<pre><code class="language-javascript">await view.delete();
+
+// This method will throw an exception if there are still `view()`s depending
+// on this `table()`!
+await table.delete();
+</code></pre>
+<p>Similarly, <code>&lt;perspective-viewer&gt;</code> Custom Elements do not delete the memory
+allocated for the UI when they are removed from the DOM.</p>
+<pre><code class="language-javascript">await viewer.delete();
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="server-only-via-websocketserver-and-nodejs"><a class="header" href="#server-only-via-websocketserver-and-nodejs">Server-only via <code>WebSocketServer()</code> and Node.js</a></h1>
+<p>For exceptionally large datasets, a <code>Client</code> can be bound to a
+<code>perspective.table()</code> instance running in Node.js/Python/Rust remotely, rather
+than creating one in a Web Worker and downloading the entire data set. This
+trades off network bandwidth and server resource requirements for a smaller
+browser memory and CPU footprint.</p>
+<p>An example in Node.js:</p>
+<pre><code class="language-javascript">const { WebSocketServer, table } = require("@finos/perspective");
+const fs = require("fs");
+
+// Start a WS/HTTP host on port 8080.  The `assets` property allows
+// the `WebSocketServer()` to also serves the file structure rooted in this
+// module's directory.
+const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
+
+// Read an arrow file from the file system and host it as a named table.
+const arr = fs.readFileSync(__dirname + "/superstore.lz4.arrow");
+await table(arr, { name: "table_one" });
+</code></pre>
+<p>... and the [<code>Client</code>] implementation in the browser:</p>
+<pre><code class="language-javascript">const elem = document.getElementsByTagName("perspective-viewer")[0];
+
+// Bind to the server's worker instead of instantiating a Web Worker.
+const websocket = await perspective.websocket(
+    window.location.origin.replace("http", "ws")
+);
+
+// Create a virtual `Table` to the preloaded data source.  `table` and `view`
+// objects live on the server.
+const server_table = await websocket.open_table("table_one");
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="perspective-viewer-custom-element-library"><a class="header" href="#perspective-viewer-custom-element-library"><code>&lt;perspective-viewer&gt;</code> Custom Element library</a></h1>
+<p><code>&lt;perspective-viewer&gt;</code> provides a complete graphical UI for configuring the
+<code>perspective</code> library and formatting its output to the provided visualization
+plugins.</p>
+<p>Once imported and initialized in JavaScript, the <code>&lt;perspective-viewer&gt;</code> Web
+Component will be available in any standard HTML on your site. A simple example:</p>
+<pre><code class="language-html">&lt;perspective-viewer id="view1"&gt;&lt;/perspective-viewer&gt;
+&lt;script type="module"&gt;
+    const viewer = document.createElement("perspective-viewer");
+    await viewer.load(table);
+&lt;/script&gt;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="theming"><a class="header" href="#theming">Theming</a></h1>
+<p>Theming is supported in <code>perspective-viewer</code> and its accompanying plugins. A
+number of themes come bundled with <code>perspective-viewer</code>; you can import any of
+these themes directly into your app, and the <code>perspective-viewer</code>s will be
+themed accordingly:</p>
+<pre><code class="language-javascript">// Themes based on Thought Merchants's Prospective design
+import "@finos/perspective-viewer/dist/css/pro.css";
+import "@finos/perspective-viewer/dist/css/pro-dark.css";
+
+// Other themes
+import "@finos/perspective-viewer/dist/css/solarized.css";
+import "@finos/perspective-viewer/dist/css/solarized-dark.css";
+import "@finos/perspective-viewer/dist/css/monokai.css";
+import "@finos/perspective-viewer/dist/css/vaporwave.css";
+</code></pre>
+<p>Alternatively, you may use <code>themes.css</code>, which bundles all default themes</p>
+<pre><code class="language-javascript">import "@finos/perspective-viewer/dist/css/themes.css";
+</code></pre>
+<p>If you choose not to bundle the themes yourself, they are available through
+<a href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/">CDN</a>. These
+can be directly linked in your HTML file:</p>
+<pre><code class="language-html">&lt;link
+    rel="stylesheet"
+    crossorigin="anonymous"
+    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro.css"
+/&gt;
+</code></pre>
+<p>Note the <code>crossorigin="anonymous"</code> attribute. When including a theme from a
+cross-origin context, this attribute may be required to allow
+<code>&lt;perspective-viewer&gt;</code> to detect the theme. If this fails, additional themes are
+added to the <code>document</code> after <code>&lt;perspective-viewer&gt;</code> init, or for any other
+reason theme auto-detection fails, you may manually inform
+<code>&lt;perspective-viewer&gt;</code> of the available theme names with the <code>.resetThemes()</code>
+method.</p>
+<pre><code class="language-javascript">// re-auto-detect themes
+viewer.resetThemes();
+
+// Set available themes explicitly (they still must be imported as CSS!)
+viewer.resetThemes(["Pro Light", "Pro Dark"]);
+</code></pre>
+<p><code>&lt;perspective-viewer&gt;</code> will default to the first loaded theme when initialized.
+You may override this via <code>.restore()</code>, or provide an initial theme by setting
+the <code>theme</code> attribute:</p>
+<pre><code class="language-html">&lt;perspective-viewer theme="Pro Light"&gt;&lt;/perspective-viewer&gt;
+</code></pre>
+<p>or</p>
+<pre><code class="language-javascript">const viewer = document.querySelector("perspective-viewer");
+await viewer.restore({ theme: "Pro Dark" });
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="loading-data-from-a-table"><a class="header" href="#loading-data-from-a-table">Loading data from a Table</a></h1>
+<p>Data can be loaded into <code>&lt;perspective-viewer&gt;</code> in the form of a <code>Table()</code> or a
+<code>Promise&lt;Table&gt;</code> via the <code>load()</code> method.</p>
+<pre><code class="language-javascript">// Create a new worker, then a new table promise on that worker.
+const worker = await perspective.worker();
+const table = await worker.table(data);
+
+// Bind a viewer element to this table.
+await viewer.load(table);
+</code></pre>
+<h2 id="sharing-a-table-between-multiple-perspective-viewers"><a class="header" href="#sharing-a-table-between-multiple-perspective-viewers">Sharing a <code>Table</code> between multiple <code>&lt;perspective-viewer&gt;</code>s</a></h2>
+<p>Multiple <code>&lt;perspective-viewer&gt;</code>s can share a <code>table()</code> by passing the <code>table()</code>
+into the <code>load()</code> method of each viewer. Each <code>perspective-viewer</code> will update
+when the underlying <code>table()</code> is updated, but <code>table.delete()</code> will fail until
+all <code>perspective-viewer</code> instances referencing it are also deleted:</p>
+<pre><code class="language-javascript">const viewer1 = document.getElementById("viewer1");
+const viewer2 = document.getElementById("viewer2");
+
+// Create a new WebWorker
+const worker = await perspective.worker();
+
+// Create a table in this worker
+const table = await worker.table(data);
+
+// Load the same table in 2 different &lt;perspective-viewer&gt; elements
+await viewer1.load(table);
+await viewer2.load(table);
+
+// Both `viewer1` and `viewer2` will reflect this update
+await table.update([{ x: 5, y: "e", z: true }]);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="loading-data-from-a-virtual-table"><a class="header" href="#loading-data-from-a-virtual-table">Loading data from a virtual <code>Table</code></a></h3>
+<p>Loading a virtual (server-only) [<code>Table</code>] works just like loading a local/Web
+Worker [<code>Table</code>] - just pass the virtual [<code>Table</code>] to <code>viewer.load()</code>. In the
+browser:</p>
+<pre><code class="language-javascript">const elem = document.getElementsByTagName("perspective-viewer")[0];
+
+// Bind to the server's worker instead of instantiating a Web Worker.
+const websocket = await perspective.websocket(
+    window.location.origin.replace("http", "ws")
+);
+
+// Bind the viewer to the preloaded data source.  `table` and `view` objects
+// live on the server.
+const server_table = await websocket.open_table("table_one");
+await elem.load(server_table);
+</code></pre>
+<p>Alternatively, data can be <em>cloned</em> from a server-side virtual <code>Table</code> into a
+client-side WebAssemblt <code>Table</code>. The browser clone will be synced via delta
+updates transferred via Apache Arrow IPC format, but local <code>View</code>s created will
+be calculated locally on the client browser.</p>
+<pre><code class="language-javascript">const worker = await perspective.worker();
+const server_view = await server_table.view();
+const client_table = worker.table(server_view);
+await elem.load(client_table);
+</code></pre>
+<p><code>&lt;perspective-viewer&gt;</code> instances bound in this way are otherwise no different
+than <code>&lt;perspective-viewer&gt;</code>s which rely on a Web Worker, and can even share a
+host application with Web Worker-bound <code>table()</code>s. The same <code>promise</code>-based API
+is used to communicate with the server-instantiated <code>view()</code>, only in this case
+it is over a websocket.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="saving-and-restoring-ui-state"><a class="header" href="#saving-and-restoring-ui-state">Saving and restoring UI state.</a></h1>
+<p><code>&lt;perspective-viewer&gt;</code> is <em>persistent</em>, in that its entire state (sans the data
+itself) can be serialized or deserialized. This include all column, filter,
+pivot, expressions, etc. properties, as well as datagrid style settings, config
+panel visibility, and more. This overloaded feature covers a range of use cases:</p>
+<ul>
+<li>Setting a <code>&lt;perspective-viewer&gt;</code>'s initial state after a <code>load()</code> call.</li>
+<li>Updating a single or subset of properties, without modifying others.</li>
+<li>Resetting some or all properties to their data-relative default.</li>
+<li>Persisting a user's configuration to <code>localStorage</code> or a server.</li>
+</ul>
+<h2 id="serializing-and-deserializing-the-viewer-state"><a class="header" href="#serializing-and-deserializing-the-viewer-state">Serializing and deserializing the viewer state</a></h2>
+<p>To retrieve the entire state as a JSON-ready JavaScript object, use the <code>save()</code>
+method. <code>save()</code> also supports a few other formats such as <code>"arraybuffer"</code> and
+<code>"string"</code> (base64, not JSON), which you may choose for size at the expense of
+easy migration/manual-editing.</p>
+<pre><code class="language-javascript">const json_token = await elem.save();
+const string_token = await elem.save("string");
+</code></pre>
+<p>For any format, the serialized token can be restored to any
+<code>&lt;perspective-viewer&gt;</code> with a <code>Table</code> of identical schema, via the <code>restore()</code>
+method. Note that while the data for a token returned from <code>save()</code> may differ,
+generally its schema may not, as many other settings depend on column names and
+types.</p>
+<pre><code class="language-javascript">await elem.restore(json_token);
+await elem.restore(string_token);
+</code></pre>
+<p>As <code>restore()</code> dispatches on the token's type, it is important to make sure that
+these types match! A common source of error occurs when passing a
+JSON-stringified token to <code>restore()</code>, which will assume base64-encoded msgpack
+when a string token is used.</p>
+<pre><code class="language-javascript">// This will error!
+await elem.restore(JSON.stringify(json_token));
+</code></pre>
+<h3 id="updating-individual-properties"><a class="header" href="#updating-individual-properties">Updating individual properties</a></h3>
+<p>Using the JSON format, every facet of a <code>&lt;perspective-viewer&gt;</code>'s configuration
+can be manipulated from JavaScript using the <code>restore()</code> method. The valid
+structure of properties is described via the
+<a href="https://github.com/finos/perspective/blob/ebced4caa/rust/perspective-viewer/src/ts/viewer.ts#L16"><code>ViewerConfig</code></a>
+and embedded
+<a href="https://github.com/finos/perspective/blob/ebced4caa19435a2a57d4687be7e428a4efc759b/packages/perspective/index.d.ts#L140"><code>ViewConfig</code></a>
+type declarations, and <a href="how_to/javascript/view.html"><code>View</code></a> chapter of the documentation which has
+several interactive examples for each <code>ViewConfig</code> property.</p>
+<pre><code class="language-javascript">// Set the plugin (will also update `columns` to plugin-defaults)
+await elem.restore({ plugin: "X Bar" });
+
+// Update plugin and columns (only draws once)
+await elem.restore({ plugin: "X Bar", columns: ["Sales"] });
+
+// Open the config panel
+await elem.restore({ settings: true });
+
+// Create an expression
+await elem.restore({
+    columns: ['"Sales" + 100'],
+    expressions: { "New Column": '"Sales" + 100' },
+});
+
+// ERROR if the column does not exist in the schema or expressions
+// await elem.restore({columns: ["\"Sales\" + 100"], expressions: {}});
+
+// Add a filter
+await elem.restore({ filter: [["Sales", "&lt;", 100]] });
+
+// Add a sort, don't remove filter
+await elem.restore({ sort: [["Prodit", "desc"]] });
+
+// Reset just filter, preserve sort
+await elem.restore({ filter: undefined });
+
+// Reset all properties to default e.g. after `load()`
+await elem.reset();
+</code></pre>
+<p>Another effective way to quickly create a token for a desired configuration is
+to simply copy the token returned from <code>save()</code> after settings the view manually
+in the browser. The JSON format is human-readable and should be quite easy to
+tweak once generated, as <code>save()</code> will return even the default settings for all
+properties. You can call <code>save()</code> in your application code, or e.g. through the
+Chrome developer console:</p>
+<pre><code class="language-javascript">// Copy to clipboard
+copy(await document.querySelector("perspective-viewer").save());
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="listening-for-events"><a class="header" href="#listening-for-events">Listening for events</a></h1>
+<p>The <code>&lt;perspective-viewer&gt;</code> Custom Element fires all the same HTML <code>Event</code>s that
+standard DOM <code>HTMLElement</code> objects fire, in addition to a few custom
+<code>CustomEvent</code>s which relate to UI updates including those initiaed through user
+interaction.</p>
+<h2 id="update-events"><a class="header" href="#update-events">Update events</a></h2>
+<p>Whenever a <code>&lt;perspective-viewer&gt;</code>s underlying <code>table()</code> is changed via the
+<code>load()</code> or <code>update()</code> methods, a <code>perspective-view-update</code> DOM event is fired.
+Similarly, <code>view()</code> updates instigated either through the Attribute API or
+through user interaction will fire a <code>perspective-config-update</code> event:</p>
+<pre><code class="language-javascript">elem.addEventListener("perspective-config-update", function (event) {
+    var config = elem.save();
+    console.log("The view() config has changed to " + JSON.stringify(config));
+});
+</code></pre>
+<h2 id="click-events"><a class="header" href="#click-events">Click events</a></h2>
+<p>Whenever a <code>&lt;perspective-viewer&gt;</code>'s grid or chart is clicked, a
+<code>perspective-click</code> DOM event is fired containing a detail object with <code>config</code>,
+<code>column_names</code>, and <code>row</code>.</p>
+<p>The <code>config</code> object contains an array of <code>filters</code> that can be applied to a
+<code>&lt;perspective-viewer&gt;</code> through the use of <code>restore()</code> updating it to show the
+filtered subset of data.</p>
+<p>The <code>column_names</code> property contains an array of matching columns, and the <code>row</code>
+property returns the associated row data.</p>
+<pre><code class="language-javascript">elem.addEventListener("perspective-click", function (event) {
+    var config = event.detail.config;
+    elem.restore(config);
+});
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="python"><a class="header" href="#python">Python</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<p><code>perspective-python</code> contains full bindings to the Perspective API, a JupyterLab
+widget, and WebSocket handlers for several webserver libraries that allow you to
+host Perspective using server-side Python.</p>
+<h2 id="pypi"><a class="header" href="#pypi">PyPI</a></h2>
+<p><code>perspective-python</code> can be installed from <a href="https://pypi.org">PyPI</a> via <code>pip</code>:</p>
+<pre><code class="language-bash">pip install perspective-python
+</code></pre>
+<p>That's it! If JupyterLab is installed in this Python environment, you'll also
+get the <code>perspective.widget.PerspectiveWidget</code> class when you import
+<code>perspective</code> in a Jupyter Lab kernel.</p>
+<!--
+### Anaconda
+
+`perspective-python` can also be installed for [Anaconda](https://anaconda.org/)
+via [Conda Forge](https://conda-forge.org)
+
+```bash
+conda install -c conda-forge perspective
+``` -->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="loading-data-into-a-table"><a class="header" href="#loading-data-into-a-table">Loading data into a Table</a></h1>
+<p>A <code>Table</code> can be created from a dataset or a schema, the specifics of which are
+<a href="how_to/python/table.html#loading-data-with-table">discussed</a> in the JavaScript section of the user's
+guide. In Python, however, Perspective supports additional data types that are
+commonly used when processing data:</p>
+<ul>
+<li><code>pandas.DataFrame</code></li>
+<li><code>polars.DataFrame</code></li>
+<li><code>bytes</code> (encoding an Apache Arrow)</li>
+<li><code>objects</code> (either extracting a repr or via reference)</li>
+<li><code>str</code> (encoding as a CSV)</li>
+</ul>
+<p>A <code>Table</code> is created in a similar fashion to its JavaScript equivalent:</p>
+<pre><code class="language-python">from datetime import date, datetime
+import numpy as np
+import pandas as pd
+import perspective
+
+data = pd.DataFrame({
+    "int": np.arange(100),
+    "float": [i * 1.5 for i in range(100)],
+    "bool": [True for i in range(100)],
+    "date": [date.today() for i in range(100)],
+    "datetime": [datetime.now() for i in range(100)],
+    "string": [str(i) for i in range(100)]
+})
+
+table = perspective.table(data, index="float")
+</code></pre>
+<p>Likewise, a <code>View</code> can be created via the <code>view()</code> method:</p>
+<pre><code class="language-python">view = table.view(group_by=["float"], filter=[["bool", "==", True]])
+column_data = view.to_columns()
+row_data = view.to_json()
+</code></pre>
+<h2 id="polars-support"><a class="header" href="#polars-support">Polars Support</a></h2>
+<p>Polars <code>DataFrame</code> types work similarly to Apache Arrow input, which Perspective
+uses to interface with Polars.</p>
+<pre><code class="language-python">df = polars.DataFrame({"a": [1,2,3,4,5]})
+table = perspective.table(df)
+</code></pre>
+<h2 id="pandas-support"><a class="header" href="#pandas-support">Pandas Support</a></h2>
+<p>Perspective's <code>Table</code> can be constructed from <code>pandas.DataFrame</code> objects.
+Internally, this just uses
+<a href="https://arrow.apache.org/docs/python/pandas.html"><code>pyarrow::from_pandas</code></a>,
+which dictates behavior of this feature including type support.</p>
+<p>If the dataframe does not have an index set, an integer-typed column named
+<code>"index"</code> is created. If you want to preserve the indexing behavior of the
+dataframe passed into Perspective, simply create the <code>Table</code> with
+<code>index="index"</code> as a keyword argument. This tells Perspective to once again
+treat the index as a primary key:</p>
+<pre><code class="language-python">data.set_index("datetime")
+table = perspective.table(data, index="index")
+</code></pre>
+<h2 id="time-zone-handling"><a class="header" href="#time-zone-handling">Time Zone Handling</a></h2>
+<p>When parsing <code>"datetime"</code> strings, times are assumed <em>local time</em> unless an
+explicit timezone offset is parsed. All <code>"datetime"</code> columns (regardless of
+input time zone) are <em>output</em> to the user as <code>datetime.datetime</code> objects in
+<em>local time</em> according to the Python runtime.</p>
+<p>This behavior is consistent with Perspective's behavior in JavaScript. For more
+details, see this in-depth
+<a href="https://github.com/finos/perspective/pull/867">explanation</a> of
+<code>perspective-python</code> semantics around time zone handling.</p>
+<pre><code>
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="callbacks-and-events"><a class="header" href="#callbacks-and-events">Callbacks and Events</a></h1>
+<p><code>perspective.Table</code> allows for <code>on_update</code> and <code>on_delete</code> callbacks to be
+set—simply call <code>on_update</code> or <code>on_delete</code> with a reference to a function or a
+lambda without any parameters:</p>
+<pre><code class="language-python">def update_callback():
+    print("Updated!")
+
+# set the update callback
+on_update_id = view.on_update(update_callback)
+
+
+def delete_callback():
+    print("Deleted!")
+
+# set the delete callback
+on_delete_id = view.on_delete(delete_callback)
+
+# set a lambda as a callback
+view.on_delete(lambda: print("Deleted x2!"))
+</code></pre>
+<p>If the callback is a named reference to a function, it can be removed with
+<code>remove_update</code> or <code>remove_delete</code>:</p>
+<pre><code class="language-python">view.remove_update(on_update_id)
+view.remove_delete(on_delete_id)
+</code></pre>
+<p>Callbacks defined with a lambda function cannot be removed, as lambda functions
+have no identifier.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="multi-threading"><a class="header" href="#multi-threading">Multi-threading</a></h1>
+<p>Perspective's server API releases the GIL when called (though it may be retained
+for some portion of the <code>Client</code> call to encode RPC messages). It also
+dispatches to an internal thread pool for some operations, enabling better
+parallelism and overall better server performance. However, Perspective's Python
+interface itself will still process queries in a single queue. To enable
+parallel query processing, call <code>set_loop_callback</code> with a multi-threaded
+executor such as <code>concurrent.futures.ThreadPoolExecutor</code>:</p>
+<pre><code class="language-python">def perspective_thread():
+    server = perspective.Server()
+    loop = tornado.ioloop.IOLoop()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        server.set_loop_callback(loop.run_in_executor, executor)
+        loop.start()
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="hosting-a-websocket-server"><a class="header" href="#hosting-a-websocket-server">Hosting a WebSocket server</a></h1>
+<p>An in-memory <code>Server</code> "hosts" all <code>perspective.Table</code> and <code>perspective.View</code>
+instances created by its connected <code>Client</code>s. Hosted tables/views can have their
+methods called from other sources than the Python server, i.e. by a
+<code>perspective-viewer</code> running in a JavaScript client over the network,
+interfacing with <code>perspective-python</code> through the websocket API.</p>
+<p>The server has full control of all hosted <code>Table</code> and <code>View</code> instances, and can
+call any public API method on hosted instances. This makes it extremely easy to
+stream data to a hosted <code>Table</code> using <code>.update()</code>:</p>
+<pre><code class="language-python">server = perspective.Server()
+client = server.new_local_client()
+table = client.table(data, name="data_source")
+
+for i in range(10):
+    # updates continue to propagate automatically
+    table.update(new_data)
+</code></pre>
+<p>The <code>name</code> provided is important, as it enables Perspective in JavaScript to
+look up a <code>Table</code> and get a handle to it over the network. Otherwise, <code>name</code>
+will be assigned randomlu and the <code>Client</code> must look this up with
+<code>CLient.get_hosted_table_names()</code></p>
+<h2 id="clientserver-replicated-mode"><a class="header" href="#clientserver-replicated-mode">Client/Server Replicated Mode</a></h2>
+<p>Using Tornado and
+<a href="how_to/python/python.html#perspectivetornadohandler"><code>PerspectiveTornadoHandler</code></a>, as well as
+<code>Perspective</code>'s JavaScript library, we can set up "distributed" Perspective
+instances that allows multiple browser <code>perspective-viewer</code> clients to read from
+a common <code>perspective-python</code> server, as in the
+<a href="https://github.com/finos/perspective/tree/master/examples/python-tornado">Tornado Example Project</a>.</p>
+<p>This architecture works by maintaining two <code>Tables</code>—one on the server, and one
+on the client that mirrors the server's <code>Table</code> automatically using <code>on_update</code>.
+All updates to the table on the server are automatically applied to each client,
+which makes this architecture a natural fit for streaming dashboards and other
+distributed use-cases. In conjunction with <a href="how_to/python/websocket.html#multi-threading">multithreading</a>,
+distributed Perspective offers consistently high performance over large numbers
+of clients and large datasets.</p>
+<p><em><em>server.py</em></em></p>
+<pre><code class="language-python">from perspective import Server
+from perspective.hadnlers.tornado import PerspectiveTornadoHandler
+
+# Create an instance of Server, and host a Table
+SERVER = Server()
+CLIENT = SERVER.new_local_client()
+
+# The Table is exposed at `localhost:8888/websocket` with the name `data_source`
+client.table(data, name = "data_source")
+
+app = tornado.web.Application([
+    # create a websocket endpoint that the client JavaScript can access
+    (r"/websocket", PerspectiveTornadoHandler, {"perspective_server": SERVER})
+])
+
+# Start the Tornado server
+app.listen(8888)
+loop = tornado.ioloop.IOLoop.current()
+loop.start()
+</code></pre>
+<p>Instead of calling <code>load(server_table)</code>, create a <code>View</code> using <code>server_table</code>
+and pass that into <code>viewer.load()</code>. This will automatically register an
+<code>on_update</code> callback that synchronizes state between the server and the client.</p>
+<p><em><em>index.html</em></em></p>
+<pre><code class="language-html">&lt;perspective-viewer id="viewer" editable&gt;&lt;/perspective-viewer&gt;
+
+&lt;script type="module"&gt;
+    // Create a client that expects a Perspective server
+    // to accept connections at the specified URL.
+    const websocket = await perspective.websocket(
+        "ws://localhost:8888/websocket"
+    );
+
+    // Get a handle to the Table on the server
+    const server_table = await websocket.open_table("data_source_one");
+
+    // Create a new view
+    const server_view = await table.view();
+
+    // Create a Table on the client using `perspective.worker()`
+    const worker = await perspective.worker();
+    const client_table = await worker.table(view);
+
+    // Load the client table in the `&lt;perspective-viewer&gt;`.
+    document.getElementById("viewer").load(client_table);
+&lt;/script&gt;
+</code></pre>
+<p>For a more complex example that offers distributed editing of the server
+dataset, see
+<a href="https://github.com/finos/perspective/blob/master/examples/python-tornado/client_server_editing.html">client_server_editing.html</a>.</p>
+<p>We also provide examples for Starlette/FastAPI and AIOHTTP:</p>
+<ul>
+<li><a href="https://github.com/finos/perspective/tree/master/examples/python-starlette">Starlette Example Project</a>.</li>
+<li><a href="https://github.com/finos/perspective/tree/master/examples/python-aiohttp">AIOHTTP Example Project</a>.</li>
+</ul>
+<h2 id="server-only-mode"><a class="header" href="#server-only-mode">Server-only Mode</a></h2>
+<p>The server setup is identical to
+<a href="how_to/python/websocket.html#client-server-replicated-mode">Client/Server Replicated Mode</a> above, but
+instead of creating a <code>View</code>, the client calls <code>load(server_table)</code>: In Python,
+use <code>Server</code> and <code>PerspectiveTornadoHandler</code> to create a websocket server that
+exposes a <code>Table</code>. In this example, <code>table</code> is a proxy for the <code>Table</code> we
+created on the server. All API methods are available on <em>proxies</em>, the.g.us
+calling <code>view()</code>, <code>schema()</code>, <code>update()</code> on <code>table</code> will pass those operations
+to the Python <code>Table</code>, execute the commands, and return the result back to
+Javascript.</p>
+<pre><code class="language-html">&lt;perspective-viewer id="viewer" editable&gt;&lt;/perspective-viewer&gt;
+</code></pre>
+<pre><code class="language-javascript">const websocket = perspective.websocket("ws://localhost:8888/websocket");
+const table = websocket.open_table("data_source");
+document.getElementById("viewer").load(table);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="perspectivewidget-for-jupyterlab"><a class="header" href="#perspectivewidget-for-jupyterlab"><code>PerspectiveWidget</code> for JupyterLab</a></h1>
+<p>Building on top of the API provided by <code>perspective.Table</code>, the
+<code>PerspectiveWidget</code> is a JupyterLab plugin that offers the entire functionality
+of Perspective within the Jupyter environment. It supports the same API
+semantics of <code>&lt;perspective-viewer&gt;</code>, along with the additional data types
+supported by <code>perspective.Table</code>. <code>PerspectiveWidget</code> takes keyword arguments
+for the managed <code>View</code>:</p>
+<pre><code class="language-python">from perspective.widget import PerspectiveWidget
+w = perspective.PerspectiveWidget(
+    data,
+    plugin="X Bar",
+    aggregates={"datetime": "any"},
+    sort=[["date", "desc"]]
+)
+</code></pre>
+<h2 id="creating-a-widget"><a class="header" href="#creating-a-widget">Creating a widget</a></h2>
+<p>A widget is created through the <code>PerspectiveWidget</code> constructor, which takes as
+its first, required parameter a <code>perspective.Table</code>, a dataset, a schema, or
+<code>None</code>, which serves as a special value that tells the Widget to defer loading
+any data until later. In maintaining consistency with the Javascript API,
+Widgets cannot be created with empty dictionaries or lists — <code>None</code> should be
+used if the intention is to await data for loading later on. A widget can be
+constructed from a dataset:</p>
+<pre><code class="language-python">from perspective.widget import PerspectiveWidget
+PerspectiveWidget(data, group_by=["date"])
+</code></pre>
+<p>.. or a schema:</p>
+<pre><code class="language-python">PerspectiveWidget({"a": int, "b": str})
+</code></pre>
+<p>.. or an instance of a <code>perspective.Table</code>:</p>
+<pre><code class="language-python">table = perspective.table(data)
+PerspectiveWidget(table)
+</code></pre>
+<h2 id="updating-a-widget"><a class="header" href="#updating-a-widget">Updating a widget</a></h2>
+<p><code>PerspectiveWidget</code> shares a similar API to the <code>&lt;perspective-viewer&gt;</code> Custom
+Element, and has similar <code>save()</code> and <code>restore()</code> methods that
+serialize/deserialize UI state for the widget.</p>
+<!--
+## `PerspectiveRenderer`
+
+Perspective also exposes a JS-only `mimerender-extension`. This lets you view
+`csv`, `json`, and `arrow` files directly from the file browser. You can see
+this by right clicking one of these files and `Open With->CSVPerspective` (or
+`JSONPerspective` or `ArrowPerspective`). Perspective will also install itself
+as the default handler for opening `.arrow` files. -->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-a-tornado-server-in-python"><a class="header" href="#tutorial-a-tornado-server-in-python">Tutorial: A tornado server in Python</a></h1>
+<p>Perspective ships with a pre-built Tornado handler that makes integration with
+<code>tornado.websockets</code> extremely easy. This allows you to run an instance of
+<code>Perspective</code> on a server using Python, open a websocket to a <code>Table</code>, and
+access the <code>Table</code> in JavaScript and through <code>&lt;perspective-viewer&gt;</code>. All
+instructions sent to the <code>Table</code> are processed in Python, which executes the
+commands, and returns its output through the websocket back to Javascript.</p>
+<h3 id="python-setup"><a class="header" href="#python-setup">Python setup</a></h3>
+<p>Make sure Perspective and Tornado are installed!</p>
+<pre><code class="language-bash">pip install perspective-python tornado
+</code></pre>
+<p>To use the handler, we need to first have a <code>Server</code>, a <code>Client</code> and an instance
+of a <code>Table</code>:</p>
+<pre><code class="language-python">import perspective
+
+SERVER = perspective.Server()
+CLIENT = SERVER.new_local_client()
+</code></pre>
+<p>Once the server has been created, create a <code>Table</code> instance with a name. The
+name that you host the table under is important — it acts as a unique accessor
+on the JavaScript side, which will look for a Table hosted at the websocket with
+the name you specify.</p>
+<pre><code class="language-python">TABLE = client.table(data, name="data_source_one")
+</code></pre>
+<p>After the server and table setup is complete, create a websocket endpoint and
+provide it a reference to <code>PerspectiveTornadoHandler</code>. You must provide the
+configuration object in the route tuple, and it must contain
+<code>"perspective_server"</code>, which is a reference to the <code>Server</code> you just created.</p>
+<pre><code class="language-python">from perspective.handlers.tornado import PerspectiveTornadoHandler
+
+app = tornado.web.Application([
+
+    # ... other handlers ...
+
+    # Create a websocket endpoint that the client JavaScript can access
+    (r"/websocket", PerspectiveTornadoHandler, {"perspective_server": SERVER, "check_origin": True})
+])
+</code></pre>
+<p>Optionally, the configuration object can also include <code>check_origin</code>, a boolean
+that determines whether the websocket accepts requests from origins other than
+where the server is hosted. See
+<a href="https://www.tornadoweb.org/en/stable/websocket.html#tornado.websocket.WebSocketHandler.check_origin">Tornado docs</a>
+for more details.</p>
+<h3 id="javascript-setup"><a class="header" href="#javascript-setup">JavaScript setup</a></h3>
+<p>Once the server is up and running, you can access the Table you just hosted
+using <code>perspective.websocket</code> and <code>open_table()</code>. First, create a client that
+expects a Perspective server to accept connections at the specified URL:</p>
+<pre><code class="language-javascript">import "@finos/perspective-viewer";
+import "@finos/perspective-viewer-datagrid";
+import perspective from "@finos/perspective";
+
+const websocket = await perspective.websocket("ws://localhost:8888/websocket");
+</code></pre>
+<p>Next open the <code>Table</code> we created on the server by name:</p>
+<pre><code class="language-javascript">const table = await websocket.open_table("data_source_one");
+</code></pre>
+<p><code>table</code> is a proxy for the <code>Table</code> we created on the server. All operations that
+are possible through the JavaScript API are possible on the Python API as well,
+thus calling <code>view()</code>, <code>schema()</code>, <code>update()</code> etc. on <code>const table</code> will pass
+those operations to the Python <code>Table</code>, execute the commands, and return the
+result back to JavaScript. Similarly, providing this <code>table</code> to a
+<code>&lt;perspective-viewer&gt;</code> instance will allow virtual rendering:</p>
+<pre><code class="language-javascript">const viewer = document.createElement("perspective-viewer");
+viewer.style.height = "500px";
+document.body.appendChild(viewer);
+await viewer.load(table);
+</code></pre>
+<p><code>perspective.websocket</code> expects a Websocket URL where it will send instructions.
+When <code>open_table</code> is called, the name to a hosted Table is passed through, and a
+request is sent through the socket to fetch the Table. No actual <code>Table</code>
+instance is passed inbetween the runtimes; all instructions are proxied through
+websockets.</p>
+<p>This provides for great flexibility — while <code>Perspective.js</code> is full of
+features, browser WebAssembly runtimes currently have some performance
+restrictions on memory and CPU feature utilization, and the architecture in
+general suffers when the dataset itself is too large to download to the client
+in full.</p>
+<p>The Python runtime does not suffer from memory limitations, utilizes Apache
+Arrow internal threadpools for threading and parallel processing, and generates
+architecture optimized code, which currently makes it more suitable as a
+server-side runtime than <code>node.js</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="api-reference"><a class="header" href="#api-reference">API Reference</a></h1>
+<p>Perspective's complete API is hosted on <code>docs.rs</code>:</p>
+<ul>
+<li><a href="https://docs.rs/perspective-client/latest/perspective_client/index.html"><code>perspective-client</code></a>
+covers <code>Table</code> and <code>View</code> data engine API methods common for Rust,
+JavaScript and Python.</li>
+<li><a href="https://docs.rs/perspective-client/latest/perspective_client/index.html"><code>perspective-rs</code></a>
+adds Rust-specific documentation for the Rust crate entrypoint.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
