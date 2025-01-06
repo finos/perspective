@@ -1,1 +1,187 @@
-import"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.2.1/dist/cdn/perspective-viewer.js";import"https://cdn.jsdelivr.net/npm/@finos/perspective-workspace@3.2.1/dist/cdn/perspective-workspace.js";import"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.2.1/dist/cdn/perspective-viewer-datagrid.js";import"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.2.1/dist/cdn/perspective-viewer-d3fc.js";import"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-openlayers/dist/cdn/perspective-viewer-openlayers.js";import e from"https://cdn.jsdelivr.net/npm/@finos/perspective@3.2.1/dist/cdn/perspective.js";let t=localStorage.getItem("layouts")?JSON.parse(localStorage.getItem("layouts")):void 0;const n=await e.worker(),i=document.createElement("style");let s,o;function a(){if("Pro Light"===i.dataset.theme){i.textContent=s,document.body.classList.add("dark"),window.theme.textContent="Light Theme";for(const e of document.querySelectorAll("perspective-viewer"))e.setAttribute("theme","Pro Dark"),e.restyleElement();i.dataset.theme="Pro Dark"}else{i.textContent=o,document.body.classList.remove("dark"),window.theme.textContent="Dark Theme";for(const e of document.querySelectorAll("perspective-viewer"))e.setAttribute("theme","Pro Light"),e.restyleElement();i.dataset.theme="Pro Light"}}document.head.appendChild(i),s=await fetch("https://cdn.jsdelivr.net/npm/@finos/perspective-workspace/dist/css/pro-dark.css").then((e=>e.text())),o=await fetch("https://cdn.jsdelivr.net/npm/@finos/perspective-workspace/dist/css/pro.css").then((e=>e.text())),document.body.innerHTML='\n        <style>\n        </style>\n        <div id=\'buttons\'>\n            <span id="message"></span>\n            <select id="layouts"></select>\n            <button id="save_as">Save As</button>\n            <input id="name_input" style="display: none"></input>\n            <button id="save" style="display: none">Save</button>\n            <button id="cancel" style="display: none">Cancel</button>\n            <button id="theme" style="float: right">Light Theme</button>\n            <button id="copy" style="float: right">Debug to Clipboard</button>\n            <button id="reset" style="float: right">Reset LocalStorage</button>\n            <a href="https://github.com/texodus/nypd-ccrb">NYCLU/CCRB Data</a>\n            <a href="https://github.com/finos/perspective">Built With Perspective</a>\n        </div>\n        <perspective-workspace id=\'workspace\'></perspective-workspace>\n    '.trim(),a(),window.workspace.addEventListener("workspace-new-view",(({detail:{widget:e}})=>{e.viewer.setAttribute("theme",i.dataset.theme)})),window.workspace.addTable("ccrb",(async()=>n.table(await async function(e){window.message.textContent="Downloading...";const t=await fetch(e),n=await new Response(await t.blob()).arrayBuffer();return window.message.style.display="none",n}("nypdccrb.arrow")))()),null==t&&(t=await(await fetch("./layout.json")).json());const d=Object.keys(t);let r=t[d[0]];function c(){const e=Object.keys(t);window.layouts.innerHTML="";for(const t of e)window.layouts.innerHTML+=`<option${t===r?" selected='true'":""}>${t}</option>`}function l(){window.save_as.style.display="inline-block",window.save.style.display="none",window.cancel.style.display="none",window.name_input.style.display="none",window.copy.style.display="inline-block",window.layouts.style.display="inline-block"}await window.workspace.restore(r),c(),window.name_input.value=d[0],window.layouts.addEventListener("change",(async()=>{0!==window.layouts.value.trim().length&&(window.workspace.innerHTML="",await window.workspace.restore(t[window.layouts.value]),window.name_input.value=window.layouts.value)})),window.save_as.addEventListener("click",(async()=>{window.save_as.style.display="none",window.save.style.display="inline-block",window.cancel.style.display="inline-block",window.name_input.style.display="inline-block",window.copy.style.display="none",window.layouts.style.display="none"})),window.cancel.addEventListener("click",l),window.reset.addEventListener("click",(()=>{localStorage.clear(),window.reset.innerText="Reset!",setTimeout((()=>{window.reset.innerText="Reset LocalStorage"}),1e3)})),window.save.addEventListener("click",(async()=>{const e=await window.workspace.save(),n=window.name_input.value;t[n]=e,c(),window.layouts.value=n,window.save_as.innerText="Saved!",setTimeout((()=>{window.save_as.innerText="Save As"}),1e3),localStorage.setItem("layouts",JSON.stringify(t)),l()})),window.copy.addEventListener("click",(async()=>{await navigator.clipboard.writeText(JSON.stringify(t)),window.copy.innerText="Copied!",setTimeout((()=>{window.copy.innerText="Debug to Clipboard"}),1e3)})),window.theme.addEventListener("click",a);
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.2.1/dist/cdn/perspective-viewer.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-workspace@3.2.1/dist/cdn/perspective-workspace.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.2.1/dist/cdn/perspective-viewer-datagrid.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.2.1/dist/cdn/perspective-viewer-d3fc.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-openlayers/dist/cdn/perspective-viewer-openlayers.js";
+
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.2.1/dist/cdn/perspective.js";
+
+let DATA_URL = "nypdccrb.arrow";
+
+let LAYOUTS = localStorage.getItem("layouts")
+    ? JSON.parse(localStorage.getItem("layouts"))
+    : undefined;
+
+const worker = await perspective.worker();
+const theme_style_node = document.createElement("style");
+document.head.appendChild(theme_style_node);
+let DARK_THEME;
+let LIGHT_THEME;
+
+function toggle_theme() {
+    if (theme_style_node.dataset.theme === "Pro Light") {
+        theme_style_node.textContent = DARK_THEME;
+        document.body.classList.add("dark");
+        window.theme.textContent = "Light Theme";
+        for (const view of document.querySelectorAll("perspective-viewer")) {
+            view.setAttribute("theme", "Pro Dark");
+            view.restyleElement();
+        }
+
+        theme_style_node.dataset.theme = "Pro Dark";
+    } else {
+        theme_style_node.textContent = LIGHT_THEME;
+        document.body.classList.remove("dark");
+        window.theme.textContent = "Dark Theme";
+        for (const view of document.querySelectorAll("perspective-viewer")) {
+            view.setAttribute("theme", "Pro Light");
+            view.restyleElement();
+        }
+        theme_style_node.dataset.theme = "Pro Light";
+    }
+}
+
+async function fetch_progress(url) {
+    window.message.textContent = "Downloading...";
+    const response = await fetch(url);
+    const ab = await new Response(await response.blob()).arrayBuffer();
+    window.message.style.display = "none";
+    return ab;
+}
+
+DARK_THEME = await fetch(
+    "https://cdn.jsdelivr.net/npm/@finos/perspective-workspace/dist/css/pro-dark.css"
+).then((x) => x.text());
+
+LIGHT_THEME = await fetch(
+    "https://cdn.jsdelivr.net/npm/@finos/perspective-workspace/dist/css/pro.css"
+).then((x) => x.text());
+
+document.body.innerHTML = `
+        <style>
+        </style>
+        <div id='buttons'>
+            <span id="message"></span>
+            <select id="layouts"></select>
+            <button id="save_as">Save As</button>
+            <input id="name_input" style="display: none"></input>
+            <button id="save" style="display: none">Save</button>
+            <button id="cancel" style="display: none">Cancel</button>
+            <button id="theme" style="float: right">Light Theme</button>
+            <button id="copy" style="float: right">Debug to Clipboard</button>
+            <button id="reset" style="float: right">Reset LocalStorage</button>
+            <a href="https://github.com/texodus/nypd-ccrb">NYCLU/CCRB Data</a>
+            <a href="https://github.com/finos/perspective">Built With Perspective</a>
+        </div>
+        <perspective-workspace id='workspace'></perspective-workspace>
+    `.trim();
+
+toggle_theme();
+
+window.workspace.addEventListener(
+    "workspace-new-view",
+    ({ detail: { widget } }) => {
+        widget.viewer.setAttribute("theme", theme_style_node.dataset.theme);
+    }
+);
+
+window.workspace.addTable(
+    "ccrb",
+    (async () => worker.table(await fetch_progress(DATA_URL)))()
+    // worker.table(await fetch_progress(DATA_URL))
+);
+
+if (LAYOUTS == undefined) {
+    LAYOUTS = await (await fetch("./layout.json")).json();
+}
+
+const layout_names = Object.keys(LAYOUTS);
+let selected_layout = LAYOUTS[layout_names[0]];
+await window.workspace.restore(selected_layout);
+
+function set_layout_options() {
+    const layout_names = Object.keys(LAYOUTS);
+    window.layouts.innerHTML = "";
+    for (const layout of layout_names) {
+        window.layouts.innerHTML += `<option${
+            layout === selected_layout ? " selected='true'" : ""
+        }>${layout}</option>`;
+    }
+}
+
+set_layout_options();
+
+window.name_input.value = layout_names[0];
+window.layouts.addEventListener("change", async () => {
+    if (window.layouts.value.trim().length === 0) {
+        return;
+    }
+
+    window.workspace.innerHTML = "";
+    await window.workspace.restore(LAYOUTS[window.layouts.value]);
+    window.name_input.value = window.layouts.value;
+});
+
+window.save_as.addEventListener("click", async () => {
+    window.save_as.style.display = "none";
+    window.save.style.display = "inline-block";
+    window.cancel.style.display = "inline-block";
+    window.name_input.style.display = "inline-block";
+    window.copy.style.display = "none";
+    window.layouts.style.display = "none";
+});
+
+function cancel() {
+    window.save_as.style.display = "inline-block";
+    window.save.style.display = "none";
+    window.cancel.style.display = "none";
+    window.name_input.style.display = "none";
+    window.copy.style.display = "inline-block";
+    window.layouts.style.display = "inline-block";
+}
+
+window.cancel.addEventListener("click", cancel);
+
+window.reset.addEventListener("click", () => {
+    localStorage.clear();
+    window.reset.innerText = "Reset!";
+    setTimeout(() => {
+        window.reset.innerText = "Reset LocalStorage";
+    }, 1000);
+});
+
+window.save.addEventListener("click", async () => {
+    const token = await window.workspace.save();
+    const new_name = window.name_input.value;
+    LAYOUTS[new_name] = token;
+    set_layout_options();
+    window.layouts.value = new_name;
+    window.save_as.innerText = "Saved!";
+    setTimeout(() => {
+        window.save_as.innerText = "Save As";
+    }, 1000);
+    localStorage.setItem("layouts", JSON.stringify(LAYOUTS));
+    cancel();
+});
+
+window.copy.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(JSON.stringify(LAYOUTS));
+    window.copy.innerText = "Copied!";
+    setTimeout(() => {
+        window.copy.innerText = "Debug to Clipboard";
+    }, 1000);
+});
+
+window.theme.addEventListener("click", toggle_theme);

@@ -1,1 +1,14 @@
-.dark button{background-color:inherit;border:1px solid #fff3;color:#fff}.dark #buttons,.dark select{background-color:#242526}.dark select{color:#fff}
+.dark button {
+    background-color: inherit;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark #buttons {
+    background-color: #242526;
+}
+
+.dark select {
+    background-color: #242526;
+    color: white;
+}

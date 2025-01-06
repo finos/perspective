@@ -1,1 +1,15 @@
-perspective-viewer{height:500px}div.javascript:before{content:"JavaScript:"}div.python:before{content:"Python:"}div.rust:before{content:"Rust:"}
+perspective-viewer {
+    height: 500px;
+}
+
+div.javascript:before {
+    content: "JavaScript:";
+}
+
+div.python:before {
+    content: "Python:";
+}
+
+div.rust:before {
+    content: "Rust:";
+}

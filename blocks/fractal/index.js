@@ -1,1 +1,157 @@
-import"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.2.1/dist/cdn/perspective-viewer.js";import"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.2.1/dist/cdn/perspective-viewer-datagrid.js";import"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.2.1/dist/cdn/perspective-viewer-d3fc.js";import n from"https://cdn.jsdelivr.net/npm/@finos/perspective@3.2.1/dist/cdn/perspective.js";function e(n){return`\n// color\nvar resolution := ${n.resolution};\nvar xmin := ${n.xmin};\nvar xmax := ${n.xmax};\nvar ymin := ${n.ymin};\nvar ymax := ${n.ymax};\nvar iterations := ${n.iterations};\n\nvar x := floor("index" / resolution);\nvar y := "index" % resolution;\nvar c := iterations;\n\nvar cx := xmin + ((xmax - xmin) * x) / (resolution - 1);\nvar cy := ymin + ((ymax - ymin) * y) / (resolution - 1);\n\nvar vx := 0;\nvar vy := 0;\nvar vxx := 0;\nvar vyy := 0;\nvar vxy := 0;\n\nfor (var ii := 0; ii < iterations; ii += 1) {\n    if (vxx + vyy <= float(4)) {\n        vxy := vx * vy;\n        vxx := vx * vx;\n        vyy := vy * vy;\n        vx := vxx - vyy + cx;\n        vy := vxy + vxy + cy;\n        c -= 1;\n    }\n};\n\nc`}function i(n,e,i){n.addEventListener("input",(()=>{window.run.disabled=!1,n.value=Math.min(n.valueAsNumber,e.valueAsNumber-.1)})),e.addEventListener("input",(()=>{window.run.disabled=!1,e.value=Math.max(n.valueAsNumber+.1,e.valueAsNumber)}))}function r(){window.run.disabled=!1}var t,o;(await window.viewer.getPlugin("Heatmap")).max_cells=1e5,i(xmin,xmax),i(ymin,ymax),window.resolution.addEventListener("input",r),window.iterations.addEventListener("input",r),run.addEventListener("click",(t=await n.worker(),o={},async()=>{if("Run"!==window.run.innerHTML.trim())return void(window.run.innerHTML="Run");window.run.disabled=!0,o.table||(o.table=await t.table({index:"integer"}),window.viewer.load(Promise.resolve(o.table)));const n=document.getElementById("run"),i=["xmin","xmax","ymin","ymax","resolution","iterations"].reduce(((n,e)=>(n[e]=window[e].valueAsNumber,n)),{}),r=Math.pow(i.resolution,2);if(!o.size||o.size!==r){let n={index:new Array(r)};for(let e=0;e<r;++e)n.index[e]=e;o.table.replace(n)}o.size=r,n.innerHTML="Run",window.viewer.restore(function(n){return{plugin:"Heatmap",settings:!0,group_by:[`floor("index" / ${n.resolution})`],split_by:[`"index" % ${n.resolution}`],columns:["color"],expressions:{color:e(n).trim(),[`floor("index" / ${n.resolution})`]:`floor("index" / ${n.resolution})`,[`"index" % ${n.resolution}`]:`"index" % ${n.resolution}`}}}(i))})),run.dispatchEvent(new Event("click"));
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.2.1/dist/cdn/perspective-viewer.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.2.1/dist/cdn/perspective-viewer-datagrid.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.2.1/dist/cdn/perspective-viewer-d3fc.js";
+
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.2.1/dist/cdn/perspective.js";
+
+function generate_mandelbrot(params) {
+    return `
+// color
+var resolution := ${params.resolution};
+var xmin := ${params.xmin};
+var xmax := ${params.xmax};
+var ymin := ${params.ymin};
+var ymax := ${params.ymax};
+var iterations := ${params.iterations};
+
+var x := floor("index" / resolution);
+var y := "index" % resolution;
+var c := iterations;
+
+var cx := xmin + ((xmax - xmin) * x) / (resolution - 1);
+var cy := ymin + ((ymax - ymin) * y) / (resolution - 1);
+
+var vx := 0;
+var vy := 0;
+var vxx := 0;
+var vyy := 0;
+var vxy := 0;
+
+for (var ii := 0; ii < iterations; ii += 1) {
+    if (vxx + vyy <= float(4)) {
+        vxy := vx * vy;
+        vxx := vx * vx;
+        vyy := vy * vy;
+        vx := vxx - vyy + cx;
+        vy := vxy + vxy + cy;
+        c -= 1;
+    }
+};
+
+c`;
+}
+
+function generate_layout(params) {
+    return {
+        plugin: "Heatmap",
+        settings: true,
+        group_by: [`floor("index" / ${params.resolution})`],
+        split_by: [`"index" % ${params.resolution}`],
+        columns: ["color"],
+        expressions: {
+            color: generate_mandelbrot(params).trim(),
+            [`floor("index" / ${params.resolution})`]: `floor("index" / ${params.resolution})`,
+            [`"index" % ${params.resolution}`]: `"index" % ${params.resolution}`,
+        },
+    };
+}
+
+async function generate_data(table) {
+    const run = document.getElementById("run");
+    let json = new Array(Math.pow(resolution, 2));
+    for (let x = 0; x < resolution; ++x) {
+        for (let y = 0; y < resolution; ++y) {
+            const index = x * resolution + y;
+            json[index] = {
+                index,
+            };
+        }
+    }
+
+    await table.replace(json);
+    run.innerHTML = `Run`;
+}
+
+// GUI
+
+function get_gui_params() {
+    return ["xmin", "xmax", "ymin", "ymax", "resolution", "iterations"].reduce(
+        (acc, x) => {
+            acc[x] = window[x].valueAsNumber;
+            return acc;
+        },
+        {}
+    );
+}
+
+function make_range(x, y, name) {
+    x.addEventListener("input", () => {
+        window.run.disabled = false;
+        x.value = Math.min(x.valueAsNumber, y.valueAsNumber - 0.1);
+    });
+
+    y.addEventListener("input", () => {
+        window.run.disabled = false;
+        y.value = Math.max(x.valueAsNumber + 0.1, y.valueAsNumber);
+    });
+}
+
+const make_run_click_callback = (worker, state) => async () => {
+    if (window.run.innerHTML.trim() !== "Run") {
+        window.run.innerHTML = "Run";
+        return;
+    }
+
+    window.run.disabled = true;
+    if (!state.table) {
+        state.table = await worker.table({
+            index: "integer",
+        });
+        window.viewer.load(Promise.resolve(state.table));
+    }
+
+    const run = document.getElementById("run");
+    const params = get_gui_params();
+    const new_size = Math.pow(params.resolution, 2);
+    if (!state.size || state.size !== new_size) {
+        let json = { index: new Array(new_size) };
+        for (let x = 0; x < new_size; ++x) {
+            json.index[x] = x;
+        }
+
+        state.table.replace(json);
+    }
+
+    state.size = new_size;
+    run.innerHTML = `Run`;
+    window.viewer.restore(generate_layout(params));
+};
+
+function set_runnable() {
+    window.run.disabled = false;
+}
+
+const heatmap_plugin = await window.viewer.getPlugin("Heatmap");
+heatmap_plugin.max_cells = 100000;
+make_range(xmin, xmax, "X");
+make_range(ymin, ymax, "Y");
+window.resolution.addEventListener("input", set_runnable);
+window.iterations.addEventListener("input", set_runnable);
+
+run.addEventListener(
+    "click",
+    make_run_click_callback(await perspective.worker(), {})
+);
+run.dispatchEvent(new Event("click"));
