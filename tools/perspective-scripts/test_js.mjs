@@ -32,6 +32,7 @@ const IS_PLAYWRIGHT = get_scope().reduce(
             "perspective-cli",
             "perspective-js",
             "perspective",
+            "perspective-react",
             "perspective-viewer",
             "perspective-viewer-datagrid",
             "perspective-viewer-d3fc",
@@ -97,6 +98,8 @@ if (process.env.PACKAGE) {
     }
 
     if (IS_PLAYWRIGHT) {
+        // Run bundler for tests that require bundling.
+        sh`pnpm run build`.cwd("tools/perspective-test").runSync();
         playwright(process.env.PACKAGE).runSync();
     }
 

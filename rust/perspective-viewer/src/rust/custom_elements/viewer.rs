@@ -180,6 +180,12 @@ impl PerspectiveViewerElement {
                 if let Some(table) =
                     wasm_bindgen_derive::try_from_js_option::<perspective_js::Table>(jstable)?
                 {
+                    if let Some(existing_table) = session.get_table() {
+                        if table.get_table().get_name() == existing_table.get_name() {
+                            tracing::debug!("Ignoring duplicate table load");
+                            return Ok(&session);
+                        }
+                    }
                     tracing::debug!(
                         "Successfully loaded {:.0} rows from Table",
                         table.size().await?
