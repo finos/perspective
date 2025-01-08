@@ -160,6 +160,11 @@ async function focus_package() {
             name: "perspective-cli",
             value: "perspective-cli",
         },
+        {
+            key: "a",
+            name: "perspective-react",
+            value: "perspective-react",
+        },
     ];
     const new_config = await inquirer.prompt([
         {
