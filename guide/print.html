@@ -443,15 +443,25 @@ dictionary to the <code>Client::table</code> method, or by passing <em>data</em>
 from which the schema is <em>inferred</em> (if CSV or JSON format) or inherited (if
 Arrow).</p>
 <h2 id="type-inference"><a class="header" href="#type-inference">Type inference</a></h2>
-<p>When passing data directly to the <code>crate::Client::table</code> constructor, the type
-of each column is inferred automatically. In some cases, the inference algorithm
+<p>When passing CSV or JSON data to the <code>Client::table</code> constructor, the type of
+each column is inferred automatically. In some cases, the inference algorithm
 may not return exactly what you'd like. For example, a column may be interpreted
 as a <code>datetime</code> when you intended it to be a <code>string</code>, or a column may have no
 values at all (yet), as it will be updated with values from a real-time data
 source later on. In these cases, create a <code>table()</code> with a <em>schema</em>.</p>
-<p>Once the <code>Table</code> has been created with a schema, further <code>update()</code> calls will
-no longer perform type inference, so columns must only include values supported
-by the column's <code>ColumnType</code>.</p>
+<p>Once the <code>Table</code> has been created, further <code>Table::update</code> calls will perform
+limited type <em>coercion</em> based on the schema. While <em>coercion</em> works similarly to
+<em>inference</em>, in that input data may be parsed based on the expected column type,
+<code>Table::update</code> will not <em>change</em> the column's type further. For example, a
+number literal <code>1234</code> would be <em>inferred</em> as an <code>"integer"</code>, but <em>in the context
+of an <code>Table::update</code> call on a known <code>"string"</code> column</em>, this will be parsed as
+the <em>string</em> <code>"1234"</code>.</p>
+<h2 id="date-and-datetime-inference"><a class="header" href="#date-and-datetime-inference"><code>date</code> and <code>datetime</code> inference</a></h2>
+<p>Various string representations of <code>date</code> and <code>datetime</code> format columns can be
+<em>inferred</em> as well <em>coerced</em> from strings if they match one of Perspective's
+internal known datetime parsing formats, for example
+<a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> (which is also the format
+Perspective will <em>output</em> these types for CSV).</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="loading-data"><a class="header" href="#loading-data">Loading data</a></h1>
 <p>A <code>Table</code> may also be created-or-updated by data in CSV,
 <a href="https://arrow.apache.org/">Apache Arrow</a>, JSON row-oriented or JSON
