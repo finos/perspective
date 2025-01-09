@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
 import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
 async function load() {

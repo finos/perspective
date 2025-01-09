@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import type { HTMLPerspectiveViewerPluginElement } from "./plugin";
-import { PerspectiveViewerElement } from "../../dist/pkg/perspective-viewer.js";
+import { PerspectiveViewerElement } from "../../dist/wasm/perspective-viewer.js";
 import type React from "react";
 
 // JSX / React extensions

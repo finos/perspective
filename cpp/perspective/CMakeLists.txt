@@ -202,16 +202,16 @@ if(NOT DEFINED PSP_WASM_EXCEPTIONS AND NOT PSP_PYTHON_BUILD)
 endif()
 
 if(PSP_WASM_BUILD)
-    # ###################
+    ####################
     # EMSCRIPTEN BUILD #
-    # ###################
+    ####################
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
     set(EXTENDED_FLAGS " \
         -Wall \
         -fcolor-diagnostics \
-        ")
+    ")
 
     if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
         # Pyodide DEBUG block
@@ -231,13 +231,7 @@ if(PSP_WASM_BUILD)
             ")
         endif()
     else()
-        set(OPT_FLAGS " -O3 -g0 ")
-        if(NOT PSP_PYODIDE)
-            set(OPT_FLAGS " \
-                ${OPT_FLAGS} \
-            ")
-        endif()
-
+        set(OPT_FLAGS " -O3 -g0 -flto --emit-tsd=perspective-server.d.ts ")
         if (PSP_WASM_EXCEPTIONS)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
         endif()

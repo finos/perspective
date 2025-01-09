@@ -14,7 +14,7 @@
     },
     "include": [
         "./src/ts/perspective.node.ts",
-        "./src/ts/perspective.ts",
+        "./src/ts/perspective.cdn.ts",
         "./test/js/*.ts"
     ]
 }

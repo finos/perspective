@@ -1,254 +1,60 @@
 # -*- mode: gitignore; -*-
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# Intellij/WebStorm IDE
-*.iml
-/.idea
-
-# Visual Studio Code configuration
-*.code-workspace
-.history
-/jsconfig.json
-
-# Org-mode
-.org-id-locations
-*_archive
-
-# flymake-mode
-*_flymake.*
-
-# eshell files
-/eshell/history
-/eshell/lastdir
-
-# elpa packages
-/elpa/
-
-# reftex files
-*.rel
-
-# AUCTeX auto folder
-/auto/
-
-# cask packages
-.cask/
-dist/
-
-# Flycheck
-flycheck_*.el
-
-# server auth directory
-/server/
-
-# projectiles files
-.projectile
-
-# directory configuration
-.dir-locals.el
-
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.pyd
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Build artifacts
-rust/target*
-/docs/build
-/packages/*/build
-/python/*/build
-/examples/*/build
-CMakeCache.txt
-CMakeFiles
-cmake_install.cmake
-compile_commands.json
-node_modules
-*.mem
-ftpsync.settings
-*.log
-Gemfile
-Gemfile.lock
-Vagrantfile
-/packages/sigma
-cmake-build-debug
-/src/include/boost
-obj
-packages/*/cjs
-cppbuild
-docsbuild
-tools/perspective-build/lib
-packages/perspective-esbuild-plugin/lib
-rust/perspective-python/perspective/nbextension/static
-rust/perspective-python/perspective/labextension
-boost_*.tar.gz
-
-# editor, IDE, OS
-.DS_Store
-.idea
-rust/perspective-viewer/target.vscode
-target.vscode
-.vscode/*
+__pycache__/
 !.vscode/extensions.json
+!.vscode/perspective.code-snippets
 !.vscode/settings.default.json
 !.vscode/tasks.json
-!.vscode/perspective.code-snippets
-
-.llvm
-
-# docs
-website/translated_docs
-website/build/
-website/yarn.lock
-website/node_modules
-website/i18n/*
 !website/i18n/en.json
-website/static/css/material-dark.css
-website/static/css/pro-dark.css
-
-# test artifacts
+.cache
+.clangd
+.DS_Store
+.emsdk
 .ipynb_checkpoints
-.python-version
-.pytest_cache
-.mypy_cache
-.coverage
-coverage
-screenshots/
-junit.xml
-results.debug.json
-
-# CPP Compile
+.perspectiverc
+.vscode/*
+*.so
+*~
+/.emacs.desktop
+/.emacs.desktop.lock
+/.idea
+/auto/
+/docs/build
+/elpa/
+/eshell/history
+/eshell/lastdir
+/examples/*/build
+/jsconfig.json
+/packages/*/build
+/packages/sigma
+/server/
 /src/include/boost
-obj
-packages/*/cjs
-cppbuild
-docsbuild
-
-# docs generated
+benchmark_venv
+dist/
 docs/.docusaurus
-docs/_build
 docs/i18n/en.json
 docs/modules.rst
 docs/perspective.*.rst
-docs/python
-docs/static/css/material-dark.css
-docs/i18n/en.json
-docs/.docusaurus
+docs/static/arrow/
 docs/static/blocks
 docs/static/features
-docs/static/arrow/
-docs/static/js
-docs/static/js/logo.js
-docs/static/js/logo.js.map
-docs/static/css/pro-dark.css
-
-# other
-package.json.bak
-yarn.lock.bak
-
-# Python
-*.pyc
-__pycache__/
+docs/static/guide
+examples/blocks/src/nypd/nypdccrb.arrow
+node_modules
+packages/perspective-jupyterlab/test/config/jupyter/migrated
 py_modules
-
-# Copied outer source folders
-python/perspective/cmake
-python/perspective/src
-python/perspective/test
 python/cmake
 python/cpp
-python/perspective/perspective_python.egg-info
-python/perspective/perspective/tests/table/psp_test
-python/perspective/perspective/node/assets/*
-python/perspective/pip-wheel-metadata
-python/perspective/python_junit.xml
-python/perspective/coverage.xml
-python/perspective/bench/stresstest/results
-rust/perspective-viewer/target*
-rust/perspective-viewer/target.vscode
-rust/perspective-viewer/pkg
-
-# config and deps
-.perspectiverc
-.emsdk
-vcpkg
-
-# jupyterlab test artifacts
-packages/perspective-jupyterlab/test/config/jupyter/lab
-packages/perspective-jupyterlab/test/config/jupyter/migrated
-docs/static/features
-results.debug.json
-
-tools/perspective-build/lib
-docs/.docusaurus
-packages/perspective-esbuild-plugin/lib
-docs/static/blocks
-test-results/
-playwright-report/
-playwright/.cache/
-
-.pyodide-xbuildenv
-benchmark_venv
-
-venv/
-testenv
-.cache
-.clangd
-.llvm/
-examples/blocks/src/nypd/nypdccrb.arrow
-.clangd
-rust/perspective/build
-rust/perspective-viewer/build
-rust/perspective-client/src/rust/proto.rs
-.vscode/vscode.css
-rust/perspective/src/ts/ts-rs
-rust/perspective-viewer/src/ts/ts-rs
-rust/perspective-js/build
-rust/perspective-js/src/ts/ts-rs
-rust/perspective-python/cpp
-rust/perspective-python/cmake
-rust/perspective-server/cpp
-rust/perspective-server/cmake
-
-.pyodide-*/
-rust/perspective-python/*.data
-rust/perspective-python/PKG-INFO
-rust/perspective-python/LICENSE.md
-rust/perspective-python/LICENSE_*
-rust/perspective-viewer/docs/exprtk.md
-rust/perspective-server/docs/lib_gen.md
 rust/perspective-client/docs/expression_gen.md
+rust/perspective-client/src/rust/proto.rs
+rust/perspective-js/src/ts/ts-rs
+rust/perspective-python/LICENSE_THIRDPARTY_cargo.yml
+rust/perspective-python/LICENSE.md
+rust/perspective-server/cmake
+rust/perspective-server/cpp
+rust/perspective-server/docs/lib_gen.md
+rust/perspective-viewer/src/ts/ts-rs
+rust/perspective/src/ts/ts-rs
+rust/target*
+Vagrantfile
+vcpkg
+venv/

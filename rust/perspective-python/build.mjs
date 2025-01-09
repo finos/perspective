@@ -61,33 +61,23 @@ if (process.platform !== "win32") {
 const build_wheel = !!process.env.PSP_BUILD_WHEEL || is_pyodide;
 const build_sdist = !!process.env.PSP_BUILD_SDIST;
 
-if (build_wheel) {
-    let target = "";
-    if (is_pyodide) {
-        target = `--target=wasm32-unknown-emscripten -i${python_version}`;
-    } else if (
-        process.env.PSP_ARCH === "x86_64" &&
-        process.platform === "darwin"
-    ) {
-        target = "--target=x86_64-apple-darwin";
-    } else if (
-        process.env.PSP_ARCH === "aarch64" &&
-        process.platform === "darwin"
-    ) {
-        target = "--target=aarch64-apple-darwin";
-    } else if (
-        process.env.PSP_ARCH === "x86_64" &&
-        process.platform === "linux"
-    ) {
-        target =
-            "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
-    } else if (
-        process.env.PSP_ARCH === "aarch64" &&
-        process.platform === "linux"
-    ) {
-        target = "--target=aarch64-unknown-linux-gnu";
-    }
+let target = "";
+if (is_pyodide) {
+    target = `--target=wasm32-unknown-emscripten -i${python_version}`;
+} else if (process.env.PSP_ARCH === "x86_64" && process.platform === "darwin") {
+    target = "--target=x86_64-apple-darwin";
+} else if (
+    process.env.PSP_ARCH === "aarch64" &&
+    process.platform === "darwin"
+) {
+    target = "--target=aarch64-apple-darwin";
+} else if (process.env.PSP_ARCH === "x86_64" && process.platform === "linux") {
+    target = "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
+} else if (process.env.PSP_ARCH === "aarch64" && process.platform === "linux") {
+    target = "--target=aarch64-unknown-linux-gnu";
+}
 
+if (build_wheel) {
     if (!!process.env.PSP_BUILD_VERBOSE) {
         flags += " -vv";
     }
@@ -157,7 +147,7 @@ if (build_sdist) {
 }
 
 if (!build_wheel && !build_sdist) {
-    cmd.sh(`maturin develop ${flags}`);
+    cmd.sh(`maturin develop ${flags} ${target}`);
 }
 
 if (!cmd.isEmpty()) {

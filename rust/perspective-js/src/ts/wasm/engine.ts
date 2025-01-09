@@ -10,7 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { EmscriptenApi, EmscriptenServer, PspPtr } from "./emscripten_api.ts";
+import type { MainModule } from "../../../dist/wasm/perspective-server.js";
+import type { EmscriptenServer, PspPtr } from "./emscripten_api.ts";
 
 export type ApiResponse = {
     client_id: number;
@@ -21,8 +22,8 @@ export class PerspectiveServer {
     clients: Map<number, (buffer: Uint8Array) => Promise<void>>;
     id_gen: number;
     server: EmscriptenServer;
-    module: EmscriptenApi;
-    constructor(module: EmscriptenApi) {
+    module: MainModule;
+    constructor(module: MainModule) {
         this.clients = new Map();
         this.id_gen = 0;
         this.module = module;
@@ -52,7 +53,7 @@ export class PerspectiveServer {
 
 export class PerspectiveSession {
     constructor(
-        private mod: EmscriptenApi,
+        private mod: MainModule,
         private server: EmscriptenServer,
         private client_id: number,
         private client_map: Map<number, (buffer: Uint8Array) => Promise<void>>
@@ -66,9 +67,9 @@ export class PerspectiveSession {
                 return this.mod._psp_handle_request(
                     this.server,
                     this.client_id,
-                    viewPtr,
+                    viewPtr as number,
                     this.mod._psp_is_memory64()
-                        ? BigInt(view.byteLength)
+                        ? (BigInt(view.byteLength) as any as number)
                         : view.byteLength
                 );
             }
@@ -92,12 +93,14 @@ export class PerspectiveSession {
 }
 
 async function convert_typed_array_to_pointer(
-    core: EmscriptenApi,
+    core: MainModule,
     array: Uint8Array,
     callback: (_: PspPtr) => Promise<PspPtr>
 ): Promise<PspPtr> {
     const ptr = core._psp_alloc(
-        core._psp_is_memory64() ? BigInt(array.byteLength) : array.byteLength
+        core._psp_is_memory64()
+            ? (BigInt(array.byteLength) as any as number)
+            : array.byteLength
     );
 
     core.HEAPU8.set(array, Number(ptr));
@@ -131,7 +134,7 @@ async function convert_typed_array_to_pointer(
  * references memory on the wasm stack.
  */
 async function decode_api_responses(
-    core: EmscriptenApi,
+    core: MainModule,
     ptr: PspPtr,
     callback: (_: ApiResponse) => Promise<void>
 ) {
@@ -182,14 +185,18 @@ async function decode_api_responses(
                 ? messages.getBigInt64(i * 16, true)
                 : messages.getInt32(i * 12, true);
 
-            core._psp_free(data_ptr);
+            core._psp_free(data_ptr as number);
         }
 
         core._psp_free(
-            is_64 ? BigInt(messages.byteOffset) : messages.byteOffset
+            is_64
+                ? (BigInt(messages.byteOffset) as any as number)
+                : messages.byteOffset
         );
         core._psp_free(
-            is_64 ? BigInt(response.byteOffset) : response.byteOffset
+            is_64
+                ? (BigInt(response.byteOffset) as any as number)
+                : response.byteOffset
         );
     }
 }

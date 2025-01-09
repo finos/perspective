@@ -10,5 +10,5 @@
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true
     },
-    "files": ["./src/ts/perspective.ts"]
+    "files": ["./src/ts/perspective.cdn.ts"]
 }

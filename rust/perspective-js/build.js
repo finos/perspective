@@ -22,40 +22,75 @@ const IS_DEBUG =
 
 const BUILD = [
     {
+        entryPoints: ["src/ts/perspective-server.worker.ts"],
+        format: "esm",
+        target: "es2022",
+        // plugins: [PerspectiveEsbuildPlugin()],
+        // loader: { ".wasm": "binary" },
+        outfile: "dist/cdn/perspective-server.worker.js",
+    },
+    // WASM assets inlined into a single monolithic `.js` file. No special
+    // loades required, this version of Perspective should be the easiest
+    // to use but also the least performant at load time.
+    // {
+    //     'Import via `<script type="module">`': true,
+    //     "Requires WASM bootstrap": false,
+    //     "Load as binary": false,
+    //     "Bundler friendly": true,
+    // },
+    {
         entryPoints: ["src/ts/perspective.inline.ts"],
         format: "esm",
         target: "es2022",
-        plugins: [
-            PerspectiveEsbuildPlugin({
-                wasm: { inline: true },
-            }),
-        ],
+        plugins: [PerspectiveEsbuildPlugin()],
+        loader: { ".wasm": "binary" },
         outfile: "dist/esm/perspective.inline.js",
     },
+    // WASM assets linked to relative path via `fetch()`. This efficiently
+    // loading build is great for `<script>` tags but will give many
+    // bundlers trouble.
+    // {
+    //     'Import via `<script type="module">`': true,
+    //     "Requires WASM bootstrap": false,
+    //     "Load as binary": true,
+    //     "Bundler friendly": false,
+    // },
     {
-        entryPoints: ["src/ts/perspective.ts"],
+        entryPoints: ["src/ts/perspective.cdn.ts"],
         format: "esm",
         target: "es2022",
         plugins: [PerspectiveEsbuildPlugin()],
-        outdir: "dist/cdn",
+        outfile: "dist/cdn/perspective.js",
     },
+    // No WASM assets inlined or linked.
+    // {
+    //     'Import via `<script type="module">`': true, // *******
+    //     "Requires WASM bootstrap": true,
+    //     "Load as binary": true,
+    //     "Bundler friendly": true,
+    // },
     {
-        entryPoints: ["src/ts/perspective.ts"],
+        entryPoints: ["src/ts/perspective.browser.ts"],
         format: "esm",
         target: "es2022",
-        external: ["*.wasm", "*.worker.js"],
-        outdir: "dist/esm",
+        plugins: [PerspectiveEsbuildPlugin()],
+        outfile: "dist/esm/perspective.js",
     },
+    // Node.js build
+    // {
+    //     'Import via `<script type="module">`': false,
+    //     "Requires WASM bootstrap": false,
+    //     "Load as binary": true,
+    //     "Bundler friendly": false,
+    // },
     {
         entryPoints: ["src/ts/perspective.node.ts"],
         format: "esm",
         platform: "node",
         target: "es2022",
         minify: false,
-        plugins: [
-            PerspectiveEsbuildPlugin({ wasm: { inline: true } }),
-            NodeModulesExternal(),
-        ],
+        plugins: [PerspectiveEsbuildPlugin(), NodeModulesExternal()],
+        loader: { ".wasm": "binary" },
         outdir: "dist/esm",
     },
 ];
@@ -78,8 +113,11 @@ function build_rust() {
 }
 
 async function build_web_assets() {
-    await cpy(["../../cpp/perspective/dist/web/*"], "dist/pkg/web");
-    await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
+    await cpy(["../../cpp/perspective/dist/web/*"], "dist/wasm");
+    await Promise.all(BUILD.map(build)).catch((e) => {
+        console.error(e);
+        process.exit(1);
+    });
 }
 
 async function build_all() {

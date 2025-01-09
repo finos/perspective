@@ -21,7 +21,7 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen(inline_js = "
 
     export async function worker() {
-        await import('/dist/pkg/test/perspective.js');
+        await import('/dist/wasm/test/perspective.js');
         return window.perspective.worker();
     }
 

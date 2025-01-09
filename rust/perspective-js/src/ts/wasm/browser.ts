@@ -10,13 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// @ts-ignore
-import perspective_wasm from "../../dist/pkg/web/perspective-server.wasm";
-
-// @ts-ignore
-import perspective_wasm_worker from "../../src/ts/perspective-server.worker.js";
-
-import type * as psp from "../../dist/pkg/perspective-js.d.ts";
+import type * as psp from "../../../dist/wasm/perspective-js.d.ts";
 
 function invert_promise<T>(): [(t: T) => void, Promise<T>] {
     let sender;
@@ -27,14 +21,17 @@ function invert_promise<T>(): [(t: T) => void, Promise<T>] {
     return [sender as unknown as (t: T) => void, receiver];
 }
 
-async function _init(ws: Worker, wasm: ArrayBuffer) {
+async function _init(ws: Worker, wasm: WebAssembly.Module) {
     const [sender, receiver] = invert_promise();
     ws.addEventListener("message", function listener(resp) {
         ws.removeEventListener("message", listener);
         sender(null);
     });
 
-    ws.postMessage({ cmd: "init", args: [wasm] }, { transfer: [wasm] });
+    ws.postMessage(
+        { cmd: "init", args: [wasm] },
+        { transfer: wasm instanceof WebAssembly.Module ? [] : [wasm] }
+    );
     await receiver;
 }
 
@@ -44,16 +41,14 @@ async function _init(ws: Worker, wasm: ArrayBuffer) {
  * @param module
  * @returns
  */
-export async function worker(module: Promise<typeof psp>) {
-    const [wasm, webworker]: [ArrayBuffer, Worker] = await Promise.all([
-        perspective_wasm().then((x: Response | ArrayBuffer) => {
-            if (x instanceof Response) {
-                return x.arrayBuffer();
-            } else {
-                return x.slice(0);
-            }
-        }),
-        perspective_wasm_worker(),
+export async function worker(
+    module: Promise<typeof psp>,
+    server_wasm: Promise<WebAssembly.Module>,
+    perspective_wasm_worker: Promise<Worker>
+) {
+    const [wasm, webworker]: [WebAssembly.Module, Worker] = await Promise.all([
+        server_wasm,
+        perspective_wasm_worker,
     ]);
 
     const { Client } = await module;
