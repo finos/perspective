@@ -16,9 +16,9 @@ import * as perspective_server from "./perspective-server.poly.ts";
 export type * from "../../../dist/wasm/perspective-js.js";
 import type * as perspective_server_t from "../../../dist/wasm/perspective-server.js";
 
-export type PspPtr = bigint | number;
+export type PspPtr = BigInt | number;
 
-export type EmscriptenServer = number;
+export type EmscriptenServer = bigint | number;
 
 export async function compile_perspective(
     wasmBinary: ArrayBuffer

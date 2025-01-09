@@ -168,8 +168,6 @@ jobs:
                       packages/perspective-viewer-d3fc/dist
                       packages/perspective-viewer-datagrid/dist
                       packages/perspective-viewer-openlayers/dist
-                      packages/perspective-esbuild-plugin/dist
-                      packages/perspective-webpack-plugin/dist
                       packages/perspective-cli/dist
                       packages/perspective-workspace/dist
 
@@ -946,12 +944,6 @@ jobs:
 
             - run: pnpm pack --pack-destination=../..
               working-directory: ./packages/perspective-cli
-
-            - run: pnpm pack --pack-destination=../..
-              working-directory: ./packages/perspective-webpack-plugin
-
-            - run: pnpm pack --pack-destination=../..
-              working-directory: ./packages/perspective-esbuild-plugin
 
             - run: pnpm pack --pack-destination=../..
               working-directory: ./packages/perspective-jupyterlab

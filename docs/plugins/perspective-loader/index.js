@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const PerspectiveWebpackPlugin = require("@finos/perspective-webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = function (context, options) {
     return {
@@ -20,7 +20,10 @@ module.exports = function (context, options) {
                 config.optimization.minimizer[0].options.minimizer.options.module = true;
             }
 
-            config.experiments = config.experiments || {};
+            config.experiments = config.experiments || {
+                asyncWebAssembly: true,
+            };
+
             config.experiments.topLevelAwait = true;
             config.module.rules.map((x) => {
                 if (x.test.toString() === "/\\.css$/i") {
@@ -37,7 +40,14 @@ module.exports = function (context, options) {
                 node: {
                     __filename: false,
                 },
-                plugins: [new PerspectiveWebpackPlugin({})],
+                plugins: isServer
+                    ? [
+                          new webpack.NormalModuleReplacementPlugin(
+                              /@finos\/perspective/,
+                              "@finos/perspective/dist/esm/perspective.js"
+                          ),
+                      ]
+                    : [],
             };
         },
     };

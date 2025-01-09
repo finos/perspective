@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use js_sys::{Array, ArrayBuffer, Function, Object};
+use macro_rules_attribute::apply;
 use perspective_client::{assert_view_api, OnUpdateOptions, ViewWindow};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
@@ -46,7 +47,8 @@ impl From<ViewWindow> for JsViewWindow {
     }
 }
 
-#[doc = inherit_docs!("view.md")]
+#[apply(inherit_docs)]
+#[inherit_doc = "view.md"]
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct View(pub(crate) perspective_client::View);
@@ -66,42 +68,48 @@ impl View {
         self.clone()
     }
 
-    #[doc = inherit_docs!("view/column_paths.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/column_paths.md"]
     #[wasm_bindgen]
     pub async fn column_paths(&self) -> ApiResult<JsValue> {
         let columns = self.0.column_paths().await?;
         Ok(JsValue::from_serde_ext(&columns)?)
     }
 
-    #[doc = inherit_docs!("view/delete.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/delete.md"]
     #[wasm_bindgen]
     pub async fn delete(&self) -> ApiResult<()> {
         self.0.delete().await?;
         Ok(())
     }
 
-    #[doc = inherit_docs!("view/dimensions.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/dimensions.md"]
     #[wasm_bindgen]
     pub async fn dimensions(&self) -> ApiResult<JsValue> {
         let dimensions = self.0.dimensions().await?;
         Ok(JsValue::from_serde_ext(&dimensions)?)
     }
 
-    #[doc = inherit_docs!("view/expression_schema.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/expression_schema.md"]
     #[wasm_bindgen]
     pub async fn expression_schema(&self) -> ApiResult<JsValue> {
         let schema = self.0.expression_schema().await?;
         Ok(JsValue::from_serde_ext(&schema)?)
     }
 
-    #[doc = inherit_docs!("view/get_config.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/get_config.md"]
     #[wasm_bindgen]
     pub async fn get_config(&self) -> ApiResult<JsValue> {
         let config = self.0.get_config().await?;
         Ok(JsValue::from_serde_ext(&config)?)
     }
 
-    #[doc = inherit_docs!("view/get_min_max.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/get_min_max.md"]
     #[wasm_bindgen]
     pub async fn get_min_max(&self, name: String) -> ApiResult<Array> {
         let result = self.0.get_min_max(name).await?;
@@ -111,21 +119,24 @@ impl View {
             .collect::<Result<_, _>>()?)
     }
 
-    #[doc = inherit_docs!("view/num_rows.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/num_rows.md"]
     #[wasm_bindgen]
     pub async fn num_rows(&self) -> ApiResult<i32> {
         let size = self.0.num_rows().await?;
         Ok(size as i32)
     }
 
-    #[doc = inherit_docs!("view/schema.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/schema.md"]
     #[wasm_bindgen]
     pub async fn schema(&self) -> ApiResult<JsValue> {
         let schema = self.0.schema().await?;
         Ok(JsValue::from_serde_ext(&schema)?)
     }
 
-    #[doc = inherit_docs!("view/to_arrow.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/to_arrow.md"]
     #[wasm_bindgen]
     pub async fn to_arrow(&self, window: Option<JsViewWindow>) -> ApiResult<ArrayBuffer> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -135,7 +146,8 @@ impl View {
             .unchecked_into())
     }
 
-    #[doc = inherit_docs!("view/to_columns_string.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/to_columns_string.md"]
     #[wasm_bindgen]
     pub async fn to_columns_string(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -143,14 +155,16 @@ impl View {
         Ok(json)
     }
 
-    #[doc = inherit_docs!("view/to_columns.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/to_columns.md"]
     #[wasm_bindgen]
     pub async fn to_columns(&self, window: Option<JsViewWindow>) -> ApiResult<Object> {
         let json = self.to_columns_string(window).await?;
         Ok(js_sys::JSON::parse(&json)?.unchecked_into())
     }
 
-    #[doc = inherit_docs!("view/to_json_string.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/to_json_string.md"]
     #[wasm_bindgen]
     pub async fn to_json_string(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -158,14 +172,16 @@ impl View {
         Ok(json)
     }
 
-    #[doc = inherit_docs!("view/to_json.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/to_json.md"]
     #[wasm_bindgen]
     pub async fn to_json(&self, window: Option<JsViewWindow>) -> ApiResult<Array> {
         let json = self.to_json_string(window).await?;
         Ok(js_sys::JSON::parse(&json)?.unchecked_into())
     }
 
-    #[doc = inherit_docs!("view/to_ndjson.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/to_ndjson.md"]
     #[wasm_bindgen]
     pub async fn to_ndjson(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -173,14 +189,16 @@ impl View {
         Ok(ndjson)
     }
 
-    #[doc = inherit_docs!("view/to_csv.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/to_csv.md"]
     #[wasm_bindgen]
     pub async fn to_csv(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
         Ok(self.0.to_csv(window.unwrap_or_default()).await?)
     }
 
-    #[doc = inherit_docs!("view/on_update.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/on_update.md"]
     #[wasm_bindgen]
     pub async fn on_update(
         &self,
@@ -201,13 +219,15 @@ impl View {
         Ok(id)
     }
 
-    #[doc = inherit_docs!("view/remove_update.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/remove_update.md"]
     #[wasm_bindgen]
     pub async fn remove_update(&self, callback_id: u32) -> ApiResult<()> {
         Ok(self.0.remove_update(callback_id).await?)
     }
 
-    #[doc = inherit_docs!("view/on_delete.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/on_delete.md"]
     #[wasm_bindgen]
     pub async fn on_delete(&self, on_delete: Function) -> ApiResult<u32> {
         let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
@@ -215,7 +235,8 @@ impl View {
         Ok(self.0.on_delete(on_delete).await?)
     }
 
-    #[doc = inherit_docs!("view/num_columns.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/num_columns.md"]
     #[wasm_bindgen]
     pub async fn num_columns(&self) -> ApiResult<u32> {
         // TODO: This is broken because of how split by creates a
@@ -223,7 +244,8 @@ impl View {
         Ok(self.0.dimensions().await?.num_view_columns)
     }
 
-    #[doc = inherit_docs!("view/remove_delete.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/remove_delete.md"]
     #[wasm_bindgen]
     pub fn remove_delete(&self, callback_id: u32) -> ApiFuture<()> {
         let client = self.0.clone();
@@ -233,19 +255,22 @@ impl View {
         })
     }
 
-    #[doc = inherit_docs!("view/collapse.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/collapse.md"]
     #[wasm_bindgen]
     pub async fn collapse(&self, row_index: u32) -> ApiResult<u32> {
         Ok(self.0.collapse(row_index).await?)
     }
 
-    #[doc = inherit_docs!("view/expand.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/expand.md"]
     #[wasm_bindgen]
     pub async fn expand(&self, row_index: u32) -> ApiResult<u32> {
         Ok(self.0.expand(row_index).await?)
     }
 
-    #[doc = inherit_docs!("view/set_depth.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "view/set_depth.md"]
     #[wasm_bindgen]
     pub async fn set_depth(&self, depth: u32) -> ApiResult<()> {
         Ok(self.0.set_depth(depth).await?)

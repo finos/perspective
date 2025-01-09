@@ -18,7 +18,6 @@
 
         #plugin_selector_container {
             min-height: 48px;
-            overflow: scroll;
             display: flex;
             white-space: nowrap;
             flex-direction: column;
@@ -36,6 +35,10 @@
                 width: 100%;
                 background-color: var(--inactive--color, #6e6e6e);
                 margin-top: 1px;
+            }
+
+            .plugin-selector-options {
+                overflow-y: auto;
             }
 
             &.open {

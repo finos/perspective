@@ -119,76 +119,20 @@ const config = {
                         label: "Docs",
                         items: [
                             {
-                                type: "html",
-                                value: "<span>JavaScript</span>",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-viewer/latest/perspective_viewer/",
-                                label: "`@finos/perspective-viewer` JavaScript UI API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-js/latest/perspective_js/",
-                                label: "`@finos/perspective` JavaScript Client/Server API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-js/latest/perspective_js/struct.Table.html",
-                                label: "`Table` API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-js/latest/perspective_js/struct.View.html",
-                                label: "`View` API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-js/latest/perspective_js/#installation",
-                                label: "Installation Guide",
+                                href: "/guide/",
+                                label: "User Guide",
                             },
                             {
                                 type: "html",
-                                value: "<span>Python</span>",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-python/latest/perspective_python/",
-                                label: "`perspective-python` Python Client/Server API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-python/latest/perspective_python/#perspectivewidget",
-                                label: "`PerspectiveWidget` Jupyter Plugin",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-python/latest/perspective_python/struct.Table.html",
-                                label: "`Table` API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-python/latest/perspective_python/struct.View.html",
-                                label: "`View` API",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-js/latest/perspective_js/"><code>@finos/perspective</code> JavaScript API</a>`,
                             },
                             {
                                 type: "html",
-                                value: "<span>Rust</span>",
-                            },
-                            {
-                                href: "https://docs.rs/perspective/latest/perspective/",
-                                label: "`perspective`, Rust API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-client/latest/perspective_client/struct.Table.html",
-                                label: "`Table` API",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-client/latest/perspective_client/struct.View.html",
-                                label: "`View` API",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-python/latest/perspective_python/"><code>perspective-python</code> Python API</a>`,
                             },
                             {
                                 type: "html",
-                                value: "<span>Appendix</span>",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-server/latest/perspective_server/",
-                                label: "Data Binding",
-                            },
-                            {
-                                href: "https://docs.rs/perspective-client/latest/perspective_client/config/expressions/",
-                                label: "Expression Columns",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective/latest/perspective/"><code>perspective</code> Rust API</a>`,
                             },
                         ],
                     },

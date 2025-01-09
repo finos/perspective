@@ -28,8 +28,10 @@ pub use local_poll_loop::*;
 pub use serde::*;
 
 macro_rules! inherit_docs {
-    ($x:literal) => {
-        include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $x))
+    (#[inherit_doc = $y:literal] $x:item) => {
+        #[cfg_attr(feature = "external-docs", doc =
+                                include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $y)))]
+        $x
     };
 }
 

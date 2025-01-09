@@ -1,0 +1,20 @@
+{
+    "name": "vite-example",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "start": "vite",
+        "build": "vite build"
+    },
+    "dependencies": {
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "superstore-arrow": "^3.0.0"
+    },
+    "devDependencies": {
+        "vite": "^6.0.5"
+    }
+}

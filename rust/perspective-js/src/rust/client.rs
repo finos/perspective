@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use js_sys::{Function, Uint8Array};
+use macro_rules_attribute::apply;
 #[cfg(doc)]
 use perspective_client::SystemInfo;
 use perspective_client::{TableData, TableInitOptions};
@@ -31,7 +32,8 @@ extern "C" {
     pub type JsTableInitOptions;
 }
 
-#[doc = inherit_docs!("client.md")]
+#[apply(inherit_docs)]
+#[inherit_doc = "client.md"]
 #[wasm_bindgen]
 pub struct Client {
     pub(crate) close: Option<Function>,
@@ -74,7 +76,8 @@ impl Client {
         Ok(())
     }
 
-    #[doc = inherit_docs!("client/table.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/table.md"]
     #[wasm_bindgen]
     pub async fn table(
         &self,
@@ -89,7 +92,8 @@ impl Client {
         Ok(Table(self.client.table(args, options).await?))
     }
 
-    #[doc = inherit_docs!("client/terminate.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/terminate.md"]
     #[wasm_bindgen]
     pub fn terminate(&self) -> ApiResult<JsValue> {
         if let Some(f) = self.close.clone() {
@@ -99,13 +103,15 @@ impl Client {
         }
     }
 
-    #[doc = inherit_docs!("client/open_table.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/open_table.md"]
     #[wasm_bindgen]
     pub async fn open_table(&self, entity_id: String) -> ApiResult<Table> {
         Ok(Table(self.client.open_table(entity_id).await?))
     }
 
-    #[doc = inherit_docs!("client/get_hosted_table_names.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/get_hosted_table_names.md"]
     #[wasm_bindgen]
     pub async fn get_hosted_table_names(&self) -> ApiResult<JsValue> {
         Ok(JsValue::from_serde_ext(
@@ -113,7 +119,8 @@ impl Client {
         )?)
     }
 
-    #[doc = inherit_docs!("client/system_info.md")]
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/system_info.md"]
     #[wasm_bindgen]
     pub async fn system_info(&self) -> ApiResult<JsValue> {
         let info = self.client.system_info().await?;

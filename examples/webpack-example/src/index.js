@@ -10,20 +10,24 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "@finos/perspective";
-
-import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc/bar";
+import "./index.css";
+import superstore from "superstore-arrow/superstore.lz4.arrow";
 
 import "@finos/perspective-viewer/dist/css/themes.css";
 
-import "./index.css";
+import "@finos/perspective-viewer-datagrid";
+import "@finos/perspective-viewer-d3fc/bar";
+import perspective from "@finos/perspective";
+import perspective_viewer from "@finos/perspective-viewer";
+import * as SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
+import * as CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
 
-import superstore from "superstore-arrow/superstore.lz4.arrow";
+await Promise.all([
+    perspective.init_server(SERVER_WASM),
+    perspective_viewer.init_client(CLIENT_WASM),
+]);
 
-const worker = perspective.worker();
-
+const worker = await perspective.worker();
 const viewer = document.createElement("perspective-viewer");
 document.body.append(viewer);
 

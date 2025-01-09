@@ -94,10 +94,16 @@ if (build_wheel) {
         }
         // we need to generate proto.rs using conda's protoc, which is set in
         // the environment.  we use the unstable "versioned" python abi
-        features.push(["generate-proto"]);
+        features.push(["generate-proto", "external-docs"]);
     } else {
         // standard for in-repo builds.  a different set will be standard in the sdist
-        const standard_features = ["abi3", "generate-proto", "protobuf-src"];
+        const standard_features = [
+            "abi3",
+            "generate-proto",
+            "protobuf-src",
+            "external-docs",
+        ];
+
         console.log("Building with standard flags and features");
         features.push(...standard_features);
     }
@@ -127,6 +133,7 @@ if (build_sdist) {
     const readme_md = fs.readFileSync("./README.md");
     const pkg_info = generatePkgInfo(pyproject, cargo, readme_md);
     fs.writeFileSync("./PKG-INFO", pkg_info);
+
     // Maturin finds extra license files in the root of the source directory,
     // then packages them into .dist-info in the wheel.  As of Nov 2024,
     // Maturin does not yet support explicitly declaring `license-files` in
@@ -147,7 +154,7 @@ if (build_sdist) {
 }
 
 if (!build_wheel && !build_sdist) {
-    cmd.sh(`maturin develop ${flags} ${target}`);
+    cmd.sh(`maturin develop --features=external-docs ${flags} ${target}`);
 }
 
 if (!cmd.isEmpty()) {

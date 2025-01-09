@@ -1,0 +1,60 @@
+# Summary
+
+[What is Perspective](./perspective.md)
+
+# Overview
+
+-   [Data Architecture](./explanation/architecture.md)
+    -   [Client-only](./explanation/architecture/client_only.md)
+    -   [Client/Server replicated](./explanation/architecture/client_server.md)
+    -   [Server only](./explanation/architecture/server_only.md)
+-   [`Table`](./explanation/table.md)
+    -   [Construct an empty `Table` from a schema](./explanation/table/constructing_schema.md)
+    -   [Schema and column types](./explanation/table/schema.md)
+    -   [Loading data](./explanation/table/loading_data.md)
+    -   [`index` and `limit` options](./explanation/table/options.md)
+    -   [`update()` and `remove()` streaming methods](./explanation/table/update_and_remove.md)
+    -   [`clear()` and `replace()` start-over methods](./explanation/table/clear_and_replace.md)
+-   [`View`](./explanation/view.md)
+    -   [Querying data](./explanation/view/querying.md)
+        -   [`group_by`](./explanation/view/config/group_by.md)
+        -   [`split_by`](./explanation/view/config/split_by.md)
+        -   [`aggregates`](./explanation/view/config/aggregates.md)
+        -   [`columns`](./explanation/view/config/columns.md)
+        -   [`sort`](./explanation/view/config/sort.md)
+        -   [`filter`](./explanation/view/config/filter.md)
+        -   [`expressions`](./explanation/view/config/expressions.md)
+    -   [Flattening a View into a Table](./explanation/view/config/flattening.md)
+-   [JavaScript](./explanation/javascript.md)
+    -   [Module Structure](./explanation/javascript_module_structure.md)
+    -   [Build options](./explanation/javascript_builds.md)
+-   [Python](./explanation/python.md)
+
+# Getting Started
+
+-   [Rust](./how_to/rust.md)
+-   [JavaScript](./how_to/javascript.md)
+    -   [Installation via NPM](./how_to/javascript/installation.md)
+    -   [Importing with or without a bundler](./how_to/javascript/importing.md)
+    -   [`perspective` data engine library](./how_to/javascript/worker.md)
+        -   [Serializing data](./how_to/javascript/serializing.md)
+        -   [Cleaning up resources](./how_to/javascript/deleting.md)
+        -   [Hosting a `WebSocketServer` in Node.js](./how_to/javascript/nodejs_server.md)
+    -   [`perspective-viewer` Custom Element library](./how_to/javascript/viewer.md)
+        -   [Theming](./how_to/javascript/theming.md)
+        -   [Loading data from a `Table`](./how_to/javascript/loading_data.md)
+        -   [Loading data from a virtual `Table`](./how_to/javascript/loading_virtual_data.md)
+        -   [Saving and restoring UI state](./how_to/javascript/save_restore.md)
+        -   [Listening for events](./how_to/javascript/events.md)
+-   [Python](./how_to/python.md)
+    -   [Installation](./how_to/python/installation.md)
+    -   [Loading data into a `Table`](./how_to/python/table.md)
+    -   [Callbacks and events](./how_to/python/callbacks.md)
+    -   [Multithreading](./how_to/python/multithreading.md)
+    -   [Hosting a WebSocket server](./how_to/python/websocket.md)
+    -   [`PerspectiveWidget` for JupyterLab](./how_to/python/jupyterlab.md)
+    -   [Tutorial: A `tornado` server with virtual `perspective-viewer`](./tutorials/python/tornado.md)
+
+# API
+
+-   [Crate documentation on `docs.rs` ](./api_reference.md)

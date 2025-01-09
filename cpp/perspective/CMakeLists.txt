@@ -231,9 +231,9 @@ if(PSP_WASM_BUILD)
             ")
         endif()
     else()
-        set(OPT_FLAGS " -O3 -g0 -flto --emit-tsd=perspective-server.d.ts ")
+        set(OPT_FLAGS " -O3 -g0 ")
         if (PSP_WASM_EXCEPTIONS)
-            set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")
+            set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions -flto --emit-tsd=perspective-server.d.ts ")
         endif()
     endif()
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
@@ -523,7 +523,6 @@ else()
         -s DYNAMIC_EXECUTION=0 \
         -s POLYFILL=0 \
         -s EXPORT_NAME=\"load_perspective\" \
-        -s MAXIMUM_MEMORY=16gb \
         -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
         -s NODEJS_CATCH_EXIT=0 \
         -s NODEJS_CATCH_REJECTION=0 \

@@ -47,6 +47,7 @@ abi3 = ["pyo3/abi3-py39"]
 external-cpp = ["perspective-server/external-cpp"]
 generate-proto = ["perspective-client/generate-proto"]
 protobuf-src = ["perspective-client/protobuf-src"]
+external-docs = []
 
 [lib]
 crate-type = ["cdylib"]
@@ -58,11 +59,9 @@ pyo3-build-config = "0.20.2"
 python-config-rs = "0.1.2"
 
 [dependencies]
-# NOTE: when building from the git repo, these perspective-* dependencies are
-# overridden with path dependencies in .cargo/config.toml.  This is done to
-# support the sdist, which doesn't include these packages.
-perspective-client = { version = "3.2.1", path = "../perspective-client" }
-perspective-server = { version = "3.2.1", path = "../perspective-server" }
+perspective-client = { version = "3.2.1" }
+perspective-server = { version = "3.2.1" }
+macro_rules_attribute = "0.2.0"
 async-lock = "2.5.0"
 pollster = "0.3.0"
 extend = "1.1.2"

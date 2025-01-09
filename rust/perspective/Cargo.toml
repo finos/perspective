@@ -38,10 +38,10 @@ external-cpp = [
 
 [dependencies]
 async-lock = "2.5.0"
-perspective-client = { version = "3.2.1", path = "../perspective-client" }
-perspective-server = { version = "3.2.1", path = "../perspective-server" }
+perspective-client = { version = "3.2.1" }
+perspective-server = { version = "3.2.1" }
 tracing = { version = ">=0.1.36" }
 
-axum = { version = ">=0.7,<2", features = ["ws"], optional = true }
+axum = { version = ">=0.7,<0.8", features = ["ws"], optional = true }
 tokio = { version = "~1", features = ["full"], optional = true }
 futures = { version = "~0", optional = true }

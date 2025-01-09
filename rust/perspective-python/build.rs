@@ -17,10 +17,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Pass the `perspective_client` links metadata flag so that the `inherit_docs`
     // macro can find the path to the docs.
-    println!(
-        "cargo:rustc-env=PERSPECTIVE_CLIENT_DOCS_PATH={}",
-        std::env::var("DEP_PERSPECTIVE_CLIENT_DOCS_PATH").unwrap()
-    );
+    if let Ok(x) = std::env::var("DEP_PERSPECTIVE_CLIENT_DOCS_PATH") {
+        println!("cargo:rustc-env=PERSPECTIVE_CLIENT_DOCS_PATH={}", x);
+    }
 
     if std::option_env!("PSP_DISABLE_CPP").is_some() {
         return Ok(());

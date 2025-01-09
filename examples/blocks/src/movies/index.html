@@ -1,22 +1,17 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
-        <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
-        <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+        <link rel="preload" href="/node_modules/@finos/perspective/dist/wasm/perspective-server.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+        <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/pro-dark.css" />
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css" />
         <style>
-            body {
-                display: flex;
-                flex-direction: column;
+            perspective-workspace {
+                left: 0;
                 position: absolute;
                 top: 0;
-                left: 0;
-                right: 0;
                 bottom: 0;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
+                right: 0;
             }
 
             perspective-viewer {

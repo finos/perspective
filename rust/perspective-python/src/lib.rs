@@ -24,13 +24,15 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{fmt, EnvFilter};
 
-macro_rules! inherit_docs {
-    ($x:literal) => {
-        include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $x))
+macro_rules! inherit_doc {
+    (#[inherit_doc = $y:literal] $x:item) => {
+        #[cfg_attr(feature = "external-docs", doc =
+                                include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $y)))]
+        $x
     };
 }
 
-pub(crate) use inherit_docs;
+pub(crate) use inherit_doc;
 
 /// Create a tracing filter which mimics the default behavior of reading from
 /// env, customized to exclude timestamp.

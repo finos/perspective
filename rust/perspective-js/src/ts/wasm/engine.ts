@@ -27,7 +27,7 @@ export class PerspectiveServer {
         this.clients = new Map();
         this.id_gen = 0;
         this.module = module;
-        this.server = module._psp_new_server();
+        this.server = module._psp_new_server() as EmscriptenServer;
     }
 
     /**
@@ -36,7 +36,7 @@ export class PerspectiveServer {
     make_session(
         callback: (buffer: Uint8Array) => Promise<void>
     ): PerspectiveSession {
-        const client_id = this.module._psp_new_session(this.server);
+        const client_id = this.module._psp_new_session(this.server as any);
         this.clients.set(client_id, callback);
         return new PerspectiveSession(
             this.module,
@@ -47,7 +47,7 @@ export class PerspectiveServer {
     }
 
     delete() {
-        this.module._psp_delete_server(this.server);
+        this.module._psp_delete_server(this.server as any);
     }
 }
 
@@ -65,12 +65,12 @@ export class PerspectiveSession {
             view,
             async (viewPtr) => {
                 return this.mod._psp_handle_request(
-                    this.server,
+                    this.server as any,
                     this.client_id,
-                    viewPtr as number,
+                    viewPtr as any,
                     this.mod._psp_is_memory64()
                         ? (BigInt(view.byteLength) as any as number)
-                        : view.byteLength
+                        : (view.byteLength as any)
                 );
             }
         );
@@ -81,14 +81,14 @@ export class PerspectiveSession {
     }
 
     poll() {
-        const polled = this.mod._psp_poll(this.server);
+        const polled = this.mod._psp_poll(this.server as any);
         decode_api_responses(this.mod, polled, async (msg: ApiResponse) => {
             await this.client_map.get(msg.client_id)!(msg.data);
         });
     }
 
     close() {
-        this.mod._psp_close_session(this.server, this.client_id);
+        this.mod._psp_close_session(this.server as any, this.client_id);
     }
 }
 
@@ -100,7 +100,7 @@ async function convert_typed_array_to_pointer(
     const ptr = core._psp_alloc(
         core._psp_is_memory64()
             ? (BigInt(array.byteLength) as any as number)
-            : array.byteLength
+            : (array.byteLength as any)
     );
 
     core.HEAPU8.set(array, Number(ptr));
@@ -185,18 +185,18 @@ async function decode_api_responses(
                 ? messages.getBigInt64(i * 16, true)
                 : messages.getInt32(i * 12, true);
 
-            core._psp_free(data_ptr as number);
+            core._psp_free(data_ptr as any);
         }
 
         core._psp_free(
             is_64
                 ? (BigInt(messages.byteOffset) as any as number)
-                : messages.byteOffset
+                : (messages.byteOffset as any)
         );
         core._psp_free(
             is_64
                 ? (BigInt(response.byteOffset) as any as number)
-                : response.byteOffset
+                : (response.byteOffset as any)
         );
     }
 }

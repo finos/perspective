@@ -905,7 +905,7 @@ Table::update_cols(const std::string_view& data, std::uint32_t port_id) {
     }
 
     t_uindex nrows = 0;
-    for (const auto& it : document.GetObject()) {
+    for (const auto& it : document.GetObj()) {
         if (!it.value.IsArray()) {
             PSP_COMPLAIN_AND_ABORT("Malformed column")
         }
@@ -940,14 +940,14 @@ Table::update_cols(const std::string_view& data, std::uint32_t port_id) {
 
     auto schema = data_table.get_schema();
 
-    if (is_implicit && !document.GetObject().HasMember("__INDEX__")) {
+    if (is_implicit && !document.GetObj().HasMember("__INDEX__")) {
         for (std::uint32_t ii = 0; ii < nrows; ii++) {
             psp_pkey_col->set_nth<std::uint32_t>(ii, (m_offset + ii) % m_limit);
         }
     }
 
     // 3.) Fill table
-    for (const auto& column : document.GetObject()) {
+    for (const auto& column : document.GetObj()) {
         t_uindex ii = 0;
         std::string_view col_name = column.name.GetString();
         if (std::string_view{column.name.GetString()} == "__INDEX__") {
@@ -1001,7 +1001,7 @@ Table::from_cols(
     t_uindex nrows = 0;
 
     // https://github.com/Tencent/rapidjson/issues/1994
-    for (const auto& it : document.GetObject()) {
+    for (const auto& it : document.GetObj()) {
         if (!it.value.IsArray()) {
             PSP_COMPLAIN_AND_ABORT("Malformed column")
         }
@@ -1052,7 +1052,7 @@ Table::from_cols(
     const auto& psp_okey_col = data_table.get_column("psp_okey");
 
     // 3.) Fill table
-    for (const auto& col : document.GetObject()) {
+    for (const auto& col : document.GetObj()) {
         t_uindex ii = 0;
         const auto& col_name = col.name.GetString();
         LOG_DEBUG(
@@ -1153,7 +1153,7 @@ Table::update_rows(const std::string_view& data, std::uint32_t port_id) {
         }
 
         // col_count = m_column_names.size();
-        for (const auto& it : row.GetObject()) {
+        for (const auto& it : row.GetObj()) {
             std::shared_ptr<t_column> col;
             std::string_view col_name = it.name.GetString();
             if (std::string_view{it.name.GetString()} == "__INDEX__") {
@@ -1246,12 +1246,12 @@ Table::from_rows(
 
     [&]() {
         for (const auto& row : document.GetArray()) {
-            for (const auto& col : row.GetObject()) {
+            for (const auto& col : row.GetObj()) {
                 columns_seen.insert(col.name.GetString());
             }
 
             // https://github.com/Tencent/rapidjson/issues/1994
-            for (const auto& col : row.GetObject()) {
+            for (const auto& col : row.GetObj()) {
                 if (col.name.GetString() == index) {
                     is_implicit = false;
                 }
@@ -1307,7 +1307,7 @@ Table::from_rows(
 
     // 3.) Fill table
     for (const auto& row : document.GetArray()) {
-        for (const auto& it : row.GetObject()) {
+        for (const auto& it : row.GetObj()) {
             auto col = data_table.get_column(it.name.GetString());
             const auto* col_name = it.name.GetString();
             const auto& cell = it.value;
@@ -1399,7 +1399,7 @@ Table::update_ndjson(const std::string_view& data, std::uint32_t port_id) {
             psp_pkey_col->set_nth<std::uint32_t>(ii, (ii + m_offset) % m_limit);
         }
 
-        for (const auto& it : document.GetObject()) {
+        for (const auto& it : document.GetObj()) {
             std::shared_ptr<t_column> col;
             std::string_view col_name = it.name.GetString();
             if (std::string_view{it.name.GetString()} == "__INDEX__") {
@@ -1486,12 +1486,12 @@ Table::from_ndjson(
     // enhancement we do for regular JSON. For now this only checks the first
     // row.
     [&]() {
-        for (const auto& col : document.GetObject()) {
+        for (const auto& col : document.GetObj()) {
             columns_seen.insert(col.name.GetString());
         }
 
         // https://github.com/Tencent/rapidjson/issues/1994
-        for (const auto& col : document.GetObject()) {
+        for (const auto& col : document.GetObj()) {
             if (col.name.GetString() == index) {
                 is_implicit = false;
             }
@@ -1555,7 +1555,7 @@ Table::from_ndjson(
     // 3.) Fill table
     bool is_finished = false;
     while (!is_finished) {
-        for (const auto& it : document.GetObject()) {
+        for (const auto& it : document.GetObj()) {
             auto col = data_table.get_column(it.name.GetString());
             const auto* col_name = it.name.GetString();
             const auto& cell = it.value;
