@@ -1,8 +1,11 @@
 {
     "compilerOptions": {
         "moduleResolution": "bundler",
-        "target": "es5",
-        "lib": ["es6", "dom"],
+        "target": "es2020",
+        "lib": [
+            "es2020",
+            "dom"
+        ],
         "module": "esnext",
         "strict": true,
         "alwaysStrict": true,
@@ -10,15 +13,15 @@
         "noImplicitReturns": true,
         "noImplicitThis": true,
         "noImplicitUseStrict": false,
-        "noUnusedLocals": true,
+        "noUnusedLocals": false,
         "strictNullChecks": true,
         "skipLibCheck": true,
         "removeComments": false,
-        "jsx": "react",
+        "jsx": "react-jsx",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
-        "importHelpers": true,
+        "importHelpers": false,
         "noEmitHelpers": true,
         "inlineSourceMap": false,
         "sourceMap": true,
@@ -27,5 +30,7 @@
         "downlevelIteration": true,
         "pretty": true
     },
-    "exclude": ["node_modules"]
+    "exclude": [
+        "node_modules"
+    ]
 }
