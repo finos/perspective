@@ -174,8 +174,7 @@
 <p>Perspective is an <i>interactive</i> analytics and data visualization component,
 which is especially well-suited for <i>large</i> and/or <i>streaming</i>
 datasets. Use it to create user-configurable reports, dashboards, notebooks and
-applications, then deploy stand-alone in the browser, or in concert with Python
-and/or <a href="https://jupyterlab.readthedocs.io/en/stable/">Jupyterlab</a>.</p>
+applications.</p>
 <h3 id="features"><a class="header" href="#features">Features</a></h3>
 <ul>
 <li>
@@ -190,52 +189,22 @@ a high-performance columnar expression language based on
 <p>A framework-agnostic User Interface packaged as a
 <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements">Custom Element</a>,
 powered either in-browser via WebAssembly or virtually via WebSocket server
-(Python/Node).</p>
+(Python/Node/Rust).</p>
 </li>
 <li>
 <p>A <a href="https://jupyter.org/">JupyterLab</a> widget and Python client library, for
 interactive data analysis in a notebook, as well as <em>scalable</em> production
-<a href="https://github.com/voila-dashboards/voila">Voila</a> applications.</p>
+applications.</p>
 </li>
 </ul>
 <h3 id="documentation"><a class="header" href="#documentation">Documentation</a></h3>
 <ul>
 <li><a href="https://perspective.finos.org/">Project Site</a></li>
-<li>JavaScript (NPM)
-<ul>
+<li><a href="https://perspective.finos.org/guide/">User Guide</a></li>
+<li><a href="https://docs.rs/perspective-js/latest/perspective_js/"><code>@finos/perspective</code>, JavaScript Client API</a></li>
 <li><a href="https://docs.rs/perspective-viewer/latest/perspective_viewer/"><code>@finos/perspective-viewer</code>, JavaScript UI API</a></li>
-<li><a href="https://docs.rs/perspective-js/latest/perspective_js/"><code>@finos/perspective</code>, JavaScript Client/Server API</a></li>
-<li><a href="https://docs.rs/perspective-js/latest/perspective_js/struct.Table.html"><code>Table</code> API</a></li>
-<li><a href="https://docs.rs/perspective-js/latest/perspective_js/struct.View.html"><code>View</code> API</a></li>
-<li><a href="https://docs.rs/perspective-js/latest/perspective_js/#installation">Installation Guide</a></li>
-</ul>
-</li>
-<li>Python (PyPI)
-<ul>
-<li><a href="https://docs.rs/perspective-python/latest/perspective_python/"><code>perspective-python</code>, Python Client/Server API</a></li>
-<li><a href="https://docs.rs/perspective-python/latest/perspective_python/#perspectivewidget"><code>PerspectiveWidget</code> Jupyter Plugin</a></li>
-<li><a href="https://docs.rs/perspective-python/latest/perspective_python/struct.Table.html"><code>Table</code> API</a></li>
-<li><a href="https://docs.rs/perspective-python/latest/perspective_python/struct.View.html"><code>View</code> API</a></li>
-</ul>
-</li>
-<li>Rust (Crates.io)
-<ul>
-<li><a href="https://docs.rs/perspective-rs/latest/perspective_rs/"><code>perspective</code>, Rust API</a>
-<ul>
-<li><a href="https://docs.rs/perspective-client/latest/perspective_client/"><code>perspective-client</code>, Rust Client API</a></li>
-<li><a href="https://docs.rs/perspective-server/latest/perspective_server/"><code>perspective-server</code>, Rust Server API</a></li>
-</ul>
-</li>
-<li><a href="https://docs.rs/perspective-client/latest/perspective_client/struct.Table.html"><code>Table</code> API</a></li>
-<li><a href="https://docs.rs/perspective-client/latest/perspective_client/struct.View.html"><code>View</code> API</a></li>
-</ul>
-</li>
-<li>Appendix
-<ul>
-<li><a href="https://docs.rs/perspective-server/latest/perspective_server/">Data Binding</a></li>
-<li><a href="https://docs.rs/perspective-client/latest/perspective_client/config/expressions/">Expression Columns</a></li>
-</ul>
-</li>
+<li><a href="https://docs.rs/perspective-python/latest/perspective_python/"><code>perspective-python</code>, Python API</a></li>
+<li><a href="https://docs.rs/perspective-rs/latest/perspective_rs/"><code>perspective</code>, Rust API</a></li>
 </ul>
 <h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
 <!-- Examples -->
@@ -1179,6 +1148,15 @@ await Promise.all([
     perspective.init_server(fetch(SERVER_WASM)),
     perspective_viewer.init_client(fetch(CLIENT_WASM)),
 ]);
+</code></pre>
+<p>You'll also need to target <code>esnext</code> in your <code>vite.config.js</code> in order to run the
+<code>build</code> step:</p>
+<pre><code class="language-javascript">import { defineConfig } from "vite";
+export default defineConfig({
+    build: {
+        target: "esnext",
+    },
+});
 </code></pre>
 <h3 id="esbuild"><a class="header" href="#esbuild">ESBuild</a></h3>
 <pre><code class="language-javascript">import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";

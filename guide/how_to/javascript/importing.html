@@ -187,6 +187,15 @@ await Promise.all([
     perspective_viewer.init_client(fetch(CLIENT_WASM)),
 ]);
 </code></pre>
+<p>You'll also need to target <code>esnext</code> in your <code>vite.config.js</code> in order to run the
+<code>build</code> step:</p>
+<pre><code class="language-javascript">import { defineConfig } from "vite";
+export default defineConfig({
+    build: {
+        target: "esnext",
+    },
+});
+</code></pre>
 <h3 id="esbuild"><a class="header" href="#esbuild">ESBuild</a></h3>
 <pre><code class="language-javascript">import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
 import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
