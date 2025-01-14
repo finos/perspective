@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-openlayers",
-    "version": "3.2.1",
+    "version": "3.3.0",
     "unpkg": "dist/cdn/perspective-viewer-openlayers.js",
     "jsdelivr": "dist/cdn/perspective-viewer-openlayers.js",
     "exports": {

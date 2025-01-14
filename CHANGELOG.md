@@ -1,3 +1,15 @@
+# [v3.3.0](https://github.com/finos/perspective/releases/tag/v3.3.0)
+
+_14 January 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.2.1...v3.3.0))
+
+**Breaking**
+
+- Unbundled JavaScript builds [#2890](https://github.com/finos/perspective/pull/2890)
+
+Misc
+
+- Add build support for `Memory64` [#2888](https://github.com/finos/perspective/pull/2888)
+
 # [v3.2.1](https://github.com/finos/perspective/releases/tag/v3.2.1)
 
 _23 December 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.2.0...v3.2.1))

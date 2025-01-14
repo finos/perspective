@@ -21,6 +21,15 @@ rustflags = ["-C", "target-feature=+crt-static", "--cfg=web_sys_unstable_apis"]
 [future-incompat-report]
 frequency = 'never'
 
+# TODO this is required to synth public releases on GH Actions
+[patch.crates-io]
+perspective-client = { path = "rust/perspective-client" }
+perspective-server = { path = "rust/perspective-server" }
+perspective-js = { path = "rust/perspective-js" }
+perspective-python = { path = "rust/perspective-python" }
+perspective-viewer = { path = "rust/perspective-viewer" }
+perspective = { path = "rust/perspective" }
+
 [unstable]
 bindeps = true
 package-workspace = true

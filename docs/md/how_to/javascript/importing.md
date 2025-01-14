@@ -37,6 +37,18 @@ await Promise.all([
 ]);
 ```
 
+You'll also need to target `esnext` in your `vite.config.js` in order to run the
+`build` step:
+
+```javascript
+import { defineConfig } from "vite";
+export default defineConfig({
+    build: {
+        target: "esnext",
+    },
+});
+```
+
 ### ESBuild
 
 ```javascript
