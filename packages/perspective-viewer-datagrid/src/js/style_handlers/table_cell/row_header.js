@@ -20,7 +20,11 @@ export function cell_style_row_header(regularTable, td, metadata) {
         dx: 0,
         dy: metadata.y - metadata.y0 + 1,
     });
+
+    const is_last_item = !next || next.row_header === undefined;
+
     const is_collapse =
+        !is_last_item &&
         next &&
         next.row_header &&
         typeof next.row_header[metadata.row_header_x + 1] !== "undefined";
