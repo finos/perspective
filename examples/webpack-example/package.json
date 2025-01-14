@@ -16,12 +16,11 @@
         "@finos/perspective-viewer-datagrid": "workspace:^"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "workspace:^",
         "arraybuffer-loader": "^1.0.8",
         "css-loader": "^0.28.7",
         "html-webpack-plugin": "^5.1.0",
         "style-loader": "^0.18.2",
-        "webpack": "^5.14.0",
-        "webpack-cli": "^4.7.0"
+        "webpack": "^5",
+        "webpack-cli": "^5"
     }
 }

@@ -3,7 +3,7 @@
     <head>
         <script type="module">
             import "/node_modules/@finos/perspective-viewer/dist/esm/perspective-viewer.inline.js";
-            import perspective from "/node_modules/@finos/perspective/dist/esm/perspective.inline.js";
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
             async function load() {
                 let resp = await fetch("/node_modules/@finos/perspective-test/assets/superstore.csv");

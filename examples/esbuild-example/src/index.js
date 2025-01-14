@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import perspective from "@finos/perspective";
-import "@finos/perspective-viewer";
+import perspective_viewer from "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
@@ -19,6 +19,14 @@ import "@finos/perspective-viewer/dist/css/pro-dark.css";
 import "./index.css";
 
 import arrow from "superstore-arrow/superstore.lz4.arrow";
+
+import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
+import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
+
+await Promise.all([
+    perspective.init_server(fetch(SERVER_WASM)),
+    perspective_viewer.init_client(fetch(CLIENT_WASM)),
+]);
 
 const req = fetch(arrow);
 const viewer = document.createElement("perspective-viewer");

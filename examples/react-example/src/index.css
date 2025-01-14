@@ -11,8 +11,6 @@
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
  */
 
-@import "~@finos/perspective-viewer/dist/css/themes.css";
-
 perspective-viewer {
     position: absolute;
     top: 0;

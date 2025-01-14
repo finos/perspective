@@ -17,7 +17,6 @@
         "superstore-arrow": "^3.0.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "workspace:^",
         "npm-run-all": "^4.1.3",
         "rimraf": "^6"
     }

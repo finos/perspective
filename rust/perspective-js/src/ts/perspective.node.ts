@@ -10,39 +10,41 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// @ts-ignore
-import perspective_client_wasm from "../../dist/pkg/perspective-js.wasm";
+export type * from "../../dist/wasm/perspective-js.d.ts";
+export { PerspectiveServer } from "./wasm/engine.ts";
 
-// @ts-ignore
-import perspective_server_wasm from "../../dist/pkg/web/perspective-server.wasm";
-
-export type * from "../../dist/pkg/perspective-js.d.ts";
-export { PerspectiveServer } from "./engine.js";
-
-import * as perspective_client from "../../dist/pkg/perspective-js.js";
-import { load_wasm_stage_0 } from "./decompress.js";
 import WebSocket, { WebSocketServer as HttpWebSocketServer } from "ws";
 import stoppable from "stoppable";
 import { promises as fs } from "node:fs";
 import http from "node:http";
 import path from "node:path";
-import type * as net from "node:net";
-import { PerspectiveServer } from "./engine.js";
-import { compile_perspective } from "./emscripten_api.js";
 import { webcrypto } from "node:crypto";
+import type * as net from "node:net";
+import * as url from "node:url";
+
+import * as perspective_client from "../../dist/wasm/perspective-js.js";
+import { load_wasm_stage_0 } from "./wasm/decompress.js";
+import { PerspectiveServer } from "./wasm/engine.ts";
+import { compile_perspective } from "./wasm/emscripten_api.ts";
+
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 if (!globalThis.crypto) {
     globalThis.crypto = webcrypto as Crypto;
 }
 
-const uncompressed_client_wasm = await load_wasm_stage_0(
-    perspective_client_wasm as unknown as ArrayBuffer | Response
-);
+const uncompressed_client_wasm = await fs
+    .readFile(path.join(__dirname, "../../dist/wasm/perspective-js.wasm"))
+    .then((buffer) => load_wasm_stage_0(buffer.buffer as ArrayBuffer));
 
 await perspective_client.default(uncompressed_client_wasm);
 perspective_client.init();
 
-const SYNC_MODULE = await compile_perspective(perspective_server_wasm);
+const SYNC_MODULE = await fs
+    .readFile(path.join(__dirname, "../../dist/wasm/perspective-server.wasm"))
+    .then((buffer) => load_wasm_stage_0(buffer.buffer as ArrayBuffer))
+    .then((buffer) => compile_perspective(buffer.buffer as ArrayBuffer));
+
 let SYNC_CLIENT: perspective_client.Client;
 const SYNC_SERVER = new PerspectiveServer(SYNC_MODULE);
 const SYNC_SESSION = SYNC_SERVER.make_session(
@@ -146,7 +148,7 @@ export async function cwd_static_file_handler(
 }
 
 function buffer_to_arraybuffer(
-    buffer: string | Buffer | ArrayBuffer | Buffer[]
+    buffer: string | Buffer | ArrayBuffer | Buffer[] | Uint8Array
 ): Uint8Array {
     if (typeof buffer === "string") {
         throw new Error("Unknown websocket message: " + buffer);

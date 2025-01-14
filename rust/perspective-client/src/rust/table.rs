@@ -147,7 +147,6 @@ pub struct ValidateExpressionsData {
     pub expression_alias: HashMap<String, String>,
 }
 
-#[doc = include_str!("../../docs/table.md")]
 #[derive(Clone)]
 pub struct Table {
     name: String,

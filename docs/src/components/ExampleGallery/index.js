@@ -63,7 +63,6 @@ export default function ExampleGallery(props) {
 }
 
 function OverlayDemo(props) {
-    const { SUPERSTORE_TABLE } = require("@site/src/data/superstore.js");
     const ref = useRef();
     const dismissCallback = useCallback(
         (event) => {
@@ -77,6 +76,10 @@ function OverlayDemo(props) {
 
     const perspectiveRef = useCallback(
         (viewer) => {
+            const {
+                SUPERSTORE_TABLE,
+            } = require("@site/src/data/superstore.js");
+
             if (viewer !== null) {
                 viewer.load(SUPERSTORE_TABLE);
                 viewer.restore({

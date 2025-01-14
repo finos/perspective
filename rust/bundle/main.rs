@@ -104,7 +104,7 @@ fn opt(outpath: &Path, is_release: bool) {
 
 fn main() {
     let args = BundleArgs::parse();
-    let outdir = Path::new("dist/pkg");
+    let outdir = Path::new("dist/wasm");
     let is_release = args.release;
     let package = args.artifact.clone().replace('_', "-");
     let outpath = &Path::new(outdir).join(format!(

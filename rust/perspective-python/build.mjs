@@ -61,33 +61,23 @@ if (process.platform !== "win32") {
 const build_wheel = !!process.env.PSP_BUILD_WHEEL || is_pyodide;
 const build_sdist = !!process.env.PSP_BUILD_SDIST;
 
-if (build_wheel) {
-    let target = "";
-    if (is_pyodide) {
-        target = `--target=wasm32-unknown-emscripten -i${python_version}`;
-    } else if (
-        process.env.PSP_ARCH === "x86_64" &&
-        process.platform === "darwin"
-    ) {
-        target = "--target=x86_64-apple-darwin";
-    } else if (
-        process.env.PSP_ARCH === "aarch64" &&
-        process.platform === "darwin"
-    ) {
-        target = "--target=aarch64-apple-darwin";
-    } else if (
-        process.env.PSP_ARCH === "x86_64" &&
-        process.platform === "linux"
-    ) {
-        target =
-            "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
-    } else if (
-        process.env.PSP_ARCH === "aarch64" &&
-        process.platform === "linux"
-    ) {
-        target = "--target=aarch64-unknown-linux-gnu";
-    }
+let target = "";
+if (is_pyodide) {
+    target = `--target=wasm32-unknown-emscripten -i${python_version}`;
+} else if (process.env.PSP_ARCH === "x86_64" && process.platform === "darwin") {
+    target = "--target=x86_64-apple-darwin";
+} else if (
+    process.env.PSP_ARCH === "aarch64" &&
+    process.platform === "darwin"
+) {
+    target = "--target=aarch64-apple-darwin";
+} else if (process.env.PSP_ARCH === "x86_64" && process.platform === "linux") {
+    target = "--target=x86_64-unknown-linux-gnu --compatibility manylinux_2_28";
+} else if (process.env.PSP_ARCH === "aarch64" && process.platform === "linux") {
+    target = "--target=aarch64-unknown-linux-gnu";
+}
 
+if (build_wheel) {
     if (!!process.env.PSP_BUILD_VERBOSE) {
         flags += " -vv";
     }
@@ -104,10 +94,16 @@ if (build_wheel) {
         }
         // we need to generate proto.rs using conda's protoc, which is set in
         // the environment.  we use the unstable "versioned" python abi
-        features.push(["generate-proto"]);
+        features.push(["generate-proto", "external-docs"]);
     } else {
         // standard for in-repo builds.  a different set will be standard in the sdist
-        const standard_features = ["abi3", "generate-proto", "protobuf-src"];
+        const standard_features = [
+            "abi3",
+            "generate-proto",
+            "protobuf-src",
+            "external-docs",
+        ];
+
         console.log("Building with standard flags and features");
         features.push(...standard_features);
     }
@@ -137,6 +133,7 @@ if (build_sdist) {
     const readme_md = fs.readFileSync("./README.md");
     const pkg_info = generatePkgInfo(pyproject, cargo, readme_md);
     fs.writeFileSync("./PKG-INFO", pkg_info);
+
     // Maturin finds extra license files in the root of the source directory,
     // then packages them into .dist-info in the wheel.  As of Nov 2024,
     // Maturin does not yet support explicitly declaring `license-files` in
@@ -157,7 +154,7 @@ if (build_sdist) {
 }
 
 if (!build_wheel && !build_sdist) {
-    cmd.sh(`maturin develop ${flags}`);
+    cmd.sh(`maturin develop --features=external-docs ${flags} ${target}`);
 }
 
 if (!cmd.isEmpty()) {

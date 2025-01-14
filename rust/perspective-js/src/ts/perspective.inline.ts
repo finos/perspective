@@ -10,49 +10,18 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as api from "./browser.ts";
-export type * from "../../dist/pkg/perspective-js.d.ts";
+import perspective, { PerspectiveWasm } from "./perspective.browser.ts";
+export * from "./perspective.browser.ts";
 
-import * as wasm_module from "../../dist/pkg/perspective-js.js";
-import wasm_binary from "../../dist/pkg/perspective-js.wasm";
-import { load_wasm_stage_0 } from "@finos/perspective/src/ts/decompress.ts";
+// @ts-ignore;
+import server_wasm from "../../dist/wasm/perspective-server.wasm";
 
-import type * as psp from "../../dist/pkg/perspective-js.d.ts";
+// @ts-ignore;
+import client_wasm from "../../dist/wasm/perspective-js.wasm";
 
-type WasmElement = {
-    __wasm_module__: Promise<typeof psp>;
-};
+await perspective.init_server(server_wasm);
+await perspective.init_client(client_wasm as any as PerspectiveWasm);
 
-export async function compile_perspective() {
-    let elem = customElements.get(
-        "perspective-viewer"
-    ) as unknown as WasmElement;
+console.warn("Perspective wasn been initialized in inline mode");
 
-    if (!elem) {
-        console.warn(
-            "No `<perspective-viewer>` Custom Element found, using inline `Client`."
-        );
-
-        const module = await load_wasm_stage_0(
-            wasm_binary as unknown as ArrayBuffer
-        );
-
-        await wasm_module.default(module);
-        await wasm_module.init();
-        return wasm_module;
-    }
-
-    return elem.__wasm_module__;
-}
-
-export async function websocket(url: string | URL) {
-    const wasm_module = compile_perspective();
-    return await api.websocket(wasm_module, url);
-}
-
-export async function worker() {
-    const wasm_module = compile_perspective();
-    return await api.worker(wasm_module);
-}
-
-export default { websocket, worker };
+export default perspective;

@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
         "moduleResolution": "bundler",
-        "target": "es5",
+        "target": "ESNext",
+        "module": "ESNext",
         "lib": ["es6", "dom"],
-        "module": "esnext",
         "strict": true,
         "alwaysStrict": true,
         "noImplicitAny": true,

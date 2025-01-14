@@ -10,9 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
-const path = require("path");
 
 module.exports = {
     mode: process.env.NODE_ENV || "production",
@@ -24,7 +22,6 @@ module.exports = {
         new HtmlWebPackPlugin({
             title: "Perspective Webpack Example",
         }),
-        new PerspectivePlugin(),
     ],
     module: {
         rules: [
@@ -45,6 +42,10 @@ module.exports = {
         version: false,
         builtAt: false,
         entrypoints: false,
+    },
+    experiments: {
+        asyncWebAssembly: true,
+        syncWebAssembly: false,
     },
     devtool: "source-map",
 };

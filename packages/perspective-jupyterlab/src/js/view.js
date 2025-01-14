@@ -13,7 +13,7 @@
 import { DOMWidgetView } from "@jupyter-widgets/base";
 import { PerspectiveJupyterWidget } from "./widget";
 
-import perspective from "@finos/perspective/src/ts/perspective.ts";
+import perspective from "@finos/perspective";
 
 function isEqual(a, b) {
     if (a === b) return true;

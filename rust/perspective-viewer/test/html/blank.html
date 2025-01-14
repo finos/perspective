@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
         <script type="module">
+            import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
             window.WORKER = perspective.worker();
         </script>

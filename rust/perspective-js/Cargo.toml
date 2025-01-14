@@ -32,7 +32,7 @@ path = "src/rust/lib.rs"
 
 [features]
 export-init = []
-metadata = []
+external-docs = []
 default = []
 external-cpp = [
     "perspective-client/generate-proto",
@@ -47,7 +47,8 @@ anyhow = "1.0.66"
 wasm-bindgen-test = "0.3.13"
 
 [dependencies]
-perspective-client = { path = "../perspective-client", version = "3.2.1" }
+macro_rules_attribute = "0.2.0"
+perspective-client = { version = "3.2.1" }
 base64 = "0.13.0"
 chrono = "0.4"
 extend = "1.1.2"
@@ -127,6 +128,3 @@ features = [
     "VisibilityState",
     "Window",
 ]
-
-[patch.crates-io]
-simd-adler32 = { git = "https://github.com/mcountryman/simd-adler32.git", rev = "140cde033e8b9a12d4de840648c65ccd5320bcc5" }

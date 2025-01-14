@@ -36,7 +36,7 @@ export { HTMLPerspectiveViewerPluginElement } from "./plugin";
 import {
     ExportDropDownMenuElement,
     CopyDropDownMenuElement,
-} from "../../dist/pkg/perspective-viewer";
+} from "../../dist/wasm/perspective-viewer";
 
 export interface HTMLPerspectiveViewerExportMenu
     extends HTMLElement,
@@ -54,4 +54,7 @@ export type * from "./ts-rs/FilterTerm.d.ts";
 export type * from "./ts-rs/FilterReducer.d.ts";
 // export type * from "./ts-rs/Vi"
 
-import "./bootstrap";
+export { init_client } from "./bootstrap";
+import { init_client } from "./bootstrap";
+
+export default { init_client };

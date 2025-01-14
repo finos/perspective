@@ -16,9 +16,6 @@ use std::collections::HashSet;
 use std::path::Path;
 use std::{fs, io};
 
-use base64::prelude::*;
-use regex::{Captures, Regex};
-
 pub fn copy_dir_all(
     src: impl AsRef<Path>,
     dst: impl AsRef<Path>,
@@ -45,19 +42,6 @@ fn main() -> Result<(), std::io::Error> {
         return Ok(());
     }
 
-    let markdown = fs::read_to_string("./docs/lib.md")?;
-    let markdown = Regex::new("<img src=\"(.+?)\"")
-        .expect("regex")
-        .replace_all(markdown.as_str(), |caps: &Captures| {
-            let x = &caps[1];
-            let svg = fs::read_to_string(format!("./docs/{}", x)).expect("svg");
-            format!(
-                "<img src=\"data:image/svg+xml;base64,{}\"",
-                base64::prelude::BASE64_STANDARD.encode(svg)
-            )
-        });
-
-    std::fs::write("docs/lib_gen.md", markdown.as_ref())?;
     if std::env::var("CARGO_FEATURE_EXTERNAL_CPP").is_ok() {
         println!("cargo:warning=MESSAGE Building in development mode");
         let root_dir_env = std::env::var("PSP_ROOT_DIR").expect("Must set PSP_ROOT_DIR");

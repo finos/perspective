@@ -17,7 +17,6 @@
         "express-ws": "^5.0.2"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "workspace:^",
         "esbuild": "^0.14.54"
     }
 }

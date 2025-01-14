@@ -11,35 +11,46 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-import * as perspective from "@finos/perspective";
+import * as ReactDOM from "react-dom/client";
 
-import "@finos/perspective-viewer";
+import perspective from "@finos/perspective";
+import perspective_viewer from "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import {
-    PerspectiveViewerConfig,
-    HTMLPerspectiveViewerElement,
-} from "@finos/perspective-viewer";
+import type { ViewerConfigUpdate } from "@finos/perspective-viewer";
 
+import "@finos/perspective-viewer/dist/css/themes.css";
 import "./index.css";
 
-const worker = perspective.default.worker();
+// @ts-ignore
+import SUPERSTORE_ARROW from "superstore-arrow/superstore.lz4.arrow";
 
-const getTable = async (): Promise<perspective.Table> => {
-    const req = fetch("./superstore.lz4.arrow");
+// @ts-ignore
+import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
+
+// @ts-ignore
+import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
+
+await Promise.all([
+    perspective.init_server(fetch(SERVER_WASM)),
+    perspective_viewer.init_client(fetch(CLIENT_WASM)),
+]);
+
+const worker = await perspective.worker();
+
+async function getTable() {
+    const req = fetch(SUPERSTORE_ARROW);
     const resp = await req;
     const buffer = await resp.arrayBuffer();
-    return await worker.table(buffer as any);
-};
+    return await worker.table(buffer);
+}
 
-const config: PerspectiveViewerConfig = {
+const config: ViewerConfigUpdate = {
     group_by: ["State"],
 };
 
 const App = (): React.ReactElement => {
-    const viewer = React.useRef<HTMLPerspectiveViewerElement>(null);
-
+    const viewer = React.useRef(null);
     React.useEffect(() => {
         getTable().then((table) => {
             if (viewer.current) {
@@ -52,6 +63,4 @@ const App = (): React.ReactElement => {
     return <perspective-viewer ref={viewer}></perspective-viewer>;
 };
 
-window.addEventListener("load", () => {
-    ReactDOM.render(<App />, document.getElementById("root"));
-});
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);

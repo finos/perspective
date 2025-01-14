@@ -40,35 +40,50 @@ async function build_all() {
 
     // JavaScript
     const BUILD = [
+        // WASM assets inlined into a single monolithic `.js` file. No special
+        // loades required, this version of Perspective should be the easiest
+        // to use but also the least performant at load time.
+        // {
+        //     'Import via `<script type="module">`': true,
+        //     "Requires WASM bootstrap": false,
+        //     "Load as binary": false,
+        //     "Bundler friendly": true,
+        // },
         {
-            entryPoints: ["src/ts/perspective-viewer.ts"],
+            entryPoints: ["src/ts/perspective-viewer.inline.ts"],
             format: "esm",
-            plugins: [
-                PerspectiveEsbuildPlugin({
-                    wasm: { inline: true },
-                }),
-            ],
+            plugins: [PerspectiveEsbuildPlugin()],
+            loader: { ".wasm": "binary" },
             outfile: "dist/esm/perspective-viewer.inline.js",
         },
+        // No WASM assets inlined or linked.
+        // {
+        //     'Import via `<script type="module">`': true, // *****
+        //     "Requires WASM bootstrap": true,
+        //     "Load as binary": true,
+        //     "Bundler friendly": true,
+        // },
         {
             entryPoints: ["src/ts/perspective-viewer.ts"],
             format: "esm",
-            plugins: [NodeModulesExternal()],
             external: ["*.wasm"],
             outdir: "dist/esm",
         },
+        // WASM assets linked to relative path via `fetch()`. This efficiently
+        // loading build is great for `<script>` tags but will give many
+        // bundlers trouble.
+        // {
+        //     'Import via `<script type="module">`': true,
+        //     "Requires WASM bootstrap": false,
+        //     "Load as binary": true,
+        //     "Bundler friendly": false,
+        // },
         {
-            entryPoints: ["src/ts/perspective-viewer.ts"],
-            format: "esm",
-            plugins: [PerspectiveEsbuildPlugin({ wasm: { inline: true } })],
-            outfile: "dist/esm/perspective-viewer.inline.js",
-        },
-        {
-            entryPoints: ["src/ts/perspective-viewer.ts"],
+            entryPoints: ["src/ts/perspective-viewer.cdn.ts"],
             format: "esm",
             plugins: [PerspectiveEsbuildPlugin()],
-            splitting: true,
-            outdir: "dist/cdn",
+            loader: { ".wasm": "file" },
+            outfile: "dist/cdn/perspective-viewer.js",
         },
     ];
 

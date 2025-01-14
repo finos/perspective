@@ -5,7 +5,7 @@
     "description": "An esbuild example app built using `@finos/perspective-viewer`.",
     "scripts": {
         "build": "node build.js",
-        "start": "pnpm run build && http-server dist"
+        "start": "node build.js && http-server dist"
     },
     "keywords": [],
     "license": "Apache-2.0",
@@ -14,11 +14,9 @@
         "@finos/perspective-viewer": "workspace:^",
         "@finos/perspective-viewer-d3fc": "workspace:^",
         "@finos/perspective-viewer-datagrid": "workspace:^",
-        "@finos/perspective-viewer-openlayers": "workspace:^",
         "superstore-arrow": "^3.0.0"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "workspace:^",
         "esbuild": "^0.14.54",
         "http-server": "^14.1.1"
     }

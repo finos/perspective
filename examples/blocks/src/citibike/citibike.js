@@ -85,7 +85,7 @@ async function main() {
     }
 
     // Start a recurring asyn call to `get_feed` and update the `table` with the response.
-    get_feed("station_status", table.update);
+    get_feed("station_status", table.update.bind(table));
 
     window.workspace.tables.set("citibike", Promise.resolve(table));
     const layout = await get_layout();

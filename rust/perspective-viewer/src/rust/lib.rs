@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+//! The API for the [`@finos/perspective-viewer`]() JavaScript library.
+
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
@@ -22,7 +24,6 @@
     clippy::panic_in_result_fn,
     clippy::await_holding_refcell_ref
 )]
-#![doc = include_str!("../../docs/viewer.md")]
 
 pub mod components;
 pub mod config;
@@ -50,7 +51,7 @@ use crate::utils::define_web_component;
 
 // #[wasm_bindgen(typescript_custom_section)]
 // const TS_APPEND_CONTENT: &'static str = r#"
-// import type * as perspective from "../../dist/pkg/ViewConfigUpdate.ts";
+// import type * as perspective from "../../dist/wasm/ViewConfigUpdate.ts";
 // "#;
 
 /// Register a plugin globally.
@@ -60,64 +61,6 @@ pub fn registerPlugin(name: &str) {
     use crate::renderer::*;
     PLUGIN_REGISTRY.register_plugin(name);
 }
-
-// // #[cfg(feature = "metadata")]
-// #[wasm_bindgen(js_name = "getTypes")]
-// pub fn generate_type_bindings() -> String {
-//     use perspective_js::generate_type_bindings;
-//     use specta::ts;
-//     use specta::ts::ExportConfig;
-//     let mut parts = vec![];
-//     let config = ExportConfig::default();
-//     use config::*;
-
-//     parts.push(ts::export::<CompactDisplay>(&config).unwrap());
-//     parts.push(ts::export::<NumberBackgroundMode>(&config).unwrap());
-//     parts.push(ts::export::<NumberForegroundMode>(&config).unwrap());
-//     parts.push(ts::export::<CurrencySign>(&config).unwrap());
-//     parts.push(ts::export::<CurrencyDisplay>(&config).unwrap());
-//     parts.push(ts::export::<CurrencyCode>(&config).unwrap());
-//     parts.push(ts::export::<UnitDisplay>(&config).unwrap());
-//     parts.push(ts::export::<Unit>(&config).unwrap());
-//     parts.push(ts::export::<SignDisplay>(&config).unwrap());
-//     parts.push(ts::export::<UseGrouping>(&config).unwrap());
-//     parts.push(ts::export::<RoundingPriority>(&config).unwrap());
-//     parts.push(ts::export::<RoundingMode>(&config).unwrap());
-//     parts.push(ts::export::<TrailingZeroDisplay>(&config).unwrap());
-//     parts.push(ts::export::<SimpleDatetimeStyleConfig>(&config).unwrap());
-//     parts.push(ts::export::<SimpleDatetimeFormat>(&config).unwrap());
-//     parts.push(ts::export::<CustomDatetimeStyleConfig>(&config).unwrap());
-//     parts.push(ts::export::<FormatUnit>(&config).unwrap());
-//     parts.push(ts::export::<CustomDatetimeFormat>(&config).unwrap());
-//     parts.push(ts::export::<DatetimeColorMode>(&config).unwrap());
-//     parts.push(ts::export::<OptionalUpdate<()>>(&config).unwrap());
-//     parts.push(ts::export::<StringColumnStyleConfig>(&config).unwrap());
-//     parts.push(ts::export::<FormatMode>(&config).unwrap());
-//     parts.push(ts::export::<StringColorMode>(&config).unwrap());
-//     parts.push(ts::export::<CustomNumberFormatConfig>(&config).unwrap());
-//     parts.push(ts::export::<Notation>(&config).unwrap());
-//     parts.push(ts::export::<RoundingIncrement>(&config).unwrap());
-//     parts.push(ts::export::<UnitNumberFormatStyle>(&config).unwrap());
-//     parts.push(ts::export::<CurrencyNumberFormatStyle>(&config).unwrap());
-//     parts.push(ts::export::<NumberFormatStyle>(&config).unwrap());
-//     parts.push(ts::export::<NumberColumnStyleConfig>(&config).unwrap());
-//     parts.push(ts::export::<DatetimeColumnStyleConfig>(&config).unwrap());
-//     parts.push(ts::export::<DatetimeFormatType>(&config).unwrap());
-//     parts.push(ts::export::<ColumnConfigValues>(&config).unwrap());
-//     parts.push(ts::export::<ViewerConfigUpdate>(&config).unwrap());
-//     format!("{}\n{}", generate_type_bindings(), parts.join("\n\n"))
-// }
-
-/// Export all ExprTK commands, for use in generating documentation.
-// #[cfg(feature = "metadata")]
-// #[wasm_bindgen(js_name = "getExprTKCommands")]
-// pub fn js_get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
-//     crate::exprtk::COMPLETIONS.with(|x| {
-//         Ok(x.iter()
-//             .map(<JsValue as JsValueSerdeExt>::from_serde_ext)
-//             .collect::<Result<Box<[_]>, _>>()?)
-//     })
-// }
 
 /// Register this crate's Custom Elements in the browser's current session.
 ///

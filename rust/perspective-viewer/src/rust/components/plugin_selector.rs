@@ -129,7 +129,9 @@ impl Component for PluginSelector {
                 <div id="plugin_selector_container" {class}>
                     <PluginSelect name={plugin_name} on_click={callback} />
                     <div id="plugin_selector_border" />
-                    if self.is_open { { items.collect::<Html>() } }
+                    if self.is_open {
+                        <div class="plugin-selector-options">{ items.collect::<Html>() }</div>
+                    }
                 </div>
             </>
         }

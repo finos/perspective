@@ -1,6 +1,10 @@
 <br />
-<a href="https://github.com/finos/perspective/blob/master/docs/static/svg/perspective-logo-light.svg?raw=true#gh-light-mode-only"><img src="https://github.com/finos/perspective/raw/master/docs/static/svg/perspective-logo-light.svg?raw=true#gh-light-mode-only" alt="Perspective" width="260"></a>
-<a href="https://github.com/finos/perspective/blob/master/docs/static/svg/perspective-logo-dark.svg?raw=true#gh-dark-mode-only"><img src="https://github.com/finos/perspective/raw/master/docs/static/svg/perspective-logo-dark.svg?raw=true#gh-dark-mode-only" alt="Perspective" width="260"></a>
+<a href="https://perspective.finos.org">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://github.com/finos/perspective/raw/master/docs/static/svg/perspective-logo-dark.svg?raw=true">
+<img width="260" src="https://github.com/finos/perspective/raw/master/docs/static/svg/perspective-logo-light.svg?raw=true">
+</picture>
+</a>
 <br/><br/>
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/finos/perspective/build.yaml?event=push&style=for-the-badge)](https://github.com/finos/perspective/actions/workflows/build.yaml)
@@ -13,8 +17,7 @@
 Perspective is an <i>interactive</i> analytics and data visualization component,
 which is especially well-suited for <i>large</i> and/or <i>streaming</i>
 datasets. Use it to create user-configurable reports, dashboards, notebooks and
-applications, then deploy stand-alone in the browser, or in concert with Python
-and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
+applications.
 
 ### Features
 
@@ -28,35 +31,20 @@ and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 -   A framework-agnostic User Interface packaged as a
     [Custom Element](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements),
     powered either in-browser via WebAssembly or virtually via WebSocket server
-    (Python/Node).
+    (Python/Node/Rust).
 
 -   A [JupyterLab](https://jupyter.org/) widget and Python client library, for
     interactive data analysis in a notebook, as well as _scalable_ production
-    [Voila](https://github.com/voila-dashboards/voila) applications.
+    applications.
 
 ### Documentation
 
 -   [Project Site](https://perspective.finos.org/)
--   JavaScript (NPM)
-    -   [`@finos/perspective-viewer`, JavaScript UI API](https://docs.rs/perspective-viewer/latest/perspective_viewer/)
-    -   [`@finos/perspective`, JavaScript Client/Server API](https://docs.rs/perspective-js/latest/perspective_js/)
-    -   [`Table` API](https://docs.rs/perspective-js/latest/perspective_js/struct.Table.html)
-    -   [`View` API](https://docs.rs/perspective-js/latest/perspective_js/struct.View.html)
-    -   [Installation Guide](https://docs.rs/perspective-js/latest/perspective_js/#installation)
--   Python (PyPI)
-    -   [`perspective-python`, Python Client/Server API](https://docs.rs/perspective-python/latest/perspective_python/)
-    -   [`PerspectiveWidget` Jupyter Plugin](https://docs.rs/perspective-python/latest/perspective_python/#perspectivewidget)
-    -   [`Table` API](https://docs.rs/perspective-python/latest/perspective_python/struct.Table.html)
-    -   [`View` API](https://docs.rs/perspective-python/latest/perspective_python/struct.View.html)
--   Rust (Crates.io)
-    -   [`perspective`, Rust API](https://docs.rs/perspective-rs/latest/perspective_rs/)
-        -   [`perspective-client`, Rust Client API](https://docs.rs/perspective-client/latest/perspective_client/)
-        -   [`perspective-server`, Rust Server API](https://docs.rs/perspective-server/latest/perspective_server/)
-    -   [`Table` API](https://docs.rs/perspective-client/latest/perspective_client/struct.Table.html)
-    -   [`View` API](https://docs.rs/perspective-client/latest/perspective_client/struct.View.html)
--   Appendix
-    -   [Data Binding](https://docs.rs/perspective-server/latest/perspective_server/)
-    -   [Expression Columns](https://docs.rs/perspective-client/latest/perspective_client/config/expressions/)
+-   [User Guide](https://perspective.finos.org/guide/)
+-   [`@finos/perspective`, JavaScript Client API](https://docs.rs/perspective-js/latest/perspective_js/)
+-   [`@finos/perspective-viewer`, JavaScript UI API](https://docs.rs/perspective-viewer/latest/perspective_viewer/)
+-   [`perspective-python`, Python API](https://docs.rs/perspective-python/latest/perspective_python/)
+-   [`perspective`, Rust API](https://docs.rs/perspective-rs/latest/perspective_rs/)
 
 ### Examples
 

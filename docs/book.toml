@@ -1,0 +1,42 @@
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+[book]
+authors = ["Andrew Stein"]
+language = "en"
+multilingual = false
+src = "md"
+title = "Perspective"
+
+[build]
+build-dir = "static/guide"
+
+[output.html]
+# theme = "my-theme"
+# default-theme = "light"
+# preferred-dark-theme = "navy"
+# smart-punctuation = true
+# mathjax-support = false
+copy-fonts = true
+git-repository-url = "https://github.com/finos/perspective"
+git-repository-icon = "fa-github"
+site-url = "https://perspective.finos.org/guide/"
+additional-css = [
+    "md/perspective.css",
+    "node_modules/@finos/perspective-viewer/dist/css/themes.css",
+]
+# additional-js = []
+# no-section-label = false
+# edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"
+# site-url = "/guide/"
+# cname = "myproject.rs"
+# input-404 = "not-found.md"
