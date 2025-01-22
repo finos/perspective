@@ -168,7 +168,14 @@ async function focus_package() {
             message: "Focus NPM package(s)?",
             default: () => {
                 if (CONFIG["PACKAGE"]) {
-                    return CONFIG["PACKAGE"].split(",");
+                    const packages = CONFIG["PACKAGE"].split(",");
+                    if (CONFIG["PSP_PYODIDE"] === "1") {
+                        const py = packages.indexOf("perspective-python");
+                        if (py >= 0) {
+                            packages[py] = "perspective-pyodide";
+                        }
+                    }
+                    return packages;
                 } else {
                     return [""];
                 }
