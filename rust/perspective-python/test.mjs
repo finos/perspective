@@ -41,6 +41,8 @@ if (process.env.PSP_PYODIDE) {
             "--runtime=chrome",
             `--dist-dir=${pyodideDistDir}`,
             `--perspective-emscripten-wheel=${emscriptenWheel}`,
+            "--verbose",
+            ...process.argv.slice(2),
         ],
         execOpts
     );
