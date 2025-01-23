@@ -42,6 +42,10 @@ if (process.env.PSP_PYODIDE) {
             `--dist-dir=${pyodideDistDir}`,
             `--perspective-emscripten-wheel=${emscriptenWheel}`,
             "--verbose",
+            "--timeout=300",
+            // with --timeout_method=signal, tests hang.  seems like the
+            // pytest-pyodide webserver fixture does not shut down
+            "--timeout_method=thread",
             ...process.argv.slice(2),
         ],
         execOpts

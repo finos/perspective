@@ -2,4 +2,4 @@
 pytest==8.2.2
 pytest-playwright==0.5.2
 pytest-pyodide==0.58.3
-
+pytest-timeout==2.3.1
