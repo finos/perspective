@@ -108,6 +108,7 @@ load_file(
 
         std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
         auto num_batches = batch_reader->num_record_batches();
+        batches.reserve(num_batches);
         for (int i = 0; i < num_batches; ++i) {
             auto status2 = batch_reader->ReadRecordBatch(i);
             if (!status2.ok()) {

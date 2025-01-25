@@ -92,7 +92,6 @@ export function init_client(wasm: PerspectiveWasm, disable_stage_0 = false) {
                     .arrayBuffer()
                     .then((x) => compilerize(x, disable_stage_0));
             } else {
-                // } else if (wasm instanceof Object) {
                 return wasm as typeof psp;
             }
         });
@@ -123,17 +122,6 @@ function get_server() {
 }
 
 let GLOBAL_WORKER: undefined | (() => Promise<Worker>) = undefined;
-
-// function init_worker(worker) {
-//     GLOBAL_WORKER = worker;
-// }
-
-// function perspective_wasm_worker() {
-//     return new Worker(
-//         new URL("./perspective-server.worker.js", import.meta.url),
-//         { type: "module" }
-//     );
-// }
 
 // Inline the worker for now. This code will eventually allow outlining this resource
 // @ts-ignore
