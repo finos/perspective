@@ -1,3 +1,11 @@
+# [v3.3.1](https://github.com/finos/perspective/releases/tag/v3.3.1)
+
+_27 January 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.3.0...v3.3.1))
+
+Fixes
+
+- Fix `date` formatting for `perspective-viewer-datagrid` plugin [#2904](https://github.com/finos/perspective/pull/2904)
+
 # [v3.3.0](https://github.com/finos/perspective/releases/tag/v3.3.0)
 
 _14 January 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.2.1...v3.3.0))

@@ -142,7 +142,7 @@ const config = {
                         label: "Examples",
                     },
                     {
-                        href: "https://www.prospective.co/blog",
+                        href: "https://prospective.co/blog",
                         label: "Blog",
                         position: "right",
                     },
