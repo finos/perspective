@@ -10,14 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// import * as perspective_server from "../../../dist/wasm/perspective-server.js";
 import * as perspective_server from "./perspective-server.poly.ts";
-
 export type * from "../../../dist/wasm/perspective-js.js";
 import type * as perspective_server_t from "../../../dist/wasm/perspective-server.js";
 
 export type PspPtr = BigInt | number;
-
 export type EmscriptenServer = bigint | number;
 
 export async function compile_perspective(
@@ -48,7 +45,11 @@ export async function compile_perspective(
                     return ptr;
                 },
                 psp_heap_size() {
-                    return module.HEAPU8.buffer.byteLength;
+                    if (module._psp_is_memory64()) {
+                        return BigInt(module.HEAPU8.buffer.byteLength);
+                    } else {
+                        return module.HEAPU8.buffer.byteLength;
+                    }
                 },
             };
 
