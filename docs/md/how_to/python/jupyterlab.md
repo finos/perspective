@@ -9,7 +9,7 @@ for the managed `View`:
 
 ```python
 from perspective.widget import PerspectiveWidget
-w = perspective.PerspectiveWidget(
+w = PerspectiveWidget(
     data,
     plugin="X Bar",
     aggregates={"datetime": "any"},
