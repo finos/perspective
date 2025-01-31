@@ -203,25 +203,25 @@ public:
 
     static std::shared_ptr<Table> from_csv(
         const std::string& index,
-        const std::string_view& data,
+        std::string&& data,
         std::uint32_t limit = std::numeric_limits<std::uint32_t>::max()
     );
 
     static std::shared_ptr<Table> from_cols(
         const std::string& index,
-        const std::string_view& data,
+        std::string&& data,
         std::uint32_t limit = std::numeric_limits<std::uint32_t>::max()
     );
 
     static std::shared_ptr<Table> from_rows(
         const std::string& index,
-        const std::string_view& data,
+        std::string&& data,
         std::uint32_t limit = std::numeric_limits<std::uint32_t>::max()
     );
 
     static std::shared_ptr<Table> from_ndjson(
         const std::string& index,
-        const std::string_view& data,
+        std::string&& data,
         std::uint32_t limit = std::numeric_limits<std::uint32_t>::max()
     );
 
@@ -233,7 +233,7 @@ public:
 
     static std::shared_ptr<Table> from_arrow(
         const std::string& index,
-        const std::string_view& data,
+        std::string&& data,
         std::uint32_t limit = std::numeric_limits<std::uint32_t>::max()
     );
 
