@@ -625,7 +625,7 @@ namespace server {
         );
 
         std::vector<ProtoServerResp<Response>>
-        _handle_request(std::uint32_t client_id, const Request& req);
+        _handle_request(std::uint32_t client_id, Request&& req);
 
         std::vector<ProtoServerResp<Response>> _poll();
 

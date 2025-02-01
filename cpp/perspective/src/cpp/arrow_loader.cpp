@@ -138,6 +138,7 @@ using namespace perspective;
 
 ArrowLoader::ArrowLoader() = default;
 ArrowLoader::~ArrowLoader() = default;
+ArrowLoader::ArrowLoader(ArrowLoader&&) noexcept = default;
 
 t_dtype
 convert_type(const std::string& src) {
@@ -483,6 +484,11 @@ copy_array(
 
             t_vocab* vocab = dest->_get_vocab();
             std::string elem;
+
+            vocab->reserve(
+                dict->value_data()->size() + dsize, // vocab len + null bytes
+                dsize
+            );
 
             for (std::uint64_t i = 0; i < dsize; ++i) {
                 std::int32_t bidx = offsets[i];

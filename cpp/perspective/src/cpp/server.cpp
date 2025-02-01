@@ -682,13 +682,16 @@ ProtoServer::handle_request(
     req_env.ParseFromString(data);
     std::vector<ProtoServerResp<std::string>> serialized_responses;
     std::vector<proto::Response> responses;
+
+    auto msg_id = req_env.msg_id();
+    auto entity_id = req_env.entity_id();
     try {
-        auto resp_msg = _handle_request(client_id, req_env);
+        auto resp_msg = _handle_request(client_id, std::move(req_env));
         for (auto& resp : resp_msg) {
             ProtoServerResp<std::string> str_resp;
             str_resp.data = resp.data.SerializeAsString();
             str_resp.client_id = resp.client_id;
-            serialized_responses.emplace_back(str_resp);
+            serialized_responses.emplace_back(std::move(str_resp));
         }
     } catch (const PerspectiveException& e) {
         proto::Response resp;
@@ -718,13 +721,13 @@ ProtoServer::handle_request(
     // proto::Response resp_env;
     serialized_responses.reserve(responses.size());
     for (auto& resp : responses) {
-        resp.set_msg_id(req_env.msg_id());
-        resp.set_entity_id(req_env.entity_id());
+        resp.set_msg_id(msg_id);
+        resp.set_entity_id(entity_id);
 
         ProtoServerResp<std::string> str_resp;
         str_resp.data = resp.SerializeAsString();
         str_resp.client_id = client_id;
-        serialized_responses.emplace_back(str_resp);
+        serialized_responses.emplace_back(std::move(str_resp));
     }
 
     return serialized_responses;
@@ -1148,7 +1151,7 @@ coerce_to(const t_dtype dtype, const A& val) {
 }
 
 std::vector<ProtoServerResp<ProtoServer::Response>>
-ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
+ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
     static bool is_init_expr = false;
     if (!is_init_expr) {
         t_computed_expression_parser::init();
@@ -1157,9 +1160,13 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
 
     std::vector<ProtoServerResp<ProtoServer::Response>> proto_resp;
     // proto::Response resp_env;
+
+    auto msg_id = req.msg_id();
+    auto entity_id = req.entity_id();
+
     auto push_resp = [&](Response&& resp) {
-        resp.set_msg_id(req.msg_id());
-        resp.set_entity_id(req.entity_id());
+        resp.set_msg_id(msg_id);
+        resp.set_entity_id(entity_id);
         ProtoServerResp<ProtoServer::Response> resp2;
         resp2.data = std::move(resp);
         resp2.client_id = client_id;
@@ -1280,32 +1287,42 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                         dims.end_col
                     );
 
-                    table = Table::from_arrow(index, *arrow, limit);
+                    table = Table::from_arrow(index, std::move(*arrow), limit);
                     break;
                 }
                 case proto::MakeTableData::kFromArrow: {
-                    table =
-                        Table::from_arrow(index, r.data().from_arrow(), limit);
+                    std::string data = r.data().from_arrow();
+                    { auto _ = std::move(req); }
+
+                    table = Table::from_arrow(index, std::move(data), limit);
                     break;
                 }
                 case proto::MakeTableData::kFromCsv: {
-                    table = Table::from_csv(index, r.data().from_csv(), limit);
+                    std::string data = r.data().from_csv();
+                    { auto _ = std::move(req); }
+
+                    table = Table::from_csv(index, std::move(data), limit);
                     break;
                 }
                 case proto::MakeTableData::kFromCols: {
-                    table =
-                        Table::from_cols(index, r.data().from_cols(), limit);
+                    std::string data = r.data().from_cols();
+                    { auto _ = std::move(req); }
+
+                    table = Table::from_cols(index, std::move(data), limit);
                     break;
                 }
                 case proto::MakeTableData::kFromRows: {
-                    table =
-                        Table::from_rows(index, r.data().from_rows(), limit);
+                    std::string data = r.data().from_rows();
+                    { auto _ = std::move(req); }
+
+                    table = Table::from_rows(index, std::move(data), limit);
                     break;
                 }
                 case proto::MakeTableData::kFromNdjson: {
-                    table = Table::from_ndjson(
-                        index, r.data().from_ndjson(), limit
-                    );
+                    std::string data = r.data().from_ndjson();
+                    { auto _ = std::move(req); }
+
+                    table = Table::from_ndjson(index, std::move(data), limit);
                     break;
                 }
                 case proto::MakeTableData::kFromSchema: {
@@ -1327,7 +1344,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, const Request& req) {
                 }
             }
 
-            m_resources.host_table(req.entity_id(), table);
+            m_resources.host_table(entity_id, table);
             proto::Response resp;
             resp.mutable_make_table_resp();
             push_resp(std::move(resp));

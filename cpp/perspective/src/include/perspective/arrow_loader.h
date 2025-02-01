@@ -32,6 +32,7 @@ namespace apachearrow {
     public:
         ArrowLoader();
         ~ArrowLoader();
+        ArrowLoader(ArrowLoader&& other) noexcept;
 
         /**
          * @brief Initialize the arrow loader with a pointer to a binary.

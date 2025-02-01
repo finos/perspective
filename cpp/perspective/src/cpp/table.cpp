@@ -360,15 +360,13 @@ Table::update_csv(const std::string_view& data, std::uint32_t port_id) {
 
 std::shared_ptr<Table>
 Table::from_csv(
-    const std::string& index, const std::string_view& data, std::uint32_t limit
+    const std::string& index, std::string&& data, std::uint32_t limit
 ) {
-    auto pool = std::make_shared<t_pool>();
-    pool->init();
     auto map =
         std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>();
 
     apachearrow::ArrowLoader arrow_loader;
-    arrow_loader.init_csv(data.data(), false, map);
+    arrow_loader.init_csv(data, false, map);
 
     std::vector<std::string> column_names;
     std::vector<t_dtype> data_types;
@@ -390,14 +388,22 @@ Table::from_csv(
     std::uint32_t row_count = 0;
     row_count = arrow_loader.row_count();
 
-    t_data_table data_table(output_schema);
-    data_table.init();
-    data_table.extend(row_count);
-    arrow_loader.fill_table(data_table, input_schema, index, 0, limit, false);
+    auto data_table = std::make_shared<t_data_table>(output_schema);
+    data_table->init();
+
+    {
+        auto _ = std::move(data);
+        auto loader = std::move(arrow_loader);
+        data_table->extend(row_count);
+        loader.fill_table(*data_table, input_schema, index, 0, limit, false);
+    }
+    auto pool = std::make_shared<t_pool>();
+    pool->init();
     auto tbl =
         std::make_shared<Table>(pool, column_names, data_types, limit, index);
 
-    tbl->init(data_table, row_count, t_op::OP_INSERT, 0);
+    tbl->init(*data_table, row_count, t_op::OP_INSERT, 0);
+    data_table.reset();
     pool->_process();
     return tbl;
 }
@@ -986,11 +992,8 @@ Table::update_cols(const std::string_view& data, std::uint32_t port_id) {
 
 std::shared_ptr<Table>
 Table::from_cols(
-    const std::string& index, const std::string_view& data, std::uint32_t limit
+    const std::string& index, std::string&& data, std::uint32_t limit
 ) {
-    auto pool = std::make_shared<t_pool>();
-    pool->init();
-
     // 1.) Infer schema
     rapidjson::Document document;
     document.Parse(data.data());
@@ -1035,21 +1038,21 @@ Table::from_cols(
     t_schema schema(column_names, data_types);
 
     // 2.) Create table
-    t_data_table data_table(schema);
-    data_table.init();
-    data_table.extend(nrows);
+    auto data_table = std::make_unique<t_data_table>(schema);
+    data_table->init();
+    data_table->extend(nrows);
 
     if (is_implicit) {
         // TODO should this be t_uindex?
-        data_table.add_column("psp_pkey", DTYPE_INT32, true);
-        data_table.add_column("psp_okey", DTYPE_INT32, true);
+        data_table->add_column("psp_pkey", DTYPE_INT32, true);
+        data_table->add_column("psp_okey", DTYPE_INT32, true);
     } else {
-        data_table.add_column("psp_pkey", schema.get_dtype(index), true);
-        data_table.add_column("psp_okey", schema.get_dtype(index), true);
+        data_table->add_column("psp_pkey", schema.get_dtype(index), true);
+        data_table->add_column("psp_okey", schema.get_dtype(index), true);
     }
 
-    const auto& psp_pkey_col = data_table.get_column("psp_pkey");
-    const auto& psp_okey_col = data_table.get_column("psp_okey");
+    const auto& psp_pkey_col = data_table->get_column("psp_pkey");
+    const auto& psp_okey_col = data_table->get_column("psp_okey");
 
     // 3.) Fill table
     for (const auto& col : document.GetObj()) {
@@ -1061,7 +1064,7 @@ Table::from_cols(
             << dtype_to_str(data_table.get_column(col_name)->get_dtype())
         );
         for (const auto& cell : col.value.GetArray()) {
-            auto col = data_table.get_column(col_name);
+            auto col = data_table->get_column(col_name);
             auto promote = fill_column_json(col, ii, cell, false);
             if (promote) {
                 LOG_DEBUG(
@@ -1069,8 +1072,8 @@ Table::from_cols(
                                         << dtype_to_str(col->get_dtype())
                                         << " to " << dtype_to_str(*promote)
                 );
-                data_table.promote_column(col_name, *promote, ii, true);
-                col = data_table.get_column(col_name);
+                data_table->promote_column(col_name, *promote, ii, true);
+                col = data_table->get_column(col_name);
                 fill_column_json(col, ii, cell, false);
             }
 
@@ -1090,11 +1093,17 @@ Table::from_cols(
         }
     }
 
+    { auto _ = std::move(document); }
+    { auto _ = std::move(data); }
+
+    auto pool = std::make_shared<t_pool>();
+    pool->init();
     auto tbl = std::make_shared<Table>(
         pool, schema.columns(), schema.types(), limit, index
     );
 
-    tbl->init(data_table, nrows, t_op::OP_INSERT, 0);
+    tbl->init(*data_table, nrows, t_op::OP_INSERT, 0);
+    data_table.reset();
     pool->_process();
     return tbl;
 }
@@ -1218,11 +1227,8 @@ Table::update_rows(const std::string_view& data, std::uint32_t port_id) {
 
 std::shared_ptr<Table>
 Table::from_rows(
-    const std::string& index, const std::string_view& data, std::uint32_t limit
+    const std::string& index, std::string&& data, std::uint32_t limit
 ) {
-    auto pool = std::make_shared<t_pool>();
-    pool->init();
-
     // 1.) Infer schema
     rapidjson::Document document;
     document.Parse(data.data());
@@ -1288,27 +1294,27 @@ Table::from_rows(
     t_schema schema(column_names, data_types);
 
     // 2.) Create table
-    t_data_table data_table(schema);
-    data_table.init();
-    data_table.extend(document.Size());
+    auto data_table = std::make_unique<t_data_table>(schema);
+    data_table->init();
+    data_table->extend(document.Size());
 
     if (is_implicit) {
-        data_table.add_column("psp_pkey", DTYPE_INT32, true);
-        data_table.add_column("psp_okey", DTYPE_INT32, true);
+        data_table->add_column("psp_pkey", DTYPE_INT32, true);
+        data_table->add_column("psp_okey", DTYPE_INT32, true);
     } else {
-        data_table.add_column("psp_pkey", schema.get_dtype(index), true);
-        data_table.add_column("psp_okey", schema.get_dtype(index), true);
+        data_table->add_column("psp_pkey", schema.get_dtype(index), true);
+        data_table->add_column("psp_okey", schema.get_dtype(index), true);
     }
 
     std::int32_t ii = 0;
 
-    const auto& psp_pkey_col = data_table.get_column("psp_pkey");
-    const auto& psp_okey_col = data_table.get_column("psp_okey");
+    const auto& psp_pkey_col = data_table->get_column("psp_pkey");
+    const auto& psp_okey_col = data_table->get_column("psp_okey");
 
     // 3.) Fill table
     for (const auto& row : document.GetArray()) {
         for (const auto& it : row.GetObj()) {
-            auto col = data_table.get_column(it.name.GetString());
+            auto col = data_table->get_column(it.name.GetString());
             const auto* col_name = it.name.GetString();
             const auto& cell = it.value;
             auto promote = fill_column_json(col, ii, cell, false);
@@ -1318,8 +1324,8 @@ Table::from_rows(
                                         << dtype_to_str(col->get_dtype())
                                         << " to " << dtype_to_str(*promote)
                 );
-                data_table.promote_column(col_name, *promote, ii, true);
-                col = data_table.get_column(col_name);
+                data_table->promote_column(col_name, *promote, ii, true);
+                col = data_table->get_column(col_name);
                 fill_column_json(col, ii, cell, false);
             }
 
@@ -1337,11 +1343,17 @@ Table::from_rows(
         ii++;
     }
 
+    { auto _ = std::move(document); }
+    { auto _ = std::move(data); }
+
+    auto pool = std::make_shared<t_pool>();
+    pool->init();
     auto tbl = std::make_shared<Table>(
         pool, schema.columns(), schema.types(), limit, index
     );
 
-    tbl->init(data_table, document.Size(), t_op::OP_INSERT, 0);
+    tbl->init(*data_table, document.Size(), t_op::OP_INSERT, 0);
+    data_table.reset();
     pool->_process();
     return tbl;
 }
@@ -1460,11 +1472,8 @@ Table::update_ndjson(const std::string_view& data, std::uint32_t port_id) {
 
 std::shared_ptr<Table>
 Table::from_ndjson(
-    const std::string& index, const std::string_view& data, std::uint32_t limit
+    const std::string& index, std::string&& data, std::uint32_t limit
 ) {
-    auto pool = std::make_shared<t_pool>();
-    pool->init();
-
     // 1.) Infer schema
     rapidjson::Document document;
     rapidjson::StringStream s(data.data());
@@ -1527,20 +1536,20 @@ Table::from_ndjson(
     t_schema schema(column_names, data_types);
 
     // 2.) Create table
-    t_data_table data_table(schema);
-    data_table.init();
+    auto data_table = std::make_unique<t_data_table>(schema);
+    data_table->init();
 
     if (is_implicit) {
-        data_table.add_column("psp_pkey", DTYPE_INT32, true);
-        data_table.add_column("psp_okey", DTYPE_INT32, true);
+        data_table->add_column("psp_pkey", DTYPE_INT32, true);
+        data_table->add_column("psp_okey", DTYPE_INT32, true);
     } else {
-        data_table.add_column("psp_pkey", schema.get_dtype(index), true);
-        data_table.add_column("psp_okey", schema.get_dtype(index), true);
+        data_table->add_column("psp_pkey", schema.get_dtype(index), true);
+        data_table->add_column("psp_okey", schema.get_dtype(index), true);
     }
 
     std::int32_t ii = 0;
-    const auto& psp_pkey_col = data_table.get_column("psp_pkey");
-    const auto& psp_okey_col = data_table.get_column("psp_okey");
+    const auto& psp_pkey_col = data_table->get_column("psp_pkey");
+    const auto& psp_okey_col = data_table->get_column("psp_okey");
 
     // 2a.) Estimate row size to reduce malloc pressure.
     auto newlines = 0;
@@ -1550,13 +1559,13 @@ Table::from_ndjson(
         }
     }
 
-    data_table.reserve(newlines + 1);
+    data_table->reserve(newlines + 1);
 
     // 3.) Fill table
     bool is_finished = false;
     while (!is_finished) {
         for (const auto& it : document.GetObj()) {
-            auto col = data_table.get_column(it.name.GetString());
+            auto col = data_table->get_column(it.name.GetString());
             const auto* col_name = it.name.GetString();
             const auto& cell = it.value;
             auto promote = fill_column_json(col, ii, cell, false);
@@ -1567,8 +1576,8 @@ Table::from_ndjson(
                                         << " to " << dtype_to_str(*promote)
                 );
 
-                data_table.promote_column(col_name, *promote, ii, true);
-                col = data_table.get_column(col_name);
+                data_table->promote_column(col_name, *promote, ii, true);
+                col = data_table->get_column(col_name);
                 fill_column_json(col, ii, cell, false);
             }
 
@@ -1590,12 +1599,19 @@ Table::from_ndjson(
         }
     }
 
-    data_table.extend(ii);
+    data_table->extend(ii);
+
+    { auto _ = std::move(document); }
+    { auto _ = std::move(data); }
+
+    auto pool = std::make_shared<t_pool>();
+    pool->init();
     auto tbl = std::make_shared<Table>(
         pool, schema.columns(), schema.types(), limit, index
     );
 
-    tbl->init(data_table, ii, t_op::OP_INSERT, 0);
+    tbl->init(*data_table, ii, t_op::OP_INSERT, 0);
+    data_table.reset();
     pool->_process();
     return tbl;
 }
@@ -1671,7 +1687,7 @@ Table::update_arrow(const std::string_view& data, std::uint32_t port_id) {
 
 std::shared_ptr<Table>
 Table::from_arrow(
-    const std::string& index, const std::string_view& data, std::uint32_t limit
+    const std::string& index, std::string&& data, std::uint32_t limit
 ) {
     apachearrow::ArrowLoader arrow_loader;
 
@@ -1698,18 +1714,23 @@ Table::from_arrow(
     }
 
     t_schema output_schema{columns, types};
-    t_data_table data_table{output_schema};
-    data_table.init();
+    auto data_table = std::make_unique<t_data_table>(output_schema);
+    data_table->init();
 
-    auto row_count = arrow_loader.row_count();
-    data_table.extend(row_count);
-    arrow_loader.fill_table(data_table, input_schema, index, 0, limit, false);
+    {
+        auto _ = std::move(data);
+        auto loader = std::move(arrow_loader);
+        auto row_count = loader.row_count();
+        data_table->extend(row_count);
+        loader.fill_table(*data_table, input_schema, index, 0, limit, false);
+    }
 
     // Make Table
     auto pool = std::make_shared<t_pool>();
     pool->init();
     auto table = std::make_shared<Table>(pool, columns, types, limit, index);
-    table->init(data_table, data_table.num_rows(), t_op::OP_INSERT, 0);
+    table->init(*data_table, data_table->num_rows(), t_op::OP_INSERT, 0);
+    data_table.reset();
     pool->_process();
     return table;
 }
