@@ -56,7 +56,7 @@ enum t_dtype {
     DTYPE_LAST
 };
 
-#ifdef PSP_ENABLE_WASM
+#ifdef __wasm32__
 typedef std::uint32_t t_uindex;
 typedef std::int32_t t_index;
 #else

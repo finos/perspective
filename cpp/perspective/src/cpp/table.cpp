@@ -1061,7 +1061,7 @@ Table::from_cols(
         LOG_DEBUG(
             "Filling column "
             << col_name << " dtype "
-            << dtype_to_str(data_table.get_column(col_name)->get_dtype())
+            << dtype_to_str(data_table->get_column(col_name)->get_dtype())
         );
         for (const auto& cell : col.value.GetArray()) {
             auto col = data_table->get_column(col_name);
