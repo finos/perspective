@@ -37,6 +37,7 @@ function(psp_build_dep name cmake_file)
             message(FATAL_ERROR "Build step for ${name} failed: ${result}")
         endif()
     endif()
+
     if(${name} STREQUAL arrow)
         set(ARROW_DEFINE_OPTIONS ON)
         set(ARROW_BUILD_SHARED OFF)

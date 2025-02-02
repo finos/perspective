@@ -197,21 +197,6 @@ runs:
               fi
           if: ${{ runner.os == 'Linux' && inputs.cpp == 'true' && inputs.javascript == 'false' }}
 
-        - name: Install Python Pyodide dependencies
-          shell: bash
-          run: python -m pip install -r rust/perspective-python/requirements-pyodide.txt
-          if: ${{ inputs.pyodide == 'true' }}
-
-        - name: Install Pyodide distribution
-          shell: bash
-          run: pnpm run install_pyodide
-          if: ${{ inputs.pyodide == 'true' }}
-
-        - name: Install Python Playwright browsers
-          shell: bash
-          run: python -m playwright install
-          if: ${{ inputs.pyodide == 'true' }}
-
         # - name: Install CCache
         #   shell: bash
         #   run: sudo apt install -y ccache

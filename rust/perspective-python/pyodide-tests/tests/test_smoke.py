@@ -30,6 +30,8 @@ def psp_wheel_path(pytestconfig):
 
 # Based on micropip's test server fixture:
 # https://github.com/pyodide/micropip/blob/eb8c4497d742e515d24d532db2b9cc014328265b/tests/conftest.py#L64-L87
+# Run web server serving the directory containing the perspective wheel,
+# yielding the wheel's URL for the fixture value
 @pytest.fixture()
 def psp_wheel_url(psp_wheel_path):
     from pathlib import Path
@@ -72,3 +74,44 @@ async def test_parsing_good_csv(selenium):
     client = server.new_local_client()
     abc123 = client.table("a,b,c\n1,2,3\n")
     assert abc123.columns() == ["a", "b", "c"]
+
+
+# Test that perspective can load pyarrow Table values
+@run_in_pyodide
+async def test_perspective_and_pyarrow_together_at_last(selenium):
+    import micropip
+
+    await micropip.install("pyarrow")
+
+    import perspective
+    import pyarrow as pa
+
+    n_legs = pa.array([2, 2, 4, 4, 5, 100])
+    animals = pa.array(
+        ["Flamingo", "Parrot", "Dog", "Horse", "Brittle stars", "Centipede"]
+    )
+    names = ["n_legs", "animals"]
+    table = pa.Table.from_arrays([n_legs, animals], names=names)
+
+    server = perspective.Server()
+    client = server.new_local_client()
+
+    animals = client.table(table, name="animals")
+    assert animals.columns() == ["n_legs", "animals"]
+
+
+# Test that perspective can load pandas DataFrame values
+@run_in_pyodide
+async def test_pandas_dataframes(selenium):
+    import micropip
+
+    await micropip.install(["pyarrow", "pandas"])
+
+    import perspective
+    import pandas as pd
+
+    server = perspective.Server()
+    client = server.new_local_client()
+    df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+    ab = client.table(df, name="ab")
+    assert sorted(ab.columns()) == ["a", "b", "index"]
