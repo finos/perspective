@@ -39,6 +39,7 @@ include = [
 ]
 
 [package.metadata.docs.rs]
+features = ["external-docs"]
 rustdoc-args = ["--html-in-header", "docs/index.html"]
 
 [features]
