@@ -10,13 +10,13 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.3.0/dist/cdn/perspective-viewer.js";
-import "https://cdn.jsdelivr.net/npm/@finos/perspective-workspace@3.3.0/dist/cdn/perspective-workspace.js";
-import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.3.0/dist/cdn/perspective-viewer-datagrid.js";
-import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.3.0/dist/cdn/perspective-viewer-d3fc.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.3.2/dist/cdn/perspective-viewer.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-workspace@3.3.2/dist/cdn/perspective-workspace.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.3.2/dist/cdn/perspective-viewer-datagrid.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.3.2/dist/cdn/perspective-viewer-d3fc.js";
 import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-openlayers/dist/cdn/perspective-viewer-openlayers.js";
 
-import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.3.0/dist/cdn/perspective.js";
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.3.2/dist/cdn/perspective.js";
 
 // Quick wrapper function for making a GET call.
 function get(url) {
