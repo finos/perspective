@@ -17,7 +17,10 @@ import perspective from "@finos/perspective";
 import perspective_viewer from "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import type { ViewerConfigUpdate } from "@finos/perspective-viewer";
+import type {
+    HTMLPerspectiveViewerElement,
+    ViewerConfigUpdate,
+} from "@finos/perspective-viewer";
 
 import "@finos/perspective-viewer/dist/css/themes.css";
 import "./index.css";
@@ -50,7 +53,7 @@ const config: ViewerConfigUpdate = {
 };
 
 const App = (): React.ReactElement => {
-    const viewer = React.useRef(null);
+    const viewer = React.useRef<HTMLPerspectiveViewerElement>(null);
     React.useEffect(() => {
         getTable().then((table) => {
             if (viewer.current) {
@@ -63,4 +66,6 @@ const App = (): React.ReactElement => {
     return <perspective-viewer ref={viewer}></perspective-viewer>;
 };
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+ReactDOM.createRoot(
+    document.getElementById("root") as ReactDOM.Container
+).render(<App />);

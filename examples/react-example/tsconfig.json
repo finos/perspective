@@ -12,7 +12,7 @@
         "noImplicitUseStrict": false,
         "noUnusedLocals": true,
         "strictNullChecks": true,
-        "skipLibCheck": true,
+        "skipLibCheck": false,
         "removeComments": false,
         "jsx": "react",
         "allowSyntheticDefaultImports": true,
