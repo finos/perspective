@@ -18,6 +18,16 @@
 #include <string>
 #include <tsl/hopscotch_map.h>
 
+#if HEAP_INSTRUMENTS
+#include <emscripten/heap.h>
+
+#define UNINSTRUMENTED_MALLOC(x) emscripten_builtin_malloc(x)
+#define UNINSTRUMENTED_FREE(x) emscripten_builtin_free(x)
+#else
+#define UNINSTRUMENTED_MALLOC(x) malloc(x)
+#define UNINSTRUMENTED_FREE(x) free(x)
+#endif
+
 using namespace perspective::server;
 
 #pragma pack(push, 1)
@@ -102,14 +112,16 @@ psp_close_session(ProtoServer* server, std::uint32_t client_id) {
 PERSPECTIVE_EXPORT
 std::size_t
 psp_alloc(std::size_t size) {
-    auto* mem = (char*)malloc(size);
+    // We use this to allocate stack traces for instrumentation with heap
+    // profiling builds.
+    auto* mem = (char*)UNINSTRUMENTED_MALLOC(size);
     return (size_t)mem;
 }
 
 PERSPECTIVE_EXPORT
 void
 psp_free(void* ptr) {
-    free(ptr);
+    UNINSTRUMENTED_FREE(ptr);
 }
 
 PERSPECTIVE_EXPORT

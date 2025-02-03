@@ -10,61 +10,50 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { execSync } = require("child_process");
-const os = require("os");
-const path = require("path");
+#include <emscripten/heap.h>
+#include <limits>
+#include <memory>
+#include <new>
 
-const stdio = "inherit";
-const rust_env = process.env.PSP_DEBUG ? "" : "--release";
-const env = process.env.PSP_DEBUG ? "debug" : "release";
-const cwd = path.join(process.cwd(), "dist", env);
+// Don't track our own memory usage
+template <typename T>
+class UnderlyingAllocator : std::allocator<T> {
+public:
+    using value_type = T;
 
-delete process.env.NODE;
+    UnderlyingAllocator() = default;
 
-function bootstrap(file) {
-    execSync(`cargo run -p perspective-bootstrap -- ${rust_env} ${file}`, {
-        cwd: path.join(process.cwd(), "..", "..", "rust", "perspective-js"),
-        stdio,
-    });
-}
+    template <typename U>
+    UnderlyingAllocator(const UnderlyingAllocator<U>& /*unused*/) noexcept {}
 
-let cmake_flags = "";
-let make_flags = "";
-
-if (!!process.env.PSP_BUILD_VERBOSE) {
-    cmake_flags += "-Wdev --debug-output ";
-    make_flags += "VERBOSE=1 ";
-} else {
-    cmake_flags = "-Wno-dev "; // suppress developer warnings
-}
-
-try {
-    execSync(`mkdirp ${cwd}`, { stdio });
-    process.env.CLICOLOR_FORCE = 1;
-    execSync(
-        `emcmake cmake ${__dirname} ${cmake_flags} -DCMAKE_BUILD_TYPE=${env}`,
-        {
-            cwd,
-            stdio,
+    T*
+    allocate(std::size_t n) {
+        if (n > std::numeric_limits<std::size_t>::max() / sizeof(T)) {
+            throw std::bad_alloc();
         }
-    );
-
-    execSync(
-        `emmake make -j${
-            process.env.PSP_NUM_CPUS || os.cpus().length
-        } ${make_flags}`,
-        {
-            cwd,
-            stdio,
+        void* ptr = emscripten_builtin_malloc(n * sizeof(T));
+        if (ptr == nullptr) {
+            throw std::bad_alloc();
         }
-    );
-
-    execSync(`cpy web/**/* ../web`, { cwd, stdio });
-    execSync(`cpy node/**/* ../node`, { cwd, stdio });
-    if (!process.env.PSP_HEAP_INSTRUMENTS) {
-        bootstrap(`../../cpp/perspective/dist/web/perspective-server.wasm`);
+        return static_cast<T*>(ptr);
     }
-} catch (e) {
-    console.error(e);
-    process.exit(1);
-}
+
+    // Deallocate memory
+    void
+    deallocate(T* ptr, std::size_t /*unused*/) noexcept {
+        emscripten_builtin_free(ptr);
+    }
+
+    // Equality comparison (required for allocators)
+    template <typename U>
+    bool
+    operator==(const UnderlyingAllocator<U>& /*unused*/) const noexcept {
+        return true;
+    }
+
+    template <typename U>
+    bool
+    operator!=(const UnderlyingAllocator<U>& other) const noexcept {
+        return !(*this == other);
+    }
+};
