@@ -1977,7 +1977,7 @@ checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
 
 [[package]]
 name = "perspective"
-version = "3.3.2"
+version = "3.3.3"
 dependencies = [
  "async-lock",
  "axum",
@@ -2016,7 +2016,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-client"
-version = "3.3.2"
+version = "3.3.3"
 dependencies = [
  "async-lock",
  "futures",
@@ -2038,7 +2038,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-js"
-version = "3.3.2"
+version = "3.3.3"
 dependencies = [
  "anyhow",
  "base64 0.13.1",
@@ -2068,7 +2068,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-lint"
-version = "3.3.2"
+version = "3.3.3"
 dependencies = [
  "glob",
  "yew-fmt",
@@ -2088,7 +2088,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-python"
-version = "3.3.2"
+version = "3.3.3"
 dependencies = [
  "async-lock",
  "cmake",
@@ -2109,7 +2109,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-server"
-version = "3.3.2"
+version = "3.3.3"
 dependencies = [
  "async-lock",
  "cmake",
@@ -2123,7 +2123,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-viewer"
-version = "3.3.2"
+version = "3.3.3"
 dependencies = [
  "anyhow",
  "async-lock",

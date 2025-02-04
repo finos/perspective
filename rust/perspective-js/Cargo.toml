@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-js"
-version = "3.3.2"
+version = "3.3.3"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -49,7 +49,7 @@ wasm-bindgen-test = "0.3.13"
 
 [dependencies]
 macro_rules_attribute = "0.2.0"
-perspective-client = { version = "3.3.2" }
+perspective-client = { version = "3.3.3" }
 base64 = "0.13.0"
 chrono = "0.4"
 extend = "1.1.2"
