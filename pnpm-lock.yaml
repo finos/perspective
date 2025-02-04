@@ -345,6 +345,12 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
     devDependencies:
+      '@types/react':
+        specifier: ^18
+        version: 18.3.8
+      '@types/react-dom':
+        specifier: ^18
+        version: 18.3.5(@types/react@18.3.8)
       esbuild:
         specifier: ^0.14.54
         version: 0.14.54
@@ -4022,6 +4028,11 @@ packages:
 
   '@types/range-parser@1.2.7':
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
+
+  '@types/react-dom@18.3.5':
+    resolution: {integrity: sha512-P4t6saawp+b/dFrUr2cvkVsfvPguwsxtH6dNIYRllMsefqFzkZk5UIjzyDOv5g1dXIPdG4Sp1yCR4Z6RCUsG/Q==}
+    peerDependencies:
+      '@types/react': ^18.0.0
 
   '@types/react-router-config@5.0.11':
     resolution: {integrity: sha512-WmSAg7WgqW7m4x8Mt4N6ZyKz0BubSj/2tVUMsAHp+Yd2AMwcSbeFq9WympT19p5heCFmF97R9eD5uUR/t4HEqw==}
@@ -12704,7 +12715,7 @@ snapshots:
 
   '@docusaurus/react-loadable@6.0.0(react@18.3.1)':
     dependencies:
-      '@types/react': 17.0.82
+      '@types/react': 18.3.8
       react: 18.3.1
 
   '@docusaurus/theme-classic@3.7.0(@types/react@18.3.8)(esbuild@0.14.54)(eslint@9.17.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.2.2)':
@@ -14822,22 +14833,26 @@ snapshots:
 
   '@types/range-parser@1.2.7': {}
 
+  '@types/react-dom@18.3.5(@types/react@18.3.8)':
+    dependencies:
+      '@types/react': 18.3.8
+
   '@types/react-router-config@5.0.11':
     dependencies:
       '@types/history': 4.7.11
-      '@types/react': 17.0.82
+      '@types/react': 18.3.8
       '@types/react-router': 5.1.20
 
   '@types/react-router-dom@5.3.3':
     dependencies:
       '@types/history': 4.7.11
-      '@types/react': 17.0.82
+      '@types/react': 18.3.8
       '@types/react-router': 5.1.20
 
   '@types/react-router@5.1.20':
     dependencies:
       '@types/history': 4.7.11
-      '@types/react': 17.0.82
+      '@types/react': 18.3.8
 
   '@types/react@17.0.82':
     dependencies:

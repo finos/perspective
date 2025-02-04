@@ -5,7 +5,10 @@
     "unpkg": "dist/cdn/perspective-viewer-datagrid.js",
     "jsdelivr": "dist/cdn/perspective-viewer-datagrid.js",
     "exports": {
-        ".": "./dist/esm/perspective-viewer-datagrid.js",
+        ".": {
+            "types": "./index.d.ts",
+            "default": "./dist/esm/perspective-viewer-datagrid.js"
+        },
         "./dist/*": "./dist/*",
         "./package.json": "./package.json"
     },
@@ -14,7 +17,6 @@
         "dist/**/*",
         "index.d.ts"
     ],
-    "types": "index.d.ts",
     "scripts": {
         "build": "node build.js",
         "clean": "rimraf dist",

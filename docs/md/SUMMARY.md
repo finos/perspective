@@ -42,6 +42,7 @@
         -   [Hosting a `WebSocketServer` in Node.js](./how_to/javascript/nodejs_server.md)
     -   [`perspective-viewer` Custom Element library](./how_to/javascript/viewer.md)
         -   [Theming](./how_to/javascript/theming.md)
+        -   [Custom Themes](./how_to/javascript/custom_themes.md)
         -   [Loading data from a `Table`](./how_to/javascript/loading_data.md)
         -   [Loading data from a virtual `Table`](./how_to/javascript/loading_virtual_data.md)
         -   [Saving and restoring UI state](./how_to/javascript/save_restore.md)

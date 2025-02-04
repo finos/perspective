@@ -23,6 +23,7 @@ keywords = ["experimental"]
 include = ["src/**/*", "Cargo.toml", "./package.json", "docs/**/*", "build.rs"]
 
 [package.metadata.docs.rs]
+features = ["external-docs"]
 rustc-args = ["--cfg", "web_sys_unstable_apis"]
 rustdoc-args = ["--html-in-header", "docs/index.html"]
 
