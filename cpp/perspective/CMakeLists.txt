@@ -86,6 +86,7 @@ option(PSP_CPP_BUILD "Build the C++ Project" OFF)
 option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
 option(PSP_CPP_BUILD_STRICT "Build the C++ with strict warnings" OFF)
 option(PSP_SANITIZE "Build with sanitizers" OFF)
+option(PSP_HEAP_INSTRUMENTS "Build with heap inspection tooling" OFF)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     set(PSP_WASM_BUILD ON)
@@ -105,6 +106,12 @@ else()
     if(NOT DEFINED CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE RELEASE)
     endif()
+endif()
+
+if(DEFINED ENV{PSP_HEAP_INSTRUMENTS})
+    set(PSP_HEAP_INSTRUMENTS ON)
+else()
+    set(PSP_HEAP_INSTRUMENTS OFF)
 endif()
 
 if(DEFINED ENV{PSP_MANYLINUX})
@@ -201,6 +208,11 @@ if(NOT DEFINED PSP_WASM_EXCEPTIONS AND NOT PSP_PYTHON_BUILD)
     set(PSP_WASM_EXCEPTIONS ON)
 endif()
 
+set(DEBUG_LEVEL "0")
+if(PSP_HEAP_INSTRUMENTS)
+    set(DEBUG_LEVEL "3")
+endif()
+
 if(PSP_WASM_BUILD)
     ####################
     # EMSCRIPTEN BUILD #
@@ -231,7 +243,7 @@ if(PSP_WASM_BUILD)
             ")
         endif()
     else()
-        set(OPT_FLAGS " -O3 -g0 ")
+        set(OPT_FLAGS " -O3 -g${DEBUG_LEVEL} ")
         if (PSP_WASM_EXCEPTIONS)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions -flto --emit-tsd=perspective-server.d.ts ")
         endif()
@@ -301,12 +313,12 @@ endif()
 if (PSP_WASM_EXCEPTIONS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
         -O3 \
-        -g0 \
+        -g${DEBUG_LEVEL} \
     ")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
         -fwasm-exceptions \
         -O3 \
-        -g0 \
+        -g${DEBUG_LEVEL} \
     ")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
@@ -498,6 +510,11 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/binding_api.cpp
 )
 
+if(PSP_HEAP_INSTRUMENTS)
+    list(APPEND SOURCE_FILES ${PSP_CPP_SRC}/src/cpp/heap_instruments.cpp)
+    add_compile_definitions(HEAP_INSTRUMENTS=1)
+endif()
+
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES})
 set(WASM_SOURCE_FILES ${SOURCE_FILES})
 
@@ -509,11 +526,33 @@ else()
     # set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
 endif()
 
+set(PSP_EXPORTED_FUNCTIONS 
+    _psp_poll
+    _psp_new_server
+    _psp_free
+    _psp_alloc
+    _psp_handle_request
+    _psp_new_session
+    _psp_close_session
+    _psp_delete_server
+    _psp_is_memory64
+)
+
+if(PSP_HEAP_INSTRUMENTS)
+    list(APPEND PSP_EXPORTED_FUNCTIONS
+        _psp_print_used_memory
+        _psp_dump_stack_traces
+        _psp_clear_stack_traces
+    )
+endif()
+
+string(JOIN "," PSP_EXPORTED_FUNCTIONS_JOINED ${PSP_EXPORTED_FUNCTIONS})
+
 # Common flags for WASM/JS build and Pyodide
 if(PSP_PYODIDE)
     set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
         --no-entry \
-        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server,_psp_is_memory64 \
+        -s EXPORTED_FUNCTIONS=${PSP_EXPORTED_FUNCTIONS_JOINED} \
         -s SIDE_MODULE=2 \
     ")
 else()
@@ -537,7 +576,7 @@ else()
         -s NODEJS_CATCH_REJECTION=0 \
         -s USE_ES6_IMPORT_META=1 \
         -s EXPORT_ES6=1 \
-        -s EXPORTED_FUNCTIONS=_psp_poll,_psp_new_server,_psp_free,_psp_alloc,_psp_handle_request,_psp_new_session,_psp_close_session,_psp_delete_server,_psp_is_memory64 \
+        -s EXPORTED_FUNCTIONS=${PSP_EXPORTED_FUNCTIONS_JOINED} \
     ")
 
     if(PSP_WASM64)
