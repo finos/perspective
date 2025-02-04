@@ -10,11 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.3.2/dist/cdn/perspective-viewer.js";
-import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.3.2/dist/cdn/perspective-viewer-datagrid.js";
-import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.3.2/dist/cdn/perspective-viewer-d3fc.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@3.3.3/dist/cdn/perspective-viewer.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@3.3.3/dist/cdn/perspective-viewer-datagrid.js";
+import "https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@3.3.3/dist/cdn/perspective-viewer-d3fc.js";
 
-import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.3.2/dist/cdn/perspective.js";
+import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective@3.3.3/dist/cdn/perspective.js";
 
 const MSG_BATCH_TIMEOUT = 50;
 const MSG_PER_BATCH = 10;
