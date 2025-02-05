@@ -1,0 +1,21 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/universal
+{
+	"name": "Ubuntu: pnpm, rust, cmake, for JS dev",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"rust-lang.rust-analyzer",
+				"ms-playwright.playwright"
+			]
+		}
+	},
+
+	"features": {
+		"ghcr.io/devcontainers/features/rust:1": {},
+		"ghcr.io/devcontainers-extra/features/pnpm:2": {}
+	},
+
+	"postCreateCommand": "./.devcontainer/postcreate.sh"
+}

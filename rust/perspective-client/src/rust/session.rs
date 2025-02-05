@@ -90,7 +90,7 @@ pub struct ProxySession {
 }
 
 impl ProxySession {
-    pub async fn new(
+    pub fn new(
         client: Client,
         send_response: impl Fn(&[u8]) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
             + Send
