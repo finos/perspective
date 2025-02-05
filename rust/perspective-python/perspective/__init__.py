@@ -17,6 +17,7 @@ __all__ = [
     "Client",
     "PerspectiveError",
     "ProxySession",
+    "AsyncClient",
 ]
 
 import functools
@@ -26,6 +27,7 @@ from .perspective import (
     PerspectiveError,
     ProxySession,
     PySyncServer as Server,
+    AsyncClient,
     # NOTE: these are classes without constructors,
     # so we import them just for type hinting
     Table,  # noqa: F401

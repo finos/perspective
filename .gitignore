@@ -59,3 +59,4 @@ Vagrantfile
 vcpkg
 venv/
 rust/perspective-python/perspective_python-*.data
+.pytest-cache/

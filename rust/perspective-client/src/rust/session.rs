@@ -90,7 +90,7 @@ pub struct ProxySession {
 }
 
 impl ProxySession {
-    pub async fn new(
+    pub fn new(
         client: Client,
         send_response: impl Fn(&[u8]) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
             + Send
@@ -115,8 +115,8 @@ impl Session<ClientError> for ProxySession {
     async fn handle_request(&self, request: &[u8]) -> Result<(), ClientError> {
         let req = Request::decode(request)?;
         let callback = self.callback.clone();
-        match req.client_req.as_ref().unwrap() {
-            ClientReq::ViewOnUpdateReq(_) => {
+        match req.client_req.as_ref() {
+            Some(ClientReq::ViewOnUpdateReq(_)) => {
                 let on_update = move |response| -> Pin<
                     Box<dyn Future<Output = Result<(), ClientError>> + Send>,
                 > {
@@ -126,11 +126,16 @@ impl Session<ClientError> for ProxySession {
 
                 self.parent.subscribe(&req, Box::new(on_update)).await?
             },
-            _ => {
+            Some(_) => {
                 let on_update = move |response| encode(response, callback);
                 self.parent
                     .subscribe_once(&req, Box::new(on_update))
                     .await?
+            },
+            None => {
+                return Err(ClientError::Internal(
+                    "ProxySession::handle_request: invalid request".to_string(),
+                ))
             },
         };
 

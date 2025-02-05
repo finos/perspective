@@ -53,7 +53,7 @@ fn from_string(
 }
 
 fn from_list(py: Python<'_>, pylist: &Bound<'_, PyList>) -> Result<Option<UpdateData>, PyErr> {
-    let json_module = PyModule::import_bound(py, "json")?;
+    let json_module = PyModule::import(py, "json")?;
     let string = json_module.call_method("dumps", (pylist,), None)?;
     Ok(Some(UpdateData::JsonRows(string.extract::<String>()?)))
 }
@@ -69,7 +69,7 @@ fn from_dict(py: Python<'_>, pydict: &Bound<'_, PyDict>) -> Result<Option<Update
         .ok_or_else(|| PyValueError::new_err("Bad Input"))?;
 
     if first_item.downcast::<PyList>().is_ok() {
-        let json_module = PyModule::import_bound(py, "json")?;
+        let json_module = PyModule::import(py, "json")?;
         let string = json_module.call_method("dumps", (pydict,), None)?;
         Ok(Some(UpdateData::JsonColumns(string.extract::<String>()?)))
     } else {
@@ -80,17 +80,17 @@ fn from_dict(py: Python<'_>, pydict: &Bound<'_, PyDict>) -> Result<Option<Update
 #[extend::ext]
 pub impl UpdateData {
     fn from_py_partial(
-        py: Python<'_>,
-        input: &Py<PyAny>,
+        input: &Bound<'_, PyAny>,
         format: Option<TableReadFormat>,
     ) -> Result<Option<UpdateData>, PyErr> {
-        if let Ok(pybytes) = input.downcast_bound::<PyBytes>(py) {
+        let py = input.py();
+        if let Ok(pybytes) = input.downcast::<PyBytes>() {
             from_arrow(pybytes, format)
-        } else if let Ok(pystring) = input.downcast_bound::<PyString>(py) {
+        } else if let Ok(pystring) = input.downcast::<PyString>() {
             from_string(pystring, format)
-        } else if let Ok(pylist) = input.downcast_bound::<PyList>(py) {
+        } else if let Ok(pylist) = input.downcast::<PyList>() {
             from_list(py, pylist)
-        } else if let Ok(pydict) = input.downcast_bound::<PyDict>(py) {
+        } else if let Ok(pydict) = input.downcast::<PyDict>() {
             from_dict(py, pydict)
         } else {
             Ok(None)
@@ -98,16 +98,15 @@ pub impl UpdateData {
     }
 
     fn from_py(
-        py: Python<'_>,
-        input: &Py<PyAny>,
+        input: Bound<'_, PyAny>,
         format: Option<TableReadFormat>,
     ) -> Result<UpdateData, PyErr> {
-        if let Some(x) = Self::from_py_partial(py, input, format)? {
+        if let Some(x) = Self::from_py_partial(&input, format)? {
             Ok(x)
         } else {
             Err(PyValueError::new_err(format!(
                 "Unknown input type {:?}",
-                input.type_id()
+                input.unbind().type_id().clone()
             )))
         }
     }

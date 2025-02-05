@@ -10,12 +10,27 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-# The regular Python test suite doesn't work in pytest-pyodide --run-in-pyodide,
-# for several reasons.
+# As of Feb 2025, the regular Python test suite doesn't work in pytest-pyodide
+# --run-in-pyodide, for several reasons.
 # One: https://github.com/pyodide/pytest-pyodide/issues/81
+#
+
+# These pytest-pyodide tests are still quirky.  Be wary of trying to split into
+# several files: relative imports will break, things seem to work best contained in
+# one python module.
 
 from pytest_pyodide import run_in_pyodide, spawn_web_server
 import pytest
+
+
+#  __________
+# < FIXTURES >
+#  ----------
+#         \   ^__^
+#          \  (oo)\_______
+#             (__)\       )\/\
+#                 ||----w |
+#                 ||     ||
 
 
 @pytest.fixture(scope="session")
@@ -32,6 +47,7 @@ def psp_wheel_path(pytestconfig):
 # https://github.com/pyodide/micropip/blob/eb8c4497d742e515d24d532db2b9cc014328265b/tests/conftest.py#L64-L87
 # Run web server serving the directory containing the perspective wheel,
 # yielding the wheel's URL for the fixture value
+# FIXME: Try using https://github.com/pyodide/pytest-pyodide/tree/main?tab=readme-ov-file#copying-files-to-pyodide
 @pytest.fixture()
 def psp_wheel_url(psp_wheel_path):
     from pathlib import Path
@@ -52,6 +68,48 @@ async def psp_installed(selenium, psp_wheel_url):
     import micropip
 
     await micropip.install(psp_wheel_url)
+
+
+@pytest.fixture
+@run_in_pyodide
+def server(selenium):
+    from perspective import Server
+    from pytest_pyodide.decorator import PyodideHandle
+
+    s = Server()
+    return PyodideHandle(s)
+
+
+@pytest.fixture
+@run_in_pyodide
+def client(selenium, psp_installed, server):
+    from perspective import AsyncClient
+    from pytest_pyodide.decorator import PyodideHandle
+
+    import asyncio
+
+    async def send_request(msg):
+        sess.handle_request(msg)
+
+    def send_response(msg):
+        async def poke_client():
+            await client.handle_response(msg)
+
+        asyncio.get_running_loop().create_task(poke_client())
+
+    sess = server.new_session(send_response)
+    client = AsyncClient(send_request)
+    return PyodideHandle(client)
+
+
+#  _________
+# < PYTESTS >
+#  ---------
+#         \   ^__^
+#          \  (oo)\_______
+#             (__)\       )\/\
+#                 ||----w |
+#                 ||     ||
 
 
 @run_in_pyodide
@@ -115,3 +173,54 @@ async def test_pandas_dataframes(selenium):
     df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
     ab = client.table(df, name="ab")
     assert sorted(ab.columns()) == ["a", "b", "index"]
+
+
+@run_in_pyodide
+async def test_async_client_kitchen_sink(selenium, client):
+    """run various things on the async client"""
+
+    from unittest.mock import Mock
+    from perspective import PerspectiveError
+    import pytest
+
+    table = await client.table({"a": [0]}, name="my-cool-data", limit=100)
+    view = await table.view()
+    # synchronous methods
+    assert table.get_index() is None
+    assert table.get_name() == "my-cool-data"
+    limit = table.get_limit()
+    assert limit == 100
+
+    # view update callbacks
+    view_updated = Mock()
+    await view.on_update(view_updated)
+    for i in range(1, limit):
+        await table.update([{"a": i}])
+        await table.size()  # force update to process
+    assert (await table.size()) == limit
+    assert view_updated.call_count == limit - 1
+    rex = await view.to_records()
+    assert rex == [{"a": i} for i in range(limit)]
+
+    # view/table delete callbacks
+    view_deleted = Mock()
+    table_deleted = Mock()
+    await table.on_delete(table_deleted)
+    await view.on_delete(view_deleted)
+    with pytest.raises(PerspectiveError) as excinfo:
+        await table.delete()
+    assert excinfo.match(r"Cannot delete table with views")
+    await view.delete()
+    view_deleted.assert_called_once()
+    await table.delete()
+    table_deleted.assert_called_once()
+
+    # Cleaning up the client fixture's PyodideHandle causes pytest to
+    # spew some nasty errors on exit.  Seems like playwright's shutdown and
+    # deletion of the PyodideHandle are racing, and PyodideHandle's finalizer
+    # throws trying to execute code in the playwright browser which has already
+    # stopped its event loop.
+    # TODO: File bug on pytest-pyodide
+    #
+    # Exception ignored in: <function PyodideHandle.__del__ at 0x7b9df0c7a710>
+    # playwright._impl._errors.Error: Event loop is closed! Is Playwright already stopped?
