@@ -559,7 +559,7 @@ impl Component for PerspectiveViewer {
                                 initial_size={self.settings_panel_width_override}
                                 on_reset={ctx.link().callback(|_| PerspectiveViewerMsg::SettingsPanelSizeUpdate(None))}
                                 on_resize={on_split_panel_resize}
-                                on_resize_finished={ctx.props().render_callback()}
+                                on_resize_finished={ctx.props().resize_callback()}
                             >
                                 { settings_panel }
                                 { main_panel }

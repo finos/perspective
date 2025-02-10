@@ -39,6 +39,18 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
         })
     }
 
+    /// Create a `Callback` that resizes from the current `View` and `Plugin`.
+    fn resize_callback(&self) -> Callback<()> {
+        clone!(self.renderer());
+        Callback::from(move |_| {
+            clone!(renderer);
+            ApiFuture::spawn(async move {
+                renderer.resize().await?;
+                Ok(())
+            })
+        })
+    }
+
     /// Apply a `ViewConfigUpdate` to the current `View` and render.
     fn update_and_render(&self, update: ViewConfigUpdate) -> ApiFuture<()> {
         self.session().update_view_config(update);

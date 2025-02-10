@@ -12,6 +12,7 @@
 
 use itertools::Itertools;
 use perspective_client::config::*;
+use perspective_client::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -147,7 +148,7 @@ impl Component for InactiveColumn {
             .session
             .metadata()
             .get_column_table_type(&ctx.props().name)
-            .expect("Unknown column");
+            .unwrap_or(ColumnType::String);
 
         let add_column = ctx
             .link()
