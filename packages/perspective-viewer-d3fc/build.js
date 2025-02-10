@@ -82,7 +82,7 @@ function add(builder, path) {
     );
 }
 
-async function compile_css() {
+function compile_css() {
     fs.mkdirSync("dist/css", { recursive: true });
     const builder = new BuildCss("");
     add(builder, "./series_colors.less");
@@ -94,10 +94,24 @@ async function compile_css() {
     );
 }
 
+function move_html() {
+    fs.mkdirSync("dist/html", { recursive: true });
+
+    const srcDir = "src/html";
+    const destDir = "dist/html";
+
+    fs.readdirSync(srcDir).forEach((file) => {
+        const srcFile = `${srcDir}/${file}`;
+        const destFile = `${destDir}/${file}`;
+        fs.copyFileSync(srcFile, destFile);
+    });
+}
+
 async function build_all() {
     // NOTE: compile_css and other build step must be run before tsc, because
     // (for now) nothing runs after the tsc step.
-    await compile_css();
+    compile_css();
+    move_html();
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 
     // esbuild can handle typescript files, and strips out types from the output,

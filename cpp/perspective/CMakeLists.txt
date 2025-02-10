@@ -220,6 +220,7 @@ if(PSP_WASM_BUILD)
             -g3 \
             -Wcast-align \
             -Wover-aligned \
+            --emit-tsd=perspective-server.d.ts \
             ")
         if (PSP_WASM_EXCEPTIONS)
             set(OPT_FLAGS "${OPT_FLAGS} -fwasm-exceptions ")

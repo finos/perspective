@@ -14,7 +14,11 @@ import * as fc from "d3fc";
 import { withoutOpacity } from "./seriesColors.js";
 import { D3Scale, Settings } from "../types.js";
 
-export function lineSeries(settings: Settings, color: D3Scale) {
+export function lineSeries(
+    settings: Settings,
+    color: D3Scale,
+    stroke_width: number | undefined = undefined
+) {
     let series = fc.seriesSvgLine();
 
     const estimated_size =
@@ -23,15 +27,17 @@ export function lineSeries(settings: Settings, color: D3Scale) {
             ? Object.keys(settings.data[0]).length -
               (settings.crossValues?.length > 0 ? 1 : 0)
             : 0);
-    const stroke_width = Math.max(
-        1,
-        Math.min(3, Math.floor(settings.size.width / estimated_size / 2))
-    );
+    const width =
+        stroke_width ??
+        Math.max(
+            1,
+            Math.min(3, Math.floor(settings.size.width / estimated_size / 2))
+        );
 
     series = series.decorate((selection) => {
         selection
             .style("stroke", (d) => withoutOpacity(color(d[0] && d[0].key)))
-            .style("stroke-width", stroke_width);
+            .style("stroke-width", width);
     });
 
     return series.crossValue((d) => d.crossValue).mainValue((d) => d.mainValue);
