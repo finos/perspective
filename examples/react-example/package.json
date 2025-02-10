@@ -1,7 +1,7 @@
 {
     "name": "react-example",
     "private": true,
-    "version": "3.3.3",
+    "version": "3.3.4",
     "description": "An example app built using `@finos/perspective-viewer`.",
     "scripts": {
         "build": "node build.js",

@@ -1,3 +1,11 @@
+# [v3.3.4](https://github.com/finos/perspective/releases/tag/v3.3.4)
+
+_10 February 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.3.3...v3.3.4))
+
+Fixes
+
+- Fix datagrid scroll drift on resize [#2919](https://github.com/finos/perspective/pull/2919)
+
 # [v3.3.3](https://github.com/finos/perspective/releases/tag/v3.3.3)
 
 _4 February 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.3.2...v3.3.3))
