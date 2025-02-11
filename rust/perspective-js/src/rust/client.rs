@@ -14,7 +14,7 @@ use js_sys::{Function, Uint8Array};
 use macro_rules_attribute::apply;
 #[cfg(doc)]
 use perspective_client::SystemInfo;
-use perspective_client::{TableData, TableInitOptions};
+use perspective_client::{Session, TableData, TableInitOptions};
 use wasm_bindgen::prelude::*;
 
 pub use crate::table::*;
@@ -30,6 +30,51 @@ extern "C" {
     #[derive(Clone)]
     #[wasm_bindgen(typescript_type = "TableInitOptions")]
     pub type JsTableInitOptions;
+}
+
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct ProxySession(perspective_client::ProxySession);
+
+#[wasm_bindgen]
+impl ProxySession {
+    #[wasm_bindgen(constructor)]
+    pub fn new(client: &Client, on_response: &Function) -> Self {
+        let poll_loop = LocalPollLoop::new({
+            let on_response = on_response.clone();
+            move |msg: Vec<u8>| {
+                let msg = Uint8Array::from(&msg[..]);
+                on_response.call1(&JsValue::UNDEFINED, &JsValue::from(msg))?;
+                Ok(JsValue::null())
+            }
+        });
+        // NB: This swallows any errors raised by the inner callback
+        let on_response = Box::new(move |msg: &[u8]| {
+            wasm_bindgen_futures::spawn_local(poll_loop.poll(msg.to_vec()));
+            Ok(())
+        });
+        Self(perspective_client::ProxySession::new(
+            client.client.clone(),
+            on_response,
+        ))
+    }
+
+    #[wasm_bindgen]
+    pub async fn handle_request(&self, data: &[u8]) -> ApiResult<()> {
+        use perspective_client::Session;
+        self.0.handle_request(data).await?;
+        Ok(())
+    }
+
+    #[wasm_bindgen]
+    pub async fn poll(&self) -> ApiResult<()> {
+        self.0.poll().await?;
+        Ok(())
+    }
+
+    pub async fn close(self) {
+        self.0.close().await;
+    }
 }
 
 #[apply(inherit_docs)]
@@ -59,6 +104,11 @@ impl Client {
         });
 
         Client { close, client }
+    }
+
+    #[wasm_bindgen]
+    pub fn new_proxy_session(&self, on_response: &Function) -> ProxySession {
+        ProxySession::new(self, on_response)
     }
 
     #[wasm_bindgen]

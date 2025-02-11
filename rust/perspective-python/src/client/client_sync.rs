@@ -47,10 +47,10 @@ impl ProxySession {
             }
         };
 
-        Ok(ProxySession(
-            perspective_client::ProxySession::new(client.borrow(py).0.client.clone(), callback)
-                .py_block_on(py),
-        ))
+        Ok(ProxySession(perspective_client::ProxySession::new(
+            client.borrow(py).0.client.clone(),
+            callback,
+        )))
     }
 
     pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
