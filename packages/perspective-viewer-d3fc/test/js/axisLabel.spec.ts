@@ -36,79 +36,78 @@ test.beforeEach(async ({ page }) => {
 });
 
 function confirmDataIsDate(dateValues: any[]) {
-    if (dateValues.length === 0){
-        throw Error("No date values recorded")
+    if (dateValues.length === 0) {
+        throw Error("No date values recorded");
     }
 
-    const filtered_dates = dateValues.filter(_ => isNaN(Date.parse(_)));
+    const filtered_dates = dateValues.filter((_) => isNaN(Date.parse(_)));
 
-    expect(filtered_dates.length).toEqual(0)
+    expect(filtered_dates.length).toEqual(0);
 }
 
 function confirmDataIsNotEpochForm(dateValues: any[]) {
-    confirmDataIsDate(dateValues)
+    confirmDataIsDate(dateValues);
 
     const isEpoch = (date: any): boolean => {
-        return !isNaN(date) && (date.length === 10 || date.length === 13)
-    }
+        return !isNaN(date) && (date.length === 10 || date.length === 13);
+    };
 
-    const filtered_dates = dateValues.filter(_ => isEpoch(_));
+    const filtered_dates = dateValues.filter((_) => isEpoch(_));
 
-    expect(filtered_dates.length).toEqual(0)
-
+    expect(filtered_dates.length).toEqual(0);
 }
 
 test.describe("Axis Values With Grouped Data With A Date Field In The Group", () => {
     test("X Bar y-axis label with grouped data", async ({ page }) => {
         await page.click('div[data-plugin="X Bar"]');
-        await page.waitForSelector("perspective-viewer")
+        await page.waitForSelector("perspective-viewer");
 
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-xbar`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
                 "div d3fc-group d3fc-svg.y-axis.left-axis svg g.group:last-child g.tick text"
             );
-            
+
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
                 el.textContent?.trim()
             );
         });
 
-        confirmDataIsNotEpochForm(dateValues)
+        confirmDataIsNotEpochForm(dateValues);
     });
 
     test("Y Bar x-axis label with grouped data", async ({ page }) => {
         await page.click('div[data-plugin="Y Bar"]');
-        await page.waitForSelector("perspective-viewer")
+        await page.waitForSelector("perspective-viewer");
 
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-ybar`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;
@@ -133,15 +132,15 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-ohlc`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;
@@ -155,7 +154,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-       confirmDataIsNotEpochForm(dateValues);
+        confirmDataIsNotEpochForm(dateValues);
     });
 
     test("Heatmap x-axis label with grouped data", async ({ page }) => {
@@ -166,15 +165,15 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-heatmap`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;
@@ -199,15 +198,15 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-yline`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;
@@ -232,15 +231,15 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-yarea`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;
@@ -265,15 +264,15 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-yscatter`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;
@@ -298,15 +297,15 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             let viewer = document.querySelector("perspective-viewer");
 
             if (!viewer) {
-                return Error("Invalid Viewer")
-            };
+                return Error("Invalid Viewer");
+            }
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-candlestick`
             );
 
             if (!plugin_element) {
-                throw Error("Invalid Plugin Element")
+                throw Error("Invalid Plugin Element");
             }
 
             const shadowRoot = plugin_element.shadowRoot;

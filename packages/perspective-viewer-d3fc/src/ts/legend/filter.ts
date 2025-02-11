@@ -18,7 +18,7 @@ function refineDateData(settings: Settings) {
     const { crossValues } = settings;
 
     crossValues.forEach(({ type }, index) => {
-        console.log("Type:", type)
+        console.log("Type:", type);
         const formatType =
             type === "date" || type === "datetime"
                 ? (value: any) => new Date(value).toLocaleString()
