@@ -13,19 +13,15 @@
 import { groupFromKey } from "../series/seriesKey";
 import { DataRowsWithKey, Settings } from "../types";
 
-function refineDateData(
-    settings: Settings,
-    data: any[] | undefined = undefined
-) {
-    let dataToRefine = data ?? settings.data;
+function refineDateData(settings: Settings) {
+    let dataToRefine = settings.data;
     const { crossValues } = settings;
 
     crossValues.forEach(({ type }, index) => {
+        console.log("Type:", type)
         const formatType =
-            type === "date" || type === "timestamp" || type === "datetime"
-                ? (value: any) => new Date(value).toLocaleDateString()
-                : type === "time"
-                ? (value: any) => new Date(value).toLocaleTimeString()
+            type === "date" || type === "datetime"
+                ? (value: any) => new Date(value).toLocaleString()
                 : null;
 
         if (formatType) {
@@ -42,7 +38,7 @@ export function filterData(
     settings: Settings,
     data: any[] | undefined = undefined
 ) {
-    const useData = data || refineDateData(settings, settings.data);
+    const useData = data || refineDateData(settings);
     const len = settings.hideKeys?.length ?? 0;
     return len > 0
         ? useData.map((col) => {

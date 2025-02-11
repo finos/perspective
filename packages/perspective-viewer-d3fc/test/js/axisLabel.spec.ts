@@ -35,90 +35,86 @@ test.beforeEach(async ({ page }) => {
     await page.click(".plugin-select-item");
 });
 
-function confirmDateData(dateValues: any[]) {
-    // expect the first to be a date.
-    expect(!isNaN(Date.parse(dateValues[0]))).toEqual(true);
+function confirmDataIsDate(dateValues: any[]) {
+    if (dateValues.length === 0){
+        throw Error("No date values recorded")
+    }
 
-    // expect any random index of axisLabels to also be a date.
-    let len = dateValues.length;
-    const index = Math.floor(Math.random() * len);
+    const filtered_dates = dateValues.filter(_ => isNaN(Date.parse(_)));
 
-    expect(!isNaN(Date.parse(dateValues[index]))).toEqual(true);
+    expect(filtered_dates.length).toEqual(0)
+}
 
-    // expect the last value to be a date.
+function confirmDataIsNotEpochForm(dateValues: any[]) {
+    confirmDataIsDate(dateValues)
 
-    expect(!isNaN(Date.parse(dateValues[len - 1]))).toEqual(true);
+    const isEpoch = (date: any): boolean => {
+        return !isNaN(date) && (date.length === 10 || date.length === 13)
+    }
 
-    /**
-     * To confirm that the date string is not in epoch format.
-     * check if the entire string is numeric.
-     * if it is, confirm that the length is not 10 or 13.
-     * if it is not, return true.
-     */
-    let isNumericOnly = /^\d+$/.test(dateValues[index]);
+    const filtered_dates = dateValues.filter(_ => isEpoch(_));
 
-    expect(isNumericOnly).toEqual(false);
+    expect(filtered_dates.length).toEqual(0)
+
 }
 
 test.describe("Axis Values With Grouped Data With A Date Field In The Group", () => {
     test("X Bar y-axis label with grouped data", async ({ page }) => {
         await page.click('div[data-plugin="X Bar"]');
-        await page.waitForSelector("perspective-viewer");
+        await page.waitForSelector("perspective-viewer")
 
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-xbar`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.y-axis.left-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.y-axis.left-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
-
+            
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
                 el.textContent?.trim()
             );
         });
 
-        confirmDateData(dateValues);
+        confirmDataIsNotEpochForm(dateValues)
     });
 
     test("Y Bar x-axis label with grouped data", async ({ page }) => {
         await page.click('div[data-plugin="Y Bar"]');
-        await page.waitForSelector("perspective-viewer");
+        await page.waitForSelector("perspective-viewer")
 
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-ybar`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
@@ -126,7 +122,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-        confirmDateData(dateValues);
+        confirmDataIsNotEpochForm(dateValues);
     });
 
     test("OHLC x-axis label with grouped data", async ({ page }) => {
@@ -136,23 +132,22 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-ohlc`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
@@ -160,7 +155,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-        confirmDateData(dateValues);
+       confirmDataIsNotEpochForm(dateValues);
     });
 
     test("Heatmap x-axis label with grouped data", async ({ page }) => {
@@ -170,23 +165,22 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-heatmap`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
@@ -194,7 +188,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-        confirmDateData(dateValues);
+        confirmDataIsNotEpochForm(dateValues);
     });
 
     test("Y Line x-axis label with grouped data", async ({ page }) => {
@@ -204,23 +198,22 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-yline`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
@@ -228,7 +221,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-        confirmDateData(dateValues);
+        confirmDataIsNotEpochForm(dateValues);
     });
 
     test("Y Area x-axis label with grouped data", async ({ page }) => {
@@ -238,23 +231,22 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-yarea`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
@@ -262,7 +254,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-        confirmDateData(dateValues);
+        confirmDataIsNotEpochForm(dateValues);
     });
 
     test("Y Scatter x-axis label with grouped data", async ({ page }) => {
@@ -272,23 +264,22 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-yscatter`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
@@ -296,7 +287,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-        confirmDateData(dateValues);
+        confirmDataIsNotEpochForm(dateValues);
     });
 
     test("CandleStick x-axis label with grouped data", async ({ page }) => {
@@ -306,23 +297,22 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
         const dateValues = await page.evaluate(async () => {
             let viewer = document.querySelector("perspective-viewer");
 
-            if (!viewer) return [];
+            if (!viewer) {
+                return Error("Invalid Viewer")
+            };
 
             const plugin_element = viewer.querySelector(
                 `perspective-viewer-d3fc-candlestick`
             );
 
-            if (!plugin_element) return [];
+            if (!plugin_element) {
+                throw Error("Invalid Plugin Element")
+            }
 
             const shadowRoot = plugin_element.shadowRoot;
-            const elements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg, g.group"
+            const dateTextElements = shadowRoot.querySelectorAll(
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
             );
-
-            // By how the data is grouped, the date values are the last in the array.
-            const lastGroup = elements[elements.length - 1];
-
-            const dateTextElements = lastGroup.querySelectorAll("g.tick text");
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
@@ -330,6 +320,6 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             );
         });
 
-        confirmDateData(dateValues);
+        confirmDataIsNotEpochForm(dateValues);
     });
 });
