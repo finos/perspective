@@ -70,7 +70,10 @@ impl PySyncServer {
         loop_callback: Option<Py<PyAny>>,
     ) -> PyResult<crate::client::client_sync::Client> {
         let client = crate::client::client_sync::Client(PyClient::new_from_client(
-            self.server.new_local_client().clone(),
+            self.server
+                .new_local_client()
+                .take()
+                .map_err(PyValueError::new_err)?,
         ));
 
         if let Some(loop_cb) = loop_callback {
