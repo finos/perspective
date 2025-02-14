@@ -62,7 +62,6 @@ pub fn arrow_to_polars(py: Python<'_>, arrow: &[u8]) -> PyResult<Py<PyAny>> {
     Ok(polars
         .getattr("read_ipc_stream")?
         .call1((bytes,))?
-        .call0()?
         .as_unbound()
         .clone())
 }

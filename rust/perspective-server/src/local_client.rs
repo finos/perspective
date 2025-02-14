@@ -65,24 +65,26 @@ impl LocalClientState {
 }
 
 /// A [`Client`] specialized for connecting to an in-process [`Server`].
-pub struct LocalClient(LocalClientState);
+pub struct LocalClient(Option<LocalClientState>);
 
 impl Deref for LocalClient {
     type Target = Client;
 
     fn deref(&self) -> &Self::Target {
-        self.0.get_client()
+        self.0.as_ref().unwrap().get_client()
     }
 }
 
 impl Drop for LocalClient {
     fn drop(&mut self) {
-        if let Some(session) = self.0.session.get() {
-            if session.try_read().unwrap().is_some() {
-                tracing::error!("`Client` dropped without `Client::close`");
+        if let Some(state) = &self.0 {
+            if let Some(session) = state.session.get() {
+                if session.try_read().unwrap().is_some() {
+                    tracing::error!("`Client` dropped without `Client::close`");
+                }
+            } else {
+                tracing::debug!("`Session` dropped before init");
             }
-        } else {
-            tracing::debug!("`Session` dropped before init");
         }
     }
 }
@@ -96,14 +98,18 @@ impl LocalClient {
             session: Arc::default(),
         };
 
-        LocalClient(state)
+        LocalClient(Some(state))
+    }
+
+    pub fn take(mut self) -> Result<Client, &'static str> {
+        self.0.take().map(|x| x.get_client().clone()).ok_or("Empty")
     }
 
     /// Close this [`LocalClient`]. Dropping a [`LocalClient`] instead of
     /// calling [`LocalClient::close`] will result in a log error, as this
     /// will leak!
     pub async fn close(self) {
-        if let Some(session) = self.0.session.get() {
+        if let Some(session) = self.0.as_ref().unwrap().session.get() {
             session.write().await.take().unwrap().close().await
         } else {
             tracing::debug!("`Session` dropped before init");

@@ -469,33 +469,58 @@ copy_array(
             }
         } break;
         case arrow::DictionaryType::type_id: {
+            auto dictionary_type =
+                static_cast<const arrow::DictionaryType*>(src->type().get());
+
+            auto value_type = dictionary_type->value_type();
+
             // If there are duplicate values in the dictionary
             // at different indices, i.e. [0 => a, 1 => b, 2 =>
             // a], tables with explicit indexes on a string
             // column created from a dictionary array may have
             // duplicate primary keys.
             auto scol = std::static_pointer_cast<arrow::DictionaryArray>(src);
-            std::shared_ptr<arrow::StringArray> dict =
-                std::static_pointer_cast<arrow::StringArray>(scol->dictionary()
+            if (value_type->id() == arrow::large_utf8()->id()) {
+                auto dict = std::static_pointer_cast<arrow::LargeStringArray>(
+                    scol->dictionary()
                 );
-            const int32_t* offsets = dict->raw_value_offsets();
-            const uint8_t* values = dict->value_data()->data();
-            const std::uint64_t dsize = dict->length();
 
-            t_vocab* vocab = dest->_get_vocab();
-            std::string elem;
+                const uint8_t* values = dict->value_data()->data();
+                const std::uint64_t dsize = dict->length();
+                t_vocab* vocab = dest->_get_vocab();
+                std::string elem;
+                // vocab len + null bytes
+                vocab->reserve(dict->value_data()->size() + dsize, dsize);
+                for (std::uint64_t i = 0; i < dsize; ++i) {
+                    std::int64_t bidx = dict->value_offset(i);
+                    std::size_t es = dict->value_length(i);
+                    elem.assign(
+                        reinterpret_cast<const char*>(values) + bidx, es
+                    );
 
-            vocab->reserve(
-                dict->value_data()->size() + dsize, // vocab len + null bytes
-                dsize
-            );
+                    vocab->get_interned(elem);
+                }
+            } else {
+                auto dict = std::static_pointer_cast<arrow::StringArray>(
+                    scol->dictionary()
+                );
 
-            for (std::uint64_t i = 0; i < dsize; ++i) {
-                std::int32_t bidx = offsets[i];
-                std::size_t es = offsets[i + 1] - bidx;
-                elem.assign(reinterpret_cast<const char*>(values) + bidx, es);
-                vocab->get_interned(elem);
+                const uint8_t* values = dict->value_data()->data();
+                const std::uint64_t dsize = dict->length();
+                t_vocab* vocab = dest->_get_vocab();
+                std::string elem;
+                vocab->reserve(dict->value_data()->size() + dsize, dsize);
+                for (std::uint64_t i = 0; i < dsize; ++i) {
+                    std::int32_t bidx = dict->value_offset(i);
+                    std::size_t es = dict->value_length(i);
+                    elem.assign(
+                        reinterpret_cast<const char*>(values) + bidx, es
+                    );
+
+                    vocab->get_interned(elem);
+                }
             }
+
             auto indices = scol->indices();
             switch (indices->type()->id()) {
                 case arrow::Int8Type::type_id: {
