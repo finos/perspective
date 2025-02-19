@@ -65,6 +65,8 @@ export class PerspectiveWorkspace extends SplitPanel {
     private _maximizedWidget?: PerspectiveViewerWidget;
     private _last_updated_state?: PerspectiveWorkspaceConfig<string>;
     // private _context_menu?: Menu & { init_overlay?: () => void };
+    private _primaryWidget?: PerspectiveViewerWidget;
+    private _lock: boolean;
 
     constructor(element: HTMLElement) {
         super({ orientation: "horizontal" });
@@ -101,6 +103,8 @@ export class PerspectiveWorkspace extends SplitPanel {
         element.addEventListener("contextmenu", (event) =>
             this.showContextMenu(null, event)
         );
+        this._onPrimaryWidgetChange();
+        this._lock = false;
     }
 
     get_context_menu(): WorkspaceMenu | undefined {
@@ -539,22 +543,123 @@ export class PerspectiveWorkspace extends SplitPanel {
         filters: [string, string, string][],
         candidates: Set<string>
     ) {
-        const config = await viewer.save();
-        const table = await viewer.getTable();
-        const availableColumns = Object.keys(await table.schema());
-        const currentFilters = config.filter || [];
-        const columnAvailable = (filter: [string, string, any]) =>
-            filter[0] && availableColumns.includes(filter[0]);
+        while (this._lock) {
+            await new Promise((resolve) => setTimeout(resolve, 10));
+        }
 
-        const validFilters = filters.filter(columnAvailable);
-        validFilters.push(
-            ...currentFilters.filter(
-                (x: [string, ..._: string[]]) => !candidates.has(x[0])
-            )
-        );
+        this._lock = true;
 
-        const newFilters = uniqBy(validFilters, (item) => item[0]);
-        await viewer.restore({ filter: newFilters });
+        try {
+            const config = await viewer.save();
+
+            const isViewerWidget = (widget: PerspectiveViewerWidget) =>
+                isEqual(widget.viewer, viewer) as boolean;
+
+            let viewWasInactive = false;
+            let isHiddenView = false;
+
+            if (config.plugin !== "Datagrid") {
+                isHiddenView = this.viewIsHidden(isViewerWidget);
+            }
+
+            if (isHiddenView) {
+                this.activateViewer(isViewerWidget);
+                viewWasInactive = true;
+            }
+
+            const table = await viewer.getTable();
+            const availableColumns = Object.keys(await table.schema());
+            const currentFilters = config.filter || [];
+            const columnAvailable = (filter: [string, string, any]) =>
+                filter[0] && availableColumns.includes(filter[0]);
+
+            const validFilters = filters.filter(columnAvailable);
+            validFilters.push(
+                ...currentFilters.filter(
+                    (x: [string, ..._: string[]]) => !candidates.has(x[0])
+                )
+            );
+
+            const newFilters = uniqBy(validFilters, (item) => item[0]);
+            await viewer.restore({ filter: newFilters });
+
+            if (viewWasInactive) {
+                await this.reactivatePrimaryViewer();
+            }
+        } finally {
+            this._lock = false;
+        }
+    }
+
+    _onPrimaryWidgetChange() {
+        const visibleWidgets: PerspectiveViewerWidget[] = toArray(
+            this.dockpanel.widgets()
+        ).filter((w: PerspectiveViewerWidget) => w.isVisible);
+
+        if (visibleWidgets.length > 0) {
+            if (!this._primaryWidget) {
+                this._primaryWidget = visibleWidgets[0];
+            }
+
+            if (
+                !isEqual(this._primaryWidget?.viewer, visibleWidgets[0].viewer)
+            ) {
+                this._primaryWidget = visibleWidgets[0];
+            }
+        }
+    }
+
+    /**
+     * @param isViewerWidget: fxn that returns a boolean
+     * @returns PerspectiveViewerWidget
+     */
+    _widgetFromViewer(
+        isViewerWidget: (w: PerspectiveViewerWidget) => boolean
+    ): PerspectiveViewerWidget {
+        return toArray(this.dockpanel.widgets()).filter(isViewerWidget)[0];
+    }
+
+    /**
+     *
+     * @param isViewerWidget
+     * @returns boolean - is the widget hidden or visible
+     */
+    viewIsHidden(
+        isViewerWidget: (w: PerspectiveViewerWidget) => boolean
+    ): boolean {
+        const currWidget = this._widgetFromViewer(isViewerWidget);
+        return currWidget.isHidden;
+    }
+
+    /**
+     * given a viewer, this function makes it a visible widget on the dockpanel
+     * @param isViewerWidget
+     */
+    activateViewer(isViewerWidget: (w: PerspectiveViewerWidget) => boolean) {
+        const currWidget = this._widgetFromViewer(isViewerWidget);
+
+        if (currWidget) {
+            this.dockpanel.activateWidget(currWidget);
+        }
+    }
+
+    /**
+     * Given an overlay dockpanel, make the primary widget the visible one.
+     */
+    async reactivatePrimaryViewer() {
+        if (this._primaryWidget) {
+            const primaryViewer: HTMLPerspectiveViewerElement =
+                this._primaryWidget.viewer;
+
+            const isViewerWidget = (w: PerspectiveViewerWidget) =>
+                isEqual(primaryViewer, w.viewer) as boolean;
+
+            const primaryWidget = this._widgetFromViewer(isViewerWidget);
+
+            if (primaryWidget && primaryWidget.isHidden) {
+                await this.dockpanel.activateWidget(primaryWidget);
+            }
+        }
     }
 
     async onPerspectiveSelect(event: CustomEvent) {
@@ -575,8 +680,12 @@ export class PerspectiveWorkspace extends SplitPanel {
             ...(config.filter || []).map((x: [string, string, any]) => x[0]),
         ]);
 
+        this._onPrimaryWidgetChange();
+
         const filters = [...event.detail.config.filter];
-        toArray(this.dockpanel.widgets()).forEach((widget) => {
+        const widgets = toArray(this.dockpanel.widgets());
+
+        widgets.forEach((widget) => {
             this._filterViewer(
                 (widget as PerspectiveViewerWidget).viewer,
                 filters,
