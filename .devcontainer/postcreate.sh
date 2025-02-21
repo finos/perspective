@@ -13,5 +13,8 @@ sudo apt-get update
 sudo apt-get install -y kitware-archive-keyring
 sudo apt-get install -y cmake
 
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
 # Repo setup
 pnpm install

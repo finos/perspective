@@ -51,5 +51,5 @@ if (process.env.PSP_PYODIDE) {
         execOpts
     );
 } else {
-    execFileSync("pytest", ["perspective/tests", "-W error"], execOpts);
+    execFileSync("pytest", ["perspective/tests", "-W error", ...process.argv.slice(2)], execOpts);
 }

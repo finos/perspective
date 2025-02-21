@@ -15,10 +15,10 @@ use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyBytes};
 
 fn get_pyarrow_table_cls(py: Python<'_>) -> PyResult<Option<Py<PyAny>>> {
-    let sys = PyModule::import_bound(py, "sys")?;
+    let sys = PyModule::import(py, "sys")?;
     if sys.getattr("modules")?.contains("pyarrow")? {
-        let pandas = PyModule::import_bound(py, "pyarrow")?;
-        Ok(Some(pandas.getattr("Table")?.to_object(py)))
+        let pandas = PyModule::import(py, "pyarrow")?;
+        Ok(Some(pandas.getattr("Table")?.unbind()))
     } else {
         Ok(None)
     }
@@ -36,7 +36,7 @@ pub fn to_arrow_bytes<'py>(
     py: Python<'py>,
     table: &Bound<'py, PyAny>,
 ) -> PyResult<Bound<'py, PyBytes>> {
-    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
+    let pyarrow = PyModule::import(py, "pyarrow")?;
     let table_class = get_pyarrow_table_cls(py)?
         .ok_or_else(|| PyValueError::new_err("Failed to import pyarrow.Table"))?;
 

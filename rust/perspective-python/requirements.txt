@@ -12,6 +12,7 @@ polars==1.13.1
 pyarrow==16.1.0
 psutil==6.0.0
 pytest==8.2.2
+pytest-asyncio==0.25.3
 pytest-sugar==1.0.0
 ruff==0.5.0
 tornado==6.4.1
