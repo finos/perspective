@@ -20,7 +20,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyBytes};
 
-use crate::client::python::PyClient;
+use crate::client::client_async::AsyncClient;
 
 #[pyclass(module = "perspective")]
 #[derive(Clone)]
@@ -42,7 +42,7 @@ impl SessionHandler for PyConnection {
         &'a mut self,
         msg: &'a [u8],
     ) -> Result<(), perspective_server::ServerError> {
-        Python::with_gil(|py| self.0.call1(py, (PyBytes::new_bound(py, msg),)))?;
+        Python::with_gil(|py| self.0.call1(py, (PyBytes::new(py, msg),)))?;
         Ok(())
     }
 }
@@ -64,12 +64,13 @@ impl PySyncServer {
         PySyncSession { session }
     }
 
+    #[pyo3(signature = (loop_callback=None))]
     pub fn new_local_client(
         &self,
         py: Python<'_>,
         loop_callback: Option<Py<PyAny>>,
     ) -> PyResult<crate::client::client_sync::Client> {
-        let client = crate::client::client_sync::Client(PyClient::new_from_client(
+        let client = crate::client::client_sync::Client(AsyncClient::new_from_client(
             self.server
                 .new_local_client()
                 .take()

@@ -56,3 +56,4 @@ python_classes = ["Test", "Describe"]
 python_functions = ["test_", "it_", "and_", "but_", "they_"]
 python_files = ["test_*.py"]
 testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
