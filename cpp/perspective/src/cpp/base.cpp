@@ -489,6 +489,12 @@ str_to_aggtype(const std::string& str) {
     if (str == "any") {
         return t_aggtype::AGGTYPE_ANY;
     }
+    if (str == "q1") {
+        return t_aggtype::AGGTYPE_Q1;
+    }
+    if (str == "q3") {
+        return t_aggtype::AGGTYPE_Q3;
+    }
     if (str == "median") {
         return t_aggtype::AGGTYPE_MEDIAN;
     }

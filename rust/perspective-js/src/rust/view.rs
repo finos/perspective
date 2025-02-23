@@ -20,11 +20,6 @@ use wasm_bindgen_futures::spawn_local;
 use crate::table::Table;
 use crate::utils::{inherit_docs, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop};
 
-#[wasm_bindgen(typescript_custom_section)]
-const TS_APPEND_CONTENT: &'static str = r#"
-import type {OnUpdateOptions, ViewWindow} from "@finos/perspective";
-"#;
-
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = "ViewWindow")]

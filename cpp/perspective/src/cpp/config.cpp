@@ -213,6 +213,8 @@ t_config::setup(
             case AGGTYPE_MEAN:
             case AGGTYPE_WEIGHTED_MEAN:
             case AGGTYPE_UNIQUE:
+            case AGGTYPE_Q1:
+            case AGGTYPE_Q3:
             case AGGTYPE_MEDIAN:
             case AGGTYPE_JOIN:
             case AGGTYPE_DOMINANT:

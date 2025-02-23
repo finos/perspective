@@ -184,11 +184,6 @@ impl Table {
     }
 }
 
-#[wasm_bindgen(typescript_custom_section)]
-const TS_APPEND_CONTENT: &'static str = r#"
-import type {UpdateOptions, ViewConfigUpdate} from "@finos/perspective";
-"#;
-
 #[wasm_bindgen]
 extern "C" {
     // TODO Fix me

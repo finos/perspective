@@ -143,6 +143,12 @@ t_aggspec::agg_str() const {
         case AGGTYPE_ANY: {
             return "any";
         } break;
+        case AGGTYPE_Q1: {
+            return "q1";
+        } break;
+        case AGGTYPE_Q3: {
+            return "q3";
+        } break;
         case AGGTYPE_MEDIAN: {
             return "median";
         } break;
@@ -343,6 +349,8 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         case AGGTYPE_ANY:
         case AGGTYPE_UNIQUE:
         case AGGTYPE_DOMINANT:
+        case AGGTYPE_Q1:
+        case AGGTYPE_Q3:
         case AGGTYPE_MEDIAN:
         case AGGTYPE_FIRST:
         case AGGTYPE_LAST_BY_INDEX:

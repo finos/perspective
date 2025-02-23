@@ -39,12 +39,12 @@ export type * from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
 export type * from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 export type * from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 
-import type * as view_window from "../../src/ts/ts-rs/ViewWindow.d.ts";
-import type * as table_init_options from "../../src/ts/ts-rs/TableInitOptions.d.ts";
-import type * as view_config_update from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
+import type {ViewWindow} from "../../src/ts/ts-rs/ViewWindow.d.ts";
+import type {TableInitOptions} from "../../src/ts/ts-rs/TableInitOptions.d.ts";
+import type {ViewConfigUpdate} from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
 import type * as on_update_args from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
-import type * as on_update_options from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
-import type * as update_options from "../../src/ts/ts-rs/UpdateOptions.d.ts";
+import type {OnUpdateOptions} from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
+import type {UpdateOptions} from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 "#;
 
 #[cfg(feature = "export-init")]

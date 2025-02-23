@@ -49,6 +49,12 @@ pub enum SingleAggregate {
     #[serde(rename = "dominant")]
     Dominant,
 
+    #[serde(rename = "q1")]
+    Q1,
+
+    #[serde(rename = "q3")]
+    Q3,
+
     #[serde(rename = "median")]
     Median,
 
@@ -117,6 +123,8 @@ impl Display for SingleAggregate {
             Self::Unique => "unique",
             Self::Dominant => "dominant",
             Self::Median => "median",
+            Self::Q1 => "q1",
+            Self::Q3 => "q3",
             Self::First => "first",
             Self::FirstByIndex => "first by index",
             Self::LastByIndex => "last by index",
@@ -155,6 +163,8 @@ impl FromStr for SingleAggregate {
             "unique" => Ok(Self::Unique),
             "dominant" => Ok(Self::Dominant),
             "median" => Ok(Self::Median),
+            "q1" => Ok(Self::Q1),
+            "q3" => Ok(Self::Q3),
             "first by index" => Ok(Self::FirstByIndex),
             "first" => Ok(Self::First),
             "last by index" => Ok(Self::LastByIndex),
@@ -241,6 +251,8 @@ const STRING_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::Last,
     SingleAggregate::LastByIndex,
     SingleAggregate::Median,
+    SingleAggregate::Q1,
+    SingleAggregate::Q3,
     SingleAggregate::Unique,
 ];
 
@@ -262,6 +274,8 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::Last,
     SingleAggregate::Mean,
     SingleAggregate::Median,
+    SingleAggregate::Q1,
+    SingleAggregate::Q3,
     SingleAggregate::PctSumParent,
     SingleAggregate::PctSumGrandTotal,
     SingleAggregate::StdDev,
@@ -286,6 +300,8 @@ const DATETIME_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::LastByIndex,
     SingleAggregate::Last,
     SingleAggregate::Median,
+    SingleAggregate::Q1,
+    SingleAggregate::Q3,
     SingleAggregate::Unique,
 ];
 
