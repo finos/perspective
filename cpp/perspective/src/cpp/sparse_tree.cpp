@@ -1323,6 +1323,42 @@ t_stree::update_agg_table(
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
+            case AGGTYPE_Q1: {
+                old_value.set(dst->get_scalar(dst_ridx));
+                auto pkeys = get_pkeys(nidx);
+                new_value.set(
+                    reduce_from_gstate<
+                        std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [&](std::vector<t_tscalar>& values) {
+                            return get_aggregate_median(values, 0.25);
+                        }
+                    )
+                );
+
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
+            case AGGTYPE_Q3: {
+                old_value.set(dst->get_scalar(dst_ridx));
+                auto pkeys = get_pkeys(nidx);
+                new_value.set(
+                    reduce_from_gstate<
+                        std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [&](std::vector<t_tscalar>& values) {
+                            return get_aggregate_median(values, 0.75);
+                        }
+                    )
+                );
+
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
             case AGGTYPE_MEDIAN: {
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
@@ -1335,7 +1371,7 @@ t_stree::update_agg_table(
                         spec.get_dependencies()[0].name(),
                         pkeys,
                         [&](std::vector<t_tscalar>& values) {
-                            return get_aggregate_median(values);
+                            return get_aggregate_median(values, 0.5);
                         }
                     )
                 );
@@ -2326,26 +2362,31 @@ t_stree::get_aggregate(t_index idx, t_index aggnum) const {
 }
 
 t_tscalar
-t_stree::get_aggregate_median(std::vector<t_tscalar>& values) const {
-    int size = values.size();
-    bool is_even_size = size % 2 == 0;
-
+t_stree::get_aggregate_median(std::vector<t_tscalar>& values, float n) const {
+    const auto size = values.size();
+    const float raw_size = static_cast<float>(size) * n;
+    bool is_even_size = fabsf(roundf(raw_size) - raw_size) <= 0.00001;
     if (size == 0) {
         return {};
     }
+
     if (size == 1) {
         return values[0];
     }
+
+    const auto split = static_cast<long>(raw_size);
     if (is_even_size && values[0].is_floating_point()) {
         t_tscalar median_average;
-        auto middle = values.begin() + (size / 2);
+        auto middle = values.begin() + split;
         nth_element(values.begin(), middle, values.end());
         median_average.set(
             (*middle + *(middle - 1)) / static_cast<t_tscalar>(2)
         );
+
         return median_average;
     }
-    auto middle = values.begin() + (size / 2);
+
+    auto middle = values.begin() + split;
     std::nth_element(values.begin(), middle, values.end());
     return *middle;
 }

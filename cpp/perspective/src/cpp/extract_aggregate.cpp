@@ -59,6 +59,8 @@ extract_aggregate(
         case AGGTYPE_COUNT:
         case AGGTYPE_ANY:
         case AGGTYPE_DOMINANT:
+        case AGGTYPE_Q1:
+        case AGGTYPE_Q3:
         case AGGTYPE_MEDIAN:
         case AGGTYPE_FIRST:
         case AGGTYPE_AND:
