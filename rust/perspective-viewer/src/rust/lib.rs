@@ -49,10 +49,16 @@ use crate::custom_elements::export_dropdown::ExportDropDownMenuElement;
 use crate::custom_elements::viewer::PerspectiveViewerElement;
 use crate::utils::define_web_component;
 
-// #[wasm_bindgen(typescript_custom_section)]
-// const TS_APPEND_CONTENT: &'static str = r#"
-// import type * as perspective from "../../dist/wasm/ViewConfigUpdate.ts";
-// "#;
+#[wasm_bindgen(typescript_custom_section)]
+const TS_APPEND_CONTENT: &'static str = r#"
+import type {
+    TableInitOptions, 
+    ViewWindow, 
+    OnUpdateOptions,
+    UpdateOptions, 
+    ViewConfigUpdate,
+} from "@finos/perspective";
+"#;
 
 /// Register a plugin globally.
 #[wasm_bindgen]

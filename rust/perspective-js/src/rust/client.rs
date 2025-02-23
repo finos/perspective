@@ -20,11 +20,6 @@ use wasm_bindgen::prelude::*;
 pub use crate::table::*;
 use crate::utils::{inherit_docs, ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop};
 
-#[wasm_bindgen(typescript_custom_section)]
-const TS_APPEND_CONTENT: &'static str = r#"
-import type {TableInitOptions} from "@finos/perspective";
-"#;
-
 #[wasm_bindgen]
 extern "C" {
     #[derive(Clone)]
