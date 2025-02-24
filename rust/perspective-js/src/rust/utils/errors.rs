@@ -49,7 +49,11 @@ impl ApiError {
 
 impl Display for ApiError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        if let Some(msg) = self.0.as_string() {
+            write!(f, "{}", msg)
+        } else {
+            write!(f, "{:?}", self.0)
+        }
     }
 }
 

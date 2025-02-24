@@ -74,7 +74,7 @@ pub trait RestoreAndRender: HasRenderer + HasSession + HasPresentation {
                 session.set_update_column_defaults(&mut view_config, &renderer.metadata());
             }
 
-            session.update_view_config(view_config);
+            session.update_view_config(view_config)?;
             let draw_task = renderer.draw(async {
                 task.await?;
                 let plugin = renderer.get_active_plugin()?;

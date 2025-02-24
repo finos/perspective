@@ -107,10 +107,7 @@ test.describe("Settings", () => {
             });
 
             const contents = await get_contents(page);
-            expect(errors).toEqual([
-                "::Intentional Load Error",
-                //   "RuntimeError::unreachable",
-            ]);
+            expect(errors).toEqual(["Error::Intentional Load Error"]);
 
             consoleLogs.expectedLogs.push(
                 "error",
