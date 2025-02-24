@@ -169,10 +169,11 @@ impl PerspectiveViewerElement {
         self.session
             .set_update_column_defaults(&mut config, &self.renderer.metadata());
 
-        self.session.update_view_config(config);
+        let update_task = self.session.update_view_config(config);
         clone!(self.renderer, self.session);
         ApiFuture::new(async move {
             let task = async {
+                update_task?;
                 #[wasm_bindgen]
                 extern "C" {
                     pub type Model;
@@ -198,7 +199,12 @@ impl PerspectiveViewerElement {
 
             renderer.set_throttle(None);
             let (draw, delete) = join(renderer.draw(task), delete_task).await;
-            draw.and(delete)
+            let result = draw.and(delete);
+            if let Err(e) = result.clone() {
+                session.set_error(e.to_string()).await?;
+            }
+
+            result
         })
     }
 
@@ -374,11 +380,11 @@ impl PerspectiveViewerElement {
         })
     }
 
-    pub fn invalidate(&self) -> ApiFuture<()> {
+    pub fn resetError(&self) -> ApiFuture<()> {
         self.session.invalidate();
         let this = self.clone();
         ApiFuture::new(async move {
-            this.update_and_render(ViewConfigUpdate::default()).await?;
+            this.update_and_render(ViewConfigUpdate::default())?.await?;
             Ok(())
         })
     }

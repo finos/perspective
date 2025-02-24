@@ -52,10 +52,10 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
     }
 
     /// Apply a `ViewConfigUpdate` to the current `View` and render.
-    fn update_and_render(&self, update: ViewConfigUpdate) -> ApiFuture<()> {
-        self.session().update_view_config(update);
+    fn update_and_render(&self, update: ViewConfigUpdate) -> ApiResult<ApiFuture<()>> {
+        self.session().update_view_config(update)?;
         clone!(self.session(), self.renderer());
-        ApiFuture::new(update_and_render(session, renderer))
+        Ok(ApiFuture::new(update_and_render(session, renderer)))
     }
 }
 

@@ -21,7 +21,6 @@ use futures::Future;
 use nanoid::*;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use tracing_unwrap::{OptionExt, ResultExt};
 
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
@@ -242,7 +241,7 @@ impl Client {
         tracing::debug!("SEND {}", msg);
         if let Err(e) = (self.send)(msg).await {
             self.subscriptions_once.write().await.remove(&msg.msg_id);
-            Err(e.into())
+            Err(ClientError::Unknown(e.to_string()))
         } else {
             Ok(())
         }
@@ -260,7 +259,7 @@ impl Client {
         tracing::debug!("SEND {}", msg);
         if let Err(e) = (self.send)(msg).await {
             self.subscriptions.write().await.remove(&msg.msg_id);
-            Err(e.into())
+            Err(ClientError::Unknown(e.to_string()))
         } else {
             Ok(())
         }
@@ -308,7 +307,7 @@ impl Client {
                 let table = table.clone();
                 move |update: crate::proto::ViewOnUpdateResp| {
                     let table = table.clone();
-                    let update = update.delta.unwrap_or_log();
+                    let update = update.delta.expect("Missing update");
                     async move {
                         table
                             .update(

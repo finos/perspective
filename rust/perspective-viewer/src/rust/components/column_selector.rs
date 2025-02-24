@@ -183,8 +183,11 @@ impl Component for ColumnSelector {
                         &ctx.props().renderer.metadata(),
                     );
 
-                    ApiFuture::spawn(ctx.props().update_and_render(update));
+                    if let Ok(task) = ctx.props().update_and_render(update) {
+                        ApiFuture::spawn(task);
+                    }
                 }
+
                 true
             },
             Drop((column, DragTarget::Active, effect, index)) => {
@@ -196,7 +199,10 @@ impl Component for ColumnSelector {
                     &ctx.props().renderer.metadata(),
                 );
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                if let Ok(task) = ctx.props().update_and_render(update) {
+                    ApiFuture::spawn(task);
+                }
+
                 true
             },
             Drop((_, _, DragEffect::Move(DragTarget::Active), _)) => true,
