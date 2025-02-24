@@ -47,7 +47,7 @@ pub enum Token<'a> {
 
 use Token::*;
 
-impl<'a> ToHtml for Token<'a> {
+impl ToHtml for Token<'_> {
     fn to_html(&self) -> Html {
         html! {
             if matches!(self, Break(_)) { <br /> } else {

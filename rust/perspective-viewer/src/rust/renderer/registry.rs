@@ -117,7 +117,7 @@ pub impl LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
 
 fn register_default() {
     PLUGIN_REGISTRY.with(|plugins| {
-        if plugins.borrow().len() == 0 {
+        if plugins.borrow().is_empty() {
             plugins.borrow_mut().push(PluginRecord {
                 name: "Debug".to_owned(),
                 category: "Custom".to_owned(),

@@ -534,7 +534,7 @@ impl AsyncView {
     }
 
     #[pyo3(signature = (**window))]
-    pub async fn to_records<'a>(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+    pub async fn to_records(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         let json = self.to_json_string(window).await?;
         Python::with_gil(|py| {
             let json_module = PyModule::import(py, "json")?;
@@ -544,7 +544,7 @@ impl AsyncView {
     }
 
     #[pyo3(signature = (**window))]
-    pub async fn to_json<'a>(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+    pub async fn to_json(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         self.to_records(window).await
     }
 }

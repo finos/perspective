@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use perspective_client::config::*;
-// use perspective_client::ColumnType;
+use perspective_client::utils::PerspectiveResultExt;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -75,7 +75,12 @@ impl Component for SortColumn {
                     sort: Some(sort),
                     ..ViewConfigUpdate::default()
                 };
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 false
             },
         }

@@ -49,7 +49,11 @@ impl ApiError {
 
 impl Display for ApiError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        if let Some(msg) = self.0.as_string() {
+            write!(f, "{}", msg)
+        } else {
+            write!(f, "{:?}", self.0)
+        }
     }
 }
 
@@ -101,11 +105,11 @@ define_api_error!(
 #[wasm_bindgen(inline_js = r#"
 export class PerspectiveViewNotFoundError extends Error {}
 "#)]
-extern "C" {
+unsafe extern "C" {
     pub type PerspectiveViewNotFoundError;
 
     #[wasm_bindgen(constructor)]
-    fn new() -> PerspectiveViewNotFoundError;
+    unsafe fn new() -> PerspectiveViewNotFoundError;
 }
 
 /// Explicit conversion methods for `ApiResult<T>`, for situations where
@@ -130,7 +134,9 @@ impl ToApiError<JsValue> for Result<(), ApiResult<JsValue>> {
 impl From<perspective_client::ClientError> for ApiError {
     fn from(value: ClientError) -> Self {
         match value {
-            ClientError::ViewNotFound => ApiError(PerspectiveViewNotFoundError::new().into()),
+            ClientError::ViewNotFound => {
+                ApiError(unsafe { PerspectiveViewNotFoundError::new() }.into())
+            },
             err => ApiError(JsError::new(format!("{}", err).as_str()).into()),
         }
     }

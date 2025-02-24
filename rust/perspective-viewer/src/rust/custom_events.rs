@@ -110,9 +110,7 @@ impl CustomEvents {
 
         let view_sub = session.view_created.add_listener({
             clone!(data);
-            move |_| {
-                data.clone().dispatch_config_update();
-            }
+            move |_| data.clone().dispatch_config_update()
         });
 
         Self(Rc::new((data, [

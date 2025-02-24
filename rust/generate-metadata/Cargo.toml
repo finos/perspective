@@ -13,7 +13,7 @@
 [package]
 name = "perspective-metadata"
 description = "A CLI utility for generating Perspective project metadata like TypeScript definitions."
-edition = "2021"
+edition = "2024"
 publish = false
 
 [[bin]]

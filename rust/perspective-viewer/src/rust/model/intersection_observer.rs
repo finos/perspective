@@ -68,7 +68,7 @@ impl IntersectionObserverState {
     async fn set_pause(self, intersect: bool) -> ApiResult<()> {
         if intersect {
             if self.session.set_pause(false) {
-                self.update_and_render(ViewConfigUpdate::default()).await?;
+                self.update_and_render(ViewConfigUpdate::default())?.await?;
             }
         } else {
             self.session.set_pause(true);

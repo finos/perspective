@@ -44,13 +44,13 @@ impl RenderWarning {
     fn update_warnings(&mut self, ctx: &Context<Self>) {
         if let Some((num_cols, num_rows, max_cols, max_rows)) = ctx.props().dimensions {
             let count = num_cols * num_rows;
-            if max_cols.map_or(false, |x| x < num_cols) {
+            if max_cols.is_some_and(|x| x < num_cols) {
                 self.col_warn = Some((max_cols.unwrap(), num_cols));
             } else {
                 self.col_warn = None;
             }
 
-            if max_rows.map_or(false, |x| x < num_rows) {
+            if max_rows.is_some_and(|x| x < num_rows) {
                 self.row_warn = Some((num_cols * max_rows.unwrap(), count));
             } else {
                 self.row_warn = None;

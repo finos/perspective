@@ -28,7 +28,7 @@
 //! freeing the uncompressed memory from the archive.
 
 #![no_std]
-#![allow(internal_features, improper_ctypes_definitions)]
+#![allow(internal_features, improper_ctypes_definitions, static_mut_refs)]
 #![feature(core_intrinsics, lang_items, alloc_error_handler)]
 
 extern crate alloc;
@@ -53,13 +53,13 @@ static ALLOCATOR: talc::Talck<talc::locking::AssumeUnlockable, talc::ClaimOnOom>
 
 #[cfg(not(test))]
 #[panic_handler]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn panic(_info: &::core::panic::PanicInfo) -> ! {
     ::core::intrinsics::abort();
 }
 
 #[alloc_error_handler]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn oom(_: ::core::alloc::Layout) -> ! {
     ::core::intrinsics::abort();
 }
@@ -74,13 +74,13 @@ const COMPRESSED_BYTES: &[u8] = include_bytes!(env!("BOOTSTRAP_TARGET"));
 
 static mut DECOMPRESSED_BYTES: Vec<u8> = Vec::new();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn size() -> usize {
     init();
     unsafe { DECOMPRESSED_BYTES.len() }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn offset() -> *const u8 {
     unsafe { DECOMPRESSED_BYTES.as_ptr() }
 }

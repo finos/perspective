@@ -23,7 +23,7 @@ pub struct CppResponseBatch {
     entries_ptr: usize,
 }
 
-extern "C" {
+unsafe extern "C" {
     fn psp_alloc(size: usize) -> *mut u8;
     fn psp_free(ptr: *const u8);
     fn psp_new_server() -> *const u8;

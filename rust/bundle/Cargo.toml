@@ -13,7 +13,7 @@
 [package]
 name = "perspective-bundle"
 description = "A CLI utility to build and link persecptive-viewer"
-edition = "2021"
+edition = "2024"
 publish = false
 
 [[bin]]

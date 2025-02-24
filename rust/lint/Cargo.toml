@@ -14,7 +14,7 @@
 name = "perspective-lint"
 description = "A CLI utility to lint rust code"
 version = "3.3.4"
-edition = "2021"
+edition = "2024"
 publish = false
 
 [[bin]]

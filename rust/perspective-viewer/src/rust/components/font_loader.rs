@@ -191,7 +191,10 @@ impl FontLoaderProps {
 
 // An async task which times out.  Can be used to timeout an optional async task
 // by combinging with `Promise::any`.
-fn timeout_font_task(family: &str, weight: &str) -> impl Future<Output = ApiResult<JsValue>> {
+fn timeout_font_task(
+    family: &str,
+    weight: &str,
+) -> impl Future<Output = ApiResult<JsValue>> + use<> {
     let timeout_msg = format!("Timeout awaiting font \"{}:{}\"", family, weight);
     async {
         set_timeout(FONT_DOWNLOAD_TIMEOUT_MS).await?;

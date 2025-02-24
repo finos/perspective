@@ -104,7 +104,7 @@ pub impl ViewConfig {
                 if !is_swap_to_after_last {
                     if is_to_swap || is_from_required {
                         let column = Some(column);
-                        config.columns.extend(std::iter::repeat(None).take({
+                        config.columns.extend(std::iter::repeat_n(None, {
                             let fill_to = requirements
                                 .names
                                 .as_ref()
@@ -125,7 +125,8 @@ pub impl ViewConfig {
                         }
                     } else {
                         config.columns.retain(|x| x.as_ref() != Some(&column));
-                        config.columns.extend(std::iter::repeat(None).take(
+                        config.columns.extend(std::iter::repeat_n(
+                            None,
                             if index >= config.columns.len() {
                                 index - config.columns.len()
                             } else {

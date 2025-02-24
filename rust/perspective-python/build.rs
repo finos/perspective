@@ -25,6 +25,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
 
-    std::env::set_var("CARGO_FEATURE_PYTHON", "1");
+    unsafe { std::env::set_var("CARGO_FEATURE_PYTHON", "1") };
     Ok(())
 }

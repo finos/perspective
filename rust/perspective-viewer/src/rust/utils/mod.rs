@@ -27,10 +27,12 @@ mod scope;
 mod tee;
 mod wasm_abi;
 mod weak_scope;
+mod hooks;
 
 #[cfg(test)]
 mod tests;
 
+pub use hooks::*;
 pub use browser::*;
 pub use custom_element::*;
 pub use datetime::*;

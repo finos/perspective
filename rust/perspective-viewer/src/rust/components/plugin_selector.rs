@@ -77,20 +77,28 @@ impl Component for PluginSelector {
         match msg {
             RendererSelectPlugin(_plugin_name) => true,
             ComponentSelectPlugin(plugin_name) => {
-                ctx.props()
-                    .renderer
-                    .update_plugin(&PluginUpdate::Update(plugin_name))
-                    .unwrap();
+                if ctx.props().session.get_error().is_none() {
+                    ctx.props()
+                        .renderer
+                        .update_plugin(&PluginUpdate::Update(plugin_name))
+                        .unwrap();
 
-                let mut update = ViewConfigUpdate::default();
-                ctx.props()
-                    .session
-                    .set_update_column_defaults(&mut update, &ctx.props().renderer.metadata());
+                    let mut update = ViewConfigUpdate::default();
+                    ctx.props()
+                        .session
+                        .set_update_column_defaults(&mut update, &ctx.props().renderer.metadata());
 
-                ctx.props().presentation.set_open_column_settings(None);
-                ApiFuture::spawn(ctx.props().update_and_render(update));
-                self.is_open = false;
-                false
+                    if let Ok(task) = ctx.props().update_and_render(update) {
+                        ApiFuture::spawn(task);
+                    }
+
+                    ctx.props().presentation.set_open_column_settings(None);
+                    self.is_open = false;
+                    false
+                } else {
+                    self.is_open = false;
+                    true
+                }
             },
             OpenMenu => {
                 self.is_open = !self.is_open;

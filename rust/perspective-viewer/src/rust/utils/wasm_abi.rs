@@ -37,7 +37,7 @@ macro_rules! derive_wasm_abi {
             type Abi = <js_sys::Object as wasm_bindgen::convert::IntoWasmAbi>::Abi;
             #[inline]
             unsafe fn from_abi(js: Self::Abi) -> Self {
-                let obj = js_sys::Object::from_abi(js);
+                let obj = unsafe { js_sys::Object::from_abi(js) };
                 use ::perspective_js::utils::JsValueSerdeExt;
                 wasm_bindgen::JsValue::from(obj).into_serde_ext().unwrap()
             }

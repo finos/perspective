@@ -71,7 +71,7 @@ fn bindgen(outdir: &Path, artifact: &str, is_release: bool) {
         .input_path(input)
         .encode_into(EncodeInto::Always)
         .typescript(true)
-        .reference_types(true)
+        // .reference_types(true)
         .out_name(&format!("{}.wasm", artifact.replace('_', "-")))
         .generate(outdir)
         .unwrap();

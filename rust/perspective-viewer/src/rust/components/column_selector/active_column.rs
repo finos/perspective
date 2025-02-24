@@ -13,6 +13,7 @@
 use std::collections::HashSet;
 
 use perspective_client::config::*;
+use perspective_client::utils::PerspectiveResultExt;
 use perspective_client::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
@@ -144,7 +145,9 @@ impl ActiveColumnProps {
             ..ViewConfigUpdate::default()
         };
 
-        ApiFuture::spawn(self.update_and_render(config));
+        self.update_and_render(config)
+            .map(ApiFuture::spawn)
+            .unwrap_or_log();
     }
 }
 
@@ -213,7 +216,11 @@ impl Component for ActiveColumn {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 true
             },
             New(InPlaceColumn::Expression(col)) => {
@@ -231,7 +238,11 @@ impl Component for ActiveColumn {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 true
             },
         }

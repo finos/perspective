@@ -124,7 +124,7 @@ where
     #[inline]
     unsafe fn from_abi(js: Self::Abi) -> Self {
         Self::new(async move {
-            let promise = js_sys::Promise::from_abi(js);
+            let promise = unsafe { js_sys::Promise::from_abi(js) };
             Ok(JsFuture::from(promise).await?.into())
         })
     }

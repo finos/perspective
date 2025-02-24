@@ -14,7 +14,7 @@
 name = "perspective-server"
 version = "3.3.4"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
-edition = "2021"
+edition = "2024"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
 repository = "https://github.com/finos/perspective"
 license = "Apache-2.0"

@@ -41,7 +41,9 @@ fn prost_build() -> Result<()> {
         // that crate. When protobuf-src is disabled, builders must set PROTOC
         // in the environment to a protocol buffer compiler.
         #[cfg(feature = "protobuf-src")]
-        std::env::set_var("PROTOC", protobuf_src::protoc());
+        unsafe {
+            std::env::set_var("PROTOC", protobuf_src::protoc())
+        };
         #[cfg(not(feature = "protobuf-src"))]
         if std::env::var("PROTOC").is_err() {
             panic!(

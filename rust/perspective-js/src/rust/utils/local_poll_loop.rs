@@ -56,7 +56,7 @@ impl<R: Send + Sync + Clone + 'static> LocalPollLoop<R> {
     }
 
     /// Send a new `R` to the poll loop.
-    pub fn poll(&self, msg: R) -> impl Future<Output = ()> + Send + Sync + 'static {
+    pub fn poll(&self, msg: R) -> impl Future<Output = ()> + Send + Sync + 'static + use<R> {
         let mut emit = self.0.clone();
         async move { emit.send(msg).await.unwrap() }
     }

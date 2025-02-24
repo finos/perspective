@@ -77,3 +77,18 @@ impl From<proto::response::ClientResp> for ClientError {
         }
     }
 }
+
+pub trait PerspectiveResultExt {
+    fn unwrap_or_log(&self);
+}
+
+impl<T, E> PerspectiveResultExt for Result<T, E>
+where
+    E: std::error::Error,
+{
+    fn unwrap_or_log(&self) {
+        if let Err(e) = self {
+            tracing::warn!("{}", e);
+        }
+    }
+}

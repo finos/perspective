@@ -72,12 +72,12 @@ pub struct ColumnsIteratorSet<'a> {
     named_columns: Vec<String>,
 }
 
-impl<'a> HasRenderer for ColumnsIteratorSet<'a> {
+impl HasRenderer for ColumnsIteratorSet<'_> {
     fn renderer(&self) -> &'_ Renderer {
         self.renderer
     }
 }
-impl<'a> HasSession for ColumnsIteratorSet<'a> {
+impl HasSession for ColumnsIteratorSet<'_> {
     fn session(&self) -> &'_ Session {
         self.session
     }
@@ -300,7 +300,7 @@ impl<'a> ColumnsIteratorSet<'a> {
 
         if !is_active || is_swap_over.unwrap_or_default() {
             let col_type = self.session.metadata().get_column_table_type(name)?;
-            let is_visible = !dragover_col.map_or(false, |(_, x)| x == name);
+            let is_visible = dragover_col.is_none_or(|(_, x)| x != name);
             Some(OrderedColumn {
                 is_visible,
                 name,
@@ -324,7 +324,7 @@ impl<'a> PartialEq for OrderedColumn<'a> {
     }
 }
 
-impl<'a> Eq for OrderedColumn<'a> {}
+impl Eq for OrderedColumn<'_> {}
 
 impl<'a> PartialOrd for OrderedColumn<'a> {
     fn partial_cmp(&self, rhs: &OrderedColumn<'a>) -> Option<std::cmp::Ordering> {

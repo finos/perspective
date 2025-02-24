@@ -10,41 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::*;
+use wasm_bindgen::__rt::IntoJsResult;
+use wasm_bindgen_futures::future_to_promise;
+use yew::prelude::*;
 
-#[derive(Properties)]
-pub struct TrapDoorPanelProps {
-    pub id: Option<&'static str>,
-    pub class: Option<&'static str>,
+use crate::renderer::*;
+use crate::session::*;
+use crate::*;
+
+#[derive(Clone, Properties, PartialEq)]
+pub struct StatusIndicatorProps {
+    pub session: Session,
+    pub renderer: Renderer,
     pub children: Children,
 }
 
-impl PartialEq for TrapDoorPanelProps {
-    fn eq(&self, _other: &Self) -> bool {
-        false
-    }
-}
-
-/// A simple panel with an invisible inner `<div>` which stretches to fit the
-/// width of the container, but will not shrink (unless the state is reset).
-#[function_component(TrapDoorPanel)]
-pub fn trap_door_panel(props: &TrapDoorPanelProps) -> Html {
-    let sizer = use_node_ref();
-    let width = use_state_eq(|| 0.0);
-    use_effect_with((width.setter(), sizer.clone()), |(width, sizer)| {
-        width.set(
-            sizer
-                .cast::<web_sys::HtmlElement>()
-                .unwrap()
-                .get_bounding_client_rect()
-                .width(),
-        )
-    });
-
-    html! {
-        <div id={props.id} class={props.class} ref={sizer}>
-            { props.children.clone() }
-            <div class="scroll-panel-auto-width" style={format!("width:{}px", *width)} />
-        </div>
-    }
+/// Just like `use_callback`, except convenient for an async cresult body.
+#[hook]
+pub fn use_async_callback<IN, OUT, F, D>(deps: D, f: F) -> Callback<IN, ()>
+where
+    IN: Clone + 'static,
+    OUT: IntoJsResult + 'static,
+    F: AsyncFn(IN, &D) -> OUT + 'static,
+    D: Clone + PartialEq + 'static,
+{
+    let deps = std::rc::Rc::new(deps);
+    let f = std::rc::Rc::new(f);
+    (*use_memo(deps, move |deps| {
+        let deps = deps.clone();
+        let ff = move |value: IN| {
+            let value = value.clone();
+            let f = f.clone();
+            let deps = deps.clone();
+            let _ = future_to_promise(async move {
+                f(value, &deps).await.into_js_result()?;
+                Ok(JsValue::UNDEFINED)
+            });
+        };
+        Callback::from(ff)
+    }))
+    .clone()
 }

@@ -25,14 +25,14 @@ use yew::prelude::*;
 #[derivative(Default(bound = ""))]
 struct IndexedSet<T> {
     set: HashMap<usize, T>,
-    gen: usize,
+    gen_: usize,
 }
 
 impl<T> IndexedSet<T> {
     fn insert(&mut self, v: T) -> usize {
-        let key = self.gen;
+        let key = self.gen_;
         self.set.insert(key, v);
-        self.gen += 1;
+        self.gen_ += 1;
         key
     }
 

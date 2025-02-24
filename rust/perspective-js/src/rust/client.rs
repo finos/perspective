@@ -26,7 +26,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{future_to_promise, JsFuture};
 
 pub use crate::table::*;
-use crate::utils::{inherit_docs, ApiError, ApiResult, JsValueSerdeExt};
+use crate::utils::{inherit_docs, ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop};
 
 #[wasm_bindgen]
 extern "C" {
@@ -106,7 +106,8 @@ impl<I> JsReconnect<I> {
     fn run_all(
         &self,
         args: I,
-    ) -> impl Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + Sync {
+    ) -> impl Future<Output = Result<(), Box<dyn Error + Send + Sync + 'static>>> + Send + Sync + 'static
+    {
         let (sender, receiver) = oneshot::channel::<Result<(), Box<dyn Error + Send + Sync>>>();
         let p = self.0(args);
         let _ = future_to_promise(async move {
@@ -136,7 +137,8 @@ where
 impl Client {
     #[wasm_bindgen(constructor)]
     pub fn new(send_request: Function, close: Option<Function>) -> Self {
-        let send_request = JsReconnect::from(move |buff2: Uint8Array| {
+        let send_request = JsReconnect::from(move |mut v: Vec<u8>| {
+            let buff2 = unsafe { js_sys::Uint8Array::view_mut_raw(v.as_mut_ptr(), v.len()) };
             send_request
                 .call1(&JsValue::UNDEFINED, &buff2)
                 .unwrap()
@@ -144,13 +146,8 @@ impl Client {
         });
 
         let client = perspective_client::Client::new_with_callback(move |msg| {
-            let send_request = send_request.clone();
-            Box::pin(async move {
-                let mut v = msg.to_vec();
-                let buff2 = unsafe { js_sys::Uint8Array::view_mut_raw(v.as_mut_ptr(), v.len()) };
-                send_request.run_all(buff2).await?;
-                Ok(())
-            })
+            let vec = msg.to_vec();
+            Box::pin(send_request.run_all(vec))
         });
 
         Client { close, client }
