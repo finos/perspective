@@ -60,9 +60,10 @@ impl ProxySession {
     }
 
     #[wasm_bindgen]
-    pub async fn handle_request(&self, data: &[u8]) -> ApiResult<()> {
-        use perspective_client::Session;
-        self.0.handle_request(data).await?;
+    pub async fn handle_request(&self, value: &JsValue) -> ApiResult<()> {
+        let uint8array = Uint8Array::new(value);
+        let slice = uint8array.to_vec();
+        self.0.handle_request(&slice).await?;
         Ok(())
     }
 
