@@ -24,6 +24,12 @@ Run setup, select `perspective-pyodide` target:
 pnpm -w run setup
 ```
 
+Build the pyodide wheel:
+
+```
+PSP_BUILD_WHEEL=1 pnpm -w run build
+```
+
 Then run tests:
 
 ```

@@ -17,13 +17,12 @@ use macro_rules_attribute::apply;
 use perspective_client::{assert_table_api, assert_view_api, Session};
 #[cfg(doc)]
 use perspective_client::{config::ViewConfigUpdate, Schema, TableInitOptions, UpdateOptions};
-use pollster::FutureExt;
 use pyo3::exceptions::PyTypeError;
 use pyo3::marker::Ungil;
 use pyo3::prelude::*;
 use pyo3::types::*;
 
-use super::python::*;
+use super::client_async::*;
 use crate::inherit_doc;
 use crate::py_err::ResultTClientErrorExt;
 use crate::server::PySyncServer;
@@ -40,17 +39,17 @@ impl ProxySession {
             move |msg: &[u8]| {
                 let msg = msg.to_vec();
                 Python::with_gil(|py| {
-                    let bytes = PyBytes::new_bound(py, &msg);
+                    let bytes = PyBytes::new(py, &msg);
                     handle_request.call1(py, (bytes,))?;
                     Ok(())
                 })
             }
         };
 
-        Ok(ProxySession(
-            perspective_client::ProxySession::new(client.borrow(py).0.client.clone(), callback)
-                .py_block_on(py),
-        ))
+        Ok(ProxySession(perspective_client::ProxySession::new(
+            client.borrow(py).0.client.clone(),
+            callback,
+        )))
     }
 
     pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
@@ -85,17 +84,19 @@ impl<F: Future> PyFutureExt for F {}
 #[apply(inherit_doc)]
 #[inherit_doc = "client.md"]
 #[pyclass(subclass, module = "perspective")]
-pub struct Client(pub(crate) PyClient);
+pub struct Client(pub(crate) AsyncClient);
 
 #[pymethods]
 impl Client {
     #[new]
+    #[pyo3(signature = (handle_request, close_cb=None))]
     pub fn new(handle_request: Py<PyAny>, close_cb: Option<Py<PyAny>>) -> PyResult<Self> {
-        let client = PyClient::new(handle_request, close_cb);
+        let client = AsyncClient::new(handle_request, close_cb);
         Ok(Client(client))
     }
 
     #[staticmethod]
+    #[pyo3(signature = (server, loop_callback=None))]
     pub fn from_server(
         py: Python<'_>,
         server: Py<PySyncServer>,
@@ -144,18 +145,18 @@ impl Client {
     #[apply(inherit_doc)]
     #[inherit_doc = "client/set_loop_callback.md"]
     pub fn set_loop_callback(&self, py: Python<'_>, loop_cb: Py<PyAny>) -> PyResult<()> {
-        self.0.set_loop_cb(loop_cb).py_block_on(py)
+        self.0.set_loop_callback(loop_cb).py_block_on(py)
     }
 
     #[apply(inherit_doc)]
     #[inherit_doc = "client/terminate.md"]
     pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {
-        self.0.terminate(py).block_on()
+        self.0.terminate(py)
     }
 }
 
 #[pyclass(subclass, name = "Table", module = "perspective")]
-pub struct Table(PyTable);
+pub struct Table(AsyncTable);
 
 assert_table_api!(Table);
 
@@ -170,8 +171,8 @@ impl Table {
 
     #[apply(inherit_doc)]
     #[inherit_doc = "table/get_index.md"]
-    pub fn get_index(&self, py: Python<'_>) -> Option<String> {
-        self.0.get_index().py_block_on(py)
+    pub fn get_index(&self) -> Option<String> {
+        self.0.get_index()
     }
 
     #[apply(inherit_doc)]
@@ -182,12 +183,12 @@ impl Table {
 
     #[apply(inherit_doc)]
     #[inherit_doc = "table/get_client.md"]
-    pub fn get_limit(&self, py: Python<'_>) -> Option<u32> {
-        self.0.get_limit().py_block_on(py)
+    pub fn get_limit(&self) -> Option<u32> {
+        self.0.get_limit()
     }
 
-    pub fn get_name(&self, py: Python<'_>) -> String {
-        self.0.get_name().py_block_on(py)
+    pub fn get_name(&self) -> String {
+        self.0.get_name()
     }
 
     #[apply(inherit_doc)]
@@ -297,7 +298,7 @@ impl Table {
 #[apply(inherit_doc)]
 #[inherit_doc = "view.md"]
 #[pyclass(subclass, name = "View", module = "perspective")]
-pub struct View(PyView);
+pub struct View(AsyncView);
 
 assert_view_api!(View);
 
@@ -348,7 +349,7 @@ impl View {
         window: Option<Py<PyDict>>,
     ) -> PyResult<Bound<'a, PyAny>> {
         let json = self.0.to_json_string(window).py_block_on(py)?;
-        let json_module = PyModule::import_bound(py, "json")?;
+        let json_module = PyModule::import(py, "json")?;
         json_module.call_method1("loads", (json,))
     }
 
@@ -372,7 +373,7 @@ impl View {
         window: Option<Py<PyDict>>,
     ) -> PyResult<Bound<'a, PyAny>> {
         let json = self.0.to_columns_string(window).py_block_on(py)?;
-        let json_module = PyModule::import_bound(py, "json")?;
+        let json_module = PyModule::import(py, "json")?;
         json_module.call_method1("loads", (json,))
     }
 
@@ -477,6 +478,7 @@ impl View {
 
     #[apply(inherit_doc)]
     #[inherit_doc = "view/on_update.md"]
+    #[pyo3(signature = (callback, mode=None))]
     pub fn on_update(
         &self,
         py: Python<'_>,
