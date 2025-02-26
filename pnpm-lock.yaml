@@ -8,30 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@finos/perspective':
-        specifier: workspace:^
-        version: link:rust/perspective-js
-      '@finos/perspective-jupyterlab':
-        specifier: workspace:^
-        version: link:packages/perspective-jupyterlab
-      '@finos/perspective-test':
-        specifier: workspace:^
-        version: link:tools/perspective-test
-      '@finos/perspective-viewer':
-        specifier: workspace:^
-        version: link:rust/perspective-viewer
-      '@finos/perspective-viewer-d3fc':
-        specifier: workspace:^
-        version: link:packages/perspective-viewer-d3fc
-      '@finos/perspective-viewer-datagrid':
-        specifier: workspace:^
-        version: link:packages/perspective-viewer-datagrid
-      '@finos/perspective-viewer-openlayers':
-        specifier: workspace:^
-        version: link:packages/perspective-viewer-openlayers
-      '@finos/perspective-workspace':
-        specifier: workspace:^
-        version: link:packages/perspective-workspace
       '@fontsource/roboto-mono':
         specifier: 4.5.10
         version: 4.5.10
