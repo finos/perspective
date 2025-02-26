@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as fc from "d3fc";
+import * as fc from "d3fc/index.js";
 import { axisFactory } from "../axis/axisFactory";
 import { chartSvgFactory } from "../axis/chartFactory";
 import domainMatchOrigins from "../axis/domainMatchOrigins";

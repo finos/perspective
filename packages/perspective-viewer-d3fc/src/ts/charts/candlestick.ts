@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { seriesCanvasCandlestick } from "d3fc";
+import { seriesCanvasCandlestick } from "d3fc/index.js";
 import ohlcCandle from "./ohlcCandle";
 
 let candlestick = ohlcCandle(seriesCanvasCandlestick);

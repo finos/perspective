@@ -35,6 +35,7 @@
     },
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "workspace:^",
+        "@finos/perspective-test": "workspace:^",
         "@prospective.co/procss": "^0.1.16"
     }
 }

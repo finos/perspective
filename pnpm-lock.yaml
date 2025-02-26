@@ -442,6 +442,10 @@ importers:
       puppeteer:
         specifier: ^23
         version: 23.11.1(typescript@5.2.2)
+    devDependencies:
+      '@finos/perspective-test':
+        specifier: workspace:^
+        version: link:../../tools/perspective-test
 
   packages/perspective-jupyterlab:
     dependencies:
@@ -590,6 +594,9 @@ importers:
       '@finos/perspective-esbuild-plugin':
         specifier: workspace:^
         version: link:../../tools/perspective-esbuild-plugin
+      '@finos/perspective-test':
+        specifier: workspace:^
+        version: link:../../tools/perspective-test
       '@prospective.co/procss':
         specifier: ^0.1.16
         version: 0.1.16
