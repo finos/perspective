@@ -35,6 +35,8 @@ async function _init(ws: Worker, wasm: WebAssembly.Module) {
     await receiver;
 }
 
+let PING_PONG_BUFFER: ArrayBuffer | undefined = undefined;
+
 /**
  * Create a new client connected exclusively to a new Web Worker instance of
  * the Perspective engine.
@@ -54,8 +56,26 @@ export async function worker(
     const { Client } = await module;
     const client = new Client(
         (proto: Uint8Array) => {
-            const f = proto.slice().buffer;
-            webworker.postMessage(f, { transfer: [f] });
+            if (typeof PING_PONG_BUFFER === "undefined") {
+                PING_PONG_BUFFER = new ArrayBuffer(proto.byteLength + 4);
+            }
+
+            if (PING_PONG_BUFFER.byteLength < proto.byteLength + 4) {
+                if (PING_PONG_BUFFER.resizable) {
+                    PING_PONG_BUFFER.resize(proto.byteLength + 4);
+                } else {
+                    PING_PONG_BUFFER = new ArrayBuffer(proto.byteLength + 4);
+                }
+            }
+
+            const view = new DataView(PING_PONG_BUFFER, 0);
+            view.setUint32(0, proto.byteLength, true);
+            new Uint8Array(PING_PONG_BUFFER).set(proto, 4);
+            webworker.postMessage(PING_PONG_BUFFER, {
+                transfer: [PING_PONG_BUFFER],
+            });
+
+            PING_PONG_BUFFER = undefined;
         },
         () => {
             console.debug("Closing WebWorker");
@@ -64,8 +84,12 @@ export async function worker(
     );
 
     await _init(webworker, wasm);
-    webworker.addEventListener("message", (json: MessageEvent<Uint8Array>) => {
-        client.handle_response(json.data);
+    webworker.addEventListener("message", (json: MessageEvent<ArrayBuffer>) => {
+        PING_PONG_BUFFER = json.data as ArrayBuffer;
+        const view = new DataView(PING_PONG_BUFFER, 0);
+        const len = view.getUint32(0, true);
+        const slice = new Uint8Array(PING_PONG_BUFFER, 4, len);
+        client.handle_response(slice);
     });
 
     await client.init();

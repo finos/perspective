@@ -14,7 +14,7 @@
         "url": "https://github.com/finos/perspective/packages/perspective-bench"
     },
     "scripts": {
-        "bench_js": "node --experimental-wasm-memory64 basic_suite.mjs",
+        "bench_js": "node --experimental-wasm-memory64 puppeteer_suite.mjs",
         "bench_python": "node --experimental-wasm-memory64 python_suite.mjs"
     },
     "author": "",
@@ -28,6 +28,7 @@
         "zx": "^8.1.8"
     },
     "dependencies": {
+        "perspective-3-3-4": "npm:@finos/perspective@3.3.4",
         "perspective-3-3-0": "npm:@finos/perspective@3.3.0",
         "perspective-3-2-0": "npm:@finos/perspective@3.2.0",
         "perspective-3-1-0": "npm:@finos/perspective@3.1.0",

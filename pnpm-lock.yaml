@@ -829,6 +829,9 @@ importers:
       perspective-3-3-0:
         specifier: npm:@finos/perspective@3.3.0
         version: '@finos/perspective@3.3.0'
+      perspective-3-3-4:
+        specifier: npm:@finos/perspective@3.3.4
+        version: '@finos/perspective@3.3.4'
     devDependencies:
       '@finos/perspective':
         specifier: workspace:^
@@ -3104,6 +3107,9 @@ packages:
 
   '@finos/perspective@3.3.0':
     resolution: {integrity: sha512-GYzXPqHnhrWQz930f9OejVvsBs5I6jjJLvbK/xfUK2AUijMhzAUsPI70uEKUFwsy5VMA6sxWPl/UQB9W9IBGDw==}
+
+  '@finos/perspective@3.3.4':
+    resolution: {integrity: sha512-0LjOyxg+noE+q/Omj4uZ+PPnQzjYdZex4Sr0vxs1A6Rr369ynlryEHyrys04PCVTHceA3YVV6XML2UOCdYPTaQ==}
 
   '@fontsource/roboto-mono@4.5.10':
     resolution: {integrity: sha512-KrJdmkqz6DszT2wV/bbhXef4r0hV3B0vw2mAqei8A2kRnvq+gcJLmmIeQ94vu9VEXrUQzos5M9lH1TAAXpRphw==}
@@ -13355,6 +13361,14 @@ snapshots:
       - utf-8-validate
 
   '@finos/perspective@3.3.0':
+    dependencies:
+      stoppable: 1.1.0
+      ws: 8.18.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@finos/perspective@3.3.4':
     dependencies:
       stoppable: 1.1.0
       ws: 8.18.0

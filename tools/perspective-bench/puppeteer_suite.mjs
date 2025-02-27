@@ -28,6 +28,7 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
  */
 const VERSIONS = [
     "@finos/perspective",
+    "perspective-3-3-0",
     "perspective-3-0-0",
     "perspective-2-10-0",
 ];

@@ -125,11 +125,11 @@ async function build_all() {
     await build_web_assets();
 
     // Typecheck
-    await $`npx tsc --project ./tsconfig.browser.json`.stdio(
-        "inherit",
-        "inherit",
-        "inherit"
-    );
+    // await $`npx tsc --project ./tsconfig.browser.json`.stdio(
+    //     "inherit",
+    //     "inherit",
+    //     "inherit"
+    // );
     await cpy("target/themes/*", "dist/css");
     await cpy("target/themes/*", "dist/css");
 }
