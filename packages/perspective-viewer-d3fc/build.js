@@ -66,7 +66,6 @@ const BUILD = [
         },
         plugins: [],
         format: "esm",
-        metafile: false,
         loader: {
             ".css": "text",
             ".html": "text",

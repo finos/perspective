@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as fc from "d3fc";
+import * as fc from "d3fc/index.js";
 import { getChartElement } from "../plugin/root";
 import { withoutOpacity } from "../series/seriesColors.js";
 import { HTMLSelection, Settings } from "../types";

@@ -12,7 +12,7 @@
 
 import { Pad, PadUnit, PaddingStrategy } from "../../types";
 import { defaultPadding } from "./default";
-import * as fc from "d3fc";
+import * as fc from "d3fc/index.js";
 
 export const hardLimitZeroPadding = (): PaddingStrategy => {
     const _defaultPadding = defaultPadding();
