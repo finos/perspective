@@ -13,13 +13,23 @@
 
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-            const worker = await perspective.worker();
-            const resp = await fetch("/node_modules/superstore-arrow/superstore.lz4.arrow");
-            const arrow = await resp.arrayBuffer();
             const viewer = document.getElementsByTagName("perspective-viewer")[0];
-            const table = worker.table(arrow);
-            viewer.load(table);
-            viewer.restore({ settings: true, plugin_config: { edit_mode: "EDIT" } });
+
+            const worker = new SharedWorker("/node_modules/@finos/perspective/dist/cdn/perspective-server.worker.js");
+            const client = await perspective.worker(worker);
+            const tables = await client.get_hosted_table_names();
+
+            if (tables.length > 0) {
+                const table = client.open_table(tables[0]);
+                viewer.load(table);
+            } else {
+                const resp = await fetch("/node_modules/superstore-arrow/superstore.lz4.arrow");
+                const arrow = await resp.arrayBuffer();
+                const table = client.table(arrow);
+                viewer.load(table);
+            }
+
+            viewer.restore({ plugin_config: { edit_mode: "EDIT" } });
         </script>
         <style>
             perspective-viewer {

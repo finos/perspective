@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module">
+            import perspective from "/node_modules/@finos/perspective/dist/esm/perspective.js";
+            let resp = await fetch("/node_modules/@finos/perspective-test/assets/superstore.csv");
+            let csv = await resp.text();
+            const wasm = fetch("/node_modules/@finos/perspective/dist/wasm/perspective-js.wasm");
+            const wasm2 = fetch("/node_modules/@finos/perspective/dist/wasm/perspective-server.wasm");
+            perspective.init_client(wasm);
+            perspective.init_server(wasm2);
+            const registration = await navigator.serviceWorker.register("/node_modules/@finos/perspective/dist/cdn/perspective-server.worker.js", {
+                scope: "/node_modules/@finos/perspective/dist/cdn/",
+            });
+
+            const worker = await perspective.worker(registration.active);
+            window.table = worker.table(csv, { index: "Row ID" });
+            window.__TEST_WORKER__ = worker;
+            window.__TEST_PERSPECTIVE_READY__ = true;
+        </script>
+    </head>
+</html>
