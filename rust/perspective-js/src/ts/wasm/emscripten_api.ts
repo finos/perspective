@@ -31,10 +31,7 @@ export async function compile_perspective(
             imports["env"] = {
                 ...imports["env"],
                 psp_stack_trace() {
-                    const old = Error.stackTraceLimit;
-                    Error.stackTraceLimit = 1000;
                     const str = Error().stack || "";
-                    Error.stackTraceLimit = old;
                     const textEncoder = new TextEncoder();
                     const bytes = textEncoder.encode(str);
                     const ptr = module._psp_alloc(

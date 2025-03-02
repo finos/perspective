@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { seriesCanvasOhlc } from "d3fc";
+import { seriesCanvasOhlc } from "d3fc/index.js";
 import ohlcCandle from "./ohlcCandle";
 
 const ohlc = ohlcCandle(seriesCanvasOhlc);

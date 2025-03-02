@@ -19,7 +19,7 @@ import {
     dataJoin,
     rebindAll,
     exclude,
-} from "d3fc";
+} from "d3fc/index.js";
 import store from "./store";
 import { Orient } from "../../types";
 

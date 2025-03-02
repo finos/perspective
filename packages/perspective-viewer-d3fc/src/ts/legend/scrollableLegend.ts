@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as d3Legend from "d3-svg-legend";
-import { rebindAll } from "d3fc";
+import { rebindAll } from "d3fc/index.js";
 import { getOrCreateElement } from "../utils/utils";
 import legendControlsTemplate from "../../html/legend-controls.html";
 import { cropCellContents } from "./styling/cropCellContents";

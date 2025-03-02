@@ -8,7 +8,8 @@
         "outDir": "./dist/esm",
         "rootDir": "./src/ts",
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true
+        "allowImportingTsExtensions": true,
+        "typeRoots": ["./node_modules/@types"]
     },
     "files": ["src/ts/perspective-viewer.ts"]
 }

@@ -33,5 +33,8 @@
         "@finos/perspective-workspace": "workspace:^",
         "commander": "^2.19.0",
         "puppeteer": "^23"
+    },
+    "devDependencies": {
+        "@finos/perspective-test": "workspace:^"
     }
 }

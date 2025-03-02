@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { seriesCanvasPoint } from "d3fc";
+import { seriesCanvasPoint } from "d3fc/index.js";
 import { withOpacity, withoutOpacity } from "./seriesColors";
 import { groupFromKey } from "./seriesKey";
 import { fromDomain } from "./seriesSymbols";

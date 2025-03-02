@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import * as d3 from "d3";
-import * as fc from "d3fc";
+import * as fc from "d3fc/index.js";
 import minBandwidth from "./minBandwidth";
 import { flattenArray } from "./flatten";
 import {
