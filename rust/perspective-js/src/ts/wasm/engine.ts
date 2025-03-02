@@ -20,12 +20,10 @@ export type ApiResponse = {
 
 export class PerspectiveServer {
     clients: Map<number, (buffer: Uint8Array) => Promise<void>>;
-    id_gen: number;
     server: EmscriptenServer;
     module: MainModule;
     constructor(module: MainModule) {
         this.clients = new Map();
-        this.id_gen = 0;
         this.module = module;
         this.server = module._psp_new_server() as EmscriptenServer;
     }

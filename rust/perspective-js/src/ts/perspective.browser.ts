@@ -127,7 +127,7 @@ let GLOBAL_WORKER: undefined | (() => Promise<Worker>) = undefined;
 // @ts-ignore
 import perspective_wasm_worker from "../../src/ts/perspective-server.worker.js";
 
-function get_worker() {
+function get_worker(): Promise<Worker> {
     if (GLOBAL_WORKER === undefined) {
         return perspective_wasm_worker();
     }
@@ -139,8 +139,14 @@ export async function websocket(url: string | URL) {
     return await api.websocket(get_client(), url);
 }
 
-export async function worker() {
-    return await api.worker(get_client(), get_server(), get_worker());
+export async function worker(
+    worker?: Promise<SharedWorker | ServiceWorker | Worker>
+) {
+    if (typeof worker === "undefined") {
+        worker = get_worker();
+    }
+
+    return await api.worker(get_client(), get_server(), worker);
 }
 
 export default { websocket, worker, init_client, init_server };

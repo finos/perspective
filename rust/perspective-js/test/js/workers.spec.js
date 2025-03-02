@@ -10,37 +10,64 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { PerspectiveSession, PerspectiveServer } from "./wasm/engine.ts";
-import { compile_perspective } from "./wasm/emscripten_api.ts";
+import { test } from "@finos/perspective-test";
 
-let GLOBAL_SERVER: PerspectiveServer;
+test.describe("worker types", () => {
+    test("Worker", async ({ page }) => {
+        await page.goto(
+            "/node_modules/@finos/perspective/test/html/worker.html"
+        );
 
-function bindPort(e: MessageEvent) {
-    const port = e.ports[0];
-    let session: PerspectiveSession;
-    port.addEventListener("message", async (msg) => {
-        if (msg.data.cmd === "init") {
-            const id = msg.data.id;
-            if (!GLOBAL_SERVER) {
-                const module = await compile_perspective(msg.data.args[0]);
-                GLOBAL_SERVER = new PerspectiveServer(module);
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
             }
+        });
 
-            session = GLOBAL_SERVER.make_session(async (resp) => {
-                const f = resp.slice().buffer;
-                port.postMessage(f, { transfer: [f] });
-            });
+        const s = await page.evaluate(async (x) => {
+            const t = await window.table;
+            return await t.size();
+        });
 
-            port.postMessage({ id });
-        } else {
-            session.handle_request(new Uint8Array(msg.data));
-            setTimeout(() => session.poll());
-        }
+        test.expect(s).toEqual(99);
     });
 
-    port.start();
-}
+    test("SharedWorker", async ({ page }) => {
+        await page.goto(
+            "/node_modules/@finos/perspective/test/html/shared_worker.html"
+        );
 
-// @ts-expect-error wrong scope
-self.addEventListener("connect", bindPort);
-self.addEventListener("message", bindPort);
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        const s = await page.evaluate(async (x) => {
+            const t = await window.table;
+            return await t.size();
+        });
+
+        test.expect(s).toEqual(99);
+    });
+
+    // Not supported https://github.com/microsoft/playwright/issues/30981
+    test.skip("ServiceWorker", async ({ page }) => {
+        await page.goto(
+            "/node_modules/@finos/perspective/test/html/service_worker.html"
+        );
+
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        const s = await page.evaluate(async (x) => {
+            const t = await window.table;
+            return await t.size();
+        });
+
+        test.expect(s).toEqual(99);
+    });
+});

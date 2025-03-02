@@ -40,6 +40,7 @@
         -   [Serializing data](./how_to/javascript/serializing.md)
         -   [Cleaning up resources](./how_to/javascript/deleting.md)
         -   [Hosting a `WebSocketServer` in Node.js](./how_to/javascript/nodejs_server.md)
+        -   [Using a dedicated `Worker`, `SharedWorker`, or `ServiceWorker`](./how_to/javascript/custom_worker.md)
     -   [`perspective-viewer` Custom Element library](./how_to/javascript/viewer.md)
         -   [Theming](./how_to/javascript/theming.md)
         -   [Custom Themes](./how_to/javascript/custom_themes.md)
