@@ -1,6 +1,26 @@
+# [v3.4.0](https://github.com/finos/perspective/releases/tag/v3.4.0)
+
+_6 March 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.3.4...v3.4.0))
+
+Features
+
+- Add connection error/retry API and UI support [#2902](https://github.com/finos/perspective/pull/2902)
+- Add dedicated `Worker`, `SharedWorker` and `ServiceWorker` support [#2936](https://github.com/finos/perspective/pull/2936)
+- Python AsyncClient and JS ProxySession [#2929](https://github.com/finos/perspective/pull/2929)
+- Quartiles [#2930](https://github.com/finos/perspective/pull/2930)
+- Fix `View::to_polars` and add `LargeUTF8` Arrow dictionary support [#2924](https://github.com/finos/perspective/pull/2924)
+
+Fixes
+
+- Show appropriate date when date is part of grouped data on chart. [#2857](https://github.com/finos/perspective/pull/2857)
+
+Misc
+
+- Shrink `d3fc` bundle [#2934](https://github.com/finos/perspective/pull/2934)
+
 # [v3.3.4](https://github.com/finos/perspective/releases/tag/v3.3.4)
 
-_10 February 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.3.3...v3.3.4))
+_9 February 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.3.3...v3.3.4))
 
 Fixes
 
@@ -114,7 +134,7 @@ Misc
 
 # [v3.1.5](https://github.com/finos/perspective/releases/tag/v3.1.5)
 
-_15 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4...v3.1.5))
+_15 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.5-test1...v3.1.5))
 
 Features
 
@@ -131,9 +151,14 @@ Misc
 - Update ExprTk [#2825](https://github.com/finos/perspective/pull/2825)
 - sdist licensing follow ups [#2843](https://github.com/finos/perspective/pull/2843)
 
+# [v3.1.5-test1](https://github.com/finos/perspective/releases/tag/v3.1.5-test1)
+
+_11 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4...v3.1.5-test1))
+
+
 # [v3.1.4](https://github.com/finos/perspective/releases/tag/v3.1.4)
 
-_7 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.3...v3.1.4))
+_7 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test8...v3.1.4))
 
 Features
 
@@ -149,6 +174,56 @@ Misc
 
 - Fix failed color range update [#2823](https://github.com/finos/perspective/pull/2823)
 - CI sdist fixes, port conda patch, fix ODR violation [#2826](https://github.com/finos/perspective/pull/2826)
+
+# [v3.1.4-test8](https://github.com/finos/perspective/releases/tag/v3.1.4-test8)
+
+_4 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test7...v3.1.4-test8))
+
+
+# [v3.1.4-test7](https://github.com/finos/perspective/releases/tag/v3.1.4-test7)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test6...v3.1.4-test7))
+
+
+# [v3.1.4-test6](https://github.com/finos/perspective/releases/tag/v3.1.4-test6)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test5...v3.1.4-test6))
+
+
+# [v3.1.4-test5](https://github.com/finos/perspective/releases/tag/v3.1.4-test5)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test4...v3.1.4-test5))
+
+
+# [v3.1.4-test4](https://github.com/finos/perspective/releases/tag/v3.1.4-test4)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test3...v3.1.4-test4))
+
+
+# [v3.1.4-test3](https://github.com/finos/perspective/releases/tag/v3.1.4-test3)
+
+_1 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test2...v3.1.4-test3))
+
+
+# [v3.1.4-test2](https://github.com/finos/perspective/releases/tag/v3.1.4-test2)
+
+_31 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test12...v3.1.4-test2))
+
+
+# [v3.1.4-test12](https://github.com/finos/perspective/releases/tag/v3.1.4-test12)
+
+_4 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test11...v3.1.4-test12))
+
+
+# [v3.1.4-test11](https://github.com/finos/perspective/releases/tag/v3.1.4-test11)
+
+_4 November 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.4-test1...v3.1.4-test11))
+
+
+# [v3.1.4-test1](https://github.com/finos/perspective/releases/tag/v3.1.4-test1)
+
+_31 October 2024_ ([Full changelog](https://github.com/finos/perspective/compare/v3.1.3...v3.1.4-test1))
+
 
 # [v3.1.3](https://github.com/finos/perspective/releases/tag/v3.1.3)
 

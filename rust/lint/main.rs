@@ -26,7 +26,7 @@ pub fn main() {
         .collect::<Vec<String>>();
 
     let edition_args = if needs_edition {
-        vec!["--edition", "2021"]
+        vec!["--edition", "2024"]
     } else {
         vec![]
     };
