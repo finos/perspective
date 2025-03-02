@@ -59,10 +59,11 @@ fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<client::client_sync::Table>()?;
     m.add_class::<client::client_sync::View>()?;
     m.add_class::<client::client_sync::ProxySession>()?;
-    m.add(
-        "PerspectiveError",
-        py.get_type_bound::<PyPerspectiveError>(),
-    )?;
+    m.add_class::<client::client_async::AsyncClient>()?;
+    m.add_class::<client::client_async::AsyncTable>()?;
+    m.add_class::<client::client_async::AsyncView>()?;
+
+    m.add("PerspectiveError", py.get_type::<PyPerspectiveError>())?;
 
     Ok(())
 }

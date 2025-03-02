@@ -17,12 +17,10 @@ use pyo3::types::{PyAny, PyBytes, PyDict, PyList};
 use super::pyarrow;
 
 fn get_pandas_df_cls(py: Python<'_>) -> PyResult<Option<Bound<'_, PyAny>>> {
-    let sys = PyModule::import_bound(py, "sys")?;
+    let sys = PyModule::import(py, "sys")?;
     if sys.getattr("modules")?.contains("pandas")? {
-        let pandas = PyModule::import_bound(py, "pandas")?;
-        Ok(Some(
-            pandas.getattr("DataFrame")?.to_object(py).into_bound(py),
-        ))
+        let pandas = PyModule::import(py, "pandas")?;
+        Ok(Some(pandas.getattr("DataFrame")?.into_pyobject(py)?))
     } else {
         Ok(None)
     }
@@ -43,8 +41,8 @@ pub fn is_pandas_df(py: Python, df: &Bound<'_, PyAny>) -> PyResult<bool> {
 // return x
 
 pub fn arrow_to_pandas(py: Python<'_>, arrow: &[u8]) -> PyResult<Py<PyAny>> {
-    let pyarrow = PyModule::import_bound(py, "pyarrow")?;
-    let bytes = PyBytes::new_bound(py, arrow);
+    let pyarrow = PyModule::import(py, "pyarrow")?;
+    let bytes = PyBytes::new(py, arrow);
     Ok(pyarrow
         .getattr("ipc")?
         .getattr("open_stream")?
@@ -53,21 +51,21 @@ pub fn arrow_to_pandas(py: Python<'_>, arrow: &[u8]) -> PyResult<Py<PyAny>> {
         .call0()?
         .getattr("to_pandas")?
         .call0()?
-        .as_unbound()
-        .clone())
+        .unbind())
 }
 
 pub fn pandas_to_arrow_bytes<'py>(
     py: Python<'py>,
     df: &Bound<'py, PyAny>,
 ) -> PyResult<Bound<'py, PyBytes>> {
-    let pyarrow = match PyModule::import_bound(py, "pyarrow") {
+    let pyarrow = match PyModule::import(py, "pyarrow") {
         Ok(pyarrow) => pyarrow,
         Err(_) => {
             return Err(PyImportError::new_err(
-                "Perspective requires pyarrow to convert pandas DataFrames. Please install pyarrow.",
+                "Perspective requires pyarrow to convert pandas DataFrames. Please install \
+                 pyarrow.",
             ))
-        }
+        },
     };
 
     let df_class = get_pandas_df_cls(py)?
@@ -77,7 +75,7 @@ pub fn pandas_to_arrow_bytes<'py>(
         return Err(PyValueError::new_err("Input is not a pandas.DataFrame"));
     }
 
-    let kwargs = PyDict::new_bound(py);
+    let kwargs = PyDict::new(py);
     kwargs.set_item("preserve_index", true)?;
 
     let table = pyarrow
@@ -97,13 +95,13 @@ pub fn pandas_to_arrow_bytes<'py>(
         })
         .collect();
 
-    let names = PyList::new_bound(py, new_names.clone());
+    let names = PyList::new(py, new_names.clone())?;
     let table = table.call_method1("rename_columns", (names,))?;
 
     // move the index column to be the first column.
     if new_names[new_names.len() - 1] == "index" {
         new_names.rotate_right(1);
-        let order = PyList::new_bound(py, new_names);
+        let order = PyList::new(py, new_names)?;
         let table = table.call_method1("select", (order,))?;
         pyarrow::to_arrow_bytes(py, &table)
     } else {

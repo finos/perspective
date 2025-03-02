@@ -13,7 +13,7 @@
 import * as fs from "node:fs";
 import sh from "../../tools/perspective-scripts/sh.mjs";
 import * as url from "url";
-import * as TOML from "@iarna/toml";
+import * as toml from "smol-toml";
 import * as tar from "tar";
 import * as glob from "glob";
 import * as path from "path";
@@ -114,10 +114,10 @@ if (build_wheel) {
 if (build_sdist) {
     // `maturin sdist` has some issues with Cargo workspaces, so we assemble the sdist by hand here
     // Note that the resulting sdist is _not_ a Cargo workspace, it is rooted in this package.
-    const cargo_toml = fs.readFileSync("./Cargo.toml");
-    const pyproject_toml = fs.readFileSync("./pyproject.toml");
-    const cargo = TOML.parse(cargo_toml);
-    const pyproject = TOML.parse(pyproject_toml);
+    const cargo_toml = fs.readFileSync("./Cargo.toml").toString('utf-8');
+    const pyproject_toml = fs.readFileSync("./pyproject.toml").toString('utf-8');
+    const cargo = toml.parse(cargo_toml);
+    const pyproject = toml.parse(pyproject_toml);
 
     const version = cargo["package"]["version"];
     const data_dir = `perspective_python-${version}.data`;
@@ -153,8 +153,16 @@ if (build_sdist) {
     );
 }
 
+if (process.env['PSP_UV'] === '1') {
+    flags += ' --uv'
+}
+
 if (!build_wheel && !build_sdist) {
-    cmd.sh(`maturin develop --features=external-docs ${flags} ${target}`);
+    const dev_features = [
+        "abi3",
+        "external-docs",
+    ];
+    cmd.sh(`maturin develop --features=${dev_features.join(',')} ${flags} ${target}`);
 }
 
 if (!cmd.isEmpty()) {

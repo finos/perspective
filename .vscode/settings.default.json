@@ -6,6 +6,10 @@
         "PSP_ENABLE_WASM": "1"
     },
     "python.formatting.provider": "black",
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "rust/perspective-python/perspective/tests/"
+    ],
     "rust-analyzer.server.extraEnv": {
         "PSP_ROOT_DIR": "../..",
         "PSP_DISABLE_CPP": "1",

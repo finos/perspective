@@ -11,6 +11,10 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 
+# This is where to change pytest_pyodide's config if necessary.
+# See: https://github.com/pyodide/pyodide/blob/4b1c22ba27f62fba8ae2e13fbaf0e23a32b580ad/conftest.py#L44-L48
+
+
 def pytest_addoption(parser):
     parser.addoption(
         "--perspective-emscripten-wheel",

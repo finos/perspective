@@ -17,24 +17,20 @@ use pyo3::types::{PyAny, PyBytes, PyList};
 use super::pyarrow;
 
 fn get_polars_df_cls(py: Python<'_>) -> PyResult<Option<Bound<'_, PyAny>>> {
-    let sys = PyModule::import_bound(py, "sys")?;
+    let sys = PyModule::import(py, "sys")?;
     if sys.getattr("modules")?.contains("polars")? {
-        let polars = PyModule::import_bound(py, "polars")?;
-        Ok(Some(
-            polars.getattr("DataFrame")?.to_object(py).into_bound(py),
-        ))
+        let polars = PyModule::import(py, "polars")?;
+        Ok(Some(polars.getattr("DataFrame")?.into_pyobject(py)?))
     } else {
         Ok(None)
     }
 }
 
 fn get_polars_lf_cls(py: Python<'_>) -> PyResult<Option<Bound<'_, PyAny>>> {
-    let sys = PyModule::import_bound(py, "sys")?;
+    let sys = PyModule::import(py, "sys")?;
     if sys.getattr("modules")?.contains("polars")? {
-        let polars = PyModule::import_bound(py, "polars")?;
-        Ok(Some(
-            polars.getattr("LazyFrame")?.to_object(py).into_bound(py),
-        ))
+        let polars = PyModule::import(py, "polars")?;
+        Ok(Some(polars.getattr("LazyFrame")?.into_pyobject(py)?))
     } else {
         Ok(None)
     }
@@ -57,13 +53,12 @@ pub fn is_polars_lf(py: Python, df: &Bound<'_, PyAny>) -> PyResult<bool> {
 }
 
 pub fn arrow_to_polars(py: Python<'_>, arrow: &[u8]) -> PyResult<Py<PyAny>> {
-    let polars = PyModule::import_bound(py, "polars")?;
-    let bytes = PyBytes::new_bound(py, arrow);
+    let polars = PyModule::import(py, "polars")?;
+    let bytes = PyBytes::new(py, arrow);
     Ok(polars
         .getattr("read_ipc_stream")?
         .call1((bytes,))?
-        .as_unbound()
-        .clone())
+        .unbind())
 }
 
 pub fn polars_to_arrow_bytes<'py>(
@@ -102,13 +97,13 @@ pub fn polars_to_arrow_bytes<'py>(
         })
         .collect();
 
-    let names = PyList::new_bound(py, new_names.clone());
+    let names = PyList::new(py, new_names.clone())?;
     let table = table.call_method1("rename_columns", (names,))?;
 
     // move the index column to be the first column.
     if new_names[new_names.len() - 1] == "index" {
         new_names.rotate_right(1);
-        let order = PyList::new_bound(py, new_names);
+        let order = PyList::new(py, new_names)?;
         let table = table.call_method1("select", (order,))?;
         pyarrow::to_arrow_bytes(py, &table)
     } else {

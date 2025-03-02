@@ -14,8 +14,8 @@ import queue
 import random
 import threading
 from functools import partial
+import tornado
 
-import tornado.ioloop
 from perspective import (
     Server,
     Client,
@@ -49,6 +49,14 @@ class TestAsync(object):
     def setup_class(cls):
         import asyncio
 
+        # Storing the current loop, which was set up by the pytest-asyncio
+        # tests running in tests/async, delays its cleanup, which foregoes a
+        # pytest exception about an unclosed socket.  A cleaner way to fix this
+        # probably exists (use an event loop fixture? convert these tests to
+        # pytest-asyncio?)
+        cls.save_old_loop_to_prevent_unclosed_socket_exception = (
+            asyncio.get_event_loop()
+        )
         asyncio.set_event_loop(asyncio.new_event_loop())
         cls.loop = tornado.ioloop.IOLoop.current()
         cls.thread = threading.Thread(target=cls.loop.start)
