@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use perspective_client::config::*;
+use perspective_client::utils::PerspectiveResultExt;
 use yew::prelude::*;
 
 use crate::components::containers::select::*;
@@ -117,7 +118,10 @@ impl AggregateSelector {
             ..ViewConfigUpdate::default()
         };
 
-        ApiFuture::spawn(ctx.props().update_and_render(config));
+        ctx.props()
+            .update_and_render(config)
+            .map(ApiFuture::spawn)
+            .unwrap_or_log();
     }
 
     pub fn get_dropdown_aggregates(&self, ctx: &Context<Self>) -> Vec<SelectItem<Aggregate>> {

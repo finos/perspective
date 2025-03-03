@@ -12,13 +12,24 @@
 
 import type * as psp from "../../../dist/wasm/perspective-js.d.ts";
 
-function invert_promise<T>(): [(t: T) => void, Promise<T>] {
-    let sender;
-    let receiver: Promise<T> = new Promise((x) => {
+import * as psp_websocket from "../websocket.ts";
+
+function invert_promise<T>(): [
+    (t: T) => void,
+    Promise<T>,
+    (e: string) => void
+] {
+    let sender, reject;
+    let receiver: Promise<T> = new Promise((x, y) => {
         sender = x;
+        reject = y;
     });
 
-    return [sender as unknown as (t: T) => void, receiver];
+    return [
+        sender as unknown as (t: T) => void,
+        receiver,
+        reject as unknown as (e: string) => void,
+    ];
 }
 
 async function _init(ws: MessagePort | Worker, wasm: WebAssembly.Module) {
@@ -69,11 +80,11 @@ export async function worker(
     }
 
     const client = new Client(
-        (proto: Uint8Array) => {
+        async (proto: Uint8Array) => {
             const f = proto.slice().buffer;
             port.postMessage(f, { transfer: [f] });
         },
-        () => {
+        async () => {
             console.debug("Closing WebWorker");
             port.close();
         }
@@ -99,29 +110,8 @@ export async function websocket(
     module: Promise<typeof psp>,
     url: string | URL
 ) {
-    const ws = new WebSocket(url);
-    let [sender, receiver] = invert_promise();
-    ws.onopen = sender;
-    ws.binaryType = "arraybuffer";
-    await receiver;
     const { Client } = await module;
-    const client = new Client(
-        (proto: Uint8Array) => {
-            const buffer = proto.slice().buffer;
-            ws.send(buffer);
-        },
-        () => {
-            console.debug("Closing WebSocket");
-            ws.close();
-        }
-    );
-
-    ws.onmessage = (msg) => {
-        client.handle_response(msg.data);
-    };
-
-    await client.init();
-    return client;
+    return await psp_websocket.websocket(WebSocket, Client, url);
 }
 
 export default { websocket, worker };

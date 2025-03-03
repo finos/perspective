@@ -10,7 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use model::UpdateAndRender;
+use perspective_client::config::ViewConfigUpdate;
 use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -27,7 +30,7 @@ use crate::utils::WeakScope;
 use crate::utils::*;
 use crate::*;
 
-#[derive(Properties)]
+#[derive(Properties, Clone)]
 pub struct StatusBarProps {
     pub id: String,
     pub on_reset: Callback<bool>,
@@ -54,6 +57,7 @@ pub enum StatusBarMsg {
     Copy,
     SetThemeConfig((Vec<String>, Option<usize>)),
     SetTheme(String),
+    SetError(Option<String>),
     TableStatsChanged,
     SetIsUpdating(bool),
     SetTitle(Option<String>),
@@ -66,7 +70,8 @@ pub struct StatusBar {
     themes: Vec<String>,
     export_ref: NodeRef,
     copy_ref: NodeRef,
-    _sub: [Subscription; 5],
+    state: StatusIconState,
+    _sub: [Subscription; 6],
 }
 
 impl Component for StatusBar {
@@ -95,6 +100,10 @@ impl Component for StatusBar {
                 .presentation
                 .title_changed
                 .add_listener(ctx.link().callback(|_| StatusBarMsg::TableStatsChanged)),
+            ctx.props()
+                .session
+                .table_errored
+                .add_listener(ctx.link().callback(StatusBarMsg::SetError)),
         ];
 
         // Fetch initial theme
@@ -111,14 +120,34 @@ impl Component for StatusBar {
             themes: vec![],
             copy_ref: NodeRef::default(),
             export_ref: NodeRef::default(),
+            state: if let Some(err) = ctx.props().session.get_error() {
+                StatusIconState::Errored(err)
+            } else {
+                StatusIconState::Normal
+            },
             is_updating: 0,
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
+            StatusBarMsg::SetError(error) => {
+                if let Some(err) = error {
+                    self.state = StatusIconState::Errored(err)
+                } else {
+                    self.state = StatusIconState::Normal
+                }
+
+                true
+            },
             StatusBarMsg::SetIsUpdating(is_updating) => {
                 self.is_updating = max!(0, self.is_updating + if is_updating { 1 } else { -1 });
+                if self.is_updating > 0 {
+                    self.state = StatusIconState::Updating;
+                } else {
+                    self.state = StatusIconState::Normal;
+                }
+
                 true
             },
             StatusBarMsg::TableStatsChanged => true,
@@ -181,7 +210,6 @@ impl Component for StatusBar {
 
         let export = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Export);
         let copy = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Copy);
-
         let theme_button = match &self.theme {
             None => html! {},
             Some(selected) => {
@@ -232,23 +260,35 @@ impl Component for StatusBar {
             && (ctx.props().presentation.is_settings_open()
                 || ctx.props().presentation.get_title().is_some());
 
+        if !ctx.props().session.has_table() {
+            is_updating_class_name.push("updating");
+        }
+
+        let state = self.state.clone();
         html! {
             <>
                 <LocalStyle href={css!("status-bar")} />
                 <div id={ctx.props().id.clone()} class={is_updating_class_name}>
-                    <StatusIndicator {stats} is_updating={self.is_updating > 0}>
-                        <label
-                            class="input-sizer"
-                            data-value={ctx.props().presentation.get_title().unwrap_or_default()}
-                        >
-                            <input
-                                placeholder=" "
-                                value={ctx.props().presentation.get_title()}
-                                size="10"
-                                {oninput}
-                            />
-                            <span id="status-bar-placeholder" />
-                        </label>
+                    <StatusIndicator
+                        {stats}
+                        {state}
+                        session={&ctx.props().session}
+                        renderer={&ctx.props().renderer}
+                    >
+                        if is_menu {
+                            <label
+                                class="input-sizer"
+                                data-value={ctx.props().presentation.get_title().unwrap_or_default()}
+                            >
+                                <input
+                                    placeholder=" "
+                                    value={ctx.props().presentation.get_title()}
+                                    size="10"
+                                    {oninput}
+                                />
+                                <span id="status-bar-placeholder" />
+                            </label>
+                        }
                     </StatusIndicator>
                     <div id="spacer" />
                     if is_menu {
@@ -272,41 +312,97 @@ impl Component for StatusBar {
     }
 }
 
+impl PartialEq for TableErrorState {
+    fn eq(&self, _other: &Self) -> bool {
+        false
+    }
+}
+
+#[derive(Clone, Default, PartialEq)]
+enum StatusIconState {
+    Updating,
+    Errored(String),
+
+    #[default]
+    Normal,
+}
+
 #[derive(Clone, Properties, PartialEq)]
 pub struct StatusIndicatorProps {
     stats: Option<ViewStats>,
-    is_updating: bool,
+    // is_updating: bool,
+    state: StatusIconState,
+    session: Session,
+    renderer: Renderer,
     children: Children,
 }
+
+derive_model!(Session, Renderer for StatusIndicatorProps);
 
 /// A pure-functional indicator component which does not hook into `model`
 /// state.
 #[function_component]
 fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
-    let class_name = match &props.stats {
-        Some(ViewStats {
-            num_table_cells: Some(_),
-            ..
-        }) => {
-            if props.is_updating {
-                "updating"
-            } else {
-                "connected"
-            }
-        },
-        Some(ViewStats {
-            num_table_cells: None,
-            ..
-        }) => "loading",
-        None => "uninitialized",
+    let class_name = match (&props.state, &props.stats, props.session.is_reconnect()) {
+        (StatusIconState::Errored(_), _, true) => "errored",
+        (StatusIconState::Errored(_), _, false) => "errored disabled",
+        (
+            StatusIconState::Normal,
+            Some(ViewStats {
+                num_table_cells: Some(_),
+                ..
+            }),
+            _,
+        ) => "connected",
+        (
+            StatusIconState::Updating,
+            Some(ViewStats {
+                num_table_cells: Some(_),
+                ..
+            }),
+            _,
+        ) => "updating",
+        (
+            _,
+            Some(ViewStats {
+                num_table_cells: None,
+                ..
+            }),
+            _,
+        ) => "loading",
+        (_, None, _) => "uninitialized",
     };
+
+    let error_dialog = match &props.state {
+        StatusIconState::Errored(err) => {
+            html! { <span class="error-dialog">{ err }</span> }
+        },
+        _ => html! { <></> },
+    };
+
+    let onclick = use_callback(props.clone(), |_: MouseEvent, props| {
+        if let StatusIconState::Errored(_) = &props.state {
+            let props = props.clone();
+            let _ = future_to_promise(async move {
+                props.session.reconnect().await?;
+                props
+                    .update_and_render(ViewConfigUpdate::default())?
+                    .await?;
+
+                Ok(JsValue::UNDEFINED)
+            });
+        }
+    });
 
     html! {
         <>
             <div class="section">
-                <span id="status" class={class_name} />
-                <span id="status_updating" class={class_name} />
+                <div id="status_reconnect" class={class_name} {onclick}>
+                    <span id="status" class={class_name} />
+                    <span id="status_updating" class={class_name} />
+                </div>
             </div>
+            { error_dialog }
             { for props.children.iter() }
             <div id="rows" class="section"><StatusBarRowsCounter stats={props.stats.clone()} /></div>
         </>
