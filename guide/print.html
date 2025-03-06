@@ -1381,6 +1381,29 @@ the <code>theme</code> attribute:</p>
 <pre><code class="language-javascript">const viewer = document.querySelector("perspective-viewer");
 await viewer.restore({ theme: "Pro Dark" });
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="custom-themes"><a class="header" href="#custom-themes">Custom themes</a></h1>
+<p>The best way to write a new theme is to
+<a href="https://github.com/finos/perspective/tree/master/rust/perspective-viewer/src/themes">fork and modify an existing theme</a>,
+which are <em>just</em> collections of regular CSS variables (no preprocessor is
+required, though Perspective's own themes use one). <code>&lt;perspective-viewer&gt;</code> is
+not "themed" by default and will lack icons and label text in addition to colors
+and fonts, so starting from an empty theme forces you to define <em>every</em>
+theme-able variable to get a functional UI.</p>
+<h3 id="icons-and-translation"><a class="header" href="#icons-and-translation">Icons and Translation</a></h3>
+<p>UI icons are defined by CSS variables provided by
+<a href="https://github.com/finos/perspective/blob/master/rust/perspective-viewer/src/themes/icons.less"><code>@finos/perspective-viewer/dist/css/icons.css</code></a>.
+These variables must be defined for the UI icons to work - there are no default
+icons without a theme.</p>
+<p>UI text is also defined in CSS variables provided by
+<a href="https://github.com/finos/perspective/blob/master/rust/perspective-viewer/src/themes/intl.less"><code>@finos/perspective-viewer/dist/css/intl.css</code></a>,
+and has identical import requirements. Some <em>example definitions</em>
+(automatically-translated sans-editing) can be found
+<a href="https://github.com/finos/perspective/tree/master/rust/perspective-viewer/src/themes/intl"><code>@finos/perspective-viewer/dist/css/intl/</code> folder</a>.</p>
+<p>Importing the pre-built <code>themes.css</code> stylesheet as well as a custom theme will
+define Icons and Translation globally as a side-effect. You can still customize
+icons in this mode with rules (of the appropriate specificity), <em>but</em> if you do
+not still remember to define these variables yourself, your theme will not work
+without the base <code>themes.css</code> pacage available.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="loading-data-from-a-table"><a class="header" href="#loading-data-from-a-table">Loading data from a Table</a></h1>
 <p>Data can be loaded into <code>&lt;perspective-viewer&gt;</code> in the form of a <code>Table()</code> or a
 <code>Promise&lt;Table&gt;</code> via the <code>load()</code> method.</p>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Theming - Perspective</title>
+        <title>Custom Themes - Perspective</title>
 
 
         <!-- Custom HTML head -->
@@ -157,65 +157,39 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="theming"><a class="header" href="#theming">Theming</a></h1>
-<p>Theming is supported in <code>perspective-viewer</code> and its accompanying plugins. A
-number of themes come bundled with <code>perspective-viewer</code>; you can import any of
-these themes directly into your app, and the <code>perspective-viewer</code>s will be
-themed accordingly:</p>
-<pre><code class="language-javascript">// Themes based on Thought Merchants's Prospective design
-import "@finos/perspective-viewer/dist/css/pro.css";
-import "@finos/perspective-viewer/dist/css/pro-dark.css";
-
-// Other themes
-import "@finos/perspective-viewer/dist/css/solarized.css";
-import "@finos/perspective-viewer/dist/css/solarized-dark.css";
-import "@finos/perspective-viewer/dist/css/monokai.css";
-import "@finos/perspective-viewer/dist/css/vaporwave.css";
-</code></pre>
-<p>Alternatively, you may use <code>themes.css</code>, which bundles all default themes</p>
-<pre><code class="language-javascript">import "@finos/perspective-viewer/dist/css/themes.css";
-</code></pre>
-<p>If you choose not to bundle the themes yourself, they are available through
-<a href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/">CDN</a>. These
-can be directly linked in your HTML file:</p>
-<pre><code class="language-html">&lt;link
-    rel="stylesheet"
-    crossorigin="anonymous"
-    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro.css"
-/&gt;
-</code></pre>
-<p>Note the <code>crossorigin="anonymous"</code> attribute. When including a theme from a
-cross-origin context, this attribute may be required to allow
-<code>&lt;perspective-viewer&gt;</code> to detect the theme. If this fails, additional themes are
-added to the <code>document</code> after <code>&lt;perspective-viewer&gt;</code> init, or for any other
-reason theme auto-detection fails, you may manually inform
-<code>&lt;perspective-viewer&gt;</code> of the available theme names with the <code>.resetThemes()</code>
-method.</p>
-<pre><code class="language-javascript">// re-auto-detect themes
-viewer.resetThemes();
-
-// Set available themes explicitly (they still must be imported as CSS!)
-viewer.resetThemes(["Pro Light", "Pro Dark"]);
-</code></pre>
-<p><code>&lt;perspective-viewer&gt;</code> will default to the first loaded theme when initialized.
-You may override this via <code>.restore()</code>, or provide an initial theme by setting
-the <code>theme</code> attribute:</p>
-<pre><code class="language-html">&lt;perspective-viewer theme="Pro Light"&gt;&lt;/perspective-viewer&gt;
-</code></pre>
-<p>or</p>
-<pre><code class="language-javascript">const viewer = document.querySelector("perspective-viewer");
-await viewer.restore({ theme: "Pro Dark" });
-</code></pre>
+                        <h1 id="custom-themes"><a class="header" href="#custom-themes">Custom themes</a></h1>
+<p>The best way to write a new theme is to
+<a href="https://github.com/finos/perspective/tree/master/rust/perspective-viewer/src/themes">fork and modify an existing theme</a>,
+which are <em>just</em> collections of regular CSS variables (no preprocessor is
+required, though Perspective's own themes use one). <code>&lt;perspective-viewer&gt;</code> is
+not "themed" by default and will lack icons and label text in addition to colors
+and fonts, so starting from an empty theme forces you to define <em>every</em>
+theme-able variable to get a functional UI.</p>
+<h3 id="icons-and-translation"><a class="header" href="#icons-and-translation">Icons and Translation</a></h3>
+<p>UI icons are defined by CSS variables provided by
+<a href="https://github.com/finos/perspective/blob/master/rust/perspective-viewer/src/themes/icons.less"><code>@finos/perspective-viewer/dist/css/icons.css</code></a>.
+These variables must be defined for the UI icons to work - there are no default
+icons without a theme.</p>
+<p>UI text is also defined in CSS variables provided by
+<a href="https://github.com/finos/perspective/blob/master/rust/perspective-viewer/src/themes/intl.less"><code>@finos/perspective-viewer/dist/css/intl.css</code></a>,
+and has identical import requirements. Some <em>example definitions</em>
+(automatically-translated sans-editing) can be found
+<a href="https://github.com/finos/perspective/tree/master/rust/perspective-viewer/src/themes/intl"><code>@finos/perspective-viewer/dist/css/intl/</code> folder</a>.</p>
+<p>Importing the pre-built <code>themes.css</code> stylesheet as well as a custom theme will
+define Icons and Translation globally as a side-effect. You can still customize
+icons in this mode with rules (of the appropriate specificity), <em>but</em> if you do
+not still remember to define these variables yourself, your theme will not work
+without the base <code>themes.css</code> pacage available.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../how_to/javascript/viewer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../how_to/javascript/theming.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../how_to/javascript/custom_themes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../how_to/javascript/loading_data.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -225,11 +199,11 @@ await viewer.restore({ theme: "Pro Dark" });
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../how_to/javascript/viewer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../how_to/javascript/theming.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../how_to/javascript/custom_themes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../how_to/javascript/loading_data.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
