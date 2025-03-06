@@ -21,22 +21,22 @@ mod browser;
 mod custom_element;
 mod datetime;
 mod debounce;
+mod hooks;
 mod number_format;
 mod pubsub;
 mod scope;
 mod tee;
 mod wasm_abi;
 mod weak_scope;
-mod hooks;
 
 #[cfg(test)]
 mod tests;
 
-pub use hooks::*;
 pub use browser::*;
 pub use custom_element::*;
 pub use datetime::*;
 pub use debounce::*;
+pub use hooks::*;
 pub use number_format::*;
 pub use perspective_client::clone;
 pub use pubsub::*;

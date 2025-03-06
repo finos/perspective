@@ -16,7 +16,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 use async_lock::Mutex;
-use perspective_js::utils::{global, ApiFuture, ApiResult, ToApiError};
+use perspective_js::utils::{ApiFuture, ApiResult, ToApiError, global};
 use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::html::ImplicitClone;

@@ -626,7 +626,7 @@ mod py_async {
         #[allow(unused)]
         pub fn into_future(
             awaitable: Bound<PyAny>,
-        ) -> PyResult<impl Future<Output = PyResult<PyObject>> + Send> {
+        ) -> PyResult<impl Future<Output = PyResult<PyObject>> + Send + use<>> {
             pyo3_async_runtimes::generic::into_future::<TrivialRuntime>(awaitable)
         }
     }

@@ -12,13 +12,13 @@
 
 use std::cell::{Cell, Ref, RefCell};
 use std::future::Future;
-use std::iter::{repeat_with, Iterator};
+use std::iter::{Iterator, repeat_with};
 use std::rc::Rc;
 
 use futures::future::{join_all, select_all};
 use perspective_js::utils::{global, *};
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
 

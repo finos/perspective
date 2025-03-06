@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::{classes, html, Callback, Children, Component, Html, Properties};
+use yew::{Callback, Children, Component, Html, Properties, classes, html};
 
 use crate::components::style::LocalStyle;
 use crate::css;

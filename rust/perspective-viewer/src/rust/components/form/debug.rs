@@ -19,7 +19,7 @@ use yew::prelude::*;
 use crate::components::containers::trap_door_panel::TrapDoorPanel;
 use crate::components::form::code_editor::CodeEditor;
 use crate::components::style::LocalStyle;
-use crate::js::{copy_to_clipboard, paste_from_clipboard, MimeType};
+use crate::js::{MimeType, copy_to_clipboard, paste_from_clipboard};
 use crate::model::*;
 use crate::presentation::*;
 use crate::renderer::*;

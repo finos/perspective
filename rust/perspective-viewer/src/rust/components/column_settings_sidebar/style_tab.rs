@@ -14,9 +14,9 @@ pub mod stub;
 mod symbol;
 
 use itertools::Itertools;
-use perspective_client::{clone, ColumnType};
+use perspective_client::{ColumnType, clone};
 use perspective_js::utils::*;
-use yew::{function_component, html, Html, Properties};
+use yew::{Html, Properties, function_component, html};
 
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;

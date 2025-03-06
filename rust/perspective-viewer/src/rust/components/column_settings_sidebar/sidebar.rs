@@ -15,10 +15,10 @@ use std::rc::Rc;
 
 use derivative::Derivative;
 use itertools::Itertools;
+use perspective_client::ColumnType;
 use perspective_client::config::Expression;
 use perspective_client::utils::PerspectiveResultExt;
-use perspective_client::ColumnType;
-use yew::{html, Callback, Component, Html, Properties};
+use yew::{Callback, Component, Html, Properties, html};
 
 use super::attributes_tab::AttributesTabProps;
 use super::style_tab::StyleTabProps;

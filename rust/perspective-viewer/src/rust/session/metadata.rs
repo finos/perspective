@@ -14,8 +14,8 @@ use std::collections::{HashMap, HashSet};
 use std::iter::IntoIterator;
 use std::ops::{Deref, DerefMut};
 
-use perspective_client::config::*;
 use perspective_client::ColumnType;
+use perspective_client::config::*;
 
 use crate::components::viewer::ColumnLocator;
 use crate::*;
@@ -148,31 +148,30 @@ impl SessionMetadata {
     /// # Arguments
     /// - `alias` An alias name for an expression column in this `Session`.
     pub fn get_edit_by_alias(&self, alias: &str) -> Option<String> {
-        maybe!(self
-            .as_ref()?
-            .expr_meta
-            .as_ref()?
-            .edited
-            .get(alias)
-            .cloned())
+        maybe!(
+            self.as_ref()?
+                .expr_meta
+                .as_ref()?
+                .edited
+                .get(alias)
+                .cloned()
+        )
     }
 
     pub fn set_edit_by_alias(&mut self, alias: &str, edit: String) {
-        drop(maybe!(self
-            .as_mut()?
-            .expr_meta
-            .as_mut()?
-            .edited
-            .insert(alias.to_owned(), edit)))
+        drop(maybe!(
+            self.as_mut()?
+                .expr_meta
+                .as_mut()?
+                .edited
+                .insert(alias.to_owned(), edit)
+        ))
     }
 
     pub fn clear_edit_by_alias(&mut self, alias: &str) {
-        drop(maybe!(self
-            .as_mut()?
-            .expr_meta
-            .as_mut()?
-            .edited
-            .remove(alias)))
+        drop(maybe!(
+            self.as_mut()?.expr_meta.as_mut()?.edited.remove(alias)
+        ))
     }
 
     pub fn get_table_columns(&self) -> Option<&'_ Vec<String>> {

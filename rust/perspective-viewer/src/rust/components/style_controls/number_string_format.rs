@@ -17,7 +17,7 @@ mod types;
 
 use perspective_client::ColumnType;
 pub use types::*;
-use yew::{html, Callback, Component, Properties};
+use yew::{Callback, Component, Properties, html};
 
 use crate::components::style::LocalStyle;
 use crate::config::*;

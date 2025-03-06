@@ -17,8 +17,8 @@ use std::thread::LocalKey;
 
 use extend::ext;
 use perspective_js::utils::global;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use web_sys::*;
 
 use crate::js::plugin::*;

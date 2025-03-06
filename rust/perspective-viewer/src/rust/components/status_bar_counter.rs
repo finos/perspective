@@ -14,8 +14,6 @@ use perspective_client::*;
 use yew::prelude::*;
 
 use crate::session::{Session, ViewStats};
-#[cfg(test)]
-use crate::utils::*;
 use crate::utils::{AddListener, ToFormattedString};
 
 #[derive(Properties, PartialEq)]

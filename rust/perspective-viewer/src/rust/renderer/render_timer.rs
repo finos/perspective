@@ -17,8 +17,8 @@ use std::rc::Rc;
 
 use perspective_js::utils::global;
 use serde::*;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 
 /// A utility struct to track and calculate framerate metrics.
 #[derive(Default, Clone)]

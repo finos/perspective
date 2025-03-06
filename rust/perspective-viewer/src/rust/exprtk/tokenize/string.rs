@@ -10,13 +10,13 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use nom::IResult;
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, take_while_m_n};
 use nom::character::complete::{char, multispace1};
 use nom::combinator::{map, map_opt, map_res, value, verify};
 use nom::multi::fold_many0;
 use nom::sequence::{delimited, preceded};
-use nom::IResult;
 
 fn parse_unicode(input: &str) -> IResult<&str, char> {
     let parse_hex = take_while_m_n(1, 6, |c: char| c.is_ascii_hexdigit());

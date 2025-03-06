@@ -17,10 +17,10 @@ use perspective_client::config::*;
 use perspective_client::utils::PerspectiveResultExt;
 use yew::prelude::*;
 
+use super::InPlaceColumn;
 use super::filter_column::*;
 use super::pivot_column::*;
 use super::sort_column::*;
-use super::InPlaceColumn;
 use crate::components::containers::dragdrop_list::*;
 use crate::components::style::LocalStyle;
 use crate::custom_elements::{ColumnDropDownElement, FilterDropDownElement};

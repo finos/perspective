@@ -224,7 +224,7 @@ where
 
                 let is_duplicate = columns
                     .iter()
-                    .position(|x| x.1 .1.as_ref().unwrap().props.get_item() == *column);
+                    .position(|x| x.1.1.as_ref().unwrap().props.get_item() == *column);
 
                 valid_duplicate_drag = is_duplicate.is_some() && !ctx.props().allow_duplicates;
                 if let Some(duplicate) = is_duplicate {

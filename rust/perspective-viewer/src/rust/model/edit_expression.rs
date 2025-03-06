@@ -12,8 +12,8 @@
 
 use perspective_client::config::{Expression, ViewConfigUpdate};
 
-use super::structural::*;
 use super::UpdateAndRender;
+use super::structural::*;
 use crate::components::column_settings_sidebar::ColumnSettingsTab;
 use crate::components::viewer::ColumnLocator;
 use crate::presentation::{OpenColumnSettings, Presentation};

@@ -12,7 +12,7 @@
 
 use perspective_client::clone;
 use yew::prelude::*;
-use yew::{function_component, html, Properties};
+use yew::{Properties, function_component, html};
 
 use crate::components::style::LocalStyle;
 use crate::css;

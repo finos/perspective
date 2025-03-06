@@ -13,9 +13,9 @@
 use std::collections::HashSet;
 
 use chrono::{Datelike, NaiveDate, TimeZone, Utc};
+use perspective_client::ColumnType;
 use perspective_client::config::*;
 use perspective_client::utils::PerspectiveResultExt;
-use perspective_client::ColumnType;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;

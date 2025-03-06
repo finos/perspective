@@ -10,12 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use nom::IResult;
 use nom::branch::alt;
 use nom::character::complete::{char, one_of};
 use nom::combinator::{opt, recognize};
 use nom::multi::{many0, many1};
 use nom::sequence::{preceded, terminated, tuple};
-use nom::IResult;
 
 fn decimal(input: &str) -> IResult<&str, &str> {
     recognize(many1(terminated(one_of("0123456789"), many0(char('_')))))(input)

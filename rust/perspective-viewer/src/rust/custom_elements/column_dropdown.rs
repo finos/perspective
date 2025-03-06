@@ -16,11 +16,11 @@ use perspective_client::clone;
 use perspective_client::config::Expression;
 use perspective_js::json;
 use perspective_js::utils::global;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::html::ImplicitClone;
-use yew::{props, Callback};
+use yew::{Callback, props};
 
 use crate::components::column_dropdown::*;
 use crate::components::column_selector::InPlaceColumn;

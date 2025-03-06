@@ -11,9 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use itertools::Itertools;
+use perspective_client::ColumnType;
 use perspective_client::config::*;
 use perspective_client::utils::PerspectiveResultExt;
-use perspective_client::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
 

@@ -13,8 +13,8 @@
 use perspective_client::clone;
 use web_sys::Element;
 use yew::{
-    function_component, html, use_effect_with, use_node_ref, use_state_eq, AttrValue, Callback,
-    Children, Html, Properties,
+    AttrValue, Callback, Children, Html, Properties, function_component, html, use_effect_with,
+    use_node_ref, use_state_eq,
 };
 
 use crate::components::editable_header::{EditableHeader, EditableHeaderProps};

@@ -12,7 +12,7 @@
 
 use std::rc::Rc;
 
-use perspective_client::{clone, ExprValidationError};
+use perspective_client::{ExprValidationError, clone};
 use yew::prelude::*;
 
 use super::form::code_editor::*;

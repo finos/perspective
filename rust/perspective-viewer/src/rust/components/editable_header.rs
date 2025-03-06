@@ -15,7 +15,7 @@ use std::rc::Rc;
 use derivative::Derivative;
 use itertools::Itertools;
 use web_sys::{FocusEvent, HtmlInputElement, KeyboardEvent};
-use yew::{classes, html, Callback, Component, Html, NodeRef, Properties, TargetCast};
+use yew::{Callback, Component, Html, NodeRef, Properties, TargetCast, classes, html};
 
 use super::type_icon::TypeIconType;
 use crate::components::type_icon::TypeIcon;
