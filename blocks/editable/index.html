@@ -15,7 +15,13 @@
 
             const viewer = document.getElementsByTagName("perspective-viewer")[0];
 
-            const worker = new SharedWorker("https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective-server.worker.js");
+            let worker;
+            try {
+                worker = new SharedWorker("https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective-server.worker.js");
+            } catch (e) {
+                worker = new Worker("https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective-server.worker.js");
+            }
+
             const client = await perspective.worker(worker);
             const tables = await client.get_hosted_table_names();
 
