@@ -10,8 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use perspective_client::config::*;
 use perspective_client::ColumnType;
+use perspective_client::config::*;
 
 use crate::dragdrop::{DragEffect, DragTarget};
 use crate::js::plugin::ViewConfigRequirements;
@@ -104,7 +104,7 @@ pub impl ViewConfig {
                 if !is_swap_to_after_last {
                     if is_to_swap || is_from_required {
                         let column = Some(column);
-                        config.columns.extend(std::iter::repeat(None).take({
+                        config.columns.extend(std::iter::repeat_n(None, {
                             let fill_to = requirements
                                 .names
                                 .as_ref()
@@ -125,7 +125,8 @@ pub impl ViewConfig {
                         }
                     } else {
                         config.columns.retain(|x| x.as_ref() != Some(&column));
-                        config.columns.extend(std::iter::repeat(None).take(
+                        config.columns.extend(std::iter::repeat_n(
+                            None,
                             if index >= config.columns.len() {
                                 index - config.columns.len()
                             } else {

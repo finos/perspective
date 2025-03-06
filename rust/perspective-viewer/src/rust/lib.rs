@@ -102,9 +102,10 @@ macro_rules! define_web_components {
         #[wasm_bindgen::prelude::wasm_bindgen(inline_js = $x)]
         extern "C" {
             #[wasm_bindgen::prelude::wasm_bindgen(js_name = "psp")]
+            #[wasm_bindgen::prelude::wasm_bindgen(thread_local_v2)]
             pub static PSP: wasm_bindgen::prelude::JsValue;
         }
 
-        $crate::bootstrap_web_components(&PSP);
+        PSP.with(|x| $crate::bootstrap_web_components(x));
     }};
 }

@@ -17,8 +17,8 @@ use std::thread::LocalKey;
 
 use extend::ext;
 use perspective_js::utils::global;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use web_sys::*;
 
 use crate::js::plugin::*;
@@ -117,7 +117,7 @@ pub impl LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
 
 fn register_default() {
     PLUGIN_REGISTRY.with(|plugins| {
-        if plugins.borrow().len() == 0 {
+        if plugins.borrow().is_empty() {
             plugins.borrow_mut().push(PluginRecord {
                 name: "Debug".to_owned(),
                 category: "Custom".to_owned(),

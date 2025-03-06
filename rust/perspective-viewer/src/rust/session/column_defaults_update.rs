@@ -13,8 +13,8 @@
 use std::iter::IntoIterator;
 
 use itertools::Itertools;
-use perspective_client::config::*;
 use perspective_client::ColumnType;
+use perspective_client::config::*;
 
 use super::metadata::*;
 use crate::js::plugin::*;
@@ -76,7 +76,7 @@ pub impl ViewConfigUpdate {
                             .filter(|x| {
                                 !numeric_config_columns
                                     .iter()
-                                    .any(|y| y.as_ref().map_or(false, |z| z == *x))
+                                    .any(|y| y.as_ref() == Some(*x))
                             })
                             .filter(|x| {
                                 matches!(

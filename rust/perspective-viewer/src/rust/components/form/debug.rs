@@ -19,7 +19,7 @@ use yew::prelude::*;
 use crate::components::containers::trap_door_panel::TrapDoorPanel;
 use crate::components::form::code_editor::CodeEditor;
 use crate::components::style::LocalStyle;
-use crate::js::{copy_to_clipboard, paste_from_clipboard, MimeType};
+use crate::js::{MimeType, copy_to_clipboard, paste_from_clipboard};
 use crate::model::*;
 use crate::presentation::*;
 use crate::renderer::*;
@@ -56,7 +56,7 @@ impl DebugPanelProps {
         text: UseStateSetter<Rc<String>>,
         error: UseStateSetter<Option<ExprValidationError>>,
         modified: UseStateSetter<bool>,
-    ) -> impl Fn(()) {
+    ) -> impl Fn(()) + use<> {
         let props = self.clone();
         move |_| {
             error.set(None);
@@ -118,17 +118,32 @@ pub fn debug_panel(props: &DebugPanelProps) -> Html {
         move |(text, props)| {
             props.set_text(text.clone());
             error.set(None);
-            let sub1 = props.renderer().style_changed.add_listener({
-                props.reset_callback(text.clone(), error.setter(), modified.setter())
-            });
+            let sub1 = props
+                .renderer()
+                .style_changed
+                .add_listener(props.reset_callback(
+                    text.clone(),
+                    error.setter(),
+                    modified.setter(),
+                ));
 
-            let sub2 = props.renderer().reset_changed.add_listener({
-                props.reset_callback(text.clone(), error.setter(), modified.setter())
-            });
+            let sub2 = props
+                .renderer()
+                .reset_changed
+                .add_listener(props.reset_callback(
+                    text.clone(),
+                    error.setter(),
+                    modified.setter(),
+                ));
 
-            let sub3 = props.session().view_config_changed.add_listener({
-                props.reset_callback(text.clone(), error.setter(), modified.setter())
-            });
+            let sub3 = props
+                .session()
+                .view_config_changed
+                .add_listener(props.reset_callback(
+                    text.clone(),
+                    error.setter(),
+                    modified.setter(),
+                ));
 
             || {
                 drop(sub1);

@@ -14,7 +14,7 @@
 name = "perspective-js"
 version = "3.3.4"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
-edition = "2021"
+edition = "2024"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
 repository = "https://github.com/finos/perspective"
 license = "Apache-2.0"
@@ -54,6 +54,7 @@ base64 = "0.13.0"
 chrono = "0.4"
 extend = "1.1.2"
 futures = "0.3.28"
+derivative = "2.2.0"
 getrandom = { version = "0.2", features = ["js"] }
 js-intern = "0.3.1"
 js-sys = "0.3.64"
@@ -73,7 +74,7 @@ ts-rs = { version = "10.0.0", features = [
 tracing = { version = ">=0.1.36" }
 tracing-subscriber = "0.3.15"
 console_error_panic_hook = "0.1.6"
-wasm-bindgen = { version = "=0.2.92", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.100", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.41"
 
 [dependencies.web-sys]

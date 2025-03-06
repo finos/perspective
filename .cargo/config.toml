@@ -9,7 +9,7 @@ target-dir = "rust/target"
 runner = 'wasm-bindgen-test-runner'
 rustflags = [
     "--cfg=web_sys_unstable_apis",
-    "-Ctarget-feature=+bulk-memory,+simd128,+relaxed-simd",
+    "-Ctarget-feature=+bulk-memory,+simd128,+relaxed-simd,+reference-types",
 ]
 
 [target.i686-pc-windows-msvc]

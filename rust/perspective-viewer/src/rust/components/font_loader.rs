@@ -12,13 +12,13 @@
 
 use std::cell::{Cell, Ref, RefCell};
 use std::future::Future;
-use std::iter::{repeat_with, Iterator};
+use std::iter::{Iterator, repeat_with};
 use std::rc::Rc;
 
 use futures::future::{join_all, select_all};
 use perspective_js::utils::{global, *};
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
 
@@ -191,7 +191,10 @@ impl FontLoaderProps {
 
 // An async task which times out.  Can be used to timeout an optional async task
 // by combinging with `Promise::any`.
-fn timeout_font_task(family: &str, weight: &str) -> impl Future<Output = ApiResult<JsValue>> {
+fn timeout_font_task(
+    family: &str,
+    weight: &str,
+) -> impl Future<Output = ApiResult<JsValue>> + use<> {
     let timeout_msg = format!("Timeout awaiting font \"{}:{}\"", family, weight);
     async {
         set_timeout(FONT_DOWNLOAD_TIMEOUT_MS).await?;

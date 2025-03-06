@@ -107,7 +107,7 @@ impl ProxySession {
 fn encode(response: Response, callback: ProxyCallback) -> Result<(), ClientError> {
     let mut enc = vec![];
     response.encode(&mut enc)?;
-    callback(&enc)?;
+    callback(&enc).map_err(|x| ClientError::Unknown(x.to_string()))?;
     Ok(())
 }
 

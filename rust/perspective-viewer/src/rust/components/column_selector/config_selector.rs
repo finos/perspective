@@ -14,12 +14,13 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 use perspective_client::config::*;
+use perspective_client::utils::PerspectiveResultExt;
 use yew::prelude::*;
 
+use super::InPlaceColumn;
 use super::filter_column::*;
 use super::pivot_column::*;
 use super::sort_column::*;
-use super::InPlaceColumn;
 use crate::components::containers::dragdrop_list::*;
 use crate::components::style::LocalStyle;
 use crate::custom_elements::{ColumnDropDownElement, FilterDropDownElement};
@@ -233,7 +234,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(config));
+                ctx.props()
+                    .update_and_render(config)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -245,7 +250,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(config));
+                ctx.props()
+                    .update_and_render(config)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -257,7 +266,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(config));
+                ctx.props()
+                    .update_and_render(config)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -270,7 +283,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(config));
+                ctx.props()
+                    .update_and_render(config)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -285,7 +302,12 @@ impl Component for ConfigSelector {
                     effect,
                     &ctx.props().renderer.metadata(),
                 );
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -305,7 +327,10 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
                 ctx.props().onselect.emit(());
                 false
             },
@@ -340,7 +365,11 @@ impl Component for ConfigSelector {
                     }
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 false
             },
             ConfigSelectorMsg::New(DragTarget::GroupBy, InPlaceColumn::Column(col)) => {
@@ -351,7 +380,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -363,7 +396,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -381,7 +418,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -393,7 +434,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -407,7 +452,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -421,7 +470,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -443,7 +496,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },
@@ -459,7 +516,11 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 ctx.props().onselect.emit(());
                 false
             },

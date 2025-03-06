@@ -13,7 +13,7 @@
 use std::rc::Rc;
 
 use itertools::Itertools;
-use yew::{html, Callback, Html, Properties};
+use yew::{Callback, Html, Properties, html};
 
 use super::symbol_config::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::row_selector::RowSelector;

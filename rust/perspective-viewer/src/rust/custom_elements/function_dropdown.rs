@@ -13,10 +13,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use perspective_client::config::{CompletionItemSuggestion, COMPLETIONS};
+use perspective_client::config::{COMPLETIONS, CompletionItemSuggestion};
 use perspective_js::utils::global;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::html::ImplicitClone;
 use yew::*;

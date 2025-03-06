@@ -140,7 +140,7 @@ runs:
           uses: dtolnay/rust-toolchain@nightly
           if: ${{ inputs.rust == 'true' && inputs.arch != 'aarch64' }}
           with:
-              toolchain: nightly-2024-08-29
+              toolchain: nightly-2025-02-01
               targets: wasm32-unknown-unknown
               components: rustfmt, clippy, rust-src
 
@@ -148,7 +148,7 @@ runs:
           uses: dtolnay/rust-toolchain@nightly
           if: ${{ inputs.rust == 'true' && inputs.arch == 'aarch64' && runner.os == 'macOS' }}
           with:
-              toolchain: nightly-2024-08-29
+              toolchain: nightly-2025-02-01
               targets: aarch64-apple-darwin
               components: rustfmt, clippy, rust-src
 
@@ -156,7 +156,7 @@ runs:
           uses: dtolnay/rust-toolchain@nightly
           if: ${{ inputs.rust == 'true' && inputs.arch == 'aarch64' && runner.os == 'Linux' }}
           with:
-              toolchain: nightly-2024-08-29
+              toolchain: nightly-2025-02-01
               targets: aarch64-unknown-linux-gnu
               components: rustfmt, clippy, rust-src
 

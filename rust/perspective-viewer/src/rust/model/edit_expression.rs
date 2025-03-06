@@ -12,8 +12,8 @@
 
 use perspective_client::config::{Expression, ViewConfigUpdate};
 
-use super::structural::*;
 use super::UpdateAndRender;
+use super::structural::*;
 use crate::components::column_settings_sidebar::ColumnSettingsTab;
 use crate::components::viewer::ColumnLocator;
 use crate::presentation::{OpenColumnSettings, Presentation};
@@ -46,18 +46,20 @@ pub trait EditExpression: HasPresentation + HasRenderer + HasSession + UpdateAnd
                 .session
                 .create_replace_expression_update(&old_name, &new_expr)
                 .await;
+
             this.presentation
                 .set_open_column_settings(Some(OpenColumnSettings {
                     locator: Some(ColumnLocator::Expression(new_expr.name.to_string())),
                     tab: Some(ColumnSettingsTab::Attributes),
                 }));
-            this.update_and_render(update).await?;
+
+            this.update_and_render(update)?.await?;
             Ok(())
         });
     }
 
     /// Saves a new expression. Spawns a future.
-    fn save_expr(&self, expr: Expression) {
+    fn save_expr(&self, expr: Expression) -> ApiResult<()> {
         let task = {
             let mut serde_exprs = self.session().get_view_config().expressions.clone();
             serde_exprs.insert(&expr);
@@ -70,12 +72,13 @@ pub trait EditExpression: HasPresentation + HasRenderer + HasSession + UpdateAnd
                 expressions: Some(serde_exprs),
                 ..Default::default()
             })
-        };
+        }?;
 
         ApiFuture::spawn(task);
+        Ok(())
     }
 
-    fn delete_expr(&self, expr_name: &str) {
+    fn delete_expr(&self, expr_name: &str) -> ApiResult<()> {
         let mut serde_exprs = self.session().get_view_config().expressions.clone();
         serde_exprs.remove(expr_name);
         let config = ViewConfigUpdate {
@@ -83,8 +86,9 @@ pub trait EditExpression: HasPresentation + HasRenderer + HasSession + UpdateAnd
             ..ViewConfigUpdate::default()
         };
 
-        let task = self.update_and_render(config);
+        let task = self.update_and_render(config)?;
         ApiFuture::spawn(task);
+        Ok(())
     }
 }
 

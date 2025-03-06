@@ -14,6 +14,7 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
+use super::status_indicator::StatusIndicator;
 use super::style::LocalStyle;
 use crate::components::containers::select::*;
 use crate::components::status_bar_counter::StatusBarRowsCounter;
@@ -27,7 +28,7 @@ use crate::utils::WeakScope;
 use crate::utils::*;
 use crate::*;
 
-#[derive(Properties)]
+#[derive(Properties, Clone)]
 pub struct StatusBarProps {
     pub id: String,
     pub on_reset: Callback<bool>,
@@ -52,10 +53,12 @@ pub enum StatusBarMsg {
     Reset(bool),
     Export,
     Copy,
+    Noop,
     SetThemeConfig((Vec<String>, Option<usize>)),
     SetTheme(String),
-    TableStatsChanged,
-    SetIsUpdating(bool),
+    // SetError(Option<String>),
+    // TableStatsChanged,
+    // SetIsUpdating(bool),
     SetTitle(Option<String>),
 }
 
@@ -66,7 +69,7 @@ pub struct StatusBar {
     themes: Vec<String>,
     export_ref: NodeRef,
     copy_ref: NodeRef,
-    _sub: [Subscription; 5],
+    _sub: [Subscription; 2],
 }
 
 impl Component for StatusBar {
@@ -76,25 +79,13 @@ impl Component for StatusBar {
     fn create(ctx: &Context<Self>) -> Self {
         let _sub = [
             ctx.props()
-                .session
-                .stats_changed
-                .add_listener(ctx.link().callback(|_| StatusBarMsg::TableStatsChanged)),
-            ctx.props()
-                .session
-                .view_config_changed
-                .add_listener(ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(true))),
-            ctx.props()
-                .session
-                .view_created
-                .add_listener(ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(false))),
-            ctx.props()
                 .presentation
                 .theme_config_updated
                 .add_listener(ctx.link().callback(StatusBarMsg::SetThemeConfig)),
             ctx.props()
                 .presentation
                 .title_changed
-                .add_listener(ctx.link().callback(|_| StatusBarMsg::TableStatsChanged)),
+                .add_listener(ctx.link().callback(|_| StatusBarMsg::Noop)),
         ];
 
         // Fetch initial theme
@@ -117,11 +108,6 @@ impl Component for StatusBar {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            StatusBarMsg::SetIsUpdating(is_updating) => {
-                self.is_updating = max!(0, self.is_updating + if is_updating { 1 } else { -1 });
-                true
-            },
-            StatusBarMsg::TableStatsChanged => true,
             StatusBarMsg::Reset(all) => {
                 ctx.props().on_reset.emit(all);
                 false
@@ -157,6 +143,7 @@ impl Component for StatusBar {
                 CopyDropDownMenuElement::new_from_model(ctx.props()).open(target);
                 false
             },
+            StatusBarMsg::Noop => true,
             StatusBarMsg::SetTitle(title) => {
                 ctx.props().presentation.set_title(title);
                 false
@@ -165,7 +152,6 @@ impl Component for StatusBar {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let stats = ctx.props().session.get_table_stats();
         let mut is_updating_class_name = classes!();
         if self.is_updating > 0 {
             is_updating_class_name.push("updating")
@@ -181,7 +167,6 @@ impl Component for StatusBar {
 
         let export = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Export);
         let copy = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Copy);
-
         let theme_button = match &self.theme {
             None => html! {},
             Some(selected) => {
@@ -232,11 +217,19 @@ impl Component for StatusBar {
             && (ctx.props().presentation.is_settings_open()
                 || ctx.props().presentation.get_title().is_some());
 
+        if !ctx.props().session.has_table() {
+            is_updating_class_name.push("updating");
+        }
+
         html! {
             <>
                 <LocalStyle href={css!("status-bar")} />
                 <div id={ctx.props().id.clone()} class={is_updating_class_name}>
-                    <StatusIndicator {stats} is_updating={self.is_updating > 0}>
+                    <StatusIndicator
+                        session={&ctx.props().session}
+                        renderer={&ctx.props().renderer}
+                    />
+                    if is_menu {
                         <label
                             class="input-sizer"
                             data-value={ctx.props().presentation.get_title().unwrap_or_default()}
@@ -249,7 +242,8 @@ impl Component for StatusBar {
                             />
                             <span id="status-bar-placeholder" />
                         </label>
-                    </StatusIndicator>
+                    }
+                    <StatusBarRowsCounter session={&ctx.props().session} />
                     <div id="spacer" />
                     if is_menu {
                         <div id="menu-bar" class="section">
@@ -269,46 +263,5 @@ impl Component for StatusBar {
                 </div>
             </>
         }
-    }
-}
-
-#[derive(Clone, Properties, PartialEq)]
-pub struct StatusIndicatorProps {
-    stats: Option<ViewStats>,
-    is_updating: bool,
-    children: Children,
-}
-
-/// A pure-functional indicator component which does not hook into `model`
-/// state.
-#[function_component]
-fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
-    let class_name = match &props.stats {
-        Some(ViewStats {
-            num_table_cells: Some(_),
-            ..
-        }) => {
-            if props.is_updating {
-                "updating"
-            } else {
-                "connected"
-            }
-        },
-        Some(ViewStats {
-            num_table_cells: None,
-            ..
-        }) => "loading",
-        None => "uninitialized",
-    };
-
-    html! {
-        <>
-            <div class="section">
-                <span id="status" class={class_name} />
-                <span id="status_updating" class={class_name} />
-            </div>
-            { for props.children.iter() }
-            <div id="rows" class="section"><StatusBarRowsCounter stats={props.stats.clone()} /></div>
-        </>
     }
 }

@@ -45,6 +45,17 @@ test.describe("WebSocketManager", function () {
         await table.delete();
     });
 
+    test("Throws an exception when the server is detached", async () => {
+        const data = [{ x: 1 }];
+        const _table = await perspective.table(data, { name: "test" });
+        const client = await perspective.websocket(`ws://localhost:${port}`);
+        const client_table = await client.open_table("test");
+        const client_view = await client_table.view();
+        await server.close();
+        const client_data = client_view.to_json();
+        await expect(client_data).rejects.toThrow();
+    });
+
     test("passes back errors from server", async () => {
         expect.assertions(2);
         const data = [{ x: 1 }];

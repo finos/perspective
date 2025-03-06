@@ -29,7 +29,7 @@ pub mod config;
 mod proto;
 pub mod utils;
 
-pub use crate::client::{Client, ClientHandler, Features, SystemInfo};
+pub use crate::client::{Client, ClientHandler, Features, ReconnectCallback, SystemInfo};
 pub use crate::proto::{ColumnType, SortOp, ViewOnUpdateResp};
 pub use crate::session::{ProxySession, Session};
 pub use crate::table::{

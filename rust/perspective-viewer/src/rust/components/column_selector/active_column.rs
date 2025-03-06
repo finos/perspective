@@ -12,14 +12,15 @@
 
 use std::collections::HashSet;
 
-use perspective_client::config::*;
 use perspective_client::ColumnType;
+use perspective_client::config::*;
+use perspective_client::utils::PerspectiveResultExt;
 use web_sys::*;
 use yew::prelude::*;
 
+use super::InPlaceColumn;
 use super::aggregate_selector::*;
 use super::expression_toolbar::*;
-use super::InPlaceColumn;
 use crate::components::column_selector::{EmptyColumn, InvalidColumn};
 use crate::components::type_icon::TypeIcon;
 use crate::components::viewer::ColumnLocator;
@@ -144,7 +145,9 @@ impl ActiveColumnProps {
             ..ViewConfigUpdate::default()
         };
 
-        ApiFuture::spawn(self.update_and_render(config));
+        self.update_and_render(config)
+            .map(ApiFuture::spawn)
+            .unwrap_or_log();
     }
 }
 
@@ -213,7 +216,11 @@ impl Component for ActiveColumn {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 true
             },
             New(InPlaceColumn::Expression(col)) => {
@@ -231,7 +238,11 @@ impl Component for ActiveColumn {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(ctx.props().update_and_render(update));
+                ctx.props()
+                    .update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
+
                 true
             },
         }

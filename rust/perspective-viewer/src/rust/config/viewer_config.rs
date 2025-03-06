@@ -16,16 +16,16 @@ use std::ops::Deref;
 use std::str::FromStr;
 use std::sync::LazyLock;
 
+use flate2::Compression;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
-use flate2::Compression;
 use perspective_client::config::*;
 use perspective_js::utils::*;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 use ts_rs::TS;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 
 use super::ColumnConfigValues;
 use crate::presentation::ColumnConfigMap;

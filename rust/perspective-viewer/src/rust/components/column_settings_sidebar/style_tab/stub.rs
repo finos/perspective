@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::{function_component, html, Html, Properties};
+use yew::{Html, Properties, function_component, html};
 
 #[derive(Properties, PartialEq)]
 pub struct StubProps {

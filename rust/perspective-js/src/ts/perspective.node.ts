@@ -27,6 +27,8 @@ import { load_wasm_stage_0 } from "./wasm/decompress.js";
 import { PerspectiveServer } from "./wasm/engine.ts";
 import { compile_perspective } from "./wasm/emscripten_api.ts";
 
+import * as psp_websocket from "./websocket.ts";
+
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 if (!globalThis.crypto) {
@@ -68,7 +70,7 @@ export const make_session = async (
 
 // Helper function to create client emitter/receiver pairs
 export function make_client(
-    send_request: (buffer: Uint8Array) => void,
+    send_request: (buffer: Uint8Array) => Promise<void>,
     close?: Function
 ) {
     return new perspective_client.Client(send_request, close);
@@ -166,13 +168,15 @@ function buffer_to_arraybuffer(
     }
 }
 
-function invert_promise<T>(): [(t: T) => void, Promise<T>] {
-    let sender: ((t: T) => void) | undefined = undefined;
-    let receiver: Promise<T> = new Promise((x) => {
+function invert_promise<T>(): [(t: T) => void, Promise<T>, (t: any) => void] {
+    let sender: ((t: T) => void) | undefined = undefined,
+        reject = undefined;
+    let receiver: Promise<T> = new Promise((x, u) => {
         sender = x;
+        reject = u;
     });
 
-    return [sender!, receiver];
+    return [sender!, receiver, reject!];
 }
 
 export class WebSocketServer {
@@ -272,27 +276,11 @@ export function table(
 export async function websocket(
     url: string
 ): Promise<perspective_client.Client> {
-    const ws = new WebSocket(url);
-    let [sender, receiver] = invert_promise();
-    ws.onopen = sender;
-    ws.binaryType = "arraybuffer";
-    await receiver;
-    const client = make_client(
-        (proto) => {
-            ws.send(proto.slice().buffer);
-        },
-        () => {
-            console.log("Closing websocket");
-            ws.close();
-        }
+    return await psp_websocket.websocket(
+        WebSocket as unknown as typeof window.WebSocket,
+        perspective_client.Client,
+        url
     );
-
-    ws.onmessage = (msg) => {
-        client.handle_response(msg.data);
-    };
-
-    await client.init();
-    return client;
 }
 
 export default {

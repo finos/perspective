@@ -110,9 +110,7 @@ impl CustomEvents {
 
         let view_sub = session.view_created.add_listener({
             clone!(data);
-            move |_| {
-                data.clone().dispatch_config_update();
-            }
+            move |_| data.clone().dispatch_config_update()
         });
 
         Self(Rc::new((data, [
@@ -131,8 +129,8 @@ impl CustomEvents {
             "perspective-column-style-change",
             &event_init,
         );
-        self.0 .0.elem.dispatch_event(&event.unwrap()).unwrap();
-        self.0 .0.clone().dispatch_config_update();
+        self.0.0.elem.dispatch_event(&event.unwrap()).unwrap();
+        self.0.0.clone().dispatch_config_update();
     }
 }
 

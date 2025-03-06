@@ -15,12 +15,12 @@ mod number;
 mod string;
 mod symbol;
 
+use nom::IResult;
 use nom::branch::alt;
 use nom::bytes::complete::{is_a, is_not};
 use nom::character::complete::{line_ending, space1};
 use nom::combinator::map;
 use nom::multi::many0;
-use nom::IResult;
 use yew::prelude::*;
 
 use self::comment::*;
@@ -47,7 +47,7 @@ pub enum Token<'a> {
 
 use Token::*;
 
-impl<'a> ToHtml for Token<'a> {
+impl ToHtml for Token<'_> {
     fn to_html(&self) -> Html {
         html! {
             if matches!(self, Break(_)) { <br /> } else {

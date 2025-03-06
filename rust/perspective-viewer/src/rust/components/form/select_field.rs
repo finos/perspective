@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use itertools::Itertools;
 use strum::IntoEnumIterator;
-use yew::{function_component, html, Callback, Properties};
+use yew::{Callback, Properties, function_component, html};
 
 use crate::components::containers::select::{Select, SelectItem};
 use crate::components::form::optional_field::OptionalField;

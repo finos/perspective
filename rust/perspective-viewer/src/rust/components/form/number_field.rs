@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use web_sys::{HtmlInputElement, InputEvent};
-use yew::{function_component, html, Callback, Properties, TargetCast};
+use yew::{Callback, Properties, TargetCast, function_component, html};
 
 use crate::components::form::optional_field::OptionalField;
 

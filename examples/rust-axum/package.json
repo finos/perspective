@@ -4,7 +4,7 @@
     "version": "3.3.4",
     "description": "An example of a Rust/Axum virtual Perspective server",
     "scripts": {
-        "start": "cargo run"
+        "start": "cargo run --target=$(rustc -vV | sed -n 's|host: ||p')"
     },
     "keywords": [],
     "license": "Apache-2.0",

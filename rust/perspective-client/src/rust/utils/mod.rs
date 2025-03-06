@@ -57,7 +57,7 @@ pub enum ClientError {
     #[error("Can't use both `limit` and `index` arguments")]
     BadTableOptions,
 
-    #[error("External error: {0:?}")]
+    #[error("External error: {0}")]
     ExternalError(#[from] Box<dyn std::error::Error + Send + Sync>),
 
     #[error("Undecipherable proto message")]
@@ -74,6 +74,21 @@ impl From<proto::response::ClientResp> for ClientError {
                 proto::StatusCode::ViewNotFound => ClientError::ViewNotFound,
             },
             x => ClientError::ResponseFailed(Box::new(x)),
+        }
+    }
+}
+
+pub trait PerspectiveResultExt {
+    fn unwrap_or_log(&self);
+}
+
+impl<T, E> PerspectiveResultExt for Result<T, E>
+where
+    E: std::error::Error,
+{
+    fn unwrap_or_log(&self) {
+        if let Err(e) = self {
+            tracing::warn!("{}", e);
         }
     }
 }

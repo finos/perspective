@@ -107,14 +107,11 @@ test.describe("Settings", () => {
             });
 
             const contents = await get_contents(page);
-            expect(errors).toEqual([
-                "::Intentional Load Error",
-                //   "RuntimeError::unreachable",
-            ]);
+            expect(errors).toEqual(["Error::Intentional Load Error"]);
 
             consoleLogs.expectedLogs.push(
                 "error",
-                /Invalid config: Error: `restore\(\)` called before `load\(\)`.*/
+                /Failed to apply config: Error: `restore\(\)` called before `load\(\)`.*/
             );
             consoleLogs.expectedLogs.push(
                 "error",

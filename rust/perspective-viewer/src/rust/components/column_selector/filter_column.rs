@@ -13,8 +13,9 @@
 use std::collections::HashSet;
 
 use chrono::{Datelike, NaiveDate, TimeZone, Utc};
-use perspective_client::config::*;
 use perspective_client::ColumnType;
+use perspective_client::config::*;
+use perspective_client::utils::PerspectiveResultExt;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
@@ -140,7 +141,9 @@ impl FilterColumnProps {
             ..ViewConfigUpdate::default()
         };
 
-        ApiFuture::spawn(self.update_and_render(update));
+        self.update_and_render(update)
+            .map(ApiFuture::spawn)
+            .unwrap_or_log();
     }
 
     /// Update the filter value from the string input read from the DOM.
@@ -210,7 +213,9 @@ impl FilterColumnProps {
                     ..ViewConfigUpdate::default()
                 };
 
-                ApiFuture::spawn(self.update_and_render(update));
+                self.update_and_render(update)
+                    .map(ApiFuture::spawn)
+                    .unwrap_or_log();
             }
         }
     }
@@ -255,7 +260,7 @@ impl Component for FilterColumn {
                     ctx.props().filter_dropdown.autocomplete(
                         column,
                         if ctx.props().filter.op() == "in" || ctx.props().filter.op() == "not in" {
-                            input.split(',').last().unwrap().to_owned()
+                            input.split(',').next_back().unwrap().to_owned()
                         } else {
                             input.clone()
                         },

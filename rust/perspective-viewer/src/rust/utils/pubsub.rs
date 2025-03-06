@@ -25,14 +25,14 @@ use yew::prelude::*;
 #[derivative(Default(bound = ""))]
 struct IndexedSet<T> {
     set: HashMap<usize, T>,
-    gen: usize,
+    gen_: usize,
 }
 
 impl<T> IndexedSet<T> {
     fn insert(&mut self, v: T) -> usize {
-        let key = self.gen;
+        let key = self.gen_;
         self.set.insert(key, v);
-        self.gen += 1;
+        self.gen_ += 1;
         key
     }
 
@@ -87,6 +87,9 @@ impl<T: Clone> PubSubInternal<T> {
 #[derivative(Default(bound = ""))]
 pub struct PubSub<T: Clone>(Rc<PubSubInternal<T>>);
 
+unsafe impl<T: Clone> Send for PubSub<T> {}
+unsafe impl<T: Clone> Sync for PubSub<T> {}
+
 pub trait AddListener<T> {
     /// Register a listener to this `PubSub<_>`, which will be automatically
     /// deregistered when the return `Subscription` is dropped.
@@ -109,6 +112,11 @@ impl<T: Clone + 'static> PubSub<T> {
     pub fn callback(&self) -> Callback<T> {
         let internal = self.0.clone();
         Callback::from(move |val: T| internal.emit(val))
+    }
+
+    pub fn as_boxfn(&self) -> Box<dyn Fn(T) + Send + Sync + 'static> {
+        let internal = PubSub(self.0.clone());
+        Box::new(move |val: T| internal.emit(val))
     }
 
     /// Await this `PubSub<_>`'s next call to `emit_all()`, once.

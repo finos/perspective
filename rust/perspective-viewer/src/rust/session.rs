@@ -21,9 +21,10 @@ use std::collections::HashSet;
 use std::future::Future;
 use std::ops::Deref;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use perspective_client::config::*;
-use perspective_client::{View, ViewWindow};
+use perspective_client::{ReconnectCallback, View, ViewWindow};
 use perspective_js::utils::*;
 use wasm_bindgen::prelude::*;
 use yew::html::ImplicitClone;
@@ -41,7 +42,7 @@ use crate::utils::*;
 /// the `Table` and `View` objects for this viewer, and all associated state
 /// including the `ViewConfig`.
 #[derive(Clone, Default)]
-pub struct Session(Rc<SessionHandle>);
+pub struct Session(Arc<SessionHandle>);
 
 impl ImplicitClone for Session {}
 
@@ -53,7 +54,8 @@ pub struct SessionHandle {
     pub table_loaded: PubSub<()>,
     pub view_created: PubSub<()>,
     pub view_config_changed: PubSub<()>,
-    pub stats_changed: PubSub<()>,
+    pub stats_changed: PubSub<Option<ViewStats>>,
+    pub table_errored: PubSub<Option<String>>,
 }
 
 /// Mutable state for `Session`.
@@ -67,7 +69,11 @@ pub struct SessionData {
     stats: Option<ViewStats>,
     is_clean: bool,
     is_paused: bool,
+    error: Option<TableErrorState>,
 }
+
+#[derive(Clone, Default)]
+pub struct TableErrorState(Option<String>, Option<ReconnectCallback>);
 
 impl Deref for Session {
     type Target = SessionHandle;
@@ -79,7 +85,7 @@ impl Deref for Session {
 
 impl PartialEq for Session {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.0, &other.0)
+        Arc::ptr_eq(&self.0, &other.0)
     }
 }
 
@@ -103,16 +109,21 @@ impl Session {
         std::cell::RefMut::map(self.borrow_mut(), |x| &mut x.metadata)
     }
 
+    pub fn invalidate(&self) {
+        self.borrow_mut().error = None;
+        self.borrow_mut().is_clean = false;
+        self.borrow_mut().view_sub = None;
+    }
+
     /// Reset this `Session`'s `View` state, but preserve the `Table`.
     ///
     /// # Arguments
     /// - `reset_expressions` Whether to reset the `expressions` property.
-    pub fn reset(&self, reset_expressions: bool) -> impl Future<Output = ApiResult<()>> {
+    pub fn reset(&self, reset_expressions: bool) -> impl Future<Output = ApiResult<()>> + use<> {
         self.borrow_mut().is_clean = false;
         let view = self.0.borrow_mut().view_sub.take();
         self.borrow_mut().view_sub = None;
         self.borrow_mut().config.reset(reset_expressions);
-
         view.delete()
     }
 
@@ -142,13 +153,50 @@ impl Session {
     /// `ViewSubscription`, which will need to be re-initialized later via
     /// `create_view()`.
     pub async fn set_table(&self, table: perspective_client::Table) -> ApiResult<JsValue> {
-        let metadata = SessionMetadata::from_table(&table).await?;
+        match SessionMetadata::from_table(&table).await {
+            Ok(metadata) => {
+                let client = table.get_client();
+                let set_error = self.table_errored.as_boxfn();
+                let session = self.clone();
+                let poll_loop =
+                    LocalPollLoop::new(move |(message, reconnect): (Option<String>, _)| {
+                        set_error(message.clone());
+                        session.borrow_mut().error = Some(TableErrorState(message, reconnect));
+                        Ok(JsValue::UNDEFINED)
+                    });
+
+                let _callback_id = client
+                    .on_error(Box::new(move |message, reconnect| {
+                        let poll_loop = poll_loop.clone();
+                        Box::pin(async move {
+                            poll_loop.poll((message, reconnect)).await;
+                            Ok(())
+                        })
+                    }))
+                    .await?;
+
+                let sub = self.borrow_mut().view_sub.take();
+                self.borrow_mut().metadata = metadata;
+                self.borrow_mut().table = Some(table);
+                sub.delete().await?;
+                self.table_loaded.emit(());
+                Ok(JsValue::UNDEFINED)
+            },
+            Err(err) => self
+                .set_error(err.to_string())
+                .await
+                .map(|_| JsValue::UNDEFINED),
+        }
+    }
+
+    pub async fn set_error(&self, err: String) -> ApiResult<()> {
+        self.borrow_mut().error = Some(TableErrorState(Some(err.clone()), None));
+        self.table_errored.emit(Some(err.clone()));
         let sub = self.borrow_mut().view_sub.take();
-        self.borrow_mut().metadata = metadata;
-        self.borrow_mut().table = Some(table);
+        self.borrow_mut().metadata = SessionMetadata::default();
+        self.borrow_mut().table = None;
         sub.delete().await?;
-        self.table_loaded.emit(());
-        Ok(JsValue::UNDEFINED)
+        Err(err.into())
     }
 
     pub fn set_pause(&self, pause: bool) -> bool {
@@ -181,6 +229,30 @@ impl Session {
     pub fn js_get_view(&self) -> Option<JsValue> {
         let view = self.borrow().view_sub.as_ref()?.get_view().clone();
         Some(perspective_js::View::from(view).into())
+    }
+
+    pub fn get_error(&self) -> Option<String> {
+        self.borrow().error.as_ref().and_then(|x| x.0.clone())
+    }
+
+    pub fn is_reconnect(&self) -> bool {
+        self.borrow()
+            .error
+            .as_ref()
+            .map(|x| x.1.is_some())
+            .unwrap_or_default()
+    }
+
+    pub async fn reconnect(&self) -> ApiResult<()> {
+        let err = self.borrow().error.clone();
+        if let Some(TableErrorState(_, Some(reconnect))) = err {
+            reconnect().await?;
+            self.borrow_mut().error = None;
+            self.borrow_mut().is_clean = false;
+            self.borrow_mut().view_sub = None;
+        }
+
+        Ok(())
     }
 
     pub fn is_column_expression_in_use(&self, name: &str) -> bool {
@@ -418,11 +490,22 @@ impl Session {
 
     /// Update the config, setting the `columns` property to the plugin defaults
     /// if provided.
-    pub fn update_view_config(&self, config_update: ViewConfigUpdate) {
+    pub fn update_view_config(&self, config_update: ViewConfigUpdate) -> ApiResult<()> {
+        if let Some(x) = self.borrow().error.as_ref() {
+            tracing::warn!("Errored state");
+
+            // Load bearing return
+            return Err(ApiError::new(
+                x.0.clone().unwrap_or_else(|| "Unknown error".to_string()),
+            ));
+        }
+
         if self.borrow_mut().config.apply_update(config_update) {
             self.0.borrow_mut().is_clean = false;
             self.view_config_changed.emit(());
         }
+
+        Ok(())
     }
 
     pub fn reset_stats(&self) {
@@ -444,19 +527,14 @@ impl Session {
         };
 
         if let Err(err) = self.validate_view_config().await {
-            web_sys::console::error_3(
-                &"Invalid config:".into(),
-                &err.clone().into(),
-                &JsValue::from_serde_ext(&self.borrow().config).unwrap(),
-            );
-
+            self.borrow_mut().error = Some(TableErrorState(Some(err.to_string()), None));
+            web_sys::console::error_2(&"Failed to apply config:".into(), &err.clone().into());
             if let Some(config) = old {
                 self.borrow_mut().config = config;
             } else {
                 self.reset(true).await?;
             }
 
-            self.0.view_created.emit(());
             return Err(err)?;
         } else {
             let old_config = Some(self.borrow().config.clone());
@@ -480,8 +558,8 @@ impl Session {
     }
 
     fn update_stats(&self, stats: ViewStats) {
-        self.borrow_mut().stats = Some(stats);
-        self.stats_changed.emit(());
+        self.borrow_mut().stats = Some(stats.clone());
+        self.stats_changed.emit(Some(stats));
     }
 
     async fn validate_view_config(&self) -> ApiResult<()> {
@@ -620,7 +698,7 @@ impl<'a> ValidSession<'a> {
     }
 }
 
-impl<'a> Drop for ValidSession<'a> {
+impl Drop for ValidSession<'_> {
     /// `ValidSession` is a guard for listeners of the `view_created` pubsub
     /// event.
     fn drop(&mut self) {

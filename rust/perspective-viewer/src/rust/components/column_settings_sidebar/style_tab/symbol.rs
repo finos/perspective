@@ -19,7 +19,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use itertools::Itertools;
-use yew::{html, Callback, Html, Properties};
+use yew::{Callback, Html, Properties, html};
 
 use self::symbol_config::SymbolKVPair;
 use crate::components::column_settings_sidebar::style_tab::symbol::symbol_pairs::PairsList;

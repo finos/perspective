@@ -15,9 +15,10 @@ use std::rc::Rc;
 
 use derivative::Derivative;
 use itertools::Itertools;
-use perspective_client::config::Expression;
 use perspective_client::ColumnType;
-use yew::{html, Callback, Component, Html, Properties};
+use perspective_client::config::Expression;
+use perspective_client::utils::PerspectiveResultExt;
+use yew::{Callback, Component, Html, Properties, html};
 
 use super::attributes_tab::AttributesTabProps;
 use super::style_tab::StyleTabProps;
@@ -278,7 +279,11 @@ impl Component for ColumnSettingsSidebar {
                     ColumnLocator::Expression(name) => {
                         ctx.props().update_expr(name.clone(), new_expr)
                     },
-                    ColumnLocator::NewExpression => ctx.props().save_expr(new_expr),
+                    ColumnLocator::NewExpression => {
+                        if let Err(_err) = ctx.props().save_expr(new_expr) {
+                            tracing::warn!("Errflerr!");
+                        }
+                    },
                 }
 
                 self.initial_expr_value.clone_from(&self.expr_value);
@@ -290,8 +295,9 @@ impl Component for ColumnSettingsSidebar {
             },
             ColumnSettingsMsg::OnDelete(()) => {
                 if ctx.props().selected_column.is_saved_expr() {
-                    ctx.props().delete_expr(&self.column_name);
+                    ctx.props().delete_expr(&self.column_name).unwrap_or_log();
                 }
+
                 ctx.props().on_close.emit(());
                 true
             },

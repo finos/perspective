@@ -16,8 +16,8 @@ use std::rc::Rc;
 
 use perspective_client::clone;
 use perspective_js::utils::global;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
 use super::mimetype::*;

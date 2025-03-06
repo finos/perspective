@@ -16,12 +16,11 @@ use std::sync::atomic::AtomicU32;
 use std::sync::Arc;
 
 use async_lock::{Mutex, RwLock};
-use futures::future::BoxFuture;
+use futures::future::{join_all, BoxFuture, LocalBoxFuture};
 use futures::Future;
 use nanoid::*;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use tracing_unwrap::{OptionExt, ResultExt};
 
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
@@ -63,8 +62,11 @@ impl GetFeaturesResp {
 }
 
 type BoxFn<I, O> = Box<dyn Fn(I) -> O + Send + Sync + 'static>;
+type Box2Fn<I, J, O> = Box<dyn Fn(I, J) -> O + Send + Sync + 'static>;
 
 type Subscriptions<C> = Arc<RwLock<HashMap<u32, C>>>;
+type OnErrorCallback =
+    Box2Fn<Option<String>, Option<ReconnectCallback>, BoxFuture<'static, Result<(), ClientError>>>;
 type OnceCallback = Box<dyn FnOnce(Response) -> ClientResult<()> + Send + Sync + 'static>;
 type SendCallback = Arc<
     dyn for<'a> Fn(&'a Request) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>>
@@ -86,6 +88,7 @@ pub struct Client {
     features: Arc<Mutex<Option<Features>>>,
     send: SendCallback,
     id_gen: Arc<AtomicU32>,
+    subscriptions_errors: Subscriptions<OnErrorCallback>,
     subscriptions_once: Subscriptions<OnceCallback>,
     subscriptions: Subscriptions<BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>>,
 }
@@ -97,6 +100,15 @@ impl std::fmt::Debug for Client {
             .finish()
     }
 }
+
+/// The type of the `reconnect` parameter passed to [`Client::handle_error`},
+/// and to the callback closure of [`Client::on_error`].
+///
+/// Calling this function from a [`Client::on_error`] closure should run the
+/// (implementation specific) client reconnect logic, e.g. rebindign a
+/// websocket.
+pub type ReconnectCallback =
+    Arc<dyn Fn() -> LocalBoxFuture<'static, Result<(), Box<dyn Error>>> + Send + Sync>;
 
 impl Client {
     /// Create a new client instance with a closure that handles message
@@ -119,9 +131,10 @@ impl Client {
         Client {
             features: Arc::default(),
             id_gen: Arc::new(AtomicU32::new(1)),
-            subscriptions_once: Arc::default(),
-            subscriptions: Subscriptions::default(),
             send,
+            subscriptions: Subscriptions::default(),
+            subscriptions_errors: Arc::default(),
+            subscriptions_once: Arc::default(),
         }
     }
 
@@ -158,6 +171,26 @@ impl Client {
 
         tracing::warn!("Received unsolicited server message");
         Ok(false)
+    }
+
+    pub async fn handle_error(
+        &self,
+        message: Option<String>,
+        reconnect: Option<ReconnectCallback>,
+    ) -> ClientResult<()> {
+        let subs = self.subscriptions_errors.read().await;
+        let tasks = join_all(
+            subs.values()
+                .map(|callback| callback(message.clone(), reconnect.clone())),
+        );
+        tasks.await.into_iter().collect::<Result<(), _>>()?;
+        Ok(())
+    }
+
+    pub async fn on_error(&self, on_error: OnErrorCallback) -> ClientResult<u32> {
+        let id = self.gen_id();
+        self.subscriptions_errors.write().await.insert(id, on_error);
+        Ok(id)
     }
 
     pub async fn init(&self) -> ClientResult<()> {
@@ -207,7 +240,7 @@ impl Client {
         tracing::debug!("SEND {}", msg);
         if let Err(e) = (self.send)(msg).await {
             self.subscriptions_once.write().await.remove(&msg.msg_id);
-            Err(e.into())
+            Err(ClientError::Unknown(e.to_string()))
         } else {
             Ok(())
         }
@@ -225,7 +258,7 @@ impl Client {
         tracing::debug!("SEND {}", msg);
         if let Err(e) = (self.send)(msg).await {
             self.subscriptions.write().await.remove(&msg.msg_id);
-            Err(e.into())
+            Err(ClientError::Unknown(e.to_string()))
         } else {
             Ok(())
         }
@@ -273,7 +306,7 @@ impl Client {
                 let table = table.clone();
                 move |update: crate::proto::ViewOnUpdateResp| {
                     let table = table.clone();
-                    let update = update.delta.unwrap_or_log();
+                    let update = update.delta.expect("Missing update");
                     async move {
                         table
                             .update(

@@ -182,8 +182,8 @@ impl Component for PerspectiveViewer {
                         presentation
                             .get_open_column_settings()
                             .locator
-                            .filter(|locator| match locator {
-                                ColumnLocator::Table(ref name) => {
+                            .filter(|locator| match &locator {
+                                ColumnLocator::Table(name) => {
                                     locator.is_active(&session)
                                         && plugin_query
                                             .can_render_column_styles(name)

@@ -12,7 +12,7 @@
 
 use perspective_client::ColumnType;
 use yew::html::IntoPropValue;
-use yew::{classes, function_component, html, Properties};
+use yew::{Properties, classes, function_component, html};
 
 use crate::components::style::LocalStyle;
 use crate::css;

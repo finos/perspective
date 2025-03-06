@@ -20,7 +20,7 @@ use yew::prelude::*;
 use crate::components::form::highlight::highlight;
 use crate::components::style::LocalStyle;
 use crate::custom_elements::FunctionDropDownElement;
-use crate::exprtk::{tokenize, Cursor};
+use crate::exprtk::{Cursor, tokenize};
 use crate::utils::*;
 use crate::*;
 

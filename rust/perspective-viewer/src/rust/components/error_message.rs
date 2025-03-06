@@ -10,41 +10,47 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use yew::*;
+use perspective_client::clone;
+use yew::prelude::*;
+use yew::{Properties, function_component, html};
 
-#[derive(Properties)]
-pub struct TrapDoorPanelProps {
-    pub id: Option<&'static str>,
-    pub class: Option<&'static str>,
-    pub children: Children,
+use crate::components::style::LocalStyle;
+use crate::css;
+use crate::session::Session;
+use crate::utils::AddListener;
+
+#[derive(PartialEq, Properties)]
+pub struct ErrorMessageProps {
+    pub session: Session,
 }
 
-impl PartialEq for TrapDoorPanelProps {
-    fn eq(&self, _other: &Self) -> bool {
-        false
-    }
-}
+#[function_component(ErrorMessage)]
+pub fn error_message(p: &ErrorMessageProps) -> yew::Html {
+    let error = use_state(|| p.session.get_error());
+    use_effect_with(
+        (error.setter(), p.session.clone()),
+        |(set_error, session)| {
+            let sub = session.table_errored.add_listener({
+                clone!(set_error);
+                move |y| set_error.set(y)
+            });
 
-/// A simple panel with an invisible inner `<div>` which stretches to fit the
-/// width of the container, but will not shrink (unless the state is reset).
-#[function_component(TrapDoorPanel)]
-pub fn trap_door_panel(props: &TrapDoorPanelProps) -> Html {
-    let sizer = use_node_ref();
-    let width = use_state_eq(|| 0.0);
-    use_effect_with((width.setter(), sizer.clone()), |(width, sizer)| {
-        width.set(
-            sizer
-                .cast::<web_sys::HtmlElement>()
-                .unwrap()
-                .get_bounding_client_rect()
-                .width(),
-        )
-    });
-
+            || drop(sub)
+        },
+    );
+    tracing::error!("Fucked");
     html! {
-        <div id={props.id} class={props.class} ref={sizer}>
-            { props.children.clone() }
-            <div class="scroll-panel-auto-width" style={format!("width:{}px", *width)} />
-        </div>
+        <>
+            <LocalStyle href={css!("render-warning")} />
+            <div
+                class="plugin_information plugin_information--warning"
+                id="plugin_information--size"
+            >
+                <span class="plugin_information__icon" />
+                <span class="plugin_information__text" id="plugin_information_count">
+                    if let Some(msg) = error.as_ref() { { msg } }
+                </span>
+            </div>
+        </>
     }
 }

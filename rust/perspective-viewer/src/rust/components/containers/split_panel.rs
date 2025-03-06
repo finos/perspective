@@ -13,8 +13,8 @@
 use std::cmp::max;
 
 use perspective_js::utils::global;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 use yew::html::Scope;
 use yew::prelude::*;

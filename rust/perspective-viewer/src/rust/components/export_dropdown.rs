@@ -83,7 +83,7 @@ fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
             ExportMethod::ArrowAll.new_file(name),
         ]),
         ExportDropDownMenuItem::OptGroup("Config".into(), vec![
-            ExportMethod::JsonConfig.new_file(name)
+            ExportMethod::JsonConfig.new_file(name),
         ]),
     ]
 }

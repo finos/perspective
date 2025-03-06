@@ -13,7 +13,7 @@
 [package]
 name = "perspective-bootstrap-runtime"
 description = "A tiny runtime wrapper to create self-extracting wasm binaries"
-edition = "2021"
+edition = "2024"
 publish = false
 
 [lib]
@@ -32,4 +32,3 @@ features = ["zlib"]
 [features]
 env_target = []
 default_features = []
-

@@ -22,7 +22,7 @@ use crate::components::form::optional_field::OptionalField;
 use crate::components::form::select_field::SelectEnumField;
 use crate::components::style_controls::CustomNumberFormatMsg;
 use crate::config::{
-    RoundingIncrement, RoundingMode, RoundingPriority, TrailingZeroDisplay, ROUNDING_INCREMENTS,
+    ROUNDING_INCREMENTS, RoundingIncrement, RoundingMode, RoundingPriority, TrailingZeroDisplay,
 };
 
 impl CustomNumberFormat {

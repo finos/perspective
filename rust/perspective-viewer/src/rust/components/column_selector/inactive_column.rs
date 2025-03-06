@@ -11,8 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use itertools::Itertools;
-use perspective_client::config::*;
 use perspective_client::ColumnType;
+use perspective_client::config::*;
+use perspective_client::utils::PerspectiveResultExt;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -97,7 +98,9 @@ impl InactiveColumnProps {
             ..ViewConfigUpdate::default()
         };
 
-        ApiFuture::spawn(self.update_and_render(config));
+        self.update_and_render(config)
+            .map(ApiFuture::spawn)
+            .unwrap_or_log();
     }
 }
 

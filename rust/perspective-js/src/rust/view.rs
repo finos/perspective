@@ -21,7 +21,7 @@ use crate::table::Table;
 use crate::utils::{inherit_docs, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop};
 
 #[wasm_bindgen]
-extern "C" {
+unsafe extern "C" {
     #[wasm_bindgen(typescript_type = "ViewWindow")]
     #[derive(Clone)]
     pub type JsViewWindow;
