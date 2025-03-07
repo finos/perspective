@@ -15,25 +15,12 @@
 
             const viewer = document.getElementsByTagName("perspective-viewer")[0];
 
-            let worker;
-            try {
-                worker = new SharedWorker("https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective-server.worker.js");
-            } catch (e) {
-                worker = new Worker("https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective-server.worker.js");
-            }
+            const client = await perspective.worker();
 
-            const client = await perspective.worker(worker);
-            const tables = await client.get_hosted_table_names();
-
-            if (tables.length > 0) {
-                const table = client.open_table(tables[0]);
-                viewer.load(table);
-            } else {
-                const resp = await fetch("https://cdn.jsdelivr.net/npm/superstore-arrow/superstore.lz4.arrow");
-                const arrow = await resp.arrayBuffer();
-                const table = client.table(arrow);
-                viewer.load(table);
-            }
+            const resp = await fetch("https://cdn.jsdelivr.net/npm/superstore-arrow/superstore.lz4.arrow");
+            const arrow = await resp.arrayBuffer();
+            const table = client.table(arrow);
+            viewer.load(table);
 
             viewer.restore({ plugin_config: { edit_mode: "EDIT" }, settings: true });
         </script>
