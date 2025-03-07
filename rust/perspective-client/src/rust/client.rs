@@ -12,12 +12,12 @@
 
 use std::collections::HashMap;
 use std::error::Error;
-use std::sync::atomic::AtomicU32;
 use std::sync::Arc;
+use std::sync::atomic::AtomicU32;
 
 use async_lock::{Mutex, RwLock};
-use futures::future::{join_all, BoxFuture, LocalBoxFuture};
 use futures::Future;
+use futures::future::{BoxFuture, LocalBoxFuture, join_all};
 use nanoid::*;
 use prost::Message;
 use serde::{Deserialize, Serialize};
@@ -76,9 +76,9 @@ type SendCallback = Arc<
 >;
 
 pub trait ClientHandler: Clone + Send + Sync + 'static {
-    fn send_request<'a>(
-        &'a self,
-        msg: &'a [u8],
+    fn send_request(
+        &self,
+        msg: Vec<u8>,
     ) -> impl Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send;
 }
 
@@ -115,7 +115,7 @@ impl Client {
     /// dispatch. See [`Client::new`] for details.
     pub fn new_with_callback<T>(send_request: T) -> Self
     where
-        T: for<'a> Fn(&'a [u8]) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>>
+        T: for<'a> Fn(Vec<u8>) -> BoxFuture<'static, Result<(), Box<dyn Error + Send + Sync>>>
             + 'static
             + Sync
             + Send,
@@ -125,7 +125,7 @@ impl Client {
             let mut bytes: Vec<u8> = Vec::new();
             req.encode(&mut bytes).unwrap();
             let send_request = send_request.clone();
-            Box::pin(async move { send_request(&bytes).await })
+            Box::pin(async move { send_request(bytes).await })
         });
 
         Client {

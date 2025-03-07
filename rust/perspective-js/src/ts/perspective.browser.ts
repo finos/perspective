@@ -60,7 +60,7 @@ async function compilerize(
     disable_stage_0: boolean = false
 ) {
     const wasm_buff = disable_stage_0 ? wasm : await load_wasm_stage_0(wasm);
-    await wasm_module.default(wasm_buff);
+    await wasm_module.default({ module_or_path: wasm_buff });
     await wasm_module.init();
     return wasm_module;
 }

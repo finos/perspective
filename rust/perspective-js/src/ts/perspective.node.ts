@@ -39,7 +39,7 @@ const uncompressed_client_wasm = await fs
     .readFile(path.join(__dirname, "../../dist/wasm/perspective-js.wasm"))
     .then((buffer) => load_wasm_stage_0(buffer.buffer as ArrayBuffer));
 
-await perspective_client.default(uncompressed_client_wasm);
+await perspective_client.default({ module_or_path: uncompressed_client_wasm });
 perspective_client.init();
 
 const SYNC_MODULE = await fs

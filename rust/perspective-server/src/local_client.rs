@@ -34,13 +34,13 @@ impl SessionHandler for LocalClientState {
 }
 
 impl ClientHandler for LocalClientState {
-    async fn send_request<'a>(
-        &'a self,
-        msg: &'a [u8],
+    async fn send_request(
+        &self,
+        msg: Vec<u8>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let session_lock = self.get_session().await;
         let session = session_lock.as_ref().unwrap();
-        session.handle_request(msg).await?;
+        session.handle_request(&msg).await?;
         session.poll().await?;
         Ok(())
     }

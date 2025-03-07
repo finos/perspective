@@ -62,7 +62,7 @@ impl AsyncClient {
                 let handle_request = handle_request.clone();
                 Box::pin(async move {
                     if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
-                        let ret = handle_request.call1(py, (PyBytes::new(py, msg),))?;
+                        let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
                         if isawaitable(ret.bind(py)).unwrap_or(false) {
                             Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
                         } else {

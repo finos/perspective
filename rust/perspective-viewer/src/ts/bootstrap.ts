@@ -32,7 +32,7 @@ export async function init_client(
         wasm_binary = wasm_binary.buffer as ArrayBuffer;
     }
 
-    const module = await load_wasm_stage_0(wasm_binary);
-    await wasm_module.default(module);
+    const module_or_path = await load_wasm_stage_0(wasm_binary);
+    await wasm_module.default({ module_or_path });
     await wasm_module.init();
 }

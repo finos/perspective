@@ -23,10 +23,10 @@ use macro_rules_attribute::apply;
 use perspective_client::SystemInfo;
 use perspective_client::{ReconnectCallback, Session, TableData, TableInitOptions};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
 pub use crate::table::*;
-use crate::utils::{inherit_docs, ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop};
+use crate::utils::{ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop, inherit_docs};
 
 #[wasm_bindgen]
 extern "C" {
@@ -146,8 +146,7 @@ impl Client {
         });
 
         let client = perspective_client::Client::new_with_callback(move |msg| {
-            let vec = msg.to_vec();
-            Box::pin(send_request.run_all(vec))
+            Box::pin(send_request.run_all(msg))
         });
 
         Client { close, client }
