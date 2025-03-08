@@ -17,9 +17,9 @@ use std::sync::Arc;
 use async_lock::RwLock;
 use futures::FutureExt;
 use perspective_client::{
-    assert_table_api, assert_view_api, Client, OnUpdateMode, OnUpdateOptions, Table, TableData,
-    TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View, ViewOnUpdateResp,
-    ViewWindow,
+    Client, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions, TableReadFormat,
+    UpdateData, UpdateOptions, View, ViewOnUpdateResp, ViewWindow, assert_table_api,
+    assert_view_api,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -37,8 +37,8 @@ use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 #[derive(Clone)]
 pub struct AsyncClient {
     pub(crate) client: Client,
-    loop_cb: Arc<RwLock<Option<Py<PyAny>>>>,
-    close_cb: Option<Py<PyAny>>,
+    loop_cb: Arc<RwLock<Arc<Option<Py<PyAny>>>>>,
+    close_cb: Arc<Option<Py<PyAny>>>,
 }
 
 impl AsyncClient {
@@ -46,7 +46,7 @@ impl AsyncClient {
         AsyncClient {
             client,
             loop_cb: Arc::default(),
-            close_cb: None,
+            close_cb: Arc::default(),
         }
     }
 }
@@ -80,7 +80,7 @@ impl AsyncClient {
         AsyncClient {
             client,
             loop_cb: Arc::default(),
-            close_cb: handle_close,
+            close_cb: handle_close.into(),
         }
     }
 
@@ -160,12 +160,12 @@ impl AsyncClient {
     }
 
     pub async fn set_loop_callback(&self, loop_cb: Py<PyAny>) -> PyResult<()> {
-        *self.loop_cb.write().await = Some(loop_cb);
+        *self.loop_cb.write().await = Some(loop_cb).into();
         Ok(())
     }
 
     pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {
-        if let Some(cb) = &self.close_cb {
+        if let Some(cb) = &*self.close_cb {
             cb.call0(py)?;
         }
 
@@ -225,12 +225,12 @@ impl AsyncTable {
     }
 
     pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
-        let loop_cb = self.client.loop_cb.read().await.clone();
+        let loop_cb = (*self.client.loop_cb.read().await).clone();
         let callback = {
             let callback_py = Python::with_gil(|py| Py::clone_ref(&callback_py, py));
             Box::new(move || {
                 Python::with_gil(|py| {
-                    if let Some(loop_cb) = &loop_cb {
+                    if let Some(loop_cb) = &*loop_cb {
                         loop_cb.call1(py, (&callback_py,))?;
                     } else {
                         callback_py.call0(py)?;
@@ -402,7 +402,7 @@ impl AsyncView {
             Box::new(move || {
                 let loop_cb = loop_cb.clone();
                 Python::with_gil(|py| {
-                    if let Some(loop_cb) = &loop_cb {
+                    if let Some(loop_cb) = &*loop_cb {
                         loop_cb.call1(py, (&*callback_py,))?;
                     } else {
                         callback_py.call0(py)?;
@@ -424,8 +424,8 @@ impl AsyncView {
 
     #[pyo3(signature=(callback, mode=None))]
     pub async fn on_update(&self, callback: Py<PyAny>, mode: Option<String>) -> PyResult<u32> {
-        let locked_val = self.client.loop_cb.read().await;
-        let loop_cb = Python::with_gil(|py| locked_val.as_ref().map(|v| Py::clone_ref(v, py)));
+        let locked_val = self.client.loop_cb.read().await.clone();
+        let loop_cb = Python::with_gil(|py| (*locked_val).as_ref().map(|v| Py::clone_ref(v, py)));
         let callback = move |x: ViewOnUpdateResp| {
             let loop_cb = Python::with_gil(|py| loop_cb.as_ref().map(|v| Py::clone_ref(v, py)));
             let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
