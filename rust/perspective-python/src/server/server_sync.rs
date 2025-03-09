@@ -35,7 +35,7 @@ pub struct PySyncServer {
 }
 
 #[derive(Clone)]
-struct PyConnection(Py<PyAny>);
+struct PyConnection(Arc<Py<PyAny>>);
 
 impl SessionHandler for PyConnection {
     async fn send_response<'a>(
@@ -57,7 +57,7 @@ impl PySyncServer {
     pub fn new_session(&self, _py: Python, response_cb: Py<PyAny>) -> PySyncSession {
         let session = self
             .server
-            .new_session(PyConnection(response_cb))
+            .new_session(PyConnection(response_cb.into()))
             .block_on();
 
         let session = Arc::new(RwLock::new(Some(session)));
