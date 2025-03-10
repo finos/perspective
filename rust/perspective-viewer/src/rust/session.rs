@@ -23,8 +23,11 @@ use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::Arc;
 
+use futures::channel::oneshot;
+use futures::lock::Mutex;
 use perspective_client::config::*;
-use perspective_client::{ReconnectCallback, View, ViewWindow};
+use perspective_client::utils::ClientResult;
+use perspective_client::{Client, ReconnectCallback, View, ViewWindow};
 use perspective_js::utils::*;
 use wasm_bindgen::prelude::*;
 use yew::html::ImplicitClone;
@@ -61,6 +64,7 @@ pub struct SessionHandle {
 /// Mutable state for `Session`.
 #[derive(Default)]
 pub struct SessionData {
+    client: Option<perspective_client::Client>,
     table: Option<perspective_client::Table>,
     metadata: SessionMetadata,
     old_config: Option<ViewConfig>,
@@ -149,11 +153,58 @@ impl Session {
         self.borrow().table.clone()
     }
 
+    pub fn set_client(&self, client: Client) {
+        self.borrow_mut().client = Some(client);
+    }
+
     /// Reset this `Session`'s state with a new `Table`.  Implicitly clears the
     /// `ViewSubscription`, which will need to be re-initialized later via
     /// `create_view()`.
-    pub async fn set_table(&self, table: perspective_client::Table) -> ApiResult<JsValue> {
+    pub async fn set_table(&self, table_name: String) -> ApiResult<bool> {
+        let client = self.0.borrow().client.clone().into_apierror()?;
+        let table = if let Ok(table) = client.open_table(table_name.clone()).await {
+            table
+        } else {
+            let (send, rec) = oneshot::channel::<ClientResult<()>>();
+            let send = Arc::new(Mutex::new(Some(send)));
+            let id = client
+                .on_hosted_tables_update({
+                    clone!(client, table_name);
+                    move || {
+                        clone!(client, table_name, send);
+                        async move {
+                            match client
+                                .get_hosted_table_names()
+                                .await
+                                .map(|x| x.iter().any(|x| x == &table_name))
+                            {
+                                Ok(true) => {
+                                    if let Some(send) = send.lock().await.take() {
+                                        send.send(Ok(())).unwrap();
+                                    }
+                                },
+                                Err(x) => {
+                                    if let Some(send) = send.lock().await.take() {
+                                        send.send(Err(x)).unwrap();
+                                    }
+                                },
+                                _ => (),
+                            };
+                        }
+                    }
+                })
+                .await?;
+
+            rec.await??;
+            client.remove_hosted_tables_update(id).await?;
+            client.open_table(table_name).await?
+        };
+
         match SessionMetadata::from_table(&table).await {
+            Err(err) => {
+                self.set_error(err.to_string()).await?;
+                Err(err)
+            },
             Ok(metadata) => {
                 let client = table.get_client();
                 let set_error = self.table_errored.as_boxfn();
@@ -180,12 +231,8 @@ impl Session {
                 self.borrow_mut().table = Some(table);
                 sub.delete().await?;
                 self.table_loaded.emit(());
-                Ok(JsValue::UNDEFINED)
+                Ok(true)
             },
-            Err(err) => self
-                .set_error(err.to_string())
-                .await
-                .map(|_| JsValue::UNDEFINED),
         }
     }
 

@@ -45,40 +45,16 @@ export class PerspectiveViewerWidget extends Widget {
         return this.viewer.toggleConfig();
     }
 
-    async load(table: psp.Table | Promise<psp.Table>) {
-        this._is_table_loaded = true;
-        let promises = [this.viewer.load(table)];
-        if (this._restore_config) {
-            promises.push(this._restore_config());
-        }
-
-        await Promise.all(promises);
-    }
-
-    restore(
-        config: psp_viewer.ViewerConfigUpdate & {
-            table: string;
-        }
-    ) {
-        const { table, ...viewerConfig } = config;
+    restore(config: psp_viewer.ViewerConfigUpdate) {
         this._title = config.title as string;
         this.title.label = config.title as string;
-        if (table) {
-            this.viewer.setAttribute("table", table);
-        }
-
-        const restore_config = () => this.viewer.restore({ ...viewerConfig });
-        if (this._is_table_loaded) {
-            return restore_config();
-        } else {
-            this._restore_config = restore_config;
-        }
+        const restore_config = () => this.viewer.restore({ ...config });
+        return restore_config();
     }
 
     async save() {
         let config = {
             ...(await this.viewer.save()),
-            table: this.viewer.getAttribute("table"),
         };
 
         delete config["theme"];

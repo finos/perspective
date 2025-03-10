@@ -176,16 +176,28 @@ impl PerspectiveViewerElement {
                 update_task?;
                 let jstable = JsFuture::from(promise).await?;
 
-                if let Some(table) =
-                    wasm_bindgen_derive::try_from_js_option::<perspective_js::Table>(jstable)?
+                // TODO add view here?
+                if let Ok(Some(table)) = wasm_bindgen_derive::try_from_js_option::<
+                    perspective_js::Table,
+                >(jstable.clone())
                 {
+                    let client = table.get_client().await;
+                    session.set_client(client.get_client().clone());
+                    let name = table.get_name().await;
                     tracing::debug!(
-                        "Successfully loaded {:.0} rows from Table",
-                        table.size().await?
+                        "Loading {:.0} rows from Table {}",
+                        table.size().await?,
+                        name
                     );
 
-                    session.set_table(table.get_table().clone()).await?;
-                    session.validate().await?.create_view().await
+                    session.set_table(name).await?;
+                    session.validate().await?.create_view().await?;
+                    Ok(&session)
+                } else if let Ok(Some(client)) =
+                    wasm_bindgen_derive::try_from_js_option::<perspective_js::Client>(jstable)
+                {
+                    session.set_client(client.get_client().clone());
+                    Ok(&session)
                 } else {
                     Err(ApiError::new("Invalid Table"))
                 }
@@ -368,7 +380,34 @@ impl PerspectiveViewerElement {
                     PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
                 });
 
-            this.restore_and_render(decoded_update, async move { Ok(result.await?) })
+            let this2 = this.clone();
+            let t = decoded_update.table.clone();
+            if let OptionalUpdate::Update(name) = t {
+                let table = this.session.get_table();
+                if Some(name.as_str()) != table.as_ref().map(|x| x.get_name()) {
+                    this.session.set_table(name).await?;
+                    this.session.reset(true).await?;
+                    this.presentation.reset_columns_configs();
+                    this.renderer.reset(None).await?;
+                    this.presentation.reset_available_themes(None).await;
+                }
+            };
+
+            this2
+                .restore_and_render(decoded_update, async move {
+                    // if let OptionalUpdate::Update(name) = t {
+                    //     if Some(name.as_str())
+                    //         != this.session.get_table().as_ref().map(|x| x.get_name())
+                    //     {
+                    //         this.session.set_table(name).await?;
+                    //         this.session.reset(true).await?;
+                    //         this.presentation.reset_columns_configs();
+                    //         this.renderer.reset(None).await?;
+                    //         this.presentation.reset_available_themes(None).await;
+                    //     }
+                    // };
+                    Ok(result.await?)
+                })
                 .await?;
             Ok(())
         })

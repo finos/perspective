@@ -56,10 +56,11 @@ impl FromStr for ViewerConfigEncoding {
 #[serde(deny_unknown_fields)]
 pub struct ViewerConfig {
     pub version: String,
+    pub columns_config: ColumnConfigMap,
     pub plugin: String,
     pub plugin_config: Value,
-    pub columns_config: ColumnConfigMap,
     pub settings: bool,
+    pub table: Option<String>,
     pub theme: Option<String>,
     pub title: Option<String>,
 
@@ -86,6 +87,7 @@ type ViewerConfigBinaryDeserialFormat = (
     PluginUpdate,
     Option<Value>,
     SettingsUpdate,
+    TableUpdate,
     ThemeUpdate,
     TitleUpdate,
     ViewConfigUpdate,
@@ -201,6 +203,11 @@ pub struct ViewerConfigUpdate {
     #[serde(default)]
     #[ts(as = "Option<_>")]
     #[ts(optional)]
+    pub table: TableUpdate,
+
+    #[serde(default)]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
     pub theme: ThemeUpdate,
 
     #[serde(default)]
@@ -224,7 +231,17 @@ pub struct ViewerConfigUpdate {
 
 impl ViewerConfigUpdate {
     fn from_token(
-        (version, columns_config, plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
+        (
+            version,
+            columns_config,
+            plugin,
+            plugin_config,
+            settings,
+            table,
+            theme,
+            title,
+            view_config,
+        ): ViewerConfigBinaryDeserialFormat,
     ) -> ViewerConfigUpdate {
         ViewerConfigUpdate {
             version,
@@ -232,6 +249,7 @@ impl ViewerConfigUpdate {
             plugin,
             plugin_config: plugin_config.map(PluginConfig),
             settings,
+            table,
             theme,
             title,
             view_config,
@@ -301,6 +319,7 @@ pub type PluginUpdate = OptionalUpdate<String>;
 pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
+pub type TableUpdate = OptionalUpdate<String>;
 pub type VersionUpdate = OptionalUpdate<String>;
 pub type ColumnConfigUpdate = OptionalUpdate<HashMap<String, ColumnConfigValues>>;
 

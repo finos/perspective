@@ -23,6 +23,7 @@ use macro_rules_attribute::apply;
 use perspective_client::SystemInfo;
 use perspective_client::{ReconnectCallback, Session, TableData, TableInitOptions};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
 pub use crate::table::*;
@@ -84,6 +85,7 @@ impl ProxySession {
 #[apply(inherit_docs)]
 #[inherit_doc = "client.md"]
 #[wasm_bindgen]
+#[derive(TryFromJsValue, Clone)]
 pub struct Client {
     pub(crate) close: Option<Function>,
     pub(crate) client: perspective_client::Client,
@@ -130,6 +132,12 @@ where
 {
     fn from(value: F) -> Self {
         JsReconnect(Arc::new(value))
+    }
+}
+
+impl Client {
+    pub fn get_client(&self) -> &'_ perspective_client::Client {
+        &self.client
     }
 }
 

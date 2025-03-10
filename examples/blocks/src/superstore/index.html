@@ -36,16 +36,18 @@
                 const json = await req.json();
                 return json;
             }
+            const worker = await perspective.worker();
 
-            const datasource = async () => {
-                const request = fetch(DATA_URL);
-                const worker = await perspective.worker();
-                const response = await request;
-                const buffer = await response.arrayBuffer();
-                return await worker.table(buffer);
-            };
+            // const datasource = async () => {
+            const request = fetch(DATA_URL);
+            const response = await request;
+            const buffer = await response.arrayBuffer();
+            await worker.table(buffer, { name: "superstore" });
+            // };
 
-            window.workspace.tables.set("superstore", datasource());
+            window.workspace.load(worker);
+
+            // window.workspace.tables.set("superstore", datasource());
             const layout = await get_layout();
             window.workspace.restore(layout);
         </script>
