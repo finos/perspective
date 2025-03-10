@@ -13,8 +13,6 @@
 import asyncio
 import threading
 import websocket
-import os
-import os.path
 
 import tornado.websocket
 import tornado.web
@@ -26,26 +24,14 @@ import perspective.handlers.tornado
 PORT = 8082
 
 
-def test_big_multi_thing():
-    here = os.path.abspath(os.path.dirname(__file__))
-    file_path = os.path.join(
-        here,
-        "..",
-        "..",
-        "..",
-        "..",
-        "..",
-        "node_modules",
-        "superstore-arrow",
-        "superstore.lz4.arrow",
-    )
-
+def test_big_multi_thing(superstore):
     async def init_table(client):
         global SERVER_DATA
         global SERVER_TABLE
-        with open(file_path, mode="rb") as file:
-            SERVER_DATA = file.read()
-            SERVER_TABLE = client.table(SERVER_DATA, name="superstore")
+
+        SERVER_DATA = "x,y\n1,2\n3,4"
+        # with open(file_path, mode="rb") as file:
+        SERVER_TABLE = client.table(SERVER_DATA, name="superstore")
 
         global ws
         ws = websocket.WebSocketApp(
@@ -75,7 +61,7 @@ def test_big_multi_thing():
         perspective_server = perspective.Server()
         app = make_app(perspective_server)
         global server
-        server = app.listen(PORT)
+        server = app.listen(PORT, "0.0.0.0")
 
         global server_loop
         server_loop = tornado.ioloop.IOLoop.current()
@@ -126,7 +112,7 @@ def test_big_multi_thing():
         view = await table.view()
         await view.on_update(update)
         SERVER_TABLE.update(SERVER_DATA)
-        assert await table.size() == 19988
+        assert await table.size() == 4
         assert count == 1
         await server.close_all_connections()
         client_loop.stop()

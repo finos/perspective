@@ -44,7 +44,7 @@ starlette = ["starlette<1"]
 
 [tool.maturin]
 module-name = "perspective"
-data = "perspective_python-3.4.0.data"
+data = "perspective_python-3.4.1.data"
 features = ["pyo3/extension-module"]
 include = [
     { path = "perspective/*libpsp.so", format = "wheel" },
@@ -57,3 +57,8 @@ python_functions = ["test_", "it_", "and_", "but_", "they_"]
 python_files = ["test_*.py"]
 testpaths = ["tests"]
 asyncio_default_fixture_loop_scope = "function"
+
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
