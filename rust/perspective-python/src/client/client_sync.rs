@@ -14,9 +14,9 @@ use std::collections::HashMap;
 use std::future::Future;
 
 use macro_rules_attribute::apply;
-use perspective_client::{assert_table_api, assert_view_api, Session};
 #[cfg(doc)]
-use perspective_client::{config::ViewConfigUpdate, Schema, TableInitOptions, UpdateOptions};
+use perspective_client::{Schema, TableInitOptions, UpdateOptions, config::ViewConfigUpdate};
+use perspective_client::{Session, assert_table_api, assert_view_api};
 use pyo3::exceptions::PyTypeError;
 use pyo3::marker::Ungil;
 use pyo3::prelude::*;
@@ -140,6 +140,20 @@ impl Client {
     #[inherit_doc = "client/get_hosted_table_names.md"]
     pub fn get_hosted_table_names(&self, py: Python<'_>) -> PyResult<Vec<String>> {
         self.0.get_hosted_table_names().py_block_on(py)
+    }
+
+    #[apply(inherit_doc)]
+    #[inherit_doc = "client/on_hosted_tables_update.md"]
+    pub fn on_hosted_tables_update(&self, py: Python<'_>, callback: Py<PyAny>) -> PyResult<u32> {
+        self.0.on_hosted_tables_update(callback).py_block_on(py)
+    }
+
+    #[apply(inherit_doc)]
+    #[inherit_doc = "client/remove_hosted_tables_update.md"]
+    pub fn remove_hosted_tables_update(&self, py: Python<'_>, callback_id: u32) -> PyResult<()> {
+        self.0
+            .remove_hosted_tables_update(callback_id)
+            .py_block_on(py)
     }
 
     #[apply(inherit_doc)]

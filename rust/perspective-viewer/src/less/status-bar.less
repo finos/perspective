@@ -125,16 +125,15 @@
             flex: 1 1000 auto;
         }
 
-        #rows {
+        span#rows {
             flex: 0 1000 auto;
             overflow: hidden;
             margin: 0px 14px;
             span {
-                white-space: nowrap;
                 margin: 0 !important;
             }
 
-            span span {
+            span {
                 color: var(--inactive--color);
             }
         }
@@ -156,15 +155,17 @@
         }
 
         span {
+            white-space: nowrap;
+
             // font-size: var(--label--font-size, 0.75em);
             margin: 0px 14px;
             user-select: none;
             // height: 100%;
             // line-height: 36px;
 
-            &:before {
-                position: relative;
-            }
+            // &:before {
+            //     position: relative;
+            // }
 
             &:hover {
                 color: inherit;

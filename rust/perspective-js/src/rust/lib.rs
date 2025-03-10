@@ -18,6 +18,8 @@
 )]
 #![allow(non_snake_case)]
 
+extern crate alloc;
+
 mod client;
 mod table;
 pub mod utils;

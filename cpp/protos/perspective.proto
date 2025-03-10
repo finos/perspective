@@ -118,6 +118,7 @@ message Request {
         // Minimum Virtual API (theoretical).
         GetFeaturesReq get_features_req = 3;
         GetHostedTablesReq get_hosted_tables_req = 4;
+        RemoveHostedTablesUpdateReq remove_hosted_tables_update_req = 37;
         TableMakePortReq table_make_port_req = 5;
         TableMakeViewReq table_make_view_req = 6;
         TableSchemaReq table_schema_req = 7;
@@ -164,6 +165,7 @@ message Response {
     oneof client_resp {
         GetFeaturesResp get_features_resp = 3;
         GetHostedTablesResp get_hosted_tables_resp = 4;
+        RemoveHostedTablesUpdateResp remove_hosted_tables_update_resp = 37;
         TableMakePortResp table_make_port_resp = 5;
         TableMakeViewResp table_make_view_resp = 6;
         TableSchemaResp table_schema_resp = 7;
@@ -219,7 +221,10 @@ message GetFeaturesResp {
 }
 
 // `Client::get_hosted_tables`
-message GetHostedTablesReq {}
+message GetHostedTablesReq {
+    bool subscribe = 1;
+}
+
 message GetHostedTablesResp {
     repeated HostedTable table_infos = 1;
 }
@@ -229,6 +234,11 @@ message HostedTable {
     optional string index = 2;
     optional uint32 limit = 3;
 }
+
+message RemoveHostedTablesUpdateReq {
+    uint32 id = 1;
+}
+message RemoveHostedTablesUpdateResp {}
 
 // `Table::size`
 message TableSizeReq {}

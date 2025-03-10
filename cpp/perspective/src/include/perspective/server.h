@@ -569,6 +569,13 @@ namespace server {
         );
         void drop_view_on_delete_sub(const t_id& view_id);
 
+        // `on_hosted_tables_update()`
+        void create_on_hosted_tables_update_sub(Subscription sub);
+        std::vector<Subscription> get_on_hosted_tables_update_sub();
+        void remove_on_hosted_tables_update_sub(
+            std::uint32_t sub_id, std::uint32_t client_id
+        );
+
         void mark_table_dirty(const t_id& id);
         void mark_table_clean(const t_id& id);
         void mark_all_tables_clean();
@@ -593,6 +600,8 @@ namespace server {
 
         tsl::hopscotch_map<t_id, std::vector<Subscription>>
             m_table_on_delete_subs;
+
+        std::vector<Subscription> m_on_hosted_tables_update_subs;
 
         tsl::hopscotch_set<t_id> m_dirty_tables;
 

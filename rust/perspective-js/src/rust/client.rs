@@ -23,10 +23,10 @@ use macro_rules_attribute::apply;
 use perspective_client::SystemInfo;
 use perspective_client::{ReconnectCallback, Session, TableData, TableInitOptions};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
 pub use crate::table::*;
-use crate::utils::{inherit_docs, ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop};
+use crate::utils::{ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop, inherit_docs};
 
 #[wasm_bindgen]
 extern "C" {
@@ -146,8 +146,7 @@ impl Client {
         });
 
         let client = perspective_client::Client::new_with_callback(move |msg| {
-            let vec = msg.to_vec();
-            Box::pin(send_request.run_all(vec))
+            Box::pin(send_request.run_all(msg))
         });
 
         Client { close, client }
@@ -301,6 +300,24 @@ impl Client {
         Ok(JsValue::from_serde_ext(
             &self.client.get_hosted_table_names().await?,
         )?)
+    }
+
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/on_hosted_tables_update.md"]
+    #[wasm_bindgen]
+    pub async fn on_hosted_tables_update(&self, on_update_js: Function) -> ApiResult<u32> {
+        let poll_loop = LocalPollLoop::new(move |_| on_update_js.call0(&JsValue::UNDEFINED));
+        let on_update = Box::new(move || poll_loop.poll(()));
+        let id = self.client.on_hosted_tables_update(on_update).await?;
+        Ok(id)
+    }
+
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/remove_hosted_tables_update.md"]
+    #[wasm_bindgen]
+    pub async fn remove_hosted_tables_update(&self, update_id: u32) -> ApiResult<()> {
+        self.client.remove_hosted_tables_update(update_id).await?;
+        Ok(())
     }
 
     #[apply(inherit_docs)]

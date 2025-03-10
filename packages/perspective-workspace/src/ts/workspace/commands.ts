@@ -39,7 +39,7 @@ export const createCommands = (
                 args.widget_name as string
             )!;
 
-            menu.unsafe_set_model(await widget.viewer.unsafe_get_model());
+            menu.set_model(widget.viewer.get_model());
             menu.open(indicator);
             workspace.get_context_menu()?.init_overlay?.();
             menu.addEventListener("blur", () => {
@@ -80,7 +80,7 @@ export const createCommands = (
             const widget = workspace.getWidgetByName(
                 args.widget_name as string
             )!;
-            menu.unsafe_set_model(await widget.viewer.unsafe_get_model());
+            menu.set_model(widget.viewer.get_model());
 
             menu.open(indicator);
             workspace.get_context_menu()?.init_overlay?.();
