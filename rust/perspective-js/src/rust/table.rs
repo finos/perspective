@@ -11,19 +11,20 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use extend::ext;
-use js_sys::{Array, ArrayBuffer, Function, Object, Reflect, Uint8Array, JSON};
+use js_sys::{Array, ArrayBuffer, Function, JSON, Object, Reflect, Uint8Array};
 use macro_rules_attribute::apply;
 use perspective_client::config::*;
 use perspective_client::{
-    assert_table_api, ColumnType, TableData, TableReadFormat, UpdateData, UpdateOptions,
+    ColumnType, TableData, TableReadFormat, UpdateData, UpdateOptions, assert_table_api,
 };
 use wasm_bindgen::convert::TryFromJsValue;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::spawn_local;
 
 use crate::client::Client;
 use crate::utils::{
-    inherit_docs, ApiError, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError,
+    ApiError, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError, inherit_docs,
 };
 pub use crate::view::*;
 
@@ -166,7 +167,7 @@ pub(crate) impl UpdateData {
     }
 }
 
-#[derive(Clone)]
+#[derive(TryFromJsValue, Clone)]
 #[wasm_bindgen]
 pub struct Table(pub(crate) perspective_client::Table);
 
@@ -215,6 +216,13 @@ impl Table {
             close: None,
             client: self.0.get_client(),
         }
+    }
+
+    #[apply(inherit_docs)]
+    #[inherit_doc = "table/get_name.md"]
+    #[wasm_bindgen]
+    pub async fn get_name(&self) -> String {
+        self.0.get_name().to_owned()
     }
 
     #[apply(inherit_docs)]
@@ -359,11 +367,5 @@ impl Table {
         let exprs = JsValue::into_serde_ext::<Expressions>(exprs.clone())?;
         let columns = self.0.validate_expressions(exprs).await?;
         Ok(JsValue::from_serde_ext(&columns)?)
-    }
-
-    #[allow(clippy::use_self)]
-    #[doc(hidden)]
-    pub fn unsafe_get_model(&self) -> *const Table {
-        std::ptr::addr_of!(*self)
     }
 }

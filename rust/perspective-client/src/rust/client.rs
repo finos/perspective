@@ -16,8 +16,8 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicU32;
 
 use async_lock::{Mutex, RwLock};
-use futures::Future;
 use futures::future::{BoxFuture, LocalBoxFuture, join_all};
+use futures::{Future, FutureExt};
 use nanoid::*;
 use prost::Message;
 use serde::{Deserialize, Serialize};
@@ -26,7 +26,7 @@ use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::{
     self, ColumnType, GetFeaturesReq, GetFeaturesResp, GetHostedTablesReq, GetHostedTablesResp,
-    HostedTable, MakeTableReq, Request, Response, ServerSystemInfoReq,
+    HostedTable, MakeTableReq, RemoveHostedTablesUpdateReq, Request, Response, ServerSystemInfoReq,
 };
 use crate::table::{Table, TableInitOptions, TableOptions};
 use crate::table_data::{TableData, UpdateData};
@@ -359,7 +359,9 @@ impl Client {
         let msg = Request {
             msg_id: self.gen_id(),
             entity_id: "".to_owned(),
-            client_req: Some(ClientReq::GetHostedTablesReq(GetHostedTablesReq {})),
+            client_req: Some(ClientReq::GetHostedTablesReq(GetHostedTablesReq {
+                subscribe: false,
+            })),
         };
 
         match self.oneshot(&msg).await? {
@@ -391,13 +393,65 @@ impl Client {
         let msg = Request {
             msg_id: self.gen_id(),
             entity_id: "".to_owned(),
-            client_req: Some(ClientReq::GetHostedTablesReq(GetHostedTablesReq {})),
+            client_req: Some(ClientReq::GetHostedTablesReq(GetHostedTablesReq {
+                subscribe: false,
+            })),
         };
 
         match self.oneshot(&msg).await? {
             ClientResp::GetHostedTablesResp(GetHostedTablesResp { table_infos }) => {
                 Ok(table_infos.into_iter().map(|i| i.entity_id).collect())
             },
+            resp => Err(resp.into()),
+        }
+    }
+
+    #[doc = include_str!("../../docs/client/on_hosted_tables_update.md")]
+    pub async fn on_hosted_tables_update<T, U>(&self, on_update: T) -> ClientResult<u32>
+    where
+        T: Fn() -> U + Send + Sync + 'static,
+        U: Future<Output = ()> + Send + 'static,
+    {
+        let on_update = Arc::new(on_update);
+        let callback = move |resp: Response| {
+            let on_update = on_update.clone();
+            async move {
+                match resp.client_resp {
+                    Some(ClientResp::GetHostedTablesResp(_)) | None => {
+                        on_update().await;
+                        Ok(())
+                    },
+                    resp => Err(ClientError::OptionResponseFailed(resp.into())),
+                }
+            }
+            .boxed()
+        };
+
+        let msg = Request {
+            msg_id: self.gen_id(),
+            entity_id: "".to_owned(),
+            client_req: Some(ClientReq::GetHostedTablesReq(GetHostedTablesReq {
+                subscribe: true,
+            })),
+        };
+
+        self.subscribe(&msg, Box::new(callback)).await?;
+        Ok(msg.msg_id)
+    }
+
+    #[doc = include_str!("../../docs/client/remove_hosted_tables_update.md")]
+    pub async fn remove_hosted_tables_update(&self, update_id: u32) -> ClientResult<()> {
+        let msg = Request {
+            msg_id: self.gen_id(),
+            entity_id: "".to_owned(),
+            client_req: Some(ClientReq::RemoveHostedTablesUpdateReq(
+                RemoveHostedTablesUpdateReq { id: update_id },
+            )),
+        };
+
+        self.unsubscribe(update_id).await?;
+        match self.oneshot(&msg).await? {
+            ClientResp::RemoveHostedTablesUpdateResp(_) => Ok(()),
             resp => Err(resp.into()),
         }
     }

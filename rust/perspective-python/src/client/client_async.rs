@@ -159,6 +159,48 @@ impl AsyncClient {
         self.client.get_hosted_table_names().await.into_pyerr()
     }
 
+    pub async fn on_hosted_tables_update(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
+        let locked_val = self.loop_cb.read().await.clone();
+        let loop_cb = Python::with_gil(|py| (*locked_val).as_ref().map(|v| Py::clone_ref(v, py)));
+        let callback = Box::new(move || {
+            let loop_cb = Python::with_gil(|py| loop_cb.as_ref().map(|v| Py::clone_ref(v, py)));
+            let callback = Python::with_gil(|py| Py::clone_ref(&callback_py, py));
+            async move {
+                let aggregate_errors: PyResult<()> = {
+                    let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
+                    Python::with_gil(|py| {
+                        match &loop_cb {
+                            None => callback.call0(py)?,
+                            Some(loop_cb) => loop_cb.call1(py, (&callback,))?,
+                        };
+
+                        Ok(())
+                    })
+                };
+
+                // TODO These are unrecoverable errors - we should mark them as such
+                if let Err(err) = aggregate_errors {
+                    tracing::warn!("Error in on_hosted_tables_update callback: {:?}", err);
+                }
+            }
+            .boxed()
+        });
+
+        let callback_id = self
+            .client
+            .on_hosted_tables_update(callback)
+            .await
+            .into_pyerr()?;
+        Ok(callback_id)
+    }
+
+    pub async fn remove_hosted_tables_update(&self, id: u32) -> PyResult<()> {
+        self.client
+            .remove_hosted_tables_update(id)
+            .await
+            .into_pyerr()
+    }
+
     pub async fn set_loop_callback(&self, loop_cb: Py<PyAny>) -> PyResult<()> {
         *self.loop_cb.write().await = Some(loop_cb).into();
         Ok(())

@@ -245,6 +245,14 @@ export function get_hosted_table_names() {
     return SYNC_CLIENT.get_hosted_table_names();
 }
 
+export function on_hosted_tables_update(cb: () => void) {
+    return SYNC_CLIENT.on_hosted_tables_update(cb);
+}
+
+export function remove_hosted_tables_update(id: number) {
+    return SYNC_CLIENT.remove_hosted_tables_update(id);
+}
+
 export function system_info() {
     return SYNC_CLIENT.system_info();
 }
@@ -287,6 +295,8 @@ export default {
     table,
     websocket,
     get_hosted_table_names,
+    on_hosted_tables_update,
+    remove_hosted_tables_update,
     system_info,
     WebSocketServer,
 };

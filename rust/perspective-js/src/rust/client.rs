@@ -303,6 +303,24 @@ impl Client {
     }
 
     #[apply(inherit_docs)]
+    #[inherit_doc = "client/on_hosted_tables_update.md"]
+    #[wasm_bindgen]
+    pub async fn on_hosted_tables_update(&self, on_update_js: Function) -> ApiResult<u32> {
+        let poll_loop = LocalPollLoop::new(move |_| on_update_js.call0(&JsValue::UNDEFINED));
+        let on_update = Box::new(move || poll_loop.poll(()));
+        let id = self.client.on_hosted_tables_update(on_update).await?;
+        Ok(id)
+    }
+
+    #[apply(inherit_docs)]
+    #[inherit_doc = "client/remove_hosted_tables_update.md"]
+    #[wasm_bindgen]
+    pub async fn remove_hosted_tables_update(&self, update_id: u32) -> ApiResult<()> {
+        self.client.remove_hosted_tables_update(update_id).await?;
+        Ok(())
+    }
+
+    #[apply(inherit_docs)]
     #[inherit_doc = "client/system_info.md"]
     #[wasm_bindgen]
     pub async fn system_info(&self) -> ApiResult<JsValue> {

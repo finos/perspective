@@ -609,6 +609,11 @@ ServerResources::remove_view_on_delete_sub(
 }
 
 void
+ServerResources::drop_view_on_delete_sub(const t_id& view_id) {
+    m_view_on_delete_subs.erase(view_id);
+}
+
+void
 ServerResources::create_view_on_update_sub(
     const t_id& view_id, Subscription sub
 ) {
@@ -634,6 +639,53 @@ void
 ServerResources::drop_view_on_update_sub(const t_id& view_id) {
     PSP_WRITE_LOCK(m_write_lock);
     m_view_on_update_subs.erase(view_id);
+}
+
+void
+ServerResources::remove_view_on_update_sub(
+    const t_id& view_id, std::uint32_t sub_id, std::uint32_t client_id
+) {
+    if (m_view_on_update_subs.find(view_id) != m_view_on_update_subs.end()) {
+        auto& subs = m_view_on_update_subs[view_id];
+        subs.erase(
+            std::remove_if(
+                subs.begin(),
+                subs.end(),
+                [sub_id, client_id](const Subscription& sub) {
+                    return sub.id == sub_id && sub.client_id == client_id;
+                }
+            ),
+            subs.end()
+        );
+    }
+}
+
+void
+ServerResources::create_on_hosted_tables_update_sub(Subscription sub) {
+    PSP_WRITE_LOCK(m_write_lock);
+    m_on_hosted_tables_update_subs.push_back(sub);
+}
+
+std::vector<Subscription>
+ServerResources::get_on_hosted_tables_update_sub() {
+    PSP_READ_LOCK(m_write_lock);
+    return m_on_hosted_tables_update_subs;
+}
+
+void
+ServerResources::remove_on_hosted_tables_update_sub(
+    std::uint32_t sub_id, std::uint32_t client_id
+) {
+    m_on_hosted_tables_update_subs.erase(
+        std::remove_if(
+            m_on_hosted_tables_update_subs.begin(),
+            m_on_hosted_tables_update_subs.end(),
+            [sub_id, client_id](const Subscription& sub) {
+                return sub.id == sub_id && sub.client_id == client_id;
+            }
+        ),
+        m_on_hosted_tables_update_subs.end()
+    );
 }
 
 std::vector<std::pair<std::shared_ptr<Table>, const ServerResources::t_id>>
@@ -662,6 +714,18 @@ ServerResources::drop_client(const std::uint32_t client_id) {
             delete_view(client_id, view_id);
         }
     }
+
+    std::vector<Subscription> subs;
+    std::remove_copy_if(
+        m_on_hosted_tables_update_subs.begin(),
+        m_on_hosted_tables_update_subs.end(),
+        std::back_inserter(subs),
+        [&client_id](const Subscription& item) {
+            return item.client_id == client_id;
+        }
+    );
+
+    m_on_hosted_tables_update_subs = subs;
 }
 
 std::uint32_t
@@ -876,6 +940,7 @@ needs_poll(const proto::Request::ClientReqCase proto_case) {
         case ReqCase::kTableUpdateReq:
         case ReqCase::kTableRemoveDeleteReq:
         case ReqCase::kGetHostedTablesReq:
+        case ReqCase::kRemoveHostedTablesUpdateReq:
         case ReqCase::kTableReplaceReq:
         case ReqCase::kTableDeleteReq:
         case ReqCase::kViewGetConfigReq:
@@ -932,6 +997,7 @@ entity_type_is_table(const proto::Request::ClientReqCase proto_case) {
         case ReqCase::kViewDeleteReq:
         case ReqCase::kViewExpressionSchemaReq:
         case ReqCase::kViewRemoveOnUpdateReq:
+        case ReqCase::kRemoveHostedTablesUpdateReq:
             return false;
         case proto::Request::CLIENT_REQ_NOT_SET:
             throw std::runtime_error("Unhandled request type 2");
@@ -1228,24 +1294,41 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             break;
         }
         case proto::Request::kGetHostedTablesReq: {
-            proto::Response resp;
-            const auto& tables = resp.mutable_get_hosted_tables_resp();
-            const auto& infos = tables->mutable_table_infos();
-            for (const auto& name : m_resources.get_table_ids()) {
-                const auto& v = infos->Add();
+            const auto& r = req.get_hosted_tables_req();
+            if (!r.subscribe()) {
+                proto::Response resp;
+                const auto& tables = resp.mutable_get_hosted_tables_resp();
+                const auto& infos = tables->mutable_table_infos();
+                for (const auto& name : m_resources.get_table_ids()) {
+                    const auto& v = infos->Add();
 
-                v->set_entity_id(name);
-                const auto tbl = m_resources.get_table(name);
+                    v->set_entity_id(name);
+                    const auto tbl = m_resources.get_table(name);
 
-                if (!tbl->get_index().empty()) {
-                    v->set_index(tbl->get_index());
+                    if (!tbl->get_index().empty()) {
+                        v->set_index(tbl->get_index());
+                    }
+
+                    if (tbl->get_limit() != std::numeric_limits<int>::max()) {
+                        v->set_limit(tbl->get_limit());
+                    }
                 }
 
-                if (tbl->get_limit() != std::numeric_limits<int>::max()) {
-                    v->set_limit(tbl->get_limit());
-                }
+                push_resp(std::move(resp));
+            } else {
+                Subscription sub_info;
+                sub_info.id = req.msg_id();
+                sub_info.client_id = client_id;
+                m_resources.create_on_hosted_tables_update_sub(sub_info);
             }
 
+            break;
+        }
+        case proto::Request::kRemoveHostedTablesUpdateReq: {
+            auto sub_id = req.remove_hosted_tables_update_req().id();
+            m_resources.remove_on_hosted_tables_update_sub(sub_id, client_id);
+            proto::Response resp;
+            resp.mutable_remove_hosted_tables_update_resp();
             push_resp(std::move(resp));
             break;
         }
@@ -1348,6 +1431,18 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             proto::Response resp;
             resp.mutable_make_table_resp();
             push_resp(std::move(resp));
+
+            // Notify `on_thsoted_tables_update` listeners
+            auto subscriptions = m_resources.get_on_hosted_tables_update_sub();
+            for (auto& subscription : subscriptions) {
+                Response out;
+                out.set_msg_id(subscription.id);
+                ProtoServerResp<ProtoServer::Response> resp2;
+                resp2.data = std::move(out);
+                resp2.client_id = subscription.client_id;
+                proto_resp.emplace_back(std::move(resp2));
+            }
+
             break;
         }
         case proto::Request::kTableSizeReq: {
@@ -2272,6 +2367,18 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             proto::Response resp;
             resp.mutable_table_delete_resp();
             push_resp(std::move(resp));
+
+            // notify `on_hosted_tables_update` listeners
+            auto subscriptions = m_resources.get_on_hosted_tables_update_sub();
+            for (auto& subscription : subscriptions) {
+                Response out;
+                out.set_msg_id(subscription.id);
+                ProtoServerResp<ProtoServer::Response> resp2;
+                resp2.data = std::move(out);
+                resp2.client_id = subscription.client_id;
+                proto_resp.emplace_back(std::move(resp2));
+            }
+
             break;
         }
         case proto::Request::kViewDeleteReq: {
@@ -2507,30 +2614,6 @@ ProtoServer::_process_table(
 
     _process_table_unchecked(table, table_id, outs);
     m_resources.mark_table_clean(table_id);
-}
-
-void
-ServerResources::remove_view_on_update_sub(
-    const t_id& view_id, std::uint32_t sub_id, std::uint32_t client_id
-) {
-    if (m_view_on_update_subs.find(view_id) != m_view_on_update_subs.end()) {
-        auto& subs = m_view_on_update_subs[view_id];
-        subs.erase(
-            std::remove_if(
-                subs.begin(),
-                subs.end(),
-                [sub_id, client_id](const Subscription& sub) {
-                    return sub.id == sub_id && sub.client_id == client_id;
-                }
-            ),
-            subs.end()
-        );
-    }
-}
-
-void
-ServerResources::drop_view_on_delete_sub(const t_id& view_id) {
-    m_view_on_delete_subs.erase(view_id);
 }
 
 } // namespace perspective::server

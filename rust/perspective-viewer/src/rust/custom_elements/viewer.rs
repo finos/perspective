@@ -174,27 +174,21 @@ impl PerspectiveViewerElement {
         ApiFuture::new(async move {
             let task = async {
                 update_task?;
-                #[wasm_bindgen]
-                extern "C" {
-                    pub type Model;
+                let jstable = JsFuture::from(promise).await?;
 
-                    #[wasm_bindgen(method)]
-                    pub fn unsafe_get_model(this: &Model) -> *const Table;
+                if let Some(table) =
+                    wasm_bindgen_derive::try_from_js_option::<perspective_js::Table>(jstable)?
+                {
+                    tracing::debug!(
+                        "Successfully loaded {:.0} rows from Table",
+                        table.size().await?
+                    );
+
+                    session.set_table(table.get_table().clone()).await?;
+                    session.validate().await?.create_view().await
+                } else {
+                    Err(ApiError::new("Invalid Table"))
                 }
-
-                let jstable = JsFuture::from(promise).await?.unchecked_into::<Model>();
-                pub fn unsafe_set_model(ptr: *const Table) -> Table {
-                    (unsafe { ptr.as_ref().unwrap() }).clone()
-                }
-
-                let table = unsafe_set_model(jstable.unsafe_get_model());
-                tracing::debug!(
-                    "Successfully loaded {:.0} rows from Table",
-                    table.size().await?
-                );
-
-                session.set_table(table.get_table().clone()).await?;
-                session.validate().await?.create_view().await
             };
 
             renderer.set_throttle(None);
@@ -771,11 +765,12 @@ impl PerspectiveViewerElement {
         }
     }
 
+    /// Create a new JavaScript Heap reference for this model instance.
     #[doc(hidden)]
     #[allow(clippy::use_self)]
     #[wasm_bindgen]
-    pub fn unsafe_get_model(&self) -> *const PerspectiveViewerElement {
-        std::ptr::addr_of!(*self)
+    pub fn get_model(&self) -> PerspectiveViewerElement {
+        self.clone()
     }
 
     /// Asynchronously opens the column settings for a specific column.

@@ -61,10 +61,8 @@ impl CopyDropDownMenuElement {
     /// Internal Only.
     ///
     /// Set this custom element model's raw pointer.
-    #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    pub fn unsafe_set_model(&self, ptr: *const PerspectiveViewerElement) {
-        let model = unsafe { ptr.as_ref().unwrap() };
-        self.set_model(model);
+    pub fn set_model(&self, parent: &PerspectiveViewerElement) {
+        self.set_config_model(parent)
     }
 
     pub fn connected_callback(&self) {}
@@ -78,11 +76,11 @@ impl CopyDropDownMenuElement {
             .unchecked_into::<HtmlElement>();
 
         let elem = Self::new(dropdown);
-        elem.set_model(model);
+        elem.set_config_model(model);
         elem
     }
 
-    pub fn set_model<A: GetViewerConfigModel>(&self, model: &A) {
+    pub fn set_config_model<A: GetViewerConfigModel>(&self, model: &A) {
         let callback = Callback::from({
             let model = model.cloned();
             let modal_rc = self.modal.clone();

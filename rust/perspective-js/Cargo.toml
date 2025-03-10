@@ -75,6 +75,7 @@ tracing = { version = ">=0.1.36" }
 tracing-subscriber = "0.3.15"
 console_error_panic_hook = "0.1.6"
 wasm-bindgen = { version = "=0.2.100", features = ["serde-serialize"] }
+wasm-bindgen-derive = "0.3.0"
 wasm-bindgen-futures = "0.4.41"
 
 [dependencies.web-sys]
