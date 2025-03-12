@@ -776,7 +776,7 @@ jobs:
               run: python -c 'import perspective'
 
             - name: Run pytests
-              run: pytest -v --pyargs 'perspective.tests'
+              run: pytest -v --pyargs 'perspective.tests' --timeout=300
 
     # ,-,---.             .                 .
     #  '|___/ ,-. ,-. ,-. |-. ,-,-. ,-. ,-. | ,
