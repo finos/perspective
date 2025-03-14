@@ -1,3 +1,11 @@
+# [v3.4.2](https://github.com/finos/perspective/releases/tag/v3.4.2)
+
+_14 March 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.4.1...v3.4.2))
+
+Fixes
+
+- Add timeouts to pytest, fix jupyterlab error [#2952](https://github.com/finos/perspective/pull/2952)
+
 # [v3.4.1](https://github.com/finos/perspective/releases/tag/v3.4.1)
 
 _10 March 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.4.0...v3.4.1))
