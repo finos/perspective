@@ -36,6 +36,7 @@ export const DEFAULT_CONFIG: ViewerConfigUpdate = {
     sort: [],
     split_by: [],
     version: API_VERSION,
+    table: "load-viewer-csv",
     title: null,
     theme: "Pro Light",
 };

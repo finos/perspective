@@ -40,6 +40,78 @@ use crate::session::Session;
 use crate::utils::*;
 use crate::*;
 
+#[macro_export]
+macro_rules! internal_api {
+    ($name:ident, $inner:ident, (&self) -> $ret:ty { $($rest:tt)* }) => {
+        pub fn $name(&self) -> std::pin::Pin<Box<dyn Future<Output = $ret> + 'static>> {
+            let this: Self = (*self).clone();
+            Box::pin(async move { this.$inner().await })
+        }
+    };
+
+    ($name:ident, $inner:ident, (&self, $($arg:ident : $argtype:ty),*) -> $ret:ty { $($rest:tt)+ }) => {
+        pub fn $name(&self, $($arg : $argtype),*) -> std::pin::Pin<Box<dyn Future<Output = $ret> + '_>> {
+            let this = self.clone();
+            Box::pin(async move { this.$inner($($arg),*).await })
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! apifuture_2 {
+    // (#[doc = $x:literal] $($rest:tt)*) => {
+    //     #[doc = $x]
+    //     $crate::apifuture_2!($($rest)*)
+    // };
+
+
+    // ($(#[$($attr:tt)+])+ $($rest:tt)*) => {
+    //     $(#[$($attr)+])+
+    //     $crate::apifuture_2!($($rest)*);
+    // };
+
+
+    // (unsafe $($rest:tt)*) => {
+    //     unsafe extern "C" { $($body)* }
+    // };
+
+    ($(#[$($attr:tt)+])+ async fn $name:ident $($rest:tt)*) => {
+        perspective_client::vendor::paste::paste! {
+            async fn [< _ $name >]$($rest)*
+
+            $(#[$($attr)+])+
+            internal_api!($name, [< _ $name >], $($rest)*);
+        }
+    };
+
+    ($(#[$($attr:tt)+])+ pub unsafe extern "C" fn $name:ident $($rest:tt)*) => {
+        perspective_client::vendor::paste::paste! {
+            async fn [< _ $name >]$($rest)*
+
+            $(#[$($attr)+])+
+            internal_api!($name, [< _ $name >], $($rest)*);
+        }
+    };
+
+    ($(#[$($attr:tt)+])+ pub async fn $name:ident $($rest:tt)*) => {
+        perspective_client::vendor::paste::paste! {
+            async fn [< _ $name >]$($rest)*
+
+            $(#[$($attr)+])+
+            internal_api!($name, [< _ $name >], $($rest)*);
+        }
+    };
+
+
+}
+
+#[macro_export]
+macro_rules! apifuture {
+    ($($rest:tt)*) => {
+        $crate::apifuture_2!($($rest)*);
+    };
+}
+
 /// The `<perspective-viewer>` custom element.
 ///
 /// # JavaScript Examples
@@ -176,16 +248,30 @@ impl PerspectiveViewerElement {
                 update_task?;
                 let jstable = JsFuture::from(promise).await?;
 
-                if let Some(table) =
-                    wasm_bindgen_derive::try_from_js_option::<perspective_js::Table>(jstable)?
+                // TODO add view here?
+                if let Ok(Some(table)) = wasm_bindgen_derive::try_from_js_option::<
+                    perspective_js::Table,
+                >(jstable.clone())
                 {
+                    let client = table.get_client().await;
+                    session.set_client(client.get_client().clone());
+                    let name = table.get_name().await;
                     tracing::debug!(
-                        "Successfully loaded {:.0} rows from Table",
-                        table.size().await?
+                        "Loading {:.0} rows from Table {}",
+                        table.size().await?,
+                        name
                     );
 
-                    session.set_table(table.get_table().clone()).await?;
-                    session.validate().await?.create_view().await
+                    if session.set_table(name).await? {
+                        session.validate().await?.create_view().await?;
+                    }
+
+                    Ok(&session)
+                } else if let Ok(Some(client)) =
+                    wasm_bindgen_derive::try_from_js_option::<perspective_js::Client>(jstable)
+                {
+                    session.set_client(client.get_client().clone());
+                    Ok(&session)
                 } else {
                     Err(ApiError::new("Invalid Table"))
                 }
@@ -368,6 +454,12 @@ impl PerspectiveViewerElement {
                     PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
                 });
 
+            if let OptionalUpdate::Update(name) = decoded_update.table.clone() {
+                if this.session.set_table(name).await? {
+                    this.reset_all().await?;
+                }
+            };
+
             this.restore_and_render(decoded_update, async move { Ok(result.await?) })
                 .await?;
             Ok(())
@@ -407,14 +499,14 @@ impl PerspectiveViewerElement {
     /// });
     /// ```
     pub fn save(&self, format: Option<String>) -> ApiFuture<JsValue> {
-        let viewer_config_task = self.get_viewer_config();
+        let this = self.clone();
         ApiFuture::new(async move {
             let format = format
                 .as_ref()
                 .map(|x| ViewerConfigEncoding::from_str(x))
                 .transpose()?;
 
-            let viewer_config = viewer_config_task.await?;
+            let viewer_config = this.get_viewer_config().await?;
             viewer_config.encode(&format)
         })
     }
@@ -468,9 +560,11 @@ impl PerspectiveViewerElement {
             ExportMethod::Csv
         };
 
-        let js_task = self.export_method_to_jsvalue(method);
-        let copy_task = copy_to_clipboard(js_task, MimeType::TextPlain);
-        ApiFuture::new(copy_task)
+        let this = self.clone();
+        ApiFuture::new(async move {
+            let js_task = this.export_method_to_jsvalue(method);
+            copy_to_clipboard(js_task, MimeType::TextPlain).await
+        })
     }
 
     /// Reset the viewer's `ViewerConfig` to the default.

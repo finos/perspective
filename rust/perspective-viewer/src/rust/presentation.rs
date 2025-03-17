@@ -105,6 +105,13 @@ impl Presentation {
         theme
     }
 
+    pub fn is_visible(&self) -> bool {
+        self.viewer_elem
+            .offset_parent()
+            .map(|x| !x.is_null())
+            .unwrap_or(false)
+    }
+
     pub fn get_title(&self) -> Option<String> {
         self.name.borrow().clone()
     }

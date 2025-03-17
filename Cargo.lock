@@ -2184,6 +2184,7 @@ dependencies = [
  "itertools 0.10.5",
  "js-intern",
  "js-sys",
+ "macro_rules_attribute",
  "nom",
  "perspective-client",
  "perspective-js",

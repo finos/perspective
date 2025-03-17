@@ -26,18 +26,18 @@ export function toggle_edit_mode(mode = undefined) {
             ];
     }
 
+    this.parentElement?.setSelection();
+    this._edit_mode = mode;
     if (this.model) {
         this.model._edit_mode = mode;
-        this.parentElement?.setSelection();
         this.model._selection_state = {
             selected_areas: [],
             dirty: true,
         };
+    }
 
-        this._edit_mode = mode;
-        if (this._edit_button !== undefined) {
-            this._edit_button.dataset.editMode = mode;
-        }
+    if (this._edit_button !== undefined) {
+        this._edit_button.dataset.editMode = mode;
     }
 
     this.dataset.editMode = mode;

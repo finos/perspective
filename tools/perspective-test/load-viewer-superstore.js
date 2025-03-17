@@ -21,7 +21,7 @@ async function load() {
     let csv = await resp.text();
     const viewer = document.querySelector("perspective-viewer");
     const worker = await perspective.worker();
-    const table = worker.table(csv);
+    const table = worker.table(csv, { name: "load-viewer-superstore" });
     await viewer.load(table);
     const config = {
         plugin: "datagrid",
@@ -30,7 +30,7 @@ async function load() {
         columns: ["Sales", "Profit"],
         master: false,
         name: "Sales Report",
-        table: "superstore",
+        table: "load-viewer-superstore",
         linked: false,
         title: "Sales Report 2",
     };

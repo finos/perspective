@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::path::Path;
-use std::process::{exit, Command};
+use std::process::{Command, exit};
 
 use clap::*;
 
@@ -89,17 +89,17 @@ fn opt(outpath: &Path, is_release: bool) {
             .unwrap();
     }
 
-    let mut cmd = Command::new("cargo");
-    cmd.args(["run"])
-        .args(["-p", "perspective-bootstrap"])
-        .args(["--target", env!("TARGET")])
-        .args(["--"]);
+    // let mut cmd = Command::new("cargo");
+    // cmd.args(["run"])
+    //     .args(["-p", "perspective-bootstrap"])
+    //     .args(["--target", env!("TARGET")])
+    //     .args(["--"]);
 
-    if is_release {
-        cmd.args(["--release"]);
-    }
+    // if is_release {
+    //     cmd.args(["--release"]);
+    // }
 
-    cmd.args([outpath]).execute();
+    // cmd.args([outpath]).execute();
 }
 
 fn main() {

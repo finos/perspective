@@ -16,13 +16,15 @@ use std::sync::Arc;
 
 use derivative::Derivative;
 use futures::channel::oneshot;
-use futures::future::LocalBoxFuture;
 use js_sys::{Function, Uint8Array};
 use macro_rules_attribute::apply;
 #[cfg(doc)]
 use perspective_client::SystemInfo;
-use perspective_client::{ReconnectCallback, Session, TableData, TableInitOptions};
+use perspective_client::{
+    ClientError, ReconnectCallback, Session, TableData, TableInitOptions, asyncfn,
+};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
 pub use crate::table::*;
@@ -84,6 +86,7 @@ impl ProxySession {
 #[apply(inherit_docs)]
 #[inherit_doc = "client.md"]
 #[wasm_bindgen]
+#[derive(TryFromJsValue, Clone)]
 pub struct Client {
     pub(crate) close: Option<Function>,
     pub(crate) client: perspective_client::Client,
@@ -106,8 +109,11 @@ impl<I> JsReconnect<I> {
     fn run_all(
         &self,
         args: I,
-    ) -> impl Future<Output = Result<(), Box<dyn Error + Send + Sync + 'static>>> + Send + Sync + 'static
-    {
+    ) -> impl Future<Output = Result<(), Box<dyn Error + Send + Sync + 'static>>>
+    + Send
+    + Sync
+    + 'static
+    + use<I> {
         let (sender, receiver) = oneshot::channel::<Result<(), Box<dyn Error + Send + Sync>>>();
         let p = self.0(args);
         let _ = future_to_promise(async move {
@@ -133,6 +139,12 @@ where
     }
 }
 
+impl Client {
+    pub fn get_client(&self) -> &'_ perspective_client::Client {
+        &self.client
+    }
+}
+
 #[wasm_bindgen]
 impl Client {
     #[wasm_bindgen(constructor)]
@@ -145,9 +157,8 @@ impl Client {
                 .unchecked_into::<js_sys::Promise>()
         });
 
-        let client = perspective_client::Client::new_with_callback(move |msg| {
-            Box::pin(send_request.run_all(msg))
-        });
+        let client =
+            perspective_client::Client::new_with_callback(move |msg| send_request.run_all(msg));
 
         Client { close, client }
     }
@@ -193,23 +204,22 @@ impl Client {
                             },
                         });
 
-                    Arc::new(move || {
+                    move || {
                         let fut = JsFuture::from(reconnect.run(()));
-                        Box::pin(async move {
+                        async move {
                             // This error may occur when _awaiting_ the promise returned by the
                             // function
                             if let Err(e) = fut.await {
                                 if let Some(e) = e.dyn_ref::<js_sys::Object>() {
-                                    Err(e.to_string().as_string().unwrap().into())
+                                    Err(ClientError::Unknown(e.to_string().as_string().unwrap()))
                                 } else {
-                                    Err(e.as_string().unwrap().into())
+                                    Err(ClientError::Unknown(e.as_string().unwrap()))
                                 }
                             } else {
                                 Ok(())
                             }
-                        })
-                            as LocalBoxFuture<'static, Result<(), Box<dyn Error>>>
-                    }) as Arc<(dyn Fn() -> _ + Send + Sync)>
+                        }
+                    }
                 }),
             )
             .await?;
@@ -245,14 +255,12 @@ impl Client {
             },
         );
 
+        let poll_loop = LocalPollLoop::new_async(move |x| JsFuture::from(callback.run(x)));
         let id = self
             .client
-            .on_error(Box::new(move |message, reconnect| {
-                let callback = callback.clone();
-                Box::pin(async move {
-                    let _promise = callback.run((message, reconnect));
-                    Ok(())
-                })
+            .on_error(asyncfn!(poll_loop, async move |message, reconnect| {
+                poll_loop.poll((message, reconnect)).await;
+                Ok(())
             }))
             .await?;
 

@@ -79,6 +79,8 @@ js-intern = "0.3.1"
 # JavaScript stdlib bindings
 js-sys = "0.3.64"
 
+macro_rules_attribute = "0.2.0"
+
 # Parse ExprTK for syntax highlighting.
 nom = "7.1.1"
 

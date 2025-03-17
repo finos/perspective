@@ -64,6 +64,9 @@ pub enum ClientError {
     ProtoError(#[from] prost::EncodeError),
 }
 
+unsafe impl Send for ClientError {}
+unsafe impl Sync for ClientError {}
+
 pub type ClientResult<T> = Result<T, ClientError>;
 
 impl From<proto::response::ClientResp> for ClientError {

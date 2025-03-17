@@ -38,7 +38,7 @@ pub use datetime::*;
 pub use debounce::*;
 pub use hooks::*;
 pub use number_format::*;
-pub use perspective_client::clone;
+pub use perspective_client::{asyncfn, clone};
 pub use pubsub::*;
 pub use scope::*;
 pub use tee::*;

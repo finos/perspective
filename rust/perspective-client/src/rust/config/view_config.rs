@@ -32,7 +32,7 @@ pub struct ViewConfig {
     pub split_by: Vec<String>,
 
     #[serde(default)]
-    pub columns: Vec<Option<String>>,
+    pub sort: Vec<Sort>,
 
     #[serde(default)]
     pub filter: Vec<Filter>,
@@ -42,10 +42,10 @@ pub struct ViewConfig {
     pub filter_op: FilterReducer,
 
     #[serde(default)]
-    pub sort: Vec<Sort>,
+    pub expressions: Expressions,
 
     #[serde(default)]
-    pub expressions: Expressions,
+    pub columns: Vec<Option<String>>,
 
     #[serde(default)]
     pub aggregates: HashMap<String, Aggregate>,

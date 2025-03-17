@@ -10,7 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::pin::Pin;
 use std::sync::Arc;
 
 use futures::Future;
@@ -18,7 +17,7 @@ use prost::Message;
 
 use crate::proto::request::ClientReq;
 use crate::proto::{Request, Response};
-use crate::{Client, ClientError};
+use crate::{Client, ClientError, asyncfn};
 #[cfg(doc)]
 use crate::{Table, View};
 
@@ -93,9 +92,9 @@ impl ProxySession {
     pub fn new(
         client: Client,
         send_response: impl Fn(&[u8]) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
-            + Send
-            + Sync
-            + 'static,
+        + Send
+        + Sync
+        + 'static,
     ) -> Self {
         ProxySession {
             parent: client,
@@ -117,14 +116,9 @@ impl Session<ClientError> for ProxySession {
         let callback = self.callback.clone();
         match req.client_req.as_ref() {
             Some(ClientReq::ViewOnUpdateReq(_)) => {
-                let on_update = move |response| -> Pin<
-                    Box<dyn Future<Output = Result<(), ClientError>> + Send>,
-                > {
-                    let callback = callback.clone();
-                    Box::pin(async move { encode(response, callback) })
-                };
-
-                self.parent.subscribe(&req, Box::new(on_update)).await?
+                let on_update =
+                    asyncfn!(callback, async move |response| encode(response, callback));
+                self.parent.subscribe(&req, on_update).await?
             },
             Some(_) => {
                 let on_update = move |response| encode(response, callback);
@@ -135,7 +129,7 @@ impl Session<ClientError> for ProxySession {
             None => {
                 return Err(ClientError::Internal(
                     "ProxySession::handle_request: invalid request".to_string(),
-                ))
+                ));
             },
         };
 

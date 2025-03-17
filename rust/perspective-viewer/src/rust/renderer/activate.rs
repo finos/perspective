@@ -12,7 +12,7 @@
 
 use std::future::Future;
 
-use perspective_js::utils::ApiResult;
+use perspective_js::utils::{ApiResult, ToApiError};
 use wasm_bindgen::JsCast;
 use web_sys::*;
 
@@ -39,7 +39,7 @@ pub async fn activate_plugin<T>(
     }
 
     let result = task.await;
-    let first_child = viewer.children().item(0).unwrap();
+    let first_child = viewer.children().item(0).into_apierror()?;
     if first_child != *plugin.unchecked_ref::<Element>() {
         viewer.remove_child(&first_child)?;
     }

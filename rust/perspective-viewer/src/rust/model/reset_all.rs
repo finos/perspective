@@ -10,69 +10,22 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { Widget } from "@lumino/widgets";
-import { Message } from "@lumino/messaging";
+use super::structural::*;
+use crate::utils::*;
+use crate::*;
 
-import type * as psp_viewer from "@finos/perspective-viewer";
-import type * as psp from "@finos/perspective";
-
-interface IPerspectiveViewerWidgetOptions {
-    node: HTMLElement;
-    viewer: psp_viewer.HTMLPerspectiveViewerElement;
-}
-
-export class PerspectiveViewerWidget extends Widget {
-    viewer: psp_viewer.HTMLPerspectiveViewerElement;
-    _title: string;
-    _is_table_loaded: boolean;
-    _is_pivoted: boolean;
-    _restore_config?: () => Promise<void>;
-    task?: Promise<void>;
-
-    constructor({ viewer, node }: IPerspectiveViewerWidgetOptions) {
-        super({ node });
-        this.viewer = viewer;
-        this._title = "";
-        this._is_table_loaded = false;
-        this._is_pivoted = false;
-    }
-
-    get name(): string {
-        return this._title;
-    }
-
-    toggleConfig(): Promise<void> {
-        return this.viewer.toggleConfig();
-    }
-
-    restore(config: psp_viewer.ViewerConfigUpdate) {
-        this._title = config.title as string;
-        this.title.label = config.title as string;
-        const restore_config = () => this.viewer.restore({ ...config });
-        return restore_config();
-    }
-
-    async save() {
-        let config = {
-            ...(await this.viewer.save()),
-        };
-
-        delete config["theme"];
-        delete config["settings"];
-        return config;
-    }
-
-    removeClass(name: string) {
-        super.removeClass(name);
-        this.viewer && this.viewer.classList.remove(name);
-    }
-
-    async onCloseRequest(msg: Message) {
-        super.onCloseRequest(msg);
-        if (this.viewer.parentElement) {
-            this.viewer.parentElement.removeChild(this.viewer);
-        }
-
-        await this.viewer.delete().then(() => this.viewer.free());
+pub trait ResetAll: HasRenderer + HasSession + HasPresentation {
+    /// Completely reset viewer state
+    fn reset_all(&self) -> ApiFuture<()> {
+        clone!(self.session(), self.renderer(), self.presentation());
+        ApiFuture::new(async move {
+            session.reset(true).await?;
+            presentation.reset_columns_configs();
+            renderer.reset(None).await?;
+            presentation.reset_available_themes(None).await;
+            Ok(())
+        })
     }
 }
+
+impl<T: HasRenderer + HasSession + HasPresentation> ResetAll for T {}

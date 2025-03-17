@@ -38,7 +38,7 @@ pub fn error_message(p: &ErrorMessageProps) -> yew::Html {
             || drop(sub)
         },
     );
-    tracing::error!("Fucked");
+
     html! {
         <>
             <LocalStyle href={css!("render-warning")} />

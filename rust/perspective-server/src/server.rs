@@ -15,8 +15,8 @@ use std::error::Error;
 use std::sync::Arc;
 
 use async_lock::RwLock;
-use futures::future::BoxFuture;
 use futures::Future;
+use futures::future::BoxFuture;
 pub use perspective_client::Session;
 
 use crate::ffi;

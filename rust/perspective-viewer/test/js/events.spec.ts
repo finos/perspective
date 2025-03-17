@@ -82,6 +82,7 @@ test.describe("Events", () => {
             group_by: ["State"],
             settings: true,
             sort: [],
+            table: "load-viewer-csv",
             theme: "Pro Light",
             title: null,
         });

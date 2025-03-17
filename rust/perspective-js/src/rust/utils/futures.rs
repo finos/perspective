@@ -20,7 +20,7 @@ use wasm_bindgen::__rt::IntoJsResult;
 use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi};
 use wasm_bindgen::describe::WasmDescribe;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
 use super::errors::*;
 
@@ -163,6 +163,7 @@ pub impl Result<JsValue, JsValue> {
     /// case (instead of whatever the `async` returns), which is helpful for
     /// detecting this condition when debugging.
     fn ignore_view_delete(self) -> Result<JsValue, JsValue> {
+        tracing::error!("A");
         self.or_else(|x| match x.dyn_ref::<PerspectiveViewNotFoundError>() {
             Some(_) => Ok(js_intern::js_intern!(CANCELLED_MSG).clone()),
             None => Err(x),
@@ -173,6 +174,7 @@ pub impl Result<JsValue, JsValue> {
 #[extend::ext]
 pub impl Result<JsValue, ApiError> {
     fn ignore_view_delete(self) -> Result<JsValue, ApiError> {
+        tracing::error!("B");
         self.or_else(|x| {
             let f: JsValue = x.clone().into();
             match f.dyn_ref::<PerspectiveViewNotFoundError>() {

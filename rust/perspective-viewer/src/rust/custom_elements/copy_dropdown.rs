@@ -85,10 +85,12 @@ impl CopyDropDownMenuElement {
             let model = model.cloned();
             let modal_rc = self.modal.clone();
             move |x: ExportMethod| {
-                let js_task = model.export_method_to_jsvalue(x);
-                let copy_task = copy_to_clipboard(js_task, x.mimetype());
+                let model = model.clone();
                 let modal = modal_rc.borrow().clone().unwrap();
+                // TODO clean me up
                 spawn_local(async move {
+                    let js_task = model.export_method_to_jsvalue(x);
+                    let copy_task = copy_to_clipboard(js_task, x.mimetype());
                     let result = copy_task.await;
                     crate::js_log_maybe!({
                         result?;

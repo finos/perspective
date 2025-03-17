@@ -164,58 +164,10 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
         await this.flush();
     }
 
-    /**
-     * Add a new `Table` to the workspace, so that it can be bound by viewers.
-     * Each `Table` is identified by a unique `name`.
-     */
-    async addTable(name: string, table: Promise<psp.Table>) {
-        this.workspace!.addTable(name, table);
-        await this.flush();
-    }
-
-    /**
-     * Deleta a table by name from this workspace
-     * @param name
-     * @returns
-     */
-    getTable(name: string) {
-        return this.workspace!.getTable(name);
-    }
-
-    /**
-     * Replace a `Table` by name. As `Table` doe snot guarantee the same
-     * structure, this will wipe the viewer's state.
-     * @param name
-     * @param table
-     */
-    async replaceTable(name: string, table: Promise<psp.Table>) {
-        this.workspace!.replaceTable(name, table);
-        await this.flush();
-    }
-
-    /**
-     * Remove a `Table` by name.
-     * @param name
-     * @returns
-     */
-    removeTable(name: string) {
-        return this.workspace!.removeTable(name);
-    }
-
-    /**
-     * A `Map()` of `perspective.Table()` by name.  The names set here will auto
-     * wire any child `perspective-viewer` elements in this Workspace's subtree,
-     * by looking up their respective `table` attribute.
-     *
-     * Calling methods on this `Map()` may have side-effects, as
-     * `PerspectiveViewerHTMLElement.load()` is called when a new `Table()` is
-     * set with a name matching an existing child `perspective-viewer`.
-     *
-     * @readonly
-     * @memberof HTMLPerspectiveWorkspaceElement
-     */
-    get tables() {
-        return this.workspace!.tables;
+    load(client: any) {
+        if (this.workspace) {
+            this.workspace.client = client;
+        }
     }
 
     /**
