@@ -111,11 +111,11 @@ test.describe("Settings", () => {
 
             consoleLogs.expectedLogs.push(
                 "error",
-                /Failed to apply config: Error: `restore\(\)` called before `load\(\)`.*/
+                /Failed to apply config: Error: Trying to draw the viewer with no table attached/
             );
             consoleLogs.expectedLogs.push(
                 "error",
-                /Caught error: Error: `restore\(\)` called before `load\(\)`.*/
+                /Caught error: Error: Trying to draw the viewer with no table attached/
             );
         });
     });

@@ -92,7 +92,9 @@ function tests(context, compare) {
 
         // NOTE This is the error message we expect when `restore()` is called
         // without a `Table`, subject to change.
-        expect(result).toEqual("Error: `restore()` called before `load()`");
+        expect(result).toEqual(
+            "Error: Trying to draw the viewer with no table attached"
+        );
         await page.evaluate(async () => {
             await workspace.replaceTable(
                 "errored",
