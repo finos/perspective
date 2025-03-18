@@ -10,8 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { getSvgContentString, compareContentsToSnapshot } from "./utils.ts";
-import { test } from "./index.js";
+import {
+    getSvgContentString,
+    compareContentsToSnapshot,
+    shadow_click,
+} from "./utils.ts";
+import { test, expect } from "./index.js";
 import type { PerspectiveViewerConfig } from "@finos/perspective-viewer";
 
 export type ContentExtractor = (page: any) => Promise<string>;
@@ -32,6 +36,37 @@ function runSimpleCompareTest(
         await restoreViewer(page, viewerConfig);
         const content = await extractContent(page);
         await compareContentsToSnapshot(content, snapshotPath);
+    };
+}
+
+export function runPerspectiveEventClickTest() {
+    return async ({ page }) => {
+        const viewerConfig = {
+            filter: [["date", "<", "2025-01-01"]],
+        };
+        await restoreViewer(page, viewerConfig);
+
+        const viewer = await page.$("perspective-viewer")!;
+        const perspectiveClick = viewer.evaluate(
+            (element) =>
+                new Promise((resolve) =>
+                    element.addEventListener("perspective-click", (event) => {
+                        // extract the detail
+                        resolve(event.detail);
+                    })
+                )
+        );
+
+        await shadow_click(
+            page,
+            "perspective-viewer-datagrid",
+            "regular-table > table > tbody > tr:nth-child(1) > td:nth-child(2)"
+        );
+
+        const detail = await perspectiveClick;
+        const expectedFilter = [["date", "<", "2025-01-01"]];
+        const resultFilter = detail["config"]["filter"];
+        expect(resultFilter).toEqual(expectedFilter);
     };
 }
 
