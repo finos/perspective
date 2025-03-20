@@ -1,3 +1,15 @@
+# [v3.4.3](https://github.com/finos/perspective/releases/tag/v3.4.3)
+
+_20 March 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.4.2...v3.4.3))
+
+Fixes
+
+- Fix date filters in perspective-{select,click} events [#2957](https://github.com/finos/perspective/pull/2957)
+
+Misc
+
+- Invalidate viewer session before loading table [#2958](https://github.com/finos/perspective/pull/2958)
+
 # [v3.4.2](https://github.com/finos/perspective/releases/tag/v3.4.2)
 
 _14 March 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.4.1...v3.4.2))
