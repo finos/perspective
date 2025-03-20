@@ -580,7 +580,7 @@ impl Session {
             .borrow()
             .table
             .as_ref()
-            .ok_or("`restore()` called before `load()`")?
+            .ok_or("Trying to draw the viewer with no table attached")?
             .clone();
 
         let valid_recs = table.validate_expressions(config.expressions).await?;

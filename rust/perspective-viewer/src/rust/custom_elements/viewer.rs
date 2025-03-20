@@ -154,6 +154,7 @@ impl PerspectiveViewerElement {
     /// ```
     pub fn load(&self, table: JsValue) -> ApiFuture<()> {
         tracing::info!("Loading Table");
+        self.session.invalidate();
         let promise = table
             .clone()
             .dyn_into::<js_sys::Promise>()

@@ -76,8 +76,8 @@ function playwright(pkg, is_jlab) {
 
     return sh`
         TZ=UTC
-        npx playwright test 
-        --config=tools/perspective-test/playwright.config.ts 
+        npx playwright test
+        --config=tools/perspective-test/playwright.config.ts
         ${args}
     `.env(env);
 }
