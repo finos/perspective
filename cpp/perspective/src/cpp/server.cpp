@@ -2141,7 +2141,10 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                             std::stringstream ss;
                             ss << std::setfill('0') << std::setw(4) << tm.year()
                                << "-" << std::setfill('0') << std::setw(2)
-                               << tm.month() << "-" << std::setfill('0')
+                               // Increment month by 1, as date::month is [1-12] but
+                               // t_date::month() is [0-11]
+                               << tm.month() + 1
+                               << "-" << std::setfill('0')
                                << std::setw(2) << tm.day();
                             s->set_string(ss.str());
                             break;

@@ -14,6 +14,7 @@ import { test } from "@finos/perspective-test";
 import {
     compareContentsToSnapshot,
     run_standard_tests,
+    runPerspectiveEventClickTest,
 } from "@finos/perspective-test";
 
 async function getDatagridContents(page) {
@@ -88,4 +89,28 @@ test.describe("Datagrid with superstore data set", () => {
             "column-headers-are-printed-correctly-split-by-a-date-column.txt"
         );
     });
+});
+
+test.describe("Datagrid with superstore arrow data set", () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto(
+            "/tools/perspective-test/src/html/all-types-small-multi-arrow-test.html"
+        );
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+            });
+        });
+    });
+
+    test(
+        `Filter based on date results in correct perspective-click event`,
+        runPerspectiveEventClickTest()
+    );
 });
