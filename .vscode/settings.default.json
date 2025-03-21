@@ -7,9 +7,7 @@
     },
     "python.formatting.provider": "black",
     "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [
-        "rust/perspective-python/perspective/tests/"
-    ],
+    "python.testing.pytestArgs": ["rust/perspective-python/perspective/tests/"],
     "rust-analyzer.server.extraEnv": {
         "PSP_ROOT_DIR": "../..",
         "PSP_DISABLE_CPP": "1",
@@ -46,5 +44,15 @@
     "playwright.env": {
         "TZ": "UTC"
     },
-    "clangd.arguments": ["--enable-config"]
+    "clangd.arguments": ["--enable-config"],
+    "[javascript][typescript][typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[markdown][less][html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "prettier.proseWrap": "always"
 }
