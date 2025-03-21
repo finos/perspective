@@ -199,6 +199,21 @@ export async function table_suite(perspective, metadata) {
     }
 
     await benchmark({
+        name: `.table(arrow, {limit: 1000})`,
+        before_all,
+        metadata,
+        async after(_, table) {
+            if (check_version_gte(metadata.version, "3.0.0")) {
+                await table.delete();
+            }
+        },
+        async test({ arrow }) {
+            return await perspective.table(arrow.slice(), { limit: 1000 });
+        },
+    });
+
+
+    await benchmark({
         name: `.table(arrow)`,
         before_all,
         metadata,
@@ -209,6 +224,32 @@ export async function table_suite(perspective, metadata) {
         },
         async test({ table, arrow }) {
             return await perspective.table(arrow.slice());
+        },
+    });
+
+
+    await benchmark({
+        name: `table.update(arrow)`,
+        before_all,
+        metadata,
+        async before({ arrow }) {
+            let table2 = await perspective.table(arrow.slice(), { limit: 1000 });
+            return table2
+        },
+        async after(_, table) {
+            if (check_version_gte(metadata.version, "3.0.0")) {
+                if (!check_version_gte(metadata.version, "3.4.3")) {
+                    // Bug with old versions of perspective segfault when you delete
+                    // a table with pending updates.
+                    await table.size();
+                }
+                await table.delete();
+            }
+        },
+        async test({ arrow }, table2) {
+            for (let i = 0; i < 3; i++) {
+                await table2.update(arrow.slice());
+            }
         },
     });
 

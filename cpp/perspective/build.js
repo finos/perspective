@@ -42,7 +42,7 @@ try {
     execSync(`mkdirp ${cwd}`, { stdio });
     process.env.CLICOLOR_FORCE = 1;
     execSync(
-        `emcmake cmake ${__dirname} ${cmake_flags} -DCMAKE_BUILD_TYPE=${env}`,
+        `emcmake cmake ${__dirname} ${cmake_flags} -DCMAKE_BUILD_TYPE=${env} -DRAPIDJSON_BUILD_EXAMPLES=OFF`,
         {
             cwd,
             stdio,

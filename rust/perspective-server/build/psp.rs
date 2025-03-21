@@ -26,6 +26,9 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     let profile = std::env::var("PROFILE").unwrap();
     dst.always_configure(true);
     dst.define("CMAKE_BUILD_TYPE", profile.as_str());
+    dst.define("ARROW_BUILD_EXAMPLES", "OFF");
+    dst.define("RAPIDJSON_BUILD_EXAMPLES", "OFF");
+    dst.define("ARROW_CXX_FLAGS_DEBUG", "-Wno-error");
 
     if cfg!(target_os = "macos") {
         // Set CMAKE_OSX_ARCHITECTURES et al. for Mac builds.  Arrow does not forward on

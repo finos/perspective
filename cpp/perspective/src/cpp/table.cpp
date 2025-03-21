@@ -182,7 +182,7 @@ Table::validate_expressions(
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
     t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"});
-    auto gnode = std::make_shared<t_gnode>(in_schema, out_schema);
+    auto gnode = std::make_shared<t_gnode>(in_schema, out_schema, m_limit);
     gnode->init();
     return gnode;
 }
@@ -226,7 +226,7 @@ Table::remove_port(t_uindex port_id) const {
 
 void
 Table::calculate_offset(std::uint32_t row_count) {
-    m_offset = (m_offset + row_count) % m_limit;
+    m_offset = m_offset + row_count;
 }
 
 t_uindex
@@ -518,7 +518,9 @@ PROMOTE_IMPL(DTYPE_INT32, DTYPE_INT64, DTYPE_INT64)
 template <typename A>
 static A
 json_into(const rapidjson::Value& value) {
-    if constexpr (std::is_same_v<A, std::int32_t> || std::is_same_v<A, std::int64_t> || std::is_same_v<A, double>) {
+    if constexpr (std::is_same_v<A, std::int32_t>
+                  || std::is_same_v<A, std::int64_t>
+                  || std::is_same_v<A, double>) {
         if (value.IsInt()) {
             return value.GetInt();
         }
@@ -536,7 +538,8 @@ json_into(const rapidjson::Value& value) {
                 return std::atoi(value.GetString());
             } else if constexpr (std::is_same_v<A, std::int64_t>) {
                 return std::atoll(value.GetString());
-            } else if constexpr (std::is_same_v<A, double> || std::is_same_v<A, float>) {
+            } else if constexpr (std::is_same_v<A, double>
+                                 || std::is_same_v<A, float>) {
                 return std::atof(value.GetString());
             } else {
                 static_assert(!std::is_same_v<A, A>, "No coercion for type");
@@ -758,9 +761,11 @@ fill_column_json(
         case t_dtype::DTYPE_BOOL: {
             if (value.IsBool()) [[likely]] {
                 col->set_nth<bool>(i, value.GetBool());
-            } else if (value.IsString() && istrequals(value.GetString(), "true")) {
+            } else if (value.IsString()
+                       && istrequals(value.GetString(), "true")) {
                 col->set_nth<bool>(i, true);
-            } else if (value.IsString() && istrequals(value.GetString(), "false")) {
+            } else if (value.IsString()
+                       && istrequals(value.GetString(), "false")) {
                 col->set_nth<bool>(i, false);
             } else if (value.IsInt()) {
                 col->set_nth<bool>(i, value.GetInt() != 0);
@@ -948,7 +953,7 @@ Table::update_cols(const std::string_view& data, std::uint32_t port_id) {
 
     if (is_implicit && !document.GetObj().HasMember("__INDEX__")) {
         for (std::uint32_t ii = 0; ii < nrows; ii++) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, (m_offset + ii) % m_limit);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, m_offset + ii);
         }
     }
 
@@ -1088,8 +1093,8 @@ Table::from_cols(
 
     if (is_implicit) {
         for (t_uindex ii = 0; ii < nrows; ii++) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii);
         }
     }
 
@@ -1158,7 +1163,7 @@ Table::update_rows(const std::string_view& data, std::uint32_t port_id) {
     // 3.) Fill table
     for (const auto& row : document.GetArray()) {
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, (ii + m_offset) % m_limit);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, ii + m_offset);
         }
 
         // col_count = m_column_names.size();
@@ -1336,8 +1341,8 @@ Table::from_rows(
         }
 
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii);
         }
 
         ii++;
@@ -1408,7 +1413,7 @@ Table::update_ndjson(const std::string_view& data, std::uint32_t port_id) {
     bool is_finished = false;
     while (!is_finished) {
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, (ii + m_offset) % m_limit);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, ii + m_offset);
         }
 
         for (const auto& it : document.GetObj()) {
@@ -1588,8 +1593,8 @@ Table::from_ndjson(
         }
 
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii);
         }
 
         ii++;

@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#include "perspective/base.h"
+#include "perspective/raw_types.h"
 #include <perspective/first.h>
 #include <perspective/context_base.h>
 #include <perspective/get_data_extents.h>
@@ -101,6 +103,7 @@ t_ctx0::notify(
         flattened.get_const_column("psp_pkey");
     std::shared_ptr<const t_column> op_sptr =
         flattened.get_const_column("psp_op");
+    auto old_pkey_col = flattened.get_column("psp_old_pkey");
     const t_column* pkey_col = pkey_sptr.get();
     const t_column* op_col = op_sptr.get();
 
@@ -173,11 +176,20 @@ t_ctx0::notify(
             m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
         std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
         t_op op = static_cast<t_op>(op_);
-        bool existed = *(existed_col->get_nth<bool>(idx));
+        const auto existed = *(existed_col->get_nth<bool>(idx));
+        const auto old_pkey = old_pkey_col->get_scalar(idx);
 
         switch (op) {
             case OP_INSERT: {
-                if (existed) {
+                if (old_pkey.is_valid()) {
+                    m_traversal->move_row(
+                        *m_gstate,
+                        *(m_expression_tables->m_master),
+                        m_config,
+                        old_pkey,
+                        pkey
+                    );
+                } else if (existed) {
                     m_traversal->update_row(
                         *m_gstate,
                         *(m_expression_tables->m_master),

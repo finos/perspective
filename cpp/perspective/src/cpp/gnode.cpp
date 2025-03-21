@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#include "perspective/raw_types.h"
 #include <perspective/first.h>
 #include <perspective/context_unit.h>
 #include <perspective/context_zero.h>
@@ -48,7 +49,9 @@ calc_negate(t_tscalar val) {
     return val.negate();
 }
 
-t_gnode::t_gnode(t_schema input_schema, t_schema output_schema) :
+t_gnode::t_gnode(
+    t_schema input_schema, t_schema output_schema, t_uindex limit
+) :
     m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
 #ifdef PSP_PARALLEL_FOR
     ,
@@ -60,6 +63,7 @@ t_gnode::t_gnode(t_schema input_schema, t_schema output_schema) :
     m_output_schema(std::move(output_schema)),
     m_init(false),
     m_id(0),
+    m_limit(limit),
     m_last_input_port_id(0),
     m_pool_cleanup([]() {}) {
     PSP_TRACE_SENTINEL();
@@ -85,6 +89,10 @@ t_gnode::t_gnode(t_schema input_schema, t_schema output_schema) :
         existed_schema
     };
     m_epoch = std::chrono::high_resolution_clock::now();
+
+    m_input_schema.add_column(
+        "psp_old_pkey", m_input_schema.get_dtype("psp_pkey")
+    );
 }
 
 t_gnode::~t_gnode() {
@@ -97,7 +105,8 @@ void
 t_gnode::init() {
     PSP_TRACE_SENTINEL();
 
-    m_gstate = std::make_shared<t_gstate>(m_input_schema, m_output_schema);
+    m_gstate =
+        std::make_shared<t_gstate>(m_input_schema, m_output_schema, m_limit);
     m_gstate->init();
 
     // Create and store the main input port, which is always port 0. The next
@@ -123,7 +132,7 @@ t_gnode::init() {
 
     for (const auto& iter : m_input_ports) {
         std::shared_ptr<t_port> input_port = iter.second;
-        input_port->get_table()->flatten();
+        input_port->get_table()->flatten(m_limit);
     }
 
     // Initialize expression-related state
@@ -186,11 +195,13 @@ t_gnode::calc_transition(
 
     if (!row_pre_existed && !cur_valid && !t_env::backout_invalid_neq_ft()) {
         trans = VALUE_TRANSITION_NEQ_FT;
-    } else if (row_pre_existed && !prev_valid && !cur_valid && !t_env::backout_eq_invalid_invalid()) {
+    } else if (row_pre_existed && !prev_valid && !cur_valid
+               && !t_env::backout_eq_invalid_invalid()) {
         trans = VALUE_TRANSITION_EQ_TT;
     } else if (!prev_existed && !exists) {
         trans = VALUE_TRANSITION_EQ_FF;
-    } else if (row_pre_existed && exists && !prev_valid && cur_valid && !t_env::backout_nveq_ft()) {
+    } else if (row_pre_existed && exists && !prev_valid && cur_valid
+               && !t_env::backout_nveq_ft()) {
         trans = VALUE_TRANSITION_NVEQ_FT;
     } else if (prev_existed && exists && prev_cur_eq) {
         trans = VALUE_TRANSITION_EQ_TT;
@@ -298,15 +309,21 @@ t_gnode::_process_table(t_uindex port_id) {
     }
 
     m_was_updated = true;
-    flattened = input_port->get_table()->flatten();
+    flattened = input_port->get_table()->flatten(m_limit);
 
     PSP_GNODE_VERIFY_TABLE(flattened);
     PSP_GNODE_VERIFY_TABLE(get_table());
 
     t_uindex flattened_num_rows = flattened->num_rows();
-
     std::vector<t_rlookup> row_lookup(flattened_num_rows);
     t_column* pkey_col = flattened->get_column("psp_pkey").get();
+
+#if PSP_DEBUG
+    LOG_DEBUG("m_mapping");
+    for (const auto [k, v] : m_gstate->get_pkey_map()) {
+        LOG_DEBUG("KEY: " << k << " , VALUE: " << v);
+    }
+#endif
 
     for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
         // See if each primary key in flattened already exist in the dataset

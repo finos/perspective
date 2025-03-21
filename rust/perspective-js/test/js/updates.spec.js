@@ -1508,12 +1508,11 @@ async function match_delta(perspective, delta, expected) {
 
         test("{limit: 5} with 2 updates of size 4", async function () {
             var table = await perspective.table(data, { limit: 5 });
-            table.update(data);
+            await table.update(data);
             var view = await table.view();
             let result = await view.to_json();
-            expect(result).toEqual(
-                data.slice(1).concat(data.slice(3, 4)).concat(data.slice(0, 1))
-            );
+            let expected = data.concat(data).slice(-5);
+            expect(result).toEqual(expected);
             view.delete();
             table.delete();
         });
@@ -3369,6 +3368,21 @@ async function match_delta(perspective, delta, expected) {
             }
 
             await view2.delete();
+            await tbl.delete();
+        });
+
+        test("Delete a table with pending updates", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "string",
+                    x: "string",
+                },
+                { index: "index" }
+            );
+
+            for (let i = 0; i < 3; i++) {
+                await tbl.update({ index: ["a", "d", "b"], x: ["abc", "def", "acc"] });
+            }
             await tbl.delete();
         });
     });

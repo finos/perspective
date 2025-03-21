@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <ostream>
 #ifdef WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -310,7 +311,16 @@ enum t_ctx_type {
     GROUPED_COLUMNS_CONTEXT
 };
 
-enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR };
+#define FOREACH_T_OP(X)                                                        \
+    X(OP_INSERT)                                                               \
+    X(OP_DELETE)                                                               \
+    X(OP_CLEAR)
+
+#define X(NAME) NAME,
+enum t_op { FOREACH_T_OP(X) };
+#undef X
+
+std::ostream& operator<<(std::ostream& os, const t_op& op);
 
 enum t_value_transition {
     VALUE_TRANSITION_EQ_FF, // Value did not change, and row remains invalid
@@ -451,12 +461,12 @@ void check_init(bool init, const char* file, std::int32_t line);
 
 t_uindex root_pidx();
 
-struct PERSPECTIVE_EXPORT t_cmp_charptr {
-    bool
-    operator()(const char* a, const char* b) const {
-        return std::strcmp(a, b) < 0;
-    }
-};
+struct PERSPECTIVE_EXPORT t_cmp_charptr{
+    bool operator()(const char* a, const char* b)
+        const {return std::strcmp(a, b) < 0;
+} // namespace perspective
+}
+;
 
 template <class Arg1, class Arg2, class Result>
 struct binary_function {
