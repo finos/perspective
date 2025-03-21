@@ -74,7 +74,9 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                         import worker from ${JSON.stringify(args.path)};
                         function make_host(a, b) {
                             function addEventListener(type, callback) {
-                                a.push(callback);
+                                if (type === "message") {
+                                    a.push(callback);
+                                }
                             }
 
                             function removeEventListener(callback) {
@@ -84,9 +86,9 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                                 }
                             }
 
-                            function postMessage(msg) {
+                            function postMessage(msg, ports) {
                                 for (const listener of b) {
-                                    listener({data: msg});
+                                    listener({data: msg, ports: ports});
                                 }
                             }
 
