@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 #pragma once
+#include "perspective/raw_types.h"
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/port.h>
@@ -93,7 +94,11 @@ public:
      * @param input_schema
      * @param output_schema
      */
-    t_gnode(t_schema input_schema, t_schema output_schema);
+    t_gnode(
+        t_schema input_schema,
+        t_schema output_schema,
+        t_uindex limit = std::numeric_limits<t_uindex>::max()
+    );
     ~t_gnode();
 
     void init();
@@ -381,6 +386,7 @@ private:
 
     bool m_init;
     t_uindex m_id;
+    t_uindex m_limit;
 
     // Input ports mapped by integer id
     tsl::ordered_map<t_uindex, std::shared_ptr<t_port>> m_input_ports;
@@ -511,8 +517,18 @@ t_gnode::update_context_from_state(
         // together and pass it to the context.
         std::shared_ptr<t_expression_tables> ctx_expression_tables =
             ctx->get_expression_tables();
+#if PSP_DEBUG
+        LOG_DEBUG("FLATTENED");
+        flattened->pprint();
+        LOG_DEBUG("EXPRESSION_TABLE");
+        ctx_expression_tables->m_flattened->pprint();
+#endif
         std::shared_ptr<t_data_table> joined_flattened =
             flattened->join(ctx_expression_tables->m_flattened);
+#if PSP_DEBUG
+        LOG_DEBUG("JOINED");
+        joined_flattened->pprint();
+#endif
         ctx->notify(*joined_flattened);
     } else {
         // Just use the table from the gnode

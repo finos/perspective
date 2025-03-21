@@ -1508,12 +1508,11 @@ async function match_delta(perspective, delta, expected) {
 
         test("{limit: 5} with 2 updates of size 4", async function () {
             var table = await perspective.table(data, { limit: 5 });
-            table.update(data);
+            await table.update(data);
             var view = await table.view();
             let result = await view.to_json();
-            expect(result).toEqual(
-                data.slice(1).concat(data.slice(3, 4)).concat(data.slice(0, 1))
-            );
+            let expected = data.concat(data).slice(-5);
+            expect(result).toEqual(expected);
             view.delete();
             table.delete();
         });
