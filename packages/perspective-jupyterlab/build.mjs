@@ -131,7 +131,9 @@ async function build_all() {
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     cpy(["src/less/*"], "dist/less");
-    execSync("jupyter labextension build .", { stdio: "inherit" });
+    execSync("jupyter labextension build .", {
+        stdio: "inherit",
+    });
 
     const pkg = JSON.parse(fs.readFileSync("../../package.json").toString());
     const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>

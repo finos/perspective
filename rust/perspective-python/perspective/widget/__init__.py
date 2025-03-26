@@ -15,6 +15,7 @@ import logging
 import os
 import re
 import importlib.metadata
+import inspect
 
 from string import Template
 from ipywidgets import DOMWidget
@@ -25,6 +26,7 @@ __version__ = re.sub(
     "(rc|alpha|beta)", "-\\1.", importlib.metadata.version("perspective-python")
 )
 
+__all__ = ["PerspectiveWidget"]
 
 class PerspectiveWidget(DOMWidget, PerspectiveViewer):
     """:class`~perspective.PerspectiveWidget` allows for Perspective to be used
@@ -82,9 +84,12 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         preserves pivots and applies them.  See `PerspectiveViewer.__init__` for
         arguments that transform the view shown in the widget.
 
+        If an `AsyncTable` is passed in, then certain widget methods like
+        `update()` and `delete()` return coroutines which must be awaited.
+
         Args:
-            data (:obj:`Table`|:obj:`View`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
-                `perspective.Table` instance, a `perspective.View` instance, or
+            data (:obj:`Table`|:obj:`AsyncTable`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
+                `perspective.Table` instance, a `perspective.AsyncTable` instance, or
                 a dataset to be loaded in the widget.
 
         Keyword Arguments:
@@ -152,27 +157,30 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             if limit is not None:
                 self._options.update({"limit": limit})
 
-            self.load(data, **self._options)
+            loading = self.load(data, **self._options)
+            if inspect.isawaitable(loading):
+                import asyncio
+                asyncio.create_task(loading)
 
     def load(self, data, **options):
         """Load the widget with data."""
         # Viewer will ignore **options if `data` is a Table or View.
-        super(PerspectiveWidget, self).load(data, **options)
+        return super(PerspectiveWidget, self).load(data, **options)
 
     def update(self, data):
         """Update the widget with new data."""
-        super(PerspectiveWidget, self).update(data)
+        return super(PerspectiveWidget, self).update(data)
 
     def clear(self):
         """Clears the widget's underlying `Table`."""
-        super(PerspectiveWidget, self).clear()
+        return super(PerspectiveWidget, self).clear()
 
     def replace(self, data):
         """Replaces the widget's `Table` with new data conforming to the same
         schema. Does not clear user-set state. If in client mode, serializes
         the data and sends it to the browser.
         """
-        super(PerspectiveWidget, self).replace(data)
+        return super(PerspectiveWidget, self).replace(data)
 
     def delete(self, delete_table=True):
         """Delete the Widget's data and clears its internal state.
@@ -181,10 +189,11 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             delete_table (`bool`): whether the underlying `Table` will be
                 deleted. Defaults to True.
         """
-        super(PerspectiveWidget, self).delete(delete_table)
+        ret = super(PerspectiveWidget, self).delete(delete_table)
 
         # Close the underlying comm and remove widget from the front-end
         self.close()
+        return ret
 
     @observe("value")
     def handle_message(self, widget, content, buffers):
@@ -201,18 +210,19 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if content["type"] == "connect":
             client_id = content["client_id"]
             logging.debug("view {} connected", client_id)
-            self._sessions[client_id] = self.new_proxy_session(
-                lambda msg: self.send(
+
+            def send_response(msg):
+                self.send(
                     {"type": "binary_msg", "client_id": client_id}, [msg]
                 )
-            )
+            self._sessions[client_id] = self.new_proxy_session(send_response)
         elif content["type"] == "binary_msg":
             [binary_msg] = buffers
             client_id = content["client_id"]
             session = self._sessions[client_id]
-            logging.debug("view {} message {}", client_id, len(binary_msg))
             if session is not None:
-                session.handle_request(binary_msg)
+                import asyncio
+                asyncio.create_task(session.handle_request_async(binary_msg))
             else:
                 logging.error("No session for client_id {}".format(client_id))
         elif content["type"] == "hangup":

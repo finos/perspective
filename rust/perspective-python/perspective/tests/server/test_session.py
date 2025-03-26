@@ -10,7 +10,8 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from perspective import Server, Client, ProxySession
+from perspective import Server, Client, ProxySession, AsyncClient
+import pytest
 
 
 client = Server().new_local_client()
@@ -53,3 +54,21 @@ class TestProxySession(object):
         assert table.size() == 3
         table2.update([{"a": 4, "d": 5}])
         assert table.size() == 4
+
+    @pytest.mark.asyncio
+    async def test_handle_request_async(self):
+        """tests use of ProxySession.handle_request_async() in an AsyncClient callback"""
+        server = Server()
+        client = server.new_local_client()
+
+        def handle_response(bytes):
+            import asyncio
+            asyncio.create_task(sub_client.handle_response(bytes))
+
+        sub_session = ProxySession(client, handle_response)
+        sub_client = AsyncClient(sub_session.handle_request_async, sub_session.close)
+        table = await sub_client.table(data, name="table1")
+        table2 = client.open_table("table1")
+        assert (await table.size()) == 3
+        table2.update([{"a": 4, "d": 5}])
+        assert (await table.size()) == 4

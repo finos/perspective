@@ -52,7 +52,7 @@
         "@finos/perspective-test": "workspace:^",
         "@finos/perspective-metadata": "workspace:^",
         "@types/stoppable": "^1.1.0",
-        "@types/ws": "^8.5.10",
+        "@types/ws": "^8.18.1",
         "apache-arrow": "18.1.0",
         "cpy": "^9.0.1",
         "lodash": "^4.17.21",

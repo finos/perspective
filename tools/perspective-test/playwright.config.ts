@@ -227,7 +227,7 @@ export default defineConfig({
     snapshotPathTemplate:
         "dist/snapshots/{projectName}/{testFilePath}/{arg}{ext}",
     webServer: {
-        command: "node --loader ts-node/esm src/js/start_test_server.ts",
+        command: "tsx src/js/start_test_server.ts",
         port: TEST_SERVER_PORT,
         reuseExistingServer: true,
         stdout: "pipe",

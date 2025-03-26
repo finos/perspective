@@ -330,13 +330,13 @@ impl Client {
 
     /// Send a `ClientReq` and await both the successful completion of the
     /// `send`, _and_ the `ClientResp` which is returned.
-    pub(crate) async fn oneshot(&self, msg: &Request) -> ClientResult<ClientResp> {
+    pub(crate) async fn oneshot(&self, req: &Request) -> ClientResult<ClientResp> {
         let (sender, receiver) = futures::channel::oneshot::channel::<ClientResp>();
-        let on_update = Box::new(move |msg: Response| {
-            sender.send(msg.client_resp.unwrap()).map_err(|x| x.into())
+        let on_update = Box::new(move |res: Response| {
+            sender.send(res.client_resp.unwrap()).map_err(|x| x.into())
         });
 
-        self.subscribe_once(msg, on_update).await?;
+        self.subscribe_once(req, on_update).await?;
         receiver
             .await
             .map_err(|_| ClientError::Unknown("Internal error".to_owned()))

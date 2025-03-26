@@ -39,8 +39,8 @@ importers:
         specifier: ^1.49.1
         version: 1.49.1
       '@types/ws':
-        specifier: ^7.4.7
-        version: 7.4.7
+        specifier: ^8.18.1
+        version: 8.18.1
       '@zip.js/zip.js':
         specifier: ^2.7.54
         version: 2.7.54
@@ -405,7 +405,7 @@ importers:
         version: 0.28.11
       html-webpack-plugin:
         specifier: ^5.1.0
-        version: 5.6.0(webpack@5.97.1)
+        version: 5.6.0(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))
       style-loader:
         specifier: ^0.18.2
         version: 0.18.2
@@ -682,8 +682,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.3
       '@types/ws':
-        specifier: ^8.5.10
-        version: 8.5.12
+        specifier: ^8.18.1
+        version: 8.18.1
       apache-arrow:
         specifier: 18.1.0
         version: 18.1.0
@@ -4095,11 +4095,8 @@ packages:
   '@types/webpack-sources@0.1.12':
     resolution: {integrity: sha512-+vRVqE3LzMLLVPgZHUeI8k1YmvgEky+MOir5fQhKvFxpB8uZ0CFnGqxkRAmf8jvNhUBQzhuGZpIMNWZDeEyDIA==}
 
-  '@types/ws@7.4.7':
-    resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}
-
-  '@types/ws@8.5.12':
-    resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
+  '@types/ws@8.18.1':
+    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -14918,11 +14915,7 @@ snapshots:
       '@types/source-list-map': 0.1.6
       source-map: 0.6.1
 
-  '@types/ws@7.4.7':
-    dependencies:
-      '@types/node': 22.10.5
-
-  '@types/ws@8.5.12':
+  '@types/ws@8.18.1':
     dependencies:
       '@types/node': 22.10.5
 
@@ -15020,7 +15013,7 @@ snapshots:
       webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1(esbuild@0.14.54))
 
-  '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.97.1)':
+  '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))':
     dependencies:
       webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1)
@@ -15030,7 +15023,7 @@ snapshots:
       webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1(esbuild@0.14.54))
 
-  '@webpack-cli/info@2.0.2(webpack-cli@5.1.4)(webpack@5.97.1)':
+  '@webpack-cli/info@2.0.2(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))':
     dependencies:
       webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1)
@@ -15040,7 +15033,7 @@ snapshots:
       webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1(esbuild@0.14.54))
 
-  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack@5.97.1)':
+  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))':
     dependencies:
       webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1)
@@ -15997,7 +15990,7 @@ snapshots:
       postcss-value-parser: 4.2.0
       semver: 7.6.3
     optionalDependencies:
-      webpack: 5.97.1(esbuild@0.14.54)
+      webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
 
   css-minimizer-webpack-plugin@5.0.1(clean-css@5.3.3)(esbuild@0.14.54)(webpack@5.97.1(esbuild@0.14.54)):
     dependencies:
@@ -17727,6 +17720,16 @@ snapshots:
 
   html-void-elements@3.0.0: {}
 
+  html-webpack-plugin@5.6.0(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)):
+    dependencies:
+      '@types/html-minifier-terser': 6.1.0
+      html-minifier-terser: 6.1.0
+      lodash: 4.17.21
+      pretty-error: 4.0.0
+      tapable: 2.2.1
+    optionalDependencies:
+      webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
+
   html-webpack-plugin@5.6.0(webpack@5.97.1(esbuild@0.14.54)):
     dependencies:
       '@types/html-minifier-terser': 6.1.0
@@ -17736,16 +17739,6 @@ snapshots:
       tapable: 2.2.1
     optionalDependencies:
       webpack: 5.97.1(esbuild@0.14.54)
-
-  html-webpack-plugin@5.6.0(webpack@5.97.1):
-    dependencies:
-      '@types/html-minifier-terser': 6.1.0
-      html-minifier-terser: 6.1.0
-      lodash: 4.17.21
-      pretty-error: 4.0.0
-      tapable: 2.2.1
-    optionalDependencies:
-      webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
 
   htmlparser2@6.1.0:
     dependencies:
@@ -19057,7 +19050,7 @@ snapshots:
     dependencies:
       schema-utils: 4.3.0
       tapable: 2.2.1
-      webpack: 5.97.1(esbuild@0.14.54)
+      webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
 
   mini-svg-data-uri@1.4.4: {}
 
@@ -21328,6 +21321,17 @@ snapshots:
       mkdirp: 3.0.1
       yallist: 5.0.0
 
+  terser-webpack-plugin@5.3.11(esbuild@0.14.54)(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.25
+      jest-worker: 27.5.1
+      schema-utils: 4.3.0
+      serialize-javascript: 6.0.2
+      terser: 5.37.0
+      webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
+    optionalDependencies:
+      esbuild: 0.14.54
+
   terser-webpack-plugin@5.3.11(esbuild@0.14.54)(webpack@5.97.1(esbuild@0.14.54)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -21336,17 +21340,6 @@ snapshots:
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.97.1(esbuild@0.14.54)
-    optionalDependencies:
-      esbuild: 0.14.54
-
-  terser-webpack-plugin@5.3.11(esbuild@0.14.54)(webpack@5.97.1):
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.25
-      jest-worker: 27.5.1
-      schema-utils: 4.3.0
-      serialize-javascript: 6.0.2
-      terser: 5.37.0
-      webpack: 5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4)
     optionalDependencies:
       esbuild: 0.14.54
 
@@ -21774,9 +21767,9 @@ snapshots:
   webpack-cli@5.1.4(webpack@5.97.1):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4)(webpack@5.97.1)
-      '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4)(webpack@5.97.1)
-      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4)(webpack@5.97.1)
+      '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))
+      '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))
+      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))
       colorette: 2.0.20
       commander: 10.0.1
       cross-spawn: 7.0.6
@@ -21805,7 +21798,7 @@ snapshots:
       '@types/serve-index': 1.9.4
       '@types/serve-static': 1.15.7
       '@types/sockjs': 0.3.36
-      '@types/ws': 8.5.12
+      '@types/ws': 8.18.1
       ansi-html-community: 0.0.8
       bonjour-service: 1.2.1
       chokidar: 3.6.0
@@ -21908,7 +21901,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.11(esbuild@0.14.54)(webpack@5.97.1)
+      terser-webpack-plugin: 5.3.11(esbuild@0.14.54)(webpack@5.97.1(esbuild@0.14.54)(webpack-cli@5.1.4))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     optionalDependencies:

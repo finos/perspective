@@ -17,7 +17,7 @@ import minimatch from "minimatch";
 // Unfortunately we have to handle parts of the Jupyter test case here,
 // as the Jupyter server needs to be run outside of the main Jest process.
 const IS_JUPYTER =
-    getarg("--jupyter") &&
+    !!getarg("--jupyter") &&
     process.env.PACKAGE.indexOf("perspective-jupyterlab") > -1;
 
 if (getarg("--debug")) {
@@ -104,7 +104,9 @@ if (process.env.PACKAGE) {
         process.env.PACKAGE.indexOf("perspective-python") >= 0 &&
         process.env.PACKAGE.indexOf("!perspective-python") === -1
     ) {
-        sh`pnpm run --recursive --filter @finos/perspective-python test`.runSync();
+        // Support `pnpm test -- --my_cool --test_arguments`
+        const args = process.argv.slice(2);
+        sh`pnpm run --recursive --filter @finos/perspective-python test ${args}`.runSync();
     }
 
     if (IS_RUST) {
@@ -137,7 +139,7 @@ if (process.env.PACKAGE) {
             target = "--target=aarch64-unknown-linux-gnu";
         }
 
-        sh`cargo test ${flags} ${target} -p perspective`.runSync();
+        sh`cargo test ${flags} ${target} -p perspective -p perspective-client`.runSync();
     }
 } else {
     console.log("-- Running all tests");

@@ -16,7 +16,7 @@ use std::future::Future;
 use macro_rules_attribute::apply;
 #[cfg(doc)]
 use perspective_client::{Schema, TableInitOptions, UpdateOptions, config::ViewConfigUpdate};
-use perspective_client::{Session, assert_table_api, assert_view_api};
+use perspective_client::{assert_table_api, assert_view_api};
 use pyo3::exceptions::PyTypeError;
 use pyo3::marker::Ungil;
 use pyo3::prelude::*;
@@ -24,51 +24,9 @@ use pyo3::types::*;
 
 use super::client_async::*;
 use crate::inherit_doc;
-use crate::py_err::ResultTClientErrorExt;
 use crate::server::PySyncServer;
 
-#[pyclass(module = "perspective")]
-#[derive(Clone)]
-pub struct ProxySession(perspective_client::ProxySession);
-
-#[pymethods]
-impl ProxySession {
-    #[new]
-    pub fn new(py: Python<'_>, client: Py<Client>, handle_request: Py<PyAny>) -> PyResult<Self> {
-        let callback = {
-            move |msg: &[u8]| {
-                let msg = msg.to_vec();
-                Python::with_gil(|py| {
-                    let bytes = PyBytes::new(py, &msg);
-                    handle_request.call1(py, (bytes,))?;
-                    Ok(())
-                })
-            }
-        };
-
-        Ok(ProxySession(perspective_client::ProxySession::new(
-            client.borrow(py).0.client.clone(),
-            callback,
-        )))
-    }
-
-    pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
-        self.0.handle_request(&data).py_block_on(py).into_pyerr()?;
-        Ok(())
-    }
-
-    pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
-        self.0.poll().py_block_on(py).into_pyerr()?;
-        Ok(())
-    }
-
-    pub fn close(&self, py: Python<'_>) -> PyResult<()> {
-        self.0.clone().close().py_block_on(py);
-        Ok(())
-    }
-}
-
-trait PyFutureExt: Future {
+pub(crate) trait PyFutureExt: Future {
     fn py_block_on(self, py: Python<'_>) -> Self::Output
     where
         Self: Sized + Send,
