@@ -31,9 +31,8 @@ public:
     /**
      * @brief A mapping of `t_tscalar` primary keys to `t_uindex` row indices.
      */
-    typedef tsl::hopscotch_map<t_tscalar, t_uindex> t_mapping;
-
-    typedef tsl::hopscotch_set<t_uindex> t_free_items;
+    using t_mapping = tsl::hopscotch_map<t_tscalar, t_uindex>;
+    using t_free_items = tsl::hopscotch_set<t_uindex>;
 
     /**
      * @brief Construct a new `t_gstate`, which manages the canonical state of
@@ -47,7 +46,11 @@ public:
      * @param input_schema
      * @param output_schema
      */
-    t_gstate(t_schema input_schema, t_schema output_schema);
+    t_gstate(
+        t_schema input_schema,
+        t_schema output_schema,
+        t_uindex limit = std::numeric_limits<t_uindex>::max()
+    );
 
     ~t_gstate();
 
@@ -289,6 +292,7 @@ private:
     t_schema m_output_schema; // tblschema
 
     bool m_init;
+    t_uindex m_limit;
     std::shared_ptr<t_data_table> m_table;
     t_mapping m_mapping;
     t_free_items m_free;

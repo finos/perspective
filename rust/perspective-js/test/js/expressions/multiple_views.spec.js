@@ -397,8 +397,10 @@ import * as expressions_common from "./common.js";
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
-                expect(result["column"]).toEqual([null, 20]);
-                expect(result2["column"]).toEqual(["DEF", "ABC"]);
+                expect(result["column"]).toEqual([20, null]);
+                expect(result2["column"]).toEqual(["ABC", "DEF"]);
+
+                expect(await table.size()).toEqual(2);
 
                 await v2.delete();
                 await v1.delete();
@@ -737,6 +739,7 @@ import * as expressions_common from "./common.js";
 
                 expect(result["column"]).toEqual([6, 8]);
                 expect(result2["column"]).toEqual(["C", "D"]);
+                expect(result["y"]).toEqual(["c", "d"]);
 
                 table.update({
                     x: [2, 4, 3, 10, null],
@@ -746,8 +749,8 @@ import * as expressions_common from "./common.js";
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
-                expect(result["column"]).toEqual([null, 20]);
-                expect(result2["column"]).toEqual(["DEF", "ABC"]);
+                expect(result["column"]).toEqual([20, null]);
+                expect(result2["column"]).toEqual(["ABC", "DEF"]);
 
                 await v2.delete();
                 await v1.delete();

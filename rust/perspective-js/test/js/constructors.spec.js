@@ -1821,9 +1821,9 @@ function validate_typed_array(typed_array, column_data) {
                 await view.delete();
                 await table.delete();
                 expect(records).toEqual([
-                    { a: 40, b: null },
                     { a: 20, b: 2 },
                     { a: 30, b: null },
+                    { a: 40, b: null },
                 ]);
             });
 
