@@ -29,6 +29,9 @@ inputs:
     rust:
         default: "true"
         description: "Install Rust toolchain?"
+    install_python:
+        default: "false"
+        description: "A hack"
     python:
         default: "true"
         description: "Install Python dependencies?"
@@ -111,14 +114,14 @@ runs:
           shell: bash
           run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV
 
-        # Use python 3.9 from manylinu
-        - run: echo "/opt/python/cp39-cp39/bin" >> $GITHUB_PATH
-          shell: bash
-          if: ${{ runner.os == 'Linux' }}
+        # # Use python 3.9 from manylinu
+        # - run: echo "/opt/python/cp39-cp39/bin" >> $GITHUB_PATH
+        #   shell: bash
+        #   if: ${{ runner.os == 'Linux' }}
 
         - name: Set up Python ${{ matrix.python-version }}
           uses: actions/setup-python@v5
-          if: ${{ inputs.python == 'true' && runner.os != 'Linux' }}
+          if: ${{ inputs.python == 'true' && inputs.install_python != 'true' }}
           with:
               python-version: ${{ matrix.python-version }}
               cache: "pip"

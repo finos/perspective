@@ -1,11 +1,9 @@
-pytest>=7.4.3
-ruff>=0.4.6
 Faker==26.0.0
 ipywidgets==8.1.3
 jupyterlab==4.2.3
 jupyterlab_git==0.50.1
 maturin==1.6.0
-numpy==2.0.0
+numpy>=1.24.0
 packaging==24.1
 pandas==2.2.2
 polars==1.13.1
