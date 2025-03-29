@@ -45,6 +45,25 @@ inputs:
 runs:
     using: "composite"
     steps:
+
+        - name: Clean System
+          run: |
+            rm -rf /opt/hostedtoolcache/{Java*,PyPy,Ruby,go}
+            rm -rf /opt/hostedtoolcache/Python/3.8*
+            rm -rf /opt/hostedtoolcache/Python/3.10*
+            rm -rf /opt/hostedtoolcache/Python/3.11*
+            rm -rf /opt/hostedtoolcache/Python/3.12*
+            rm -rf /opt/hostedtoolcache/Python/3.13*
+            rm -rf /opt/hostedtoolcache/node/18*
+            rm -rf /opt/hostedtoolcache/node/22*
+            if sudo -l > /dev/null; then
+              sudo apt-get remove -y azure-cli 'dotnet.*' google-cloud-sdk google-chrome-stable firefox 'mongodb.*' mono-devel 'mysql.*' 'php.*' powershell
+              sudo apt-get autoremove -y
+              sudo apt-get clean
+            fi
+          shell: bash
+          if: ${{ inputs.clean == 'true' && runner.os == 'Linux' }}
+
         - name: Clean System
           uses: AdityaGarg8/remove-unwanted-software@v4.1
           if: ${{ inputs.clean == 'true' && runner.os != 'Windows' }}
@@ -53,6 +72,9 @@ runs:
               remove-dotnet: "true"
               remove-haskell: "true"
               remove-codeql: "true"
+              remove-docker-images: "true"
+              remove-swapfile: "true"
+
 
         # https://github.com/open-telemetry/opentelemetry-cpp/issues/2998
         - name: Setup cmake
