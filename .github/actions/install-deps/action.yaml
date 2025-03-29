@@ -46,13 +46,14 @@ runs:
     using: "composite"
     steps:
         - name: Clean System
-          uses: AdityaGarg8/remove-unwanted-software@v4.1
+          uses: easimon/maximize-build-space@master
           if: ${{ inputs.clean == 'true' && runner.os != 'Windows' }}
           with:
               remove-android: "true"
               remove-dotnet: "true"
               remove-haskell: "true"
               remove-codeql: "true"
+              remove-docker-images: "true"
 
         # https://github.com/open-telemetry/opentelemetry-cpp/issues/2998
         - name: Setup cmake
