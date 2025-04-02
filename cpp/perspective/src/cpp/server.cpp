@@ -329,10 +329,11 @@ template <typename F>
 static std::vector<ValidatedExpr>
 parse_expression_strings(const F& column_expr) {
     // assert that F has an operator[] that takes a string and returns a string
-    static_assert(std::is_same_v<
-                  decltype(std::declval<F>()[std::declval<const std::string&>()]
-                  ),
-                  std::string&>);
+    static_assert(
+        std::is_same_v<
+            decltype(std::declval<F>()[std::declval<const std::string&>()]),
+            std::string&>
+    );
     std::vector<ValidatedExpr> validated_exprs;
     for (const auto& [colname, expr] : column_expr) {
         // TODO: Remove
@@ -356,9 +357,9 @@ parse_expression_strings(const F& column_expr) {
                 validated_expr
             );
 
-        validated_expr.parse_expression_string =
-            re_intern_strings(std::move(validated_expr.parse_expression_string)
-            );
+        validated_expr.parse_expression_string = re_intern_strings(
+            std::move(validated_expr.parse_expression_string)
+        );
 
         validated_expr.parse_expression_string = re_unintern_some_exprs(
             std::move(validated_expr.parse_expression_string)
@@ -494,6 +495,7 @@ ServerResources::delete_table(const t_id& id) {
     if (m_tables.find(id) != m_tables.end()) {
         if (m_table_to_view.find(id) == m_table_to_view.end()) {
             m_tables.erase(id);
+            m_dirty_tables.erase(id);
         } else {
             PSP_COMPLAIN_AND_ABORT("Cannot delete table with views");
         }
@@ -896,7 +898,7 @@ parse_format_options(
         viewport.has_end_row()
             ? viewport.end_row()
             : (viewport_height != 0 ? out.start_row + viewport_height : max_rows
-            )
+              )
     );
     out.end_col = std::min(
         max_cols,
@@ -1749,13 +1751,15 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                 auto dtype = computed_expression->get_dtype();
 
                 schema->add_column(expr.expression_alias, dtype);
-                expressions.push_back(std::make_shared<t_computed_expression>(
-                    expr.expression_alias,
-                    expr.expression,
-                    expr.parse_expression_string,
-                    column_id_map,
-                    dtype
-                ));
+                expressions.push_back(
+                    std::make_shared<t_computed_expression>(
+                        expr.expression_alias,
+                        expr.expression,
+                        expr.parse_expression_string,
+                        column_id_map,
+                        dtype
+                    )
+                );
             }
 
             t_vocab vocab;
@@ -2140,11 +2144,11 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                             auto tm = scalar.get<t_date>();
                             std::stringstream ss;
                             ss << std::setfill('0') << std::setw(4) << tm.year()
-                               << "-" << std::setfill('0') << std::setw(2)
-                               // Increment month by 1, as date::month is [1-12] but
-                               // t_date::month() is [0-11]
-                               << tm.month() + 1
                                << "-" << std::setfill('0')
+                               << std::setw(2)
+                               // Increment month by 1, as date::month is [1-12]
+                               // but t_date::month() is [0-11]
+                               << tm.month() + 1 << "-" << std::setfill('0')
                                << std::setw(2) << tm.day();
                             s->set_string(ss.str());
                             break;
