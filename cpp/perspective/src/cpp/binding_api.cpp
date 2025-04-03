@@ -47,7 +47,7 @@ void
 encode_api_response(
     const ProtoServerResp<std::string>& msg, EncodedApiResp* encoded
 ) {
-    auto* data = new char[msg.data.size()];
+    auto* data = static_cast<char*>(UNINSTRUMENTED_MALLOC(msg.data.size()));
     std::copy(msg.data.begin(), msg.data.end(), data);
 
     encoded->data = data;
@@ -57,8 +57,12 @@ encode_api_response(
 
 EncodedApiEntries*
 encode_api_responses(const std::vector<ProtoServerResp<std::string>>& msgs) {
-    auto* encoded = new EncodedApiEntries;
-    encoded->entries = new EncodedApiResp[msgs.size()];
+    auto* encoded = static_cast<EncodedApiEntries*>(
+        UNINSTRUMENTED_MALLOC(sizeof(EncodedApiEntries))
+    );
+    encoded->entries = static_cast<EncodedApiResp*>(
+        UNINSTRUMENTED_MALLOC(sizeof(EncodedApiResp) * msgs.size())
+    );
 
     encoded->size = msgs.size();
     auto* encoded_mem = encoded->entries;
