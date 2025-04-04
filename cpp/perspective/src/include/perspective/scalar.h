@@ -34,14 +34,14 @@
 namespace perspective {
 
 template <template <typename COMPARED_T> class COMPARER_T>
-struct PERSPECTIVE_EXPORT t_const_char_comparator {
-    inline bool
-    operator()(const char* s1, const char* s2) const {
-        COMPARER_T<t_index> cmp;
-        int cmpval = std::strcmp(s1, s2);
-        return cmp(cmpval, 0);
-    }
-};
+struct PERSPECTIVE_EXPORT t_const_char_comparator{
+    inline bool operator()(const char* s1, const char* s2)
+        const {COMPARER_T<t_index> cmp;
+int cmpval = std::strcmp(s1, s2);
+return cmp(cmpval, 0);
+} // namespace perspective
+}
+;
 
 #ifdef PSP_SSO_SCALAR
 const int SCALAR_INPLACE_LEN = 13;
@@ -202,7 +202,7 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar coerce_numeric_dtype(t_dtype dtype) const;
 
     t_scalar_u m_data;
-    unsigned char m_type;
+    t_dtype m_type;
     t_status m_status;
 #ifdef PSP_SSO_SCALAR
     bool m_inplace;

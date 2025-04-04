@@ -799,6 +799,19 @@ type_to_dtype<void*>() {
     return DTYPE_OBJECT;
 }
 
+std::ostream&
+operator<<(std::ostream& os, const t_op& op) {
+#define X(NAME)                                                                \
+    case NAME:                                                                 \
+        os << #NAME;                                                           \
+        break;
+
+    switch (op) { FOREACH_T_OP(X) }
+#undef X
+
+    return os;
+}
+
 } // end namespace perspective
 
 namespace std {
