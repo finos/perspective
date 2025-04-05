@@ -114,14 +114,12 @@ t_gstate::lookup_or_create(const t_tscalar& pkey) {
 
     if (next_idx + 1 <= m_limit) {
         if (next_idx >= m_table->get_capacity() - 1) {
-            m_table->reserve(
-                std::max(
-                    (next_idx + 1),
-                    static_cast<t_uindex>(
-                        m_table->get_capacity() * PSP_TABLE_GROW_RATIO
-                    )
+            m_table->reserve(std::max(
+                (next_idx + 1),
+                static_cast<t_uindex>(
+                    m_table->get_capacity() * PSP_TABLE_GROW_RATIO
                 )
-            );
+            ));
         }
         m_table->set_size(std::max(m_table->size() + 1, next_idx + 1));
     }
@@ -164,8 +162,7 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
     m_pkcol = master_table->get_column("psp_pkey");
     m_opcol = master_table->get_column("psp_op");
 
-    master_table->set_capacity(
-        std::min(flattened->get_capacity(), m_limit + 1)
+    master_table->set_capacity(std::min(flattened->get_capacity(), m_limit + 1)
     );
     master_table->set_size(std::min(flattened->size(), m_limit + 1));
 

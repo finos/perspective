@@ -90,9 +90,29 @@ export const domain = (): OrdinalAxisDomain => {
 };
 
 export const labelFunction =
-    (valueName) =>
-    (d): string =>
-        d[valueName].join("|");
+    (valueName, settings?: Settings) =>
+    (d): string => {
+        return d[valueName]
+            .map((value, i) => {
+                const ty = settings.crossValues[i].type;
+                if (ty === "datetime") {
+                    return new Date(value).toLocaleString(undefined, {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                        second: "numeric",
+                        fractionalSecondDigits: 3,
+                    });
+                } else if (ty === "date") {
+                    return new Date(value).toLocaleDateString();
+                }
+
+                return value;
+            })
+            .join("|");
+    };
 
 export const component = (settings: Settings): Component => {
     let orient = "horizontal";

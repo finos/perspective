@@ -329,11 +329,10 @@ template <typename F>
 static std::vector<ValidatedExpr>
 parse_expression_strings(const F& column_expr) {
     // assert that F has an operator[] that takes a string and returns a string
-    static_assert(
-        std::is_same_v<
-            decltype(std::declval<F>()[std::declval<const std::string&>()]),
-            std::string&>
-    );
+    static_assert(std::is_same_v<
+                  decltype(std::declval<F>()[std::declval<const std::string&>()]
+                  ),
+                  std::string&>);
     std::vector<ValidatedExpr> validated_exprs;
     for (const auto& [colname, expr] : column_expr) {
         // TODO: Remove
@@ -357,9 +356,9 @@ parse_expression_strings(const F& column_expr) {
                 validated_expr
             );
 
-        validated_expr.parse_expression_string = re_intern_strings(
-            std::move(validated_expr.parse_expression_string)
-        );
+        validated_expr.parse_expression_string =
+            re_intern_strings(std::move(validated_expr.parse_expression_string)
+            );
 
         validated_expr.parse_expression_string = re_unintern_some_exprs(
             std::move(validated_expr.parse_expression_string)
@@ -898,7 +897,7 @@ parse_format_options(
         viewport.has_end_row()
             ? viewport.end_row()
             : (viewport_height != 0 ? out.start_row + viewport_height : max_rows
-              )
+            )
     );
     out.end_col = std::min(
         max_cols,
@@ -1751,15 +1750,13 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                 auto dtype = computed_expression->get_dtype();
 
                 schema->add_column(expr.expression_alias, dtype);
-                expressions.push_back(
-                    std::make_shared<t_computed_expression>(
-                        expr.expression_alias,
-                        expr.expression,
-                        expr.parse_expression_string,
-                        column_id_map,
-                        dtype
-                    )
-                );
+                expressions.push_back(std::make_shared<t_computed_expression>(
+                    expr.expression_alias,
+                    expr.expression,
+                    expr.parse_expression_string,
+                    column_id_map,
+                    dtype
+                ));
             }
 
             t_vocab vocab;

@@ -461,12 +461,12 @@ void check_init(bool init, const char* file, std::int32_t line);
 
 t_uindex root_pidx();
 
-struct PERSPECTIVE_EXPORT t_cmp_charptr{
-    bool operator()(const char* a, const char* b)
-        const {return std::strcmp(a, b) < 0;
-} // namespace perspective
-}
-;
+struct PERSPECTIVE_EXPORT t_cmp_charptr {
+    bool
+    operator()(const char* a, const char* b) const {
+        return std::strcmp(a, b) < 0;
+    } // namespace perspective
+};
 
 template <class Arg1, class Arg2, class Result>
 struct binary_function {

@@ -210,6 +210,7 @@ export default defineConfig({
     projects: PROJECTS,
     outputDir: "dist/results",
     use: {
+        headless: true,
         viewport: { width: 1280, height: 720 },
         actionTimeout: 0,
         // trace: "retain-on-failure",
