@@ -35,13 +35,12 @@ export interface LabelFunction {
 export const labelFunction = (settings: Settings): LabelFunction => {
     const base = axisType(settings);
     let valueName = "__ROW_PATH__";
-
+    const fn = labelFunctions[base()];
     const label: Partial<LabelFunction> = (d, _i) => {
-        return labelFunctions[base()](valueName)(d);
+        return fn(valueName, settings)(d);
     };
 
     rebindAll(label, base);
-
     label.valueName = (...args: string[]): any => {
         if (!args.length) {
             return valueName;
