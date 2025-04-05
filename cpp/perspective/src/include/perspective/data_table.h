@@ -53,7 +53,7 @@ std::ostream& operator<<(std::ostream& os, const t_flatten_record& fr);
 
 class t_data_table;
 
-class PERSPECTIVE_EXPORT t_tabular{};
+class PERSPECTIVE_EXPORT t_tabular {};
 
 /**
  * @brief `t_data_table` is the underlying structure used to store and access
