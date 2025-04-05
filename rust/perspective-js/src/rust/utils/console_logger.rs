@@ -13,11 +13,11 @@
 use std::fmt::{Debug, Write};
 use std::sync::OnceLock;
 
-use tracing::field::{Field, Visit};
 use tracing::Subscriber;
+use tracing::field::{Field, Visit};
+use tracing_subscriber::Layer;
 use tracing_subscriber::layer::Context;
 use tracing_subscriber::registry::LookupSpan;
-use tracing_subscriber::Layer;
 use wasm_bindgen::prelude::*;
 
 use crate::utils::*;
@@ -209,6 +209,14 @@ impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for WasmLogger {
 pub fn set_global_logging() {
     static INIT_LOGGING: OnceLock<()> = OnceLock::new();
     INIT_LOGGING.get_or_init(|| {
+        if !*IS_CHROME.get_or_init(detect_chrome) {
+            web_sys::console::warn_1(
+                &"Unknown browser detected. Some features may not work, and performance may be \
+                  degraded."
+                    .into(),
+            );
+        }
+
         use tracing_subscriber::layer::SubscriberExt;
         let filter = tracing_subscriber::filter::filter_fn(|meta| {
             meta.module_path()

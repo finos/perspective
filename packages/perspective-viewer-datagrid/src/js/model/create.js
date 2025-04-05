@@ -125,6 +125,8 @@ export async function createModel(regular, table, view, extend = {}) {
         _is_editable.push(!!table_schema[column]);
     }
 
+    let _edit_mode = this._edit_mode || "READ_ONLY";
+    this._edit_button.dataset.editMode = _edit_mode;
     const model = Object.assign(extend, {
         _edit_port,
         _view: view,
@@ -143,6 +145,7 @@ export async function createModel(regular, table, view, extend = {}) {
         _column_paths,
         _column_types,
         _is_editable,
+        _edit_mode,
         _selection_state: {
             selected_areas: [],
             dirty: false,

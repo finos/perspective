@@ -62,11 +62,11 @@ macro_rules! clone {
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt $($tail:tt)+) => {
-        $crate::clone!(impl @expand { $($orig)* $i } { $($binder)* } $($tail)+);
+        $crate::clone!(impl @expand { $($orig)* $i } { $($binder)* } $($tail)+)
     };
 
     (impl @context { $($orig:tt)* } $tail:tt) => {
-        $crate::clone!(impl @expand { } { } $($orig)* $tail);
+        $crate::clone!(impl @expand { } { } $($orig)* $tail)
     };
 
     (impl @context { $($orig:tt)* } , $($tail:tt)+) => {
@@ -75,10 +75,56 @@ macro_rules! clone {
     };
 
     (impl @context { $($orig:tt)* } $i:tt $($tail:tt)+) => {
-        $crate::clone!(impl @context { $($orig)* $i } $($tail)+);
+        $crate::clone!(impl @context { $($orig)* $i } $($tail)+)
     };
 
     ($($tail:tt)+) => {
         $crate::clone!(impl @context { } $($tail)+);
+    }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! asyncfn {
+    // Munch function args
+    (impl @bindings { $($args:tt)* } { $($clones:tt)* } !{ } | $($tail:tt)+) => {{
+        move |$($args)*| {
+            $($clones)*
+            async move {
+                $($tail)+
+            }
+        }
+    }};
+
+    (impl @bindings { $($args:tt)* } { $($clones:tt)* } !{ } $i:tt $($tail:tt)+) => {
+        $crate::asyncfn!(impl @bindings { $($args)* $i } { $($clones)* } !{ } $($tail)+)
+    };
+
+    // Munch function start
+    (impl @context { $($clones:tt)* } !{ } async move || $($tail:tt)+) => {{
+        move || {
+            $($clones)*
+            async move {
+                $($tail)+
+            }
+        }
+    }};
+
+    (impl @context { $($clones:tt)* } !{ } async move | $($tail:tt)+) => {
+        $crate::asyncfn!(impl @bindings { } { $($clones)* } !{ } $($tail)+)
+    };
+
+    // Munch clone bindings
+    (impl @context { $($clones:tt)* } !{ $($stack:tt)* } , $($tail:tt)+) => {{
+        $crate::asyncfn!(impl @context { $crate::clone!($($stack)*); $($clones)* } !{ } $($tail)+)
+    }};
+
+    (impl @context { $($clones:tt)* } !{ $($stack:tt)* } $i:tt $($tail:tt)+) => {
+        $crate::asyncfn!(impl @context { $($clones)* } !{ $($stack)* $i } $($tail)+)
+    };
+
+    // Root
+    ($($tail:tt)+) => {
+        $crate::asyncfn!(impl @context { } !{ } $($tail)+)
     }
 }
