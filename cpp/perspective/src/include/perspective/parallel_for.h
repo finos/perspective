@@ -26,7 +26,6 @@ namespace perspective {
 template <class FUNCTION>
 void
 parallel_for(int num_tasks, FUNCTION&& func) {
-#undef PSP_PARALLEL_FOR
 #ifdef PSP_PARALLEL_FOR
     std::exception_ptr e;
     std::mutex e_mtx;

@@ -244,7 +244,6 @@ t_gstate::update_master_table(const t_data_table* flattened) {
                     flattened_old_pkey_col->set_scalar(flattened_idx, old);
                     flattened_old_pkey_col->set_valid(flattened_idx, true);
                     LOG_DEBUG("DELETING OLD PKEY: " << old);
-                    // erase(old);
                 }
 
                 // Write the op and pkey to `m_table`
