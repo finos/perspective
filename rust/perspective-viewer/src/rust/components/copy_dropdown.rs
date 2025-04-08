@@ -22,12 +22,12 @@ use crate::renderer::*;
 use crate::utils::*;
 
 pub type CopyDropDownMenuMsg = DropDownMenuMsg;
-pub type CopyDropDownMenuItem = DropDownMenuItem<ExportMethod>;
+pub type CopyDropDownMenuItem = DropDownMenuItem<ExportFile>;
 
 #[derive(Properties, PartialEq)]
 pub struct CopyDropDownMenuProps {
     pub renderer: Renderer,
-    pub callback: Callback<ExportMethod>,
+    pub callback: Callback<ExportFile>,
 
     #[prop_or_default]
     weak_link: WeakScope<CopyDropDownMenu>,
@@ -49,12 +49,14 @@ impl Component for CopyDropDownMenu {
 
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
-        let has_render = js_sys::Reflect::has(&plugin, js_intern::js_intern!("render")).unwrap();
+        // let has_render = js_sys::Reflect::has(&plugin,
+        // js_intern::js_intern!("render")).unwrap();
+        let is_chart = plugin.name().as_str() != "Datagrid";
         let has_selection = ctx.props().renderer.get_selection().is_some();
         html! {
             <StyleProvider>
-                <DropDownMenu<ExportMethod>
-                    values={Rc::new(get_menu_items(has_render, has_selection))}
+                <DropDownMenu<ExportFile>
+                    values={Rc::new(get_menu_items(is_chart, has_selection))}
                     callback={&ctx.props().callback}
                 />
             </StyleProvider>
@@ -77,37 +79,55 @@ impl Component for CopyDropDownMenu {
     }
 }
 
-fn get_menu_items(has_render: bool, has_selection: bool) -> Vec<CopyDropDownMenuItem> {
+fn get_menu_items(is_chart: bool, has_selection: bool) -> Vec<CopyDropDownMenuItem> {
     let mut items = vec![
         CopyDropDownMenuItem::OptGroup(
             "Current View".into(),
-            if has_render {
+            if is_chart {
                 vec![
-                    ExportMethod::Csv,
-                    ExportMethod::Json,
-                    ExportMethod::Ndjson,
-                    ExportMethod::Png,
+                    ExportMethod::Csv.new_file("clipboard", is_chart),
+                    ExportMethod::Json.new_file("clipboard", is_chart),
+                    ExportMethod::Ndjson.new_file("clipboard", is_chart),
+                    ExportMethod::Plugin.new_file("clipboard", is_chart),
                 ]
             } else {
-                vec![ExportMethod::Csv, ExportMethod::Json, ExportMethod::Ndjson]
+                vec![
+                    ExportMethod::Csv.new_file("clipboard", is_chart),
+                    ExportMethod::Json.new_file("clipboard", is_chart),
+                    ExportMethod::Ndjson.new_file("clipboard", is_chart),
+                ]
             },
         ),
         CopyDropDownMenuItem::OptGroup("All".into(), vec![
-            ExportMethod::CsvAll,
-            ExportMethod::JsonAll,
-            ExportMethod::NdjsonAll,
+            ExportMethod::CsvAll.new_file("clipboard", is_chart),
+            ExportMethod::JsonAll.new_file("clipboard", is_chart),
+            ExportMethod::NdjsonAll.new_file("clipboard", is_chart),
         ]),
-        CopyDropDownMenuItem::OptGroup("Config".into(), vec![ExportMethod::JsonConfig]),
+        CopyDropDownMenuItem::OptGroup("Config".into(), vec![
+            ExportMethod::JsonConfig.new_file("clipboard", is_chart),
+        ]),
     ];
 
     if has_selection {
         items.insert(
             0,
-            CopyDropDownMenuItem::OptGroup("Current Selection".into(), vec![
-                ExportMethod::CsvSelected,
-                ExportMethod::JsonSelected,
-                ExportMethod::NdjsonSelected,
-            ]),
+            CopyDropDownMenuItem::OptGroup(
+                "Current Selection".into(),
+                if is_chart {
+                    vec![
+                        ExportMethod::CsvSelected.new_file("clipboard", is_chart),
+                        ExportMethod::JsonSelected.new_file("clipboard", is_chart),
+                        ExportMethod::NdjsonSelected.new_file("clipboard", is_chart),
+                    ]
+                } else {
+                    vec![
+                        ExportMethod::CsvSelected.new_file("clipboard", is_chart),
+                        ExportMethod::JsonSelected.new_file("clipboard", is_chart),
+                        ExportMethod::NdjsonSelected.new_file("clipboard", is_chart),
+                        ExportMethod::Plugin.new_file("clipboard", is_chart),
+                    ]
+                },
+            ),
         )
     }
 

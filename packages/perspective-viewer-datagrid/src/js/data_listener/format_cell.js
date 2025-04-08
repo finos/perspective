@@ -15,6 +15,10 @@ import { FormatterCache } from "./formatter_cache";
 const FORMAT_CACHE = new FormatterCache();
 const MAX_BAR_WIDTH_PCT = 1;
 
+export function format_raw(type, value) {
+    return FORMAT_CACHE.get(type, value);
+}
+
 /**
  * Format a single cell's text content as the content of a `<td>` or `<th>`.
  *

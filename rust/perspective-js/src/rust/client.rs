@@ -204,22 +204,17 @@ impl Client {
                             },
                         });
 
-                    move || {
-                        let fut = JsFuture::from(reconnect.run(()));
-                        async move {
-                            // This error may occur when _awaiting_ the promise returned by the
-                            // function
-                            if let Err(e) = fut.await {
-                                if let Some(e) = e.dyn_ref::<js_sys::Object>() {
-                                    Err(ClientError::Unknown(e.to_string().as_string().unwrap()))
-                                } else {
-                                    Err(ClientError::Unknown(e.as_string().unwrap()))
-                                }
+                    asyncfn!(reconnect, async move || {
+                        if let Err(e) = JsFuture::from(reconnect.run(())).await {
+                            if let Some(e) = e.dyn_ref::<js_sys::Object>() {
+                                Err(ClientError::Unknown(e.to_string().as_string().unwrap()))
                             } else {
-                                Ok(())
+                                Err(ClientError::Unknown(e.as_string().unwrap()))
                             }
+                        } else {
+                            Ok(())
                         }
-                    }
+                    })
                 }),
             )
             .await?;

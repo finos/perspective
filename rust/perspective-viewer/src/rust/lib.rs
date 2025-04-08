@@ -19,6 +19,7 @@
 #![feature(macro_metavar_expr)]
 #![feature(iter_intersperse)]
 #![feature(stmt_expr_attributes)]
+#![allow(async_fn_in_trait)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,

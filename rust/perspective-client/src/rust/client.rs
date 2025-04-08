@@ -171,6 +171,31 @@ impl Client {
         Ok(false)
     }
 
+    // pub async fn handle_error<T>(
+    //     &self,
+    //     message: Option<String>,
+    //     reconnect: Option<T>,
+    // ) -> ClientResult<()>
+    // where
+    //     T: AsyncFn() -> ClientResult<()> + Clone + Send + Sync + 'static,
+    // {
+    //     let subs = self.subscriptions_errors.read().await;
+    //     let tasks = join_all(subs.values().map(|callback| {
+    //         callback(
+    //             message.clone(),
+    //             reconnect.clone().map(move |f| {
+    //                 Arc::new(move || {
+    //                     clone!(f);
+    //                     Box::pin(async move { Ok(f().await?) }) as
+    // LocalBoxFuture<'static, _>                 }) as ReconnectCallback
+    //             }),
+    //         )
+    //     }));
+
+    //     tasks.await.into_iter().collect::<Result<(), _>>()?;
+    //     Ok(())
+    // }
+
     pub async fn handle_error<T, U>(
         &self,
         message: Option<String>,
@@ -178,7 +203,7 @@ impl Client {
     ) -> ClientResult<()>
     where
         T: Fn() -> U + Clone + Send + Sync + 'static,
-        U: Future<Output = Result<(), ClientError>>,
+        U: Future<Output = ClientResult<()>>,
     {
         let subs = self.subscriptions_errors.read().await;
         let tasks = join_all(subs.values().map(|callback| {

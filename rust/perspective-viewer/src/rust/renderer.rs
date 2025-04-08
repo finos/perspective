@@ -141,6 +141,11 @@ impl Renderer {
         Ref::map(self.borrow(), |x| &x.metadata)
     }
 
+    pub fn is_chart(&self) -> bool {
+        let plugin = self.get_active_plugin().unwrap();
+        plugin.name().as_str() != "Datagrid"
+    }
+
     /// Return all plugin instances, whether they are active or not.  Useful
     /// for configuring all or specific plugins at application init.
     pub fn get_all_plugins(&self) -> Vec<JsPerspectiveViewerPlugin> {

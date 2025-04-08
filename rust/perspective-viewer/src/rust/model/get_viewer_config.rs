@@ -10,10 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::future::Future;
-use std::pin::Pin;
-
-use perspective_client::clone;
 use perspective_client::config::ViewConfig;
 
 use super::columns_iter_set::*;
@@ -46,28 +42,25 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
     }
 
     /// Get the current ViewerConfig
-    fn get_viewer_config(&self) -> Pin<Box<dyn Future<Output = ApiResult<ViewerConfig>>>> {
-        clone!(self.renderer(), self.session(), self.presentation());
-        Box::pin(async move {
-            let version = config::API_VERSION.to_string();
-            let view_config = session.get_view_config().clone();
-            let js_plugin = renderer.get_active_plugin()?;
-            let settings = presentation.is_settings_open();
-            let plugin = js_plugin.name();
-            let plugin_config: serde_json::Value = js_plugin.save()?.into_serde_ext()?;
-            let theme = presentation.get_selected_theme_name().await;
-            let title = presentation.get_title();
-            let columns_config = presentation.all_columns_configs();
-            Ok(ViewerConfig {
-                version,
-                plugin,
-                title,
-                plugin_config,
-                columns_config,
-                settings,
-                view_config,
-                theme,
-            })
+    async fn get_viewer_config(&self) -> ApiResult<ViewerConfig> {
+        let version = config::API_VERSION.to_string();
+        let view_config = self.session().get_view_config().clone();
+        let js_plugin = self.renderer().get_active_plugin()?;
+        let settings = self.presentation().is_settings_open();
+        let plugin = js_plugin.name();
+        let plugin_config: serde_json::Value = js_plugin.save()?.into_serde_ext()?;
+        let theme = self.presentation().get_selected_theme_name().await;
+        let title = self.presentation().get_title();
+        let columns_config = self.presentation().all_columns_configs();
+        Ok(ViewerConfig {
+            version,
+            plugin,
+            title,
+            plugin_config,
+            columns_config,
+            settings,
+            view_config,
+            theme,
         })
     }
 }

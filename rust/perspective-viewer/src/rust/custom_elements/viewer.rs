@@ -408,8 +408,9 @@ impl PerspectiveViewerElement {
     /// });
     /// ```
     pub fn save(&self, format: Option<String>) -> ApiFuture<JsValue> {
-        let viewer_config_task = self.get_viewer_config();
+        let this = self.clone();
         ApiFuture::new(async move {
+            let viewer_config_task = this.get_viewer_config();
             let format = format
                 .as_ref()
                 .map(|x| ViewerConfigEncoding::from_str(x))
@@ -452,8 +453,8 @@ impl PerspectiveViewerElement {
     ///
     /// # Arguments
     ///
-    /// - `flat` - Whether to use the current [`perspective_js::JsViewConfig`]
-    ///   to generate this data, or use the default.
+    /// - `method` - The `ExportMethod` (serialized as a `String`) to use to
+    ///   render the data to the Clipboard.
     ///
     /// # JavaScript Examples
     ///
@@ -462,16 +463,21 @@ impl PerspectiveViewerElement {
     ///     await viewer.copy();
     /// })
     /// ```
-    pub fn copy(&self, flat: Option<bool>) -> ApiFuture<()> {
-        let method = if flat.unwrap_or_default() {
-            ExportMethod::CsvAll
-        } else {
-            ExportMethod::Csv
-        };
+    pub fn copy(&self, method: Option<JsString>) -> ApiFuture<()> {
+        let this = self.clone();
+        ApiFuture::new(async move {
+            let method = if let Some(method) = method
+                .map(|x| x.unchecked_into())
+                .map(serde_wasm_bindgen::from_value)
+            {
+                method?
+            } else {
+                ExportMethod::Csv
+            };
 
-        let js_task = self.export_method_to_jsvalue(method);
-        let copy_task = copy_to_clipboard(js_task, MimeType::TextPlain);
-        ApiFuture::new(copy_task)
+            let js_task = this.export_method_to_jsvalue(method);
+            copy_to_clipboard(js_task, MimeType::TextPlain).await
+        })
     }
 
     /// Reset the viewer's `ViewerConfig` to the default.

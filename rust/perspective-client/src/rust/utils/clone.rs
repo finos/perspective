@@ -29,12 +29,26 @@ macro_rules! clone {
         let $i = $($orig)*.clone();
     };
 
+    (impl @bind $i:tt { $($orig:tt)* } { @mut }) => {
+        let mut $i = $($orig)*.clone();
+    };
+
     (impl @bind $i:tt { $($orig:tt)* } { $binder:tt }) => {
         let $binder = $($orig)*.clone();
     };
 
+    (impl @bind $i:tt { $($orig:tt)* } { @mut $binder:tt }) => {
+        let mut $binder = $($orig)*.clone();
+    };
+
+
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt) => {
         $crate::clone!(impl @bind $i { $($orig)* $i } { $($binder)* });
+    };
+
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } mut $i:tt) => {
+        $crate::clone!(impl @bind $i { $($orig)* $i } { @mut $($binder)* });
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt ()) => {
@@ -55,6 +69,10 @@ macro_rules! clone {
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 3) => {
         $crate::clone!(impl @bind $i { $($orig)* $i . 3 } { $($binder)* });
+    };
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } mut $i:tt = $($tail:tt)+) => {
+        $crate::clone!(impl @expand { $($orig)* } { @mut $i } $($tail)+);
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt = $($tail:tt)+) => {
