@@ -89,7 +89,8 @@ impl ExportDropDownMenuElement {
                     clone!(modal_rc, model);
                     spawn_local(async move {
                         let val = model.export_method_to_jsvalue(x.method).await.unwrap();
-                        download(&x.as_filename(), &val).unwrap();
+                        let is_chart = model.renderer().is_chart();
+                        download(&x.as_filename(is_chart), &val).unwrap();
                         modal_rc.borrow().clone().unwrap().hide().unwrap();
                     })
                 }

@@ -168,10 +168,10 @@ impl Session {
                 let _callback_id = client
                     .on_error(Box::new(move |message, reconnect| {
                         let poll_loop = poll_loop.clone();
-                        Box::pin(async move {
+                        async move {
                             poll_loop.poll((message, reconnect)).await;
                             Ok(())
-                        })
+                        }
                     }))
                     .await?;
 
@@ -366,7 +366,7 @@ impl Session {
     }
 
     pub async fn arrow_as_jsvalue(
-        self,
+        &self,
         flat: bool,
         window: Option<ViewWindow>,
     ) -> Result<js_sys::ArrayBuffer, ApiError> {
@@ -381,7 +381,7 @@ impl Session {
     }
 
     pub async fn ndjson_as_jsvalue(
-        self,
+        &self,
         flat: bool,
         window: Option<ViewWindow>,
     ) -> Result<js_sys::JsString, ApiError> {
@@ -395,7 +395,7 @@ impl Session {
     }
 
     pub async fn json_as_jsvalue(
-        self,
+        &self,
         flat: bool,
         window: Option<ViewWindow>,
     ) -> Result<js_sys::Object, ApiError> {

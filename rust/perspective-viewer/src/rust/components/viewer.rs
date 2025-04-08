@@ -324,7 +324,10 @@ impl Component for PerspectiveViewer {
                 if matches!(self.fonts.get_status(), FontLoaderStatus::Finished) =>
             {
                 self.selected_column = None;
-                resolve.send(()).expect("Orphan render");
+                if let Err(e) = resolve.send(()) {
+                    tracing::error!("toggle settings failed {:?}", e);
+                }
+
                 false
             },
             PerspectiveViewerMsg::ToggleSettingsComplete(_, resolve) => {
@@ -414,12 +417,9 @@ impl Component for PerspectiveViewer {
 
         if self.on_rendered.is_some()
             && matches!(self.fonts.get_status(), FontLoaderStatus::Finished)
+            && self.on_rendered.take().unwrap().send(()).is_err()
         {
-            self.on_rendered
-                .take()
-                .unwrap()
-                .send(())
-                .expect("Orphan render");
+            tracing::warn!("Orphan render");
         }
     }
 

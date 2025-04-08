@@ -16,8 +16,8 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicU32;
 
 use async_lock::{Mutex, RwLock};
+use futures::Future;
 use futures::future::{BoxFuture, LocalBoxFuture, join_all};
-use futures::{Future, FutureExt};
 use nanoid::*;
 use prost::Message;
 use serde::{Deserialize, Serialize};
@@ -32,6 +32,7 @@ use crate::table::{Table, TableInitOptions, TableOptions};
 use crate::table_data::{TableData, UpdateData};
 use crate::utils::*;
 use crate::view::ViewWindow;
+use crate::{OnUpdateMode, OnUpdateOptions, asyncfn, clone};
 
 /// Metadata about the engine runtime (such as total heap utilization).
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -113,12 +114,10 @@ pub type ReconnectCallback =
 impl Client {
     /// Create a new client instance with a closure that handles message
     /// dispatch. See [`Client::new`] for details.
-    pub fn new_with_callback<T>(send_request: T) -> Self
+    pub fn new_with_callback<T, U>(send_request: T) -> Self
     where
-        T: for<'a> Fn(Vec<u8>) -> BoxFuture<'static, Result<(), Box<dyn Error + Send + Sync>>>
-            + 'static
-            + Sync
-            + Send,
+        T: Fn(Vec<u8>) -> U + 'static + Sync + Send,
+        U: Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static,
     {
         let send_request = Arc::new(send_request);
         let send: SendCallback = Arc::new(move |req| {
@@ -143,10 +142,9 @@ impl Client {
     where
         T: ClientHandler + 'static + Sync + Send,
     {
-        Self::new_with_callback(move |req| {
-            let client_handler = client_handler.clone();
-            Box::pin(async move { client_handler.send_request(req).await })
-        })
+        Self::new_with_callback(asyncfn!(client_handler, async move |req| {
+            client_handler.send_request(req).await
+        }))
     }
 
     /// Handle a message from the external message queue.
@@ -173,23 +171,70 @@ impl Client {
         Ok(false)
     }
 
-    pub async fn handle_error(
+    // pub async fn handle_error<T>(
+    //     &self,
+    //     message: Option<String>,
+    //     reconnect: Option<T>,
+    // ) -> ClientResult<()>
+    // where
+    //     T: AsyncFn() -> ClientResult<()> + Clone + Send + Sync + 'static,
+    // {
+    //     let subs = self.subscriptions_errors.read().await;
+    //     let tasks = join_all(subs.values().map(|callback| {
+    //         callback(
+    //             message.clone(),
+    //             reconnect.clone().map(move |f| {
+    //                 Arc::new(move || {
+    //                     clone!(f);
+    //                     Box::pin(async move { Ok(f().await?) }) as
+    // LocalBoxFuture<'static, _>                 }) as ReconnectCallback
+    //             }),
+    //         )
+    //     }));
+
+    //     tasks.await.into_iter().collect::<Result<(), _>>()?;
+    //     Ok(())
+    // }
+
+    pub async fn handle_error<T, U>(
         &self,
         message: Option<String>,
-        reconnect: Option<ReconnectCallback>,
-    ) -> ClientResult<()> {
+        reconnect: Option<T>,
+    ) -> ClientResult<()>
+    where
+        T: Fn() -> U + Clone + Send + Sync + 'static,
+        U: Future<Output = ClientResult<()>>,
+    {
         let subs = self.subscriptions_errors.read().await;
-        let tasks = join_all(
-            subs.values()
-                .map(|callback| callback(message.clone(), reconnect.clone())),
-        );
+        let tasks = join_all(subs.values().map(|callback| {
+            callback(
+                message.clone(),
+                reconnect.clone().map(move |f| {
+                    Arc::new(move || {
+                        clone!(f);
+                        Box::pin(async move { Ok(f().await?) }) as LocalBoxFuture<'static, _>
+                    }) as ReconnectCallback
+                }),
+            )
+        }));
+
         tasks.await.into_iter().collect::<Result<(), _>>()?;
         Ok(())
     }
 
-    pub async fn on_error(&self, on_error: OnErrorCallback) -> ClientResult<u32> {
+    pub async fn on_error<T, U, V>(&self, on_error: T) -> ClientResult<u32>
+    where
+        T: Fn(Option<String>, Option<ReconnectCallback>) -> U + Clone + Send + Sync + 'static,
+        U: Future<Output = V> + Send + 'static,
+        V: Into<Result<(), ClientError>> + Sync + 'static,
+    {
         let id = self.gen_id();
-        self.subscriptions_errors.write().await.insert(id, on_error);
+        let callback = asyncfn!(on_error, async move |x, y| on_error(x, y).await.into());
+        self.subscriptions_errors
+            .write()
+            .await
+            .insert(id, Box::new(move |x, y| Box::pin(callback(x, y))));
+
         Ok(id)
     }
 
@@ -246,15 +291,34 @@ impl Client {
         }
     }
 
-    pub(crate) async fn subscribe(
-        &self,
-        msg: &Request,
-        on_update: BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>,
-    ) -> ClientResult<()> {
+    // pub(crate) async fn subscribe(
+    //     &self,
+    //     msg: &Request,
+    //     on_update: BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>,
+    // ) -> ClientResult<()> {
+    //     self.subscriptions
+    //         .write()
+    //         .await
+    //         .insert(msg.msg_id, on_update);
+    //     tracing::debug!("SEND {}", msg);
+    //     if let Err(e) = (self.send)(msg).await {
+    //         self.subscriptions.write().await.remove(&msg.msg_id);
+    //         Err(ClientError::Unknown(e.to_string()))
+    //     } else {
+    //         Ok(())
+    //     }
+    // }
+
+    pub(crate) async fn subscribe<T, U>(&self, msg: &Request, on_update: T) -> ClientResult<()>
+    where
+        T: Fn(Response) -> U + Send + Sync + 'static,
+        U: Future<Output = Result<(), ClientError>> + Send + 'static,
+    {
         self.subscriptions
             .write()
             .await
-            .insert(msg.msg_id, on_update);
+            .insert(msg.msg_id, Box::new(move |x| Box::pin(on_update(x))));
+
         tracing::debug!("SEND {}", msg);
         if let Err(e) = (self.send)(msg).await {
             self.subscriptions.write().await.remove(&msg.msg_id);
@@ -302,29 +366,22 @@ impl Client {
                 .crate_table_inner(UpdateData::Arrow(arrow).into(), options.into(), entity_id)
                 .await?;
 
-            let callback = {
-                let table = table.clone();
-                move |update: crate::proto::ViewOnUpdateResp| {
-                    let table = table.clone();
-                    let update = update.delta.expect("Missing update");
-                    async move {
-                        table
-                            .update(
-                                UpdateData::Arrow(update.into()),
-                                crate::UpdateOptions::default(),
-                            )
-                            .await
-                            .unwrap_or_log();
-                    }
+            let table_ = table.clone();
+            let callback = asyncfn!(
+                table_,
+                update,
+                async move |update: crate::proto::ViewOnUpdateResp| {
+                    let update = UpdateData::Arrow(update.delta.expect("Malformed message").into());
+                    let options = crate::UpdateOptions::default();
+                    table_.update(update, options).await.unwrap_or_log();
                 }
+            );
+
+            let options = OnUpdateOptions {
+                mode: Some(OnUpdateMode::Row),
             };
 
-            let on_update_token = view
-                .on_update(callback, crate::view::OnUpdateOptions {
-                    mode: Some(crate::view::OnUpdateMode::Row),
-                })
-                .await?;
-
+            let on_update_token = view.on_update(callback, options).await?;
             table.view_update_token = Some(on_update_token);
             Ok(table)
         } else {
@@ -413,19 +470,15 @@ impl Client {
         U: Future<Output = ()> + Send + 'static,
     {
         let on_update = Arc::new(on_update);
-        let callback = move |resp: Response| {
-            let on_update = on_update.clone();
-            async move {
-                match resp.client_resp {
-                    Some(ClientResp::GetHostedTablesResp(_)) | None => {
-                        on_update().await;
-                        Ok(())
-                    },
-                    resp => Err(ClientError::OptionResponseFailed(resp.into())),
-                }
+        let callback = asyncfn!(on_update, async move |resp: Response| {
+            match resp.client_resp {
+                Some(ClientResp::GetHostedTablesResp(_)) | None => {
+                    on_update().await;
+                    Ok(())
+                },
+                resp => Err(ClientError::OptionResponseFailed(resp.into())),
             }
-            .boxed()
-        };
+        });
 
         let msg = Request {
             msg_id: self.gen_id(),
@@ -435,7 +488,7 @@ impl Client {
             })),
         };
 
-        self.subscribe(&msg, Box::new(callback)).await?;
+        self.subscribe(&msg, callback).await?;
         Ok(msg.msg_id)
     }
 

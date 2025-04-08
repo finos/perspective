@@ -14,7 +14,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use futures::{Future, FutureExt};
+use futures::Future;
 use prost::bytes::Bytes;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
@@ -321,14 +321,13 @@ impl View {
                     resp => Err(ClientError::OptionResponseFailed(resp.into())),
                 }
             }
-            .boxed()
         };
 
         let msg = self.client_message(ClientReq::ViewOnUpdateReq(ViewOnUpdateReq {
             mode: options.mode.map(|OnUpdateMode::Row| Mode::Row as i32),
         }));
 
-        self.client.subscribe(&msg, Box::new(callback)).await?;
+        self.client.subscribe(&msg, callback).await?;
         Ok(msg.msg_id)
     }
 

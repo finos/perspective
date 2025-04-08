@@ -10,12 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import { PRIVATE_PLUGIN_SYMBOL } from "../model";
 import { activate } from "../plugin/activate.js";
 import { restore } from "../plugin/restore.js";
 import { save } from "../plugin/save";
 import { draw } from "../plugin/draw";
 import column_style_controls from "../plugin/column_style_controls.js";
 import datagridStyles from "../../../dist/css/perspective-viewer-datagrid.css";
+import { format_raw } from "../data_listener/format_cell.js";
 
 /**
  * The custom element class for this plugin.  The interface methods for this
@@ -103,6 +105,38 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     async update(view) {
         this.model._num_rows = await view.num_rows();
         await this.regular_table.draw();
+    }
+
+    async render(viewport) {
+        const view = await this.parentElement.getView();
+        const json = await view.to_columns(viewport);
+        const cols = await view
+            .column_paths()
+            .then((x) => x.slice(viewport.start_col, viewport.end_col));
+
+        const nrows = viewport.end_row - viewport.start_row;
+        let out = "";
+        for (let ridx = 0; ridx < nrows; ridx++) {
+            for (const col_name of cols) {
+                const col = json[col_name];
+                const type = this.model._schema[col_name];
+                const formatter = format_raw(
+                    type,
+                    this.regular_table[PRIVATE_PLUGIN_SYMBOL][
+                        col_name.split("|").at(-1)
+                    ] || {}
+                );
+
+                if (formatter) {
+                    out += formatter.format(col[ridx]) + "\t";
+                } else {
+                    out += col[ridx] + "\t";
+                }
+            }
+            out += "\n";
+        }
+
+        return out.trim();
     }
 
     async resize() {

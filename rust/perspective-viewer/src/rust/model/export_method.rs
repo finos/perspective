@@ -12,38 +12,82 @@
 
 use std::rc::Rc;
 
+use serde::Deserialize;
 use yew::prelude::*;
 
 use crate::js::*;
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq, Deserialize)]
 pub enum ExportMethod {
+    #[serde(rename = "csv")]
     Csv,
+
+    #[serde(rename = "csv-all")]
     CsvAll,
+
+    #[serde(rename = "csv-selected")]
     CsvSelected,
+
+    #[serde(rename = "json")]
     Json,
+
+    #[serde(rename = "json-all")]
     JsonAll,
+
+    #[serde(rename = "json-selected")]
     JsonSelected,
+
+    // #[serde(rename = "columns")]
+    // JsonColumns,
+
+    // #[serde(rename = "columns-all")]
+    // JsonColumnsAll,
+
+    // #[serde(rename = "columns-selected")]
+    // JsonColumnsSelected,
+    #[serde(rename = "ndjson")]
     Ndjson,
+
+    #[serde(rename = "ndjson-all")]
     NdjsonAll,
+
+    #[serde(rename = "ndjson-selected")]
     NdjsonSelected,
+
+    #[serde(rename = "html")]
     Html,
-    Png,
+
+    #[serde(rename = "plugin")]
+    Plugin,
+
+    #[serde(rename = "arrow")]
     Arrow,
+
+    #[serde(rename = "arrow-selected")]
     ArrowSelected,
+
+    #[serde(rename = "arrow-all")]
     ArrowAll,
+
+    #[serde(rename = "json-config")]
     JsonConfig,
 }
 
 impl ExportMethod {
-    pub const fn as_filename(&self) -> &'static str {
+    pub const fn as_filename(&self, is_chart: bool) -> &'static str {
         match self {
             Self::Csv => ".csv",
             Self::CsvAll => ".all.csv",
             Self::Json => ".json",
             Self::JsonAll => ".all.json",
             Self::Html => ".html",
-            Self::Png => ".png",
+            Self::Plugin => {
+                if is_chart {
+                    ".png"
+                } else {
+                    ".txt"
+                }
+            },
             Self::Arrow => ".arrow",
             Self::ArrowAll => ".all.arrow",
             Self::JsonConfig => ".config.json",
@@ -53,28 +97,30 @@ impl ExportMethod {
             Self::Ndjson => ".ndjson",
             Self::NdjsonAll => ".all.ndjson",
             Self::NdjsonSelected => ".selected.ndjson",
+            // Self::JsonColumns => ".columns.json",
+            // Self::JsonColumnsAll => ".all.columns.json",
+            // Self::JsonColumnsSelected => ".selected.columns.json",
         }
     }
 
-    pub const fn mimetype(&self) -> MimeType {
+    pub const fn mimetype(&self, is_chart: bool) -> MimeType {
         match self {
-            Self::Png => MimeType::ImagePng,
+            Self::Plugin if is_chart => MimeType::ImagePng,
             _ => MimeType::TextPlain,
         }
     }
-}
 
-impl From<ExportMethod> for Html {
-    fn from(x: ExportMethod) -> Self {
-        html! { <code>{ x.as_filename() }</code> }
+    pub fn to_html(&self, is_chart: bool) -> Html {
+        html! { <code>{ self.as_filename(is_chart) }</code> }
     }
 }
 
 impl ExportMethod {
-    pub fn new_file(&self, x: &str) -> ExportFile {
+    pub fn new_file(&self, x: &str, is_chart: bool) -> ExportFile {
         ExportFile {
             name: Rc::new(x.to_owned()),
             method: *self,
+            is_chart,
         }
     }
 }
@@ -83,11 +129,12 @@ impl ExportMethod {
 pub struct ExportFile {
     pub name: Rc<String>,
     pub method: ExportMethod,
+    pub is_chart: bool,
 }
 
 impl ExportFile {
-    pub fn as_filename(&self) -> String {
-        format!("{}{}", self.name, self.method.as_filename())
+    pub fn as_filename(&self, is_chart: bool) -> String {
+        format!("{}{}", self.name, self.method.as_filename(is_chart))
     }
 }
 
@@ -99,6 +146,6 @@ impl From<ExportFile> for Html {
             None
         };
 
-        html! { <code {class}>{ x.name }{ x.method.as_filename() }</code> }
+        html! { <code {class}>{ x.name }{ x.method.as_filename(x.is_chart) }</code> }
     }
 }

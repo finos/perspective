@@ -19,7 +19,7 @@ use futures::FutureExt;
 use perspective_client::{
     Client, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions, TableReadFormat,
     UpdateData, UpdateOptions, View, ViewOnUpdateResp, ViewWindow, assert_table_api,
-    assert_view_api,
+    assert_view_api, asyncfn,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -57,25 +57,20 @@ impl AsyncClient {
     #[pyo3(signature=(handle_request, handle_close=None))]
     pub fn new(handle_request: Py<PyAny>, handle_close: Option<Py<PyAny>>) -> Self {
         let handle_request = Arc::new(handle_request);
-        let client = Client::new_with_callback({
-            move |msg| {
-                let handle_request = handle_request.clone();
-                Box::pin(async move {
-                    if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
-                        let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
-                        if isawaitable(ret.bind(py)).unwrap_or(false) {
-                            Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
-                        } else {
-                            Ok(None)
-                        }
-                    })? {
-                        fut.await?;
-                    }
-
-                    Ok(())
-                })
+        let client = Client::new_with_callback(asyncfn!(handle_request, async move |msg| {
+            if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
+                let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
+                if isawaitable(ret.bind(py)).unwrap_or(false) {
+                    Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
+                } else {
+                    Ok(None)
+                }
+            })? {
+                fut.await?;
             }
-        });
+
+            Ok(())
+        }));
 
         AsyncClient {
             client,
