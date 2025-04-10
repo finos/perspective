@@ -213,6 +213,7 @@ jobs:
 
         steps:
             - name: Free up disk space
+              if: ${{ runner.os == 'Linux' }}
               run: |
                   rm -rf /__t/*
 

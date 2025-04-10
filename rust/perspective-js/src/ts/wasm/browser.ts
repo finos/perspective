@@ -71,9 +71,13 @@ export async function worker(
 
     const { Client } = await module;
     let port: MessagePort;
-    if (webworker instanceof SharedWorker) {
+    if (
+        typeof SharedWorker !== "undefined" &&
+        webworker instanceof SharedWorker
+    ) {
         port = webworker.port;
     } else {
+        webworker = webworker as ServiceWorker | Worker | MessagePort;
         const messageChannel = new MessageChannel();
         webworker.postMessage(null, [messageChannel.port2]);
         port = messageChannel.port1;

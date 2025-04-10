@@ -90,7 +90,11 @@ impl tracing::Level {
 static IS_CHROME: OnceLock<bool> = OnceLock::new();
 
 fn detect_chrome() -> bool {
-    web_sys::window().and_then(|w| w.get("chrome")).is_some()
+    if let Some(window) = web_sys::window() {
+        window.get("chrome").is_some()
+    } else {
+        true
+    }
 }
 
 #[extend::ext]
@@ -124,7 +128,7 @@ struct WasmLogger {
 impl Default for WasmLogger {
     fn default() -> Self {
         Self {
-            max_level: tracing::Level::TRACE,
+            max_level: tracing::Level::WARN,
         }
     }
 }

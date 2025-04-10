@@ -70,4 +70,42 @@ test.describe("worker types", () => {
 
         test.expect(s).toEqual(99);
     });
+
+    test("No SharedWorker or ServiceWorker (embedded)", async ({ page }) => {
+        await page.goto("/node_modules/@finos/perspective/test/html/test.html");
+        const s = await page.evaluate(async () => {
+            window.SharedWorker = undefined;
+            window.ServiceWorker = undefined;
+            const perspective = await import(
+                "/node_modules/@finos/perspective/dist/esm/perspective.js"
+            );
+
+            const wasm = fetch(
+                "/node_modules/@finos/perspective/dist/wasm/perspective-js.wasm"
+            );
+
+            const wasm2 = fetch(
+                "/node_modules/@finos/perspective/dist/wasm/perspective-server.wasm"
+            );
+
+            perspective.init_client(wasm);
+            perspective.init_server(wasm2);
+
+            const worker = await perspective.worker(
+                new Worker(
+                    "/node_modules/@finos/perspective/dist/cdn/perspective-server.worker.js"
+                )
+            );
+
+            let resp = await fetch(
+                "/node_modules/@finos/perspective-test/assets/superstore.csv"
+            );
+
+            let csv = await resp.text();
+            const t = await worker.table(csv);
+            return await t.size();
+        });
+
+        test.expect(s).toEqual(99);
+    });
 });

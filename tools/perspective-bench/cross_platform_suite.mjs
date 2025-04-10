@@ -198,7 +198,7 @@ export async function table_suite(perspective, metadata) {
         }
     }
 
-    if (!check_version_gte(metadata.version, "2.3.0")) {
+    if (check_version_gte(metadata.version, "2.3.0")) {
         await benchmark({
             name: `.table(arrow, {limit: 1000})`,
             before_all,
@@ -228,15 +228,16 @@ export async function table_suite(perspective, metadata) {
         },
     });
 
-
-    if (!check_version_gte(metadata.version, "3.0.0")) {
+    if (check_version_gte(metadata.version, "3.0.0")) {
         await benchmark({
             name: `table.update(arrow)`,
             before_all,
             metadata,
             async before({ arrow }) {
-                let table2 = await perspective.table(arrow.slice(), { limit: 1000 });
-                return table2
+                let table2 = await perspective.table(arrow.slice(), {
+                    limit: 1000,
+                });
+                return table2;
             },
             async after(_, table) {
                 if (!check_version_gte(metadata.version, "3.4.3")) {
