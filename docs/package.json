@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-docs",
-    "version": "3.4.3",
+    "version": "3.5.0",
     "private": true,
     "scripts": {
         "build": "node build.js && docusaurus build",

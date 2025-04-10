@@ -43,7 +43,7 @@ perspective_bench.suite(
             const { default: perspective } = await import("@finos/perspective");
             client = await perspective.websocket(path);
             metadata = {
-                version: "3.4.3",
+                version: "3.5.0",
                 version_idx,
             };
         } else {

@@ -1,3 +1,22 @@
+# [v3.5.0](https://github.com/finos/perspective/releases/tag/v3.5.0)
+
+_10 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.4.3...v3.5.0))
+
+Features
+
+- Add API for keyboard copy from `perspective-viewer-datagrid` [#2975](https://github.com/finos/perspective/pull/2975)
+- Update `limit` behavior to use incrementing `index` (fix `last_by_index` aggregate) [#2964](https://github.com/finos/perspective/pull/2964)
+
+Fixes
+
+- Fix support for browsers lacking the `SharedWorker` API [#2978](https://github.com/finos/perspective/pull/2978)
+- Fix chart bug which rounds subsecond ticks [#2971](https://github.com/finos/perspective/pull/2971)
+- Fix export-to-html in `perspective-viewer` [#2960](https://github.com/finos/perspective/pull/2960)
+
+Misc
+
+- Fix parallel_for and cleanup commented out code. [#2972](https://github.com/finos/perspective/pull/2972)
+
 # [v3.4.3](https://github.com/finos/perspective/releases/tag/v3.4.3)
 
 _20 March 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.4.2...v3.4.3))
@@ -5,9 +24,6 @@ _20 March 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v
 Fixes
 
 - Fix date filters in perspective-{select,click} events [#2957](https://github.com/finos/perspective/pull/2957)
-
-Misc
-
 - Invalidate viewer session before loading table [#2958](https://github.com/finos/perspective/pull/2958)
 
 # [v3.4.2](https://github.com/finos/perspective/releases/tag/v3.4.2)
