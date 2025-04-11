@@ -16,7 +16,9 @@ import { getPyodideDistDir } from "@finos/perspective-scripts/pyodide.mjs";
 import { getEmscriptenWheelPath } from "@finos/perspective-scripts/workspace.mjs";
 
 // avoid executing this script directly, instead run `pnpm run test` from the workspace root
-
+// to pass extra arguments to pytest, run (with perspective-python focused):
+//
+// pnpm run test -k "my_cool_test"
 const execOpts = { stdio: "inherit" };
 if (process.env.PSP_PYODIDE) {
     const pyodideDistDir = getPyodideDistDir();
@@ -51,5 +53,14 @@ if (process.env.PSP_PYODIDE) {
         execOpts
     );
 } else {
-    execFileSync("pytest", ["perspective/tests", "-W error", "--timeout=300", ...process.argv.slice(2)], execOpts);
+    execFileSync(
+        "pytest",
+        [
+            "perspective/tests",
+            "-W error",
+            "--timeout=300",
+            ...process.argv.slice(2),
+        ],
+        execOpts
+    );
 }

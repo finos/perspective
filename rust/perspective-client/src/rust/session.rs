@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::error::Error as StdError;
 use std::sync::Arc;
 
 use futures::Future;
@@ -78,8 +79,8 @@ pub trait Session<E> {
     fn close(self) -> impl Future<Output = ()>;
 }
 
-type ProxyCallback =
-    Arc<dyn Fn(&[u8]) -> Result<(), Box<dyn std::error::Error + Send + Sync>> + Send + Sync>;
+type ProxyCallbackError = Box<dyn StdError + Send + Sync>;
+type ProxyCallback = Arc<dyn Fn(&[u8]) -> Result<(), ProxyCallbackError> + Send + Sync>;
 
 /// A [`Session`] implementation which tunnels through another [`Client`].
 #[derive(Clone)]
@@ -91,10 +92,7 @@ pub struct ProxySession {
 impl ProxySession {
     pub fn new(
         client: Client,
-        send_response: impl Fn(&[u8]) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
-        + Send
-        + Sync
-        + 'static,
+        send_response: impl Fn(&[u8]) -> Result<(), ProxyCallbackError> + Send + Sync + 'static,
     ) -> Self {
         ProxySession {
             parent: client,

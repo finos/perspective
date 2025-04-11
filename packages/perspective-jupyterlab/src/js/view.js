@@ -180,7 +180,6 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     get psp_client_id() {
-        // XXX(tom): why can't we just use the GUID already used to uniquely identify the view in comms ?
         return this.#psp_client_id;
     }
 

@@ -136,27 +136,27 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
     @property
     def client(self):
-        """Returns the ``perspective.Client`` under management by the viewer."""
+        """Returns the ``perspective.Client`` or ``perspective.AsyncClient`` under management by the viewer."""
         return self._client
 
     @property
     def table(self):
-        """Returns the ``perspective.Table`` under management by the viewer."""
+        """Returns the ``perspective.Table`` or ``perspective.AsyncTable`` under management by the viewer."""
         return self._table
 
+    def is_async(self):
+        """Returns whether this widget has an async interface or synchronous"""
+        return isinstance(self._table, perspective.perspective.AsyncTable)
+
     def load(self, data, **options):
-        """Given a ``perspective.Table``, a ``perspective.View``,
+        """Given a ``perspective.Table``, a ``perspective.AsyncTable``,
         or data that can be handled by ``perspective.Table``, pass it to the
         viewer.  Like `__init__`, load accepts a `perspective.Table`, a dataset,
         or a schema.
 
-        ``load()`` resets the state of the viewer :
-
-        * If a ``perspective.Table`` has already been  loaded, ``**options`` is
-          ignored as the options already set on the ``Table`` take precedence.
-
-        * If a ``perspective.View`` is loaded, the options on the
-          ``perspective.Table`` linked to the view take precedence.
+        ``load()`` resets the state of the viewer: if a ``perspective.Table``
+        has already been  loaded, ``**options`` is ignored as the options
+        already set on the ``Table`` take precedence.
 
         If data is passed in, a ``perspective.Table`` is automatically created
         by this method, and the options passed to ``**config`` are extended to
@@ -165,21 +165,31 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         sort, etc.) is cleared to prevent applying settings on columns that
         don't exist.
 
+        When a ``perspective.AsyncTable`` is loaded, the widget's interface
+        becomes async. Methods which operate on the underlying Perspective
+        view, inclusive of the ``load()`` call itself, return coroutine values
+        which must be awaited.
+
+        Loading a ``perspective.Table`` or plain data will make the interface
+        synchronous again.
+
         Args:
-            data (:obj:`Table`|:obj:`View`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
-                `perspective.Table` instance, a `perspective.View` instance, or
-                a dataset to be loaded in the viewer.
+            data (:obj:`Table`|:obj:`AsyncTable`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
+                `perspective.Table` instance, a `perspective.AsyncTable`
+                instance, or a dataset to be loaded in the viewer.
 
         Keyword Arguments:
             name (:obj:`str`): An optional name to reference the table by so it can
                 be accessed from the front-end. If not provided, a name will
                 be generated.
             index (:obj:`str`): A column name to be used as the primary key.
-                Ignored if a ``Table`` or ``View`` is supplied.
+                Ignored if a ``Table`` or ``AsyncTable`` is supplied.
             limit (:obj:`int`): A upper limit on the number of rows in the Table.
                 Cannot be set at the same time as `index`. Ignored if a
-                ``Table`` or ``View`` is supplied.
+                ``Table`` or ``AsyncTable`` is supplied.
 
+        Returns:
+            coro (:obj:`coroutine`): when `AsyncTable` is passed, the `load()` call must be awaited
         """
         name = options.pop("name", str(random()))
 
@@ -187,11 +197,21 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if self.table is not None:
             self.reset()
 
-        if isinstance(data, perspective.perspective.Table):
+        if isinstance(data, perspective.perspective.AsyncTable):
+            self._table = data
+            async def load_table():
+                self._client = await self.table.get_client()
+                self.table_name = self.table.get_name()
+                # If the user does not set columns to show, synchronize viewer state
+                # with dataset.
+                if len(self.columns) == 0:
+                    self.columns = await self.table.columns()
+
+            return load_table()
+        elif isinstance(data, perspective.perspective.Table):
             self._table = data
             self._client = data.get_client()
-            name = self._table.get_name()
-        elif isinstance(data, perspective.perspective.View):
+        elif isinstance(data, perspective.perspective.View) or isinstance(data, perspective.perspective.AsyncView):
             raise TypeError(
                 "Views cannot be loaded directly, load a table or raw data instead"
             )
@@ -204,8 +224,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if len(self.columns) == 0:
             self.columns = self.table.columns()
 
-        # Assigning to this traitlet signals the frontend viewer to connect to the
-        # table we're hosting.
         self.table_name = self.table.get_name()
 
     def update(self, data):
@@ -213,16 +231,22 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         This function follows the semantics of `Table.update()`, and will be
         affected by whether an index is set on the underlying table.
 
+        When this widget has loaded an ``AsyncTable``, returns a coroutine
+        which must be awaited.
+
         Args:
             data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): the
             update data for the table.
+
+        Returns:
+            coro (:obj:`coroutine`): when async, must be awaited
         """
-        self.table.update(data)
+        return self.table.update(data)
 
     def clear(self):
         """Clears the rows of this viewer's ``Table``."""
         if self.table is not None:
-            self.table.clear()
+            return self.table.clear()
 
     def replace(self, data):
         """Replaces the rows of this viewer's `Table` with new data.
@@ -230,9 +254,12 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         Args:
             data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): new data
             to set into the table - must conform to the table's schema.
+
+        Returns:
+            coro (:obj:`coroutine`): when async, must be awaited
         """
         if self.table is not None:
-            self.table.replace(data)
+            return self.table.replace(data)
 
     def save(self):
         """Get the viewer's attributes as a dictionary, symmetric with `restore`
@@ -300,11 +327,17 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         Args:
             delete_table (:obj:`bool`) : whether the underlying `Table` will be
                 deleted. Defaults to True.
+
+        Returns:
+            coro (:obj:`coroutine`): when async and `delete_table` is `True`,
+                must be awaited
         """
+        ret = None
         if delete_table:
             # Delete table
-            self.table.delete()
+            ret = self.table.delete()
             self.table_name = None
             self._table = None
 
         self.reset()
+        return ret

@@ -110,6 +110,65 @@ describe_jupyter(
             }
         );
 
+        test_jupyter(
+            "Loads AsyncTable",
+            [
+                `
+server = perspective.Server()
+sync_client = server.new_local_client()
+sync_client.table({"Income": [5,4,3,2,1], "Expense": [4,3,2,1,1], "Profit": [1,1,1,1,0]}, name="Microstore")
+proxy_sess = perspective.ProxySession(sync_client, lambda msg: asyncio.create_task(async_client.handle_response(msg)))
+
+async_client = perspective.AsyncClient(proxy_sess.handle_request_async)
+async_table = await async_client.open_table("Microstore")`,
+                "w = perspective.widget.PerspectiveWidget(async_table)",
+                "w",
+            ],
+            async ({ page }) => {
+                await default_body(page);
+                const num_columns = await page
+                    .locator("regular-table thead tr")
+                    .first()
+                    .evaluate((tr) => tr.childElementCount);
+
+                expect(num_columns).toEqual(3);
+                await expect(
+                    page.locator("regular-table tbody tr")
+                ).toHaveCount(5);
+            }
+        );
+
+        test_jupyter(
+            "Loads updates to AsyncTable",
+            [
+                [
+                    `
+server = perspective.Server()
+sync_client = server.new_local_client()
+sync_table = sync_client.table(arrow_data)
+proxy_sess = perspective.ProxySession(sync_client, lambda msg: asyncio.create_task(async_client.handle_response(msg)))
+
+async_client = perspective.AsyncClient(proxy_sess.handle_request_async)
+async_table = await async_client.open_table(sync_table.get_name())`,
+                    "w = perspective.widget.PerspectiveWidget(async_table, columns=['f64', 'str', 'datetime'])",
+                ].join("\n"),
+                "w",
+                "sync_table.update(arrow_data)",
+            ],
+            async ({ page }) => {
+                await default_body(page);
+                const num_columns = await page
+                    .locator("regular-table thead tr")
+                    .first()
+                    .evaluate((tr) => tr.childElementCount);
+
+                expect(num_columns).toEqual(3);
+
+                await expect(
+                    page.locator("regular-table tbody tr")
+                ).toHaveCount(10);
+            }
+        );
         // Restore
 
         test_jupyter(

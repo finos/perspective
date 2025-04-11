@@ -14,6 +14,7 @@ pub mod client_async;
 pub mod client_sync;
 mod pandas;
 mod polars;
+pub mod proxy_session;
 mod pyarrow;
 pub mod table_data;
 pub mod update_data;

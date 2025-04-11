@@ -1,6 +1,7 @@
 # Perspective JupyterLab Extension
 
-This extension allows in-lining perspective based charts in jupyterlab notebooks.
+This extension allows in-lining perspective based charts in jupyterlab
+notebooks.
 
 [Examples](https://github.com/finos/perspective/tree/master/examples/jupyter-notebooks)
 

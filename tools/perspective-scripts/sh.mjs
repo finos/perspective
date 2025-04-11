@@ -323,7 +323,7 @@ function parse_bind_args(fragments, ...args) {
     for (let i = 0; i < fragments.length - 1; i++) {
         const arg = args[i];
         const start = terms.length === 0 ? fragments[i] : terms.pop();
-        if (arg === undefined || arg !== arg || arg === false) {
+        if (arg === undefined || Number.isNaN(arg) || arg === false) {
             terms.push(start.split(" ").slice(0, -1).join(" "));
             terms.push(" ");
             terms.push(fragments[i + 1].split(" ").slice(1).join(" "));
