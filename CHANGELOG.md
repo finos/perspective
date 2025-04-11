@@ -1,3 +1,12 @@
+# [v3.5.1](https://github.com/finos/perspective/releases/tag/v3.5.1)
+
+_11 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.5.0...v3.5.1))
+
+Misc
+
+- Add vscode settings to enable prettier [#2959](https://github.com/finos/perspective/pull/2959)
+- AsyncTable support in widget [#2974](https://github.com/finos/perspective/pull/2974)
+
 # [v3.5.0](https://github.com/finos/perspective/releases/tag/v3.5.0)
 
 _10 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.4.3...v3.5.0))

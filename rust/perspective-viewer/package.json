@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "3.5.0",
+    "version": "3.5.1",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
