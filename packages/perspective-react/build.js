@@ -10,29 +10,35 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import esbuild from "esbuild";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
+import { build } from "@finos/perspective-esbuild-plugin/build.js";
+import "zx/globals";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-await esbuild.build({
-    entryPoints: ["src/index.tsx"],
-    outdir: "dist",
-    format: "esm",
-    bundle: true,
-    sourcemap: "linked",
-    target: "es2022",
-    loader: {
-        ".arrow": "file",
-        ".wasm": "file",
+const BUILD = [
+    {
+        define: {
+            global: "window",
+        },
+        entryPoints: ["src/index.tsx"],
+        format: "esm",
+        loader: {},
+        outfile: "dist/esm/index.js",
+        plugins: [NodeModulesExternal()],
     },
-    assetNames: "[name]",
-});
+];
 
-fs.writeFileSync(
-    path.join(__dirname, "dist/index.html"),
-    fs.readFileSync(path.join(__dirname, "src/index.html")).toString()
-);
+async function build_all() {
+    await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
+    try {
+        await $`npx tsc --project ./tsconfig.json`.stdio(
+            "inherit",
+            "inherit",
+            "inherit"
+        );
+    } catch (e) {
+        console.error(e);
+        process.exit(1);
+    }
+}
+
+build_all();

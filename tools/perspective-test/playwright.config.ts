@@ -82,6 +82,10 @@ const BROWSER_PACKAGES = [
         testDir: "rust/perspective-viewer/test/js",
     },
     {
+        packageName: "perspective-react",
+        testDir: "packages/perspective-react/test/js",
+    },
+    {
         packageName: "perspective-viewer-datagrid",
         testDir: "packages/perspective-viewer-datagrid/test/js",
     },

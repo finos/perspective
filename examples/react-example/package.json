@@ -3,6 +3,7 @@
     "private": true,
     "version": "3.5.1",
     "description": "An example app built using `@finos/perspective-viewer`.",
+    "type": "module",
     "scripts": {
         "build": "node build.js",
         "start": "node build.js && http-server dist"
@@ -14,9 +15,10 @@
         "@finos/perspective-viewer": "workspace:^",
         "@finos/perspective-viewer-d3fc": "workspace:^",
         "@finos/perspective-viewer-datagrid": "workspace:^",
-        "superstore-arrow": "^3.0.0",
-        "react": "^18",
-        "react-dom": "^18"
+        "@finos/perspective-react": "workspace:^",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "superstore-arrow": "^3.0.0"
     },
     "devDependencies": {
         "esbuild": "^0.14.54",

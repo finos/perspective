@@ -10,29 +10,24 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import esbuild from "esbuild";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { build } from "@finos/perspective-esbuild-plugin/build.js";
+import fs from "fs/promises";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-await esbuild.build({
-    entryPoints: ["src/index.tsx"],
-    outdir: "dist",
-    format: "esm",
-    bundle: true,
-    sourcemap: "linked",
-    target: "es2022",
-    loader: {
-        ".arrow": "file",
-        ".wasm": "file",
+/** @type {import("esbuild").CommonOptions[]} */
+const BUILD = [
+    {
+        define: {
+            global: "window",
+        },
+        entryPoints: ["react-test/index.tsx"],
+        format: "esm",
+        external: [],
+        loader: {
+            ".wasm": "file",
+        },
+        outfile: "dist/react-test/react-test.js",
     },
-    assetNames: "[name]",
-});
+];
 
-fs.writeFileSync(
-    path.join(__dirname, "dist/index.html"),
-    fs.readFileSync(path.join(__dirname, "src/index.html")).toString()
-);
+await Promise.all(BUILD.map(build));
+fs.cp("./src/html/react-test.html", "dist/react-test/index.html");

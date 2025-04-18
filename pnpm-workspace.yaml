@@ -10,6 +10,7 @@ packages:
     - "packages/perspective-viewer-openlayers"
     - "packages/perspective-workspace"
     - "packages/perspective-jupyterlab"
+    - "packages/perspective-react"
     - "packages/perspective-cli"
     - "rust/generate-metadata"
     - "rust/perspective"

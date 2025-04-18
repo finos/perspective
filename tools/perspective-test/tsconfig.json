@@ -11,7 +11,7 @@
         "moduleResolution": "NodeNext",
         "skipLibCheck": true,
         "resolveJsonModule": true,
-        "allowImportingTsExtensions": true
-    },
-    "files": ["./src/js/index.ts"]
+        "allowImportingTsExtensions": true,
+        "jsx": "react-jsx"
+    }
 }

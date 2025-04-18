@@ -150,6 +150,7 @@ const Toolbar: React.FC<{
                             });
                             // Yield event loop to prevent react from
                             // batching updates.
+                            // await Promise.resolve();
 
                             await new Promise((resolve) =>
                                 setTimeout(resolve, 5)
