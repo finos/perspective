@@ -1,3 +1,11 @@
+# [v3.6.0](https://github.com/finos/perspective/releases/tag/v3.6.0)
+
+_24 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.5.1...v3.6.0))
+
+**Breaking**
+
+- Fix `limit` overflow bug [#2983](https://github.com/finos/perspective/pull/2983)
+
 # [v3.5.1](https://github.com/finos/perspective/releases/tag/v3.5.1)
 
 _11 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.5.0...v3.5.1))
