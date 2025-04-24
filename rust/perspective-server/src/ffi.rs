@@ -35,7 +35,7 @@ unsafe extern "C" {
         buffer_ptr: *const u8,
         buffer_len: usize,
     ) -> ResponseBatch;
-    fn psp_poll(server: *const u8) -> ResponseBatch;
+    fn psp_poll(server: *const u8, client_id: u32) -> ResponseBatch;
     fn psp_close_session(server: *const u8, client_id: u32);
 }
 
@@ -122,8 +122,8 @@ impl Server {
         unsafe { psp_handle_request(self.0, client_id, request.0, request.1) }
     }
 
-    pub fn poll(&self) -> ResponseBatch {
-        unsafe { psp_poll(self.0) }
+    pub fn poll(&self, client_id: u32) -> ResponseBatch {
+        unsafe { psp_poll(self.0, client_id) }
     }
 
     pub fn close_session(&self, session_id: u32) {

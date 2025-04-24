@@ -799,13 +799,52 @@ ProtoServer::handle_request(
 }
 
 std::vector<ProtoServerResp<std::string>>
-ProtoServer::poll() {
+ProtoServer::poll(std::uint32_t client_id) {
     std::vector<ProtoServerResp<std::string>> out;
-    for (auto& resp : _poll()) {
+    try {
+        const auto& responses = _poll();
+        for (const auto& resp : responses) {
+            ProtoServerResp<std::string> str_resp;
+            str_resp.data = resp.data.SerializeAsString();
+            str_resp.client_id = resp.client_id;
+            out.emplace_back(str_resp);
+        }
+
+    } catch (const PerspectiveException& e) {
+        proto::Response resp;
+        auto* err = resp.mutable_server_error()->mutable_message();
+        *err = std::string(e.what());
         ProtoServerResp<std::string> str_resp;
-        str_resp.data = resp.data.SerializeAsString();
-        str_resp.client_id = resp.client_id;
-        out.emplace_back(str_resp);
+        str_resp.data = resp.SerializeAsString();
+        str_resp.client_id = client_id;
+        out.emplace_back(std::move(str_resp));
+    } catch (const PerspectiveViewNotFoundException& e) {
+        proto::Response resp;
+        auto* err = resp.mutable_server_error();
+        err->set_status_code(proto::StatusCode::VIEW_NOT_FOUND);
+        auto* msg = err->mutable_message();
+        *msg = std::string(e.what());
+        ProtoServerResp<std::string> str_resp;
+        str_resp.data = resp.SerializeAsString();
+        str_resp.client_id = client_id;
+        out.emplace_back(std::move(str_resp));
+    } catch (const std::exception& e) {
+        proto::Response resp;
+        auto* err = resp.mutable_server_error()->mutable_message();
+        *err = std::string(e.what());
+        ProtoServerResp<std::string> str_resp;
+        str_resp.data = resp.SerializeAsString();
+        str_resp.client_id = client_id;
+        out.emplace_back(std::move(str_resp));
+    } catch (...) {
+        proto::Response resp;
+        auto* err = resp.mutable_server_error()->mutable_message();
+        std::exception_ptr p = std::current_exception();
+        *err = "Unknown exception";
+        ProtoServerResp<std::string> str_resp;
+        str_resp.data = resp.SerializeAsString();
+        str_resp.client_id = client_id;
+        out.emplace_back(std::move(str_resp));
     }
 
     return out;
@@ -2141,11 +2180,11 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                             auto tm = scalar.get<t_date>();
                             std::stringstream ss;
                             ss << std::setfill('0') << std::setw(4) << tm.year()
-                               << "-" << std::setfill('0') << std::setw(2)
-                               // Increment month by 1, as date::month is [1-12] but
-                               // t_date::month() is [0-11]
-                               << tm.month() + 1
                                << "-" << std::setfill('0')
+                               << std::setw(2)
+                               // Increment month by 1, as date::month is [1-12]
+                               // but t_date::month() is [0-11]
+                               << tm.month() + 1 << "-" << std::setfill('0')
                                << std::setw(2) << tm.day();
                             s->set_string(ss.str());
                             break;
