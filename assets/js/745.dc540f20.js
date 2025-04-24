@@ -1,0 +1,1 @@
+(self.webpackChunk_finos_perspective_docs=self.webpackChunk_finos_perspective_docs||[]).push([[745],{6745:(e,s,c)=>{e.exports=c.v(s,e.id,"9688636b12c8105c")}}]);
