@@ -388,28 +388,6 @@ t_ftrav::delete_row(t_tscalar pkey) {
     ++m_step_deletes;
 }
 
-void
-t_ftrav::move_row(
-    const t_gstate& gstate,
-    const t_data_table& expression_master_table,
-    const t_config& config,
-    t_tscalar old_pkey,
-    t_tscalar new_pkey
-) {
-    auto old_pkiter = m_pkeyidx.find(old_pkey);
-    bool old_pkey_existed = old_pkiter != m_pkeyidx.end();
-    if (!old_pkey_existed) {
-        LOG_DEBUG("Tried to move pkey that doesn't exist: " << old_pkey);
-        return;
-    }
-    LOG_DEBUG("Moving pkey from: " << old_pkey << " to: " << new_pkey);
-
-    (*m_index)[old_pkiter->second].m_deleted = true;
-    t_mselem mselem;
-    fill_sort_elem(gstate, expression_master_table, config, new_pkey, mselem);
-    m_new_elems[new_pkey] = mselem;
-}
-
 std::vector<t_sortspec>
 t_ftrav::get_sort_by() const {
     return m_sortby;

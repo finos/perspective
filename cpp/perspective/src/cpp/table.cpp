@@ -182,7 +182,7 @@ Table::validate_expressions(
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
     t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"});
-    auto gnode = std::make_shared<t_gnode>(in_schema, out_schema, m_limit);
+    auto gnode = std::make_shared<t_gnode>(in_schema, out_schema);
     gnode->init();
     return gnode;
 }
@@ -226,7 +226,7 @@ Table::remove_port(t_uindex port_id) const {
 
 void
 Table::calculate_offset(std::uint32_t row_count) {
-    m_offset = m_offset + row_count;
+    m_offset = (m_offset + row_count) % m_limit;
 }
 
 t_uindex
@@ -948,7 +948,7 @@ Table::update_cols(const std::string_view& data, std::uint32_t port_id) {
 
     if (is_implicit && !document.GetObj().HasMember("__INDEX__")) {
         for (std::uint32_t ii = 0; ii < nrows; ii++) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, m_offset + ii);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, (m_offset + ii) % m_limit);
         }
     }
 
@@ -1088,8 +1088,8 @@ Table::from_cols(
 
     if (is_implicit) {
         for (t_uindex ii = 0; ii < nrows; ii++) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
         }
     }
 
@@ -1158,7 +1158,7 @@ Table::update_rows(const std::string_view& data, std::uint32_t port_id) {
     // 3.) Fill table
     for (const auto& row : document.GetArray()) {
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, ii + m_offset);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, (ii + m_offset) % m_limit);
         }
 
         // col_count = m_column_names.size();
@@ -1336,8 +1336,8 @@ Table::from_rows(
         }
 
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
         }
 
         ii++;
@@ -1408,7 +1408,7 @@ Table::update_ndjson(const std::string_view& data, std::uint32_t port_id) {
     bool is_finished = false;
     while (!is_finished) {
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, ii + m_offset);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, (ii + m_offset) % m_limit);
         }
 
         for (const auto& it : document.GetObj()) {
@@ -1588,8 +1588,8 @@ Table::from_ndjson(
         }
 
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::int32_t>(ii, ii);
-            psp_okey_col->set_nth<std::int32_t>(ii, ii);
+            psp_pkey_col->set_nth<std::int32_t>(ii, ii % limit);
+            psp_okey_col->set_nth<std::int32_t>(ii, ii % limit);
         }
 
         ii++;

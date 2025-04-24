@@ -10,9 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-#include "perspective/raw_types.h"
-#include <algorithm>
-#include <limits>
 #include <perspective/first.h>
 #include <perspective/context_unit.h>
 #include <perspective/context_zero.h>
@@ -27,15 +24,10 @@
 
 namespace perspective {
 
-t_gstate::t_gstate(
-    t_schema input_schema, t_schema output_schema, t_uindex limit
-) :
+t_gstate::t_gstate(t_schema input_schema, t_schema output_schema) :
     m_input_schema(std::move(input_schema)),
     m_output_schema(std::move(output_schema)),
-    m_init(false),
-    m_limit(limit)
-
-{
+    m_init(false) {
     LOG_CONSTRUCTOR("t_gstate");
 }
 
@@ -109,22 +101,21 @@ t_gstate::lookup_or_create(const t_tscalar& pkey) {
         return idx;
     }
 
-    t_uindex next_idx_original = m_table->size();
-    t_uindex next_idx = next_idx_original % m_limit;
-
-    if (next_idx + 1 <= m_limit) {
-        if (next_idx >= m_table->get_capacity() - 1) {
-            m_table->reserve(std::max(
-                (next_idx + 1),
-                static_cast<t_uindex>(
-                    m_table->get_capacity() * PSP_TABLE_GROW_RATIO
-                )
-            ));
-        }
-        m_table->set_size(std::max(m_table->size() + 1, next_idx + 1));
+    t_uindex nrows = m_table->num_rows();
+    if (nrows >= m_table->get_capacity() - 1) {
+        m_table->reserve(std::max(
+            nrows + 1,
+            static_cast<t_uindex>(
+                m_table->get_capacity() * PSP_TABLE_GROW_RATIO
+            )
+        ));
     }
-    m_mapping[pkey_] = next_idx;
-    return next_idx_original;
+
+    m_table->set_size(nrows + 1);
+    m_opcol->set_nth<std::uint8_t>(nrows, OP_INSERT);
+    m_pkcol->set_scalar(nrows, pkey);
+    m_mapping[pkey_] = nrows;
+    return nrows;
 }
 
 void
@@ -162,9 +153,8 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
     m_pkcol = master_table->get_column("psp_pkey");
     m_opcol = master_table->get_column("psp_op");
 
-    master_table->set_capacity(std::min(flattened->get_capacity(), m_limit + 1)
-    );
-    master_table->set_size(std::min(flattened->size(), m_limit + 1));
+    master_table->set_capacity(flattened->get_capacity());
+    master_table->set_size(flattened->size());
 
     for (t_uindex idx = 0, loop_end = flattened->num_rows(); idx < loop_end;
          ++idx) {
@@ -175,27 +165,18 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
         switch (op) {
             case OP_INSERT: {
                 // Write new primary keys into `m_mapping`
-                m_mapping[m_symtable.get_interned_tscalar(pkey)] =
-                    idx % m_limit;
-                m_opcol->set_nth<std::uint8_t>(idx % m_limit, OP_INSERT);
-                m_pkcol->set_scalar(idx % m_limit, pkey);
+                m_mapping[m_symtable.get_interned_tscalar(pkey)] = idx;
+                m_opcol->set_nth<std::uint8_t>(idx, OP_INSERT);
+                m_pkcol->set_scalar(idx, pkey);
             } break;
             case OP_DELETE: {
-                _mark_deleted(idx % m_limit);
+                _mark_deleted(idx);
             } break;
             default: {
                 PSP_COMPLAIN_AND_ABORT("Unexpected OP");
             } break;
         }
     }
-
-#if PSP_DEBUG
-    LOG_DEBUG("Flattened");
-    flattened->pprint();
-
-    LOG_DEBUG("Master");
-    m_table->pprint();
-#endif
 
 #ifdef PSP_TABLE_VERIFY
     master_table->verify();
@@ -212,43 +193,28 @@ t_gstate::update_master_table(const t_data_table* flattened) {
     // Update existing `m_table`
     const t_column* flattened_pkey_col =
         flattened->get_const_column("psp_pkey").get();
-    t_column* flattened_old_pkey_col =
-        flattened->get_column("psp_old_pkey").get();
     const t_column* flattened_op_col =
         flattened->get_const_column("psp_op").get();
 
     t_data_table* master_table = m_table.get();
-    std::vector<t_uindex> master_table_indexes(
-        std::min(flattened->num_rows(), m_limit)
-    );
+    std::vector<t_uindex> master_table_indexes(flattened->num_rows());
 
-    for (t_uindex flattened_idx = 0, loop_end = flattened->num_rows();
-         flattened_idx < loop_end;
-         ++flattened_idx) {
-        t_tscalar pkey = flattened_pkey_col->get_scalar(flattened_idx);
-        const auto* op_ptr =
-            flattened_op_col->get_nth<std::uint8_t>(flattened_idx);
+    for (t_uindex idx = 0, loop_end = flattened->num_rows(); idx < loop_end;
+         ++idx) {
+        t_tscalar pkey = flattened_pkey_col->get_scalar(idx);
+        const auto* op_ptr = flattened_op_col->get_nth<std::uint8_t>(idx);
         t_op op = static_cast<t_op>(*op_ptr);
 
         switch (op) {
             case OP_INSERT: {
                 // Lookup/create the row index in `m_table` based on pkey
-                const auto new_idx = lookup_or_create(pkey);
-                master_table_indexes[flattened_idx % m_limit] =
-                    new_idx % m_limit;
-
-                if (new_idx >= m_limit
-                    && m_pkcol->is_valid(new_idx % m_limit)) {
-                    const auto old = m_pkcol->get_scalar(new_idx % m_limit);
-                    m_mapping.erase(old);
-                    flattened_old_pkey_col->set_scalar(flattened_idx, old);
-                    flattened_old_pkey_col->set_valid(flattened_idx, true);
-                    LOG_DEBUG("DELETING OLD PKEY: " << old);
-                }
+                master_table_indexes[idx] = lookup_or_create(pkey);
 
                 // Write the op and pkey to `m_table`
-                m_opcol->set_nth<std::uint8_t>(new_idx % m_limit, OP_INSERT);
-                m_pkcol->set_scalar(new_idx % m_limit, pkey);
+                m_opcol->set_nth<std::uint8_t>(
+                    master_table_indexes[idx], OP_INSERT
+                );
+                m_pkcol->set_scalar(master_table_indexes[idx], pkey);
             } break;
             case OP_DELETE: {
                 // Erase the pkey from the master table, but this does not
@@ -261,12 +227,8 @@ t_gstate::update_master_table(const t_data_table* flattened) {
         }
     }
 
-    m_table->set_size(std::min(m_table->size(), m_limit));
-
     const t_schema& master_schema = m_table->get_schema();
     t_uindex ncols = master_table->num_columns();
-
-    LOG_DEBUG("Master Table Indices: " << master_table_indexes);
 
     parallel_for(
         int(ncols),
@@ -284,24 +246,15 @@ t_gstate::update_master_table(const t_data_table* flattened) {
             if (!flattened_column) {
                 return;
             }
-
             update_master_column(
                 master_column,
                 flattened_column.get(),
                 flattened_op_col,
                 master_table_indexes,
-                std::min(flattened->num_rows(), m_limit)
+                flattened->num_rows()
             );
         }
     );
-
-#if PSP_DEBUG
-    LOG_DEBUG("Flattened");
-    flattened->pprint();
-
-    LOG_DEBUG("Master");
-    m_table->pprint();
-#endif
 }
 
 void

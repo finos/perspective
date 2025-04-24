@@ -40,7 +40,7 @@ struct PERSPECTIVE_EXPORT t_const_char_comparator {
         COMPARER_T<t_index> cmp;
         int cmpval = std::strcmp(s1, s2);
         return cmp(cmpval, 0);
-    } // namespace perspective
+    }
 };
 
 #ifdef PSP_SSO_SCALAR
@@ -202,7 +202,7 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar coerce_numeric_dtype(t_dtype dtype) const;
 
     t_scalar_u m_data;
-    t_dtype m_type;
+    unsigned char m_type;
     t_status m_status;
 #ifdef PSP_SSO_SCALAR
     bool m_inplace;
