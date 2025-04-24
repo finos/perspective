@@ -96,8 +96,8 @@ psp_handle_request(
 
 PERSPECTIVE_EXPORT
 EncodedApiEntries*
-psp_poll(ProtoServer* server) {
-    auto responses = server->poll();
+psp_poll(ProtoServer* server, std::uint32_t client_id) {
+    auto responses = server->poll(client_id);
     return encode_api_responses(responses);
 }
 

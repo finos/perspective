@@ -625,7 +625,7 @@ namespace server {
         void close_session(std::uint32_t);
         std::vector<ProtoServerResp<std::string>>
         handle_request(std::uint32_t client_id, const std::string_view& data);
-        std::vector<ProtoServerResp<std::string>> poll();
+        std::vector<ProtoServerResp<std::string>> poll(std::uint32_t client_id);
 
     private:
         void handle_process_table(

@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 #pragma once
-#include "perspective/raw_types.h"
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/column.h>
@@ -34,22 +33,11 @@ struct t_rowpack {
     t_op m_op;
 };
 
-template <typename DATA_T>
-std::ostream&
-operator<<(std::ostream& os, const t_rowpack<DATA_T>& fr) {
-    os << "t_rowpack { m_pkey: " << fr.m_pkey
-       << ", m_pkey_is_valid: " << fr.m_pkey_is_valid << ", m_idx: " << fr.m_idx
-       << ", m_op: " << fr.m_op << "}";
-    return os;
-}
-
 struct t_flatten_record {
     t_uindex m_store_idx;
-    t_uindex m_begin_idx;
-    t_uindex m_edge_idx;
+    t_uindex m_bidx;
+    t_uindex m_eidx;
 };
-
-std::ostream& operator<<(std::ostream& os, const t_flatten_record& fr);
 
 class t_data_table;
 
@@ -139,7 +127,7 @@ public:
 
     t_column* _get_column(std::string_view colname);
 
-    std::shared_ptr<t_data_table> flatten(t_uindex limit) const;
+    std::shared_ptr<t_data_table> flatten() const;
 
     bool is_pkey_table() const;
     bool is_same_shape(t_data_table& tbl) const;
@@ -243,10 +231,10 @@ public:
 
 protected:
     template <typename FLATTENED_T>
-    void flatten_body(FLATTENED_T flattened, t_uindex limit) const;
+    void flatten_body(FLATTENED_T flattened) const;
 
     template <typename FLATTENED_T, typename PKEY_T>
-    void flatten_helper_1(FLATTENED_T flattened, t_uindex limit) const;
+    void flatten_helper_1(FLATTENED_T flattened) const;
 
     template <typename DATA_T, typename ROWPACK_VEC_T>
     void flatten_helper_2(
@@ -273,7 +261,7 @@ operator==(const t_data_table& lhs, const t_data_table& rhs);
 
 template <typename FLATTENED_T>
 void
-t_data_table::flatten_body(FLATTENED_T flattened, t_uindex limit) const {
+t_data_table::flatten_body(FLATTENED_T flattened) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
@@ -281,43 +269,43 @@ t_data_table::flatten_body(FLATTENED_T flattened, t_uindex limit) const {
     t_dtype pkey_dtype = get_const_column("psp_pkey")->get_dtype();
     switch (pkey_dtype) {
         case DTYPE_INT64: {
-            flatten_helper_1<FLATTENED_T, std::int64_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::int64_t>(flattened);
         } break;
         case DTYPE_INT32: {
-            flatten_helper_1<FLATTENED_T, std::int32_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::int32_t>(flattened);
         } break;
         case DTYPE_INT16: {
-            flatten_helper_1<FLATTENED_T, std::int16_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::int16_t>(flattened);
         } break;
         case DTYPE_INT8: {
-            flatten_helper_1<FLATTENED_T, std::int8_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::int8_t>(flattened);
         } break;
         case DTYPE_UINT64: {
-            flatten_helper_1<FLATTENED_T, std::uint64_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::uint64_t>(flattened);
         } break;
         case DTYPE_UINT32: {
-            flatten_helper_1<FLATTENED_T, std::uint32_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::uint32_t>(flattened);
         } break;
         case DTYPE_UINT16: {
-            flatten_helper_1<FLATTENED_T, std::uint16_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::uint16_t>(flattened);
         } break;
         case DTYPE_UINT8: {
-            flatten_helper_1<FLATTENED_T, std::uint8_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::uint8_t>(flattened);
         } break;
         case DTYPE_TIME: {
-            flatten_helper_1<FLATTENED_T, std::int64_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::int64_t>(flattened);
         } break;
         case DTYPE_DATE: {
-            flatten_helper_1<FLATTENED_T, std::uint32_t>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, std::uint32_t>(flattened);
         } break;
         case DTYPE_STR: {
-            flatten_helper_1<FLATTENED_T, t_uindex>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, t_uindex>(flattened);
         } break;
         case DTYPE_FLOAT64: {
-            flatten_helper_1<FLATTENED_T, double>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, double>(flattened);
         } break;
         case DTYPE_FLOAT32: {
-            flatten_helper_1<FLATTENED_T, float>(flattened, limit);
+            flatten_helper_1<FLATTENED_T, float>(flattened);
         } break;
         default: {
             std::stringstream ss;
@@ -336,28 +324,27 @@ void
 t_data_table::flatten_helper_2(
     ROWPACK_VEC_T& sorted,
     std::vector<t_flatten_record>& fltrecs,
-    const t_column* source_col,
-    t_column* dest_col
+    const t_column* scol,
+    t_column* dcol
 ) const {
     for (const auto& rec : fltrecs) {
-        bool should_write = false;
+        bool added = false;
         t_index fragidx = 0;
         t_status status = STATUS_INVALID;
-        for (t_index spanidx = rec.m_edge_idx - 1;
-             spanidx >= t_index(rec.m_begin_idx);
+        for (t_index spanidx = rec.m_eidx - 1; spanidx >= t_index(rec.m_bidx);
              --spanidx) {
             const auto& sort_rec = sorted[spanidx];
             fragidx = sort_rec.m_idx;
-            status = *(source_col->get_nth_status(fragidx));
+            status = *(scol->get_nth_status(fragidx));
             if (status != STATUS_INVALID) {
-                should_write = true;
+                added = true;
                 break;
             }
         }
 
-        if (should_write) {
-            dest_col->set_nth<DATA_T>(
-                rec.m_store_idx, *(source_col->get_nth<DATA_T>(fragidx)), status
+        if (added) {
+            dcol->set_nth<DATA_T>(
+                rec.m_store_idx, *(scol->get_nth<DATA_T>(fragidx)), status
             );
         }
     }
@@ -365,9 +352,8 @@ t_data_table::flatten_helper_2(
 
 template <typename FLATTENED_T, typename PKEY_T>
 void
-t_data_table::flatten_helper_1(FLATTENED_T flattened, t_uindex limit) const {
+t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
 
-    // t_uindex frags_size = std::min(size(), limit);
     t_uindex frags_size = size();
 
     PSP_VERBOSE_ASSERT(is_same_shape(*flattened), "Misaligned shaped found");
@@ -376,13 +362,13 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened, t_uindex limit) const {
         return;
     }
 
-    std::vector<const t_column*> source_columns;
-    std::vector<t_column*> dest_columns;
+    std::vector<const t_column*> s_columns;
+    std::vector<t_column*> d_columns;
 
     for (const auto& colname : m_schema.m_columns) {
         if (colname != "psp_pkey" && colname != "psp_op") {
-            source_columns.push_back(get_const_column(colname).get());
-            dest_columns.push_back(flattened->get_column(colname).get());
+            s_columns.push_back(get_const_column(colname).get());
+            d_columns.push_back(flattened->get_column(colname).get());
         }
     }
 
@@ -408,7 +394,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened, t_uindex limit) const {
         operator()(const t_rowpack<PKEY_T>& a, const t_rowpack<PKEY_T>& b)
             const {
             return a.m_pkey < b.m_pkey
-                || (a.m_pkey == b.m_pkey && a.m_idx < b.m_idx);
+                || (!(b.m_pkey < a.m_pkey) && a.m_idx < b.m_idx);
         }
     };
 
@@ -418,9 +404,6 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened, t_uindex limit) const {
     std::vector<t_index> edges;
     edges.push_back(0);
 
-    // | pkey-1 | pkey-1 | pkey-2 | pkey-2
-    //                   ^ Is this an edge? I think so.
-    // |-----------------| <- This is a span between those edges.
     for (t_index idx = 1, loop_end = sorted.size(); idx < loop_end; ++idx) {
         if ((sorted[idx].m_pkey_is_valid != sorted[idx - 1].m_pkey_is_valid)
             || (sorted[idx].m_pkey != sorted[idx - 1].m_pkey)) {
@@ -434,147 +417,129 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened, t_uindex limit) const {
 
     t_uindex store_idx = 0;
 
-    for (t_index frag_index = 0; frag_index < edges.size(); ++frag_index) {
-        t_index begin_edge_idx = edges[frag_index];
-        bool edge_bool = frag_index == static_cast<t_index>(edges.size() - 1);
-        t_index next_edge_idx =
-            edge_bool ? sorted.size() : edges[frag_index + 1];
+    for (t_index fidx = 0, loop_end = edges.size(); fidx < loop_end; ++fidx) {
+        t_index bidx = edges[fidx];
+        bool edge_bool = fidx == static_cast<t_index>(edges.size() - 1);
+        t_index eidx = edge_bool ? sorted.size() : edges[fidx + 1];
 
         bool delete_encountered = false;
 
-        for (t_index spanidx = begin_edge_idx; spanidx < next_edge_idx;
-             ++spanidx) {
+        for (t_index spanidx = bidx; spanidx < eidx; ++spanidx) {
             if (sorted[spanidx].m_op == OP_DELETE) {
-                begin_edge_idx = spanidx;
+                bidx = spanidx;
                 delete_encountered = true;
             }
         }
 
-        const auto& sort_rec = sorted[begin_edge_idx];
+        const auto& sort_rec = sorted[bidx];
         if (delete_encountered) {
-            d_pkey_col->set_nth(
-                store_idx % limit,
+            d_pkey_col->push_back(
                 sort_rec.m_pkey,
                 sort_rec.m_pkey_is_valid ? t_status::STATUS_VALID
                                          : t_status::STATUS_INVALID
             );
             std::uint8_t op8 = OP_DELETE;
-            d_op_col->set_nth(store_idx % limit, op8);
+            d_op_col->push_back(op8);
             ++store_idx;
         }
 
-        const auto single_element_span = (begin_edge_idx + 1 == next_edge_idx);
-        // if there are no deletes in the span, flatten.
-        // if there are deletes but the span is larger than 1 op, flatten.
-        if (!delete_encountered || !single_element_span) {
+        if (!delete_encountered || (bidx + 1 != eidx)) {
             t_flatten_record rec;
-            rec.m_store_idx = store_idx % limit;
-            rec.m_begin_idx = begin_edge_idx;
-            rec.m_edge_idx = next_edge_idx;
+            rec.m_store_idx = store_idx;
+            rec.m_bidx = bidx;
+            rec.m_eidx = eidx;
             fltrecs.push_back(rec);
 
-            d_pkey_col->set_nth(
-                store_idx % limit,
+            d_pkey_col->push_back(
                 sort_rec.m_pkey,
                 sort_rec.m_pkey_is_valid ? t_status::STATUS_VALID
                                          : t_status::STATUS_INVALID
             );
 
             std::uint8_t op8 = OP_INSERT;
-            d_op_col->set_nth(store_idx % limit, op8);
+            d_op_col->push_back(op8);
             ++store_idx;
         }
     }
 
-    flattened->set_size(std::min(store_idx, limit));
-    t_uindex ndata_cols = dest_columns.size();
-
-#if PSP_DEBUG
-    LOG_DEBUG("sorted: ");
-    for (const auto& sort : sorted) {
-        LOG_DEBUG(sort);
-    }
-    LOG_DEBUG("fltrecs: ");
-    for (const auto& fltrec : fltrecs) {
-        LOG_DEBUG(fltrec);
-    }
-#endif
+    flattened->set_size(store_idx);
+    t_uindex ndata_cols = d_columns.size();
 
     parallel_for(
         int(ndata_cols),
-        [&source_columns, &sorted, &dest_columns, &fltrecs, this](int colidx) {
-            const auto* source_col = source_columns[colidx];
-            auto* dest_col = dest_columns[colidx];
+        [&s_columns, &sorted, &d_columns, &fltrecs, this](int colidx) {
+            auto scol = s_columns[colidx];
+            auto dcol = d_columns[colidx];
 
-            switch (source_col->get_dtype()) {
+            switch (scol->get_dtype()) {
                 case DTYPE_INT64: {
                     this->flatten_helper_2<std::int64_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_INT32: {
                     this->flatten_helper_2<std::int32_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_INT16: {
                     this->flatten_helper_2<std::int16_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_INT8: {
                     this->flatten_helper_2<std::int8_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_UINT64: {
                     this->flatten_helper_2<std::uint64_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_UINT32: {
                     this->flatten_helper_2<std::uint32_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_UINT16: {
                     this->flatten_helper_2<std::uint16_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_UINT8: {
                     this->flatten_helper_2<std::uint8_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_FLOAT64: {
                     this->flatten_helper_2<double, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_FLOAT32: {
                     this->flatten_helper_2<float, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_BOOL: {
                     this->flatten_helper_2<std::uint8_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_TIME: {
                     this->flatten_helper_2<std::int64_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_DATE: {
                     this->flatten_helper_2<std::uint32_t, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_STR: {
                     this->flatten_helper_2<t_uindex, t_rpvec>(
-                        sorted, fltrecs, source_col, dest_col
+                        sorted, fltrecs, scol, dcol
                     );
                 } break;
                 case DTYPE_OBJECT:

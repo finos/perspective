@@ -57,7 +57,7 @@ impl Session<ServerError> for LocalSession {
     }
 
     async fn poll(&self) -> Result<(), ServerError> {
-        let responses = self.server.server.poll();
+        let responses = self.server.server.poll(self.id);
         for response in responses.iter_responses() {
             let cb = self
                 .server

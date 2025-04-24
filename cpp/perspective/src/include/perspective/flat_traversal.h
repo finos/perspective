@@ -117,16 +117,6 @@ public:
 
     void delete_row(t_tscalar pkey);
 
-    // Moves a row under a new primary key and deletes references to old primary
-    // key.
-    void move_row(
-        const t_gstate& gstate,
-        const t_data_table& expression_master_table,
-        const t_config& config,
-        t_tscalar old_pkey,
-        t_tscalar new_pkey
-    );
-
     std::vector<t_sortspec> get_sort_by() const;
     bool empty_sort_by() const;
 

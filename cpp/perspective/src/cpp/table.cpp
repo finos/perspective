@@ -182,7 +182,7 @@ Table::validate_expressions(
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
     t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"});
-    auto gnode = std::make_shared<t_gnode>(in_schema, out_schema, m_limit);
+    auto gnode = std::make_shared<t_gnode>(in_schema, out_schema);
     gnode->init();
     return gnode;
 }
@@ -350,9 +350,7 @@ Table::update_csv(const std::string_view& data, std::uint32_t port_id) {
     t_data_table data_table(get_schema());
     data_table.init();
     data_table.extend(row_count);
-    arrow_loader.fill_table(
-        data_table, get_schema(), m_index, m_offset, m_limit, true
-    );
+    arrow_loader.fill_table(data_table, get_schema(), m_index, m_offset, true);
     process_op_column(data_table, t_op::OP_INSERT);
     calculate_offset(row_count);
     m_pool->send(get_gnode()->get_id(), port_id, data_table);
@@ -395,7 +393,7 @@ Table::from_csv(
         auto _ = std::move(data);
         auto loader = std::move(arrow_loader);
         data_table->extend(row_count);
-        loader.fill_table(*data_table, input_schema, index, 0, limit, false);
+        loader.fill_table(*data_table, input_schema, index, 0, false);
     }
     auto pool = std::make_shared<t_pool>();
     pool->init();
@@ -948,7 +946,7 @@ Table::update_cols(const std::string_view& data, std::uint32_t port_id) {
 
     if (is_implicit && !document.GetObj().HasMember("__INDEX__")) {
         for (std::uint32_t ii = 0; ii < nrows; ii++) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, m_offset + ii);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, (m_offset + ii));
         }
     }
 
@@ -1158,7 +1156,7 @@ Table::update_rows(const std::string_view& data, std::uint32_t port_id) {
     // 3.) Fill table
     for (const auto& row : document.GetArray()) {
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, ii + m_offset);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, (ii + m_offset));
         }
 
         // col_count = m_column_names.size();
@@ -1199,23 +1197,7 @@ Table::update_rows(const std::string_view& data, std::uint32_t port_id) {
             }
         }
 
-        // // Check if this row "overflows", wrapping around due to a `m_limit`
-        // // value, as partial updates are not allowed in this case.
-        // if (!supports_partial && col_count != 0) {
-        //     std::cout << col_count << std::endl;
-        //     PSP_COMPLAIN_AND_ABORT(
-        //         "Inconsistent row count in update - `Table` partial updates "
-        //         "require an `index`"
-        //     );
-        // }
-
         is_first_row = false;
-        if (ii + m_offset >= m_limit) {
-            for (auto& col_name : missing_columns) {
-                data_table.get_column(col_name)->unset(ii);
-            }
-        }
-
         ii++;
     }
 
@@ -1408,7 +1390,7 @@ Table::update_ndjson(const std::string_view& data, std::uint32_t port_id) {
     bool is_finished = false;
     while (!is_finished) {
         if (is_implicit) {
-            psp_pkey_col->set_nth<std::uint32_t>(ii, ii + m_offset);
+            psp_pkey_col->set_nth<std::uint32_t>(ii, (ii + m_offset));
         }
 
         for (const auto& it : document.GetObj()) {
@@ -1449,11 +1431,6 @@ Table::update_ndjson(const std::string_view& data, std::uint32_t port_id) {
         }
 
         is_first_row = false;
-        if (ii + m_offset >= m_limit) {
-            for (auto& col_name : missing_columns) {
-                data_table.get_column(col_name)->unset(ii);
-            }
-        }
 
         ii++;
 
@@ -1676,9 +1653,7 @@ Table::update_arrow(const std::string_view& data, std::uint32_t port_id) {
         }
     }
 
-    arrow_loader.fill_table(
-        data_table, input_schema, m_index, m_offset, m_limit, true
-    );
+    arrow_loader.fill_table(data_table, input_schema, m_index, m_offset, true);
 
     process_op_column(data_table, t_op::OP_INSERT);
     calculate_offset(row_count);
@@ -1722,7 +1697,7 @@ Table::from_arrow(
         auto loader = std::move(arrow_loader);
         auto row_count = loader.row_count();
         data_table->extend(row_count);
-        loader.fill_table(*data_table, input_schema, index, 0, limit, false);
+        loader.fill_table(*data_table, input_schema, index, 0, false);
     }
 
     // Make Table
@@ -1795,6 +1770,21 @@ Table::process_op_column(t_data_table& data_table, const t_op op) {
         } break;
         default: {
             op_col->raw_fill<std::uint8_t>(OP_INSERT);
+            const auto size = data_table.size();
+            if (m_offset + size >= m_limit) {
+                const auto& psp_pkey_col = data_table.get_column("psp_pkey");
+                const auto d_rows =
+                    size - std::max<t_index>(0, m_limit - m_offset);
+                data_table.extend(size + d_rows);
+                auto* op_col =
+                    data_table.add_column("psp_op", DTYPE_UINT8, false);
+                auto old_key = std::max<t_index>(0, m_offset - m_limit);
+                for (auto i = 0; i < d_rows; i++) {
+                    psp_pkey_col->set_nth<std::uint32_t>(size + i, old_key);
+                    op_col->set_nth<std::uint8_t>(size + i, OP_DELETE);
+                    old_key += 1;
+                }
+            }
         }
     }
 }

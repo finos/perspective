@@ -79,7 +79,7 @@ export class PerspectiveSession {
     }
 
     poll() {
-        const polled = this.mod._psp_poll(this.server as any);
+        const polled = this.mod._psp_poll(this.server as any, this.client_id);
         decode_api_responses(this.mod, polled, async (msg: ApiResponse) => {
             await this.client_map.get(msg.client_id)!(msg.data);
         });

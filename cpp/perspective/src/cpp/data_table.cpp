@@ -23,12 +23,6 @@
 #include <sstream>
 #include <utility>
 namespace perspective {
-std::ostream&
-operator<<(std::ostream& os, const t_flatten_record& fr) {
-    os << "store_idx: " << fr.m_store_idx << ", bidx: " << fr.m_begin_idx
-       << ", eidx: " << fr.m_edge_idx;
-    return os;
-}
 
 void
 t_data_table::set_capacity(t_uindex idx) {
@@ -325,7 +319,7 @@ t_data_table::get_schema() const {
 }
 
 std::shared_ptr<t_data_table>
-t_data_table::flatten(t_uindex limit) const {
+t_data_table::flatten() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
@@ -333,7 +327,7 @@ t_data_table::flatten(t_uindex limit) const {
         "", "", m_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY
     );
     flattened->init();
-    flatten_body<std::shared_ptr<t_data_table>>(flattened, limit);
+    flatten_body<std::shared_ptr<t_data_table>>(flattened);
     return flattened;
 }
 
@@ -641,13 +635,6 @@ t_data_table::join(const std::shared_ptr<t_data_table>& other_table) const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (size() != other_table->size()) {
-#if PSP_DEBUG
-        LOG_DEBUG("Joining current table:");
-        pprint();
-        LOG_DEBUG("on this this table:");
-        other_table->pprint();
-#endif
-
         std::stringstream ss;
         ss << "[t_data_table::join] Cannot join two tables of unequal sizes! "
               "Current size: "

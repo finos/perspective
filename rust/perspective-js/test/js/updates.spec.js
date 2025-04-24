@@ -3381,7 +3381,7 @@ async function match_delta(perspective, delta, expected) {
             );
 
             for (let i = 0; i < 3; i++) {
-                await tbl.update({
+                tbl.update({
                     index: ["a", "d", "b"],
                     x: ["abc", "def", "acc"],
                 });
