@@ -62,7 +62,6 @@ namespace apachearrow {
          * @param input_schema
          * @param index
          * @param offset
-         * @param limit
          * @param is_update
          */
         void fill_table(
@@ -70,7 +69,6 @@ namespace apachearrow {
             const t_schema& input_schema,
             const std::string& index,
             std::uint32_t offset,
-            std::uint32_t limit,
             bool is_update
         );
 

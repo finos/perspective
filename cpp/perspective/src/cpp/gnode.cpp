@@ -1202,10 +1202,10 @@ t_gnode::_compute_expressions(
                     expression_regex_mapping
                 );
                 ctx->get_expression_tables()->set_flattened(
-                    m_gstate->get_pkeyed_table(
-                        ctx->get_expression_tables()->m_master->get_schema(),
-                        ctx->get_expression_tables()->m_master
-                    )
+                    // m_gstate->get_pkeyed_table(
+                    //     ctx->get_expression_tables()->m_master->get_schema(),
+                    ctx->get_expression_tables()->m_master
+                    // )
                 );
             } break;
             case ONE_SIDED_CONTEXT: {
@@ -1217,10 +1217,10 @@ t_gnode::_compute_expressions(
                     expression_regex_mapping
                 );
                 ctx->get_expression_tables()->set_flattened(
-                    m_gstate->get_pkeyed_table(
-                        ctx->get_expression_tables()->m_master->get_schema(),
-                        ctx->get_expression_tables()->m_master
-                    )
+                    // m_gstate->get_pkeyed_table(
+                    //     ctx->get_expression_tables()->m_master->get_schema(),
+                    ctx->get_expression_tables()->m_master
+                    // )
                 );
             } break;
             case ZERO_SIDED_CONTEXT: {
@@ -1232,10 +1232,10 @@ t_gnode::_compute_expressions(
                     expression_regex_mapping
                 );
                 ctx->get_expression_tables()->set_flattened(
-                    m_gstate->get_pkeyed_table(
-                        ctx->get_expression_tables()->m_master->get_schema(),
-                        ctx->get_expression_tables()->m_master
-                    )
+                    // m_gstate->get_pkeyed_table(
+                    //     ctx->get_expression_tables()->m_master->get_schema(),
+                    ctx->get_expression_tables()->m_master
+                    // )
                 );
             } break;
             case GROUPED_PKEY_CONTEXT: {
@@ -1247,10 +1247,10 @@ t_gnode::_compute_expressions(
                     expression_regex_mapping
                 );
                 ctx->get_expression_tables()->set_flattened(
-                    m_gstate->get_pkeyed_table(
-                        ctx->get_expression_tables()->m_master->get_schema(),
-                        ctx->get_expression_tables()->m_master
-                    )
+                    // m_gstate->get_pkeyed_table(
+                    //     ctx->get_expression_tables()->m_master->get_schema(),
+                    ctx->get_expression_tables()->m_master
+                    // )
                 );
             } break;
             case UNIT_CONTEXT:
