@@ -45,9 +45,9 @@
 //!   JavaScript API.
 //! - [`perspective-python`](https://docs.rs/perspective-python/latest/) for the
 //!   Python API.
-//! - [`perspective-server`](https://docs.rs/perspective-python/latest/) for
+//! - [`perspective-server`](https://docs.rs/perspective-server/latest/) for
 //!   Data Binding details.
-//! - [`perspective-client`](https://docs.rs/perspective-python/latest/) for the
+//! - [`perspective-client`](https://docs.rs/perspective-client/latest/) for the
 //!   Rust Client API
 //! - [`perspective-viewer`](https://docs.rs/perspective-viewer/latest/) for the
 //!   WebAssembly `<perspective-viewer>` Custom Element API.
