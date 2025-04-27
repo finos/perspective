@@ -18,8 +18,11 @@
         "clean": "rimraf dist"
     },
     "peerDependencies": {
-        "@types/react": "^18.0.0",
-        "react": "^18.0.0"
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@types/react": "^18",
+        "react": "^18",
+        "react-dom": "^18"
     },
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "workspace:^",

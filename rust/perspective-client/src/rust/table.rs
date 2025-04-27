@@ -20,8 +20,8 @@ use ts_rs::TS;
 use crate::assert_table_api;
 use crate::client::{Client, Features};
 use crate::config::{Expressions, ViewConfigUpdate};
-use crate::proto::make_table_req::make_table_options::MakeTableType;
 use crate::proto::make_table_req::MakeTableOptions;
+use crate::proto::make_table_req::make_table_options::MakeTableType;
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::*;
@@ -134,6 +134,11 @@ impl From<TableInitOptions> for TableOptions {
     }
 }
 
+#[derive(Clone, Debug, Default, Deserialize, TS)]
+pub struct DeleteOptions {
+    pub lazy: bool,
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 pub struct UpdateOptions {
     pub port_id: Option<u32>,
@@ -160,6 +165,12 @@ pub struct Table {
 }
 
 assert_table_api!(Table);
+
+impl PartialEq for Table {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.client == other.client
+    }
+}
 
 impl Table {
     pub(crate) fn new(name: String, client: Client, options: TableOptions) -> Self {
@@ -210,8 +221,11 @@ impl Table {
     }
 
     #[doc = include_str!("../../docs/table/delete.md")]
-    pub async fn delete(&self) -> ClientResult<()> {
-        let msg = self.client_message(ClientReq::TableDeleteReq(TableDeleteReq {}));
+    pub async fn delete(&self, options: DeleteOptions) -> ClientResult<()> {
+        let msg = self.client_message(ClientReq::TableDeleteReq(TableDeleteReq {
+            is_immediate: !options.lazy,
+        }));
+
         match self.client.oneshot(&msg).await? {
             ClientResp::TableDeleteResp(_) => Ok(()),
             resp => Err(resp.into()),

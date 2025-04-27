@@ -13,12 +13,24 @@
 import type { HTMLPerspectiveViewerPluginElement } from "./plugin";
 import { PerspectiveViewerElement } from "../../dist/wasm/perspective-viewer.js";
 import type React from "react";
+import { ViewerConfigUpdate } from "./ts-rs/ViewerConfigUpdate.js";
+import type { ViewWindow } from "@finos/perspective";
 
 // JSX / React extensions
 
 export type HTMLPerspectiveViewerElement = PerspectiveViewerElement &
     PerspectiveViewerElementExt &
     HTMLElement;
+
+export type PerspectiveClickEventDetail = {
+    config: ViewerConfigUpdate;
+    row: Record<string, any>;
+    column_names: Array<string | Array<string>>;
+};
+
+export type PerspectiveSelectEventDetail = {
+    view_window: ViewWindow;
+};
 
 type ReactPerspectiveViewerAttributes<T> = React.HTMLAttributes<T>;
 
@@ -83,22 +95,26 @@ export interface PerspectiveViewerElementExt {
 
     addEventListener(
         name: "perspective-click",
-        cb: (e: CustomEvent) => void
+        cb: (e: CustomEvent) => void,
+        options?: { signal: AbortSignal }
     ): void;
 
     addEventListener(
         name: "perspective-select",
-        cb: (e: CustomEvent) => void
+        cb: (e: CustomEvent) => void,
+        options?: { signal: AbortSignal }
     ): void;
 
     addEventListener(
         name: "perspective-toggle-settings",
-        cb: (e: CustomEvent) => void
+        cb: (e: CustomEvent) => void,
+        options?: { signal: AbortSignal }
     ): void;
 
     addEventListener(
         name: "perspective-config-update",
-        cb: (e: CustomEvent) => void
+        cb: (e: CustomEvent) => void,
+        options?: { signal: AbortSignal }
     ): void;
 
     removeEventListener(name: "perspective-click", cb: any): void;

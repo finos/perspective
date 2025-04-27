@@ -45,7 +45,8 @@ test.describe("Save/Restore", async () => {
         });
     });
 
-    test("Flush after delete should wait for underlying view to be deleted", async ({
+    // `delete()` is destructive now
+    test.skip("Flush after delete should wait for underlying view to be deleted", async ({
         page,
     }) => {
         await page.evaluate(async () => {

@@ -6,11 +6,10 @@ using the perspective-viewer web component in the context of React.
 Before trying this example, please take a look at
 [how to bootstrap perspective](./importing.md).
 
-Below is a very simple usage example:
+A simple example:
 
 ```typescript
-{{#include ../../../../tools/perspective-test/react-test/index.tsx:0:39}}
-{{#include ../../../../tools/perspective-test/react-test/index.tsx:52:}}
+{{#include ../../../../examples/react-example/src/index.tsx:63:}}
 ```
 
 This adds a perspective table to the provider at the root of the app and allows

@@ -52,7 +52,6 @@ export type * from "./ts-rs/ColumnConfigValues.d.ts";
 export type * from "./ts-rs/Filter.d.ts";
 export type * from "./ts-rs/FilterTerm.d.ts";
 export type * from "./ts-rs/FilterReducer.d.ts";
-// export type * from "./ts-rs/Vi"
 
 export { init_client } from "./bootstrap";
 import { init_client } from "./bootstrap";

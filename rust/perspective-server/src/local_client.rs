@@ -48,7 +48,8 @@ impl ClientHandler for LocalClientState {
 
 impl LocalClientState {
     fn get_client(&self) -> &Client {
-        self.client.get_or_init(|| Client::new(self.clone()))
+        self.client
+            .get_or_init(|| Client::new(None, self.clone()).unwrap())
     }
 
     async fn get_session(&self) -> RwLockReadGuard<'_, Option<LocalSession>> {

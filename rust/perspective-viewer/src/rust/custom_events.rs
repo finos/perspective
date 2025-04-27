@@ -14,7 +14,7 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use perspective_client::clone;
+use perspective_client::{ViewWindow, clone};
 use perspective_js::json;
 use wasm_bindgen::prelude::*;
 use web_sys::*;
@@ -131,6 +131,18 @@ impl CustomEvents {
         );
         self.0.0.elem.dispatch_event(&event.unwrap()).unwrap();
         self.0.0.clone().dispatch_config_update();
+    }
+
+    pub fn dispatch_select(&self, view_window: Option<&ViewWindow>) -> ApiResult<()> {
+        tracing::info!("FUCK");
+        let mut event_init = web_sys::CustomEventInit::new();
+        event_init.detail(&serde_wasm_bindgen::to_value(&view_window)?);
+        let event =
+            web_sys::CustomEvent::new_with_event_init_dict("perspective-select", &event_init);
+
+        self.0.0.elem.dispatch_event(&event.unwrap()).unwrap();
+        self.0.0.clone().dispatch_config_update();
+        Ok(())
     }
 }
 

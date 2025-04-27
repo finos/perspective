@@ -62,9 +62,18 @@ pub enum ClientError {
 
     #[error("Undecipherable proto message")]
     ProtoError(#[from] prost::EncodeError),
+
+    #[error("Duplicate name {0}")]
+    DuplicateNameError(String),
 }
 
 pub type ClientResult<T> = Result<T, ClientError>;
+
+impl<'a, A> From<std::sync::PoisonError<std::sync::MutexGuard<'a, A>>> for ClientError {
+    fn from(_: std::sync::PoisonError<std::sync::MutexGuard<'a, A>>) -> Self {
+        ClientError::Internal("Lock Error".to_owned())
+    }
+}
 
 impl From<proto::response::ClientResp> for ClientError {
     fn from(value: proto::response::ClientResp) -> Self {

@@ -83,15 +83,51 @@ pub trait ClientHandler: Clone + Send + Sync + 'static {
     ) -> impl Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send;
 }
 
+mod name_registry {
+    use std::collections::HashSet;
+    use std::sync::{Arc, LazyLock, Mutex};
+
+    use crate::ClientError;
+    use crate::view::ClientResult;
+
+    static CLIENT_ID_GEN: LazyLock<Arc<Mutex<u32>>> = LazyLock::new(Arc::default);
+    static REGISTERED_CLIENTS: LazyLock<Arc<Mutex<HashSet<String>>>> = LazyLock::new(Arc::default);
+
+    pub(crate) fn generate_name(name: Option<&str>) -> ClientResult<String> {
+        if let Some(name) = name {
+            if let Some(name) = REGISTERED_CLIENTS
+                .lock()
+                .map_err(ClientError::from)?
+                .get(name)
+            {
+                Err(ClientError::DuplicateNameError(name.to_owned()))
+            } else {
+                Ok(name.to_owned())
+            }
+        } else {
+            let mut guard = CLIENT_ID_GEN.lock()?;
+            *guard += 1;
+            Ok(format!("client-{}", guard))
+        }
+    }
+}
+
 #[derive(Clone)]
 #[doc = include_str!("../../docs/client.md")]
 pub struct Client {
+    name: Arc<String>,
     features: Arc<Mutex<Option<Features>>>,
     send: SendCallback,
     id_gen: Arc<AtomicU32>,
     subscriptions_errors: Subscriptions<OnErrorCallback>,
     subscriptions_once: Subscriptions<OnceCallback>,
     subscriptions: Subscriptions<BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>>,
+}
+
+impl PartialEq for Client {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
 }
 
 impl std::fmt::Debug for Client {
@@ -114,11 +150,12 @@ pub type ReconnectCallback =
 impl Client {
     /// Create a new client instance with a closure that handles message
     /// dispatch. See [`Client::new`] for details.
-    pub fn new_with_callback<T, U>(send_request: T) -> Self
+    pub fn new_with_callback<T, U>(name: Option<&str>, send_request: T) -> ClientResult<Self>
     where
         T: Fn(Vec<u8>) -> U + 'static + Sync + Send,
         U: Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static,
     {
+        let name = name_registry::generate_name(name)?;
         let send_request = Arc::new(send_request);
         let send: SendCallback = Arc::new(move |req| {
             let mut bytes: Vec<u8> = Vec::new();
@@ -127,24 +164,32 @@ impl Client {
             Box::pin(async move { send_request(bytes).await })
         });
 
-        Client {
+        Ok(Client {
+            name: Arc::new(name),
             features: Arc::default(),
             id_gen: Arc::new(AtomicU32::new(1)),
             send,
             subscriptions: Subscriptions::default(),
             subscriptions_errors: Arc::default(),
             subscriptions_once: Arc::default(),
-        }
+        })
     }
 
     /// Create a new [`Client`] instance with [`ClientHandler`].
-    pub fn new<T>(client_handler: T) -> Self
+    pub fn new<T>(name: Option<&str>, client_handler: T) -> ClientResult<Self>
     where
         T: ClientHandler + 'static + Sync + Send,
     {
-        Self::new_with_callback(asyncfn!(client_handler, async move |req| {
-            client_handler.send_request(req).await
-        }))
+        Self::new_with_callback(
+            name,
+            asyncfn!(client_handler, async move |req| {
+                client_handler.send_request(req).await
+            }),
+        )
+    }
+
+    pub fn get_name(&self) -> &'_ str {
+        self.name.as_str()
     }
 
     /// Handle a message from the external message queue.

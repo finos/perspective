@@ -74,7 +74,7 @@ impl View {
     #[apply(inherit_docs)]
     #[inherit_doc = "view/delete.md"]
     #[wasm_bindgen]
-    pub async fn delete(&self) -> ApiResult<()> {
+    pub async fn delete(self) -> ApiResult<()> {
         self.0.delete().await?;
         Ok(())
     }
@@ -224,10 +224,13 @@ impl View {
     #[apply(inherit_docs)]
     #[inherit_doc = "view/on_delete.md"]
     #[wasm_bindgen]
-    pub async fn on_delete(&self, on_delete: Function) -> ApiResult<u32> {
-        let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
-        let on_delete = Box::new(move || spawn_local(emit.poll(())));
-        Ok(self.0.on_delete(on_delete).await?)
+    pub fn on_delete(&self, on_delete: Function) -> ApiFuture<u32> {
+        let view = self.clone();
+        ApiFuture::new(async move {
+            let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
+            let on_delete = Box::new(move || spawn_local(emit.poll(())));
+            Ok(view.0.on_delete(on_delete).await?)
+        })
     }
 
     #[apply(inherit_docs)]

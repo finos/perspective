@@ -27,6 +27,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
+use crate::TableDataExt;
 pub use crate::table::*;
 use crate::utils::{ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop, inherit_docs};
 
@@ -92,6 +93,12 @@ pub struct Client {
     pub(crate) client: perspective_client::Client,
 }
 
+impl PartialEq for Client {
+    fn eq(&self, other: &Self) -> bool {
+        self.client.get_name() == other.client.get_name()
+    }
+}
+
 /// A wrapper around [`js_sys::Function`] to ease async integration for the
 /// `reconnect` argument of [`Client::on_error`] callback.
 #[derive(Derivative)]
@@ -148,7 +155,7 @@ impl Client {
 #[wasm_bindgen]
 impl Client {
     #[wasm_bindgen(constructor)]
-    pub fn new(send_request: Function, close: Option<Function>) -> Self {
+    pub fn new(send_request: Function, close: Option<Function>) -> ApiResult<Self> {
         let send_request = JsReconnect::from(move |mut v: Vec<u8>| {
             let buff2 = unsafe { js_sys::Uint8Array::view_mut_raw(v.as_mut_ptr(), v.len()) };
             send_request
@@ -157,10 +164,11 @@ impl Client {
                 .unchecked_into::<js_sys::Promise>()
         });
 
-        let client =
-            perspective_client::Client::new_with_callback(move |msg| send_request.run_all(msg));
+        let client = perspective_client::Client::new_with_callback(None, move |msg| {
+            send_request.run_all(msg)
+        })?;
 
-        Client { close, client }
+        Ok(Client { close, client })
     }
 
     #[wasm_bindgen]

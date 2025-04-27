@@ -47,9 +47,13 @@ pub struct Client(pub(crate) AsyncClient);
 #[pymethods]
 impl Client {
     #[new]
-    #[pyo3(signature = (handle_request, close_cb=None))]
-    pub fn new(handle_request: Py<PyAny>, close_cb: Option<Py<PyAny>>) -> PyResult<Self> {
-        let client = AsyncClient::new(handle_request, close_cb);
+    #[pyo3(signature = (handle_request, close_cb=None, name=None))]
+    pub fn new(
+        handle_request: Py<PyAny>,
+        close_cb: Option<Py<PyAny>>,
+        name: Option<String>,
+    ) -> PyResult<Self> {
+        let client = AsyncClient::new(name, handle_request, close_cb)?;
         Ok(Client(client))
     }
 
@@ -177,8 +181,8 @@ impl Table {
 
     #[apply(inherit_doc)]
     #[inherit_doc = "table/delete.md"]
-    pub fn delete(&self, py: Python<'_>) -> PyResult<()> {
-        self.0.delete().py_block_on(py)
+    pub fn delete(&self, py: Python<'_>, lazy: bool) -> PyResult<()> {
+        self.0.delete(lazy).py_block_on(py)
     }
 
     #[apply(inherit_doc)]

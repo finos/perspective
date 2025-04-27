@@ -55,7 +55,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     disconnectedCallback() {
-        this._toolbar.parentElement.removeChild(this._toolbar);
+        this._toolbar?.parentElement?.removeChild?.(this._toolbar);
     }
 
     async activate(view) {
@@ -167,6 +167,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     delete() {
+        this._toolbar = undefined;
         if (this.regular_table.table_model) {
             this.regular_table._resetAutoSize();
         }

@@ -60,11 +60,11 @@ pub struct PerspectiveViewerElement {
     session: Session,
     renderer: Renderer,
     presentation: Presentation,
-    _events: CustomEvents,
+    events: CustomEvents,
     _subscriptions: Rc<Subscription>,
 }
 
-derive_model!(Renderer, Session, Presentation for PerspectiveViewerElement);
+derive_model!( Renderer, Session, Presentation for PerspectiveViewerElement);
 
 impl CustomElementMetadata for PerspectiveViewerElement {
     const CUSTOM_ELEMENT_NAME: &'static str = "perspective-viewer";
@@ -76,13 +76,16 @@ impl PerspectiveViewerElement {
     #[doc(hidden)]
     #[wasm_bindgen(constructor)]
     pub fn new(elem: web_sys::HtmlElement) -> Self {
-        tracing::debug!("Creating <perspective-viewer>");
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
         let shadow_root = elem
             .attach_shadow(&init)
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
+        Self::new_from_shadow(elem, shadow_root)
+    }
+
+    fn new_from_shadow(elem: web_sys::HtmlElement, shadow_root: web_sys::Element) -> Self {
         // Application State
         let session = Session::default();
         let renderer = Renderer::new(&elem);
@@ -120,7 +123,7 @@ impl PerspectiveViewerElement {
             presentation,
             resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
             intersection_handle: Rc::new(RefCell::new(None)),
-            _events: events,
+            events,
             _subscriptions: Rc::new(update_sub),
         }
     }
@@ -181,11 +184,22 @@ impl PerspectiveViewerElement {
                     wasm_bindgen_derive::try_from_js_option::<perspective_js::Table>(jstable)?
                 {
                     if let Some(existing_table) = session.get_table() {
-                        if table.get_table().get_name() == existing_table.get_name() {
-                            tracing::debug!("Ignoring duplicate table load");
+                        if table.get_table() == &existing_table {
+                            tracing::info!(
+                                "Table `{}` already loaded, skipping",
+                                table.get_name().await
+                            );
+
                             return Ok(&session);
+                        } else {
+                            tracing::debug!(
+                                "New table {} vs {}",
+                                table.get_table().get_name(),
+                                existing_table.get_name()
+                            );
                         }
                     }
+
                     tracing::debug!(
                         "Successfully loaded {:.0} rows from Table",
                         table.size().await?
@@ -214,6 +228,9 @@ impl PerspectiveViewerElement {
     /// Does not delete the supplied [`Table`] (as this is constructed by the
     /// callee).
     ///
+    /// Calling _any_ method on a `<perspective-viewer>` after [`Self::delete`]
+    /// will throw.
+    ///
     /// <div class="warning">
     ///
     /// Allowing a `<perspective-viewer>` to be garbage-collected
@@ -227,19 +244,38 @@ impl PerspectiveViewerElement {
     /// ```javascript
     /// await viewer.delete();
     /// ```
-    pub fn delete(&self) -> ApiFuture<()> {
+    pub fn delete(self) -> ApiFuture<()> {
         clone!(self.renderer, self.session, self.root);
         ApiFuture::new(self.renderer.clone().with_lock(async move {
             renderer.delete()?;
-            session.delete().await?;
             root.borrow_mut()
                 .take()
                 .ok_or("Already deleted!")?
                 .destroy();
-
+            session.delete().await?;
             tracing::info!("Deleted <perspective-viewer>");
             Ok(())
         }))
+    }
+
+    /// Restart this `<perspective-viewer>` to its initial state, before
+    /// `load()`.
+    ///
+    /// Use `Self::restart` if you plan to call `Self::load` on this viewer
+    /// again, or alternatively `Self::delete` if this viewer is no longer
+    /// needed.
+    pub fn eject(&mut self) -> ApiFuture<()> {
+        if self.session.has_table() {
+            let mut state = Self::new_from_shadow(
+                self.elem.clone(),
+                self.elem.shadow_root().unwrap().unchecked_into(),
+            );
+
+            std::mem::swap(self, &mut state);
+            state.delete()
+        } else {
+            ApiFuture::new(async move { Ok(()) })
+        }
     }
 
     /// Get the underlying [`View`] for this viewer.
@@ -622,6 +658,10 @@ impl PerspectiveViewerElement {
     #[wasm_bindgen]
     pub fn setSelection(&self, window: Option<JsViewWindow>) -> ApiResult<()> {
         let window = window.map(|x| x.into_serde_ext()).transpose()?;
+        if self.renderer.get_selection() != window {
+            self.events.dispatch_select(window.as_ref())?;
+        }
+
         self.renderer.set_selection(window);
         Ok(())
     }

@@ -133,7 +133,16 @@ impl Renderer {
     }
 
     pub fn delete(&self) -> ApiResult<()> {
-        self.get_active_plugin()?.delete();
+        //        self.get_active_plugin()?.delete();
+        self.0.plugin_data.borrow().viewer_elem.set_inner_text("");
+
+        // self.plugin_data.borrow_mut().metadata = ViewConfigRequirements::default();
+        let new_state = Self::new(&self.plugin_data.borrow().viewer_elem);
+        std::mem::swap(
+            &mut *self.plugin_data.borrow_mut(),
+            &mut *new_state.plugin_data.borrow_mut(),
+        );
+
         Ok(())
     }
 

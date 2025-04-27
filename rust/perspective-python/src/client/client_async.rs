@@ -17,9 +17,9 @@ use std::sync::Arc;
 use async_lock::RwLock;
 use futures::FutureExt;
 use perspective_client::{
-    Client, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions, TableReadFormat,
-    UpdateData, UpdateOptions, View, ViewOnUpdateResp, ViewWindow, assert_table_api,
-    assert_view_api, asyncfn,
+    Client, DeleteOptions, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions,
+    TableReadFormat, UpdateData, UpdateOptions, View, ViewOnUpdateResp, ViewWindow,
+    assert_table_api, assert_view_api, asyncfn,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -54,29 +54,36 @@ impl AsyncClient {
 #[pymethods]
 impl AsyncClient {
     #[new]
-    #[pyo3(signature=(handle_request, handle_close=None))]
-    pub fn new(handle_request: Py<PyAny>, handle_close: Option<Py<PyAny>>) -> Self {
+    #[pyo3(signature=(name, handle_request, handle_close=None))]
+    pub fn new(
+        name: Option<String>,
+        handle_request: Py<PyAny>,
+        handle_close: Option<Py<PyAny>>,
+    ) -> PyResult<Self> {
         let handle_request = Arc::new(handle_request);
-        let client = Client::new_with_callback(asyncfn!(handle_request, async move |msg| {
-            if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
-                let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
-                if isawaitable(ret.bind(py)).unwrap_or(false) {
-                    Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
-                } else {
-                    Ok(None)
+        let client = Client::new_with_callback(
+            name.as_deref(),
+            asyncfn!(handle_request, async move |msg| {
+                if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
+                    let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
+                    if isawaitable(ret.bind(py)).unwrap_or(false) {
+                        Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
+                    } else {
+                        Ok(None)
+                    }
+                })? {
+                    fut.await?;
                 }
-            })? {
-                fut.await?;
-            }
 
-            Ok(())
-        }));
+                Ok(())
+            }),
+        );
 
-        AsyncClient {
-            client,
+        Ok(AsyncClient {
+            client: client.into_pyerr()?,
             loop_cb: Arc::default(),
             close_cb: handle_close.into(),
-        }
+        })
     }
 
     pub async fn handle_response(&self, bytes: Py<PyBytes>) -> PyResult<bool> {
@@ -253,8 +260,9 @@ impl AsyncTable {
         self.table.clear().await.into_pyerr()
     }
 
-    pub async fn delete(&self) -> PyResult<()> {
-        self.table.delete().await.into_pyerr()
+    #[pyo3(signature=(lazy=false))]
+    pub async fn delete(&self, lazy: bool) -> PyResult<()> {
+        self.table.delete(DeleteOptions { lazy }).await.into_pyerr()
     }
 
     pub async fn make_port(&self) -> PyResult<i32> {

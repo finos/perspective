@@ -1,9 +1,17 @@
-Delete this [`Table`] and cleans up associated resources, assuming it has no
-[`View`] instances registered to it (which must be deleted first).
+Delete this [`Table`] and cleans up associated resources.
 
 [`Table`]s do not stop consuming resources or processing updates when they are
 garbage collected in their host language - you must call this method to reclaim
 these.
+
+# Arguments
+
+-   `options` An options dictionary.
+    -   `lazy` Whether to delete this [`Table`] _lazily_. When false (the
+        default), the delete will occur immediately, assuming it has no [`View`]
+        instances registered to it (which must be deleted first, otherwise this
+        method will throw an error). When true, the [`Table`] will only be
+        marked for deltion once its [`View`] dependency count reaches 0.
 
 <div class="javascript">
 
@@ -14,7 +22,7 @@ const table = await client.table("x,y\n1,2\n3,4");
 
 // ...
 
-await table.delete();
+await table.delete({ lazy: true });
 ```
 
 </div>
@@ -27,7 +35,7 @@ table = client.table("x,y\n1,2\n3,4")
 
 // ...
 
-table.delete()
+table.delete(lazy=True)
 ```
 
 </div>
@@ -42,7 +50,7 @@ let table = client.table(data, opts).await?;
 
 // ...
 
-table.delete().await?;
+table.delete(DeleteOptions::default()).await?;
 ```
 
 </div>

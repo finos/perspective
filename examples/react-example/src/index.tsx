@@ -10,32 +10,19 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import * as React from "react";
-import { createRoot } from "react-dom/client";
+// # [Perspective bootstrapping](https://perspective.finos.org/guide/how_to/javascript/importing.html)
 
-import perspective, { Table } from "@finos/perspective";
+// Here we're initializing the WASM interpreter that powers the perspective API
+// and viewer, as covered in the [user guide section on bundling](https://perspective.finos.org/guide/how_to/javascript/importing.html).
+// This example is written assuming that the bundler is configured
+// to treat these files as a "file" and returns a path as the default export.
+// Use ./build.js as an example. The type stubs are in ./globals.d.ts
+
+import perspective from "@finos/perspective";
 import perspective_viewer from "@finos/perspective-viewer";
-
-// Import perspective viewer plugins to register them on the web component.
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
-import { ViewerConfigUpdate } from "@finos/perspective-viewer";
-import {
-    PerspectiveViewer,
-    PerspectiveProvider,
-} from "@finos/perspective-react";
-import * as psp from "@finos/perspective-react";
-
-import "@finos/perspective-viewer/dist/css/themes.css";
-import "./index.css";
-
-/**
- * Here we're initializing the WASM interpreter that powers the perspective API and viewer.
- * This example is written assuming that the bundler is configured to treat these files as a "file"
- * and returns a path as the default export. Use ./build.js as an example. The type stubs are in ./globals.d.ts
- */
-import SUPERSTORE_ARROW from "superstore-arrow/superstore.lz4.arrow";
 import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
 import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
 
@@ -44,147 +31,109 @@ await Promise.all([
     perspective_viewer.init_client(fetch(CLIENT_WASM)),
 ]);
 
-// Now WASM has booted and we can construct a web worker to host our tables.
-const worker = await perspective.worker();
+// # Data Source
 
-async function createTable(): Promise<Table> {
+// Data source creates a static Web Worker instance of Perspective engine, and a
+// table creation function which both downloads data and loads it into the
+// engine.
+
+import type * as psp from "@finos/perspective";
+import type * as pspViewer from "@finos/perspective-viewer";
+
+import SUPERSTORE_ARROW from "superstore-arrow/superstore.lz4.arrow";
+
+const WORKER = await perspective.worker();
+
+async function createNewSuperstoreTable(): Promise<psp.Table> {
+    console.warn("Creating new table!");
     const req = fetch(SUPERSTORE_ARROW);
     const resp = await req;
     const buffer = await resp.arrayBuffer();
-    return await worker.table(buffer);
+    return await WORKER.table(buffer);
 }
 
-const config: ViewerConfigUpdate = {
+const CONFIG: pspViewer.ViewerConfigUpdate = {
     group_by: ["State"],
 };
 
-const Root: React.FC = () => {
-    return (
-        <PerspectiveProvider>
-            <App />
-        </PerspectiveProvider>
-    );
-};
+// # React application
 
-const App: React.FC = () => {
-    const actions = psp.useActions();
-    const [state, setState] = React.useState<ToolbarState>({
-        mounted: true,
-        selectedTable: "superstore",
-    });
+// The React application itself
 
-    React.useEffect(() => {
-        actions.addTable({ table: "superstore", promise: createTable() });
-        return () => {
-            actions.removeTable({ table: "superstore" });
-        };
-    }, []);
+import * as React from "react";
+import { createRoot } from "react-dom/client";
+import { PerspectiveViewer } from "@finos/perspective-react";
 
-    return (
-        <div className="container">
-            <Toolbar state={state} setState={setState} />
-            <div className="workspace">
-                <div className="viewer-container">
-                    {state.mounted && (
-                        <PerspectiveViewer
-                            selectedTable={state.selectedTable}
-                            config={{
-                                plugin: "datagrid",
-                                ...config,
-                            }}
-                        />
-                    )}
-                </div>
-                <div className="viewer-container">
-                    {state.mounted && (
-                        <PerspectiveViewer
-                            selectedTable={state.selectedTable}
-                        />
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
+import "@finos/perspective-viewer/dist/css/themes.css";
+import "./index.css";
 
 interface ToolbarState {
     mounted: boolean;
-    selectedTable: string;
+    table?: Promise<psp.Table>;
+    config: pspViewer.ViewerConfigUpdate;
 }
 
-const table = createTable();
+const App: React.FC = () => {
+    const [state, setState] = React.useState<ToolbarState>(() => ({
+        mounted: true,
+        table: createNewSuperstoreTable(),
+        config: { ...CONFIG },
+    }));
 
-const Toolbar: React.FC<{
-    state: ToolbarState;
-    setState: React.Dispatch<React.SetStateAction<ToolbarState>>;
-}> = ({ state, setState }) => {
-    const actions = psp.useActions();
-    const tables = psp.useTables();
+    React.useEffect(() => {
+        return () => {
+            state.table?.then((table) => table?.delete({ lazy: true }));
+        };
+    }, []);
 
-    const selectOptions = Object.keys(tables).map((table) => (
-        <option key={table} value={table}>
-            {table}
-        </option>
-    ));
+    const onClickOverwrite = () => {
+        state.table?.then((table) => table?.delete({ lazy: true }));
+        const table = createNewSuperstoreTable();
+        setState({ ...state, table });
+    };
+
+    const onClickDelete = () => {
+        state.table?.then((table) => table?.delete({ lazy: true }));
+        setState({ ...state, table: undefined });
+    };
+
+    const onClickToggleMount = () =>
+        setState((old) => ({ ...old, mounted: !state.mounted }));
+
+    const onConfigUpdate = (config: pspViewer.ViewerConfigUpdate) => {
+        console.log("Config Update Event", config);
+        setState({ ...state, config });
+    };
+
+    const onClick = (detail: pspViewer.PerspectiveClickEventDetail) => {
+        console.log("Click Event,", detail);
+    };
+
+    const onSelect = (detail: pspViewer.PerspectiveSelectEventDetail) => {
+        console.log("Select Event", detail);
+    };
 
     return (
-        <div className="toolbar">
-            <div>
-                <button
-                    id="toggle"
-                    onClick={() =>
-                        setState((old) => ({ ...old, mounted: !state.mounted }))
-                    }
-                >
-                    Toggle Mount
-                </button>
+        <div className="container">
+            <div className="toolbar">
+                <button onClick={onClickToggleMount}>Toggle Mount</button>
+                <button onClick={onClickOverwrite}>Overwrite Superstore</button>
+                <button onClick={onClickDelete}>Delete Table</button>
             </div>
-            <button
-                onContextMenu={(e) => {
-                    e.preventDefault();
-                    (async () => {
-                        for (let i = 0; i < 100; i++) {
-                            actions.addTable({
-                                table: "superstore",
-                                promise: table,
-                            });
-                            // Yield event loop to prevent react from
-                            // batching updates.
-
-                            await new Promise((resolve) =>
-                                setTimeout(resolve, 5)
-                            );
-                        }
-                    })();
-                }}
-                onClick={() => {
-                    actions.addTable({
-                        table: "superstore",
-                        promise: createTable(),
-                    });
-                }}
-            >
-                Overwrite Superstore
-            </button>
-            <button
-                onClick={() => {
-                    actions.removeTable({ table: state.selectedTable });
-                }}
-            >
-                Remove Table
-            </button>
-            <select
-                onChange={(e) => {
-                    setState((old) => ({
-                        ...old,
-                        selectedTable: e.target.value,
-                    }));
-                }}
-            >
-                {selectOptions}
-            </select>
+            {state.mounted && (
+                <>
+                    <PerspectiveViewer table={state.table} />
+                    <PerspectiveViewer
+                        table={state.table}
+                        config={state.config}
+                        onClick={onClick}
+                        onSelect={onSelect}
+                        onConfigUpdate={onConfigUpdate}
+                    />
+                </>
+            )}
         </div>
     );
 };
 
-createRoot(document.getElementById("root")!).render(<Root />);
+createRoot(document.getElementById("root")!).render(<App />);

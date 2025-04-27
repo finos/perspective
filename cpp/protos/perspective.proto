@@ -315,7 +315,9 @@ message MakeTableReq {
 message MakeTableResp {}
 
 // `Table::delete`
-message TableDeleteReq {}
+message TableDeleteReq { 
+    bool is_immediate = 1; 
+}
 message TableDeleteResp {}
 
 // `Table::on_delete`

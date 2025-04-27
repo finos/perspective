@@ -11,44 +11,44 @@
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
  */
 
-perspective-viewer {
+body {
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
+}
+
+.container {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 45px 1fr;
 }
 
-body {
-    margin: 0;
-    background-color: #f0f0f0;
-}
-
-.viewer-container {
-    display: flex;
-    position: relative;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.workspace {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    gap: 5px;
-}
-
-.container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+perspective-viewer {
+    grid-row: 2;
 }
 
 .toolbar {
+    grid-row: 1;
+    grid-column-start: 1;
+    grid-column-end: 3;
+
     display: flex;
     flex-direction: row;
     gap: 10px;
     padding: 10px;
-    background-color: #cecece;
+    justify-content: stretch;
+    border-bottom: 1px solid #666;
+}
+
+button {
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
 }

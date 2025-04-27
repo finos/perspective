@@ -12,253 +12,64 @@
 
 import * as React from "react";
 import type * as psp from "@finos/perspective";
-import type {
-    HTMLPerspectiveViewerElement,
-    ViewerConfigUpdate,
-} from "@finos/perspective-viewer";
+import type * as pspViewer from "@finos/perspective-viewer";
 
-import {
-    createContextWithSelectors,
-    useContextSelector,
-    useContextSelectors,
-} from "./context";
-
-type PspAction =
-    | {
-          type: "addTable";
-          table: string;
-          promise: Promise<psp.Table>;
-      }
-    | {
-          type: "removeTable";
-          table: string;
-      };
-
-type GeneratorsByType<T extends { type: string }> = {
-    [K in T["type"]]: (fields: Omit<Extract<T, { type: K }>, "type">) => T;
-};
-
-type FunctionsByType<T extends { type: string }> = {
-    [K in T["type"]]: (fields: Omit<Extract<T, { type: K }>, "type">) => void;
-};
-
-function createGenerator<T extends { type: string }>(): GeneratorsByType<T> {
-    return new Proxy(
-        {},
-        {
-            get: (_, type: string) => {
-                return (fields: Record<string, unknown>) => ({
-                    type,
-                    ...fields,
-                });
-            },
-        }
-    ) as GeneratorsByType<T>;
-}
-
-const actions: GeneratorsByType<PspAction> = createGenerator<PspAction>();
-
-export function useActions(): FunctionsByType<PspAction> {
-    const dispatch = usePspDispatch();
-    return new Proxy(
-        {},
-        {
-            get: (_, type: string) => {
-                return (fields: Record<string, unknown>) =>
-                    dispatch((actions as any)[type](fields));
-            },
-        }
-    ) as FunctionsByType<PspAction>;
-}
-
-interface PspState {
-    tables: Record<string, Promise<psp.Table>>;
-}
-
-const PspContext = createContextWithSelectors<PspState>(null);
-
-const PspDispatchContext =
-    React.createContext<React.Dispatch<PspAction> | null>(null);
-
-export const PerspectiveProvider: React.FC<React.PropsWithChildren> = ({
-    children,
-}) => {
-    const [state, dispatch] = React.useReducer(
-        (state: PspState, action: PspAction) => {
-            switch (action.type) {
-                case "addTable":
-                    return {
-                        ...state,
-                        tables: {
-                            ...state.tables,
-                            [action.table]: action.promise,
-                        },
-                    };
-                case "removeTable": {
-                    const { [action.table]: removed, ...tables } = state.tables;
-                    return {
-                        ...state,
-                        tables,
-                    };
-                }
-                default:
-                    return state;
-            }
-        },
-        { tables: {} }
-    );
-
-    return (
-        <PspContext.Provider value={state}>
-            <PspDispatchContext.Provider value={dispatch}>
-                {children}
-            </PspDispatchContext.Provider>
-        </PspContext.Provider>
-    );
-};
-
-export function useTables(): Record<string, Promise<psp.Table>> {
-    return usePsp((s) => s.tables);
-}
-
-function usePsp<A>(selector: (_: PspState) => A): A {
-    return useContextSelector(PspContext, (state) => {
-        if (!state) {
-            throw new Error("usePsp must be used within a PerspectiveProvider");
-        }
-        return selector(state);
-    });
-}
-
-const usePspMulti = <
-    Selectors extends readonly ((value: PspState) => any)[],
-    R
->(
-    selectors: [...Selectors],
-    mapper: (
-        ...args: {
-            [K in keyof Selectors]: Selectors[K] extends (
-                value: PspState
-            ) => infer B
-                ? B
-                : never;
-        }
-    ) => R
-): R => {
-    const nullableSelectors = selectors.map((f) => (s: PspState | null) => {
-        if (s === null) {
-            throw Error(
-                "usePspDispatch must be used within a PerspectiveProvider"
-            );
-        }
-        return f(s);
-    });
-    return useContextSelectors(PspContext, nullableSelectors, mapper as any);
-};
-
-function usePspDispatch(): React.Dispatch<PspAction> {
-    const ctx = React.useContext(PspDispatchContext);
-    if (!ctx) {
-        throw new Error(
-            "usePspDispatch must be used within a PerspectiveProvider"
-        );
-    }
-    return ctx;
-}
-
-function validateProps(props: PerspectiveViewerProps) {
-    if (props.selectedTable && props.tableData) {
-        throw new Error(
-            "Cannot provide both `selectedTable` and `tableData` props"
-        );
-    }
-}
-
-interface PerspectiveViewerProps {
-    selectedTable?: string;
-    config?: ViewerConfigUpdate;
-    onConfigUpdate?: (e: ViewerConfigUpdate) => void;
-    tableData?: string | Array<object> | Record<string, any[]>;
-}
-
-const PerspectiveViewerInternal: React.FC<PerspectiveViewerProps> = (props) => {
-    validateProps(props);
-    const { selectedTable, config, onConfigUpdate } = props;
-
-    const [viewer, setViewer] = React.useState<HTMLPerspectiveViewerElement>();
-    const [version, setVersion] = React.useState(0);
-    const tablePromise = usePsp((s) =>
-        selectedTable ? s.tables[selectedTable] : undefined
-    );
-
-    // Allows the effect block to access the latest `onConfigUpdate` function without
-    // needing to re-register the event listener every time it changes.
-    const onConfigUpdateRef = React.useRef(onConfigUpdate);
-    onConfigUpdateRef.current = onConfigUpdate;
-
-    const lastConfigRef = React.useRef<ViewerConfigUpdate>();
-    const [loaded, setLoaded] = React.useState(false);
-
-    // Propagate config updates up the the parent if desired
+function usePspListener<A>(
+    viewer: HTMLElement | null,
+    name: string,
+    f?: (x: A) => void
+) {
     React.useEffect(() => {
-        if (viewer) {
-            const configUpdate = (e: CustomEvent) => {
-                lastConfigRef.current = e.detail;
-                onConfigUpdateRef.current &&
-                    onConfigUpdateRef.current(e.detail);
-            };
-            viewer.addEventListener("perspective-config-update", configUpdate);
-            return () => {
-                viewer.removeEventListener(
-                    "perspective-config-update",
-                    configUpdate
-                );
-            };
-        }
+        if (!f) return;
+        const ctx = new AbortController();
+        const callback = (e: Event) => f((e as CustomEvent).detail);
+        viewer?.addEventListener(name, callback, { signal: ctx.signal });
+        return () => ctx.abort();
+    }, [viewer, f]);
+}
+
+export interface PerspectiveViewerProps {
+    table?: psp.Table | Promise<psp.Table>;
+    config?: pspViewer.ViewerConfigUpdate;
+    onConfigUpdate?: (config: pspViewer.ViewerConfigUpdate) => void;
+    onClick?: (data: pspViewer.PerspectiveClickEventDetail) => void;
+    onSelect?: (data: pspViewer.PerspectiveSelectEventDetail) => void;
+}
+
+function PerspectiveViewerImpl(props: PerspectiveViewerProps) {
+    const [viewer, setViewer] =
+        React.useState<pspViewer.HTMLPerspectiveViewerElement | null>(null);
+
+    React.useEffect(() => {
+        return () => {
+            viewer?.delete();
+        };
     }, [viewer]);
 
-    // Load the table, we never unload
     React.useEffect(() => {
-        if (viewer && tablePromise) {
-            const cleanup = () => {
-                console.log(`v${version} Cleanup`);
-                // Force recreation of webcomponent on next render.
-                setVersion(version + 1);
-                // Prevent config restores while the viewer is being replaced.
-                setLoaded(false);
-            };
-
-            viewer.load(tablePromise);
-            // Now we can restore.
-            setLoaded(true);
-            return cleanup;
+        if (props.table) {
+            viewer?.load(props.table);
+        } else {
+            viewer?.eject();
         }
-    }, [viewer, tablePromise]);
+    }, [viewer, props.table]);
 
     React.useEffect(() => {
-        if (!loaded) {
-            return;
+        if (props.table && props.config) {
+            viewer?.restore(props.config);
         }
-        if (viewer && config) {
-            // Check identity to avoid infinite loop.
-            if (lastConfigRef.current !== config) {
-                console.log("Restoring viewer");
-                viewer.restore(config);
-            }
-        }
-    }, [viewer, config, loaded]);
+    }, [viewer, props.table, JSON.stringify(props.config)]);
 
-    React.useEffect(() => {
-        if (viewer) {
-            return () => {
-                viewer.delete();
-            };
-        }
-    }, [viewer]);
+    usePspListener(viewer, "perspective-click", props.onClick);
+    usePspListener(viewer, "perspective-select", props.onSelect);
+    usePspListener(viewer, "perspective-config-update", props.onConfigUpdate);
 
-    return <perspective-viewer key={version} ref={setViewer as any} />;
-};
+    return <perspective-viewer ref={setViewer} />;
+}
 
+/**
+ * A React wrapper component for `<perspective-viewer>` Custom Element.
+ */
 export const PerspectiveViewer: React.FC<PerspectiveViewerProps> = React.memo(
-    PerspectiveViewerInternal
+    PerspectiveViewerImpl
 );
