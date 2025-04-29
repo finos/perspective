@@ -34,6 +34,12 @@
         padding: 12px;
         overflow: hidden;
 
+        &.yline {
+            .y-series:not(:first-child) .gridline-x {
+                display: none;
+            }
+        }
+
         &.heatmap,
         &.treemap {
             d3fc-group.cartesian-chart {
