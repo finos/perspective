@@ -214,19 +214,23 @@ export const component = (settings: Settings): Component => {
         if (orient === "horizontal") {
             // x-axis may rotate labels and expand the available height
             if (group && group.length * 16 > width - 100) {
+                // Vertical
                 return {
-                    size: maxLength * 5 + 10,
+                    size: maxLength * 6.62 + 10,
                     rotation: 90,
                 };
             } else if (
                 group &&
                 group.length * (maxLength * 6 + 10) > width - 100
             ) {
+                // Angle
                 return {
-                    size: maxLength * 3 + 20,
+                    size: maxLength * 4 + 20,
                     rotation: 45,
                 };
             }
+
+            // Horizontal
             return {
                 size: 25,
                 rotation: 0,
@@ -234,7 +238,7 @@ export const component = (settings: Settings): Component => {
         } else {
             // y-axis size always based on label size
             return {
-                size: maxLength * 5 + 10,
+                size: maxLength * 6.62 + 10,
                 rotation: 0,
             };
         }

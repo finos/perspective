@@ -37,6 +37,11 @@
             }
         }
 
+        text {
+            // `font-family` does not apply to `<text>` nodes via inheritance.
+            font-family: var(--interface-monospace--font-family);
+        }
+
         &.heatmap,
         &.treemap {
             d3fc-group.cartesian-chart {
