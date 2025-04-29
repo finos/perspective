@@ -27,10 +27,10 @@ export const initialiseStyles = (
         };
 
         const computed = computedStyle(container);
-        styles["series"] = computed(`--d3fc-local-series`);
+        styles["series"] = computed(`--d3fc-series`);
         for (let i = 1; ; i++) {
             const key = `series-${i}`;
-            const color = computed(`--d3fc-local-${key}`);
+            const color = computed(`--d3fc-${key}`);
             if (!color) {
                 break;
             }
@@ -44,7 +44,7 @@ export const initialiseStyles = (
 
         const gradients = ["full", "positive", "negative"];
         gradients.forEach((g) => {
-            const gradient = computed(`--d3fc-local-${g}--gradient`);
+            const gradient = computed(`--d3fc-${g}--gradient`);
             styles.gradient[g] = parseGradient(gradient, styles.opacity);
         });
 

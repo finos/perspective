@@ -10,9 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-@import "./gradient_colors.less";
-@import "./series_colors.less";
-
 @mixin icon {
     background-repeat: no-repeat;
     background-color: var(--icon--color);
@@ -33,6 +30,17 @@
         height: 100%;
         padding: 12px;
         overflow: hidden;
+
+        &.yline {
+            .y-series:not(:first-child) .gridline-x {
+                display: none;
+            }
+        }
+
+        text {
+            // `font-family` does not apply to `<text>` nodes via inheritance.
+            font-family: var(--interface-monospace--font-family);
+        }
 
         &.heatmap,
         &.treemap {
@@ -298,11 +306,13 @@
         }
 
         & .y-axis text,
+        & .y2-axis text,
         & .x-axis text {
             fill: var(--d3fc-axis-ticks--color, rgb(80, 80, 80));
             font-size: 11px;
         }
         & .y-axis path,
+        & .y2-axis path,
         & .x-axis path {
             stroke: var(--d3fc-axis--lines, rgb(180, 210, 225));
         }
@@ -350,10 +360,16 @@
         &.ybar .y-axis path,
         &.yline .y-axis path,
         &.xyline .y-axis path,
+        &.ybar .y2-axis path,
+        &.yline .y2-axis path,
+        &.xyline .y2-axis path,
         &.xyline .x-axis path,
         &.yarea .y-axis path,
         &.yscatter .y-axis path,
         &.xyscatter .y-axis path,
+        &.yarea .y2-axis path,
+        &.yscatter .y2-axis path,
+        &.xyscatter .y2-axis path,
         &.xyscatter .x-axis path,
         &.xbar .x-axis path {
             visibility: hidden;

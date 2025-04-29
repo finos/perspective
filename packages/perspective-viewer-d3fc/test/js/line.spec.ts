@@ -79,4 +79,50 @@ test.describe("Line regressions", () => {
             "line-charts-denser-than-one-second-regression.txt",
         ]);
     });
+
+    test("Zoom on a chart with split Y axis renders the right axis", async ({
+        page,
+    }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "Y Line",
+                plugin_config: {
+                    splitMainValues: ["Profit"],
+                },
+                settings: true,
+                theme: "Pro Light",
+                group_by: ["Order Date"],
+                columns: ["Sales", "Profit"],
+            });
+        });
+
+        await page.mouse.move(500, 500);
+        await page.mouse.wheel(0, -100);
+
+        const contents = await page.$(
+            "perspective-viewer-d3fc-yline .y2-axis.right-axis"
+        );
+
+        test.expect(await contents?.innerText()).toEqual(`−1,800
+−1,600
+−1,400
+−1,200
+−1,000
+−800
+−600
+−400
+−200
+0
+200
+400`);
+
+        await page.pause();
+    });
 });

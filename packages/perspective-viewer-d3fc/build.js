@@ -84,8 +84,6 @@ function add(builder, path) {
 async function compile_css() {
     fs.mkdirSync("dist/css", { recursive: true });
     const builder = new BuildCss("");
-    add(builder, "./series_colors.less");
-    add(builder, "./gradient_colors.less");
     add(builder, "./chart.less");
     fs.writeFileSync(
         "dist/css/perspective-viewer-d3fc.css",

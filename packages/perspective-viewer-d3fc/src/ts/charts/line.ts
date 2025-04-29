@@ -61,9 +61,8 @@ function lineChart(container, settings: Settings) {
     const yAxis1: AxisFactoryContent = yAxisFactory(splitter.data());
 
     // No grid lines if splitting y-axis
-    const plotSeries = splitter.haveSplit()
-        ? series
-        : withGridLines(series, settings).orient("vertical");
+    const plotSeries = withGridLines(series, settings).orient("vertical");
+
     const chart = chartSvgFactory(xAxis, yAxis1)
         .axisSplitter(splitter)
         .plotArea(plotSeries);
