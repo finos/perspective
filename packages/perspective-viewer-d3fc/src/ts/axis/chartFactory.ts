@@ -155,7 +155,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
 
             // Render the axis
             y2AxisDataJoin(container, ["right"])
-                .attr("class", (d) => `y-axis ${d}-axis`)
+                .attr("class", (d) => `y2-axis ${d}-axis`)
                 .on("measure", function (event, d) {
                     const { width, height } = event.detail;
                     if (d === "left") {
