@@ -15,7 +15,7 @@ datasets. Use it to create user-configurable reports, dashboards, notebooks and
 applications, then deploy stand-alone in the browser, or in concert with Python
 and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 
-### Features
+### Features :
 
 -   A fast, memory efficient streaming query engine, written in
     C++ and compiled for both [WebAssembly](https://webassembly.org/) and
