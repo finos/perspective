@@ -1,3 +1,11 @@
+# [v3.6.1](https://github.com/finos/perspective/releases/tag/v3.6.1)
+
+_30 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.6.0...v3.6.1))
+
+Fixes
+
+- Fix line chart alt Y axis on zoom [#2986](https://github.com/finos/perspective/pull/2986)
+
 # [v3.6.0](https://github.com/finos/perspective/releases/tag/v3.6.0)
 
 _24 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.5.1...v3.6.0))
