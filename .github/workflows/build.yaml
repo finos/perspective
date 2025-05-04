@@ -375,7 +375,6 @@ jobs:
     build_emscripten_wheel:
         runs-on: ${{ matrix.os }}
         needs: [lint_and_docs]
-        # if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         strategy:
             fail-fast: false
             matrix:
@@ -701,9 +700,9 @@ jobs:
                   # PSP_USE_CCACHE: 1
 
     test_python_sdist:
+        if: startsWith(github.ref, 'refs/tags/v') || github.ref_name == 'master'
         needs: [build_and_test_jupyterlab, build_and_test_rust]
         runs-on: ${{ matrix.os }}
-
         strategy:
             fail-fast: false
             matrix:
@@ -795,6 +794,7 @@ jobs:
     #        `-'
     benchmark_python:
         needs: [build_python, build_js]
+        if: startsWith(github.ref, 'refs/tags/v') || github.ref_name == 'master'
         runs-on: ${{ matrix.os }}
         strategy:
             fail-fast: false
@@ -854,6 +854,7 @@ jobs:
     # `--'                              '
     benchmark_js:
         needs: [build_js]
+        if: startsWith(github.ref, 'refs/tags/v') || github.ref_name == 'master'
         strategy:
             matrix:
                 os: [ubuntu-22.04]

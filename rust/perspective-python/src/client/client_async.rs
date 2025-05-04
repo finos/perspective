@@ -60,11 +60,11 @@ impl AsyncClient {
 #[pymethods]
 impl AsyncClient {
     #[new]
-    #[pyo3(signature=(name, handle_request, handle_close=None))]
+    #[pyo3(signature=(handle_request, handle_close=None, name=None))]
     pub fn new(
-        name: Option<String>,
         handle_request: Py<PyAny>,
         handle_close: Option<Py<PyAny>>,
+        name: Option<String>,
     ) -> PyResult<Self> {
         let handle_request = Arc::new(handle_request);
         let client = Client::new_with_callback(

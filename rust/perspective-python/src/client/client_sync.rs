@@ -58,7 +58,7 @@ impl Client {
         close_cb: Option<Py<PyAny>>,
         name: Option<String>,
     ) -> PyResult<Self> {
-        let client = AsyncClient::new(name, handle_request, close_cb)?;
+        let client = AsyncClient::new(handle_request, close_cb, name)?;
         Ok(Client(client))
     }
 
