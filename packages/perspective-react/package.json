@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-react",
-    "version": "1.0.0",
+    "version": "0.0.0",
     "description": "",
     "main": "index.js",
     "keywords": [],
@@ -16,6 +16,9 @@
     "scripts": {
         "build": "node ./build.js",
         "clean": "rimraf dist"
+    },
+    "publishConfig": {
+        "access": "public"
     },
     "peerDependencies": {
         "@finos/perspective": "workspace:^",

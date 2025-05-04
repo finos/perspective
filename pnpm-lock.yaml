@@ -510,14 +510,17 @@ importers:
       '@finos/perspective':
         specifier: workspace:^
         version: link:../../rust/perspective-js
+      '@finos/perspective-viewer':
+        specifier: workspace:^
+        version: link:../../rust/perspective-viewer
       '@types/react':
-        specifier: ^18.0.0
+        specifier: ^18
         version: 18.3.8
       react:
-        specifier: ^18.0.0
+        specifier: ^18
         version: 18.3.1
       react-dom:
-        specifier: ^18.0.0
+        specifier: ^18
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@finos/perspective-esbuild-plugin':
@@ -901,24 +904,6 @@ importers:
 
   tools/perspective-test:
     dependencies:
-      '@finos/perspective':
-        specifier: workspace:^
-        version: link:../../rust/perspective-js
-      '@finos/perspective-react':
-        specifier: workspace:^
-        version: link:../../packages/perspective-react
-      '@finos/perspective-viewer':
-        specifier: workspace:^
-        version: link:../../rust/perspective-viewer
-      '@finos/perspective-viewer-d3fc':
-        specifier: workspace:^
-        version: link:../../packages/perspective-viewer-d3fc
-      '@finos/perspective-viewer-datagrid':
-        specifier: workspace:^
-        version: link:../../packages/perspective-viewer-datagrid
-      '@types/react':
-        specifier: ^18.0.0
-        version: 18.3.8
       glob:
         specifier: ^11
         version: 11.0.0
@@ -931,10 +916,6 @@ importers:
       xml-formatter:
         specifier: 2.4.0
         version: 2.4.0
-    devDependencies:
-      '@finos/perspective-esbuild-plugin':
-        specifier: workspace:^
-        version: link:../perspective-esbuild-plugin
 
 packages:
 

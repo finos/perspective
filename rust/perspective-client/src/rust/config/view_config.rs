@@ -62,41 +62,94 @@ fn is_default_value<A: Default + PartialEq>(value: &A) -> bool {
 #[derive(Clone, Debug, Deserialize, Default, Serialize, TS)]
 #[serde(deny_unknown_fields)]
 pub struct ViewConfigUpdate {
+    /// A group by _groups_ the dataset by the unique values of each column used
+    /// as a group by - a close analogue in SQL to the `GROUP BY` statement.
+    /// The underlying dataset is aggregated to show the values belonging to
+    /// each group, and a total row is calculated for each group, showing
+    /// the currently selected aggregated value (e.g. `sum`) of the column.
+    /// Group by are useful for hierarchies, categorizing data and
+    /// attributing values, i.e. showing the number of units sold based on
+    /// State and City. In Perspective, group by are represented as an array
+    /// of string column names to pivot, are applied in the order provided;
+    /// For example, a group by of `["State", "City", "Postal Code"]` shows
+    /// the values for each Postal Code, which are grouped by City,
+    /// which are in turn grouped by State.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
     pub group_by: Option<Vec<String>>,
 
+    /// A split by _splits_ the dataset by the unique values of each column used
+    /// as a split by. The underlying dataset is not aggregated, and a new
+    /// column is created for each unique value of the split by. Each newly
+    /// created column contains the parts of the dataset that correspond to
+    /// the column header, i.e. a `View` that has `["State"]` as its split
+    /// by will have a new column for each state. In Perspective, Split By
+    /// are represented as an array of string column names to pivot.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
     pub split_by: Option<Vec<String>>,
 
+    /// The `columns` property specifies which columns should be included in the
+    /// [`crate::View`]'s output. This allows users to show or hide a specific
+    /// subset of columns, as well as control the order in which columns
+    /// appear to the user. This is represented in Perspective as an array
+    /// of string column names.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
     pub columns: Option<Vec<Option<String>>>,
 
+    /// The `filter` property specifies columns on which the query can be
+    /// filtered, returning rows that pass the specified filter condition.
+    /// This is analogous to the `WHERE` clause in SQL. There is no limit on
+    /// the number of columns where `filter` is applied, but the resulting
+    /// dataset is one that passes all the filter conditions, i.e. the
+    /// filters are joined with an `AND` condition.
+    ///
+    /// Perspective represents `filter` as an array of arrays, with the values
+    /// of each inner array being a string column name, a string filter
+    /// operator, and a filter operand in the type of the column.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
     pub filter: Option<Vec<Filter>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    #[ts(optional)]
-    pub filter_op: Option<FilterReducer>,
-
+    /// The `sort` property specifies columns on which the query should be
+    /// sorted, analogous to `ORDER BY` in SQL. A column can be sorted
+    /// regardless of its data type, and sorts can be applied in ascending
+    /// or descending order. Perspective represents `sort` as an array of
+    /// arrays, with the values of each inner array being a string column
+    /// name and a string sort direction. When `column-pivots` are applied,
+    /// the additional sort directions `"col asc"` and `"col desc"` will
+    /// determine the order of pivot columns groups.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
     pub sort: Option<Vec<Sort>>,
 
+    /// The `expressions` property specifies _new_ columns in Perspective that
+    /// are created using existing column values or arbitary scalar values
+    /// defined within the expression. In `<perspective-viewer>`,
+    /// expressions are added using the "New Column" button in the side
+    /// panel.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
     pub expressions: Option<Expressions>,
 
+    /// Aggregates perform a calculation over an entire column, and are
+    /// displayed when one or more [Group By](#group-by) are applied to the
+    /// `View`. Aggregates can be specified by the user, or Perspective will
+    /// use the following sensible default aggregates based on column type:
+    ///
+    /// - "sum" for `integer` and `float` columns
+    /// - "count" for all other columns
+    ///
+    /// Perspective provides a selection of aggregate functions that can be
+    /// applied to columns in the `View` constructor using a dictionary of
+    /// column name to aggregate function name.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     #[ts(optional)]
@@ -106,6 +159,11 @@ pub struct ViewConfigUpdate {
     #[serde(default)]
     #[ts(optional)]
     pub group_by_depth: Option<u32>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    #[ts(optional)]
+    pub filter_op: Option<FilterReducer>,
 }
 
 impl From<ViewConfigUpdate> for proto::ViewConfig {

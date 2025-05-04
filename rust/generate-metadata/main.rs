@@ -55,6 +55,7 @@ fn generate_exprtk_docs() -> Result<(), Box<dyn Error>> {
         )?;
     }
 
+    fs::create_dir_all("../perspective-client/docs/")?;
     fs::write("../perspective-client/docs/expression_gen.md", txt)?;
     Ok(())
 }

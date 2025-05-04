@@ -26,13 +26,3 @@ pub use errors::*;
 pub use futures::*;
 pub use local_poll_loop::*;
 pub use serde::*;
-
-macro_rules! inherit_docs {
-    (#[inherit_doc = $y:literal] $x:item) => {
-        #[cfg_attr(feature = "external-docs", doc =
-                                include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $y)))]
-        $x
-    };
-}
-
-pub(crate) use inherit_docs;

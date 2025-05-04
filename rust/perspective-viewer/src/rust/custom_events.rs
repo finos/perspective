@@ -134,7 +134,6 @@ impl CustomEvents {
     }
 
     pub fn dispatch_select(&self, view_window: Option<&ViewWindow>) -> ApiResult<()> {
-        tracing::info!("FUCK");
         let mut event_init = web_sys::CustomEventInit::new();
         event_init.detail(&serde_wasm_bindgen::to_value(&view_window)?);
         let event =
