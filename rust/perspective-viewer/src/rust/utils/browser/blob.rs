@@ -29,8 +29,8 @@ impl AsBlob for js_sys::ArrayBuffer {
 impl AsBlob for js_sys::JsString {
     fn as_blob(&self) -> ApiResult<web_sys::Blob> {
         let array = std::iter::once(self).collect::<js_sys::Array>();
-        let mut options = web_sys::BlobPropertyBag::new();
-        options.type_("text/plain");
+        let options = web_sys::BlobPropertyBag::new();
+        options.set_type("text/plain");
         Ok(web_sys::Blob::new_with_str_sequence_and_options(
             &array, &options,
         )?)
@@ -40,8 +40,8 @@ impl AsBlob for js_sys::JsString {
 impl AsBlob for js_sys::Object {
     fn as_blob(&self) -> ApiResult<web_sys::Blob> {
         let array = std::iter::once(js_sys::JSON::stringify(self)?).collect::<js_sys::Array>();
-        let mut options = web_sys::BlobPropertyBag::new();
-        options.type_("text/plain");
+        let options = web_sys::BlobPropertyBag::new();
+        options.set_type("text/plain");
         Ok(web_sys::Blob::new_with_str_sequence_and_options(
             &array, &options,
         )?)

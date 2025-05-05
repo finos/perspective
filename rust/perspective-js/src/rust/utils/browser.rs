@@ -34,6 +34,6 @@ pub mod global {
     }
 
     pub fn clipboard() -> web_sys::Clipboard {
-        navigator().clipboard().unwrap()
+        navigator().clipboard()
     }
 }

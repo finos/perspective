@@ -25,11 +25,11 @@ pub struct ProxySession(perspective_client::ProxySession);
 
 #[pymethods]
 impl ProxySession {
-    #[new]
     /// Construct a proxy session from an AsyncClient or Client object and a
-    /// `handle_request`` callback.  The callback should ultimately invoke
+    /// `handle_request` callback.  The callback should ultimately invoke
     /// `handle_request` on another client, passing along the argument
     /// passed to it.
+    #[new]
     fn new(py: Python<'_>, client: Py<PyAny>, handle_request: Py<PyAny>) -> PyResult<Self> {
         let client = if let Ok(py_client) = client.downcast_bound::<AsyncClient>(py) {
             py_client.borrow().client.clone()
@@ -40,6 +40,7 @@ impl ProxySession {
                 "ProxySession::new() not passed a Perspective client",
             ));
         };
+
         let callback = {
             move |msg: &[u8]| {
                 let msg = msg.to_vec();
@@ -68,6 +69,11 @@ impl ProxySession {
 
     pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
         self.0.poll().py_block_on(py).into_pyerr()?;
+        Ok(())
+    }
+
+    pub async fn poll_async(&self) -> PyResult<()> {
+        self.0.poll().await.into_pyerr()?;
         Ok(())
     }
 
