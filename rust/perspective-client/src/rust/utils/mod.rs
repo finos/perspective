@@ -18,6 +18,9 @@ mod logging;
 #[cfg(test)]
 mod tests;
 
+use std::sync::Arc;
+
+use rand_unique::{RandomSequence, RandomSequenceBuilder};
 use thiserror::*;
 
 use crate::proto;
@@ -98,6 +101,34 @@ where
     fn unwrap_or_log(&self) {
         if let Err(e) = self {
             tracing::warn!("{}", e);
+        }
+    }
+}
+
+/// Generate a sequence of IDs
+#[derive(Clone)]
+pub struct IDGen(Arc<std::sync::Mutex<RandomSequence<u32>>>);
+
+impl Default for IDGen {
+    fn default() -> Self {
+        Self(Arc::new(std::sync::Mutex::new(Self::new_seq())))
+    }
+}
+
+impl IDGen {
+    fn new_seq() -> RandomSequence<u32> {
+        let mut rng = rand::rngs::ThreadRng::default();
+        let config = RandomSequenceBuilder::<u32>::rand(&mut rng);
+        config.into_iter()
+    }
+
+    pub fn next(&self) -> u32 {
+        let mut idgen = self.0.lock().unwrap();
+        if let Some(x) = idgen.next() {
+            x
+        } else {
+            *idgen = Self::new_seq();
+            idgen.next().unwrap()
         }
     }
 }

@@ -170,8 +170,8 @@ pub fn debug_panel(props: &DebugPanelProps) -> Html {
         (expr.clone(), select_all.callback()),
         move |_, (text, select_all)| {
             select_all.emit(());
-            let mut options = web_sys::BlobPropertyBag::new();
-            options.type_("text/plain");
+            let options = web_sys::BlobPropertyBag::new();
+            options.set_type("text/plain");
             let blob_txt = (JsValue::from((***text).clone())).clone();
             let blob_parts = js_sys::Array::from_iter([blob_txt].iter());
             let blob = web_sys::Blob::new_with_str_sequence_and_options(&blob_parts, &options);

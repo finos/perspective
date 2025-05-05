@@ -6,8 +6,8 @@ rustflags = ["--cfg=web_sys_unstable_apis"]
 target-dir = "rust/target"
 
 [target.wasm32-unknown-unknown]
-runner = 'wasm-bindgen-test-runner'
 rustflags = [
+    "--cfg=getrandom_backend=\"wasm_js\"",
     "--cfg=web_sys_unstable_apis",
     "-Ctarget-feature=+bulk-memory,+simd128,+relaxed-simd,+reference-types",
 ]

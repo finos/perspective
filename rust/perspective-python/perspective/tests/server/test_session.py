@@ -72,3 +72,39 @@ class TestProxySession(object):
         assert (await table.size()) == 3
         table2.update([{"a": 4, "d": 5}])
         assert (await table.size()) == 4
+
+    @pytest.mark.asyncio
+    async def test_dismabiguate_message_ids_in_proxy_session(self):
+        """tests concurrent calls from clients on Session + ProxySession"""
+        server = Server()
+        client = server.new_local_client()
+
+        def send_response(bytes):
+            import asyncio
+
+            asyncio.create_task(sub_client.handle_response(bytes))
+
+        async def send_request(bytes):
+            await sub_session.handle_request_async(bytes)
+            await sub_session.poll_async()
+
+        sub_session = ProxySession(client, send_response)
+        sub_client = AsyncClient(send_request, sub_session.close)
+
+        table = client.table("x\n1", name="test_table")
+        table2 = await sub_client.open_table("test_table")
+        view = table.view()
+        view2 = await table2.view()
+
+        sentinel = []
+
+        def callback1(*args):
+            sentinel.append("Callback 1")
+
+        def callback2(*args):
+            sentinel.append("Callback 2")
+
+        view.on_update(callback1)
+        await view2.on_update(callback2)
+        await table2.update("x\n2")
+        assert sentinel == ["Callback 1", "Callback 2"]

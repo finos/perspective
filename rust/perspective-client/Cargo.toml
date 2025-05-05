@@ -59,6 +59,9 @@ itertools = { version = "0.10.1" }
 nanoid = { version = "0.4.0" }
 paste = { version = "1.0.12" }
 prost-types = { version = "0.12.3" }
+getrandom = { version = "0.3", features = ["wasm_js"] }
+rand = { version = "*" }
+rand-unique = { version = "0.2.2" }
 serde = { version = "1.0", features = ["derive"] }
 serde_bytes = { version = "0.11" }
 serde_json = { version = "1.0.107", features = ["raw_value"] }

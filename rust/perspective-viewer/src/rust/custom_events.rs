@@ -123,8 +123,8 @@ impl CustomEvents {
     }
 
     pub fn dispatch_column_style_changed(&self, config: &JsValue) {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(config);
+        let event_init = web_sys::CustomEventInit::new();
+        event_init.set_detail(config);
         let event = web_sys::CustomEvent::new_with_event_init_dict(
             "perspective-column-style-change",
             &event_init,
@@ -134,8 +134,8 @@ impl CustomEvents {
     }
 
     pub fn dispatch_select(&self, view_window: Option<&ViewWindow>) -> ApiResult<()> {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(&serde_wasm_bindgen::to_value(&view_window)?);
+        let event_init = web_sys::CustomEventInit::new();
+        event_init.set_detail(&serde_wasm_bindgen::to_value(&view_window)?);
         let event =
             web_sys::CustomEvent::new_with_event_init_dict("perspective-select", &event_init);
 
@@ -147,8 +147,8 @@ impl CustomEvents {
 
 impl CustomEventsDataRc {
     fn dispatch_settings_open_changed(&self, open: bool) {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(&JsValue::from(open));
+        let event_init = web_sys::CustomEventInit::new();
+        event_init.set_detail(&JsValue::from(open));
         let event = web_sys::CustomEvent::new_with_event_init_dict(
             "perspective-toggle-settings",
             &event_init,
@@ -161,8 +161,8 @@ impl CustomEventsDataRc {
     }
 
     fn dispatch_column_settings_open_changed(&self, open: bool, column_name: Option<String>) {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(&JsValue::from(
+        let event_init = web_sys::CustomEventInit::new();
+        event_init.set_detail(&JsValue::from(
             json!( {"open": open, "column_name": column_name} ),
         ));
         let event = web_sys::CustomEvent::new_with_event_init_dict(
@@ -174,8 +174,8 @@ impl CustomEventsDataRc {
     }
 
     fn dispatch_plugin_changed(&self, plugin: &JsPerspectiveViewerPlugin) {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(plugin);
+        let event_init = web_sys::CustomEventInit::new();
+        event_init.set_detail(plugin);
         let event = web_sys::CustomEvent::new_with_event_init_dict(
             "perspective-plugin-update",
             &event_init,
@@ -191,8 +191,8 @@ impl CustomEventsDataRc {
                 && Some(&viewer_config) != self.last_dispatched.borrow().as_ref()
             {
                 let json_config = JsValue::from_serde_ext(&viewer_config)?;
-                let mut event_init = web_sys::CustomEventInit::new();
-                event_init.detail(&json_config);
+                let event_init = web_sys::CustomEventInit::new();
+                event_init.set_detail(&json_config);
                 let event = web_sys::CustomEvent::new_with_event_init_dict(
                     "perspective-config-update",
                     &event_init,

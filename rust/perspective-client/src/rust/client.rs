@@ -13,7 +13,6 @@
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
-use std::sync::atomic::AtomicU32;
 
 use async_lock::{Mutex, RwLock};
 use futures::Future;
@@ -142,7 +141,7 @@ pub struct Client {
     name: Arc<String>,
     features: Arc<Mutex<Option<Features>>>,
     send: SendCallback,
-    id_gen: Arc<AtomicU32>,
+    id_gen: IDGen,
     subscriptions_errors: Subscriptions<OnErrorCallback>,
     subscriptions_once: Subscriptions<OnceCallback>,
     subscriptions: Subscriptions<BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>>,
@@ -156,9 +155,7 @@ impl PartialEq for Client {
 
 impl std::fmt::Debug for Client {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Client")
-            .field("id_gen", &self.id_gen)
-            .finish()
+        f.debug_struct("Client").finish()
     }
 }
 
@@ -182,7 +179,7 @@ impl Client {
         Ok(Client {
             name: Arc::new(name),
             features: Arc::default(),
-            id_gen: Arc::new(AtomicU32::new(1)),
+            id_gen: IDGen::default(),
             send,
             subscriptions: Subscriptions::default(),
             subscriptions_errors: Arc::default(),
@@ -291,8 +288,7 @@ impl Client {
 
     /// Generate a message ID unique to this client.
     pub(crate) fn gen_id(&self) -> u32 {
-        self.id_gen
-            .fetch_add(1, std::sync::atomic::Ordering::Acquire)
+        self.id_gen.next()
     }
 
     pub(crate) async fn unsubscribe(&self, update_id: u32) -> ClientResult<()> {

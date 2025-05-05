@@ -870,6 +870,15 @@ importers:
       perspective-3-3-0:
         specifier: npm:@finos/perspective@3.3.0
         version: '@finos/perspective@3.3.0'
+      perspective-3-4-0:
+        specifier: npm:@finos/perspective@3.4.0
+        version: '@finos/perspective@3.4.0'
+      perspective-3-5-0:
+        specifier: npm:@finos/perspective@3.5.0
+        version: '@finos/perspective@3.5.0'
+      perspective-3-6-0:
+        specifier: npm:@finos/perspective@3.6.0
+        version: '@finos/perspective@3.6.0'
     devDependencies:
       '@finos/perspective':
         specifier: workspace:^
@@ -3350,6 +3359,15 @@ packages:
 
   '@finos/perspective@3.3.0':
     resolution: {integrity: sha512-GYzXPqHnhrWQz930f9OejVvsBs5I6jjJLvbK/xfUK2AUijMhzAUsPI70uEKUFwsy5VMA6sxWPl/UQB9W9IBGDw==}
+
+  '@finos/perspective@3.4.0':
+    resolution: {integrity: sha512-7FlOdnotYkJOc5/+yerpcSv9VH+1e2fs53ZiOAm0/id2cke9RySbm30NpHICGq13SQW5J3ezByZElx3V72A8mQ==}
+
+  '@finos/perspective@3.5.0':
+    resolution: {integrity: sha512-J4Q6aGq541iFeNeCrnW6tuq1ELfg0hhILH8qYoI9oJUSx1O/kwackunHOkxcPxW6zeaT0vUfHZaJjS7u1dYTuA==}
+
+  '@finos/perspective@3.6.0':
+    resolution: {integrity: sha512-MOXifjSsPNO39Bc0LiXp1OvV6ujNes4EoFxJ58edzCutbeSWf0yknXyEBmwR0PB/QWNHx1Czl3cnnJHXgRPn3Q==}
 
   '@fontsource/roboto-mono@4.5.10':
     resolution: {integrity: sha512-KrJdmkqz6DszT2wV/bbhXef4r0hV3B0vw2mAqei8A2kRnvq+gcJLmmIeQ94vu9VEXrUQzos5M9lH1TAAXpRphw==}
@@ -13972,6 +13990,30 @@ snapshots:
       - utf-8-validate
 
   '@finos/perspective@3.3.0':
+    dependencies:
+      stoppable: 1.1.0
+      ws: 8.18.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@finos/perspective@3.4.0':
+    dependencies:
+      stoppable: 1.1.0
+      ws: 8.18.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@finos/perspective@3.5.0':
+    dependencies:
+      stoppable: 1.1.0
+      ws: 8.18.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@finos/perspective@3.6.0':
     dependencies:
       stoppable: 1.1.0
       ws: 8.18.0
