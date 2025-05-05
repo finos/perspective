@@ -32,6 +32,7 @@ const IS_PLAYWRIGHT = get_scope().reduce(
             "perspective-cli",
             "perspective-js",
             "perspective",
+            "perspective-react",
             "perspective-viewer",
             "perspective-viewer-datagrid",
             "perspective-viewer-d3fc",

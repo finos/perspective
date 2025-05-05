@@ -21,6 +21,8 @@
     "license": "Apache-2.0",
     "dependencies": {
         "glob": "^11",
-        "xml-formatter": "2.4.0"
+        "xml-formatter": "2.4.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
     }
 }

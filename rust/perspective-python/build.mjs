@@ -94,15 +94,10 @@ if (build_wheel) {
         }
         // we need to generate proto.rs using conda's protoc, which is set in
         // the environment.  we use the unstable "versioned" python abi
-        features.push(["generate-proto", "external-docs"]);
+        features.push(["generate-proto"]);
     } else {
         // standard for in-repo builds.  a different set will be standard in the sdist
-        const standard_features = [
-            "abi3",
-            "generate-proto",
-            "protobuf-src",
-            "external-docs",
-        ];
+        const standard_features = ["abi3", "generate-proto", "protobuf-src"];
 
         console.log("Building with standard flags and features");
         features.push(...standard_features);
@@ -114,8 +109,10 @@ if (build_wheel) {
 if (build_sdist) {
     // `maturin sdist` has some issues with Cargo workspaces, so we assemble the sdist by hand here
     // Note that the resulting sdist is _not_ a Cargo workspace, it is rooted in this package.
-    const cargo_toml = fs.readFileSync("./Cargo.toml").toString('utf-8');
-    const pyproject_toml = fs.readFileSync("./pyproject.toml").toString('utf-8');
+    const cargo_toml = fs.readFileSync("./Cargo.toml").toString("utf-8");
+    const pyproject_toml = fs
+        .readFileSync("./pyproject.toml")
+        .toString("utf-8");
     const cargo = toml.parse(cargo_toml);
     const pyproject = toml.parse(pyproject_toml);
 
@@ -153,16 +150,17 @@ if (build_sdist) {
     );
 }
 
-if (process.env['PSP_UV'] === '1') {
-    flags += ' --uv'
+if (process.env["PSP_UV"] === "1") {
+    flags += " --uv";
 }
 
 if (!build_wheel && !build_sdist) {
-    const dev_features = [
-        "abi3",
-        "external-docs",
-    ];
-    cmd.sh(`maturin develop --features=${dev_features.join(',')} ${flags} ${target}`);
+    const dev_features = ["abi3"];
+    cmd.sh(
+        `maturin develop --features=${dev_features.join(
+            ","
+        )} ${flags} ${target}`
+    );
 }
 
 if (!cmd.isEmpty()) {

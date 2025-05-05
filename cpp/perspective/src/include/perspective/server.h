@@ -583,7 +583,14 @@ namespace server {
         std::vector<std::pair<std::shared_ptr<Table>, const std::string>>
         get_dirty_tables();
         bool is_table_dirty(const t_id& id);
-        void drop_client(const std::uint32_t);
+        void drop_client(std::uint32_t);
+
+        std::uint32_t get_table_view_count(const t_id& table_id);
+        void mark_table_deleted(
+            const t_id& table_id, std::uint32_t client_id, std::uint32_t msg_id
+        );
+        bool is_table_deleted(const t_id& table_id);
+        Subscription get_table_deleted_client(const t_id& table_id);
 
     protected:
         tsl::hopscotch_map<t_id, t_id> m_view_to_table;
@@ -604,6 +611,7 @@ namespace server {
         std::vector<Subscription> m_on_hosted_tables_update_subs;
 
         tsl::hopscotch_set<t_id> m_dirty_tables;
+        tsl::hopscotch_map<t_id, Subscription> m_deleted_tables;
 
 #ifdef PSP_PARALLEL_FOR
         std::shared_mutex m_write_lock;

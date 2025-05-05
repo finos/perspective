@@ -280,8 +280,8 @@ impl Component for ColumnSettingsSidebar {
                         ctx.props().update_expr(name.clone(), new_expr)
                     },
                     ColumnLocator::NewExpression => {
-                        if let Err(_err) = ctx.props().save_expr(new_expr) {
-                            tracing::warn!("Errflerr!");
+                        if let Err(err) = ctx.props().save_expr(new_expr) {
+                            tracing::warn!("{}", err);
                         }
                     },
                 }

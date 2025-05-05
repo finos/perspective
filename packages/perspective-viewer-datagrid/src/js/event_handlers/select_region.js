@@ -47,9 +47,10 @@ export const addAreaMouseSelection = (
 
 const getMousedownListener = (datagrid, table, className) => (event) => {
     if (
-        datagrid.model._edit_mode === "SELECT_REGION" ||
-        datagrid.model._edit_mode === "SELECT_ROW" ||
-        datagrid.model._edit_mode === "SELECT_COLUMN"
+        event.button === 0 &&
+        (datagrid.model._edit_mode === "SELECT_REGION" ||
+            datagrid.model._edit_mode === "SELECT_ROW" ||
+            datagrid.model._edit_mode === "SELECT_COLUMN")
     ) {
         datagrid.model._selection_state.CURRENT_MOUSEDOWN_COORDINATES = {};
         const meta = table.getMeta(event.target);
@@ -68,7 +69,12 @@ const getMousedownListener = (datagrid, table, className) => (event) => {
                 datagrid.model._selection_state.selected_areas;
             datagrid.model._selection_state.selected_areas = [];
 
-            const start = { x0: meta.x, x1: meta.x, y0: meta.y, y1: meta.y };
+            const start = {
+                x0: meta.x,
+                x1: meta.x,
+                y0: meta.y,
+                y1: meta.y,
+            };
             datagrid.model._selection_state.potential_selection = start;
             applyMouseAreaSelections(
                 datagrid,

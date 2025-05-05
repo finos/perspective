@@ -10,6 +10,10 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+//! <div class="warning">
+//! The examples in this module are in JavaScript. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
+//! </div>
+
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -22,6 +26,7 @@ extern crate alloc;
 
 mod client;
 mod table;
+mod table_data;
 pub mod utils;
 mod view;
 
@@ -30,6 +35,7 @@ use wasm_bindgen::prelude::*;
 
 pub use crate::client::Client;
 pub use crate::table::*;
+pub use crate::table_data::*;
 
 #[cfg(feature = "export-init")]
 #[wasm_bindgen(typescript_custom_section)]
@@ -40,6 +46,7 @@ export type * from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
 export type * from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
 export type * from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 export type * from "../../src/ts/ts-rs/UpdateOptions.d.ts";
+export type * from "../../src/ts/ts-rs/DeleteOptions.d.ts";
 
 import type {ViewWindow} from "../../src/ts/ts-rs/ViewWindow.d.ts";
 import type {TableInitOptions} from "../../src/ts/ts-rs/TableInitOptions.d.ts";
@@ -47,6 +54,7 @@ import type {ViewConfigUpdate} from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
 import type * as on_update_args from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
 import type {OnUpdateOptions} from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 import type {UpdateOptions} from "../../src/ts/ts-rs/UpdateOptions.d.ts";
+import type {DeleteOptions} from "../../src/ts/ts-rs/DeleteOptions.d.ts";
 "#;
 
 #[cfg(feature = "export-init")]

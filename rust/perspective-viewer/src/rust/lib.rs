@@ -56,7 +56,8 @@ import type {
     TableInitOptions, 
     ViewWindow, 
     OnUpdateOptions,
-    UpdateOptions, 
+    UpdateOptions,
+    DeleteOptions,
     ViewConfigUpdate,
 } from "@finos/perspective";
 "#;

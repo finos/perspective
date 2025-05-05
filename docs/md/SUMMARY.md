@@ -48,6 +48,7 @@
         -   [Loading data from a virtual `Table`](./how_to/javascript/loading_virtual_data.md)
         -   [Saving and restoring UI state](./how_to/javascript/save_restore.md)
         -   [Listening for events](./how_to/javascript/events.md)
+    -   [React Component](./how_to/javascript/react.md)
 -   [Python](./how_to/python.md)
     -   [Installation](./how_to/python/installation.md)
     -   [Loading data into a `Table`](./how_to/python/table.md)

@@ -173,7 +173,7 @@ pub impl Option<ViewSubscription> {
 impl Drop for ViewSubscription {
     fn drop(&mut self) {
         if !self.data.is_deleted.get() {
-            tracing::warn!("View dropped without calling `delete()`");
+            tracing::debug!("View dropped without calling `delete()`");
             let view = self.data.clone();
             ApiFuture::spawn(async move { view.internal_delete().await })
         }

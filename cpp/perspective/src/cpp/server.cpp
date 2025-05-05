@@ -412,7 +412,9 @@ ServerResources::get_table_ids() {
     PSP_READ_LOCK(m_write_lock);
     std::vector<t_id> vec;
     for (auto const& imap : m_tables) {
-        vec.push_back(imap.first);
+        if (!m_deleted_tables.contains(imap.first)) {
+            vec.push_back(imap.first);
+        }
     }
 
     return vec;
@@ -495,6 +497,7 @@ ServerResources::delete_table(const t_id& id) {
         if (m_table_to_view.find(id) == m_table_to_view.end()) {
             m_tables.erase(id);
             m_dirty_tables.erase(id);
+            m_deleted_tables.erase(id);
         } else {
             PSP_COMPLAIN_AND_ABORT("Cannot delete table with views");
         }
@@ -706,7 +709,7 @@ ServerResources::is_table_dirty(const t_id& id) {
 }
 
 void
-ServerResources::drop_client(const std::uint32_t client_id) {
+ServerResources::drop_client(std::uint32_t client_id) {
     if (m_client_to_view.contains(client_id)) {
 
         // Load-bearing copy
@@ -727,6 +730,30 @@ ServerResources::drop_client(const std::uint32_t client_id) {
     );
 
     m_on_hosted_tables_update_subs = subs;
+}
+
+std::uint32_t
+ServerResources::get_table_view_count(const t_id& table_id) {
+    const auto ret = m_table_to_view.find(table_id);
+    return std::distance(ret, m_table_to_view.end());
+}
+
+void
+ServerResources::mark_table_deleted(
+    const t_id& table_id, std::uint32_t client_id, std::uint32_t msg_id
+) {
+    m_deleted_tables[table_id] = Subscription{msg_id, client_id};
+}
+
+bool
+ServerResources::is_table_deleted(const t_id& table_id) {
+    return get_table_view_count(table_id) == 0
+        && m_deleted_tables.contains(table_id);
+}
+
+Subscription
+ServerResources::get_table_deleted_client(const t_id& table_id) {
+    return m_deleted_tables[table_id];
 }
 
 std::uint32_t
@@ -2393,33 +2420,42 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             break;
         }
         case proto::Request::kTableDeleteReq: {
-            m_resources.delete_table(req.entity_id());
+            const auto is_immediate = req.table_delete_req().is_immediate();
+            if (is_immediate
+                || m_resources.get_table_view_count(req.entity_id()) == 0) {
+                m_resources.delete_table(req.entity_id());
 
-            for (const auto& sub :
-                 m_resources.get_table_on_delete_sub(req.entity_id())) {
+                for (const auto& sub :
+                     m_resources.get_table_on_delete_sub(req.entity_id())) {
+                    proto::Response resp;
+                    resp.mutable_table_on_delete_resp();
+                    resp.set_msg_id(sub.id);
+                    resp.set_entity_id(req.entity_id());
+                    ProtoServerResp<proto::Response> resp2;
+                    resp2.data = std::move(resp);
+                    resp2.client_id = sub.client_id;
+                    proto_resp.emplace_back(std::move(resp2));
+                }
+
                 proto::Response resp;
-                resp.mutable_table_on_delete_resp();
-                resp.set_msg_id(sub.id);
-                resp.set_entity_id(req.entity_id());
-                ProtoServerResp<proto::Response> resp2;
-                resp2.data = std::move(resp);
-                resp2.client_id = sub.client_id;
-                proto_resp.emplace_back(std::move(resp2));
-            }
+                resp.mutable_table_delete_resp();
+                push_resp(std::move(resp));
 
-            proto::Response resp;
-            resp.mutable_table_delete_resp();
-            push_resp(std::move(resp));
-
-            // notify `on_hosted_tables_update` listeners
-            auto subscriptions = m_resources.get_on_hosted_tables_update_sub();
-            for (auto& subscription : subscriptions) {
-                Response out;
-                out.set_msg_id(subscription.id);
-                ProtoServerResp<ProtoServer::Response> resp2;
-                resp2.data = std::move(out);
-                resp2.client_id = subscription.client_id;
-                proto_resp.emplace_back(std::move(resp2));
+                // notify `on_hosted_tables_update` listeners
+                auto subscriptions =
+                    m_resources.get_on_hosted_tables_update_sub();
+                for (auto& subscription : subscriptions) {
+                    Response out;
+                    out.set_msg_id(subscription.id);
+                    ProtoServerResp<ProtoServer::Response> resp2;
+                    resp2.data = std::move(out);
+                    resp2.client_id = subscription.client_id;
+                    proto_resp.emplace_back(std::move(resp2));
+                }
+            } else {
+                m_resources.mark_table_deleted(
+                    req.entity_id(), client_id, req.msg_id()
+                );
             }
 
             break;
@@ -2437,10 +2473,52 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                 proto_resp.emplace_back(std::move(resp2));
             }
 
+            const auto table_id =
+                m_resources.get_table_id_for_view(req.entity_id());
             m_resources.delete_view(client_id, req.entity_id());
             proto::Response resp;
             resp.mutable_view_delete_resp();
             push_resp(std::move(resp));
+            if (m_resources.is_table_deleted(table_id)) {
+                Subscription deleted_id =
+                    m_resources.get_table_deleted_client(table_id);
+
+                m_resources.delete_table(table_id);
+                for (const auto& sub :
+                     m_resources.get_table_on_delete_sub(table_id)) {
+                    proto::Response resp;
+                    resp.mutable_table_on_delete_resp();
+                    resp.set_msg_id(sub.id);
+                    resp.set_entity_id(table_id);
+                    ProtoServerResp<proto::Response> resp2;
+                    resp2.data = std::move(resp);
+                    resp2.client_id = sub.client_id;
+                    proto_resp.emplace_back(std::move(resp2));
+                }
+
+                // Notify the client which initially called delete
+                proto::Response resp;
+                resp.mutable_table_delete_resp();
+                resp.set_msg_id(deleted_id.id);
+                resp.set_entity_id(table_id);
+                ProtoServerResp<proto::Response> resp2;
+                resp2.data = std::move(resp);
+                resp2.client_id = deleted_id.client_id;
+                proto_resp.emplace_back(std::move(resp2));
+
+                // notify `on_hosted_tables_update` listeners
+                auto subscriptions =
+                    m_resources.get_on_hosted_tables_update_sub();
+                for (auto& subscription : subscriptions) {
+                    Response out;
+                    out.set_msg_id(subscription.id);
+                    ProtoServerResp<ProtoServer::Response> resp2;
+                    resp2.data = std::move(out);
+                    resp2.client_id = subscription.client_id;
+                    proto_resp.emplace_back(std::move(resp2));
+                }
+            }
+            // const auto table_id =
             break;
         }
         case proto::Request::kViewRemoveOnUpdateReq: {

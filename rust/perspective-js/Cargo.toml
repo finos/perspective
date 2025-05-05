@@ -20,10 +20,9 @@ repository = "https://github.com/finos/perspective"
 license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
-include = ["src/**/*", "Cargo.toml", "./package.json", "docs/**/*", "build.rs"]
+include = ["src/**/*", "Cargo.toml", "./package.json", "docs/**/*"]
 
 [package.metadata.docs.rs]
-features = ["external-docs"]
 rustc-args = ["--cfg", "web_sys_unstable_apis"]
 rustdoc-args = ["--html-in-header", "docs/index.html"]
 
@@ -33,7 +32,6 @@ path = "src/rust/lib.rs"
 
 [features]
 export-init = []
-external-docs = []
 default = []
 external-cpp = [
     "perspective-client/generate-proto",

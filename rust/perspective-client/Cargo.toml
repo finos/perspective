@@ -30,9 +30,6 @@ include = [
     "perspective.proto",
 ]
 
-[package.metadata.docs.rs]
-rustdoc-args = ["--html-in-header", "docs/index.html"]
-
 [features]
 default = []
 

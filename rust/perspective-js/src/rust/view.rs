@@ -11,14 +11,13 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use js_sys::{Array, ArrayBuffer, Function, Object};
-use macro_rules_attribute::apply;
-use perspective_client::{assert_view_api, OnUpdateOptions, ViewWindow};
+use perspective_client::{OnUpdateOptions, ViewWindow, assert_view_api};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
 #[cfg(doc)]
 use crate::table::Table;
-use crate::utils::{inherit_docs, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop};
+use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop};
 
 #[wasm_bindgen]
 unsafe extern "C" {
@@ -42,8 +41,19 @@ impl From<ViewWindow> for JsViewWindow {
     }
 }
 
-#[apply(inherit_docs)]
-#[inherit_doc = "view.md"]
+/// The [`View`] struct is Perspective's query and serialization interface. It
+/// represents a query on the `Table`'s dataset and is always created from an
+/// existing `Table` instance via the [`Table::view`] method.
+///
+/// [`View`]s are immutable with respect to the arguments provided to the
+/// [`Table::view`] method; to change these parameters, you must create a new
+/// [`View`] on the same [`Table`]. However, each [`View`] is _live_ with
+/// respect to the [`Table`]'s data, and will (within a conflation window)
+/// update with the latest state as its parent [`Table`] updates, including
+/// incrementally recalculating all aggregates, pivots, filters, etc. [`View`]
+/// query parameters are composable, in that each parameter works independently
+/// _and_ in conjunction with each other, and there is no limit to the number of
+/// pivots, filters, etc. which can be applied.
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct View(pub(crate) perspective_client::View);
@@ -63,48 +73,70 @@ impl View {
         self.clone()
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/column_paths.md"]
+    /// Returns an array of strings containing the column paths of the [`View`]
+    /// without any of the source columns.
+    ///
+    /// A column path shows the columns that a given cell belongs to after
+    /// pivots are applied.
     #[wasm_bindgen]
     pub async fn column_paths(&self) -> ApiResult<JsValue> {
         let columns = self.0.column_paths().await?;
         Ok(JsValue::from_serde_ext(&columns)?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/delete.md"]
+    /// Delete this [`View`] and clean up all resources associated with it.
+    /// [`View`] objects do not stop consuming resources or processing
+    /// updates when they are garbage collected - you must call this method
+    /// to reclaim these.
     #[wasm_bindgen]
-    pub async fn delete(&self) -> ApiResult<()> {
+    pub async fn delete(self) -> ApiResult<()> {
         self.0.delete().await?;
         Ok(())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/dimensions.md"]
+    /// Returns this [`View`]'s _dimensions_, row and column count, as well as
+    /// those of the [`crate::Table`] from which it was derived.
+    ///
+    /// - `num_table_rows` - The number of rows in the underlying
+    ///   [`crate::Table`].
+    /// - `num_table_columns` - The number of columns in the underlying
+    ///   [`crate::Table`] (including the `index` column if this
+    ///   [`crate::Table`] was constructed with one).
+    /// - `num_view_rows` - The number of rows in this [`View`]. If this
+    ///   [`View`] has a `group_by` clause, `num_view_rows` will also include
+    ///   aggregated rows.
+    /// - `num_view_columns` - The number of columns in this [`View`]. If this
+    ///   [`View`] has a `split_by` clause, `num_view_columns` will include all
+    ///   _column paths_, e.g. the number of `columns` clause times the number
+    ///   of `split_by` groups.
     #[wasm_bindgen]
     pub async fn dimensions(&self) -> ApiResult<JsValue> {
         let dimensions = self.0.dimensions().await?;
         Ok(JsValue::from_serde_ext(&dimensions)?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/expression_schema.md"]
+    /// The expression schema of this [`View`], which contains only the
+    /// expressions created on this [`View`]. See [`View::schema`] for
+    /// details.
     #[wasm_bindgen]
     pub async fn expression_schema(&self) -> ApiResult<JsValue> {
         let schema = self.0.expression_schema().await?;
         Ok(JsValue::from_serde_ext(&schema)?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/get_config.md"]
+    /// A copy of the config object passed to the [`Table::view`] method which
+    /// created this [`View`].
     #[wasm_bindgen]
     pub async fn get_config(&self) -> ApiResult<JsValue> {
         let config = self.0.get_config().await?;
         Ok(JsValue::from_serde_ext(&config)?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/get_min_max.md"]
+    /// Calculates the [min, max] of the leaf nodes of a column `column_name`.
+    ///
+    /// # Returns
+    ///
+    /// A tuple of [min, max], whose types are column and aggregate dependent.
     #[wasm_bindgen]
     pub async fn get_min_max(&self, name: String) -> ApiResult<Array> {
         let result = self.0.get_min_max(name).await?;
@@ -114,24 +146,33 @@ impl View {
             .collect::<Result<_, _>>()?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/num_rows.md"]
+    /// The number of aggregated rows in this [`View`]. This is affected by the
+    /// "group_by" configuration parameter supplied to this view's contructor.
+    ///
+    /// # Returns
+    ///
+    /// The number of aggregated rows.
     #[wasm_bindgen]
     pub async fn num_rows(&self) -> ApiResult<i32> {
         let size = self.0.num_rows().await?;
         Ok(size as i32)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/schema.md"]
+    /// The schema of this [`View`].
+    ///
+    /// The [`View`] schema differs from the `schema` returned by
+    /// [`Table::schema`]; it may have different column names due to
+    /// `expressions` or `columns` configs, or it maye have _different
+    /// column types_ due to the application og `group_by` and `aggregates`
+    /// config. You can think of [`Table::schema`] as the _input_ schema and
+    /// [`View::schema`] as the _output_ schema of a Perspective pipeline.
     #[wasm_bindgen]
     pub async fn schema(&self) -> ApiResult<JsValue> {
         let schema = self.0.schema().await?;
         Ok(JsValue::from_serde_ext(&schema)?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/to_arrow.md"]
+    /// Serializes a [`View`] to the Apache Arrow data format.
     #[wasm_bindgen]
     pub async fn to_arrow(&self, window: Option<JsViewWindow>) -> ApiResult<ArrayBuffer> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -141,8 +182,8 @@ impl View {
             .unchecked_into())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/to_columns_string.md"]
+    /// Serializes this [`View`] to a string of JSON data. Useful if you want to
+    /// save additional round trip serialize/deserialize cycles.
     #[wasm_bindgen]
     pub async fn to_columns_string(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -150,16 +191,15 @@ impl View {
         Ok(json)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/to_columns.md"]
+    /// Serializes this [`View`] to JavaScript objects in a column-oriented
+    /// format.
     #[wasm_bindgen]
     pub async fn to_columns(&self, window: Option<JsViewWindow>) -> ApiResult<Object> {
         let json = self.to_columns_string(window).await?;
         Ok(js_sys::JSON::parse(&json)?.unchecked_into())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/to_json_string.md"]
+    /// Render this `View` as a JSON string.
     #[wasm_bindgen]
     pub async fn to_json_string(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -167,16 +207,16 @@ impl View {
         Ok(json)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/to_json.md"]
+    /// Serializes this [`View`] to JavaScript objects in a row-oriented
+    /// format.
     #[wasm_bindgen]
     pub async fn to_json(&self, window: Option<JsViewWindow>) -> ApiResult<Array> {
         let json = self.to_json_string(window).await?;
         Ok(js_sys::JSON::parse(&json)?.unchecked_into())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/to_ndjson.md"]
+    /// Renders this [`View`] as an [NDJSON](https://github.com/ndjson/ndjson-spec)
+    /// formatted [`String`].
     #[wasm_bindgen]
     pub async fn to_ndjson(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
@@ -184,16 +224,40 @@ impl View {
         Ok(ndjson)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/to_csv.md"]
+    /// Serializes this [`View`] to CSV data in a standard format.
     #[wasm_bindgen]
     pub async fn to_csv(&self, window: Option<JsViewWindow>) -> ApiResult<String> {
         let window = window.into_serde_ext::<Option<ViewWindow>>()?;
         Ok(self.0.to_csv(window.unwrap_or_default()).await?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/on_update.md"]
+    /// Register a callback with this [`View`]. Whenever the view's underlying
+    /// table emits an update, this callback will be invoked with an object
+    /// containing `port_id`, indicating which port the update fired on, and
+    /// optionally `delta`, which is the new data that was updated for each
+    /// cell or each row.
+    ///
+    /// # Arguments
+    ///
+    /// - `on_update` - A callback function invoked on update, which receives an
+    ///   object with two keys: `port_id`, indicating which port the update was
+    ///   triggered on, and `delta`, whose value is dependent on the mode
+    ///   parameter.
+    /// - `options` - If this is provided as `OnUpdateOptions { mode:
+    ///   Some(OnUpdateMode::Row) }`, then `delta` is an Arrow of the updated
+    ///   rows. Otherwise `delta` will be [`Option::None`].
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// // Attach an `on_update` callback
+    /// view.on_update((updated) => console.log(updated.port_id));
+    /// ```
+    ///
+    /// ```javascript
+    /// // `on_update` with row deltas
+    /// view.on_update((updated) => console.log(updated.delta), { mode: "row" });
+    /// ```
     #[wasm_bindgen]
     pub async fn on_update(
         &self,
@@ -214,24 +278,36 @@ impl View {
         Ok(id)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/remove_update.md"]
+    /// Unregister a previously registered update callback with this [`View`].
+    ///
+    /// # Arguments
+    ///
+    /// - `id` - A callback `id` as returned by a recipricol call to
+    ///   [`View::on_update`].
     #[wasm_bindgen]
     pub async fn remove_update(&self, callback_id: u32) -> ApiResult<()> {
         Ok(self.0.remove_update(callback_id).await?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/on_delete.md"]
+    /// Register a callback with this [`View`]. Whenever the [`View`] is
+    /// deleted, this callback will be invoked.
     #[wasm_bindgen]
-    pub async fn on_delete(&self, on_delete: Function) -> ApiResult<u32> {
-        let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
-        let on_delete = Box::new(move || spawn_local(emit.poll(())));
-        Ok(self.0.on_delete(on_delete).await?)
+    pub fn on_delete(&self, on_delete: Function) -> ApiFuture<u32> {
+        let view = self.clone();
+        ApiFuture::new(async move {
+            let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
+            let on_delete = Box::new(move || spawn_local(emit.poll(())));
+            Ok(view.0.on_delete(on_delete).await?)
+        })
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/num_columns.md"]
+    /// The number of aggregated columns in this [`View`]. This is affected by
+    /// the "split_by" configuration parameter supplied to this view's
+    /// contructor.
+    ///
+    /// # Returns
+    ///
+    /// The number of aggregated columns.
     #[wasm_bindgen]
     pub async fn num_columns(&self) -> ApiResult<u32> {
         // TODO: This is broken because of how split by creates a
@@ -239,8 +315,7 @@ impl View {
         Ok(self.0.dimensions().await?.num_view_columns)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/remove_delete.md"]
+    /// Unregister a previously registered [`View::on_delete`] callback.
     #[wasm_bindgen]
     pub fn remove_delete(&self, callback_id: u32) -> ApiFuture<()> {
         let client = self.0.clone();
@@ -250,22 +325,19 @@ impl View {
         })
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/collapse.md"]
+    /// Collapses the `group_by` row at `row_index`.
     #[wasm_bindgen]
     pub async fn collapse(&self, row_index: u32) -> ApiResult<u32> {
         Ok(self.0.collapse(row_index).await?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/expand.md"]
+    /// Expand the `group_by` row at `row_index`.
     #[wasm_bindgen]
     pub async fn expand(&self, row_index: u32) -> ApiResult<u32> {
         Ok(self.0.expand(row_index).await?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "view/set_depth.md"]
+    /// Set expansion `depth` of the `group_by` tree.
     #[wasm_bindgen]
     pub async fn set_depth(&self, depth: u32) -> ApiResult<()> {
         Ok(self.0.set_depth(depth).await?)

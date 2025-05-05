@@ -10,164 +10,19 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use extend::ext;
-use js_sys::{Array, ArrayBuffer, Function, JSON, Object, Reflect, Uint8Array};
-use macro_rules_attribute::apply;
+use js_sys::Function;
 use perspective_client::config::*;
-use perspective_client::{
-    ColumnType, TableData, TableReadFormat, UpdateData, UpdateOptions, assert_table_api,
-};
-use wasm_bindgen::convert::TryFromJsValue;
+use perspective_client::{DeleteOptions, UpdateData, UpdateOptions, assert_table_api};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::spawn_local;
 
-use crate::client::Client;
-use crate::utils::{
-    ApiError, ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop, ToApiError, inherit_docs,
-};
+use crate::Client;
+use crate::table_data::UpdateDataExt;
+use crate::utils::{ApiFuture, ApiResult, JsValueSerdeExt, LocalPollLoop};
 pub use crate::view::*;
 
-#[ext]
-impl Vec<(String, ColumnType)> {
-    fn from_js_value(value: &JsValue) -> ApiResult<Vec<(String, ColumnType)>> {
-        Ok(Object::keys(value.unchecked_ref())
-            .iter()
-            .map(|x| -> Result<_, JsValue> {
-                let key = x.as_string().into_apierror()?;
-                let val = Reflect::get(value, &x)?
-                    .as_string()
-                    .into_apierror()?
-                    .into_serde_ext()?;
-
-                Ok((key, val))
-            })
-            .collect::<Result<Vec<_>, _>>()?)
-    }
-}
-
-#[ext]
-pub(crate) impl TableData {
-    fn from_js_value(value: &JsValue, format: Option<TableReadFormat>) -> ApiResult<TableData> {
-        let err_fn = || JsValue::from(format!("Failed to construct Table {:?}", value));
-        if let Some(result) = UpdateData::from_js_value_partial(value, format)? {
-            Ok(result.into())
-        } else if value.is_instance_of::<Object>() && Reflect::has(value, &"__get_model".into())? {
-            let val = Reflect::get(value, &"__get_model".into())?
-                .dyn_into::<Function>()?
-                .call0(value)?;
-
-            let view = View::try_from_js_value(val)?;
-            Ok(TableData::View(view.0))
-        } else if value.is_instance_of::<Object>() {
-            let all_strings = || {
-                Object::values(value.unchecked_ref())
-                    .to_vec()
-                    .iter()
-                    .all(|x| x.is_string())
-            };
-
-            let all_arrays = || {
-                Object::values(value.unchecked_ref())
-                    .to_vec()
-                    .iter()
-                    .all(|x| x.is_instance_of::<Array>())
-            };
-
-            if all_strings() {
-                Ok(TableData::Schema(Vec::from_js_value(value)?))
-            } else if all_arrays() {
-                let json = JSON::stringify(value)?.as_string().into_apierror()?;
-                Ok(UpdateData::JsonColumns(json).into())
-            } else {
-                Err(err_fn().into())
-            }
-        } else {
-            Err(err_fn().into())
-        }
-    }
-}
-
-#[ext]
-pub(crate) impl UpdateData {
-    fn from_js_value_partial(
-        value: &JsValue,
-        format: Option<TableReadFormat>,
-    ) -> ApiResult<Option<UpdateData>> {
-        let err_fn = || JsValue::from(format!("Failed to construct Table {:?}", value));
-        if value.is_undefined() {
-            Err(err_fn().into())
-        } else if value.is_string() {
-            match format {
-                None | Some(TableReadFormat::Csv) => {
-                    Ok(Some(UpdateData::Csv(value.as_string().into_apierror()?)))
-                },
-                Some(TableReadFormat::JsonString) => Ok(Some(UpdateData::JsonRows(
-                    value.as_string().into_apierror()?,
-                ))),
-                Some(TableReadFormat::ColumnsString) => Ok(Some(UpdateData::JsonColumns(
-                    value.as_string().into_apierror()?,
-                ))),
-                Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(
-                    value.as_string().into_apierror()?.into_bytes().into(),
-                ))),
-                Some(TableReadFormat::Ndjson) => {
-                    Ok(Some(UpdateData::Ndjson(value.as_string().into_apierror()?)))
-                },
-            }
-        } else if value.is_instance_of::<ArrayBuffer>() {
-            let uint8array = Uint8Array::new(value);
-            let slice = uint8array.to_vec();
-            match format {
-                Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(String::from_utf8(slice)?))),
-                Some(TableReadFormat::JsonString) => {
-                    Ok(Some(UpdateData::JsonRows(String::from_utf8(slice)?)))
-                },
-                Some(TableReadFormat::ColumnsString) => {
-                    Ok(Some(UpdateData::JsonColumns(String::from_utf8(slice)?)))
-                },
-                Some(TableReadFormat::Ndjson) => {
-                    Ok(Some(UpdateData::Ndjson(String::from_utf8(slice)?)))
-                },
-                None | Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(slice.into()))),
-            }
-        } else if let Some(uint8array) = value.dyn_ref::<Uint8Array>() {
-            let slice = uint8array.to_vec();
-            match format {
-                Some(TableReadFormat::Csv) => Ok(Some(UpdateData::Csv(String::from_utf8(slice)?))),
-                Some(TableReadFormat::JsonString) => {
-                    Ok(Some(UpdateData::JsonRows(String::from_utf8(slice)?)))
-                },
-                Some(TableReadFormat::ColumnsString) => {
-                    Ok(Some(UpdateData::JsonColumns(String::from_utf8(slice)?)))
-                },
-                Some(TableReadFormat::Ndjson) => {
-                    Ok(Some(UpdateData::Ndjson(String::from_utf8(slice)?)))
-                },
-                None | Some(TableReadFormat::Arrow) => Ok(Some(UpdateData::Arrow(slice.into()))),
-            }
-        } else if value.is_instance_of::<Array>() {
-            let rows = JSON::stringify(value)?.as_string().into_apierror()?;
-            Ok(Some(UpdateData::JsonRows(rows)))
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn from_js_value(value: &JsValue, format: Option<TableReadFormat>) -> ApiResult<UpdateData> {
-        match TableData::from_js_value(value, format)? {
-            TableData::Schema(_) => Err(ApiError::new(
-                "Method cannot be called with `Schema` argument",
-            )),
-            TableData::Update(x) => Ok(x),
-            TableData::View(_) => Err(ApiError::new(
-                "Method cannot be called with `Schema` argument",
-            )),
-        }
-    }
-}
-
-#[derive(TryFromJsValue, Clone)]
+#[derive(TryFromJsValue, Clone, PartialEq)]
 #[wasm_bindgen]
 pub struct Table(pub(crate) perspective_client::Table);
 
@@ -197,19 +52,27 @@ extern "C" {
 
     #[wasm_bindgen(typescript_type = "UpdateOptions")]
     pub type JsUpdateOptions;
+
+    #[wasm_bindgen(typescript_type = "DeleteOptions")]
+    pub type JsDeleteOptions;
 }
 
 #[wasm_bindgen]
 impl Table {
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/get_index.md"]
+    /// Returns the name of the index column for the table.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const table = await client.table("x,y\n1,2\n3,4", { index: "x" });
+    /// const index = table.get_index(); // "x"
+    /// ```
     #[wasm_bindgen]
     pub async fn get_index(&self) -> Option<String> {
         self.0.get_index()
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/get_client.md"]
+    /// Get a copy of the [`Client`] this [`Table`] came from.
     #[wasm_bindgen]
     pub async fn get_client(&self) -> Client {
         Client {
@@ -218,77 +81,136 @@ impl Table {
         }
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/get_name.md"]
+    /// Returns the user-specified name for this table, or the auto-generated
+    /// name if a name was not specified when the table was created.
     #[wasm_bindgen]
     pub async fn get_name(&self) -> String {
         self.0.get_name().to_owned()
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/get_limit.md"]
+    /// Returns the user-specified row limit for this table.
     #[wasm_bindgen]
     pub async fn get_limit(&self) -> Option<u32> {
         self.0.get_limit()
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/clear.md"]
+    /// Removes all the rows in the [`Table`], but preserves everything else
+    /// including the schema, index, and any callbacks or registered
+    /// [`View`] instances.
+    ///
+    /// Calling [`Table::clear`], like [`Table::update`] and [`Table::remove`],
+    /// will trigger an update event to any registered listeners via
+    /// [`View::on_update`].
     #[wasm_bindgen]
     pub async fn clear(&self) -> ApiResult<()> {
         self.0.clear().await?;
         Ok(())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/delete.md"]
+    /// Delete this [`Table`] and cleans up associated resources.
+    ///
+    /// [`Table`]s do not stop consuming resources or processing updates when
+    /// they are garbage collected in their host language - you must call
+    /// this method to reclaim these.
+    ///
+    /// # Arguments
+    ///
+    /// - `options` An options dictionary.
+    ///     - `lazy` Whether to delete this [`Table`] _lazily_. When false (the
+    ///       default), the delete will occur immediately, assuming it has no
+    ///       [`View`] instances registered to it (which must be deleted first,
+    ///       otherwise this method will throw an error). When true, the
+    ///       [`Table`] will only be marked for deltion once its [`View`]
+    ///       dependency count reaches 0.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const table = await client.table("x,y\n1,2\n3,4");
+    ///
+    /// // ...
+    ///
+    /// await table.delete({ lazy: true });
+    /// ```
     #[wasm_bindgen]
-    pub async fn delete(&self) -> ApiResult<()> {
-        self.0.delete().await?;
+    pub async fn delete(self, options: Option<JsDeleteOptions>) -> ApiResult<()> {
+        let options = options
+            .into_serde_ext::<Option<DeleteOptions>>()?
+            .unwrap_or_default();
+
+        self.0.delete(options).await?;
         Ok(())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/size.md"]
+    /// Returns the number of rows in a [`Table`].
     #[wasm_bindgen]
     pub async fn size(&self) -> ApiResult<f64> {
         Ok(self.0.size().await? as f64)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/schema.md"]
+    /// Returns a table's [`Schema`], a mapping of column names to column types.
+    ///
+    /// The mapping of a [`Table`]'s column names to data types is referred to
+    /// as a [`Schema`]. Each column has a unique name and a data type, one
+    /// of:
+    ///
+    /// - `"boolean"` - A boolean type
+    /// - `"date"` - A timesonze-agnostic date type (month/day/year)
+    /// - `"datetime"` - A millisecond-precision datetime type in the UTC
+    ///   timezone
+    /// - `"float"` - A 64 bit float
+    /// - `"integer"` - A signed 32 bit integer (the integer type supported by
+    ///   JavaScript)
+    /// - `"string"` - A [`String`] data type (encoded internally as a
+    ///   _dictionary_)
+    ///
+    /// Note that all [`Table`] columns are _nullable_, regardless of the data
+    /// type.
     #[wasm_bindgen]
     pub async fn schema(&self) -> ApiResult<JsValue> {
         let schema = self.0.schema().await?;
         Ok(JsValue::from_serde_ext(&schema)?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/columns.md"]
+    /// Returns the column names of this [`Table`] in "natural" order (the
+    /// ordering implied by the input format).
+    ///  
+    ///  # JavaScript Examples
+    ///
+    ///  ```javascript
+    ///  const columns = await table.columns();
+    ///  ```   
     #[wasm_bindgen]
     pub async fn columns(&self) -> ApiResult<JsValue> {
         let columns = self.0.columns().await?;
         Ok(JsValue::from_serde_ext(&columns)?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/make_port.md"]
+    /// Create a unique channel ID on this [`Table`], which allows
+    /// `View::on_update` callback calls to be associated with the
+    /// `Table::update` which caused them.
     #[wasm_bindgen]
     pub async fn make_port(&self) -> ApiResult<i32> {
         Ok(self.0.make_port().await?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/on_delete.md"]
+    /// Register a callback which is called exactly once, when this [`Table`] is
+    /// deleted with the [`Table::delete`] method.
+    ///
+    /// [`Table::on_delete`] resolves when the subscription message is sent, not
+    /// when the _delete_ event occurs.
     #[wasm_bindgen]
-    pub async fn on_delete(&self, on_delete: Function) -> ApiResult<u32> {
-        let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
-        let on_delete = Box::new(move || spawn_local(emit.poll(())));
-        Ok(self.0.on_delete(on_delete).await?)
+    pub fn on_delete(&self, on_delete: Function) -> ApiFuture<u32> {
+        let table = self.clone();
+        ApiFuture::new(async move {
+            let emit = LocalPollLoop::new(move |()| on_delete.call0(&JsValue::UNDEFINED));
+            let on_delete = Box::new(move || spawn_local(emit.poll(())));
+            Ok(table.0.on_delete(on_delete).await?)
+        })
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/remove_delete.md"]
+    /// Removes a listener with a given ID, as returned by a previous call to
+    /// [`Table::on_delete`].
     #[wasm_bindgen]
     pub fn remove_delete(&self, callback_id: u32) -> ApiFuture<()> {
         let client = self.0.clone();
@@ -298,8 +220,19 @@ impl Table {
         })
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/replace.md"]
+    /// Removes rows from this [`Table`] with the `index` column values
+    /// supplied.
+    ///
+    /// # Arguments
+    ///
+    /// - `indices` - A list of `index` column values for rows that should be
+    ///   removed.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// await table.remove([1, 2, 3]);
+    /// ```
     #[wasm_bindgen]
     pub async fn remove(&self, value: &JsValue, options: Option<JsUpdateOptions>) -> ApiResult<()> {
         let options = options
@@ -311,8 +244,22 @@ impl Table {
         Ok(())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/replace.md"]
+    /// Replace all rows in this [`Table`] with the input data, coerced to this
+    /// [`Table`]'s existing [`Schema`], notifying any derived [`View`] and
+    /// [`View::on_update`] callbacks.
+    ///
+    /// Calling [`Table::replace`] is an easy way to replace _all_ the data in a
+    /// [`Table`] without losing any derived [`View`] instances or
+    /// [`View::on_update`] callbacks. [`Table::replace`] does _not_ infer
+    /// data types like [`Client::table`] does, rather it _coerces_ input
+    /// data to the `Schema` like [`Table::update`]. If you need a [`Table`]
+    /// with a different `Schema`, you must create a new one.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// await table.replace("x,y\n1,2");
+    /// ```
     #[wasm_bindgen]
     pub async fn replace(
         &self,
@@ -328,25 +275,59 @@ impl Table {
         Ok(())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/update.md"]
+    /// Updates the rows of this table and any derived [`View`] instances.
+    ///
+    /// Calling [`Table::update`] will trigger the [`View::on_update`] callbacks
+    /// register to derived [`View`], and the call itself will not resolve until
+    /// _all_ derived [`View`]'s are notified.
+    ///
+    /// When updating a [`Table`] with an `index`, [`Table::update`] supports
+    /// partial updates, by omitting columns from the update data.
+    ///
+    /// # Arguments
+    ///
+    /// - `input` - The input data for this [`Table`]. The schema of a [`Table`]
+    ///   is immutable after creation, so this method cannot be called with a
+    ///   schema.
+    /// - `options` - Options for this update step - see [`UpdateOptions`].
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// await table.update("x,y\n1,2");
+    /// ```
     #[wasm_bindgen]
-    pub async fn update(
+    pub fn update(
         &self,
-        input: &JsTableInitData,
+        input: JsTableInitData,
         options: Option<JsUpdateOptions>,
-    ) -> ApiResult<()> {
-        let options = options
-            .into_serde_ext::<Option<UpdateOptions>>()?
-            .unwrap_or_default();
+    ) -> ApiFuture<()> {
+        let table = self.clone();
+        ApiFuture::new(async move {
+            let options = options
+                .into_serde_ext::<Option<UpdateOptions>>()?
+                .unwrap_or_default();
 
-        let input = UpdateData::from_js_value(input, options.format)?;
-        self.0.update(input, options).await?;
-        Ok(())
+            let input = UpdateData::from_js_value(&input, options.format)?;
+            Ok(table.0.update(input, options).await?)
+        })
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/view.md"]
+    /// Create a new [`View`] from this table with a specified
+    /// [`ViewConfigUpdate`].
+    ///
+    /// See [`View`] struct.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const view = await table.view({
+    ///     columns: ["Sales"],
+    ///     aggregates: { Sales: "sum" },
+    ///     group_by: ["Region", "Country"],
+    ///     filter: [["Category", "in", ["Furniture", "Technology"]]],
+    /// });
+    /// ```
     #[wasm_bindgen]
     pub async fn view(&self, config: Option<JsViewConfig>) -> ApiResult<View> {
         let config = config
@@ -360,8 +341,7 @@ impl Table {
         Ok(View(view))
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "table/validate_expressions.md"]
+    /// Validates the given expressions.
     #[wasm_bindgen]
     pub async fn validate_expressions(&self, exprs: &JsValue) -> ApiResult<JsValue> {
         let exprs = JsValue::into_serde_ext::<Expressions>(exprs.clone())?;

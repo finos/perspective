@@ -20,8 +20,8 @@ use ts_rs::TS;
 use crate::assert_table_api;
 use crate::client::{Client, Features};
 use crate::config::{Expressions, ViewConfigUpdate};
-use crate::proto::make_table_req::make_table_options::MakeTableType;
 use crate::proto::make_table_req::MakeTableOptions;
+use crate::proto::make_table_req::make_table_options::MakeTableType;
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::*;
@@ -134,6 +134,11 @@ impl From<TableInitOptions> for TableOptions {
     }
 }
 
+#[derive(Clone, Debug, Default, Deserialize, TS)]
+pub struct DeleteOptions {
+    pub lazy: bool,
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 pub struct UpdateOptions {
     pub port_id: Option<u32>,
@@ -161,6 +166,12 @@ pub struct Table {
 
 assert_table_api!(Table);
 
+impl PartialEq for Table {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.client == other.client
+    }
+}
+
 impl Table {
     pub(crate) fn new(name: String, client: Client, options: TableOptions) -> Self {
         Table {
@@ -179,46 +190,102 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/get_client.md")]
+    /// Get a copy of the [`Client`] this [`Table`] came from.
     pub fn get_client(&self) -> Client {
         self.client.clone()
     }
 
-    #[doc = include_str!("../../docs/table/get_features.md")]
+    /// Get a metadata dictionary of the `perspective_server::Server`'s
+    /// features, which is (currently) implementation specific, but there is
+    /// only one implementation.
     pub fn get_features(&self) -> ClientResult<Features> {
         self.client.get_features()
     }
 
-    #[doc = include_str!("../../docs/table/get_index.md")]
+    /// Returns the name of the index column for the table.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let options = TableInitOptions {
+    ///     index: Some("x".to_string()),
+    ///     ..default()
+    /// };
+    /// let table = client.table("x,y\n1,2\n3,4", options).await;
+    /// let tables = client.open_table("table_one").await;
+    /// ```
     pub fn get_index(&self) -> Option<String> {
         self.options.index.as_ref().map(|index| index.to_owned())
     }
 
-    #[doc = include_str!("../../docs/table/get_limit.md")]
+    /// Returns the user-specified row limit for this table.
     pub fn get_limit(&self) -> Option<u32> {
         self.options.limit.as_ref().map(|limit| *limit)
     }
 
-    // #[doc = include_str!("../../docs/table/get_limit.md")]
+    /// Returns the user-specified name for this table, or the auto-generated
+    /// name if a name was not specified when the table was created.
     pub fn get_name(&self) -> &str {
         self.name.as_str()
     }
 
-    #[doc = include_str!("../../docs/table/clear.md")]
+    /// Removes all the rows in the [`Table`], but preserves everything else
+    /// including the schema, index, and any callbacks or registered
+    /// [`View`] instances.
+    ///
+    /// Calling [`Table::clear`], like [`Table::update`] and [`Table::remove`],
+    /// will trigger an update event to any registered listeners via
+    /// [`View::on_update`].
     pub async fn clear(&self) -> ClientResult<()> {
         self.replace(UpdateData::JsonRows("[]".to_owned())).await
     }
 
-    #[doc = include_str!("../../docs/table/delete.md")]
-    pub async fn delete(&self) -> ClientResult<()> {
-        let msg = self.client_message(ClientReq::TableDeleteReq(TableDeleteReq {}));
+    /// Delete this [`Table`] and cleans up associated resources.
+    ///
+    /// [`Table`]s do not stop consuming resources or processing updates when
+    /// they are garbage collected in their host language - you must call
+    /// this method to reclaim these.
+    ///
+    /// # Arguments
+    ///
+    /// - `options` An options dictionary.
+    ///     - `lazy` Whether to delete this [`Table`] _lazily_. When false (the
+    ///       default), the delete will occur immediately, assuming it has no
+    ///       [`View`] instances registered to it (which must be deleted first,
+    ///       otherwise this method will throw an error). When true, the
+    ///       [`Table`] will only be marked for deltion once its [`View`]
+    ///       dependency count reaches 0.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let opts = TableInitOptions::default();
+    /// let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+    /// let table = client.table(data, opts).await?;
+    ///
+    /// // ...
+    ///
+    /// table.delete(DeleteOptions::default()).await?;
+    /// ```
+    pub async fn delete(&self, options: DeleteOptions) -> ClientResult<()> {
+        let msg = self.client_message(ClientReq::TableDeleteReq(TableDeleteReq {
+            is_immediate: !options.lazy,
+        }));
+
         match self.client.oneshot(&msg).await? {
             ClientResp::TableDeleteResp(_) => Ok(()),
             resp => Err(resp.into()),
         }
     }
 
-    #[doc = include_str!("../../docs/table/columns.md")]
+    /// Returns the column names of this [`Table`] in "natural" order (the
+    /// ordering implied by the input format).
+    ///  
+    /// # Examples
+    ///
+    /// ```rust
+    /// let columns = table.columns().await;
+    /// ```
     pub async fn columns(&self) -> ClientResult<Vec<String>> {
         let msg = self.client_message(ClientReq::TableSchemaReq(TableSchemaReq {}));
         match self.client.oneshot(&msg).await? {
@@ -229,7 +296,7 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/size.md")]
+    /// Returns the number of rows in a [`Table`].
     pub async fn size(&self) -> ClientResult<usize> {
         let msg = self.client_message(ClientReq::TableSizeReq(TableSizeReq {}));
         match self.client.oneshot(&msg).await? {
@@ -238,7 +305,24 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/schema.md")]
+    /// Returns a table's [`Schema`], a mapping of column names to column types.
+    ///
+    /// The mapping of a [`Table`]'s column names to data types is referred to
+    /// as a [`Schema`]. Each column has a unique name and a data type, one
+    /// of:
+    ///
+    /// - `"boolean"` - A boolean type
+    /// - `"date"` - A timesonze-agnostic date type (month/day/year)
+    /// - `"datetime"` - A millisecond-precision datetime type in the UTC
+    ///   timezone
+    /// - `"float"` - A 64 bit float
+    /// - `"integer"` - A signed 32 bit integer (the integer type supported by
+    ///   JavaScript)
+    /// - `"string"` - A [`String`] data type (encoded internally as a
+    ///   _dictionary_)
+    ///
+    /// Note that all [`Table`] columns are _nullable_, regardless of the data
+    /// type.
     pub async fn schema(&self) -> ClientResult<HashMap<String, ColumnType>> {
         let msg = self.client_message(ClientReq::TableSchemaReq(TableSchemaReq {}));
         match self.client.oneshot(&msg).await? {
@@ -254,7 +338,9 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/make_port.md")]
+    /// Create a unique channel ID on this [`Table`], which allows
+    /// `View::on_update` callback calls to be associated with the
+    /// `Table::update` which caused them.
     pub async fn make_port(&self) -> ClientResult<i32> {
         let msg = self.client_message(ClientReq::TableMakePortReq(TableMakePortReq {}));
         match self.client.oneshot(&msg).await? {
@@ -263,7 +349,11 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/on_delete.md")]
+    /// Register a callback which is called exactly once, when this [`Table`] is
+    /// deleted with the [`Table::delete`] method.
+    ///
+    /// [`Table::on_delete`] resolves when the subscription message is sent, not
+    /// when the _delete_ event occurs.
     pub async fn on_delete(
         &self,
         on_delete: Box<dyn Fn() + Send + Sync + 'static>,
@@ -281,7 +371,8 @@ impl Table {
         Ok(msg.msg_id)
     }
 
-    #[doc = include_str!("../../docs/table/remove_delete.md")]
+    /// Removes a listener with a given ID, as returned by a previous call to
+    /// [`Table::on_delete`].
     pub async fn remove_delete(&self, callback_id: u32) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::TableRemoveDeleteReq(TableRemoveDeleteReq {
             id: callback_id,
@@ -293,7 +384,19 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/remove.md")]
+    /// Removes rows from this [`Table`] with the `index` column values
+    /// supplied.
+    ///
+    /// # Arguments
+    ///
+    /// - `indices` - A list of `index` column values for rows that should be
+    ///   removed.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// table.remove(UpdateData::Csv("index\n1\n2\n3")).await?;
+    /// ```
     pub async fn remove(&self, input: UpdateData) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::TableRemoveReq(TableRemoveReq {
             data: Some(input.into()),
@@ -305,7 +408,24 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/replace.md")]
+    /// Replace all rows in this [`Table`] with the input data, coerced to this
+    /// [`Table`]'s existing [`Schema`], notifying any derived [`View`] and
+    /// [`View::on_update`] callbacks.
+    ///
+    /// Calling [`Table::replace`] is an easy way to replace _all_ the data in a
+    /// [`Table`] without losing any derived [`View`] instances or
+    /// [`View::on_update`] callbacks. [`Table::replace`] does _not_ infer
+    /// data types like [`Client::table`] does, rather it _coerces_ input
+    /// data to the `Schema` like [`Table::update`]. If you need a [`Table`]
+    /// with a different `Schema`, you must create a new one.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let data = UpdateData::Csv("x,y\n1,2".into());
+    /// let opts = UpdateOptions::default();
+    /// table.replace(data, opts).await?;
+    /// ```
     pub async fn replace(&self, input: UpdateData) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::TableReplaceReq(TableReplaceReq {
             data: Some(input.into()),
@@ -317,7 +437,29 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/update.md")]
+    /// Updates the rows of this table and any derived [`View`] instances.
+    ///
+    /// Calling [`Table::update`] will trigger the [`View::on_update`] callbacks
+    /// register to derived [`View`], and the call itself will not resolve until
+    /// _all_ derived [`View`]'s are notified.
+    ///
+    /// When updating a [`Table`] with an `index`, [`Table::update`] supports
+    /// partial updates, by omitting columns from the update data.
+    ///
+    /// # Arguments
+    ///
+    /// - `input` - The input data for this [`Table`]. The schema of a [`Table`]
+    ///   is immutable after creation, so this method cannot be called with a
+    ///   schema.
+    /// - `options` - Options for this update step - see [`UpdateOptions`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let data = UpdateData::Csv("x,y\n1,2".into());
+    /// let opts = UpdateOptions::default();
+    /// table.update(data, opts).await?;
+    /// ```  
     pub async fn update(&self, input: UpdateData, options: UpdateOptions) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::TableUpdateReq(TableUpdateReq {
             data: Some(input.into()),
@@ -330,7 +472,7 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/validate_expressions.md")]
+    /// Validates the given expressions.
     pub async fn validate_expressions(
         &self,
         expressions: Expressions,
@@ -353,7 +495,28 @@ impl Table {
         }
     }
 
-    #[doc = include_str!("../../docs/table/view.md")]
+    /// Create a new [`View`] from this table with a specified
+    /// [`ViewConfigUpdate`].
+    ///
+    /// See [`View`] struct.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use crate::config::*;
+    /// let view = table
+    ///     .view(Some(ViewConfigUpdate {
+    ///         columns: Some(vec![Some("Sales".into())]),
+    ///         aggregates: Some(HashMap::from_iter(vec![("Sales".into(), "sum".into())])),
+    ///         group_by: Some(vec!["Region".into(), "Country".into()]),
+    ///         filter: Some(vec![Filter::new("Category", "in", &[
+    ///             "Furniture",
+    ///             "Technology",
+    ///         ])]),
+    ///         ..ViewConfigUpdate::default()
+    ///     }))
+    ///     .await?;
+    /// ```
     pub async fn view(&self, config: Option<ViewConfigUpdate>) -> ClientResult<View> {
         let view_name = nanoid!();
         let msg = Request {

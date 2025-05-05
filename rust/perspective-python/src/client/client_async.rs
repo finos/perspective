@@ -17,9 +17,9 @@ use std::sync::Arc;
 use async_lock::RwLock;
 use futures::FutureExt;
 use perspective_client::{
-    Client, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions, TableReadFormat,
-    UpdateData, UpdateOptions, View, ViewOnUpdateResp, ViewWindow, assert_table_api,
-    assert_view_api, asyncfn,
+    Client, DeleteOptions, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions,
+    TableReadFormat, UpdateData, UpdateOptions, View, ViewOnUpdateResp, ViewWindow,
+    assert_table_api, assert_view_api, asyncfn,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -33,6 +33,12 @@ use super::update_data::UpdateDataExt;
 use super::{pandas, polars, pyarrow};
 use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 
+/// An instance of a [`Client`] is a unique connection to a single
+/// `perspective_server::Server`, whether locally in-memory or remote over some
+/// transport like a WebSocket.
+///
+/// `AsyncClient` and Perspective objects derived from it have _async_ APIs,
+/// suitable for integration with a Python event loop like `asyncio`.
 #[pyclass(module = "perspective")]
 #[derive(Clone)]
 pub struct AsyncClient {
@@ -54,31 +60,44 @@ impl AsyncClient {
 #[pymethods]
 impl AsyncClient {
     #[new]
-    #[pyo3(signature=(handle_request, handle_close=None))]
-    pub fn new(handle_request: Py<PyAny>, handle_close: Option<Py<PyAny>>) -> Self {
+    #[pyo3(signature=(handle_request, handle_close=None, name=None))]
+    pub fn new(
+        handle_request: Py<PyAny>,
+        handle_close: Option<Py<PyAny>>,
+        name: Option<String>,
+    ) -> PyResult<Self> {
         let handle_request = Arc::new(handle_request);
-        let client = Client::new_with_callback(asyncfn!(handle_request, async move |msg| {
-            if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
-                let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
-                if isawaitable(ret.bind(py)).unwrap_or(false) {
-                    Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
-                } else {
-                    Ok(None)
+        let client = Client::new_with_callback(
+            name.as_deref(),
+            asyncfn!(handle_request, async move |msg| {
+                if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
+                    let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
+                    if isawaitable(ret.bind(py)).unwrap_or(false) {
+                        Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
+                    } else {
+                        Ok(None)
+                    }
+                })? {
+                    fut.await?;
                 }
-            })? {
-                fut.await?;
-            }
 
-            Ok(())
-        }));
+                Ok(())
+            }),
+        );
 
-        AsyncClient {
-            client,
+        Ok(AsyncClient {
+            client: client.into_pyerr()?,
             loop_cb: Arc::default(),
             close_cb: handle_close.into(),
-        }
+        })
     }
 
+    /// Handle a message from the external message queue.
+    /// [`Client::handle_response`] is part of the low-level message-handling
+    /// API necessary to implement new transports for a [`Client`]
+    /// connection to a local-or-remote `perspective_server::Server`, and
+    /// doesn't generally need to be called directly by "users" of a
+    /// [`Client`] once connected.
     pub async fn handle_response(&self, bytes: Py<PyBytes>) -> PyResult<bool> {
         self.client
             .handle_response(Python::with_gil(|py| bytes.as_bytes(py)))
@@ -86,6 +105,55 @@ impl AsyncClient {
             .into_pyerr()
     }
 
+    /// Creates a new [`Table`] from either a _schema_ or _data_.
+    ///
+    /// The [`Client::table`] factory function can be initialized with either a
+    /// _schema_ (see [`Table::schema`]), or data in one of these formats:
+    ///
+    /// - Apache Arrow
+    /// - CSV
+    /// - JSON row-oriented
+    /// - JSON column-oriented
+    ///
+    /// When instantiated with _data_, the schema is inferred from this data.
+    /// While this is convenient, inferrence is sometimes imperfect e.g.
+    /// when the input is empty, null or ambiguous. For these cases,
+    /// [`Client::table`] can first be instantiated with a explicit schema.
+    ///
+    /// When instantiated with a _schema_, the resulting [`Table`] is empty but
+    /// with known column names and column types. When subsqeuently
+    /// populated with [`Table::update`], these columns will be _coerced_ to
+    /// the schema's type. This behavior can be useful when
+    /// [`Client::table`]'s column type inferences doesn't work.
+    ///
+    /// The resulting [`Table`] is _virtual_, and invoking its methods
+    /// dispatches events to the `perspective_server::Server` this
+    /// [`Client`] connects to, where the data is stored and all calculation
+    /// occurs.
+    ///
+    /// # Arguments
+    ///
+    /// - `arg` - Either _schema_ or initialization _data_.
+    /// - `options` - Optional configuration which provides one of:
+    ///     - `limit` - The max number of rows the resulting [`Table`] can
+    ///       store.
+    ///     - `index` - The column name to use as an _index_ column. If this
+    ///       `Table` is being instantiated by _data_, this column name must be
+    ///       present in the data.
+    ///     - `name` - The name of the table. This will be generated if it is
+    ///       not provided.
+    ///     - `format` - The explicit format of the input data, can be one of
+    ///       `"json"`, `"columns"`, `"csv"` or `"arrow"`. This overrides
+    ///       language-specific type dispatch behavior, which allows stringified
+    ///       and byte array alternative inputs.
+    ///
+    /// # Python Examples
+    ///
+    /// Load a CSV from a `str`:
+    ///
+    /// ```python
+    /// table = await client.table("x,y\n1,2\n3,4")
+    /// ```
     #[pyo3(signature=(input, limit=None, index=None, name=None, format=None))]
     pub async fn table(
         &self,
@@ -140,6 +208,18 @@ impl AsyncClient {
         })
     }
 
+    /// Opens a [`Table`] that is hosted on the `perspective_server::Server`
+    /// that is connected to this [`Client`].
+    ///
+    /// The `name` property of [`TableInitOptions`] is used to identify each
+    /// [`Table`]. [`Table`] `name`s can be looked up for each [`Client`]
+    /// via [`Client::get_hosted_table_names`].
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// table = await client.open_table("table_one");
+    /// ```
     pub async fn open_table(&self, name: String) -> PyResult<AsyncTable> {
         let client = self.client.clone();
         let py_client = self.clone();
@@ -150,10 +230,25 @@ impl AsyncClient {
         })
     }
 
+    /// Retrieves the names of all tables that this client has access to.
+    ///
+    /// `name` is a string identifier unique to the [`Table`] (per [`Client`]),
+    /// which can be used in conjunction with [`Client::open_table`] to get
+    /// a [`Table`] instance without the use of [`Client::table`]
+    /// constructor directly (e.g., one created by another [`Client`]).
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// tables = await client.get_hosted_table_names();
+    /// ```
     pub async fn get_hosted_table_names(&self) -> PyResult<Vec<String>> {
         self.client.get_hosted_table_names().await.into_pyerr()
     }
 
+    /// Register a callback which is invoked whenever [`Client::table`] (on this
+    /// [`Client`]) or [`Table::delete`] (on a [`Table`] belinging to this
+    /// [`Client`]) are called.
     pub async fn on_hosted_tables_update(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let locked_val = self.loop_cb.read().await.clone();
         let loop_cb = Python::with_gil(|py| (*locked_val).as_ref().map(|v| Py::clone_ref(v, py)));
@@ -189,6 +284,8 @@ impl AsyncClient {
         Ok(callback_id)
     }
 
+    /// Remove a callback previously registered via
+    /// [`Client::on_hosted_tables_update`].
     pub async fn remove_hosted_tables_update(&self, id: u32) -> PyResult<()> {
         self.client
             .remove_hosted_tables_update(id)
@@ -201,6 +298,8 @@ impl AsyncClient {
         Ok(())
     }
 
+    /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the
+    /// [`Client`] has open as well as its callbacks.
     pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {
         if let Some(cb) = &*self.close_cb {
             cb.call0(py)?;
@@ -225,6 +324,7 @@ impl AsyncTable {
         self.table.get_index()
     }
 
+    /// Get a copy of the [`Client`] this [`Table`] came from.
     pub async fn get_client(&self) -> AsyncClient {
         AsyncClient {
             client: self.table.get_client(),
@@ -233,34 +333,87 @@ impl AsyncTable {
         }
     }
 
+    /// Returns the user-specified row limit for this table.
     pub fn get_limit(&self) -> Option<u32> {
         self.table.get_limit()
     }
 
+    /// Returns the user-specified name for this table, or the auto-generated
+    /// name if a name was not specified when the table was created.
     pub fn get_name(&self) -> String {
         self.table.get_name().into()
     }
 
+    /// Returns the number of rows in a [`Table`].
     pub async fn size(&self) -> PyResult<usize> {
         self.table.size().await.into_pyerr()
     }
 
+    /// Returns the column names of this [`Table`] in "natural" order (the
+    /// ordering implied by the input format).
+    ///  
+    ///  # Python Examples
+    ///
+    /// ```python
+    /// columns = table.columns()
+    /// ```
     pub async fn columns(&self) -> PyResult<Vec<String>> {
         self.table.columns().await.into_pyerr()
     }
 
+    /// Removes all the rows in the [`Table`], but preserves everything else
+    /// including the schema, index, and any callbacks or registered
+    /// [`View`] instances.
+    ///
+    /// Calling [`Table::clear`], like [`Table::update`] and [`Table::remove`],
+    /// will trigger an update event to any registered listeners via
+    /// [`View::on_update`].
     pub async fn clear(&self) -> PyResult<()> {
         self.table.clear().await.into_pyerr()
     }
 
-    pub async fn delete(&self) -> PyResult<()> {
-        self.table.delete().await.into_pyerr()
+    /// Delete this [`Table`] and cleans up associated resources.
+    ///
+    /// [`Table`]s do not stop consuming resources or processing updates when
+    /// they are garbage collected in their host language - you must call
+    /// this method to reclaim these.
+    ///
+    /// # Arguments
+    ///
+    /// - `options` An options dictionary.
+    ///     - `lazy` Whether to delete this [`Table`] _lazily_. When false (the
+    ///       default), the delete will occur immediately, assuming it has no
+    ///       [`View`] instances registered to it (which must be deleted first,
+    ///       otherwise this method will throw an error). When true, the
+    ///       [`Table`] will only be marked for deltion once its [`View`]
+    ///       dependency count reaches 0.
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// table = await client.table("x,y\n1,2\n3,4")
+    ///
+    /// # ...
+    ///
+    /// table.delete(lazy=True)
+    /// ```
+    #[pyo3(signature=(lazy=false))]
+    pub async fn delete(&self, lazy: bool) -> PyResult<()> {
+        self.table.delete(DeleteOptions { lazy }).await.into_pyerr()
     }
 
+    /// Create a unique channel ID on this [`Table`], which allows
+    /// `View::on_update` callback calls to be associated with the
+    /// `Table::update` which caused them.
     pub async fn make_port(&self) -> PyResult<i32> {
         self.table.make_port().await.into_pyerr()
     }
 
+    /// Register a callback which is called exactly once, when this [`Table`] is
+    /// deleted with the [`Table::delete`] method.
+    ///
+    /// [`Table::on_delete`] resolves when the subscription message is sent, not
+    /// when the _delete_ event occurs.
     pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let loop_cb = (*self.client.loop_cb.read().await).clone();
         let callback = {
@@ -282,10 +435,26 @@ impl AsyncTable {
         Ok(callback_id)
     }
 
+    /// Removes a listener with a given ID, as returned by a previous call to
+    /// [`Table::on_delete`].
     pub async fn remove_delete(&self, callback_id: u32) -> PyResult<()> {
         self.table.remove_delete(callback_id).await.into_pyerr()
     }
 
+    /// Removes rows from this [`Table`] with the `index` column values
+    /// supplied.
+    ///
+    /// # Arguments
+    ///
+    /// - `indices` - A list of `index` column values for rows that should be
+    ///   removed.
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// tbl = await client.table({"a": [1, 2, 3]}, index="a")
+    /// await tbl.remove([2, 3])
+    /// ```
     #[pyo3(signature=(input, format=None))]
     pub async fn remove(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
@@ -294,6 +463,22 @@ impl AsyncTable {
         table.remove(table_data).await.into_pyerr()
     }
 
+    /// Replace all rows in this [`Table`] with the input data, coerced to this
+    /// [`Table`]'s existing [`Schema`], notifying any derived [`View`] and
+    /// [`View::on_update`] callbacks.
+    ///
+    /// Calling [`Table::replace`] is an easy way to replace _all_ the data in a
+    /// [`Table`] without losing any derived [`View`] instances or
+    /// [`View::on_update`] callbacks. [`Table::replace`] does _not_ infer
+    /// data types like [`Client::table`] does, rather it _coerces_ input
+    /// data to the `Schema` like [`Table::update`]. If you need a [`Table`]
+    /// with a different `Schema`, you must create a new one.
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// await table.replace("x,y\n1,2")
+    /// ```
     #[pyo3(signature=(input, format=None))]
     pub async fn replace(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
@@ -302,6 +487,27 @@ impl AsyncTable {
         table.replace(table_data).await.into_pyerr()
     }
 
+    /// Updates the rows of this table and any derived [`View`] instances.
+    ///
+    /// Calling [`Table::update`] will trigger the [`View::on_update`] callbacks
+    /// register to derived [`View`], and the call itself will not resolve until
+    /// _all_ derived [`View`]'s are notified.
+    ///
+    /// When updating a [`Table`] with an `index`, [`Table::update`] supports
+    /// partial updates, by omitting columns from the update data.
+    ///
+    /// # Arguments
+    ///
+    /// - `input` - The input data for this [`Table`]. The schema of a [`Table`]
+    ///   is immutable after creation, so this method cannot be called with a
+    ///   schema.
+    /// - `options` - Options for this update step - see [`UpdateOptions`].
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// await table.update("x,y\n1,2")
+    /// ```
     #[pyo3(signature=(input, port_id=None, format=None))]
     pub async fn update(
         &self,
@@ -332,6 +538,7 @@ impl AsyncTable {
         Ok(())
     }
 
+    /// Validates the given expressions.
     pub async fn validate_expressions(&self, expressions: Py<PyAny>) -> PyResult<Py<PyAny>> {
         let expressions = Python::with_gil(|py| depythonize(expressions.bind(py)))?;
         let records = self
@@ -343,6 +550,24 @@ impl AsyncTable {
         Python::with_gil(|py| Ok(pythonize::pythonize(py, &records)?.unbind()))
     }
 
+    /// Returns a table's [`Schema`], a mapping of column names to column types.
+    ///
+    /// The mapping of a [`Table`]'s column names to data types is referred to
+    /// as a [`Schema`]. Each column has a unique name and a data type, one
+    /// of:
+    ///
+    /// - `"boolean"` - A boolean type
+    /// - `"date"` - A timesonze-agnostic date type (month/day/year)
+    /// - `"datetime"` - A millisecond-precision datetime type in the UTC
+    ///   timezone
+    /// - `"float"` - A 64 bit float
+    /// - `"integer"` - A signed 32 bit integer (the integer type supported by
+    ///   JavaScript)
+    /// - `"string"` - A [`String`] data type (encoded internally as a
+    ///   _dictionary_)
+    ///
+    /// Note that all [`Table`] columns are _nullable_, regardless of the data
+    /// type.
     pub async fn schema(&self) -> PyResult<HashMap<String, String>> {
         let schema = self.table.schema().await.into_pyerr()?;
         Ok(schema
@@ -351,6 +576,21 @@ impl AsyncTable {
             .collect())
     }
 
+    /// Create a new [`View`] from this table with a specified
+    /// [`ViewConfigUpdate`].
+    ///
+    /// See [`View`] struct.
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// view = await table.view(
+    ///   columns=["Sales"],
+    ///   aggregates={"Sales": "sum"},
+    ///   group_by=["Region", "Country"],
+    ///   filter=[["Category", "in", ["Furniture", "Technology"]]]
+    /// )
+    /// ```
     #[pyo3(signature = (**kwargs))]
     pub async fn view(&self, kwargs: Option<Py<PyDict>>) -> PyResult<AsyncView> {
         let config = kwargs
@@ -365,6 +605,19 @@ impl AsyncTable {
     }
 }
 
+/// The [`View`] struct is Perspective's query and serialization interface. It
+/// represents a query on the `Table`'s dataset and is always created from an
+/// existing `Table` instance via the [`Table::view`] method.
+///
+/// [`View`]s are immutable with respect to the arguments provided to the
+/// [`Table::view`] method; to change these parameters, you must create a new
+/// [`View`] on the same [`Table`]. However, each [`View`] is _live_ with
+/// respect to the [`Table`]'s data, and will (within a conflation window)
+/// update with the latest state as its parent [`Table`] updates, including
+/// incrementally recalculating all aggregates, pivots, filters, etc. [`View`]
+/// query parameters are composable, in that each parameter works independently
+/// _and_ in conjunction with each other, and there is no limit to the number of
+/// pivots, filters, etc. which can be applied.
 #[pyclass]
 #[derive(Clone)]
 pub struct AsyncView {
@@ -376,14 +629,38 @@ assert_view_api!(AsyncView);
 
 #[pymethods]
 impl AsyncView {
+    /// Returns an array of strings containing the column paths of the [`View`]
+    /// without any of the source columns.
+    ///
+    /// A column path shows the columns that a given cell belongs to after
+    /// pivots are applied.
     pub async fn column_paths(&self) -> PyResult<Vec<String>> {
         self.view.column_paths().await.into_pyerr()
     }
 
+    /// Delete this [`View`] and clean up all resources associated with it.
+    /// [`View`] objects do not stop consuming resources or processing
+    /// updates when they are garbage collected - you must call this method
+    /// to reclaim these.
     pub async fn delete(&self) -> PyResult<()> {
         self.view.delete().await.into_pyerr()
     }
 
+    /// Returns this [`View`]'s _dimensions_, row and column count, as well as
+    /// those of the [`crate::Table`] from which it was derived.
+    ///
+    /// - `num_table_rows` - The number of rows in the underlying
+    ///   [`crate::Table`].
+    /// - `num_table_columns` - The number of columns in the underlying
+    ///   [`crate::Table`] (including the `index` column if this
+    ///   [`crate::Table`] was constructed with one).
+    /// - `num_view_rows` - The number of rows in this [`View`]. If this
+    ///   [`View`] has a `group_by` clause, `num_view_rows` will also include
+    ///   aggregated rows.
+    /// - `num_view_columns` - The number of columns in this [`View`]. If this
+    ///   [`View`] has a `split_by` clause, `num_view_columns` will include all
+    ///   _column paths_, e.g. the number of `columns` clause times the number
+    ///   of `split_by` groups.
     pub async fn dimensions(&self) -> PyResult<Py<PyAny>> {
         let dim = self.view.dimensions().await.into_pyerr()?;
         Python::with_gil(|py| Ok(pythonize::pythonize(py, &dim)?.unbind()))
@@ -397,6 +674,9 @@ impl AsyncView {
         self.view.collapse(index).await.into_pyerr()
     }
 
+    /// The expression schema of this [`View`], which contains only the
+    /// expressions created on this [`View`]. See [`View::schema`] for
+    /// details.
     pub async fn expression_schema(&self) -> PyResult<HashMap<String, String>> {
         Ok(self
             .view
@@ -408,19 +688,40 @@ impl AsyncView {
             .collect())
     }
 
+    /// A copy of the config object passed to the [`Table::view`] method which
+    /// created this [`View`].
     pub async fn get_config(&self) -> PyResult<Py<PyAny>> {
         let config = self.view.get_config().await.into_pyerr()?;
         Python::with_gil(|py| Ok(pythonize::pythonize(py, &config)?.unbind()))
     }
 
+    /// Calculates the [min, max] of the leaf nodes of a column `column_name`.
+    ///
+    /// # Returns
+    ///
+    /// A tuple of [min, max], whose types are column and aggregate dependent.
     pub async fn get_min_max(&self, name: String) -> PyResult<(String, String)> {
         self.view.get_min_max(name).await.into_pyerr()
     }
 
+    /// The number of aggregated rows in this [`View`]. This is affected by the
+    /// "group_by" configuration parameter supplied to this view's contructor.
+    ///
+    /// # Returns
+    ///
+    /// The number of aggregated rows.
     pub async fn num_rows(&self) -> PyResult<u32> {
         self.view.num_rows().await.into_pyerr()
     }
 
+    /// The schema of this [`View`].
+    ///
+    /// The [`View`] schema differs from the `schema` returned by
+    /// [`Table::schema`]; it may have different column names due to
+    /// `expressions` or `columns` configs, or it maye have _different
+    /// column types_ due to the application og `group_by` and `aggregates`
+    /// config. You can think of [`Table::schema`] as the _input_ schema and
+    /// [`View::schema`] as the _output_ schema of a Perspective pipeline.
     pub async fn schema(&self) -> PyResult<HashMap<String, String>> {
         Ok(self
             .view
@@ -432,6 +733,8 @@ impl AsyncView {
             .collect())
     }
 
+    /// Register a callback with this [`View`]. Whenever the [`View`] is
+    /// deleted, this callback will be invoked.
     pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let callback = {
             let callback_py = Arc::new(callback_py);
@@ -455,10 +758,26 @@ impl AsyncView {
         Ok(callback_id)
     }
 
+    /// Unregister a previously registered [`View::on_delete`] callback.
     pub async fn remove_delete(&self, callback_id: u32) -> PyResult<()> {
         self.view.remove_delete(callback_id).await.into_pyerr()
     }
 
+    /// Register a callback with this [`View`]. Whenever the view's underlying
+    /// table emits an update, this callback will be invoked with an object
+    /// containing `port_id`, indicating which port the update fired on, and
+    /// optionally `delta`, which is the new data that was updated for each
+    /// cell or each row.
+    ///
+    /// # Arguments
+    ///
+    /// - `on_update` - A callback function invoked on update, which receives an
+    ///   object with two keys: `port_id`, indicating which port the update was
+    ///   triggered on, and `delta`, whose value is dependent on the mode
+    ///   parameter.
+    /// - `options` - If this is provided as `OnUpdateOptions { mode:
+    ///   Some(OnUpdateMode::Row) }`, then `delta` is an Arrow of the updated
+    ///   rows. Otherwise `delta` will be [`Option::None`].
     #[pyo3(signature=(callback, mode=None))]
     pub async fn on_update(&self, callback: Py<PyAny>, mode: Option<String>) -> PyResult<u32> {
         let locked_val = self.client.loop_cb.read().await.clone();
@@ -503,6 +822,12 @@ impl AsyncView {
             .into_pyerr()
     }
 
+    /// Unregister a previously registered update callback with this [`View`].
+    ///
+    /// # Arguments
+    ///
+    /// - `id` - A callback `id` as returned by a recipricol call to
+    ///   [`View::on_update`].
     pub async fn remove_update(&self, callback_id: u32) -> PyResult<()> {
         self.view.remove_update(callback_id).await.into_pyerr()
     }
@@ -525,6 +850,7 @@ impl AsyncView {
         Python::with_gil(|py| arrow_to_polars(py, &arrow))
     }
 
+    /// Serializes a [`View`] to the Apache Arrow data format.
     #[pyo3(signature=(window=None))]
     pub async fn to_arrow(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
@@ -534,6 +860,7 @@ impl AsyncView {
         Ok(Python::with_gil(|py| PyBytes::new(py, &arrow).into()))
     }
 
+    /// Serializes this [`View`] to CSV data in a standard format.
     #[pyo3(signature=(window=None))]
     pub async fn to_csv(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
@@ -543,6 +870,8 @@ impl AsyncView {
         self.view.to_csv(window).await.into_pyerr()
     }
 
+    /// Serializes this [`View`] to a string of JSON data. Useful if you want to
+    /// save additional round trip serialize/deserialize cycles.
     #[pyo3(signature=(window=None))]
     pub async fn to_columns_string(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
@@ -552,6 +881,19 @@ impl AsyncView {
         self.view.to_columns_string(window).await.into_pyerr()
     }
 
+    /// Serializes this [`View`] to Python objects in a column-oriented
+    /// format.
+    #[pyo3(signature = (**window))]
+    pub async fn to_columns(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
+        let json = self.to_columns_string(window).await?;
+        Python::with_gil(|py| {
+            let json_module = PyModule::import(py, "json")?;
+            let records = json_module.call_method1("loads", (json,))?;
+            Ok(records.unbind())
+        })
+    }
+
+    /// Render this `View` as a JSON string.
     #[pyo3(signature=(window=None))]
     pub async fn to_json_string(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
@@ -561,6 +903,8 @@ impl AsyncView {
         self.view.to_json_string(window).await.into_pyerr()
     }
 
+    /// Renders this [`View`] as an [NDJSON](https://github.com/ndjson/ndjson-spec)
+    /// formatted [`String`].
     #[pyo3(signature=(window=None))]
     pub async fn to_ndjson(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
@@ -570,6 +914,7 @@ impl AsyncView {
         self.view.to_ndjson(window).await.into_pyerr()
     }
 
+    /// Alias for [`View::to_json`].
     #[pyo3(signature = (**window))]
     pub async fn to_records(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         let json = self.to_json_string(window).await?;
@@ -580,6 +925,8 @@ impl AsyncView {
         })
     }
 
+    /// Serializes this [`View`] to Python objects in a row-oriented
+    /// format.
     #[pyo3(signature = (**window))]
     pub async fn to_json(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         self.to_records(window).await

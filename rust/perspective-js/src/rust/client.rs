@@ -17,7 +17,6 @@ use std::sync::Arc;
 use derivative::Derivative;
 use futures::channel::oneshot;
 use js_sys::{Function, Uint8Array};
-use macro_rules_attribute::apply;
 #[cfg(doc)]
 use perspective_client::SystemInfo;
 use perspective_client::{
@@ -27,8 +26,9 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
+use crate::TableDataExt;
 pub use crate::table::*;
-use crate::utils::{ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop, inherit_docs};
+use crate::utils::{ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop};
 
 #[wasm_bindgen]
 extern "C" {
@@ -83,13 +83,53 @@ impl ProxySession {
     }
 }
 
-#[apply(inherit_docs)]
-#[inherit_doc = "client.md"]
+/// An instance of a [`Client`] is a unique connection to a single
+/// `perspective_server::Server`, whether locally in-memory or remote over some
+/// transport like a WebSocket.
+///
+/// The browser and node.js libraries both support the `websocket(url)`
+/// constructor, which connects to a remote `perspective_server::Server`
+/// instance over a WebSocket transport.
+///
+/// In the browser, the `worker()` constructor creates a new Web Worker
+/// `perspective_server::Server` and returns a [`Client`] connected to it.
+///
+/// In node.js, a pre-instantied [`Client`] connected synhronously to a global
+/// singleton `perspective_server::Server` is the default module export.
+///
+/// # JavaScript Examples
+///
+/// Create a Web Worker `perspective_server::Server` in the browser and return a
+/// [`Client`] instance connected for it:
+///
+/// ```javascript
+/// import perspective from "@finos/perspective";
+/// const client = await perspective.worker();
+/// ```
+///
+/// Create a WebSocket connection to a remote `perspective_server::Server`:
+///
+/// ```javascript
+/// import perspective from "@finos/perspective";
+/// const client = await perspective.websocket("ws://locahost:8080/ws");
+/// ```
+///
+/// Access the synchronous client in node.js:
+///
+/// ```javascript
+/// import { default as client } from "@finos/perspective";
+/// ```
 #[wasm_bindgen]
 #[derive(TryFromJsValue, Clone)]
 pub struct Client {
     pub(crate) close: Option<Function>,
     pub(crate) client: perspective_client::Client,
+}
+
+impl PartialEq for Client {
+    fn eq(&self, other: &Self) -> bool {
+        self.client.get_name() == other.client.get_name()
+    }
 }
 
 /// A wrapper around [`js_sys::Function`] to ease async integration for the
@@ -148,7 +188,7 @@ impl Client {
 #[wasm_bindgen]
 impl Client {
     #[wasm_bindgen(constructor)]
-    pub fn new(send_request: Function, close: Option<Function>) -> Self {
+    pub fn new(send_request: Function, close: Option<Function>) -> ApiResult<Self> {
         let send_request = JsReconnect::from(move |mut v: Vec<u8>| {
             let buff2 = unsafe { js_sys::Uint8Array::view_mut_raw(v.as_mut_ptr(), v.len()) };
             send_request
@@ -157,10 +197,11 @@ impl Client {
                 .unchecked_into::<js_sys::Promise>()
         });
 
-        let client =
-            perspective_client::Client::new_with_callback(move |msg| send_request.run_all(msg));
+        let client = perspective_client::Client::new_with_callback(None, move |msg| {
+            send_request.run_all(msg)
+        })?;
 
-        Client { close, client }
+        Ok(Client { close, client })
     }
 
     #[wasm_bindgen]
@@ -243,7 +284,7 @@ impl Client {
                     &JsValue::from(message),
                     &cl.into_js_value(),
                 ) {
-                    tracing::warn!("D {:?}", e);
+                    tracing::warn!("{:?}", e);
                 }
 
                 js_sys::Promise::resolve(&JsValue::UNDEFINED)
@@ -262,8 +303,78 @@ impl Client {
         Ok(id)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "client/table.md"]
+    /// Creates a new [`Table`] from either a _schema_ or _data_.
+    ///
+    /// The [`Client::table`] factory function can be initialized with either a
+    /// _schema_ (see [`Table::schema`]), or data in one of these formats:
+    ///
+    /// - Apache Arrow
+    /// - CSV
+    /// - JSON row-oriented
+    /// - JSON column-oriented
+    ///
+    /// When instantiated with _data_, the schema is inferred from this data.
+    /// While this is convenient, inferrence is sometimes imperfect e.g.
+    /// when the input is empty, null or ambiguous. For these cases,
+    /// [`Client::table`] can first be instantiated with a explicit schema.
+    ///
+    /// When instantiated with a _schema_, the resulting [`Table`] is empty but
+    /// with known column names and column types. When subsqeuently
+    /// populated with [`Table::update`], these columns will be _coerced_ to
+    /// the schema's type. This behavior can be useful when
+    /// [`Client::table`]'s column type inferences doesn't work.
+    ///
+    /// The resulting [`Table`] is _virtual_, and invoking its methods
+    /// dispatches events to the `perspective_server::Server` this
+    /// [`Client`] connects to, where the data is stored and all calculation
+    /// occurs.
+    ///
+    /// # Arguments
+    ///
+    /// - `arg` - Either _schema_ or initialization _data_.
+    /// - `options` - Optional configuration which provides one of:
+    ///     - `limit` - The max number of rows the resulting [`Table`] can
+    ///       store.
+    ///     - `index` - The column name to use as an _index_ column. If this
+    ///       `Table` is being instantiated by _data_, this column name must be
+    ///       present in the data.
+    ///     - `name` - The name of the table. This will be generated if it is
+    ///       not provided.
+    ///     - `format` - The explicit format of the input data, can be one of
+    ///       `"json"`, `"columns"`, `"csv"` or `"arrow"`. This overrides
+    ///       language-specific type dispatch behavior, which allows stringified
+    ///       and byte array alternative inputs.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Load a CSV from a `string`:
+    ///
+    /// ```javascript
+    /// const table = await client.table("x,y\n1,2\n3,4");
+    /// ```
+    ///
+    /// Load an Arrow from an `ArrayBuffer`:
+    ///
+    /// ```javascript
+    /// import * as fs from "node:fs/promises";
+    /// const table2 = await client.table(await fs.readFile("superstore.arrow"));
+    /// ```
+    ///
+    /// Load a CSV from a `UInt8Array` (the default for this type is Arrow)
+    /// using a format override:
+    ///
+    /// ```javascript
+    /// const enc = new TextEncoder();
+    /// const table = await client.table(enc.encode("x,y\n1,2\n3,4"), {
+    ///     format: "csv",
+    /// });
+    /// ```
+    ///
+    /// Create a table with an `index`:
+    ///
+    /// ```javascript
+    /// const table = await client.table(data, { index: "Row ID" });
+    /// ```
     #[wasm_bindgen]
     pub async fn table(
         &self,
@@ -278,8 +389,8 @@ impl Client {
         Ok(Table(self.client.table(args, options).await?))
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "client/terminate.md"]
+    /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the
+    /// [`Client`] has open as well as its callbacks.
     #[wasm_bindgen]
     pub fn terminate(&self) -> ApiResult<JsValue> {
         if let Some(f) = self.close.clone() {
@@ -289,15 +400,37 @@ impl Client {
         }
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "client/open_table.md"]
+    /// Opens a [`Table`] that is hosted on the `perspective_server::Server`
+    /// that is connected to this [`Client`].
+    ///
+    /// The `name` property of [`TableInitOptions`] is used to identify each
+    /// [`Table`]. [`Table`] `name`s can be looked up for each [`Client`]
+    /// via [`Client::get_hosted_table_names`].
+    ///
+    /// # JavaScript Examples
+    ///
+    /// Get a virtual [`Table`] named "table_one" from this [`Client`]
+    ///
+    /// ```javascript
+    /// const tables = await client.open_table("table_one");
+    /// ```
     #[wasm_bindgen]
     pub async fn open_table(&self, entity_id: String) -> ApiResult<Table> {
         Ok(Table(self.client.open_table(entity_id).await?))
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "client/get_hosted_table_names.md"]
+    /// Retrieves the names of all tables that this client has access to.
+    ///
+    /// `name` is a string identifier unique to the [`Table`] (per [`Client`]),
+    /// which can be used in conjunction with [`Client::open_table`] to get
+    /// a [`Table`] instance without the use of [`Client::table`]
+    /// constructor directly (e.g., one created by another [`Client`]).
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const tables = await client.get_hosted_table_names();
+    /// ```
     #[wasm_bindgen]
     pub async fn get_hosted_table_names(&self) -> ApiResult<JsValue> {
         Ok(JsValue::from_serde_ext(
@@ -305,8 +438,9 @@ impl Client {
         )?)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "client/on_hosted_tables_update.md"]
+    /// Register a callback which is invoked whenever [`Client::table`] (on this
+    /// [`Client`]) or [`Table::delete`] (on a [`Table`] belinging to this
+    /// [`Client`]) are called.
     #[wasm_bindgen]
     pub async fn on_hosted_tables_update(&self, on_update_js: Function) -> ApiResult<u32> {
         let poll_loop = LocalPollLoop::new(move |_| on_update_js.call0(&JsValue::UNDEFINED));
@@ -315,16 +449,25 @@ impl Client {
         Ok(id)
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "client/remove_hosted_tables_update.md"]
+    /// Remove a callback previously registered via
+    /// `Client::on_hosted_tables_update`.
     #[wasm_bindgen]
     pub async fn remove_hosted_tables_update(&self, update_id: u32) -> ApiResult<()> {
         self.client.remove_hosted_tables_update(update_id).await?;
         Ok(())
     }
 
-    #[apply(inherit_docs)]
-    #[inherit_doc = "client/system_info.md"]
+    /// Provides the [`SystemInfo`] struct, implementation-specific metadata
+    /// about the [`perspective_server::Server`] runtime such as Memory and
+    /// CPU usage.
+    ///
+    /// For WebAssembly servers, this method includes the WebAssembly heap size.
+    ///
+    /// # JavaScript Examples
+    ///
+    /// ```javascript
+    /// const info = await client.system_info();
+    /// ```
     #[wasm_bindgen]
     pub async fn system_info(&self) -> ApiResult<JsValue> {
         let info = self.client.system_info().await?;

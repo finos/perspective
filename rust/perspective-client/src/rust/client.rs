@@ -83,22 +83,32 @@ pub trait ClientHandler: Clone + Send + Sync + 'static {
     ) -> impl Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send;
 }
 
-#[derive(Clone)]
-#[doc = include_str!("../../docs/client.md")]
-pub struct Client {
-    features: Arc<Mutex<Option<Features>>>,
-    send: SendCallback,
-    id_gen: Arc<AtomicU32>,
-    subscriptions_errors: Subscriptions<OnErrorCallback>,
-    subscriptions_once: Subscriptions<OnceCallback>,
-    subscriptions: Subscriptions<BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>>,
-}
+mod name_registry {
+    use std::collections::HashSet;
+    use std::sync::{Arc, LazyLock, Mutex};
 
-impl std::fmt::Debug for Client {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Client")
-            .field("id_gen", &self.id_gen)
-            .finish()
+    use crate::ClientError;
+    use crate::view::ClientResult;
+
+    static CLIENT_ID_GEN: LazyLock<Arc<Mutex<u32>>> = LazyLock::new(Arc::default);
+    static REGISTERED_CLIENTS: LazyLock<Arc<Mutex<HashSet<String>>>> = LazyLock::new(Arc::default);
+
+    pub(crate) fn generate_name(name: Option<&str>) -> ClientResult<String> {
+        if let Some(name) = name {
+            if let Some(name) = REGISTERED_CLIENTS
+                .lock()
+                .map_err(ClientError::from)?
+                .get(name)
+            {
+                Err(ClientError::DuplicateNameError(name.to_owned()))
+            } else {
+                Ok(name.to_owned())
+            }
+        } else {
+            let mut guard = CLIENT_ID_GEN.lock()?;
+            *guard += 1;
+            Ok(format!("client-{}", guard))
+        }
     }
 }
 
@@ -111,14 +121,56 @@ impl std::fmt::Debug for Client {
 pub type ReconnectCallback =
     Arc<dyn Fn() -> LocalBoxFuture<'static, Result<(), Box<dyn Error>>> + Send + Sync>;
 
+/// An instance of a [`Client`] is a unique connection to a single
+/// `perspective_server::Server`, whether locally in-memory or remote over some
+/// transport like a WebSocket.
+///
+/// # Examples
+///
+/// Create a `perspective_server::Server` and a synchronous [`Client`] via the
+/// `perspective` crate:
+///
+/// ```rust
+/// use perspective::LocalClient;
+/// use perspective::server::Server;
+///
+/// let server = Server::default();
+/// let client = perspective::LocalClient::new(&server);
+/// ```
+#[derive(Clone)]
+pub struct Client {
+    name: Arc<String>,
+    features: Arc<Mutex<Option<Features>>>,
+    send: SendCallback,
+    id_gen: Arc<AtomicU32>,
+    subscriptions_errors: Subscriptions<OnErrorCallback>,
+    subscriptions_once: Subscriptions<OnceCallback>,
+    subscriptions: Subscriptions<BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>>,
+}
+
+impl PartialEq for Client {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl std::fmt::Debug for Client {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Client")
+            .field("id_gen", &self.id_gen)
+            .finish()
+    }
+}
+
 impl Client {
     /// Create a new client instance with a closure that handles message
     /// dispatch. See [`Client::new`] for details.
-    pub fn new_with_callback<T, U>(send_request: T) -> Self
+    pub fn new_with_callback<T, U>(name: Option<&str>, send_request: T) -> ClientResult<Self>
     where
         T: Fn(Vec<u8>) -> U + 'static + Sync + Send,
         U: Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static,
     {
+        let name = name_registry::generate_name(name)?;
         let send_request = Arc::new(send_request);
         let send: SendCallback = Arc::new(move |req| {
             let mut bytes: Vec<u8> = Vec::new();
@@ -127,24 +179,32 @@ impl Client {
             Box::pin(async move { send_request(bytes).await })
         });
 
-        Client {
+        Ok(Client {
+            name: Arc::new(name),
             features: Arc::default(),
             id_gen: Arc::new(AtomicU32::new(1)),
             send,
             subscriptions: Subscriptions::default(),
             subscriptions_errors: Arc::default(),
             subscriptions_once: Arc::default(),
-        }
+        })
     }
 
     /// Create a new [`Client`] instance with [`ClientHandler`].
-    pub fn new<T>(client_handler: T) -> Self
+    pub fn new<T>(name: Option<&str>, client_handler: T) -> ClientResult<Self>
     where
         T: ClientHandler + 'static + Sync + Send,
     {
-        Self::new_with_callback(asyncfn!(client_handler, async move |req| {
-            client_handler.send_request(req).await
-        }))
+        Self::new_with_callback(
+            name,
+            asyncfn!(client_handler, async move |req| {
+                client_handler.send_request(req).await
+            }),
+        )
+    }
+
+    pub fn get_name(&self) -> &'_ str {
+        self.name.as_str()
     }
 
     /// Handle a message from the external message queue.
@@ -171,31 +231,7 @@ impl Client {
         Ok(false)
     }
 
-    // pub async fn handle_error<T>(
-    //     &self,
-    //     message: Option<String>,
-    //     reconnect: Option<T>,
-    // ) -> ClientResult<()>
-    // where
-    //     T: AsyncFn() -> ClientResult<()> + Clone + Send + Sync + 'static,
-    // {
-    //     let subs = self.subscriptions_errors.read().await;
-    //     let tasks = join_all(subs.values().map(|callback| {
-    //         callback(
-    //             message.clone(),
-    //             reconnect.clone().map(move |f| {
-    //                 Arc::new(move || {
-    //                     clone!(f);
-    //                     Box::pin(async move { Ok(f().await?) }) as
-    // LocalBoxFuture<'static, _>                 }) as ReconnectCallback
-    //             }),
-    //         )
-    //     }));
-
-    //     tasks.await.into_iter().collect::<Result<(), _>>()?;
-    //     Ok(())
-    // }
-
+    /// Handle an exception from the underlying transport.
     pub async fn handle_error<T, U>(
         &self,
         message: Option<String>,
@@ -291,24 +327,6 @@ impl Client {
         }
     }
 
-    // pub(crate) async fn subscribe(
-    //     &self,
-    //     msg: &Request,
-    //     on_update: BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>,
-    // ) -> ClientResult<()> {
-    //     self.subscriptions
-    //         .write()
-    //         .await
-    //         .insert(msg.msg_id, on_update);
-    //     tracing::debug!("SEND {}", msg);
-    //     if let Err(e) = (self.send)(msg).await {
-    //         self.subscriptions.write().await.remove(&msg.msg_id);
-    //         Err(ClientError::Unknown(e.to_string()))
-    //     } else {
-    //         Ok(())
-    //     }
-    // }
-
     pub(crate) async fn subscribe<T, U>(&self, msg: &Request, on_update: T) -> ClientResult<()>
     where
         T: Fn(Response) -> U + Send + Sync + 'static,
@@ -352,7 +370,57 @@ impl Client {
             .clone())
     }
 
-    #[doc = include_str!("../../docs/client/table.md")]
+    /// Creates a new [`Table`] from either a _schema_ or _data_.
+    ///
+    /// The [`Client::table`] factory function can be initialized with either a
+    /// _schema_ (see [`Table::schema`]), or data in one of these formats:
+    ///
+    /// - Apache Arrow
+    /// - CSV
+    /// - JSON row-oriented
+    /// - JSON column-oriented
+    ///
+    /// When instantiated with _data_, the schema is inferred from this data.
+    /// While this is convenient, inferrence is sometimes imperfect e.g.
+    /// when the input is empty, null or ambiguous. For these cases,
+    /// [`Client::table`] can first be instantiated with a explicit schema.
+    ///
+    /// When instantiated with a _schema_, the resulting [`Table`] is empty but
+    /// with known column names and column types. When subsqeuently
+    /// populated with [`Table::update`], these columns will be _coerced_ to
+    /// the schema's type. This behavior can be useful when
+    /// [`Client::table`]'s column type inferences doesn't work.
+    ///
+    /// The resulting [`Table`] is _virtual_, and invoking its methods
+    /// dispatches events to the `perspective_server::Server` this
+    /// [`Client`] connects to, where the data is stored and all calculation
+    /// occurs.
+    ///
+    /// # Arguments
+    ///
+    /// - `arg` - Either _schema_ or initialization _data_.
+    /// - `options` - Optional configuration which provides one of:
+    ///     - `limit` - The max number of rows the resulting [`Table`] can
+    ///       store.
+    ///     - `index` - The column name to use as an _index_ column. If this
+    ///       `Table` is being instantiated by _data_, this column name must be
+    ///       present in the data.
+    ///     - `name` - The name of the table. This will be generated if it is
+    ///       not provided.
+    ///     - `format` - The explicit format of the input data, can be one of
+    ///       `"json"`, `"columns"`, `"csv"` or `"arrow"`. This overrides
+    ///       language-specific type dispatch behavior, which allows stringified
+    ///       and byte array alternative inputs.
+    ///
+    /// # Examples
+    ///
+    /// Load a CSV from a `String`:
+    ///
+    /// ```rust
+    /// let opts = TableInitOptions::default();
+    /// let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+    /// let table = client.table(data, opts).await?;
+    /// ```
     pub async fn table(&self, input: TableData, options: TableInitOptions) -> ClientResult<Table> {
         let entity_id = match options.name.clone() {
             Some(x) => x.to_owned(),
@@ -427,7 +495,18 @@ impl Client {
         }
     }
 
-    #[doc = include_str!("../../docs/client/open_table.md")]
+    /// Opens a [`Table`] that is hosted on the `perspective_server::Server`
+    /// that is connected to this [`Client`].
+    ///
+    /// The `name` property of [`TableInitOptions`] is used to identify each
+    /// [`Table`]. [`Table`] `name`s can be looked up for each [`Client`]
+    /// via [`Client::get_hosted_table_names`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let tables = client.open_table("table_one").await;
+    /// ```  
     pub async fn open_table(&self, entity_id: String) -> ClientResult<Table> {
         let infos = self.get_table_infos().await?;
 
@@ -445,7 +524,18 @@ impl Client {
         }
     }
 
-    #[doc = include_str!("../../docs/client/get_hosted_table_names.md")]
+    /// Retrieves the names of all tables that this client has access to.
+    ///
+    /// `name` is a string identifier unique to the [`Table`] (per [`Client`]),
+    /// which can be used in conjunction with [`Client::open_table`] to get
+    /// a [`Table`] instance without the use of [`Client::table`]
+    /// constructor directly (e.g., one created by another [`Client`]).
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let tables = client.get_hosted_table_names().await;
+    /// ```
     pub async fn get_hosted_table_names(&self) -> ClientResult<Vec<String>> {
         let msg = Request {
             msg_id: self.gen_id(),
@@ -463,7 +553,9 @@ impl Client {
         }
     }
 
-    #[doc = include_str!("../../docs/client/on_hosted_tables_update.md")]
+    /// Register a callback which is invoked whenever [`Client::table`] (on this
+    /// [`Client`]) or [`Table::delete`] (on a [`Table`] belinging to this
+    /// [`Client`]) are called.
     pub async fn on_hosted_tables_update<T, U>(&self, on_update: T) -> ClientResult<u32>
     where
         T: Fn() -> U + Send + Sync + 'static,
@@ -492,7 +584,8 @@ impl Client {
         Ok(msg.msg_id)
     }
 
-    #[doc = include_str!("../../docs/client/remove_hosted_tables_update.md")]
+    /// Remove a callback previously registered via
+    /// `Client::on_hosted_tables_update`.
     pub async fn remove_hosted_tables_update(&self, update_id: u32) -> ClientResult<()> {
         let msg = Request {
             msg_id: self.gen_id(),
@@ -509,7 +602,9 @@ impl Client {
         }
     }
 
-    #[doc = include_str!("../../docs/client/system_info.md")]
+    /// Provides the [`SystemInfo`] struct, implementation-specific metadata
+    /// about the [`perspective_server::Server`] runtime such as Memory and
+    /// CPU usage.
     pub async fn system_info(&self) -> ClientResult<SystemInfo> {
         let msg = Request {
             msg_id: self.gen_id(),

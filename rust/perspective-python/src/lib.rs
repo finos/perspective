@@ -25,16 +25,6 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, fmt};
 
-macro_rules! inherit_doc {
-    (#[inherit_doc = $y:literal] $x:item) => {
-        #[cfg_attr(feature = "external-docs", doc =
-                                include_str!(concat!(env!("PERSPECTIVE_CLIENT_DOCS_PATH"), $y)))]
-        $x
-    };
-}
-
-pub(crate) use inherit_doc;
-
 /// Create a tracing filter which mimics the default behavior of reading from
 /// env, customized to exclude timestamp.
 /// [`tracing` filter docs](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/index.html#per-layer-filtering)
@@ -50,7 +40,7 @@ fn init_tracing() {
         .init();
 }
 
-/// A Python module implemented in Rust.
+/// Perspective Python main module.
 #[pymodule]
 fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     init_tracing();
@@ -63,8 +53,6 @@ fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<client::client_async::AsyncTable>()?;
     m.add_class::<client::client_async::AsyncView>()?;
     m.add_class::<client::proxy_session::ProxySession>()?;
-
     m.add("PerspectiveError", py.get_type::<PyPerspectiveError>())?;
-
     Ok(())
 }

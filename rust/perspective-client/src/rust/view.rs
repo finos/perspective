@@ -61,7 +61,7 @@ pub struct Dimensions {
     pub num_table_columns: usize,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, TS, PartialEq)]
 pub struct ViewWindow {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub start_row: Option<f32>,
@@ -102,7 +102,90 @@ impl From<ViewWindow> for ViewPort {
     }
 }
 
-#[doc = include_str!("../../docs/view.md")]
+/// The [`View`] struct is Perspective's query and serialization interface. It
+/// represents a query on the `Table`'s dataset and is always created from an
+/// existing `Table` instance via the [`Table::view`] method.
+///
+/// [`View`]s are immutable with respect to the arguments provided to the
+/// [`Table::view`] method; to change these parameters, you must create a new
+/// [`View`] on the same [`Table`]. However, each [`View`] is _live_ with
+/// respect to the [`Table`]'s data, and will (within a conflation window)
+/// update with the latest state as its parent [`Table`] updates, including
+/// incrementally recalculating all aggregates, pivots, filters, etc. [`View`]
+/// query parameters are composable, in that each parameter works independently
+/// _and_ in conjunction with each other, and there is no limit to the number of
+/// pivots, filters, etc. which can be applied.
+///
+/// To construct a [`View`], call the [`Table::view`] factory method. A
+/// [`Table`] can have as many [`View`]s associated with it as you need -
+/// Perspective conserves memory by relying on a single [`Table`] to power
+/// multiple [`View`]s concurrently.
+///
+/// # Examples
+///
+/// ```rust
+/// let opts = TableInitOptions::default();
+/// let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+/// let table = client.table(data, opts).await?;
+///
+/// let view = table.view(None).await?;
+/// let arrow = view.to_arrow().await?;
+/// view.delete().await?;
+/// ```
+///
+/// ```rust
+/// use crate::config::*;
+/// let view = table
+///     .view(Some(ViewConfigUpdate {
+///         columns: Some(vec![Some("Sales".into())]),
+///         aggregates: Some(HashMap::from_iter(vec![("Sales".into(), "sum".into())])),
+///         group_by: Some(vec!["Region".into(), "Country".into()]),
+///         filter: Some(vec![Filter::new("Category", "in", &[
+///             "Furniture",
+///             "Technology",
+///         ])]),
+///         ..ViewConfigUpdate::default()
+///     }))
+///     .await?;
+/// ```
+///
+///  Group By
+///
+/// ```rust
+/// let view = table
+///     .view(Some(ViewConfigUpdate {
+///         group_by: Some(vec!["a".into(), "c".into()]),
+///         ..ViewConfigUpdate::default()
+///     }))
+///     .await?;
+/// ```
+///
+/// Split By
+///
+/// ```rust
+/// let view = table
+///     .view(Some(ViewConfigUpdate {
+///         split_by: Some(vec!["a".into(), "c".into()]),
+///         ..ViewConfigUpdate::default()
+///     }))
+///     .await?;
+/// ```
+///
+/// In Javascript, a [`Table`] can be constructed on a [`Table::view`] instance,
+/// which will return a new [`Table`] based on the [`Table::view`]'s dataset,
+/// and all future updates that affect the [`Table::view`] will be forwarded to
+/// the new [`Table`]. This is particularly useful for implementing a
+/// [Client/Server Replicated](server.md#clientserver-replicated) design, by
+/// serializing the `View` to an arrow and setting up an `on_update` callback.
+///
+/// ```rust
+/// let opts = TableInitOptions::default();
+/// let data = TableData::Update(UpdateData::Csv("x,y\n1,2\n3,4".into()));
+/// let table = client.table(data, opts).await?;
+/// let view = table.view(None).await?;
+/// let table2 = client.table(TableData::View(view)).await?;
+/// table.update(data).await?;
+/// ```
 #[derive(Clone, Debug)]
 pub struct View {
     pub name: String,
@@ -124,7 +207,11 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/column_paths.md")]
+    /// Returns an array of strings containing the column paths of the [`View`]
+    /// without any of the source columns.
+    ///
+    /// A column path shows the columns that a given cell belongs to after
+    /// pivots are applied.
     pub async fn column_paths(&self) -> ClientResult<Vec<String>> {
         let msg = self.client_message(ClientReq::ViewColumnPathsReq(ViewColumnPathsReq {}));
         match self.client.oneshot(&msg).await? {
@@ -136,7 +223,21 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/dimensions.md")]
+    /// Returns this [`View`]'s _dimensions_, row and column count, as well as
+    /// those of the [`crate::Table`] from which it was derived.
+    ///
+    /// - `num_table_rows` - The number of rows in the underlying
+    ///   [`crate::Table`].
+    /// - `num_table_columns` - The number of columns in the underlying
+    ///   [`crate::Table`] (including the `index` column if this
+    ///   [`crate::Table`] was constructed with one).
+    /// - `num_view_rows` - The number of rows in this [`View`]. If this
+    ///   [`View`] has a `group_by` clause, `num_view_rows` will also include
+    ///   aggregated rows.
+    /// - `num_view_columns` - The number of columns in this [`View`]. If this
+    ///   [`View`] has a `split_by` clause, `num_view_columns` will include all
+    ///   _column paths_, e.g. the number of `columns` clause times the number
+    ///   of `split_by` groups.
     pub async fn dimensions(&self) -> ClientResult<ViewDimensionsResp> {
         let msg = self.client_message(ClientReq::ViewDimensionsReq(ViewDimensionsReq {}));
         match self.client.oneshot(&msg).await? {
@@ -145,7 +246,9 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/expression_schema.md")]
+    /// The expression schema of this [`View`], which contains only the
+    /// expressions created on this [`View`]. See [`View::schema`] for
+    /// details.
     pub async fn expression_schema(&self) -> ClientResult<HashMap<String, ColumnType>> {
         let msg = self.client_message(ClientReq::ViewExpressionSchemaReq(
             ViewExpressionSchemaReq {},
@@ -159,7 +262,8 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/get_config.md")]
+    /// A copy of the config object passed to the [`Table::view`] method which
+    /// created this [`View`].
     pub async fn get_config(&self) -> ClientResult<crate::config::ViewConfig> {
         let msg = self.client_message(ClientReq::ViewGetConfigReq(ViewGetConfigReq {}));
         match self.client.oneshot(&msg).await? {
@@ -170,12 +274,24 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/num_rows.md")]
+    /// The number of aggregated rows in this [`View`]. This is affected by the
+    /// "group_by" configuration parameter supplied to this view's contructor.
+    ///
+    /// # Returns
+    ///
+    /// The number of aggregated rows.
     pub async fn num_rows(&self) -> ClientResult<u32> {
         Ok(self.dimensions().await?.num_view_rows)
     }
 
-    #[doc = include_str!("../../docs/view/schema.md")]
+    /// The schema of this [`View`].
+    ///
+    /// The [`View`] schema differs from the `schema` returned by
+    /// [`Table::schema`]; it may have different column names due to
+    /// `expressions` or `columns` configs, or it maye have _different
+    /// column types_ due to the application og `group_by` and `aggregates`
+    /// config. You can think of [`Table::schema`] as the _input_ schema and
+    /// [`View::schema`] as the _output_ schema of a Perspective pipeline.
     pub async fn schema(&self) -> ClientResult<HashMap<String, ColumnType>> {
         let msg = self.client_message(ClientReq::ViewSchemaReq(ViewSchemaReq {}));
         match self.client.oneshot(&msg).await? {
@@ -187,7 +303,7 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/to_arrow.md")]
+    /// Serializes a [`View`] to the Apache Arrow data format.
     pub async fn to_arrow(&self, window: ViewWindow) -> ClientResult<Bytes> {
         let msg = self.client_message(ClientReq::ViewToArrowReq(ViewToArrowReq {
             viewport: Some(window.clone().into()),
@@ -200,7 +316,8 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/to_columns_string.md")]
+    /// Serializes this [`View`] to a string of JSON data. Useful if you want to
+    /// save additional round trip serialize/deserialize cycles.    
     pub async fn to_columns_string(&self, window: ViewWindow) -> ClientResult<String> {
         let msg = self.client_message(ClientReq::ViewToColumnsStringReq(ViewToColumnsStringReq {
             viewport: Some(window.clone().into()),
@@ -218,7 +335,7 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/to_json_string.md")]
+    /// Render this `View` as a JSON string.
     pub async fn to_json_string(&self, window: ViewWindow) -> ClientResult<String> {
         let viewport = ViewPort {
             start_row: window.start_row.map(|x| x.floor() as u32),
@@ -243,7 +360,8 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/to_ndjson.md")]
+    /// Renders this [`View`] as an [NDJSON](https://github.com/ndjson/ndjson-spec)
+    /// formatted [`String`].
     pub async fn to_ndjson(&self, window: ViewWindow) -> ClientResult<String> {
         let viewport = ViewPort {
             start_row: window.start_row.map(|x| x.floor() as u32),
@@ -268,7 +386,7 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/to_csv.md")]
+    /// Serializes this [`View`] to CSV data in a standard format.
     pub async fn to_csv(&self, window: ViewWindow) -> ClientResult<String> {
         let msg = self.client_message(ClientReq::ViewToCsvReq(ViewToCsvReq {
             viewport: Some(window.into()),
@@ -280,7 +398,10 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/delete.md")]
+    /// Delete this [`View`] and clean up all resources associated with it.
+    /// [`View`] objects do not stop consuming resources or processing
+    /// updates when they are garbage collected - you must call this method
+    /// to reclaim these.
     pub async fn delete(&self) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::ViewDeleteReq(ViewDeleteReq {}));
         match self.client.oneshot(&msg).await? {
@@ -289,7 +410,11 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/get_min_max.md")]
+    /// Calculates the [min, max] of the leaf nodes of a column `column_name`.
+    ///
+    /// # Returns
+    ///
+    /// A tuple of [min, max], whose types are column and aggregate dependent.
     pub async fn get_min_max(&self, column_name: String) -> ClientResult<(String, String)> {
         let msg = self.client_message(ClientReq::ViewGetMinMaxReq(ViewGetMinMaxReq {
             column_name,
@@ -301,9 +426,21 @@ impl View {
         }
     }
 
-    /// This is used when constructing a [`super::table::Table`] from a
-    /// [`View`]. The callback needs to be async to wire up the views
-    /// on_update to the tables.
+    /// Register a callback with this [`View`]. Whenever the view's underlying
+    /// table emits an update, this callback will be invoked with an object
+    /// containing `port_id`, indicating which port the update fired on, and
+    /// optionally `delta`, which is the new data that was updated for each
+    /// cell or each row.
+    ///
+    /// # Arguments
+    ///
+    /// - `on_update` - A callback function invoked on update, which receives an
+    ///   object with two keys: `port_id`, indicating which port the update was
+    ///   triggered on, and `delta`, whose value is dependent on the mode
+    ///   parameter.
+    /// - `options` - If this is provided as `OnUpdateOptions { mode:
+    ///   Some(OnUpdateMode::Row) }`, then `delta` is an Arrow of the updated
+    ///   rows. Otherwise `delta` will be [`Option::None`].
     pub async fn on_update<T, U>(&self, on_update: T, options: OnUpdateOptions) -> ClientResult<u32>
     where
         T: Fn(ViewOnUpdateResp) -> U + Send + Sync + 'static,
@@ -331,7 +468,20 @@ impl View {
         Ok(msg.msg_id)
     }
 
-    #[doc = include_str!("../../docs/view/remove_update.md")]
+    /// Unregister a previously registered update callback with this [`View`].
+    ///
+    /// # Arguments
+    ///
+    /// - `id` - A callback `id` as returned by a recipricol call to
+    ///   [`View::on_update`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let callback = |_| async { print!("Updated!") };
+    /// let cid = view.on_update(callback, OnUpdateOptions::default()).await?;
+    /// view.remove_update(cid).await?;
+    /// ```
     pub async fn remove_update(&self, update_id: u32) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::ViewRemoveOnUpdateReq(ViewRemoveOnUpdateReq {
             id: update_id,
@@ -344,7 +494,8 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/on_delete.md")]
+    /// Register a callback with this [`View`]. Whenever the [`View`] is
+    /// deleted, this callback will be invoked.
     pub async fn on_delete(
         &self,
         on_delete: Box<dyn Fn() + Send + Sync + 'static>,
@@ -362,7 +513,7 @@ impl View {
         Ok(msg.msg_id)
     }
 
-    #[doc = include_str!("../../docs/view/remove_delete.md")]
+    /// Unregister a previously registered [`View::on_delete`] callback.
     pub async fn remove_delete(&self, callback_id: u32) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::ViewRemoveDeleteReq(ViewRemoveDeleteReq {
             id: callback_id,
@@ -374,7 +525,7 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/collapse.md")]
+    /// Collapses the `group_by` row at `row_index`.
     pub async fn collapse(&self, row_index: u32) -> ClientResult<u32> {
         let msg = self.client_message(ClientReq::ViewCollapseReq(ViewCollapseReq { row_index }));
         match self.client.oneshot(&msg).await? {
@@ -383,7 +534,7 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/expand.md")]
+    /// Expand the `group_by` row at `row_index`.
     pub async fn expand(&self, row_index: u32) -> ClientResult<u32> {
         let msg = self.client_message(ClientReq::ViewExpandReq(ViewExpandReq { row_index }));
         match self.client.oneshot(&msg).await? {
@@ -392,7 +543,7 @@ impl View {
         }
     }
 
-    #[doc = include_str!("../../docs/view/set_depth.md")]
+    /// Set expansion `depth` of the `group_by` tree.
     pub async fn set_depth(&self, depth: u32) -> ClientResult<()> {
         let msg = self.client_message(ClientReq::ViewSetDepthReq(ViewSetDepthReq { depth }));
         match self.client.oneshot(&msg).await? {

@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { Project, defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/experimental-ct-react";
 import path from "path";
 import * as dotenv from "dotenv";
 import { createRequire } from "node:module";
@@ -80,6 +80,10 @@ const BROWSER_PACKAGES = [
     {
         packageName: "perspective-viewer",
         testDir: "rust/perspective-viewer/test/js",
+    },
+    {
+        packageName: "perspective-react",
+        testDir: "packages/perspective-react/test/js",
     },
     {
         packageName: "perspective-viewer-datagrid",
@@ -178,7 +182,7 @@ let PROJECTS = (() => {
                             baseURL: `http://localhost:${TEST_SERVER_PORT}`,
                             timezoneId: "UTC",
                         },
-                    } as Project);
+                    } as any);
                 }
             }
         }
@@ -211,6 +215,7 @@ export default defineConfig({
     outputDir: "dist/results",
     use: {
         headless: true,
+        ctPort: 3100,
         viewport: { width: 1280, height: 720 },
         actionTimeout: 0,
         // trace: "retain-on-failure",

@@ -1,0 +1,34 @@
+{
+    "name": "@finos/perspective-react",
+    "version": "0.0.0",
+    "description": "",
+    "main": "index.js",
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@finos/perspective": "workspace:^"
+    },
+    "exports": {
+        ".": "./dist/esm/index.js"
+    },
+    "type": "module",
+    "scripts": {
+        "build": "node ./build.js",
+        "clean": "rimraf dist"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "peerDependencies": {
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@types/react": "^18",
+        "react": "^18",
+        "react-dom": "^18"
+    },
+    "devDependencies": {
+        "@finos/perspective-esbuild-plugin": "workspace:^",
+        "zx": "^8.3.0"
+    }
+}

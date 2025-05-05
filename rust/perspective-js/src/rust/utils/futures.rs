@@ -173,7 +173,6 @@ pub impl Result<JsValue, JsValue> {
 #[extend::ext]
 pub impl Result<JsValue, ApiError> {
     fn ignore_view_delete(self) -> Result<JsValue, ApiError> {
-        tracing::error!("B");
         self.or_else(|x| {
             let f: JsValue = x.clone().into();
             match f.dyn_ref::<PerspectiveViewNotFoundError>() {

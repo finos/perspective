@@ -47,7 +47,6 @@ test.describe("leaks", () => {
             await page.evaluate(async () => {
                 const element = document.querySelector("perspective-viewer");
                 await element.delete();
-                await element.free();
                 document.body.innerHTML =
                     "<perspective-viewer></perspective-viewer>";
 

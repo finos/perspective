@@ -20,10 +20,10 @@
 //! computes a "Group By" operation, returning a new Arrow.
 //!
 //! ```rust
+//! use perspective::LocalClient;
 //! use perspective::client::config::ViewConfigUpdate;
 //! use perspective::client::{TableInitOptions, UpdateData, ViewWindow};
 //! use perspective::server::Server;
-//! use perspective::LocalClient;
 //!
 //! # let arow_vec_data: Vec<u8> = vec![];
 //! let data = UpdateData::Arrow(arrow_vec_data);
@@ -45,9 +45,9 @@
 //!   JavaScript API.
 //! - [`perspective-python`](https://docs.rs/perspective-python/latest/) for the
 //!   Python API.
-//! - [`perspective-server`](https://docs.rs/perspective-python/latest/) for
+//! - [`perspective-server`](https://docs.rs/perspective-server/latest/) for
 //!   Data Binding details.
-//! - [`perspective-client`](https://docs.rs/perspective-python/latest/) for the
+//! - [`perspective-client`](https://docs.rs/perspective-client/latest/) for the
 //!   Rust Client API
 //! - [`perspective-viewer`](https://docs.rs/perspective-viewer/latest/) for the
 //!   WebAssembly `<perspective-viewer>` Custom Element API.
