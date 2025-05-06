@@ -46,8 +46,7 @@ anyhow = "1.0.66"
 wasm-bindgen-test = "0.3.13"
 
 [dependencies]
-macro_rules_attribute = "0.2.0"
-perspective-client = { version = "3.6.1" }
+perspective-client = { version = "^3.6.1" }
 base64 = "0.13.0"
 chrono = "0.4"
 extend = "1.1.2"
@@ -56,6 +55,7 @@ derivative = "2.2.0"
 getrandom = { version = "0.2", features = ["js"] }
 js-intern = "0.3.1"
 js-sys = "0.3.77"
+macro_rules_attribute = "0.2.0"
 prost = { version = "0.12.3", default-features = false, features = [
     "prost-derive",
     "std",
