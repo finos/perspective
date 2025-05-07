@@ -14,6 +14,8 @@ import { Octokit } from "octokit";
 import sh from "./sh.mjs";
 import fs from "node:fs/promises";
 
+import "zx/globals";
+
 // GitHub API Wrapper
 const OCTOKIT = new Octokit({
     auth: process.env.GITHUB_TOKEN,
@@ -72,13 +74,19 @@ async function publish_release_assets(releases) {
                 sh`twine upload ${release.name}`.runSync();
             } else if (release.name.endsWith(".tgz")) {
                 sh`npm publish ${release.name}`.runSync();
+            } else {
+                console.log(`Skipping  "${release.name}"`);
             }
         }
 
-        // `node_modules` is considered dirty and we've already checked git status below.
-        sh`cargo publish --allow-dirty`
-            .cwd("rust/perspective-viewer")
-            .runSync();
+        await $`mkdir -p rust/target/package && mv *.crate rust/target/package`;
+
+        await $`cargo publish -p perspective-server --allow-dirty --no-verify`;
+        await $`cargo publish -p perspective-client --allow-dirty --no-verify`;
+        await $`cargo publish -p perspective-python --allow-dirty --no-verify`;
+        await $`cargo publish -p perspective-js --allow-dirty --no-verify`;
+        await $`cargo publish -p perspective-viewer --allow-dirty --no-verify`;
+        await $`cargo publish -p perspective- --allow-dirty --no-verify`;
     } else {
         console.warn(`COMMIT not specified, aborting`);
     }

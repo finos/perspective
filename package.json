@@ -48,6 +48,7 @@
         "@finos/perspective-viewer-openlayers": "workspace:^",
         "@finos/perspective-workspace": "workspace:^",
         "@fontsource/roboto-mono": "4.5.10",
+        "@iarna/toml": "toml-1.0.0-rc.1",
         "@playwright/test": "^1.52.0",
         "@playwright/experimental-ct-react": "1.52.0",
         "@types/ws": "^8.18.1",

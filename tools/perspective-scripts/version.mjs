@@ -17,12 +17,27 @@ import { parseReleases } from "auto-changelog/src/releases.js";
 import { fetchTags } from "auto-changelog/src/tags.js";
 import { fetchRemote } from "auto-changelog/src/remote.js";
 import sh from "./sh.mjs";
+import * as toml from "@iarna/toml";
 
-if (!process.env.GITHUB_TOKEN) {
-    throw new Error("Missing GITHUB_TOKEN");
-}
+import "zx/globals";
 
-const NEW_VERSION = JSON.parse(fs.readFileSync("./package.json")).version;
+// if (!process.env.GITHUB_TOKEN) {
+//     throw new Error("Missing GITHUB_TOKEN");
+// }
+
+const IS_NIGHTLY = process.argv.indexOf("--nightly") > -1;
+
+const PKG_VERSION = JSON.parse(fs.readFileSync("./package.json")).version.match(
+    /[0-9]+\.[0-9]+\.[0-9]+/
+)[0];
+
+const GIT_REV = await $`git show --no-patch --format=%ct HEAD`;
+
+console.log();
+
+const NEW_VERSION = IS_NIGHTLY
+    ? `${PKG_VERSION}-dev${+new Date(parseInt(GIT_REV.toString()))}`
+    : PKG_VERSION;
 
 /**
  * A Github data fetching cache designed to run in parallel with changelog formatting.
@@ -174,7 +189,7 @@ async function update_package_jsons() {
     const pkg = JSON.parse(fs.readFileSync("./package.json"));
     pkg.version = NEW_VERSION;
     const pkg_json = `${JSON.stringify(pkg, undefined, 4)}\n`;
-    fs.writeFileSync("../package.json", pkg_json);
+    fs.writeFileSync("./package.json", pkg_json);
     const packages = {};
     for (const ws of pkg.workspaces) {
         for (const path of glob.sync(`${ws}/package.json`, {
@@ -190,26 +205,40 @@ async function update_package_jsons() {
         }
     }
 
-    // for (const pkg_name of Object.keys(packages)) {
-    //     const { pkg, path } = packages[pkg_name];
-    //     for (const deptype of [
-    //         "dependencies",
-    //         "devDependencies",
-    //         "peerDependencies",
-    //     ]) {
-    //         if (pkg[deptype]) {
-    //             for (const dep of Object.keys(pkg[deptype])) {
-    //                 if (packages[dep] !== undefined) {
-    //                     pkg[deptype][dep] = `^${NEW_VERSION}`;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     const pkg_json = `${JSON.stringify(pkg, undefined, 4)}\n`;
-    //     fs.writeFileSync(path, pkg_json);
-    //     sh`git add ${path}`.runSync();
-    // }
+    const cargo = toml.parse(fs.readFileSync("./Cargo.toml"));
+    for (const pkg of cargo.workspace.members) {
+        const crate = toml.parse(fs.readFileSync(`./${pkg}/Cargo.toml`));
+        if (crate?.package.version) {
+            crate.package.version = NEW_VERSION;
+        }
+
+        for (const key of Object.keys(crate?.dependencies)) {
+            if (key.startsWith("perspective")) {
+                crate.dependencies[key].version = NEW_VERSION;
+            }
+        }
+        fs.writeFileSync(`./${pkg}/Cargo.toml`, toml.stringify(crate));
+    }
+
+    if (!IS_NIGHTLY) {
+        const pyproject = toml.parse(
+            fs.readFileSync(`./rust/perspective-python/pyproject.toml`)
+        );
+
+        pyproject.tool.maturin.data = `perspective_python-${NEW_VERSION}.data`;
+        fs.writeFileSync(
+            `./rust/perspective-python/pyproject.toml`,
+            toml.stringify(pyproject)
+        );
+    }
 }
 
-await update_changelog();
+if (!IS_NIGHTLY) {
+    if (!process.env.GITHUB_TOKEN) {
+        throw new Error("Missing GITHUB_TOKEN");
+    }
+
+    await update_changelog();
+}
+
 await update_package_jsons();
