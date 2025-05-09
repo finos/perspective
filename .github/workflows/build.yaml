@@ -95,7 +95,7 @@ jobs:
                   PACKAGE: "perspective-metadata"
 
             - name: Lint
-              run: pnpm run lint
+              run: pnpm run lint --nightly
 
             # - name: Docs Build
             #   run: pnpm run docs
@@ -155,7 +155,7 @@ jobs:
             - name: WebAssembly Build
               run: pnpm run build --ci
               env:
-                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli"
+                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli,perspective-react"
                   # PSP_USE_CCACHE: 1
 
             - uses: actions/upload-artifact@v4
@@ -170,6 +170,7 @@ jobs:
                       packages/perspective-viewer-openlayers/dist
                       packages/perspective-cli/dist
                       packages/perspective-workspace/dist
+                      packages/perspective-react/dist
 
     # ,-,---.       .    .  .-,--.     .  .
     #  '|___/ . . . |  ,-|   '|__/ . . |- |-. ,-. ,-.
@@ -627,7 +628,7 @@ jobs:
             - name: Run Tests
               run: pnpm run test
               env:
-                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli"
+                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli,perspective-react"
                   # PSP_USE_CCACHE: 1
 
     # ,--,--'      .   .-,--.     .  .
@@ -990,6 +991,9 @@ jobs:
 
             - run: pnpm pack --pack-destination=../..
               working-directory: ./packages/perspective-workspace
+
+            - run: pnpm pack --pack-destination=../..
+              working-directory: ./packages/perspective-react
 
             - run: pnpm pack --pack-destination=../..
               working-directory: ./packages/perspective-cli

@@ -38,7 +38,7 @@ export function getRustWheelsDir() {
     return rustWheelsDir;
 }
 export function getEmscriptenWheelPath() {
-    const pspVersion = getWorkspacePackageJson().version;
+    const pspVersion = getWorkspacePackageJson().version.replace("-", ".");
     const wheeljunk = "cp39-abi3-emscripten_3_1_58_wasm32";
     return path.join(
         rustWheelsDir,

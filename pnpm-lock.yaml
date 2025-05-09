@@ -38,6 +38,9 @@ importers:
       '@fontsource/roboto-mono':
         specifier: 4.5.10
         version: 4.5.10
+      '@iarna/toml':
+        specifier: toml-1.0.0-rc.1
+        version: 3.0.0
       '@playwright/experimental-ct-react':
         specifier: 1.52.0
         version: 1.52.0(@types/node@22.10.5)(jiti@1.21.6)(less@4.2.0)(terser@5.37.0)(tsx@4.19.2)(vite@6.3.3(@types/node@22.10.5)(jiti@1.21.6)(less@4.2.0)(terser@5.37.0)(tsx@4.19.2))
@@ -3401,6 +3404,9 @@ packages:
   '@humanwhocodes/retry@0.4.1':
     resolution: {integrity: sha512-c7hNEllBlenFTHBky65mhq8WD2kbN9Q6gk0bTk8lSBvc554jpXSkST1iePudpt7+A/AQvuHs9EMqjHDXMY1lrA==}
     engines: {node: '>=18.18'}
+
+  '@iarna/toml@3.0.0':
+    resolution: {integrity: sha512-td6ZUkz2oS3VeleBcN+m//Q6HlCFCPrnI0FZhrt/h4XqLEdOyYp2u21nd8MdsR+WJy5r9PTDaHTDDfhf4H4l6Q==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -14048,6 +14054,8 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.1':
     optional: true
+
+  '@iarna/toml@3.0.0': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:

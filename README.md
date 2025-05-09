@@ -44,7 +44,7 @@ applications.
 -   [`@finos/perspective`, JavaScript Client API](https://docs.rs/perspective-js/latest/perspective_js/)
 -   [`@finos/perspective-viewer`, JavaScript UI API](https://docs.rs/perspective-viewer/latest/perspective_viewer/)
 -   [`perspective-python`, Python API](https://docs.rs/perspective-python/latest/perspective_python/)
--   [`perspective`, Rust API](https://docs.rs/perspective-rs/latest/perspective_rs/)
+-   [`perspective`, Rust API](https://docs.rs/perspective/latest/perspective/)
 
 ### Examples
 
@@ -64,7 +64,6 @@ applications.
 <td><a href="https://www.youtube.com/watch?v=v5Y5ftlGNhU"><img width="240" src="https://img.youtube.com/vi/v5Y5ftlGNhU/0.jpg" /></a></td>
 <td><a href="https://www.youtube.com/watch?v=lDpIu4dnp78"><img width="240" src="https://img.youtube.com/vi/lDpIu4dnp78/0.jpg" /></a></td>
 <td><a href="https://www.youtube.com/watch?v=IO-HJsGdleE"><img width="240"  src="https://img.youtube.com/vi/IO-HJsGdleE/0.jpg" /></a></td>
-
 </tr>
 <tr>
 <td><a href="https://github.com/texodus"><code>@texodus</code></a></td>

@@ -79,7 +79,14 @@ async function check(is_write, pattern, comment) {
 
         const expected_header = header_text(default_comment);
         let seen_whitespace = false;
-        if (!contents.startsWith(expected_header)) {
+        // Nightly builds modify the version of metadata scripts in place to
+        // tag the nightly, so lint will fail if we don't make an exception
+        // for these files.
+        const is_nightly =
+            process.argv.indexOf("--nightly") > -1 &&
+            match.indexOf("Cargo.toml") > -1;
+
+        if (!contents.startsWith(expected_header) && !is_nightly) {
             console.error(`Missing header in file ${match}`);
             while (
                 contents.length > 0 &&
