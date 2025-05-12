@@ -72,11 +72,6 @@ impl ProxySession {
         Ok(())
     }
 
-    #[wasm_bindgen]
-    pub async fn poll(&self) -> ApiResult<()> {
-        self.0.poll().await?;
-        Ok(())
-    }
 
     pub async fn close(self) {
         self.0.close().await;

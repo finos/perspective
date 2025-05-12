@@ -63,6 +63,7 @@ class TestProxySession(object):
 
         def handle_response(bytes):
             import asyncio
+
             asyncio.create_task(sub_client.handle_response(bytes))
 
         sub_session = ProxySession(client, handle_response)
@@ -86,7 +87,6 @@ class TestProxySession(object):
 
         async def send_request(bytes):
             await sub_session.handle_request_async(bytes)
-            await sub_session.poll_async()
 
         sub_session = ProxySession(client, send_response)
         sub_client = AsyncClient(send_request, sub_session.close)

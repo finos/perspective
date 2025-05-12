@@ -12,30 +12,27 @@
 
 from perspective import (
     AsyncClient,
-    Server,
+    AsyncServer,
     PerspectiveError,
 )
 
-import asyncio
+
 import pytest
 from unittest.mock import Mock
 
 
 @pytest.fixture
 def server():
-    return Server()
+    return AsyncServer()
 
 
 @pytest.fixture
 def client(server):
     async def send_request(msg):
-        sess.handle_request(msg)
+        await sess.handle_request(msg)
 
-    def send_response(msg):
-        async def poke_client():
-            await client.handle_response(msg)
-
-        asyncio.get_running_loop().create_task(poke_client())
+    async def send_response(msg):
+        await client.handle_response(msg)
 
     sess = server.new_session(send_response)
     client = AsyncClient(send_request)

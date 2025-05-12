@@ -84,7 +84,8 @@ async function check(is_write, pattern, comment) {
         // for these files.
         const is_nightly =
             process.argv.indexOf("--nightly") > -1 &&
-            match.indexOf("Cargo.toml") > -1;
+            (match.indexOf("Cargo.toml") > -1 ||
+                match.indexOf("pyproject.toml") > -1);
 
         if (!contents.startsWith(expected_header) && !is_nightly) {
             console.error(`Missing header in file ${match}`);

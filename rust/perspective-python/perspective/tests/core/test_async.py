@@ -77,7 +77,6 @@ class TestAsync(object):
         server = Server()
         client = Client.from_server(
             server,
-            loop_callback=lambda fn, *args: TestAsync.loop.add_callback(fn, *args),
         )
 
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
@@ -97,7 +96,6 @@ class TestAsync(object):
         server = Server()
         client = Client.from_server(
             server,
-            loop_callback=lambda fn, *args: TestAsync.loop.add_callback(fn, *args),
         )
         tbl = client.table("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
 
@@ -116,7 +114,6 @@ class TestAsync(object):
         server = Server()
         client = Client.from_server(
             server,
-            loop_callback=lambda fn, *args: TestAsync.loop.add_callback(fn, *args),
         )
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl.update(data)
@@ -130,13 +127,9 @@ class TestAsync(object):
 
     def test_async_multiple_managers_queue_process(self):
         server = Server()
-        client = Client.from_server(
-            server, lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = Client.from_server(server)
         server2 = Server()
-        client2 = Client.from_server(
-            server2, lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client2 = Client.from_server(server2)
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
 
@@ -179,12 +172,10 @@ class TestAsync(object):
             f(*args, **kwargs)
 
         server = Server()
-        client = Client.from_server(
-            server, lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = Client.from_server(server)
 
         server2 = Server()
-        client2 = Client.from_server(server2, sync_queue_process)
+        client2 = Client.from_server(server2)
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
 
@@ -232,15 +223,11 @@ class TestAsync(object):
             TestAsync.loop.add_timeout, 1, _counter, "async"
         )
 
-        server = Server()
-        client = Client.from_server(
-            server, lambda fn, *args: short_delay_queue_process(fn, *args)
-        )
+        server = Server(on_poll_request=short_delay_queue_process)
+        client = Client.from_server(server)
 
-        server2 = Server()
-        client2 = Client.from_server(
-            server2, lambda fn, *args: long_delay_queue_process(fn, *args)
-        )
+        server2 = Server(on_poll_request=long_delay_queue_process)
+        client2 = Client.from_server(server2)
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
 
@@ -271,7 +258,7 @@ class TestAsync(object):
             TestAsync.loop.add_callback(fn, *args)
 
         server = Server()
-        client = Client.from_server(server, call_loop)
+        client = Client.from_server(server)
         columns = {"index": "integer", "num1": "integer", "num2": "integer"}
         # tbl = client.table(columns, index="index")
         tbl = client.table(columns)
@@ -306,9 +293,7 @@ class TestAsync(object):
 
     def test_async_queue_process_multiple_ports(self):
         server = Server()
-        client = Client.from_server(
-            server, lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = Client.from_server(server)
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         port_ids = [0]
         port_data = [{"a": 0, "b": 0, "c": "0"}]
@@ -338,14 +323,10 @@ class TestAsync(object):
 
     def test_async_multiple_managers_queue_process_multiple_ports(self):
         server = Server()
-        client = Client.from_server(
-            server, lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client = Client.from_server(server)
 
         server2 = Server()
-        client2 = Client.from_server(
-            server2, lambda fn, *args: TestAsync.loop.add_callback(fn, *args)
-        )
+        client2 = Client.from_server(server2)
         tbl = client.table({"a": "integer", "b": "float", "c": "string"})
         tbl2 = client2.table({"a": "integer", "b": "float", "c": "string"})
         port_ids = [0]
@@ -368,55 +349,3 @@ class TestAsync(object):
             return (tbl.size(), tbl2.size())
 
         assert _task() == (11, 11)
-
-    @mark.skip(
-        reason="This test is failing because we're not calling process after each update like before"
-    )
-    def test_async_multiple_managers_mixed_queue_process_multiple_ports(self):
-        sentinel = {"async": 0, "sync": 0}
-
-        def _counter(key, f, *args, **kwargs):
-            sentinel[key] += 1
-            return f(*args, **kwargs)
-
-        sync_process = partial(_counter, "sync")
-        async_process = partial(TestAsync.loop.add_timeout, 1, _counter, "async")
-        server = Server()
-        sync_client = Client.from_server(server, lambda *args: sync_process(*args))
-        async_client = Client.from_server(server, lambda *args: async_process(*args))
-        tbl = async_client.table({"a": "integer", "b": "float", "c": "string"})
-        tbl2 = sync_client.table({"a": "integer", "b": "float", "c": "string"})
-        port_ids = [0]
-        port_data = [{"a": 0, "b": 0, "c": "0"}]
-
-        for i in range(10):
-            port_id = tbl.make_port()
-            port_id2 = tbl2.make_port()
-            assert port_id == port_id2
-            port_ids.append(port_id)
-            port_data.append({"a": port_id, "b": port_id * 1.5, "c": str(port_id)})
-
-        random.shuffle(port_ids)
-
-        @syncify
-        def _task():
-            for port_id in port_ids:
-                idx = port_id if port_id < len(port_ids) else len(port_ids) - 1
-                tbl.update([port_data[idx]], port_id=port_id)
-
-        _task()
-        for port_id in port_ids:
-            idx = port_id if port_id < len(port_ids) else len(port_ids) - 1
-            tbl2.update([port_data[idx]], port_id=port_id)
-
-        @syncify
-        def _get_size():
-            size = tbl.size()
-            tbl.delete()
-            return size
-
-        assert _get_size() == 11
-        assert tbl2.size() == 11
-        assert sentinel["async"] == 1
-        assert sentinel["sync"] == 11
-        tbl2.delete()

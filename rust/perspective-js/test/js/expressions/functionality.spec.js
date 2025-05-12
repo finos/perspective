@@ -159,7 +159,7 @@ import perspective from "../perspective_client";
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [
                         new Date(2020, 3, 1),
                         new Date(2012, 0, 30),
@@ -199,7 +199,7 @@ import perspective from "../perspective_client";
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [
                         new Date(2020, 3, 1, 12, 30, 45, 850),
                         new Date(2012, 0, 30, 19, 25),
@@ -294,7 +294,7 @@ import perspective from "../perspective_client";
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [
                         new Date(2020, 3, 1),
                         new Date(2012, 0, 30),
@@ -330,7 +330,7 @@ import perspective from "../perspective_client";
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [
                         new Date(2020, 3, 1, 12, 30, 45, 850),
                         new Date(2012, 0, 30, 19, 25),
@@ -436,7 +436,7 @@ import perspective from "../perspective_client";
                     y: "string",
                     z: "boolean",
                 });
-                table.update(expressions_common.int_float_data);
+                await table.update(expressions_common.int_float_data);
                 const expr = `switch { case "w" > 2: (sqrt(144) * "w"); case "y" == 'a': (sqrt(121) * "w"); default: "x"; }`;
                 const view = await table.view({
                     expressions: { [expr]: expr },
@@ -769,7 +769,7 @@ import perspective from "../perspective_client";
             await view.delete();
             await table.clear();
 
-            table.update([expressions_common.int_float_data[0]]);
+            await table.update([expressions_common.int_float_data[0]]);
 
             const view2 = await table.view({
                 expressions: [
@@ -936,7 +936,7 @@ import perspective from "../perspective_client";
 
             await table.clear();
 
-            table.update([expressions_common.int_float_data[0]]);
+            await table.update([expressions_common.int_float_data[0]]);
 
             const view2 = await table.view({
                 expressions: [
@@ -1134,7 +1134,7 @@ import perspective from "../perspective_client";
             const tomorrow = new Date();
             tomorrow.setDate(new Date().getDate() + 1);
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 3, 1),
                     new Date(2012, 0, 30),
@@ -1167,7 +1167,7 @@ import perspective from "../perspective_client";
             const tomorrow = new Date();
             tomorrow.setDate(new Date().getDate() + 1);
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 3, 1, 12, 30, 45, 850),
                     new Date(2012, 0, 30, 19, 25),
@@ -1445,12 +1445,12 @@ import perspective from "../perspective_client";
                 z: [],
             });
 
-            table.update(expressions_common.int_float_data);
+            await table.update(expressions_common.int_float_data);
 
             const new_result = await view.to_columns();
             expect(new_result['("w" + "x") * 10']).toEqual([25, 45, 65, 85]);
 
-            table.update(expressions_common.int_float_data);
+            await table.update(expressions_common.int_float_data);
 
             const new_result2 = await view.to_columns();
             expect(new_result2['("w" + "x") * 10']).toEqual([
@@ -2226,7 +2226,7 @@ import perspective from "../perspective_client";
                 '"w" + "x"': [2.5, 4.5, 6.5, 8.5],
             });
 
-            table.update({
+            await table.update({
                 w: [5, 6, 7, 8],
                 x: [1, 2, 3, 4],
             });

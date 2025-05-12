@@ -103,8 +103,12 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     async update(view) {
-        this.model._num_rows = await view.num_rows();
-        await this.regular_table.draw();
+        if (this.model === undefined) {
+            await this.draw(view);
+        } else {
+            this.model._num_rows = await view.num_rows();
+            await this.regular_table.draw();
+        }
     }
 
     async render(viewport) {

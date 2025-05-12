@@ -67,16 +67,6 @@ impl ProxySession {
         Ok(())
     }
 
-    pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
-        self.0.poll().py_block_on(py).into_pyerr()?;
-        Ok(())
-    }
-
-    pub async fn poll_async(&self) -> PyResult<()> {
-        self.0.poll().await.into_pyerr()?;
-        Ok(())
-    }
-
     pub fn close(&self, py: Python<'_>) -> PyResult<()> {
         self.0.clone().close().py_block_on(py);
         Ok(())

@@ -65,7 +65,7 @@ const pivot_data = [
                 "hello world, here is a long, long, long string with lots of characters",
                 "hello world, here is a long, long, long string with lots of characters",
             ]);
-            table.update({ x: [5, 6, 7] });
+            await table.update({ x: [5, 6, 7] });
 
             const after = await view.to_columns();
             expect(after["10 + 20"]).toEqual([30, 30, 30, 30, 30, 30, 30]);
@@ -119,7 +119,7 @@ const pivot_data = [
                 false,
             ]);
 
-            table.update({ x: [5, 6, 7], y: ["A", "A", "B"] });
+            await table.update({ x: [5, 6, 7], y: ["A", "A", "B"] });
 
             const after = await view.to_columns();
             expect(after['if ("x" > 4) 10; else 100']).toEqual([
@@ -174,7 +174,7 @@ const pivot_data = [
                 "hello world, here is a long, long, long string with lots of characters",
             ]);
 
-            table.update({ x: [5, 6, 7], y: ["A", "B", "D"] });
+            await table.update({ x: [5, 6, 7], y: ["A", "B", "D"] });
 
             const after = await view.to_columns();
             expect(after["10 + 20"]).toEqual([30, 30, 30, 30]);
@@ -220,7 +220,7 @@ const pivot_data = [
             ]);
 
             for (let i = 0; i < 5; i++) {
-                table.update({
+                await table.update({
                     x: [1.5, 2.5, 3.5, 4.5],
                     y: ["A", "B", "C", "D"],
                 });
@@ -317,7 +317,7 @@ const pivot_data = [
                 false,
                 false,
             ]);
-            table.update({
+            await table.update({
                 x: [5, 6, 7],
                 y: ["A", "C", "D"],
                 z: ["a", "a", "a"],
@@ -348,7 +348,7 @@ const pivot_data = [
 
             const before = await view.to_columns();
             expect(before['lower("y")']).toEqual(["a", "b", "c", "d"]);
-            table.update({ y: ["HELLO", "WORLD"] });
+            await table.update({ y: ["HELLO", "WORLD"] });
 
             const after = await view.to_columns();
             expect(after['lower("y")']).toEqual([
@@ -374,7 +374,7 @@ const pivot_data = [
 
             const before = await view.to_columns();
             expect(before['lower("y")']).toEqual(["a", "b", "c", "d"]);
-            table.update({ y: ["HELLO", "WORLD"] });
+            await table.update({ y: ["HELLO", "WORLD"] });
 
             const result = await view.to_columns();
             expect(result['lower("y")']).toEqual([
@@ -386,7 +386,7 @@ const pivot_data = [
                 "world",
             ]);
 
-            table.update({ x: [12, 34], y: ["XYZ", "ABCdEFg"] });
+            await table.update({ x: [12, 34], y: ["XYZ", "ABCdEFg"] });
 
             const result2 = await view.to_columns();
             expect(result2["x"]).toEqual([1, 2, 3, 4, null, null, 12, 34]);
@@ -422,7 +422,7 @@ const pivot_data = [
                 4.5, 4, 4.5, 5.25,
             ]);
 
-            table.update({
+            await table.update({
                 x: [5, 6, 7, 8],
                 y: [5.5, 6.5, 7.5, 8.5],
                 z: [10, 10, 10, 10],
@@ -450,7 +450,7 @@ const pivot_data = [
 
             const before = await view.to_columns();
             expect(before['lower("y")']).toEqual(["a", "b", "c", "d"]);
-            table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
+            await table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
 
             const after = await view.to_columns();
             expect(after['lower("y")']).toEqual(["hello", "b", "world", "d"]);
@@ -471,7 +471,7 @@ const pivot_data = [
             expect(before['upper("z")']).toEqual(["A", "B", "C", "D"]);
 
             // `z` is missing in the update, so it should render as null
-            table.update({ x: [2, 4], y: [10.5, 12.5] });
+            await table.update({ x: [2, 4], y: [10.5, 12.5] });
 
             const after = await view.to_columns();
             expect(after).toEqual({
@@ -502,7 +502,7 @@ const pivot_data = [
                 y: [4, 1, 1, 2],
             });
 
-            table.update({ y: ["HELLO", "WORLD"] });
+            await table.update({ y: ["HELLO", "WORLD"] });
 
             const after = await view.to_columns();
             expect(after).toEqual({
@@ -523,7 +523,7 @@ const pivot_data = [
             const before = await view.to_columns();
             expect(before['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
 
-            table.update({ x: [2, 4], w: [10.5, 12.5] });
+            await table.update({ x: [2, 4], w: [10.5, 12.5] });
 
             const after = await view.to_columns();
             expect(after['"w" + "x"']).toEqual([
@@ -547,12 +547,12 @@ const pivot_data = [
             expect(before['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(before['upper("y")']).toEqual(["A", "B", "C", "D"]);
 
-            table.update({ x: [2, 4], w: [10.5, 12.5] });
+            await table.update({ x: [2, 4], w: [10.5, 12.5] });
 
             const after = await view.to_columns();
             expect(after['"w" + "x"']).toEqual([2.5, 12.5, 6.5, 16.5]);
 
-            table.update({ x: [1, 3], y: ["hello", "world"] });
+            await table.update({ x: [1, 3], y: ["hello", "world"] });
 
             const after2 = await view.to_columns();
             expect(after2['upper("y")']).toEqual(["HELLO", "B", "WORLD", "D"]);
@@ -575,7 +575,7 @@ const pivot_data = [
             expect(before['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(before2['"w" - "x"']).toEqual([0.5, 0.5, 0.5, 0.5]);
 
-            table.update({ x: [2, 4], w: [10.5, 12.5] });
+            await table.update({ x: [2, 4], w: [10.5, 12.5] });
 
             const after = await view.to_columns();
             const after2 = await view2.to_columns();
@@ -607,7 +607,7 @@ const pivot_data = [
             expect(before2['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(before2['"w" - "x"']).toEqual([0.5, 0.5, 0.5, 0.5]);
 
-            table.update({ x: [2, 4], w: [10.5, 12.5] });
+            await table.update({ x: [2, 4], w: [10.5, 12.5] });
 
             const after = await view.to_columns();
             const after2 = await view2.to_columns();
@@ -640,7 +640,7 @@ const pivot_data = [
             expect(before['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(before2['"w" - "x"']).toEqual([0.5, 0.5, 0.5, 0.5]);
 
-            table.update({ x: [2, 4], w: [10.5, 12.5] });
+            await table.update({ x: [2, 4], w: [10.5, 12.5] });
 
             const after = await view.to_columns();
             const after2 = await view2.to_columns();
@@ -672,7 +672,7 @@ const pivot_data = [
             expect(before2['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(before2['"w" - "x"']).toEqual([0.5, 0.5, 0.5, 0.5]);
 
-            table.update({ x: [2, 4], w: [10.5, 12.5] });
+            await table.update({ x: [2, 4], w: [10.5, 12.5] });
 
             const after = await view.to_columns();
             const after2 = await view2.to_columns();
@@ -701,7 +701,7 @@ const pivot_data = [
             expect(before['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(before2['"w" - "x"']).toEqual([0.5, 0.5, 0.5, 0.5]);
 
-            table.update({ x: [2, 4], w: [null, 12.5] });
+            await table.update({ x: [2, 4], w: [null, 12.5] });
 
             const after = await view.to_columns();
             const after2 = await view2.to_columns();
@@ -733,7 +733,7 @@ const pivot_data = [
             expect(before2['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(before2['"w" - "x"']).toEqual([0.5, 0.5, 0.5, 0.5]);
 
-            table.update({ x: [2, 4], w: [null, 12.5] });
+            await table.update({ x: [2, 4], w: [null, 12.5] });
 
             const after = await view.to_columns();
             const after2 = await view2.to_columns();
@@ -761,10 +761,10 @@ const pivot_data = [
 
             let before = await view.to_columns();
             expect(before['"w" + "y"']).toEqual([6.5, 8.5, 10.5, 12.5]);
-            table.update({ x: [2, 4], w: [null, 12.5] });
+            await table.update({ x: [2, 4], w: [null, 12.5] });
             const after = await view.to_columns();
             expect(after['"w" + "y"']).toEqual([6.5, null, 10.5, 20.5]);
-            table.update({ x: [2, 3], w: [20.5, null] });
+            await table.update({ x: [2, 3], w: [20.5, null] });
             const after2 = await view.to_columns();
             expect(after2['"w" + "y"']).toEqual([6.5, 26.5, null, 20.5]);
             view.delete();
@@ -786,12 +786,12 @@ const pivot_data = [
             let before = await view.to_columns();
             expect(before['"w" + "y"']).toEqual([6.5, 8.5, 10.5, 12.5]);
 
-            table.update({ x: [2, 4], w: [undefined, 12.5] });
+            await table.update({ x: [2, 4], w: [undefined, 12.5] });
 
             const after = await view.to_columns();
             expect(after['"w" + "y"']).toEqual([6.5, 8.5, 10.5, 20.5]);
 
-            table.update({ x: [2, 3], w: [20.5, undefined] });
+            await table.update({ x: [2, 3], w: [20.5, undefined] });
 
             const after2 = await view.to_columns();
             expect(after2['"w" + "y"']).toEqual([6.5, 26.5, 10.5, 20.5]);
@@ -814,14 +814,14 @@ const pivot_data = [
             let before = await view.to_columns();
             expect(before['"w" + "y"']).toEqual([6.5, 8.5, 10.5, 12.5]);
 
-            table.update({ x: [2] });
-            table.update({ x: [4], w: [12.5] });
+            await table.update({ x: [2] });
+            await table.update({ x: [4], w: [12.5] });
 
             const after = await view.to_columns();
             expect(after['"w" + "y"']).toEqual([6.5, 8.5, 10.5, 20.5]);
 
-            table.update({ x: [2], w: [20.5] });
-            table.update({ x: [3] });
+            await table.update({ x: [2], w: [20.5] });
+            await table.update({ x: [3] });
 
             const after2 = await view.to_columns();
             expect(after2['"w" + "y"']).toEqual([6.5, 26.5, 10.5, 20.5]);
@@ -842,7 +842,7 @@ const pivot_data = [
                 expressions: { '"w" / "x"': '"w" / "x"' },
             });
 
-            table.update(common.int_float_data);
+            await table.update(common.int_float_data);
 
             let delta_upd = [
                 { y: "a", z: false },
@@ -850,7 +850,7 @@ const pivot_data = [
                 { y: "c", z: false },
                 { y: "d", z: true },
             ];
-            table.update(delta_upd);
+            await table.update(delta_upd);
             let result = await view.to_json();
             let expected = [
                 { y: "a", '"w" / "x"': 1.5 },
@@ -872,8 +872,8 @@ const pivot_data = [
                 expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
-            table.update(data);
-            table.update([
+            await table.update(data);
+            await table.update([
                 { __INDEX__: 0, x: 10 },
                 { __INDEX__: 2, x: 10 },
             ]);
@@ -903,7 +903,7 @@ const pivot_data = [
                 { x: 4, y: 8, '"x" * "y"': 32 },
             ]);
 
-            table.update([{ __INDEX__: 0, x: 1 }]);
+            await table.update([{ __INDEX__: 0, x: 1 }]);
             const json2 = await view.to_json();
             expect(json2).toEqual(json);
             view.delete();
@@ -916,7 +916,7 @@ const pivot_data = [
                 expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
-            table.update([{ __INDEX__: 0, x: 10 }]);
+            await table.update([{ __INDEX__: 0, x: 10 }]);
             const json = await view.to_json();
             expect(json).toEqual([
                 { x: 10, y: 2, '"x" * "y"': 20 },
@@ -953,7 +953,7 @@ const pivot_data = [
             const view = await table.view({
                 expressions: { '"x" * "y"': '"x" * "y"' },
             });
-            table.update([
+            await table.update([
                 { x: 1, y: 10 },
                 { x: 3, y: 20 },
             ]);
@@ -979,7 +979,7 @@ const pivot_data = [
                 { index: "index" }
             );
 
-            table.update({
+            await table.update({
                 a: [null, null, 1.5, null],
                 b: [null, 2.5, null, null],
                 c: ["a", "b", "b", "a"],
@@ -993,7 +993,7 @@ const pivot_data = [
             let result = await view.to_columns();
             expect(result["computed"]).toEqual([null, null, null, null]);
 
-            table.update({
+            await table.update({
                 index: [4],
                 a: [100],
             });
@@ -1001,7 +1001,7 @@ const pivot_data = [
             result = await view.to_columns();
             expect(result["computed"]).toEqual([null, null, null, null]);
 
-            table.update({
+            await table.update({
                 index: [4],
                 b: [100],
             });
@@ -1009,7 +1009,7 @@ const pivot_data = [
             result = await view.to_columns();
             expect(result["computed"]).toEqual([null, null, null, 200]);
 
-            table.update({
+            await table.update({
                 index: [3],
                 b: [100],
             });
@@ -1027,15 +1027,15 @@ const pivot_data = [
                 expressions: { '"x" * "y"': '"x" * "y"' },
             });
 
-            table.update([
+            await table.update([
                 { __INDEX__: 0, x: 10 },
                 { __INDEX__: 2, x: 10 },
             ]);
-            table.update([
+            await table.update([
                 { __INDEX__: 0, x: 20 },
                 { __INDEX__: 2, x: 20 },
             ]);
-            table.update([
+            await table.update([
                 { __INDEX__: 0, x: 30 },
                 { __INDEX__: 2, x: 30 },
             ]);
@@ -1060,7 +1060,7 @@ const pivot_data = [
                 expressions: { '"x" + "y"': '"x" + "y"' },
             });
 
-            table.update([
+            await table.update([
                 { __INDEX__: 0, x: 5 },
                 { __INDEX__: 2, x: 10 },
             ]);
@@ -1100,7 +1100,7 @@ const pivot_data = [
                 expressions: { '"x" - "y"': '"x" - "y"' },
             });
 
-            table.update({ x: [1, 2, 3, 4], y: [1, 2, 3, 4] });
+            await table.update({ x: [1, 2, 3, 4], y: [1, 2, 3, 4] });
 
             let result = await view.to_columns();
             let result2 = await view2.to_columns();
@@ -1145,7 +1145,7 @@ const pivot_data = [
                 expressions: { '"x" - "y"': '"x" - "y"' },
             });
 
-            table.update({ x: [1, 2, 3, 4], y: [1, 2, 3, 4] });
+            await table.update({ x: [1, 2, 3, 4], y: [1, 2, 3, 4] });
 
             let result = await view.to_columns();
             let result2 = await view2.to_columns();
@@ -1188,7 +1188,7 @@ const pivot_data = [
                 expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
-            table.update({ int: [4], __INDEX__: [0] });
+            await table.update({ int: [4], __INDEX__: [0] });
 
             let results = await view.to_columns({
                 index: true,
@@ -1213,7 +1213,7 @@ const pivot_data = [
                 expressions: { '"int" - "float"': '"int" - "float"' },
             });
 
-            table.update([{ int: 4, __INDEX__: 0 }]);
+            await table.update([{ int: 4, __INDEX__: 0 }]);
 
             let json = await view.to_json({
                 index: true,
@@ -1265,7 +1265,7 @@ const pivot_data = [
                 expressions: { '"int" * "float"': '"int" * "float"' },
             });
 
-            table.update([{ int: 4, __INDEX__: 0 }]);
+            await table.update([{ int: 4, __INDEX__: 0 }]);
 
             let json = await view.to_json({
                 index: true,
@@ -1317,7 +1317,7 @@ const pivot_data = [
                 expressions: { '"int" / "float"': '"int" / "float"' },
             });
 
-            table.update([{ int: 4, __INDEX__: 0 }]);
+            await table.update([{ int: 4, __INDEX__: 0 }]);
 
             let json = await view.to_json({
                 index: true,
@@ -1369,7 +1369,7 @@ const pivot_data = [
                 expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
-            table.update([{ int: 2, float: 3.5 }]);
+            await table.update([{ int: 2, float: 3.5 }]);
 
             let result = await view.to_columns();
 
@@ -1391,7 +1391,7 @@ const pivot_data = [
                 expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
-            table.update([{ int: 2, float: null }]);
+            await table.update([{ int: 2, float: null }]);
 
             let result = await view.to_columns();
 
@@ -1420,7 +1420,7 @@ const pivot_data = [
                 expressions: { '"int" + "float"': '"int" + "float"' },
             });
 
-            table.update([{ int: 2, float: undefined }]);
+            await table.update([{ int: 2, float: undefined }]);
 
             let result = await view.to_columns();
 
@@ -1451,13 +1451,13 @@ const pivot_data = [
 
             const before = await view.to_columns();
             expect(before['lower("y")']).toEqual(["a", "b", "c", "d"]);
-            table.update({ y: ["HELLO", "WORLD"] });
+            await table.update({ y: ["HELLO", "WORLD"] });
 
             const result = await view.to_columns();
             expect(result["x"]).toEqual([null, 1, 2, 3, 4]);
             expect(result['lower("y")']).toEqual(["world", "a", "b", "c", "d"]);
 
-            table.remove([4, null, 1]);
+            await table.remove([4, null, 1]);
 
             const result2 = await view.to_columns();
             expect(result2["x"]).toEqual([2, 3]);

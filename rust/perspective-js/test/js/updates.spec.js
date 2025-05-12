@@ -311,7 +311,7 @@ async function match_delta(perspective, delta, expected) {
     test.describe("Removes", function () {
         test("should not remove without explicit index", async function () {
             const table = await perspective.table(meta);
-            table.update(data);
+            await table.update(data);
             const view = await table.view();
             let threw = false;
             try {
@@ -333,9 +333,9 @@ async function match_delta(perspective, delta, expected) {
 
         test("after an `update()`", async function () {
             const table = await perspective.table(meta, { index: "x" });
-            table.update(data);
+            await table.update(data);
             const view = await table.view();
-            table.remove([1, 2]);
+            await table.remove([1, 2]);
             const result = await view.to_json();
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
@@ -348,7 +348,7 @@ async function match_delta(perspective, delta, expected) {
         test("after a regular data load", async function () {
             const table = await perspective.table(data, { index: "x" });
             const view = await table.view();
-            table.remove([1, 2]);
+            await table.remove([1, 2]);
             const result = await view.to_json();
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
@@ -360,9 +360,9 @@ async function match_delta(perspective, delta, expected) {
 
         test("after an `update()`, string pkey", async function () {
             const table = await perspective.table(meta, { index: "y" });
-            table.update(data);
+            await table.update(data);
             const view = await table.view();
-            table.remove(["a", "b"]);
+            await table.remove(["a", "b"]);
             const result = await view.to_json();
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
@@ -375,7 +375,7 @@ async function match_delta(perspective, delta, expected) {
         test("after a regular data load, string pkey", async function () {
             const table = await perspective.table(data, { index: "y" });
             const view = await table.view();
-            table.remove(["a", "b"]);
+            await table.remove(["a", "b"]);
             const result = await view.to_json();
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
@@ -400,13 +400,13 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { index: "y" }
             );
-            table.update({
+            await table.update({
                 x: [1, 2, 3, 4],
                 y: datetimes,
                 z: [1.5, 2.5, 3.5, 4.5],
             });
             const view = await table.view();
-            table.remove(datetimes.slice(0, 2));
+            await table.remove(datetimes.slice(0, 2));
             const result = await view.to_columns();
             expect(await view.num_rows()).toEqual(2);
             expect(result).toEqual({
@@ -434,13 +434,13 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { index: "y" }
             );
-            table.update({
+            await table.update({
                 x: [1, 2, 3, 4],
                 y: datetimes,
                 z: [1.5, 2.5, 3.5, 4.5],
             });
             const view = await table.view();
-            table.remove(datetimes.slice(0, 2));
+            await table.remove(datetimes.slice(0, 2));
             const result = await view.to_columns();
             expect(await view.num_rows()).toEqual(2);
             expect(result).toEqual({
@@ -469,7 +469,7 @@ async function match_delta(perspective, delta, expected) {
                 { index: "y" }
             );
             const view = await table.view();
-            table.remove(datetimes.slice(0, 2));
+            await table.remove(datetimes.slice(0, 2));
             const result = await view.to_columns();
             expect(await view.num_rows()).toEqual(2);
             expect(result).toEqual({
@@ -485,10 +485,10 @@ async function match_delta(perspective, delta, expected) {
         test("multiple single element removes", async function () {
             const table = await perspective.table(meta, { index: "x" });
             for (let i = 0; i < 100; i++) {
-                table.update([{ x: i, y: "test", z: false }]);
+                await table.update([{ x: i, y: "test", z: false }]);
             }
             for (let i = 1; i < 100; i++) {
-                table.remove([i]);
+                await table.remove([i]);
             }
             const view = await table.view();
             const result = await view.to_json();
@@ -524,7 +524,7 @@ async function match_delta(perspective, delta, expected) {
                 idx: [1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: ["B"],
                 idx: [2],
@@ -537,7 +537,7 @@ async function match_delta(perspective, delta, expected) {
                 idx: [3, 1, 2],
             });
 
-            table.remove([1]);
+            await table.remove([1]);
 
             expect(await view.to_columns()).toEqual({
                 __ROW_PATH__: [[], ["B"]],
@@ -546,7 +546,7 @@ async function match_delta(perspective, delta, expected) {
                 idx: [2, 2],
             });
 
-            table.remove([2]);
+            await table.remove([2]);
 
             expect(await view.to_columns()).toEqual({
                 __ROW_PATH__: [[]],
@@ -568,7 +568,7 @@ async function match_delta(perspective, delta, expected) {
                 { index: "x" }
             );
 
-            table.update({
+            await table.update({
                 x: ["b", "1", "a", "c"],
                 y: [3, 1, 2, 4],
             });
@@ -579,7 +579,7 @@ async function match_delta(perspective, delta, expected) {
                 y: [1, 2, 3, 4],
             });
 
-            table.remove(["a", "c", "1", "b"]);
+            await table.remove(["a", "c", "1", "b"]);
 
             // num_rows should always reflect latest - we did not call_process
             // in num_rows and I think the viewer covered that up because
@@ -600,7 +600,7 @@ async function match_delta(perspective, delta, expected) {
                 { index: "x" }
             );
 
-            table.update({
+            await table.update({
                 x: ["b", "1", "a", "c"],
                 y: [3, 1, 2, 4],
             });
@@ -611,7 +611,7 @@ async function match_delta(perspective, delta, expected) {
                 y: [1, 2, 3, 4],
             });
 
-            table.remove(["z", "ff", "2312", "b"]);
+            await table.remove(["z", "ff", "2312", "b"]);
 
             expect(await view.to_columns()).toEqual({
                 x: ["1", "a", "c"],
@@ -631,11 +631,11 @@ async function match_delta(perspective, delta, expected) {
                 { index: "x" }
             );
 
-            table.update({
+            await table.update({
                 x: ["b", "1", "a", "c"],
                 y: [3, 1, 2, 4],
             });
-            table.remove(["1", "c"]);
+            await table.remove(["1", "c"]);
 
             // removes applied after update
             const view = await table.view();
@@ -644,23 +644,23 @@ async function match_delta(perspective, delta, expected) {
                 y: [2, 3],
             });
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: [103],
             });
-            table.remove(["b"]);
+            await table.remove(["b"]);
 
             expect(await view.to_columns()).toEqual({
                 x: ["a"],
                 y: [2],
             });
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: [100],
             });
 
-            table.remove(["a"]);
+            await table.remove(["a"]);
 
             expect(await view.to_columns()).toEqual({
                 x: ["b"],
@@ -669,11 +669,11 @@ async function match_delta(perspective, delta, expected) {
 
             // remove applied after update
             for (let i = 0; i < 100; i++) {
-                table.update({
+                await table.update({
                     x: ["c", "a"],
                     y: [i + 1, i + 2],
                 });
-                table.remove(["c", "a"]);
+                await table.remove(["c", "a"]);
             }
 
             expect(await view.to_columns()).toEqual({
@@ -695,26 +695,26 @@ async function match_delta(perspective, delta, expected) {
             );
 
             for (let i = 0; i < 100; i++) {
-                table.update([{ x: i, y: i }]);
+                await table.update([{ x: i, y: i }]);
             }
 
             expect(await table.size()).toEqual(100);
 
             for (let i = 0; i < 100; i++) {
-                table.remove([i]);
-                table.update([{ x: i, y: i }]);
+                await table.remove([i]);
+                await table.update([{ x: i, y: i }]);
             }
 
             expect(await table.size()).toEqual(100);
 
             for (let i = 0; i < 100; i++) {
-                table.update([{ x: i, y: i }]);
+                await table.update([{ x: i, y: i }]);
             }
 
             expect(await table.size()).toEqual(100);
 
             for (let i = 0; i < 100; i++) {
-                table.remove([i]);
+                await table.remove([i]);
             }
 
             expect(await table.size()).toEqual(0);
@@ -726,7 +726,7 @@ async function match_delta(perspective, delta, expected) {
     test.describe("Schema", function () {
         test("updates with columns not in schema", async function () {
             var table = await perspective.table({ x: "integer", y: "string" });
-            table.update(data);
+            await table.update(data);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual([
@@ -745,7 +745,7 @@ async function match_delta(perspective, delta, expected) {
                 y: "string",
                 z: "string",
             });
-            table.update(data);
+            await table.update(data);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual([
@@ -762,7 +762,7 @@ async function match_delta(perspective, delta, expected) {
     test.describe("Updates", function () {
         test("Meta constructor then `update()`", async function () {
             var table = await perspective.table(meta);
-            table.update(data);
+            await table.update(data);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual(data);
@@ -772,7 +772,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("Meta constructor then column oriented `update()`", async function () {
             var table = await perspective.table(meta);
-            table.update(col_data);
+            await table.update(col_data);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual(data);
@@ -789,7 +789,7 @@ async function match_delta(perspective, delta, expected) {
                 x: [1, 2, 3, 4],
             };
 
-            table.update(reordered_col_data);
+            await table.update(reordered_col_data);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual(data);
@@ -813,7 +813,7 @@ async function match_delta(perspective, delta, expected) {
             ];
 
             var table = await perspective.table(col_data, { index: "x" });
-            table.update(colUpdate);
+            await table.update(colUpdate);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual(expected);
@@ -824,16 +824,16 @@ async function match_delta(perspective, delta, expected) {
         test("`update()` should increment `table.size()` without a view created", async function () {
             const table = await perspective.table(data);
             expect(await table.size()).toEqual(4);
-            table.update(data);
+            await table.update(data);
             expect(await table.size()).toEqual(8);
-            table.update(data);
+            await table.update(data);
             expect(await table.size()).toEqual(12);
             table.delete();
         });
 
         test.skip("`update()` unbound to table", async function () {
             var table = await perspective.table(meta);
-            var updater = table.update;
+            var updater = await table.update;
             console.log(updater);
             updater(data);
             let view = await table.view();
@@ -846,7 +846,7 @@ async function match_delta(perspective, delta, expected) {
         test("`update([])` does not error", async function () {
             let table = await perspective.table(meta);
             let view = await table.view();
-            table.update([]);
+            await table.update([]);
             let result = await view.to_json();
             expect(result).toEqual([]);
             view.delete();
@@ -855,8 +855,8 @@ async function match_delta(perspective, delta, expected) {
 
         test("Multiple `update()`s", async function () {
             var table = await perspective.table(meta);
-            table.update(data);
-            table.update(data);
+            await table.update(data);
+            await table.update(data);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual(data.concat(data));
@@ -867,7 +867,7 @@ async function match_delta(perspective, delta, expected) {
         test("`update()` called after `view()`", async function () {
             var table = await perspective.table(meta);
             var view = await table.view();
-            table.update(data);
+            await table.update(data);
             let result = await view.to_json();
             expect(result).toEqual(data);
             view.delete();
@@ -879,7 +879,7 @@ async function match_delta(perspective, delta, expected) {
         test("arrow contructor then arrow `update()`", async function () {
             const arrow = arrows.test_arrow;
             var table = await perspective.table(arrow.slice());
-            table.update(arrow.slice());
+            await table.update(arrow.slice());
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_result.concat(arrow_result));
@@ -891,7 +891,7 @@ async function match_delta(perspective, delta, expected) {
             let table = await perspective.table(arrow_result);
             let view = await table.view();
             let generated_arrow = await view.to_arrow();
-            table.update(generated_arrow);
+            await table.update(generated_arrow);
             let result = await view.to_json();
             expect(result).toEqual(arrow_result.concat(arrow_result));
             view.delete();
@@ -900,7 +900,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("arrow dict contructor then arrow dict `update()`", async function () {
             var table = await perspective.table(arrows.dict_arrow.slice());
-            table.update(arrows.dict_update_arrow.slice());
+            await table.update(arrows.dict_update_arrow.slice());
             var view = await table.view();
             let result = await view.to_columns();
             expect(result).toEqual({
@@ -935,7 +935,7 @@ async function match_delta(perspective, delta, expected) {
                 b: ["d", "e", "f"],
             });
             let view = await table.view();
-            table.update(arrows.dict_update_arrow.slice());
+            await table.update(arrows.dict_update_arrow.slice());
             let result = await view.to_columns();
             expect(result).toEqual({
                 a: ["a", "b", "c", null, "update1", "update2"],
@@ -947,7 +947,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("arrow dict contructor then arrow dict `update()` subset of columns", async function () {
             var table = await perspective.table(arrows.dict_arrow.slice());
-            table.update(arrows.dict_update_arrow.slice());
+            await table.update(arrows.dict_update_arrow.slice());
             var view = await table.view({
                 columns: ["a"],
             });
@@ -976,7 +976,7 @@ async function match_delta(perspective, delta, expected) {
             let view = await table.view({
                 columns: ["a"],
             });
-            table.update(arrows.dict_update_arrow.slice());
+            await table.update(arrows.dict_update_arrow.slice());
             let result = await view.to_columns();
             expect(result).toEqual({
                 a: ["a", "b", "c", null, "update1", "update2"],
@@ -989,7 +989,7 @@ async function match_delta(perspective, delta, expected) {
             let table = await perspective.table(arrows.test_arrow.slice(), {
                 index: "i64",
             });
-            table.update(arrows.partial_arrow.slice());
+            await table.update(arrows.partial_arrow.slice());
             const view = await table.view();
             const result = await view.to_json();
             expect(result).toEqual(arrow_partial_result);
@@ -1001,7 +1001,7 @@ async function match_delta(perspective, delta, expected) {
             let table = await perspective.table(arrows.test_arrow.slice(), {
                 index: "i64",
             });
-            table.update(arrows.partial_missing_rows_arrow.slice());
+            await table.update(arrows.partial_missing_rows_arrow.slice());
             const view = await table.view();
             const result = await view.to_json();
             expect(result).toEqual(arrow_partial_missing_result);
@@ -1015,7 +1015,7 @@ async function match_delta(perspective, delta, expected) {
                 b: "float",
                 c: "string",
             });
-            table.update(arrows.int_float_str_arrow.slice());
+            await table.update(arrows.int_float_str_arrow.slice());
             const view = await table.view();
             const size = await table.size();
             expect(size).toEqual(4);
@@ -1034,7 +1034,7 @@ async function match_delta(perspective, delta, expected) {
                 a: "string",
                 b: "string",
             });
-            table.update(arrows.dict_arrow.slice());
+            await table.update(arrows.dict_arrow.slice());
             const view = await table.view();
             const size = await table.size();
             expect(size).toEqual(5);
@@ -1055,7 +1055,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { index: "a" }
             );
-            table.update(arrows.dict_arrow.slice());
+            await table.update(arrows.dict_arrow.slice());
             const view = await table.view();
             const size = await table.size();
             expect(size).toEqual(3);
@@ -1075,7 +1075,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { index: "a" }
             );
-            table.update(arrows.dict_arrow.slice());
+            await table.update(arrows.dict_arrow.slice());
             const view = await table.view();
             const size = await table.size();
             console.log(await view.to_columns());
@@ -1097,7 +1097,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { index: "a" }
             );
-            table.update(arrows.dict_arrow.slice());
+            await table.update(arrows.dict_arrow.slice());
             const view = await table.view();
             const size = await table.size();
             console.log(await view.to_columns());
@@ -1123,8 +1123,8 @@ async function match_delta(perspective, delta, expected) {
             );
 
             const view = await table.view();
-            table.update(arrows.int_float_str_arrow.slice());
-            table.update(arrows.int_float_str_update_arrow.slice());
+            await table.update(arrows.int_float_str_arrow.slice());
+            await table.update(arrows.int_float_str_update_arrow.slice());
             expect(await table.size()).toBe(4);
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1141,7 +1141,7 @@ async function match_delta(perspective, delta, expected) {
                 a: "integer",
             });
             const view = await table.view();
-            table.update(arrows.int_float_str_arrow.slice());
+            await table.update(arrows.int_float_str_arrow.slice());
             expect(await table.size()).toBe(4);
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1182,8 +1182,8 @@ async function match_delta(perspective, delta, expected) {
                 }
             );
             const view = await table.view();
-            table.update(arrows.int_float_str_arrow.slice());
-            table.update(arrows.int_float_str_update_arrow.slice());
+            await table.update(arrows.int_float_str_arrow.slice());
+            await table.update(arrows.int_float_str_update_arrow.slice());
             expect(await table.size()).toBe(4);
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1201,7 +1201,7 @@ async function match_delta(perspective, delta, expected) {
                 y: "string",
             });
             const view = await table.view();
-            table.update(arrows.int_float_str_arrow.slice());
+            await table.update(arrows.int_float_str_arrow.slice());
             expect(await table.size()).toBe(4);
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1225,8 +1225,8 @@ async function match_delta(perspective, delta, expected) {
                 }
             );
             const view = await table.view();
-            table.update(arrows.int_float_str_arrow.slice());
-            table.update(arrows.int_float_str_update_arrow.slice());
+            await table.update(arrows.int_float_str_arrow.slice());
+            await table.update(arrows.int_float_str_update_arrow.slice());
             expect(await table.size()).toBe(4);
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1245,8 +1245,8 @@ async function match_delta(perspective, delta, expected) {
                 c: "string",
             });
 
-            table.update(arrows.int_float_str_arrow.slice());
-            table.update(arrows.int_float_str_file_arrow.slice());
+            await table.update(arrows.int_float_str_arrow.slice());
+            await table.update(arrows.int_float_str_file_arrow.slice());
             const view = await table.view();
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1272,7 +1272,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { mode: "row" }
             );
-            table.update(data);
+            await table.update(data);
         });
 
         it_old_behavior(
@@ -1280,7 +1280,7 @@ async function match_delta(perspective, delta, expected) {
             async function (done) {
                 var table = await perspective.table(meta);
                 var view = await table.view();
-                table.update(data);
+                await table.update(data);
                 var ran = false;
                 view.on_update(
                     async function (updated) {
@@ -1294,44 +1294,47 @@ async function match_delta(perspective, delta, expected) {
                     },
                     { mode: "row" }
                 );
-                table.update(data);
+                await table.update(data);
             }
         );
 
-        it_old_behavior("`on_update(table.update) !`", async function (done) {
-            var table1 = await perspective.table(meta);
-            var table2 = await perspective.table(meta);
-            var view1 = await table1.view();
-            var view2 = await table2.view();
-            view1.on_update(
-                async function (updated) {
-                    table2.update(updated.delta);
-                    let result = await view2.to_json();
-                    expect(result).toEqual(data);
-                    view1.delete();
-                    view2.delete();
-                    table1.delete();
-                    table2.delete();
-                    done();
-                },
-                { mode: "row" }
-            );
-            table1.update(data);
-        });
+        it_old_behavior(
+            "`on_update(await table.update) !`",
+            async function (done) {
+                var table1 = await perspective.table(meta);
+                var table2 = await perspective.table(meta);
+                var view1 = await table1.view();
+                var view2 = await table2.view();
+                view1.on_update(
+                    async function (updated) {
+                        await table2.update(updated.delta);
+                        let result = await view2.to_json();
+                        expect(result).toEqual(data);
+                        view1.delete();
+                        view2.delete();
+                        table1.delete();
+                        table2.delete();
+                        done();
+                    },
+                    { mode: "row" }
+                );
+                await table1.update(data);
+            }
+        );
 
         it_old_behavior(
-            "`on_update(table.update)` before and after `update()`",
+            "`on_update( table.update)` before and after `update()`",
             async function (done) {
                 var table1 = await perspective.table(meta);
                 var table2 = await perspective.table(meta);
                 var view1 = await table1.view();
                 var view2 = await table2.view();
 
-                table1.update(data);
-                table2.update(data);
+                await table1.update(data);
+                await table2.update(data);
                 view1.on_update(
                     async function (updated) {
-                        table2.update(updated.delta);
+                        await table2.update(updated.delta);
                         let result = await view2.to_json();
                         expect(result).toEqual(data.concat(data));
                         view1.delete();
@@ -1342,7 +1345,7 @@ async function match_delta(perspective, delta, expected) {
                     },
                     { mode: "row" }
                 );
-                table1.update(data);
+                await table1.update(data);
             }
         );
 
@@ -1367,9 +1370,9 @@ async function match_delta(perspective, delta, expected) {
                     expect(sz).toEqual(size++);
                 });
 
-                table.update([{ x: 1 }]);
-                table.update([{ x: 2 }]);
-                table.update([{ x: 3 }]);
+                await table.update([{ x: 1 }]);
+                await table.update([{ x: 2 }]);
+                await table.update([{ x: 3 }]);
 
                 const view2 = await table.view(); // create a new view to make sure we process every update transacation.
                 const final_size = await table.size();
@@ -1396,11 +1399,11 @@ async function match_delta(perspective, delta, expected) {
                     expect(sz).toEqual(++size);
                 });
 
-                table.update([{ x: 1 }]);
+                await table.update([{ x: 1 }]);
                 await table.size();
-                table.update([{ x: 2 }]);
+                await table.update([{ x: 2 }]);
                 await table.size();
-                table.update([{ x: 3 }]);
+                await table.update([{ x: 3 }]);
                 await table.size();
 
                 const final_size = await table.size();
@@ -1429,7 +1432,7 @@ async function match_delta(perspective, delta, expected) {
                     table.delete();
                     done();
                 });
-                table.update(data);
+                await table.update(data);
             }
         );
 
@@ -1457,7 +1460,7 @@ async function match_delta(perspective, delta, expected) {
                     });
                 }
 
-                table.update(data);
+                await table.update(data);
             }
         );
 
@@ -1491,7 +1494,7 @@ async function match_delta(perspective, delta, expected) {
                     });
                 }
 
-                table.update(data);
+                await table.update(data);
             }
         );
     });
@@ -1520,7 +1523,7 @@ async function match_delta(perspective, delta, expected) {
         test("{limit: 1} with arrow update", async function () {
             const arrow = arrows.test_arrow.slice();
             var table = await perspective.table(arrow, { limit: 1 });
-            table.update(arrow.slice());
+            await table.update(arrow.slice());
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual([arrow_result[arrow_result.length - 1]]);
@@ -1533,7 +1536,7 @@ async function match_delta(perspective, delta, expected) {
         test("{index: 'x'} (int)", async function () {
             var table = await perspective.table(data, { index: "x" });
             var view = await table.view();
-            table.update(data);
+            await table.update(data);
             let result = await view.to_json();
             expect(result).toEqual(data);
             view.delete();
@@ -1543,7 +1546,7 @@ async function match_delta(perspective, delta, expected) {
         test("{index: 'y'} (string)", async function () {
             var table = await perspective.table(data, { index: "y" });
             var view = await table.view();
-            table.update(data);
+            await table.update(data);
             let result = await view.to_json();
             expect(result).toEqual(data);
             view.delete();
@@ -1588,7 +1591,7 @@ async function match_delta(perspective, delta, expected) {
                 y: ["a", "b", "c", "d", "e"],
             };
             const table = await perspective.table(data, { index: "x" });
-            table.update({
+            await table.update({
                 x: [null, 0],
                 y: ["x", "y"],
             });
@@ -1608,7 +1611,7 @@ async function match_delta(perspective, delta, expected) {
                 y: ["", "a", "b", "c", null],
             };
             const table = await perspective.table(data, { index: "y" });
-            table.update({
+            await table.update({
                 x: [5, 6],
                 y: ["", null],
             });
@@ -1634,7 +1637,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { index: "x" }
             );
-            table.update(data);
+            await table.update(data);
             const view = await table.view();
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1667,7 +1670,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { index: "x" }
             );
-            table.update(data);
+            await table.update(data);
             const view = await table.view();
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1719,9 +1722,9 @@ async function match_delta(perspective, delta, expected) {
         test("multiple updates on int {index: 'x'}", async function () {
             var table = await perspective.table(data, { index: "x" });
             var view = await table.view();
-            table.update(data);
-            table.update(data);
-            table.update(data);
+            await table.update(data);
+            await table.update(data);
+            await table.update(data);
             let result = await view.to_json();
             expect(result).toEqual(data);
             view.delete();
@@ -1731,9 +1734,9 @@ async function match_delta(perspective, delta, expected) {
         test("multiple updates on str {index: 'y'}", async function () {
             var table = await perspective.table(data, { index: "y" });
             var view = await table.view();
-            table.update(data);
-            table.update(data);
-            table.update(data);
+            await table.update(data);
+            await table.update(data);
+            await table.update(data);
             let result = await view.to_json();
             expect(result).toEqual(data);
             view.delete();
@@ -1743,9 +1746,9 @@ async function match_delta(perspective, delta, expected) {
         test("multiple updates on str {index: 'y'} with new, old, null pkey", async function () {
             var table = await perspective.table(data, { index: "y" });
             var view = await table.view();
-            table.update([{ x: 1, y: "a", z: true }]);
-            table.update([{ x: 100, y: null, z: true }]);
-            table.update([{ x: 123, y: "abc", z: true }]);
+            await table.update([{ x: 1, y: "a", z: true }]);
+            await table.update([{ x: 100, y: null, z: true }]);
+            await table.update([{ x: 123, y: "abc", z: true }]);
             let result = await view.to_json();
             expect(result).toEqual([
                 { x: 100, y: null, z: true },
@@ -1771,9 +1774,9 @@ async function match_delta(perspective, delta, expected) {
 
             const view = await table.view();
 
-            table.update([{ x: 12345, y: "a" }]);
-            table.update([{ x: 100, y: null }]);
-            table.update([{ x: 123, y: "abc" }]);
+            await table.update([{ x: 12345, y: "a" }]);
+            await table.update([{ x: 100, y: null }]);
+            await table.update([{ x: 123, y: "abc" }]);
 
             const result = await view.to_json();
             expect(result).toEqual([
@@ -1790,8 +1793,8 @@ async function match_delta(perspective, delta, expected) {
         test("{index: 'x'} with overlap", async function () {
             var table = await perspective.table(data, { index: "x" });
             var view = await table.view();
-            table.update(data);
-            table.update(data_2);
+            await table.update(data);
+            await table.update(data_2);
             let result = await view.to_json();
             expect(result).toEqual(data.slice(0, 2).concat(data_2));
             view.delete();
@@ -1801,7 +1804,7 @@ async function match_delta(perspective, delta, expected) {
         it_old_behavior("update and index (int)", async function (done) {
             var table = await perspective.table(meta, { index: "x" });
             var view = await table.view();
-            table.update(data);
+            await table.update(data);
             view.on_update(
                 async function (updated) {
                     await match_delta(perspective, updated.delta, data_2);
@@ -1813,13 +1816,13 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { mode: "row" }
             );
-            table.update(data_2);
+            await table.update(data_2);
         });
 
         it_old_behavior("update and index (string)", async function (done) {
             var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
-            table.update(data);
+            await table.update(data);
             view.on_update(
                 async function (updated) {
                     await match_delta(perspective, updated.delta, data_2);
@@ -1831,7 +1834,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { mode: "row" }
             );
-            table.update(data_2);
+            await table.update(data_2);
         });
 
         test("update with depth expansion", async function () {
@@ -1840,7 +1843,7 @@ async function match_delta(perspective, delta, expected) {
                 group_by: ["z", "y"],
                 columns: [],
             });
-            table.update(data);
+            await table.update(data);
 
             let result = await view.to_json();
 
@@ -1871,7 +1874,7 @@ async function match_delta(perspective, delta, expected) {
             ];
             var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
-            table.update(data);
+            await table.update(data);
             view.on_update(
                 async function (updated) {
                     await match_delta(
@@ -1887,7 +1890,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 { mode: "row" }
             );
-            table.update(partial);
+            await table.update(partial);
         });
 
         it_old_behavior(
@@ -1907,7 +1910,7 @@ async function match_delta(perspective, delta, expected) {
                 ];
                 var table = await perspective.table(meta, { index: "y" });
                 var view = await table.view();
-                table.update(col_data);
+                await table.update(col_data);
                 view.on_update(
                     async function (updated) {
                         await match_delta(
@@ -1923,7 +1926,7 @@ async function match_delta(perspective, delta, expected) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial);
+                await table.update(partial);
             },
             { skip: true }
         );
@@ -1950,7 +1953,7 @@ async function match_delta(perspective, delta, expected) {
                 ];
                 var table = await perspective.table(meta, { index: "y" });
                 var view = await table.view();
-                table.update(col_data);
+                await table.update(col_data);
                 view.on_update(
                     async function (updated) {
                         await match_delta(
@@ -2010,7 +2013,7 @@ async function match_delta(perspective, delta, expected) {
                     { mode: "row" }
                 );
 
-                table.update({
+                await table.update({
                     x: [4],
                     y: ["f"],
                 });
@@ -2059,7 +2062,7 @@ async function match_delta(perspective, delta, expected) {
                     { mode: "row" }
                 );
 
-                table.update({
+                await table.update({
                     x: [4],
                     y: ["f"],
                 });
@@ -2082,7 +2085,7 @@ async function match_delta(perspective, delta, expected) {
                 ];
                 var table = await perspective.table(meta, { index: "y" });
                 var view = await table.view();
-                table.update(col_data);
+                await table.update(col_data);
                 view.on_update(
                     async function (updated) {
                         await match_delta(
@@ -2098,7 +2101,7 @@ async function match_delta(perspective, delta, expected) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial);
+                await table.update(partial);
             }
         );
     });
@@ -2112,7 +2115,7 @@ async function match_delta(perspective, delta, expected) {
                 ],
                 { index: "x" }
             );
-            table.update([{ x: 2, y: null }]);
+            await table.update([{ x: 2, y: null }]);
             var view = await table.view({
                 group_by: ["x"],
                 columns: ["y"],
@@ -2131,8 +2134,8 @@ async function match_delta(perspective, delta, expected) {
             var table = await perspective.table([{ x: 1, y: 1 }], {
                 index: "x",
             });
-            table.update([{ x: 1, y: null }]);
-            table.update([{ x: 1, y: 1 }]);
+            await table.update([{ x: 1, y: null }]);
+            await table.update([{ x: 1, y: 1 }]);
             var view = await table.view();
             let json = await view.to_json();
             expect(json).toEqual([{ x: 1, y: 1 }]);
@@ -2150,8 +2153,8 @@ async function match_delta(perspective, delta, expected) {
             ];
             var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
-            table.update(data);
-            table.update(partial);
+            await table.update(data);
+            await table.update(partial);
             const json = await view.to_json();
             expect(json).toEqual(expected);
             view.delete();
@@ -2169,8 +2172,8 @@ async function match_delta(perspective, delta, expected) {
             ];
             var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
-            table.update(data);
-            table.update(update);
+            await table.update(data);
+            await table.update(update);
             const json = await view.to_json();
             expect(json).toEqual(expected);
             view.delete();
@@ -2191,8 +2194,8 @@ async function match_delta(perspective, delta, expected) {
             ];
             var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
-            table.update(col_data);
-            table.update(partial);
+            await table.update(col_data);
+            await table.update(partial);
             const json = await view.to_json();
             expect(json).toEqual(expected);
             view.delete();
@@ -2280,7 +2283,7 @@ async function match_delta(perspective, delta, expected) {
     test.describe("implicit index", function () {
         test("should apply single partial update on unindexed table using row id from '__INDEX__'", async function () {
             let table = await perspective.table(data);
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 2,
                     y: "new_string",
@@ -2299,7 +2302,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should partial update on unindexed table, column dataset", async function () {
             let table = await perspective.table(data);
-            table.update({
+            await table.update({
                 __INDEX__: [2],
                 y: ["new_string"],
             });
@@ -2320,7 +2323,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should partial update and unset on unindexed table", async function () {
             let table = await perspective.table(data);
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 2,
                     y: "new_string",
@@ -2345,7 +2348,7 @@ async function match_delta(perspective, delta, expected) {
         // ORIGINAL VERSION OF TEST BELOW
         test.skip("OG - should partial update and unset on unindexed table, column dataset", async function () {
             let table = await perspective.table(data);
-            table.update({
+            await table.update({
                 __INDEX__: [0, 2],
                 y: [undefined, "new_string"],
                 z: [null, undefined],
@@ -2368,11 +2371,11 @@ async function match_delta(perspective, delta, expected) {
         // Split the updates to avoid handling `undefined` values.
         test("should partial update and unset on unindexed table, column dataset", async function () {
             let table = await perspective.table(data);
-            table.update({
+            await table.update({
                 __INDEX__: [0],
                 z: [null],
             });
-            table.update({
+            await table.update({
                 __INDEX__: [2],
                 y: ["new_string"],
             });
@@ -2393,7 +2396,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should apply single multi-column partial update on unindexed table using row id from '__INDEX__'", async function () {
             let table = await perspective.table(data);
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 2,
                     y: "new_string",
@@ -2414,7 +2417,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should apply updates using '__INDEX__' on a table with explicit index set", async function () {
             let table = await perspective.table(data, { index: "x" });
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 2,
                     y: "new_string",
@@ -2433,7 +2436,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should apply multiple sequential updates using '__INDEX__' on a table with explicit index set", async function () {
             let table = await perspective.table(data, { index: "x" });
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 2,
                     y: "new_string",
@@ -2457,7 +2460,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should apply mulitple nonsequential updates using '__INDEX__' on a table with explicit index set", async function () {
             let table = await perspective.table(data, { index: "x" });
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 2,
                     y: "new_string",
@@ -2481,7 +2484,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should apply multiple sequential partial updates on unindexed table using '__INDEX__'", async function () {
             let table = await perspective.table(data);
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 0,
                     y: "new_string1",
@@ -2510,7 +2513,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should correctly apply multiple out-of-sequence partial updates on unindexed table using '__INDEX__'", async function () {
             let table = await perspective.table(data);
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 0,
                     y: "new_string1",
@@ -2544,7 +2547,7 @@ async function match_delta(perspective, delta, expected) {
 
         test("should stack multiple partial updates on unindexed table using the same '__INDEX__'", async function () {
             let table = await perspective.table(data);
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 0,
                     y: "new_string1",
@@ -2571,13 +2574,13 @@ async function match_delta(perspective, delta, expected) {
 
         test("updates without '__INDEX' should append", async function () {
             let table = await perspective.table(data);
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 0,
                     y: "new_string",
                 },
             ]);
-            table.update([
+            await table.update([
                 {
                     y: "new_string",
                 },
@@ -2600,7 +2603,7 @@ async function match_delta(perspective, delta, expected) {
                 group_by: ["x"],
             });
 
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 0,
                     x: 100,
@@ -2637,7 +2640,7 @@ async function match_delta(perspective, delta, expected) {
                 split_by: ["y"],
             });
 
-            table.update([
+            await table.update([
                 {
                     __INDEX__: 0,
                     x: 100,
@@ -2759,7 +2762,7 @@ async function match_delta(perspective, delta, expected) {
             const sub1 = view.on_update(cb1);
             view.on_update(cb2);
             view.remove_update(await sub1);
-            table.update(data);
+            await table.update(data);
         });
 
         it_old_behavior(
@@ -2793,7 +2796,7 @@ async function match_delta(perspective, delta, expected) {
                 view.on_update(cb3);
                 view.remove_update(await sub1);
                 view.remove_update(await sub2);
-                table.update(data);
+                await table.update(data);
             }
         );
     });
@@ -2841,7 +2844,7 @@ async function match_delta(perspective, delta, expected) {
                     case 0:
                         {
                             // insert
-                            table.update({
+                            await table.update({
                                 x: [i],
                                 y: [i % 2 ? "a" : "b"],
                             });
@@ -2850,7 +2853,7 @@ async function match_delta(perspective, delta, expected) {
                     case 1:
                         {
                             // partial update
-                            table.update({
+                            await table.update({
                                 x: [update_idx],
                                 y: [update_idx % 2 ? "b" : "a"],
                             });
@@ -2861,7 +2864,7 @@ async function match_delta(perspective, delta, expected) {
                     case 2:
                         {
                             // remove
-                            table.remove([remove_idx]);
+                            await table.remove([remove_idx]);
                             remove_idx++;
                         }
                         break;
@@ -2890,7 +2893,7 @@ async function match_delta(perspective, delta, expected) {
                     case 0:
                         {
                             // insert
-                            table.update({
+                            await table.update({
                                 x: [i],
                                 y: [i % 2 ? "a" : "b"],
                             });
@@ -2899,7 +2902,7 @@ async function match_delta(perspective, delta, expected) {
                     case 1:
                         {
                             // partial update
-                            table.update({
+                            await table.update({
                                 x: [update_idx],
                                 y: [update_idx % 2 ? "b" : "a"],
                             });
@@ -2910,7 +2913,7 @@ async function match_delta(perspective, delta, expected) {
                     case 2:
                         {
                             // remove
-                            table.remove([remove_idx]);
+                            await table.remove([remove_idx]);
                             remove_idx++;
                         }
                         break;
@@ -2941,7 +2944,7 @@ async function match_delta(perspective, delta, expected) {
 
             for (let i = 0; i < 10; i++) {
                 // append new rows
-                table.update([{ x: i, y: "a" }]);
+                await table.update([{ x: i, y: "a" }]);
                 expect(await table.size()).toEqual(i + 1);
 
                 // make sure appended
@@ -2967,7 +2970,7 @@ async function match_delta(perspective, delta, expected) {
             for (let i = 0; i < 10; i++) {
                 // partial update rows
                 if (i % 2 == 0) {
-                    table.update([{ x: i, y: "b" }]);
+                    await table.update([{ x: i, y: "b" }]);
 
                     flat = await flat_view.to_json();
                     filtered = await filtered_view.to_json();
@@ -2987,7 +2990,7 @@ async function match_delta(perspective, delta, expected) {
 
             // Remove "b" rows
             flat = await flat_view.to_json();
-            table.remove(
+            await table.remove(
                 flat.filter((row) => row.y === "b").map((row) => row.x)
             );
             expect(await flat_view.to_json()).toEqual([
@@ -3009,8 +3012,11 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({ index: ["a", "d", "b"], x: ["abc", "def", "acc"] });
-            tbl.remove(["b"]);
+            await tbl.update({
+                index: ["a", "d", "b"],
+                x: ["abc", "def", "acc"],
+            });
+            await tbl.remove(["b"]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
@@ -3032,8 +3038,8 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({ index: ["a", "c"], x: ["abc", "def"] });
-            tbl.remove(["c"]);
+            await tbl.update({ index: ["a", "c"], x: ["abc", "def"] });
+            await tbl.remove(["c"]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
@@ -3055,8 +3061,11 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({ index: ["a", "b", "c"], x: ["abc", "def", "acc"] });
-            tbl.remove(["b"]);
+            await tbl.update({
+                index: ["a", "b", "c"],
+                x: ["abc", "def", "acc"],
+            });
+            await tbl.remove(["b"]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
@@ -3078,8 +3087,8 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({ index: [50, 1, 2], x: ["abc", "def", "acc"] });
-            tbl.remove([1]);
+            await tbl.update({ index: [50, 1, 2], x: ["abc", "def", "acc"] });
+            await tbl.remove([1]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "acc"]] });
             await view.delete();
@@ -3101,8 +3110,8 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({ index: [1, 2, 3], x: ["abc", "def", "acc"] });
-            tbl.remove([3]);
+            await tbl.update({ index: [1, 2, 3], x: ["abc", "def", "acc"] });
+            await tbl.remove([3]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "def"]] });
             await view.delete();
@@ -3124,7 +3133,7 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({
+            await tbl.update({
                 index: [
                     new Date(2021, 3, 15),
                     new Date(2009, 1, 13),
@@ -3132,7 +3141,7 @@ async function match_delta(perspective, delta, expected) {
                 ],
                 x: ["abc", "def", "acc"],
             });
-            tbl.remove([1]);
+            await tbl.remove([1]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "acc"]] });
             await view.delete();
@@ -3156,7 +3165,7 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({
+            await tbl.update({
                 index: [
                     new Date(2009, 1, 13),
                     new Date(2015, 5, 10),
@@ -3164,7 +3173,7 @@ async function match_delta(perspective, delta, expected) {
                 ],
                 x: ["abc", "def", "acc"],
             });
-            tbl.remove([3]);
+            await tbl.remove([3]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "def"]] });
             await view.delete();
@@ -3188,7 +3197,7 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({
+            await tbl.update({
                 index: [
                     new Date(2021, 3, 15, 5, 10, 3),
                     new Date(2009, 1, 13, 0, 0, 1),
@@ -3196,7 +3205,7 @@ async function match_delta(perspective, delta, expected) {
                 ],
                 x: ["abc", "def", "acc"],
             });
-            tbl.remove([1]);
+            await tbl.remove([1]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "acc"]] });
             await view.delete();
@@ -3220,7 +3229,7 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({
+            await tbl.update({
                 index: [
                     new Date(2009, 1, 13, 0, 0, 1),
                     new Date(2015, 5, 10, 15, 10, 2),
@@ -3228,7 +3237,7 @@ async function match_delta(perspective, delta, expected) {
                 ],
                 x: ["abc", "def", "acc"],
             });
-            tbl.remove([3]);
+            await tbl.remove([3]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "def"]] });
             await view.delete();
@@ -3252,26 +3261,29 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({ index: ["a", "d", "b"], x: ["abc", "def", "acc"] });
-            tbl.remove(["b"]);
+            await tbl.update({
+                index: ["a", "d", "b"],
+                x: ["abc", "def", "acc"],
+            });
+            await tbl.remove(["b"]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
 
             expect(await view2.to_json()).toEqual([{ index: "a", x: "abc" }]);
 
-            tbl.update([{ index: "b", x: "abc" }]);
+            await tbl.update([{ index: "b", x: "abc" }]);
 
             expect(await view2.to_json()).toEqual([
                 { index: "a", x: "abc" },
                 { index: "b", x: "abc" },
             ]);
 
-            tbl.remove(["a"]);
+            await tbl.remove(["a"]);
 
             expect(await view2.to_json()).toEqual([{ index: "b", x: "abc" }]);
 
-            tbl.update([
+            await tbl.update([
                 { index: "a", x: "abc" },
                 { index: null, x: "abc" },
             ]);
@@ -3285,7 +3297,7 @@ async function match_delta(perspective, delta, expected) {
             const indices = "abcdefghijklmnopqrstuvwxyz".split("");
 
             for (const idx of indices) {
-                tbl.update([{ index: idx, x: "abc" }]);
+                await tbl.update([{ index: idx, x: "abc" }]);
             }
 
             let result = await view2.to_json();
@@ -3311,26 +3323,29 @@ async function match_delta(perspective, delta, expected) {
             );
             const view = await tbl.view();
 
-            tbl.update({ index: ["a", "d", "b"], x: ["abc", "def", "acc"] });
-            tbl.remove(["b"]);
+            await tbl.update({
+                index: ["a", "d", "b"],
+                x: ["abc", "def", "acc"],
+            });
+            await tbl.remove(["b"]);
 
             const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
 
             expect(await view2.to_json()).toEqual([{ index: "a", x: "abc" }]);
 
-            tbl.update([{ index: "b", x: "abc" }]);
+            await tbl.update([{ index: "b", x: "abc" }]);
 
             expect(await view2.to_json()).toEqual([
                 { index: "a", x: "abc" },
                 { index: "b", x: "abc" },
             ]);
 
-            tbl.remove(["a"]);
+            await tbl.remove(["a"]);
 
             expect(await view2.to_json()).toEqual([{ index: "b", x: "abc" }]);
 
-            tbl.update([
+            await tbl.update([
                 { index: "a", x: "abc" },
                 { index: null, x: "abc" },
             ]);
@@ -3350,10 +3365,10 @@ async function match_delta(perspective, delta, expected) {
                 .sort((a, b) => a.key - b.key)
                 .map((v) => v.value);
 
-            console.log(indices);
+            // console.log(indices);
 
             for (const idx of indices) {
-                tbl.update([{ index: idx, x: "abc" }]);
+                await tbl.update([{ index: idx, x: "abc" }]);
             }
 
             let result = await view2.to_json();

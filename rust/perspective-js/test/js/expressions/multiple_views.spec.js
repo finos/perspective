@@ -52,7 +52,7 @@ import * as expressions_common from "./common.js";
                 expect(result).toEqual({ column: [], x: [], y: [], z: [] });
                 expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
-                table.update(expressions_common.data);
+                await table.update(expressions_common.data);
 
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
@@ -90,7 +90,7 @@ import * as expressions_common from "./common.js";
                 const expected2 = [];
 
                 for (let i = 1; i < 10; i++) {
-                    table.update({
+                    await table.update({
                         x: [i],
                         y: [`${i}`],
                     });
@@ -137,7 +137,7 @@ import * as expressions_common from "./common.js";
                 const expected2 = [];
 
                 for (let i = 1; i < 10; i++) {
-                    table.update({
+                    await table.update({
                         x: [i],
                         y: [`A${i}`],
                     });
@@ -194,7 +194,7 @@ import * as expressions_common from "./common.js";
 
                 let idx = 0;
                 for (let i = 5; i < 9; i++) {
-                    table.update({
+                    await table.update({
                         x: [i],
                         y: [`${i}`],
                     });
@@ -238,7 +238,7 @@ import * as expressions_common from "./common.js";
                 expect(result).toEqual({ column: [], x: [], y: [], z: [] });
                 expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -285,7 +285,7 @@ import * as expressions_common from "./common.js";
                 expect(result).toEqual({ column: [], x: [], y: [], z: [] });
                 expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -326,7 +326,7 @@ import * as expressions_common from "./common.js";
                 expect(result).toEqual({ column: [], x: [], y: [], z: [] });
                 expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -343,7 +343,7 @@ import * as expressions_common from "./common.js";
                     "ABC",
                 ]);
 
-                table.update({
+                await table.update({
                     x: [2, 10],
                     y: ["XYZ", "DEF"],
                 });
@@ -389,7 +389,7 @@ import * as expressions_common from "./common.js";
                 expect(result).toEqual({ column: [], x: [], y: [], z: [] });
                 expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -425,7 +425,7 @@ import * as expressions_common from "./common.js";
                 expect(result["column"]).toEqual([11, 12, 13, 14]);
                 expect(result2["column"]).toEqual(["A", "B", "C", "D"]);
 
-                table.update(expressions_common.data);
+                await table.update(expressions_common.data);
 
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
@@ -475,7 +475,7 @@ import * as expressions_common from "./common.js";
                 const expected2 = ["ABCD", "BBCD", "CBCD", "DBCD"];
 
                 for (let i = 0; i < 10; i++) {
-                    table.update({
+                    await table.update({
                         x: [i + 4],
                         y: [`${i + 4}`],
                     });
@@ -517,7 +517,7 @@ import * as expressions_common from "./common.js";
                 const expected = [6, 8];
 
                 for (let i = 0; i < 10; i++) {
-                    table.update({
+                    await table.update({
                         x: [i + 4],
                         y: [`${i + 4}`],
                     });
@@ -560,7 +560,7 @@ import * as expressions_common from "./common.js";
 
                 let idx = 0;
                 for (let i = 5; i < 9; i++) {
-                    table.update({
+                    await table.update({
                         x: [i],
                         y: [`${i}`],
                     });
@@ -599,7 +599,7 @@ import * as expressions_common from "./common.js";
                 expect(result["column"]).toEqual([2, 4, 6, 8]);
                 expect(result2["column"]).toEqual(["A", "B", "C", "D"]);
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -642,7 +642,7 @@ import * as expressions_common from "./common.js";
                 expect(result["column"]).toEqual([8]);
                 expect(result2["column"]).toEqual(["B"]);
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -680,7 +680,7 @@ import * as expressions_common from "./common.js";
                 expect(result["column"]).toEqual([8, 6, 4, 2]);
                 expect(result2["column"]).toEqual(["D", "C", "B", "A"]);
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -698,7 +698,7 @@ import * as expressions_common from "./common.js";
                     "A",
                 ]);
 
-                table.update({
+                await table.update({
                     x: [2, 10],
                     y: ["XYZ", "DEF"],
                 });
@@ -741,7 +741,7 @@ import * as expressions_common from "./common.js";
                 expect(result2["column"]).toEqual(["C", "D"]);
                 expect(result["y"]).toEqual(["c", "d"]);
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -824,7 +824,7 @@ import * as expressions_common from "./common.js";
                     { mode: "row" }
                 );
 
-                table.update(expressions_common.data);
+                await table.update(expressions_common.data);
                 await result3;
             });
 
@@ -901,7 +901,7 @@ import * as expressions_common from "./common.js";
                     { mode: "row" }
                 );
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
@@ -981,7 +981,7 @@ import * as expressions_common from "./common.js";
                     { mode: "row" }
                 );
 
-                table.update({
+                await table.update({
                     x: [2, 4, 3, 10, null],
                     y: ["X", "Y", "Z", "ABC", "DEF"],
                 });

@@ -15,7 +15,8 @@
 
 import os
 import os.path
-import concurrent.futures
+
+# import concurrent.futures
 import threading
 import tornado
 import perspective
@@ -33,14 +34,14 @@ if not perspective.__version__.startswith("3"):
         manager,
     ):
         psp_loop = tornado.ioloop.IOLoop()
-        [x, y, z] = map(int, perspective.__version__.split("."))
-        if x > 2 or (x > 1 and y > 2):
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                manager.set_loop_callback(psp_loop.run_in_executor, executor)
-                psp_loop.start()
-        else:
-            manager.set_loop_callback(psp_loop.add_callback)
-            psp_loop.start()
+        # [x, y, z] = map(int, perspective.__version__.split("."))
+        # if x > 2 or (x > 1 and y > 2):
+        #     # with concurrent.futures.ThreadPoolExecutor() as executor:
+        #         # manager.set_loop_callback(psp_loop.run_in_executor, executor)
+        #         psp_loop.start()
+        # else:
+        #     manager.set_loop_callback(psp_loop.add_callback)
+        psp_loop.start()
 
     def make_app():
         manager = PerspectiveManager()
@@ -93,6 +94,6 @@ else:
         app = make_app(perspective_server)
         app.listen(8082)
         loop = tornado.ioloop.IOLoop.current()
-        client = perspective_server.new_local_client(loop_callback=loop.add_callback)
+        client = perspective_server.new_local_client()
         print("Listening on 8082", flush=True)
         loop.start()

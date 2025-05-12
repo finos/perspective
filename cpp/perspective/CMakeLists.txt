@@ -537,6 +537,8 @@ set(PSP_EXPORTED_FUNCTIONS
     _psp_close_session
     _psp_delete_server
     _psp_is_memory64
+    _psp_num_cpus
+    _psp_set_num_cpus
 )
 
 if(PSP_HEAP_INSTRUMENTS)

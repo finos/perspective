@@ -1,5 +1,8 @@
 # Multi-threading
 
+Perspective's API is thread-safe (safe to call from multiple threads
+concurrently),
+
 Perspective's server API releases the GIL when called (though it may be retained
 for some portion of the `Client` call to encode RPC messages). It also
 dispatches to an internal thread pool for some operations, enabling better

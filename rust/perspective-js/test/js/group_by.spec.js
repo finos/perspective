@@ -136,13 +136,13 @@ const std = (nums) => {
                 { id: 3, name: "Tom", pos: 300, chg: 3 },
             ];
             const table = await perspective.table(schema, { index: "id" });
-            table.update(rec1);
+            await table.update(rec1);
             let view = await table.view({
                 group_by: ["id"],
                 columns: ["pos"],
             });
             let rec2 = [{ id: 1, chg: 3 }];
-            table.update(rec2);
+            await table.update(rec2);
             let result2 = await view.to_json();
             var answer = [
                 { __ROW_PATH__: [], pos: 600 },
@@ -195,7 +195,7 @@ const std = (nums) => {
                 ];
 
                 var table = await perspective.table(dataWithNull1);
-                table.update(dataWithNull2);
+                await table.update(dataWithNull2);
 
                 var view = await table.view({
                     group_by: ["name"],

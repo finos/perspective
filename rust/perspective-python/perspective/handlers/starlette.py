@@ -17,9 +17,6 @@ import perspective
 class PerspectiveStarletteHandler(object):
     """PerspectiveStarletteHandler is a drop-in implementation of Perspective.
 
-    The Perspective client and server will automatically keep the Websocket
-    alive without timing out.
-
     Examples:
         >>> server = Server()
         >>> client = server.client()
@@ -34,6 +31,7 @@ class PerspectiveStarletteHandler(object):
     def __init__(self, **kwargs):
         self._server = kwargs.pop("perspective_server", perspective.GLOBAL_SERVER)
         self._websocket = kwargs.pop("websocket")
+        self._executor = kwargs.pop("executor", None)
         self._loop = kwargs.pop("loop", asyncio.get_event_loop())
         super().__init__(**kwargs)
 
@@ -48,6 +46,9 @@ class PerspectiveStarletteHandler(object):
             while True:
                 message = await self._websocket.receive()
                 self._websocket._raise_on_disconnect(message)
-                self.session.handle_request(message["bytes"])
+                if self._executor is not None:
+                    self._executor.submit(self.session.handle_request, message["bytes"])
+                else:
+                    self.session.handle_request(message["bytes"])
         finally:
             self.session.close()

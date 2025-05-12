@@ -17,6 +17,7 @@ mod local_client;
 mod local_session;
 mod server;
 
+pub use ffi::{num_cpus, set_num_cpus};
 pub use local_client::LocalClient;
 pub use local_session::LocalSession;
-pub use server::{Server, ServerError, SessionHandler};
+pub use server::{Server, ServerError, ServerResult, SessionHandler};

@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { test, expect } from "@finos/perspective-test";
-import { make_client, make_server } from "@finos/perspective";
+import { make_client, PerspectiveServer } from "@finos/perspective";
 
 test("Proxy session tunnels requests through client", async () => {
     const { client, server } = connectClientToServer();
@@ -72,14 +72,13 @@ test("Proxy session tunnels on_update callbacks through client", async () => {
 });
 
 function connectClientToServer() {
-    const server = make_server();
+    const server = new PerspectiveServer();
     const session = server.make_session(async (msg) => {
         await client.handle_response(msg);
     });
 
     const client = make_client(async (msg) => {
         session.handle_request(msg);
-        session.poll();
     });
 
     return {

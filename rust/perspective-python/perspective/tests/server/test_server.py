@@ -1000,12 +1000,12 @@ class TestServer(object):
     def test_server_set_queue_process(self, sentinel):
         s = sentinel(0)
 
-        def fake_queue_process(f, *args, **kwargs):
+        def fake_poll_process(server):
             s.set(s.get() + 1)
-            f(*args, **kwargs)
+            server.poll()
 
-        server = Server()
-        client = Client.from_server(server, loop_callback=fake_queue_process)
+        server = Server(on_poll_request=fake_poll_process)
+        client = Client.from_server(server)
         table = client.table({"a": [1, 2, 3]}, name="tbl")
         view = table.view()
         view.on_update(lambda *args: print(args))
@@ -1013,54 +1013,4 @@ class TestServer(object):
         assert table.view().to_columns() == {"a": [1, 2, 3, 4, 5, 6]}
 
         table.update({"a": [7, 8, 9]})
-        assert s.get() == 2
-
-    @mark.skip(
-        reason="This method no longer dispatches to the loop_cb because it is sync without an on_update callback"
-    )
-    def test_server_set_queue_process_before_host_table(self, sentinel):
-        s = sentinel(0)
-        server = Server()
-        client = Client.from_server(server)
-        table = client.table({"a": [1, 2, 3]}, name="tbl")
-
-        def fake_queue_process(f, *args, **kwargs):
-            s.set(s.get() + 1)
-            f(*args, **kwargs)
-
-        client.set_loop_callback(fake_queue_process)
-        table.update({"a": [4, 5, 6]})
-        table.update({"a": [4, 5, 6]})
-
-        assert s.get() == 2
-
-    @mark.skip(
-        reason="This method no longer dispatches to the loop_cb because it is sync without an on_update callback"
-    )
-    def test_server_set_queue_process_multiple(self, sentinel):
-        # client2's queue process should not affect client1,
-        # provided they manage different tables
-        s = sentinel(0)
-        s2 = sentinel(0)
-        server = Server()
-        client = Client.from_server(server)
-        client2 = Client.from_server(server)
-        table = client.table({"a": [1, 2, 3]}, name="tbl")
-        table2 = client2.table({"a": [1, 2, 3]}, name="tbl2")
-
-        def fake_queue_process(f, *args, **kwargs):
-            s2.set(s2.get() + 1)
-            f(*args, **kwargs)
-
-        client2.set_loop_callback(fake_queue_process)
-
-        table.update({"a": [4, 5, 6]})
-        assert table.view().to_columns() == {"a": [1, 2, 3, 4, 5, 6]}
-
-        table2.update({"a": [7, 8, 9]})
-        table.update({"a": [7, 8, 9]})
-
-        assert table.view().to_columns() == {"a": [1, 2, 3, 4, 5, 6, 7, 8, 9]}
-        assert table2.view().to_columns() == {"a": [1, 2, 3, 7, 8, 9]}
-        assert s.get() == 0
-        assert s2.get() == 3
+        assert s.get() == 7

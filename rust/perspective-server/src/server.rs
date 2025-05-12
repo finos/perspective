@@ -15,8 +15,8 @@ use std::error::Error;
 use std::sync::Arc;
 
 use async_lock::RwLock;
-use futures::future::BoxFuture;
 use futures::Future;
+use futures::future::BoxFuture;
 pub use perspective_client::Session;
 
 use crate::ffi;
@@ -25,8 +25,13 @@ use crate::local_session::LocalSession;
 
 pub type ServerError = Box<dyn Error + Send + Sync>;
 
+pub type ServerResult<T> = Result<T, ServerError>;
+
 type SessionCallback =
     Arc<dyn for<'a> Fn(&'a [u8]) -> BoxFuture<'a, Result<(), ServerError>> + Send + Sync>;
+
+type OnPollRequestCallback =
+    Arc<dyn Fn(&Server) -> BoxFuture<'static, Result<(), ServerError>> + Send + Sync>;
 
 /// Use [`SessionHandler`] to implement a callback for messages emitted from
 /// a [`Session`], to be passed to the [`Server::new_session`] constructor.
@@ -49,6 +54,8 @@ pub trait SessionHandler: Send + Sync {
 pub struct Server {
     pub(crate) server: Arc<ffi::Server>,
     pub(crate) callbacks: Arc<RwLock<HashMap<u32, SessionCallback>>>,
+
+    pub(crate) on_poll_request: Option<OnPollRequestCallback>,
 }
 
 impl std::fmt::Debug for Server {
@@ -59,15 +66,17 @@ impl std::fmt::Debug for Server {
     }
 }
 
-impl Default for Server {
-    fn default() -> Self {
-        let server = Arc::new(ffi::Server::new());
-        let callbacks = Arc::default();
-        Self { server, callbacks }
-    }
-}
-
 impl Server {
+    pub fn new(on_poll_request: Option<OnPollRequestCallback>) -> Self {
+        let server = Arc::new(ffi::Server::new(on_poll_request.is_some()));
+        let callbacks = Arc::default();
+        Self {
+            server,
+            callbacks,
+            on_poll_request,
+        }
+    }
+
     /// An alternative method for creating a new [`Session`] for this
     /// [`Server`], from a callback closure instead of a via a trait.
     /// See [`Server::new_session`] for details.
@@ -120,5 +129,35 @@ impl Server {
 
     pub fn new_local_client(&self) -> LocalClient {
         LocalClient::new(self)
+    }
+
+    /// Flush any pending messages which may have resulted from previous
+    /// [`Session::handle_request`] calls.
+    ///
+    /// Calling [`Session::poll`] may result in the `send_response` parameter
+    /// which was used to construct this (or other) [`Session`] to fire.
+    /// Whenever a [`Session::handle_request`] method is invoked for a
+    /// `perspective_server::Server`, at least one [`Session::poll`] should be
+    /// scheduled to clear other clients message queues.
+    ///
+    /// `poll()` _must_ be called after [`Table::update`] or [`Table::remove`]
+    /// and `on_poll_request` set, or these changes will not be applied.
+    pub async fn poll(&self) -> Result<(), ServerError> {
+        let responses = self.server.poll();
+        let mut results = Vec::with_capacity(responses.size());
+        for response in responses.iter_responses() {
+            let cb = self
+                .callbacks
+                .read()
+                .await
+                .get(&response.client_id())
+                .cloned();
+
+            if let Some(f) = cb {
+                results.push(f(response.msg()).await);
+            }
+        }
+
+        results.into_iter().collect()
     }
 }

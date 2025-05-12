@@ -259,23 +259,26 @@ impl View {
     /// view.on_update((updated) => console.log(updated.delta), { mode: "row" });
     /// ```
     #[wasm_bindgen]
-    pub async fn on_update(
+    pub fn on_update(
         &self,
         on_update_js: Function,
         options: Option<JsOnUpdateOptions>,
-    ) -> ApiResult<u32> {
+    ) -> ApiFuture<u32> {
         let poll_loop = LocalPollLoop::new(move |args| {
             let js_obj = JsValue::from_serde_ext(&args)?;
             on_update_js.call1(&JsValue::UNDEFINED, &js_obj)
         });
 
         let on_update = Box::new(move |msg| poll_loop.poll(msg));
-        let on_update_opts = options
-            .into_serde_ext::<Option<OnUpdateOptions>>()?
-            .unwrap_or_default();
+        let view = self.0.clone();
+        ApiFuture::new(async move {
+            let on_update_opts = options
+                .into_serde_ext::<Option<OnUpdateOptions>>()?
+                .unwrap_or_default();
 
-        let id = self.0.on_update(on_update, on_update_opts).await?;
-        Ok(id)
+            let id = view.on_update(on_update, on_update_opts).await?;
+            Ok(id)
+        })
     }
 
     /// Unregister a previously registered update callback with this [`View`].

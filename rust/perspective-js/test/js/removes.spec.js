@@ -62,7 +62,7 @@ test.describe("Removes", () => {
                         float: [1, 2, 3, 4, 5, 6].map((x) => x * 0.5),
                     };
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(
                         table,
@@ -71,7 +71,7 @@ test.describe("Removes", () => {
                         },
                         async (getter) => {
                             const pkey = 3;
-                            table.remove([
+                            await table.remove([
                                 string_pkey ? pkey.toString() : pkey,
                             ]);
 
@@ -100,7 +100,7 @@ test.describe("Removes", () => {
                     data.int.push(7);
                     data.float.push(3.5);
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(
                         table,
@@ -109,7 +109,7 @@ test.describe("Removes", () => {
                         },
                         async (getter) => {
                             const pkey = 3;
-                            table.remove([
+                            await table.remove([
                                 string_pkey ? pkey.toString() : pkey,
                             ]);
 
@@ -146,7 +146,7 @@ test.describe("Removes", () => {
                     data.int.push(7);
                     data.float.push(3.5);
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(
                         table,
@@ -155,7 +155,7 @@ test.describe("Removes", () => {
                         },
                         async (getter) => {
                             const pkey = 3;
-                            table.remove([
+                            await table.remove([
                                 string_pkey ? pkey.toString() : pkey,
                             ]);
 
@@ -188,8 +188,8 @@ test.describe("Removes", () => {
                         float: [1, 2, 3, 4, 5, 6].map((x) => x * 0.5),
                     };
 
-                    table.update(data);
-                    table.remove(
+                    await table.update(data);
+                    await table.remove(
                         [1, 3, 5].map((x) => (string_pkey ? x.toString() : x))
                     );
 
@@ -205,7 +205,7 @@ test.describe("Removes", () => {
                                 float: [3, 2, 1],
                             });
 
-                            table.update({
+                            await table.update({
                                 str: ["7", "9", "8"],
                                 int: [7, 9, 8],
                                 float: [3.5, 4.5, 4],
@@ -232,7 +232,7 @@ test.describe("Removes", () => {
                         float: [1, 2, 3, 4, 5, 6].map((x) => x * 0.5),
                     };
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(
                         table,
@@ -241,7 +241,7 @@ test.describe("Removes", () => {
                         },
                         async (getter) => {
                             const pkey = 3;
-                            table.remove([
+                            await table.remove([
                                 string_pkey ? pkey.toString() : pkey,
                             ]);
 
@@ -251,7 +251,7 @@ test.describe("Removes", () => {
                                 float: [0.5, 2, 2.5, 3],
                             });
 
-                            table.update({
+                            await table.update({
                                 str: ["7", "9", "8"],
                                 int: [7, 9, 8],
                                 float: [3.5, 4.5, 4],
@@ -278,12 +278,12 @@ test.describe("Removes", () => {
                         float: [1, 2, 3, 4, 5, 6].map((x) => x * 0.5),
                     };
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(table, {}, async (getter) => {
                         expect(await getter()).toEqual(data);
 
-                        table.update({
+                        await table.update({
                             str: [string_pkey ? null : "7"],
                             int: [string_pkey ? 7 : null],
                             float: [3.5],
@@ -311,7 +311,7 @@ test.describe("Removes", () => {
                             });
                         }
 
-                        table.remove([string_pkey ? "3" : 3]);
+                        await table.remove([string_pkey ? "3" : 3]);
 
                         if (string_pkey) {
                             expect(await getter()).toEqual({
@@ -346,7 +346,7 @@ test.describe("Removes", () => {
                         float: [1, 2, 3, 4, 5, 6].map((x) => x * 0.5),
                     };
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(
                         table,
@@ -354,7 +354,7 @@ test.describe("Removes", () => {
                             filter: [["int", "!=", 3]],
                         },
                         async (getter) => {
-                            table.remove(
+                            await table.remove(
                                 [1, 2, 3, 4, 5, 6].map((x) =>
                                     string_pkey ? x.toString() : x
                                 )
@@ -366,7 +366,7 @@ test.describe("Removes", () => {
                                 str: [],
                             });
 
-                            table.update({
+                            await table.update({
                                 str: ["def", "abc", "deff"],
                                 int: [1, 2, 4],
                                 float: [100.5, 200.5, 300.5],
@@ -407,7 +407,7 @@ test.describe("Removes", () => {
                     data.int.splice(splice_idx, 0, string_pkey ? 7 : null);
                     data.float.splice(splice_idx, 0, 3.5);
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(
                         table,
@@ -415,7 +415,7 @@ test.describe("Removes", () => {
                             filter: [["float", "==", 3.5]],
                         },
                         async (getter) => {
-                            table.remove([null]);
+                            await table.remove([null]);
                             const v = await table.view();
                             console.log(
                                 "str?",
@@ -426,7 +426,7 @@ test.describe("Removes", () => {
 
                             expect(await getter()).toEqual({});
 
-                            table.update({
+                            await table.update({
                                 str: [string_pkey ? null : "7"],
                                 int: [string_pkey ? 7 : null],
                                 float: [3.5],
@@ -458,7 +458,7 @@ test.describe("Removes", () => {
                     data.int.splice(splice_idx, 0, string_pkey ? 7 : null);
                     data.float.splice(splice_idx, 0, 3.5);
 
-                    table.update(data);
+                    await table.update(data);
 
                     await query(table, {}, async (getter) => {
                         const expected = {
@@ -469,7 +469,7 @@ test.describe("Removes", () => {
 
                         expect(await getter()).toEqual(expected);
 
-                        table.update([
+                        await table.update([
                             {
                                 str: string_pkey ? null : "7",
                                 int: string_pkey ? 7 : null,

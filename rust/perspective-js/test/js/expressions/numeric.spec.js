@@ -180,7 +180,7 @@ function validate_binary_operations(output, expressions, operator) {
                             expressions: { '"a"': '"a"' },
                         });
 
-                        table.update({
+                        await table.update({
                             a: [40, 50, 60, 70],
                         });
 
@@ -569,7 +569,7 @@ function validate_binary_operations(output, expressions, operator) {
                             '"a" != "b"': '"a" != "b"',
                         },
                     });
-                    table.update({
+                    await table.update({
                         a: [1, 2, 3, 4],
                         b: [1.0, 2.0, 3.0, 4.0],
                         c: [1, 0, 1, 0],
@@ -607,7 +607,7 @@ function validate_binary_operations(output, expressions, operator) {
                             '"b" != "d"',
                         ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                     });
-                    table.update({
+                    await table.update({
                         a: [1, 2, 3, 4],
                         b: [1.0, 2.0, 3.0, 4.0],
                         c: [1, 0, 1, 0],
@@ -764,7 +764,7 @@ function validate_binary_operations(output, expressions, operator) {
                     expressions,
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [1.5, 2.5, 3.5, 4.5],
                 });
@@ -810,7 +810,7 @@ function validate_binary_operations(output, expressions, operator) {
                     expressions,
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [1.5, 2.5, 3.5, 4.5],
                 });
@@ -855,7 +855,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [10, 15, 20, 30],
                     b: [10.5, 15.5, 20.5, 30.5],
                 });
@@ -884,7 +884,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [10, 15, 20, 30],
                     b: [10.5, 15.5, 20.5, 30.5],
                 });
@@ -911,7 +911,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [1.5, 2.5, 3.5, 4.5],
                 });
@@ -938,7 +938,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [100, 200, 300, 400],
                     b: [100.5, 200.5, 300.5, 400.5],
                 });
@@ -970,7 +970,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [100, 200, 300, 400],
                     b: [100.5, 200.5, 300.5, 400.5],
                 });
@@ -1007,7 +1007,7 @@ function validate_binary_operations(output, expressions, operator) {
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [1.5, 2.5, 3.5, 4.5],
                 });
@@ -1036,7 +1036,7 @@ function validate_binary_operations(output, expressions, operator) {
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [1.5, 2.5, 3.5, 4.5],
                 });
@@ -1065,7 +1065,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [1.5, 2.5, 3.5, 4.5],
                 });
@@ -1090,7 +1090,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [30, 60, 90, 120],
                     b: [25.5, 45.5, 88.721282, 91.12983],
                 });
@@ -1121,7 +1121,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [25.5, 45.5, 88.721282, 91.12983].map(
                         (x) => x * (Math.PI / 180)
@@ -1152,7 +1152,7 @@ function validate_binary_operations(output, expressions, operator) {
                     },
                 });
 
-                table.update({
+                await table.update({
                     a: [1, 2, 3, 4],
                     b: [25.5, 45.5, 88.721282, 91.12983].map(
                         (x) => x * (Math.PI / 180)
@@ -1187,7 +1187,7 @@ function validate_binary_operations(output, expressions, operator) {
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [1, null, null, 4],
                     b: [null, 2.5, null, 4.5],
                 });
@@ -1230,7 +1230,7 @@ function validate_binary_operations(output, expressions, operator) {
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [1, null, null, 4],
                     b: [null, 2.5, null, 4.5],
                 });
@@ -1272,7 +1272,7 @@ function validate_binary_operations(output, expressions, operator) {
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [100, 200, 300, 400],
                     b: [100.5, 200.5, 300.5, 400.5],
                 });
@@ -1309,7 +1309,7 @@ function validate_binary_operations(output, expressions, operator) {
                     ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
                 });
 
-                table.update({
+                await table.update({
                     a: [15, 15, 35, 40, 1250, 1255],
                     b: [2.25, 2, 3.5, 16.5, 28, 8],
                 });
@@ -1335,7 +1335,7 @@ function validate_binary_operations(output, expressions, operator) {
                 for (let i = 0; i < 1000; i++) {
                     data.push(i);
                 }
-                table.update({ x: data });
+                await table.update({ x: data });
                 const view = await table.view({
                     expressions: { "random()": "random()" },
                 });

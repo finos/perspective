@@ -12,73 +12,85 @@
 
 use std::sync::Arc;
 
-use futures::future::BoxFuture;
-use perspective_server::{Server, ServerResult};
+// use async_lock::RwLock;
+use perspective_client::Session;
+use perspective_server::{LocalSession, SessionHandler};
 use pollster::FutureExt;
-use pyo3::IntoPyObjectExt;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::PyAny;
+use pyo3::types::{PyAny, PyBytes};
 
-use super::session_sync::{PyConnectionSync, PySession};
-use crate::client::client_async::AsyncClient;
-
-#[pyclass(subclass, module = "perspective")]
+#[pyclass(module = "perspective")]
 #[derive(Clone)]
-pub struct PyServer {
-    pub server: Server,
+pub struct PySession {
+    pub(crate) session: Arc<std::sync::RwLock<Option<LocalSession>>>,
 }
 
+#[derive(Clone)]
+pub struct PyConnectionSync(pub Arc<Py<PyAny>>);
+
+impl SessionHandler for PyConnectionSync {
+    async fn send_response<'a>(
+        &'a mut self,
+        msg: &'a [u8],
+    ) -> Result<(), perspective_server::ServerError> {
+        Python::with_gil(move |py| self.0.call1(py, (PyBytes::new(py, msg),)))?;
+
+        Ok(())
+    }
+}
+
+impl PySession {
+    fn with_session<F, G>(&self, f_ctx: F) -> PyResult<G>
+    where
+        F: Fn(&LocalSession) -> G,
+    {
+        let lock = self
+            .session
+            .read()
+            .map_err(|_| PyValueError::new_err("Internal lock error"))?;
+
+        let val = lock.as_ref().ok_or_else(|| {
+            PyValueError::new_err(format!("Session {:?} already deleted", self.session))
+        })?;
+
+        Ok(f_ctx(val))
+    }
+}
+
+#[allow(non_local_definitions)]
 #[pymethods]
-impl PyServer {
-    #[new]
-    #[pyo3(signature = (on_poll_request=None))]
-    pub fn new(on_poll_request: Option<Py<PyAny>>) -> Self {
-        Self {
-            server: Server::new(on_poll_request.map(|f| {
-                let f = Arc::new(f);
-                Arc::new(move |server: &Server| {
-                    let f = f.clone();
-                    let server = server.clone();
-                    Box::pin(async move {
-                        Python::with_gil(|py| {
-                            f.call1(py, (PyServer { server }.into_py_any(py).unwrap(),))
-                        })?;
-                        Ok(())
-                    }) as BoxFuture<'static, ServerResult<()>>
-                })
-                    as Arc<dyn Fn(&Server) -> BoxFuture<'static, ServerResult<()>> + Send + Sync>
-            })),
-        }
-    }
-
-    pub fn new_session(&self, _py: Python, response_cb: Py<PyAny>) -> PySession {
-        let session = self
-            .server
-            .new_session(PyConnectionSync(response_cb.into()))
-            .block_on();
-
-        let session = Arc::new(std::sync::RwLock::new(Some(session)));
-        PySession { session }
-    }
-
-    pub fn new_local_client(&self) -> PyResult<crate::client::client_sync::Client> {
-        let client = crate::client::client_sync::Client(AsyncClient::new_from_client(
-            self.server
-                .new_local_client()
-                .take()
-                .map_err(PyValueError::new_err)?,
-        ));
-
-        Ok(client)
-    }
-
-    pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
+impl PySession {
+    pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
         py.allow_threads(|| {
-            self.server
-                .poll()
-                .block_on()
-                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+            self.with_session(|session| {
+                let result = session
+                    .handle_request(&data)
+                    .block_on()
+                    .map_err(|e| PyValueError::new_err(format!("{}", e)));
+
+                result
+            })
+        })?
+    }
+
+    pub fn close(&self, py: Python<'_>) -> PyResult<()> {
+        py.allow_threads(|| {
+            let lock = self
+                .session
+                .write()
+                .map_err(|_| PyValueError::new_err("Internal lock error"));
+
+            if let Ok(mut lock) = lock {
+                lock.take()
+                    .ok_or_else(|| {
+                        PyValueError::new_err(format!("Session {:?} already deleted", self.session))
+                    })?
+                    .close()
+                    .block_on();
+            }
+
+            Ok(())
         })
     }
 }

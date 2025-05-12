@@ -785,7 +785,7 @@ function validate_typed_array(typed_array, column_data) {
     test.describe("CSV parsing", function () {
         test("Does not lose leading 0's when a CSV column is declared as a string", async function () {
             let table = await perspective.table({ x: "string", y: "integer" });
-            table.update("x,y\n000123,000123");
+            await table.update("x,y\n000123,000123");
             let view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual([{ x: "000123", y: 123 }]);
@@ -826,7 +826,7 @@ function validate_typed_array(typed_array, column_data) {
 
         test("Handles strings with quotation characters and commas", async function () {
             let table = await perspective.table({ x: "string", y: "integer" });
-            table.update([
+            await table.update([
                 { x: "Test, hello!", y: 1 },
                 { x: 'Test2"', y: 2 },
                 { x: 'Test3, Hello!"', y: 3 },
@@ -1037,7 +1037,7 @@ function validate_typed_array(typed_array, column_data) {
                 x: [1],
                 y: [null],
             });
-            table.update("x,y\n1,abc\n2,123");
+            await table.update("x,y\n1,abc\n2,123");
             const result2 = await view.to_columns();
             expect(result2).toEqual({
                 x: [1, 2],
@@ -1198,7 +1198,7 @@ function validate_typed_array(typed_array, column_data) {
             var schema_1 = await table.schema();
             expect(schema_1["a"]).toEqual("integer");
 
-            table.update(int_to_float);
+            await table.update(int_to_float);
 
             var schema_2 = await table.schema();
             expect(schema_2["a"]).toEqual("float");
@@ -1260,7 +1260,7 @@ function validate_typed_array(typed_array, column_data) {
 
         test("Handles date updates when constructed from a schema", async function () {
             var table = await perspective.table(meta_4);
-            table.update(data_4);
+            await table.update(data_4);
             let view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual([{ v: +data_4[0]["v"] }]);
@@ -1363,7 +1363,7 @@ function validate_typed_array(typed_array, column_data) {
 
         test("Handles datetime values with mixed formats", async function () {
             var table = await perspective.table({ datetime: "datetime" });
-            table.update([
+            await table.update([
                 { datetime: new Date(1549257586108) },
                 { datetime: "2019-01-30" },
                 { datetime: 11 },
@@ -1381,7 +1381,7 @@ function validate_typed_array(typed_array, column_data) {
 
         test("Handles date values", async function () {
             var table = await perspective.table({ v: "date" });
-            table.update(data_4);
+            await table.update(data_4);
             let view = await table.view();
             let result = await view.to_json();
             let d = new Date(data_4[0]["v"]);
@@ -1810,7 +1810,7 @@ function validate_typed_array(typed_array, column_data) {
                     }
                 );
 
-                table.update([
+                await table.update([
                     { a: 10, b: 1 },
                     { a: 20, b: 2 },
                 ]);
@@ -1836,7 +1836,7 @@ function validate_typed_array(typed_array, column_data) {
                     }
                 );
 
-                table.update([
+                await table.update([
                     { a: 10 },
                     { b: 1 },
                     { a: 20 },

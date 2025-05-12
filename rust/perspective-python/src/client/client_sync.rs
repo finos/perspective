@@ -22,7 +22,7 @@ use pyo3::prelude::*;
 use pyo3::types::*;
 
 use super::client_async::*;
-use crate::server::PySyncServer;
+use crate::server::PyServer;
 
 pub(crate) trait PyFutureExt: Future {
     fn py_block_on(self, py: Python<'_>) -> Self::Output
@@ -63,13 +63,8 @@ impl Client {
     }
 
     #[staticmethod]
-    #[pyo3(signature = (server, loop_callback=None))]
-    pub fn from_server(
-        py: Python<'_>,
-        server: Py<PySyncServer>,
-        loop_callback: Option<Py<PyAny>>,
-    ) -> PyResult<Self> {
-        server.borrow(py).new_local_client(py, loop_callback)
+    pub fn from_server(py: Python<'_>, server: Py<PyServer>) -> PyResult<Self> {
+        server.borrow(py).new_local_client()
     }
 
     /// Handle a message from the external message queue.
@@ -195,10 +190,6 @@ impl Client {
         self.0
             .remove_hosted_tables_update(callback_id)
             .py_block_on(py)
-    }
-
-    pub fn set_loop_callback(&self, py: Python<'_>, loop_cb: Py<PyAny>) -> PyResult<()> {
-        self.0.set_loop_callback(loop_cb).py_block_on(py)
     }
 
     /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the

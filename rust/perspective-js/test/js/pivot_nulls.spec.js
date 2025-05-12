@@ -251,7 +251,7 @@ import perspective from "./perspective_client";
             ];
 
             var table = await perspective.table(dataWithNull1);
-            table.update(dataWithNull2);
+            await table.update(dataWithNull2);
 
             var view = await table.view({
                 group_by: ["name"],

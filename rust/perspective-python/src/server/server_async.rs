@@ -10,9 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::pin::pin;
 use std::sync::Arc;
 
 use futures::future::BoxFuture;
+// use async_lock::RwLock;
 use perspective_server::{Server, ServerResult};
 use pollster::FutureExt;
 use pyo3::IntoPyObjectExt;
@@ -20,17 +22,18 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyAny;
 
-use super::session_sync::{PyConnectionSync, PySession};
-use crate::client::client_async::AsyncClient;
+use super::PyAsyncSession;
+use super::session_async::PyConnection;
+use crate::py_async::AllowThreads;
 
 #[pyclass(subclass, module = "perspective")]
 #[derive(Clone)]
-pub struct PyServer {
+pub struct PyAsyncServer {
     pub server: Server,
 }
 
 #[pymethods]
-impl PyServer {
+impl PyAsyncServer {
     #[new]
     #[pyo3(signature = (on_poll_request=None))]
     pub fn new(on_poll_request: Option<Py<PyAny>>) -> Self {
@@ -42,7 +45,7 @@ impl PyServer {
                     let server = server.clone();
                     Box::pin(async move {
                         Python::with_gil(|py| {
-                            f.call1(py, (PyServer { server }.into_py_any(py).unwrap(),))
+                            f.call1(py, (PyAsyncServer { server }.into_py_any(py).unwrap(),))
                         })?;
                         Ok(())
                     }) as BoxFuture<'static, ServerResult<()>>
@@ -52,33 +55,40 @@ impl PyServer {
         }
     }
 
-    pub fn new_session(&self, _py: Python, response_cb: Py<PyAny>) -> PySession {
+    pub fn new_session(&self, _py: Python, response_cb: Py<PyAny>) -> PyAsyncSession {
         let session = self
             .server
-            .new_session(PyConnectionSync(response_cb.into()))
+            .new_session(PyConnection(response_cb.into()))
             .block_on();
 
-        let session = Arc::new(std::sync::RwLock::new(Some(session)));
-        PySession { session }
+        let session = Arc::new(async_lock::RwLock::new(Some(session)));
+        PyAsyncSession { session }
     }
 
-    pub fn new_local_client(&self) -> PyResult<crate::client::client_sync::Client> {
-        let client = crate::client::client_sync::Client(AsyncClient::new_from_client(
-            self.server
-                .new_local_client()
-                .take()
-                .map_err(PyValueError::new_err)?,
-        ));
+    // #[pyo3(signature = (loop_callback=None))]
+    // pub fn new_local_client(
+    //     &self,
+    //     py: Python<'_>,
+    //     loop_callback: Option<Py<PyAny>>,
+    // ) -> PyResult<crate::client::client_sync::Client> {
+    //     let client =
+    // crate::client::client_sync::Client(AsyncClient::new_from_client(
+    //         self.server
+    //             .new_local_client()
+    //             .take()
+    //             .map_err(PyValueError::new_err)?,
+    //     ));
 
-        Ok(client)
-    }
+    //     Ok(client)
+    // }
 
-    pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
-        py.allow_threads(|| {
+    pub async fn poll(&self) -> PyResult<()> {
+        AllowThreads(pin!(async move {
             self.server
                 .poll()
-                .block_on()
+                .await
                 .map_err(|e| PyValueError::new_err(format!("{}", e)))
-        })
+        }))
+        .await
     }
 }

@@ -490,7 +490,7 @@ const pivoted_output = [
             let table = await perspective.table({
                 date: "date",
             });
-            table.update([
+            await table.update([
                 { date: new Date("2016-06-13") },
                 { date: new Date("2016-06-14") },
             ]);

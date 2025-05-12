@@ -45,7 +45,7 @@
             // Load this in the `<perspective-viewer>`.
             viewer.load(table);
             viewer.restore({
-                plugin: "X/Y Scatter",
+                plugin: "Datagrid",
                 aggregates: {
                     high: "avg",
                     low: "avg",
@@ -55,7 +55,7 @@
                 split_by: ["name"],
             });
 
-            viewer.toggleConfig();
+            // viewer.toggleConfig();
         </script>
     </body>
 </html>

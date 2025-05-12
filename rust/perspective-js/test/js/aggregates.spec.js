@@ -240,7 +240,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [true], x: 2.3333333333333335 },
             ];
 
-            table.update(data2);
+            await table.update(data2);
 
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -283,7 +283,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [true], x: 2 },
             ];
 
-            table.update(data);
+            await table.update(data);
 
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -615,7 +615,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [false], x: 2 },
                 { __ROW_PATH__: [true], x: 1 },
             ];
-            table.update({
+            await table.update({
                 x: [5],
                 y: ["e"],
                 z: [true],
@@ -646,7 +646,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [false], x: 2 },
                 { __ROW_PATH__: [true], x: -2 },
             ];
-            table.update({
+            await table.update({
                 x: [5],
                 y: ["a"],
                 z: [true],
@@ -677,7 +677,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [false], x: 2 },
                 { __ROW_PATH__: [true], x: 2 },
             ];
-            table.update({
+            await table.update({
                 x: [5],
                 y: ["a"],
                 z: [true],
@@ -700,7 +700,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [false], x: 2 },
                 { __ROW_PATH__: [true], x: 5 },
             ];
-            table.update({
+            await table.update({
                 x: [5],
                 y: ["a"],
                 z: [true],
@@ -737,7 +737,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 5; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     index: [1],
                 });
@@ -746,7 +746,7 @@ const std = (nums) => {
             let result = await view.to_columns();
             expect(result["y"]).toEqual([1, 1]);
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: ["A"],
                 index: [1],
@@ -860,7 +860,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 5; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     y: [100],
                     index: [1],
@@ -870,7 +870,7 @@ const std = (nums) => {
             let result = await view.to_columns();
             expect(result["y"]).toEqual([100, 100]);
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: [101],
                 index: [1],
@@ -910,7 +910,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 5; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     y: [100],
                     index: [1],
@@ -920,7 +920,7 @@ const std = (nums) => {
             let result = await view.to_columns();
             expect(result["y"]).toEqual([100, 100]);
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: [101],
                 index: [1],
@@ -930,7 +930,7 @@ const std = (nums) => {
             expect(result["x"]).toEqual([1, 1]);
             expect(result["y"]).toEqual([100, 101]);
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: [99],
                 index: [1],
@@ -970,7 +970,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 100; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     y: [99],
                     index: [1],
@@ -980,7 +980,7 @@ const std = (nums) => {
             let result = await view.to_columns();
             expect(result["y"]).toEqual([99, 99]);
 
-            table.update({
+            await table.update({
                 y: [101],
                 index: [1],
             });
@@ -993,7 +993,7 @@ const std = (nums) => {
             // like it's storing a "global" low?
             expect(result["y"]).toEqual([99, 99]);
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: [100],
                 index: [1],
@@ -1033,7 +1033,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 100; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     index: [1],
                 });
@@ -1043,7 +1043,7 @@ const std = (nums) => {
             expect(result["y"]).toEqual([1, 1]);
 
             for (let i = 0; i < 100; i++) {
-                table.update({
+                await table.update({
                     x: ["b"],
                     index: [1],
                 });
@@ -1085,7 +1085,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 100; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     index: [1],
                 });
@@ -1095,7 +1095,7 @@ const std = (nums) => {
             expect(result["y"]).toEqual([1, 1, 1]);
 
             for (let i = 0; i < 100; i++) {
-                table.update({
+                await table.update({
                     x: ["b"],
                     index: [1],
                 });
@@ -1106,7 +1106,7 @@ const std = (nums) => {
             expect(result["y"]).toEqual([1, 1, 1]);
 
             for (let i = 2; i < 6; i++) {
-                table.update({
+                await table.update({
                     x: [i.toString()],
                     y: [i.toString()],
                     z: [i],
@@ -1180,7 +1180,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 100; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     index: [1],
                 });
@@ -1190,7 +1190,7 @@ const std = (nums) => {
             expect(result["y"]).toEqual([1, 1]);
 
             // y[0] becomes valid
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: ["B"],
                 index: [1],
@@ -1203,7 +1203,7 @@ const std = (nums) => {
             expect(result2["y"]).toEqual(["B", "B"]);
 
             // and invalid
-            table.update({
+            await table.update({
                 y: [null],
                 index: [1],
             });
@@ -1245,7 +1245,7 @@ const std = (nums) => {
             });
 
             for (let i = 0; i < 5; i++) {
-                table.update({
+                await table.update({
                     x: ["a"],
                     index: [1],
                 });
@@ -1254,7 +1254,7 @@ const std = (nums) => {
             let result = await view.to_columns();
             expect(result["a|y"]).toEqual([1, 1]);
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 y: ["A"],
                 index: [1],
@@ -1293,7 +1293,7 @@ const std = (nums) => {
                 index: [1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 index: [1],
             });
@@ -1306,7 +1306,7 @@ const std = (nums) => {
                 index: [1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["c"],
                 index: [1],
             });
@@ -1319,7 +1319,7 @@ const std = (nums) => {
                 index: [1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["d"],
                 y: ["B"],
                 index: [2],
@@ -1363,7 +1363,7 @@ const std = (nums) => {
                 index: [1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 index: [1],
             });
@@ -1376,7 +1376,7 @@ const std = (nums) => {
                 index: [0],
             });
 
-            table.update({
+            await table.update({
                 x: ["a"],
                 index: [1],
             });
@@ -1389,7 +1389,7 @@ const std = (nums) => {
                 index: [1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["a"],
                 y: ["B"],
                 index: [2],
@@ -1429,7 +1429,7 @@ const std = (nums) => {
                 index: [1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["b"],
                 index: [1],
             });
@@ -1441,7 +1441,7 @@ const std = (nums) => {
                 index: [2, 1, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["c"],
                 index: [1],
             });
@@ -1454,7 +1454,7 @@ const std = (nums) => {
                 index: [3, 2, 1],
             });
 
-            table.update({
+            await table.update({
                 x: ["d"],
                 y: ["B"],
                 index: [2],
@@ -1502,7 +1502,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [false], x: 4 },
                 { __ROW_PATH__: [true], x: 5 },
             ];
-            table.update({
+            await table.update({
                 x: [5],
                 y: ["e"],
                 z: [true],
@@ -1525,7 +1525,7 @@ const std = (nums) => {
                 { __ROW_PATH__: [false], x: 4 },
                 { __ROW_PATH__: [true], x: 5 },
             ];
-            table.update({
+            await table.update({
                 x: [5],
                 y: ["c"],
                 z: [true],
@@ -1551,7 +1551,7 @@ const std = (nums) => {
             let result = await view.to_json();
             expect(result).toEqual(answer);
 
-            table.update([
+            await table.update([
                 { x: 1, y: "c", z: true },
                 { x: 2, y: "d", z: false },
             ]);
@@ -1592,7 +1592,7 @@ const std = (nums) => {
                 z: [null, "a", null],
             });
 
-            table.update({
+            await table.update({
                 y: [4],
                 z: ["a"],
             });
@@ -1604,7 +1604,7 @@ const std = (nums) => {
                 z: ["a", "a", "a"],
             });
 
-            table.update({
+            await table.update({
                 y: [5],
                 z: ["x"],
             });
@@ -1692,7 +1692,7 @@ const std = (nums) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{ x: 0.64294039, y: "a" }]);
+            await table.update([{ x: 0.64294039, y: "a" }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -1737,7 +1737,7 @@ const std = (nums) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{ x: 0.284169685, z: 3 }]);
+            await table.update([{ x: 0.284169685, z: 3 }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -1894,7 +1894,7 @@ const std = (nums) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{ x: 0.64294039, y: "a" }]);
+            await table.update([{ x: 0.64294039, y: "a" }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -1942,7 +1942,7 @@ const std = (nums) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{ x: 0.284169685, z: 3 }]);
+            await table.update([{ x: 0.284169685, z: 3 }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -2074,7 +2074,7 @@ const std = (nums) => {
 
         test("mean with 0.0 (floats)", async function () {
             var table = await perspective.table({ x: "float", y: "integer" });
-            table.update([
+            await table.update([
                 { x: 3, y: 1 },
                 { x: 3, y: 1 },
                 { x: 0, y: 1 },
@@ -2154,7 +2154,7 @@ const std = (nums) => {
                 { x: null, y: 1 },
                 { x: null, y: 2 },
             ]);
-            table.update([
+            await table.update([
                 { x: 2, y: 1 },
                 { x: null, y: 1 },
                 { x: 4, y: 2 },
@@ -2181,14 +2181,14 @@ const std = (nums) => {
                 { x: null, y: 1, z: "a" },
                 { x: null, y: 2, z: "a" },
             ]);
-            table.update([
+            await table.update([
                 { x: 1, y: 1, z: "b" },
                 { x: 1, y: 1, z: "b" },
                 { x: null, y: 1, z: "b" },
                 { x: 4, y: 2, z: "b" },
                 { x: null, y: 2, z: "b" },
             ]);
-            table.update([
+            await table.update([
                 { x: 2, y: 2, z: "c" },
                 { x: 3, y: 2, z: "c" },
                 { x: null, y: 2, z: "c" },

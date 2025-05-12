@@ -73,10 +73,10 @@ async def psp_installed(selenium, psp_wheel_url):
 @pytest.fixture
 @run_in_pyodide
 def server(selenium):
-    from perspective import Server
+    from perspective import AsyncServer
     from pytest_pyodide.decorator import PyodideHandle
 
-    s = Server()
+    s = AsyncServer()
     return PyodideHandle(s)
 
 
@@ -86,16 +86,11 @@ def client(selenium, psp_installed, server):
     from perspective import AsyncClient
     from pytest_pyodide.decorator import PyodideHandle
 
-    import asyncio
-
     async def send_request(msg):
-        sess.handle_request(msg)
+        await sess.handle_request(msg)
 
-    def send_response(msg):
-        async def poke_client():
-            await client.handle_response(msg)
-
-        asyncio.get_running_loop().create_task(poke_client())
+    async def send_response(msg):
+        await client.handle_response(msg)
 
     sess = server.new_session(send_response)
     client = AsyncClient(send_request)

@@ -37,6 +37,7 @@ class PerspectiveAIOHTTPHandler(object):
     def __init__(self, **kwargs):
         self.server = kwargs.pop("perspective_server", perspective.GLOBAL_SERVER)
         self._request = kwargs.pop("request")
+        self._executor = kwargs.pop("executor", None)
         self._loop = kwargs.pop("loop", asyncio.get_event_loop())
         super().__init__(**kwargs)
 
@@ -50,8 +51,10 @@ class PerspectiveAIOHTTPHandler(object):
             await self._ws.prepare(self._request)
             async for msg in self._ws:
                 if msg.type == WSMsgType.BINARY:
-                    self.session.handle_request(msg.data)
-
+                    if self._executor is not None:
+                        self._executor.submit(self.session.handle_request, msg.data)
+                    else:
+                        self.session.handle_request(msg.data)
         finally:
             self.session.close()
         return self._ws
