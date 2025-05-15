@@ -10,10 +10,15 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { PerspectiveSession, PerspectiveServer } from "./wasm/engine.ts";
+import {
+    PerspectiveSession,
+    PerspectiveServer,
+    PerspectivePollThread,
+} from "./wasm/engine.ts";
 import { compile_perspective } from "./wasm/emscripten_api.ts";
 
 let GLOBAL_SERVER: PerspectiveServer;
+let POLL_THREAD: PerspectivePollThread;
 
 function bindPort(e: MessageEvent) {
     const port = e.ports[0];
@@ -23,7 +28,11 @@ function bindPort(e: MessageEvent) {
             const id = msg.data.id;
             if (!GLOBAL_SERVER) {
                 const module = await compile_perspective(msg.data.args[0]);
-                GLOBAL_SERVER = new PerspectiveServer(module);
+                GLOBAL_SERVER = new PerspectiveServer(module, {
+                    on_poll_request: () => POLL_THREAD.on_poll_request(),
+                });
+
+                POLL_THREAD = new PerspectivePollThread(GLOBAL_SERVER);
             }
 
             session = GLOBAL_SERVER.make_session(async (resp) => {
@@ -33,8 +42,7 @@ function bindPort(e: MessageEvent) {
 
             port.postMessage({ id });
         } else {
-            session.handle_request(new Uint8Array(msg.data));
-            setTimeout(() => session.poll());
+            await session.handle_request(new Uint8Array(msg.data));
         }
     });
 

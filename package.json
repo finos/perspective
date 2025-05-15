@@ -33,9 +33,9 @@
         "packages/perspective-cli",
         "rust/perspective-js",
         "rust/perspective-viewer",
+        "rust/perspective-python",
         "examples/*",
-        "docs",
-        "python/perspective"
+        "docs"
     ],
     "devDependencies": {
         "@finos/perspective": "workspace:^",

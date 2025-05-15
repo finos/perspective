@@ -32,9 +32,7 @@ if (!!process.env.PSP_DEBUG) {
 const python_version = process.env.PSP_PYTHON_VERSION || "3.12";
 const is_pyodide = !!process.env.PSP_PYODIDE;
 
-const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>
-    x.replace("-", "").replace(".", "")
-);
+const version = pkg.version;
 
 fs.mkdirSync(`./perspective_python-${version}.data`, { recursive: true });
 fs.copyFileSync("../../LICENSE.md", "./LICENSE.md");

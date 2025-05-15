@@ -19,7 +19,7 @@ use perspective_client::*;
 use crate::local_session::LocalSession;
 use crate::server::{Server, ServerError, SessionHandler};
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 struct LocalClientState {
     client: Arc<OnceLock<Client>>,
     session: Arc<OnceLock<RwLock<Option<LocalSession>>>>,
@@ -41,7 +41,6 @@ impl ClientHandler for LocalClientState {
         let session_lock = self.get_session().await;
         let session = session_lock.as_ref().unwrap();
         session.handle_request(&msg).await?;
-        session.poll().await?;
         Ok(())
     }
 }

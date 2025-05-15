@@ -53,7 +53,7 @@ function mock_fn() {
             const cb2 = mock_fn();
             const sub1 = await table.on_delete(cb1);
             table.on_delete(cb2);
-            table.remove_delete(sub1);
+            await table.remove_delete(sub1);
             await table.delete();
             expect(cb1.count()).toEqual(0);
             expect(cb2.count()).toEqual(1);

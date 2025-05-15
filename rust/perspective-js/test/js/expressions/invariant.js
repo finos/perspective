@@ -306,7 +306,7 @@ const generator = function (length = 100, has_zero = true) {
                         e: "boolean",
                     });
 
-                    table.update(data);
+                    await table.update(data);
 
                     const view = await table.view({
                         expressions: { '"c" == "c"': '"c" == "c"' },
@@ -335,7 +335,7 @@ const generator = function (length = 100, has_zero = true) {
                         e: "boolean",
                     });
 
-                    table.update(data);
+                    await table.update(data);
 
                     const view = await table.view({
                         expressions: { '"d" == "d"': '"d" == "d"' },
@@ -364,7 +364,7 @@ const generator = function (length = 100, has_zero = true) {
                         e: "boolean",
                     });
 
-                    table.update(data);
+                    await table.update(data);
 
                     const view = await table.view({
                         expressions: { '"d" == "d"': '"d" == "d"' },

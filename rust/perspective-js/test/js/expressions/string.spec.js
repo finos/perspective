@@ -871,7 +871,7 @@ const random_string = (
                 c: "string",
             });
 
-            table.update({
+            await table.update({
                 a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
                 b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"],
                 c: [
@@ -943,7 +943,7 @@ const random_string = (
                 c: "string",
             });
 
-            table.update({
+            await table.update({
                 a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
                 b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"],
                 c: ["1234567890", "123x4567", "abcdefg123", "4567123", "123"],
@@ -1864,7 +1864,7 @@ const random_string = (
                 y: "string",
             });
 
-            table.update({
+            await table.update({
                 x: ["15 02 1997", "31 11 2021", "01 01 2020", "31 12 2029"],
                 y: ["$300", "$123.58", "$0.99", "$1.99"],
             });
@@ -1904,7 +1904,7 @@ const random_string = (
                 y: "string",
             });
 
-            table.update({
+            await table.update({
                 x: ["15 02 1997", "31 11 2021", "01 01 2020", "31 12 2029"],
                 y: ["$300", "$123.58", "$0.99", "$1.99"],
             });
@@ -1949,7 +1949,7 @@ const random_string = (
                 y: "string",
             });
 
-            table.update({
+            await table.update({
                 x: ["15 02 1997", "31 11 2021", "01 01 2020", "31 12 2029"],
                 y: ["$300", "$123.58", "$0.99", "$1.99"],
             });
@@ -1999,7 +1999,7 @@ const random_string = (
                 y: "string",
             });
 
-            table.update({
+            await table.update({
                 x: ["15 02 1997", "31 11 2021", "01 01 2020", "31 12 2029"],
                 y: ["$300", "$123.58", "$0.99", "$1.99"],
             });
@@ -2163,7 +2163,7 @@ const random_string = (
                 "23",
             ]);
 
-            table.update({
+            await table.update({
                 x: ["new string", null, "abc"],
                 y: [3, 1, 5],
             });
@@ -2185,7 +2185,7 @@ const random_string = (
                 "bc",
             ]);
 
-            table.update({
+            await table.update({
                 x: ["1234", "1234", "1234", "1234", "1234"],
                 y: [5, 4, 3, 2, 1],
             });
@@ -2246,7 +2246,7 @@ const random_string = (
 
             expect(await table.size()).toEqual(0);
 
-            table.update({
+            await table.update({
                 x: ["new string", null, "abc"],
             });
 
@@ -2295,10 +2295,10 @@ const random_string = (
                 Array(5).fill(null)
             );
 
-            table.remove([1, 2, 3, 4, 5]);
+            await table.remove([1, 2, 3, 4, 5]);
 
             const str = Array(100).fill("abcde").join("");
-            table.update({
+            await table.update({
                 x: [str],
                 y: [1],
             });
@@ -2393,7 +2393,7 @@ const random_string = (
             }
 
             const table = await perspective.table({ a: "string", b: "string" });
-            table.update({ a: data, b: index });
+            await table.update({ a: data, b: index });
             const expressions = {
                 [`w`]: `replace('abc-def-hijk', '-', '')`,
                 [`x`]: `replace("a", '[0-9]{4}$', "b")`,
@@ -2464,7 +2464,7 @@ const random_string = (
             }
 
             const table = await perspective.table({ a: "string", b: "string" });
-            table.update({ a: data, b: index });
+            await table.update({ a: data, b: index });
             const expressions = {
                 [`w`]: `replace_all('abc-def-hijk', '-', '')`,
                 [`x`]: `replace_all("a", '[0-9]{4}', "b")`,

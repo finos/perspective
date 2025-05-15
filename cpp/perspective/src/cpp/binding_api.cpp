@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <string>
 #include <tsl/hopscotch_map.h>
+#include <arrow/util/thread_pool.h>
 
 #if HEAP_INSTRUMENTS
 #include <emscripten/heap.h>
@@ -77,8 +78,8 @@ extern "C" {
 
 PERSPECTIVE_EXPORT
 ProtoServer*
-psp_new_server() {
-    return new ProtoServer;
+psp_new_server(bool realtime_mode) {
+    return new ProtoServer(realtime_mode);
 }
 
 PERSPECTIVE_EXPORT
@@ -96,8 +97,8 @@ psp_handle_request(
 
 PERSPECTIVE_EXPORT
 EncodedApiEntries*
-psp_poll(ProtoServer* server, std::uint32_t client_id) {
-    auto responses = server->poll(client_id);
+psp_poll(ProtoServer* server) {
+    auto responses = server->poll();
     return encode_api_responses(responses);
 }
 
@@ -143,6 +144,18 @@ psp_is_memory64() {
 #elif UINTPTR_MAX == 0xffffffffffffffff
     return true;
 #endif
+}
+
+PERSPECTIVE_EXPORT
+std::int32_t
+psp_num_cpus() {
+    return arrow::GetCpuThreadPoolCapacity();
+}
+
+PERSPECTIVE_EXPORT
+void
+psp_set_num_cpus(std::int32_t num_cpus) {
+    arrow::SetCpuThreadPoolCapacity(num_cpus);
 }
 
 } // end extern "C"

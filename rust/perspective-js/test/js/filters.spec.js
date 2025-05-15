@@ -167,7 +167,7 @@ const datetime_data_local = [
 
                 test("w > date as string", async function () {
                     var table = await perspective.table(schema);
-                    table.update(date_results);
+                    await table.update(date_results);
                     var view = await table.view({
                         filter: [["w", ">", "10/02/2018"]],
                     });
@@ -179,7 +179,7 @@ const datetime_data_local = [
 
                 test("w > date as number", async function () {
                     var table = await perspective.table(schema);
-                    table.update(date_results);
+                    await table.update(date_results);
                     var view = await table.view({
                         filter: [["w", ">", 1538352000000]],
                     });
@@ -191,7 +191,7 @@ const datetime_data_local = [
 
                 test("w < date as string", async function () {
                     var table = await perspective.table(schema);
-                    table.update(date_results);
+                    await table.update(date_results);
                     var view = await table.view({
                         filter: [["w", "<", "10/02/2018"]],
                     });
@@ -240,14 +240,14 @@ const datetime_data_local = [
                 expect(json).toEqual([{ x: 1 }]);
 
                 for (let i = 0; i < 5; i++) {
-                    table.update([{ x: 1 }]);
+                    await table.update([{ x: 1 }]);
                 }
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
                 });
 
-                table.update([{ x: 2 }]);
+                await table.update([{ x: 2 }]);
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
@@ -277,14 +277,14 @@ const datetime_data_local = [
                 expect(out["__ROW_PATH__"]).toEqual([[], [1], [2], [3], [4]]);
 
                 for (let i = 0; i < 5; i++) {
-                    table.update([{ x: 1 }]);
+                    await table.update([{ x: 1 }]);
                 }
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
                 });
 
-                table.update([{ x: 2 }]);
+                await table.update([{ x: 2 }]);
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
@@ -751,7 +751,7 @@ const datetime_data_local = [
                     x: "float",
                     y: "integer",
                 });
-                table.update([
+                await table.update([
                     { x: 3.5, y: 1 },
                     { x: 2.5, y: 1 },
                     { x: null, y: 1 },
@@ -785,7 +785,7 @@ const datetime_data_local = [
                     { x: 4.5, y: 2 },
                     { x: null, y: 2 },
                 ];
-                table.update(dataSet);
+                await table.update(dataSet);
                 var view = await table.view({
                     filter: [["x", ">", null]],
                 });

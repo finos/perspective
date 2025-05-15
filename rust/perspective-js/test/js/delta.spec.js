@@ -84,7 +84,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -110,7 +110,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -144,7 +144,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update([
+                    await table.update([
                         { x: 1, y: "a", z: true },
                         { x: 2, y: "b", z: false },
                         { x: 3, y: "c", z: true },
@@ -169,7 +169,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -190,7 +190,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(data);
+                    await table.update(data);
                 }
             );
 
@@ -210,7 +210,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update([
+                await table.update([
                     { x: 1, y: null },
                     { x: 4, y: null },
                 ]);
@@ -240,7 +240,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -277,7 +277,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update([
+                    await table.update([
                         { x: 1, y: "a", z: true },
                         { x: 2, y: "b", z: false },
                         { x: 3, y: "c", z: true },
@@ -309,7 +309,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(data);
+                    await table.update(data);
                 }
             );
 
@@ -332,7 +332,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_nonseq);
+                    await table.update(partial_change_nonseq);
                 }
             );
         });
@@ -357,7 +357,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -393,7 +393,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update([
+                    await table.update([
                         { x: 1, y: "a", z: true },
                         { x: 2, y: "b", z: false },
                         { x: 3, y: "c", z: true },
@@ -421,7 +421,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -446,7 +446,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -471,7 +471,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(data);
+                    await table.update(data);
                 }
             );
 
@@ -494,7 +494,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update([
+                await table.update([
                     { x: 1, y: null },
                     { x: 4, y: null },
                 ]);
@@ -522,7 +522,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_nonseq);
+                    await table.update(partial_change_nonseq);
                 }
             );
         });
@@ -543,7 +543,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -578,7 +578,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update([
+                    await table.update([
                         { x: 1, y: "a", z: true },
                         { x: 2, y: "b", z: false },
                         { x: 3, y: "c", z: true },
@@ -602,7 +602,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -630,7 +630,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(data);
+                    await table.update(data);
                 }
             );
 
@@ -649,7 +649,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update([
+                await table.update([
                     { x: 1, y: null },
                     { x: 4, y: null },
                 ]);
@@ -674,7 +674,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_nonseq);
+                    await table.update(partial_change_nonseq);
                 }
             );
         });
@@ -699,7 +699,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             test.skip("returns changed rows, unique", async function () {
@@ -742,7 +742,7 @@ function it_old_behavior(name, capture) {
                     { mode: "row" }
                 );
 
-                table.update({
+                await table.update({
                     x: [4],
                     y: ["a"],
                     z: [200],
@@ -775,7 +775,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -799,7 +799,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_z);
+                    await table.update(partial_change_z);
                 }
             );
 
@@ -823,7 +823,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -852,7 +852,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -873,7 +873,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update([
+                await table.update([
                     { x: 1, y: null },
                     { x: 4, y: null },
                 ]);
@@ -908,7 +908,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_nonseq);
+                    await table.update(partial_change_nonseq);
                 }
             );
 
@@ -940,7 +940,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
         });
@@ -972,7 +972,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -1003,7 +1003,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -1034,7 +1034,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -1070,7 +1070,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior(
@@ -1099,7 +1099,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_z);
+                    await table.update(partial_change_z);
                 }
             );
 
@@ -1130,7 +1130,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_z);
+                    await table.update(partial_change_z);
                 }
             );
 
@@ -1160,7 +1160,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y_z);
+                    await table.update(partial_change_y_z);
                 }
             );
 
@@ -1191,7 +1191,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y_z);
+                    await table.update(partial_change_y_z);
                 }
             );
 
@@ -1216,7 +1216,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_z);
+                    await table.update(partial_change_z);
                 }
             );
 
@@ -1240,7 +1240,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update(partial_change_y);
+                await table.update(partial_change_y);
             });
 
             it_old_behavior("returns deleted columns", async function (done) {
@@ -1266,7 +1266,7 @@ function it_old_behavior(name, capture) {
                     },
                     { mode: "row" }
                 );
-                table.update([
+                await table.update([
                     { x: 1, y: null },
                     { x: 2, y: null },
                     { x: 4, y: null },
@@ -1302,7 +1302,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update([
+                    await table.update([
                         { x: 1, y: null },
                         { x: 2, y: null },
                         { x: 4, y: null },
@@ -1341,7 +1341,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_nonseq);
+                    await table.update(partial_change_nonseq);
                 }
             );
 
@@ -1384,7 +1384,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_nonseq);
+                    await table.update(partial_change_nonseq);
                 }
             );
 
@@ -1456,7 +1456,7 @@ function it_old_behavior(name, capture) {
                             mode: "row",
                         }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -1510,7 +1510,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -1559,7 +1559,7 @@ function it_old_behavior(name, capture) {
                             mode: "row",
                         }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -1610,7 +1610,7 @@ function it_old_behavior(name, capture) {
                             mode: "row",
                         }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
 
@@ -1645,7 +1645,7 @@ function it_old_behavior(name, capture) {
                             mode: "row",
                         }
                     );
-                    table.update([{ x: 3, y: 100 }]);
+                    await table.update([{ x: 3, y: 100 }]);
                 }
             );
 
@@ -1691,7 +1691,7 @@ function it_old_behavior(name, capture) {
                         },
                         { mode: "row" }
                     );
-                    table.update(partial_change_y);
+                    await table.update(partial_change_y);
                 }
             );
         });

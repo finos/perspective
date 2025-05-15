@@ -33,41 +33,12 @@ pub trait Session<E> {
     /// [`Session::handle_request`] will result in the `send_response` parameter
     /// which was used to construct this [`Session`] to fire one or more times.
     ///
-    /// ```text
-    ///                      :
-    ///  Client              :   Session
-    /// ┏━━━━━━━━━━━━━━━━━━┓ :  ┏━━━━━━━━━━━━━━━━━━━━┓
-    /// ┃ send_request     ┃━━━>┃ handle_request (*) ┃
-    /// ┃ ..               ┃ :  ┃ ..                 ┃
-    /// ┗━━━━━━━━━━━━━━━━━━┛ :  ┗━━━━━━━━━━━━━━━━━━━━┛
-    ///                      :
-    /// ```
-    ///
     /// # Arguments
     ///
     /// - `request` An incoming request message, generated from a
     ///   [`Client::new`]'s `send_request` handler (which may-or-may-not be
     ///   local).
     fn handle_request(&self, request: &[u8]) -> impl Future<Output = Result<(), E>>;
-
-    /// Flush any pending messages which may have resulted from previous
-    /// [`Session::handle_request`] calls. Calling [`Session::poll`] may result
-    /// in the `send_response` parameter which was used to construct this (or
-    /// other) [`Session`] to fire. Whenever a [`Session::handle_request`]
-    /// method is invoked for a `perspective_server::Server`, at least one
-    /// [`Session::poll`] should be scheduled to clear other clients message
-    /// queues.
-    ///
-    /// ```text
-    ///                      :
-    ///  Client              :   Session                  Server
-    /// ┏━━━━━━━━━━━━━━━━━━┓ :  ┏━━━━━━━━━━━━━━━━━━━┓
-    /// ┃ send_request     ┃━┳━>┃ handle_request    ┃    ┏━━━━━━━━━━━━━━━━━━━┓
-    /// ┃ ..               ┃ ┗━>┃ poll (*)          ┃━━━>┃ poll (*)          ┃
-    /// ┗━━━━━━━━━━━━━━━━━━┛ :  ┃ ..                ┃    ┃ ..                ┃
-    ///                      :  ┗━━━━━━━━━━━━━━━━━━━┛    ┗━━━━━━━━━━━━━━━━━━━┛
-    /// ```
-    fn poll(&self) -> impl Future<Output = Result<(), E>>;
 
     /// Close this [`Session`], cleaning up any callbacks (e.g. arguments
     /// provided to [`Session::handle_request`]) and resources (e.g. views
@@ -131,10 +102,6 @@ impl Session<ClientError> for ProxySession {
             },
         };
 
-        Ok(())
-    }
-
-    async fn poll(&self) -> Result<(), ClientError> {
         Ok(())
     }
 

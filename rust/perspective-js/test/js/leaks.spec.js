@@ -30,7 +30,7 @@ const arr = fs.readFileSync(
  * @param {*} test
  * @param {*} num_iterations
  */
-async function leak_test(test, num_iterations = 10000) {
+async function leak_test(test, num_iterations = 10_000) {
     // warmup
     await test();
     await test();
@@ -138,10 +138,13 @@ test.describe("leaks", function () {
                 count += 1;
             });
 
+            await table.update([{ x: 1, y: "TestTestTest" }]);
             await leak_test(async function () {
-                await table.update([{ x: 1, y: "TestTestTest" }]);
+                table.update([{ x: 1, y: "TestTestTest" }]);
                 expect(await table.size()).toEqual(1);
             });
+
+            // await table.update([{ x: 1, y: "TestTestTest" }]);
 
             expect(count).toBeGreaterThan(0);
             view.delete();
@@ -178,10 +181,12 @@ test.describe("leaks", function () {
                 const view = await table.view({
                     expressions,
                 });
+
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
                     Object.keys(expressions).length
                 );
+
                 await view.delete();
             });
 

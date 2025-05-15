@@ -14,6 +14,7 @@
 #![warn(unstable_features)]
 
 mod client;
+pub(crate) mod py_async;
 mod py_err;
 mod server;
 
@@ -40,13 +41,25 @@ fn init_tracing() {
         .init();
 }
 
+#[pyfunction]
+fn num_cpus() -> i32 {
+    perspective_server::num_cpus()
+}
+
+#[pyfunction]
+fn set_num_cpus(num_cpus: i32) {
+    perspective_server::set_num_cpus(num_cpus)
+}
+
 /// Perspective Python main module.
 #[pymodule]
 fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     init_tracing();
     m.add_class::<client::client_sync::Client>()?;
-    m.add_class::<server::PySyncServer>()?;
-    m.add_class::<server::PySyncSession>()?;
+    m.add_class::<server::PyServer>()?;
+    m.add_class::<server::PyAsyncServer>()?;
+    m.add_class::<server::PySession>()?;
+    m.add_class::<server::PyAsyncSession>()?;
     m.add_class::<client::client_sync::Table>()?;
     m.add_class::<client::client_sync::View>()?;
     m.add_class::<client::client_async::AsyncClient>()?;
@@ -54,5 +67,7 @@ fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<client::client_async::AsyncView>()?;
     m.add_class::<client::proxy_session::ProxySession>()?;
     m.add("PerspectiveError", py.get_type::<PyPerspectiveError>())?;
+    m.add_function(wrap_pyfunction!(num_cpus, m)?)?;
+    m.add_function(wrap_pyfunction!(set_num_cpus, m)?)?;
     Ok(())
 }

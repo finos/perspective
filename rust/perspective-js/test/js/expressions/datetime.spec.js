@@ -35,7 +35,7 @@ import perspective from "../perspective_client";
                 },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 26),
                     new Date(2020, 0, 27),
@@ -88,7 +88,7 @@ import perspective from "../perspective_client";
                 },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 26),
                     new Date(2020, 0, 27),
@@ -141,7 +141,7 @@ import perspective from "../perspective_client";
                 },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 26),
                     new Date(2020, 0, 27),
@@ -191,7 +191,7 @@ import perspective from "../perspective_client";
                 expressions: { 'today() == "a"': 'today() == "a"' },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(), new Date(), new Date()],
             });
 
@@ -210,7 +210,7 @@ import perspective from "../perspective_client";
                 expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(), new Date(), new Date()],
             });
 
@@ -229,7 +229,7 @@ import perspective from "../perspective_client";
                 expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(), null, undefined, new Date()],
             });
 
@@ -248,7 +248,7 @@ import perspective from "../perspective_client";
                 expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 26),
                     new Date(2020, 0, 27),
@@ -275,7 +275,7 @@ import perspective from "../perspective_client";
                 expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 26),
                     null,
@@ -304,7 +304,7 @@ import perspective from "../perspective_client";
                 expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     new Date(2020, 1, 27),
@@ -335,7 +335,7 @@ import perspective from "../perspective_client";
                 expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     null,
@@ -366,7 +366,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     new Date(2020, 1, 27),
@@ -478,7 +478,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     null,
@@ -507,7 +507,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     new Date(2020, 1, 27),
@@ -534,7 +534,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     null,
@@ -563,7 +563,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     new Date(2020, 1, 27),
@@ -590,7 +590,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     null,
@@ -619,7 +619,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     new Date(2020, 1, 27),
@@ -646,7 +646,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     null,
@@ -675,7 +675,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 0, 15),
@@ -705,7 +705,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 0, 15),
@@ -735,7 +735,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(2015, 0, 3, 15), new Date(2015, 0, 4)],
             });
 
@@ -757,7 +757,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 0, 15),
@@ -787,7 +787,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     null,
@@ -819,7 +819,7 @@ import perspective from "../perspective_client";
                 expressions: { [col_name]: col_name },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 1, 15),
@@ -853,7 +853,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 0, 15),
@@ -883,7 +883,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     null,
@@ -915,7 +915,7 @@ import perspective from "../perspective_client";
                 expressions: { [col_name]: col_name },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2010, 0, 12),
                     new Date(2011, 1, 15),
@@ -951,7 +951,7 @@ import perspective from "../perspective_client";
                 expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(), new Date(), new Date()],
             });
 
@@ -972,7 +972,7 @@ import perspective from "../perspective_client";
                 expressions: { 'hour_of_day("a")': 'hour_of_day("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(), null, undefined, new Date()],
             });
 
@@ -993,7 +993,7 @@ import perspective from "../perspective_client";
                 expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 26, 1),
                     new Date(2020, 0, 27, 2),
@@ -1022,7 +1022,7 @@ import perspective from "../perspective_client";
                 expressions: { 'day_of_week("a")': 'day_of_week("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 26, 1),
                     null,
@@ -1051,7 +1051,7 @@ import perspective from "../perspective_client";
                 expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     new Date(2020, 1, 27),
@@ -1082,7 +1082,7 @@ import perspective from "../perspective_client";
                 expressions: { 'month_of_year("a")': 'month_of_year("a")' },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15),
                     null,
@@ -1113,7 +1113,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     new Date(2020, 1, 27, 1, 30, 30),
@@ -1140,7 +1140,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 's')": "bucket(\"a\", 's')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     null,
@@ -1171,7 +1171,7 @@ import perspective from "../perspective_client";
                 expressions: { [col_name]: col_name },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 5),
                     new Date(2020, 3, 29, 1, 30, 10),
@@ -1200,7 +1200,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     new Date(2020, 1, 27, 1, 30, 30),
@@ -1227,7 +1227,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'm')": "bucket(\"a\", 'm')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     null,
@@ -1258,7 +1258,7 @@ import perspective from "../perspective_client";
                 expressions: { [col_name]: col_name },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 0, 0),
                     new Date(2020, 0, 15, 1, 6, 0),
@@ -1286,7 +1286,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     new Date(2020, 1, 27, 1, 30, 30),
@@ -1313,7 +1313,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'h')": "bucket(\"a\", 'h')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     null,
@@ -1342,7 +1342,7 @@ import perspective from "../perspective_client";
                 expressions: { [col_name]: col_name },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 0, 30, 15),
                     new Date(2020, 0, 15, 5, 30, 15),
@@ -1371,7 +1371,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     new Date(2020, 1, 27, 1, 30, 30),
@@ -1398,7 +1398,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 1, 30, 15),
                     null,
@@ -1425,7 +1425,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'D')": "bucket(\"a\", 'D')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 15, 23, 30, 15),
                     null,
@@ -1452,7 +1452,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 0, 15),
@@ -1480,7 +1480,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     null,
@@ -1508,7 +1508,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'W')": "bucket(\"a\", 'W')" },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(2015, 0, 3, 15), new Date(2015, 0, 4)],
             });
 
@@ -1530,7 +1530,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 0, 15),
@@ -1558,7 +1558,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'M')": "bucket(\"a\", 'M')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     null,
@@ -1586,7 +1586,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     new Date(2020, 0, 15),
@@ -1614,7 +1614,7 @@ import perspective from "../perspective_client";
                 expressions: { "bucket(\"a\", 'Y')": "bucket(\"a\", 'Y')" },
             });
 
-            table.update({
+            await table.update({
                 a: [
                     new Date(2020, 0, 12),
                     null,

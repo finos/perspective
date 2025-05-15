@@ -41,6 +41,7 @@ import { addAreaMouseSelection } from "../event_handlers/select_region.js";
 export async function activate(view) {
     let viewer = this.parentElement;
     let table = await viewer.getTable(true);
+
     if (!this._initialized) {
         this.innerHTML = "";
         if (this.shadowRoot) {
@@ -48,12 +49,17 @@ export async function activate(view) {
         } else {
             this.appendChild(this.regular_table);
         }
+
         this.model = await createModel.call(
             this,
             this.regular_table,
             table,
             view
         );
+
+        if (!this.model) {
+            return;
+        }
 
         addAreaMouseSelection(this, this.regular_table, {
             className: "psp-select-region",

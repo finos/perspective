@@ -11,10 +11,10 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::collections::HashMap;
+use std::pin::pin;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use async_lock::RwLock;
 use futures::FutureExt;
 use perspective_client::{
     Client, DeleteOptions, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions,
@@ -31,6 +31,7 @@ use super::polars::arrow_to_polars;
 use super::table_data::TableDataExt;
 use super::update_data::UpdateDataExt;
 use super::{pandas, polars, pyarrow};
+use crate::py_async::{self, AllowThreads};
 use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 
 /// An instance of a [`Client`] is a unique connection to a single
@@ -43,7 +44,6 @@ use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 #[derive(Clone)]
 pub struct AsyncClient {
     pub(crate) client: Client,
-    loop_cb: Arc<RwLock<Arc<Option<Py<PyAny>>>>>,
     close_cb: Arc<Option<Py<PyAny>>>,
 }
 
@@ -51,7 +51,6 @@ impl AsyncClient {
     pub fn new_from_client(client: Client) -> Self {
         AsyncClient {
             client,
-            loop_cb: Arc::default(),
             close_cb: Arc::default(),
         }
     }
@@ -87,7 +86,6 @@ impl AsyncClient {
 
         Ok(AsyncClient {
             client: client.into_pyerr()?,
-            loop_cb: Arc::default(),
             close_cb: handle_close.into(),
         })
     }
@@ -250,20 +248,13 @@ impl AsyncClient {
     /// [`Client`]) or [`Table::delete`] (on a [`Table`] belinging to this
     /// [`Client`]) are called.
     pub async fn on_hosted_tables_update(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
-        let locked_val = self.loop_cb.read().await.clone();
-        let loop_cb = Python::with_gil(|py| (*locked_val).as_ref().map(|v| Py::clone_ref(v, py)));
         let callback = Box::new(move || {
-            let loop_cb = Python::with_gil(|py| loop_cb.as_ref().map(|v| Py::clone_ref(v, py)));
             let callback = Python::with_gil(|py| Py::clone_ref(&callback_py, py));
             async move {
                 let aggregate_errors: PyResult<()> = {
                     let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
                     Python::with_gil(|py| {
-                        match &loop_cb {
-                            None => callback.call0(py)?,
-                            Some(loop_cb) => loop_cb.call1(py, (&callback,))?,
-                        };
-
+                        callback.call0(py)?;
                         Ok(())
                     })
                 };
@@ -291,11 +282,6 @@ impl AsyncClient {
             .remove_hosted_tables_update(id)
             .await
             .into_pyerr()
-    }
-
-    pub async fn set_loop_callback(&self, loop_cb: Py<PyAny>) -> PyResult<()> {
-        *self.loop_cb.write().await = Some(loop_cb).into();
-        Ok(())
     }
 
     /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the
@@ -328,7 +314,6 @@ impl AsyncTable {
     pub async fn get_client(&self) -> AsyncClient {
         AsyncClient {
             client: self.table.get_client(),
-            loop_cb: self.client.loop_cb.clone(),
             close_cb: self.client.close_cb.clone(),
         }
     }
@@ -415,19 +400,11 @@ impl AsyncTable {
     /// [`Table::on_delete`] resolves when the subscription message is sent, not
     /// when the _delete_ event occurs.
     pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
-        let loop_cb = (*self.client.loop_cb.read().await).clone();
         let callback = {
             let callback_py = Python::with_gil(|py| Py::clone_ref(&callback_py, py));
             Box::new(move || {
-                Python::with_gil(|py| {
-                    if let Some(loop_cb) = &*loop_cb {
-                        loop_cb.call1(py, (&callback_py,))?;
-                    } else {
-                        callback_py.call0(py)?;
-                    }
-                    Ok(()) as PyResult<()>
-                })
-                .expect("`on_delete()` callback failed");
+                Python::with_gil(|py| callback_py.call0(py))
+                    .expect("`on_delete()` callback failed");
             })
         };
 
@@ -534,7 +511,9 @@ impl AsyncTable {
         let table_data =
             Python::with_gil(|py| UpdateData::from_py(input_data.into_bound(py), format))?;
         let options = UpdateOptions { port_id, format };
-        table.update(table_data, options).await.into_pyerr()?;
+        AllowThreads(pin!(table.update(table_data, options)))
+            .await
+            .into_pyerr()?;
         Ok(())
     }
 
@@ -600,7 +579,7 @@ impl AsyncTable {
         let view = self.table.view(config).await.into_pyerr()?;
         Ok(AsyncView {
             view: Arc::new(view),
-            client: self.client.clone(),
+            _client: self.client.clone(),
         })
     }
 }
@@ -622,7 +601,7 @@ impl AsyncTable {
 #[derive(Clone)]
 pub struct AsyncView {
     view: Arc<View>,
-    client: AsyncClient,
+    _client: AsyncClient,
 }
 
 assert_view_api!(AsyncView);
@@ -738,19 +717,9 @@ impl AsyncView {
     pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let callback = {
             let callback_py = Arc::new(callback_py);
-            let loop_cb = self.client.loop_cb.read().await.clone();
             Box::new(move || {
-                let loop_cb = loop_cb.clone();
-                Python::with_gil(|py| {
-                    if let Some(loop_cb) = &*loop_cb {
-                        loop_cb.call1(py, (&*callback_py,))?;
-                    } else {
-                        callback_py.call0(py)?;
-                    }
-
-                    Ok(()) as PyResult<()>
-                })
-                .expect("`on_delete()` callback failed");
+                Python::with_gil(|py| callback_py.call0(py))
+                    .expect("`on_delete()` callback failed");
             })
         };
 
@@ -780,23 +749,16 @@ impl AsyncView {
     ///   rows. Otherwise `delta` will be [`Option::None`].
     #[pyo3(signature=(callback, mode=None))]
     pub async fn on_update(&self, callback: Py<PyAny>, mode: Option<String>) -> PyResult<u32> {
-        let locked_val = self.client.loop_cb.read().await.clone();
-        let loop_cb = Python::with_gil(|py| (*locked_val).as_ref().map(|v| Py::clone_ref(v, py)));
         let callback = move |x: ViewOnUpdateResp| {
-            let loop_cb = Python::with_gil(|py| loop_cb.as_ref().map(|v| Py::clone_ref(v, py)));
             let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
             async move {
                 let aggregate_errors: PyResult<()> = {
                     let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
                     Python::with_gil(|py| {
-                        match (&x.delta, &loop_cb) {
-                            (None, None) => callback.call1(py, (x.port_id,))?,
-                            (None, Some(loop_cb)) => loop_cb.call1(py, (&callback, x.port_id))?,
-                            (Some(delta), None) => {
+                        match &x.delta {
+                            None => callback.call1(py, (x.port_id,))?,
+                            Some(delta) => {
                                 callback.call1(py, (x.port_id, PyBytes::new(py, delta)))?
-                            },
-                            (Some(delta), Some(loop_cb)) => {
-                                loop_cb.call1(py, (callback, x.port_id, PyBytes::new(py, delta)))?
                             },
                         };
 
@@ -938,80 +900,4 @@ fn isawaitable(object: &Bound<'_, PyAny>) -> PyResult<bool> {
     py.import("inspect")?
         .call_method1("isawaitable", (object,))?
         .extract()
-}
-
-mod py_async {
-    #[cfg(not(target_os = "emscripten"))]
-    pub use pyo3_async_runtimes::tokio::into_future as py_into_future;
-
-    #[cfg(target_os = "emscripten")]
-    pub use self::trivial::into_future as py_into_future;
-
-    /// This do-nothing, panic all the time runtime is sufficient in emscripten
-    /// for the primitive test suite in test_smoke.py to pass
-    mod trivial {
-        use std::future::Future;
-
-        use pyo3::prelude::*;
-        use pyo3_async_runtimes::generic::{ContextExt, JoinError, Runtime};
-
-        struct TrivialJoinError {}
-        impl JoinError for TrivialJoinError {
-            fn is_panic(&self) -> bool {
-                unimplemented!("TrivialJoinError::is_panic")
-            }
-
-            fn into_panic(self) -> Box<dyn std::any::Any + Send + 'static> {
-                unimplemented!("TrivialJoinError::into_panic")
-            }
-        }
-        struct TrivialJoinHandle {}
-        impl Future for TrivialJoinHandle {
-            type Output = Result<(), TrivialJoinError>;
-
-            fn poll(
-                self: std::pin::Pin<&mut Self>,
-                _cx: &mut std::task::Context<'_>,
-            ) -> std::task::Poll<Self::Output> {
-                unimplemented!("TrivialJoinHandle::poll")
-            }
-        }
-
-        struct TrivialRuntime {}
-
-        impl Runtime for TrivialRuntime {
-            type JoinError = TrivialJoinError;
-            type JoinHandle = TrivialJoinHandle;
-
-            fn spawn<F>(_fut: F) -> Self::JoinHandle
-            where
-                F: std::future::Future<Output = ()> + Send + 'static,
-            {
-                unimplemented!("TrivialRuntime::spawn")
-            }
-        }
-
-        impl ContextExt for TrivialRuntime {
-            fn get_task_locals() -> Option<pyo3_async_runtimes::TaskLocals> {
-                None
-            }
-
-            fn scope<F, R>(
-                _locals: pyo3_async_runtimes::TaskLocals,
-                _fut: F,
-            ) -> std::pin::Pin<Box<dyn std::future::Future<Output = R> + Send>>
-            where
-                F: std::future::Future<Output = R> + Send + 'static,
-            {
-                unimplemented!("TrivialRuntime::scope")
-            }
-        }
-
-        #[allow(unused)]
-        pub fn into_future(
-            awaitable: Bound<PyAny>,
-        ) -> PyResult<impl Future<Output = PyResult<PyObject>> + Send + use<>> {
-            pyo3_async_runtimes::generic::into_future::<TrivialRuntime>(awaitable)
-        }
-    }
 }

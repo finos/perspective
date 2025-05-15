@@ -10,24 +10,24 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-from tornado.websocket import WebSocketHandler
+from tornado.websocket import WebSocketHandler, WebSocketClosedError
 from tornado.ioloop import IOLoop
-
 import perspective
 
 
 class PerspectiveTornadoHandler(WebSocketHandler):
-    """`PerspectiveTornadoHandler` is a drop-in implementation of Perspective as
-    a `tornado` handler.
+    """`PerspectiveTornadoHandler` is a `perspective.Server` API as a `tornado`
+    websocket handler.
 
-    Use it inside Tornado routing to create a server-side Perspective that is
-    ready to receive websocket messages from the front-end `perspective-viewer`.
-    Because Tornado implements an event loop, this handler links Perspective
-    with `IOLoop.current()` in order to defer expensive operations until the
-    next free iteration of the event loop.
+    Use it inside `tornado` routing to create a `perspective.Server` that can
+    connect to a JavaScript (Wasm) `Client`, providing a virtual interface to
+    the `Server`'s resources for e.g. `<perspective-viewer>`.
 
-    The Perspective client and server will automatically keep the Websocket
-    alive without timing out.
+    Args:
+        loop: An optional `IOLoop` instance to use for scheduling IO calls,
+            defaults to `IOLoop.current()`.
+        executor: An optional executor for scheduling `perspective.Server`
+            message processing calls from websocket `Client`s.
 
     Examples:
         >>> server = psp.Server()
@@ -37,7 +37,6 @@ class PerspectiveTornadoHandler(WebSocketHandler):
         ...     (r"/", MainHandler),
         ...     (r"/websocket", PerspectiveTornadoHandler, {
         ...         "perspective_server": server,
-        ...         "check_origin": True
         ...     })
         ... ])
     """
@@ -45,15 +44,24 @@ class PerspectiveTornadoHandler(WebSocketHandler):
     def check_origin(self, origin):
         return True
 
-    def initialize(self, perspective_server=perspective.GLOBAL_SERVER, loop=None):
+    def initialize(
+        self, perspective_server=perspective.GLOBAL_SERVER, loop=None, executor=None
+    ):
         self.server = perspective_server
         self.loop = loop or IOLoop.current()
+        self.executor = executor
 
     def open(self):
-        def inner(msg):
-            self.write_message(msg, binary=True)
+        def write(msg):
+            try:
+                self.write_message(msg, binary=True)
+            except WebSocketClosedError:
+                self.close()
 
-        self.session = self.server.new_session(inner)
+        def send_response(msg):
+            self.loop.add_callback(write, msg)
+
+        self.session = self.server.new_session(send_response)
 
     def on_close(self) -> None:
         self.session.close()
@@ -63,5 +71,7 @@ class PerspectiveTornadoHandler(WebSocketHandler):
         if not isinstance(msg, bytes):
             return
 
-        self.session.handle_request(msg)
-        self.loop.call_later(0, self.session.poll)
+        if self.executor is None:
+            self.session.handle_request(msg)
+        else:
+            self.executor.submit(self.session.handle_request, msg)

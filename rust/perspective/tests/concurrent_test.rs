@@ -20,7 +20,7 @@ use tokio::sync::Mutex;
 
 #[tokio::test]
 async fn test_two_sync_clients_receive_messages_on_update() -> Result<(), Box<dyn Error>> {
-    let server = perspective::server::Server::default();
+    let server = perspective::server::Server::new(None);
     let client1 = LocalClient::new(&server);
     let client2 = LocalClient::new(&server);
     let table = client1

@@ -14,8 +14,8 @@ use std::fs::File;
 use std::io::Read;
 use std::net::SocketAddr;
 
-use axum::routing::get_service;
 use axum::Router;
+use axum::routing::get_service;
 use perspective::client::{TableInitOptions, UpdateData};
 use perspective::server::Server;
 use tower_http::services::{ServeDir, ServeFile};
@@ -72,7 +72,7 @@ async fn main() -> Result<(), AppError> {
         .with(layer().compact().with_filter(LevelFilter::INFO))
         .init();
 
-    let server = Server::default();
+    let server = Server::new(None);
     load_server_arrow(&server).await?;
     start_web_server_and_block(server).await?;
     Ok(())

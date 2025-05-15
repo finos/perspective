@@ -148,7 +148,7 @@ test.describe("WebSocketManager", function () {
         client_view.on_update(on_update);
         client_view.to_json().then((client_data) => {
             expect(client_data).toEqual(data);
-            table.update([{ x: 2 }]);
+            return table.update([{ x: 2 }]);
         });
 
         await result;
@@ -161,12 +161,12 @@ test.describe("WebSocketManager", function () {
         const arrow = await view.to_arrow();
         const client = await perspective.websocket(`ws://localhost:${port}`);
         const client_table = await client.open_table("test");
-        client_table.update(arrow);
+        await client_table.update(arrow);
         const client_view = await client_table.view();
         const client_data = await client_view.to_json();
         expect(client_data).toEqual([{ x: 1 }, { x: 1 }]);
+        await client_view.delete();
         await client.terminate();
-        await new Promise((x) => setTimeout(x, 10));
         await view.delete();
         await table.delete();
     });
@@ -178,9 +178,9 @@ test.describe("WebSocketManager", function () {
         const arrow = await view.to_arrow();
         const client = await perspective.websocket(`ws://localhost:${port}`);
         const client_table = await client.open_table("test");
-        client_table.update(arrow);
-        client_table.update(arrow);
-        client_table.update(arrow);
+        await client_table.update(arrow);
+        await client_table.update(arrow);
+        await client_table.update(arrow);
         const client_view = await client_table.view();
         const client_data = await client_view.to_json();
         expect(client_data).toEqual([{ x: 1 }, { x: 1 }, { x: 1 }, { x: 1 }]);
@@ -220,7 +220,7 @@ test.describe("WebSocketManager", function () {
         }
 
         update_port = await client_table.make_port();
-        client_table.update(arrow, { port_id: update_port });
+        await client_table.update(arrow, { port_id: update_port });
         await result;
     });
 

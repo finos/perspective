@@ -220,17 +220,17 @@ async function update_package_jsons() {
         fs.writeFileSync(`./${pkg}/Cargo.toml`, toml.stringify(crate));
     }
 
-    if (!IS_NIGHTLY) {
-        const pyproject = toml.parse(
-            fs.readFileSync(`./rust/perspective-python/pyproject.toml`)
-        );
+    // if (!IS_NIGHTLY) {
+    const pyproject = toml.parse(
+        fs.readFileSync(`./rust/perspective-python/pyproject.toml`)
+    );
 
-        pyproject.tool.maturin.data = `perspective_python-${NEW_VERSION}.data`;
-        fs.writeFileSync(
-            `./rust/perspective-python/pyproject.toml`,
-            toml.stringify(pyproject)
-        );
-    }
+    pyproject.tool.maturin.data = `perspective_python-${NEW_VERSION}.data`;
+    fs.writeFileSync(
+        `./rust/perspective-python/pyproject.toml`,
+        toml.stringify(pyproject)
+    );
+    // }
 }
 
 if (!IS_NIGHTLY) {

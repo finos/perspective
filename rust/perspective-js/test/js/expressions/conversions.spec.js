@@ -41,7 +41,7 @@ import perspective from "../perspective_client";
                 },
             });
 
-            table.update({
+            await table.update({
                 a: [new Date(2020, 4, 30), new Date(2021, 6, 13)],
                 b: [
                     new Date(2015, 10, 29, 23, 59, 59),
@@ -173,7 +173,7 @@ import perspective from "../perspective_client";
                 expressions: { computed: `integer("x")` },
             });
 
-            table.update({
+            await table.update({
                 x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937],
             });
 
@@ -198,7 +198,7 @@ import perspective from "../perspective_client";
                 expressions: { computed: `integer("x")` },
             });
 
-            table.update({
+            await table.update({
                 x: [
                     100.9999999,
                     -17238.8123,
@@ -232,7 +232,7 @@ import perspective from "../perspective_client";
 
             const value = new Date(2020, 5, 30);
 
-            table.update({
+            await table.update({
                 x: [value],
             });
 
@@ -264,7 +264,7 @@ import perspective from "../perspective_client";
             });
 
             // first will not overflow, second will
-            table.update({
+            await table.update({
                 x: [new Date(1970, 0, 1, 1), new Date(2020, 0, 1, 1)],
             });
 
@@ -375,7 +375,7 @@ import perspective from "../perspective_client";
         });
 
         // TODO same deal as above - not sure this behavior is correct.
-        // `table.update()` should be invalid here.
+        // `await table.update()` should be invalid here.
         test.skip("Should create float from integer columns", async () => {
             const table = await perspective.table({ x: "integer" });
 
@@ -383,7 +383,7 @@ import perspective from "../perspective_client";
                 expressions: { computed: `float("x")` },
             });
 
-            table.update({
+            await table.update({
                 x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937],
             });
 
@@ -408,7 +408,7 @@ import perspective from "../perspective_client";
                 expressions: { computed: ` float("x")` },
             });
 
-            table.update({
+            await table.update({
                 x: [
                     100.9999999,
                     -17238.8123,
@@ -442,7 +442,7 @@ import perspective from "../perspective_client";
 
             const value = new Date(2020, 5, 30);
 
-            table.update({
+            await table.update({
                 x: [value],
             });
 
@@ -473,7 +473,7 @@ import perspective from "../perspective_client";
                 expressions: { computed: `float("x")` },
             });
 
-            table.update({
+            await table.update({
                 x: [new Date(2020, 0, 1, 1), new Date(2020, 0, 1, 1, 50)],
             });
 
@@ -591,7 +591,7 @@ import perspective from "../perspective_client";
                 'boolean("x")': [true, true, false, true],
             });
 
-            table.update({
+            await table.update({
                 idx: [3, 2],
                 x: [100, null],
             });
@@ -629,7 +629,7 @@ import perspective from "../perspective_client";
                 'boolean("x")': [true, true, false, true],
             });
 
-            table.remove([1, 4]);
+            await table.remove([1, 4]);
 
             expect(await view.to_columns()).toEqual({
                 idx: [2, 3],
@@ -686,7 +686,7 @@ import perspective from "../perspective_client";
                 expressions: { computed: ` date("y", "m", "d")` },
             });
 
-            table.update({
+            await table.update({
                 // y: [0, 2020, 1776, 2018, 2020, 2020], // old values, see note above.
                 y: [1970, 2020, 2000, 2018, 2020, 2020],
                 m: [1, 2, 5, 2, 12, null],
@@ -723,7 +723,7 @@ import perspective from "../perspective_client";
                 expressions: { computed: ` date("y", "m", "d")` },
             });
 
-            table.update({
+            await table.update({
                 // y: [0, 2020, 1776, 2018, 2020, 2020], // old values, see note above.
                 y: [1970, 2020, 2000, 2018, 2020, 2020],
                 m: [1, 2, 5, 2, 12, null],
@@ -900,7 +900,7 @@ import perspective from "../perspective_client";
             ].map((x) => x.getTime());
             data.push(null);
 
-            table.update({
+            await table.update({
                 x: data,
             });
 
@@ -932,7 +932,7 @@ import perspective from "../perspective_client";
             ].map((x) => x.getTime());
             data.push(null);
 
-            table.update({
+            await table.update({
                 x: data,
             });
 

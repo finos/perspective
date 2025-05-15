@@ -47,7 +47,7 @@ import * as common from "./common.js";
                         ),
                     });
 
-                    table.update({
+                    await table.update({
                         a: [
                             new Date(2020, 0, 12),
                             new Date(2020, 0, 15),

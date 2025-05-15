@@ -26,7 +26,7 @@ pub struct CppResponseBatch {
 unsafe extern "C" {
     fn psp_alloc(size: usize) -> *mut u8;
     fn psp_free(ptr: *const u8);
-    fn psp_new_server() -> *const u8;
+    fn psp_new_server(realtime_mode: bool) -> *const u8;
     fn psp_new_session(server: *const u8) -> u32;
     fn psp_delete_server(server: *const u8);
     fn psp_handle_request(
@@ -35,8 +35,18 @@ unsafe extern "C" {
         buffer_ptr: *const u8,
         buffer_len: usize,
     ) -> ResponseBatch;
-    fn psp_poll(server: *const u8, client_id: u32) -> ResponseBatch;
+    fn psp_poll(server: *const u8) -> ResponseBatch;
     fn psp_close_session(server: *const u8, client_id: u32);
+    fn psp_num_cpus() -> i32;
+    fn psp_set_num_cpus(num_cpus: i32);
+}
+
+pub fn num_cpus() -> i32 {
+    unsafe { psp_num_cpus() }
+}
+
+pub fn set_num_cpus(num_cpus: i32) {
+    unsafe { psp_set_num_cpus(num_cpus) }
 }
 
 pub struct Response(*const CppResponse);
@@ -68,6 +78,11 @@ impl Drop for Response {
 pub struct ResponseBatch(*const CppResponseBatch);
 
 impl ResponseBatch {
+    pub fn size(&self) -> usize {
+        let batch = unsafe { &*self.0 };
+        batch.length as usize
+    }
+
     pub fn iter_responses(&self) -> impl Iterator<Item = Response> + Send + Sync {
         let batch = unsafe { &*self.0 };
         let num_responses = batch.length;
@@ -110,8 +125,8 @@ impl Drop for Request {
 pub struct Server(*const u8);
 
 impl Server {
-    pub fn new() -> Self {
-        Server(unsafe { psp_new_server() })
+    pub fn new(realtime_mode: bool) -> Self {
+        Server(unsafe { psp_new_server(realtime_mode) })
     }
 
     pub fn new_session(&self) -> u32 {
@@ -122,8 +137,8 @@ impl Server {
         unsafe { psp_handle_request(self.0, client_id, request.0, request.1) }
     }
 
-    pub fn poll(&self, client_id: u32) -> ResponseBatch {
-        unsafe { psp_poll(self.0, client_id) }
+    pub fn poll(&self) -> ResponseBatch {
+        unsafe { psp_poll(self.0) }
     }
 
     pub fn close_session(&self, session_id: u32) {

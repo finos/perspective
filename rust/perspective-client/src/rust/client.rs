@@ -25,7 +25,8 @@ use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::{
     self, ColumnType, GetFeaturesReq, GetFeaturesResp, GetHostedTablesReq, GetHostedTablesResp,
-    HostedTable, MakeTableReq, RemoveHostedTablesUpdateReq, Request, Response, ServerSystemInfoReq,
+    HostedTable, MakeTableReq, RemoveHostedTablesUpdateReq, Request, Response, ServerError,
+    ServerSystemInfoReq,
 };
 use crate::table::{Table, TableInitOptions, TableOptions};
 use crate::table_data::{TableData, UpdateData};
@@ -224,7 +225,16 @@ impl Client {
             return Ok(true);
         }
 
-        tracing::warn!("Received unsolicited server message");
+        if let Response {
+            client_resp: Some(ClientResp::ServerError(ServerError { message, .. })),
+            ..
+        } = &msg
+        {
+            tracing::error!("{}", message);
+        } else {
+            tracing::warn!("Received unsolicited server message");
+        }
+
         Ok(false)
     }
 

@@ -18,14 +18,58 @@ export type ApiResponse = {
     data: Uint8Array;
 };
 
+export interface PerspectiveServerOptions {
+    on_poll_request?: (x: PerspectiveServer) => Promise<void>;
+}
+
+export class PerspectivePollThread {
+    private poll_handle?: Promise<void>;
+    private server: PerspectiveServer;
+    constructor(server: PerspectiveServer) {
+        this.server = server;
+    }
+
+    private set_poll_handle() {
+        this.poll_handle = new Promise((resolve, reject) =>
+            setTimeout(() =>
+                this.server
+                    .poll()
+                    .then(resolve)
+                    .catch(reject)
+                    .finally(() => {
+                        this.poll_handle = undefined;
+                    })
+            )
+        );
+
+        return this.poll_handle;
+    }
+
+    async on_poll_request() {
+        if (!this.poll_handle) {
+            await this.set_poll_handle();
+        } else {
+            await this.poll_handle.then(() => {
+                if (!this.poll_handle) {
+                    return this.set_poll_handle();
+                }
+            });
+        }
+    }
+}
+
 export class PerspectiveServer {
     clients: Map<number, (buffer: Uint8Array) => Promise<void>>;
     server: EmscriptenServer;
     module: MainModule;
-    constructor(module: MainModule) {
+    on_poll_request?: (x: PerspectiveServer) => Promise<void>;
+    constructor(module: MainModule, options?: PerspectiveServerOptions) {
         this.clients = new Map();
         this.module = module;
-        this.server = module._psp_new_server() as EmscriptenServer;
+        this.on_poll_request = options?.on_poll_request;
+        this.server = module._psp_new_server(
+            !!options?.on_poll_request ? 1 : 0
+        ) as EmscriptenServer;
     }
 
     /**
@@ -40,7 +84,19 @@ export class PerspectiveServer {
             this.module,
             this.server,
             client_id,
-            this.clients
+            this.clients,
+            this.on_poll_request && (() => this.on_poll_request!(this))
+        );
+    }
+
+    async poll() {
+        const polled = this.module._psp_poll(this.server as any);
+        await decode_api_responses(
+            this.module,
+            polled,
+            async (msg: ApiResponse) => {
+                await this.clients.get(msg.client_id)!(msg.data);
+            }
         );
     }
 
@@ -54,7 +110,8 @@ export class PerspectiveSession {
         private mod: MainModule,
         private server: EmscriptenServer,
         private client_id: number,
-        private client_map: Map<number, (buffer: Uint8Array) => Promise<void>>
+        private client_map: Map<number, (buffer: Uint8Array) => Promise<void>>,
+        private on_poll_request?: () => Promise<void>
     ) {}
 
     async handle_request(view: Uint8Array) {
@@ -76,13 +133,27 @@ export class PerspectiveSession {
         await decode_api_responses(this.mod, ptr, async (msg: ApiResponse) => {
             await this.client_map.get(msg.client_id)!(msg.data);
         });
+
+        if (this.on_poll_request) {
+            await this.on_poll_request();
+        } else {
+            await this.poll();
+        }
     }
 
-    poll() {
-        const polled = this.mod._psp_poll(this.server as any, this.client_id);
-        decode_api_responses(this.mod, polled, async (msg: ApiResponse) => {
-            await this.client_map.get(msg.client_id)!(msg.data);
-        });
+    private async poll() {
+        const polled = this.mod._psp_poll(this.server as any);
+        await decode_api_responses(
+            this.mod,
+            polled,
+            async (msg: ApiResponse) => {
+                if (msg.client_id === 0) {
+                    console.error("Poll error");
+                } else {
+                    await this.client_map.get(msg.client_id)!(msg.data);
+                }
+            }
+        );
     }
 
     close() {

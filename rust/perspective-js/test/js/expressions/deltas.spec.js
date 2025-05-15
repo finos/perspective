@@ -84,7 +84,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
+                    await table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
                 }
             );
 
@@ -119,7 +119,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({
+                    await table.update({
                         x: [1, 2, 3, 4],
                         y: ["a", "b", "c", "d"],
                     });
@@ -164,7 +164,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
+                    await table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
                 }
             );
 
@@ -203,7 +203,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3] });
+                    await table.update({ x: [1, 3] });
                 }
             );
         });
@@ -240,7 +240,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
+                    await table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
                 }
             );
 
@@ -273,7 +273,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
+                    await table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
                 }
             );
         });
@@ -371,7 +371,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
+                    await table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
                 }
             );
         });
@@ -419,7 +419,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3] });
+                    await table.update({ x: [1, 3] });
                 }
             );
 
@@ -469,7 +469,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["ABCD", null] });
+                    await table.update({ x: [1, 3], y: ["ABCD", null] });
                 }
             );
 
@@ -511,7 +511,6 @@ function it_old_behavior(name, capture) {
                                 updated.delta,
                                 expected
                             );
-                            await view.delete();
                         },
                         { mode: "row" }
                     );
@@ -533,6 +532,8 @@ function it_old_behavior(name, capture) {
                                 updated.delta,
                                 expected
                             );
+
+                            await view.delete();
                             await view2.delete();
                             await table.delete();
                             done();
@@ -540,7 +541,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
+                    await table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
                 }
             );
 
@@ -582,7 +583,7 @@ function it_old_behavior(name, capture) {
                         { mode: "row" }
                     );
 
-                    table.update({ x: [1, 3], y: ["abc", "def"] });
+                    await table.update({ x: [1, 3], y: ["abc", "def"] });
                 }
             );
         });

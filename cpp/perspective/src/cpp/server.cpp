@@ -447,6 +447,12 @@ ServerResources::get_view_ids(const t_id& table_id) {
     return out;
 }
 
+bool
+ServerResources::has_view(const t_id& id) {
+    PSP_READ_LOCK(m_write_lock);
+    return m_views.contains(id);
+}
+
 std::shared_ptr<ErasedView>
 ServerResources::get_view(const t_id& id) {
     PSP_READ_LOCK(m_write_lock);
@@ -826,7 +832,7 @@ ProtoServer::handle_request(
 }
 
 std::vector<ProtoServerResp<std::string>>
-ProtoServer::poll(std::uint32_t client_id) {
+ProtoServer::poll() {
     std::vector<ProtoServerResp<std::string>> out;
     try {
         const auto& responses = _poll();
@@ -843,7 +849,7 @@ ProtoServer::poll(std::uint32_t client_id) {
         *err = std::string(e.what());
         ProtoServerResp<std::string> str_resp;
         str_resp.data = resp.SerializeAsString();
-        str_resp.client_id = client_id;
+        str_resp.client_id = 0;
         out.emplace_back(std::move(str_resp));
     } catch (const PerspectiveViewNotFoundException& e) {
         proto::Response resp;
@@ -853,7 +859,7 @@ ProtoServer::poll(std::uint32_t client_id) {
         *msg = std::string(e.what());
         ProtoServerResp<std::string> str_resp;
         str_resp.data = resp.SerializeAsString();
-        str_resp.client_id = client_id;
+        str_resp.client_id = 0;
         out.emplace_back(std::move(str_resp));
     } catch (const std::exception& e) {
         proto::Response resp;
@@ -861,7 +867,7 @@ ProtoServer::poll(std::uint32_t client_id) {
         *err = std::string(e.what());
         ProtoServerResp<std::string> str_resp;
         str_resp.data = resp.SerializeAsString();
-        str_resp.client_id = client_id;
+        str_resp.client_id = 0;
         out.emplace_back(std::move(str_resp));
     } catch (...) {
         proto::Response resp;
@@ -870,7 +876,7 @@ ProtoServer::poll(std::uint32_t client_id) {
         *err = "Unknown exception";
         ProtoServerResp<std::string> str_resp;
         str_resp.data = resp.SerializeAsString();
-        str_resp.client_id = client_id;
+        str_resp.client_id = 0;
         out.emplace_back(std::move(str_resp));
     }
 
@@ -1077,7 +1083,7 @@ ProtoServer::handle_process_table(
     const Request& req,
     std::vector<ProtoServerResp<ProtoServer::Response>>& proto_resp
 ) {
-    if (needs_poll(req.client_req_case())) {
+    if (!m_realtime_mode && needs_poll(req.client_req_case())) {
         if (entity_type_is_table(req.client_req_case())) {
             if (m_resources.is_table_dirty(req.entity_id())) {
                 auto table = m_resources.get_table(req.entity_id());
@@ -1306,7 +1312,10 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
         proto_resp.emplace_back(std::move(resp2));
     };
 
-    handle_process_table(req, proto_resp);
+    if (!m_realtime_mode) {
+        handle_process_table(req, proto_resp);
+    }
+
     switch (req.client_req_case()) {
         case proto::Request::kGetFeaturesReq: {
             proto::Response resp;
@@ -2702,6 +2711,10 @@ ProtoServer::_process_table_unchecked(
         // record changes per port.
         auto view_ids = m_resources.get_view_ids(table_id);
         for (const auto& view_id : view_ids) {
+            if (!m_resources.has_view(view_id)) {
+                continue;
+            }
+
             auto view = m_resources.get_view(view_id);
             auto subscriptions = m_resources.get_view_on_update_sub(view_id);
             for (auto& subscription : subscriptions) {

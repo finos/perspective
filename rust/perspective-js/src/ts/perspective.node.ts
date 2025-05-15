@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 export type * from "../../dist/wasm/perspective-js.d.ts";
-export { PerspectiveServer } from "./wasm/engine.ts";
 
 import WebSocket, { WebSocketServer as HttpWebSocketServer } from "ws";
 import stoppable from "stoppable";
@@ -24,7 +23,7 @@ import * as url from "node:url";
 
 import * as perspective_client from "../../dist/wasm/perspective-js.js";
 import { load_wasm_stage_0 } from "./wasm/decompress.js";
-import { PerspectiveServer } from "./wasm/engine.ts";
+import * as engine from "./wasm/engine.ts";
 import { compile_perspective } from "./wasm/emscripten_api.ts";
 
 import * as psp_websocket from "./websocket.ts";
@@ -48,20 +47,30 @@ const SYNC_MODULE = await fs
     .then((buffer) => compile_perspective(buffer.buffer as ArrayBuffer));
 
 let SYNC_CLIENT: perspective_client.Client;
-const SYNC_SERVER = new PerspectiveServer(SYNC_MODULE);
+
+const SYNC_SERVER = new engine.PerspectiveServer(SYNC_MODULE);
+
+// const SYNC_SERVER = new engine.PerspectiveServer(SYNC_MODULE, {
+//     on_poll_request: () => SYNC_POLL_HANDLE.on_poll_request(),
+// });
+
+// const SYNC_POLL_HANDLE: engine.PerspectivePollThread =
+//     new engine.PerspectivePollThread(SYNC_SERVER);
+
 const SYNC_SESSION = SYNC_SERVER.make_session(
     async (resp) => await SYNC_CLIENT.handle_response(resp)
 );
 
 SYNC_CLIENT = new perspective_client.Client(async (req: Uint8Array) => {
     await SYNC_SESSION.handle_request(req);
-    setTimeout(() => SYNC_SESSION.poll());
 });
 
 await SYNC_CLIENT.init();
 
-export function make_server() {
-    return new PerspectiveServer(SYNC_MODULE);
+export class PerspectiveServer extends engine.PerspectiveServer {
+    constructor(options?: engine.PerspectiveServerOptions) {
+        super(SYNC_MODULE, options);
+    }
 }
 
 export const make_session = async (
@@ -206,7 +215,6 @@ export class WebSocketServer {
 
             ws.on("message", (proto) => {
                 session.handle_request(buffer_to_arraybuffer(proto));
-                setTimeout(() => session.poll());
             });
 
             ws.on("close", () => {

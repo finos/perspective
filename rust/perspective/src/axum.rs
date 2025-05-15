@@ -12,13 +12,13 @@
 
 use std::net::SocketAddr;
 
+use axum::extract::State;
 use axum::extract::connect_info::ConnectInfo;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::State;
 use axum::response::IntoResponse;
-use axum::routing::{get, MethodRouter};
-use futures::channel::mpsc::{unbounded, UnboundedReceiver, UnboundedSender};
-use futures::future::{select, Either};
+use axum::routing::{MethodRouter, get};
+use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender, unbounded};
+use futures::future::{Either, select};
 use futures::{FutureExt, SinkExt, StreamExt};
 
 use crate::client::Session;
@@ -80,7 +80,6 @@ async fn process_message_loop(
             Outgoing(bytes) => socket.send(Binary(bytes)).await?,
             Incoming(bytes) => {
                 session.handle_request(&bytes).await?;
-                session.poll().await?
             },
         }
     }

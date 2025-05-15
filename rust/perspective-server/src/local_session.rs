@@ -39,6 +39,7 @@ impl Session<ServerError> for LocalSession {
     async fn handle_request(&self, request: &[u8]) -> Result<(), ServerError> {
         let request = ffi::Request::from(request);
         let responses = self.server.server.handle_request(self.id, &request);
+        let mut results = Vec::with_capacity(responses.size());
         for response in responses.iter_responses() {
             let cb = self
                 .server
@@ -49,30 +50,17 @@ impl Session<ServerError> for LocalSession {
                 .cloned();
 
             if let Some(f) = cb {
-                f(response.msg()).await?;
+                results.push(f(response.msg()).await);
             }
         }
 
-        Ok(())
-    }
-
-    async fn poll(&self) -> Result<(), ServerError> {
-        let responses = self.server.server.poll(self.id);
-        for response in responses.iter_responses() {
-            let cb = self
-                .server
-                .callbacks
-                .read()
-                .await
-                .get(&response.client_id())
-                .cloned();
-
-            if let Some(f) = cb {
-                f(response.msg()).await?;
-            }
+        if let Some(cb) = &self.server.on_poll_request {
+            cb(&self.server).await?
+        } else {
+            results.push(self.server.poll().await);
         }
 
-        Ok(())
+        results.into_iter().collect()
     }
 
     async fn close(mut self) {

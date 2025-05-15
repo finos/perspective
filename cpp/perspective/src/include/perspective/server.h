@@ -540,6 +540,7 @@ namespace server {
         std::shared_ptr<Table> get_table_for_view(const t_id& view_id);
         t_id get_table_id_for_view(const t_id& view_id);
         std::vector<t_id> get_view_ids(const t_id& table_id);
+        bool has_view(const t_id& id);
         std::shared_ptr<ErasedView> get_view(const t_id& id);
         std::vector<t_id> get_table_ids();
 
@@ -629,11 +630,12 @@ namespace server {
         using Request = perspective::proto::Request;
         using Response = perspective::proto::Response;
 
+        ProtoServer(bool realtime_mode) : m_realtime_mode(realtime_mode) {}
         std::uint32_t new_session();
         void close_session(std::uint32_t);
         std::vector<ProtoServerResp<std::string>>
         handle_request(std::uint32_t client_id, const std::string_view& data);
-        std::vector<ProtoServerResp<std::string>> poll(std::uint32_t client_id);
+        std::vector<ProtoServerResp<std::string>> poll();
 
     private:
         void handle_process_table(
@@ -659,6 +661,7 @@ namespace server {
         );
 
         static std::uint32_t m_client_id;
+        bool m_realtime_mode;
         ServerResources m_resources;
     };
 

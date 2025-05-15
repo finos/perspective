@@ -24,7 +24,7 @@ export async function draw(view) {
         await this.activate(view);
     }
 
-    if (!this.isConnected || this.offsetParent == null) {
+    if (!this.isConnected || this.offsetParent == null || !this.model) {
         return;
     }
 

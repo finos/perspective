@@ -65,9 +65,7 @@ def test_big_multi_thing(superstore):
 
         global server_loop
         server_loop = tornado.ioloop.IOLoop.current()
-        client = perspective_server.new_local_client(
-            loop_callback=server_loop.add_callback
-        )
+        client = perspective_server.new_local_client()
         server_loop.call_later(0, init_table, client)
         server_loop.start()
 
