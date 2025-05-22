@@ -181,7 +181,7 @@ runs:
 
         - name: Template version
           shell: bash
-          if: ${{ !startsWith(github.ref_name, 'v') }}
+          # if: ${{ !startsWith(github.ref_name, 'v') }}
           run: |
               git config --global --add safe.directory $GITHUB_WORKSPACE
               node tools/perspective-scripts/version.mjs --nightly
