@@ -221,6 +221,8 @@ t_config::setup(
             case AGGTYPE_PY_AGG:
             case AGGTYPE_MIN:
             case AGGTYPE_MAX:
+            case AGGTYPE_MAX_BY:
+            case AGGTYPE_MIN_BY:
             case AGGTYPE_SUM_NOT_NULL:
             case AGGTYPE_SUM_ABS:
             case AGGTYPE_ABS_SUM:

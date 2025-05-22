@@ -69,6 +69,8 @@ extract_aggregate(
         case AGGTYPE_LAST_VALUE:
         case AGGTYPE_LAST_MINUS_FIRST:
         case AGGTYPE_MAX:
+        case AGGTYPE_MAX_BY:
+        case AGGTYPE_MIN_BY:
         case AGGTYPE_MIN:
         case AGGTYPE_HIGH_WATER_MARK:
         case AGGTYPE_LOW_WATER_MARK:

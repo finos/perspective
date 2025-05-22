@@ -187,17 +187,25 @@ impl FromStr for SingleAggregate {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize, TS)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, TS)]
 #[serde()]
 pub enum MultiAggregate {
     #[serde(rename = "weighted mean")]
     WeightedMean,
+
+    #[serde(rename = "max by")]
+    MaxBy,
+
+    #[serde(rename = "min by")]
+    MinBy,
 }
 
 impl Display for MultiAggregate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             MultiAggregate::WeightedMean => write!(f, "weighted mean"),
+            MultiAggregate::MaxBy => write!(f, "max by"),
+            MultiAggregate::MinBy => write!(f, "min by"),
         }
     }
 }
@@ -222,6 +230,8 @@ impl Display for Aggregate {
             Self::MultiAggregate(MultiAggregate::WeightedMean, x) => {
                 write!(fmt, "weighted mean by {}", x)?
             },
+            Self::MultiAggregate(MultiAggregate::MaxBy, x) => write!(fmt, "max by {}", x)?,
+            Self::MultiAggregate(MultiAggregate::MinBy, x) => write!(fmt, "min by {}", x)?,
         };
         Ok(())
     }
@@ -234,6 +244,10 @@ impl FromStr for Aggregate {
         Ok(
             if let Some(stripped) = input.strip_prefix("weighted mean by ") {
                 Self::MultiAggregate(MultiAggregate::WeightedMean, stripped.to_owned())
+            } else if let Some(stripped) = input.strip_prefix("max by ") {
+                Self::MultiAggregate(MultiAggregate::MaxBy, stripped.to_owned())
+            } else if let Some(stripped) = input.strip_prefix("min by ") {
+                Self::MultiAggregate(MultiAggregate::MinBy, stripped.to_owned())
             } else {
                 Self::SingleAggregate(SingleAggregate::from_str(input)?)
             },
