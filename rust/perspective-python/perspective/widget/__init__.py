@@ -22,11 +22,10 @@ from ipywidgets import DOMWidget
 from traitlets import Unicode, observe
 from .viewer import PerspectiveViewer
 
-__version__ = re.sub(
-    "(rc|alpha|beta)", "-\\1.", importlib.metadata.version("perspective-python")
-)
+__version__ = re.sub(".dev[0-9]+", "", importlib.metadata.version("perspective-python"))
 
 __all__ = ["PerspectiveWidget"]
+
 
 class PerspectiveWidget(DOMWidget, PerspectiveViewer):
     """:class`~perspective.PerspectiveWidget` allows for Perspective to be used
@@ -160,6 +159,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             loading = self.load(data, **self._options)
             if inspect.isawaitable(loading):
                 import asyncio
+
                 asyncio.create_task(loading)
 
     def load(self, data, **options):
@@ -212,9 +212,8 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             logging.debug("view {} connected", client_id)
 
             def send_response(msg):
-                self.send(
-                    {"type": "binary_msg", "client_id": client_id}, [msg]
-                )
+                self.send({"type": "binary_msg", "client_id": client_id}, [msg])
+
             self._sessions[client_id] = self.new_proxy_session(send_response)
         elif content["type"] == "binary_msg":
             [binary_msg] = buffers
@@ -222,6 +221,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             session = self._sessions[client_id]
             if session is not None:
                 import asyncio
+
                 asyncio.create_task(session.handle_request_async(binary_msg))
             else:
                 logging.error("No session for client_id {}".format(client_id))

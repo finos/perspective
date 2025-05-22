@@ -136,11 +136,7 @@ async function build_all() {
     });
 
     const pkg = JSON.parse(fs.readFileSync("../../package.json").toString());
-    const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>
-        x.replace("-", "").replace(".", "")
-    );
-
-    const labext_dest = `../../rust/perspective-python/perspective_python-${version}.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab`;
+    const labext_dest = `../../rust/perspective-python/perspective_python-${pkg.version}.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab`;
     await cpy(["dist/cjs/**/*"], labext_dest);
 }
 
