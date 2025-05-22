@@ -192,6 +192,10 @@ async function update_package_jsons() {
     fs.writeFileSync("./package.json", pkg_json);
     const packages = {};
     for (const ws of pkg.workspaces) {
+        if (ws === "packages/perspective-jupyterlab" && IS_NIGHTLY) {
+            continue;
+        }
+
         for (const path of glob.sync(`${ws}/package.json`, {
             sync: true,
         })) {

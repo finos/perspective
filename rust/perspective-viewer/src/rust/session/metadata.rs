@@ -284,7 +284,34 @@ impl SessionMetadata {
                         .map(|(name, _)| {
                             Aggregate::MultiAggregate(MultiAggregate::WeightedMean, name)
                         });
-                    Box::new(aggregates.chain(num_cols))
+                    Box::new(aggregates.chain(num_cols)) as Box<dyn Iterator<Item = Aggregate>>
+                },
+                ColumnType::String => {
+                    let exp_cols = self
+                        .get_expression_columns()
+                        .cloned()
+                        .chain(self.get_table_columns()?.clone().into_iter())
+                        .map(move |name| {
+                            self.get_column_table_type(&name)
+                                .map(|coltype| (name, coltype))
+                        })
+                        .collect::<Option<Vec<_>>>()?;
+
+                    let max_cols = exp_cols
+                        .clone()
+                        .into_iter()
+                        .filter(|(_, coltype)| {
+                            *coltype == ColumnType::Integer || *coltype == ColumnType::Float
+                        })
+                        .map(|(name, _)| Aggregate::MultiAggregate(MultiAggregate::MaxBy, name));
+
+                    let min_cols = exp_cols
+                        .into_iter()
+                        .filter(|(_, coltype)| {
+                            *coltype == ColumnType::Integer || *coltype == ColumnType::Float
+                        })
+                        .map(|(name, _)| Aggregate::MultiAggregate(MultiAggregate::MinBy, name));
+                    Box::new(aggregates.chain(max_cols).chain(min_cols))
                 },
                 _ => aggregates,
             })

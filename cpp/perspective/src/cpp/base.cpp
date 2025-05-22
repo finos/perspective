@@ -531,6 +531,12 @@ str_to_aggtype(const std::string& str) {
     if (str == "last" || str == "last_value") {
         return t_aggtype::AGGTYPE_LAST_VALUE;
     }
+    if (str == "max_by" || str == "max by") {
+        return t_aggtype::AGGTYPE_MAX_BY;
+    }
+    if (str == "min_by" || str == "min by") {
+        return t_aggtype::AGGTYPE_MIN_BY;
+    }
     if (str == "max") {
         return t_aggtype::AGGTYPE_MAX;
     }

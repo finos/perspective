@@ -25,10 +25,12 @@
         label {
             font-size: 10px;
             white-space: nowrap;
-            height: 21px;
+            height: 19px;
             display: flex;
             align-items: center;
             margin-right: 3px;
+            max-width: 60px;
+            overflow: hidden;
         }
 
         .aggregate-selector {
@@ -46,6 +48,20 @@
                 border: 1px solid var(--icon--color);
                 border-radius: 2px;
                 transition: none;
+            }
+        }
+
+        label + .aggregate-selector {
+            display: none;
+        }
+
+        &:hover {
+            label + .aggregate-selector {
+                display: flex;
+            }
+
+            label {
+                display: none;
             }
         }
 

@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::collections::HashSet;
+
 use perspective_client::config::*;
 use perspective_client::utils::PerspectiveResultExt;
 use yew::prelude::*;
@@ -90,6 +92,10 @@ impl Component for AggregateSelector {
             .unwrap();
 
         let values = self.aggregates.clone();
+        let label = ctx.props().aggregate.as_ref().map(|x| match x {
+            Aggregate::SingleAggregate(_) => "".to_string(),
+            Aggregate::MultiAggregate(x, _) => format!("{}", x),
+        });
 
         html! {
             <>
@@ -98,7 +104,7 @@ impl Component for AggregateSelector {
                     <Select<Aggregate>
                         wrapper_class="aggregate-selector"
                         {values}
-                        label="weighted mean"
+                        label={label.map(|x| x.into())}
                         selected={selected_agg}
                         on_select={callback}
                     />
@@ -133,20 +139,51 @@ impl AggregateSelector {
             .expect("Bad Aggs")
             .collect::<Vec<_>>();
 
-        let multi_aggregates = aggregates
-            .iter()
-            .filter(|x| matches!(x, Aggregate::MultiAggregate(_, _)))
-            .cloned()
+        let multi_aggregates2 = aggregates
+            .clone()
+            .into_iter()
+            .flat_map(|x| match x {
+                Aggregate::MultiAggregate(x, _) => Some(x),
+                _ => None,
+            })
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .map(|x| match x {
+                MultiAggregate::WeightedMean => SelectItem::OptGroup(
+                    "weighted mean".into(),
+                    aggregates
+                        .iter()
+                        .filter(|x| {
+                            matches!(
+                                x,
+                                Aggregate::MultiAggregate(MultiAggregate::WeightedMean, _)
+                            )
+                        })
+                        .cloned()
+                        .collect(),
+                ),
+                MultiAggregate::MaxBy => SelectItem::OptGroup(
+                    "max by".into(),
+                    aggregates
+                        .iter()
+                        .filter(|x| {
+                            matches!(x, Aggregate::MultiAggregate(MultiAggregate::MaxBy, _))
+                        })
+                        .cloned()
+                        .collect(),
+                ),
+                MultiAggregate::MinBy => SelectItem::OptGroup(
+                    "min by".into(),
+                    aggregates
+                        .iter()
+                        .filter(|x| {
+                            matches!(x, Aggregate::MultiAggregate(MultiAggregate::MinBy, _))
+                        })
+                        .cloned()
+                        .collect(),
+                ),
+            })
             .collect::<Vec<_>>();
-
-        let multi_aggregates2 = if !multi_aggregates.is_empty() {
-            vec![SelectItem::OptGroup(
-                "weighted mean".into(),
-                multi_aggregates,
-            )]
-        } else {
-            vec![]
-        };
 
         let s = aggregates
             .iter()

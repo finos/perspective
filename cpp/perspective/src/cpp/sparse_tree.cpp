@@ -1592,6 +1592,35 @@ t_stree::update_agg_table(
                 new_value.set(*std::max_element(values.begin(), values.end()));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
+            case AGGTYPE_MAX_BY: {
+                t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
+                old_value.set(dst_scalar);
+                auto pkeys = get_pkeys(nidx);
+                std::vector<t_tscalar> values;
+                read_column_from_gstate(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[1].name(),
+                    pkeys,
+                    values
+                );
+
+                const auto max_row_idx = std::distance(
+                    values.begin(),
+                    std::max_element(values.begin(), values.end())
+                );
+
+                read_column_from_gstate(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[0].name(),
+                    pkeys,
+                    values
+                );
+
+                new_value.set(values.at(max_row_idx));
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
             case AGGTYPE_MIN: {
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
@@ -1606,6 +1635,35 @@ t_stree::update_agg_table(
                 );
 
                 new_value.set(*std::min_element(values.begin(), values.end()));
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
+            case AGGTYPE_MIN_BY: {
+                t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
+                old_value.set(dst_scalar);
+                auto pkeys = get_pkeys(nidx);
+                std::vector<t_tscalar> values;
+                read_column_from_gstate(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[1].name(),
+                    pkeys,
+                    values
+                );
+
+                const auto min_row_idx = std::distance(
+                    values.begin(),
+                    std::min_element(values.begin(), values.end())
+                );
+
+                read_column_from_gstate(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[0].name(),
+                    pkeys,
+                    values
+                );
+
+                new_value.set(values.at(min_row_idx));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_HIGH_WATER_MARK: {

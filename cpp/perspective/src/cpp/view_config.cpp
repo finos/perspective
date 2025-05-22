@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+#include "perspective/base.h"
 #include <perspective/view_config.h>
 
 #include <utility>
@@ -343,6 +344,12 @@ t_view_config::fill_aggspecs(const std::shared_ptr<t_schema>& schema) {
                 if (col.at(0) == "weighted mean") {
                     dependencies.emplace_back(col.at(1), DEPTYPE_COLUMN);
                     agg_type = AGGTYPE_WEIGHTED_MEAN;
+                } else if (col.at(0) == "max by") {
+                    dependencies.emplace_back(col.at(1), DEPTYPE_COLUMN);
+                    agg_type = AGGTYPE_MAX_BY;
+                } else if (col.at(0) == "min by") {
+                    dependencies.emplace_back(col.at(1), DEPTYPE_COLUMN);
+                    agg_type = AGGTYPE_MIN_BY;
                 } else {
                     agg_type = str_to_aggtype(col.at(0));
                 }
@@ -427,6 +434,12 @@ t_view_config::make_aggspec(
         if (aggregate.at(0) == "weighted mean") {
             dependencies.emplace_back(aggregate.at(1), DEPTYPE_COLUMN);
             agg_type = AGGTYPE_WEIGHTED_MEAN;
+        } else if (aggregate.at(0) == "max by") {
+            dependencies.emplace_back(aggregate.at(1), DEPTYPE_COLUMN);
+            agg_type = AGGTYPE_MAX_BY;
+        } else if (aggregate.at(0) == "min by") {
+            dependencies.emplace_back(aggregate.at(1), DEPTYPE_COLUMN);
+            agg_type = AGGTYPE_MIN_BY;
         } else {
             agg_type = str_to_aggtype(aggregate.at(0));
         }

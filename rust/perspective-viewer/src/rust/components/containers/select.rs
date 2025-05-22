@@ -48,7 +48,7 @@ where
     pub is_autosize: bool,
 
     #[prop_or_default]
-    pub label: Option<&'static str>,
+    pub label: Option<Cow<'static, str>>,
 
     #[prop_or_default]
     pub id: Option<&'static str>,
@@ -212,7 +212,7 @@ where
 
         html! {
             if is_group_selected && ctx.props().label.is_some() {
-                <label>{ ctx.props().label.unwrap() }</label>
+                <label>{ ctx.props().label.to_owned() }</label>
                 <div class={wrapper_class} data-value={value.clone()}>{ select }</div>
             } else {
                 <div class={wrapper_class} data-value={value}>{ select }</div>

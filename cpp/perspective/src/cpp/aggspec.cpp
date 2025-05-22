@@ -188,6 +188,12 @@ t_aggspec::agg_str() const {
         case AGGTYPE_LAST_VALUE: {
             return "last_value";
         }
+        case AGGTYPE_MAX_BY: {
+            return "max_by";
+        }
+        case AGGTYPE_MIN_BY: {
+            return "min_by";
+        }
         case AGGTYPE_MAX: {
             return "max";
         }
@@ -358,6 +364,8 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         case AGGTYPE_OR:
         case AGGTYPE_LAST_VALUE:
         case AGGTYPE_MAX:
+        case AGGTYPE_MAX_BY:
+        case AGGTYPE_MIN_BY:
         case AGGTYPE_MIN:
         case AGGTYPE_HIGH_WATER_MARK:
         case AGGTYPE_LOW_WATER_MARK:
