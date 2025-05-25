@@ -237,6 +237,10 @@ export class PerspectiveWorkspace extends SplitPanel {
         // Using ES generators as context managers ..
         for (const viewers of this._capture_viewers()) {
             for (const widgets of this._capture_widgets()) {
+                for (const v of viewers) {
+                    v.removeAttribute("class");
+                }
+
                 const callback = this._restore_callback.bind(
                     this,
                     viewer_configs,
