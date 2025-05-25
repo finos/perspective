@@ -34,7 +34,7 @@ use crate::*;
 /// on `CustomElements`, but when it is `drop()` the Custom Element will no
 /// longer dispatch events such as `"perspective-config-change"`.
 #[derive(Clone)]
-pub struct CustomEvents(Rc<(CustomEventsDataRc, [Subscription; 5])>);
+pub struct CustomEvents(Rc<(CustomEventsDataRc, [Subscription; 6])>);
 
 impl ImplicitClone for CustomEvents {}
 impl PartialEq for CustomEvents {
@@ -113,12 +113,18 @@ impl CustomEvents {
             move |_| data.clone().dispatch_config_update()
         });
 
+        let title_sub = presentation.title_changed.add_listener({
+            clone!(data);
+            move |_| data.clone().dispatch_config_update()
+        });
+
         Self(Rc::new((data, [
             theme_sub,
             settings_sub,
             column_settings_sub,
             plugin_sub,
             view_sub,
+            title_sub,
         ])))
     }
 

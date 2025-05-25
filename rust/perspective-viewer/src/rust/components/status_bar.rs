@@ -196,8 +196,8 @@ impl Component for StatusBar {
             },
         };
 
-        let oninput = ctx.link().callback({
-            move |input: InputEvent| {
+        let onchange = ctx.link().callback({
+            move |input: Event| {
                 let title = input
                     .target()
                     .unwrap()
@@ -239,7 +239,7 @@ impl Component for StatusBar {
                                 placeholder=" "
                                 value={ctx.props().presentation.get_title()}
                                 size="10"
-                                {oninput}
+                                {onchange}
                             />
                             <span id="status-bar-placeholder" />
                         </label>

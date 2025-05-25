@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
+import { test, expect, shadow_type } from "@finos/perspective-test";
 import {
     compareContentsToSnapshot,
     API_VERSION,
@@ -91,6 +91,45 @@ test.describe("Events", () => {
         await compareContentsToSnapshot(contents, [
             "restore-fires-the-perspective-config-update-event.txt",
         ]);
+    });
+
+    test("Editing the title fires the 'perspective-config-update' event", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            window["acc"] = [];
+
+            await viewer!.restore({
+                settings: true,
+            });
+
+            viewer!.addEventListener("perspective-config-update", (event) => {
+                window["acc"].push(event.detail);
+            });
+        });
+
+        await shadow_type(
+            page,
+            "New Title",
+            true,
+            "perspective-viewer",
+            "#status_bar",
+            "input"
+        );
+
+        const result = await page.evaluate(async () => {
+            return window["acc"];
+        });
+
+        expect(result.map((x) => x.title)).toEqual(["New Title"]);
+
+        const config = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            return await viewer?.save();
+        });
+
+        expect(config.title).toEqual("New Title");
     });
 
     // NOTE: Previously skipped, kept for future reference
