@@ -33,6 +33,7 @@ impl<T: Display> SelectItem<T> {
 
 pub enum SelectMsg {
     SelectedChanged(i32),
+    KeyboardInput(bool, i32, String),
 }
 
 #[derive(Properties)]
@@ -111,10 +112,37 @@ where
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        let SelectMsg::SelectedChanged(x) = msg;
-        self.selected = find_nth(x, &ctx.props().values).unwrap().clone();
-        ctx.props().on_select.emit(self.selected.clone());
-        true
+        match msg {
+            SelectMsg::SelectedChanged(x) => {
+                self.selected = find_nth(x, &ctx.props().values).unwrap().clone();
+                ctx.props().on_select.emit(self.selected.clone());
+                true
+            },
+
+            // All the up and down arrow keys to instantly select, which is
+            // useful for keyboard warrios. This is not ada without the shift
+            // key. I'm not sure if it is _with_ the shift key either, but its
+            // cool.
+            SelectMsg::KeyboardInput(is_shift, idx, code) => {
+                if is_shift {
+                    if code.as_str() == "ArrowUp" {
+                        if let Some(x) = find_nth(idx - 1, &ctx.props().values) {
+                            self.selected = x.clone();
+                            ctx.props().on_select.emit(self.selected.clone());
+                            return true;
+                        }
+                    } else if code.as_str() == "ArrowDown" {
+                        if let Some(x) = find_nth(idx + 1, &ctx.props().values) {
+                            self.selected = x.clone();
+                            ctx.props().on_select.emit(self.selected.clone());
+                            return true;
+                        }
+                    }
+                }
+
+                false
+            },
+        }
     }
 
     // The `<select>` has its own state not refelcted by `SelectProps`.
@@ -131,13 +159,25 @@ where
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let callback = ctx.link().callback(|event: Event| {
+        let callback = ctx.link().callback(|event: InputEvent| {
             let value = event
                 .target()
                 .unwrap()
                 .unchecked_into::<web_sys::HtmlSelectElement>()
                 .selected_index();
             SelectMsg::SelectedChanged(value)
+        });
+
+        let key_callback = ctx.link().callback(|event: KeyboardEvent| {
+            event.prevent_default();
+            let value = event
+                .target()
+                .unwrap()
+                .unchecked_into::<web_sys::HtmlSelectElement>()
+                .selected_index();
+
+            let is_shift = event.shift_key();
+            SelectMsg::KeyboardInput(is_shift, value, event.code())
         });
 
         let class = if let Some(class) = &ctx.props().class {
@@ -153,7 +193,13 @@ where
             .any(|x| matches!(x, SelectItem::Option(y) if *y == ctx.props().selected));
 
         let select = html! {
-            <select id={ctx.props().id} {class} ref={&self.select_ref} onchange={callback}>
+            <select
+                id={ctx.props().id}
+                {class}
+                ref={&self.select_ref}
+                oninput={callback}
+                onkeydown={key_callback}
+            >
                 { for ctx.props().values.iter().map(|value| match value {
                         SelectItem::Option(value) => {
                             let selected = *value == ctx.props().selected;

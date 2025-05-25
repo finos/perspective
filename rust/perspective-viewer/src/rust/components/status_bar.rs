@@ -184,6 +184,7 @@ impl Component for StatusBar {
                             <span id="theme" class="button">
                                 <Select<String>
                                     id="theme_selector"
+                                    class="invert"
                                     {values}
                                     selected={selected.to_owned()}
                                     on_select={ontheme}

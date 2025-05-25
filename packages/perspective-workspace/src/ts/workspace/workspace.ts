@@ -965,8 +965,15 @@ export class PerspectiveWorkspace extends SplitPanel {
 
         const updated = async (event: CustomEvent) => {
             this.workspaceUpdated();
-            widget.title.label = event.detail.title;
-            widget._is_pivoted = event.detail.group_by?.length > 0;
+            // Sometimes plugins or other external code fires this event and
+            //  does not populate this field!
+            const config =
+                typeof event.detail === "undefined"
+                    ? await widget.viewer.save()
+                    : event.detail;
+
+            widget.title.label = config.title;
+            widget._is_pivoted = config.group_by?.length > 0;
         };
 
         widget.node.addEventListener("contextmenu", contextMenu);

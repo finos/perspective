@@ -13,6 +13,7 @@
 :host {
     position: relative;
     display: block;
+    height: 100%;
 }
 
 :host #container {
@@ -29,19 +30,18 @@
 
 :host #toolbar {
     display: flex;
-    align-items: center;
-    height: 36px;
+    align-items: stretch;
+    height: 100%;
 }
 
 :host #toolbar .hover-target {
     margin: 0;
     display: inline-flex;
     align-items: center;
-    height: 48px;
     cursor: pointer;
 
     &:hover {
-        outline: 4px solid var(--icon--color);
+        box-shadow: -4px 0 0 var(--icon--color), 4px 0 0 var(--icon--color);
         background-color: var(--icon--color);
     }
 }
@@ -162,6 +162,7 @@
     padding: 0;
 }
 
+.hover-target:focus-within .button,
 .hover-target:hover .button {
     position: relative;
     background-color: var(--icon--color);
@@ -172,11 +173,13 @@
     cursor: pointer;
 }
 
+.hover-target:focus-within .button:before,
 .hover-target:hover .button:before {
     background-color: var(--plugin--background);
 }
 
 // The label.
+.hover-target:focus-within .button > span,
 .hover-target:hover .button > span {
     display: block;
     position: absolute;

@@ -141,13 +141,12 @@
         // Exceptions when the menu bar is visible and the settings panel is closed.
         #menu-bar {
             flex: 0 1000000 auto;
-            .button {
-                height: 22px;
-            }
+            height: 100%;
         }
 
         #plugin-settings {
             margin-left: auto;
+            align-self: stretch;
         }
 
         #counter-arrow:before {
@@ -338,15 +337,21 @@
         }
 
         #theme {
-            height: 48px;
+            align-self: stretch;
+            border-radius: 0px;
+            select {
+                height: 100%;
+            }
+
             &:before {
                 -webkit-mask-image: var(--theme-icon--mask-image);
                 mask-image: var(--theme-icon--mask-image);
             }
         }
 
-        #menu-bar .button select#theme_selector {
-            height: 48px;
+        #theme_selector {
+            max-width: 100px;
+            text-overflow: ellipsis;
         }
 
         .button {
@@ -375,9 +380,10 @@
         .hover-target {
             margin: 0;
             display: inline-flex;
+            height: 100%;
             align-items: center;
-            height: 48px;
             cursor: pointer;
+            &:focus-within,
             &:hover,
             &.modal-target {
                 box-shadow: -4px 0 0 var(--icon--color),
@@ -385,6 +391,7 @@
                 background-color: var(--icon--color);
             }
 
+            &:focus-within .button select,
             &:hover .button select {
                 background-color: transparent;
             }
@@ -393,6 +400,7 @@
                 color: var(--icon--color) !important;
             }
 
+            &:focus-within .button,
             &:hover .button,
             &.modal-target .button {
                 position: relative;
@@ -432,7 +440,6 @@
                 & > .dropdown-width-container {
                     display: block;
                     margin: 0;
-                    height: auto;
                     white-space: nowrap;
                     line-height: 1;
                     background-color: var(--icon--color);

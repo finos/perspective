@@ -81,7 +81,6 @@ export class PerspectiveViewerWidget extends Widget {
             table: this.viewer.getAttribute("table"),
         };
 
-        delete config["theme"];
         delete config["settings"];
         return config;
     }
@@ -97,6 +96,6 @@ export class PerspectiveViewerWidget extends Widget {
             this.viewer.parentElement.removeChild(this.viewer);
         }
 
-        await this.viewer.delete().then(() => this.viewer.free());
+        await this.viewer.delete();
     }
 }

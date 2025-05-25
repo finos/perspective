@@ -17,7 +17,9 @@
         display: flex;
         flex: 1 1 auto;
         position: relative;
-        overflow: scroll;
+        overflow-x: visible;
+        overflow-y: auto;
+        @include scrollbar;
 
         #editor-height-sizer {
             height: 100px;
