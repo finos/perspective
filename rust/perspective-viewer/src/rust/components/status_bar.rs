@@ -184,6 +184,7 @@ impl Component for StatusBar {
                             <span id="theme" class="button">
                                 <Select<String>
                                     id="theme_selector"
+                                    class="invert"
                                     {values}
                                     selected={selected.to_owned()}
                                     on_select={ontheme}
@@ -195,8 +196,8 @@ impl Component for StatusBar {
             },
         };
 
-        let oninput = ctx.link().callback({
-            move |input: InputEvent| {
+        let onchange = ctx.link().callback({
+            move |input: Event| {
                 let title = input
                     .target()
                     .unwrap()
@@ -238,7 +239,7 @@ impl Component for StatusBar {
                                 placeholder=" "
                                 value={ctx.props().presentation.get_title()}
                                 size="10"
-                                {oninput}
+                                {onchange}
                             />
                             <span id="status-bar-placeholder" />
                         </label>

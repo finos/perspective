@@ -296,6 +296,17 @@ export async function shadow_type(
 
                 triggerInputEvent(elem);
             }
+
+            if (is_incremental) {
+                if (elem instanceof HTMLElement) {
+                    const event = new Event("change", {
+                        bubbles: true,
+                        cancelable: true,
+                    });
+
+                    elem.dispatchEvent(event);
+                }
+            }
         },
         { content, path, is_incremental }
     );

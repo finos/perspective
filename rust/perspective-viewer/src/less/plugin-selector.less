@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@import "dom/scrollbar.less";
+
 :host {
     #settings_panel {
         #plugin_selector_container.open ~ * {
@@ -39,6 +41,7 @@
 
             .plugin-selector-options {
                 overflow-y: auto;
+                @include scrollbar;
             }
 
             &.open {

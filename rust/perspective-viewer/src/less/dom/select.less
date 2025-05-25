@@ -50,6 +50,11 @@
         background-position: right 2px center;
         background-repeat: no-repeat;
 
+        &.invert:focus-within,
+        &.invert:hover {
+            background-image: var(--select-arrow--hover--background-image);
+        }
+
         option {
             color: var(--icon--color, inherit);
             background: var(--plugin--background, transparent);

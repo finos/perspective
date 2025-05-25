@@ -141,6 +141,15 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
         await this.workspace!.restore(layout);
     }
 
+    async clear() {
+        await this.restore({
+            sizes: [],
+            master: { sizes: [] },
+            detail: { sizes: [] },
+            viewers: {},
+        });
+    }
+
     /**
      * Await all asynchronous tasks for all viewers in this workspace. This is
      * useful to make sure asynchonous side effects of synchronous methods calls
