@@ -75,7 +75,7 @@ pub struct PresentationHandle {
     pub settings_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub column_settings_updated: PubSub<JsValue>,
-    pub theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
+    pub theme_config_updated: PubSub<(Rc<Vec<String>>, Option<usize>)>,
     pub title_changed: PubSub<Option<String>>,
 }
 
@@ -173,7 +173,7 @@ impl Presentation {
     /// Get the available theme names from the browser environment by parsing
     /// readable stylesheets.  This method is memoized - the state can be
     /// flushed by calling `reset()`.
-    pub async fn get_available_themes(&self) -> ApiResult<Vec<String>> {
+    pub async fn get_available_themes(&self) -> ApiResult<Rc<Vec<String>>> {
         let mut data = self.0.theme_data.lock().await;
         if data.themes.is_none() {
             await_dom_loaded().await?;
@@ -181,7 +181,7 @@ impl Presentation {
             data.themes = Some(themes);
         }
 
-        Ok(data.themes.clone().unwrap())
+        Ok(data.themes.clone().unwrap().into())
     }
 
     /// Reset the state.  `styleSheets` will be re-parsed next time
@@ -202,7 +202,7 @@ impl Presentation {
         changed
     }
 
-    pub async fn get_selected_theme_config(&self) -> ApiResult<(Vec<String>, Option<usize>)> {
+    pub async fn get_selected_theme_config(&self) -> ApiResult<(Rc<Vec<String>>, Option<usize>)> {
         let themes = self.get_available_themes().await?;
         let name = self.0.viewer_elem.get_attribute("theme");
         let index = name
@@ -226,6 +226,13 @@ impl Presentation {
         } else {
             Ok(self.0.viewer_elem.remove_attribute("theme")?)
         }
+    }
+
+    pub async fn reset_theme(&self) -> ApiResult<()> {
+        let themes = self.get_available_themes().await?;
+        let default_theme = themes.first().map(|x| x.as_str());
+        self.set_theme_name(default_theme).await?;
+        Ok(())
     }
 
     /// Set the theme by name, or `None` for the default theme.

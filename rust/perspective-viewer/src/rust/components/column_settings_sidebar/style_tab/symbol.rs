@@ -122,7 +122,7 @@ impl yew::Component for SymbolStyle {
                     pairs={self.pairs.clone()}
                     row_dropdown={self.row_dropdown.clone()}
                     column_name={ctx.props().column_name.clone()}
-                    values={ctx.props().default_config.values.clone()}
+                    values={Rc::new(ctx.props().default_config.values.clone())}
                     {update_pairs}
                 />
             </>

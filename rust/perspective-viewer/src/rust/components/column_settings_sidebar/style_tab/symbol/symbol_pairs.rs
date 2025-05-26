@@ -29,7 +29,7 @@ pub struct PairsListProps {
     pub update_pairs: Callback<Vec<SymbolKVPair>>,
     pub id: Option<String>,
     pub row_dropdown: Rc<FilterDropDownElement>,
-    pub values: Vec<String>,
+    pub values: Rc<Vec<String>>,
     pub column_name: String,
 }
 
@@ -100,7 +100,7 @@ pub struct PairsListItemProps {
     pub pairs: Vec<SymbolKVPair>,
     pub update_pairs: Callback<Vec<SymbolKVPair>>,
     pub row_dropdown: Rc<FilterDropDownElement>,
-    pub values: Vec<String>,
+    pub values: Rc<Vec<String>>,
     pub focused: bool,
     pub set_focused_index: Callback<Option<usize>>,
     pub column_name: String,

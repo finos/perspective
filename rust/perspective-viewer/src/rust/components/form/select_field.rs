@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::fmt::{Debug, Display};
-use std::sync::Arc;
+use std::rc::Rc;
 
 use itertools::Itertools;
 use strum::IntoEnumIterator;
@@ -41,7 +41,7 @@ pub fn select_enum_field<T>(props: &SelectEnumFieldProps<T>) -> yew::Html
 where
     T: IntoEnumIterator + Debug + Display + Default + PartialEq + Clone + 'static,
 {
-    let values = T::iter().map(SelectItem::Option).collect_vec();
+    let values = yew::use_memo((), |_| T::iter().map(SelectItem::Option).collect_vec());
     let selected = props.current_value.clone().unwrap_or_default();
     let checked = selected != props.default_value.clone().unwrap_or_default();
     let reset_value = props.default_value.clone();
@@ -67,7 +67,7 @@ where
     pub label: String,
     pub current_value: Option<T>,
     pub default_value: T,
-    pub values: Arc<Vec<T>>,
+    pub values: Rc<Vec<T>>,
     pub on_change: Callback<Option<T>>,
 
     #[prop_or_default]
@@ -79,12 +79,9 @@ pub fn select_value_field<T>(props: &SelectValueFieldProps<T>) -> yew::Html
 where
     T: Display + PartialEq + Clone + 'static,
 {
-    let values = props
-        .values
-        .iter()
-        .cloned()
-        .map(SelectItem::Option)
-        .collect_vec();
+    let values = yew::use_memo(props.values.clone(), |values| {
+        values.iter().cloned().map(SelectItem::Option).collect_vec()
+    });
 
     let selected = props
         .current_value

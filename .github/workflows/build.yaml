@@ -358,11 +358,11 @@ jobs:
                   PACKAGE: "perspective-rs"
 
             - name: Package
-              if: ${{ !contains(matrix.os, 'windows') }}
-              run: cargo package --allow-dirty -p perspective -p perspective-viewer -p perspective-js -p perspective-client -p perspective-server -p perspective-python
+              if: ${{ !contains(matrix.os, 'windows') && steps.config-step.outputs.FULL_RUN }}
+              run: cargo package --no-verify --allow-dirty -p perspective -p perspective-viewer -p perspective-js -p perspective-client -p perspective-server -p perspective-python
 
             - uses: actions/upload-artifact@v4
-              if: ${{ !contains(matrix.os, 'windows') }}
+              if: ${{ !contains(matrix.os, 'windows') && steps.config-step.outputs.FULL_RUN }}
               with:
                   name: perspective-rust
                   path: rust/target/package/*.crate
@@ -795,7 +795,7 @@ jobs:
     #        `-'
     benchmark_python:
         needs: [build_python, build_js]
-        if: startsWith(github.ref, 'refs/tags/v') || github.ref_name == 'master'
+        if: startsWith(github.ref, 'refs/tags/v')
         runs-on: ${{ matrix.os }}
         strategy:
             fail-fast: false
@@ -855,7 +855,7 @@ jobs:
     # `--'                              '
     benchmark_js:
         needs: [build_js]
-        if: startsWith(github.ref, 'refs/tags/v') || github.ref_name == 'master'
+        if: startsWith(github.ref, 'refs/tags/v')
         strategy:
             matrix:
                 os: [ubuntu-22.04]
@@ -963,10 +963,12 @@ jobs:
                   name: perspective-python-sdist
 
             - uses: actions/download-artifact@v4
+              if: startsWith(github.ref, 'refs/tags/v')
               with:
                   name: perspective-js-benchmarks
 
             - uses: actions/download-artifact@v4
+              if: startsWith(github.ref, 'refs/tags/v')
               with:
                   name: perspective-python-benchmarks
 

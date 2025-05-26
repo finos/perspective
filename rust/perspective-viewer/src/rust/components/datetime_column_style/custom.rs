@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::sync::Arc;
+use std::rc::Rc;
 
 use yew::prelude::*;
 
@@ -143,9 +143,9 @@ impl Component for DatetimeStyleCustom {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let all_values = Arc::new(Vec::from(CustomDatetimeFormat::values()));
-        let number_values = Arc::new(Vec::from(CustomDatetimeFormat::values_1()));
-        let text_values = Arc::new(Vec::from(CustomDatetimeFormat::values_2()));
+        let all_values = Rc::new(Vec::from(CustomDatetimeFormat::values()));
+        let number_values = Rc::new(Vec::from(CustomDatetimeFormat::values_1()));
+        let text_values = Rc::new(Vec::from(CustomDatetimeFormat::values_2()));
         type SelectStrField = SelectValueField<&'static str>;
         html! {
             <>
@@ -210,7 +210,7 @@ impl Component for DatetimeStyleCustom {
                     />
                     <SelectStrField
                         label="hours"
-                        values={Arc::new(vec!["12 Hour", "24 Hour"])}
+                        values={Rc::new(vec!["12 Hour", "24 Hour"])}
                         default_value="12 Hour"
                         on_change={ctx.link().callback(|x: Option<_>| DatetimeStyleCustomMsg::Hour12(x != Some("24 Hour") ))}
                         current_value={if self.config.hour12 { "12 Hour" } else { "24 Hour" }}

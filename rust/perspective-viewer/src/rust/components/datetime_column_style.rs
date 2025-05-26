@@ -13,7 +13,8 @@
 mod custom;
 mod simple;
 
-use std::sync::{Arc, LazyLock};
+use std::rc::Rc;
+use std::sync::LazyLock;
 
 use derivative::Derivative;
 use perspective_js::json;
@@ -38,14 +39,16 @@ extern "C" {
     pub fn supported_values_of(s: &JsValue) -> js_sys::Array;
 }
 
-static ALL_TIMEZONES: LazyLock<Arc<Vec<String>>> = LazyLock::new(|| {
-    Arc::new(
-        supported_values_of(&JsValue::from("timeZone"))
-            .iter()
-            .map(|x| x.as_string().unwrap())
-            .collect(),
-    )
-});
+thread_local! {
+    static ALL_TIMEZONES: LazyLock<Rc<Vec<String>>> = LazyLock::new(|| {
+        Rc::new(
+            supported_values_of(&JsValue::from("timeZone"))
+                .iter()
+                .map(|x| x.as_string().unwrap())
+                .collect(),
+        )
+    });
+}
 
 static USER_TIMEZONE: LazyLock<String> = LazyLock::new(|| {
     js_sys::Reflect::get(
@@ -63,6 +66,7 @@ pub enum DatetimeColumnStyleMsg {
     TimezoneChanged(Option<String>),
     ColorModeChanged(Option<DatetimeColorMode>),
     ColorChanged(String),
+    ColorReset,
 }
 
 #[derive(Properties, Derivative)]
@@ -123,8 +127,10 @@ impl DatetimeColumnStyle {
 
         let color_props = props!(ColorProps {
             title: title.to_owned(),
+            on_color,
+            is_modified: color != self.default_config.color,
             color,
-            on_color
+            on_reset: ctx.link().callback(|_| DatetimeColumnStyleMsg::ColorReset)
         });
 
         if &self.config.datetime_color_mode == mode {
@@ -195,6 +201,11 @@ impl Component for DatetimeColumnStyle {
                 self.dispatch_config(ctx);
                 true
             },
+            DatetimeColumnStyleMsg::ColorReset => {
+                self.config.color = Some(self.default_config.color.clone());
+                self.dispatch_config(ctx);
+                true
+            },
         }
     }
 
@@ -227,7 +238,7 @@ impl Component for DatetimeColumnStyle {
                     if ctx.props().enable_time_config {
                         <SelectValueField<String>
                             label="timezone"
-                            values={ALL_TIMEZONES.clone()}
+                            values={ALL_TIMEZONES.with(|x| (*x).clone())}
                             default_value={(*USER_TIMEZONE).clone()}
                             on_change={ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged)}
                             current_value={self.config.date_format.time_zone().as_ref().unwrap_or(&*USER_TIMEZONE).clone()}

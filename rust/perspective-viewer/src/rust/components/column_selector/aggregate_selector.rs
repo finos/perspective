@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::collections::HashSet;
+use std::rc::Rc;
 
 use perspective_client::config::*;
 use perspective_client::utils::PerspectiveResultExt;
@@ -44,7 +45,7 @@ pub enum AggregateSelectorMsg {
 }
 
 pub struct AggregateSelector {
-    aggregates: Vec<SelectItem<Aggregate>>,
+    aggregates: Rc<Vec<SelectItem<Aggregate>>>,
     aggregate: Option<Aggregate>,
 }
 
@@ -54,11 +55,11 @@ impl Component for AggregateSelector {
 
     fn create(ctx: &Context<Self>) -> Self {
         let mut selector = Self {
-            aggregates: vec![],
+            aggregates: Rc::new(vec![]),
             aggregate: ctx.props().aggregate.clone(),
         };
 
-        selector.aggregates = selector.get_dropdown_aggregates(ctx);
+        selector.aggregates = Rc::new(selector.get_dropdown_aggregates(ctx));
         selector
     }
 
@@ -72,7 +73,7 @@ impl Component for AggregateSelector {
     }
 
     fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
-        self.aggregates = self.get_dropdown_aggregates(ctx);
+        self.aggregates = Rc::new(self.get_dropdown_aggregates(ctx));
         true
     }
 

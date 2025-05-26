@@ -336,6 +336,17 @@
             }
         }
 
+        #theme_icon {
+            margin-right: -32px;
+            height: 100%;
+            width: 28px;
+            z-index: 1;
+        }
+
+        #theme_icon.modified {
+            cursor: pointer;
+        }
+
         #theme {
             align-self: stretch;
             border-radius: 0px;
@@ -344,9 +355,15 @@
             }
 
             &:before {
+                margin: 0 6px 0 4px;
                 -webkit-mask-image: var(--theme-icon--mask-image);
                 mask-image: var(--theme-icon--mask-image);
             }
+        }
+
+        #theme_icon.modified:hover + #theme:before {
+            -webkit-mask-image: var(--close-icon--mask-image);
+            mask-image: var(--close-icon--mask-image);
         }
 
         #theme_selector {
@@ -382,7 +399,7 @@
             display: inline-flex;
             height: 100%;
             align-items: center;
-            cursor: pointer;
+
             &:focus-within,
             &:hover,
             &.modal-target {

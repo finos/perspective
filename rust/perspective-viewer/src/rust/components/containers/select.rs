@@ -12,6 +12,7 @@
 
 use std::borrow::{Borrow, Cow};
 use std::fmt::Display;
+use std::rc::Rc;
 
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
@@ -41,7 +42,7 @@ pub struct SelectProps<T>
 where
     T: Clone + Display + PartialEq + 'static,
 {
-    pub values: Vec<SelectItem<T>>,
+    pub values: Rc<Vec<SelectItem<T>>>,
     pub selected: T,
     pub on_select: Callback<T>,
 

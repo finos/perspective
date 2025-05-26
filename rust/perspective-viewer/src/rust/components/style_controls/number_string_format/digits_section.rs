@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::rc::Rc;
+
 use itertools::Itertools;
 use perspective_client::ColumnType;
 use yew::html;
@@ -51,15 +53,18 @@ impl CustomNumberFormat {
             .map(|val| RoundingIncrement::Custom(*val))
             .map(SelectItem::Option)
             .collect_vec();
-        let values = [vec![SelectItem::Option(RoundingIncrement::Auto)], values].concat();
+
+        let values = Rc::new([vec![SelectItem::Option(RoundingIncrement::Auto)], values].concat());
         let on_check = ctx
             .link()
             .callback(|_| CustomNumberFormatMsg::RoundingIncrement(RoundingIncrement::default()));
+
         let selected = self
             .config
             .rounding_increment
             .map(RoundingIncrement::Custom)
             .unwrap_or_default();
+
         html! {
             <div class="row">
                 <OptionalField
