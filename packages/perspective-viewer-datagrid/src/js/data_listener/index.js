@@ -82,15 +82,26 @@ export function createDataListener(viewer) {
             const path = this._column_paths[ipath];
             const path_parts = path.split("|");
             const column = columns[path] || new Array(y1 - y0).fill(null);
+            const agg_depth = Math.min(
+                regularTable[PRIVATE_PLUGIN_SYMBOL]?.[
+                    path_parts[this._config.split_by.length]
+                ]?.aggregate_depth || 0,
+                this._config.group_by.length
+            );
+
             data.push(
-                column.map((x) =>
-                    format_cell.call(
-                        this,
-                        path_parts[this._config.split_by.length],
-                        x,
-                        regularTable[PRIVATE_PLUGIN_SYMBOL]
-                    )
-                )
+                column.map((x, i) => {
+                    if (columns?.__ROW_PATH__?.[i]?.length < agg_depth) {
+                        return "";
+                    } else {
+                        return format_cell.call(
+                            this,
+                            path_parts[this._config.split_by.length],
+                            x,
+                            regularTable[PRIVATE_PLUGIN_SYMBOL]
+                        );
+                    }
+                })
             );
             metadata.push(column);
             if (is_settings_open) {

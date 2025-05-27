@@ -14,7 +14,7 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, PartialEq, Clone)]
 pub struct ColorRangeProps {
     pub id: String,
     pub pos_color: String,
@@ -22,6 +22,8 @@ pub struct ColorRangeProps {
     pub is_gradient: bool,
     pub on_pos_color: Callback<String>,
     pub on_neg_color: Callback<String>,
+    pub on_reset: Callback<()>,
+    pub is_modified: bool,
 }
 
 fn infer_fg(color: &str) -> &'static str {
@@ -37,68 +39,45 @@ fn infer_fg(color: &str) -> &'static str {
 
 #[function_component(ColorRangeSelector)]
 pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
-    let gradient = use_state_eq(|| {
-        (
-            props.pos_color.to_owned(),
-            props.neg_color.to_owned(),
-            false,
-        )
-    });
-
-    {
-        let gradient = gradient.clone();
-
-        use_effect_with(
-            (props.neg_color.clone(), props.pos_color.clone()),
-            move |(neg_color, pos_color)| {
-                let current_gradient = gradient.clone();
-                if &current_gradient.0 != pos_color || &current_gradient.1 != neg_color {
-                    gradient.set((pos_color.clone(), neg_color.clone(), true));
-                }
-                || ()
-            },
-        );
-    }
-
     let on_pos_color = use_callback(
-        (gradient.clone(), props.on_pos_color.clone()),
-        |event: InputEvent, (gradient, on_pos_color)| {
+        props.on_pos_color.clone(),
+        |event: InputEvent, on_pos_color| {
             let color = event
                 .target()
                 .unwrap()
                 .unchecked_into::<HtmlInputElement>()
                 .value();
-            gradient.set((color.clone(), gradient.1.to_owned(), true));
             on_pos_color.emit(color);
         },
     );
 
     let on_neg_color = use_callback(
-        (gradient.clone(), props.on_neg_color.clone()),
-        |event: InputEvent, (gradient, on_neg_color)| {
+        props.on_neg_color.clone(),
+        |event: InputEvent, on_neg_color| {
             let color = event
                 .target()
                 .unwrap()
                 .unchecked_into::<HtmlInputElement>()
                 .value();
-            gradient.set((gradient.0.to_owned(), color.clone(), true));
             on_neg_color.emit(color);
         },
     );
 
-    let fg_pos = infer_fg(&gradient.0);
-    let fg_neg = infer_fg(&gradient.1);
+    let fg_pos = infer_fg(&props.pos_color);
+    let fg_neg = infer_fg(&props.neg_color);
     let style = if props.is_gradient {
         format!(
             "background:linear-gradient(to right, {} 0%, transparent 50%, {} 100%)",
-            gradient.0, gradient.1
+            props.pos_color, props.neg_color
         )
     } else {
         format!(
             "background:linear-gradient(to right, {} 0%, {} 50%, {} 50%,  {} 100%)",
-            gradient.0, gradient.0, gradient.1, gradient.1
+            props.pos_color, props.pos_color, props.neg_color, props.neg_color
         )
     };
+
+    let on_reset = use_callback(props.clone(), |_: MouseEvent, deps| deps.on_reset.emit(()));
 
     html! {
         <>
@@ -109,7 +88,8 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
                         id={format!("{}-pos", props.id)}
                         class="parameter pos-color-param"
                         type="color"
-                        value={gradient.0.to_owned()}
+                        value={props.pos_color.to_owned()}
+                        data-value={props.pos_color.to_owned()}
                         oninput={on_pos_color}
                     />
                     <label for={format!("{}-pos", props.id)} class="color-label">{ "+" }</label>
@@ -120,18 +100,14 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
                         id={format!("{}-neg", props.id)}
                         class="parameter neg-color-param"
                         type="color"
-                        value={gradient.1.to_owned()}
+                        value={props.neg_color.to_owned()}
+                        data-value={props.neg_color.to_owned()}
                         oninput={on_neg_color}
                     />
                     <label for={format!("{}-neg", props.id)} class="color-label">{ "-" }</label>
                 </div>
-                if gradient.2 {
-                    <span class="reset-default-style" // onclick={props.on_check.clone()}
-                    // id={format!("{}-checkbox", props.label.replace(' ', "-"))}
-                    />
-                } else {
-                    <span class="reset-default-style-disabled" // id={format!("{}-checkbox", props.label.replace(' ', "-"))}
-                    />
+                if props.is_modified { <span class="reset-default-style" onclick={on_reset} /> } else {
+                    <span class="reset-default-style-disabled" />
                 }
             </div>
         </>

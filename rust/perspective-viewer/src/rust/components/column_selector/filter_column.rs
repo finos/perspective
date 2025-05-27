@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::collections::HashSet;
+use std::rc::Rc;
 
 use chrono::{Datelike, NaiveDate, TimeZone, Utc};
 use perspective_client::ColumnType;
@@ -36,6 +37,7 @@ use crate::*;
 pub struct FilterColumn {
     input: String,
     input_ref: NodeRef,
+    filter_ops: Rc<Vec<SelectItem<String>>>,
 }
 
 #[derive(Debug)]
@@ -234,11 +236,28 @@ impl Component for FilterColumn {
             .get_filter_input()
             .unwrap_or_else(|| "".to_owned());
         let input_ref = NodeRef::default();
-        if ctx.props().get_filter_type() == Some(ColumnType::Boolean) {
+        let col_type = ctx.props().get_filter_type();
+        if col_type == Some(ColumnType::Boolean) {
             ctx.props().update_filter_input(input.clone());
         }
 
-        Self { input, input_ref }
+        let filter_ops = Rc::new(
+            maybe! {
+                Some(ctx
+                    .props()
+                    .get_filter_ops(col_type?)?
+                    .into_iter()
+                    .map(SelectItem::Option)
+                    .collect::<Vec<_>>())
+            }
+            .unwrap_or_default(),
+        );
+
+        Self {
+            input,
+            input_ref,
+            filter_ops,
+        }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: FilterColumnMsg) -> bool {
@@ -306,13 +325,31 @@ impl Component for FilterColumn {
         }
     }
 
-    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, old: &Self::Properties) -> bool {
+        let col_type = ctx.props().get_filter_type();
+        let old_col_type = old.get_filter_type();
+        let mut changed = false;
+        if col_type != old_col_type {
+            changed = true;
+            self.filter_ops = Rc::new(
+                maybe! {
+                    Some(ctx
+                        .props()
+                        .get_filter_ops(col_type?)?
+                        .into_iter()
+                        .map(SelectItem::Option)
+                        .collect::<Vec<_>>())
+                }
+                .unwrap_or_default(),
+            );
+        };
+
         if let Some(input) = ctx.props().get_filter_input() {
             self.input = input;
-            true
-        } else {
-            false
+            changed = true
         }
+
+        changed
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
@@ -453,16 +490,6 @@ impl Component for FilterColumn {
             },
         };
 
-        let filter_ops = maybe! {
-            Some(ctx
-                .props()
-                .get_filter_ops(col_type?)?
-                .into_iter()
-                .map(SelectItem::Option)
-                .collect::<Vec<_>>())
-        }
-        .unwrap_or_default();
-
         let final_col_type = col_type.expect("Unknown column");
 
         html! {
@@ -480,7 +507,7 @@ impl Component for FilterColumn {
                     <FilterOpSelector
                         class="filterop-selector"
                         is_autosize=true
-                        values={filter_ops}
+                        values={self.filter_ops.clone()}
                         selected={filter.op().to_string()}
                         on_select={select}
                     />

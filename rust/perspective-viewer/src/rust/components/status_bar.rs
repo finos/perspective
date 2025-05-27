@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::rc::Rc;
+
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
@@ -54,8 +56,9 @@ pub enum StatusBarMsg {
     Export,
     Copy,
     Noop,
-    SetThemeConfig((Vec<String>, Option<usize>)),
+    SetThemeConfig((Rc<Vec<String>>, Option<usize>)),
     SetTheme(String),
+    ResetTheme,
     // SetError(Option<String>),
     // TableStatsChanged,
     // SetIsUpdating(bool),
@@ -66,7 +69,7 @@ pub enum StatusBarMsg {
 pub struct StatusBar {
     is_updating: i32,
     theme: Option<String>,
-    themes: Vec<String>,
+    themes: Rc<Vec<String>>,
     export_ref: NodeRef,
     copy_ref: NodeRef,
     _sub: [Subscription; 2],
@@ -99,7 +102,7 @@ impl Component for StatusBar {
         Self {
             _sub,
             theme: None,
-            themes: vec![],
+            themes: vec![].into(),
             copy_ref: NodeRef::default(),
             export_ref: NodeRef::default(),
             is_updating: 0,
@@ -111,6 +114,20 @@ impl Component for StatusBar {
             StatusBarMsg::Reset(all) => {
                 ctx.props().on_reset.emit(all);
                 false
+            },
+            StatusBarMsg::ResetTheme => {
+                clone!(
+                    ctx.props().renderer,
+                    ctx.props().session,
+                    ctx.props().presentation
+                );
+
+                ApiFuture::spawn(async move {
+                    presentation.reset_theme().await?;
+                    let view = session.get_view().into_apierror()?;
+                    renderer.restyle_all(&view).await
+                });
+                true
             },
             StatusBarMsg::SetThemeConfig((themes, index)) => {
                 let new_theme = index.and_then(|x| themes.get(x)).cloned();
@@ -167,34 +184,6 @@ impl Component for StatusBar {
 
         let export = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Export);
         let copy = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Copy);
-        let theme_button = match &self.theme {
-            None => html! {},
-            Some(selected) => {
-                let ontheme = ctx.link().callback(StatusBarMsg::SetTheme);
-                let values = self
-                    .themes
-                    .iter()
-                    .cloned()
-                    .map(SelectItem::Option)
-                    .collect::<Vec<_>>();
-
-                html! {
-                    if values.len() > 1 {
-                        <span class="hover-target">
-                            <span id="theme" class="button">
-                                <Select<String>
-                                    id="theme_selector"
-                                    class="invert"
-                                    {values}
-                                    selected={selected.to_owned()}
-                                    on_select={ontheme}
-                                />
-                            </span>
-                        </span>
-                    }
-                }
-            },
-        };
 
         let onchange = ctx.link().callback({
             move |input: Event| {
@@ -248,7 +237,12 @@ impl Component for StatusBar {
                     <div id="spacer" />
                     if is_menu {
                         <div id="menu-bar" class="section">
-                            { theme_button }
+                            <ThemeSelector
+                                theme={self.theme.clone()}
+                                themes={self.themes.clone()}
+                                on_change={ctx.link().callback(StatusBarMsg::SetTheme)}
+                                on_reset={ctx.link().callback(|_| StatusBarMsg::ResetTheme)}
+                            />
                             <div id="plugin-settings"><slot name="plugin-settings" /></div>
                             <span class="hover-target">
                                 <span id="reset" class="button" onmousedown={reset}><span /></span>
@@ -264,5 +258,57 @@ impl Component for StatusBar {
                 </div>
             </>
         }
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct ThemeSelectorProps {
+    pub theme: Option<String>,
+    pub themes: Rc<Vec<String>>,
+    pub on_reset: Callback<()>,
+    pub on_change: Callback<String>,
+}
+
+#[function_component]
+pub fn ThemeSelector(props: &ThemeSelectorProps) -> Html {
+    let is_first = props
+        .theme
+        .as_ref()
+        .and_then(|x| props.themes.first().map(|y| y == x))
+        .unwrap_or_default();
+
+    let values = use_memo(props.themes.clone(), |themes| {
+        themes
+            .iter()
+            .cloned()
+            .map(SelectItem::Option)
+            .collect::<Vec<_>>()
+    });
+
+    match &props.theme {
+        None => html! {},
+        Some(selected) => {
+            html! {
+                if values.len() > 1 {
+                    <span class="hover-target">
+                        <div
+                            id="theme_icon"
+                            class={if is_first {""} else {"modified"}}
+                            tabindex="0"
+                            onclick={props.on_reset.reform(|_| ())}
+                        />
+                        <span id="theme" class="button">
+                            <Select<String>
+                                id="theme_selector"
+                                class="invert"
+                                {values}
+                                selected={selected.to_owned()}
+                                on_select={props.on_change.clone()}
+                            />
+                        </span>
+                    </span>
+                }
+            }
+        },
     }
 }

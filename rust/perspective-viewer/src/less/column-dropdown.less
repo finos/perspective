@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+@import "dom/scrollbar.less";
+
 @mixin icon {
     background-repeat: no-repeat;
     background-color: var(--icon--color);
@@ -35,7 +37,8 @@
     max-width: 300px;
     overflow: hidden;
     max-height: 600px;
-    overflow: scroll;
+    overflow: auto;
+    @include scrollbar;
 
     display: flex;
     flex-direction: column;

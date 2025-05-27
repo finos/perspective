@@ -44,7 +44,10 @@ export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
         const [hex, r, g, b, _gradhex] = bg_tuple;
 
         td.style.position = "";
-        if (plugin?.number_bg_mode === "color") {
+        if (metadata._is_hidden_by_aggregate_depth) {
+            td.style.animation = "";
+            td.style.backgroundColor = "";
+        } else if (plugin?.number_bg_mode === "color") {
             td.style.animation = "";
             td.style.backgroundColor = hex;
         } else if (plugin?.number_bg_mode === "gradient") {
@@ -99,7 +102,10 @@ export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
         }
     })();
 
-    if (plugin?.number_fg_mode === "disabled") {
+    if (metadata._is_hidden_by_aggregate_depth) {
+        td.style.backgroundColor = "";
+        td.style.color = "";
+    } else if (plugin?.number_fg_mode === "disabled") {
         if (plugin?.number_bg_mode === "color") {
             const source = this._plugin_background;
             const foreground = infer_foreground_from_background(

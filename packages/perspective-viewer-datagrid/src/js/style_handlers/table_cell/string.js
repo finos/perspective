@@ -26,7 +26,13 @@ export function cell_style_string(plugin, td, metadata) {
         }
     })();
 
-    if (plugin?.string_color_mode === "foreground" && metadata.user !== null) {
+    if (metadata._is_hidden_by_aggregate_depth) {
+        td.style.backgroundColor = "";
+        td.style.color = "";
+    } else if (
+        plugin?.string_color_mode === "foreground" &&
+        metadata.user !== null
+    ) {
         td.style.color = hex;
         td.style.backgroundColor = "";
         if (plugin?.format === "link") {

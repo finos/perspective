@@ -26,6 +26,7 @@ pub enum StringColumnStyleMsg {
     FormatChanged(Option<FormatMode>),
     ColorModeChanged(Option<StringColorMode>),
     ColorChanged(String),
+    ColorReset,
 }
 
 #[derive(Properties)]
@@ -79,8 +80,10 @@ impl StringColumnStyle {
 
         let color_props = props!(ColorProps {
             title: title.to_owned(),
+            on_color,
+            is_modified: color != self.default_config.color,
             color,
-            on_color
+            on_reset: ctx.link().callback(|_| StringColumnStyleMsg::ColorReset)
         });
 
         if &self.config.string_color_mode == mode {
@@ -133,7 +136,12 @@ impl Component for StringColumnStyle {
             StringColumnStyleMsg::ColorChanged(color) => {
                 self.config.color = Some(color);
                 self.dispatch_config(ctx);
-                false
+                true
+            },
+            StringColumnStyleMsg::ColorReset => {
+                self.config.color = Some(self.default_config.color.clone());
+                self.dispatch_config(ctx);
+                true
             },
         }
     }

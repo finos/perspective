@@ -365,6 +365,7 @@ impl Component for ColumnSettingsSidebar {
             presentation: ctx.props().presentation.clone(),
             ty: self.maybe_ty,
             column_name: self.column_name.clone(),
+            group_by_depth: ctx.props().session.get_view_config().group_by.len() as u32,
         };
 
         let tab_children = self.tabs.iter().map(|tab| match tab {

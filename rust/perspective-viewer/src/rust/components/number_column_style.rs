@@ -397,6 +397,8 @@ impl NumberColumnStyle {
             .link()
             .callback(move |x| NumberColumnStyleMsg::NegColorChanged(side, x));
 
+        let default_config = self.default_config.clone();
+
         props!(ColorRangeProps {
             id: id.to_string(),
             is_gradient,
@@ -413,7 +415,37 @@ impl NumberColumnStyle {
             }
             .to_owned(),
             on_pos_color,
-            on_neg_color
+            on_neg_color,
+            on_reset: ctx.link().batch_callback(move |_| if side == Fg {
+                vec![
+                    NumberColumnStyleMsg::PosColorChanged(
+                        side,
+                        default_config.pos_fg_color.clone(),
+                    ),
+                    NumberColumnStyleMsg::NegColorChanged(
+                        side,
+                        default_config.neg_fg_color.clone(),
+                    ),
+                ]
+            } else {
+                vec![
+                    NumberColumnStyleMsg::PosColorChanged(
+                        side,
+                        default_config.pos_bg_color.clone(),
+                    ),
+                    NumberColumnStyleMsg::NegColorChanged(
+                        side,
+                        default_config.neg_bg_color.clone(),
+                    ),
+                ]
+            }),
+            is_modified: if side == Fg {
+                self.pos_fg_color != self.default_config.pos_fg_color
+                    || self.neg_fg_color != self.default_config.neg_fg_color
+            } else {
+                self.pos_bg_color != self.default_config.pos_bg_color
+                    || self.neg_bg_color != self.default_config.neg_bg_color
+            },
         })
     }
 

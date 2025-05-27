@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::rc::Rc;
+
 use itertools::Itertools;
 use yew::{Callback, Html, Properties, function_component, html};
 
@@ -19,18 +21,15 @@ use crate::components::containers::select::{Select, SelectItem};
 pub struct SymbolSelectorProps {
     pub index: usize,
     pub selected_value: Option<String>,
-    pub values: Vec<String>,
+    pub values: Rc<Vec<String>>,
     pub callback: Callback<String>,
 }
 
 #[function_component(SymbolSelector)]
 pub fn symbol_selector(p: &SymbolSelectorProps) -> Html {
-    let values = p
-        .values
-        .clone()
-        .into_iter()
-        .map(SelectItem::Option)
-        .collect_vec();
+    let values = yew::use_memo(p.values.clone(), |values| {
+        values.iter().cloned().map(SelectItem::Option).collect_vec()
+    });
 
     let selected = p
         .values
