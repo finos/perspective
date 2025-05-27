@@ -33,12 +33,25 @@ export function table_cell_style_listener(regularTable, viewer) {
     for (const tr of regularTable.children[0].children[1].children) {
         for (const td of tr.children) {
             const metadata = regularTable.getMeta(td);
+
             const column_name =
                 metadata.column_header?.[this._config.split_by.length];
 
             let type = get_psp_type.call(this, metadata);
             const plugin = plugins[column_name];
             const is_numeric = type === "integer" || type === "float";
+
+            // Check if aggregate depth hides this cell
+            metadata._is_hidden_by_aggregate_depth = ((x) =>
+                x === 0
+                    ? false
+                    : x - 1 <
+                      Math.min(
+                          this._config.group_by.length,
+                          plugin?.aggregate_depth
+                      ))(
+                metadata.row_header?.filter((x) => x !== undefined)?.length
+            );
 
             if (is_numeric) {
                 cell_style_numeric.call(

@@ -88,7 +88,7 @@ export function make_client(
 const CONTENT_TYPES: Record<string, string> = {
     ".js": "text/javascript",
     ".mjs": "text/javascript",
-    ".css": "text/css",
+    ".css": "text/css; charset=utf-8",
     ".json": "application/json",
     ".arrow": "arraybuffer",
     ".feather": "arraybuffer",

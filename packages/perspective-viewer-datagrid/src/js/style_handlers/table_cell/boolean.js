@@ -11,13 +11,17 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 export function cell_style_boolean(plugin, td, metadata) {
-    const [hex] =
-        metadata.user === true
-            ? this._pos_fg_color
-            : metadata.user === false
-            ? this._neg_fg_color
-            : ["", 0, 0, 0, ""];
-
-    td.style.backgroundColor = "";
-    td.style.color = hex;
+    if (metadata._is_hidden_by_aggregate_depth) {
+        td.style.backgroundColor = "";
+        td.style.color = "";
+    } else {
+        const [hex] =
+            metadata.user === true
+                ? this._pos_fg_color
+                : metadata.user === false
+                ? this._neg_fg_color
+                : ["", 0, 0, 0, ""];
+        td.style.backgroundColor = "";
+        td.style.color = hex;
+    }
 }

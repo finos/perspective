@@ -64,6 +64,7 @@ impl OpenColumnSettings {
 }
 
 pub type ColumnConfigMap = HashMap<String, ColumnConfigValues>;
+
 pub struct PresentationHandle {
     viewer_elem: HtmlElement,
     theme_data: Mutex<ThemeData>,

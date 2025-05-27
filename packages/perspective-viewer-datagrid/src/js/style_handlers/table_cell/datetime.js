@@ -27,7 +27,10 @@ export function cell_style_datetime(plugin, td, metadata) {
         }
     })();
 
-    if (
+    if (metadata._is_hidden_by_aggregate_depth) {
+        td.style.backgroundColor = "";
+        td.style.color = "";
+    } else if (
         plugin?.datetime_color_mode === "foreground" &&
         metadata.user !== null
     ) {

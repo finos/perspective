@@ -22,6 +22,10 @@ use super::{
     StringColumnStyleDefaultConfig,
 };
 
+fn is_zero(x: &u32) -> bool {
+    x == &0
+}
+
 /// The value de/serialized and stored in the viewer config.
 /// Also passed to the plugin via `plugin.save()`.
 #[skip_serializing_none]
@@ -43,6 +47,10 @@ pub struct ColumnConfigValues {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub number_format: Option<CustomNumberFormatConfig>,
+
+    #[serde(default)]
+    #[serde(skip_serializing_if = "is_zero")]
+    pub aggregate_depth: u32,
 }
 
 #[derive(Debug)]
@@ -52,6 +60,7 @@ pub enum ColumnConfigValueUpdate {
     DatagridDatetimeStyle(Option<DatetimeColumnStyleConfig>),
     Symbols(Option<HashMap<String, String>>),
     CustomNumberStringFormat(Option<CustomNumberFormatConfig>),
+    AggregateDepth(u32),
 }
 
 impl ColumnConfigValues {
@@ -75,6 +84,10 @@ impl ColumnConfigValues {
             },
             ColumnConfigValueUpdate::CustomNumberStringFormat(update) => Self {
                 number_format: update.filter(|x| x != &CustomNumberFormatConfig::default()),
+                ..self
+            },
+            ColumnConfigValueUpdate::AggregateDepth(aggregate_depth) => Self {
+                aggregate_depth,
                 ..self
             },
         }

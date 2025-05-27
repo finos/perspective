@@ -16,11 +16,12 @@ mod symbol;
 use itertools::Itertools;
 use perspective_client::{ColumnType, clone};
 use perspective_js::utils::*;
-use yew::{Html, Properties, function_component, html};
+use yew::{Callback, Html, Properties, function_component, html};
 
 use crate::components::column_settings_sidebar::style_tab::stub::Stub;
 use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
+use crate::components::form::number_field::NumberField;
 use crate::components::number_column_style::NumberColumnStyle;
 use crate::components::string_column_style::StringColumnStyle;
 use crate::components::style_controls::CustomNumberFormat;
@@ -41,6 +42,7 @@ pub struct StyleTabProps {
 
     pub ty: Option<ColumnType>,
     pub column_name: String,
+    pub group_by_depth: u32,
 }
 derive_model!(Session, Renderer, Presentation for StyleTabProps);
 
@@ -71,11 +73,24 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
     let on_change = yew::use_callback(props.clone(), |config, props| {
         props.send_plugin_config(config);
     });
+
     let config = props.presentation.get_columns_config(&props.column_name);
     let components = props
         .get_column_style_control_options(&props.column_name)
         .map(|opts| {
             let mut components = vec![];
+
+            if !props.session.get_view_config().group_by.is_empty() {
+                let aggregate_depth = config.as_ref().map(|x| x.aggregate_depth as f64);
+                components.push(("Aggregate Depth", html! {
+                    <AggregateDepthSelector
+                        group_by_depth={props.group_by_depth}
+                        on_change={on_change.clone()}
+                        column_name={props.column_name.to_owned()}
+                        value={aggregate_depth.unwrap_or_default() as u32}
+                    />
+                }));
+            }
 
             if let Some(default_config) = opts.datagrid_number_style {
                 let config = config
@@ -144,7 +159,7 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
                 components.push(("Number Formatting", html! {
                     <CustomNumberFormat
                         {restored_config}
-                        {on_change}
+                        on_change={on_change.clone()}
                         view_type={props.ty.unwrap()}
                         column_name={props.column_name.clone()}
                     />
@@ -173,5 +188,43 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
         <div id="style-tab">
             <div id="column-style-container" class="tab-section">{ components }</div>
         </div>
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct AggregateDepthSelectorProps {
+    pub on_change: Callback<ColumnConfigValueUpdate>,
+    pub value: u32,
+    pub group_by_depth: u32,
+    pub column_name: String,
+}
+
+#[function_component]
+fn AggregateDepthSelector(props: &AggregateDepthSelectorProps) -> Html {
+    let state = yew::use_state_eq(|| 0);
+    yew::use_effect_with((props.column_name.to_owned(), props.group_by_depth), {
+        clone!(state, props.value);
+        move |deps| state.set(std::cmp::min(deps.1, value))
+    });
+
+    let on_change = yew::use_callback(
+        (state.setter(), props.on_change.clone()),
+        |x: Option<f64>, deps| {
+            deps.0.set(x.unwrap_or_default() as u32);
+            deps.1.emit(ColumnConfigValueUpdate::AggregateDepth(
+                x.unwrap_or_default() as u32,
+            ))
+        },
+    );
+
+    html! {
+        <NumberField
+            label="aggregate-depth"
+            {on_change}
+            min=0.0
+            max={props.group_by_depth as f64}
+            default=0.0
+            current_value={*state as f64}
+        />
     }
 }
