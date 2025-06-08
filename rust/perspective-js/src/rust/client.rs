@@ -26,9 +26,9 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::{JsFuture, future_to_promise};
 
-use crate::TableDataExt;
 pub use crate::table::*;
 use crate::utils::{ApiError, ApiResult, JsValueSerdeExt, LocalPollLoop};
+use crate::{TableDataExt, apierror};
 
 #[wasm_bindgen]
 extern "C" {
@@ -71,7 +71,6 @@ impl ProxySession {
         self.0.handle_request(&slice).await?;
         Ok(())
     }
-
 
     pub async fn close(self) {
         self.0.close().await;
@@ -221,14 +220,10 @@ impl Client {
 
     #[doc(hidden)]
     #[wasm_bindgen]
-    pub async fn handle_error(
-        &self,
-        error: Option<String>,
-        reconnect: Option<Function>,
-    ) -> ApiResult<()> {
+    pub async fn handle_error(&self, error: String, reconnect: Option<Function>) -> ApiResult<()> {
         self.client
             .handle_error(
-                error,
+                ClientError::Unknown(error),
                 reconnect.map(|reconnect| {
                     let reconnect =
                         JsReconnect::from(move |()| match reconnect.call0(&JsValue::UNDEFINED) {
@@ -262,7 +257,7 @@ impl Client {
     #[wasm_bindgen]
     pub async fn on_error(&self, callback: Function) -> ApiResult<u32> {
         let callback = JsReconnect::from(
-            move |(message, reconnect): (Option<String>, Option<ReconnectCallback>)| {
+            move |(message, reconnect): (ClientError, Option<ReconnectCallback>)| {
                 let cl: Closure<dyn Fn() -> js_sys::Promise> = Closure::new(move || {
                     let reconnect = reconnect.clone();
                     future_to_promise(async move {
@@ -276,7 +271,7 @@ impl Client {
 
                 if let Err(e) = callback.call2(
                     &JsValue::UNDEFINED,
-                    &JsValue::from(message),
+                    &JsValue::from(apierror!(ClientError(message))),
                     &cl.into_js_value(),
                 ) {
                     tracing::warn!("{:?}", e);

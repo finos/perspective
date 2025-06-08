@@ -21,7 +21,7 @@ use ::perspective_js::{Table, View};
 use futures::future::join;
 use js_sys::*;
 use perspective_client::config::ViewConfigUpdate;
-use perspective_js::JsViewWindow;
+use perspective_js::{JsViewWindow, apierror};
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
@@ -178,7 +178,9 @@ impl PerspectiveViewerElement {
         ApiFuture::new(async move {
             let task = async {
                 update_task?;
-                let jstable = JsFuture::from(promise).await?;
+                let jstable = JsFuture::from(promise)
+                    .await
+                    .map_err(|x| apierror!(TableError(x)))?;
 
                 if let Some(table) =
                     wasm_bindgen_derive::try_from_js_option::<perspective_js::Table>(jstable)?
@@ -215,8 +217,8 @@ impl PerspectiveViewerElement {
             renderer.set_throttle(None);
             let (draw, delete) = join(renderer.draw(task), delete_task).await;
             let result = draw.and(delete);
-            if let Err(e) = result.clone() {
-                session.set_error(e.to_string()).await?;
+            if let Err(e) = &result {
+                session.set_error(false, e.clone()).await?;
             }
 
             result
@@ -411,9 +413,16 @@ impl PerspectiveViewerElement {
                     PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
                 });
 
-            this.restore_and_render(decoded_update, async move { Ok(result.await?) })
-                .await?;
-            Ok(())
+            let task = this
+                .restore_and_render(decoded_update, async move { Ok(result.await?) })
+                .await;
+
+            if let Err(e) = task {
+                this.session().set_error(false, e.clone()).await?;
+                Err(e)
+            } else {
+                Ok(())
+            }
         })
     }
 

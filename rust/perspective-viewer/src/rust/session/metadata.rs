@@ -16,6 +16,7 @@ use std::ops::{Deref, DerefMut};
 
 use perspective_client::ColumnType;
 use perspective_client::config::*;
+use perspective_js::apierror;
 
 use crate::components::viewer::ColumnLocator;
 use crate::*;
@@ -87,7 +88,9 @@ impl SessionMetadata {
         valid_recs: &perspective_client::ValidateExpressionsData,
     ) -> ApiResult<HashSet<String>> {
         if !valid_recs.errors.is_empty() {
-            return Err("Expressions invalid".into());
+            return Err(apierror!(InvalidViewerConfigExpressionsError(
+                valid_recs.clone().into(),
+            )));
         }
 
         let mut edited = self

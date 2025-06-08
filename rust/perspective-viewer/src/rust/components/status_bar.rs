@@ -205,7 +205,8 @@ impl Component for StatusBar {
 
         let is_menu = ctx.props().session.has_table()
             && (ctx.props().presentation.is_settings_open()
-                || ctx.props().presentation.get_title().is_some());
+                || (ctx.props().presentation.get_title().is_some()
+                    && !ctx.props().session.is_errored()));
 
         if !ctx.props().session.has_table() {
             is_updating_class_name.push("updating");

@@ -212,12 +212,46 @@
         }
 
         .error-dialog {
+            position: absolute;
+            z-index: 1;
+            width: 100%;
+            flex-direction: column;
+            max-height: 300px;
+            top: 0;
+            left: 0;
+            padding: 0px 0px 0px 50px;
             display: none;
+            white-space: pre-wrap;
+            color: var(--plugin--background);
+            background: var(--icon--color);
+            border-radius: var(--status-bar--border-radius);
+        }
+
+        .error-dialog-message {
+            align-items: center;
+            display: flex;
+            padding-right: 17px;
+            height: var(--status-bar--height, 48px);
+            min-height: var(--status-bar--height, 48px);
+        }
+
+        .error-dialog-stack {
+            font-size: 10px;
+            padding-right: 17px;
+            color: var(--inactive--color);
+            overflow-y: auto;
+            padding-bottom: 24px;
+        }
+
+        .section:hover .error-dialog {
+            display: flex;
         }
 
         div#status_reconnect {
+            z-index: 2;
             display: flex;
             align-items: center;
+            border-radius: var(--status-bar--border-radius);
             height: var(--status-bar--height, 48px);
             &.errored {
                 cursor: pointer;

@@ -24,7 +24,8 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use perspective_client::config::*;
-use perspective_client::{ReconnectCallback, View, ViewWindow};
+use perspective_client::{ClientError, ReconnectCallback, View, ViewWindow};
+use perspective_js::apierror;
 use perspective_js::utils::*;
 use wasm_bindgen::prelude::*;
 use yew::html::ImplicitClone;
@@ -55,7 +56,7 @@ pub struct SessionHandle {
     pub view_created: PubSub<()>,
     pub view_config_changed: PubSub<()>,
     pub stats_changed: PubSub<Option<ViewStats>>,
-    pub table_errored: PubSub<Option<String>>,
+    pub table_errored: PubSub<ApiError>,
 }
 
 /// Mutable state for `Session`.
@@ -72,8 +73,8 @@ pub struct SessionData {
     error: Option<TableErrorState>,
 }
 
-#[derive(Clone, Default)]
-pub struct TableErrorState(Option<String>, Option<ReconnectCallback>);
+#[derive(Clone)]
+pub struct TableErrorState(ApiError, Option<ReconnectCallback>);
 
 impl Deref for Session {
     type Target = SessionHandle;
@@ -124,7 +125,11 @@ impl Session {
         let view = self.0.borrow_mut().view_sub.take();
         self.borrow_mut().view_sub = None;
         self.borrow_mut().config.reset(reset_expressions);
-        view.delete()
+        let err = self.get_error();
+        async move {
+            let res = view.delete().await;
+            if let Some(err) = err { Err(err) } else { res }
+        }
     }
 
     /// Reset this (presumably shared) `Session` to its initial state, returning
@@ -158,18 +163,17 @@ impl Session {
                 let client = table.get_client();
                 let set_error = self.table_errored.as_boxfn();
                 let session = self.clone();
-                let poll_loop =
-                    LocalPollLoop::new(move |(message, reconnect): (Option<String>, _)| {
-                        set_error(message.clone());
-                        session.borrow_mut().error = Some(TableErrorState(message, reconnect));
-                        Ok(JsValue::UNDEFINED)
-                    });
+                let poll_loop = LocalPollLoop::new(move |(message, reconnect): (ApiError, _)| {
+                    set_error(message.clone());
+                    session.borrow_mut().error = Some(TableErrorState(message, reconnect));
+                    Ok(JsValue::UNDEFINED)
+                });
 
                 let _callback_id = client
-                    .on_error(Box::new(move |message, reconnect| {
+                    .on_error(Box::new(move |message: ClientError, reconnect| {
                         let poll_loop = poll_loop.clone();
                         async move {
-                            poll_loop.poll((message, reconnect)).await;
+                            poll_loop.poll((message.into(), reconnect)).await;
                             Ok(())
                         }
                     }))
@@ -182,21 +186,38 @@ impl Session {
                 self.table_loaded.emit(());
                 Ok(JsValue::UNDEFINED)
             },
-            Err(err) => self
-                .set_error(err.to_string())
-                .await
-                .map(|_| JsValue::UNDEFINED),
+            Err(err) => self.set_error(false, err).await.map(|_| JsValue::UNDEFINED),
         }
     }
 
-    pub async fn set_error(&self, err: String) -> ApiResult<()> {
-        self.borrow_mut().error = Some(TableErrorState(Some(err.clone()), None));
-        self.table_errored.emit(Some(err.clone()));
+    pub async fn set_error(&self, reset_table: bool, err: ApiError) -> ApiResult<()> {
+        let session = self.clone();
+        let poll_loop = LocalPollLoop::new(move |()| {
+            session.invalidate();
+            ApiFuture::spawn(session.reset(true));
+            Ok(JsValue::UNDEFINED)
+        });
+
+        self.borrow_mut().error = Some(TableErrorState(
+            err.clone(),
+            Some(Arc::new(move || {
+                clone!(poll_loop);
+                Box::pin(async move {
+                    poll_loop.poll(()).await;
+                    Ok(())
+                })
+            })),
+        ));
+
+        self.table_errored.emit(err.clone());
         let sub = self.borrow_mut().view_sub.take();
-        self.borrow_mut().metadata = SessionMetadata::default();
-        self.borrow_mut().table = None;
+        if reset_table {
+            self.borrow_mut().metadata = SessionMetadata::default();
+            self.borrow_mut().table = None;
+        }
+
         sub.delete().await?;
-        Err(err.into())
+        Err(err)
     }
 
     pub fn set_pause(&self, pause: bool) -> bool {
@@ -231,8 +252,12 @@ impl Session {
         Some(perspective_js::View::from(view).into())
     }
 
-    pub fn get_error(&self) -> Option<String> {
-        self.borrow().error.as_ref().and_then(|x| x.0.clone())
+    pub fn is_errored(&self) -> bool {
+        self.borrow().error.is_some()
+    }
+
+    pub fn get_error(&self) -> Option<ApiError> {
+        self.borrow().error.as_ref().map(|x| x.0.clone())
     }
 
     pub fn is_reconnect(&self) -> bool {
@@ -336,7 +361,6 @@ impl Session {
         &self,
         expr: &str,
     ) -> Result<Option<perspective_client::ExprValidationError>, ApiError> {
-        // let arr = HashMap::from_iter([("_".to_string(), expr.to_string())]);
         let table = self.borrow().table.as_ref().unwrap().clone();
         let errors = table
             .validate_expressions(
@@ -495,9 +519,7 @@ impl Session {
             tracing::warn!("Errored state");
 
             // Load bearing return
-            return Err(ApiError::new(
-                x.0.clone().unwrap_or_else(|| "Unknown error".to_string()),
-            ));
+            return Err(ApiError::new(x.0.clone()));
         }
 
         if self.borrow_mut().config.apply_update(config_update) {
@@ -519,7 +541,7 @@ impl Session {
 
     /// In order to create a new view in this session, the session must first be
     /// validated to create a `ValidSession<'_>` guard.
-    pub async fn validate(&self) -> Result<ValidSession<'_>, JsValue> {
+    pub async fn validate(&self) -> Result<ValidSession<'_>, ApiError> {
         let old = self.borrow_mut().old_config.take();
         let is_diff = match old.as_ref() {
             Some(old) => !old.is_equivalent(&self.borrow().config),
@@ -527,15 +549,31 @@ impl Session {
         };
 
         if let Err(err) = self.validate_view_config().await {
-            self.borrow_mut().error = Some(TableErrorState(Some(err.to_string()), None));
-            web_sys::console::error_2(&"Failed to apply config:".into(), &err.clone().into());
+            let session = self.clone();
+            let poll_loop = LocalPollLoop::new(move |()| {
+                session.invalidate();
+                ApiFuture::spawn(session.reset(true));
+                Ok(JsValue::UNDEFINED)
+            });
+
+            self.borrow_mut().error = Some(TableErrorState(
+                err.clone(),
+                Some(Arc::new(move || {
+                    clone!(poll_loop);
+                    Box::pin(async move {
+                        poll_loop.poll(()).await;
+                        Ok(())
+                    })
+                })),
+            ));
+
             if let Some(config) = old {
                 self.borrow_mut().config = config;
             } else {
                 self.reset(true).await?;
             }
 
-            return Err(err)?;
+            return Err(err);
         } else {
             let old_config = Some(self.borrow().config.clone());
             self.borrow_mut().old_config = old_config;
@@ -573,14 +611,12 @@ impl Session {
             .collect::<Vec<String>>();
 
         let all_columns: HashSet<String> = table_columns.iter().cloned().collect();
-
         let mut view_columns: HashSet<&str> = HashSet::new();
-
         let table = self
             .borrow()
             .table
             .as_ref()
-            .ok_or("Trying to draw the viewer with no table attached")?
+            .ok_or_else(|| apierror!(NoTableError))?
             .clone();
 
         let valid_recs = table.validate_expressions(config.expressions).await?;
@@ -598,7 +634,10 @@ impl Session {
             if all_columns.contains(column) || expression_names.contains(column) {
                 let _existed = view_columns.insert(column);
             } else {
-                return Err(format!("Unknown \"{}\" in `columns`", column).into());
+                return Err(apierror!(InvalidViewerConfigError(
+                    "columns",
+                    column.to_owned()
+                )));
             }
         }
 
@@ -606,7 +645,10 @@ impl Session {
             if all_columns.contains(column) || expression_names.contains(column) {
                 let _existed = view_columns.insert(column);
             } else {
-                return Err(format!("Unknown \"{}\" in `group_by`", column).into());
+                return Err(apierror!(InvalidViewerConfigError(
+                    "group_by",
+                    column.to_owned(),
+                )));
             }
         }
 
@@ -614,7 +656,10 @@ impl Session {
             if all_columns.contains(column) || expression_names.contains(column) {
                 let _existed = view_columns.insert(column);
             } else {
-                return Err(format!("Unknown \"{}\" in `split_by`", column).into());
+                return Err(apierror!(InvalidViewerConfigError(
+                    "split_by",
+                    column.to_owned(),
+                )));
             }
         }
 
@@ -622,7 +667,10 @@ impl Session {
             if all_columns.contains(&sort.0) || expression_names.contains(&sort.0) {
                 let _existed = view_columns.insert(&sort.0);
             } else {
-                return Err(format!("Unknown \"{}\" in `sort`", sort.0).into());
+                return Err(apierror!(InvalidViewerConfigError(
+                    "sort",
+                    sort.0.to_owned(),
+                )));
             }
         }
 
@@ -631,7 +679,10 @@ impl Session {
             if all_columns.contains(filter.column()) || expression_names.contains(filter.column()) {
                 let _existed = view_columns.insert(filter.column());
             } else {
-                return Err(format!("Unknown \"{}\" in `filter`", filter.column()).into());
+                return Err(apierror!(InvalidViewerConfigError(
+                    "filter",
+                    filter.column().to_owned(),
+                )));
             }
         }
 

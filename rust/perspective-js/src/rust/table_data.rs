@@ -16,6 +16,7 @@ use perspective_client::{ColumnType, TableData, TableReadFormat, UpdateData};
 use wasm_bindgen::convert::TryFromJsValue;
 use wasm_bindgen::prelude::*;
 
+use crate::apierror;
 use crate::utils::{ApiError, ApiResult, JsValueSerdeExt, ToApiError};
 pub use crate::view::*;
 
@@ -40,7 +41,6 @@ impl Vec<(String, ColumnType)> {
 #[ext]
 pub(crate) impl TableData {
     fn from_js_value(value: &JsValue, format: Option<TableReadFormat>) -> ApiResult<TableData> {
-        let err_fn = || JsValue::from(format!("Failed to construct Table {:?}", value));
         if let Some(result) = UpdateData::from_js_value_partial(value, format)? {
             Ok(result.into())
         } else if value.is_instance_of::<Object>() && Reflect::has(value, &"__get_model".into())? {
@@ -71,10 +71,10 @@ pub(crate) impl TableData {
                 let json = JSON::stringify(value)?.as_string().into_apierror()?;
                 Ok(UpdateData::JsonColumns(json).into())
             } else {
-                Err(err_fn().into())
+                Err(apierror!(TableError(value.clone())))
             }
         } else {
-            Err(err_fn().into())
+            Err(apierror!(TableError(value.clone())))
         }
     }
 }
@@ -85,9 +85,8 @@ pub(crate) impl UpdateData {
         value: &JsValue,
         format: Option<TableReadFormat>,
     ) -> ApiResult<Option<UpdateData>> {
-        let err_fn = || JsValue::from(format!("Failed to construct Table {:?}", value));
         if value.is_undefined() {
-            Err(err_fn().into())
+            Err(apierror!(TableError(value.clone())))
         } else if value.is_string() {
             match format {
                 None | Some(TableReadFormat::Csv) => {

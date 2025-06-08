@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use futures::channel::mpsc::{unbounded, UnboundedSender};
+use futures::channel::mpsc::{UnboundedSender, unbounded};
 use futures::{Future, SinkExt, StreamExt};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -18,9 +18,9 @@ use wasm_bindgen_futures::spawn_local;
 /// A useful abstraction for connecting `!Sync + !Send` callbacks (like
 /// `js_sys::Function`) to `Send + Sync` contexts (like the client loop).
 #[derive(Clone)]
-pub struct LocalPollLoop<R: Send + Sync + Clone + 'static>(UnboundedSender<R>);
+pub struct LocalPollLoop<R: Send + Sync + 'static>(UnboundedSender<R>);
 
-impl<R: Send + Sync + Clone + 'static> LocalPollLoop<R> {
+impl<R: Send + Sync + 'static> LocalPollLoop<R> {
     /// Create a new loop which accepts a `R: Send + Sync` intermediate state
     /// argument and calls the `!Send + !Sync` callback.
     pub fn new<F: Fn(R) -> Result<JsValue, JsValue> + 'static>(send: F) -> Self {

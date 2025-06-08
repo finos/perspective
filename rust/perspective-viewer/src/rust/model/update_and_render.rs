@@ -61,9 +61,13 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
 
 #[tracing::instrument(level = "debug", skip(session, renderer))]
 async fn update_and_render(session: Session, renderer: Renderer) -> ApiResult<()> {
+    // The previous call which acquired the lock errored, so skip this render
+    if session.get_error().is_some() {
+        return Ok(());
+    }
+
     let view = session.validate().await?;
-    renderer.draw(view.create_view()).await?;
-    Ok(())
+    renderer.draw(view.create_view()).await
 }
 
 impl<T: HasRenderer + HasSession> UpdateAndRender for T {}

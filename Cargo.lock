@@ -2119,6 +2119,7 @@ dependencies = [
  "serde-wasm-bindgen 0.6.5",
  "serde_bytes",
  "serde_json",
+ "thiserror",
  "tracing",
  "tracing-subscriber",
  "ts-rs",
@@ -2213,6 +2214,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "strum 0.26.2",
+ "thiserror",
  "tracing",
  "tracing-subscriber",
  "ts-rs",
@@ -2395,9 +2397,9 @@ dependencies = [
 
 [[package]]
 name = "procss"
-version = "0.1.16"
+version = "0.1.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24fd6979bf7b925902a304e2aecdb8689c9daab4b7b79ab96002da5bbcdfb46c"
+checksum = "4e49f7323a5d32db7e4e3fd55cac1d79b07bd144205806ea3075835d32d3fe79"
 dependencies = [
  "anyhow",
  "base64 0.13.1",

@@ -32,12 +32,13 @@ pub fn error_message(p: &ErrorMessageProps) -> yew::Html {
         |(set_error, session)| {
             let sub = session.table_errored.add_listener({
                 clone!(set_error);
-                move |y| set_error.set(y)
+                move |y| set_error.set(Some(y))
             });
 
             || drop(sub)
         },
     );
+
     html! {
         <>
             <LocalStyle href={css!("render-warning")} />
