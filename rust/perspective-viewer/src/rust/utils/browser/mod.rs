@@ -12,7 +12,6 @@
 
 mod blob;
 mod download;
-mod focus;
 mod request_animation_frame;
 mod selection;
 
@@ -21,6 +20,5 @@ mod tests;
 
 pub use blob::*;
 pub use download::*;
-pub use focus::*;
 pub use request_animation_frame::*;
 pub use selection::*;

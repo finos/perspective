@@ -16,7 +16,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
 
-use ::perspective_js::utils::global;
 use ::perspective_js::{Table, View};
 use futures::future::join;
 use js_sys::*;
@@ -399,7 +398,6 @@ impl PerspectiveViewerElement {
     /// ```
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
-        global::document().blur_active_element();
         let this = self.clone();
         ApiFuture::new(async move {
             let decoded_update = ViewerConfigUpdate::decode(&update)?;
@@ -790,7 +788,6 @@ impl PerspectiveViewerElement {
     /// ```
     #[wasm_bindgen]
     pub fn toggleConfig(&self, force: Option<bool>) -> ApiFuture<JsValue> {
-        global::document().blur_active_element();
         let root = self.root.clone();
         ApiFuture::new(async move {
             let force = force.map(SettingsUpdate::Update);
