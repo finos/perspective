@@ -63,10 +63,12 @@ fn prost_build() -> Result<()> {
             .compile_protos(&[proto_file], &[include_path])
             .unwrap();
 
-        std::fs::rename(
+        std::fs::copy(
             std::env::var("OUT_DIR").unwrap() + "/perspective.proto.rs",
             "src/rust/proto.rs",
         )?;
+
+        std::fs::remove_file(std::env::var("OUT_DIR").unwrap() + "/perspective.proto.rs")?;
     }
 
     Ok(())
