@@ -132,6 +132,7 @@ pub enum PerspectiveViewerMsg {
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
     SettingsPanelSizeUpdate(Option<i32>),
     ColumnSettingsPanelSizeUpdate(Option<i32>),
+    Error,
     OpenColumnSettings {
         locator: Option<ColumnLocator>,
         sender: Option<Sender<()>>,
@@ -150,7 +151,7 @@ pub struct PerspectiveViewer {
     selected_column_is_active: bool, // TODO: should we use a struct?
     on_resize: Rc<PubSub<()>>,
     on_dimensions_reset: Rc<PubSub<()>>,
-    _subscriptions: [Subscription; 1],
+    _subscriptions: [Subscription; 2],
     settings_panel_width_override: Option<i32>,
     column_settings_panel_width_override: Option<i32>,
 
@@ -208,6 +209,12 @@ impl Component for PerspectiveViewer {
                 .add_listener(callback)
         };
 
+        let error_sub = ctx
+            .props()
+            .session
+            .table_errored
+            .add_listener(ctx.link().callback(|_| PerspectiveViewerMsg::Error));
+
         let on_close_column_settings =
             ctx.link()
                 .callback(|_| PerspectiveViewerMsg::OpenColumnSettings {
@@ -226,7 +233,7 @@ impl Component for PerspectiveViewer {
             selected_column_is_active: false,
             on_resize: Default::default(),
             on_dimensions_reset: Default::default(),
-            _subscriptions: [session_sub],
+            _subscriptions: [session_sub, error_sub],
             settings_panel_width_override: None,
             column_settings_panel_width_override: None,
             on_close_column_settings,
@@ -241,6 +248,7 @@ impl Component for PerspectiveViewer {
                 self.on_resize.emit(());
                 false
             },
+            PerspectiveViewerMsg::Error => true,
             PerspectiveViewerMsg::Reset(all, sender) => {
                 self.selected_column = None;
                 clone!(
@@ -575,7 +583,7 @@ impl Component for PerspectiveViewer {
                             session={&ctx.props().session}
                             renderer={&ctx.props().renderer}
                         />
-                        if ctx.props().is_title() || !ctx.props().session.has_table() {
+                        if ctx.props().is_title() || !ctx.props().session.has_table() || ctx.props().session.is_errored() {
                             <StatusBar
                                 id="status_bar"
                                 session={&ctx.props().session}
@@ -646,11 +654,13 @@ impl PerspectiveViewer {
                     };
 
                     if let Some(sender) = sender {
-                        let msg = result.clone().ignore_view_delete();
-                        sender.send(msg).into_apierror()?;
+                        let msg = result.ignore_view_delete();
+                        sender
+                            .send(msg.map(|x| x.unwrap_or(JsValue::UNDEFINED)))
+                            .into_apierror()?;
                     };
 
-                    result
+                    Ok(JsValue::undefined())
                 });
             },
         };

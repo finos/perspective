@@ -77,7 +77,7 @@ impl Component for PluginSelector {
         match msg {
             RendererSelectPlugin(_plugin_name) => true,
             ComponentSelectPlugin(plugin_name) => {
-                if ctx.props().session.get_error().is_none() {
+                if !ctx.props().session.is_errored() {
                     ctx.props()
                         .renderer
                         .update_plugin(&PluginUpdate::Update(plugin_name))

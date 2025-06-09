@@ -87,6 +87,12 @@ pub trait RestoreAndRender: HasRenderer + HasSession + HasPresentation {
                 presentation.update_columns_configs(columns_config);
                 let columns_config = presentation.all_columns_configs();
                 plugin.restore(&plugin_update, Some(&columns_config))?;
+
+                // The previous call which acquired the lock errored, so skip this render
+                if let Some(error) = session.get_error() {
+                    return Err(error);
+                }
+
                 session.validate().await?.create_view().await
             });
 

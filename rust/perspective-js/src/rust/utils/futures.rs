@@ -13,6 +13,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
+use perspective_client::ClientError;
 // TODO This is risky to rely on, but it is currently impossible to implement
 // this trait locally due to the orphan instance restriction.  Using this trait
 // removes alow of boilerplate required by `async` when casting to `Promise`.
@@ -84,11 +85,10 @@ where
 {
     fn from(fut: ApiFuture<T>) -> Self {
         future_to_promise(async move {
-            fut.0
-                .await
-                .map_err(|x| x.into())
-                .into_js_result()
-                .ignore_view_delete()
+            match fut.0.await.ignore_view_delete()? {
+                Some(x) => Ok(x).into_js_result(),
+                None => Ok::<_, JsValue>(()).into_js_result(),
+            }
         })
     }
 }
@@ -145,10 +145,8 @@ where
     }
 }
 
-static CANCELLED_MSG: &str = "View method cancelled";
-
 #[extend::ext]
-pub impl Result<JsValue, JsValue> {
+pub impl<T> Result<T, ApiError> {
     /// Wraps an error `JsValue` return from a caught JavaScript exception,
     /// checking for the explicit error type indicating that a
     /// `JsPerspectiveView` call has been cancelled due to it already being
@@ -162,23 +160,15 @@ pub impl Result<JsValue, JsValue> {
     /// silently be replaced with `Ok`.  The message itself is returned in this
     /// case (instead of whatever the `async` returns), which is helpful for
     /// detecting this condition when debugging.
-    fn ignore_view_delete(self) -> Result<JsValue, JsValue> {
-        self.or_else(|x| match x.dyn_ref::<PerspectiveViewNotFoundError>() {
-            Some(_) => Ok(js_intern::js_intern!(CANCELLED_MSG).clone()),
-            None => Err(x),
-        })
-    }
-}
-
-#[extend::ext]
-pub impl Result<JsValue, ApiError> {
-    fn ignore_view_delete(self) -> Result<JsValue, ApiError> {
-        self.or_else(|x| {
-            let f: JsValue = x.clone().into();
-            match f.dyn_ref::<PerspectiveViewNotFoundError>() {
-                Some(_) => Ok(js_intern::js_intern!(CANCELLED_MSG).clone()),
-                None => Err(x),
-            }
+    fn ignore_view_delete(self) -> Result<Option<T>, ApiError> {
+        self.map(|x| Some(x)).or_else(|x| match x.inner() {
+            ApiErrorType::ClientError(ClientError::ViewNotFound) => Ok(None),
+            ApiErrorType::JsRawError(..) | ApiErrorType::JsError(..)
+                if format!("{}", x).contains("View not found") =>
+            {
+                Ok(None)
+            },
+            x => Err(x.clone().into()),
         })
     }
 }

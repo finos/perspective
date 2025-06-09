@@ -67,7 +67,7 @@ type Box2Fn<I, J, O> = Box<dyn Fn(I, J) -> O + Send + Sync + 'static>;
 
 type Subscriptions<C> = Arc<RwLock<HashMap<u32, C>>>;
 type OnErrorCallback =
-    Box2Fn<Option<String>, Option<ReconnectCallback>, BoxFuture<'static, Result<(), ClientError>>>;
+    Box2Fn<ClientError, Option<ReconnectCallback>, BoxFuture<'static, Result<(), ClientError>>>;
 type OnceCallback = Box<dyn FnOnce(Response) -> ClientResult<()> + Send + Sync + 'static>;
 type SendCallback = Arc<
     dyn for<'a> Fn(&'a Request) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>>
@@ -241,7 +241,7 @@ impl Client {
     /// Handle an exception from the underlying transport.
     pub async fn handle_error<T, U>(
         &self,
-        message: Option<String>,
+        message: ClientError,
         reconnect: Option<T>,
     ) -> ClientResult<()>
     where
@@ -262,12 +262,14 @@ impl Client {
         }));
 
         tasks.await.into_iter().collect::<Result<(), _>>()?;
+        self.subscriptions.write().await.clear();
+        self.subscriptions_once.write().await.clear();
         Ok(())
     }
 
     pub async fn on_error<T, U, V>(&self, on_error: T) -> ClientResult<u32>
     where
-        T: Fn(Option<String>, Option<ReconnectCallback>) -> U + Clone + Send + Sync + 'static,
+        T: Fn(ClientError, Option<ReconnectCallback>) -> U + Clone + Send + Sync + 'static,
         U: Future<Output = V> + Send + 'static,
         V: Into<Result<(), ClientError>> + Sync + 'static,
     {

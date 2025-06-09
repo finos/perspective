@@ -24,7 +24,7 @@ use crate::*;
 enum StatusIconState {
     Loading,
     Updating(u32),
-    Errored(String),
+    Errored(String, String, &'static str),
     Normal,
 
     #[default]
@@ -36,7 +36,7 @@ enum StatusIconStateAction {
     Increment,
     Decrement,
     Load(Option<ViewStats>),
-    SetError(Option<String>),
+    SetError(ApiError),
 }
 
 impl Reducible for StatusIconState {
@@ -57,15 +57,15 @@ impl Reducible for StatusIconState {
                     Self::Loading
                 }
             },
-            (_, StatusIconStateAction::SetError(Some(e))) => Self::Errored(e),
+            (_, StatusIconStateAction::SetError(e)) => {
+                Self::Errored(e.message(), e.stacktrace(), e.kind())
+            },
             (
                 StatusIconState::Loading,
                 StatusIconStateAction::Increment | StatusIconStateAction::Decrement,
             ) => StatusIconState::Loading,
             (_, StatusIconStateAction::Increment) => Self::Updating(1),
-            (_, StatusIconStateAction::Decrement | StatusIconStateAction::SetError(None)) => {
-                StatusIconState::Normal
-            },
+            (_, StatusIconStateAction::Decrement) => StatusIconState::Normal,
         };
 
         new_status.into()
@@ -95,7 +95,7 @@ derive_model!(Session, Renderer for StatusIndicatorProps);
 pub fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
     let state = use_reducer_eq(|| {
         if let Some(err) = props.session.get_error() {
-            StatusIconState::Errored(err)
+            StatusIconState::Errored(err.message(), err.stacktrace(), err.kind())
         } else {
             StatusIconState::Normal
         }
@@ -126,7 +126,7 @@ pub fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
     let onclick = use_async_callback(
         (props.clone(), state.clone()),
         async move |_: MouseEvent, (props, state)| {
-            if let StatusIconState::Errored(_) = &**state {
+            if let StatusIconState::Errored(..) = &**state {
                 props.session.reconnect().await?;
                 let cfg = ViewConfigUpdate::default();
                 props.update_and_render(cfg)?.await?;
@@ -137,8 +137,8 @@ pub fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
     );
 
     let class_name = match (&*state, props.session.is_reconnect()) {
-        (StatusIconState::Errored(_), true) => "errored",
-        (StatusIconState::Errored(_), false) => "errored disabled",
+        (StatusIconState::Errored(..), true) => "errored",
+        (StatusIconState::Errored(..), false) => "errored disabled",
         (StatusIconState::Normal, _) => "connected",
         (StatusIconState::Updating(_), _) => "updating",
         (StatusIconState::Loading, _) => "loading",
@@ -152,10 +152,13 @@ pub fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
                     <span id="status" class={class_name} />
                     <span id="status_updating" class={class_name} />
                 </div>
+                if let StatusIconState::Errored(err, stack, kind) = &*state {
+                    <div class="error-dialog">
+                        <div class="error-dialog-message">{ format!("{} {}", kind, err) }</div>
+                        <div class="error-dialog-stack">{ stack }</div>
+                    </div>
+                }
             </div>
-            if let StatusIconState::Errored(err) = &*state {
-                <span class="error-dialog">{ err }</span>
-            }
         </>
     }
 }

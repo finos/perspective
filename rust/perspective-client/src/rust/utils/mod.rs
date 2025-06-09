@@ -25,7 +25,7 @@ use thiserror::*;
 
 use crate::proto;
 
-#[derive(Error, Debug)]
+#[derive(Clone, Error, Debug)]
 pub enum ClientError {
     #[error("View not found")]
     ViewNotFound,
@@ -61,7 +61,7 @@ pub enum ClientError {
     BadTableOptions,
 
     #[error("External error: {0}")]
-    ExternalError(#[from] Box<dyn std::error::Error + Send + Sync>),
+    ExternalError(Arc<Box<dyn std::error::Error + Send + Sync>>),
 
     #[error("Undecipherable proto message")]
     ProtoError(#[from] prost::EncodeError),
@@ -71,6 +71,12 @@ pub enum ClientError {
 }
 
 pub type ClientResult<T> = Result<T, ClientError>;
+
+impl From<Box<dyn std::error::Error + Send + Sync>> for ClientError {
+    fn from(value: Box<dyn std::error::Error + Send + Sync>) -> Self {
+        ClientError::ExternalError(Arc::new(value))
+    }
+}
 
 impl<'a, A> From<std::sync::PoisonError<std::sync::MutexGuard<'a, A>>> for ClientError {
     fn from(_: std::sync::PoisonError<std::sync::MutexGuard<'a, A>>) -> Self {

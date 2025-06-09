@@ -73,17 +73,20 @@ impl InactiveColumnProps {
 
         // Don't treat `None` at the end of the column list as columns, we'll refill
         // these later
-        let last_filled = columns.iter().rposition(|x| !x.is_none()).unwrap();
-        columns.truncate(last_filled + 1);
+        if let Some(last_filled) = columns.iter().rposition(|x| !x.is_none()) {
+            columns.truncate(last_filled + 1);
 
-        let mode = self.renderer.metadata().mode;
-        if (mode == ColumnSelectMode::Select) ^ shift {
-            columns.clear();
-        } else {
-            columns.retain(|x| x.as_ref() != Some(&name));
+            let mode = self.renderer.metadata().mode;
+            if (mode == ColumnSelectMode::Select) ^ shift {
+                columns.clear();
+            } else {
+                columns.retain(|x| x.as_ref() != Some(&name));
+            }
+
+            columns.push(Some(name));
         }
 
-        columns.push(Some(name));
+        // Do this outside the loop so errors dont just become noops
         self.apply_columns(
             columns
                 .into_iter()

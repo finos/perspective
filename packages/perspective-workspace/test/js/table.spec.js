@@ -93,7 +93,7 @@ function tests(context, compare) {
         // NOTE This is the error message we expect when `restore()` is called
         // without a `Table`, subject to change.
         expect(result).toEqual(
-            "Error: Trying to draw the viewer with no table attached"
+            "Error: Failed to construct table from JsValue(undefined)"
         );
         await page.evaluate(async () => {
             await workspace.replaceTable(

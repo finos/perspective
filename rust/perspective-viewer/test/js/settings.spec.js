@@ -107,16 +107,10 @@ test.describe("Settings", () => {
             });
 
             const contents = await get_contents(page);
-            expect(errors).toEqual(["Error::Intentional Load Error"]);
-
-            consoleLogs.expectedLogs.push(
-                "error",
-                /Failed to apply config: Error: Trying to draw the viewer with no table attached/
-            );
-            consoleLogs.expectedLogs.push(
-                "error",
-                /Caught error: Error: Trying to draw the viewer with no table attached/
-            );
+            expect(errors).toEqual([
+                'Error::Failed to construct table from JsValue("Intentional Load Error")',
+            ]);
+            consoleLogs.expectedLogs.push("error", /Intentional Load Error/);
         });
     });
 });
