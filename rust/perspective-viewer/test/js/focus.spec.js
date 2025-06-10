@@ -10,19 +10,38 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use wasm_bindgen::JsCast;
-use web_sys::{Document, HtmlElement};
+import { test, expect } from "@finos/perspective-test";
 
-/// Blur the current active elemnt, triggering any blur handlers in the
-/// application (e.g. modals). This is often necessary when a DOM update will
-/// invalidate something that has a `"blur"` event handler.
-#[extend::ext]
-pub impl Document {
-    fn blur_active_element(&self) {
-        self.active_element()
-            .unwrap()
-            .unchecked_into::<HtmlElement>()
-            .blur()
-            .unwrap();
-    }
-}
+test.describe("browser focus", async () => {
+    test.beforeEach(async function init({ page }) {
+        await page.goto(
+            "/node_modules/@finos/perspective-viewer/test/html/superstore_with_input.html"
+        );
+
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Debug",
+            });
+        });
+    });
+
+    test("Focus is not lost on external widgets when a restore call takes place", async ({
+        page,
+    }) => {
+        const viewer = page.locator("perspective-viewer");
+        const tagName = await viewer.evaluate(async (viewer) => {
+            const input = document.querySelector("input");
+            input.focus();
+            await viewer.restore({ group_by: ["State"] });
+            return document.activeElement.tagName;
+        });
+
+        expect(tagName).toEqual("INPUT");
+    });
+});
