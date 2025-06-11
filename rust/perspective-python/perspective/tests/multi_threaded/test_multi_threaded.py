@@ -84,3 +84,57 @@ class TestServer(object):
         loop.call_soon_threadsafe(loop.stop)
         thread.join()
         loop.close()
+
+    def test_concurrent_updates_with_limit_tables_are_threadsafe(self):
+        # This is a tricky tune - at time of writing, 1000 is has a >50%
+        # chance of triggering this o my dev machine
+        TEST_ITERATIONS = 1000
+        global running
+        perspective_server = Server()
+        client = perspective_server.new_local_client()
+        table = client.table(
+            {"col{}".format(i): "integer" for i in range(100)}, limit=100
+        )
+
+        running = True
+
+        # Create an updating thread that overlaps the index alot
+        def feed(table):
+            row = {"col{}".format(i): random.randint(0, 100) for i in range(100)}
+            while running:
+                table.update([row for _ in range(100)])
+
+        thread = threading.Thread(target=feed, args=(table,))
+        thread.start()
+
+        results = []
+
+        # Create a thread that serialized the table alot, checking for nulls
+        def feed2(table):
+            global running
+            view = table.view()
+            while len(results) < TEST_ITERATIONS:
+                arr = view.to_arrow()
+                table2 = client.table(arr)
+                view2 = table2.view()
+                json = view2.to_json(end_row=1)
+                view2.delete()
+                table2.delete()
+                results.append(json)
+
+            view.delete()
+            running = False
+
+        thread2 = threading.Thread(target=feed2, args=(table,))
+        thread2.start()
+
+        thread.join()
+        thread2.join()
+
+        assert table.size() == 100
+        for result in results:
+            for row in result:
+                for col, val in row.items():
+                    assert val is not None
+
+        table.delete()
