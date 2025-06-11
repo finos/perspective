@@ -607,6 +607,9 @@ View<CTX_T>::to_arrow(
     bool emit_group_by,
     bool compress
 ) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(*get_lock());
+
     std::shared_ptr<t_data_slice<CTX_T>> data_slice =
         get_data(start_row, end_row, start_col, end_col);
     return data_slice_to_arrow(data_slice, emit_group_by, compress);
@@ -620,6 +623,8 @@ View<t_ctx2>::to_csv(
     std::int32_t start_col,
     std::int32_t end_col
 ) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(*get_lock());
 
     // See generic instance.
     if (is_column_only() && m_ctx->unity_get_column_count() == 0) {
@@ -639,6 +644,8 @@ View<t_ctx1>::to_csv(
     std::int32_t start_col,
     std::int32_t end_col
 ) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(*get_lock());
     std::shared_ptr<t_data_slice<t_ctx1>> data_slice =
         get_data(start_row, end_row, start_col, end_col);
     return data_slice_to_csv(data_slice);
@@ -652,9 +659,11 @@ View<CTX_T>::to_csv(
     std::int32_t start_col,
     std::int32_t end_col
 ) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(*get_lock());
 
-    // Arrow has a big whih miscalculates CSV header size as 1 when there are no
-    // columns (and hence no rows) in the dataset, so intercept these calls/
+    // Arrow has a bug which miscalculates CSV header size as 1 when there are
+    // no columns (and hence no rows) in the dataset, so intercept these calls/
     if (m_ctx->unity_get_column_count() == 0) {
         return std::make_shared<std::string>("");
     }
