@@ -34,6 +34,16 @@ export interface PerspectiveViewerProps {
     onConfigUpdate?: (config: pspViewer.ViewerConfigUpdate) => void;
     onClick?: (data: pspViewer.PerspectiveClickEventDetail) => void;
     onSelect?: (data: pspViewer.PerspectiveSelectEventDetail) => void;
+
+    // Applicable props from `React.HTMLAttributes`, which we cannot extend
+    // directly because Perspective changes the signature of `onClick`.
+    className?: string | undefined;
+    hidden?: boolean | undefined;
+    id?: string | undefined;
+    slot?: string | undefined;
+    style?: React.CSSProperties | undefined;
+    tabIndex?: number | undefined;
+    title?: string | undefined;
 }
 
 function PerspectiveViewerImpl(props: PerspectiveViewerProps) {
@@ -64,7 +74,18 @@ function PerspectiveViewerImpl(props: PerspectiveViewerProps) {
     usePspListener(viewer, "perspective-select", props.onSelect);
     usePspListener(viewer, "perspective-config-update", props.onConfigUpdate);
 
-    return <perspective-viewer ref={setViewer} />;
+    return (
+        <perspective-viewer
+            ref={setViewer}
+            id={props.id}
+            className={props.className}
+            hidden={props.hidden}
+            slot={props.slot}
+            style={props.style}
+            tabIndex={props.tabIndex}
+            title={props.title}
+        />
+    );
 }
 
 /**

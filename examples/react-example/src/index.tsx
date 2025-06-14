@@ -124,6 +124,7 @@ const App: React.FC = () => {
                 <>
                     <PerspectiveViewer table={state.table} />
                     <PerspectiveViewer
+                        className="my-perspective-viewer"
                         table={state.table}
                         config={state.config}
                         onClick={onClick}
