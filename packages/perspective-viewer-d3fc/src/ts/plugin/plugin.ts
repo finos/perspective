@@ -31,6 +31,9 @@ const DEFAULT_PLUGIN_SETTINGS = {
 };
 
 const styleWithD3FC = `${style}${getD3FCStyles()}`;
+const styleSheet = new CSSStyleSheet();
+styleSheet.replaceSync(styleWithD3FC);
+
 const EXCLUDED_SETTINGS = [
     "crossValues",
     "mainValues",
@@ -51,6 +54,7 @@ function getD3FCStyles(): string {
     const headerStyles = document
         .querySelector("head")
         .querySelectorAll("style");
+
     const d3fcStyles = [];
     headerStyles.forEach((s) => {
         if (s.innerText.indexOf("d3fc-") !== -1) {
@@ -99,7 +103,8 @@ export function register(...plugin_names: string[]) {
                     connectedCallback() {
                         if (!this._initialized) {
                             this.attachShadow({ mode: "open" });
-                            this.shadowRoot.innerHTML = `<style>${styleWithD3FC}</style>`;
+                            this.shadowRoot.adoptedStyleSheets.push(styleSheet);
+
                             this.shadowRoot.innerHTML += `<div id="container" class="chart"></div>`;
                             this._container =
                                 this.shadowRoot.querySelector(".chart");

@@ -18,6 +18,7 @@ use super::style_cache::StyleCache;
 
 #[derive(Properties, PartialEq)]
 pub struct StyleProviderProps {
+    pub root: web_sys::HtmlElement,
     #[prop_or(true)]
     pub is_shadow: bool,
     pub children: Children,
@@ -37,24 +38,15 @@ impl Component for StyleProvider {
     type Properties = StyleProviderProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cache = StyleCache::new(ctx.props().is_shadow);
+        let cache = StyleCache::new(ctx.props().is_shadow, &ctx.props().root);
         Self { cache }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let styles = self.cache.iter_styles();
-
         html! {
-            <>
-                { for styles.map(|x| {
-                html! {
-                    <StyleKeyed key={ x.0 } elem={ x.1 } />
-                }
-            }) }
-                <ContextProvider<StyleCache> context={self.cache.clone()}>
-                    { for ctx.props().children.iter() }
-                </ContextProvider<StyleCache>>
-            </>
+            <ContextProvider<StyleCache> context={self.cache.clone()}>
+                { for ctx.props().children.iter() }
+            </ContextProvider<StyleCache>>
         }
     }
 }

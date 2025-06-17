@@ -30,6 +30,7 @@ pub struct ExportDropDownMenuProps {
     pub renderer: Renderer,
     pub presentation: Presentation,
     pub callback: Callback<ExportFile>,
+    pub root: web_sys::HtmlElement,
 
     #[prop_or_default]
     weak_link: WeakScope<ExportDropDownMenu>,
@@ -99,7 +100,7 @@ impl Component for ExportDropDownMenu {
         // js_intern::js_intern!("render")).unwrap();
         let is_chart = plugin.name().as_str() != "Datagrid";
         html! {
-            <StyleProvider>
+            <StyleProvider root={ctx.props().root.clone()}>
                 <span class="dropdown-group-label">{ "Save as" }</span>
                 <input
                     class={if self.invalid { "invalid" } else { "" }}

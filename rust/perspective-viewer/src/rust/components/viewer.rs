@@ -544,7 +544,7 @@ impl Component for PerspectiveViewer {
 
         html! {
             <>
-                <StyleProvider>
+                <StyleProvider root={ctx.props().elem.clone()}>
                     <LocalStyle href={css!("viewer")} />
                     if self.settings_open && ctx.props().session.has_table() {
                         if self.debug_open {

@@ -11,13 +11,11 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::cell::RefCell;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Deref;
 use std::rc::Rc;
 
-use perspective_js::utils::global;
 use wasm_bindgen::JsCast;
-use web_sys::HtmlStyleElement;
 
 use crate::*;
 
@@ -27,6 +25,17 @@ type CSSResource = (&'static str, &'static str);
 /// be loaded (and perhaps lack yew components wrappers from which to have
 /// their styles registered).
 static DOM_STYLES: &[CSSResource] = &[css!("dom/checkbox"), css!("dom/select")];
+
+thread_local! {
+    /// Cache of `CssStyleSheet` objects, which can safely be re-used across
+    /// `HTMLPerspectiveViewerElement` instances
+    static STYLE_SHEET_CACHE: RefCell<BTreeMap<&'static str, web_sys::CssStyleSheet>> = RefCell::new(
+        DOM_STYLES
+            .iter()
+            .map(|x| (x.0, StyleCache::into_style(x.1)))
+            .collect(),
+    );
+}
 
 /// A state object for `<style>` snippets used by a yew `Component` with a
 /// `<StyleProvider>` at the root.
@@ -48,8 +57,8 @@ impl PartialEq for StyleCache {
 }
 
 impl StyleCache {
-    pub fn new(is_shadow: bool) -> StyleCache {
-        StyleCache(Rc::new(StyleCacheData::new(is_shadow)))
+    pub fn new(is_shadow: bool, elem: &web_sys::HtmlElement) -> StyleCache {
+        StyleCache(Rc::new(StyleCacheData::new(is_shadow, elem)))
     }
 
     /// Insert a new stylesheet into this manager, _immediately_ inserting it
@@ -63,63 +72,61 @@ impl StyleCache {
     /// attached _before_ the style's target nodes are attached.
     pub fn add_style(&self, name: &'static str, css: &'static str) {
         let mut map = self.0.styles.borrow_mut();
-        if !map.contains_key(name) {
-            let style = Self::into_style(name, css, self.0.is_shadow);
-            let first = map.values().next().cloned();
-            map.insert(name, style.clone());
-            let mut values = map.values();
-            if let Some(mut x) = first {
-                while let Some(y) = values.next()
-                    && y.get_attribute("name").as_deref() < Some(name)
-                {
-                    x = y.clone();
+        STYLE_SHEET_CACHE.with_borrow_mut(|cache| {
+            if !map.contains(name) {
+                map.insert(name);
+                if !cache.contains_key(name) {
+                    let style = Self::into_style(css);
+                    cache.insert(name, style);
                 }
 
-                x.parent_node()
-                    .unwrap_or_else(|| x.get_root_node())
-                    .insert_before(&style, x.next_sibling().as_ref())
-                    .unwrap();
+                self.adopted_style_sheets.splice(
+                    map.iter().position(|x| x == &name).unwrap() as u32,
+                    0,
+                    cache.get(name).unwrap(),
+                );
             }
-        }
+        });
     }
 
     /// Concert a CSS string to an `HtmlStyleElement`, which are memoized due
     /// to their size and DOM performance impact.
-    fn into_style(name: &str, css: &str, is_shadow: bool) -> web_sys::HtmlStyleElement {
-        let elem = global::document().create_element("style").unwrap();
-        if is_shadow {
-            elem.set_text_content(Some(css));
-        } else {
-            let new_css = css.replace(":host", ":root");
-            elem.set_text_content(Some(&new_css));
-        }
-
-        elem.set_attribute("name", name).unwrap();
-        elem.unchecked_into()
-    }
-
-    pub fn iter_styles(&self) -> impl Iterator<Item = (&'static str, HtmlStyleElement)> {
-        self.styles.borrow().clone().into_iter()
+    fn into_style(css: &str) -> web_sys::CssStyleSheet {
+        let sheet = web_sys::CssStyleSheet::new().unwrap();
+        sheet.replace_sync(css).unwrap();
+        sheet
     }
 }
 
 /// Using a `BTreeMap` so the resulting `<style>` elements have a stable order
 /// when rendered to the DOM.
 pub struct StyleCacheData {
-    styles: RefCell<BTreeMap<&'static str, web_sys::HtmlStyleElement>>,
-    is_shadow: bool,
+    styles: RefCell<BTreeSet<&'static str>>,
+    adopted_style_sheets: js_sys::Array,
 }
 
 impl StyleCacheData {
-    fn new(is_shadow: bool) -> Self {
-        let styles = DOM_STYLES
-            .iter()
-            .map(|x| (x.0, StyleCache::into_style(x.0, x.1, is_shadow)))
-            .collect();
+    fn new(is_shadow: bool, elem: &web_sys::HtmlElement) -> Self {
+        let styles: RefCell<BTreeSet<&'static str>> =
+            RefCell::new(DOM_STYLES.iter().map(|x| x.0).collect());
+
+        let root: &JsValue = if is_shadow {
+            &elem.shadow_root().unwrap()
+        } else {
+            &web_sys::window().unwrap().document().unwrap()
+        };
+
+        let adopted_style_sheets = js_sys::Reflect::get(root, &"adoptedStyleSheets".into())
+            .unwrap()
+            .unchecked_into::<js_sys::Array>();
+
+        for name in styles.borrow().iter() {
+            STYLE_SHEET_CACHE.with_borrow(|x| adopted_style_sheets.push(x.get(name).unwrap()));
+        }
 
         Self {
-            styles: RefCell::new(styles),
-            is_shadow,
+            styles,
+            adopted_style_sheets,
         }
     }
 }

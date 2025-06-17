@@ -100,7 +100,12 @@ impl CopyDropDownMenuElement {
         });
 
         let renderer = model.renderer().clone();
-        let props = props!(CopyDropDownMenuProps { renderer, callback });
+        let props = props!(CopyDropDownMenuProps {
+            renderer,
+            callback,
+            root: self.elem.clone()
+        });
+
         let modal = ModalElement::new(self.elem.clone(), props, true, None);
         *self.modal.borrow_mut() = Some(modal);
     }
