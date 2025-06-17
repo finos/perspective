@@ -82,6 +82,9 @@ export function table_cell_style_listener(regularTable, viewer) {
                 cell_style_row_header.call(this, regularTable, td, metadata);
             }
 
+            tr.dataset.y = metadata.y;
+            td.dataset.y = metadata.y;
+            td.dataset.x = metadata.x;
             td.classList.toggle("psp-align-right", !is_th && is_numeric);
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle(
