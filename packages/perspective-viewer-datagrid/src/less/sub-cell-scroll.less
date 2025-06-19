@@ -25,7 +25,8 @@ perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table,
 
     tbody tr:first-child {
         td,
-        th {
+        th,
+        &:after {
             clip-path: polygon(
                 0 var(--regular-table--clip-y, 0),
                 0 200%,

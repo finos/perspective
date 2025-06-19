@@ -12,20 +12,8 @@
 
 import "regular-table";
 
-import MATERIAL_STYLE from "../../dist/css/perspective-viewer-datagrid.css";
 import { HTMLPerspectiveViewerDatagridPluginElement } from "./custom_elements/datagrid.js";
 import { HTMLPerspectiveViewerDatagridToolbarElement } from "./custom_elements/toolbar.js";
-
-/**
- * Appends the default table CSS to `<head>`, should be run once on module
- * import.
- *
- */
-function _register_global_styles() {
-    const style = document.createElement("style");
-    style.textContent = MATERIAL_STYLE;
-    document.head.insertBefore(style, document.head.firstChild);
-}
 
 /******************************************************************************
  *
@@ -51,4 +39,3 @@ async function _register_element() {
 }
 
 _register_element();
-_register_global_styles();

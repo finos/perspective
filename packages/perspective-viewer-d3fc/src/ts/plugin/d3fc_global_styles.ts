@@ -10,51 +10,23 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test } from "@finos/perspective-test";
-import { compareContentsToSnapshot } from "@finos/perspective-test";
-import * as prettier from "prettier";
+export const D3FC_GLOBAL_STYLES = [];
 
-async function get_contents(page) {
-    const raw = await page.evaluate(async () => {
-        const viewer = document.querySelector("perspective-viewer").shadowRoot;
-        return viewer.innerHTML;
-    });
+// Capture (and restore) `document.querySelector` to prevent D3FC from
+// attaching styles to the document `<head>`.
+export async function init() {
+    const old_doc = window.document.querySelector;
+    // @ts-ignore
+    window.document.querySelector = () => {
+        return {
+            appendChild(elem) {
+                D3FC_GLOBAL_STYLES.push(elem);
+                return elem;
+            },
+        };
+    };
 
-    return await prettier.format(raw, {
-        parser: "html",
-    });
+    const { register } = await import("./plugin");
+    window.document.querySelector = old_doc;
+    register();
 }
-
-test.beforeEach(async ({ page }) => {
-    await page.goto("/rust/perspective-viewer/test/html/plugin-resize.html");
-    await page.evaluate(async () => {
-        while (!window["__TEST_PERSPECTIVE_READY__"]) {
-            await new Promise((x) => setTimeout(x, 10));
-        }
-    });
-});
-
-test.describe("Cancellable methods", () => {
-    test("Cancellable view methods do not error", async ({ page }) => {
-        await page.evaluate(async () => {
-            const viewer = document.querySelector("perspective-viewer");
-            await viewer.restore({
-                group_by: ["State"],
-                columns: ["Sales"],
-                settings: true,
-                filter: [
-                    ["State", "not in", ["California", "Texas", "New York"]],
-                ],
-            });
-
-            const view = await viewer.getView();
-            await view.delete();
-            await viewer.resize(true);
-        });
-
-        const contents = await get_contents(page);
-        await compareContentsToSnapshot(contents, [
-            "regressions-not_in-filter-works-correctly.txt",
-        ]);
-    });
-});

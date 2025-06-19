@@ -31,8 +31,6 @@ export async function draw(view) {
     const old_sizes = save_column_size_overrides.call(this);
     const draw = this.regular_table.draw({ invalid_columns: true });
     if (!this.model._preserve_focus_state) {
-        this.regular_table.scrollTop = 0;
-        this.regular_table.scrollLeft = 0;
         this.regular_table.dispatchEvent(
             new CustomEvent("psp-deselect-all", { bubbles: false })
         );

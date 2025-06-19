@@ -13,6 +13,9 @@
 import TOOLBAR_STYLE from "../../../dist/css/perspective-viewer-datagrid-toolbar.css";
 import { toggle_edit_mode, toggle_scroll_lock } from "../model/toolbar";
 
+const stylesheet = new CSSStyleSheet();
+stylesheet.replaceSync(TOOLBAR_STYLE);
+
 /**
  * The custom element for this plugin's toolbar, a component which displays in
  * the host `<perspective-viewer>`'s status bar when this plugin is active.
@@ -28,10 +31,8 @@ export class HTMLPerspectiveViewerDatagridToolbarElement extends HTMLElement {
         this._initialized = true;
         this.setAttribute("slot", "plugin-settings");
         this.attachShadow({ mode: "open" });
+        this.shadowRoot.adoptedStyleSheets.push(stylesheet);
         this.shadowRoot.innerHTML = `
-            <style>
-                ${TOOLBAR_STYLE}
-            </style>
             <div id="toolbar">
                 <span class="hover-target">
                     <span id="scroll_lock" class="button">

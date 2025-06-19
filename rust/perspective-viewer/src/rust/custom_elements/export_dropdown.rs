@@ -102,7 +102,8 @@ impl ExportDropDownMenuElement {
         let props = props!(ExportDropDownMenuProps {
             renderer,
             presentation,
-            callback
+            callback,
+            root: self.elem.clone()
         });
 
         let modal = ModalElement::new(self.elem.clone(), props, true, None);

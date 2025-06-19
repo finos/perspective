@@ -89,8 +89,8 @@ impl NumberColumnStyleProps {
                 let view = session.get_view().unwrap();
                 let min_max = view.get_min_max(column_name).await.unwrap();
                 let abs_max = max!(
-                    min_max.0.parse::<f64>().unwrap().abs(),
-                    min_max.1.parse::<f64>().unwrap().abs()
+                    min_max.0.parse::<f64>().unwrap_or_default().abs(),
+                    min_max.1.parse::<f64>().unwrap_or_default().abs()
                 );
                 let gradient = (abs_max * 100.).round() / 100.;
                 NumberColumnStyleMsg::DefaultGradientChanged(gradient)

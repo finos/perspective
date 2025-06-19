@@ -10,51 +10,34 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test } from "@finos/perspective-test";
-import { compareContentsToSnapshot } from "@finos/perspective-test";
-import * as prettier from "prettier";
+import { compareContentsToSnapshot, test } from "@finos/perspective-test";
+import { getSvgContentString } from "@finos/perspective-test";
 
-async function get_contents(page) {
-    const raw = await page.evaluate(async () => {
-        const viewer = document.querySelector("perspective-viewer").shadowRoot;
-        return viewer.innerHTML;
-    });
+import type from "@finos/perspective-viewer-d3fc";
 
-    return await prettier.format(raw, {
-        parser: "html",
-    });
-}
-
-test.beforeEach(async ({ page }) => {
-    await page.goto("/rust/perspective-viewer/test/html/plugin-resize.html");
-    await page.evaluate(async () => {
-        while (!window["__TEST_PERSPECTIVE_READY__"]) {
-            await new Promise((x) => setTimeout(x, 10));
-        }
-    });
-});
-
-test.describe("Cancellable methods", () => {
-    test("Cancellable view methods do not error", async ({ page }) => {
+test.describe("max_cells", () => {
+    test("max_cells can be statically configured", async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
         await page.evaluate(async () => {
-            const viewer = document.querySelector("perspective-viewer");
-            await viewer.restore({
-                group_by: ["State"],
-                columns: ["Sales"],
-                settings: true,
-                filter: [
-                    ["State", "not in", ["California", "Texas", "New York"]],
-                ],
-            });
-
-            const view = await viewer.getView();
-            await view.delete();
-            await viewer.resize(true);
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
         });
 
-        const contents = await get_contents(page);
-        await compareContentsToSnapshot(contents, [
-            "regressions-not_in-filter-works-correctly.txt",
+        await page.evaluate(async () => {
+            customElements.get("perspective-viewer-d3fc-treemap").max_cells = 5;
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "Treemap",
+                settings: true,
+            });
+        });
+
+        const svg = await getSvgContentString(
+            "perspective-viewer-d3fc-treemap"
+        )(page);
+
+        compareContentsToSnapshot(svg!, [
+            "max-cells-can-be-statically-linked.txt",
         ]);
     });
 });

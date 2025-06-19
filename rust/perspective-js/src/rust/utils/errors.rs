@@ -90,7 +90,7 @@ pub enum ApiErrorType {
     #[error("{0}")]
     ProstError(#[from] prost::DecodeError),
 
-    #[error("Unknown column \"{0}\" in field `{0}`")]
+    #[error("Unknown column \"{1}\" in field `{0}`")]
     InvalidViewerConfigError(&'static str, String),
 
     #[error("Invalid `expressions` {}", format_valid_exprs(.0))]

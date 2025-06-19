@@ -28,6 +28,7 @@ pub type CopyDropDownMenuItem = DropDownMenuItem<ExportFile>;
 pub struct CopyDropDownMenuProps {
     pub renderer: Renderer,
     pub callback: Callback<ExportFile>,
+    pub root: web_sys::HtmlElement,
 
     #[prop_or_default]
     weak_link: WeakScope<CopyDropDownMenu>,
@@ -54,7 +55,7 @@ impl Component for CopyDropDownMenu {
         let is_chart = plugin.name().as_str() != "Datagrid";
         let has_selection = ctx.props().renderer.get_selection().is_some();
         html! {
-            <StyleProvider>
+            <StyleProvider root={ctx.props().root.clone()}>
                 <DropDownMenu<ExportFile>
                     values={Rc::new(get_menu_items(is_chart, has_selection))}
                     callback={&ctx.props().callback}

@@ -18,6 +18,8 @@ async function get_contents(page) {
         const viewer = document.querySelector(
             "perspective-viewer perspective-viewer-plugin"
         );
+
+        // Don't format - light DOM is CSV in a <pre> tag.
         return viewer.innerHTML;
     });
 }

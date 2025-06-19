@@ -16,9 +16,10 @@ import {
     run_standard_tests,
     runPerspectiveEventClickTest,
 } from "@finos/perspective-test";
+import * as prettier from "prettier";
 
 async function getDatagridContents(page) {
-    return await page.evaluate(async () => {
+    const raw = await page.evaluate(async () => {
         const datagrid = document.querySelector(
             "perspective-viewer perspective-viewer-datagrid"
         );
@@ -26,7 +27,11 @@ async function getDatagridContents(page) {
             return "MISSING DATAGRID";
         }
         const regularTable = datagrid.shadowRoot.querySelector("regular-table");
-        return regularTable?.innerHTML || "MISSING";
+        return regularTable?.innerHTML || "";
+    });
+
+    return await prettier.format(raw, {
+        parser: "html",
     });
 }
 
