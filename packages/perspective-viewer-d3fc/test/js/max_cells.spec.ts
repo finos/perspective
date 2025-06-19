@@ -10,32 +10,34 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import "regular-table";
+import { compareContentsToSnapshot, test } from "@finos/perspective-test";
+import { getSvgContentString } from "@finos/perspective-test";
 
-import { HTMLPerspectiveViewerDatagridPluginElement } from "./custom_elements/datagrid.js";
-import { HTMLPerspectiveViewerDatagridToolbarElement } from "./custom_elements/toolbar.js";
+import type from "@finos/perspective-viewer-d3fc";
 
-/******************************************************************************
- *
- * Main
- *
- */
+test.describe("max_cells", () => {
+    test("max_cells can be statically configured", async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
 
-async function _register_element() {
-    customElements.define(
-        "perspective-viewer-datagrid-toolbar",
-        HTMLPerspectiveViewerDatagridToolbarElement
-    );
+        await page.evaluate(async () => {
+            customElements.get("perspective-viewer-d3fc-treemap").max_cells = 5;
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "Treemap",
+                settings: true,
+            });
+        });
 
-    customElements.define(
-        "perspective-viewer-datagrid",
-        HTMLPerspectiveViewerDatagridPluginElement
-    );
+        const svg = await getSvgContentString(
+            "perspective-viewer-d3fc-treemap"
+        )(page);
 
-    await customElements.whenDefined("perspective-viewer");
-    customElements
-        .get("perspective-viewer")
-        .registerPlugin("perspective-viewer-datagrid");
-}
-
-_register_element();
+        compareContentsToSnapshot(svg!, [
+            "max-cells-can-be-statically-linked.txt",
+        ]);
+    });
+});

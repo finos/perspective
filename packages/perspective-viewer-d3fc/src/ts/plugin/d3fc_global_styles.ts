@@ -10,32 +10,23 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import "regular-table";
+export const D3FC_GLOBAL_STYLES = [];
 
-import { HTMLPerspectiveViewerDatagridPluginElement } from "./custom_elements/datagrid.js";
-import { HTMLPerspectiveViewerDatagridToolbarElement } from "./custom_elements/toolbar.js";
+// Capture (and restore) `document.querySelector` to prevent D3FC from
+// attaching styles to the document `<head>`.
+export async function init() {
+    const old_doc = window.document.querySelector;
+    // @ts-ignore
+    window.document.querySelector = () => {
+        return {
+            appendChild(elem) {
+                D3FC_GLOBAL_STYLES.push(elem);
+                return elem;
+            },
+        };
+    };
 
-/******************************************************************************
- *
- * Main
- *
- */
-
-async function _register_element() {
-    customElements.define(
-        "perspective-viewer-datagrid-toolbar",
-        HTMLPerspectiveViewerDatagridToolbarElement
-    );
-
-    customElements.define(
-        "perspective-viewer-datagrid",
-        HTMLPerspectiveViewerDatagridPluginElement
-    );
-
-    await customElements.whenDefined("perspective-viewer");
-    customElements
-        .get("perspective-viewer")
-        .registerPlugin("perspective-viewer-datagrid");
+    const { register } = await import("./plugin");
+    window.document.querySelector = old_doc;
+    register();
 }
-
-_register_element();
