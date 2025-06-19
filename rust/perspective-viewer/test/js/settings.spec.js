@@ -12,15 +12,16 @@
 
 import { test, expect } from "@finos/perspective-test";
 import { compareContentsToSnapshot } from "@finos/perspective-test";
-
-// import path from "node:path";
+import * as prettier from "prettier";
 
 async function get_contents(page) {
-    return await page.evaluate(async () => {
-        const viewer = document
-            .querySelector("perspective-viewer")
-            .shadowRoot.querySelector("#app_panel");
-        return viewer ? viewer.innerHTML : "MISSING";
+    const raw = await page.evaluate(async () => {
+        const viewer = document.querySelector("perspective-viewer").shadowRoot;
+        return viewer.innerHTML;
+    });
+
+    return await prettier.format(raw, {
+        parser: "html",
     });
 }
 

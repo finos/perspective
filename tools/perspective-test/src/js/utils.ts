@@ -15,6 +15,7 @@ import { expect, Locator, Page } from "@playwright/test";
 import * as fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
+import * as prettier from "prettier";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -162,7 +163,11 @@ export async function compareContentsToSnapshot(
         .replace(/style=""/g, "")
         .replace(/(min-|max-)?(width|height): *\d+\.*\d+(px)?;? */g, "");
 
-    await expect(cleanedContents).toMatchSnapshot(snapshotPath);
+    const formatted = await prettier.format(cleanedContents, {
+        parser: "html",
+    });
+
+    await expect(formatted).toMatchSnapshot(snapshotPath);
 }
 
 export async function compareSVGContentsToSnapshot(
@@ -190,13 +195,11 @@ export function getWorkspaceShadowDOMContents(page: Page): Promise<string> {
 
 export async function compareLightDOMContents(page, snapshotFileName) {
     const contents = await getWorkspaceLightDOMContents(page);
-
     await compareContentsToSnapshot(contents, [snapshotFileName]);
 }
 
 export async function compareShadowDOMContents(page, snapshotFileName) {
     const contents = await getWorkspaceShadowDOMContents(page);
-
     await compareContentsToSnapshot(contents, [snapshotFileName]);
 }
 

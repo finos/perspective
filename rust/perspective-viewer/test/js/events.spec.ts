@@ -15,14 +15,17 @@ import {
     compareContentsToSnapshot,
     API_VERSION,
 } from "@finos/perspective-test";
+import * as prettier from "prettier";
 
 async function get_contents(page) {
-    return await page.evaluate(async () => {
+    const raw = await page.evaluate(async () => {
         // @ts-ignore
-        const viewer = document
-            .querySelector("perspective-viewer")
-            .shadowRoot.querySelector("#app_panel");
+        const viewer = document.querySelector("perspective-viewer").shadowRoot;
         return viewer ? viewer.innerHTML : "MISSING";
+    });
+
+    return await prettier.format(raw, {
+        parser: "html",
     });
 }
 
