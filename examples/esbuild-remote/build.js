@@ -24,6 +24,7 @@ async function build() {
         loader: {
             ".ttf": "file",
             ".arrow": "file",
+            ".wasm": "file",
         },
         assetNames: "[name]",
     });

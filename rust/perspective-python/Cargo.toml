@@ -22,7 +22,6 @@ authors = ["Andrew Stein <steinlink@gmail.com>"]
 keywords = []
 build = "build.rs"
 include = [
-    "bench/**/*.py",
     "build.rs",
     "./Cargo.toml",
     "LICENSE.md",

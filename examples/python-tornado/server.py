@@ -26,14 +26,6 @@ file_path = os.path.join(
 )
 
 
-async def init_table(client):
-    with open(file_path, mode="rb") as file:
-        data = file.read()
-        table = client.table(data, name="data_source_one")
-        for _ in range(10):
-            table.update(data)
-
-
 def make_app(perspective_server):
     return tornado.web.Application(
         [
@@ -62,6 +54,11 @@ if __name__ == "__main__":
     app.listen(8080)
     logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
-    client = perspective_server.new_local_client(loop_callback=loop.add_callback)
-    loop.call_later(0, init_table, client)
+    client = perspective_server.new_local_client()
+    with open(file_path, mode="rb") as file:
+        data = file.read()
+        table = client.table(data, name="data_source_one")
+        for _ in range(10):
+            table.update(data)
+
     loop.start()

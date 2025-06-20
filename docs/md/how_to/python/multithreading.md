@@ -1,21 +1,41 @@
 # Multi-threading
 
-Perspective's API is thread-safe (safe to call from multiple threads
-concurrently),
+Perspective's API is thread-safe, so methods may be called from different
+threads without additional consideration for safety/exclusivity/correctness. All
+`perspective.Client` and `perspective.Server` API methods release the GIL, which
+can be exploited for parallelism.
 
-Perspective's server API releases the GIL when called (though it may be retained
-for some portion of the `Client` call to encode RPC messages). It also
-dispatches to an internal thread pool for some operations, enabling better
-parallelism and overall better server performance. However, Perspective's Python
-interface itself will still process queries in a single queue. To enable
-parallel query processing, call `set_loop_callback` with a multi-threaded
-executor such as `concurrent.futures.ThreadPoolExecutor`:
+Interally, `perspective.Server` also dispatches to a thread pool for some
+operations, enabling better parallelism and overall better query performance.
+This independent threadpool size can be controlled via
+`perspective.set_num_cpus()`, or the `OMP_NUM_THREADS` environment variable.
 
 ```python
-def perspective_thread():
-    server = perspective.Server()
-    loop = tornado.ioloop.IOLoop()
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        server.set_loop_callback(loop.run_in_executor, executor)
-        loop.start()
+import perspective
+
+perspective.set_num_cpus(2)
+```
+
+## Server handlers
+
+Perspective's server handler implementations each take an optional `executor`
+constructor argument, which (when provided) will configure the handler to
+process WebSocket `Client` requests on a thread pool.
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+from tornado.web import Application
+from perspective.handlers.tornado import PerspectiveTornadoHandler
+from perspective import Server
+
+args = {"perspective_server": Server(), "executor": ThreadPoolExecutor()}
+
+app = Application(
+    [
+        (r"/websocket", PerspectiveTornadoHandler, args),
+
+        # ...
+
+    ]
+)
 ```
