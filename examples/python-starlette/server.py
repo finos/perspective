@@ -10,11 +10,9 @@
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import asyncio
 import os
 import os.path
 import logging
-import threading
 import uvicorn
 
 from fastapi import FastAPI, WebSocket
@@ -35,27 +33,11 @@ def static_node_modules_handler(rest_of_path):
     return FileResponse("../../node_modules/{}".format(rest_of_path))
 
 
-def perspective_thread(server):
-    """Perspective application thread starts its own event loop, and
-    adds the table with the name "data_source_one", which will be used
-    in the front-end."""
-    psp_loop = asyncio.new_event_loop()
-    client = server.new_local_client(loop_callback=psp_loop.call_soon_threadsafe)
-
-    def init():
-        with open(file_path, mode="rb") as file:
-            client.table(file.read(), index="Row ID", name="data_source_one")
-
-    psp_loop.call_soon_threadsafe(init)
-    psp_loop.run_forever()
-
-
 def make_app():
     server = Server()
-
-    thread = threading.Thread(target=perspective_thread, args=(server,))
-    thread.daemon = True
-    thread.start()
+    client = server.new_local_client()
+    with open(file_path, mode="rb") as file:
+        client.table(file.read(), index="Row ID", name="data_source_one")
 
     async def websocket_handler(websocket: WebSocket):
         handler = PerspectiveStarletteHandler(

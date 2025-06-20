@@ -10,23 +10,24 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-export const D3FC_GLOBAL_STYLES = [];
-
 // Capture (and restore) `document.querySelector` to prevent D3FC from
 // attaching styles to the document `<head>`.
 export async function init() {
     const old_doc = window.document.querySelector;
+    const stylesheets = [];
+
     // @ts-ignore
     window.document.querySelector = () => {
         return {
             appendChild(elem) {
-                D3FC_GLOBAL_STYLES.push(elem);
+                stylesheets.push(elem);
                 return elem;
             },
         };
     };
 
-    const { register } = await import("./plugin");
+    const { register, createStyleSheets } = await import("./plugin");
     window.document.querySelector = old_doc;
+    createStyleSheets(stylesheets);
     register();
 }

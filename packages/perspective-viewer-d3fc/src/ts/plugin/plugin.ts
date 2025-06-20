@@ -18,7 +18,7 @@ import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 import type * as psp_types from "@finos/perspective-viewer";
 
 import * as d3 from "d3";
-import { D3FC_GLOBAL_STYLES } from "./d3fc_global_styles";
+
 import { Chart, Settings, Type } from "../types";
 
 const DEFAULT_PLUGIN_SETTINGS = {
@@ -30,17 +30,7 @@ const DEFAULT_PLUGIN_SETTINGS = {
     selectMode: "select",
 };
 
-const styleSheets = [];
-for (const style of D3FC_GLOBAL_STYLES) {
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(style.textContent);
-    styleSheets.push(sheet);
-}
-
-const sheet = new CSSStyleSheet();
-sheet.replaceSync(style);
-
-styleSheets.push(sheet);
+const D3FC_GLOBAL_STYLES = [];
 
 const EXCLUDED_SETTINGS = [
     "crossValues",
@@ -61,6 +51,18 @@ const EXCLUDED_SETTINGS = [
 async function register_element(plugin_name: string) {
     const perspectiveViewerClass = customElements.get("perspective-viewer");
     await perspectiveViewerClass.registerPlugin(plugin_name);
+}
+
+export function createStyleSheets(sheets) {
+    for (const style of sheets) {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(style.textContent);
+        D3FC_GLOBAL_STYLES.push(sheet);
+    }
+
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(style);
+    D3FC_GLOBAL_STYLES.push(sheet);
 }
 
 export function register(...plugin_names: string[]) {
@@ -115,7 +117,7 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
     connectedCallback() {
         if (!this._initialized) {
             this.attachShadow({ mode: "open" });
-            for (const sheet of styleSheets) {
+            for (const sheet of D3FC_GLOBAL_STYLES) {
                 this.shadowRoot.adoptedStyleSheets.push(sheet);
             }
 

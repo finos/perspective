@@ -23,6 +23,15 @@ import { format_raw } from "../data_listener/format_cell.js";
  * The custom element class for this plugin.  The interface methods for this
  */
 export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
+    static global_stylesheet_installed = false;
+    static renderTarget =
+        window.CSS?.supports &&
+        window.CSS?.supports("selector(:host-context(foo))")
+            ? "shadow"
+            : "light";
+
+    static #sheet;
+
     constructor() {
         super();
         this.regular_table = document.createElement("regular-table");
@@ -30,14 +39,20 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         this._is_scroll_lock = false;
         this._edit_mode = "READ_ONLY";
         const Elem = HTMLPerspectiveViewerDatagridPluginElement;
-        if (Elem.renderTarget == "shadow") {
-            if (!Elem.#sheet) {
-                Elem.#sheet = new CSSStyleSheet();
-                Elem.#sheet.replaceSync(datagridStyles);
-            }
+        if (!Elem.#sheet) {
+            Elem.#sheet = new CSSStyleSheet();
+            Elem.#sheet.replaceSync(datagridStyles);
+        }
 
+        if (Elem.renderTarget === "shadow") {
             const shadow = this.attachShadow({ mode: "open" });
             shadow.adoptedStyleSheets.push(Elem.#sheet);
+        } else if (
+            Elem.renderTarget === "light" &&
+            !Elem.global_stylesheet_installed
+        ) {
+            Elem.global_stylesheet_installed = true;
+            document.adoptedStyleSheets.push(Elem.#sheet);
         }
     }
 
@@ -177,11 +192,4 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         }
         this.regular_table.clear();
     }
-
-    static renderTarget =
-        window.CSS?.supports &&
-        window.CSS?.supports("selector(:host-context(foo))")
-            ? "shadow"
-            : "light";
-    static #sheet;
 }
