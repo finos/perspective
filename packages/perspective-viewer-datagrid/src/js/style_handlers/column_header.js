@@ -135,17 +135,40 @@ function style_column_header_row(regularTable, col_headers, is_menu_row) {
             "psp-header-sort-asc",
             !is_menu_row && !!sort && sort[1] === "asc"
         );
+
         td.classList.toggle(
             "psp-header-sort-desc",
             !is_menu_row && !!sort && sort[1] === "desc"
         );
+
         td.classList.toggle(
             "psp-header-sort-col-asc",
             !is_menu_row && !!sort && sort[1] === "col asc"
         );
+
         td.classList.toggle(
             "psp-header-sort-col-desc",
             !is_menu_row && !!sort && sort[1] === "col desc"
+        );
+
+        td.classList.toggle(
+            "psp-header-sort-abs-asc",
+            !is_menu_row && !!sort && sort[1] === "asc abs"
+        );
+
+        td.classList.toggle(
+            "psp-header-sort-abs-desc",
+            !is_menu_row && !!sort && sort[1] === "desc abs"
+        );
+
+        td.classList.toggle(
+            "psp-header-sort-abs-col-asc",
+            !is_menu_row && !!sort && sort[1] === "col asc abs"
+        );
+
+        td.classList.toggle(
+            "psp-header-sort-abs-col-desc",
+            !is_menu_row && !!sort && sort[1] === "col desc abs"
         );
 
         let type = get_psp_type.call(this, metadata);
