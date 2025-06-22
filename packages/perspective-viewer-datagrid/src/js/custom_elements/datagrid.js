@@ -23,14 +23,17 @@ import { format_raw } from "../data_listener/format_cell.js";
  * The custom element class for this plugin.  The interface methods for this
  */
 export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
-    static global_stylesheet_installed = false;
+    static #global_stylesheet_installed = false;
+
+    static #sheet;
+
+    // Determines whether this datagrid renders in the light DOM. This will
+    // break style encapsulation and may cause inconsistent behavior.
     static renderTarget =
         window.CSS?.supports &&
         window.CSS?.supports("selector(:host-context(foo))")
             ? "shadow"
             : "light";
-
-    static #sheet;
 
     constructor() {
         super();
@@ -49,9 +52,9 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
             shadow.adoptedStyleSheets.push(Elem.#sheet);
         } else if (
             Elem.renderTarget === "light" &&
-            !Elem.global_stylesheet_installed
+            !Elem.#global_stylesheet_installed
         ) {
-            Elem.global_stylesheet_installed = true;
+            Elem.#global_stylesheet_installed = true;
             document.adoptedStyleSheets.push(Elem.#sheet);
         }
     }
@@ -190,6 +193,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         if (this.regular_table.table_model) {
             this.regular_table._resetAutoSize();
         }
+
         this.regular_table.clear();
     }
 }

@@ -30,9 +30,10 @@ export async function mousedown_listener(regularTable, viewer, event) {
         }
     }
 
+    event.preventDefault();
+    event.stopImmediatePropagation();
     if (target.classList.contains("psp-tree-label")) {
         expandCollapseHandler.call(this, regularTable, event);
-        event.stopImmediatePropagation();
         return;
     }
 
@@ -40,11 +41,8 @@ export async function mousedown_listener(regularTable, viewer, event) {
         const meta = regularTable.getMeta(target);
         const column_name = meta.column_header?.[this._config.split_by.length];
         await viewer.toggleColumnSettings(column_name);
-        event.preventDefault();
-        event.stopImmediatePropagation();
     } else if (target.classList.contains("psp-sort-enabled")) {
         sortHandler.call(this, regularTable, viewer, event, target);
-        event.stopImmediatePropagation();
     }
 }
 

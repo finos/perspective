@@ -54,6 +54,67 @@ function get_psp_type(metadata) {
 
 export async function createModel(regular, table, view, extend = {}) {
     const config = await view.get_config();
+    if (this?.model?._config) {
+        const old = this.model._config;
+        let group_by_changed = old.group_by.length !== config.group_by.length;
+        const type_changed =
+            (old.group_by.length === 0 || config.group_by.length === 0) &&
+            group_by_changed;
+
+        if (!group_by_changed) {
+            for (const lvl in old.group_by) {
+                group_by_changed ||= config.group_by[lvl] !== old.group_by[lvl];
+            }
+        }
+
+        let split_by_changed = old.split_by.length !== config.split_by.length;
+        if (split_by_changed) {
+            for (const lvl in old.split_by) {
+                split_by_changed ||= config.split_by[lvl] !== old.split_by[lvl];
+            }
+        }
+
+        let columns_changed = old.columns.length !== config.columns.length;
+        if (columns_changed) {
+            for (const lvl in old.columns) {
+                columns_changed ||= config.columns[lvl] !== old.columns[lvl];
+            }
+        }
+
+        let filter_changed = old.filter.length !== config.filter.length;
+        if (filter_changed) {
+            for (const lvl in old.filter) {
+                for (const i in config.filter[lvl]) {
+                    filter_changed ||=
+                        config.filter[lvl][i] !== old.filter[lvl][i];
+                }
+            }
+        }
+
+        let sort_changed = old.sort.length !== config.sort.length;
+        if (sort_changed) {
+            for (const lvl in old.sort) {
+                for (const i in config.sort[lvl]) {
+                    sort_changed ||= config.sort[lvl][i] !== old.sort[lvl][i];
+                }
+            }
+        }
+
+        this._reset_scroll_top = group_by_changed;
+        this._reset_scroll_left = split_by_changed;
+        this._reset_select =
+            group_by_changed ||
+            split_by_changed ||
+            filter_changed ||
+            sort_changed ||
+            columns_changed;
+
+        this._reset_column_size =
+            split_by_changed ||
+            group_by_changed ||
+            columns_changed ||
+            type_changed;
+    }
 
     // Extract the entire expression string as typed by the user, so we can
     // feed it into `validate_expressions` and get back the data types for

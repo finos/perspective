@@ -30,13 +30,29 @@ export async function draw(view) {
 
     const old_sizes = save_column_size_overrides.call(this);
     const draw = this.regular_table.draw({ invalid_columns: true });
-    if (!this.model._preserve_focus_state) {
+    if (this._reset_scroll_top) {
+        // group_by
+        this.regular_table.scrollTop = 0;
+        this._reset_scroll_top = false;
+    }
+
+    if (this._reset_scroll_left) {
+        // split_by
+        this.regular_table.scrollLeft = 0;
+        this._reset_scroll_left = false;
+    }
+    if (this._reset_select) {
+        // filter, group_by, sort ... if (col-select) { columns, split_by }
         this.regular_table.dispatchEvent(
             new CustomEvent("psp-deselect-all", { bubbles: false })
         );
+        this._reset_select = false;
+    }
+
+    if (this._reset_column_size) {
+        // split_by, group_by (?),
         this.regular_table._resetAutoSize();
-    } else {
-        this.model._preserve_focus_state = false;
+        this._reset_column_size = false;
     }
 
     restore_column_size_overrides.call(this, old_sizes);
