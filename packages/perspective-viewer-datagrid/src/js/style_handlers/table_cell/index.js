@@ -83,8 +83,18 @@ export function table_cell_style_listener(regularTable, viewer) {
             }
 
             tr.dataset.y = metadata.y;
-            td.dataset.y = metadata.y;
-            td.dataset.x = metadata.x;
+            if (
+                metadata.row_header_x === undefined ||
+                metadata.row_header_x === metadata.row_header.length - 1 ||
+                metadata.row_header[metadata.row_header_x + 1] === undefined
+            ) {
+                td.dataset.y = metadata.y;
+                td.dataset.x = metadata.x;
+            } else {
+                delete td.dataset.y;
+                delete td.dataset.x;
+            }
+
             td.classList.toggle("psp-align-right", !is_th && is_numeric);
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle(
