@@ -51,6 +51,8 @@
         "@finos/perspective-viewer": "workspace:^",
         "chroma-js": "^1.3.4",
         "d3fc": "^15.2.4",
+        "@d3fc/d3fc-chart": "^5.1.9",
+        "@d3fc/d3fc-element": "^6.2.0",
         "d3-selection": "^3.0.0",
         "d3-array": "^3.2.1",
         "d3-svg-legend": "^2.25.6",
