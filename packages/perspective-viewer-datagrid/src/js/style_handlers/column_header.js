@@ -95,7 +95,14 @@ export function column_header_style_listener(regularTable, viewer) {
             1
         );
 
-        style_column_header_row.call(this, regularTable, col_headers, false);
+        if (col_headers) {
+            style_column_header_row.call(
+                this,
+                regularTable,
+                col_headers,
+                false
+            );
+        }
 
         let [style_menu_headers] = group_header_trs.splice(
             this._config.split_by.length,
@@ -116,7 +123,7 @@ export function column_header_style_listener(regularTable, viewer) {
 function style_column_header_row(regularTable, col_headers, is_menu_row) {
     // regular header styling
     const header_depth = regularTable._view_cache.config.row_pivots.length - 1;
-    for (const td of col_headers?.children) {
+    for (const td of col_headers.children) {
         const metadata = regularTable.getMeta(td);
         const column_name =
             metadata.column_header?.[this._config.split_by.length];
