@@ -886,6 +886,60 @@ const std = (nums) => {
             await table.delete();
         });
 
+        test("max_by with empty filter", async () => {
+            const data = {
+                a: [1, 2, 3, 4, 5, 6, 7, 8],
+                b: [0, 1, 0, 1, 0, 1, 0, 1],
+                c: ["h", "g", "f", "e", "d", "c", "b", "a"],
+            };
+
+            const table = await perspective.table(data);
+            const view = await table.view({
+                columns: ["c"],
+                aggregates: {
+                    c: ["max by", "a"],
+                },
+                group_by: ["b"],
+                filter: [["b", ">", 2]],
+            });
+
+            const cols = await view.to_columns();
+            expect(cols).toEqual({
+                __ROW_PATH__: [[]],
+                c: [""],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        test("max with empty filter", async () => {
+            const data = {
+                a: [1, 2, 3, 4, 5, 6, 7, 8],
+                b: [0, 1, 0, 1, 0, 1, 0, 1],
+                c: ["h", "g", "f", "e", "d", "c", "b", "a"],
+            };
+
+            const table = await perspective.table(data);
+            const view = await table.view({
+                columns: ["c"],
+                aggregates: {
+                    c: "max",
+                },
+                group_by: ["b"],
+                filter: [["b", ">", 2]],
+            });
+
+            const cols = await view.to_columns();
+            expect(cols).toEqual({
+                __ROW_PATH__: [[]],
+                c: [""],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
         test("high with count and partial update", async () => {
             const table = await perspective.table(
                 {
