@@ -1580,6 +1580,11 @@ t_stree::update_agg_table(
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
+                if (pkeys.empty()) {
+                    dst->set_scalar(dst_ridx, new_value);
+                    break;
+                }
+
                 std::vector<t_tscalar> values;
                 read_column_from_gstate(
                     gstate,
@@ -1596,6 +1601,11 @@ t_stree::update_agg_table(
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
+                if (pkeys.empty()) {
+                    dst->set_scalar(dst_ridx, new_value);
+                    break;
+                }
+
                 std::vector<t_tscalar> values;
                 read_column_from_gstate(
                     gstate,
@@ -1625,6 +1635,11 @@ t_stree::update_agg_table(
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
+                if (pkeys.empty()) {
+                    dst->set_scalar(dst_ridx, new_value);
+                    break;
+                }
+
                 std::vector<t_tscalar> values;
                 read_column_from_gstate(
                     gstate,
@@ -1641,6 +1656,11 @@ t_stree::update_agg_table(
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
+                if (pkeys.empty()) {
+                    dst->set_scalar(dst_ridx, new_value);
+                    break;
+                }
+
                 std::vector<t_tscalar> values;
                 read_column_from_gstate(
                     gstate,
