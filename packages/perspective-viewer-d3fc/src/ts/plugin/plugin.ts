@@ -21,6 +21,9 @@ import * as d3 from "d3";
 
 import { Chart, Settings, Type } from "../types";
 
+import * as d3fc_style_1 from "@d3fc/d3fc-chart/src/css.js";
+import * as d3fc_style_2 from "@d3fc/d3fc-element/src/css.js";
+
 const DEFAULT_PLUGIN_SETTINGS = {
     initial: {
         type: "number",
@@ -30,7 +33,13 @@ const DEFAULT_PLUGIN_SETTINGS = {
     selectMode: "select",
 };
 
-const D3FC_GLOBAL_STYLES = [];
+const D3FC_GLOBAL_STYLES = [d3fc_style_1.css, d3fc_style_2.css, style].map(
+    (x) => {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(x);
+        return sheet;
+    }
+);
 
 const EXCLUDED_SETTINGS = [
     "crossValues",
@@ -51,18 +60,6 @@ const EXCLUDED_SETTINGS = [
 async function register_element(plugin_name: string) {
     const perspectiveViewerClass = customElements.get("perspective-viewer");
     await perspectiveViewerClass.registerPlugin(plugin_name);
-}
-
-export function createStyleSheets(sheets) {
-    for (const style of sheets) {
-        const sheet = new CSSStyleSheet();
-        sheet.replaceSync(style.textContent);
-        D3FC_GLOBAL_STYLES.push(sheet);
-    }
-
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(style);
-    D3FC_GLOBAL_STYLES.push(sheet);
 }
 
 export function register(...plugin_names: string[]) {

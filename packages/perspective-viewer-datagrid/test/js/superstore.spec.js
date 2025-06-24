@@ -94,6 +94,32 @@ test.describe("Datagrid with superstore data set", () => {
             "column-headers-are-printed-correctly-split-by-a-date-column.txt"
         );
     });
+
+    test("A filtered-to-empty dataset with group_by and split_by does not error internally", async ({
+        page,
+    }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
+        });
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+                columns: ["Sales", "Profit"],
+                group_by: ["State"],
+                split_by: ["Ship Mode"],
+                filter: [["State", "==", "Schmexas"]],
+            });
+        });
+
+        compareContentsToSnapshot(
+            await getDatagridContents(page),
+            "a-filtered-to-empty-dataset-with-group-by-and-split-by-does-not-error-internally.txt"
+        );
+    });
 });
 
 test.describe("Datagrid with superstore arrow data set", () => {

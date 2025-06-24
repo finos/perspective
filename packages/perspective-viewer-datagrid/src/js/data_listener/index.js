@@ -128,6 +128,8 @@ export function createDataListener(viewer) {
         }
 
         return {
+            num_column_headers: column_headers[0]?.length || 1,
+            num_row_headers: this._config.group_by.length + 1,
             num_rows: this._num_rows,
             num_columns: this._column_paths.length,
             row_headers: Array.from(

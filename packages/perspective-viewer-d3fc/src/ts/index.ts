@@ -11,9 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import type { IPerspectiveViewerPlugin } from "@finos/perspective-viewer";
-import { init } from "./plugin/d3fc_global_styles";
+import { register } from "./plugin/plugin";
 
-await init();
+await register();
 
 declare global {
     interface CustomElementRegistry {

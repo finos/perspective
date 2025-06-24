@@ -143,12 +143,6 @@ export async function createModel(regular, table, view, extend = {}) {
         this.parentElement.getEditPort(),
     ]);
 
-    // Due to conflation, this plugin may be called on a `View` that has yet
-    // to be populated with data by a `poll()`.
-    if (Object.keys(schema).length === 0) {
-        return undefined;
-    }
-
     const _plugin_background = chroma(
         get_rule(regular, "--plugin--background", "#FFFFFF")
     ).rgb();
