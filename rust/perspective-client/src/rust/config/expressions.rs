@@ -641,7 +641,7 @@ pub static COMPLETIONS: [CompletionItemSuggestion; 77] = [
     },
     CompletionItemSuggestion {
         label: "replace_all",
-        insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})",
+        insert_text: "replace_all(${1:string}, ${2:pattern}, ${3:replacer})",
         documentation: "Replaces all non-overlapping matches of pattern in string with replacer, \
                         or return the original string if no replaces were made.",
     },
@@ -661,3 +661,17 @@ pub static COMPLETIONS: [CompletionItemSuggestion; 77] = [
         documentation: "Looks up a value in another column by index",
     },
 ];
+
+#[test]
+fn test_completions_insert_text_matches_label() {
+    for comp in COMPLETIONS {
+        let label = comp.label;
+        let insert_text = comp.insert_text;
+        assert!(
+            insert_text.starts_with(&label),
+            "insert_text for label {label} does not start with {label}:\n    {insert_text}",
+            label = label,
+            insert_text = insert_text
+        );
+    }
+}
