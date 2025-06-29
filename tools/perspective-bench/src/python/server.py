@@ -61,7 +61,8 @@ if not perspective.__version__.startswith("3"):
                     tornado.web.StaticFileHandler,
                     {"path": "../../node_modules/"},
                 ),
-            ]
+            ],
+            websocket_max_message_size=1000 * 1024 * 1024,
         )
 
     if __name__ == "__main__":
@@ -86,7 +87,8 @@ else:
                     tornado.web.StaticFileHandler,
                     {"path": "../../node_modules/"},
                 ),
-            ]
+            ],
+            websocket_max_message_size=1000 * 1024 * 1024,
         )
 
     if __name__ == "__main__":

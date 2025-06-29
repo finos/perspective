@@ -23,6 +23,10 @@ class PerspectiveTornadoHandler(WebSocketHandler):
     connect to a JavaScript (Wasm) `Client`, providing a virtual interface to
     the `Server`'s resources for e.g. `<perspective-viewer>`.
 
+    You may need to increase the `websocket_max_message_size` kwarg
+    to the `tornado.web.Application` constructor, as well as provide the
+    `max_buffer_size` optional arg, for large datasets.
+
     Args:
         loop: An optional `IOLoop` instance to use for scheduling IO calls,
             defaults to `IOLoop.current()`.
@@ -45,11 +49,17 @@ class PerspectiveTornadoHandler(WebSocketHandler):
         return True
 
     def initialize(
-        self, perspective_server=perspective.GLOBAL_SERVER, loop=None, executor=None
+        self,
+        perspective_server=perspective.GLOBAL_SERVER,
+        loop=None,
+        executor=None,
+        max_buffer_size=None,
     ):
         self.server = perspective_server
         self.loop = loop or IOLoop.current()
         self.executor = executor
+        if max_buffer_size is not None:
+            self.request.connection.stream.max_buffer_size = max_buffer_size
 
     def open(self):
         def write(msg):

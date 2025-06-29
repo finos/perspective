@@ -23,17 +23,11 @@ function invert_promise<T>(): [(t: T) => void, Promise<T>, (t: any) => void] {
     return [sender!, receiver, reject!];
 }
 
-/**
- * Create a new client connected via WebSocket to a server implemnting the
- * Perspective Protocol.
- * @param module
- * @param url
- * @returns
- */
 export async function websocket(
     WebSocket: typeof window.WebSocket,
     Client: typeof perspective_client.Client,
-    url: string | URL
+    url: string | URL,
+    options?: { maxPayload: number }
 ): Promise<perspective_client.Client> {
     let client: perspective_client.Client, ws: WebSocket;
 
@@ -47,7 +41,9 @@ export async function websocket(
         }
 
         let [sender, receiver, reject] = invert_promise();
-        ws = new WebSocket(url);
+
+        // @ts-ignore
+        ws = new WebSocket(url, options);
         ws.onopen = sender;
         ws.binaryType = "arraybuffer";
         ws.onerror = (event) => {

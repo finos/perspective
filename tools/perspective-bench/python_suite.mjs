@@ -28,6 +28,10 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
 const CLIENT_VERSION = {
     master: "@finos/perspective",
+    "3.6.0": "perspective-3-6-0",
+    "3.5.0": "perspective-3-5-0",
+    "3.4.0": "perspective-3-4-0",
+    "3.3.0": "perspective-3-3-0",
     "3.2.0": "perspective-3-2-0",
     "3.1.0": "perspective-3-1-0",
     "3.0.3": "perspective-3-0-0",
@@ -53,7 +57,8 @@ perspective_bench.suite(
         console.log(version);
         const { default: perspective } = await import(CLIENT_VERSION[version]);
         const client = await perspective.websocket(
-            "ws://127.0.0.1:8082/websocket"
+            "ws://127.0.0.1:8082/websocket",
+            { maxPayload: 1024 * 1024 * 1024 }
         );
 
         const metadata = { version, version_idx };
