@@ -68,7 +68,7 @@ impl Component for PivotColumn {
             .session
             .metadata()
             .get_column_table_type(&ctx.props().column)
-            .expect("Unknown column");
+            .unwrap_or(perspective_client::ColumnType::Integer);
 
         html! {
             <div

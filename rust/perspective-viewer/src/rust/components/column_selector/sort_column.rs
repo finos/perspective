@@ -111,7 +111,7 @@ impl Component for SortColumn {
             .session
             .metadata()
             .get_column_table_type(&ctx.props().sort.0.to_owned())
-            .expect("Unknown column");
+            .unwrap_or(perspective_client::ColumnType::Integer);
 
         html! {
             <div

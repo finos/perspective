@@ -232,7 +232,7 @@ impl Client {
         {
             tracing::error!("{}", message);
         } else {
-            tracing::warn!("Received unsolicited server message");
+            tracing::debug!("Received unsolicited server response: {}", msg);
         }
 
         Ok(false)

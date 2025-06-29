@@ -605,7 +605,7 @@ impl Session {
     }
 
     async fn validate_view_config(&self) -> ApiResult<()> {
-        let config = self.borrow().config.clone();
+        let mut config = self.borrow().config.clone();
         let table_columns = self
             .metadata()
             .get_table_columns()
@@ -623,13 +623,11 @@ impl Session {
             .ok_or_else(|| apierror!(NoTableError))?
             .clone();
 
-        let valid_recs = table.validate_expressions(config.expressions).await?;
+        let valid_recs = table
+            .validate_expressions(config.expressions.clone())
+            .await?;
+
         let expression_names = self.metadata_mut().update_expressions(&valid_recs)?;
-
-        // re-fetch config after `await`; `expressions` and `all_columns` are ok,
-        // but `config` may have changed as it is unlocked.
-        let mut config = self.borrow().config.clone();
-
         if config.columns.is_empty() {
             config.columns = table_columns.into_iter().map(Some).collect();
         }
