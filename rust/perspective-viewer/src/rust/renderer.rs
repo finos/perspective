@@ -70,6 +70,7 @@ pub struct RendererMutData {
     plugins_idx: Option<usize>,
     timer: MovingWindowRenderTimer,
     selection: Option<ViewWindow>,
+    pending_plugin: Option<usize>,
 }
 
 type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
@@ -114,6 +115,7 @@ impl Renderer {
                 plugins_idx: None,
                 selection: None,
                 timer: MovingWindowRenderTimer::default(),
+                pending_plugin: None,
             }),
             draw_lock: Default::default(),
             plugin_changed: Default::default(),
@@ -172,7 +174,7 @@ impl Renderer {
     /// error.
     pub fn get_active_plugin(&self) -> ApiResult<JsPerspectiveViewerPlugin> {
         if self.0.borrow().plugins_idx.is_none() {
-            self.set_plugin(Some(&PLUGIN_REGISTRY.default_plugin_name()))?;
+            let _ = self.apply_pending_plugin()?;
         }
 
         let idx = self.0.borrow().plugins_idx.unwrap_or(0);
@@ -221,20 +223,61 @@ impl Renderer {
         self.get_active_plugin().unwrap().set_render_warning(false);
     }
 
-    /// Set the active plugin to the plugin registerd as `name`, or the default
-    /// plugin if `None` is provided.
-    ///
-    /// # Arguments
-    /// - `update` The `PluginUpdate` behavior to set.
-    pub fn update_plugin(&self, update: &PluginUpdate) -> ApiResult<bool> {
-        match update {
-            PluginUpdate::Missing => Ok(false),
-            PluginUpdate::SetDefault => self.set_plugin(None),
-            PluginUpdate::Update(plugin) => self.set_plugin(Some(plugin)),
+    pub fn get_next_plugin_metadata(
+        &self,
+        update: &PluginUpdate,
+    ) -> Option<ViewConfigRequirements> {
+        let default_plugin_name = PLUGIN_REGISTRY.default_plugin_name();
+        let name = match update {
+            PluginUpdate::Missing => return None,
+            PluginUpdate::SetDefault => default_plugin_name.as_str(),
+            PluginUpdate::Update(plugin) => plugin,
+        };
+
+        let idx = self.find_plugin_idx(name).expect("f");
+
+        let changed = !matches!(
+            self.0.borrow().plugins_idx,
+            Some(selected_idx) if selected_idx == idx
+        );
+
+        if changed {
+            self.borrow_mut().pending_plugin = Some(idx);
+            self.get_plugin(name)
+                .and_then(|x| x.get_requirements())
+                .ok()
+        } else {
+            None
+        }
+    }
+
+    pub fn apply_pending_plugin(&self) -> ApiResult<bool> {
+        let xxx = self.borrow_mut().pending_plugin.take();
+        if let Some(idx) = xxx {
+            let changed = !matches!(
+                self.0.borrow().plugins_idx,
+                Some(selected_idx) if selected_idx == idx
+            );
+
+            if changed {
+                self.borrow_mut().plugins_idx = Some(idx);
+                let plugin: JsPerspectiveViewerPlugin = self.get_active_plugin()?;
+                self.borrow_mut().metadata = plugin.get_requirements()?;
+                self.plugin_changed.emit(plugin);
+            }
+
+            Ok(changed)
+        } else {
+            if self.0.borrow().plugins_idx.is_none() {
+                self.set_plugin(Some(&PLUGIN_REGISTRY.default_plugin_name()))?;
+            }
+
+            Ok(false)
         }
     }
 
     fn set_plugin(&self, name: Option<&str>) -> ApiResult<bool> {
+        self.borrow_mut().pending_plugin = None;
         let default_plugin_name = PLUGIN_REGISTRY.default_plugin_name();
         let name = name.unwrap_or(default_plugin_name.as_str());
         let idx = self

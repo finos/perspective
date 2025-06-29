@@ -166,6 +166,10 @@ impl Session {
                 let poll_loop = LocalPollLoop::new(move |(message, reconnect): (ApiError, _)| {
                     set_error(message.clone());
                     session.borrow_mut().error = Some(TableErrorState(message, reconnect));
+                    if let Some(sub) = session.borrow_mut().view_sub.take() {
+                        sub.dismiss();
+                    }
+
                     Ok(JsValue::UNDEFINED)
                 });
 

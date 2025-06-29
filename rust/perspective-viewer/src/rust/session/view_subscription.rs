@@ -155,6 +155,10 @@ impl ViewSubscription {
     pub async fn delete(self) -> ApiResult<()> {
         self.data.internal_delete().await
     }
+
+    pub fn dismiss(self) {
+        self.data.is_deleted.set(true);
+    }
 }
 
 // Conveniently lift [`ViewSubscription::delete`] to a commonly used storage

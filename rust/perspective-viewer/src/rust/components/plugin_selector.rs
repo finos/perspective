@@ -78,15 +78,18 @@ impl Component for PluginSelector {
             RendererSelectPlugin(_plugin_name) => true,
             ComponentSelectPlugin(plugin_name) => {
                 if !ctx.props().session.is_errored() {
-                    ctx.props()
+                    let metadata = ctx
+                        .props()
                         .renderer
-                        .update_plugin(&PluginUpdate::Update(plugin_name))
-                        .unwrap();
+                        .get_next_plugin_metadata(&PluginUpdate::Update(plugin_name));
 
                     let mut update = ViewConfigUpdate::default();
-                    ctx.props()
-                        .session
-                        .set_update_column_defaults(&mut update, &ctx.props().renderer.metadata());
+                    ctx.props().session.set_update_column_defaults(
+                        &mut update,
+                        metadata
+                            .as_ref()
+                            .unwrap_or(&*ctx.props().renderer.metadata()),
+                    );
 
                     if let Ok(task) = ctx.props().update_and_render(update) {
                         ApiFuture::spawn(task);

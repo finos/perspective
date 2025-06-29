@@ -69,14 +69,14 @@ pub trait RestoreAndRender: HasRenderer + HasSession + HasPresentation {
                 _ => false,
             };
 
-            let plugin_changed = renderer.update_plugin(&plugin)?;
-            if plugin_changed {
-                session.set_update_column_defaults(&mut view_config, &renderer.metadata());
+            if let Some(metadata) = renderer.get_next_plugin_metadata(&plugin) {
+                session.set_update_column_defaults(&mut view_config, &metadata);
             }
 
             session.update_view_config(view_config)?;
             let draw_task = renderer.draw(async {
                 task.await?;
+                renderer.apply_pending_plugin()?;
                 let plugin = renderer.get_active_plugin()?;
                 let plugin_update = if let Some(x) = plugin_config {
                     wasm_bindgen::JsValue::from_serde_ext(&*x).unwrap()

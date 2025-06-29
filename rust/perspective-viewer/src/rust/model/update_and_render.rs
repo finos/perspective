@@ -66,6 +66,7 @@ async fn update_and_render(session: Session, renderer: Renderer) -> ApiResult<()
         return Ok(());
     }
 
+    renderer.apply_pending_plugin()?;
     let view = session.validate().await?;
     renderer.draw(view.create_view()).await
 }
