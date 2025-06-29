@@ -25,6 +25,7 @@ option optimize_for = LITE_RUNTIME;
 enum StatusCode {
     SERVER_ERROR = 0;
     VIEW_NOT_FOUND = 1;
+    TRANSPORT_ERROR = 2;
 }
 
 // Recoverable, user-readable error reporting from the engine.

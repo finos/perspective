@@ -50,9 +50,11 @@ export async function websocket(
         ws = new WebSocket(url);
         ws.onopen = sender;
         ws.binaryType = "arraybuffer";
-        ws.onerror = (_event) => {
-            client.handle_error(`WebSocket error`, connect);
-            reject(`WebSocket error`);
+        ws.onerror = (event) => {
+            // @ts-expect-error
+            const msg = event.message || "Generic Websocket Error";
+            client.handle_error(msg, connect);
+            reject(msg);
         };
 
         ws.onclose = (event) => {

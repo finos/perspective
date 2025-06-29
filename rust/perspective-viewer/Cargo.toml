@@ -99,9 +99,10 @@ serde-wasm-bindgen = "0.6.0"
 thiserror = { version = "1.0.55" }
 
 # specta = { version = "2.0.0-rc.9", features = ["typescript"] }
-ts-rs = { version = "10.0.0", features = [
+ts-rs = { version = "11.0.1", features = [
     "serde-json-impl",
     "no-serde-warnings",
+    "import-esm",
 ] }
 
 # Async-aware logging that can be disabled at compile-time.

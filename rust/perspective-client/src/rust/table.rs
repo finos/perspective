@@ -363,7 +363,7 @@ impl Table {
                 on_delete();
                 Ok(())
             },
-            resp => Err(ClientError::OptionResponseFailed(resp.into())),
+            resp => Err(resp.into()),
         };
 
         let msg = self.client_message(ClientReq::TableOnDeleteReq(TableOnDeleteReq {}));

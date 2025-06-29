@@ -265,6 +265,10 @@ export function system_info() {
     return SYNC_CLIENT.system_info();
 }
 
+export function on_error(callback: Function) {
+    return SYNC_CLIENT.on_error(callback);
+}
+
 /**
  * Create a table from the global Perspective instance.
  * @param init_data
@@ -305,6 +309,7 @@ export default {
     get_hosted_table_names,
     on_hosted_tables_update,
     remove_hosted_tables_update,
+    on_error,
     system_info,
     WebSocketServer,
 };

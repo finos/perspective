@@ -209,7 +209,6 @@ impl Client {
         Ok(())
     }
 
-    #[doc(hidden)]
     #[wasm_bindgen]
     pub async fn handle_response(&self, value: &JsValue) -> ApiResult<()> {
         let uint8array = Uint8Array::new(value);
@@ -218,7 +217,6 @@ impl Client {
         Ok(())
     }
 
-    #[doc(hidden)]
     #[wasm_bindgen]
     pub async fn handle_error(&self, error: String, reconnect: Option<Function>) -> ApiResult<()> {
         self.client
@@ -253,7 +251,6 @@ impl Client {
         Ok(())
     }
 
-    #[doc(hidden)]
     #[wasm_bindgen]
     pub async fn on_error(&self, callback: Function) -> ApiResult<u32> {
         let callback = JsReconnect::from(
