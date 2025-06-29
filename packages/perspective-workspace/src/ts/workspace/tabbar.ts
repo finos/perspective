@@ -93,9 +93,13 @@ export class PerspectiveTabBar extends TabBar<any> {
 
     onClick(otherTitles: Title<any>[], index: number, event: MouseEvent) {
         const commands = new CommandRegistry();
-        this._menu = new WorkspaceMenu(this._workspace.menu_elem.shadowRoot!, {
-            commands,
-        });
+        this._menu = new WorkspaceMenu(
+            this._workspace.menu_elem.shadowRoot!,
+            this._workspace.element,
+            {
+                commands,
+            }
+        );
 
         this._menu.addClass("perspective-workspace-menu");
         this._menu.dataset.minwidth = this.__titles[index];
