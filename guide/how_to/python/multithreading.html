@@ -158,19 +158,37 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="multi-threading"><a class="header" href="#multi-threading">Multi-threading</a></h1>
-<p>Perspective's server API releases the GIL when called (though it may be retained
-for some portion of the <code>Client</code> call to encode RPC messages). It also
-dispatches to an internal thread pool for some operations, enabling better
-parallelism and overall better server performance. However, Perspective's Python
-interface itself will still process queries in a single queue. To enable
-parallel query processing, call <code>set_loop_callback</code> with a multi-threaded
-executor such as <code>concurrent.futures.ThreadPoolExecutor</code>:</p>
-<pre><code class="language-python">def perspective_thread():
-    server = perspective.Server()
-    loop = tornado.ioloop.IOLoop()
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        server.set_loop_callback(loop.run_in_executor, executor)
-        loop.start()
+<p>Perspective's API is thread-safe, so methods may be called from different
+threads without additional consideration for safety/exclusivity/correctness. All
+<code>perspective.Client</code> and <code>perspective.Server</code> API methods release the GIL, which
+can be exploited for parallelism.</p>
+<p>Interally, <code>perspective.Server</code> also dispatches to a thread pool for some
+operations, enabling better parallelism and overall better query performance.
+This independent threadpool size can be controlled via
+<code>perspective.set_num_cpus()</code>, or the <code>OMP_NUM_THREADS</code> environment variable.</p>
+<pre><code class="language-python">import perspective
+
+perspective.set_num_cpus(2)
+</code></pre>
+<h2 id="server-handlers"><a class="header" href="#server-handlers">Server handlers</a></h2>
+<p>Perspective's server handler implementations each take an optional <code>executor</code>
+constructor argument, which (when provided) will configure the handler to
+process WebSocket <code>Client</code> requests on a thread pool.</p>
+<pre><code class="language-python">from concurrent.futures import ThreadPoolExecutor
+from tornado.web import Application
+from perspective.handlers.tornado import PerspectiveTornadoHandler
+from perspective import Server
+
+args = {"perspective_server": Server(), "executor": ThreadPoolExecutor()}
+
+app = Application(
+    [
+        (r"/websocket", PerspectiveTornadoHandler, args),
+
+        # ...
+
+    ]
+)
 </code></pre>
 
                     </main>

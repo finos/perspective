@@ -204,7 +204,7 @@ applications.</p>
 <li><a href="https://docs.rs/perspective-js/latest/perspective_js/"><code>@finos/perspective</code>, JavaScript Client API</a></li>
 <li><a href="https://docs.rs/perspective-viewer/latest/perspective_viewer/"><code>@finos/perspective-viewer</code>, JavaScript UI API</a></li>
 <li><a href="https://docs.rs/perspective-python/latest/perspective_python/"><code>perspective-python</code>, Python API</a></li>
-<li><a href="https://docs.rs/perspective-rs/latest/perspective_rs/"><code>perspective</code>, Rust API</a></li>
+<li><a href="https://docs.rs/perspective/latest/perspective/"><code>perspective</code>, Rust API</a></li>
 </ul>
 <h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
 <!-- Examples -->
@@ -1320,6 +1320,28 @@ const websocket = await perspective.websocket(
 // objects live on the server.
 const server_table = await websocket.open_table("table_one");
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="using-a-custom-webworker"><a class="header" href="#using-a-custom-webworker">Using a custom WebWorker</a></h1>
+<p>The <code>Client.worker</code> constructor by default creates a dedicated <code>Worker</code> bound to
+the page context. Alternatively, <code>Client.worker</code> can take a <code>Worker</code>,
+<code>SharedWorker</code> or <code>ServiceWorker</code> instance as a first argument, which load the
+worker script disted at
+<code>"@finos/perspective/dist/cdn/perspective-server.worker.js"</code>.</p>
+<p><span class="warning"><code>SharedWorker</code> and <code>ServiceWorker</code> have more complicated
+behavior compared to a dedicated <code>Worker</code>, and will need special consideration
+to integrate (or debug).</span></p>
+<h2 id="dedicated-worker"><a class="header" href="#dedicated-worker">Dedicated <code>Worker</code></a></h2>
+<pre><code class="language-javascript">const worker = await perspective.worker(new Worker(url));
+</code></pre>
+<h2 id="sharedworker"><a class="header" href="#sharedworker"><code>SharedWorker</code></a></h2>
+<pre><code class="language-javascript">const worker = await perspective.worker(new SharedWorker(url));
+</code></pre>
+<h2 id="serviceworker"><a class="header" href="#serviceworker"><code>ServiceWorker</code></a></h2>
+<pre><code class="language-javascript">const registration = await navigator.serviceWorker.register(url, {
+    scope: "", // Your scope here
+});
+
+const worker = await perspective.worker(registration.active);
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="perspective-viewer-custom-element-library"><a class="header" href="#perspective-viewer-custom-element-library"><code>&lt;perspective-viewer&gt;</code> Custom Element library</a></h1>
 <p><code>&lt;perspective-viewer&gt;</code> provides a complete graphical UI for configuring the
 <code>perspective</code> library and formatting its output to the provided visualization
@@ -1576,6 +1598,125 @@ property returns the associated row data.</p>
     elem.restore(config);
 });
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="listening-for-events-1"><a class="header" href="#listening-for-events-1">Listening for events</a></h1>
+<p>The <code>&lt;perspective-viewer&gt;</code> Custom Element fires all the same HTML <code>Event</code>s that
+standard DOM <code>HTMLElement</code> objects fire, in addition to a few custom
+<code>CustomEvent</code>s which relate to UI updates including those initiaed through user
+interaction.</p>
+<h2 id="update-events-1"><a class="header" href="#update-events-1">Update events</a></h2>
+<p>Whenever a <code>&lt;perspective-viewer&gt;</code>s underlying <code>table()</code> is changed via the
+<code>load()</code> or <code>update()</code> methods, a <code>perspective-view-update</code> DOM event is fired.
+Similarly, <code>view()</code> updates instigated either through the Attribute API or
+through user interaction will fire a <code>perspective-config-update</code> event:</p>
+<pre><code class="language-javascript">elem.addEventListener("perspective-config-update", function (event) {
+    var config = elem.save();
+    console.log("The view() config has changed to " + JSON.stringify(config));
+});
+</code></pre>
+<h2 id="click-events-1"><a class="header" href="#click-events-1">Click events</a></h2>
+<p>Whenever a <code>&lt;perspective-viewer&gt;</code>'s grid or chart is clicked, a
+<code>perspective-click</code> DOM event is fired containing a detail object with <code>config</code>,
+<code>column_names</code>, and <code>row</code>.</p>
+<p>The <code>config</code> object contains an array of <code>filters</code> that can be applied to a
+<code>&lt;perspective-viewer&gt;</code> through the use of <code>restore()</code> updating it to show the
+filtered subset of data.</p>
+<p>The <code>column_names</code> property contains an array of matching columns, and the <code>row</code>
+property returns the associated row data.</p>
+<pre><code class="language-javascript">elem.addEventListener("perspective-click", function (event) {
+    var config = event.detail.config;
+    elem.restore(config);
+});
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="react-component"><a class="header" href="#react-component">React Component</a></h1>
+<p>We provide a React wrapper to prevent common issues and mistakes associated with
+using the perspective-viewer web component in the context of React.</p>
+<p>Before trying this example, please take a look at
+<a href="how_to/javascript/./importing.html">how to bootstrap perspective</a>.</p>
+<p>A simple example:</p>
+<pre><code class="language-typescript">import * as React from "react";
+import { createRoot } from "react-dom/client";
+import { PerspectiveViewer } from "@finos/perspective-react";
+
+import "@finos/perspective-viewer/dist/css/themes.css";
+import "./index.css";
+
+interface ToolbarState {
+    mounted: boolean;
+    table?: Promise&lt;psp.Table&gt;;
+    config: pspViewer.ViewerConfigUpdate;
+}
+
+const App: React.FC = () =&gt; {
+    const [state, setState] = React.useState&lt;ToolbarState&gt;(() =&gt; ({
+        mounted: true,
+        table: createNewSuperstoreTable(),
+        config: { ...CONFIG },
+    }));
+
+    React.useEffect(() =&gt; {
+        return () =&gt; {
+            state.table?.then((table) =&gt; table?.delete({ lazy: true }));
+        };
+    }, []);
+
+    const onClickOverwrite = () =&gt; {
+        state.table?.then((table) =&gt; table?.delete({ lazy: true }));
+        const table = createNewSuperstoreTable();
+        setState({ ...state, table });
+    };
+
+    const onClickDelete = () =&gt; {
+        state.table?.then((table) =&gt; table?.delete({ lazy: true }));
+        setState({ ...state, table: undefined });
+    };
+
+    const onClickToggleMount = () =&gt;
+        setState((old) =&gt; ({ ...old, mounted: !state.mounted }));
+
+    const onConfigUpdate = (config: pspViewer.ViewerConfigUpdate) =&gt; {
+        console.log("Config Update Event", config);
+        setState({ ...state, config });
+    };
+
+    const onClick = (detail: pspViewer.PerspectiveClickEventDetail) =&gt; {
+        console.log("Click Event,", detail);
+    };
+
+    const onSelect = (detail: pspViewer.PerspectiveSelectEventDetail) =&gt; {
+        console.log("Select Event", detail);
+    };
+
+    return (
+        &lt;div className="container"&gt;
+            &lt;div className="toolbar"&gt;
+                &lt;button onClick={onClickToggleMount}&gt;Toggle Mount&lt;/button&gt;
+                &lt;button onClick={onClickOverwrite}&gt;Overwrite Superstore&lt;/button&gt;
+                &lt;button onClick={onClickDelete}&gt;Delete Table&lt;/button&gt;
+            &lt;/div&gt;
+            {state.mounted &amp;&amp; (
+                &lt;&gt;
+                    &lt;PerspectiveViewer table={state.table} /&gt;
+                    &lt;PerspectiveViewer
+                        className="my-perspective-viewer"
+                        table={state.table}
+                        config={state.config}
+                        onClick={onClick}
+                        onSelect={onSelect}
+                        onConfigUpdate={onConfigUpdate}
+                    /&gt;
+                &lt;/&gt;
+            )}
+        &lt;/div&gt;
+    );
+};
+
+createRoot(document.getElementById("root")!).render(&lt;App /&gt;);
+</code></pre>
+<p>This adds a perspective table to the provider at the root of the app and allows
+us to create viewers referencing those tables anywhere within that context. Any
+views or viewers associated with the React component are automatically cleaned
+up as part of the lifecycle of the component, but tables are still the
+responsibility of the caller to cleanup currently.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="python"><a class="header" href="#python">Python</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
 <p><code>perspective-python</code> contains full bindings to the Perspective API, a JupyterLab
@@ -1689,19 +1830,37 @@ view.remove_delete(on_delete_id)
 <p>Callbacks defined with a lambda function cannot be removed, as lambda functions
 have no identifier.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="multi-threading"><a class="header" href="#multi-threading">Multi-threading</a></h1>
-<p>Perspective's server API releases the GIL when called (though it may be retained
-for some portion of the <code>Client</code> call to encode RPC messages). It also
-dispatches to an internal thread pool for some operations, enabling better
-parallelism and overall better server performance. However, Perspective's Python
-interface itself will still process queries in a single queue. To enable
-parallel query processing, call <code>set_loop_callback</code> with a multi-threaded
-executor such as <code>concurrent.futures.ThreadPoolExecutor</code>:</p>
-<pre><code class="language-python">def perspective_thread():
-    server = perspective.Server()
-    loop = tornado.ioloop.IOLoop()
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        server.set_loop_callback(loop.run_in_executor, executor)
-        loop.start()
+<p>Perspective's API is thread-safe, so methods may be called from different
+threads without additional consideration for safety/exclusivity/correctness. All
+<code>perspective.Client</code> and <code>perspective.Server</code> API methods release the GIL, which
+can be exploited for parallelism.</p>
+<p>Interally, <code>perspective.Server</code> also dispatches to a thread pool for some
+operations, enabling better parallelism and overall better query performance.
+This independent threadpool size can be controlled via
+<code>perspective.set_num_cpus()</code>, or the <code>OMP_NUM_THREADS</code> environment variable.</p>
+<pre><code class="language-python">import perspective
+
+perspective.set_num_cpus(2)
+</code></pre>
+<h2 id="server-handlers"><a class="header" href="#server-handlers">Server handlers</a></h2>
+<p>Perspective's server handler implementations each take an optional <code>executor</code>
+constructor argument, which (when provided) will configure the handler to
+process WebSocket <code>Client</code> requests on a thread pool.</p>
+<pre><code class="language-python">from concurrent.futures import ThreadPoolExecutor
+from tornado.web import Application
+from perspective.handlers.tornado import PerspectiveTornadoHandler
+from perspective import Server
+
+args = {"perspective_server": Server(), "executor": ThreadPoolExecutor()}
+
+app = Application(
+    [
+        (r"/websocket", PerspectiveTornadoHandler, args),
+
+        # ...
+
+    ]
+)
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="hosting-a-websocket-server"><a class="header" href="#hosting-a-websocket-server">Hosting a WebSocket server</a></h1>
 <p>An in-memory <code>Server</code> "hosts" all <code>perspective.Table</code> and <code>perspective.View</code>
