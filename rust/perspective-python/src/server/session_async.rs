@@ -36,12 +36,19 @@ impl SessionHandler for PyConnection {
         &'a mut self,
         msg: &'a [u8],
     ) -> Result<(), perspective_server::ServerError> {
-        Python::with_gil(move |py| {
+        let result = Python::with_gil(move |py| {
             self.0
                 .call1(py, (PyBytes::new(py, msg),))
                 .and_then(|x| py_async::py_into_future(x.into_bound(py)))
         })?
-        .await?;
+        .await;
+
+        // test
+        Python::with_gil(|_py| {
+            result
+                .map(|_| ())
+                .map_err(perspective_server::ServerError::from)
+        })?;
 
         Ok(())
     }
@@ -78,17 +85,15 @@ impl PyAsyncSession {
     }
 
     pub async fn close(&self) -> PyResult<()> {
-        AllowThreads(pin!(async move {
-            let mut lock = self.session.write().await;
-            lock.take()
-                .ok_or_else(|| {
-                    PyValueError::new_err(format!("Session {:?} already deleted", self.session))
-                })?
-                .close()
-                .await;
 
-            Ok(())
-        }))
-        .await
+        AllowThreads(pin!(async move { self.session.write().await.take() }))
+            .await
+            .ok_or_else(|| {
+                PyValueError::new_err(format!("Session {:?} already deleted", self.session))
+            })?
+            .close()
+            .await;
+
+        Ok(())
     }
 }

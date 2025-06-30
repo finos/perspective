@@ -26,7 +26,7 @@ version = "2.0.0"
 artifact = ["bin"]
 
 [dependencies.ts-rs]
-version = "10.0.0"
+version = "11.0.1"
 features = ["serde-json-impl", "no-serde-warnings"]
 
 [dependencies.perspective-server]

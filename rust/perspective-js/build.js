@@ -130,6 +130,13 @@ async function build_all() {
         "inherit",
         "inherit"
     );
+
+    await $`npx tsc --project ./tsconfig.node.json`.stdio(
+        "inherit",
+        "inherit",
+        "inherit"
+    );
+
     await cpy("target/themes/*", "dist/css");
     await cpy("target/themes/*", "dist/css");
 }

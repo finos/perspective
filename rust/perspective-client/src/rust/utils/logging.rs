@@ -12,19 +12,21 @@
 
 use prost::Message;
 
+use crate::ViewOnUpdateResp;
 use crate::proto::make_table_data::Data;
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::{
-    MakeTableData, MakeTableReq, Request, Response, TableUpdateReq, ViewToColumnsStringResp,
+    MakeTableData, MakeTableReq, Request, Response, TableUpdateReq, ViewToArrowResp,
+    ViewToColumnsStringResp, ViewToCsvResp, ViewToNdjsonStringResp, ViewToRowsStringResp,
 };
 
 fn replace(x: Data) -> Data {
     match x {
         Data::FromArrow(_) => Data::FromArrow("<< redacted >>".to_string().encode_to_vec()),
         Data::FromRows(_) => Data::FromRows("<< redacted >>".to_string()),
-        Data::FromCols(_) => Data::FromCols("".to_string()),
-        Data::FromCsv(_) => Data::FromCsv("".to_string()),
+        Data::FromCols(_) => Data::FromCols("<< redacted >>".to_string()),
+        Data::FromCsv(_) => Data::FromCsv("<< redacted >>".to_string()),
         x => x,
     }
 }
@@ -98,6 +100,52 @@ impl std::fmt::Display for Response {
                         json_string: "<< redacted >>".to_owned(),
                     },
                 )),
+                ..msg.clone()
+            },
+            Response {
+                client_resp: Some(ClientResp::ViewToRowsStringResp(_)),
+                ..
+            } => Response {
+                client_resp: Some(ClientResp::ViewToRowsStringResp(ViewToRowsStringResp {
+                    json_string: "<< redacted >>".to_owned(),
+                })),
+                ..msg.clone()
+            },
+            Response {
+                client_resp: Some(ClientResp::ViewToNdjsonStringResp(_)),
+                ..
+            } => Response {
+                client_resp: Some(ClientResp::ViewToNdjsonStringResp(ViewToNdjsonStringResp {
+                    ndjson_string: "<< redacted >>".to_owned(),
+                })),
+                ..msg.clone()
+            },
+            Response {
+                client_resp: Some(ClientResp::ViewToArrowResp(_)),
+                ..
+            } => Response {
+                client_resp: Some(ClientResp::ViewToArrowResp(ViewToArrowResp {
+                    arrow: vec![],
+                })),
+                ..msg.clone()
+            },
+            Response {
+                client_resp: Some(ClientResp::ViewToCsvResp(_)),
+                ..
+            } => Response {
+                client_resp: Some(ClientResp::ViewToCsvResp(ViewToCsvResp {
+                    csv: "<< redacted >>".to_owned(),
+                })),
+                ..msg.clone()
+            },
+            Response {
+                client_resp: Some(ClientResp::ViewOnUpdateResp(ref x)),
+                ..
+            } => Response {
+                client_resp: Some(ClientResp::ViewOnUpdateResp(ViewOnUpdateResp {
+                    delta: x.delta.as_ref().map(|_| vec![]),
+                    port_id: x.port_id,
+                })),
                 ..msg.clone()
             },
             x => x,

@@ -17,19 +17,43 @@ import { Menu, Widget } from "@lumino/widgets";
 
 export class WorkspaceMenu extends Menu {
     private _host: ShadowRoot;
+    private _workspace: HTMLElement;
     init_overlay?: () => void;
 
-    constructor(host: ShadowRoot, options: Menu.IOptions) {
+    constructor(
+        host: ShadowRoot,
+        workspace: HTMLElement,
+        options: Menu.IOptions
+    ) {
         options.renderer = new MenuRenderer();
         super(options);
         this._host = host;
+        this._workspace = workspace;
         (this as any)._openChildMenu = this._overrideOpenChildMenu.bind(this);
     }
 
     open(x: number, y: number, options?: Menu.IOpenOptions) {
         options ||= {};
         options.host = this._host as any as HTMLElement;
+        const box = this._workspace.getBoundingClientRect();
         super.open(x, y, options);
+        const menu_box = this.node.getBoundingClientRect();
+        if (
+            menu_box.height + y > box.height &&
+            menu_box.height + y < document.documentElement.clientHeight
+        ) {
+            this.node.style.top = `-${menu_box.height}`;
+        }
+
+        if (menu_box.width + x > box.width) {
+            if (menu_box.width + x < document.documentElement.clientWidth) {
+                this.node.style.left = `-${menu_box.width + x - box.width}px`;
+            } else {
+                this.node.style.left = `-${
+                    document.documentElement.clientWidth - box.width
+                }px`;
+            }
+        }
     }
 
     // Override this lumino private method because it will otherwise always

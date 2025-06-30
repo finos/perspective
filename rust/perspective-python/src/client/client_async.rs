@@ -77,7 +77,12 @@ impl AsyncClient {
                         Ok(None)
                     }
                 })? {
-                    fut.await?;
+                    let result = fut.await;
+                    Python::with_gil(|_| {
+                        result
+                            .map(|_| ())
+                            .map_err(perspective_server::ServerError::from)
+                    })?
                 }
 
                 Ok(())

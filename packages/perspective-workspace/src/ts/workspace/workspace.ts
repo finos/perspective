@@ -645,9 +645,13 @@ export class PerspectiveWorkspace extends SplitPanel {
      */
 
     createContextMenu(widget: PerspectiveViewerWidget | null) {
-        this._menu = new WorkspaceMenu(this.menu_elem.shadowRoot!, {
-            commands: this.commands,
-        });
+        this._menu = new WorkspaceMenu(
+            this.menu_elem.shadowRoot!,
+            this.element,
+            {
+                commands: this.commands,
+            }
+        );
 
         const tabbar = find(
             this.dockpanel.tabBars(),
@@ -678,6 +682,7 @@ export class PerspectiveWorkspace extends SplitPanel {
                 submenu: (() => {
                     const submenu = new WorkspaceMenu(
                         this.menu_elem.shadowRoot!,
+                        this.element,
                         {
                             commands: this.commands,
                         }

@@ -44,7 +44,8 @@ def make_app(perspective_server):
                 tornado.web.StaticFileHandler,
                 {"path": "./", "default_filename": "index.html"},
             ),
-        ]
+        ],
+        websocket_max_message_size=100 * 1024 * 1024,
     )
 
 

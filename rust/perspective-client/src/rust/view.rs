@@ -455,7 +455,7 @@ impl View {
                         on_update(resp).await;
                         Ok(())
                     },
-                    resp => Err(ClientError::OptionResponseFailed(resp.into())),
+                    resp => Err(resp.into()),
                 }
             }
         };

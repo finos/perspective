@@ -27,7 +27,9 @@ export function group_header_style_listener(regularTable) {
             td.style.backgroundColor = "";
             const metadata = regularTable.getMeta(td);
             let needs_border =
-                metadata.row_header_x === header_depth || metadata.x >= 0;
+                (header_depth > 0 && metadata.row_header_x === header_depth) ||
+                metadata.x >= 0;
+
             td.classList.toggle("psp-align-right", false);
             td.classList.toggle("psp-align-left", false);
             td.classList.toggle("psp-header-group", true);
@@ -37,8 +39,8 @@ export function group_header_style_listener(regularTable) {
                 "psp-header-group-corner",
                 typeof metadata.x === "undefined"
             );
-            td.classList.toggle("psp-color-mode-bar", false);
 
+            td.classList.toggle("psp-color-mode-bar", false);
             td.classList.toggle("psp-header-sort-asc", false);
             td.classList.toggle("psp-header-sort-desc", false);
             td.classList.toggle("psp-header-sort-col-asc", false);

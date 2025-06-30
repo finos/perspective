@@ -11,5 +11,5 @@
         "allowImportingTsExtensions": true,
         "types": []
     },
-    "files": ["./src/ts/perspective.cdn.ts"]
+    "files": ["./src/ts/perspective.browser.ts"]
 }

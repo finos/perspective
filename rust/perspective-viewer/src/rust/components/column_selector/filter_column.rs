@@ -490,7 +490,7 @@ impl Component for FilterColumn {
             },
         };
 
-        let final_col_type = col_type.expect("Unknown column");
+        let final_col_type = col_type.unwrap_or(perspective_client::ColumnType::Integer);
 
         html! {
             <div

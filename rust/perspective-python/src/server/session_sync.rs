@@ -34,8 +34,12 @@ impl SessionHandler for PyConnectionSync {
         &'a mut self,
         msg: &'a [u8],
     ) -> Result<(), perspective_server::ServerError> {
-        Python::with_gil(move |py| self.0.call1(py, (PyBytes::new(py, msg),)))?;
-
+        Python::with_gil(move |py| {
+            self.0
+                .call1(py, (PyBytes::new(py, msg),))
+                .map(|_| ())
+                .map_err(perspective_server::ServerError::from)
+        })?;
         Ok(())
     }
 }
@@ -75,7 +79,7 @@ impl PySession {
     }
 
     pub fn close(&self, py: Python<'_>) -> PyResult<()> {
-        py.allow_threads(|| {
+        let z = py.allow_threads(|| {
             let lock = self
                 .session
                 .write()
@@ -83,14 +87,17 @@ impl PySession {
 
             if let Ok(mut lock) = lock {
                 lock.take()
-                    .ok_or_else(|| {
-                        PyValueError::new_err(format!("Session {:?} already deleted", self.session))
-                    })?
-                    .close()
-                    .block_on();
+            } else {
+                None
             }
+        });
 
-            Ok(())
-        })
+        z.ok_or_else(|| {
+            PyValueError::new_err(format!("Session {:?} already deleted", self.session))
+        })?
+        .close()
+        .block_on();
+
+        Ok(())
     }
 }

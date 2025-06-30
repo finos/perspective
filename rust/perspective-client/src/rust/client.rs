@@ -232,7 +232,7 @@ impl Client {
         {
             tracing::error!("{}", message);
         } else {
-            tracing::warn!("Received unsolicited server message");
+            tracing::debug!("Received unsolicited server response: {}", msg);
         }
 
         Ok(false)
@@ -262,9 +262,34 @@ impl Client {
         }));
 
         tasks.await.into_iter().collect::<Result<(), _>>()?;
+        self.close_and_error_subscriptions(&message).await
+    }
+
+    /// TODO Synthesize an error to provide to the caller, since the
+    /// server did not respond and the other option is to just drop the call
+    /// which results in a non-descript error message. It would be nice to
+    /// have client-side failures be a native part of the Client API.
+    async fn close_and_error_subscriptions(&self, message: &ClientError) -> ClientResult<()> {
+        let synthetic_error = |msg_id| Response {
+            msg_id,
+            entity_id: "".to_string(),
+            client_resp: Some(ClientResp::ServerError(ServerError {
+                message: format!("{}", message),
+                status_code: 2,
+            })),
+        };
+
         self.subscriptions.write().await.clear();
-        self.subscriptions_once.write().await.clear();
-        Ok(())
+        let callbacks_once = self
+            .subscriptions_once
+            .write()
+            .await
+            .drain()
+            .collect::<Vec<_>>();
+
+        callbacks_once
+            .into_iter()
+            .try_for_each(|(msg_id, f)| f(synthetic_error(msg_id)))
     }
 
     pub async fn on_error<T, U, V>(&self, on_error: T) -> ClientResult<u32>
@@ -365,7 +390,7 @@ impl Client {
         self.subscribe_once(req, on_update).await?;
         receiver
             .await
-            .map_err(|_| ClientError::Unknown("Internal error".to_owned()))
+            .map_err(|_| ClientError::Unknown(format!("Internal error for req {}", req)))
     }
 
     pub(crate) fn get_features(&self) -> ClientResult<Features> {
@@ -576,7 +601,7 @@ impl Client {
                     on_update().await;
                     Ok(())
                 },
-                resp => Err(ClientError::OptionResponseFailed(resp.into())),
+                resp => Err(resp.into()),
             }
         });
 

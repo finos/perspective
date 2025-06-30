@@ -33,6 +33,9 @@ pub enum ClientError {
     #[error("Abort(): {0}")]
     Internal(String),
 
+    #[error("Transport error: {0}")]
+    TransportError(String),
+
     #[error("Client not yet initialized")]
     NotInitialized,
 
@@ -42,14 +45,14 @@ pub enum ClientError {
     #[error("Unwrapped option")]
     Option,
 
-    #[error("Unexpected response {0:?}")]
-    OptionResponseFailed(Box<Option<proto::response::ClientResp>>),
-
     #[error("Bad string")]
     Utf8(#[from] std::str::Utf8Error),
 
     #[error("Undecipherable server message {0:?}")]
     DecodeError(#[from] prost::DecodeError),
+
+    #[error("Response aborted")]
+    ResponseAborted,
 
     #[error("Unexpected response {0:?}")]
     ResponseFailed(Box<proto::response::ClientResp>),
@@ -84,12 +87,27 @@ impl<'a, A> From<std::sync::PoisonError<std::sync::MutexGuard<'a, A>>> for Clien
     }
 }
 
+impl From<Option<proto::response::ClientResp>> for ClientError {
+    fn from(value: Option<proto::response::ClientResp>) -> Self {
+        match value {
+            Some(proto::response::ClientResp::ServerError(x)) => match x.status_code() {
+                proto::StatusCode::ServerError => ClientError::Internal(x.message),
+                proto::StatusCode::ViewNotFound => ClientError::ViewNotFound,
+                proto::StatusCode::TransportError => ClientError::TransportError(x.message),
+            },
+            Some(x) => ClientError::ResponseFailed(Box::new(x)),
+            None => ClientError::ResponseAborted,
+        }
+    }
+}
+
 impl From<proto::response::ClientResp> for ClientError {
     fn from(value: proto::response::ClientResp) -> Self {
         match value {
             proto::response::ClientResp::ServerError(x) => match x.status_code() {
                 proto::StatusCode::ServerError => ClientError::Internal(x.message),
                 proto::StatusCode::ViewNotFound => ClientError::ViewNotFound,
+                proto::StatusCode::TransportError => ClientError::TransportError(x.message),
             },
             x => ClientError::ResponseFailed(Box::new(x)),
         }
