@@ -1598,34 +1598,29 @@ property returns the associated row data.</p>
     elem.restore(config);
 });
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="listening-for-events-1"><a class="header" href="#listening-for-events-1">Listening for events</a></h1>
-<p>The <code>&lt;perspective-viewer&gt;</code> Custom Element fires all the same HTML <code>Event</code>s that
-standard DOM <code>HTMLElement</code> objects fire, in addition to a few custom
-<code>CustomEvent</code>s which relate to UI updates including those initiaed through user
-interaction.</p>
-<h2 id="update-events-1"><a class="header" href="#update-events-1">Update events</a></h2>
-<p>Whenever a <code>&lt;perspective-viewer&gt;</code>s underlying <code>table()</code> is changed via the
-<code>load()</code> or <code>update()</code> methods, a <code>perspective-view-update</code> DOM event is fired.
-Similarly, <code>view()</code> updates instigated either through the Attribute API or
-through user interaction will fire a <code>perspective-config-update</code> event:</p>
-<pre><code class="language-javascript">elem.addEventListener("perspective-config-update", function (event) {
-    var config = elem.save();
-    console.log("The view() config has changed to " + JSON.stringify(config));
-});
+<div style="break-before: page; page-break-before: always;"></div><h1 id="plugin-render-limits"><a class="header" href="#plugin-render-limits">Plugin render limits</a></h1>
+<p><code>&lt;perspective-viewer&gt;</code> plugins (especially charts) may in some cases generate
+extremely large output which may lock up the browser. In order to prevent
+accidents (which generally require a browser refresh to fix), each plugin has a
+<code>max_cells</code> and <code>max_columns</code> heuristic which requires the user to opt-in to
+fully rendering <code>View</code>s which exceed these limits. To override this behavior,
+set these values for each plugin type individually, <em>before</em> the plugin itself
+is rendered (e.g. calling <code>HTMLPerspectiveViewerElement::restore</code> with the
+respective <code>plugin</code> name).</p>
+<p>If you have a <code>&lt;perspective-viewer&gt;</code> instance, you can configure plugins via
+<code>HTMLPerspectiveViewerElement::getPlugin</code> and
+<code>HTMLPerspectiveViewerElement::getAllPlugins</code>:</p>
+<pre><code class="language-javascript">const viewer = document.querySelector("perspective-viewer");
+const plugin = viewer.getPlugin("Treemap");
+plugin.max_cells = 1_000_000;
+plugin.max_columns = 1000;
 </code></pre>
-<h2 id="click-events-1"><a class="header" href="#click-events-1">Click events</a></h2>
-<p>Whenever a <code>&lt;perspective-viewer&gt;</code>'s grid or chart is clicked, a
-<code>perspective-click</code> DOM event is fired containing a detail object with <code>config</code>,
-<code>column_names</code>, and <code>row</code>.</p>
-<p>The <code>config</code> object contains an array of <code>filters</code> that can be applied to a
-<code>&lt;perspective-viewer&gt;</code> through the use of <code>restore()</code> updating it to show the
-filtered subset of data.</p>
-<p>The <code>column_names</code> property contains an array of matching columns, and the <code>row</code>
-property returns the associated row data.</p>
-<pre><code class="language-javascript">elem.addEventListener("perspective-click", function (event) {
-    var config = event.detail.config;
-    elem.restore(config);
-});
+<p>... Or alternatively, you can look up the Custom Element classes and set the
+static variants if you know the element name (you can e.g. look this up in your
+browser's DOM inspector):</p>
+<pre><code class="language-javascript">const plugin = customElements.get("perspective-viewer-d3fc-treemap");
+plugin.max_cells = 1_000_000;
+plugin.max_columns = 1000;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="react-component"><a class="header" href="#react-component">React Component</a></h1>
 <p>We provide a React wrapper to prevent common issues and mistakes associated with

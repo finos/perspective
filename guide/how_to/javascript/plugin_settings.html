@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>React Component - Perspective</title>
+        <title>Plugin render limits - Perspective</title>
 
 
         <!-- Custom HTML head -->
@@ -157,106 +157,40 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="react-component"><a class="header" href="#react-component">React Component</a></h1>
-<p>We provide a React wrapper to prevent common issues and mistakes associated with
-using the perspective-viewer web component in the context of React.</p>
-<p>Before trying this example, please take a look at
-<a href="./importing.html">how to bootstrap perspective</a>.</p>
-<p>A simple example:</p>
-<pre><code class="language-typescript">import * as React from "react";
-import { createRoot } from "react-dom/client";
-import { PerspectiveViewer } from "@finos/perspective-react";
-
-import "@finos/perspective-viewer/dist/css/themes.css";
-import "./index.css";
-
-interface ToolbarState {
-    mounted: boolean;
-    table?: Promise&lt;psp.Table&gt;;
-    config: pspViewer.ViewerConfigUpdate;
-}
-
-const App: React.FC = () =&gt; {
-    const [state, setState] = React.useState&lt;ToolbarState&gt;(() =&gt; ({
-        mounted: true,
-        table: createNewSuperstoreTable(),
-        config: { ...CONFIG },
-    }));
-
-    React.useEffect(() =&gt; {
-        return () =&gt; {
-            state.table?.then((table) =&gt; table?.delete({ lazy: true }));
-        };
-    }, []);
-
-    const onClickOverwrite = () =&gt; {
-        state.table?.then((table) =&gt; table?.delete({ lazy: true }));
-        const table = createNewSuperstoreTable();
-        setState({ ...state, table });
-    };
-
-    const onClickDelete = () =&gt; {
-        state.table?.then((table) =&gt; table?.delete({ lazy: true }));
-        setState({ ...state, table: undefined });
-    };
-
-    const onClickToggleMount = () =&gt;
-        setState((old) =&gt; ({ ...old, mounted: !state.mounted }));
-
-    const onConfigUpdate = (config: pspViewer.ViewerConfigUpdate) =&gt; {
-        console.log("Config Update Event", config);
-        setState({ ...state, config });
-    };
-
-    const onClick = (detail: pspViewer.PerspectiveClickEventDetail) =&gt; {
-        console.log("Click Event,", detail);
-    };
-
-    const onSelect = (detail: pspViewer.PerspectiveSelectEventDetail) =&gt; {
-        console.log("Select Event", detail);
-    };
-
-    return (
-        &lt;div className="container"&gt;
-            &lt;div className="toolbar"&gt;
-                &lt;button onClick={onClickToggleMount}&gt;Toggle Mount&lt;/button&gt;
-                &lt;button onClick={onClickOverwrite}&gt;Overwrite Superstore&lt;/button&gt;
-                &lt;button onClick={onClickDelete}&gt;Delete Table&lt;/button&gt;
-            &lt;/div&gt;
-            {state.mounted &amp;&amp; (
-                &lt;&gt;
-                    &lt;PerspectiveViewer table={state.table} /&gt;
-                    &lt;PerspectiveViewer
-                        className="my-perspective-viewer"
-                        table={state.table}
-                        config={state.config}
-                        onClick={onClick}
-                        onSelect={onSelect}
-                        onConfigUpdate={onConfigUpdate}
-                    /&gt;
-                &lt;/&gt;
-            )}
-        &lt;/div&gt;
-    );
-};
-
-createRoot(document.getElementById("root")!).render(&lt;App /&gt;);
+                        <h1 id="plugin-render-limits"><a class="header" href="#plugin-render-limits">Plugin render limits</a></h1>
+<p><code>&lt;perspective-viewer&gt;</code> plugins (especially charts) may in some cases generate
+extremely large output which may lock up the browser. In order to prevent
+accidents (which generally require a browser refresh to fix), each plugin has a
+<code>max_cells</code> and <code>max_columns</code> heuristic which requires the user to opt-in to
+fully rendering <code>View</code>s which exceed these limits. To override this behavior,
+set these values for each plugin type individually, <em>before</em> the plugin itself
+is rendered (e.g. calling <code>HTMLPerspectiveViewerElement::restore</code> with the
+respective <code>plugin</code> name).</p>
+<p>If you have a <code>&lt;perspective-viewer&gt;</code> instance, you can configure plugins via
+<code>HTMLPerspectiveViewerElement::getPlugin</code> and
+<code>HTMLPerspectiveViewerElement::getAllPlugins</code>:</p>
+<pre><code class="language-javascript">const viewer = document.querySelector("perspective-viewer");
+const plugin = viewer.getPlugin("Treemap");
+plugin.max_cells = 1_000_000;
+plugin.max_columns = 1000;
 </code></pre>
-<p>This adds a perspective table to the provider at the root of the app and allows
-us to create viewers referencing those tables anywhere within that context. Any
-views or viewers associated with the React component are automatically cleaned
-up as part of the lifecycle of the component, but tables are still the
-responsibility of the caller to cleanup currently.</p>
+<p>... Or alternatively, you can look up the Custom Element classes and set the
+static variants if you know the element name (you can e.g. look this up in your
+browser's DOM inspector):</p>
+<pre><code class="language-javascript">const plugin = customElements.get("perspective-viewer-d3fc-treemap");
+plugin.max_cells = 1_000_000;
+plugin.max_columns = 1000;
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../how_to/javascript/plugin_settings.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../how_to/javascript/events.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../how_to/python.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../how_to/javascript/react.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -266,11 +200,11 @@ responsibility of the caller to cleanup currently.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../how_to/javascript/plugin_settings.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../how_to/javascript/events.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../how_to/python.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../how_to/javascript/react.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
