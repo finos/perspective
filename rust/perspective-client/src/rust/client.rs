@@ -17,7 +17,6 @@ use std::sync::Arc;
 use async_lock::{Mutex, RwLock};
 use futures::Future;
 use futures::future::{BoxFuture, LocalBoxFuture, join_all};
-use nanoid::*;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
@@ -457,7 +456,7 @@ impl Client {
     pub async fn table(&self, input: TableData, options: TableInitOptions) -> ClientResult<Table> {
         let entity_id = match options.name.clone() {
             Some(x) => x.to_owned(),
-            None => nanoid!(),
+            None => randid(),
         };
 
         if let TableData::View(view) = &input {

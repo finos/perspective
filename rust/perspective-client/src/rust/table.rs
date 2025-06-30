@@ -13,7 +13,6 @@
 use std::collections::HashMap;
 use std::fmt::Display;
 
-use nanoid::*;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -518,7 +517,7 @@ impl Table {
     ///     .await?;
     /// ```
     pub async fn view(&self, config: Option<ViewConfigUpdate>) -> ClientResult<View> {
-        let view_name = nanoid!();
+        let view_name = randid();
         let msg = Request {
             msg_id: self.client.gen_id(),
             entity_id: self.name.clone(),
