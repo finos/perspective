@@ -1,3 +1,38 @@
+# [v3.7.0](https://github.com/finos/perspective/releases/tag/v3.7.0)
+
+_26 June 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.6.1...v3.7.0))
+
+**Breaking**
+
+- New error UX [#3003](https://github.com/finos/perspective/pull/3003)
+- New conflation model [#2991](https://github.com/finos/perspective/pull/2991)
+- `@finos/perspective-react` [#2893](https://github.com/finos/perspective/pull/2893)
+
+Features
+
+- Fix datagrid `abs` sorting on header click [#3014](https://github.com/finos/perspective/pull/3014)
+- Add some native HTML attributes to `perspective-react` [#3010](https://github.com/finos/perspective/pull/3010)
+- Add `max by` and `min by` aggregates [#2998](https://github.com/finos/perspective/pull/2998)
+
+Fixes
+
+- Fix UI bugs from large dataset example [#3022](https://github.com/finos/perspective/pull/3022)
+- Fix `max_by`, `min_by`, `max`, `min` aggregates with empty filter sets [#3016](https://github.com/finos/perspective/pull/3016)
+- Fix `to_arrow` thread safety [#3006](https://github.com/finos/perspective/pull/3006)
+- Fix `perspective_viewer::restore` calls blurring [#3005](https://github.com/finos/perspective/pull/3005)
+- Fix `ProxySession` message routing bug with Jupyter widget [#2989](https://github.com/finos/perspective/pull/2989)
+
+Misc
+
+- Fix typo in docs for replace_all [#3021](https://github.com/finos/perspective/pull/3021)
+- Fix perspective-viewer-datagrid draw error when group_by+split_by+filter are empty [#3015](https://github.com/finos/perspective/pull/3015)
+- Fix examples, docs and imports [#3013](https://github.com/finos/perspective/pull/3013)
+- Fix Windows CI [#3004](https://github.com/finos/perspective/pull/3004)
+- Add `aggregate_depth` datagrid style config [#3002](https://github.com/finos/perspective/pull/3002)
+- `&lt;perspective-workspace&gt;` toolbar fix [#3000](https://github.com/finos/perspective/pull/3000)
+- Nightly versions [#2990](https://github.com/finos/perspective/pull/2990)
+- Nightly artifacts [#2987](https://github.com/finos/perspective/pull/2987)
+
 # [v3.6.1](https://github.com/finos/perspective/releases/tag/v3.6.1)
 
 _30 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.6.0...v3.6.1))
@@ -18,10 +53,13 @@ _24 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v
 
 _11 April 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.5.0...v3.5.1))
 
+Features
+
+- AsyncTable support in widget [#2974](https://github.com/finos/perspective/pull/2974)
+
 Misc
 
 - Add vscode settings to enable prettier [#2959](https://github.com/finos/perspective/pull/2959)
-- AsyncTable support in widget [#2974](https://github.com/finos/perspective/pull/2974)
 
 # [v3.5.0](https://github.com/finos/perspective/releases/tag/v3.5.0)
 

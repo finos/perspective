@@ -360,13 +360,19 @@ impl Renderer {
         let limits = get_row_and_col_limits(view, &meta).await?;
         self.render_limits_changed.emit((is_update, limits));
         let viewer_elem = &self.0.borrow().viewer_elem.clone();
-        if is_update {
+        let result = if is_update {
             let task = plugin.update(view.clone().into(), limits.2, limits.3, false);
             activate_plugin(viewer_elem, &plugin, task).await
         } else {
             let task = plugin.draw(view.clone().into(), limits.2, limits.3, false);
             activate_plugin(viewer_elem, &plugin, task).await
+        };
+
+        if let Err(err) = result {
+            web_sys::console::error_1(&err.into());
         }
+
+        Ok(())
     }
 
     /// Decide whether to draw plugin or self first based on whether the panel
