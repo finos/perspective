@@ -20,6 +20,8 @@ mod tests;
 
 use std::sync::Arc;
 
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
 use thiserror::*;
 
@@ -153,6 +155,36 @@ impl IDGen {
         } else {
             *idgen = Self::new_seq();
             idgen.next().unwrap()
+        }
+    }
+}
+
+const SIZE: usize = 21;
+
+const CHARACTERS: [char; 64] = [
+    '_', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+    'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+    'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+];
+
+/// Generate a random identifier `String`
+pub fn randid() -> String {
+    let mask = CHARACTERS.len().next_power_of_two() - 1;
+    let step: usize = 8 * SIZE / 5;
+    let mut id = String::with_capacity(SIZE);
+    loop {
+        let mut random = StdRng::from_os_rng();
+        let mut bytes: Vec<u8> = vec![0; step];
+        random.fill(&mut bytes[..]);
+        for &byte in &bytes {
+            let byte = byte as usize & mask;
+            if CHARACTERS.len() > byte {
+                id.push(CHARACTERS[byte]);
+                if id.len() == SIZE {
+                    return id;
+                }
+            }
         }
     }
 }

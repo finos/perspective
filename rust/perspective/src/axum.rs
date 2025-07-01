@@ -12,6 +12,7 @@
 
 use std::net::SocketAddr;
 
+use axum::body::Bytes;
 use axum::extract::State;
 use axum::extract::connect_info::ConnectInfo;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
@@ -32,8 +33,8 @@ type PerspectiveWSError = Box<dyn std::error::Error + Send + Sync>;
 /// client disconnects or the message stream is unrecoverably errored,
 /// we must emit an _end_ message as well.
 enum PerspectiveWSMessage {
-    Incoming(Vec<u8>),
-    Outgoing(Vec<u8>),
+    Incoming(Bytes),
+    Outgoing(Bytes),
     End,
 }
 
@@ -41,7 +42,7 @@ enum PerspectiveWSMessage {
 /// instance rule allowing us to write a [`SessionHandler`] impl for this
 /// struct.
 #[derive(Clone)]
-struct PerspectiveWSConnection(UnboundedSender<Vec<u8>>);
+struct PerspectiveWSConnection(UnboundedSender<Bytes>);
 
 /// The [`SessionHandler`] implementation provides a method for a
 /// [`Session`] to send messages to this
@@ -50,7 +51,7 @@ struct PerspectiveWSConnection(UnboundedSender<Vec<u8>>);
 /// [`perspective::Session::handle_request`]).
 impl SessionHandler for PerspectiveWSConnection {
     async fn send_response<'a>(&'a mut self, resp: &'a [u8]) -> Result<(), PerspectiveWSError> {
-        Ok(self.0.send(resp.to_vec()).await?)
+        Ok(self.0.send(Bytes::copy_from_slice(resp)).await?)
     }
 }
 
@@ -59,7 +60,7 @@ impl SessionHandler for PerspectiveWSConnection {
 /// funciton returns, messages are no longer processed.
 async fn process_message_loop(
     socket: &mut WebSocket,
-    receiver: &mut UnboundedReceiver<Vec<u8>>,
+    receiver: &mut UnboundedReceiver<Bytes>,
     session: &mut LocalSession,
 ) -> Result<(), PerspectiveWSError> {
     use Either::*;
@@ -104,7 +105,7 @@ pub fn websocket_handler() -> MethodRouter<Server> {
     ) -> impl IntoResponse {
         tracing::info!("{addr} Connected.");
         ws.on_upgrade(move |mut socket| async move {
-            let (send, mut receiver) = unbounded::<Vec<u8>>();
+            let (send, mut receiver) = unbounded::<Bytes>();
             let mut session = server.new_session(PerspectiveWSConnection(send)).await;
             if let Err(msg) = process_message_loop(&mut socket, &mut receiver, &mut session).await {
                 tracing::error!("Internal error {}", msg);

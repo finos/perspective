@@ -176,5 +176,5 @@ web-sys.features = [
     "Window",
 ]
 
-serde_with = "3.6.1"
+serde_with = { version = "3.6.1", features = ["indexmap_2"] }
 strum = { version = "0.26.1", features = ["derive"] }
