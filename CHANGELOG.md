@@ -1,6 +1,18 @@
+# [v3.7.1](https://github.com/finos/perspective/releases/tag/v3.7.1)
+
+_2 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.1...v3.7.1))
+
+Fixes
+
+- Fix global filter regression [#3025](https://github.com/finos/perspective/pull/3025)
+
+Misc
+
+- Fix dep version conflict with `rand` [#3024](https://github.com/finos/perspective/pull/3024)
+
 # [v3.7.0](https://github.com/finos/perspective/releases/tag/v3.7.0)
 
-_26 June 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.6.1...v3.7.0))
+_30 June 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.6.1...v3.7.0))
 
 **Breaking**
 
