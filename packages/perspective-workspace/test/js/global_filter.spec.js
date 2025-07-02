@@ -73,6 +73,61 @@ function tests(context, compare) {
         expect(cfg.viewers.Two.filter).toEqual([["State", "==", "Alabama"]]);
         return compare(page, `${context}-treemap-filters-work.txt`);
     });
+
+    test("Datagrid filters work", async ({ page }) => {
+        const config = {
+            viewers: {
+                One: {
+                    table: "superstore",
+                    name: "Test",
+                    group_by: ["State"],
+                    columns: ["Sales"],
+                    plugin: "Datagrid",
+                },
+                Two: { table: "superstore", name: "One" },
+            },
+            master: {
+                widgets: ["One"],
+            },
+            detail: {
+                main: {
+                    currentIndex: 0,
+                    type: "tab-area",
+                    widgets: ["Two"],
+                },
+            },
+        };
+
+        const cfg = await page.evaluate(async (config) => {
+            const workspace = document.getElementById("workspace");
+            await workspace.restore(config);
+            await workspace.flush();
+            const event = new Event("mousedown", { bubbles: true });
+            event.which = 1;
+
+            document
+                .querySelector(
+                    ".workspace-master-widget perspective-viewer-datagrid"
+                )
+                .shadowRoot.querySelector(
+                    "tbody tr:nth-child(6) th:last-of-type"
+                )
+                .dispatchEvent(event);
+
+            let resolve;
+            const timer = new Promise((x) => {
+                resolve = x;
+            });
+
+            workspace.addEventListener("workspace-layout-update", resolve);
+            await timer;
+
+            return await workspace.save();
+        }, config);
+
+        expect(cfg.viewers.Two.filter).toEqual([["State", "==", "Colorado"]]);
+        return compare(page, `${context}-datagrid-filters-work.txt`);
+    });
 }
 
 test.describe("Workspace global filters", () => {
