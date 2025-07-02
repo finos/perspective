@@ -31,7 +31,6 @@ export async function mousedown_listener(regularTable, viewer, event) {
     }
 
     event.preventDefault();
-    event.stopImmediatePropagation();
     if (target.classList.contains("psp-tree-label")) {
         expandCollapseHandler.call(this, regularTable, event);
         return;
