@@ -19,8 +19,8 @@ const WORKER = (async () => {
     );
 
     await Promise.all([
-        perspective.init_server(wasm),
-        perspective_viewer.init_client(client_wasm),
+        perspective.init_server(wasm.then(x => x.default)),
+        perspective_viewer.init_client(client_wasm.then(x => x.default)),
     ]);
 
     return await perspective.worker();

@@ -10,23 +10,20 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { execSync } = require("child_process");
-const os = require("os");
-const path = require("path");
+import { execSync } from "node:child_process";
+import os from "node:os";
+import path from "node:path";
+import * as url from "node:url";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
 const stdio = "inherit";
-const rust_env = process.env.PSP_DEBUG ? "" : "--release";
 const env = process.env.PSP_DEBUG ? "debug" : "release";
 const cwd = path.join(process.cwd(), "dist", env);
 
-delete process.env.NODE;
+const { compress } = await import("pro_self_extracting_wasm");
 
-function bootstrap(file) {
-    execSync(`cargo run -p perspective-bootstrap -- ${rust_env} ${file}`, {
-        cwd: path.join(process.cwd(), "..", "..", "rust", "perspective-js"),
-        stdio,
-    });
-}
+delete process.env.NODE;
 
 let cmake_flags = "";
 let make_flags = "";
@@ -50,8 +47,7 @@ try {
     );
 
     execSync(
-        `emmake make -j${
-            process.env.PSP_NUM_CPUS || os.cpus().length
+        `emmake make -j${process.env.PSP_NUM_CPUS || os.cpus().length
         } ${make_flags}`,
         {
             cwd,
@@ -62,7 +58,10 @@ try {
     execSync(`cpy web/**/* ../web`, { cwd, stdio });
     execSync(`cpy node/**/* ../node`, { cwd, stdio });
     if (!process.env.PSP_HEAP_INSTRUMENTS) {
-        bootstrap(`../../cpp/perspective/dist/web/perspective-server.wasm`);
+        compress(
+            `../../cpp/perspective/dist/web/perspective-server.wasm`,
+            `../../cpp/perspective/dist/web/perspective-server.wasm`
+        );
     }
 } catch (e) {
     console.error(e);

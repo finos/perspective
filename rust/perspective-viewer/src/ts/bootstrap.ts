@@ -20,18 +20,6 @@ export async function init_client(
         | ArrayBuffer
         | Uint8Array
 ) {
-    if (wasm_binary instanceof Promise) {
-        wasm_binary = await wasm_binary;
-    }
-
-    if (wasm_binary instanceof Response) {
-        wasm_binary = await wasm_binary.arrayBuffer();
-    }
-
-    if (wasm_binary instanceof Uint8Array) {
-        wasm_binary = wasm_binary.buffer as ArrayBuffer;
-    }
-
     const module_or_path = await load_wasm_stage_0(wasm_binary);
     await wasm_module.default({ module_or_path });
     await wasm_module.init();

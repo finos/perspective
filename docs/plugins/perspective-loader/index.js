@@ -21,7 +21,8 @@ module.exports = function (context, options) {
             }
 
             config.experiments = config.experiments || {
-                asyncWebAssembly: true,
+                asyncWebAssembly: false,
+                syncWebAssembly: false
             };
 
             config.experiments.topLevelAwait = true;
@@ -36,17 +37,22 @@ module.exports = function (context, options) {
                 type: "asset/resource",
             });
 
+            config.module.rules.push({
+                test: /\.wasm$/,
+                type: "asset/resource"
+            });
+
             return {
                 node: {
                     __filename: false,
                 },
                 plugins: isServer
                     ? [
-                          new webpack.NormalModuleReplacementPlugin(
-                              /@finos\/perspective/,
-                              "@finos/perspective/dist/esm/perspective.js"
-                          ),
-                      ]
+                        new webpack.NormalModuleReplacementPlugin(
+                            /@finos\/perspective/,
+                            "@finos/perspective/dist/esm/perspective.js"
+                        ),
+                    ]
                     : [],
             };
         },

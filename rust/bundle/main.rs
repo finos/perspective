@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::path::Path;
-use std::process::{exit, Command};
+use std::process::{Command, exit};
 
 use clap::*;
 
@@ -85,21 +85,10 @@ fn opt(outpath: &Path, is_release: bool) {
             .enable_feature(Feature::ReferenceTypes)
             .enable_feature(Feature::Simd)
             .enable_feature(Feature::RelaxedSimd)
+            .enable_feature(Feature::TruncSat)
             .run(outpath, outpath)
             .unwrap();
     }
-
-    let mut cmd = Command::new("cargo");
-    cmd.args(["run"])
-        .args(["-p", "perspective-bootstrap"])
-        .args(["--target", env!("TARGET")])
-        .args(["--"]);
-
-    if is_release {
-        cmd.args(["--release"]);
-    }
-
-    cmd.args([outpath]).execute();
 }
 
 fn main() {

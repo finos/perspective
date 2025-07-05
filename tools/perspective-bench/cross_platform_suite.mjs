@@ -174,10 +174,6 @@ export async function view_suite(perspective, metadata) {
 
 export async function table_suite(perspective, metadata) {
     async function before_all() {
-        // perspective.on_error((msg) => {
-        //     console.error("Fucked", msg);
-        // });
-
         try {
             const table = await perspective.table(
                 new_superstore_table(metadata)

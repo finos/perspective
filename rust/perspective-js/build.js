@@ -16,6 +16,7 @@ import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import cpy from "cpy";
 import "zx/globals";
+import { compress } from "pro_self_extracting_wasm";
 
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
@@ -104,11 +105,16 @@ function get_host() {
     return /host\: (.+?)$/gm.exec(execSync(`rustc -vV`).toString())[1];
 }
 
-function build_rust() {
+async function build_rust() {
     const release_flag = IS_DEBUG ? "" : "--release";
     execSync(
         `PSP_ROOT_DIR=../.. cargo bundle --target=${get_host()} -- perspective_js ${release_flag} --features=export-init`,
         INHERIT
+    );
+
+    await compress(
+        "dist/wasm/perspective-js.wasm",
+        "dist/wasm/perspective-js.wasm"
     );
 }
 
@@ -121,7 +127,7 @@ async function build_web_assets() {
 }
 
 async function build_all() {
-    build_rust();
+    await build_rust();
     await build_web_assets();
 
     // Typecheck

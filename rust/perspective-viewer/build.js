@@ -16,7 +16,7 @@ import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import * as fs from "node:fs";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
-
+import { compress } from "pro_self_extracting_wasm";
 import cpy from "cpy";
 
 const IS_DEBUG =
@@ -36,6 +36,11 @@ async function build_all() {
             IS_DEBUG ? "" : "--release"
         }`,
         INHERIT
+    );
+
+    await compress(
+        "dist/wasm/perspective-viewer.wasm",
+        "dist/wasm/perspective-viewer.wasm"
     );
 
     // JavaScript

@@ -31,6 +31,10 @@ module.exports = {
                 use: [{ loader: "style-loader" }, { loader: "css-loader" }],
             },
             {
+                test: /(perspective\-server\.wasm|perspective\-viewer\.wasm)$/,
+                type: "asset/resource"
+            },
+            {
                 test: /\.arrow$/,
                 use: [{ loader: "arraybuffer-loader" }],
             },
@@ -44,7 +48,7 @@ module.exports = {
         entrypoints: false,
     },
     experiments: {
-        asyncWebAssembly: true,
+        asyncWebAssembly: false,
         syncWebAssembly: false,
     },
     devtool: "source-map",

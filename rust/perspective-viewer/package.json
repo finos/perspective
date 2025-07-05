@@ -36,7 +36,8 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "workspace:^"
+        "@finos/perspective": "workspace:^",
+        "pro_self_extracting_wasm": "0.0.9"
     },
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "workspace:^",

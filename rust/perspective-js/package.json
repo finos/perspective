@@ -43,8 +43,9 @@
         "access": "public"
     },
     "dependencies": {
-        "ws": "^8.17.0",
-        "stoppable": "^1.1.0"
+        "pro_self_extracting_wasm": "0.0.9",
+        "stoppable": "^1.1.0",
+        "ws": "^8.17.0"
     },
     "devDependencies": {
         "@finos/perspective-cpp": "workspace:^",

@@ -24,4 +24,4 @@ bench = false
 [dependencies]
 clap = { version = "4.4.8", features = ["derive"] }
 wasm-bindgen-cli-support = "0.2.90"
-wasm-opt = "0.116.0"
+wasm-opt = "0.116.1"
