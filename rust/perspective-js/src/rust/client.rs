@@ -77,7 +77,7 @@ impl ProxySession {
     }
 }
 
-/// An instance of a [`Client`] is a unique connection to a single
+/// An instance of a [`Client`] is a connection to a single
 /// `perspective_server::Server`, whether locally in-memory or remote over some
 /// transport like a WebSocket.
 ///
@@ -299,6 +299,7 @@ impl Client {
     /// - CSV
     /// - JSON row-oriented
     /// - JSON column-oriented
+    /// - NDJSON
     ///
     /// When instantiated with _data_, the schema is inferred from this data.
     /// While this is convenient, inferrence is sometimes imperfect e.g.

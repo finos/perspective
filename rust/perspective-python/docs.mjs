@@ -10,57 +10,30 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! <div class="warning">
-//! The examples in this module are in JavaScript. See <a href="https://docs.rs/crate/perspective/latest"><code>perspective</code></a> docs for the Rust API.
-//! </div>
+import * as fs from "fs";
 
-#![warn(
-    clippy::all,
-    clippy::panic_in_result_fn,
-    clippy::await_holding_refcell_ref,
-    rustdoc::broken_intra_doc_links,
-    unstable_features
-)]
-#![allow(non_snake_case)]
+let content = fs.readFileSync("../../docs/static/python/perspective.html");
+const reg = /\[<code>([a-zA-Z0-9:_]+)<\/code>\]/g;
 
-extern crate alloc;
+content = content.toString().replaceAll(reg, function (_, arg) {
+    if (arg.includes("::")) {
+        const r = arg.replace("::", ".");
+        return `<a href="#${r}"><code>${r}</code></a>`;
+    } else {
+        return (
+            `<a href="https://docs.rs/perspective-python/latest/perspective_python/struct.` +
+            arg +
+            `.html"><code>` +
+            arg +
+            "</code></a>"
+        );
+    }
+});
 
-mod client;
-mod table;
-mod table_data;
-pub mod utils;
-mod view;
+const reg2 = /\[<code>([<>\/="# a-zA-Z0-9:_]+)<\/code>\]/g;
 
-#[cfg(feature = "export-init")]
-use wasm_bindgen::prelude::*;
+content = content.toString().replaceAll(reg2, function (_, arg) {
+    return arg;
+});
 
-pub use crate::client::Client;
-pub use crate::table::*;
-pub use crate::table_data::*;
-
-#[cfg(feature = "export-init")]
-#[wasm_bindgen(typescript_custom_section)]
-const TS_APPEND_CONTENT: &'static str = r#"
-export type * from "../../src/ts/ts-rs/ViewWindow.d.ts";
-export type * from "../../src/ts/ts-rs/TableInitOptions.d.ts";
-export type * from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
-export type * from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
-export type * from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
-export type * from "../../src/ts/ts-rs/UpdateOptions.d.ts";
-export type * from "../../src/ts/ts-rs/DeleteOptions.d.ts";
-
-import type {ViewWindow} from "../../src/ts/ts-rs/ViewWindow.d.ts";
-import type {TableInitOptions} from "../../src/ts/ts-rs/TableInitOptions.d.ts";
-import type {ViewConfigUpdate} from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
-import type * as on_update_args from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
-import type {OnUpdateOptions} from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
-import type {UpdateOptions} from "../../src/ts/ts-rs/UpdateOptions.d.ts";
-import type {DeleteOptions} from "../../src/ts/ts-rs/DeleteOptions.d.ts";
-"#;
-
-#[cfg(feature = "export-init")]
-#[wasm_bindgen]
-pub fn init() {
-    console_error_panic_hook::set_once();
-    utils::set_global_logging();
-}
+fs.writeFileSync("../../docs/static/python/perspective.html", content);

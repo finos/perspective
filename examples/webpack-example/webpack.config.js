@@ -32,7 +32,7 @@ module.exports = {
             },
             {
                 test: /(perspective\-server\.wasm|perspective\-viewer\.wasm)$/,
-                type: "asset/resource"
+                type: "asset/resource",
             },
             {
                 test: /\.arrow$/,

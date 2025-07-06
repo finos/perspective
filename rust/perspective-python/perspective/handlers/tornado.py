@@ -27,22 +27,24 @@ class PerspectiveTornadoHandler(WebSocketHandler):
     to the `tornado.web.Application` constructor, as well as provide the
     `max_buffer_size` optional arg, for large datasets.
 
-    Args:
-        loop: An optional `IOLoop` instance to use for scheduling IO calls,
-            defaults to `IOLoop.current()`.
-        executor: An optional executor for scheduling `perspective.Server`
-            message processing calls from websocket `Client`s.
+    # Arguments
 
-    Examples:
-        >>> server = psp.Server()
-        >>> client = server.new_local_client()
-        >>> client.table(pd.read_csv("superstore.csv"), name="data_source_one")
-        >>> app = tornado.web.Application([
-        ...     (r"/", MainHandler),
-        ...     (r"/websocket", PerspectiveTornadoHandler, {
-        ...         "perspective_server": server,
-        ...     })
-        ... ])
+    -   `loop`: An optional `IOLoop` instance to use for scheduling IO calls,
+        defaults to `IOLoop.current()`.
+    -   `executor`: An optional executor for scheduling `perspective.Server`
+        message processing calls from websocket `Client`s.
+
+    # Examples
+
+    >>> server = psp.Server()
+    >>> client = server.new_local_client()
+    >>> client.table(pd.read_csv("superstore.csv"), name="data_source_one")
+    >>> app = tornado.web.Application([
+    ...     (r"/", MainHandler),
+    ...     (r"/websocket", PerspectiveTornadoHandler, {
+    ...         "perspective_server": server,
+    ...     })
+    ... ])
     """
 
     def check_origin(self, origin):

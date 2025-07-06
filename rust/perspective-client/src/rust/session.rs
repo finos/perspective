@@ -54,6 +54,7 @@ type ProxyCallbackError = Box<dyn StdError + Send + Sync>;
 type ProxyCallback = Arc<dyn Fn(&[u8]) -> Result<(), ProxyCallbackError> + Send + Sync>;
 
 /// A [`Session`] implementation which tunnels through another [`Client`].
+/// @private
 #[derive(Clone)]
 pub struct ProxySession {
     parent: Client,

@@ -15,17 +15,18 @@ import perspective
 
 
 class PerspectiveStarletteHandler(object):
-    """PerspectiveStarletteHandler is a drop-in implementation of Perspective.
+    """`PerspectiveStarletteHandler` is a drop-in implementation of Perspective.
 
-    Examples:
-        >>> server = Server()
-        >>> client = server.client()
-        >>> client.table(pd.read_csv("superstore.csv"), name="data_source_one")
-        >>> app = FastAPI()
-        >>> async def endpoint(websocket: Websocket):
-        ...     handler = PerspectiveStarletteHandler(server, websocket)
-        ...     await handler.run()
-        ... app.add_api_websocket_route('/websocket', endpoint)
+    # Examples
+
+    >>> server = Server()
+    >>> client = server.client()
+    >>> client.table(pd.read_csv("superstore.csv"), name="data_source_one")
+    >>> app = FastAPI()
+    >>> async def endpoint(websocket: Websocket):
+    ...     handler = PerspectiveStarletteHandler(server, websocket)
+    ...     await handler.run()
+    ... app.add_api_websocket_route('/websocket', endpoint)
     """
 
     def __init__(self, **kwargs):

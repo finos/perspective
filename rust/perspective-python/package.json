@@ -12,7 +12,8 @@
     "scripts": {
         "build": "node build.mjs",
         "clean": "rimraf *.data && rimraf dist && rimraf build",
-        "test": "node test.mjs"
+        "test": "node test.mjs",
+        "docs": "pdoc perspective/__init__.py perspective/handlers/starlett.py, perspective/handlers/starlette.py perspective/handlers/tornado.py perspective/widget/__init__.py -o ../../docs/static/python && node docs.mjs"
     },
     "devDependencies": {
         "@finos/perspective-scripts": "workspace:*",

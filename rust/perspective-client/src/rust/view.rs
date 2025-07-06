@@ -262,8 +262,8 @@ impl View {
         }
     }
 
-    /// A copy of the config object passed to the [`Table::view`] method which
-    /// created this [`View`].
+    /// A copy of the [`ViewConfig`] object passed to the [`Table::view`] method
+    /// which created this [`View`].
     pub async fn get_config(&self) -> ClientResult<crate::config::ViewConfig> {
         let msg = self.client_message(ClientReq::ViewGetConfigReq(ViewGetConfigReq {}));
         match self.client.oneshot(&msg).await? {

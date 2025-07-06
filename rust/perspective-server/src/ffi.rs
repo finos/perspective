@@ -41,10 +41,13 @@ unsafe extern "C" {
     fn psp_set_num_cpus(num_cpus: i32);
 }
 
+/// Returns the number of threads the internal threadpool will use.
 pub fn num_cpus() -> i32 {
     unsafe { psp_num_cpus() }
 }
 
+/// Set the number of threads the internal threadpool will use. Can also be set
+/// with `NUM_OMP_THREADS` environment variable.
 pub fn set_num_cpus(num_cpus: i32) {
     unsafe { psp_set_num_cpus(num_cpus) }
 }

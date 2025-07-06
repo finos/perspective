@@ -211,7 +211,7 @@ impl Table {
     ///     ..default()
     /// };
     /// let table = client.table("x,y\n1,2\n3,4", options).await;
-    /// let tables = client.open_table("table_one").await;
+    /// let index = table.get_index()
     /// ```
     pub fn get_index(&self) -> Option<String> {
         self.options.index.as_ref().map(|index| index.to_owned())
