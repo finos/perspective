@@ -69,7 +69,7 @@ impl Display for CustomDatetimeFormat {
             Self::Disabled => "disabled",
         };
 
-        write!(f, "{}", text)
+        write!(f, "{text}")
     }
 }
 
@@ -84,7 +84,7 @@ impl FromStr for CustomDatetimeFormat {
             "numeric" => Ok(Self::Numeric),
             "2-digit" => Ok(Self::TwoDigit),
             "disabled" => Ok(Self::Disabled),
-            x => Err(format!("Unknown DatetimeFormat::{}", x)),
+            x => Err(format!("Unknown DatetimeFormat::{x}")),
         }
     }
 }

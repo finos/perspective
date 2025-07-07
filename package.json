@@ -57,7 +57,7 @@
         "chalk": "^2.4.2",
         "cpy-cli": "^4.2.0",
         "dotenv": "^8.6.0",
-        "esbuild": "^0.14.54",
+        "esbuild": "^0.25.5",
         "fs-extra": "^8.1.0",
         "glob": "^11.0.0",
         "glob-gitignore": "^1.0.15",
@@ -75,7 +75,7 @@
         "superstore-arrow": "3.0.0",
         "tar": "^6.2.1",
         "ts-node": "^10.9.2",
-        "tsx": "^4.19.2",
+        "tsx": "^4.20.3",
         "typescript": "~5.2.2"
     },
     "scripts": {

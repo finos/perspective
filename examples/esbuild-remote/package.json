@@ -17,6 +17,6 @@
         "express-ws": "^5.0.2"
     },
     "devDependencies": {
-        "esbuild": "^0.14.54"
+        "esbuild": "^0.25.5"
     }
 }

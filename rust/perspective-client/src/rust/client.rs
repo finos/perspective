@@ -106,7 +106,7 @@ mod name_registry {
         } else {
             let mut guard = CLIENT_ID_GEN.lock()?;
             *guard += 1;
-            Ok(format!("client-{}", guard))
+            Ok(format!("client-{guard}"))
         }
     }
 }
@@ -273,7 +273,7 @@ impl Client {
             msg_id,
             entity_id: "".to_string(),
             client_resp: Some(ClientResp::ServerError(ServerError {
-                message: format!("{}", message),
+                message: format!("{message}"),
                 status_code: 2,
             })),
         };
@@ -389,7 +389,7 @@ impl Client {
         self.subscribe_once(req, on_update).await?;
         receiver
             .await
-            .map_err(|_| ClientError::Unknown(format!("Internal error for req {}", req)))
+            .map_err(|_| ClientError::Unknown(format!("Internal error for req {req}")))
     }
 
     pub(crate) fn get_features(&self) -> ClientResult<Features> {

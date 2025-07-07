@@ -40,7 +40,7 @@ impl FromStr for NumberForegroundMode {
         match s {
             "color" => Ok(Self::Color),
             "bar" => Ok(Self::Bar),
-            x => Err(format!("Unknown NumberForegroundMode::{}", x)),
+            x => Err(format!("Unknown NumberForegroundMode::{x}")),
         }
     }
 }

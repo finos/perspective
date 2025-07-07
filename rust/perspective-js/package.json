@@ -59,6 +59,7 @@
         "lodash": "^4.17.21",
         "moment": "^2.30.1",
         "typedoc": "^0.28.7",
+        "typescript": "~5.2.2",
         "underscore": "^1.13.6",
         "zx": "8.1.9"
     }

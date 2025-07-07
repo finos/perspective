@@ -54,7 +54,7 @@ impl TryFrom<&str> for ColumnType {
         } else if val == "datetime" {
             Ok(Self::Datetime)
         } else {
-            Err(ClientError::Internal(format!("Unknown type {}", val)))
+            Err(ClientError::Internal(format!("Unknown type {val}")))
         }
     }
 }

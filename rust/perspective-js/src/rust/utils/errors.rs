@@ -43,7 +43,7 @@ fn format_js_error(value: &JsValue) -> String {
     } else {
         value
             .as_string()
-            .unwrap_or_else(|| format!("{:?}", value))
+            .unwrap_or_else(|| format!("{value:?}"))
             .to_string()
     }
 }
@@ -126,7 +126,7 @@ pub struct ApiError(pub ApiErrorType, pub JsBackTrace);
 
 impl ApiError {
     pub fn new<T: Display>(val: T) -> Self {
-        apierror!(UnknownError(format!("{}", val)))
+        apierror!(UnknownError(format!("{val}")))
     }
 
     /// The error category

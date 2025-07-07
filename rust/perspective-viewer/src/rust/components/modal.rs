@@ -109,15 +109,15 @@ where
                 rev_vert,
             } => {
                 let opacity = if visible { "" } else { ";opacity:0" };
-                self.css = format!(":host{{top:{}px;left:{}px{}}}", top, left, opacity);
+                self.css = format!(":host{{top:{top}px;left:{left}px{opacity}}}");
                 self.rev_vert.0.set(rev_vert);
                 true
             },
             ModalMsg::SubMsg(msg) => {
-                if let Some(child) = &ctx.props().child {
-                    if let Some(link) = child.props.weak_link().borrow().as_ref() {
-                        link.send_message(msg);
-                    }
+                if let Some(child) = &ctx.props().child
+                    && let Some(link) = child.props.weak_link().borrow().as_ref()
+                {
+                    link.send_message(msg);
                 }
 
                 false

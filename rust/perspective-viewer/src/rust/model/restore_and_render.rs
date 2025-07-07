@@ -35,10 +35,10 @@ pub trait RestoreAndRender: HasRenderer + HasSession + HasPresentation {
     ) -> ApiFuture<()> {
         clone!(self.session(), self.renderer(), self.presentation());
         ApiFuture::new(async move {
-            if !session.has_table() {
-                if let OptionalUpdate::Update(x) = settings {
-                    presentation.set_settings_attribute(x);
-                }
+            if !session.has_table()
+                && let OptionalUpdate::Update(x) = settings
+            {
+                presentation.set_settings_attribute(x);
             }
 
             if let OptionalUpdate::Update(title) = title {

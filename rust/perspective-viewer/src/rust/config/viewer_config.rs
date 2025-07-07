@@ -45,7 +45,7 @@ impl FromStr for ViewerConfigEncoding {
             "json" => Ok(Self::Json),
             "string" => Ok(Self::String),
             "arraybuffer" => Ok(Self::ArrayBuffer),
-            x => Err(format!("Unknown format \"{}\"", x).into()),
+            x => Err(format!("Unknown format \"{x}\"").into()),
         }
     }
 }

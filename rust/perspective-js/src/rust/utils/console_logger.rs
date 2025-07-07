@@ -36,7 +36,7 @@ impl Visit for LogLineBuffer {
             if !self.value.is_empty() {
                 self.value = format!("{:?}\n{}", value, self.value)
             } else {
-                self.value = format!("{:?}", value)
+                self.value = format!("{value:?}")
             }
         } else {
             if self.is_tail {
@@ -109,13 +109,13 @@ impl<'a> tracing::Metadata<'a> {
 
         if *IS_CHROME.get_or_init(detect_chrome) {
             level.web_logger_4()(
-                &format!("%c {} %c {}%c {} ", level, origin, msg).into(),
+                &format!("%c {level} %c {origin}%c {msg} ").into(),
                 &level.web_log_color().into(),
                 &"color: gray; font-style: italic".into(),
                 &"color: inherit".into(),
             );
         } else {
-            level.web_logger_1()(&format!("{} {}", origin, msg).into());
+            level.web_logger_1()(&format!("{origin} {msg}").into());
         }
     }
 }

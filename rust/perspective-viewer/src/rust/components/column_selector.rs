@@ -267,7 +267,7 @@ impl Component for ColumnSelector {
                 let key = name
                     .get_name()
                     .map(|x| x.to_owned())
-                    .unwrap_or_else(|| format!("__auto_{}__", idx));
+                    .unwrap_or_else(|| format!("__auto_{idx}__"));
 
                 let column_dropdown = self.column_dropdown.clone();
                 let is_editing = matches!(

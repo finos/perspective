@@ -66,7 +66,7 @@ impl Display for SimpleDatetimeFormat {
             Self::Disabled => "disabled",
         };
 
-        write!(f, "{}", text)
+        write!(f, "{text}")
     }
 }
 
@@ -80,7 +80,7 @@ impl FromStr for SimpleDatetimeFormat {
             "medium" => Ok(Self::Medium),
             "short" => Ok(Self::Short),
             "disabled" => Ok(Self::Disabled),
-            x => Err(format!("Unknown DatetimeFormat::{}", x)),
+            x => Err(format!("Unknown DatetimeFormat::{x}")),
         }
     }
 }

@@ -42,7 +42,7 @@ impl Display for StringColorMode {
             Self::Series => "series",
         };
 
-        write!(f, "{}", text)
+        write!(f, "{text}")
     }
 }
 
@@ -55,7 +55,7 @@ impl FromStr for StringColorMode {
             "foreground" => Ok(Self::Foreground),
             "background" => Ok(Self::Background),
             "series" => Ok(Self::Series),
-            x => Err(format!("Unknown StringColorMode::{}", x)),
+            x => Err(format!("Unknown StringColorMode::{x}")),
         }
     }
 }
@@ -94,7 +94,7 @@ impl Display for FormatMode {
             Self::Italics => "italics",
         };
 
-        write!(f, "{}", text)
+        write!(f, "{text}")
     }
 }
 
@@ -108,7 +108,7 @@ impl FromStr for FormatMode {
             // "image" => Ok(Self::Image),
             "bold" => Ok(Self::Bold),
             "italics" => Ok(Self::Italics),
-            x => Err(format!("Unknown format mode {}", x)),
+            x => Err(format!("Unknown format mode {x}")),
         }
     }
 }

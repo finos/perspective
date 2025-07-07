@@ -17,7 +17,6 @@ use std::sync::Arc;
 use async_lock::RwLock;
 use futures::Future;
 use futures::future::BoxFuture;
-pub use perspective_client::Session;
 
 use crate::ffi;
 use crate::local_client::LocalClient;
@@ -61,7 +60,7 @@ pub struct Server {
 impl std::fmt::Debug for Server {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let addr = std::ptr::addr_of!(self);
-        write!(f, "Server {:?}", addr)?;
+        write!(f, "Server {addr:?}")?;
         Ok(())
     }
 }

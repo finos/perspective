@@ -172,7 +172,7 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
             }
 
             if **expr != elem.value() {
-                elem.set_value(&format!("{}", expr));
+                elem.set_value(&format!("{expr}"));
                 elem.set_scroll_top(0);
                 elem.set_scroll_left(0);
                 elem.set_caret_position(0).unwrap();

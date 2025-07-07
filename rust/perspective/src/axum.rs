@@ -73,7 +73,7 @@ async fn process_message_loop(
             Left((Some(Ok(Binary(bytes))), _)) => Ok(Incoming(bytes)),
             Right((None, _)) | Left((None | Some(Ok(Close(_))), _)) => Ok(End),
             Left((Some(Ok(_)), _)) => Err("Unexpected message type".to_string()),
-            Left((Some(Err(err)), _)) => Err(format!("{}", err)),
+            Left((Some(Err(err)), _)) => Err(format!("{err}")),
         }?;
 
         match msg {

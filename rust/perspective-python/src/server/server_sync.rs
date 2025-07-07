@@ -97,7 +97,7 @@ impl Server {
             self.server
                 .poll()
                 .block_on()
-                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+                .map_err(|e| PyValueError::new_err(format!("{e}")))
         })
     }
 }

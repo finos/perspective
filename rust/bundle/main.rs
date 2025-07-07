@@ -62,7 +62,7 @@ fn build(pkg: Option<&str>, is_release: bool, features: Vec<String>) {
 fn bindgen(outdir: &Path, artifact: &str, is_release: bool) {
     let input = Path::new("../target/wasm32-unknown-unknown")
         .join(if is_release { "release" } else { "debug" })
-        .join(format!("{}.wasm", artifact));
+        .join(format!("{artifact}.wasm"));
 
     Bindgen::new()
         .web(true)

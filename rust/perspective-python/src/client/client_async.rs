@@ -557,7 +557,7 @@ impl AsyncTable {
         let schema = self.table.schema().await.into_pyerr()?;
         Ok(schema
             .into_iter()
-            .map(|(x, y)| (x, format!("{}", y)))
+            .map(|(x, y)| (x, format!("{y}")))
             .collect())
     }
 
@@ -669,7 +669,7 @@ impl AsyncView {
             .await
             .into_pyerr()?
             .into_iter()
-            .map(|(k, v)| (k, format!("{}", v)))
+            .map(|(k, v)| (k, format!("{v}")))
             .collect())
     }
 
@@ -714,7 +714,7 @@ impl AsyncView {
             .await
             .into_pyerr()?
             .into_iter()
-            .map(|(k, v)| (k, format!("{}", v)))
+            .map(|(k, v)| (k, format!("{v}")))
             .collect())
     }
 

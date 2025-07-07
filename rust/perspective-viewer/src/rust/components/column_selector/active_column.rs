@@ -331,7 +331,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
-                        style={format!("--default-column-title:var(--column-selector-column-{}--content)",path)}
+                        style={format!("--default-column-title:var(--column-selector-column-{path}--content)")}
                         data-index={ctx.props().idx.to_string()}
                         ondragenter={ondragenter.clone()}
                     >
@@ -345,7 +345,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
-                        style={format!("--default-column-title:var(--column-selector-column-{}--content)",path)}
+                        style={format!("--default-column-title:var(--column-selector-column-{path}--content)")}
                         data-index={ctx.props().idx.to_string()}
                         ondragenter={ondragenter.clone()}
                     >
@@ -404,7 +404,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
-                        style={format!("--default-column-title:var(--column-selector-column-{}--content)",path)}
+                        style={format!("--default-column-title:var(--column-selector-column-{path}--content)")}
                         data-index={ctx.props().idx.to_string()}
                         {onmouseover}
                         {onmouseout}

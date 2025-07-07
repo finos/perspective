@@ -88,7 +88,7 @@ impl AsyncServer {
             self.server
                 .poll()
                 .await
-                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+                .map_err(|e| PyValueError::new_err(format!("{e}")))
         }))
         .await
     }

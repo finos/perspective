@@ -38,7 +38,7 @@ impl Display for DatetimeColorMode {
             Self::Background => "background",
         };
 
-        write!(f, "{}", text)
+        write!(f, "{text}")
     }
 }
 
@@ -50,7 +50,7 @@ impl FromStr for DatetimeColorMode {
             "none" => Ok(Self::None),
             "foreground" => Ok(Self::Foreground),
             "background" => Ok(Self::Background),
-            x => Err(format!("Unknown DatetimeColorMode::{}", x)),
+            x => Err(format!("Unknown DatetimeColorMode::{x}")),
         }
     }
 }

@@ -89,8 +89,7 @@ pub impl LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
     fn register_plugin(&'static self, tag_name: &str) {
         assert!(
             !self.with(|plugin| plugin.borrow().iter().any(|n| n.tag_name == tag_name)),
-            "Plugin Custom Element '{}' already registered",
-            tag_name
+            "Plugin Custom Element '{tag_name}' already registered"
         );
 
         self.with(|plugin| {

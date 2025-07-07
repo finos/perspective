@@ -31,11 +31,11 @@ pub fn render(data: &str, layout: &str, plugins: &[String]) -> String {
 <html lang=\"en\">
 <head>
 <meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no\"/>
-<link rel=\"stylesheet\" crossorigin=\"anonymous\" href=\"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{0}/dist/css/themes.css\"/>
+<link rel=\"stylesheet\" crossorigin=\"anonymous\" href=\"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{VERSION}/dist/css/themes.css\"/>
 <script type=\"module\">
-import perspective from \"https://cdn.jsdelivr.net/npm/@finos/perspective@{0}/dist/cdn/perspective.js\";
-import \"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{0}/dist/cdn/perspective-viewer.js\";
-{3}
+import perspective from \"https://cdn.jsdelivr.net/npm/@finos/perspective@{VERSION}/dist/cdn/perspective.js\";
+import \"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{VERSION}/dist/cdn/perspective-viewer.js\";
+{imports}
 const worker = await perspective.worker();
 const binary_string = window.atob(window.data.textContent);
 const len = binary_string.length;
@@ -49,10 +49,10 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
 <style>perspective-viewer{{position:absolute;top:0;left:0;right:0;bottom:0}}</style>
 </head>
 <body>
-<script id='data' type=\"application/octet-stream\">{1}</script>
-<script id='layout' type=\"application/json\">{2}</script>
+<script id='data' type=\"application/octet-stream\">{data}</script>
+<script id='layout' type=\"application/json\">{layout}</script>
 <perspective-viewer id='viewer'></perspective-viewer>
 </body>
 </html>
-", VERSION, data, layout, imports)
+")
 }
