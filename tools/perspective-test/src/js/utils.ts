@@ -287,7 +287,13 @@ export async function shadow_type(
                 while (content.length > 0) {
                     if (elem instanceof HTMLInputElement) {
                         elem.value += content[0];
+                    } else if (
+                        elem instanceof HTMLElement &&
+                        elem.hasAttribute("contenteditable")
+                    ) {
+                        elem.textContent = content;
                     }
+
                     triggerInputEvent(elem);
                     await new Promise(requestAnimationFrame);
                     content = content.slice(1);
@@ -295,6 +301,11 @@ export async function shadow_type(
             } else {
                 if (elem instanceof HTMLInputElement) {
                     elem.value = content;
+                } else if (
+                    elem instanceof HTMLElement &&
+                    elem.hasAttribute("contenteditable")
+                ) {
+                    elem.textContent = content;
                 }
 
                 triggerInputEvent(elem);
@@ -310,6 +321,9 @@ export async function shadow_type(
                     elem.dispatchEvent(event);
                 }
             }
+
+            // @ts-ignore
+            document.activeElement.blur();
         },
         { content, path, is_incremental }
     );
