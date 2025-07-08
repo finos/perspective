@@ -1,6 +1,18 @@
+# [v3.7.2](https://github.com/finos/perspective/releases/tag/v3.7.2)
+
+_8 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.1...v3.7.2))
+
+Fixes
+
+- Fix datagrid editing and add tests [#3030](https://github.com/finos/perspective/pull/3030)
+
+Misc
+
+- Refactor docs [#3029](https://github.com/finos/perspective/pull/3029)
+
 # [v3.7.1](https://github.com/finos/perspective/releases/tag/v3.7.1)
 
-_2 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.1...v3.7.1))
+_2 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.0...v3.7.1))
 
 Fixes
 
