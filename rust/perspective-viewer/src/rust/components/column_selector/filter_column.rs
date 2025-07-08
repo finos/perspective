@@ -118,7 +118,7 @@ impl FilterColumnProps {
                 Some((if *x { "true" } else { "false" }).to_owned())
             },
             (ColumnType::Boolean, _) => Some("true".to_owned()),
-            (_, x) => Some(format!("{}", x)),
+            (_, x) => Some(format!("{x}")),
         }
     }
 
@@ -207,18 +207,18 @@ impl FilterColumnProps {
             }
         };
 
-        if let Some(input) = filter_input {
-            if &input != filter_column.term() {
-                *filter_column.term_mut() = input;
-                let update = ViewConfigUpdate {
-                    filter: Some(filter),
-                    ..ViewConfigUpdate::default()
-                };
+        if let Some(input) = filter_input
+            && &input != filter_column.term()
+        {
+            *filter_column.term_mut() = input;
+            let update = ViewConfigUpdate {
+                filter: Some(filter),
+                ..ViewConfigUpdate::default()
+            };
 
-                self.update_and_render(update)
-                    .map(ApiFuture::spawn)
-                    .unwrap_or_log();
-            }
+            self.update_and_render(update)
+                .map(ApiFuture::spawn)
+                .unwrap_or_log();
         }
     }
 }

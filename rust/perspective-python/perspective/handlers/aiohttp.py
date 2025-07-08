@@ -16,7 +16,7 @@ import asyncio
 
 
 class PerspectiveAIOHTTPHandler(object):
-    """PerspectiveAIOHTTPHandler is a drop-in implementation of Perspective.
+    """`PerspectiveAIOHTTPHandler` is a drop-in implementation of Perspective.
 
     Use it inside AIOHTTP routing to create a server-side Perspective that is
     ready to receive websocket messages from the front-end `perspective-viewer`.
@@ -24,14 +24,15 @@ class PerspectiveAIOHTTPHandler(object):
     The Perspective client and server will automatically keep the Websocket
     alive without timing out.
 
-    Examples:
-        >>> server = Server()
-        >>> async def websocket_handler(request):
-        ...    handler = PerspectiveAIOHTTPHandler(perspective_server=server, request=request)
-        ...    await handler.run()
+    # Examples
 
-        >>> app = web.Application()
-        >>> app.router.add_get("/websocket", websocket_handler)
+    >>> server = Server()
+    >>> async def websocket_handler(request):
+    ...    handler = PerspectiveAIOHTTPHandler(perspective_server=server, request=request)
+    ...    await handler.run()
+
+    >>> app = web.Application()
+    >>> app.router.add_get("/websocket", websocket_handler)
     """
 
     def __init__(self, **kwargs):

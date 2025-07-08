@@ -188,7 +188,7 @@ impl Renderer {
     /// - `name` The plugin name to lookup.
     pub fn get_plugin(&self, name: &str) -> ApiResult<JsPerspectiveViewerPlugin> {
         let idx = self.find_plugin_idx(name);
-        let idx = idx.ok_or_else(|| JsValue::from(format!("No Plugin `{}`", name)))?;
+        let idx = idx.ok_or_else(|| JsValue::from(format!("No Plugin `{name}`")))?;
         let result = self.0.borrow_mut().plugin_store.plugins().get(idx).cloned();
         Ok(result.unwrap())
     }
@@ -282,7 +282,7 @@ impl Renderer {
         let name = name.unwrap_or(default_plugin_name.as_str());
         let idx = self
             .find_plugin_idx(name)
-            .ok_or_else(|| JsValue::from(format!("Unknown plugin '{}'", name)))?;
+            .ok_or_else(|| JsValue::from(format!("Unknown plugin '{name}'")))?;
 
         let changed = !matches!(
             self.0.borrow().plugins_idx,

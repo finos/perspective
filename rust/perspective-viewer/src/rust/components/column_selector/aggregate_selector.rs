@@ -95,7 +95,7 @@ impl Component for AggregateSelector {
         let values = self.aggregates.clone();
         let label = ctx.props().aggregate.as_ref().map(|x| match x {
             Aggregate::SingleAggregate(_) => "".to_string(),
-            Aggregate::MultiAggregate(x, _) => format!("{}", x),
+            Aggregate::MultiAggregate(x, _) => format!("{x}"),
         });
 
         html! {

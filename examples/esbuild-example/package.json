@@ -17,7 +17,7 @@
         "superstore-arrow": "^3.0.0"
     },
     "devDependencies": {
-        "esbuild": "^0.14.54",
+        "esbuild": "^0.25.5",
         "http-server": "^14.1.1"
     }
 }

@@ -29,6 +29,7 @@
     },
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "workspace:^",
+        "typescript": "~5.2.2",
         "zx": "^8.3.0"
     }
 }

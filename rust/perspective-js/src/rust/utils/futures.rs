@@ -164,7 +164,7 @@ pub impl<T> Result<T, ApiError> {
         self.map(|x| Some(x)).or_else(|x| match x.inner() {
             ApiErrorType::ClientError(ClientError::ViewNotFound) => Ok(None),
             ApiErrorType::JsRawError(..) | ApiErrorType::JsError(..)
-                if format!("{}", x).contains("View not found") =>
+                if format!("{x}").contains("View not found") =>
             {
                 Ok(None)
             },

@@ -144,7 +144,7 @@ impl Display for SingleAggregate {
             Self::Min => "min",
         };
 
-        write!(fmt, "{}", term)
+        write!(fmt, "{term}")
     }
 }
 
@@ -182,7 +182,7 @@ impl FromStr for SingleAggregate {
             "high minus low" => Ok(Self::HighMinusLow),
             "stddev" => Ok(Self::StdDev),
             "var" => Ok(Self::Var),
-            x => Err(format!("Unknown aggregate `{}`", x)),
+            x => Err(format!("Unknown aggregate `{x}`")),
         }
     }
 }
@@ -226,12 +226,12 @@ impl From<&'static str> for Aggregate {
 impl Display for Aggregate {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            Self::SingleAggregate(x) => write!(fmt, "{}", x)?,
+            Self::SingleAggregate(x) => write!(fmt, "{x}")?,
             Self::MultiAggregate(MultiAggregate::WeightedMean, x) => {
-                write!(fmt, "weighted mean by {}", x)?
+                write!(fmt, "weighted mean by {x}")?
             },
-            Self::MultiAggregate(MultiAggregate::MaxBy, x) => write!(fmt, "max by {}", x)?,
-            Self::MultiAggregate(MultiAggregate::MinBy, x) => write!(fmt, "min by {}", x)?,
+            Self::MultiAggregate(MultiAggregate::MaxBy, x) => write!(fmt, "max by {x}")?,
+            Self::MultiAggregate(MultiAggregate::MinBy, x) => write!(fmt, "min by {x}")?,
         };
         Ok(())
     }

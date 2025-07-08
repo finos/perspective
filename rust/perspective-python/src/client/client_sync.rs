@@ -22,7 +22,7 @@ use pyo3::prelude::*;
 use pyo3::types::*;
 
 use super::client_async::*;
-use crate::server::PyServer;
+use crate::server::Server;
 
 pub(crate) trait PyFutureExt: Future {
     fn py_block_on(self, py: Python<'_>) -> Self::Output
@@ -37,13 +37,12 @@ pub(crate) trait PyFutureExt: Future {
 
 impl<F: Future> PyFutureExt for F {}
 
-/// An instance of a [`Client`] is a unique connection to a single
-/// `perspective_server::Server`, whether locally in-memory or remote over some
-/// transport like a WebSocket.
+/// An instance of a [`Client`] is a connection to a single [`Server`], whether
+/// locally in-memory or remote over some transport like a WebSocket.
 ///
 /// [`Client`] and Perspective objects derived from it have _synchronous_ APIs,
 /// suitable for use in a repl or script context where this is the _only_
-/// [`Client`] connected to its [`perspective_server::Server`]. If you want to
+/// [`Client`] connected to its [`Server`]. If you want to
 /// integrate with a Web framework or otherwise connect multiple clients,
 /// use [`AsyncClient`].
 #[pyclass(subclass, module = "perspective")]
@@ -62,15 +61,17 @@ impl Client {
         Ok(Client(client))
     }
 
+    /// Create a new [`Client`] instance bound to a specific in-process
+    /// [`Server`] (e.g. generally _not_ the global [`Server`]).
     #[staticmethod]
-    pub fn from_server(py: Python<'_>, server: Py<PyServer>) -> PyResult<Self> {
+    pub fn from_server(py: Python<'_>, server: Py<Server>) -> PyResult<Self> {
         server.borrow(py).new_local_client()
     }
 
     /// Handle a message from the external message queue.
     /// [`Client::handle_response`] is part of the low-level message-handling
     /// API necessary to implement new transports for a [`Client`]
-    /// connection to a local-or-remote `perspective_server::Server`, and
+    /// connection to a local-or-remote [`Server`], and
     /// doesn't generally need to be called directly by "users" of a
     /// [`Client`] once connected.
     pub fn handle_response(&self, py: Python<'_>, response: Py<PyBytes>) -> PyResult<bool> {
@@ -86,6 +87,7 @@ impl Client {
     /// - CSV
     /// - JSON row-oriented
     /// - JSON column-oriented
+    /// - NDJSON
     ///
     /// When instantiated with _data_, the schema is inferred from this data.
     /// While this is convenient, inferrence is sometimes imperfect e.g.
@@ -192,7 +194,7 @@ impl Client {
             .py_block_on(py)
     }
 
-    /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the
+    /// Terminates this [`Client`], cleaning up any [`View`] handles the
     /// [`Client`] has open as well as its callbacks.
     pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {
         self.0.terminate(py)
@@ -213,10 +215,19 @@ impl Table {
         ))
     }
 
+    /// Returns the name of the index column for the table.
+    ///
+    /// # Python Examples
+    ///
+    /// ```python
+    /// table = perspective.table("x,y\n1,2\n3,4", index="x");
+    /// index = client.get_index()
+    /// ```
     pub fn get_index(&self) -> Option<String> {
         self.0.get_index()
     }
 
+    /// Get a copy of the [`Client`] this [`Table`] came from.
     pub fn get_client(&self, py: Python<'_>) -> Client {
         Client(self.0.get_client().py_block_on(py))
     }
@@ -226,6 +237,8 @@ impl Table {
         self.0.get_limit()
     }
 
+    /// Returns the user-specified name for this table, or the auto-generated
+    /// name if a name was not specified when the table was created.
     pub fn get_name(&self) -> String {
         self.0.get_name()
     }
@@ -283,11 +296,19 @@ impl Table {
         self.0.delete(lazy).py_block_on(py)
     }
 
+    /// Create a unique channel ID on this [`Table`], which allows
+    /// `View::on_update` callback calls to be associated with the
+    /// `Table::update` which caused them.
     pub fn make_port(&self, py: Python<'_>) -> PyResult<i32> {
         let table = self.0.clone();
         table.make_port().py_block_on(py)
     }
 
+    /// Register a callback which is called exactly once, when this [`Table`] is
+    /// deleted with the [`Table::delete`] method.
+    ///
+    /// [`Table::on_delete`] resolves when the subscription message is sent, not
+    /// when the _delete_ event occurs.
     pub fn on_delete(&self, py: Python<'_>, callback: Py<PyAny>) -> PyResult<u32> {
         let table = self.0.clone();
         table.on_delete(callback).py_block_on(py)
@@ -299,16 +320,37 @@ impl Table {
         table.remove(input, format).py_block_on(py)
     }
 
+    /// Removes a listener with a given ID, as returned by a previous call to
+    /// [`Table::on_delete`].
     pub fn remove_delete(&self, py: Python<'_>, callback_id: u32) -> PyResult<()> {
         let table = self.0.clone();
         table.remove_delete(callback_id).py_block_on(py)
     }
 
+    /// Returns a table's [`Schema`], a mapping of column names to column types.
+    ///
+    /// The mapping of a [`Table`]'s column names to data types is referred to
+    /// as a [`Schema`]. Each column has a unique name and a data type, one
+    /// of:
+    ///
+    /// - `"boolean"` - A boolean type
+    /// - `"date"` - A timesonze-agnostic date type (month/day/year)
+    /// - `"datetime"` - A millisecond-precision datetime type in the UTC
+    ///   timezone
+    /// - `"float"` - A 64 bit float
+    /// - `"integer"` - A signed 32 bit integer (the integer type supported by
+    ///   JavaScript)
+    /// - `"string"` - A `String` data type (encoded internally as a
+    ///   _dictionary_)
+    ///
+    /// Note that all [`Table`] columns are _nullable_, regardless of the data
+    /// type.
     pub fn schema(&self, py: Python<'_>) -> PyResult<HashMap<String, String>> {
         let table = self.0.clone();
         table.schema().py_block_on(py)
     }
 
+    /// Validates the given expressions.
     pub fn validate_expressions(
         &self,
         py: Python<'_>,
@@ -318,15 +360,37 @@ impl Table {
         table.validate_expressions(expression).py_block_on(py)
     }
 
+    /// Create a new [`View`] from this table with a specified
+    /// [`ViewConfigUpdate`].
+    ///
+    /// See [`View`] struct.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// view view = table.view(
+    ///     columns=["Sales"],
+    ///     aggregates={"Sales": "sum"},
+    ///     group_by=["Region", "State"],
+    /// )
+    /// ```
     #[pyo3(signature = (**config))]
     pub fn view(&self, py: Python<'_>, config: Option<Py<PyDict>>) -> PyResult<View> {
         Ok(View(self.0.view(config).py_block_on(py)?))
     }
 
+    /// Returns the number of rows in a [`Table`].
     pub fn size(&self, py: Python<'_>) -> PyResult<usize> {
         self.0.size().py_block_on(py)
     }
 
+    /// Removes all the rows in the [`Table`], but preserves everything else
+    /// including the schema, index, and any callbacks or registered
+    /// [`View`] instances.
+    ///
+    /// Calling [`Table::clear`], like [`Table::update`] and [`Table::remove`],
+    /// will trigger an update event to any registered listeners via
+    /// [`View::on_update`].
     #[pyo3(signature = (input, format=None))]
     pub fn replace(
         &self,
@@ -337,6 +401,23 @@ impl Table {
         self.0.replace(input, format).py_block_on(py)
     }
 
+    /// Updates the rows of this table and any derived [`View`] instances.
+    ///
+    /// Calling [`Table::update`] will trigger the [`View::on_update`] callbacks
+    /// register to derived [`View`], and the call itself will not resolve until
+    /// _all_ derived [`View`]'s are notified.
+    ///
+    /// When updating a [`Table`] with an `index`, [`Table::update`] supports
+    /// partial updates, by omitting columns from the update data.
+    ///
+    /// # Arguments
+    ///
+    /// - `input` - The input data for this [`Table`]. The schema of a [`Table`]
+    ///   is immutable after creation, so this method cannot be called with a
+    ///   schema.
+    /// - `options` - Options for this update step - see
+    ///   [`perspective_client::UpdateOptions`].
+    /// ```  
     #[pyo3(signature = (input, port_id=None, format=None))]
     pub fn update(
         &self,
@@ -349,6 +430,24 @@ impl Table {
     }
 }
 
+/// The [`View`] struct is Perspective's query and serialization interface. It
+/// represents a query on the `Table`'s dataset and is always created from an
+/// existing `Table` instance via the [`Table::view`] method.
+///
+/// [`View`]s are immutable with respect to the arguments provided to the
+/// [`Table::view`] method; to change these parameters, you must create a new
+/// [`View`] on the same [`Table`]. However, each [`View`] is _live_ with
+/// respect to the [`Table`]'s data, and will (within a conflation window)
+/// update with the latest state as its parent [`Table`] updates, including
+/// incrementally recalculating all aggregates, pivots, filters, etc. [`View`]
+/// query parameters are composable, in that each parameter works independently
+/// _and_ in conjunction with each other, and there is no limit to the number of
+/// pivots, filters, etc. which can be applied.
+///
+/// To construct a [`View`], call the [`Table::view`] factory method. A
+/// [`Table`] can have as many [`View`]s associated with it as you need -
+/// Perspective conserves memory by relying on a single [`Table`] to power
+/// multiple [`View`]s concurrently.
 #[pyclass(subclass, name = "View", module = "perspective")]
 pub struct View(AsyncView);
 
@@ -363,10 +462,17 @@ impl View {
         ))
     }
 
+    /// Returns an array of strings containing the column paths of the [`View`]
+    /// without any of the source columns.
+    ///
+    /// A column path shows the columns that a given cell belongs to after
+    /// pivots are applied.
     pub fn column_paths(&self, py: Python<'_>) -> PyResult<Vec<String>> {
         self.0.column_paths().py_block_on(py)
     }
 
+    /// Renders this [`View`] as a column-oriented JSON string. Useful if you
+    /// want to save additional round trip serialize/deserialize cycles.  
     #[pyo3(signature = (**window))]
     pub fn to_columns_string(
         &self,
@@ -376,16 +482,20 @@ impl View {
         self.0.to_columns_string(window).py_block_on(py)
     }
 
+    /// Renders this `View` as a row-oriented JSON string.
     #[pyo3(signature = (**window))]
     pub fn to_json_string(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<String> {
         self.0.to_json_string(window).py_block_on(py)
     }
 
+    /// Renders this [`View`] as an [NDJSON](https://github.com/ndjson/ndjson-spec)
+    /// formatted `String`.
     #[pyo3(signature = (**window))]
     pub fn to_ndjson(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<String> {
         self.0.to_ndjson(window).py_block_on(py)
     }
 
+    /// Renders this [`View`] as a row-oriented Python `list`.
     #[pyo3(signature = (**window))]
     pub fn to_records<'a>(
         &self,
@@ -397,6 +507,7 @@ impl View {
         json_module.call_method1("loads", (json,))
     }
 
+    /// Renders this [`View`] as a row-oriented Python `list`.
     #[pyo3(signature = (**window))]
     pub fn to_json<'a>(
         &self,
@@ -406,6 +517,7 @@ impl View {
         self.to_records(py, window)
     }
 
+    /// Renders this [`View`] as a column-oriented Python `dict`.
     #[pyo3(signature = (**window))]
     pub fn to_columns<'a>(
         &self,
@@ -417,35 +529,45 @@ impl View {
         json_module.call_method1("loads", (json,))
     }
 
+    /// Renders this [`View`] as a CSV `String` in a standard format.
     #[pyo3(signature = (**window))]
     pub fn to_csv(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<String> {
         self.0.to_csv(window).py_block_on(py)
     }
 
-    /// Serialize the data to a `pandas.DataFrame`.
+    /// Renders this [`View`] as a `pandas.DataFrame`.
     #[pyo3(signature = (**window))]
     // #[deprecated(since="3.2.0", note="Please use `View::to_pandas`")]
     pub fn to_dataframe(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         self.0.to_dataframe(window).py_block_on(py)
     }
 
-    /// Serialize the data to a `pandas.DataFrame`.
+    /// Renders this [`View`] as a `pandas.DataFrame`.
     #[pyo3(signature = (**window))]
     pub fn to_pandas(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         self.0.to_dataframe(window).py_block_on(py)
     }
 
-    /// Serialize the data to a `polars.DataFrame`.
+    /// Renders this [`View`] as a `polars.DataFrame`.
     #[pyo3(signature = (**window))]
     pub fn to_polars(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         self.0.to_polars(window).py_block_on(py)
     }
 
+    /// Renders this [`View`] as the Apache Arrow data format.
+    ///
+    /// # Arguments
+    ///
+    /// - `window` - a [`ViewWindow`]
     #[pyo3(signature = (**window))]
     pub fn to_arrow(&self, py: Python<'_>, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {
         self.0.to_arrow(window).py_block_on(py)
     }
 
+    /// Delete this [`View`] and clean up all resources associated with it.
+    /// [`View`] objects do not stop consuming resources or processing
+    /// updates when they are garbage collected - you must call this method
+    /// to reclaim these.
     pub fn delete(&self, py: Python<'_>) -> PyResult<()> {
         self.0.delete().py_block_on(py)
     }
@@ -458,38 +580,95 @@ impl View {
         self.0.collapse(index).py_block_on(py)
     }
 
+    /// Returns this [`View`]'s _dimensions_, row and column count, as well as
+    /// those of the [`crate::Table`] from which it was derived.
+    ///
+    /// - `num_table_rows` - The number of rows in the underlying
+    ///   [`crate::Table`].
+    /// - `num_table_columns` - The number of columns in the underlying
+    ///   [`crate::Table`] (including the `index` column if this
+    ///   [`crate::Table`] was constructed with one).
+    /// - `num_view_rows` - The number of rows in this [`View`]. If this
+    ///   [`View`] has a `group_by` clause, `num_view_rows` will also include
+    ///   aggregated rows.
+    /// - `num_view_columns` - The number of columns in this [`View`]. If this
+    ///   [`View`] has a `split_by` clause, `num_view_columns` will include all
+    ///   _column paths_, e.g. the number of `columns` clause times the number
+    ///   of `split_by` groups.
     pub fn dimensions(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         self.0.dimensions().py_block_on(py)
     }
 
+    /// The expression schema of this [`View`], which contains only the
+    /// expressions created on this [`View`]. See [`View::schema`] for
+    /// details.
     pub fn expression_schema(&self, py: Python<'_>) -> PyResult<HashMap<String, String>> {
         self.0.expression_schema().py_block_on(py)
     }
 
+    /// A copy of the [`ViewConfig`] object passed to the [`Table::view`] method
+    /// which created this [`View`].
     pub fn get_config(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         self.0.get_config().py_block_on(py)
     }
 
+    /// Calculates the [min, max] of the leaf nodes of a column `column_name`.
+    ///
+    /// # Returns
+    ///
+    /// A tuple of [min, max], whose types are column and aggregate dependent.
     pub fn get_min_max(&self, py: Python<'_>, column_name: String) -> PyResult<(String, String)> {
         self.0.get_min_max(column_name).py_block_on(py)
     }
 
+    /// The number of aggregated rows in this [`View`]. This is affected by the
+    /// "group_by" configuration parameter supplied to this view's contructor.
+    ///
+    /// # Returns
+    ///
+    /// The number of aggregated rows.
     pub fn num_rows(&self, py: Python<'_>) -> PyResult<u32> {
         self.0.num_rows().py_block_on(py)
     }
 
+    /// The schema of this [`View`].
+    ///
+    /// The [`View`] schema differs from the `schema` returned by
+    /// [`Table::schema`]; it may have different column names due to
+    /// `expressions` or `columns` configs, or it maye have _different
+    /// column types_ due to the application og `group_by` and `aggregates`
+    /// config. You can think of [`Table::schema`] as the _input_ schema and
+    /// [`View::schema`] as the _output_ schema of a Perspective pipeline.
     pub fn schema(&self, py: Python<'_>) -> PyResult<HashMap<String, String>> {
         self.0.schema().py_block_on(py)
     }
 
+    /// Register a callback with this [`View`]. Whenever the [`View`] is
+    /// deleted, this callback will be invoked.
     pub fn on_delete(&self, py: Python<'_>, callback: Py<PyAny>) -> PyResult<u32> {
         self.0.on_delete(callback).py_block_on(py)
     }
 
+    /// Unregister a previously registered [`View::on_delete`] callback.
     pub fn remove_delete(&self, py: Python<'_>, callback_id: u32) -> PyResult<()> {
         self.0.remove_delete(callback_id).py_block_on(py)
     }
 
+    /// Register a callback with this [`View`]. Whenever the view's underlying
+    /// table emits an update, this callback will be invoked with an object
+    /// containing `port_id`, indicating which port the update fired on, and
+    /// optionally `delta`, which is the new data that was updated for each
+    /// cell or each row.
+    ///
+    /// # Arguments
+    ///
+    /// - `on_update` - A callback function invoked on update, which receives an
+    ///   object with two keys: `port_id`, indicating which port the update was
+    ///   triggered on, and `delta`, whose value is dependent on the mode
+    ///   parameter.
+    /// - `options` - If this is provided as `OnUpdateOptions { mode:
+    ///   Some(OnUpdateMode::Row) }`, then `delta` is an Arrow of the updated
+    ///   rows. Otherwise `delta` will be [`Option::None`].
     #[pyo3(signature = (callback, mode=None))]
     pub fn on_update(
         &self,
@@ -500,6 +679,20 @@ impl View {
         self.0.on_update(callback, mode).py_block_on(py)
     }
 
+    /// Unregister a previously registered update callback with this [`View`].
+    ///
+    /// # Arguments
+    ///
+    /// - `id` - A callback `id` as returned by a recipricol call to
+    ///   [`View::on_update`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let callback = |_| async { print!("Updated!") };
+    /// let cid = view.on_update(callback, OnUpdateOptions::default()).await?;
+    /// view.remove_update(cid).await?;
+    /// ```
     pub fn remove_update(&self, py: Python<'_>, callback_id: u32) -> PyResult<()> {
         self.0.remove_update(callback_id).py_block_on(py)
     }

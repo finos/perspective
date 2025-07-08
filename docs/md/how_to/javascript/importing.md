@@ -76,8 +76,8 @@ ESBuild config JSON to encode this asset as a `file`:
 ### Webpack
 
 ```javascript
-import * as SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
-import * as CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
+import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
+import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
 
 await Promise.all([
     perspective.init_server(SERVER_WASM),
@@ -90,8 +90,19 @@ Webpack config:
 ```javascript
 {
     // ...
+    module: {
+        // ...
+        rules: [
+            // ...
+            {
+                test: /\.wasm$/,
+                type: "asset/resource"
+            },
+        ]
+    },
     experiments: {
-        asyncWebAssembly: true,
+        // ...
+        asyncWebAssembly: false,
         syncWebAssembly: false,
     },
 }

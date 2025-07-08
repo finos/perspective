@@ -10,6 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+// @ts-ignore
+import { extract } from "pro_self_extracting_wasm";
+
 if (typeof WebAssembly === "undefined") {
     throw new Error("WebAssembly not supported.");
 }
@@ -53,11 +56,7 @@ export async function load_wasm_stage_0(
     }
 
     try {
-        const exports = await compile(wasm);
-        const size = exports.size();
-        const offset = exports.offset();
-        const array = new Uint8Array(exports.memory.buffer);
-        return array.slice(offset, offset + size);
+        return await extract(wasm as ArrayBuffer);
     } catch (e) {
         console.warn("Stage 0 wasm loading failed, skipping");
         return new Uint8Array(wasm as ArrayBuffer);

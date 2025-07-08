@@ -78,7 +78,7 @@ impl PyAsyncSession {
                 session
                     .handle_request(&data)
                     .await
-                    .map_err(|e| PyValueError::new_err(format!("{}", e)))
+                    .map_err(|e| PyValueError::new_err(format!("{e}")))
             })
         })))
         .await?

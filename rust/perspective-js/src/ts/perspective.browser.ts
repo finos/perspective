@@ -31,32 +31,24 @@ export function init_server(
     if (wasm instanceof Uint8Array) {
         GLOBAL_SERVER_WASM = Promise.resolve(wasm.buffer);
     } else if (wasm instanceof Response) {
-        GLOBAL_SERVER_WASM = wasm.arrayBuffer();
+        GLOBAL_SERVER_WASM = Promise.resolve(wasm);
     } else if (wasm instanceof Promise) {
-        GLOBAL_SERVER_WASM = wasm.then(
-            (wasm: ArrayBuffer | Response | WebAssembly.Module) => {
-                if (wasm instanceof Response) {
-                    return wasm.arrayBuffer();
-                } else {
-                    return wasm;
-                }
-            }
-        );
+        GLOBAL_SERVER_WASM = wasm;
     } else {
         GLOBAL_SERVER_WASM = Promise.resolve(wasm);
     }
 
     if (!disable_stage_0) {
-        GLOBAL_SERVER_WASM = GLOBAL_SERVER_WASM.then((x) => {
-            return load_wasm_stage_0(x).then((x) => x.buffer as ArrayBuffer);
-        });
+        GLOBAL_SERVER_WASM = GLOBAL_SERVER_WASM.then((x) =>
+            load_wasm_stage_0(x).then((x) => x.buffer as ArrayBuffer)
+        );
     }
 }
 
 let GLOBAL_CLIENT_WASM: Promise<typeof psp>;
 
 async function compilerize(
-    wasm: ArrayBuffer | Response,
+    wasm: PerspectiveWasm,
     disable_stage_0: boolean = false
 ) {
     const wasm_buff = disable_stage_0 ? wasm : await load_wasm_stage_0(wasm);
@@ -80,21 +72,9 @@ export function init_client(wasm: PerspectiveWasm, disable_stage_0 = false) {
     } else if (wasm instanceof ArrayBuffer) {
         GLOBAL_CLIENT_WASM = compilerize(wasm, disable_stage_0);
     } else if (wasm instanceof Response) {
-        GLOBAL_CLIENT_WASM = wasm
-            .arrayBuffer()
-            .then((x) => compilerize(x, disable_stage_0));
+        GLOBAL_CLIENT_WASM = compilerize(wasm, disable_stage_0);
     } else if (wasm instanceof Promise) {
-        GLOBAL_CLIENT_WASM = wasm.then((wasm) => {
-            if (wasm instanceof ArrayBuffer) {
-                return compilerize(wasm, disable_stage_0);
-            } else if (wasm instanceof Response) {
-                return wasm
-                    .arrayBuffer()
-                    .then((x) => compilerize(x, disable_stage_0));
-            } else {
-                return wasm as typeof psp;
-            }
-        });
+        GLOBAL_CLIENT_WASM = compilerize(wasm, disable_stage_0);
     } else if (wasm instanceof Object) {
         GLOBAL_CLIENT_WASM = Promise.resolve(wasm as typeof psp);
     }

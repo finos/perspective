@@ -19,7 +19,7 @@ fn input_value_format(x: &str) -> Result<&str, JsValue> {
         23 => Ok("%Y-%m-%dT%H:%M:%S%.3f"),
         19 => Ok("%Y-%m-%dT%H:%M:%S"),
         16 => Ok("%Y-%m-%dT%H:%M"),
-        _ => Err(format!("Unknown format {}", x).into()),
+        _ => Err(format!("Unknown format {x}").into()),
     }
 }
 
@@ -38,7 +38,7 @@ pub fn posix_to_utc_str(x: f64) -> ApiResult<String> {
             .format("%Y-%m-%dT%H:%M:%S%.3f")
             .to_string())
     } else {
-        Err(format!("Unknown timestamp {}", x).into())
+        Err(format!("Unknown timestamp {x}").into())
     }
 }
 

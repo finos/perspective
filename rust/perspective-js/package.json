@@ -37,26 +37,29 @@
     "scripts": {
         "build": "node ./build.js",
         "clean": "rimraf dist && rimraf build && rimraf src/ts/ts-rs",
-        "docs": "cargo doc"
+        "docs": "npx typedoc --tsconfig tsconfig.browser.json --out ../../docs/static/browser && npx typedoc --tsconfig tsconfig.node.json --out ../../docs/static/node"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
-        "ws": "^8.17.0",
-        "stoppable": "^1.1.0"
+        "pro_self_extracting_wasm": "0.0.9",
+        "stoppable": "^1.1.0",
+        "ws": "^8.17.0"
     },
     "devDependencies": {
         "@finos/perspective-cpp": "workspace:^",
         "@finos/perspective-esbuild-plugin": "workspace:^",
-        "@finos/perspective-test": "workspace:^",
         "@finos/perspective-metadata": "workspace:^",
+        "@finos/perspective-test": "workspace:^",
         "@types/stoppable": "^1.1.0",
         "@types/ws": "^8.18.1",
         "apache-arrow": "18.1.0",
         "cpy": "^9.0.1",
         "lodash": "^4.17.21",
         "moment": "^2.30.1",
+        "typedoc": "^0.28.7",
+        "typescript": "~5.2.2",
         "underscore": "^1.13.6",
         "zx": "8.1.9"
     }

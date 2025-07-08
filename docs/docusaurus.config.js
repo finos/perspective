@@ -39,6 +39,10 @@ const examples = fs.readdirSync("static/blocks").map((ex) => {
     };
 });
 
+function link(title, path) {
+    return `<a class="dropdown__link" href="${path}">    ${title}</a>`;
+}
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
     title: "Perspective",
@@ -119,20 +123,73 @@ const config = {
                         label: "Docs",
                         items: [
                             {
-                                href: "/guide/",
-                                label: "User Guide",
+                                type: "html",
+                                value: `<a class="dropdown__link" style="font-size:16px;padding:0.25rem 0rem" href="/guide/">User Guide</a>`,
                             },
                             {
                                 type: "html",
-                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-js/latest/perspective_js/"><code>@finos/perspective</code> JavaScript API</a>`,
+                                value: '<span style="user-select:none">Python API</span>',
                             },
                             {
                                 type: "html",
-                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-python/latest/perspective_python/"><code>perspective-python</code> Python API</a>`,
+                                value: `<a class="dropdown__link" href="/python/"><code>perspective</code></a>`,
                             },
                             {
                                 type: "html",
-                                value: `<a class="dropdown__link" href="https://docs.rs/perspective/latest/perspective/"><code>perspective</code> Rust API</a>`,
+                                value: `<a class="dropdown__link" href="/python/perspective/widget.html"><code>perspective.widget</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="/python/perspective/handlers/aiohttp.html"><code>perspective.handlers.aiohttp</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="/python/perspective/handlers/starlette.html"><code>perspective.handlers.starlette</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="/python/perspective/handlers/tornado.html"><code>perspective.handlers.tornado</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: '<span style="user-select:none">JavaScript API</span>',
+                            },
+                            {
+                                type: "html",
+                                value: link(
+                                    "<code>@finos/perspective-viewer</code>",
+                                    "/viewer/modules/perspective-viewer.html"
+                                ),
+                            },
+                            {
+                                type: "html",
+                                value: link(
+                                    "<code>@finos/perspective</code> Browser",
+                                    "/browser/modules/src_ts_perspective.browser.ts.html"
+                                ),
+                            },
+                            {
+                                type: "html",
+                                value: link(
+                                    "<code>@finos/perspective</code> Node.js",
+                                    "/node/modules/src_ts_perspective.node.ts.html"
+                                ),
+                            },
+                            {
+                                type: "html",
+                                value: '<span style="user-select:none">Rust API</span>',
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-js/latest/perspective_js/"><code>perspective-js</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-python/latest/perspective_python/"><code>perspective-python</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective/latest/perspective/"><code>perspective</code></a>`,
                             },
                         ],
                     },

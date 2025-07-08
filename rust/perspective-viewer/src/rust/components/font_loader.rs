@@ -195,7 +195,7 @@ fn timeout_font_task(
     family: &str,
     weight: &str,
 ) -> impl Future<Output = ApiResult<JsValue>> + use<> {
-    let timeout_msg = format!("Timeout awaiting font \"{}:{}\"", family, weight);
+    let timeout_msg = format!("Timeout awaiting font \"{family}:{weight}\"");
     async {
         set_timeout(FONT_DOWNLOAD_TIMEOUT_MS).await?;
         Err(timeout_msg.into())
@@ -206,10 +206,7 @@ fn timeout_font_task(
 /// since not all of the fonts may be shown and when e.g. the settings panel is
 /// closed, and this will defer font loading.
 fn font_test_html((family, weight): &(String, String)) -> Html {
-    let style = format!(
-        "opacity:0;font-family:\"{}\";font-weight:{}",
-        family, weight
-    );
+    let style = format!("opacity:0;font-family:\"{family}\";font-weight:{weight}");
 
     html! { <span {style}>{ FONT_TEST_SAMPLE }</span> }
 }

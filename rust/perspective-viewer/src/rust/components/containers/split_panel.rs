@@ -135,14 +135,12 @@ impl ResizingState {
     pub fn get_style(&self, client_offset: i32) -> Option<String> {
         let offset = self.get_offset(client_offset);
         Some(match self.orientation {
-            Orientation::Horizontal => format!(
-                "max-width:{}px;min-width:{}px;width:{}px",
-                offset, offset, offset
-            ),
-            Orientation::Vertical => format!(
-                "max-height:{}px;min-height:{}px;height:{}px",
-                offset, offset, offset
-            ),
+            Orientation::Horizontal => {
+                format!("max-width:{offset}px;min-width:{offset}px;width:{offset}px")
+            },
+            Orientation::Vertical => {
+                format!("max-height:{offset}px;min-height:{offset}px;height:{offset}px")
+            },
         })
     }
 
@@ -290,10 +288,10 @@ impl Component for SplitPanel {
         if let Some(x) = &ctx.props().initial_size {
             styles[0] = Some(match ctx.props().orientation {
                 Orientation::Horizontal => {
-                    format!("max-width:{}px;min-width:{}px;width:{}px", x, x, x)
+                    format!("max-width:{x}px;min-width:{x}px;width:{x}px")
                 },
                 Orientation::Vertical => {
-                    format!("max-height:{}px;min-height:{}px;height:{}px", x, x, x)
+                    format!("max-height:{x}px;min-height:{x}px;height:{x}px")
                 },
             });
         }

@@ -245,8 +245,8 @@ impl Table {
     }
 
     /// Replace all rows in this [`Table`] with the input data, coerced to this
-    /// [`Table`]'s existing [`Schema`], notifying any derived [`View`] and
-    /// [`View::on_update`] callbacks.
+    /// [`Table`]'s existing [`perspective_client::Schema`], notifying any
+    /// derived [`View`] and [`View::on_update`] callbacks.
     ///
     /// Calling [`Table::replace`] is an easy way to replace _all_ the data in a
     /// [`Table`] without losing any derived [`View`] instances or

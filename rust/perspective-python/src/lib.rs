@@ -20,6 +20,8 @@ mod server;
 
 pub use client::client_sync::{Client, Table, View};
 pub use client::proxy_session::ProxySession;
+pub use perspective_client::ViewWindow;
+pub use perspective_client::config::ViewConfigUpdate;
 use py_err::PyPerspectiveError;
 use pyo3::prelude::*;
 use tracing_subscriber::layer::SubscriberExt;
@@ -41,11 +43,14 @@ fn init_tracing() {
         .init();
 }
 
+/// Returns the number of threads the internal threadpool will use.
 #[pyfunction]
 fn num_cpus() -> i32 {
     perspective_server::num_cpus()
 }
 
+/// Set the number of threads the internal threadpool will use. Can also be set
+/// with `NUM_OMP_THREADS` environment variable.
 #[pyfunction]
 fn set_num_cpus(num_cpus: i32) {
     perspective_server::set_num_cpus(num_cpus)
@@ -56,8 +61,8 @@ fn set_num_cpus(num_cpus: i32) {
 fn perspective(py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     init_tracing();
     m.add_class::<client::client_sync::Client>()?;
-    m.add_class::<server::PyServer>()?;
-    m.add_class::<server::PyAsyncServer>()?;
+    m.add_class::<server::Server>()?;
+    m.add_class::<server::AsyncServer>()?;
     m.add_class::<server::PySession>()?;
     m.add_class::<server::PyAsyncSession>()?;
     m.add_class::<client::client_sync::Table>()?;

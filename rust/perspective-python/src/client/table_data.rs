@@ -33,7 +33,7 @@ fn psp_type_from_py_type(_py: Python<'_>, val: Bound<'_, PyAny>) -> PyResult<Col
             ("builtins", "bool") => Ok(ColumnType::Boolean),
             ("datetime", "date") => Ok(ColumnType::Date),
             ("datetime", "datetime") => Ok(ColumnType::Datetime),
-            (modname, typename) => Err(PyTypeError::new_err(format!("{}.{}", modname, typename))),
+            (modname, typename) => Err(PyTypeError::new_err(format!("{modname}.{typename}"))),
         }
     } else {
         Err(PyTypeError::new_err(format!(

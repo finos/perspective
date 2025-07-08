@@ -68,12 +68,12 @@ impl PySession {
     pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
         py.allow_threads(|| {
             self.with_session(|session| {
-                let result = session
+                
+
+                session
                     .handle_request(&data)
                     .block_on()
-                    .map_err(|e| PyValueError::new_err(format!("{}", e)));
-
-                result
+                    .map_err(|e| PyValueError::new_err(format!("{e}")))
             })
         })?
     }

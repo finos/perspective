@@ -77,7 +77,7 @@ impl ProxySession {
     }
 }
 
-/// An instance of a [`Client`] is a unique connection to a single
+/// An instance of a [`Client`] is a connection to a single
 /// `perspective_server::Server`, whether locally in-memory or remote over some
 /// transport like a WebSocket.
 ///
@@ -154,7 +154,7 @@ impl<I> JsReconnect<I> {
             let result = JsFuture::from(p)
                 .await
                 .map(|_| ())
-                .map_err(|x| format!("{:?}", x).into());
+                .map_err(|x| format!("{x:?}").into());
 
             sender.send(result).unwrap();
             Ok(JsValue::UNDEFINED)
@@ -229,7 +229,7 @@ impl Client {
                             Err(e) => {
                                 // This error may occur when _invoking_ the function
                                 tracing::warn!("{:?}", e);
-                                js_sys::Promise::reject(&format!("C {:?}", e).into())
+                                js_sys::Promise::reject(&format!("C {e:?}").into())
                             },
                         });
 
@@ -259,7 +259,7 @@ impl Client {
                     let reconnect = reconnect.clone();
                     future_to_promise(async move {
                         if let Some(f) = reconnect {
-                            f().await.map_err(|e| JsValue::from(format!("A {}", e)))?;
+                            f().await.map_err(|e| JsValue::from(format!("A {e}")))?;
                         }
 
                         Ok(JsValue::UNDEFINED)
@@ -299,6 +299,7 @@ impl Client {
     /// - CSV
     /// - JSON row-oriented
     /// - JSON column-oriented
+    /// - NDJSON
     ///
     /// When instantiated with _data_, the schema is inferred from this data.
     /// While this is convenient, inferrence is sometimes imperfect e.g.

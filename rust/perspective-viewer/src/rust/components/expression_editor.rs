@@ -82,7 +82,7 @@ impl Component for ExpressionEditor {
                     match session.validate_expr(&val).await {
                         Ok(x) => ExpressionEditorMsg::ValidateComplete(x),
                         Err(err) => {
-                            web_sys::console::error_1(&format!("{:?}", err).into());
+                            web_sys::console::error_1(&format!("{err:?}").into());
                             ExpressionEditorMsg::ValidateComplete(None)
                         },
                     }

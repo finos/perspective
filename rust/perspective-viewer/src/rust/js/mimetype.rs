@@ -28,7 +28,7 @@ impl Default for MimeType {
 
 impl From<MimeType> for JsValue {
     fn from(x: MimeType) -> Self {
-        Self::from(format!("{}", x))
+        Self::from(format!("{x}"))
     }
 }
 

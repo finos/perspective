@@ -10,7 +10,10 @@
         "dist/cjs/**/*"
     ],
     "scripts": {
-        "build": "node ../../tools/perspective-scripts/run_emsdk.mjs node ./build.js",
+        "build": "node ../../tools/perspective-scripts/run_emsdk.mjs node ./build.mjs",
         "clean": "rimraf dist"
+    },
+    "devDependencies": {
+        "pro_self_extracting_wasm": "0.0.9"
     }
 }

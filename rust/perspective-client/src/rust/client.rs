@@ -106,7 +106,7 @@ mod name_registry {
         } else {
             let mut guard = CLIENT_ID_GEN.lock()?;
             *guard += 1;
-            Ok(format!("client-{}", guard))
+            Ok(format!("client-{guard}"))
         }
     }
 }
@@ -120,7 +120,7 @@ mod name_registry {
 pub type ReconnectCallback =
     Arc<dyn Fn() -> LocalBoxFuture<'static, Result<(), Box<dyn Error>>> + Send + Sync>;
 
-/// An instance of a [`Client`] is a unique connection to a single
+/// An instance of a [`Client`] is a connection to a single
 /// `perspective_server::Server`, whether locally in-memory or remote over some
 /// transport like a WebSocket.
 ///
@@ -273,7 +273,7 @@ impl Client {
             msg_id,
             entity_id: "".to_string(),
             client_resp: Some(ClientResp::ServerError(ServerError {
-                message: format!("{}", message),
+                message: format!("{message}"),
                 status_code: 2,
             })),
         };
@@ -389,7 +389,7 @@ impl Client {
         self.subscribe_once(req, on_update).await?;
         receiver
             .await
-            .map_err(|_| ClientError::Unknown(format!("Internal error for req {}", req)))
+            .map_err(|_| ClientError::Unknown(format!("Internal error for req {req}")))
     }
 
     pub(crate) fn get_features(&self) -> ClientResult<Features> {
@@ -411,6 +411,7 @@ impl Client {
     /// - CSV
     /// - JSON row-oriented
     /// - JSON column-oriented
+    /// - NDJSON
     ///
     /// When instantiated with _data_, the schema is inferred from this data.
     /// While this is convenient, inferrence is sometimes imperfect e.g.

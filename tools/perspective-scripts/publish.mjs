@@ -86,7 +86,7 @@ async function publish_release_assets(releases) {
         await $`cargo publish -p perspective-python --allow-dirty --no-verify`;
         await $`cargo publish -p perspective-js --allow-dirty --no-verify`;
         await $`cargo publish -p perspective-viewer --allow-dirty --no-verify`;
-        await $`cargo publish -p perspective- --allow-dirty --no-verify`;
+        await $`cargo publish -p perspective --allow-dirty --no-verify`;
     } else {
         console.warn(`COMMIT not specified, aborting`);
     }

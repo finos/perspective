@@ -57,7 +57,7 @@ impl TableReadFormat {
             Some("arrow") => Some(TableReadFormat::Arrow),
             Some("ndjson") => Some(TableReadFormat::Ndjson),
             None => None,
-            Some(x) => return Err(format!("Unknown format \"{}\"", x)),
+            Some(x) => return Err(format!("Unknown format \"{x}\"")),
         })
     }
 }
@@ -92,7 +92,7 @@ pub struct TableInitOptions {
 
 impl TableInitOptions {
     pub fn set_name<D: Display>(&mut self, name: D) {
-        self.name = Some(format!("{}", name))
+        self.name = Some(format!("{name}"))
     }
 }
 
@@ -211,7 +211,7 @@ impl Table {
     ///     ..default()
     /// };
     /// let table = client.table("x,y\n1,2\n3,4", options).await;
-    /// let tables = client.open_table("table_one").await;
+    /// let index = table.get_index()
     /// ```
     pub fn get_index(&self) -> Option<String> {
         self.options.index.as_ref().map(|index| index.to_owned())

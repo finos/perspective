@@ -26,7 +26,7 @@ pub enum SelectItem<T> {
 impl<T: Display> SelectItem<T> {
     pub fn name<'a>(&self) -> Cow<'a, str> {
         match self {
-            Self::Option(x) => format!("{}", x).into(),
+            Self::Option(x) => format!("{x}").into(),
             Self::OptGroup(x, _) => x.clone(),
         }
     }
@@ -132,12 +132,12 @@ where
                             ctx.props().on_select.emit(self.selected.clone());
                             return true;
                         }
-                    } else if code.as_str() == "ArrowDown" {
-                        if let Some(x) = find_nth(idx + 1, &ctx.props().values) {
-                            self.selected = x.clone();
-                            ctx.props().on_select.emit(self.selected.clone());
-                            return true;
-                        }
+                    } else if code.as_str() == "ArrowDown"
+                        && let Some(x) = find_nth(idx + 1, &ctx.props().values)
+                    {
+                        self.selected = x.clone();
+                        ctx.props().on_select.emit(self.selected.clone());
+                        return true;
                     }
                 }
 
@@ -182,7 +182,7 @@ where
         });
 
         let class = if let Some(class) = &ctx.props().class {
-            format!("noselect {}", class)
+            format!("noselect {class}")
         } else {
             "noselect".to_owned()
         };
@@ -208,7 +208,7 @@ where
                                 <option
                                     key={ format!("{}", value) }
                                     selected={ selected }
-                                    value={ format!("{}", value) }>
+                                    value={ format!("{value}") }>
                                     { format!("{}", value) }
                                 </option>
                             }
@@ -222,7 +222,7 @@ where
                                         let selected =
                                             *value == ctx.props().selected;
 
-                                        let label = format!("{}", value);
+                                        let label = format!("{value}");
                                         let category: &str = name.borrow();
                                         let label = label
                                             .strip_prefix(category)
@@ -234,7 +234,7 @@ where
                                             <option
                                                 key={ format!("{}", value) }
                                                 selected={ selected }
-                                                value={ format!("{}", value) }>
+                                                value={ format!("{value}") }>
                                                 { label }
                                             </option>
                                         }

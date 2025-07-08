@@ -48,9 +48,9 @@ impl Default for Scalar {
 impl Display for Scalar {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            Self::Float(x) => write!(fmt, "{}", x),
-            Self::String(x) => write!(fmt, "{}", x),
-            Self::Bool(x) => write!(fmt, "{}", x),
+            Self::Float(x) => write!(fmt, "{x}"),
+            Self::String(x) => write!(fmt, "{x}"),
+            Self::Bool(x) => write!(fmt, "{x}"),
             Self::Null => write!(fmt, ""),
         }
     }
@@ -82,12 +82,12 @@ impl Display for FilterTerm {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
             Self::Scalar(x) => {
-                write!(fmt, "{}", x)?;
+                write!(fmt, "{x}")?;
             },
             Self::Array(xs) => write!(
                 fmt,
                 "{}",
-                Itertools::intersperse(xs.iter().map(|x| format!("{}", x)), ",".to_owned())
+                Itertools::intersperse(xs.iter().map(|x| format!("{x}")), ",".to_owned())
                     .collect::<String>()
             )?,
         }

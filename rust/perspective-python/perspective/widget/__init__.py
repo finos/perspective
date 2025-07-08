@@ -28,36 +28,36 @@ __all__ = ["PerspectiveWidget"]
 
 
 class PerspectiveWidget(DOMWidget, PerspectiveViewer):
-    """:class`~perspective.PerspectiveWidget` allows for Perspective to be used
-    in the form of a Jupyter IPython widget.
+    """`PerspectiveWidget` allows for Perspective to be used as a Jupyter
+    widget.
 
     Using `perspective.Table`, you can create a widget that extends the full
     functionality of `perspective-viewer`.  Changes on the viewer can be
-    programatically set on the :class`~perspective.PerspectiveWidget` instance,
-    and state is maintained across page refreshes.
+    programatically set on the `PerspectiveWidget` instance.
 
-    Examples:
-        >>> from perspective.widget import PerspectiveWidget
-        >>> data = {
-        ...     "a": [1, 2, 3],
-        ...     "b": [
-        ...         "2019/07/11 7:30PM",
-        ...         "2019/07/11 8:30PM",
-        ...         "2019/07/11 9:30PM"
-        ...     ]
-        ... }
-        >>> widget = PerspectiveWidget(
-        ...     data,
-        ...     group_by=["a"],
-        ...     sort=[["b", "desc"]],
-        ...     filter=[["a", ">", 1]]
-        ... )
-        >>> widget.sort
-        [["b", "desc"]]
-        >>> widget.sort.append(["a", "asc"])
-        >>> widget.sort
-        [["b", "desc"], ["a", "asc"]]
-        >>> widget.table.update({"a": [4, 5]}) # Browser UI updates
+    # Examples
+
+    >>> from perspective.widget import PerspectiveWidget
+    >>> data = {
+    ...     "a": [1, 2, 3],
+    ...     "b": [
+    ...         "2019/07/11 7:30PM",
+    ...         "2019/07/11 8:30PM",
+    ...         "2019/07/11 9:30PM"
+    ...     ]
+    ... }
+    >>> widget = PerspectiveWidget(
+    ...     data,
+    ...     group_by=["a"],
+    ...     sort=[["b", "desc"]],
+    ...     filter=[["a", ">", 1]]
+    ... )
+    >>> widget.sort
+    [["b", "desc"]]
+    >>> widget.sort.append(["a", "asc"])
+    >>> widget.sort
+    [["b", "desc"], ["a", "asc"]]
+    >>> widget.table.update({"a": [4, 5]}) # Browser UI updates
     """
 
     # Required by ipywidgets for proper registration of the backend
@@ -76,42 +76,38 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         binding_mode="server",
         **kwargs,
     ):
-        """Initialize an instance of :class`~perspective.PerspectiveWidget`
+        """Initialize an instance of `PerspectiveWidget`
         with the given table/data and viewer configuration.
-
-        If a pivoted DataFrame or MultiIndex table is passed in, the widget
-        preserves pivots and applies them.  See `PerspectiveViewer.__init__` for
-        arguments that transform the view shown in the widget.
 
         If an `AsyncTable` is passed in, then certain widget methods like
         `update()` and `delete()` return coroutines which must be awaited.
 
-        Args:
-            data (:obj:`Table`|:obj:`AsyncTable`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
-                `perspective.Table` instance, a `perspective.AsyncTable` instance, or
-                a dataset to be loaded in the widget.
+        # Arguments
 
-        Keyword Arguments:
-            index (:obj:`str`): A column name to be used as the primary key.
-                Ignored if `server` is True.
+        -   `data` (`Table`|`AsyncTable`|`dict`|`list`|`pandas.DataFrame`|`bytes`|`str`): a
+            `perspective.Table` instance, a `perspective.AsyncTable` instance, or
+            a dataset to be loaded in the widget.
 
-            limit (:obj:`int`): A upper limit on the number of rows in the Table.
-                Cannot be set at the same time as `index`, ignored if `server`
-                is True.
+        # Keyword Arguments
 
-            binding_mode (:obj:`str`): "client-server" or "server"
+        -   `index` (`str`): A column name to be used as the primary key.
+            Ignored if `server` is True.
+        -   `binding_mode` (`str`): "client-server" or "server"
+        -   `limit` (`int`): A upper limit on the number of rows in the Table.
+            Cannot be set at the same time as `index`, ignored if `server`
+            is True.
+        -   `kwargs` (`dict`): configuration options for the `PerspectiveViewer`,
+            and `Table` constructor if `data` is a dataset.
 
-            kwargs (:obj:`dict`): configuration options for the `PerspectiveViewer`,
-                and `Table` constructor if `data` is a dataset.
+        # Examples
 
-        Examples:
-            >>> widget = PerspectiveWidget(
-            ...     {"a": [1, 2, 3]},
-            ...     aggregates={"a": "avg"},
-            ...     group_by=["a"],
-            ...     sort=[["b", "desc"]],
-            ...     filter=[["a", ">", 1]],
-            ...     expressions=["\"a\" + 100"])
+        >>> widget = PerspectiveWidget(
+        ...     {"a": [1, 2, 3]},
+        ...     aggregates={"a": "avg"},
+        ...     group_by=["a"],
+        ...     sort=[["b", "desc"]],
+        ...     filter=[["a", ">", 1]],
+        ...     expressions=["\"a\" + 100"])
         """
 
         self.binding_mode = binding_mode
@@ -185,9 +181,10 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
     def delete(self, delete_table=True):
         """Delete the Widget's data and clears its internal state.
 
-        Args:
-            delete_table (`bool`): whether the underlying `Table` will be
-                deleted. Defaults to True.
+        # Arguments
+
+        -   `delete_table` (`bool`): whether the underlying `Table` will be
+            deleted. Defaults to True.
         """
         ret = super(PerspectiveWidget, self).delete(delete_table)
 
@@ -197,15 +194,16 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
 
     @observe("value")
     def handle_message(self, widget, content, buffers):
-        """Given a message from `PerspectiveJupyterClient.send()`, process the
+        """Given a message from `PerspectiveJupyterClient.send`, process the
         message and return the result to `self.post`.
 
-        Args:
-            widget: a reference to the `Widget` instance that received the
-                message.
-            content (dict): the message from the front-end. Automatically
-                de-serialized by ipywidgets.
-            buffers : optional arraybuffers from the front-end, if any.
+        # Arguments
+
+        -   `widget`: a reference to the `Widget` instance that received the
+            message.
+        -   `content` (dict): - the message from the front-end. Automatically
+            de-serialized by ipywidgets.
+        -   `buffers`: optional arraybuffers from the front-end, if any.
         """
         if content["type"] == "connect":
             client_id = content["client_id"]

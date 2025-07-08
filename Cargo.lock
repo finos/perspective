@@ -1987,23 +1987,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "perspective-bootstrap"
-version = "0.0.0"
-dependencies = [
- "clap 4.5.4",
- "flate2",
- "wasm-opt",
-]
-
-[[package]]
-name = "perspective-bootstrap-runtime"
-version = "0.0.0"
-dependencies = [
- "talc",
- "zune-inflate",
-]
-
-[[package]]
 name = "perspective-bundle"
 version = "0.0.0"
 dependencies = [
@@ -2975,6 +2958,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
+name = "shrimple-parser"
+version = "0.0.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9f95dc24585a3bbb0e368d98636146cf8aed7a5f7a1e6651e2851bdb4f216f6"
+dependencies = [
+ "either",
+ "proc-macro2 1.0.94",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2982,11 +2975,6 @@ checksum = "a9e9e0b4211b72e7b8b6e85c807d36c212bdb33ea8587f7569562a84df5465b1"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "simd-adler32"
-version = "0.3.7"
-source = "git+https://github.com/mcountryman/simd-adler32.git?rev=140cde033e8b9a12d4de840648c65ccd5320bcc5#140cde033e8b9a12d4de840648c65ccd5320bcc5"
 
 [[package]]
 name = "slab"
@@ -3156,15 +3144,6 @@ name = "sync_wrapper"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bf256ce5efdfa370213c1dabab5935a12e49f2c58d15e9eac2870d3b4f27263"
-
-[[package]]
-name = "talc"
-version = "4.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04be12ec299aadd63a0bf781d893e4b6139d33cdca6dcd6f6be31f849cedcac8"
-dependencies = [
- "lock_api",
-]
 
 [[package]]
 name = "target-lexicon"
@@ -4185,9 +4164,9 @@ dependencies = [
 
 [[package]]
 name = "yew-fmt"
-version = "0.5.1"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dd6092bf0a95eb3d61a085a9f079c67fa19ba365455df6b6036c544e22b5ce0"
+checksum = "b7b0a341a338c12c0394cd9751c8013226d810a179de7321d3901f59700d10b5"
 dependencies = [
  "anyhow",
  "basic-toml",
@@ -4196,9 +4175,11 @@ dependencies = [
  "codespan-reporting",
  "diffy",
  "dirs",
+ "either",
  "proc-macro2 1.0.94",
  "quote 1.0.39",
  "serde",
+ "shrimple-parser",
  "syn 2.0.99",
 ]
 
@@ -4237,11 +4218,7 @@ dependencies = [
  "syn 2.0.99",
 ]
 
-[[package]]
-name = "zune-inflate"
-version = "0.2.54"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73ab332fe2f6680068f3582b16a24f90ad7096d5d39b974d1c0aff0125116f02"
-dependencies = [
- "simd-adler32",
-]
+[[patch.unused]]
+name = "simd-adler32"
+version = "0.3.7"
+source = "git+https://github.com/mcountryman/simd-adler32.git?rev=140cde033e8b9a12d4de840648c65ccd5320bcc5#140cde033e8b9a12d4de840648c65ccd5320bcc5"

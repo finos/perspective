@@ -15,6 +15,8 @@ __all__ = [
     "_jupyter_labextension_paths",
     "Server",
     "Client",
+    "Table",
+    "View",
     "PerspectiveError",
     "ProxySession",
     "AsyncClient",
@@ -29,8 +31,8 @@ from .perspective import (
     Client,
     PerspectiveError,
     ProxySession,
-    PyServer as Server,
-    PyAsyncServer as AsyncServer,
+    Server,
+    AsyncServer,
     AsyncClient,
     # NOTE: these are classes without constructors,
     # so we import them just for type hinting
@@ -60,6 +62,9 @@ def get_hosted_table_names(*args, **kwargs):
     return GLOBAL_CLIENT.get_hosted_table_names(*args, **kwargs)
 
 
-# Read by `jupyter labextension develop`
 def _jupyter_labextension_paths():
+    """
+    Read by `jupyter labextension develop`
+    @private
+    """
     return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]

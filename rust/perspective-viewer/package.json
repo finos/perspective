@@ -30,22 +30,26 @@
     "scripts": {
         "build": "node ./build.js",
         "clean": "rimraf dist && rimraf build",
-        "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless"
+        "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless",
+        "docs": "npx typedoc --tsconfig tsconfig.json --out ../../docs/static/viewer"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "workspace:^"
+        "@finos/perspective": "workspace:^",
+        "pro_self_extracting_wasm": "0.0.9"
     },
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-test": "workspace:^",
         "@finos/perspective-metadata": "workspace:^",
         "@prospective.co/procss": "0.1.16",
+        "@types/react": "^17.0.2",
         "cpy": "^9.0.1",
         "prettier": "^2.8.8",
-        "@types/react": "^17.0.2",
+        "typedoc": "^0.28.7",
+        "typescript": "~5.2.2",
         "zx": "8.1.9"
     }
 }

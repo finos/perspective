@@ -23,5 +23,5 @@ path = "main.rs"
 bench = false
 
 [dependencies]
-yew-fmt = { version = "0.5.1", artifact = "bin" }
+yew-fmt = { version = "0.6.1", artifact = "bin" }
 glob = "0.3.1"

@@ -80,7 +80,7 @@ impl PerspectiveDebugPluginElement {
         ApiFuture::new(async move {
             let csv = view.to_csv(None).await?;
             elem.style().set_property("background-color", "#fff")?;
-            elem.set_inner_html(&format!("<pre style='{}'>{}</pre>", css, csv));
+            elem.set_inner_html(&format!("<pre style='{css}'>{csv}</pre>"));
             Ok(())
         })
     }

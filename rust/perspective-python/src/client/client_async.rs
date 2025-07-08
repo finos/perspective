@@ -34,12 +34,13 @@ use super::{pandas, polars, pyarrow};
 use crate::py_async::{self, AllowThreads};
 use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 
-/// An instance of a [`Client`] is a unique connection to a single
+/// An instance of a [`Client`] is a connection to a single
 /// `perspective_server::Server`, whether locally in-memory or remote over some
 /// transport like a WebSocket.
 ///
 /// `AsyncClient` and Perspective objects derived from it have _async_ APIs,
 /// suitable for integration with a Python event loop like `asyncio`.
+/// @private
 #[pyclass(module = "perspective")]
 #[derive(Clone)]
 pub struct AsyncClient {
@@ -547,7 +548,7 @@ impl AsyncTable {
     /// - `"float"` - A 64 bit float
     /// - `"integer"` - A signed 32 bit integer (the integer type supported by
     ///   JavaScript)
-    /// - `"string"` - A [`String`] data type (encoded internally as a
+    /// - `"string"` - A `String` data type (encoded internally as a
     ///   _dictionary_)
     ///
     /// Note that all [`Table`] columns are _nullable_, regardless of the data
@@ -556,7 +557,7 @@ impl AsyncTable {
         let schema = self.table.schema().await.into_pyerr()?;
         Ok(schema
             .into_iter()
-            .map(|(x, y)| (x, format!("{}", y)))
+            .map(|(x, y)| (x, format!("{y}")))
             .collect())
     }
 
@@ -668,7 +669,7 @@ impl AsyncView {
             .await
             .into_pyerr()?
             .into_iter()
-            .map(|(k, v)| (k, format!("{}", v)))
+            .map(|(k, v)| (k, format!("{v}")))
             .collect())
     }
 
@@ -713,7 +714,7 @@ impl AsyncView {
             .await
             .into_pyerr()?
             .into_iter()
-            .map(|(k, v)| (k, format!("{}", v)))
+            .map(|(k, v)| (k, format!("{v}")))
             .collect())
     }
 
@@ -871,7 +872,7 @@ impl AsyncView {
     }
 
     /// Renders this [`View`] as an [NDJSON](https://github.com/ndjson/ndjson-spec)
-    /// formatted [`String`].
+    /// formatted `String`.
     #[pyo3(signature=(window=None))]
     pub async fn to_ndjson(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))

@@ -18,6 +18,7 @@
     clippy::all,
     clippy::panic_in_result_fn,
     clippy::await_holding_refcell_ref,
+    rustdoc::broken_intra_doc_links,
     unstable_features
 )]
 #![allow(non_snake_case)]

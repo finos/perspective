@@ -41,7 +41,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
             Ok("aarch64") => Some("./cmake/toolchains/darwin-arm64.cmake"),
             Err(std::env::VarError::NotPresent) => None,
             arch @ Ok(_) | arch @ Err(_) => {
-                panic!("Unknown PSP_ARCH value: {:?}", arch)
+                panic!("Unknown PSP_ARCH value: {arch:?}")
             },
         };
         if let Some(path) = toolchain_file {
@@ -87,15 +87,14 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     // but our conda recipe doesn't directly invoke cmake
     if let Ok(cmake_args) = std::env::var("CMAKE_ARGS") {
         println!(
-            "cargo:warning=Setting CMAKE_ARGS from environment {:?}",
-            cmake_args
+            "cargo:warning=Setting CMAKE_ARGS from environment {cmake_args:?}"
         );
         for arg in Shlex::new(&cmake_args) {
             dst.configure_arg(arg);
         }
     }
 
-    println!("cargo:warning=Building cmake {}", profile);
+    println!("cargo:warning=Building cmake {profile}");
     if std::env::var("PSP_BUILD_VERBOSE").unwrap_or_default() != "" {
         // checks non-empty env var
         dst.very_verbose(true);
@@ -143,7 +142,7 @@ pub fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
 
                     // println!("cargo:warning=static link {} {}", a, dir.display());
                     println!("cargo:rustc-link-search=native={}", dir.display());
-                    println!("cargo:rustc-link-lib=static={}", a);
+                    println!("cargo:rustc-link-lib=static={a}");
                 }
             }
         }

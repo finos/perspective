@@ -668,10 +668,8 @@ fn test_completions_insert_text_matches_label() {
         let label = comp.label;
         let insert_text = comp.insert_text;
         assert!(
-            insert_text.starts_with(&label),
-            "insert_text for label {label} does not start with {label}:\n    {insert_text}",
-            label = label,
-            insert_text = insert_text
+            insert_text.starts_with(label),
+            "insert_text for label {label} does not start with {label}:\n    {insert_text}"
         );
     }
 }

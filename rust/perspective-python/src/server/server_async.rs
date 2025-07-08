@@ -26,14 +26,15 @@ use super::PyAsyncSession;
 use super::session_async::PyConnection;
 use crate::py_async::AllowThreads;
 
+/// @private
 #[pyclass(subclass, module = "perspective")]
 #[derive(Clone)]
-pub struct PyAsyncServer {
+pub struct AsyncServer {
     pub server: Server,
 }
 
 #[pymethods]
-impl PyAsyncServer {
+impl AsyncServer {
     #[new]
     #[pyo3(signature = (on_poll_request=None))]
     pub fn new(on_poll_request: Option<Py<PyAny>>) -> Self {
@@ -45,7 +46,7 @@ impl PyAsyncServer {
                     let server = server.clone();
                     Box::pin(async move {
                         Python::with_gil(|py| {
-                            f.call1(py, (PyAsyncServer { server }.into_py_any(py).unwrap(),))
+                            f.call1(py, (AsyncServer { server }.into_py_any(py).unwrap(),))
                         })?;
                         Ok(())
                     }) as BoxFuture<'static, ServerResult<()>>
@@ -87,7 +88,7 @@ impl PyAsyncServer {
             self.server
                 .poll()
                 .await
-                .map_err(|e| PyValueError::new_err(format!("{}", e)))
+                .map_err(|e| PyValueError::new_err(format!("{e}")))
         }))
         .await
     }
