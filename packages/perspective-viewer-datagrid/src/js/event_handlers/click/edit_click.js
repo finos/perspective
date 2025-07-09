@@ -45,7 +45,7 @@ export function clickListener(table, _viewer, event) {
     if (typeof meta?.x !== "undefined") {
         const is_editable2 = this._is_editable[meta.x];
         const is_bool = this.get_psp_type(meta) === "boolean";
-        const is_null = event.target.textContent === "-";
+        const is_null = event.target.classList.contains("psp-null");
         if (is_editable2 && is_bool && !is_null) {
             write_cell(table, this, event.target);
         }

@@ -35,7 +35,7 @@ export function format_cell(
     use_table_schema = false
 ) {
     if (val === null) {
-        return "-";
+        return null;
     }
 
     const type =
