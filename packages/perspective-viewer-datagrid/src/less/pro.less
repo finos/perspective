@@ -188,4 +188,9 @@ regular-table {
     a:visited {
         color: var(--active--color);
     }
+
+    td.psp-null:after,
+    th.psp-null:after {
+        content: var(--null--content, "-");
+    }
 }

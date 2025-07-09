@@ -95,6 +95,7 @@ export function table_cell_style_listener(regularTable, viewer) {
                 delete td.dataset.x;
             }
 
+            td.classList.toggle("psp-null", metadata.value === null);
             td.classList.toggle("psp-align-right", !is_th && is_numeric);
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle(

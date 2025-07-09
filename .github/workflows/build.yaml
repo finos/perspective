@@ -164,7 +164,6 @@ jobs:
                   path: |
                       rust/perspective-js/dist/
                       rust/perspective-viewer/dist
-                      packages/perspective-jupyterlab/dist/
                       packages/perspective-viewer-d3fc/dist
                       packages/perspective-viewer-datagrid/dist
                       packages/perspective-viewer-openlayers/dist
@@ -526,6 +525,7 @@ jobs:
               uses: ./.github/actions/install-deps
               with:
                   rust: "false"
+                  playwright: "true"
                   cpp: "false"
                   skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
 
@@ -576,6 +576,13 @@ jobs:
               if: ${{ runner.os == 'Linux' }}
 
             - name: Run Jupyter Tests
+              if: ${{ runner.os == 'Linux' }}
+              run: pnpm run test
+              env:
+                  PACKAGE: "perspective-jupyterlab"
+                  # PSP_USE_CCACHE: 1
+
+            - name: Run Jupyter Integration Tests
               if: ${{ false }}
               # if: ${{ runner.os == 'Linux' }}
               run: |

@@ -485,8 +485,6 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
         }
 
         this._draw();
-
-        await new Promise((resolve) => requestAnimationFrame(resolve));
     }
 
     async clear() {
