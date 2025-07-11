@@ -10,15 +10,18 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- *
- * # See Also
- *
- * [`react-example`](https://github.com/finos/perspective/tree/master/examples/react-example)
- * project from the Perspective GitHub repo.
- *
- * @module
- */
+import * as React from "react";
 
-export * from "./viewer";
-export * from "./workspace";
+export function usePspListener<A>(
+    el: HTMLElement | undefined,
+    event: string,
+    cb?: (x: A) => void
+) {
+    React.useEffect(() => {
+        if (!cb || !el) return;
+        const ctx = new AbortController();
+        const callback = (e: Event) => cb((e as CustomEvent).detail);
+        el?.addEventListener(event, callback, { signal: ctx.signal });
+        return () => ctx.abort();
+    }, [el, cb]);
+}

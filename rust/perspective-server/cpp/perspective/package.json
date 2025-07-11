@@ -1,0 +1,19 @@
+{
+    "name": "@finos/perspective-cpp",
+    "private": true,
+    "author": "The Perspective Authors",
+    "license": "Apache-2.0",
+    "version": "3.7.4",
+    "main": "./dist/esm/perspective.cpp.js",
+    "files": [
+        "dist/esm/**/*",
+        "dist/cjs/**/*"
+    ],
+    "scripts": {
+        "build": "node ../../tools/perspective-scripts/run_emsdk.mjs node ./build.mjs",
+        "clean": "rimraf dist"
+    },
+    "devDependencies": {
+        "pro_self_extracting_wasm": "0.0.9"
+    }
+}

@@ -12,10 +12,9 @@
 
 import { find, toArray } from "@lumino/algorithm";
 import { CommandRegistry } from "@lumino/commands";
-import { SplitPanel, Panel, DockPanel } from "@lumino/widgets";
+import { SplitPanel, Panel, DockPanel, Widget } from "@lumino/widgets";
 import uniqBy from "lodash/uniqBy";
-import { DebouncedFunc, isEqual } from "lodash";
-import debounce from "lodash/debounce";
+import { isEqual } from "lodash";
 import type {
     HTMLPerspectiveViewerElement,
     ViewerConfigUpdate,
@@ -32,21 +31,155 @@ const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
 let ID_COUNTER = 0;
 
-export interface PerspectiveLayout<T> {
-    children?: PerspectiveLayout<T>[];
-    widgets?: T[];
+export interface PerspectiveSplitArea<T> {
+    type: "split-area";
     sizes: number[];
+    orientation: "horizontal" | "vertical";
+    children: PerspectiveLayoutArea<T>[];
 }
+
+export interface PerspectiveTabArea<T> {
+    type: "tab-area";
+    currentIndex: number;
+    widgets: T[];
+}
+
+export type PerspectiveLayoutArea<T> =
+    | PerspectiveSplitArea<T>
+    | PerspectiveTabArea<T>;
 
 export interface ViewerConfigUpdateExt extends ViewerConfigUpdate {
     table: string;
 }
 
+/// This is a supertype of Lumino's ILayoutConfig that allows the
+/// widgets to be differently typed. Luminos DockLayout can be a
+/// PerspectiveLayoutArea<Widget>, Perspective uses PerspectiveLayoutArea<T>
+export interface PerspectiveLayoutConfig<T> {
+    main: PerspectiveLayoutArea<T> | null;
+}
+
 export interface PerspectiveWorkspaceConfig<T> {
     sizes: number[];
-    master: PerspectiveLayout<T>;
-    detail: PerspectiveLayout<T>;
     viewers: Record<string, ViewerConfigUpdateExt>;
+    detail: PerspectiveLayoutConfig<T> | undefined;
+    master?: {
+        sizes: number[];
+        widgets: T[];
+    };
+}
+
+function genId(workspace: PerspectiveWorkspaceConfig<string>): string {
+    let i = `PERSPECTIVE_GENERATED_ID_${ID_COUNTER++}`;
+    if (Object.keys(workspace.viewers).includes(i)) {
+        i = genId(workspace);
+    }
+    return i;
+}
+
+/// This function takes a workspace config and viewer config and adds the
+/// viewer config to the workspace config, returning a new workspace config.
+/// This is a slightly different algorithm from the Lumino one,
+/// which will be used on internal workspace actions (such as duplication).
+/// It currently attaches the viewer using a split-right style,
+/// (see Lumino docklayout.ts for documentation on insert modes).
+export function addViewer(
+    workspace: PerspectiveWorkspaceConfig<string>,
+    config: ViewerConfigUpdateExt
+): PerspectiveWorkspaceConfig<string> {
+    const GOLDEN_RATIO = 0.618;
+    const id = genId(workspace);
+    /// ensures that the sum of the input is 1
+    /// keeps the relative size of the elements
+    function normalize(sizes: number[]) {
+        const sum = sizes.reduce((a, b) => a + b, 0);
+        return sum === 1 ? sizes : sizes.map((size) => size / sum);
+    }
+
+    if (!workspace.detail || workspace.detail.main === null) {
+        return {
+            sizes: workspace.sizes,
+            viewers: {
+                ...workspace.viewers,
+                [id]: config,
+            },
+            detail: {
+                main: {
+                    type: "split-area",
+                    sizes: [1],
+                    orientation: "horizontal",
+                    children: [
+                        {
+                            type: "tab-area",
+                            currentIndex: 0,
+                            widgets: [id],
+                        },
+                    ],
+                },
+            },
+            master: workspace.master,
+        };
+    } else if (
+        workspace.detail.main.type === "tab-area" ||
+        (workspace.detail.main.type === "split-area" &&
+            workspace.detail.main.orientation === "vertical")
+    ) {
+        return {
+            sizes: workspace.sizes,
+            viewers: {
+                ...workspace.viewers,
+                [id]: config,
+            },
+            detail: {
+                main: {
+                    type: "split-area",
+                    sizes: [0.5, 0.5],
+                    orientation: "horizontal",
+                    children: [
+                        workspace.detail.main,
+                        {
+                            type: "tab-area",
+                            currentIndex: 0,
+                            widgets: [id],
+                        },
+                    ],
+                },
+            },
+            master: workspace.master,
+        };
+    } else if (
+        workspace.detail.main.type === "split-area" &&
+        workspace.detail.main.orientation === "horizontal"
+    ) {
+        return {
+            sizes: workspace.sizes,
+            viewers: {
+                ...workspace.viewers,
+                [id]: config,
+            },
+            detail: {
+                main: {
+                    type: "split-area",
+                    sizes: normalize([
+                        ...normalize(workspace.detail.main.sizes),
+                        GOLDEN_RATIO,
+                    ]),
+                    orientation: "horizontal",
+                    children: [
+                        ...workspace.detail.main.children,
+                        {
+                            type: "tab-area",
+                            currentIndex: 0,
+                            widgets: [id],
+                        },
+                    ],
+                },
+            },
+            master: workspace.master,
+        };
+    } else {
+        throw new Error("Unknown workspace state");
+    }
 }
 
 export class PerspectiveWorkspace extends SplitPanel {
@@ -60,8 +193,8 @@ export class PerspectiveWorkspace extends SplitPanel {
     private indicator: HTMLElement;
     private commands: CommandRegistry;
     private _menu?: WorkspaceMenu;
-    private _minimizedLayoutSlots?: DockPanel.ILayoutConfig;
-    private _minimizedLayout?: DockPanel.ILayoutConfig;
+    private _minimizedLayoutSlots?: PerspectiveLayoutConfig<string>;
+    private _minimizedLayout?: PerspectiveLayoutConfig<Widget>;
     private _maximizedWidget?: PerspectiveViewerWidget;
     private _last_updated_state?: PerspectiveWorkspaceConfig<string>;
     // private _context_menu?: Menu & { init_overlay?: () => void };
@@ -115,7 +248,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         const indicator = document.createElement("perspective-indicator");
         indicator.style.position = "fixed";
         indicator.style.pointerEvents = "none";
-        document.body.appendChild(indicator);
+        this.node.appendChild(indicator);
         return indicator;
     }
 
@@ -156,7 +289,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         return this._tables;
     }
 
-    async save() {
+    async save(): Promise<PerspectiveWorkspaceConfig<string>> {
         const is_settings = this.dockpanel.mode === "single-document";
         let detail = is_settings
             ? this._minimizedLayoutSlots
@@ -165,7 +298,7 @@ export class PerspectiveWorkspace extends SplitPanel {
                       // this.getWidgetByName(widget)!.viewer.getAttribute("slot")
                       (widget as PerspectiveViewerWidget).viewer.getAttribute(
                           "slot"
-                      ),
+                      )!,
                   this.dockpanel.saveLayout()
               );
 
@@ -190,7 +323,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             layout.master = master;
         }
 
-        const viewers: Record<string, ViewerConfigUpdate> = {};
+        const viewers: Record<string, ViewerConfigUpdateExt> = {};
         for (const widget of this.masterPanel.widgets) {
             const psp_widget = widget as PerspectiveViewerWidget;
             viewers[psp_widget.viewer.getAttribute("slot")!] =
@@ -203,9 +336,8 @@ export class PerspectiveWorkspace extends SplitPanel {
 
         await Promise.all(
             widgets.map(async (widget) => {
-                const psp_widget = widget as PerspectiveViewerWidget;
-                const slot = psp_widget.viewer.getAttribute("slot")!;
-                viewers[slot] = await psp_widget.save();
+                const slot = widget.viewer.getAttribute("slot")!;
+                viewers[slot] = await widget.save();
                 viewers[slot]!.settings = false;
             })
         );
@@ -221,7 +353,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             viewers: viewer_configs = {},
         } = structuredClone(value);
 
-        if (master && master.widgets!.length > 0) {
+        if (master && master.widgets && master.widgets.length > 0) {
             this.setupMasterPanel(sizes || DEFAULT_WORKSPACE_SIZE);
         } else {
             if (this.masterPanel.isAttached) {
@@ -506,8 +638,10 @@ export class PerspectiveWorkspace extends SplitPanel {
         widget.viewer.classList.add("widget-maximize");
         this._minimizedLayout = this.dockpanel.saveLayout();
         this._minimizedLayoutSlots = PerspectiveDockPanel.mapWidgets(
-            (widget: PerspectiveViewerWidget) =>
-                widget.viewer.getAttribute("slot"),
+            (widget: Widget) =>
+                (widget as PerspectiveViewerWidget).viewer.getAttribute(
+                    "slot"
+                )!,
             this.dockpanel.saveLayout()
         );
 
@@ -978,7 +1112,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         const updated = async (event: CustomEvent) => {
             this.workspaceUpdated();
             // Sometimes plugins or other external code fires this event and
-            //  does not populate this field!
+            // does not populate this field!
             const config =
                 typeof event.detail === "undefined"
                     ? await widget.viewer.save()
