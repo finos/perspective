@@ -13,6 +13,7 @@
 #include "perspective/arrow_loader.h"
 #include "perspective/base.h"
 #include "perspective/column.h"
+#include "perspective/computed_expression.h"
 #include "perspective/data_table.h"
 #include "perspective/raw_types.h"
 #include "perspective/schema.h"
@@ -49,6 +50,7 @@ Table::Table(
     m_limit(limit),
     m_index(std::move(index)),
     m_gnode_set(false) {
+
     validate_columns(m_column_names);
 }
 
@@ -152,7 +154,7 @@ Table::validate_expressions(
 
         const auto& column_ids = std::get<3>(expr);
 
-        t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
+        t_dtype expression_dtype = m_computed_expression_parser.get_dtype(
             expression_alias,
             expression_string,
             parsed_expression_string,

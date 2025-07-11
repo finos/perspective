@@ -1182,12 +1182,12 @@ bucket::operator()(t_parameter_list parameters) {
     t_scalar_view temp_val(gt_val);
     val.set(temp_val());
 
+    // Bucket by numeric value
+    t_scalar_view temp_unit2(gt_unit);
+    unit.set(temp_unit2());
+
     if (val.is_numeric()) {
         rval.m_type = DTYPE_FLOAT64;
-
-        // Bucket by numeric value
-        t_scalar_view temp_unit(gt_unit);
-        unit.set(temp_unit());
 
         // type-check
         if (!unit.is_numeric() || val.m_status == STATUS_CLEAR
@@ -1206,10 +1206,10 @@ bucket::operator()(t_parameter_list parameters) {
     }
 
     // Must be a datetime - second parameter is a string
-    t_string_view temp_string(gt_unit);
-    std::string unit_str = std::string(temp_string.begin(), temp_string.end());
+    const auto unit_str = std::string(unit.get<const char*>());
     char temp_unit = 0;
-    auto len = unit_str.size();
+    const auto len = unit_str.size();
+
     unsigned long multiplicity;
     t_date_bucket_unit date_unit;
     if (len == 0) {
@@ -1245,13 +1245,6 @@ bucket::operator()(t_parameter_list parameters) {
     // type-check multiplicity
     switch (date_unit) {
         case t_date_bucket_unit::SECONDS:
-            if (multiplicity != 1 && multiplicity != 5 && multiplicity != 10
-                && multiplicity != 15 && multiplicity != 20
-                && multiplicity != 30) {
-                rval.m_status = STATUS_CLEAR;
-                return rval;
-            }
-            break;
         case t_date_bucket_unit::MINUTES:
             if (multiplicity != 1 && multiplicity != 5 && multiplicity != 10
                 && multiplicity != 15 && multiplicity != 20
@@ -1270,11 +1263,6 @@ bucket::operator()(t_parameter_list parameters) {
             break;
         case t_date_bucket_unit::DAYS:
             // TODO: day multiplicity.
-            if (multiplicity != 1) {
-                rval.m_status = STATUS_CLEAR;
-                return rval;
-            }
-            break;
         case t_date_bucket_unit::WEEKS:
             // TODO: week multiplicity
             if (multiplicity != 1) {
