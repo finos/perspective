@@ -32,21 +32,145 @@ const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
 let ID_COUNTER = 0;
 
-export interface PerspectiveLayout<T> {
-    children?: PerspectiveLayout<T>[];
-    widgets?: T[];
-    sizes: number[];
-}
+export type PerspectiveLayout =
+    | {
+          type: "split-area";
+          sizes: number[];
+          orientation: "horizontal" | "vertical";
+          children: PerspectiveLayout[];
+      }
+    | {
+          type: "tab-area";
+          currentIndex: number;
+          widgets: string[];
+      };
 
 export interface ViewerConfigUpdateExt extends ViewerConfigUpdate {
     table: string;
 }
 
-export interface PerspectiveWorkspaceConfig<T> {
+// TODO: I have made some changes to this interface because it seemed to not reflect reality.
+export interface PerspectiveWorkspaceConfig {
     sizes: number[];
-    master: PerspectiveLayout<T>;
-    detail: PerspectiveLayout<T>;
     viewers: Record<string, ViewerConfigUpdateExt>;
+    detail: { main: PerspectiveLayout | null };
+    master?: {
+        sizes: number[];
+        widgets: string[];
+    };
+}
+
+export function genId(workspace: PerspectiveWorkspaceConfig) {
+    let i = `PERSPECTIVE_GENERATED_ID_${ID_COUNTER++}`;
+    if (Object.keys(workspace.viewers).includes(i)) {
+        i = genId(workspace);
+    }
+    return i;
+}
+
+/// This function takes a workspace config and viewer config and adds the
+/// viewer config to the workspace config, returning a new workspace config.
+/// This is a slightly different algorithm from the Lumino one,
+/// which will be used on internal workspace actions (such as duplication).
+/// It currently attaches the viewer using a split-right style,
+/// (see Lumino docklayout.ts for documentation on insert modes).
+export function addViewer(
+    workspace: PerspectiveWorkspaceConfig,
+    config: ViewerConfigUpdateExt,
+    id: string
+): PerspectiveWorkspaceConfig {
+    const GOLDEN_RATIO = 0.618;
+    /// ensures that the sum of the input is 1
+    /// keeps the relative size of the elements
+    function normalize(sizes: number[]) {
+        const sum = sizes.reduce((a, b) => a + b, 0);
+        return sum === 1 ? sizes : sizes.map((size) => size / sum);
+    }
+
+    if (workspace.detail.main === null) {
+        return {
+            sizes: workspace.sizes,
+            viewers: {
+                ...workspace.viewers,
+                [id]: config,
+            },
+            detail: {
+                main: {
+                    type: "split-area",
+                    sizes: [1],
+                    orientation: "horizontal",
+                    children: [
+                        {
+                            type: "tab-area",
+                            currentIndex: 0,
+                            widgets: [id],
+                        },
+                    ],
+                },
+            },
+            master: workspace.master,
+        };
+    } else if (
+        workspace.detail.main.type === "tab-area" ||
+        (workspace.detail.main.type === "split-area" &&
+            workspace.detail.main.orientation === "vertical")
+    ) {
+        return {
+            sizes: workspace.sizes,
+            viewers: {
+                ...workspace.viewers,
+                [id]: config,
+            },
+            detail: {
+                main: {
+                    type: "split-area",
+                    sizes: [0.5, 0.5],
+                    orientation: "horizontal",
+                    children: [
+                        workspace.detail.main,
+                        {
+                            type: "tab-area",
+                            currentIndex: 0,
+                            widgets: [id],
+                        },
+                    ],
+                },
+            },
+            master: workspace.master,
+        };
+    } else if (
+        workspace.detail.main.type === "split-area" &&
+        workspace.detail.main.orientation === "horizontal"
+    ) {
+        return {
+            sizes: workspace.sizes,
+            viewers: {
+                ...workspace.viewers,
+                [id]: config,
+            },
+            detail: {
+                main: {
+                    type: "split-area",
+                    sizes: normalize([
+                        ...normalize(workspace.detail.main.sizes),
+                        GOLDEN_RATIO,
+                    ]),
+                    orientation: "horizontal",
+                    children: [
+                        ...workspace.detail.main.children,
+                        {
+                            type: "tab-area",
+                            currentIndex: 0,
+                            widgets: [id],
+                        },
+                    ],
+                },
+            },
+            master: workspace.master,
+        };
+    } else {
+        throw new Error("Unknown workspace state");
+    }
 }
 
 export class PerspectiveWorkspace extends SplitPanel {
@@ -63,7 +187,7 @@ export class PerspectiveWorkspace extends SplitPanel {
     private _minimizedLayoutSlots?: DockPanel.ILayoutConfig;
     private _minimizedLayout?: DockPanel.ILayoutConfig;
     private _maximizedWidget?: PerspectiveViewerWidget;
-    private _last_updated_state?: PerspectiveWorkspaceConfig<string>;
+    private _last_updated_state?: PerspectiveWorkspaceConfig;
     // private _context_menu?: Menu & { init_overlay?: () => void };
 
     constructor(element: HTMLElement) {
@@ -112,6 +236,10 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     init_indicator() {
+        const exists = document.querySelector("body > perspective-indicator");
+        if (exists) {
+            return exists as HTMLElement;
+        }
         const indicator = document.createElement("perspective-indicator");
         indicator.style.position = "fixed";
         indicator.style.pointerEvents = "none";
@@ -213,7 +341,13 @@ export class PerspectiveWorkspace extends SplitPanel {
         return { ...layout, viewers };
     }
 
-    async restore(value: PerspectiveWorkspaceConfig<string>) {
+    async restore(value: PerspectiveWorkspaceConfig) {
+        // bail out early if there is nothing to restore.
+        const layout = await this.save();
+        if (isEqual(layout, value)) {
+            return;
+        }
+
         const {
             sizes,
             master,
@@ -221,7 +355,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             viewers: viewer_configs = {},
         } = structuredClone(value);
 
-        if (master && master.widgets!.length > 0) {
+        if (master && master.widgets && master.widgets.length > 0) {
             this.setupMasterPanel(sizes || DEFAULT_WORKSPACE_SIZE);
         } else {
             if (this.masterPanel.isAttached) {
@@ -1040,7 +1174,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             }
 
             this._last_updated_state =
-                layout as any as PerspectiveWorkspaceConfig<string>;
+                layout as any as PerspectiveWorkspaceConfig;
 
             const tables: Record<string, psp.Table | Promise<psp.Table>> = {};
             this.tables.forEach((value, key) => {
@@ -1052,6 +1186,31 @@ export class PerspectiveWorkspace extends SplitPanel {
                     detail: { tables, layout },
                 })
             );
+        }
+    }
+
+    /// swaps all tables in the workspace with the ones passed in.
+    /// Any viewers that are using tables not in the new tables will be ejected (`viewer>eject()`).
+    async replaceTables(
+        newTables: Record<string, psp.Table | Promise<psp.Table>>
+    ) {
+        const viewers = this.node.querySelectorAll(
+            "perspective-viewer"
+        ) as NodeListOf<HTMLPerspectiveViewerElement>;
+        // eject all viewers that have a table not in the new set of tables.
+        for (const viewer of viewers) {
+            if (!this._last_updated_state) break;
+            const t = this._last_updated_state.viewers[viewer.slot]?.table;
+            if (!newTables[t]) {
+                await viewer.eject();
+            } else {
+                await viewer.load(newTables[t]);
+            }
+        }
+
+        this.tables.clear();
+        for (const [name, t] of Object.entries(newTables)) {
+            this.replaceTable(name, Promise.resolve(t));
         }
     }
 }

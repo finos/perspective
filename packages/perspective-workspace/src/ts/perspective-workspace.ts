@@ -15,10 +15,15 @@ import { Widget } from "@lumino/widgets";
 import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 import type * as psp from "@finos/perspective";
 
-export { PerspectiveWorkspace } from "./workspace";
+export {
+    PerspectiveWorkspace,
+    ViewerConfigUpdateExt,
+    addViewer,
+    genId,
+} from "./workspace";
 export { PerspectiveViewerWidget } from "./workspace/widget";
 
-import "./external";
+export * from "./extensions";
 import {
     PerspectiveWorkspace,
     PerspectiveWorkspaceConfig,
@@ -27,6 +32,8 @@ import {
 import { bindTemplate, CustomElementProto } from "./utils/custom_elements";
 import style from "../../build/css/workspace.css";
 import template from "../html/workspace.html";
+
+export { PerspectiveWorkspaceConfig };
 
 /**
  * A Custom Element for coordinating a set of `<perspective-viewer>` light DOM
@@ -137,15 +144,15 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
      * // Add `Table` separately.
      * workspace.tables.set("superstore", await worker.table(data));
      */
-    async restore(layout: PerspectiveWorkspaceConfig<string>) {
+    async restore(layout: PerspectiveWorkspaceConfig) {
         await this.workspace!.restore(layout);
     }
 
     async clear() {
         await this.restore({
             sizes: [],
-            master: { sizes: [] },
-            detail: { sizes: [] },
+            master: undefined,
+            detail: { main: null },
             viewers: {},
         });
     }
@@ -199,6 +206,13 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
      */
     async replaceTable(name: string, table: Promise<psp.Table>) {
         this.workspace!.replaceTable(name, table);
+        await this.flush();
+    }
+
+    async replaceTables(
+        tables: Record<string, psp.Table | Promise<psp.Table>>
+    ) {
+        this.workspace!.replaceTables(tables);
         await this.flush();
     }
 
