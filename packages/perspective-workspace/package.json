@@ -42,6 +42,7 @@
         "@lumino/widgets": ">=2 <3",
         "@lumino/coreutils": ">=2 <3",
         "@lumino/signaling": ">=2 <3",
+        "async-mutex": "0.5.0",
         "lodash": "^4.17.21"
     },
     "devDependencies": {

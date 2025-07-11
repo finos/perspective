@@ -15,10 +15,14 @@ import { Widget } from "@lumino/widgets";
 import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 import type * as psp from "@finos/perspective";
 
-export { PerspectiveWorkspace } from "./workspace";
+export {
+    PerspectiveWorkspace,
+    ViewerConfigUpdateExt,
+    addViewer,
+} from "./workspace";
 export { PerspectiveViewerWidget } from "./workspace/widget";
 
-import "./external";
+export * from "./extensions";
 import {
     PerspectiveWorkspace,
     PerspectiveWorkspaceConfig,
@@ -27,6 +31,8 @@ import {
 import { bindTemplate, CustomElementProto } from "./utils/custom_elements";
 import style from "../../build/css/workspace.css";
 import template from "../html/workspace.html";
+
+export { PerspectiveWorkspaceConfig };
 
 /**
  * A Custom Element for coordinating a set of `<perspective-viewer>` light DOM
@@ -144,8 +150,8 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
     async clear() {
         await this.restore({
             sizes: [],
-            master: { sizes: [] },
-            detail: { sizes: [] },
+            master: undefined,
+            detail: undefined,
             viewers: {},
         });
     }
@@ -192,7 +198,7 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
     }
 
     /**
-     * Replace a `Table` by name. As `Table` doe snot guarantee the same
+     * Replace a `Table` by name. As `Table` does not guarantee the same
      * structure, this will wipe the viewer's state.
      * @param name
      * @param table
@@ -260,6 +266,11 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
             container.insertBefore(this.workspace.node, null);
             MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
         }
+    }
+
+    disconnectedCallback() {
+        // get perspective-indicator
+        // delete it.
     }
 
     /***************************************************************************

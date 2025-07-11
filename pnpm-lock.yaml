@@ -371,6 +371,46 @@ importers:
         specifier: ^14.1.1
         version: 14.1.1
 
+  examples/react-workspace-example:
+    dependencies:
+      '@finos/perspective':
+        specifier: workspace:^
+        version: link:../../rust/perspective-js
+      '@finos/perspective-react':
+        specifier: workspace:^
+        version: link:../../packages/perspective-react
+      '@finos/perspective-viewer':
+        specifier: workspace:^
+        version: link:../../rust/perspective-viewer
+      '@finos/perspective-viewer-d3fc':
+        specifier: workspace:^
+        version: link:../../packages/perspective-viewer-d3fc
+      '@finos/perspective-viewer-datagrid':
+        specifier: workspace:^
+        version: link:../../packages/perspective-viewer-datagrid
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.0.0
+        version: 18.3.1(react@18.3.1)
+      superstore-arrow:
+        specifier: ^3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@types/react':
+        specifier: ^18
+        version: 18.3.8
+      '@types/react-dom':
+        specifier: ^18
+        version: 18.3.5(@types/react@18.3.8)
+      esbuild:
+        specifier: ^0.25.5
+        version: 0.25.5
+      http-server:
+        specifier: ^14.1.1
+        version: 14.1.1
+
   examples/rust-axum: {}
 
   examples/vite-example:
@@ -418,10 +458,10 @@ importers:
         version: 0.28.11
       file-loader:
         specifier: ^5
-        version: 5.1.0(webpack@5.97.1)
+        version: 5.1.0(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))
       html-webpack-plugin:
         specifier: ^5.1.0
-        version: 5.6.0(webpack@5.97.1)
+        version: 5.6.0(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))
       style-loader:
         specifier: ^0.18.2
         version: 0.18.2
@@ -523,9 +563,15 @@ importers:
       '@finos/perspective-viewer':
         specifier: workspace:^
         version: link:../../rust/perspective-viewer
+      '@finos/perspective-workspace':
+        specifier: workspace:^
+        version: link:../perspective-workspace
       '@types/react':
         specifier: ^18
         version: 18.3.8
+      async-mutex:
+        specifier: 0.5.0
+        version: 0.5.0
       react:
         specifier: ^18
         version: 18.3.1
@@ -692,6 +738,9 @@ importers:
       '@lumino/widgets':
         specifier: '>=2 <3'
         version: 2.5.0
+      async-mutex:
+        specifier: 0.5.0
+        version: 0.5.0
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -3819,6 +3868,9 @@ packages:
 
   async-limiter@1.0.1:
     resolution: {integrity: sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==}
+
+  async-mutex@0.5.0:
+    resolution: {integrity: sha512-1A94B18jkJ3DYq284ohPxoXbfTA5HsQ7/Mf4DEhcyLx3Bz27Rh59iScbB6EPiP+B+joue6YCxcMXSbFC1tZKwA==}
 
   async@2.6.4:
     resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
@@ -13632,7 +13684,7 @@ snapshots:
       webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1(esbuild@0.25.5))
 
-  '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.97.1)':
+  '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
       webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1)
@@ -13642,7 +13694,7 @@ snapshots:
       webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1(esbuild@0.25.5))
 
-  '@webpack-cli/info@2.0.2(webpack-cli@5.1.4)(webpack@5.97.1)':
+  '@webpack-cli/info@2.0.2(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
       webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1)
@@ -13652,7 +13704,7 @@ snapshots:
       webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1(esbuild@0.25.5))
 
-  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack@5.97.1)':
+  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
       webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack@5.97.1)
@@ -13844,6 +13896,10 @@ snapshots:
   astring@1.9.0: {}
 
   async-limiter@1.0.1: {}
+
+  async-mutex@0.5.0:
+    dependencies:
+      tslib: 2.8.1
 
   async@2.6.4:
     dependencies:
@@ -14591,7 +14647,7 @@ snapshots:
       postcss-value-parser: 4.2.0
       semver: 7.6.3
     optionalDependencies:
-      webpack: 5.97.1(esbuild@0.25.5)
+      webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
 
   css-minimizer-webpack-plugin@5.0.1(clean-css@5.3.3)(esbuild@0.25.5)(webpack@5.97.1(esbuild@0.25.5)):
     dependencies:
@@ -15656,7 +15712,7 @@ snapshots:
       flat-cache: 4.0.1
     optional: true
 
-  file-loader@5.1.0(webpack@5.97.1):
+  file-loader@5.1.0(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       loader-utils: 1.4.2
       schema-utils: 2.7.1
@@ -16220,6 +16276,16 @@ snapshots:
 
   html-void-elements@3.0.0: {}
 
+  html-webpack-plugin@5.6.0(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)):
+    dependencies:
+      '@types/html-minifier-terser': 6.1.0
+      html-minifier-terser: 6.1.0
+      lodash: 4.17.21
+      pretty-error: 4.0.0
+      tapable: 2.2.1
+    optionalDependencies:
+      webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
+
   html-webpack-plugin@5.6.0(webpack@5.97.1(esbuild@0.25.5)):
     dependencies:
       '@types/html-minifier-terser': 6.1.0
@@ -16229,16 +16295,6 @@ snapshots:
       tapable: 2.2.1
     optionalDependencies:
       webpack: 5.97.1(esbuild@0.25.5)
-
-  html-webpack-plugin@5.6.0(webpack@5.97.1):
-    dependencies:
-      '@types/html-minifier-terser': 6.1.0
-      html-minifier-terser: 6.1.0
-      lodash: 4.17.21
-      pretty-error: 4.0.0
-      tapable: 2.2.1
-    optionalDependencies:
-      webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
 
   htmlparser2@6.1.0:
     dependencies:
@@ -17568,7 +17624,7 @@ snapshots:
     dependencies:
       schema-utils: 4.3.0
       tapable: 2.2.1
-      webpack: 5.97.1(esbuild@0.25.5)
+      webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
 
   mini-svg-data-uri@1.4.4: {}
 
@@ -19842,6 +19898,17 @@ snapshots:
       mkdirp: 3.0.1
       yallist: 5.0.0
 
+  terser-webpack-plugin@5.3.11(esbuild@0.25.5)(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.25
+      jest-worker: 27.5.1
+      schema-utils: 4.3.0
+      serialize-javascript: 6.0.2
+      terser: 5.37.0
+      webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
+    optionalDependencies:
+      esbuild: 0.25.5
+
   terser-webpack-plugin@5.3.11(esbuild@0.25.5)(webpack@5.97.1(esbuild@0.25.5)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -19850,17 +19917,6 @@ snapshots:
       serialize-javascript: 6.0.2
       terser: 5.37.0
       webpack: 5.97.1(esbuild@0.25.5)
-    optionalDependencies:
-      esbuild: 0.25.5
-
-  terser-webpack-plugin@5.3.11(esbuild@0.25.5)(webpack@5.97.1):
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.25
-      jest-worker: 27.5.1
-      schema-utils: 4.3.0
-      serialize-javascript: 6.0.2
-      terser: 5.37.0
-      webpack: 5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4)
     optionalDependencies:
       esbuild: 0.25.5
 
@@ -20306,9 +20362,9 @@ snapshots:
   webpack-cli@5.1.4(webpack@5.97.1):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4)(webpack@5.97.1)
-      '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4)(webpack@5.97.1)
-      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4)(webpack@5.97.1)
+      '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))
+      '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))
+      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4(webpack@5.97.1))(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))
       colorette: 2.0.20
       commander: 10.0.1
       cross-spawn: 7.0.6
@@ -20440,7 +20496,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.11(esbuild@0.25.5)(webpack@5.97.1)
+      terser-webpack-plugin: 5.3.11(esbuild@0.25.5)(webpack@5.97.1(esbuild@0.25.5)(webpack-cli@5.1.4))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     optionalDependencies:

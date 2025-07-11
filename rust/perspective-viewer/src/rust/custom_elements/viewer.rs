@@ -262,7 +262,7 @@ impl PerspectiveViewerElement {
     /// Restart this `<perspective-viewer>` to its initial state, before
     /// `load()`.
     ///
-    /// Use `Self::restart` if you plan to call `Self::load` on this viewer
+    /// Use `Self::eject` if you plan to call `Self::load` on this viewer
     /// again, or alternatively `Self::delete` if this viewer is no longer
     /// needed.
     pub fn eject(&mut self) -> ApiFuture<()> {
