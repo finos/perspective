@@ -155,6 +155,7 @@ impl PerspectiveViewerElement {
     /// viewer.load(worker.table("x,y\n1,2"));
     /// ```
     pub fn load(&self, table: JsValue) -> ApiFuture<()> {
+        tracing::warn!("DDD V - LOAD");
         tracing::info!("Loading Table");
         self.session.invalidate();
         let promise = table
@@ -246,6 +247,7 @@ impl PerspectiveViewerElement {
     /// await viewer.delete();
     /// ```
     pub fn delete(self) -> ApiFuture<()> {
+        tracing::warn!("DDD V - DELETE");
         clone!(self.renderer, self.session, self.root);
         ApiFuture::new(self.renderer.clone().with_lock(async move {
             renderer.delete()?;
@@ -266,6 +268,7 @@ impl PerspectiveViewerElement {
     /// again, or alternatively `Self::delete` if this viewer is no longer
     /// needed.
     pub fn eject(&mut self) -> ApiFuture<()> {
+        tracing::warn!("DDD V - EJECT");
         if self.session.has_table() {
             let mut state = Self::new_from_shadow(
                 self.elem.clone(),
@@ -368,6 +371,7 @@ impl PerspectiveViewerElement {
     /// await viewer.flush();
     /// ```
     pub fn flush(&self) -> ApiFuture<()> {
+        tracing::warn!("DDD V - FLUSH");
         clone!(self.renderer);
         ApiFuture::new(async move {
             request_animation_frame().await;
@@ -397,6 +401,7 @@ impl PerspectiveViewerElement {
     /// await viewer.restore({group_by: ["State"]});
     /// ```
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
+        tracing::warn!("DDD V - RESTORE");
         tracing::info!("Restoring ViewerConfig");
         let this = self.clone();
         ApiFuture::new(async move {
@@ -457,6 +462,7 @@ impl PerspectiveViewerElement {
     /// });
     /// ```
     pub fn save(&self, format: Option<String>) -> ApiFuture<JsValue> {
+        tracing::warn!("DDD V - SAVE");
         let this = self.clone();
         ApiFuture::new(async move {
             let viewer_config_task = this.get_viewer_config();
@@ -542,6 +548,7 @@ impl PerspectiveViewerElement {
     /// await viewer.reset();
     /// ```
     pub fn reset(&self, reset_all: Option<bool>) -> ApiFuture<()> {
+        tracing::warn!("DDD V - RESET");
         tracing::info!("Resetting config");
         let root = self.root.clone();
         let all = reset_all.unwrap_or_default();

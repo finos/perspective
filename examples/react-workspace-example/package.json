@@ -1,0 +1,29 @@
+{
+    "name": "react-workspace-example",
+    "private": true,
+    "version": "3.7.4",
+    "description": "An example app using @finos/perspective-react and its workspace component",
+    "type": "module",
+    "scripts": {
+        "build": "node build.js",
+        "start": "node build.js && http-server dist"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "@finos/perspective-react": "workspace:^",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "superstore-arrow": "^3.0.0"
+    },
+    "devDependencies": {
+        "esbuild": "^0.25.5",
+        "http-server": "^14.1.1",
+        "@types/react": "^18",
+        "@types/react-dom": "^18"
+    }
+}

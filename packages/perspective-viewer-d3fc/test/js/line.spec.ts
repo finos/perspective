@@ -122,7 +122,5 @@ test.describe("Line regressions", () => {
 0
 200
 400`);
-
-        await page.pause();
     });
 });

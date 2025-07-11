@@ -15,6 +15,7 @@ import { Message } from "@lumino/messaging";
 
 import type * as psp_viewer from "@finos/perspective-viewer";
 import type * as psp from "@finos/perspective";
+import type { ViewerConfigUpdateExt } from "./workspace";
 
 interface IPerspectiveViewerWidgetOptions {
     node: HTMLElement;
@@ -75,7 +76,7 @@ export class PerspectiveViewerWidget extends Widget {
         }
     }
 
-    async save() {
+    async save(): Promise<ViewerConfigUpdateExt> {
         let config = {
             ...(await this.viewer.save()),
             table: this.viewer.getAttribute("table"),

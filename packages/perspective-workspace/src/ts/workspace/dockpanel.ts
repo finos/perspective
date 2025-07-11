@@ -13,7 +13,14 @@
 import { DockLayout, DockPanel, TabBar, Widget } from "@lumino/widgets";
 import { PerspectiveTabBar } from "./tabbar";
 import { PerspectiveTabBarRenderer } from "./tabbarrenderer";
-import { PerspectiveWorkspace } from "./workspace";
+import {
+    PerspectiveLayoutArea,
+    PerspectiveLayoutConfig,
+    PerspectiveSplitArea,
+    PerspectiveTabArea,
+    PerspectiveWorkspace,
+    PerspectiveWorkspaceConfig,
+} from "./workspace";
 import { PerspectiveViewerWidget } from "./widget";
 
 class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
@@ -78,7 +85,7 @@ export class PerspectiveDockPanel extends DockPanel {
     }
 
     static getWidgets(
-        layout: DockPanel.ILayoutConfig
+        layout: PerspectiveLayoutConfig<Widget>
     ): PerspectiveViewerWidget[] {
         if (!!layout.main) {
             return PerspectiveDockPanel.getAreaWidgets(layout.main);
@@ -88,14 +95,14 @@ export class PerspectiveDockPanel extends DockPanel {
     }
 
     static getAreaWidgets(
-        layout: DockLayout.AreaConfig
+        layout: PerspectiveLayoutArea<Widget>
     ): PerspectiveViewerWidget[] {
-        if (layout?.hasOwnProperty("children")) {
+        if (layout.type === "split-area") {
             const split_panel = layout as DockLayout.ISplitAreaConfig;
             return split_panel.children.flatMap((widget) =>
                 PerspectiveDockPanel.getAreaWidgets(widget)
             );
-        } else if (layout?.hasOwnProperty("widgets")) {
+        } else if (layout.type === "tab-area") {
             const tab_panel = layout as DockLayout.ITabAreaConfig;
             return tab_panel.widgets as PerspectiveViewerWidget[];
         }
@@ -107,35 +114,48 @@ export class PerspectiveDockPanel extends DockPanel {
         return super.widgets() as IterableIterator<PerspectiveViewerWidget>;
     }
 
-    static mapWidgets(
-        widgetFunc: (widget: any) => any,
-        layout: any
-    ): DockPanel.ILayoutConfig {
+    /// transforms a layout, either a Lumino DockLayout or a PerspectiveWorkspaceConfig
+    /// each widget in the layout tree is passed to the mapping function
+    static mapWidgets<T, U>(
+        widgetFunc: (widget: T) => U,
+        layout: PerspectiveLayoutConfig<T>
+    ): PerspectiveLayoutConfig<U> {
         if (!!layout.main) {
-            layout.main = PerspectiveDockPanel.mapAreaWidgets(
-                widgetFunc,
-                layout.main
-            );
+            return {
+                ...layout,
+                main: PerspectiveDockPanel.mapAreaWidgets(
+                    widgetFunc,
+                    layout.main
+                ),
+            };
         }
 
-        return layout;
+        // this is safe because without a main there are no `T`s or `U`s
+        // within the object, so it can be casted from one to the other.
+        return layout as unknown as PerspectiveLayoutConfig<U>;
     }
 
-    static mapAreaWidgets(
-        widgetFunc: (widget: any) => any,
-        layout: DockLayout.AreaConfig
-    ): DockLayout.AreaConfig {
-        if (layout.hasOwnProperty("children")) {
-            const split_panel = layout as DockLayout.ISplitAreaConfig;
-            split_panel.children = split_panel.children.map((widget) =>
-                PerspectiveDockPanel.mapAreaWidgets(widgetFunc, widget)
-            );
-        } else if (layout.hasOwnProperty("widgets")) {
-            const tab_panel = layout as DockLayout.ITabAreaConfig;
-            tab_panel.widgets = tab_panel.widgets.map(widgetFunc);
+    static mapAreaWidgets<T, U>(
+        widgetFunc: (widget: T) => U,
+        layout: PerspectiveLayoutArea<T>
+    ): PerspectiveLayoutArea<U> {
+        if (layout.type === "split-area") {
+            const split = layout as PerspectiveSplitArea<T>;
+            return {
+                ...split,
+                children: split.children.map((w: PerspectiveLayoutArea<T>) =>
+                    PerspectiveDockPanel.mapAreaWidgets(widgetFunc, w)
+                ),
+            };
+        } else if (layout.type === "tab-area") {
+            const tab = layout as PerspectiveTabArea<T>;
+            return {
+                ...tab,
+                widgets: tab.widgets.map(widgetFunc),
+            };
+        } else {
+            throw new Error("Unknown layout type");
         }
-
-        return layout;
     }
 
     onAfterAttach() {
