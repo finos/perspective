@@ -1291,12 +1291,6 @@ coerce_to(const t_dtype dtype, const A& val) {
 
 std::vector<ProtoServerResp<ProtoServer::Response>>
 ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
-    static bool is_init_expr = false;
-    if (!is_init_expr) {
-        t_computed_expression_parser::init();
-        is_init_expr = true;
-    }
-
     std::vector<ProtoServerResp<ProtoServer::Response>> proto_resp;
     // proto::Response resp_env;
 
@@ -1810,7 +1804,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                 t_regex_mapping& regex_mapping = *expression_regex_mapping;
 
                 std::shared_ptr<t_computed_expression> computed_expression =
-                    t_computed_expression_parser::precompute(
+                    m_computed_expression_parser.precompute(
                         expr.expression_alias,
                         expr.expression,
                         expr.parse_expression_string,

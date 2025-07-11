@@ -16,24 +16,6 @@
 
 namespace perspective {
 
-// Change ExprTk's default compilation options to only check for correctness
-// of brackets and sequences. ExprTk defaults will replace "true" and "false"
-// with 1 and 0, which we don't want. Using the tokens "true" and "false"
-// will raise a syntax error, which is the correct behavior.
-std::size_t t_computed_expression_parser::PARSER_COMPILE_OPTIONS =
-    exprtk::parser<t_tscalar>::settings_t::e_joiner
-    + exprtk::parser<t_tscalar>::settings_t::e_numeric_check
-    + exprtk::parser<t_tscalar>::settings_t::e_bracket_check
-    + exprtk::parser<t_tscalar>::settings_t::e_sequence_check;
-// exprtk::parser<t_tscalar>::settings_t::e_commutative_check;
-// exprtk::parser<t_tscalar>::settings_t::e_strength_reduction;
-
-std::shared_ptr<exprtk::parser<t_tscalar>>
-    t_computed_expression_parser::PARSER =
-        std::make_shared<exprtk::parser<t_tscalar>>(
-            t_computed_expression_parser::PARSER_COMPILE_OPTIONS
-        );
-
 computed_function::bucket t_computed_expression_parser::BUCKET_FN =
     computed_function::bucket();
 
@@ -160,13 +142,13 @@ t_computed_expression::compute(
 
     expr_definition.register_symbol_table(sym_table);
 
-    if (!t_computed_expression_parser::PARSER->compile(
+    if (!m_computed_expression_parser.m_parser->compile(
             m_parsed_expression_string, expr_definition
         )) {
         std::stringstream ss;
         ss << "[t_computed_expression::compute] Failed to parse expression: `"
            << m_parsed_expression_string << "`, failed with error: "
-           << t_computed_expression_parser::PARSER->error() << '\n';
+           << m_computed_expression_parser.m_parser->error() << '\n';
 
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
@@ -227,9 +209,22 @@ t_computed_expression::get_dtype() const {
  * t_computed_expression_parser
  */
 
-void
-t_computed_expression_parser::init() {
-    t_computed_expression_parser::PARSER->settings()
+t_computed_expression_parser::t_computed_expression_parser() {
+    // Change ExprTk's default compilation options to only check for correctness
+    // of brackets and sequences. ExprTk defaults will replace "true" and
+    // "false" with 1 and 0, which we don't want. Using the tokens "true" and
+    // "false" will raise a syntax error, which is the correct behavior.
+
+    m_parser = std::make_shared<exprtk::parser<t_tscalar>>(
+        exprtk::parser<t_tscalar>::settings_t::e_joiner
+        + exprtk::parser<t_tscalar>::settings_t::e_numeric_check
+        + exprtk::parser<t_tscalar>::settings_t::e_bracket_check
+        + exprtk::parser<t_tscalar>::settings_t::e_sequence_check
+        // exprtk::parser<t_tscalar>::settings_t::e_commutative_check;
+        // exprtk::parser<t_tscalar>::settings_t::e_strength_reduction;
+    );
+
+    m_parser->settings()
         .disable_control_structure(
             exprtk::parser<t_tscalar>::settings_store::e_ctrl_repeat_loop
         )
@@ -255,7 +250,7 @@ t_computed_expression_parser::precompute(
     const std::shared_ptr<t_schema>& schema,
     t_expression_vocab& vocab,
     t_regex_mapping& regex_mapping
-) {
+) const {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
@@ -299,14 +294,12 @@ t_computed_expression_parser::precompute(
     exprtk::expression<t_tscalar> expr_definition;
     expr_definition.register_symbol_table(sym_table);
 
-    if (!t_computed_expression_parser::PARSER->compile(
-            parsed_expression_string, expr_definition
-        )) {
+    if (!m_parser->compile(parsed_expression_string, expr_definition)) {
         std::stringstream ss;
         ss << "[t_computed_expression_parser::precompute] Failed to parse "
               "expression: `"
-           << parsed_expression_string << "`, failed with error: "
-           << t_computed_expression_parser::PARSER->error() << '\n';
+           << parsed_expression_string
+           << "`, failed with error: " << m_parser->error() << '\n';
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
@@ -334,7 +327,7 @@ t_computed_expression_parser::get_dtype(
     t_expression_error& error,
     t_expression_vocab& vocab,
     t_regex_mapping& regex_mapping
-) {
+) const {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
@@ -391,14 +384,11 @@ t_computed_expression_parser::get_dtype(
     exprtk::expression<t_tscalar> expr_definition;
     expr_definition.register_symbol_table(sym_table);
 
-    if (!t_computed_expression_parser::PARSER->compile(
-            parsed_expression_string, expr_definition
-        )) {
+    if (!m_parser->compile(parsed_expression_string, expr_definition)) {
         // Error count should always be above 0 if there is a compile error -
         // We simply take the first error and return it.
-        if (t_computed_expression_parser::PARSER->error_count() > 0) {
-            auto parser_error =
-                t_computed_expression_parser::PARSER->get_error(0);
+        if (m_parser->error_count() > 0) {
+            auto parser_error = m_parser->get_error(0);
 
             // Given an error object and an expression, `update_error` maps the
             // error to a line and column number inside the expression.
