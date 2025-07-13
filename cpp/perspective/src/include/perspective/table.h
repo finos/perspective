@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 #pragma once
+#include "perspective/computed_expression.h"
 #include <perspective/first.h>
 #include <perspective/exports.h>
 #include <perspective/base.h>
@@ -268,6 +269,7 @@ private:
     std::shared_ptr<t_gnode> m_gnode;
     std::vector<std::string> m_column_names;
     std::vector<t_dtype> m_data_types;
+    t_computed_expression_parser m_computed_expression_parser;
 
     /**
      * @brief The row number at which we start to write into the Table.

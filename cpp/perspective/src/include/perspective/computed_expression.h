@@ -40,6 +40,102 @@ struct PERSPECTIVE_EXPORT t_expression_error {
     t_index m_column;
 };
 
+class PERSPECTIVE_EXPORT t_computed_expression;
+
+class PERSPECTIVE_EXPORT t_computed_expression_parser {
+public:
+    t_computed_expression_parser();
+
+    /**
+     * @brief Given expression strings, validate the expression's dtype and
+     * return a shared pointer to a new `t_computed_expression`. This method
+     * will abort() if an input column is invalid or the expression cannot be
+     * parsed.
+     *
+     * @param expression_alias an alias for the expression, which will become
+     * the name of the new expression column on the table.
+     * @param expression_string the expression, as the user typed it.
+     * @param parsed_expression_string the expression after having been
+     * parsed through the Perspective engine to replace column names, add
+     * intern(), etc.
+     * @param column_ids A map of column IDs to column names, which is used to
+     * properly access column names from the symbol table.
+     * @param schema
+     * @return std::shared_ptr<t_computed_expression>
+     */
+    std::shared_ptr<t_computed_expression> precompute(
+        const std::string& expression_alias,
+        const std::string& expression_string,
+        const std::string& parsed_expression_string,
+        const std::vector<std::pair<std::string, std::string>>& column_ids,
+        const std::shared_ptr<t_data_table>& source_table,
+        const t_gstate::t_mapping& pkey_map,
+        const std::shared_ptr<t_schema>& schema,
+        t_expression_vocab& vocab,
+        t_regex_mapping& regex_mapping
+    ) const;
+
+    /**
+     * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
+     * if the expression is invalid. Unlike `precompute`, this method
+     * implements additional checks for column validity and is guaranteed
+     * to return a value, even if the expression cannot be parsed. If the
+     * expression has an error in it, this function will return `DTYPE_NONE`
+     * and the `error_string` will have an error message set.
+     *
+     * @param expression_alias an alias for the expression, which will become
+     * the name of the new expression column on the table.
+     * @param expression_string the expression, as the user typed it.
+     * @param parsed_expression_string the expression after having been
+     * parsed through the Perspective engine to replace column names, add
+     * intern(), etc.
+     * @param column_ids A map of column IDs to column names, which is used to
+     * properly access column names from the symbol table.
+     * @param schema
+     * @param error_string
+     * @return t_dtype
+     */
+    t_dtype get_dtype(
+        const std::string& expression_alias,
+        const std::string& expression_string,
+        const std::string& parsed_expression_string,
+        const std::vector<std::pair<std::string, std::string>>& column_ids,
+        const std::shared_ptr<t_data_table>& source_table,
+        const t_gstate::t_mapping& pkey_map,
+        const t_schema& schema,
+        t_expression_error& error,
+        t_expression_vocab& vocab,
+        t_regex_mapping& regex_mapping
+    ) const;
+
+    std::shared_ptr<exprtk::parser<t_tscalar>> m_parser;
+
+    // Static computed functions have no state
+    static computed_function::bucket BUCKET_FN;
+    static computed_function::hour_of_day HOUR_OF_DAY_FN;
+    static computed_function::percent_of PERCENT_OF_FN;
+    static computed_function::inrange_fn INRANGE_FN;
+    static computed_function::min_fn MIN_FN;
+    static computed_function::max_fn MAX_FN;
+    static computed_function::diff3 diff3;
+    static computed_function::norm3 norm3;
+    static computed_function::cross_product3 cross_product3;
+    static computed_function::dot_product3 dot_product3;
+    static computed_function::length LENGTH_FN;
+    static computed_function::is_null IS_NULL_FN;
+    static computed_function::is_not_null IS_NOT_NULL_FN;
+    static computed_function::to_integer TO_INTEGER_FN;
+    static computed_function::to_float TO_FLOAT_FN;
+    static computed_function::to_boolean TO_BOOLEAN_FN;
+    static computed_function::make_date MAKE_DATE_FN;
+    static computed_function::make_datetime MAKE_DATETIME_FN;
+    static computed_function::random RANDOM_FN;
+
+    // constants for True and False as DTYPE_BOOL scalars
+    static t_tscalar TRUE_SCALAR;
+    static t_tscalar FALSE_SCALAR;
+};
+
 /**
  * @brief Contains the metadata for a single expression and the methods which
  * will compute the expression's output.
@@ -75,105 +171,9 @@ private:
     std::string m_expression_alias;
     std::string m_expression_string;
     std::string m_parsed_expression_string;
+    t_computed_expression_parser m_computed_expression_parser;
     std::vector<std::pair<std::string, std::string>> m_column_ids;
     t_dtype m_dtype;
-};
-
-class PERSPECTIVE_EXPORT t_computed_expression_parser {
-public:
-    static void init();
-
-    /**
-     * @brief Given expression strings, validate the expression's dtype and
-     * return a shared pointer to a new `t_computed_expression`. This method
-     * will abort() if an input column is invalid or the expression cannot be
-     * parsed.
-     *
-     * @param expression_alias an alias for the expression, which will become
-     * the name of the new expression column on the table.
-     * @param expression_string the expression, as the user typed it.
-     * @param parsed_expression_string the expression after having been
-     * parsed through the Perspective engine to replace column names, add
-     * intern(), etc.
-     * @param column_ids A map of column IDs to column names, which is used to
-     * properly access column names from the symbol table.
-     * @param schema
-     * @return std::shared_ptr<t_computed_expression>
-     */
-    static std::shared_ptr<t_computed_expression> precompute(
-        const std::string& expression_alias,
-        const std::string& expression_string,
-        const std::string& parsed_expression_string,
-        const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const std::shared_ptr<t_data_table>& source_table,
-        const t_gstate::t_mapping& pkey_map,
-        const std::shared_ptr<t_schema>& schema,
-        t_expression_vocab& vocab,
-        t_regex_mapping& regex_mapping
-    );
-
-    /**
-     * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
-     * if the expression is invalid. Unlike `precompute`, this method
-     * implements additional checks for column validity and is guaranteed
-     * to return a value, even if the expression cannot be parsed. If the
-     * expression has an error in it, this function will return `DTYPE_NONE`
-     * and the `error_string` will have an error message set.
-     *
-     * @param expression_alias an alias for the expression, which will become
-     * the name of the new expression column on the table.
-     * @param expression_string the expression, as the user typed it.
-     * @param parsed_expression_string the expression after having been
-     * parsed through the Perspective engine to replace column names, add
-     * intern(), etc.
-     * @param column_ids A map of column IDs to column names, which is used to
-     * properly access column names from the symbol table.
-     * @param schema
-     * @param error_string
-     * @return t_dtype
-     */
-    static t_dtype get_dtype(
-        const std::string& expression_alias,
-        const std::string& expression_string,
-        const std::string& parsed_expression_string,
-        const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const std::shared_ptr<t_data_table>& source_table,
-        const t_gstate::t_mapping& pkey_map,
-        const t_schema& schema,
-        t_expression_error& error,
-        t_expression_vocab& vocab,
-        t_regex_mapping& regex_mapping
-    );
-
-    static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
-
-    // Applied to the parser
-    static std::size_t PARSER_COMPILE_OPTIONS;
-
-    // Static computed functions have no state
-    static computed_function::bucket BUCKET_FN;
-    static computed_function::hour_of_day HOUR_OF_DAY_FN;
-    static computed_function::percent_of PERCENT_OF_FN;
-    static computed_function::inrange_fn INRANGE_FN;
-    static computed_function::min_fn MIN_FN;
-    static computed_function::max_fn MAX_FN;
-    static computed_function::diff3 diff3;
-    static computed_function::norm3 norm3;
-    static computed_function::cross_product3 cross_product3;
-    static computed_function::dot_product3 dot_product3;
-    static computed_function::length LENGTH_FN;
-    static computed_function::is_null IS_NULL_FN;
-    static computed_function::is_not_null IS_NOT_NULL_FN;
-    static computed_function::to_integer TO_INTEGER_FN;
-    static computed_function::to_float TO_FLOAT_FN;
-    static computed_function::to_boolean TO_BOOLEAN_FN;
-    static computed_function::make_date MAKE_DATE_FN;
-    static computed_function::make_datetime MAKE_DATETIME_FN;
-    static computed_function::random RANDOM_FN;
-
-    // constants for True and False as DTYPE_BOOL scalars
-    static t_tscalar TRUE_SCALAR;
-    static t_tscalar FALSE_SCALAR;
 };
 
 /**

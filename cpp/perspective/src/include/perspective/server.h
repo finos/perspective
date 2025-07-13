@@ -663,6 +663,7 @@ namespace server {
         static std::uint32_t m_client_id;
         bool m_realtime_mode;
         ServerResources m_resources;
+        t_computed_expression_parser m_computed_expression_parser;
     };
 
 } // namespace server

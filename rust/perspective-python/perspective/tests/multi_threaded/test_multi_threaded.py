@@ -138,3 +138,21 @@ class TestServer(object):
                     assert val is not None
 
         table.delete()
+
+    def test_concurrent_view_creation_on_separate_servers_are_threadsafe(self):
+        def run_perspective():
+            x = 1000
+            s = Server()
+            c = s.new_local_client()
+            t = c.table({"a": "string", "b": int})
+            t.view(expressions=["//tmp\nfalse"])
+            while x > 0:
+                t.update([{"a": "foo", "b": 42}])
+                x -= 1
+
+        thread1 = threading.Thread(target=run_perspective, daemon=True)
+        thread2 = threading.Thread(target=run_perspective, daemon=True)
+        thread1.start()
+        thread2.start()
+        thread1.join()
+        thread2.join()
