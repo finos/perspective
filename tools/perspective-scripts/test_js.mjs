@@ -39,7 +39,7 @@ const IS_PLAYWRIGHT = get_scope().reduce(
             "perspective-viewer-openlayers",
             "perspective-viewer-workspace",
             "perspective-workspace",
-            "perspective-jupyter",
+            "perspective-jupyterlab",
         ].includes(pkg),
     false
 );
