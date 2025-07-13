@@ -1,3 +1,15 @@
+# [v3.7.3](https://github.com/finos/perspective/releases/tag/v3.7.3)
+
+_13 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.2...v3.7.3))
+
+Features
+
+- Expose `null` cell style for `perspective-viewer-datagrid` [#3032](https://github.com/finos/perspective/pull/3032)
+
+Fixes
+
+- Fix thread safety of multiple `Server` instances in the same process [#3034](https://github.com/finos/perspective/pull/3034)
+
 # [v3.7.2](https://github.com/finos/perspective/releases/tag/v3.7.2)
 
 _8 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.1...v3.7.2))
