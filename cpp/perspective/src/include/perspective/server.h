@@ -662,6 +662,9 @@ namespace server {
 
         static std::uint32_t m_client_id;
         bool m_realtime_mode;
+        std::atomic<std::chrono::high_resolution_clock::time_point>
+            m_cpu_time_start;
+        std::atomic<long long> m_cpu_time;
         ServerResources m_resources;
         t_computed_expression_parser m_computed_expression_parser;
     };

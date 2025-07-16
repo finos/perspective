@@ -35,6 +35,8 @@ path = "src/rust/lib.rs"
 external-bootstrap = []
 metadata = []
 default = []
+talc-allocator = ["perspective-js/talc-allocator"]
+trace-allocator = ["perspective-js/trace-allocator"]
 
 [build-dependencies]
 serde_json = { version = "1.0.59", features = ["raw_value"] }

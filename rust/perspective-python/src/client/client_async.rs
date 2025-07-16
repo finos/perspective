@@ -290,6 +290,14 @@ impl AsyncClient {
             .into_pyerr()
     }
 
+    /// Provides the [`SystemInfo`] struct, implementation-specific metadata
+    /// about the [`perspective_server::Server`] runtime such as Memory and
+    /// CPU usage.
+    pub async fn system_info(&self) -> PyResult<Py<PyAny>> {
+        let sysinfo = self.client.system_info().await.into_pyerr()?;
+        Python::with_gil(|py| Ok(pythonize::pythonize(py, &sysinfo)?.unbind()))
+    }
+
     /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the
     /// [`Client`] has open as well as its callbacks.
     pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {
@@ -301,6 +309,19 @@ impl AsyncClient {
     }
 }
 
+/// [`AsyncTable`] is Perspective's columnar data frame, analogous to a
+/// Pandas/Polars `DataFrame` or Apache Arrow, supporting append & in-place
+/// updates, removal by index, and update notifications.
+///
+/// A [`AsyncTable`] contains columns, each of which have a unique name, are
+/// strongly and consistently typed, and contains rows of data conforming to the
+/// column's type. Each column in a [`AsyncTable`] must have the same number of
+/// rows, though not every row must contain data; null-values are used to
+/// indicate missing values in the dataset. The schema of a [`AsyncTable`] is
+/// _immutable after creation_, which means the column names and data types
+/// cannot be changed after the [`AsyncTable`] has been created. Columns cannot
+/// be added or deleted after creation either, but a [`AsyncView`] can be used
+/// to select an arbitrary set of columns from the [`AsyncTable`].
 #[pyclass]
 #[derive(Clone)]
 pub struct AsyncTable {

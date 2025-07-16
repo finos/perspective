@@ -489,7 +489,10 @@ message ViewSetDepthResp {}
 
 message ServerSystemInfoReq {}
 message ServerSystemInfoResp {
-    double heap_size = 1;
+    uint64 heap_size = 1;
+    uint64 used_size = 2;
+    uint32 cpu_time = 3;
+    uint32 cpu_time_epoch = 4;
 }
 
 

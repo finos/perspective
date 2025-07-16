@@ -39,15 +39,17 @@ async function leak_test(test, num_iterations = 10_000) {
     // the time the suite runs. Could fix with a nod eagent (and test in other
     // browsers).
 
-    // expect((await perspective.memory_usage()).wasmHeap).toEqual(16777216);
     const start = (await perspective.system_info()).heap_size;
+    const start_used = (await perspective.system_info()).used_size;
 
     for (var i = 0; i < num_iterations; i++) {
         await test();
     }
 
-    // expect((await perspective.memory_usage()).wasmHeap).toEqual(16777216);
+    const final_used = (await perspective.system_info()).used_size;
     expect((await perspective.system_info()).heap_size).toEqual(start);
+    expect(final_used / start_used).toBeGreaterThanOrEqual(0.8);
+    expect(final_used / start_used).toBeLessThanOrEqual(1.5);
 }
 
 /**

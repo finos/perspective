@@ -19,11 +19,12 @@ use futures::Future;
 use futures::future::{BoxFuture, LocalBoxFuture, join_all};
 use prost::Message;
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::{
-    self, ColumnType, GetFeaturesReq, GetFeaturesResp, GetHostedTablesReq, GetHostedTablesResp,
+    ColumnType, GetFeaturesReq, GetFeaturesResp, GetHostedTablesReq, GetHostedTablesResp,
     HostedTable, MakeTableReq, RemoveHostedTablesUpdateReq, Request, Response, ServerError,
     ServerSystemInfoReq,
 };
@@ -34,17 +35,35 @@ use crate::view::ViewWindow;
 use crate::{OnUpdateMode, OnUpdateOptions, asyncfn, clone};
 
 /// Metadata about the engine runtime (such as total heap utilization).
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, TS)]
 pub struct SystemInfo {
-    pub heap_size: f64,
-}
+    /// Total available bytes for allocation on the [`Server`].
+    pub heap_size: u64,
 
-impl From<proto::ServerSystemInfoResp> for SystemInfo {
-    fn from(value: proto::ServerSystemInfoResp) -> Self {
-        SystemInfo {
-            heap_size: value.heap_size,
-        }
-    }
+    /// Bytes allocated for use on the [`Server`].
+    pub used_size: u64,
+
+    /// Wall-clock time spent processing requests on the [`Server`], in
+    /// milliseconds (estimated). This does not properly account for the
+    /// internal thread pool (which enables column-parallel processing of
+    /// individual requests).
+    pub cpu_time: u32,
+
+    /// Milliseconds since internal CPU time accumulator was reset.
+    pub cpu_time_epoch: u32,
+
+    /// Timestamp (POSIX) this request was made. This field may be omitted
+    /// for wasm due to `perspective-client` lacking a dependency on
+    /// `wasm_bindgen`.
+    pub timestamp: Option<u64>,
+
+    /// Total available bytes for allocation on the [`Client`]. This is only
+    /// available if `trace-allocator` is enabled.
+    pub client_heap: Option<u64>,
+
+    /// Bytes allocated for use on the [`Client`].  This is only
+    /// available if `trace-allocator` is enabled.
+    pub client_used: Option<u64>,
 }
 
 /// Metadata about what features are supported by the `Server` this `Client`
@@ -646,7 +665,38 @@ impl Client {
         };
 
         match self.oneshot(&msg).await? {
-            ClientResp::ServerSystemInfoResp(resp) => Ok(resp.into()),
+            ClientResp::ServerSystemInfoResp(resp) => {
+                #[cfg(not(target_family = "wasm"))]
+                let timestamp = Some(
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)?
+                        .as_millis() as u64,
+                );
+
+                #[cfg(target_family = "wasm")]
+                let timestamp = None;
+
+                #[cfg(feature = "talc-allocator")]
+                let (client_used, client_heap) = {
+                    let (client_used, client_heap) = crate::utils::get_used();
+                    (Some(client_used as u64), Some(client_heap as u64))
+                };
+
+                #[cfg(not(feature = "talc-allocator"))]
+                let (client_used, client_heap) = (None, None);
+
+                let info = SystemInfo {
+                    heap_size: resp.heap_size,
+                    used_size: resp.used_size,
+                    cpu_time: resp.cpu_time,
+                    cpu_time_epoch: resp.cpu_time_epoch,
+                    timestamp,
+                    client_heap,
+                    client_used,
+                };
+
+                Ok(info)
+            },
             resp => Err(resp.into()),
         }
     }

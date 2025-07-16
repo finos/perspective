@@ -457,8 +457,33 @@ impl Client {
     /// const info = await client.system_info();
     /// ```
     #[wasm_bindgen]
-    pub async fn system_info(&self) -> ApiResult<JsValue> {
-        let info = self.client.system_info().await?;
-        Ok(JsValue::from_serde_ext(&info)?)
+    pub async fn system_info(&self) -> ApiResult<JsSystemInfo> {
+        let mut info = self.client.system_info().await?;
+
+        #[cfg(feature = "trace-allocator")]
+        if let perspective_client::SystemInfo {
+            client_used: None,
+            client_heap: None,
+            ..
+        } = &info
+        {
+            let (client_used, client_heap) = crate::utils::get_used();
+            info.client_used = Some(client_used as u64);
+            info.client_heap = Some(client_heap as u64);
+        };
+
+        let timestamp = web_sys::window()
+            .and_then(|x| x.performance())
+            .map(|x| x.now() as u64);
+
+        info.timestamp = timestamp;
+        let record = JsValue::from_serde_ext(&info)?;
+        Ok(record.unchecked_into())
     }
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(typescript_type = "SystemInfo")]
+    pub type JsSystemInfo;
 }

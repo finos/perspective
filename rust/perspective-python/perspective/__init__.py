@@ -23,6 +23,7 @@ __all__ = [
     "AsyncServer",
     "num_cpus",
     "set_num_cpus",
+    "system_info",
 ]
 
 import functools
@@ -60,6 +61,11 @@ def open_table(*args, **kwargs):
 @functools.wraps(Client.get_hosted_table_names)
 def get_hosted_table_names(*args, **kwargs):
     return GLOBAL_CLIENT.get_hosted_table_names(*args, **kwargs)
+
+
+@functools.wraps(Client.system_info)
+def system_info(*args, **kwargs):
+    return GLOBAL_CLIENT.system_info(*args, **kwargs)
 
 
 def _jupyter_labextension_paths():

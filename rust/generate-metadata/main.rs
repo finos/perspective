@@ -32,7 +32,8 @@ use std::fs;
 
 use perspective_client::config::*;
 use perspective_client::{
-    DeleteOptions, OnUpdateOptions, TableInitOptions, UpdateOptions, ViewOnUpdateResp, ViewWindow,
+    DeleteOptions, OnUpdateOptions, SystemInfo, TableInitOptions, UpdateOptions, ViewOnUpdateResp,
+    ViewWindow,
 };
 use perspective_viewer::config::ViewerConfigUpdate;
 use ts_rs::TS;
@@ -71,6 +72,7 @@ pub fn generate_type_bindings_js() -> Result<(), Box<dyn Error>> {
     UpdateOptions::export_all_to(&path)?;
     DeleteOptions::export_all_to(&path)?;
     ViewWindow::export_all_to(&path)?;
+    SystemInfo::export_all_to(&path)?;
     Ok(())
 }
 

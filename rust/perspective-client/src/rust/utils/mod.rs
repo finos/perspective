@@ -15,14 +15,20 @@
 mod clone;
 mod logging;
 
+#[cfg(feature = "talc-allocator")]
+mod talc_allocator;
+
 #[cfg(test)]
 mod tests;
 
 use std::sync::Arc;
+use std::time::SystemTimeError;
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rand_unique::{RandomSequence, RandomSequenceBuilder};
+#[cfg(feature = "talc-allocator")]
+pub(crate) use talc_allocator::get_used;
 use thiserror::*;
 
 use crate::proto;
@@ -73,6 +79,9 @@ pub enum ClientError {
 
     #[error("Duplicate name {0}")]
     DuplicateNameError(String),
+
+    #[error("{0}")]
+    TimeError(#[from] SystemTimeError),
 }
 
 pub type ClientResult<T> = Result<T, ClientError>;
