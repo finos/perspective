@@ -290,6 +290,14 @@ impl AsyncClient {
             .into_pyerr()
     }
 
+    /// Provides the [`SystemInfo`] struct, implementation-specific metadata
+    /// about the [`perspective_server::Server`] runtime such as Memory and
+    /// CPU usage.
+    pub async fn system_info(&self) -> PyResult<Py<PyAny>> {
+        let sysinfo = self.client.system_info().await.into_pyerr()?;
+        Python::with_gil(|py| Ok(pythonize::pythonize(py, &sysinfo)?.unbind()))
+    }
+
     /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the
     /// [`Client`] has open as well as its callbacks.
     pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {

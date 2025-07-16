@@ -2,18 +2,13 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
-
-        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
-
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
         
         <style>
         
             perspective-viewer {
                 flex: 1;
-                margin: 24px;
+                margin: 4px;
                 overflow: visible;
             }
 
@@ -131,6 +126,7 @@
                     <span>Bool columns</span>
                     <input id="num_boolean" min="0" max="50" type="number" placeholder="#" value="1"></input>
                 </div>
+                <button id="del">Delete</button>
             </div>
 
             <perspective-viewer 
@@ -138,12 +134,21 @@
                 id="viewer">
 
             </perspective-viewer>
+
+            <perspective-viewer 
+                editable
+                id="stats">
+
+            </perspective-viewer>
         </div>
 
         <script type="module">
+            import "/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js";
+            import "/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js";
+            import "/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js";
 
             import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
-            const WORKER = perspective.worker();
+            const WORKER = await perspective.worker();
 
             const choose = x => x[Math.floor(Math.random() * x.length)];
             const range = (x, y) => Math.random() * (y - x) + x;
@@ -210,6 +215,7 @@
                         }
                     }
                 })();
+
                 return tbl;
             }
 
@@ -228,9 +234,33 @@
                 }            
             }
 
+            const state = {};
+
             // Main
-            run.addEventListener("click", make_run_click_callback({}));
+            run.addEventListener("click", make_run_click_callback(state));
             run.dispatchEvent(new Event("click"));
+
+            del.addEventListener("click", async () => {
+                if (state.table) {
+                    await viewer.eject();
+                    await state.table.then(x => x.delete());
+                    state.table = undefined;
+                }
+            })
+
+            const table2 = await WORKER.table({
+                heap_size: "integer",
+                used_size: "integer",
+                cpu_time: "integer",
+                cpu_time_epoch: "integer",
+            });
+
+            stats.load(table2);
+
+            (async function checkmem() {
+                await table2.update([await WORKER.system_info()]);
+                setTimeout(checkmem, 200);
+            })();
 
         </script>
     </body>

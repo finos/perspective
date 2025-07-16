@@ -194,6 +194,13 @@ impl Client {
             .py_block_on(py)
     }
 
+    /// Provides the [`SystemInfo`] struct, implementation-specific metadata
+    /// about the [`perspective_server::Server`] runtime such as Memory and
+    /// CPU usage.
+    pub fn system_info(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        self.0.system_info().py_block_on(py)
+    }
+
     /// Terminates this [`Client`], cleaning up any [`View`] handles the
     /// [`Client`] has open as well as its callbacks.
     pub fn terminate(&self, py: Python<'_>) -> PyResult<()> {

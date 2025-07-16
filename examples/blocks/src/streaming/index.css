@@ -16,5 +16,10 @@ perspective-viewer {
     top: 0;
     left: 0;
     right: 0;
+    bottom: 50%;
+}
+
+perspective-viewer:nth-child(2) {
+    top: 50%;
     bottom: 0;
 }

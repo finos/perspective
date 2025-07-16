@@ -105,3 +105,20 @@ elem.restore({
     table.update(newRows());
     setTimeout(postRow, 10);
 })();
+
+const table2 = await worker.table({
+    heap_size: "integer",
+    used_size: "integer",
+    cpu_time: "integer",
+    cpu_time_epoch: "integer",
+});
+
+var elem2 = document.getElementsByTagName("perspective-viewer")[1];
+elem2.load(table2);
+
+(async function checkmem() {
+    await table2.update([await worker.system_info()]);
+    setTimeout(checkmem, 200);
+})();
+
+// checkmem();

@@ -36,13 +36,19 @@ use crate::{OnUpdateMode, OnUpdateOptions, asyncfn, clone};
 /// Metadata about the engine runtime (such as total heap utilization).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SystemInfo {
-    pub heap_size: f64,
+    pub heap_size: u64,
+    pub used_size: u64,
+    pub cpu_time: u32,
+    pub cpu_time_epoch: u32,
 }
 
 impl From<proto::ServerSystemInfoResp> for SystemInfo {
     fn from(value: proto::ServerSystemInfoResp) -> Self {
         SystemInfo {
             heap_size: value.heap_size,
+            used_size: value.used_size,
+            cpu_time: value.cpu_time,
+            cpu_time_epoch: value.cpu_time_epoch,
         }
     }
 }
