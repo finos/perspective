@@ -3307,6 +3307,36 @@ import perspective from "../perspective_client";
                 table.delete();
             });
 
+            test("index() should work with an update", async function () {
+                const table = await perspective.table(
+                    {
+                        a: [1, 2, 3, 4],
+                    },
+                    { index: "a" }
+                );
+
+                const view = await table.view({
+                    expressions: { "index()": "index()" },
+                });
+
+                let sentinel = false;
+                view.on_update(() => {
+                    sentinel = true;
+                });
+
+                await table.update({ a: [5, 6] });
+                const result = await view.to_columns();
+
+                expect(sentinel).toBeTruthy();
+                expect(result).toEqual({
+                    a: [1, 2, 3, 4, 5, 6],
+                    "index()": [1, 2, 3, 4, 5, 6],
+                });
+
+                view.delete();
+                table.delete();
+            });
+
             test("Validation works with both input formats", async function () {
                 const table = await perspective.table({
                     a: [1, 2, 3, 4],
