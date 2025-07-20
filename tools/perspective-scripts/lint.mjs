@@ -17,7 +17,7 @@ import * as cppLint from "./lint_cpp.mjs";
 
 export function lint_js(is_fix = false) {
     const prettier_flags = is_fix ? "--write" : "--check";
-    const cmd = sh`prettier ${prettier_flags} "examples/**/*.js" "examples/**/*.tsx" "tools/perspective-scripts/*.mjs" "rust/**/*.ts" "rust/**/*.js" "packages/**/*.js" "packages/**/*.ts" "cpp/**/*.js"`;
+    const cmd = sh`prettier ${prettier_flags} "examples/**/*.js" "examples/**/*.tsx" "tools/perspective-scripts/*.mjs" "rust/**/*.ts" "rust/**/*.js" "packages/**/*.js" "packages/**/*.ts"`;
     cmd.sh`prettier --prose-wrap=always ${prettier_flags} "rust/*/docs/**/*.md"`;
     // cmd.sh`prettier ${prettier_flags} "**/*.yaml"`;
     cmd.sh`prettier ${prettier_flags} "**/less/*.less"`;

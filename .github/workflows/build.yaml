@@ -155,7 +155,7 @@ jobs:
             - name: WebAssembly Build
               run: pnpm run build --ci
               env:
-                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli,perspective-react"
+                  PACKAGE: "perspective-server,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli,perspective-react"
                   # PSP_USE_CCACHE: 1
 
             - uses: actions/upload-artifact@v4
@@ -635,7 +635,7 @@ jobs:
             - name: Run Tests
               run: pnpm run test
               env:
-                  PACKAGE: "perspective-cpp,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli,perspective-react"
+                  PACKAGE: "perspective-server,perspective,perspective-viewer,perspective-viewer-datagrid,perspective-viewer-d3fc,perspective-viewer-openlayers,perspective-workspace,perspective-cli,perspective-react"
                   # PSP_USE_CCACHE: 1
 
     # ,--,--'      .   .-,--.     .  .

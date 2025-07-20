@@ -49,8 +49,6 @@ rust/perspective-client/src/rust/proto.rs
 rust/perspective-js/src/ts/ts-rs
 rust/perspective-python/LICENSE_THIRDPARTY_cargo.yml
 rust/perspective-python/LICENSE.md
-rust/perspective-server/cmake
-rust/perspective-server/cpp
 rust/perspective-server/docs/lib_gen.md
 rust/perspective-viewer/src/ts/ts-rs
 rust/perspective/src/ts/ts-rs

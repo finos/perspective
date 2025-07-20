@@ -51,7 +51,6 @@ const CONFIG = new Proxy(
             if (process.env.PSP_BUILD_IMMEDIATELY || process.env.PSP_ONCE) {
                 sh`node tools/perspective-scripts/build.mjs`.runSync();
                 if (process.env.PSP_ONCE) {
-                    // this.config = [];
                     while (this.config.length > 0) {
                         this.config.pop();
                     }
@@ -74,10 +73,12 @@ const CONFIG = new Proxy(
                         ).replace(/\|/g, ",");
                     }
 
-                    fs.writeFileSync(
-                        "./.perspectiverc",
-                        this.config.join("\n")
-                    );
+                    const config = [];
+                    for (const key in this._values) {
+                        config.push(`${key}=${this._values[key]}`);
+                    }
+
+                    fs.writeFileSync("./.perspectiverc", config.join("\n"));
                 }
             }
         }
@@ -127,8 +128,8 @@ async function focus_package() {
         },
         {
             key: "c",
-            name: "perspective-cpp",
-            value: "perspective-cpp",
+            name: "perspective-server",
+            value: "perspective-server",
         },
         {
             key: "p",

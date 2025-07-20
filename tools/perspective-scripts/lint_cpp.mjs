@@ -23,7 +23,7 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 export function tidyLint(flags) {
     dotenv.config({ path: "./.perspectiverc" });
     // if (process.env.PSP_PROJECT === "js") {
-    const cppPath = sh.path`${__dirname}/../../cpp/perspective`;
+    const cppPath = sh.path`${__dirname}/../../rust/perspective-server/cpp/perspective`;
     const cppDistPath = sh.path`${cppPath}/dist/release`;
     tidy(cppDistPath, sh.path`${cppPath}/src`, flags);
     // } else if (process.env.PSP_PROJECT === "python") {

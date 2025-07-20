@@ -119,7 +119,7 @@ async function build_rust() {
 }
 
 async function build_web_assets() {
-    await cpy(["../../cpp/perspective/dist/web/*"], "dist/wasm");
+    await cpy(["../../rust/perspective-server/dist/web/*"], "dist/wasm");
     await Promise.all(BUILD.map(build)).catch((e) => {
         console.error(e);
         process.exit(1);

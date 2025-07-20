@@ -23,7 +23,6 @@
         "tools/perspective-test",
         "tools/perspective-scripts",
         "tools/perspective-esbuild-plugin",
-        "cpp/perspective",
         "packages/perspective-react",
         "packages/perspective-viewer-datagrid",
         "packages/perspective-viewer-d3fc",
@@ -34,6 +33,7 @@
         "rust/perspective-js",
         "rust/perspective-viewer",
         "rust/perspective-python",
+        "rust/perspective-server",
         "examples/*",
         "docs"
     ],

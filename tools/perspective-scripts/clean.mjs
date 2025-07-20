@@ -21,9 +21,9 @@ const RUST_PKGS = [];
 const CRATE_NAMES = fs.readdirSync("rust");
 
 for (const pkg of PACKAGES) {
-    if (pkg === "perspective-cpp") {
-        console.log("-- Cleaning perspective-cpp");
-        clean("cpp/perspective/dist", "cpp/perspective/build");
+    if (pkg === "perspective-server") {
+        console.log("-- Cleaning perspective-server");
+        clean("rust/perspective-server/dist");
     } else if (CRATE_NAMES.indexOf(pkg) > -1) {
         RUST_PKGS.push(pkg);
     } else {

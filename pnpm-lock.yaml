@@ -126,12 +126,6 @@ importers:
         specifier: ~5.2.2
         version: 5.2.2
 
-  cpp/perspective:
-    devDependencies:
-      pro_self_extracting_wasm:
-        specifier: 0.0.9
-        version: 0.0.9
-
   docs:
     dependencies:
       '@docusaurus/core':
@@ -715,8 +709,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       zx:
-        specifier: ^8.1.9
-        version: 8.5.3
+        specifier: ^8.3.0
+        version: 8.3.0
 
   rust/generate-metadata: {}
 
@@ -734,15 +728,15 @@ importers:
         specifier: ^8.17.0
         version: 8.18.0
     devDependencies:
-      '@finos/perspective-cpp':
-        specifier: workspace:^
-        version: link:../../cpp/perspective
       '@finos/perspective-esbuild-plugin':
         specifier: workspace:^
         version: link:../../tools/perspective-esbuild-plugin
       '@finos/perspective-metadata':
         specifier: workspace:^
         version: link:../generate-metadata
+      '@finos/perspective-server':
+        specifier: workspace:^
+        version: link:../perspective-server
       '@finos/perspective-test':
         specifier: workspace:^
         version: link:../../tools/perspective-test
@@ -774,8 +768,8 @@ importers:
         specifier: ^1.13.6
         version: 1.13.7
       zx:
-        specifier: 8.1.9
-        version: 8.1.9
+        specifier: 8.3.0
+        version: 8.3.0
 
   rust/perspective-python:
     dependencies:
@@ -798,6 +792,15 @@ importers:
       tar:
         specifier: ^7.4.3
         version: 7.4.3
+
+  rust/perspective-server:
+    devDependencies:
+      pro_self_extracting_wasm:
+        specifier: 0.0.9
+        version: 0.0.9
+      zx:
+        specifier: 8.3.0
+        version: 8.3.0
 
   rust/perspective-viewer:
     dependencies:
@@ -836,8 +839,8 @@ importers:
         specifier: ~5.2.2
         version: 5.2.2
       zx:
-        specifier: 8.1.9
-        version: 8.1.9
+        specifier: 8.3.0
+        version: 8.3.0
 
   tools/perspective-bench:
     dependencies:
@@ -951,8 +954,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       zx:
-        specifier: ^8.1.8
-        version: 8.5.3
+        specifier: ^8.3.0
+        version: 8.3.0
 
   tools/perspective-esbuild-plugin:
     dependencies:
@@ -966,8 +969,8 @@ importers:
   tools/perspective-scripts:
     devDependencies:
       zx:
-        specifier: ^8.1.8
-        version: 8.5.3
+        specifier: ^8.3.0
+        version: 8.3.0
 
   tools/perspective-test:
     dependencies:
@@ -9449,8 +9452,8 @@ packages:
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
-  zx@8.1.9:
-    resolution: {integrity: sha512-UHuLHphHmsBYKkAchkSrEN4nzDyagafqC9HUxtc1J7eopaScW6H9dsLJ1lmkAntnLtDTGoM8fa+jrJrXiIfKFA==}
+  zx@8.3.0:
+    resolution: {integrity: sha512-L8mY3yfJwo3a8ZDD6f9jZzAcRWJZYcV8GauZmBxLB/aSTwaMzMIEVpPp2Kyx+7yF0gdvuxKnMxAZRft9UCawiw==}
     engines: {node: '>= 12.17.0'}
     hasBin: true
 
@@ -20653,7 +20656,7 @@ snapshots:
 
   zwitch@2.0.4: {}
 
-  zx@8.1.9:
+  zx@8.3.0:
     optionalDependencies:
       '@types/fs-extra': 11.0.4
       '@types/node': 22.10.5
