@@ -25,6 +25,7 @@ const LOCAL_EXAMPLES = [
     "superstore",
     "citibike",
     "olympics",
+    "dataset",
 ];
 
 exports.LOCAL_EXAMPLES = LOCAL_EXAMPLES;

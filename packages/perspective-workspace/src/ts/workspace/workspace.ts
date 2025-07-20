@@ -395,20 +395,12 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     _delete_listener(name: string) {
-        const isUsed = this.getAllWidgets().some((widget) => {
+        this.getAllWidgets().some((widget) => {
             const psp_widget = widget as PerspectiveViewerWidget;
-            return psp_widget.viewer.getAttribute("table") === name;
+            if (psp_widget.viewer.getAttribute("table") === name) {
+                psp_widget.viewer.eject();
+            }
         });
-
-        if (isUsed) {
-            console.error(
-                `Cannot remove table: '${name}' because it's still bound to widget(s)`
-            );
-
-            return false;
-        }
-
-        return true;
     }
 
     update_widget_for_viewer(viewer: HTMLPerspectiveViewerElement) {
@@ -691,7 +683,10 @@ export class PerspectiveWorkspace extends SplitPanel {
                     for (const table of this.tables.keys()) {
                         let args;
                         if (widget !== null) {
-                            args = { table, widget_name: widget.name };
+                            args = {
+                                table,
+                                widget_name: widget.viewer.getAttribute("slot"),
+                            };
                         } else {
                             args = { table };
                         }
@@ -716,12 +711,19 @@ export class PerspectiveWorkspace extends SplitPanel {
                             let args;
                             if (widget !== null) {
                                 args = {
-                                    target_widget_name: target_widget.name,
-                                    widget_name: widget.name,
+                                    target_widget_name:
+                                        target_widget.viewer.getAttribute(
+                                            "slot"
+                                        ),
+                                    widget_name:
+                                        widget.viewer.getAttribute("slot"),
                                 };
                             } else {
                                 args = {
-                                    target_widget_name: target_widget.name,
+                                    target_widget_name:
+                                        target_widget.viewer.getAttribute(
+                                            "slot"
+                                        ),
                                 };
                             }
 
@@ -741,45 +743,46 @@ export class PerspectiveWorkspace extends SplitPanel {
         }
 
         if (widget) {
+            const widget_name = widget.viewer.getAttribute("slot");
             if (widget?.parent === this.dockpanel) {
                 this._menu.addItem({ type: "separator" });
             }
 
             this._menu.addItem({
                 command: "workspace:duplicate",
-                args: { widget_name: widget.name },
+                args: { widget_name },
             });
 
             this._menu.addItem({
                 command: "workspace:master",
-                args: { widget_name: widget.name },
+                args: { widget_name },
             });
 
             this._menu.addItem({ type: "separator" });
 
             this._menu.addItem({
                 command: "workspace:settings",
-                args: { widget_name: widget.name },
+                args: { widget_name },
             });
 
             this._menu.addItem({
                 command: "workspace:reset",
-                args: { widget_name: widget.name },
+                args: { widget_name },
             });
             this._menu.addItem({
                 command: "workspace:export",
-                args: { widget_name: widget.name },
+                args: { widget_name },
             });
             this._menu.addItem({
                 command: "workspace:copy",
-                args: { widget_name: widget.name },
+                args: { widget_name },
             });
 
             this._menu.addItem({ type: "separator" });
 
             this._menu.addItem({
                 command: "workspace:close",
-                args: { widget_name: widget.name },
+                args: { widget_name },
             });
             this._menu.addItem({
                 command: "workspace:help",
@@ -1007,7 +1010,11 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     getWidgetByName(name: string): PerspectiveViewerWidget | null {
-        return this.getAllWidgets().find((x) => x.name === name) || null;
+        return (
+            this.getAllWidgets().find(
+                (x) => x.viewer.getAttribute("slot") === name
+            ) || null
+        );
     }
 
     getAllWidgets(): PerspectiveViewerWidget[] {
