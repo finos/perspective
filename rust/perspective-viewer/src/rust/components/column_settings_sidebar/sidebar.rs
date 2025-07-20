@@ -15,8 +15,7 @@ use std::rc::Rc;
 
 use derivative::Derivative;
 use itertools::Itertools;
-use perspective_client::ColumnType;
-use perspective_client::config::Expression;
+use perspective_client::config::{ColumnType, Expression};
 use perspective_client::utils::PerspectiveResultExt;
 use yew::{Callback, Component, Html, Properties, html};
 

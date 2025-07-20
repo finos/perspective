@@ -12,6 +12,7 @@
 
 use std::collections::HashMap;
 use std::error::Error;
+use std::ops::Deref;
 use std::sync::Arc;
 
 use async_lock::{Mutex, RwLock};
@@ -31,7 +32,7 @@ use crate::proto::{
 use crate::table::{Table, TableInitOptions, TableOptions};
 use crate::table_data::{TableData, UpdateData};
 use crate::utils::*;
-use crate::view::ViewWindow;
+use crate::view::{OnUpdateData, ViewWindow};
 use crate::{OnUpdateMode, OnUpdateOptions, asyncfn, clone};
 
 /// Metadata about the engine runtime (such as total heap utilization).
@@ -66,9 +67,18 @@ pub struct SystemInfo {
     pub client_used: Option<u64>,
 }
 
-/// Metadata about what features are supported by the `Server` this `Client`
-/// is connected to.
-pub type Features = Arc<GetFeaturesResp>;
+/// Metadata about what features are supported by the `Server` to which this
+/// [`Client`] connects.
+#[derive(Clone, Default)]
+pub struct Features(Arc<GetFeaturesResp>);
+
+impl Deref for Features {
+    type Target = GetFeaturesResp;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl GetFeaturesResp {
     pub fn default_op(&self, col_type: ColumnType) -> Option<&str> {
@@ -86,6 +96,7 @@ type Box2Fn<I, J, O> = Box<dyn Fn(I, J) -> O + Send + Sync + 'static>;
 type Subscriptions<C> = Arc<RwLock<HashMap<u32, C>>>;
 type OnErrorCallback =
     Box2Fn<ClientError, Option<ReconnectCallback>, BoxFuture<'static, Result<(), ClientError>>>;
+
 type OnceCallback = Box<dyn FnOnce(Response) -> ClientResult<()> + Send + Sync + 'static>;
 type SendCallback = Arc<
     dyn for<'a> Fn(&'a Request) -> BoxFuture<'a, Result<(), Box<dyn Error + Send + Sync>>>
@@ -94,6 +105,7 @@ type SendCallback = Arc<
         + 'static,
 >;
 
+/// The client-side representation of a connection to a `Server`.
 pub trait ClientHandler: Clone + Send + Sync + 'static {
     fn send_request(
         &self,
@@ -136,8 +148,27 @@ mod name_registry {
 /// Calling this function from a [`Client::on_error`] closure should run the
 /// (implementation specific) client reconnect logic, e.g. rebindign a
 /// websocket.
-pub type ReconnectCallback =
-    Arc<dyn Fn() -> LocalBoxFuture<'static, Result<(), Box<dyn Error>>> + Send + Sync>;
+#[derive(Clone)]
+#[allow(clippy::type_complexity)]
+pub struct ReconnectCallback(
+    Arc<dyn Fn() -> LocalBoxFuture<'static, Result<(), Box<dyn Error>>> + Send + Sync>,
+);
+
+impl Deref for ReconnectCallback {
+    type Target = dyn Fn() -> LocalBoxFuture<'static, Result<(), Box<dyn Error>>> + Send + Sync;
+
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+
+impl ReconnectCallback {
+    pub fn new(
+        f: impl Fn() -> LocalBoxFuture<'static, Result<(), Box<dyn Error>>> + Send + Sync + 'static,
+    ) -> Self {
+        ReconnectCallback(Arc::new(f))
+    }
+}
 
 /// An instance of a [`Client`] is a connection to a single
 /// `perspective_server::Server`, whether locally in-memory or remote over some
@@ -271,10 +302,10 @@ impl Client {
             callback(
                 message.clone(),
                 reconnect.clone().map(move |f| {
-                    Arc::new(move || {
+                    ReconnectCallback(Arc::new(move || {
                         clone!(f);
                         Box::pin(async move { Ok(f().await?) }) as LocalBoxFuture<'static, _>
-                    }) as ReconnectCallback
+                    }))
                 }),
             )
         }));
@@ -333,10 +364,10 @@ impl Client {
             client_req: Some(ClientReq::GetFeaturesReq(GetFeaturesReq {})),
         };
 
-        *self.features.lock().await = Some(Arc::new(match self.oneshot(&msg).await? {
+        *self.features.lock().await = Some(Features(Arc::new(match self.oneshot(&msg).await? {
             ClientResp::GetFeaturesResp(features) => Ok(features),
             resp => Err(resp),
-        }?));
+        }?)));
 
         Ok(())
     }
@@ -412,13 +443,15 @@ impl Client {
     }
 
     pub(crate) fn get_features(&self) -> ClientResult<Features> {
-        Ok(self
+        let features = self
             .features
             .try_lock()
             .ok_or(ClientError::NotInitialized)?
             .as_ref()
             .ok_or(ClientError::NotInitialized)?
-            .clone())
+            .clone();
+
+        Ok(features)
     }
 
     /// Creates a new [`Table`] from either a _schema_ or _data_.
@@ -487,15 +520,11 @@ impl Client {
                 .await?;
 
             let table_ = table.clone();
-            let callback = asyncfn!(
-                table_,
-                update,
-                async move |update: crate::proto::ViewOnUpdateResp| {
-                    let update = UpdateData::Arrow(update.delta.expect("Malformed message").into());
-                    let options = crate::UpdateOptions::default();
-                    table_.update(update, options).await.unwrap_or_log();
-                }
-            );
+            let callback = asyncfn!(table_, update, async move |update: OnUpdateData| {
+                let update = UpdateData::Arrow(update.delta.expect("Malformed message").into());
+                let options = crate::UpdateOptions::default();
+                table_.update(update, options).await.unwrap_or_log();
+            });
 
             let options = OnUpdateOptions {
                 mode: Some(OnUpdateMode::Row),

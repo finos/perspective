@@ -17,8 +17,8 @@ use std::sync::Arc;
 
 use futures::FutureExt;
 use perspective_client::{
-    Client, DeleteOptions, OnUpdateMode, OnUpdateOptions, Table, TableData, TableInitOptions,
-    TableReadFormat, UpdateData, UpdateOptions, View, ViewOnUpdateResp, ViewWindow,
+    Client, DeleteOptions, OnUpdateData, OnUpdateMode, OnUpdateOptions, Table, TableData,
+    TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View, ViewWindow,
     assert_table_api, assert_view_api, asyncfn,
 };
 use pyo3::exceptions::PyValueError;
@@ -776,7 +776,7 @@ impl AsyncView {
     ///   rows. Otherwise `delta` will be [`Option::None`].
     #[pyo3(signature=(callback, mode=None))]
     pub async fn on_update(&self, callback: Py<PyAny>, mode: Option<String>) -> PyResult<u32> {
-        let callback = move |x: ViewOnUpdateResp| {
+        let callback = move |x: OnUpdateData| {
             let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
             async move {
                 let aggregate_errors: PyResult<()> = {

@@ -204,7 +204,7 @@ impl Session {
 
         self.borrow_mut().error = Some(TableErrorState(
             err.clone(),
-            Some(Arc::new(move || {
+            Some(ReconnectCallback::new(move || {
                 clone!(poll_loop);
                 Box::pin(async move {
                     poll_loop.poll(()).await;
@@ -562,7 +562,7 @@ impl Session {
 
             self.borrow_mut().error = Some(TableErrorState(
                 err.clone(),
-                Some(Arc::new(move || {
+                Some(ReconnectCallback::new(move || {
                     clone!(poll_loop);
                     Box::pin(async move {
                         poll_loop.poll(()).await;

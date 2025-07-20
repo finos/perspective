@@ -14,7 +14,7 @@ use std::collections::HashMap;
 use std::future::Future;
 
 #[cfg(doc)]
-use perspective_client::{Schema, TableInitOptions, UpdateOptions, config::ViewConfigUpdate};
+use perspective_client::{TableInitOptions, UpdateOptions, config::ViewConfigUpdate};
 use perspective_client::{assert_table_api, assert_view_api};
 use pyo3::exceptions::PyTypeError;
 use pyo3::marker::Ungil;

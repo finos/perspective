@@ -14,7 +14,6 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 use chrono::{Datelike, NaiveDate, TimeZone, Utc};
-use perspective_client::ColumnType;
 use perspective_client::config::*;
 use perspective_client::utils::PerspectiveResultExt;
 use wasm_bindgen::JsCast;
@@ -490,7 +489,7 @@ impl Component for FilterColumn {
             },
         };
 
-        let final_col_type = col_type.unwrap_or(perspective_client::ColumnType::Integer);
+        let final_col_type = col_type.unwrap_or(ColumnType::Integer);
 
         html! {
             <div

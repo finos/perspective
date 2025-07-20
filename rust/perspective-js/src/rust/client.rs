@@ -259,7 +259,7 @@ impl Client {
                     let reconnect = reconnect.clone();
                     future_to_promise(async move {
                         if let Some(f) = reconnect {
-                            f().await.map_err(|e| JsValue::from(format!("A {e}")))?;
+                            (*f)().await.map_err(|e| JsValue::from(format!("A {e}")))?;
                         }
 
                         Ok(JsValue::UNDEFINED)

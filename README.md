@@ -41,10 +41,23 @@ applications.
 
 -   [Project Site](https://perspective.finos.org/)
 -   [User Guide](https://perspective.finos.org/guide/)
--   [`@finos/perspective`, JavaScript Client API](https://docs.rs/perspective-js/latest/perspective_js/)
--   [`@finos/perspective-viewer`, JavaScript UI API](https://docs.rs/perspective-viewer/latest/perspective_viewer/)
--   [`perspective-python`, Python API](https://docs.rs/perspective-python/latest/perspective_python/)
--   [`perspective`, Rust API](https://docs.rs/perspective/latest/perspective/)
+-   Python API
+    -   [`perspective`](https://perspective.finos.org/python/)
+    -   [`perspective.widget`](https://perspective.finos.org/python/perspective/widget.html)
+    -   [`perspective.handlers.aiohttp`](https://perspective.finos.org/python/perspective/handlers/aiohttp.htm)
+    -   [`perspective.handlers.starlette`](https://perspective.finos.org/python/perspective/handlers/starlett.htm)
+    -   [`perspective.handlers.tornado`](https://perspective.finos.org/python/perspective/handlers/tornado.htm)
+-   JavaScript API
+    -   [`@finos/perspective` Browser](https://perspective.finos.org/browser/modules/src_ts_perspective.browser.ts.html)
+    -   [`@finos/perspective` Node.js](https://perspective.finos.org/node/modules/src_ts_perspective.node.ts.html)
+    -   [`@finos/perspective-viewer`](https://perspective.finos.org/viewer/modules/perspective-viewer.html)
+-   Rust API
+    -   [`perspective`](https://docs.rs/perspective/latest/perspective/)
+    -   [`perspective-client`](https://docs.rs/perspective-client/latest/perspective_client/)
+    -   [`perspective-server`](https://docs.rs/perspective-server/latest/perspective_server/)
+    -   [`perspective-python`](https://docs.rs/perspective-python/latest/perspective_python/)
+    -   [`perspective-js`](https://docs.rs/perspective-js/latest/perspective_js/)
+    -   [`perspective-viewer`](https://docs.rs/perspective-viewer/latest/perspective_viewer/)
 
 ### Examples
 

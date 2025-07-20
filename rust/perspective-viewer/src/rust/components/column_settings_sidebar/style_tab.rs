@@ -14,7 +14,8 @@ pub mod stub;
 mod symbol;
 
 use itertools::Itertools;
-use perspective_client::{ColumnType, clone};
+use perspective_client::clone;
+use perspective_client::config::ColumnType;
 use perspective_js::utils::*;
 use yew::{Callback, Html, Properties, function_component, html};
 

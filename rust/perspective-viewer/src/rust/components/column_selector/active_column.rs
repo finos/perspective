@@ -12,7 +12,6 @@
 
 use std::collections::HashSet;
 
-use perspective_client::ColumnType;
 use perspective_client::config::*;
 use perspective_client::utils::PerspectiveResultExt;
 use web_sys::*;

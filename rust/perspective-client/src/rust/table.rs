@@ -30,6 +30,10 @@ use crate::view::View;
 
 pub type Schema = HashMap<String, ColumnType>;
 
+/// The format to interpret data preovided to [`Client::table`].
+///
+/// When serialized, these values are `"csv"`, `"json"`, `"columns"`, `"arrow"`
+/// and `"ndjson"`.
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, TS)]
 pub enum TableReadFormat {
     #[serde(rename = "csv")]
@@ -133,24 +137,41 @@ impl From<TableInitOptions> for TableOptions {
     }
 }
 
+/// Options for [`Table::delete`].
 #[derive(Clone, Debug, Default, Deserialize, TS)]
 pub struct DeleteOptions {
     pub lazy: bool,
 }
 
+/// Options for [`Table::update`].
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 pub struct UpdateOptions {
     pub port_id: Option<u32>,
     pub format: Option<TableReadFormat>,
 }
 
+/// Result of a call to [`Table::validate_expressions`], containing a schema
+/// for valid expressions and error messages for invalid ones.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ValidateExpressionsData {
-    pub expression_schema: HashMap<String, ColumnType>,
+pub struct ExprValidationResult {
+    pub expression_schema: Schema,
     pub errors: HashMap<String, table_validate_expr_resp::ExprValidationError>,
     pub expression_alias: HashMap<String, String>,
 }
 
+/// [`Table`] is Perspective's columnar data frame, analogous to a Pandas/Polars
+/// `DataFrame` or Apache Arrow, supporting append & in-place updates, removal
+/// by index, and update notifications.
+///
+/// A [`Table`] contains columns, each of which have a unique name, are strongly
+/// and consistently typed, and contains rows of data conforming to the column's
+/// type. Each column in a [`Table`] must have the same number of rows, though
+/// not every row must contain data; null-values are used to indicate missing
+/// values in the dataset. The schema of a [`Table`] is _immutable after
+/// creation_, which means the column names and data types cannot be changed
+/// after the [`Table`] has been created. Columns cannot be added or deleted
+/// after creation either, but a [`View`] can be used to select an arbitrary set
+/// of columns from the [`Table`].
 #[derive(Clone)]
 pub struct Table {
     name: String,
@@ -322,7 +343,7 @@ impl Table {
     ///
     /// Note that all [`Table`] columns are _nullable_, regardless of the data
     /// type.
-    pub async fn schema(&self) -> ClientResult<HashMap<String, ColumnType>> {
+    pub async fn schema(&self) -> ClientResult<Schema> {
         let msg = self.client_message(ClientReq::TableSchemaReq(TableSchemaReq {}));
         match self.client.oneshot(&msg).await? {
             ClientResp::TableSchemaResp(TableSchemaResp { schema }) => Ok(schema
@@ -475,13 +496,13 @@ impl Table {
     pub async fn validate_expressions(
         &self,
         expressions: Expressions,
-    ) -> ClientResult<ValidateExpressionsData> {
+    ) -> ClientResult<ExprValidationResult> {
         let msg = self.client_message(ClientReq::TableValidateExprReq(TableValidateExprReq {
             column_to_expr: expressions.0,
         }));
 
         match self.client.oneshot(&msg).await? {
-            ClientResp::TableValidateExprResp(result) => Ok(ValidateExpressionsData {
+            ClientResp::TableValidateExprResp(result) => Ok(ExprValidationResult {
                 errors: result.errors,
                 expression_alias: result.expression_alias,
                 expression_schema: result

@@ -11,6 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -29,11 +30,18 @@ use crate::proto::*;
 use crate::table::Table;
 pub use crate::utils::*;
 
+/// Options for [`View::on_update`].
 #[derive(Default, Debug, Deserialize, TS)]
 pub struct OnUpdateOptions {
     pub mode: Option<OnUpdateMode>,
 }
 
+/// The update mode for [`View::on_update`].
+///
+/// `Row` mode calculates and provides the update batch new rows/columns as an
+/// Apache Arrow to the callback provided to [`View::on_update`]. This allows
+/// incremental updates if your callbakc can read this format, but should be
+/// disabled otherwise.
 #[derive(Default, Debug, Deserialize, TS)]
 pub enum OnUpdateMode {
     #[default]
@@ -61,6 +69,10 @@ pub struct Dimensions {
     pub num_table_columns: usize,
 }
 
+/// Options for serializing a window of data from a [`View`].
+///
+/// Some fields of [`ViewWindow`] are only applicable to specific methods of
+/// [`View`].
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS, PartialEq)]
 pub struct ViewWindow {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -84,9 +96,11 @@ pub struct ViewWindow {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub leaves_only: Option<bool>,
 
+    /// Only impacts [`View::to_csv`]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatted: Option<bool>,
 
+    /// Only impacts [`View::to_arrow`]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub compression: Option<String>,
 }
@@ -99,6 +113,19 @@ impl From<ViewWindow> for ViewPort {
             end_row: window.end_row.map(|x| x.ceil() as u32),
             end_col: window.end_col.map(|x| x.ceil() as u32),
         }
+    }
+}
+
+/// Rows updated and port ID corresponding to an update batch, provided to the
+/// callback argument to [`View::on_update`] with the "rows" mode.
+#[derive(TS)]
+pub struct OnUpdateData(crate::proto::ViewOnUpdateResp);
+
+impl Deref for OnUpdateData {
+    type Target = crate::proto::ViewOnUpdateResp;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -443,7 +470,7 @@ impl View {
     ///   rows. Otherwise `delta` will be [`Option::None`].
     pub async fn on_update<T, U>(&self, on_update: T, options: OnUpdateOptions) -> ClientResult<u32>
     where
-        T: Fn(ViewOnUpdateResp) -> U + Send + Sync + 'static,
+        T: Fn(OnUpdateData) -> U + Send + Sync + 'static,
         U: Future<Output = ()> + Send + 'static,
     {
         let on_update = Arc::new(on_update);
@@ -452,7 +479,7 @@ impl View {
             async move {
                 match resp.client_resp {
                     Some(ClientResp::ViewOnUpdateResp(resp)) => {
-                        on_update(resp).await;
+                        on_update(OnUpdateData(resp)).await;
                         Ok(())
                     },
                     resp => Err(resp.into()),

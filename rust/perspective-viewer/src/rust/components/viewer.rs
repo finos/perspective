@@ -13,7 +13,7 @@
 use std::rc::Rc;
 
 use futures::channel::oneshot::*;
-use perspective_client::ColumnType;
+use perspective_client::config::ColumnType;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
