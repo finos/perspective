@@ -17,8 +17,10 @@ function lint(dir) {
     execSync(`clang-format -i -style=file ${dir}`, { stdio: "inherit" });
 }
 
-lint(sh.path`./cpp/perspective/src/cpp/*.cpp`);
-lint(sh.path`./cpp/perspective/src/include/perspective/*.h`);
+lint(sh.path`./rust/perspective-server/cpp/perspective/src/cpp/*.cpp`);
+lint(
+    sh.path`./rust/perspective-server/cpp/perspective/src/include/perspective/*.h`
+);
 lint(sh.path`./python/perspective/perspective/src/*.cpp`);
 lint(sh.path`./python/perspective/perspective/include/perspective/*.h`);
 lint(sh.path`./python/perspective/perspective/include/perspective/python/*.h`);

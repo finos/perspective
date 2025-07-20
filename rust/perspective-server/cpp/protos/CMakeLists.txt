@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(PSP_PROTO_PATH "Path to the perspective proto directory" "")
+
 if(NOT DEFINED psp_build_message)
     function(psp_build_message message)
         set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${message}")
@@ -25,7 +27,7 @@ endif()
 
 psp_build_dep("protobuf" "${PSP_CMAKE_MODULE_PATH}/protobuf.txt.in")
 
-set(PROTO_FILES perspective.proto)
+set(PROTO_FILES "${PSP_PROTO_PATH}/perspective.proto")
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 add_library(protos STATIC ${PROTO_SRCS} ${PROTO_HDRS})
