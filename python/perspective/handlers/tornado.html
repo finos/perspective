@@ -62,100 +62,294 @@
                     <h1 class="modulename">
 <a href="./../../perspective.html">perspective</a><wbr>.handlers<wbr>.tornado    </h1>
 
-                
+                        <div class="docstring"><p>Perspective ships with a pre-built Tornado handler that makes integration with
+<code>tornado.websockets</code> extremely easy. This allows you to run an instance of
+<code>Perspective</code> on a server using Python, open a websocket to a <code>Table</code>, and
+access the <code>Table</code> in JavaScript and through <code>&lt;perspective-viewer&gt;</code>. All
+instructions sent to the <code>Table</code> are processed in Python, which executes the
+commands, and returns its output through the websocket back to Javascript.</p>
+
+<h3 id="python-setup">Python setup</h3>
+
+<p>To use the handler, we need to first have a <code>Server</code>, a <code>Client</code> and an instance
+of a <code>Table</code>:</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="n">SERVER</span> <span class="o">=</span> <span class="n">Server</span><span class="p">()</span>
+<span class="n">CLIENT</span> <span class="o">=</span> <span class="n">SERVER</span><span class="o">.</span><span class="n">new_local_client</span><span class="p">()</span>
+</code></pre>
+</div>
+
+<p>Once the server has been created, create a <code>Table</code> instance with a name. The
+name that you host the table under is important — it acts as a unique accessor
+on the JavaScript side, which will look for a Table hosted at the websocket with
+the name you specify.</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="n">TABLE</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;data_source_one&quot;</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>After the server and table setup is complete, create a websocket endpoint and
+provide it a reference to <code><a href="#PerspectiveTornadoHandler">PerspectiveTornadoHandler</a></code>. You must provide the
+configuration object in the route tuple, and it must contain
+<code>"perspective_server"</code>, which is a reference to the <code>Server</code> you just created.</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn"><a href="">perspective.handlers.tornado</a></span><span class="w"> </span><span class="kn">import</span> <span class="n">PerspectiveTornadoHandler</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">tornado</span><span class="o">.</span><span class="n">web</span><span class="o">.</span><span class="n">Application</span><span class="p">([</span>
+
+    <span class="c1"># ... other handlers ...</span>
+
+    <span class="c1"># Create a websocket endpoint that the client JavaScript can access</span>
+    <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;/websocket&quot;</span><span class="p">,</span> <span class="n">PerspectiveTornadoHandler</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;perspective_server&quot;</span><span class="p">:</span> <span class="n">SERVER</span><span class="p">,</span> <span class="s2">&quot;check_origin&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+<span class="p">])</span>
+</code></pre>
+</div>
+
+<p>Optionally, the configuration object can also include <code>check_origin</code>, a boolean
+that determines whether the websocket accepts requests from origins other than
+where the server is hosted. See
+<a href="https://www.tornadoweb.org/en/stable/websocket.html#tornado.websocket.WebSocketHandler.check_origin">Tornado docs</a>
+for more details.</p>
+
+<h3 id="javascript-setup">JavaScript setup</h3>
+
+<p>Once the server is up and running, you can access the Table you just hosted
+using <code>perspective.websocket</code> and <code>open_table()</code>. First, create a client that
+expects a Perspective server to accept connections at the specified URL:</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">websocket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">perspective</span><span class="p">.</span><span class="nx">websocket</span><span class="p">(</span><span class="s2">&quot;ws://localhost:8888/websocket&quot;</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>Next open the <code>Table</code> we created on the server by name:</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">websocket</span><span class="p">.</span><span class="nx">open_table</span><span class="p">(</span><span class="s2">&quot;data_source_one&quot;</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p><code>table</code> is a proxy for the <code>Table</code> we created on the server. All operations that
+are possible through the JavaScript API are possible on the Python API as well,
+thus calling <code>view()</code>, <code>schema()</code>, <code>update()</code> etc. on <code>const table</code> will pass
+those operations to the Python <code>Table</code>, execute the commands, and return the
+result back to JavaScript. Similarly, providing this <code>table</code> to a
+<code>&lt;perspective-viewer&gt;</code> instance will allow virtual rendering:</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="k">await</span><span class="w"> </span><span class="nx">viewer</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="nx">table</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p><code>perspective.websocket</code> expects a Websocket URL where it will send instructions.
+When <code>open_table</code> is called, the name to a hosted Table is passed through, and a
+request is sent through the socket to fetch the Table. No actual <code>Table</code>
+instance is passed inbetween the runtimes; all instructions are proxied through
+websockets.</p>
+
+<p>This provides for great flexibility — while <code>Perspective.js</code> is full of
+features, browser WebAssembly runtimes currently have some performance
+restrictions on memory and CPU feature utilization, and the architecture in
+general suffers when the dataset itself is too large to download to the client
+in full.</p>
+
+<p>The Python runtime does not suffer from memory limitations, utilizes Apache
+Arrow internal threadpools for threading and parallel processing, and generates
+architecture optimized code, which currently makes it more suitable as a
+server-side runtime than <code>node.js</code>.</p>
+</div>
+
                         <input id="mod-tornado-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
                         <label class="view-source-button" for="mod-tornado-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="c1">#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓</span>
-</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="c1">#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃</span>
-</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="c1">#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="c1">#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃</span>
-</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="c1">#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃</span>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="c1">#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="c1">#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="c1">#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="c1">#  ┃ This file is part of the Perspective library, distributed under the terms ┃</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="c1">#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="c1">#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">tornado.websocket</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebSocketHandler</span><span class="p">,</span> <span class="n">WebSocketClosedError</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">tornado.ioloop</span><span class="w"> </span><span class="kn">import</span> <span class="n">IOLoop</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">perspective</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="k">class</span><span class="w"> </span><span class="nc">PerspectiveTornadoHandler</span><span class="p">(</span><span class="n">WebSocketHandler</span><span class="p">):</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;`PerspectiveTornadoHandler` is a `perspective.Server` API as a `tornado`</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a><span class="sd">    websocket handler.</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a><span class="sd">    Use it inside `tornado` routing to create a `perspective.Server` that can</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="sd">    connect to a JavaScript (Wasm) `Client`, providing a virtual interface to</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">    the `Server`&#39;s resources for e.g. `&lt;perspective-viewer&gt;`.</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>
-</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">    You may need to increase the `websocket_max_message_size` kwarg</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">    to the `tornado.web.Application` constructor, as well as provide the</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">    `max_buffer_size` optional arg, for large datasets.</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="sd">    # Arguments</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">    -   `loop`: An optional `IOLoop` instance to use for scheduling IO calls,</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">        defaults to `IOLoop.current()`.</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a><span class="sd">    -   `executor`: An optional executor for scheduling `perspective.Server`</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="sd">        message processing calls from websocket `Client`s.</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="sd">    # Examples</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd">    &gt;&gt;&gt; server = psp.Server()</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="sd">    &gt;&gt;&gt; client = server.new_local_client()</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">    &gt;&gt;&gt; client.table(pd.read_csv(&quot;superstore.csv&quot;), name=&quot;data_source_one&quot;)</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd">    &gt;&gt;&gt; app = tornado.web.Application([</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">    ...     (r&quot;/&quot;, MainHandler),</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">    ...     (r&quot;/websocket&quot;, PerspectiveTornadoHandler, {</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">    ...         &quot;perspective_server&quot;: server,</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="sd">    ...     })</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">    ... ])</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>        <span class="k">return</span> <span class="kc">True</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>        <span class="n">perspective_server</span><span class="o">=</span><span class="n">perspective</span><span class="o">.</span><span class="n">GLOBAL_SERVER</span><span class="p">,</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>        <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>        <span class="n">executor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>        <span class="n">max_buffer_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>    <span class="p">):</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">perspective_server</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">IOLoop</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">executor</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>        <span class="k">if</span> <span class="n">max_buffer_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">max_buffer_size</span> <span class="o">=</span> <span class="n">max_buffer_size</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>            <span class="k">try</span><span class="p">:</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">write_message</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a>            <span class="k">except</span> <span class="n">WebSocketClosedError</span><span class="p">:</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>
-</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">send_response</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>
-</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">new_session</span><span class="p">(</span><span class="n">send_response</span><span class="p">)</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a>
-</span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos">79</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos">80</span></a>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos">81</span></a>
-</span><span id="L-82"><a href="#L-82"><span class="linenos">82</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos">83</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos">84</span></a>            <span class="k">return</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos">85</span></a>
-</span><span id="L-86"><a href="#L-86"><span class="linenos">86</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos">87</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos">88</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos">89</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="c1">#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a><span class="c1">#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="c1">#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a><span class="c1">#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a><span class="c1">#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="c1">#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="c1">#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="c1">#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="c1">#  ┃ This file is part of the Perspective library, distributed under the terms ┃</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="c1">#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="c1">#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">tornado.websocket</span><span class="w"> </span><span class="kn">import</span> <span class="n">WebSocketHandler</span><span class="p">,</span> <span class="n">WebSocketClosedError</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">tornado.ioloop</span><span class="w"> </span><span class="kn">import</span> <span class="n">IOLoop</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">perspective</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="s2">Perspective ships with a pre-built Tornado handler that makes integration with</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="s2">`tornado.websockets` extremely easy. This allows you to run an instance of</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="s2">`Perspective` on a server using Python, open a websocket to a `Table`, and</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="s2">access the `Table` in JavaScript and through `&lt;perspective-viewer&gt;`. All</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="s2">instructions sent to the `Table` are processed in Python, which executes the</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="s2">commands, and returns its output through the websocket back to Javascript.</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>
+</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a><span class="s2">### Python setup</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>
+</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a><span class="s2">To use the handler, we need to first have a `Server`, a `Client` and an instance</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a><span class="s2">of a `Table`:</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a><span class="s2">```python</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="s2">SERVER = Server()</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="s2">CLIENT = SERVER.new_local_client()</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="s2">```</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="s2">Once the server has been created, create a `Table` instance with a name. The</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="s2">name that you host the table under is important — it acts as a unique accessor</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="s2">on the JavaScript side, which will look for a Table hosted at the websocket with</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="s2">the name you specify.</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="s2">```python</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="s2">TABLE = client.table(data, name=&quot;data_source_one&quot;)</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="s2">```</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="s2">After the server and table setup is complete, create a websocket endpoint and</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="s2">provide it a reference to `PerspectiveTornadoHandler`. You must provide the</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="s2">configuration object in the route tuple, and it must contain</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="s2">`&quot;perspective_server&quot;`, which is a reference to the `Server` you just created.</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="s2">```python</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="s2">from perspective.handlers.tornado import PerspectiveTornadoHandler</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="s2">app = tornado.web.Application([</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="s2">    # ... other handlers ...</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="s2">    # Create a websocket endpoint that the client JavaScript can access</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="s2">    (r&quot;/websocket&quot;, PerspectiveTornadoHandler, {&quot;perspective_server&quot;: SERVER, &quot;check_origin&quot;: True})</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="s2">])</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="s2">```</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="s2">Optionally, the configuration object can also include `check_origin`, a boolean</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a><span class="s2">that determines whether the websocket accepts requests from origins other than</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="s2">where the server is hosted. See</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="s2">[Tornado docs](https://www.tornadoweb.org/en/stable/websocket.html#tornado.websocket.WebSocketHandler.check_origin)</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="s2">for more details.</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="s2">### JavaScript setup</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="s2">Once the server is up and running, you can access the Table you just hosted</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="s2">using `perspective.websocket` and `open_table()`. First, create a client that</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="s2">expects a Perspective server to accept connections at the specified URL:</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="s2">```javascript</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="s2">const websocket = await perspective.websocket(&quot;ws://localhost:8888/websocket&quot;);</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="s2">```</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="s2">Next open the `Table` we created on the server by name:</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="s2">```javascript</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="s2">const table = await websocket.open_table(&quot;data_source_one&quot;);</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="s2">```</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="s2">`table` is a proxy for the `Table` we created on the server. All operations that</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="s2">are possible through the JavaScript API are possible on the Python API as well,</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a><span class="s2">thus calling `view()`, `schema()`, `update()` etc. on `const table` will pass</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a><span class="s2">those operations to the Python `Table`, execute the commands, and return the</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a><span class="s2">result back to JavaScript. Similarly, providing this `table` to a</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a><span class="s2">`&lt;perspective-viewer&gt;` instance will allow virtual rendering:</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="s2">```javascript</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="s2">await viewer.load(table);</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="s2">```</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="s2">`perspective.websocket` expects a Websocket URL where it will send instructions.</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="s2">When `open_table` is called, the name to a hosted Table is passed through, and a</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="s2">request is sent through the socket to fetch the Table. No actual `Table`</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a><span class="s2">instance is passed inbetween the runtimes; all instructions are proxied through</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="s2">websockets.</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="s2">This provides for great flexibility — while `Perspective.js` is full of</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="s2">features, browser WebAssembly runtimes currently have some performance</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="s2">restrictions on memory and CPU feature utilization, and the architecture in</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a><span class="s2">general suffers when the dataset itself is too large to download to the client</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="s2">in full.</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="s2">The Python runtime does not suffer from memory limitations, utilizes Apache</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="s2">Arrow internal threadpools for threading and parallel processing, and generates</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a><span class="s2">architecture optimized code, which currently makes it more suitable as a</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a><span class="s2">server-side runtime than `node.js`.</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="k">class</span><span class="w"> </span><span class="nc">PerspectiveTornadoHandler</span><span class="p">(</span><span class="n">WebSocketHandler</span><span class="p">):</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;`PerspectiveTornadoHandler` is a `perspective.Server` API as a `tornado`</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="sd">    websocket handler.</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="sd">    Use it inside `tornado` routing to create a `perspective.Server` that can</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="sd">    connect to a JavaScript (Wasm) `Client`, providing a virtual interface to</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">    the `Server`&#39;s resources for e.g. `&lt;perspective-viewer&gt;`.</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">    You may need to increase the `websocket_max_message_size` kwarg</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    to the `tornado.web.Application` constructor, as well as provide the</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="sd">    `max_buffer_size` optional arg, for large datasets.</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">    # Arguments</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="sd">    -   `loop`: An optional `IOLoop` instance to use for scheduling IO calls,</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a><span class="sd">        defaults to `IOLoop.current()`.</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">    -   `executor`: An optional executor for scheduling `perspective.Server`</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">        message processing calls from websocket `Client`s.</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">    # Examples</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">    &gt;&gt;&gt; server = psp.Server()</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="sd">    &gt;&gt;&gt; client = server.new_local_client()</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a><span class="sd">    &gt;&gt;&gt; client.table(pd.read_csv(&quot;superstore.csv&quot;), name=&quot;data_source_one&quot;)</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="sd">    &gt;&gt;&gt; app = tornado.web.Application([</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="sd">    ...     (r&quot;/&quot;, MainHandler),</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">    ...     (r&quot;/websocket&quot;, PerspectiveTornadoHandler, {</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">    ...         &quot;perspective_server&quot;: server,</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="sd">    ...     })</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="sd">    ... ])</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>        <span class="n">perspective_server</span><span class="o">=</span><span class="n">perspective</span><span class="o">.</span><span class="n">GLOBAL_SERVER</span><span class="p">,</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>        <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>        <span class="n">executor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>        <span class="n">max_buffer_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="p">):</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">perspective_server</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">IOLoop</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">executor</span>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>        <span class="k">if</span> <span class="n">max_buffer_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">max_buffer_size</span> <span class="o">=</span> <span class="n">max_buffer_size</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">write_message</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>            <span class="k">except</span> <span class="n">WebSocketClosedError</span><span class="p">:</span>
+</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">send_response</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">new_session</span><span class="p">(</span><span class="n">send_response</span><span class="p">)</span>
+</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>
+</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
+</span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a>
+</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a>            <span class="k">return</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -171,78 +365,78 @@
 
     </div>
     <a class="headerlink" href="#PerspectiveTornadoHandler"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler-19"><a href="#PerspectiveTornadoHandler-19"><span class="linenos">19</span></a><span class="k">class</span><span class="w"> </span><span class="nc">PerspectiveTornadoHandler</span><span class="p">(</span><span class="n">WebSocketHandler</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-20"><a href="#PerspectiveTornadoHandler-20"><span class="linenos">20</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;`PerspectiveTornadoHandler` is a `perspective.Server` API as a `tornado`</span>
-</span><span id="PerspectiveTornadoHandler-21"><a href="#PerspectiveTornadoHandler-21"><span class="linenos">21</span></a><span class="sd">    websocket handler.</span>
-</span><span id="PerspectiveTornadoHandler-22"><a href="#PerspectiveTornadoHandler-22"><span class="linenos">22</span></a>
-</span><span id="PerspectiveTornadoHandler-23"><a href="#PerspectiveTornadoHandler-23"><span class="linenos">23</span></a><span class="sd">    Use it inside `tornado` routing to create a `perspective.Server` that can</span>
-</span><span id="PerspectiveTornadoHandler-24"><a href="#PerspectiveTornadoHandler-24"><span class="linenos">24</span></a><span class="sd">    connect to a JavaScript (Wasm) `Client`, providing a virtual interface to</span>
-</span><span id="PerspectiveTornadoHandler-25"><a href="#PerspectiveTornadoHandler-25"><span class="linenos">25</span></a><span class="sd">    the `Server`&#39;s resources for e.g. `&lt;perspective-viewer&gt;`.</span>
-</span><span id="PerspectiveTornadoHandler-26"><a href="#PerspectiveTornadoHandler-26"><span class="linenos">26</span></a>
-</span><span id="PerspectiveTornadoHandler-27"><a href="#PerspectiveTornadoHandler-27"><span class="linenos">27</span></a><span class="sd">    You may need to increase the `websocket_max_message_size` kwarg</span>
-</span><span id="PerspectiveTornadoHandler-28"><a href="#PerspectiveTornadoHandler-28"><span class="linenos">28</span></a><span class="sd">    to the `tornado.web.Application` constructor, as well as provide the</span>
-</span><span id="PerspectiveTornadoHandler-29"><a href="#PerspectiveTornadoHandler-29"><span class="linenos">29</span></a><span class="sd">    `max_buffer_size` optional arg, for large datasets.</span>
-</span><span id="PerspectiveTornadoHandler-30"><a href="#PerspectiveTornadoHandler-30"><span class="linenos">30</span></a>
-</span><span id="PerspectiveTornadoHandler-31"><a href="#PerspectiveTornadoHandler-31"><span class="linenos">31</span></a><span class="sd">    # Arguments</span>
-</span><span id="PerspectiveTornadoHandler-32"><a href="#PerspectiveTornadoHandler-32"><span class="linenos">32</span></a>
-</span><span id="PerspectiveTornadoHandler-33"><a href="#PerspectiveTornadoHandler-33"><span class="linenos">33</span></a><span class="sd">    -   `loop`: An optional `IOLoop` instance to use for scheduling IO calls,</span>
-</span><span id="PerspectiveTornadoHandler-34"><a href="#PerspectiveTornadoHandler-34"><span class="linenos">34</span></a><span class="sd">        defaults to `IOLoop.current()`.</span>
-</span><span id="PerspectiveTornadoHandler-35"><a href="#PerspectiveTornadoHandler-35"><span class="linenos">35</span></a><span class="sd">    -   `executor`: An optional executor for scheduling `perspective.Server`</span>
-</span><span id="PerspectiveTornadoHandler-36"><a href="#PerspectiveTornadoHandler-36"><span class="linenos">36</span></a><span class="sd">        message processing calls from websocket `Client`s.</span>
-</span><span id="PerspectiveTornadoHandler-37"><a href="#PerspectiveTornadoHandler-37"><span class="linenos">37</span></a>
-</span><span id="PerspectiveTornadoHandler-38"><a href="#PerspectiveTornadoHandler-38"><span class="linenos">38</span></a><span class="sd">    # Examples</span>
-</span><span id="PerspectiveTornadoHandler-39"><a href="#PerspectiveTornadoHandler-39"><span class="linenos">39</span></a>
-</span><span id="PerspectiveTornadoHandler-40"><a href="#PerspectiveTornadoHandler-40"><span class="linenos">40</span></a><span class="sd">    &gt;&gt;&gt; server = psp.Server()</span>
-</span><span id="PerspectiveTornadoHandler-41"><a href="#PerspectiveTornadoHandler-41"><span class="linenos">41</span></a><span class="sd">    &gt;&gt;&gt; client = server.new_local_client()</span>
-</span><span id="PerspectiveTornadoHandler-42"><a href="#PerspectiveTornadoHandler-42"><span class="linenos">42</span></a><span class="sd">    &gt;&gt;&gt; client.table(pd.read_csv(&quot;superstore.csv&quot;), name=&quot;data_source_one&quot;)</span>
-</span><span id="PerspectiveTornadoHandler-43"><a href="#PerspectiveTornadoHandler-43"><span class="linenos">43</span></a><span class="sd">    &gt;&gt;&gt; app = tornado.web.Application([</span>
-</span><span id="PerspectiveTornadoHandler-44"><a href="#PerspectiveTornadoHandler-44"><span class="linenos">44</span></a><span class="sd">    ...     (r&quot;/&quot;, MainHandler),</span>
-</span><span id="PerspectiveTornadoHandler-45"><a href="#PerspectiveTornadoHandler-45"><span class="linenos">45</span></a><span class="sd">    ...     (r&quot;/websocket&quot;, PerspectiveTornadoHandler, {</span>
-</span><span id="PerspectiveTornadoHandler-46"><a href="#PerspectiveTornadoHandler-46"><span class="linenos">46</span></a><span class="sd">    ...         &quot;perspective_server&quot;: server,</span>
-</span><span id="PerspectiveTornadoHandler-47"><a href="#PerspectiveTornadoHandler-47"><span class="linenos">47</span></a><span class="sd">    ...     })</span>
-</span><span id="PerspectiveTornadoHandler-48"><a href="#PerspectiveTornadoHandler-48"><span class="linenos">48</span></a><span class="sd">    ... ])</span>
-</span><span id="PerspectiveTornadoHandler-49"><a href="#PerspectiveTornadoHandler-49"><span class="linenos">49</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="PerspectiveTornadoHandler-50"><a href="#PerspectiveTornadoHandler-50"><span class="linenos">50</span></a>
-</span><span id="PerspectiveTornadoHandler-51"><a href="#PerspectiveTornadoHandler-51"><span class="linenos">51</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-52"><a href="#PerspectiveTornadoHandler-52"><span class="linenos">52</span></a>        <span class="k">return</span> <span class="kc">True</span>
-</span><span id="PerspectiveTornadoHandler-53"><a href="#PerspectiveTornadoHandler-53"><span class="linenos">53</span></a>
-</span><span id="PerspectiveTornadoHandler-54"><a href="#PerspectiveTornadoHandler-54"><span class="linenos">54</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
-</span><span id="PerspectiveTornadoHandler-55"><a href="#PerspectiveTornadoHandler-55"><span class="linenos">55</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler-56"><a href="#PerspectiveTornadoHandler-56"><span class="linenos">56</span></a>        <span class="n">perspective_server</span><span class="o">=</span><span class="n">perspective</span><span class="o">.</span><span class="n">GLOBAL_SERVER</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler-57"><a href="#PerspectiveTornadoHandler-57"><span class="linenos">57</span></a>        <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler-58"><a href="#PerspectiveTornadoHandler-58"><span class="linenos">58</span></a>        <span class="n">executor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler-59"><a href="#PerspectiveTornadoHandler-59"><span class="linenos">59</span></a>        <span class="n">max_buffer_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler-60"><a href="#PerspectiveTornadoHandler-60"><span class="linenos">60</span></a>    <span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-61"><a href="#PerspectiveTornadoHandler-61"><span class="linenos">61</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">perspective_server</span>
-</span><span id="PerspectiveTornadoHandler-62"><a href="#PerspectiveTornadoHandler-62"><span class="linenos">62</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">IOLoop</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
-</span><span id="PerspectiveTornadoHandler-63"><a href="#PerspectiveTornadoHandler-63"><span class="linenos">63</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">executor</span>
-</span><span id="PerspectiveTornadoHandler-64"><a href="#PerspectiveTornadoHandler-64"><span class="linenos">64</span></a>        <span class="k">if</span> <span class="n">max_buffer_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler-65"><a href="#PerspectiveTornadoHandler-65"><span class="linenos">65</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">max_buffer_size</span> <span class="o">=</span> <span class="n">max_buffer_size</span>
-</span><span id="PerspectiveTornadoHandler-66"><a href="#PerspectiveTornadoHandler-66"><span class="linenos">66</span></a>
-</span><span id="PerspectiveTornadoHandler-67"><a href="#PerspectiveTornadoHandler-67"><span class="linenos">67</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-68"><a href="#PerspectiveTornadoHandler-68"><span class="linenos">68</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-69"><a href="#PerspectiveTornadoHandler-69"><span class="linenos">69</span></a>            <span class="k">try</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler-70"><a href="#PerspectiveTornadoHandler-70"><span class="linenos">70</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">write_message</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="PerspectiveTornadoHandler-71"><a href="#PerspectiveTornadoHandler-71"><span class="linenos">71</span></a>            <span class="k">except</span> <span class="n">WebSocketClosedError</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler-72"><a href="#PerspectiveTornadoHandler-72"><span class="linenos">72</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="PerspectiveTornadoHandler-73"><a href="#PerspectiveTornadoHandler-73"><span class="linenos">73</span></a>
-</span><span id="PerspectiveTornadoHandler-74"><a href="#PerspectiveTornadoHandler-74"><span class="linenos">74</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">send_response</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-75"><a href="#PerspectiveTornadoHandler-75"><span class="linenos">75</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-</span><span id="PerspectiveTornadoHandler-76"><a href="#PerspectiveTornadoHandler-76"><span class="linenos">76</span></a>
-</span><span id="PerspectiveTornadoHandler-77"><a href="#PerspectiveTornadoHandler-77"><span class="linenos">77</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">new_session</span><span class="p">(</span><span class="n">send_response</span><span class="p">)</span>
-</span><span id="PerspectiveTornadoHandler-78"><a href="#PerspectiveTornadoHandler-78"><span class="linenos">78</span></a>
-</span><span id="PerspectiveTornadoHandler-79"><a href="#PerspectiveTornadoHandler-79"><span class="linenos">79</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler-80"><a href="#PerspectiveTornadoHandler-80"><span class="linenos">80</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="PerspectiveTornadoHandler-81"><a href="#PerspectiveTornadoHandler-81"><span class="linenos">81</span></a>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
-</span><span id="PerspectiveTornadoHandler-82"><a href="#PerspectiveTornadoHandler-82"><span class="linenos">82</span></a>
-</span><span id="PerspectiveTornadoHandler-83"><a href="#PerspectiveTornadoHandler-83"><span class="linenos">83</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-84"><a href="#PerspectiveTornadoHandler-84"><span class="linenos">84</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler-85"><a href="#PerspectiveTornadoHandler-85"><span class="linenos">85</span></a>            <span class="k">return</span>
-</span><span id="PerspectiveTornadoHandler-86"><a href="#PerspectiveTornadoHandler-86"><span class="linenos">86</span></a>
-</span><span id="PerspectiveTornadoHandler-87"><a href="#PerspectiveTornadoHandler-87"><span class="linenos">87</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler-88"><a href="#PerspectiveTornadoHandler-88"><span class="linenos">88</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span id="PerspectiveTornadoHandler-89"><a href="#PerspectiveTornadoHandler-89"><span class="linenos">89</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler-90"><a href="#PerspectiveTornadoHandler-90"><span class="linenos">90</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler-114"><a href="#PerspectiveTornadoHandler-114"><span class="linenos">114</span></a><span class="k">class</span><span class="w"> </span><span class="nc">PerspectiveTornadoHandler</span><span class="p">(</span><span class="n">WebSocketHandler</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-115"><a href="#PerspectiveTornadoHandler-115"><span class="linenos">115</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;`PerspectiveTornadoHandler` is a `perspective.Server` API as a `tornado`</span>
+</span><span id="PerspectiveTornadoHandler-116"><a href="#PerspectiveTornadoHandler-116"><span class="linenos">116</span></a><span class="sd">    websocket handler.</span>
+</span><span id="PerspectiveTornadoHandler-117"><a href="#PerspectiveTornadoHandler-117"><span class="linenos">117</span></a>
+</span><span id="PerspectiveTornadoHandler-118"><a href="#PerspectiveTornadoHandler-118"><span class="linenos">118</span></a><span class="sd">    Use it inside `tornado` routing to create a `perspective.Server` that can</span>
+</span><span id="PerspectiveTornadoHandler-119"><a href="#PerspectiveTornadoHandler-119"><span class="linenos">119</span></a><span class="sd">    connect to a JavaScript (Wasm) `Client`, providing a virtual interface to</span>
+</span><span id="PerspectiveTornadoHandler-120"><a href="#PerspectiveTornadoHandler-120"><span class="linenos">120</span></a><span class="sd">    the `Server`&#39;s resources for e.g. `&lt;perspective-viewer&gt;`.</span>
+</span><span id="PerspectiveTornadoHandler-121"><a href="#PerspectiveTornadoHandler-121"><span class="linenos">121</span></a>
+</span><span id="PerspectiveTornadoHandler-122"><a href="#PerspectiveTornadoHandler-122"><span class="linenos">122</span></a><span class="sd">    You may need to increase the `websocket_max_message_size` kwarg</span>
+</span><span id="PerspectiveTornadoHandler-123"><a href="#PerspectiveTornadoHandler-123"><span class="linenos">123</span></a><span class="sd">    to the `tornado.web.Application` constructor, as well as provide the</span>
+</span><span id="PerspectiveTornadoHandler-124"><a href="#PerspectiveTornadoHandler-124"><span class="linenos">124</span></a><span class="sd">    `max_buffer_size` optional arg, for large datasets.</span>
+</span><span id="PerspectiveTornadoHandler-125"><a href="#PerspectiveTornadoHandler-125"><span class="linenos">125</span></a>
+</span><span id="PerspectiveTornadoHandler-126"><a href="#PerspectiveTornadoHandler-126"><span class="linenos">126</span></a><span class="sd">    # Arguments</span>
+</span><span id="PerspectiveTornadoHandler-127"><a href="#PerspectiveTornadoHandler-127"><span class="linenos">127</span></a>
+</span><span id="PerspectiveTornadoHandler-128"><a href="#PerspectiveTornadoHandler-128"><span class="linenos">128</span></a><span class="sd">    -   `loop`: An optional `IOLoop` instance to use for scheduling IO calls,</span>
+</span><span id="PerspectiveTornadoHandler-129"><a href="#PerspectiveTornadoHandler-129"><span class="linenos">129</span></a><span class="sd">        defaults to `IOLoop.current()`.</span>
+</span><span id="PerspectiveTornadoHandler-130"><a href="#PerspectiveTornadoHandler-130"><span class="linenos">130</span></a><span class="sd">    -   `executor`: An optional executor for scheduling `perspective.Server`</span>
+</span><span id="PerspectiveTornadoHandler-131"><a href="#PerspectiveTornadoHandler-131"><span class="linenos">131</span></a><span class="sd">        message processing calls from websocket `Client`s.</span>
+</span><span id="PerspectiveTornadoHandler-132"><a href="#PerspectiveTornadoHandler-132"><span class="linenos">132</span></a>
+</span><span id="PerspectiveTornadoHandler-133"><a href="#PerspectiveTornadoHandler-133"><span class="linenos">133</span></a><span class="sd">    # Examples</span>
+</span><span id="PerspectiveTornadoHandler-134"><a href="#PerspectiveTornadoHandler-134"><span class="linenos">134</span></a>
+</span><span id="PerspectiveTornadoHandler-135"><a href="#PerspectiveTornadoHandler-135"><span class="linenos">135</span></a><span class="sd">    &gt;&gt;&gt; server = psp.Server()</span>
+</span><span id="PerspectiveTornadoHandler-136"><a href="#PerspectiveTornadoHandler-136"><span class="linenos">136</span></a><span class="sd">    &gt;&gt;&gt; client = server.new_local_client()</span>
+</span><span id="PerspectiveTornadoHandler-137"><a href="#PerspectiveTornadoHandler-137"><span class="linenos">137</span></a><span class="sd">    &gt;&gt;&gt; client.table(pd.read_csv(&quot;superstore.csv&quot;), name=&quot;data_source_one&quot;)</span>
+</span><span id="PerspectiveTornadoHandler-138"><a href="#PerspectiveTornadoHandler-138"><span class="linenos">138</span></a><span class="sd">    &gt;&gt;&gt; app = tornado.web.Application([</span>
+</span><span id="PerspectiveTornadoHandler-139"><a href="#PerspectiveTornadoHandler-139"><span class="linenos">139</span></a><span class="sd">    ...     (r&quot;/&quot;, MainHandler),</span>
+</span><span id="PerspectiveTornadoHandler-140"><a href="#PerspectiveTornadoHandler-140"><span class="linenos">140</span></a><span class="sd">    ...     (r&quot;/websocket&quot;, PerspectiveTornadoHandler, {</span>
+</span><span id="PerspectiveTornadoHandler-141"><a href="#PerspectiveTornadoHandler-141"><span class="linenos">141</span></a><span class="sd">    ...         &quot;perspective_server&quot;: server,</span>
+</span><span id="PerspectiveTornadoHandler-142"><a href="#PerspectiveTornadoHandler-142"><span class="linenos">142</span></a><span class="sd">    ...     })</span>
+</span><span id="PerspectiveTornadoHandler-143"><a href="#PerspectiveTornadoHandler-143"><span class="linenos">143</span></a><span class="sd">    ... ])</span>
+</span><span id="PerspectiveTornadoHandler-144"><a href="#PerspectiveTornadoHandler-144"><span class="linenos">144</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="PerspectiveTornadoHandler-145"><a href="#PerspectiveTornadoHandler-145"><span class="linenos">145</span></a>
+</span><span id="PerspectiveTornadoHandler-146"><a href="#PerspectiveTornadoHandler-146"><span class="linenos">146</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-147"><a href="#PerspectiveTornadoHandler-147"><span class="linenos">147</span></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="PerspectiveTornadoHandler-148"><a href="#PerspectiveTornadoHandler-148"><span class="linenos">148</span></a>
+</span><span id="PerspectiveTornadoHandler-149"><a href="#PerspectiveTornadoHandler-149"><span class="linenos">149</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
+</span><span id="PerspectiveTornadoHandler-150"><a href="#PerspectiveTornadoHandler-150"><span class="linenos">150</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler-151"><a href="#PerspectiveTornadoHandler-151"><span class="linenos">151</span></a>        <span class="n">perspective_server</span><span class="o">=</span><span class="n">perspective</span><span class="o">.</span><span class="n">GLOBAL_SERVER</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler-152"><a href="#PerspectiveTornadoHandler-152"><span class="linenos">152</span></a>        <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler-153"><a href="#PerspectiveTornadoHandler-153"><span class="linenos">153</span></a>        <span class="n">executor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler-154"><a href="#PerspectiveTornadoHandler-154"><span class="linenos">154</span></a>        <span class="n">max_buffer_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler-155"><a href="#PerspectiveTornadoHandler-155"><span class="linenos">155</span></a>    <span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-156"><a href="#PerspectiveTornadoHandler-156"><span class="linenos">156</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">perspective_server</span>
+</span><span id="PerspectiveTornadoHandler-157"><a href="#PerspectiveTornadoHandler-157"><span class="linenos">157</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">IOLoop</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
+</span><span id="PerspectiveTornadoHandler-158"><a href="#PerspectiveTornadoHandler-158"><span class="linenos">158</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">executor</span>
+</span><span id="PerspectiveTornadoHandler-159"><a href="#PerspectiveTornadoHandler-159"><span class="linenos">159</span></a>        <span class="k">if</span> <span class="n">max_buffer_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler-160"><a href="#PerspectiveTornadoHandler-160"><span class="linenos">160</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">max_buffer_size</span> <span class="o">=</span> <span class="n">max_buffer_size</span>
+</span><span id="PerspectiveTornadoHandler-161"><a href="#PerspectiveTornadoHandler-161"><span class="linenos">161</span></a>
+</span><span id="PerspectiveTornadoHandler-162"><a href="#PerspectiveTornadoHandler-162"><span class="linenos">162</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-163"><a href="#PerspectiveTornadoHandler-163"><span class="linenos">163</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-164"><a href="#PerspectiveTornadoHandler-164"><span class="linenos">164</span></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler-165"><a href="#PerspectiveTornadoHandler-165"><span class="linenos">165</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">write_message</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="PerspectiveTornadoHandler-166"><a href="#PerspectiveTornadoHandler-166"><span class="linenos">166</span></a>            <span class="k">except</span> <span class="n">WebSocketClosedError</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler-167"><a href="#PerspectiveTornadoHandler-167"><span class="linenos">167</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="PerspectiveTornadoHandler-168"><a href="#PerspectiveTornadoHandler-168"><span class="linenos">168</span></a>
+</span><span id="PerspectiveTornadoHandler-169"><a href="#PerspectiveTornadoHandler-169"><span class="linenos">169</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">send_response</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-170"><a href="#PerspectiveTornadoHandler-170"><span class="linenos">170</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</span><span id="PerspectiveTornadoHandler-171"><a href="#PerspectiveTornadoHandler-171"><span class="linenos">171</span></a>
+</span><span id="PerspectiveTornadoHandler-172"><a href="#PerspectiveTornadoHandler-172"><span class="linenos">172</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">new_session</span><span class="p">(</span><span class="n">send_response</span><span class="p">)</span>
+</span><span id="PerspectiveTornadoHandler-173"><a href="#PerspectiveTornadoHandler-173"><span class="linenos">173</span></a>
+</span><span id="PerspectiveTornadoHandler-174"><a href="#PerspectiveTornadoHandler-174"><span class="linenos">174</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler-175"><a href="#PerspectiveTornadoHandler-175"><span class="linenos">175</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="PerspectiveTornadoHandler-176"><a href="#PerspectiveTornadoHandler-176"><span class="linenos">176</span></a>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
+</span><span id="PerspectiveTornadoHandler-177"><a href="#PerspectiveTornadoHandler-177"><span class="linenos">177</span></a>
+</span><span id="PerspectiveTornadoHandler-178"><a href="#PerspectiveTornadoHandler-178"><span class="linenos">178</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-179"><a href="#PerspectiveTornadoHandler-179"><span class="linenos">179</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler-180"><a href="#PerspectiveTornadoHandler-180"><span class="linenos">180</span></a>            <span class="k">return</span>
+</span><span id="PerspectiveTornadoHandler-181"><a href="#PerspectiveTornadoHandler-181"><span class="linenos">181</span></a>
+</span><span id="PerspectiveTornadoHandler-182"><a href="#PerspectiveTornadoHandler-182"><span class="linenos">182</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler-183"><a href="#PerspectiveTornadoHandler-183"><span class="linenos">183</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="PerspectiveTornadoHandler-184"><a href="#PerspectiveTornadoHandler-184"><span class="linenos">184</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler-185"><a href="#PerspectiveTornadoHandler-185"><span class="linenos">185</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -294,8 +488,8 @@ message processing calls from websocket <code>Client</code>s.</li>
 
     </div>
     <a class="headerlink" href="#PerspectiveTornadoHandler.check_origin"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.check_origin-51"><a href="#PerspectiveTornadoHandler.check_origin-51"><span class="linenos">51</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler.check_origin-52"><a href="#PerspectiveTornadoHandler.check_origin-52"><span class="linenos">52</span></a>        <span class="k">return</span> <span class="kc">True</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.check_origin-146"><a href="#PerspectiveTornadoHandler.check_origin-146"><span class="linenos">146</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler.check_origin-147"><a href="#PerspectiveTornadoHandler.check_origin-147"><span class="linenos">147</span></a>        <span class="k">return</span> <span class="kc">True</span>
 </span></pre></div>
 
 
@@ -362,18 +556,18 @@ do something like::</p>
 
     </div>
     <a class="headerlink" href="#PerspectiveTornadoHandler.initialize"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.initialize-54"><a href="#PerspectiveTornadoHandler.initialize-54"><span class="linenos">54</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
-</span><span id="PerspectiveTornadoHandler.initialize-55"><a href="#PerspectiveTornadoHandler.initialize-55"><span class="linenos">55</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler.initialize-56"><a href="#PerspectiveTornadoHandler.initialize-56"><span class="linenos">56</span></a>        <span class="n">perspective_server</span><span class="o">=</span><span class="n">perspective</span><span class="o">.</span><span class="n">GLOBAL_SERVER</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler.initialize-57"><a href="#PerspectiveTornadoHandler.initialize-57"><span class="linenos">57</span></a>        <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler.initialize-58"><a href="#PerspectiveTornadoHandler.initialize-58"><span class="linenos">58</span></a>        <span class="n">executor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler.initialize-59"><a href="#PerspectiveTornadoHandler.initialize-59"><span class="linenos">59</span></a>        <span class="n">max_buffer_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="PerspectiveTornadoHandler.initialize-60"><a href="#PerspectiveTornadoHandler.initialize-60"><span class="linenos">60</span></a>    <span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler.initialize-61"><a href="#PerspectiveTornadoHandler.initialize-61"><span class="linenos">61</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">perspective_server</span>
-</span><span id="PerspectiveTornadoHandler.initialize-62"><a href="#PerspectiveTornadoHandler.initialize-62"><span class="linenos">62</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">IOLoop</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
-</span><span id="PerspectiveTornadoHandler.initialize-63"><a href="#PerspectiveTornadoHandler.initialize-63"><span class="linenos">63</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">executor</span>
-</span><span id="PerspectiveTornadoHandler.initialize-64"><a href="#PerspectiveTornadoHandler.initialize-64"><span class="linenos">64</span></a>        <span class="k">if</span> <span class="n">max_buffer_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler.initialize-65"><a href="#PerspectiveTornadoHandler.initialize-65"><span class="linenos">65</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">max_buffer_size</span> <span class="o">=</span> <span class="n">max_buffer_size</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.initialize-149"><a href="#PerspectiveTornadoHandler.initialize-149"><span class="linenos">149</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
+</span><span id="PerspectiveTornadoHandler.initialize-150"><a href="#PerspectiveTornadoHandler.initialize-150"><span class="linenos">150</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler.initialize-151"><a href="#PerspectiveTornadoHandler.initialize-151"><span class="linenos">151</span></a>        <span class="n">perspective_server</span><span class="o">=</span><span class="n">perspective</span><span class="o">.</span><span class="n">GLOBAL_SERVER</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler.initialize-152"><a href="#PerspectiveTornadoHandler.initialize-152"><span class="linenos">152</span></a>        <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler.initialize-153"><a href="#PerspectiveTornadoHandler.initialize-153"><span class="linenos">153</span></a>        <span class="n">executor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler.initialize-154"><a href="#PerspectiveTornadoHandler.initialize-154"><span class="linenos">154</span></a>        <span class="n">max_buffer_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="PerspectiveTornadoHandler.initialize-155"><a href="#PerspectiveTornadoHandler.initialize-155"><span class="linenos">155</span></a>    <span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler.initialize-156"><a href="#PerspectiveTornadoHandler.initialize-156"><span class="linenos">156</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">perspective_server</span>
+</span><span id="PerspectiveTornadoHandler.initialize-157"><a href="#PerspectiveTornadoHandler.initialize-157"><span class="linenos">157</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">IOLoop</span><span class="o">.</span><span class="n">current</span><span class="p">()</span>
+</span><span id="PerspectiveTornadoHandler.initialize-158"><a href="#PerspectiveTornadoHandler.initialize-158"><span class="linenos">158</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">executor</span>
+</span><span id="PerspectiveTornadoHandler.initialize-159"><a href="#PerspectiveTornadoHandler.initialize-159"><span class="linenos">159</span></a>        <span class="k">if</span> <span class="n">max_buffer_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler.initialize-160"><a href="#PerspectiveTornadoHandler.initialize-160"><span class="linenos">160</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">max_buffer_size</span> <span class="o">=</span> <span class="n">max_buffer_size</span>
 </span></pre></div>
 
 
@@ -410,17 +604,17 @@ app = Application([
 
     </div>
     <a class="headerlink" href="#PerspectiveTornadoHandler.open"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.open-67"><a href="#PerspectiveTornadoHandler.open-67"><span class="linenos">67</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler.open-68"><a href="#PerspectiveTornadoHandler.open-68"><span class="linenos">68</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler.open-69"><a href="#PerspectiveTornadoHandler.open-69"><span class="linenos">69</span></a>            <span class="k">try</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler.open-70"><a href="#PerspectiveTornadoHandler.open-70"><span class="linenos">70</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">write_message</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="PerspectiveTornadoHandler.open-71"><a href="#PerspectiveTornadoHandler.open-71"><span class="linenos">71</span></a>            <span class="k">except</span> <span class="n">WebSocketClosedError</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler.open-72"><a href="#PerspectiveTornadoHandler.open-72"><span class="linenos">72</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="PerspectiveTornadoHandler.open-73"><a href="#PerspectiveTornadoHandler.open-73"><span class="linenos">73</span></a>
-</span><span id="PerspectiveTornadoHandler.open-74"><a href="#PerspectiveTornadoHandler.open-74"><span class="linenos">74</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">send_response</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler.open-75"><a href="#PerspectiveTornadoHandler.open-75"><span class="linenos">75</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-</span><span id="PerspectiveTornadoHandler.open-76"><a href="#PerspectiveTornadoHandler.open-76"><span class="linenos">76</span></a>
-</span><span id="PerspectiveTornadoHandler.open-77"><a href="#PerspectiveTornadoHandler.open-77"><span class="linenos">77</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">new_session</span><span class="p">(</span><span class="n">send_response</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.open-162"><a href="#PerspectiveTornadoHandler.open-162"><span class="linenos">162</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler.open-163"><a href="#PerspectiveTornadoHandler.open-163"><span class="linenos">163</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler.open-164"><a href="#PerspectiveTornadoHandler.open-164"><span class="linenos">164</span></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler.open-165"><a href="#PerspectiveTornadoHandler.open-165"><span class="linenos">165</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">write_message</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="PerspectiveTornadoHandler.open-166"><a href="#PerspectiveTornadoHandler.open-166"><span class="linenos">166</span></a>            <span class="k">except</span> <span class="n">WebSocketClosedError</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler.open-167"><a href="#PerspectiveTornadoHandler.open-167"><span class="linenos">167</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="PerspectiveTornadoHandler.open-168"><a href="#PerspectiveTornadoHandler.open-168"><span class="linenos">168</span></a>
+</span><span id="PerspectiveTornadoHandler.open-169"><a href="#PerspectiveTornadoHandler.open-169"><span class="linenos">169</span></a>        <span class="k">def</span><span class="w"> </span><span class="nf">send_response</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler.open-170"><a href="#PerspectiveTornadoHandler.open-170"><span class="linenos">170</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</span><span id="PerspectiveTornadoHandler.open-171"><a href="#PerspectiveTornadoHandler.open-171"><span class="linenos">171</span></a>
+</span><span id="PerspectiveTornadoHandler.open-172"><a href="#PerspectiveTornadoHandler.open-172"><span class="linenos">172</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">new_session</span><span class="p">(</span><span class="n">send_response</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -450,9 +644,9 @@ regular expression, just like the arguments to
 
     </div>
     <a class="headerlink" href="#PerspectiveTornadoHandler.on_close"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.on_close-79"><a href="#PerspectiveTornadoHandler.on_close-79"><span class="linenos">79</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler.on_close-80"><a href="#PerspectiveTornadoHandler.on_close-80"><span class="linenos">80</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="PerspectiveTornadoHandler.on_close-81"><a href="#PerspectiveTornadoHandler.on_close-81"><span class="linenos">81</span></a>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.on_close-174"><a href="#PerspectiveTornadoHandler.on_close-174"><span class="linenos">174</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler.on_close-175"><a href="#PerspectiveTornadoHandler.on_close-175"><span class="linenos">175</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="PerspectiveTornadoHandler.on_close-176"><a href="#PerspectiveTornadoHandler.on_close-176"><span class="linenos">176</span></a>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
 </span></pre></div>
 
 
@@ -479,14 +673,14 @@ Added <code><a href="#PerspectiveTornadoHandler.close_code">close_code</a></code
 
     </div>
     <a class="headerlink" href="#PerspectiveTornadoHandler.on_message"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.on_message-83"><a href="#PerspectiveTornadoHandler.on_message-83"><span class="linenos">83</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler.on_message-84"><a href="#PerspectiveTornadoHandler.on_message-84"><span class="linenos">84</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-</span><span id="PerspectiveTornadoHandler.on_message-85"><a href="#PerspectiveTornadoHandler.on_message-85"><span class="linenos">85</span></a>            <span class="k">return</span>
-</span><span id="PerspectiveTornadoHandler.on_message-86"><a href="#PerspectiveTornadoHandler.on_message-86"><span class="linenos">86</span></a>
-</span><span id="PerspectiveTornadoHandler.on_message-87"><a href="#PerspectiveTornadoHandler.on_message-87"><span class="linenos">87</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler.on_message-88"><a href="#PerspectiveTornadoHandler.on_message-88"><span class="linenos">88</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-</span><span id="PerspectiveTornadoHandler.on_message-89"><a href="#PerspectiveTornadoHandler.on_message-89"><span class="linenos">89</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="PerspectiveTornadoHandler.on_message-90"><a href="#PerspectiveTornadoHandler.on_message-90"><span class="linenos">90</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="PerspectiveTornadoHandler.on_message-178"><a href="#PerspectiveTornadoHandler.on_message-178"><span class="linenos">178</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler.on_message-179"><a href="#PerspectiveTornadoHandler.on_message-179"><span class="linenos">179</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+</span><span id="PerspectiveTornadoHandler.on_message-180"><a href="#PerspectiveTornadoHandler.on_message-180"><span class="linenos">180</span></a>            <span class="k">return</span>
+</span><span id="PerspectiveTornadoHandler.on_message-181"><a href="#PerspectiveTornadoHandler.on_message-181"><span class="linenos">181</span></a>
+</span><span id="PerspectiveTornadoHandler.on_message-182"><a href="#PerspectiveTornadoHandler.on_message-182"><span class="linenos">182</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler.on_message-183"><a href="#PerspectiveTornadoHandler.on_message-183"><span class="linenos">183</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="PerspectiveTornadoHandler.on_message-184"><a href="#PerspectiveTornadoHandler.on_message-184"><span class="linenos">184</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="PerspectiveTornadoHandler.on_message-185"><a href="#PerspectiveTornadoHandler.on_message-185"><span class="linenos">185</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">handle_request</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 </span></pre></div>
 
 
