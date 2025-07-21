@@ -1,3 +1,11 @@
+# [v3.7.4](https://github.com/finos/perspective/releases/tag/v3.7.4)
+
+_21 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.3...v3.7.4))
+
+Features
+
+- Upgrade `Client::system_info` [#3036](https://github.com/finos/perspective/pull/3036)
+
 # [v3.7.3](https://github.com/finos/perspective/releases/tag/v3.7.3)
 
 _13 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.2...v3.7.3))

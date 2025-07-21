@@ -1,7 +1,7 @@
 {
     "name": "rust-axum",
     "private": true,
-    "version": "3.7.3",
+    "version": "3.7.4",
     "description": "An example of a Rust/Axum virtual Perspective server",
     "scripts": {
         "start": "cargo run --target=$(rustc -vV | sed -n 's|host: ||p')"
