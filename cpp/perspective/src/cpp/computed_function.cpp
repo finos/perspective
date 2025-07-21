@@ -2205,7 +2205,7 @@ index::operator()(t_parameter_list parameters) {
     t_tscalar rval;
     rval.clear();
 
-    auto col = m_source_table->get_const_column("psp_pkey");
+    auto col = m_source_table->get_const_column("psp_okey");
     auto res = col->get_scalar(m_row_idx);
     rval.set(res);
 

@@ -15,7 +15,7 @@ mod misc_section;
 mod style_section;
 mod types;
 
-use perspective_client::ColumnType;
+use perspective_client::config::ColumnType;
 pub use types::*;
 use yew::{Callback, Component, Properties, html};
 

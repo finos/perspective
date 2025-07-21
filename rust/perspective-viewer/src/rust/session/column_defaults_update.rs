@@ -13,7 +13,6 @@
 use std::iter::IntoIterator;
 
 use itertools::Itertools;
-use perspective_client::ColumnType;
 use perspective_client::config::*;
 
 use super::metadata::*;

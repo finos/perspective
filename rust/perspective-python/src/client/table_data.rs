@@ -10,7 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use perspective_client::{ColumnType, TableData, TableReadFormat, UpdateData};
+use perspective_client::config::ColumnType;
+use perspective_client::{TableData, TableReadFormat, UpdateData};
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyAnyMethods, PyDict, PyList, PyString, PyType};

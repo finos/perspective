@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use js_sys::{Array, ArrayBuffer, Function, Object};
-use perspective_client::{OnUpdateOptions, ViewWindow, assert_view_api};
+use perspective_client::{OnUpdateData, OnUpdateOptions, ViewWindow, assert_view_api};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
@@ -264,8 +264,8 @@ impl View {
         on_update_js: Function,
         options: Option<JsOnUpdateOptions>,
     ) -> ApiFuture<u32> {
-        let poll_loop = LocalPollLoop::new(move |args| {
-            let js_obj = JsValue::from_serde_ext(&args)?;
+        let poll_loop = LocalPollLoop::new(move |args: OnUpdateData| {
+            let js_obj = JsValue::from_serde_ext(&*args)?;
             on_update_js.call1(&JsValue::UNDEFINED, &js_obj)
         });
 

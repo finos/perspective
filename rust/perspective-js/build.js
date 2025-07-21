@@ -108,7 +108,7 @@ function get_host() {
 async function build_rust() {
     const release_flag = IS_DEBUG ? "" : "--release";
     execSync(
-        `PSP_ROOT_DIR=../.. cargo bundle --target=${get_host()} -- perspective_js ${release_flag} --features=export-init`,
+        `PSP_ROOT_DIR=../.. cargo bundle --target=${get_host()} -- perspective_js ${release_flag} --features="export-init,talc-allocator"`,
         INHERIT
     );
 

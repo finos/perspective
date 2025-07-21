@@ -14,7 +14,7 @@ use std::fmt::Display;
 use std::rc::Rc;
 use std::string::FromUtf8Error;
 
-use perspective_client::{ClientError, ValidateExpressionsData};
+use perspective_client::{ClientError, ExprValidationResult};
 use thiserror::*;
 use wasm_bindgen::prelude::*;
 
@@ -48,7 +48,7 @@ fn format_js_error(value: &JsValue) -> String {
     }
 }
 
-fn format_valid_exprs(recs: &ValidateExpressionsData) -> String {
+fn format_valid_exprs(recs: &ExprValidationResult) -> String {
     recs.errors
         .iter()
         .map(|x| format!("\"{}\": {}", x.0, x.1.error_message))
@@ -94,7 +94,7 @@ pub enum ApiErrorType {
     InvalidViewerConfigError(&'static str, String),
 
     #[error("Invalid `expressions` {}", format_valid_exprs(.0))]
-    InvalidViewerConfigExpressionsError(Rc<ValidateExpressionsData>),
+    InvalidViewerConfigExpressionsError(Rc<ExprValidationResult>),
 
     #[error("No `Table` attached")]
     NoTableError,

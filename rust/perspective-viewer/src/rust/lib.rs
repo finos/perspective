@@ -59,6 +59,7 @@ import type {
     UpdateOptions,
     DeleteOptions,
     ViewConfigUpdate,
+    SystemInfo,
 } from "@finos/perspective";
 "#;
 

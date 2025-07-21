@@ -10,6 +10,24 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+//! `perspective_client` is the client implementation of
+//! [Perspective](https://perspective.finos.org), designed to be used from Rust
+//! directly, and as a core to `perspective-js` and `perspective-python` crates
+//! which wrap language-specific bindings for this module.
+//!
+//! # See also
+//!
+//! - [`perspective-rs`](https://docs.rs/perspective/latest/) for the Rust
+//!   Client and Server APIs.
+//! - [`perspective-js`](https://docs.rs/perspective-js/latest/) for the
+//!   JavaScript API.
+//! - [`perspective-python`](https://docs.rs/perspective-python/latest/) for the
+//!   Python API.
+//! - [`perspective-server`](https://docs.rs/perspective-server/latest/) for
+//!   Data Binding details.
+//! - [`perspective-viewer`](https://docs.rs/perspective-viewer/latest/) for the
+//!   WebAssembly `<perspective-viewer>` Custom Element API.
+
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -24,20 +42,18 @@ mod view;
 
 pub mod config;
 
-#[allow(unknown_lints)]
 #[allow(clippy::all)]
 mod proto;
+
 pub mod utils;
 
 pub use crate::client::{Client, ClientHandler, Features, ReconnectCallback, SystemInfo};
-pub use crate::proto::{ColumnType, SortOp, ViewOnUpdateResp};
 pub use crate::session::{ProxySession, Session};
 pub use crate::table::{
-    DeleteOptions, Schema, Table, TableInitOptions, TableReadFormat, UpdateOptions,
-    ValidateExpressionsData,
+    DeleteOptions, ExprValidationResult, Table, TableInitOptions, TableReadFormat, UpdateOptions,
 };
 pub use crate::table_data::{TableData, UpdateData};
-pub use crate::view::{OnUpdateMode, OnUpdateOptions, View, ViewWindow};
+pub use crate::view::{OnUpdateData, OnUpdateMode, OnUpdateOptions, View, ViewWindow};
 
 pub type ClientError = utils::ClientError;
 pub type ExprValidationError = crate::proto::table_validate_expr_resp::ExprValidationError;

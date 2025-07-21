@@ -48,6 +48,7 @@ export type * from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
 export type * from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 export type * from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 export type * from "../../src/ts/ts-rs/DeleteOptions.d.ts";
+export type * from "../../src/ts/ts-rs/SystemInfo.d.ts";
 
 import type {ViewWindow} from "../../src/ts/ts-rs/ViewWindow.d.ts";
 import type {TableInitOptions} from "../../src/ts/ts-rs/TableInitOptions.d.ts";
@@ -56,6 +57,7 @@ import type * as on_update_args from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
 import type {OnUpdateOptions} from "../../src/ts/ts-rs/OnUpdateOptions.d.ts";
 import type {UpdateOptions} from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 import type {DeleteOptions} from "../../src/ts/ts-rs/DeleteOptions.d.ts";
+import type {SystemInfo} from "../../src/ts/ts-rs/SystemInfo.d.ts";
 "#;
 
 #[cfg(feature = "export-init")]

@@ -38,6 +38,10 @@
 #include <vector>
 #include <ctime>
 
+#if defined(PSP_ENABLE_WASM) || defined(__linux__)
+#include <malloc.h>
+#endif
+
 #if !defined(WIN32) && !defined(PSP_ENABLE_WASM)
 #include <sys/resource.h>
 #endif
@@ -764,18 +768,28 @@ ServerResources::get_table_deleted_client(const t_id& table_id) {
 
 std::uint32_t
 ProtoServer::new_session() {
+    if (m_cpu_time_start.load().time_since_epoch().count() == 0) {
+        m_cpu_time_start = std::chrono::high_resolution_clock::now();
+    }
+
     return m_client_id++;
 }
 
 void
 ProtoServer::close_session(const std::uint32_t client_id) {
+    const auto start = std::chrono::high_resolution_clock::now();
     m_resources.drop_client(client_id);
+    const auto end = std::chrono::high_resolution_clock::now();
+    m_cpu_time +=
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+            .count();
 }
 
 std::vector<ProtoServerResp<std::string>>
 ProtoServer::handle_request(
     std::uint32_t client_id, const std::string_view& data
 ) {
+    const auto start = std::chrono::high_resolution_clock::now();
     proto::Request req_env;
     req_env.ParseFromString(data);
     std::vector<ProtoServerResp<std::string>> serialized_responses;
@@ -828,11 +842,17 @@ ProtoServer::handle_request(
         serialized_responses.emplace_back(std::move(str_resp));
     }
 
+    const auto end = std::chrono::high_resolution_clock::now();
+    m_cpu_time +=
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+            .count();
+
     return serialized_responses;
 }
 
 std::vector<ProtoServerResp<std::string>>
 ProtoServer::poll() {
+    const auto start = std::chrono::high_resolution_clock::now();
     std::vector<ProtoServerResp<std::string>> out;
     try {
         const auto& responses = _poll();
@@ -879,6 +899,11 @@ ProtoServer::poll() {
         str_resp.client_id = 0;
         out.emplace_back(std::move(str_resp));
     }
+
+    const auto end = std::chrono::high_resolution_clock::now();
+    m_cpu_time +=
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+            .count();
 
     return out;
 }
@@ -2664,13 +2689,30 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             proto::Response resp;
             auto* sys_info = resp.mutable_server_system_info_resp();
 #if defined(PSP_ENABLE_WASM) && !defined(PSP_ENABLE_PYTHON)
-            auto heap_size = psp_heap_size();
+            const auto heap_size = psp_heap_size();
             sys_info->set_heap_size(heap_size);
-#elif !defined(WIN32) && !defined(PSP_ENABLE_WASM)
+            const auto res = mallinfo();
+            sys_info->set_used_size(res.uordblks);
+#elif defined(__linux__) && !defined(PSP_ENABLE_WASM)
+            auto res = mallinfo();
+            sys_info->set_heap_size(res.usmblks);
+            sys_info->set_used_size(res.uordblks);
+#elif defined(__APPLE__) && !defined(PSP_ENABLE_WASM)
             rusage out;
             getrusage(RUSAGE_SELF, &out);
             sys_info->set_heap_size(out.ru_maxrss);
 #endif
+            sys_info->set_cpu_time(m_cpu_time);
+            sys_info->set_cpu_time_epoch(
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::high_resolution_clock::now()
+                    - m_cpu_time_start.load()
+                )
+                    .count()
+            );
+
+            m_cpu_time_start = std::chrono::high_resolution_clock::now();
+            m_cpu_time = 0;
             push_resp(std::move(resp));
             break;
         }

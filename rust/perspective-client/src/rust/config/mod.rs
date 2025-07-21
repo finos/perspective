@@ -10,9 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! A collection of [`serde::Serialize`]/[`serde::Deserialize`] structs which
-//! capture the application state, suitable for persistence, history, etc.
-//! features.
+//! Options for [`Table::view`], and details about fields like `expressions`.
+//!
+//! [`ViewConfig`] for the top level argument to [`Table::view`].
+//!
+//! [`expressions`] module for details about the ExprTK format.
+
+#[cfg(doc)]
+use crate::Table;
 
 mod aggregates;
 mod column_type;
@@ -28,3 +33,5 @@ pub use filters::*;
 pub use plugin::*;
 pub use sort::*;
 pub use view_config::*;
+
+pub use crate::proto::{ColumnType, SortOp};

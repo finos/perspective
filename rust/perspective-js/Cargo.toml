@@ -31,12 +31,29 @@ crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
 [features]
-export-init = []
 default = []
+
+# Shoould the WASM initialization methods be exported? This should _not_ be
+# enabled if you want to import `perspective-js` as a Rust dependency, in which
+# case you'll initialize the WebAssembly yourself.
+export-init = []
+
+# Should the code by built from the Perspective source tree, or the packaged
+# copy? This should only be enabled for development on the Perspective source
+# tree.
 external-cpp = [
     "perspective-client/generate-proto",
     "perspective-client/protobuf-src",
 ]
+
+# Should `talc` be used as a global allocator? Allows enhanced runtime metrics
+# via `Client::system_info`. Mutually exclusive to `trace-allocator`
+talc-allocator = ["perspective-client/talc-allocator"]
+
+# Should global allocation be traced?  Allows enhanced runtime metrics via
+# `Client::system_info`. Mutually exclusive to `talc-allocator`, which does
+# not requires a `wasm_bindgen` call to get available heap size.
+trace-allocator = []
 
 [build-dependencies]
 serde_json = { version = "1.0.107", features = ["raw_value"] }
@@ -50,6 +67,7 @@ macro_rules_attribute = "0.2.0"
 perspective-client = { version = "3.7.3" }
 base64 = "0.13.0"
 chrono = "0.4"
+console_error_panic_hook = "0.1.6"
 extend = "1.1.2"
 futures = "0.3.28"
 derivative = "2.2.0"
@@ -65,15 +83,14 @@ serde = { version = "1.0", features = ["derive"] }
 serde_bytes = "0.11"
 serde_json = { version = "1.0.107", features = ["raw_value"] }
 serde-wasm-bindgen = "0.6.0"
+thiserror = "1.0.55"
 ts-rs = { version = "11.0.1", features = [
     "serde-json-impl",
     "no-serde-warnings",
     "import-esm",
 ] }
-thiserror = "1.0.55"
 tracing = { version = ">=0.1.36" }
 tracing-subscriber = "0.3.15"
-console_error_panic_hook = "0.1.6"
 wasm-bindgen = { version = "=0.2.100", features = ["serde-serialize"] }
 wasm-bindgen-derive = "0.3.0"
 wasm-bindgen-futures = "0.4.41"

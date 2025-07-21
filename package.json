@@ -92,6 +92,7 @@
         "build_python": "node tools/perspective-scripts/build.mjs",
         "bench": "node tools/perspective-scripts/bench.mjs",
         "setup": "node tools/perspective-scripts/setup.mjs",
+        "once": "PSP_ONCE=1 node tools/perspective-scripts/setup.mjs",
         "docs": "node tools/perspective-scripts/docs.mjs",
         "test": "node tools/perspective-scripts/test.mjs",
         "test:jupyter": "pnpm run --recursive --filter @finos/perspective-jupyterlab test:jupyter",

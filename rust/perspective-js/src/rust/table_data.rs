@@ -12,7 +12,8 @@
 
 use extend::ext;
 use js_sys::{Array, ArrayBuffer, Function, JSON, Object, Reflect, Uint8Array};
-use perspective_client::{ColumnType, TableData, TableReadFormat, UpdateData};
+use perspective_client::config::ColumnType;
+use perspective_client::{TableData, TableReadFormat, UpdateData};
 use wasm_bindgen::convert::TryFromJsValue;
 use wasm_bindgen::prelude::*;
 

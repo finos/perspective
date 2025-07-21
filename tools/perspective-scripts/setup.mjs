@@ -15,14 +15,15 @@ import inquirer from "inquirer";
 import fs from "fs";
 import * as dotenv from "dotenv";
 
+const original = dotenv.config({
+    path: "./.perspectiverc",
+}).parsed;
+
 const CONFIG = new Proxy(
     new (class {
         constructor() {
             this.config = [];
-            this._values =
-                dotenv.config({
-                    path: "./.perspectiverc",
-                }).parsed || {};
+            this._values = { ...original } || {};
             if (this._values.PACKAGE && this._values.PACKAGE.startsWith("@")) {
                 this._values.PACKAGE = this._values.PACKAGE.slice(
                     2,
@@ -47,8 +48,37 @@ const CONFIG = new Proxy(
         }
         write() {
             fs.writeFileSync("./.perspectiverc", this.config.join("\n"));
-            if (process.env.PSP_BUILD_IMMEDIATELY) {
+            if (process.env.PSP_BUILD_IMMEDIATELY || process.env.PSP_ONCE) {
                 sh`node tools/perspective-scripts/build.mjs`.runSync();
+                if (process.env.PSP_ONCE) {
+                    // this.config = [];
+                    while (this.config.length > 0) {
+                        this.config.pop();
+                    }
+
+                    for (const key in this._values) {
+                        if (key in original) {
+                            this._values[key] = original[key];
+                        } else {
+                            delete this._values[key];
+                        }
+                    }
+
+                    if (
+                        this._values.PACKAGE &&
+                        this._values.PACKAGE.startsWith("@")
+                    ) {
+                        this._values.PACKAGE = this._values.PACKAGE.slice(
+                            2,
+                            this._values.PACKAGE.length - 1
+                        ).replace(/\|/g, ",");
+                    }
+
+                    fs.writeFileSync(
+                        "./.perspectiverc",
+                        this.config.join("\n")
+                    );
+                }
             }
         }
     })(),

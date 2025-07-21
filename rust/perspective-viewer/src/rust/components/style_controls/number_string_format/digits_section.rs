@@ -13,7 +13,7 @@
 use std::rc::Rc;
 
 use itertools::Itertools;
-use perspective_client::ColumnType;
+use perspective_client::config::ColumnType;
 use yew::html;
 
 use super::CustomNumberFormat;

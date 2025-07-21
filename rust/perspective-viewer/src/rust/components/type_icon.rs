@@ -10,7 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use perspective_client::ColumnType;
+use perspective_client::config::ColumnType;
 use yew::html::IntoPropValue;
 use yew::{Properties, classes, function_component, html};
 

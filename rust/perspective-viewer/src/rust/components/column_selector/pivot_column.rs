@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use perspective_client::config::ColumnType;
 // use perspective_client::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
@@ -68,7 +69,7 @@ impl Component for PivotColumn {
             .session
             .metadata()
             .get_column_table_type(&ctx.props().column)
-            .unwrap_or(perspective_client::ColumnType::Integer);
+            .unwrap_or(ColumnType::Integer);
 
         html! {
             <div

@@ -14,7 +14,6 @@ use std::collections::{HashMap, HashSet};
 use std::iter::IntoIterator;
 use std::ops::{Deref, DerefMut};
 
-use perspective_client::ColumnType;
 use perspective_client::config::*;
 use perspective_js::apierror;
 
@@ -23,7 +22,7 @@ use crate::*;
 
 struct SessionViewExpressionMetadata {
     edited: HashMap<String, String>,
-    expressions: perspective_client::ValidateExpressionsData,
+    expressions: perspective_client::ExprValidationResult,
 }
 
 /// Metadata state reflects data we could fetch from a `View`, but would like to
@@ -77,7 +76,7 @@ impl SessionMetadata {
 
     pub(super) fn update_view_schema(
         &mut self,
-        view_schema: &perspective_client::Schema,
+        view_schema: &HashMap<String, ColumnType>,
     ) -> ApiResult<()> {
         self.as_mut().unwrap().view_schema = Some(view_schema.clone());
         Ok(())
@@ -85,7 +84,7 @@ impl SessionMetadata {
 
     pub(super) fn update_expressions(
         &mut self,
-        valid_recs: &perspective_client::ValidateExpressionsData,
+        valid_recs: &perspective_client::ExprValidationResult,
     ) -> ApiResult<HashSet<String>> {
         if !valid_recs.errors.is_empty() {
             return Err(apierror!(InvalidViewerConfigExpressionsError(

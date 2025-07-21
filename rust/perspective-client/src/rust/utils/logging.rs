@@ -12,13 +12,13 @@
 
 use prost::Message;
 
-use crate::ViewOnUpdateResp;
 use crate::proto::make_table_data::Data;
 use crate::proto::request::ClientReq;
 use crate::proto::response::ClientResp;
 use crate::proto::{
-    MakeTableData, MakeTableReq, Request, Response, TableUpdateReq, ViewToArrowResp,
-    ViewToColumnsStringResp, ViewToCsvResp, ViewToNdjsonStringResp, ViewToRowsStringResp,
+    MakeTableData, MakeTableReq, Request, Response, TableUpdateReq, ViewOnUpdateResp,
+    ViewToArrowResp, ViewToColumnsStringResp, ViewToCsvResp, ViewToNdjsonStringResp,
+    ViewToRowsStringResp,
 };
 
 fn replace(x: Data) -> Data {
