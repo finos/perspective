@@ -15,7 +15,8 @@
     "type": "module",
     "scripts": {
         "build": "node ./build.js",
-        "clean": "rimraf dist"
+        "clean": "rimraf dist",
+        "docs": "npx typedoc --tsconfig tsconfig.json --out ../../docs/static/react"
     },
     "publishConfig": {
         "access": "public"
@@ -30,6 +31,7 @@
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "typescript": "~5.2.2",
+        "typedoc": "^0.28.7",
         "zx": "^8.3.0"
     }
 }

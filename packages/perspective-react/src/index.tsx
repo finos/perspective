@@ -10,6 +10,16 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+/**
+ *
+ * # See Also
+ *
+ * [`react-example`](https://github.com/finos/perspective/tree/master/examples/react-example)
+ * project from the Perspective GitHub repo.
+ *
+ * @module
+ */
+
 import * as React from "react";
 import type * as psp from "@finos/perspective";
 import type * as pspViewer from "@finos/perspective-viewer";
