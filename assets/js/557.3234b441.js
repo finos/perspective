@@ -1,1 +1,0 @@
-(self.webpackChunk_finos_perspective_docs=self.webpackChunk_finos_perspective_docs||[]).push([[557],{4557:(e,s,p)=>{e.exports=p.p+"66df4d75d5acb3f8.wasm"}}]);
