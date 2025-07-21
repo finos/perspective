@@ -127,8 +127,8 @@ async function focus_package() {
         },
         {
             key: "c",
-            name: "perspective-cpp",
-            value: "perspective-cpp",
+            name: "perspective-server",
+            value: "perspective-server",
         },
         {
             key: "p",

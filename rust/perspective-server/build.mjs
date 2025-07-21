@@ -15,11 +15,15 @@ import os from "node:os";
 import path from "node:path";
 import * as url from "node:url";
 
+import "zx/globals";
+
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
 const stdio = "inherit";
 const env = process.env.PSP_DEBUG ? "debug" : "release";
 const cwd = path.join(process.cwd(), "dist", env);
+
+const cmake_dir = path.join(__dirname, "cpp", "perspective");
 
 const { compress } = await import("pro_self_extracting_wasm");
 
@@ -38,8 +42,18 @@ if (!!process.env.PSP_BUILD_VERBOSE) {
 try {
     execSync(`mkdirp ${cwd}`, { stdio });
     process.env.CLICOLOR_FORCE = 1;
+    const out = await $`cargo metadata`;
+    const p = JSON.parse(out.stdout).packages.find(
+        (x) => x.name === "perspective-client"
+    ).manifest_path;
+
+    const pp = path.parse(p);
+
     execSync(
-        `emcmake cmake ${__dirname} ${cmake_flags} -DCMAKE_BUILD_TYPE=${env} -DRAPIDJSON_BUILD_EXAMPLES=OFF`,
+        `emcmake cmake ${cmake_dir} ${cmake_flags} \
+        -DCMAKE_BUILD_TYPE=${env} \
+        -DRAPIDJSON_BUILD_EXAMPLES=OFF \
+        -DPSP_PROTO_PATH=${pp.dir}`,
         {
             cwd,
             stdio,
@@ -47,7 +61,8 @@ try {
     );
 
     execSync(
-        `emmake make -j${process.env.PSP_NUM_CPUS || os.cpus().length
+        `emmake make -j${
+            process.env.PSP_NUM_CPUS || os.cpus().length
         } ${make_flags}`,
         {
             cwd,
@@ -59,8 +74,8 @@ try {
     execSync(`cpy node/**/* ../node`, { cwd, stdio });
     if (!process.env.PSP_HEAP_INSTRUMENTS) {
         compress(
-            `../../cpp/perspective/dist/web/perspective-server.wasm`,
-            `../../cpp/perspective/dist/web/perspective-server.wasm`
+            `./dist/web/perspective-server.wasm`,
+            `./dist/web/perspective-server.wasm`
         );
     }
 } catch (e) {

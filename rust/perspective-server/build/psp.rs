@@ -30,6 +30,11 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     dst.define("RAPIDJSON_BUILD_EXAMPLES", "OFF");
     dst.define("ARROW_CXX_FLAGS_DEBUG", "-Wno-error");
 
+    dst.env(
+        "DEP_PERSPECTIVE_CLIENT_PROTO_PATH",
+        std::env::var("DEP_PERSPECTIVE_CLIENT_PROTO_PATH").unwrap(),
+    );
+
     if cfg!(target_os = "macos") {
         // Set CMAKE_OSX_ARCHITECTURES et al. for Mac builds.  Arrow does not forward on
         // CMAKE_OSX_ARCHITECTURES but it does forward on a CMAKE_TOOLCHAIN_FILE. In
@@ -86,9 +91,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     // normally they are passed directly to a cmake invocation in the recipe,
     // but our conda recipe doesn't directly invoke cmake
     if let Ok(cmake_args) = std::env::var("CMAKE_ARGS") {
-        println!(
-            "cargo:warning=Setting CMAKE_ARGS from environment {cmake_args:?}"
-        );
+        println!("cargo:warning=Setting CMAKE_ARGS from environment {cmake_args:?}");
         for arg in Shlex::new(&cmake_args) {
             dst.configure_arg(arg);
         }

@@ -107,7 +107,7 @@ function(protobuf_generate_cpp SRCS HDRS)
 
         add_custom_command(
             OUTPUT ${GENERATED_SRC} ${GENERATED_HDR}
-            COMMAND ${PROTOC_EXECUTABLE} --cpp_out ${CMAKE_CURRENT_BINARY_DIR} ${PROTO_FILE}
+            COMMAND ${PROTOC_EXECUTABLE} --cpp_out ${CMAKE_CURRENT_BINARY_DIR} --proto_path ${PROTO_PATH} ${PROTO_FILE}
             DEPENDS ${PROTO_FILE} ${PROTOC_EXECUTABLE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Generating ${GENERATED_SRC} and ${GENERATED_HDR} from ${PROTO_FILE}"

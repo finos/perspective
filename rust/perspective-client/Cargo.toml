@@ -31,11 +31,12 @@ include = [
 ]
 
 [features]
-default = []
+default = ["generate-proto", "protobuf-src"]
 
 # Should the project build the `proto.rs` via protoc from source or assume it
 # already exists?
 generate-proto = []
+
 # Should the project build protobuf from source? If not, building this crate
 # requires PROTOC be set in the environment
 protobuf-src = ["dep:protobuf-src"]
@@ -51,6 +52,7 @@ talc-allocator = ["talc"]
 [lib]
 crate-type = ["rlib"]
 path = "src/rust/lib.rs"
+
 
 [build-dependencies]
 prost-build = { version = "0.12.3" }

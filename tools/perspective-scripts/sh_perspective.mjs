@@ -129,53 +129,6 @@ export const run_with_scope = async function run_recursive(strings, ...args) {
     });
 };
 
-/**
- * Copy C++/Config/README/LICENSE assets from outer project
- * into python folder
- */
-export const copy_files_to_python_folder = (link_files) => {
-    const dist = sh.path`${__dirname}/../../python/perspective/dist`;
-    const cpp = sh.path`${__dirname}/../../cpp/perspective/src`;
-    const cmakelists = sh.path`${__dirname}/../../cpp/perspective/CMakeLists.txt`;
-
-    const cmake = sh.path`${__dirname}/../../cmake`;
-    const dcmake = sh.path`${dist}/cmake`;
-
-    const lic = sh.path`${__dirname}/../../LICENSE`;
-    const dlic = sh.path`${dist}/LICENSE`;
-    const readme = sh.path`${__dirname}/../../README.md`;
-    const dreadme = sh.path`${dist}/README.md`;
-    const clangd = sh.path`${__dirname}/../../cpp/perspective/.clangd.in`;
-    const dclangd = sh.path`${dist}/.clangd.in`;
-    const protos = sh.path`${__dirname}/../../protos`;
-    const protosd = sh.path`${dist}/protos`;
-
-    fse.mkdirpSync(dist);
-    const copies = [
-        [cmakelists, sh.path`${dist}/CMakeLists.txt`],
-        [cpp, sh.path`${dist}/src`],
-        [lic, dlic],
-        [readme, dreadme],
-        [cmake, dcmake],
-        [clangd, dclangd],
-        [protos, protosd],
-    ];
-    for (let [src, dst] of copies) {
-        if (link_files) {
-            try {
-                fse.symlinkSync(src, dst);
-            } catch (e) {
-                if (e.code == "EEXIST") {
-                    continue;
-                }
-                throw e;
-            }
-        } else {
-            fse.copySync(src, dst, { preserveTimestamps: true });
-        }
-    }
-};
-
 export function py_requirements() {
     const version = sh`python3 --version`
         .execSync()
