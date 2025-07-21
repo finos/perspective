@@ -157,13 +157,6 @@ const config = {
                             {
                                 type: "html",
                                 value: link(
-                                    "<code>@finos/perspective-viewer</code>",
-                                    "/viewer/modules/perspective-viewer.html"
-                                ),
-                            },
-                            {
-                                type: "html",
-                                value: link(
                                     "<code>@finos/perspective</code> Browser",
                                     "/browser/modules/src_ts_perspective.browser.ts.html"
                                 ),
@@ -177,7 +170,33 @@ const config = {
                             },
                             {
                                 type: "html",
+                                value: link(
+                                    "<code>@finos/perspective-viewer</code>",
+                                    "/viewer/modules/perspective-viewer.html"
+                                ),
+                            },
+                            {
+                                type: "html",
+                                value: link(
+                                    "<code>@finos/perspective-react</code>",
+                                    "/react/index.html"
+                                ),
+                            },
+                            {
+                                type: "html",
                                 value: '<span style="user-select:none">Rust API</span>',
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective/latest/perspective/"><code>perspective</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-client/latest/perspective_client/"><code>perspective-client</code></a>`,
+                            },
+                            {
+                                type: "html",
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-server/latest/perspective_server/"><code>perspective-server</code></a>`,
                             },
                             {
                                 type: "html",
@@ -189,7 +208,7 @@ const config = {
                             },
                             {
                                 type: "html",
-                                value: `<a class="dropdown__link" href="https://docs.rs/perspective/latest/perspective/"><code>perspective</code></a>`,
+                                value: `<a class="dropdown__link" href="https://docs.rs/perspective-viewer/latest/perspective_viewer/"><code>perspective-viewer</code></a>`,
                             },
                         ],
                     },

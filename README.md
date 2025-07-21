@@ -42,7 +42,7 @@ applications.
 -   [Project Site](https://perspective.finos.org/)
 -   [User Guide](https://perspective.finos.org/guide/)
 -   Python API
-    -   [`perspective`](https://perspective.finos.org/python/)
+    -   [`perspective`](https://perspective.finos.org/python/index.html)
     -   [`perspective.widget`](https://perspective.finos.org/python/perspective/widget.html)
     -   [`perspective.handlers.aiohttp`](https://perspective.finos.org/python/perspective/handlers/aiohttp.htm)
     -   [`perspective.handlers.starlette`](https://perspective.finos.org/python/perspective/handlers/starlett.htm)
@@ -51,6 +51,7 @@ applications.
     -   [`@finos/perspective` Browser](https://perspective.finos.org/browser/modules/src_ts_perspective.browser.ts.html)
     -   [`@finos/perspective` Node.js](https://perspective.finos.org/node/modules/src_ts_perspective.node.ts.html)
     -   [`@finos/perspective-viewer`](https://perspective.finos.org/viewer/modules/perspective-viewer.html)
+    -   [`@finos/perspective-react`](https://perspective.finos.org/react/index.html)
 -   Rust API
     -   [`perspective`](https://docs.rs/perspective/latest/perspective/)
     -   [`perspective-client`](https://docs.rs/perspective-client/latest/perspective_client/)

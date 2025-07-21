@@ -542,6 +542,9 @@ importers:
       '@finos/perspective-esbuild-plugin':
         specifier: workspace:^
         version: link:../../tools/perspective-esbuild-plugin
+      typedoc:
+        specifier: ^0.28.7
+        version: 0.28.7(typescript@5.2.2)
       typescript:
         specifier: ~5.2.2
         version: 5.2.2
