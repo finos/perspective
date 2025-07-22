@@ -1258,6 +1258,45 @@ function validate_binary_operations(output, expressions, operator) {
                 await table.delete();
             });
 
+            test("null", async function () {
+                const table = await perspective.table({
+                    a: "integer",
+                    b: "float",
+                });
+
+                const view = await table.view({
+                    expressions: [
+                        "float(null)",
+                        "string(null)",
+                        "integer(null)",
+                    ].reduce((x, y) => Object.assign(x, { [y]: y }), {}),
+                });
+
+                await table.update({
+                    a: [1, null, null, 4],
+                    b: [null, 2.5, null, 4.5],
+                });
+
+                const result = await view.to_columns();
+                expect(result["float(null)"]).toEqual([null, null, null, null]);
+                expect(result["string(null)"]).toEqual([
+                    null,
+                    null,
+                    null,
+                    null,
+                ]);
+
+                expect(result["integer(null)"]).toEqual([
+                    null,
+                    null,
+                    null,
+                    null,
+                ]);
+
+                await view.delete();
+                await table.delete();
+            });
+
             test("percent_of", async function () {
                 const table = await perspective.table({
                     a: "integer",
