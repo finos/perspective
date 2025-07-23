@@ -48,8 +48,8 @@ async function leak_test(test, num_iterations = 10_000) {
 
     const final_used = (await perspective.system_info()).used_size;
     expect((await perspective.system_info()).heap_size).toEqual(start);
-    expect(final_used / start_used).toBeGreaterThanOrEqual(0.8);
-    expect(final_used / start_used).toBeLessThanOrEqual(1.5);
+    expect(Number(final_used) / Number(start_used)).toBeGreaterThanOrEqual(0.8);
+    expect(Number(final_used) / Number(start_used)).toBeLessThanOrEqual(1.5);
 }
 
 /**

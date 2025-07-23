@@ -1973,6 +1973,10 @@ to_string::operator()(t_parameter_list parameters) {
 
     t_generic_type& gt = parameters[0];
     t_scalar_view temp(gt);
+    if (temp().get_dtype() == DTYPE_NONE) {
+        return rval;
+    }
+
     val.set(temp());
 
     if (!val.is_valid()) {
@@ -2011,6 +2015,10 @@ to_integer::operator()(t_parameter_list parameters) {
 
     t_generic_type& gt = parameters[0];
     t_scalar_view temp(gt);
+    if (temp().get_dtype() == DTYPE_NONE) {
+        return rval;
+    }
+
     val.set(temp());
 
     if (!val.is_valid()) {
@@ -2059,8 +2067,11 @@ to_float::operator()(t_parameter_list parameters) {
 
     t_generic_type& gt = parameters[0];
     t_scalar_view temp(gt);
-    val.set(temp());
+    if (temp().get_dtype() == DTYPE_NONE) {
+        return rval;
+    }
 
+    val.set(temp());
     if (!val.is_valid()) {
         return rval;
     }
@@ -2101,6 +2112,10 @@ to_boolean::operator()(t_parameter_list parameters) {
 
     const t_generic_type& gt = parameters[0];
     t_scalar_view temp(gt);
+    if (temp().get_dtype() == DTYPE_NONE) {
+        return rval;
+    }
+
     val.set(temp());
 
     // handles STATUS_VALID, so no need to check separately
@@ -2169,6 +2184,10 @@ make_datetime::operator()(t_parameter_list parameters) {
 
     t_generic_type& gt = parameters[0];
     t_scalar_view temp(gt);
+    if (temp().get_dtype() == DTYPE_NONE) {
+        return rval;
+    }
+
     t_tscalar temp_scalar;
 
     temp_scalar.set(temp());
