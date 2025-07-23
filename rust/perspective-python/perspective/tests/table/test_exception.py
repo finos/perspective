@@ -63,3 +63,13 @@ class TestException(object):
             tbl.view(group_by=["b"])
 
         assert str(ex.value) == "Abort(): Invalid column 'b' found in View group_by.\n"
+
+    def test_exception_from_csv_update_with_no_header(self):
+        tbl = Table({ "stringcol": "string" })
+        data = "rowval  \n another row val"
+        errored = False
+        try:
+            tbl.update(data)
+        except:
+            errored = True
+        assert errored
