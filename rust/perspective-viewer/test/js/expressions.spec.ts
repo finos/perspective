@@ -10,24 +10,22 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "@finos/perspective-test";
+import { expect, test } from "@finos/perspective-test";
 import {
-    PageView,
     compareContentsToSnapshot,
+    PageView,
     shadow_click,
-    shadow_type,
 } from "@finos/perspective-test";
-
-// NOTE: Change this file to be a .ts file.
+import { Page } from "@playwright/test";
 
 async function openSidebarAndScrollToBottom() {
     const elem = document.querySelector("perspective-viewer");
-    await elem.getTable();
-    await elem.toggleConfig(true);
-    elem.shadowRoot.querySelector("#active-columns").scrollTop = 500;
+    await elem!.getTable();
+    await elem!.toggleConfig(true);
+    elem!.shadowRoot!.querySelector("#active-columns")!.scrollTop = 500;
 }
 
-async function checkSaveDisabled(page, expr) {
+async function checkSaveDisabled(page: Page, expr: string) {
     let view = new PageView(page);
     let settingsPanel = await view.openSettingsPanel();
     await settingsPanel.createNewExpression("", expr, false);
@@ -44,7 +42,7 @@ test.beforeEach(async ({ page }) => {
     });
 
     await page.evaluate(async () => {
-        await document.querySelector("perspective-viewer").restore({
+        await document.querySelector("perspective-viewer")!.restore({
             plugin: "Debug",
         });
     });
@@ -59,30 +57,32 @@ test.describe("Expressions", () => {
         await page.waitForFunction(
             () =>
                 !!document
-                    .querySelector("perspective-viewer")
-                    .shadowRoot.querySelector("#add-expression")
+                    .querySelector("perspective-viewer")!
+                    .shadowRoot!.querySelector("#add-expression")
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
 
         await page.waitForFunction(() => {
             const root = document
-                .querySelector("perspective-viewer")
-                .shadowRoot.querySelector("#editor-container");
+                .querySelector("perspective-viewer")!
+                .shadowRoot!.querySelector("#editor-container");
 
             return !!root;
         });
 
         const editor = await page.waitForFunction(async () => {
             const root = document
-                .querySelector("perspective-viewer")
-                .shadowRoot.querySelector("#editor-container");
-            return root.querySelector("#content");
+                .querySelector("perspective-viewer")!
+                .shadowRoot!.querySelector("#editor-container");
+            return root!.querySelector("#content");
         });
 
-        const contents = await editor.evaluate((x) => x.outerHTML);
+        const contents = await editor.evaluate((x) => x!.outerHTML);
 
-        await page.evaluate(() => document.activeElement.blur());
+        await page.evaluate(() =>
+            (document.activeElement as HTMLElement)!.blur()
+        );
 
         await compareContentsToSnapshot(contents, [
             "click-on-add-column-button-opens-the-expression-ui.txt",
@@ -94,15 +94,19 @@ test.describe("Expressions", () => {
         await page.waitForFunction(
             () =>
                 !!document
-                    .querySelector("perspective-viewer")
-                    .shadowRoot.querySelector("#add-expression")
+                    .querySelector("perspective-viewer")!
+                    .shadowRoot!.querySelector("#add-expression")
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
         await page.waitForSelector("#editor-container");
         await page.evaluate(async () => {
-            let root = document.querySelector("perspective-viewer").shadowRoot;
-            await root.querySelector("#column_settings_close_button").click();
+            let root =
+                document.querySelector("perspective-viewer")!.shadowRoot!;
+            const column_settings_close_button = root.querySelector!(
+                "#column_settings_close_button"
+            ) as HTMLElement;
+            column_settings_close_button.click();
         });
 
         await page.waitForSelector("#editor-container", {
@@ -110,7 +114,8 @@ test.describe("Expressions", () => {
         });
 
         const contents = await page.evaluate(async () => {
-            let root = document.querySelector("perspective-viewer").shadowRoot;
+            let root =
+                document.querySelector("perspective-viewer")!.shadowRoot!;
             return (
                 root.querySelector("#editor-container")?.innerHTML || "MISSING"
             );
@@ -143,13 +148,13 @@ test.describe("Expressions", () => {
         page,
     }) => {
         const contents = await page.evaluate(async () => {
-            document.activeElement.blur();
+            (document.activeElement as HTMLElement).blur();
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { "1 + 2": "1 + 2", abc: "3 + 4" },
             });
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -168,7 +173,7 @@ test.describe("Expressions", () => {
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -184,7 +189,7 @@ test.describe("Expressions", () => {
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -197,17 +202,17 @@ test.describe("Expressions", () => {
     }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
-            await elem.reset(true);
+            await elem!.reset(true);
         });
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
             return (
-                elem.shadowRoot.querySelector("#sub-columns")?.innerHTML ||
+                elem!.shadowRoot!.querySelector("#sub-columns")?.innerHTML ||
                 "MISSING"
             );
         });
@@ -222,16 +227,16 @@ test.describe("Expressions", () => {
     }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
-            await elem.reset(false);
+            await elem!.reset(false);
         });
 
         const content = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(content, [
@@ -244,18 +249,18 @@ test.describe("Expressions", () => {
     }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 columns: ["1 + 2"],
                 expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
-            await elem.reset(true);
+            await elem!.reset(true);
         });
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
             return (
-                elem.shadowRoot.querySelector("#sub-columns")?.innerHTML ||
+                elem!.shadowRoot!.querySelector("#sub-columns")?.innerHTML ||
                 "MISSING"
             );
         });
@@ -270,17 +275,17 @@ test.describe("Expressions", () => {
     }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 columns: ["1 + 2"],
                 expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
-            await elem.reset(false);
+            await elem!.reset(false);
         });
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -293,21 +298,21 @@ test.describe("Expressions", () => {
     }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 columns: ["1 + 2"],
                 group_by: ["3 + 4"],
                 sort: [["1 + 2", "asc"]],
                 filter: [["1 + 2", "==", 3]],
                 expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
-            await elem.reset(true);
+            await elem!.reset(true);
         });
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
             return (
-                elem.shadowRoot.querySelector("#sub-columns")?.innerHTML ||
+                elem!.shadowRoot!.querySelector("#sub-columns")?.innerHTML ||
                 "MISSING"
             );
         });
@@ -322,18 +327,18 @@ test.describe("Expressions", () => {
     }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
-            await elem.restore({
+            await elem!.restore({
                 columns: ["State"],
             });
         });
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -369,18 +374,18 @@ test.describe("Expressions", () => {
     }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { "3 + 4": "3 + 4", "1 + 2": "1 + 2" },
             });
-            await elem.restore({
+            await elem!.restore({
                 columns: ["3 + 4"],
             });
         });
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -391,8 +396,8 @@ test.describe("Expressions", () => {
     test("Aggregates for expressions should apply", async ({ page }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { '"Sales" + 100': '"Sales" + 100' },
                 aggregates: { '"Sales" + 100': "avg" },
                 group_by: ["State"],
@@ -402,7 +407,7 @@ test.describe("Expressions", () => {
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -413,8 +418,8 @@ test.describe("Expressions", () => {
     test("Should sort by hidden expressions", async ({ page }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { '"Sales" + 100': '"Sales" + 100' },
                 sort: [['"Sales" + 100', "asc"]],
                 columns: ["Row ID"],
@@ -423,7 +428,7 @@ test.describe("Expressions", () => {
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
@@ -434,8 +439,8 @@ test.describe("Expressions", () => {
     test("Should filter by an expression", async ({ page }) => {
         await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            await elem.toggleConfig(true);
-            await elem.restore({
+            await elem!.toggleConfig(true);
+            await elem!.restore({
                 expressions: { '"Sales" + 100': '"Sales" + 100' },
                 filter: [['"Sales" + 100', ">", 150]],
                 columns: ["Row ID", '"Sales" + 100'],
@@ -444,7 +449,7 @@ test.describe("Expressions", () => {
 
         const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
-            return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
+            return elem!.shadowRoot!.querySelector("#sub-columns")!.innerHTML;
         });
 
         await compareContentsToSnapshot(contents, [
