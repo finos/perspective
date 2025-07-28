@@ -39,3 +39,29 @@ app = Application(
     ]
 )
 ```
+
+## `on_poll_request`
+
+`on_poll_request` is an optional keyword argument for `Server()`, which which
+can be applied in cases where overlapping `Table.update` calls can be safely
+deferred.
+
+When providing a callback function to `on_poll_request`, the `Server` will
+invoke your callback when there are updates that need to be flushed, after which
+you must _eventually_ call `Server.poll` (or else no updates will be processed).
+
+The exact implementation of `on_poll_request` will depend on the context. A
+simple example which batches calls via `threading.Lock`:
+
+```python
+lock = threading.Lock()
+
+def on_poll_request(perspective_server):
+    if lock.acquire(blocking=False):
+        try:
+            perspective_server.poll()
+        finally:
+            lock.release()
+
+server = Server(on_poll_request=on_poll_request)
+```

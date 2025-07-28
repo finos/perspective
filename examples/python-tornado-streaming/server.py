@@ -91,6 +91,12 @@ def poll_target(lock, perspective_server):
         lock.release()
 
 
+# `on_poll_request` is an optional keyword argument for `Server()`, which
+# enables an optimization which can be applied in cases when deferring
+# overlapping `Table.update` calls can be done safely.
+#
+# In This case, `Table.update` is always called every `TICK_RATE`, so it is safe
+# to defer these updates as they'll get applied when the next tick occurs.
 def on_poll_request(lock, executor, perspective_server):
     if lock.acquire(blocking=False):
         executor.submit(poll_target, lock, perspective_server)
