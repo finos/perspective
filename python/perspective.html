@@ -609,7 +609,7 @@ back to Javascript.</p>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="c1">#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="c1">#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>
-</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;3.7.3&quot;</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;3.7.4&quot;</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>    <span class="s2">&quot;_jupyter_labextension_paths&quot;</span><span class="p">,</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>    <span class="s2">&quot;Server&quot;</span><span class="p">,</span>
@@ -1005,6 +1005,15 @@ back to Javascript.</p>
     
             <div class="docstring"><p>An instance of a Perspective server. Each <a href="#Server">Server</a> instance is separate,
 and does not share <a href="#Table">Table</a> (or other) data with other <a href="#Server">Server</a>s.</p>
+
+<h1 id="arguments">Arguments</h1>
+
+<ul>
+<li><code>on_poll_request</code> A callback function which the <code><a href="#Server">Server</a></code> will invoke when
+there are updates that need to be flushed, after which you must
+_eventually_ call <a href="#Server.poll"><code>Server.poll</code></a> (or else no updates will be processed).
+This optimization allows batching updates, depending on context.</li>
+</ul>
 </div>
 
 
@@ -1055,8 +1064,17 @@ a custom Perspective ['Client<code>]/[</code>Server`] transport.</p>
 <a href="#View.on_update"><code>View.on_update</code></a> callbacks.</p>
 
 <p><a href="#Server.poll"><code>Server.poll</code></a> only needs to be called if you've implemented
-a custom Perspective ['Client<code>]/[</code>Server<code>] transport and provided the
-</code>on_poll_request` constructor keyword argument.</p>
+a custom Perspective <a href="#Server">Server</a> and provided the <code>on_poll_request</code>
+constructor keyword argument.</p>
+
+<p>Calling <a href="#Session.poll"><code>Session.poll</code></a> may result in the <code>send_response</code> parameter
+which was used to construct this (or other) <a href="https://docs.rs/perspective-python/latest/perspective_python/struct.Session.html"><code>Session</code></a> to fire.
+Whenever a <a href="#Session.handle_request"><code>Session.handle_request</code></a> method is invoked for a
+<code>perspective_server::Server</code>, at least one <a href="#Session.poll"><code>Session.poll</code></a> should be
+scheduled to clear other clients message queues.</p>
+
+<p><code><a href="#Server.poll">poll()</a></code> _must_ be called after <a href="#Table.update"><code>Table.update</code></a> or <a href="#Table.remove"><code>Table.remove</code></a>
+and <code>on_poll_request</code> is notified, or the changes will not be applied.</p>
 </div>
 
 
