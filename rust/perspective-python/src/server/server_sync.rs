@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use futures::future::BoxFuture;
 #[cfg(doc)]
-use perspective_client::Table;
+use perspective_client::{Client, Table};
 use perspective_server::ServerResult;
 use pollster::FutureExt;
 use pyo3::IntoPyObjectExt;
@@ -27,6 +27,13 @@ use crate::client::client_async::AsyncClient;
 
 /// An instance of a Perspective server. Each [`Server`] instance is separate,
 /// and does not share [`Table`] (or other) data with other [`Server`]s.
+///
+/// # Arguments
+///
+/// - `on_poll_request` A callback function which the `Server` will invoke when
+///   there are updates that need to be flushed, after which you must
+///   _eventually_ call [`Server::poll`] (or else no updates will be processed).
+///   This optimization allows batching updates, depending on context.
 #[pyclass(subclass, module = "perspective")]
 #[derive(Clone)]
 pub struct Server {
@@ -72,10 +79,17 @@ impl Server {
         Ok(client)
     }
 
-    /// Create a new [`Session`] bound to this [`Server`].
+    /// Create a [`Session`] for this [`Server`], suitable for exactly one
+    /// [`Client`] (not necessarily in this process). A  [`Session`] represents
+    /// the server-side state of a single client-to-server connection.
     ///
-    /// [`Server::new_session`] only needs to be called if you've implemented
-    /// a custom Perspective ['Client`]/[`Server`] transport.
+    /// # Arguments
+    ///
+    /// - `session_handler` - An implementor of [`SessionHandler`] which will be
+    ///   invoked by the [`Server`] when a response message needs to be sent to
+    ///   the [`Client`]. The response itself should be passed to
+    ///   [`Client::handle_response`] eventually, though it may-or-may-not be in
+    ///   the same process.
     pub fn new_session(&self, _py: Python, response_cb: Py<PyAny>) -> PySession {
         let session = self
             .server
@@ -90,8 +104,17 @@ impl Server {
     /// [`View::on_update`] callbacks.
     ///
     /// [`Server::poll`] only needs to be called if you've implemented
-    /// a custom Perspective ['Client`]/[`Server`] transport and provided the
-    /// `on_poll_request` constructor keyword argument.
+    /// a custom Perspective [`Server`] and provided the `on_poll_request`
+    /// constructor keyword argument.
+    ///
+    /// Calling [`Session::poll`] may result in the `send_response` parameter
+    /// which was used to construct this (or other) [`Session`] to fire.
+    /// Whenever a [`Session::handle_request`] method is invoked for a
+    /// `perspective_server::Server`, at least one [`Session::poll`] should be
+    /// scheduled to clear other clients message queues.
+    ///
+    /// `poll()` _must_ be called after [`Table::update`] or [`Table::remove`]
+    /// and `on_poll_request` is notified, or the changes will not be applied.
     pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
         py.allow_threads(|| {
             self.server

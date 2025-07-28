@@ -53,7 +53,6 @@ pub trait SessionHandler: Send + Sync {
 pub struct Server {
     pub(crate) server: Arc<ffi::Server>,
     pub(crate) callbacks: Arc<RwLock<HashMap<u32, SessionCallback>>>,
-
     pub(crate) on_poll_request: Option<OnPollRequestCallback>,
 }
 
@@ -66,6 +65,15 @@ impl std::fmt::Debug for Server {
 }
 
 impl Server {
+    /// Create a new [`Server`].
+    ///
+    /// # Arguments
+    ///
+    /// - `on_poll_request` A callback function which the `Server` will invoke
+    ///   when there are updates that need to be flushed, after which you must
+    ///   _eventually_ call [`Server::poll`] (or else no updates will be
+    ///   processed). This optimization allows batching updates, depending on
+    ///   context.
     pub fn new(on_poll_request: Option<OnPollRequestCallback>) -> Self {
         let server = Arc::new(ffi::Server::new(on_poll_request.is_some()));
         let callbacks = Arc::default();
@@ -126,12 +134,17 @@ impl Server {
         .await
     }
 
+    /// Create a new [`Client`] instance bound to this [`Server`] directly.
     pub fn new_local_client(&self) -> LocalClient {
         LocalClient::new(self)
     }
 
     /// Flush any pending messages which may have resulted from previous
     /// [`Session::handle_request`] calls.
+    ///
+    /// [`Server::poll`] only needs to be called if you've implemented
+    /// a custom Perspective [`Server`] and provided the `on_poll_request`
+    /// constructor keyword argument.
     ///
     /// Calling [`Session::poll`] may result in the `send_response` parameter
     /// which was used to construct this (or other) [`Session`] to fire.
@@ -140,7 +153,7 @@ impl Server {
     /// scheduled to clear other clients message queues.
     ///
     /// `poll()` _must_ be called after [`Table::update`] or [`Table::remove`]
-    /// and `on_poll_request` set, or these changes will not be applied.
+    /// and `on_poll_request` is notified, or the changes will not be applied.
     pub async fn poll(&self) -> Result<(), ServerError> {
         let responses = self.server.poll();
         let mut results = Vec::with_capacity(responses.size());

@@ -218,11 +218,6 @@ const config = {
                         label: "Examples",
                     },
                     {
-                        href: "https://prospective.co/blog",
-                        label: "Blog",
-                        position: "right",
-                    },
-                    {
                         href: "https://github.com/finos/perspective",
                         label: "GitHub",
                         position: "right",
