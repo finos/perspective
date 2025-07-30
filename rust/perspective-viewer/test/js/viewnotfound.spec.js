@@ -63,16 +63,18 @@ test("View conflation is silenced", async ({ page }) => {
         await viewer.load(table);
         await viewer.restore({ plugin: "pause-plugin" });
         is_paused = true;
-        viewer.restore({});
+        const restore_task = viewer.restore({});
+
         while (!resolve) {
             await new Promise((x) => setTimeout(x, 0));
         }
-        viewer.load(table);
-        // this time must be at least as long as it takes for the load to finish
-        await new Promise((x) => setTimeout(x, 500));
+
+        const load_task = viewer.load(table);
+        await new Promise((x) => setTimeout(x, 0));
         resolve();
+        await restore_task;
+        await load_task;
     });
-    // give the console time to receive the error
-    await new Promise((x) => setTimeout(x, 10000));
+
     expect(vnf).toBeFalsy();
 });
