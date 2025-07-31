@@ -52,3 +52,17 @@ button {
     font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
         "Consolas", "Liberation Mono", monospace;
 }
+
+.workspace-container {
+    display: flex;
+    flex-direction: column;
+
+    .workspace-toolbar {
+        display: flex;
+        flex-direction: row;
+    }
+
+    perspective-workspace {
+        height: 100vh;
+    }
+}
