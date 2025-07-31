@@ -98,8 +98,8 @@ test.describe("leaks", function () {
                     let json = await view.to_json();
                     expect(json.length).toEqual(50);
                 });
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             test.skip("OG - to_columns_string does not leak", async () => {
@@ -109,8 +109,8 @@ test.describe("leaks", function () {
                     let json = await view.to_columns_string();
                     expect(json.length).toEqual(6722);
                 });
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             // The length of this string changed due to
@@ -122,8 +122,8 @@ test.describe("leaks", function () {
                     let json = await view.to_columns_string();
                     expect(json.length).toEqual(6669);
                 });
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
         });
     });
@@ -149,16 +149,16 @@ test.describe("leaks", function () {
             // await table.update([{ x: 1, y: "TestTestTest" }]);
 
             expect(count).toBeGreaterThan(0);
-            view.delete();
-            table.delete();
+            await view.delete();
+            await table.delete();
         });
 
         test.skip("csv loading does not leak", async () => {
             const table = await perspective.table(arr.slice());
             const view = await table.view();
             const csv = await view.to_csv({ end_row: 10 });
-            view.delete();
-            table.delete();
+            await view.delete();
+            await table.delete();
             await leak_test(async function () {
                 const table = await perspective.table(csv);
                 expect(await table.size()).toEqual(10);
@@ -211,13 +211,16 @@ test.describe("leaks", function () {
                 const table = await perspective.table({
                     a: "abcdefghijklmnopqrstuvwxyz".split(""),
                 });
+
                 const view = await table.view({
                     expressions,
                 });
+
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
                     Object.keys(expressions).length
                 );
+
                 await view.delete();
                 await table.delete();
             });
@@ -239,10 +242,12 @@ test.describe("leaks", function () {
                 const view = await table.view({
                     expressions,
                 });
+
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
                     Object.keys(expressions).length
                 );
+
                 await view.delete();
             });
 
@@ -259,7 +264,6 @@ test.describe("leaks", function () {
 
             const columns = ["a", "b", "c", "d"];
             const expressions = generate_expressions();
-
             await leak_test(async () => {
                 const view = await table.view({
                     group_by: [
@@ -267,10 +271,12 @@ test.describe("leaks", function () {
                     ],
                     expressions,
                 });
+
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
                     Object.keys(expressions).length
                 );
+
                 await view.delete();
             }, 3000);
 
@@ -297,10 +303,12 @@ test.describe("leaks", function () {
                     ],
                     expressions,
                 });
+
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
                     Object.keys(expressions).length
                 );
+
                 await view.delete();
             }, 3000);
 
