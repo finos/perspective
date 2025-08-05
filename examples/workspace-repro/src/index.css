@@ -1,0 +1,34 @@
+/* ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+ * ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+ * ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+ * ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+ * ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+ * ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+ * ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+ * ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+ * ┃ This file is part of the Perspective library, distributed under the terms ┃
+ * ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+ * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+ */
+
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
+        "Consolas", "Liberation Mono", monospace;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+nav.header {
+    display: flex;
+}
+
+perspective-workspace {
+    height: 100%;
+}
