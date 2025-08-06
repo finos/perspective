@@ -54,8 +54,10 @@ const ready = document.createElement("div");
 ready.innerText = "READY";
 document.querySelector("nav.header")?.appendChild(ready);
 
-const ws = document.createElement("perspective-workspace");
-document.body.appendChild(ws);
+const workspace = document.createElement(
+    "perspective-workspace"
+) as Workspace.HTMLPerspectiveWorkspaceElement;
+document.body.appendChild(workspace);
 
 const tablesMain: Record<string, Promise<psp.Table>> = {};
 const tablesSwap: Record<string, Promise<psp.Table>> = {};
@@ -67,36 +69,80 @@ let layout: PerspectiveWorkspaceConfig<string> = {
 };
 let swap = false;
 
-function swapTables() {
-    swap = !swap;
-    ws.replaceTables(swap ? tablesMain : tablesSwap);
-}
-
 function addViewer() {
     const name = window.crypto.randomUUID().slice(0, 7);
     tablesMain[name] = CLIENT.table("a,b,c\n1,2,3");
     tablesSwap[name] = CLIENT.table("a,b,c\n4,5,6\n7,8,9");
-    ws.addTable(name, swap ? tablesMain[name] : tablesSwap[name]);
+    workspace.addTable(name, swap ? tablesMain[name] : tablesSwap[name]);
 
     layout = Workspace.addViewer(layout, { table: name, title: name });
-    ws.restore(layout);
+    workspace.restore(layout);
 }
 
-document.querySelector("button.swap")?.addEventListener("click", () => {
-    swapTables();
-});
 document.querySelector("button.add")?.addEventListener("click", () => {
     addViewer();
 });
 
-addViewer();
-swapTables();
-addViewer();
-swapTables();
-// addViewer();
-// swapTables();
-// addViewer();
-// swapTables();
-// addViewer();
-// swapTables();
+workspace.restore({
+    sizes: [],
+    viewers: {},
+    detail: undefined,
+});
 
+workspace.restore({
+    sizes: [],
+    viewers: {
+        PERSPECTIVE_GENERATED_ID_0: {
+            title: "a",
+            table: "a",
+        },
+    },
+    detail: {
+        main: {
+            type: "split-area",
+            sizes: [1],
+            orientation: "horizontal",
+            children: [
+                {
+                    type: "tab-area",
+                    currentIndex: 0,
+                    widgets: ["PERSPECTIVE_GENERATED_ID_0"],
+                },
+            ],
+        },
+    },
+});
+workspace.addTable("a", CLIENT.table("a,b,c\n1,2,3"));
+workspace.restore({
+    sizes: [1],
+    detail: {
+        main: {
+            type: "tab-area",
+            widgets: ["PERSPECTIVE_GENERATED_ID_0"],
+            currentIndex: 0,
+        },
+    },
+    viewers: {
+        PERSPECTIVE_GENERATED_ID_0: {
+            version: "3.7.4",
+            plugin: "Datagrid",
+            plugin_config: {
+                columns: {},
+                edit_mode: "READ_ONLY",
+                scroll_lock: false,
+            },
+            columns_config: {},
+            theme: "Pro Light",
+            title: "a",
+            group_by: [],
+            split_by: [],
+            sort: [],
+            filter: [],
+            expressions: {},
+            columns: [],
+            aggregates: {},
+            table: "a",
+            settings: false,
+        },
+    },
+});

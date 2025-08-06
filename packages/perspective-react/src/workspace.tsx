@@ -63,35 +63,22 @@ export const PerspectiveWorkspace = React.forwardRef<
 
         React.useImperativeHandle(ref, () => workspace, [workspace]);
 
-        const tablesMutex = React.useRef(new Mutex());
-
         React.useEffect(() => {
             if (!workspace) return;
             workspace.restore(config);
         }, [workspace, config]);
 
-        // TODO: I dont want to run this only when `config` changes
-        //       because this triggering effect involves minor slow things like
-        //       iterating through a list... If tables has not changed this work will be idempotent.
-        //       so maybe its a bit of wasted compute??? TODO: How slow is it actually??
+        const lock = React.useRef(new Mutex());
+
         React.useEffect(() => {
             if (!workspace) return;
-            tablesMutex.current.runExclusive(() => {
-                console.log("DDD Replacing Tables");
-                replaceTablesAlgorithm(
-                    workspace.tables,
-                    tables,
-                    workspace,
-                    config
-                );
+            lock.current.runExclusive(async () => {
+                await reconcileNewTables(workspace, tables, config);
             });
         }, [workspace, tables, config]);
 
         utils.usePspListener(workspace, "workspace-new-view", onNewView);
 
-        // TODO: does replacing `tables` when this is fired mess up performance
-        //       by over-running replaceTables which may be expensive?
-        //       Is it expensive in the usual case of no changes to tables?
         utils.usePspListener(
             workspace,
             "workspace-layout-update",
@@ -118,17 +105,17 @@ export const PerspectiveWorkspace = React.forwardRef<
 
 /// swaps all tables in the workspace with the ones passed in.
 /// Any viewers that are using tables not in the new tables will be ejected (`viewer>eject()`).
-async function replaceTablesAlgorithm(
-    prev: Map<string, Promise<psp.Table> | psp.Table>,
-    next: Record<string, Promise<psp.Table>>,
+async function reconcileNewTables(
     workspace: pspWorkspace.HTMLPerspectiveWorkspaceElement,
+    next: Record<string, Promise<psp.Table>>,
     config: PerspectiveWorkspaceConfig<string>
 ) {
-    const viewers = Array.from(
+    const prev = workspace.tables;
+    const allViewers = Array.from(
         workspace.children
     ) as HTMLPerspectiveViewerElement[];
     const tableViewerMap: Record<string, HTMLPerspectiveViewerElement[]> =
-        viewers.reduce((acc, v) => {
+        allViewers.reduce((acc, v) => {
             const t = config.viewers[v.slot]?.table;
             if (t === undefined) {
                 return acc;
@@ -140,54 +127,54 @@ async function replaceTablesAlgorithm(
             }
         }, {} as Record<string, HTMLPerspectiveViewerElement[]>);
 
-    function* tasking(
-        prev: Map<string, Promise<psp.Table> | psp.Table>,
-        next: Record<string, Promise<psp.Table>>
-    ): Generator<
-        ["replace" | "add" | "remove", string, Promise<psp.Table>],
-        void,
-        unknown
-    > {
-        const names = new Set([...Object.keys(next), ...Object.keys(prev)]);
-        for (const name of names) {
-            if (Object.is(prev.get(name), next[name])) {
-                // We dont need to modify anything in the tables set
-                // the key is there and uses the same table.
-                // yield ["maintain", name, next[name]];
-            } else if (next[name] === undefined) {
-                // eject all viewers using `name` that is no longer mapped
-                const p = prev.get(name);
-                if (p === undefined) {
-                    throw new Error("Unreachable.");
-                }
-                yield ["remove", name, Promise.resolve(p)];
-                // TODO: Remove them from the tables
-            } else if (prev.get(name) === undefined) {
-                // new to the table-set
-                // TODO: Do we need to do any extra loading or anything??
-                yield ["add", name, next[name]];
-            } else {
-                // the table for `name` was remapped.
-                // eject and then reload viewers using [n]
-                // TODO: Do I need to eject??
-                yield ["replace", name, next[name]];
+    const tasks = [];
+
+    /// reconcile the two sets of tables into the final tables set.
+    const names = new Set([...Object.keys(next), ...prev.keys()]);
+    for (const name of names) {
+        const usedViewers = tableViewerMap[name];
+        if (Object.is(prev.get(name), next[name])) {
+            // We dont need to modify anything in the tables set
+            // the key is there and uses the same table.
+        } else if (next[name] === undefined) {
+            // name is no longer mapped in the new set of tables.
+            const p = prev.get(name);
+            if (p === undefined) {
+                throw new Error("Unreachable.");
             }
+            tasks.push(
+                (async () => {
+                    await Promise.all(
+                        usedViewers.map((v) => {
+                            return v.eject();
+                        })
+                    );
+                    workspace.removeTable(name);
+                })()
+            );
+        } else if (prev.get(name) === undefined) {
+            // A table was added that did not exist in the previous set.
+            tasks.push(
+                (async () => {
+                    await workspace.addTable(name, next[name]);
+                })()
+            );
+        } else {
+            // the table for `name` was remapped.
+            // eject and then reload viewers using [n]
+            tasks.push(
+                (async () => {
+                    await Promise.all(
+                        usedViewers.map(async (v) => {
+                            await v.eject();
+                            await v.load(next[name]);
+                        })
+                    );
+                    await workspace.replaceTable(name, next[name]);
+                })()
+            );
         }
     }
 
-    const tasks = tasking(prev, next).map(([task, name, table]) => {
-        const viewers = tableViewerMap[name];
-        return (async () => {
-            if (task === "add") {
-                workspace.addTable(name, table);
-            } else if (task === "remove") {
-                viewers.map((v) => {
-                    return v.eject();
-                });
-            } else if (task === "replace") {
-                workspace.replaceTable(name, table);
-            }
-        })();
-    });
     await Promise.all(tasks);
 }

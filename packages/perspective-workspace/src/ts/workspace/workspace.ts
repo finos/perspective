@@ -26,7 +26,6 @@ import { WorkspaceMenu } from "./menu";
 import { createCommands } from "./commands";
 import { PerspectiveViewerWidget } from "./widget";
 import { ObservableMap } from "../utils/observable_map";
-import { Mutex } from "async-mutex";
 
 const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
@@ -198,13 +197,11 @@ export class PerspectiveWorkspace extends SplitPanel {
     private _minimizedLayout?: PerspectiveLayoutConfig<Widget>;
     private _maximizedWidget?: PerspectiveViewerWidget;
     private _last_updated_state?: PerspectiveWorkspaceConfig<string>;
-    // private lock: Mutex;
     // private _context_menu?: Menu & { init_overlay?: () => void };
 
     constructor(element: HTMLElement) {
         super({ orientation: "horizontal" });
         this.addClass("perspective-workspace");
-        // this.lock = new Mutex();
         this.dockpanel = new PerspectiveDockPanel(this);
         this.detailPanel = new Panel();
         this.detailPanel.layout!.fitPolicy = "set-no-constraint";
@@ -273,27 +270,19 @@ export class PerspectiveWorkspace extends SplitPanel {
      */
 
     addTable(name: string, table: Promise<psp.Table>) {
-        // this.lock.runExclusive(() => {
         this.tables.set(name, table);
-        // });
     }
 
     getTable(name: string): psp.Table | Promise<psp.Table> {
-        // return this.lock.runExclusive(() => {
         return this.tables.get(name);
-        // });
     }
 
     removeTable(name: string) {
-        // this.lock.runExclusive(() => {
         return this.tables.delete(name);
-        // });
     }
 
     replaceTable(name: string, table: Promise<psp.Table>) {
-        // this.lock.runExclusive(() => {
         this.tables.set(name, table);
-        // });
     }
 
     get tables() {
@@ -474,6 +463,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         if (viewer) {
             widget = starting_widgets.find((x) => x.viewer === viewer);
             if (widget) {
+                console.warn("DDD Restore load??? ");
                 widget.load(this.tables.get(viewer_config.table));
                 widget.restore({ ...viewer_config });
             } else {
@@ -532,6 +522,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.getAllWidgets().forEach((widget) => {
             const psp_widget = widget as PerspectiveViewerWidget;
             if (psp_widget.viewer.getAttribute("table") === name) {
+                console.warn("DDD Loading...?", table);
                 psp_widget.load(table);
             }
         });
@@ -1090,6 +1081,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         const widget = new PerspectiveViewerWidget({ node, viewer });
         widget.task = (async () => {
             if (table) {
+                console.warn("DDD Loading B?", table);
                 widget.load(table);
             }
 

@@ -38,28 +38,7 @@ await Promise.all([
 // engine.
 
 import type * as psp from "@finos/perspective";
-import type * as pspViewer from "@finos/perspective-viewer";
 import * as Workspace from "@finos/perspective-workspace";
-
-import SUPERSTORE_ARROW from "superstore-arrow/superstore.lz4.arrow";
-
-const CLIENT = await perspective.worker();
-
-async function createNewSuperstoreTable(): Promise<psp.Table> {
-    console.warn("Creating new table!");
-    const req = fetch(SUPERSTORE_ARROW);
-    const resp = await req;
-    const buffer = await resp.arrayBuffer();
-    return await CLIENT.table(buffer);
-}
-
-const CONFIG: pspViewer.ViewerConfigUpdate = {
-    group_by: ["State"],
-};
-
-// # React application
-
-// The React application itself
 
 import * as React from "react";
 import { createRoot } from "react-dom/client";
@@ -69,6 +48,8 @@ import { PerspectiveWorkspaceConfig } from "@finos/perspective-workspace";
 import "@finos/perspective-viewer/dist/css/pro.css";
 import "@finos/perspective-workspace/dist/css/pro.css";
 import "./index.css";
+
+const CLIENT = await perspective.worker();
 
 interface WorkspaceState {
     mounted: boolean;
@@ -96,7 +77,7 @@ const WorkspaceApp: React.FC = () => {
     });
 
     const onClickAddViewer = React.useCallback(async () => {
-        const name = window.crypto.randomUUID();
+        const name = window.crypto.randomUUID().slice(0, 8);
         const data = `a,b,c\n${Math.random()},${Math.random()},${Math.random()}`;
         const swapData = `a,b,c\n${Math.random()},${Math.random()},${Math.random()}\n${Math.random()},${Math.random()},${Math.random()}`;
         // dont assign internal names to the tables they are not used by the workspace
@@ -143,7 +124,7 @@ const WorkspaceApp: React.FC = () => {
         setState({
             ...state,
             swap: !state.swap,
-        })
+        });
     }, [state]);
 
     return (

@@ -198,20 +198,13 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
     }
 
     /**
-     * Replace a `Table` by name. As `Table` doe snot guarantee the same
+     * Replace a `Table` by name. As `Table` does not guarantee the same
      * structure, this will wipe the viewer's state.
      * @param name
      * @param table
      */
     async replaceTable(name: string, table: Promise<psp.Table>) {
         this.workspace!.replaceTable(name, table);
-        await this.flush();
-    }
-
-    async replaceTables(
-        tables: Record<string, psp.Table | Promise<psp.Table>>
-    ) {
-        this.workspace!.replaceTables(tables);
         await this.flush();
     }
 
@@ -273,6 +266,11 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
             container.insertBefore(this.workspace.node, null);
             MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
         }
+    }
+
+    disconnectedCallback() {
+        // get perspective-indicator
+        // delete it.
     }
 
     /***************************************************************************
