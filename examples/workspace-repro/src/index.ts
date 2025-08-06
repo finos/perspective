@@ -68,17 +68,16 @@ let layout: PerspectiveWorkspaceConfig<string> = {
 let swap = false;
 
 function swapTables() {
-    console.warn("DDD VR Swapping");
     swap = !swap;
     ws.replaceTables(swap ? tablesMain : tablesSwap);
 }
 
 function addViewer() {
-    console.warn("DDD VR Adding");
     const name = window.crypto.randomUUID().slice(0, 7);
     tablesMain[name] = CLIENT.table("a,b,c\n1,2,3");
     tablesSwap[name] = CLIENT.table("a,b,c\n4,5,6\n7,8,9");
     ws.addTable(name, swap ? tablesMain[name] : tablesSwap[name]);
+
     layout = Workspace.addViewer(layout, { table: name, title: name });
     ws.restore(layout);
 }
@@ -94,4 +93,10 @@ addViewer();
 swapTables();
 addViewer();
 swapTables();
+// addViewer();
+// swapTables();
+// addViewer();
+// swapTables();
+// addViewer();
+// swapTables();
 

@@ -1199,39 +1199,4 @@ export class PerspectiveWorkspace extends SplitPanel {
             );
         }
     }
-
-    /// swaps all tables in the workspace with the ones passed in.
-    /// Any viewers that are using tables not in the new tables will be ejected (`viewer>eject()`).
-    async replaceTables(
-        newTables: Record<string, psp.Table | Promise<psp.Table>>
-    ) {
-        // this.lock.runExclusive(async () => {
-        const viewers = Array.from(
-            this.element.children
-        ) as HTMLPerspectiveViewerElement[];
-        const tasks = [];
-        // viewers[slot].
-        for (const viewer of viewers) {
-            if (!this._last_updated_state) break;
-            const t = this._last_updated_state.viewers[viewer.slot]?.table;
-            if (newTables[t]) {
-                if (!Object.is(newTables[t], this.tables.get(t))) {
-                    this.tables.set(t, newTables[t]);
-                    tasks.push(viewer.load(newTables[t]));
-                } else {
-                }
-            } else {
-                // eject all viewers that use a table not in the new set
-                this.tables.delete(t);
-                tasks.push(viewer.eject());
-            }
-        }
-        await Promise.all(tasks);
-
-        this.tables.clear();
-        for (const [name, t] of Object.entries(newTables)) {
-            this.replaceTable(name, Promise.resolve(t));
-        }
-        // });
-    }
 }

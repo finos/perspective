@@ -7,7 +7,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@finos/perspective": "workspace:^"
+        "@finos/perspective": "workspace:^",
+        "async-mutex": "0.5.0"
     },
     "exports": {
         ".": "./dist/esm/index.js"

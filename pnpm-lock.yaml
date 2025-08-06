@@ -600,6 +600,9 @@ importers:
       '@types/react':
         specifier: ^18
         version: 18.3.8
+      async-mutex:
+        specifier: 0.5.0
+        version: 0.5.0
       react:
         specifier: ^18
         version: 18.3.1
