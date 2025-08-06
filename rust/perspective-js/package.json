@@ -48,7 +48,6 @@
         "ws": "^8.17.0"
     },
     "devDependencies": {
-        "@finos/perspective-cpp": "workspace:^",
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-metadata": "workspace:^",
         "@finos/perspective-test": "workspace:^",

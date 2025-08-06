@@ -152,6 +152,7 @@ async function build_all() {
             "inherit"
         );
     } catch (e) {
+        console.error(e.stdout);
         process.exit(1);
     }
 }

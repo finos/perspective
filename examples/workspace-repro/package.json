@@ -1,0 +1,24 @@
+{
+    "name": "workspace-repro",
+    "private": true,
+    "version": "3.7.4",
+    "description": "To delete",
+    "type": "module",
+    "scripts": {
+        "build": "node build.js",
+        "start": "node build.js && http-server dist"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@finos/perspective": "workspace:^",
+        "@finos/perspective-viewer": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:^",
+        "@finos/perspective-viewer-datagrid": "workspace:^",
+        "@finos/perspective-workspace": "workspace:^"
+    },
+    "devDependencies": {
+        "esbuild": "^0.25.5",
+        "http-server": "^14.1.1"
+    }
+}

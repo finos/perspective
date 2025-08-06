@@ -11,58 +11,24 @@
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
  */
 
+html {
+    height: 100%;
+}
+
 body {
     margin: 0;
     background-color: #f0f0f0;
     font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
         "Consolas", "Liberation Mono", monospace;
-}
-
-.container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    display: grid;
-    gap: 8px;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 45px 1fr;
-}
-
-perspective-viewer {
-    grid-row: 2;
-}
-
-.toolbar {
-    grid-row: 1;
-    grid-column-start: 1;
-    grid-column-end: 3;
-
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding: 10px;
-    justify-content: stretch;
-    border-bottom: 1px solid #666;
-}
-
-button {
-    font-family: "ui-monospace", "SFMono-Regular", "SF Mono", "Menlo",
-        "Consolas", "Liberation Mono", monospace;
-}
-
-.workspace-container {
+    height: 100%;
     display: flex;
     flex-direction: column;
+}
 
-    .workspace-toolbar {
-        display: flex;
-        flex-direction: row;
-    }
+nav.header {
+    display: flex;
+}
 
-    perspective-workspace {
-        height: 100vh;
-    }
+perspective-workspace {
+    height: 100%;
 }
