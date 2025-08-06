@@ -127,7 +127,7 @@ async function reconcileNewTables(
             }
         }, {} as Record<string, HTMLPerspectiveViewerElement[]>);
 
-    const tasks = [];
+    // const tasks = [];
 
     /// reconcile the two sets of tables into the final tables set.
     const names = new Set([...Object.keys(next), ...prev.keys()]);
@@ -142,39 +142,28 @@ async function reconcileNewTables(
             if (p === undefined) {
                 throw new Error("Unreachable.");
             }
-            tasks.push(
-                (async () => {
-                    await Promise.all(
-                        usedViewers.map((v) => {
-                            return v.eject();
-                        })
-                    );
-                    workspace.removeTable(name);
-                })()
+            await Promise.all(
+                usedViewers.map((v) => {
+                    return v.eject();
+                })
             );
+            workspace.removeTable(name);
         } else if (prev.get(name) === undefined) {
             // A table was added that did not exist in the previous set.
-            tasks.push(
-                (async () => {
-                    await workspace.addTable(name, next[name]);
-                })()
-            );
+            await workspace.addTable(name, next[name]);
         } else {
             // the table for `name` was remapped.
             // eject and then reload viewers using [n]
-            tasks.push(
-                (async () => {
-                    await Promise.all(
-                        usedViewers.map(async (v) => {
-                            await v.eject();
-                            await v.load(next[name]);
-                        })
-                    );
-                    await workspace.replaceTable(name, next[name]);
-                })()
+
+            await Promise.all(
+                usedViewers.map(async (v) => {
+                    await v.eject();
+                    await v.load(next[name]);
+                })
             );
+            await workspace.replaceTable(name, next[name]);
         }
     }
 
-    await Promise.all(tasks);
+    // await Promise.all(tasks);
 }
