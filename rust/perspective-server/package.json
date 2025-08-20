@@ -1,5 +1,5 @@
 {
-    "name": "@finos/perspective-cpp",
+    "name": "@finos/perspective-server",
     "private": true,
     "author": "The Perspective Authors",
     "license": "Apache-2.0",
@@ -14,6 +14,7 @@
         "clean": "rimraf dist"
     },
     "devDependencies": {
-        "pro_self_extracting_wasm": "0.0.9"
+        "pro_self_extracting_wasm": "0.0.9",
+        "zx": "8.3.0"
     }
 }

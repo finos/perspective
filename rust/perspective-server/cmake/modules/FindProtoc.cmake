@@ -1,5 +1,7 @@
 set(DEFAULT_PROTOBUF_VERSION "26.1")
 
+option(PSP_PROTOC_PATH "Path to the protoc binary" "")
+
 # Function to download and extract protoc
 function(download_protoc VERSION DESTINATION)
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
@@ -29,10 +31,7 @@ function(download_protoc VERSION DESTINATION)
     endif()
 endfunction()
 
-if(EXISTS ${CMAKE_BINARY_DIR}/protoc-release/bin/protoc)
-    message(STATUS "Found protoc in ${CMAKE_BINARY_DIR}/protoc-release/bin/protoc")
-    set(Protobuf_EXECUTABLE ${CMAKE_BINARY_DIR}/protoc-release/bin/protoc)
-endif()
+find_program(Protobuf_EXECUTABLE NAMES protoc PATHS ${PSP_PROTOC_PATH} ENV PATH ${CMAKE_BINARY_DIR}/protoc-release/bin/)
 
 if(NOT Protobuf_EXECUTABLE)
     message(STATUS "Protobuf_EXECUTABLE not found, searching for protoc")
@@ -107,7 +106,7 @@ function(protobuf_generate_cpp SRCS HDRS)
 
         add_custom_command(
             OUTPUT ${GENERATED_SRC} ${GENERATED_HDR}
-            COMMAND ${PROTOC_EXECUTABLE} --cpp_out ${CMAKE_CURRENT_BINARY_DIR} ${PROTO_FILE}
+            COMMAND ${PROTOC_EXECUTABLE} --cpp_out ${CMAKE_CURRENT_BINARY_DIR} --proto_path ${PROTO_PATH} ${PROTO_FILE}
             DEPENDS ${PROTO_FILE} ${PROTOC_EXECUTABLE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Generating ${GENERATED_SRC} and ${GENERATED_HDR} from ${PROTO_FILE}"

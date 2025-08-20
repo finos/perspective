@@ -48,7 +48,7 @@
         "ws": "^8.17.0"
     },
     "devDependencies": {
-        "@finos/perspective-cpp": "workspace:^",
+        "@finos/perspective-server": "workspace:^",
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-metadata": "workspace:^",
         "@finos/perspective-test": "workspace:^",
@@ -61,6 +61,6 @@
         "typedoc": "^0.28.7",
         "typescript": "~5.2.2",
         "underscore": "^1.13.6",
-        "zx": "8.1.9"
+        "zx": "8.3.0"
     }
 }

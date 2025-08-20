@@ -49,6 +49,6 @@
         "@finos/perspective-esbuild-plugin": "workspace:^",
         "@finos/perspective-test": "workspace:^",
         "@types/lodash": "^4.17.12",
-        "zx": "^8.1.9"
+        "zx": "^8.3.0"
     }
 }
