@@ -69,6 +69,15 @@ pub struct Dimensions {
     pub num_table_columns: usize,
 }
 
+#[derive(Clone, Debug, Default, Deserialize, Serialize, TS, PartialEq)]
+pub struct ColumnWindow {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_col: Option<f32>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_col: Option<f32>,
+}
+
 /// Options for serializing a window of data from a [`View`].
 ///
 /// Some fields of [`ViewWindow`] are only applicable to specific methods of
@@ -239,8 +248,12 @@ impl View {
     ///
     /// A column path shows the columns that a given cell belongs to after
     /// pivots are applied.
-    pub async fn column_paths(&self) -> ClientResult<Vec<String>> {
-        let msg = self.client_message(ClientReq::ViewColumnPathsReq(ViewColumnPathsReq {}));
+    pub async fn column_paths(&self, window: ColumnWindow) -> ClientResult<Vec<String>> {
+        let msg = self.client_message(ClientReq::ViewColumnPathsReq(ViewColumnPathsReq {
+            start_col: window.start_col.map(|x| x as u32),
+            end_col: window.end_col.map(|x| x as u32),
+        }));
+
         match self.client.oneshot(&msg).await? {
             ClientResp::ViewColumnPathsResp(ViewColumnPathsResp { paths }) => {
                 // Ok(paths.into_iter().map(|x| x.path).collect())

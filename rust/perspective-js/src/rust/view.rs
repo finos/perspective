@@ -11,7 +11,9 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 use js_sys::{Array, ArrayBuffer, Function, Object};
-use perspective_client::{OnUpdateData, OnUpdateOptions, ViewWindow, assert_view_api};
+use perspective_client::{
+    ColumnWindow, OnUpdateData, OnUpdateOptions, ViewWindow, assert_view_api,
+};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
@@ -24,6 +26,10 @@ unsafe extern "C" {
     #[wasm_bindgen(typescript_type = "ViewWindow")]
     #[derive(Clone)]
     pub type JsViewWindow;
+
+    #[wasm_bindgen(typescript_type = "ColumnWindow")]
+    #[derive(Clone)]
+    pub type JsColumnWindow;
 
     #[wasm_bindgen(method, setter, js_name = "formatted")]
     pub fn set_formatted(this: &JsViewWindow, x: bool);
@@ -79,8 +85,9 @@ impl View {
     /// A column path shows the columns that a given cell belongs to after
     /// pivots are applied.
     #[wasm_bindgen]
-    pub async fn column_paths(&self) -> ApiResult<JsValue> {
-        let columns = self.0.column_paths().await?;
+    pub async fn column_paths(&self, window: Option<JsColumnWindow>) -> ApiResult<JsValue> {
+        let window = window.into_serde_ext::<Option<ColumnWindow>>()?;
+        let columns = self.0.column_paths(window.unwrap_or_default()).await?;
         Ok(JsValue::from_serde_ext(&columns)?)
     }
 

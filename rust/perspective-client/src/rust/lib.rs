@@ -53,7 +53,9 @@ pub use crate::table::{
     DeleteOptions, ExprValidationResult, Table, TableInitOptions, TableReadFormat, UpdateOptions,
 };
 pub use crate::table_data::{TableData, UpdateData};
-pub use crate::view::{OnUpdateData, OnUpdateMode, OnUpdateOptions, View, ViewWindow};
+pub use crate::view::{
+    ColumnWindow, OnUpdateData, OnUpdateMode, OnUpdateOptions, View, ViewWindow,
+};
 
 pub type ClientError = utils::ClientError;
 pub type ExprValidationError = crate::proto::table_validate_expr_resp::ExprValidationError;

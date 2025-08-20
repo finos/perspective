@@ -45,9 +45,45 @@ export function createDataListener(viewer) {
                 id: true,
             };
 
-            columns = JSON.parse(
-                await this._view.to_columns_string(new_window)
-            );
+            if (this._config.split_by?.length > 0) {
+                const [x, y] = await Promise.all([
+                    this._view.to_columns_string(new_window),
+                    this._view.column_paths(new_window),
+                ]);
+
+                columns = JSON.parse(x);
+                const new_col_paths = y.filter(
+                    (x) => x !== "__ROW_PATH__" && x !== "__ID__"
+                );
+
+                const old_length = this._column_paths.length;
+                this._column_paths.splice(
+                    new_window.start_col,
+                    new_col_paths.length,
+                    ...new_col_paths
+                );
+
+                if (this._column_paths.length !== old_length) {
+                    const [a, b] = await Promise.all([
+                        this._view.schema(),
+                        this._view.expression_schema(),
+                    ]);
+
+                    this._schema = { ...a, ...b };
+                    for (let i = 0; i < new_col_paths.length; i++) {
+                        const column_path_parts = new_col_paths[i].split("|");
+                        const column =
+                            column_path_parts[this._config.split_by.length];
+
+                        this._column_types[i + new_window.start_col] =
+                            this._schema[column];
+                    }
+                }
+            } else {
+                columns = JSON.parse(
+                    await this._view.to_columns_string(new_window)
+                );
+            }
 
             this._last_window = new_window;
             this._ids = columns.__ID__;
@@ -72,6 +108,10 @@ export function createDataListener(viewer) {
             column_paths = [];
 
         const is_settings_open = viewer.hasAttribute("settings");
+
+        // if (this._config.split_by?.length > 0) {
+        //     this._column_paths
+        // }
 
         // for (const path of this._column_paths.slice(x0, x1)) {
         for (

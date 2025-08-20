@@ -32,8 +32,8 @@ use std::fs;
 
 use perspective_client::config::*;
 use perspective_client::{
-    DeleteOptions, OnUpdateData, OnUpdateOptions, SystemInfo, TableInitOptions, UpdateOptions,
-    ViewWindow,
+    ColumnWindow, DeleteOptions, OnUpdateData, OnUpdateOptions, SystemInfo, TableInitOptions,
+    UpdateOptions, ViewWindow,
 };
 use perspective_viewer::config::ViewerConfigUpdate;
 use ts_rs::TS;
@@ -64,6 +64,7 @@ fn generate_exprtk_docs() -> Result<(), Box<dyn Error>> {
 #[doc(hidden)]
 pub fn generate_type_bindings_js() -> Result<(), Box<dyn Error>> {
     let path = std::env::current_dir()?.join("../perspective-js/src/ts/ts-rs");
+    ColumnWindow::export_all_to(&path)?;
     ViewWindow::export_all_to(&path)?;
     TableInitOptions::export_all_to(&path)?;
     ViewConfigUpdate::export_all_to(&path)?;

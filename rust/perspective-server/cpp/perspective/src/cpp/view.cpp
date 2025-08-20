@@ -240,21 +240,168 @@ View<t_ctxunit>::column_names(bool skip, std::int32_t depth) const {
 
 template <typename CTX_T>
 std::vector<std::vector<t_tscalar>>
+View<CTX_T>::column_names_range(
+    bool skip, std::int32_t depth, t_uindex start_col, t_uindex end_col
+) const {
+    std::vector<std::vector<t_tscalar>> names;
+    const std::vector<t_aggspec> aggs = m_ctx->get_aggregates();
+    std::vector<std::string> aggregate_names(aggs.size());
+
+    for (auto i = 0; i < aggs.size(); ++i) {
+        aggregate_names[i] = aggs[i].name();
+    }
+
+    auto col_count = m_ctx->unity_get_column_count();
+    // start_col++;
+    // end_col++;
+
+    t_uindex key = 0;
+    while (key < start_col && key < col_count) {
+        key++;
+        const std::string& name = aggregate_names[key % aggregate_names.size()];
+        if (name == "psp_okey") {
+            start_col += 1;
+            end_col += 1;
+            continue;
+        }
+
+        std::vector<t_tscalar> col_path = m_ctx->unity_get_column_path(key + 1);
+        if (skip && col_path.size() < static_cast<unsigned int>(depth)) {
+            start_col += 1;
+            end_col += 1;
+            continue;
+        }
+
+        if (!m_hidden_sort.empty()) {
+            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name)
+                != m_hidden_sort.end()) {
+                start_col += 1;
+                end_col += 1;
+                continue;
+            }
+        }
+    }
+
+    for (t_uindex max = std::min(end_col, col_count); key <= max; ++key) {
+        const std::string& name = aggregate_names[key % aggregate_names.size()];
+
+        if (name == "psp_okey") {
+            end_col += 1;
+            max = std::min(end_col, col_count);
+            continue;
+        }
+
+        std::vector<t_tscalar> col_path = m_ctx->unity_get_column_path(key + 1);
+        if (skip && col_path.size() < static_cast<unsigned int>(depth)) {
+            end_col += 1;
+            max = std::min(end_col, col_count);
+            continue;
+        }
+
+        if (!m_hidden_sort.empty()) {
+            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name)
+                != m_hidden_sort.end()) {
+                end_col += 1;
+                max = std::min(end_col, col_count);
+                continue;
+            }
+        }
+
+        std::vector<t_tscalar> new_path;
+        for (auto path = col_path.rbegin(); path != col_path.rend(); ++path) {
+            new_path.push_back(*path);
+        }
+
+        new_path.push_back(
+            m_ctx->get_aggregate_name(key % aggregate_names.size())
+        );
+
+        names.push_back(new_path);
+    }
+
+    return names;
+}
+
+template <>
+std::vector<std::vector<t_tscalar>>
+View<t_ctx0>::column_names_range(
+    bool skip, std::int32_t depth, t_uindex start_col, t_uindex end_col
+) const {
+    std::vector<std::vector<t_tscalar>> names;
+    for (t_uindex key = start_col,
+                  max = std::min(end_col, m_ctx->unity_get_column_count());
+         key != max;
+         ++key) {
+        t_tscalar name = m_ctx->get_column_name(key);
+        if (strcmp(name.get<const char*>(), "psp_okey") == 0) {
+            continue;
+        };
+
+        std::vector<t_tscalar> col_path;
+        col_path.push_back(name);
+        names.push_back(col_path);
+    }
+
+    return names;
+}
+
+template <>
+std::vector<std::vector<t_tscalar>>
+View<t_ctxunit>::column_names_range(
+    bool skip, std::int32_t depth, t_uindex start_col, t_uindex end_col
+) const {
+    std::vector<std::vector<t_tscalar>> names;
+
+    for (t_uindex key = start_col,
+                  max = std::min(end_col, m_ctx->unity_get_column_count());
+         key != max;
+         ++key) {
+        t_tscalar name = m_ctx->get_column_name(key);
+        if (strcmp(name.get<const char*>(), "psp_okey") == 0) {
+            continue;
+        };
+        std::vector<t_tscalar> col_path;
+        col_path.push_back(name);
+        names.push_back(col_path);
+    }
+
+    return names;
+}
+
+template <typename CTX_T>
+std::vector<std::vector<t_tscalar>>
 View<CTX_T>::column_paths() const {
     auto num_column_pivots = m_column_pivots.size();
     auto names = column_names(true, num_column_pivots);
-
-    if (sides() > 0 && !is_column_only()) {
-        // prepend `__ROW_PATH__` to the output vector
-        t_tscalar row_path;
-        row_path.set("__ROW_PATH__");
-        names.insert(names.begin(), std::vector<t_tscalar>{row_path});
-    }
-
     if (!m_hidden_sort.empty()) {
         // make a new vector so we don't have to erase while iterating
         std::vector<std::vector<t_tscalar>> visible_column_paths;
 
+        for (const auto& column : names) {
+            // Remove undisplayed column names used to sort
+            std::string name = column.back().to_string();
+            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name)
+                == m_hidden_sort.end()) {
+                visible_column_paths.push_back(column);
+            }
+        }
+
+        return visible_column_paths;
+    }
+
+    return names;
+}
+
+template <typename CTX_T>
+std::vector<std::vector<t_tscalar>>
+View<CTX_T>::column_paths_range(t_uindex start_col, t_uindex end_col) const {
+    auto num_column_pivots = m_column_pivots.size();
+    auto names =
+        column_names_range(true, num_column_pivots, start_col, end_col);
+
+    if (!m_hidden_sort.empty()) {
+        // make a new vector so we don't have to erase while iterating
+        std::vector<std::vector<t_tscalar>> visible_column_paths;
         for (const auto& column : names) {
             // Remove undisplayed column names used to sort
             std::string name = column.back().to_string();
@@ -1446,26 +1593,17 @@ View<CTX_T>::get_row_delta() const {
     t_rowdelta delta = m_ctx->get_row_delta();
     const std::vector<t_tscalar>& data = delta.data;
     t_uindex num_rows_changed = delta.num_rows_changed;
-
-    std::vector<std::vector<t_tscalar>> paths;
+    std::vector<std::vector<t_tscalar>> paths =
+        column_names(true, m_column_pivots.size());
 
     // num_columns needs to include __ROW_PATH__ for all pivoted contexts
     t_uindex ncols = num_columns() + m_col_offset;
     t_uindex num_sides = sides();
 
-    if (num_sides == 2 && !m_sort.empty()) {
-        // Use column_names instead of column_paths, as column_names does
-        // not skip hidden sort columns whereas column_paths does, which
-        // causes issues later on.
-        paths = column_names(true, m_column_pivots.size());
-    } else {
-        paths = column_paths();
-    }
-
     // Add __ROW_PATH__ to the beginning for column only or for 2-sided
     // sorted contexts where we used `column_names`, which does not add
     // __ROW_PATH__ automatically.
-    if (is_column_only() || (num_sides == 2 && !m_sort.empty())) {
+    if (num_sides > 0) {
         t_tscalar row_path;
         row_path.set("__ROW_PATH__");
         paths.insert(paths.begin(), std::vector<t_tscalar>{row_path});

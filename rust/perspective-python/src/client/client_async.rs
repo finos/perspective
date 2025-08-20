@@ -17,8 +17,8 @@ use std::sync::Arc;
 
 use futures::FutureExt;
 use perspective_client::{
-    Client, DeleteOptions, OnUpdateData, OnUpdateMode, OnUpdateOptions, Table, TableData,
-    TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View, ViewWindow,
+    Client, ColumnWindow, DeleteOptions, OnUpdateData, OnUpdateMode, OnUpdateOptions, Table,
+    TableData, TableInitOptions, TableReadFormat, UpdateData, UpdateOptions, View, ViewWindow,
     assert_table_api, assert_view_api, asyncfn,
 };
 use pyo3::exceptions::PyValueError;
@@ -640,8 +640,13 @@ impl AsyncView {
     ///
     /// A column path shows the columns that a given cell belongs to after
     /// pivots are applied.
-    pub async fn column_paths(&self) -> PyResult<Vec<String>> {
-        self.view.column_paths().await.into_pyerr()
+    pub async fn column_paths(&self, window: Option<Py<PyDict>>) -> PyResult<Vec<String>> {
+        let window: ColumnWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+            .transpose()?
+            .unwrap_or_default();
+
+        tracing::error!("Window {:?}", window);
+        self.view.column_paths(window).await.into_pyerr()
     }
 
     /// Delete this [`View`] and clean up all resources associated with it.
@@ -821,7 +826,7 @@ impl AsyncView {
         self.view.remove_update(callback_id).await.into_pyerr()
     }
 
-    #[pyo3(signature=(window=None))]
+    #[pyo3(signature=(**window))]
     pub async fn to_dataframe(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
@@ -830,7 +835,7 @@ impl AsyncView {
         Python::with_gil(|py| arrow_to_pandas(py, &arrow))
     }
 
-    #[pyo3(signature=(window=None))]
+    #[pyo3(signature=(**window))]
     pub async fn to_polars(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
@@ -840,7 +845,7 @@ impl AsyncView {
     }
 
     /// Serializes a [`View`] to the Apache Arrow data format.
-    #[pyo3(signature=(window=None))]
+    #[pyo3(signature=(**window))]
     pub async fn to_arrow(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
@@ -850,7 +855,7 @@ impl AsyncView {
     }
 
     /// Serializes this [`View`] to CSV data in a standard format.
-    #[pyo3(signature=(window=None))]
+    #[pyo3(signature=(**window))]
     pub async fn to_csv(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
@@ -861,7 +866,7 @@ impl AsyncView {
 
     /// Serializes this [`View`] to a string of JSON data. Useful if you want to
     /// save additional round trip serialize/deserialize cycles.
-    #[pyo3(signature=(window=None))]
+    #[pyo3(signature=(**window))]
     pub async fn to_columns_string(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
         let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?

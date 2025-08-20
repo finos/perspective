@@ -119,6 +119,13 @@ public:
     std::vector<std::vector<t_tscalar>>
     column_names(bool skip = false, std::int32_t depth = 0) const;
 
+    std::vector<std::vector<t_tscalar>> column_names_range(
+        bool skip = false,
+        std::int32_t depth = 0,
+        t_uindex start_col = 0,
+        t_uindex end_col = 0
+    ) const;
+
     /**
      * @brief The aggregated column names of this View, showing the columns that
      * have been composed through the addition of a pivot as they appear in the
@@ -130,6 +137,9 @@ public:
      * @return std::vector<std::vector<t_tscalar>>>
      */
     std::vector<std::vector<t_tscalar>> column_paths() const;
+
+    std::vector<std::vector<t_tscalar>>
+    column_paths_range(t_uindex start_col, t_uindex end_col) const;
 
     std::vector<std::vector<std::string>> column_paths_string() const;
 

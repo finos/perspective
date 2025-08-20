@@ -2385,14 +2385,7 @@ import perspective from "../perspective_client";
             });
 
             let paths = await view.column_paths();
-            expect(paths).toEqual([
-                "__ROW_PATH__",
-                "w",
-                "x",
-                "y",
-                "z",
-                "column",
-            ]);
+            expect(paths).toEqual(["w", "x", "y", "z", "column"]);
 
             await view.delete();
 
@@ -2404,7 +2397,6 @@ import perspective from "../perspective_client";
 
             for (const expected of expected_paths) {
                 const output = expected.slice();
-                output.unshift("__ROW_PATH__");
                 view = await table.view({
                     group_by: ["y"],
                     expressions: { column: '"w" + "x"' },
@@ -2417,7 +2409,6 @@ import perspective from "../perspective_client";
 
             for (const expected of expected_paths) {
                 const output = expected.slice();
-                output.unshift("__ROW_PATH__");
                 view = await table.view({
                     group_by: ["column"],
                     expressions: { column: '"w" + "x"' },
@@ -2448,7 +2439,7 @@ import perspective from "../perspective_client";
             let view = await table.view(config);
 
             let paths = await view.column_paths();
-            expect(paths).toEqual(["__ROW_PATH__", "w", "x", "y", "z", "1234"]);
+            expect(paths).toEqual(["w", "x", "y", "z", "1234"]);
 
             await view.delete();
 
@@ -2460,7 +2451,6 @@ import perspective from "../perspective_client";
 
             for (const expected of expected_paths) {
                 const output = expected.slice();
-                output.unshift("__ROW_PATH__");
                 view = await table.view({
                     ...config,
                     columns: expected,
@@ -2472,7 +2462,6 @@ import perspective from "../perspective_client";
 
             for (const expected of expected_paths) {
                 const output = expected.slice();
-                output.unshift("__ROW_PATH__");
                 view = await table.view({
                     ...config,
                     columns: expected,

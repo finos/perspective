@@ -426,7 +426,7 @@ const data3 = {
                     sort: [["x", "col desc"]],
                 });
                 const paths = await view.column_paths();
-                expect(paths).toEqual(["__ROW_PATH__", "false|w", "true|w"]);
+                expect(paths).toEqual(["false|w", "true|w"]);
                 view.delete();
                 table.delete();
             });
@@ -443,7 +443,7 @@ const data3 = {
                     ],
                 });
                 const paths = await view.column_paths();
-                expect(paths).toEqual(["__ROW_PATH__", "false|w", "true|w"]);
+                expect(paths).toEqual(["false|w", "true|w"]);
                 view.delete();
                 table.delete();
             });
@@ -758,7 +758,7 @@ const data3 = {
                     ],
                 });
                 const paths = await view.column_paths();
-                expect(paths).toEqual(["__ROW_PATH__", "x|z", "y|z"]);
+                expect(paths).toEqual(["x|z", "y|z"]);
                 const expected = {
                     __ROW_PATH__: [[], ["a"], ["b"], ["c"]],
                     "x|z": [7, 3, null, 4],
@@ -786,7 +786,7 @@ const data3 = {
                     ],
                 });
                 const paths = await view.column_paths();
-                expect(paths).toEqual(["__ROW_PATH__", "y|z", "x|z"]);
+                expect(paths).toEqual(["y|z", "x|z"]);
                 const expected = {
                     __ROW_PATH__: [[], ["c"], ["b"], ["a"]],
                     "y|z": [3, null, 3, null],
@@ -811,7 +811,7 @@ const data3 = {
                     sort: [["x", "desc"]],
                 });
                 const paths = await view.column_paths();
-                expect(paths).toEqual(["__ROW_PATH__", "a|z", "b|z", "c|z"]);
+                expect(paths).toEqual(["a|z", "b|z", "c|z"]);
                 const expected = {
                     __ROW_PATH__: [[], ["x"], ["y"]],
                     "a|z": [3, 3, null],
