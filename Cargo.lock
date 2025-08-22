@@ -2003,6 +2003,7 @@ dependencies = [
  "futures",
  "getrandom 0.3.2",
  "itertools 0.10.5",
+ "num-traits",
  "paste",
  "prost",
  "prost-build",

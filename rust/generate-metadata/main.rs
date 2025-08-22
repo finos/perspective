@@ -73,7 +73,7 @@ pub fn generate_type_bindings_js() -> Result<(), Box<dyn Error>> {
     UpdateOptions::export_all_to(&path)?;
     DeleteOptions::export_all_to(&path)?;
     ViewWindow::export_all_to(&path)?;
-    SystemInfo::export_all_to(&path)?;
+    SystemInfo::<f64>::export_all_to(&path)?;
     Ok(())
 }
 
