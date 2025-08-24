@@ -152,7 +152,7 @@ const std = (nums) => {
                 },
             });
             const paths = await view.column_paths();
-            expect(paths).toEqual(["__ROW_PATH__", "y", "z"]);
+            expect(paths).toEqual(["y", "z"]);
             const answer = [
                 { __ROW_PATH__: [], y: "c", z: true },
                 { __ROW_PATH__: [false], y: "d", z: false },
@@ -174,7 +174,7 @@ const std = (nums) => {
                 },
             });
             const paths = await view.column_paths();
-            expect(paths).toEqual(["__ROW_PATH__", "y", "z"]);
+            expect(paths).toEqual(["y", "z"]);
             const answer = [
                 { __ROW_PATH__: [], y: 4, z: 4 },
                 { __ROW_PATH__: [false], y: 2, z: 2 },

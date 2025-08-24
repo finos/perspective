@@ -119,14 +119,14 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(group_by=["a"])
         paths = view.column_paths()
-        assert paths == ["__ROW_PATH__", "a", "b"]
+        assert paths == ["a", "b"]
 
     def test_view_column_path_one_numeric_names(self):
         data = {"a": [1, 2, 3], "b": [1.5, 2.5, 3.5], "1234": [5, 6, 7]}
         tbl = Table(data)
         view = tbl.view(group_by=["a"], columns=["b", "1234", "a"])
         paths = view.column_paths()
-        assert paths == ["__ROW_PATH__", "b", "1234", "a"]
+        assert paths == ["b", "1234", "a"]
 
     def test_view_column_path_two(self):
         data = {"a": [1, 2, 3], "b": [1.5, 2.5, 3.5]}
@@ -134,7 +134,6 @@ class TestView(object):
         view = tbl.view(group_by=["a"], split_by=["b"])
         paths = view.column_paths()
         assert paths == [
-            "__ROW_PATH__",
             "1.5|a",
             "1.5|b",
             "2.5|a",
@@ -245,7 +244,7 @@ class TestView(object):
             )
         )
         view = table.view(columns=["-0.1", "-0.05", "0.0", "0.1"], group_by=["str"])
-        assert view.column_paths() == ["__ROW_PATH__", "-0.1", "-0.05", "0.0", "0.1"]
+        assert view.column_paths() == ["-0.1", "-0.05", "0.0", "0.1"]
 
     def test_view_aggregate_order_with_columns(self):
         """If `columns` is provided, order is always guaranteed."""
@@ -257,7 +256,7 @@ class TestView(object):
             aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"},
         )
 
-        order = ["__ROW_PATH__", "a", "b", "c", "d"]
+        order = ["a", "b", "c", "d"]
         assert view.column_paths() == order
 
     def test_view_df_aggregate_order_with_columns(self):
@@ -272,7 +271,7 @@ class TestView(object):
             aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"},
         )
 
-        order = ["__ROW_PATH__", "index", "d", "a", "c", "b"]
+        order = ["index", "d", "a", "c", "b"]
         assert view.column_paths() == order
 
     def test_view_aggregates_with_no_columns(self):
@@ -281,7 +280,7 @@ class TestView(object):
         view = tbl.view(
             group_by=["a"], aggregates={"c": "avg", "a": "last"}, columns=[]
         )
-        assert view.column_paths() == ["__ROW_PATH__"]
+        assert view.column_paths() == []
         assert view.to_records() == [
             {"__ROW_PATH__": []},
             {"__ROW_PATH__": [1]},
@@ -297,8 +296,7 @@ class TestView(object):
         cols = tbl.columns()
         view = tbl.view(group_by=["a"], aggregates={"c": "avg", "a": "last"})
 
-        order = ["__ROW_PATH__"] + cols
-        assert view.column_paths() == order
+        assert view.column_paths() == cols
 
         # check that default aggregates have been applied
         result = view.to_columns()

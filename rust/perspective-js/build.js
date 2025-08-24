@@ -142,9 +142,6 @@ async function build_all() {
         "inherit",
         "inherit"
     );
-
-    await cpy("target/themes/*", "dist/css");
-    await cpy("target/themes/*", "dist/css");
 }
 
 build_all();

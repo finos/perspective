@@ -477,7 +477,7 @@ impl Client {
             .map(|x| x.now() as u64);
 
         info.timestamp = timestamp;
-        let record = JsValue::from_serde_ext(&info)?;
+        let record = JsValue::from_serde_ext(&info.cast::<f64>())?;
         Ok(record.unchecked_into())
     }
 }

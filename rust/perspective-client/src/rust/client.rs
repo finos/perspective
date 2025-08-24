@@ -37,12 +37,12 @@ use crate::{OnUpdateMode, OnUpdateOptions, asyncfn, clone};
 
 /// Metadata about the engine runtime (such as total heap utilization).
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
-pub struct SystemInfo {
+pub struct SystemInfo<T = u64> {
     /// Total available bytes for allocation on the [`Server`].
-    pub heap_size: u64,
+    pub heap_size: T,
 
     /// Bytes allocated for use on the [`Server`].
-    pub used_size: u64,
+    pub used_size: T,
 
     /// Wall-clock time spent processing requests on the [`Server`], in
     /// milliseconds (estimated). This does not properly account for the
@@ -56,15 +56,34 @@ pub struct SystemInfo {
     /// Timestamp (POSIX) this request was made. This field may be omitted
     /// for wasm due to `perspective-client` lacking a dependency on
     /// `wasm_bindgen`.
-    pub timestamp: Option<u64>,
+    pub timestamp: Option<T>,
 
     /// Total available bytes for allocation on the [`Client`]. This is only
     /// available if `trace-allocator` is enabled.
-    pub client_heap: Option<u64>,
+    pub client_heap: Option<T>,
 
     /// Bytes allocated for use on the [`Client`].  This is only
     /// available if `trace-allocator` is enabled.
-    pub client_used: Option<u64>,
+    pub client_used: Option<T>,
+}
+
+impl<U: Copy + 'static> SystemInfo<U> {
+    /// Convert the numeric representation for `T` to something else, which is
+    /// useful for JavaScript where there is no `u64` native type.
+    pub fn cast<T: Copy + 'static>(&self) -> SystemInfo<T>
+    where
+        U: num_traits::AsPrimitive<T>,
+    {
+        SystemInfo {
+            heap_size: self.heap_size.as_(),
+            used_size: self.used_size.as_(),
+            cpu_time: self.cpu_time,
+            cpu_time_epoch: self.cpu_time_epoch,
+            timestamp: self.timestamp.map(|x| x.as_()),
+            client_heap: self.client_heap.map(|x| x.as_()),
+            client_used: self.client_used.map(|x| x.as_()),
+        }
+    }
 }
 
 /// Metadata about what features are supported by the `Server` to which this

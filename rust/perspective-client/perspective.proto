@@ -420,7 +420,10 @@ message ViewToArrowResp {
     bytes arrow = 1;
 }
 
-message ViewColumnPathsReq {}
+message ViewColumnPathsReq {
+    optional uint32 start_col = 1;
+    optional uint32 end_col = 2;
+}
 
 // // TODO This is a better paths representations but its not compatible with
 // // the legacy API. Let's do this when we can fix the API.

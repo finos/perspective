@@ -2296,6 +2296,8 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
         case proto::Request::kViewColumnPathsReq: {
             auto view = m_resources.get_view(req.entity_id());
 
+            const auto& r = req.view_column_paths_req();
+
             proto::Response resp;
             auto* view_col_paths =
                 resp.mutable_view_column_paths_resp()->mutable_paths();
@@ -2311,7 +2313,15 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             // }
 
             std::string col;
-            for (auto& col_paths : view->column_paths()) {
+            const auto column_paths = r.has_start_col() ? r.has_end_col()
+                    ? view->column_paths_range(r.start_col(), r.end_col())
+                    : view->column_paths_range(
+                        r.start_col(), view->num_columns()
+                    )
+                : r.has_end_col() ? view->column_paths_range(0, r.end_col())
+                                  : view->column_paths();
+
+            for (auto& col_paths : column_paths) {
                 col = "";
                 if (!col_paths.empty()) {
                     auto it = col_paths.begin();

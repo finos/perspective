@@ -148,7 +148,7 @@ export class PerspectiveSession {
             polled,
             async (msg: ApiResponse) => {
                 if (msg.client_id === 0) {
-                    console.error("Poll error");
+                    await this.client_map.get(this.client_id)!(msg.data);
                 } else {
                     await this.client_map.get(msg.client_id)!(msg.data);
                 }

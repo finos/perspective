@@ -42,6 +42,7 @@ pub use crate::table_data::*;
 #[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_CONTENT: &'static str = r#"
 export type * from "../../src/ts/ts-rs/ViewWindow.d.ts";
+export type * from "../../src/ts/ts-rs/ColumnWindow.d.ts";
 export type * from "../../src/ts/ts-rs/TableInitOptions.d.ts";
 export type * from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";
 export type * from "../../src/ts/ts-rs/ViewOnUpdateResp.d.ts";
@@ -50,6 +51,7 @@ export type * from "../../src/ts/ts-rs/UpdateOptions.d.ts";
 export type * from "../../src/ts/ts-rs/DeleteOptions.d.ts";
 export type * from "../../src/ts/ts-rs/SystemInfo.d.ts";
 
+import type {ColumnWindow} from "../../src/ts/ts-rs/ColumnWindow.d.ts";
 import type {ViewWindow} from "../../src/ts/ts-rs/ViewWindow.d.ts";
 import type {TableInitOptions} from "../../src/ts/ts-rs/TableInitOptions.d.ts";
 import type {ViewConfigUpdate} from "../../src/ts/ts-rs/ViewConfigUpdate.d.ts";

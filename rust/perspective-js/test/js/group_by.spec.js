@@ -1056,7 +1056,7 @@ const std = (nums) => {
                 group_by: ["x"],
             });
             const paths = await view.column_paths();
-            expect(paths).toEqual(["__ROW_PATH__", "x", "y", "z"]);
+            expect(paths).toEqual(["x", "y", "z"]);
             view.delete();
             table.delete();
         });
@@ -1083,13 +1083,7 @@ const std = (nums) => {
                 },
             });
             const paths = await view.column_paths();
-            expect(paths).toEqual([
-                "__ROW_PATH__",
-                "2345",
-                "1234",
-                "x",
-                "1.23456789",
-            ]);
+            expect(paths).toEqual(["2345", "1234", "x", "1.23456789"]);
             view.delete();
             table.delete();
         });
@@ -1101,7 +1095,7 @@ const std = (nums) => {
                 columns: ["z", "y", "x"],
             });
             const paths = await view.column_paths();
-            expect(paths).toEqual(["__ROW_PATH__", "z", "y", "x"]);
+            expect(paths).toEqual(["z", "y", "x"]);
             view.delete();
             table.delete();
         });
@@ -1113,7 +1107,7 @@ const std = (nums) => {
                 group_by: ["x"],
             });
             const paths = await view.column_paths();
-            expect(paths).toEqual(["__ROW_PATH__", "x"]);
+            expect(paths).toEqual(["x"]);
             view.delete();
             table.delete();
         });
@@ -1126,7 +1120,6 @@ const std = (nums) => {
             });
             const paths = await view.column_paths();
             expect(paths).toEqual([
-                "__ROW_PATH__",
                 "a|x",
                 "a|y",
                 "a|z",
@@ -1153,7 +1146,6 @@ const std = (nums) => {
             });
             const paths = await view.column_paths();
             expect(paths).toEqual([
-                "__ROW_PATH__",
                 "a|z",
                 "a|y",
                 "a|x",
@@ -1179,7 +1171,7 @@ const std = (nums) => {
                 split_by: ["y"],
             });
             const paths = await view.column_paths();
-            expect(paths).toEqual(["__ROW_PATH__", "a|x", "b|x", "c|x", "d|x"]);
+            expect(paths).toEqual(["a|x", "b|x", "c|x", "d|x"]);
             view.delete();
             table.delete();
         });
@@ -1196,7 +1188,6 @@ const std = (nums) => {
             const view = await table.view({ group_by: ["y"], split_by: ["z"] });
             const paths = await view.column_paths();
             expect(paths).toEqual([
-                "__ROW_PATH__",
                 "2019-04-11|w",
                 "2019-04-11|x",
                 "2019-04-11|y",

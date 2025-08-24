@@ -487,8 +487,13 @@ impl View {
     ///
     /// A column path shows the columns that a given cell belongs to after
     /// pivots are applied.
-    pub fn column_paths(&self, py: Python<'_>) -> PyResult<Vec<String>> {
-        self.0.column_paths().py_block_on(py)
+    #[pyo3(signature = (**window))]
+    pub fn column_paths(
+        &self,
+        py: Python<'_>,
+        window: Option<Py<PyDict>>,
+    ) -> PyResult<Vec<String>> {
+        self.0.column_paths(window).py_block_on(py)
     }
 
     /// Renders this [`View`] as a column-oriented JSON string. Useful if you
