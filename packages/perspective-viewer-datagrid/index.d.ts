@@ -16,7 +16,7 @@ declare global {
     interface CustomElementRegistry {
         get(
             tagName: "perspective-viewer-datagrid"
-        ): HTMLPerspectiveViewerDatagridPluginElement;
+        ): typeof HTMLPerspectiveViewerDatagridPluginElement;
 
         // TODO is this needed?
         whenDefined(tagName: "perspective-viewer-datagrid"): Promise<void>;
