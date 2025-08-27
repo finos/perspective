@@ -10,15 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-/**
- *
- * # See Also
- *
- * [`react-example`](https://github.com/finos/perspective/tree/master/examples/react-example)
- * project from the Perspective GitHub repo.
- *
- * @module
- */
+declare module "*.wasm" {
+    const content: string;
+    export default content;
+}
 
-export * from "./viewer";
-export * from "./workspace";
+declare module "*.arrow" {
+    const content: string;
+    export default content;
+}
