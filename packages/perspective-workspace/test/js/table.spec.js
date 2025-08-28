@@ -111,6 +111,27 @@ function tests(context, compare) {
             `${context}-replace-table-works-with-errored-table.txt`
         );
     });
+
+    test("removeTable() smoke test", async ({ page }) => {
+        const tables = await page.evaluate(async () => {
+            const table = await window.__WORKER__.table("x\n1\n");
+            const workspace = document.getElementById("workspace");
+            await workspace.addTable("temptable", table);
+            return Array.from(workspace.tables.keys());
+        });
+
+        expect(tables).toEqual(["superstore", "temptable"]);
+        const result = await page.evaluate(async () => {
+            return await workspace.removeTable("temptable");
+        });
+        expect(result).toBe(true);
+
+        const tablesAfterRemove = await page.evaluate(async () => {
+            const workspace = document.getElementById("workspace");
+            return Array.from(workspace.tables.keys());
+        });
+        expect(tablesAfterRemove).toEqual(["superstore"]);
+    });
 }
 
 test.describe("Workspace table functions", () => {
