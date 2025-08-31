@@ -245,12 +245,12 @@ impl From<proto::ViewConfig> for ViewConfig {
         ViewConfig {
             group_by: value.group_by,
             split_by: value.split_by,
-            columns: match value.columns.unwrap().opt_columns {
+            columns: match value.columns.unwrap_or_default().opt_columns {
                 Some(columns_update::OptColumns::Columns(x)) => {
                     x.columns.into_iter().map(Some).collect()
                 },
                 _ => {
-                    panic!("Expected columns in ViewConfig")
+                    vec![]
                 },
             },
             filter: value.filter.into_iter().map(|x| x.into()).collect(),
@@ -264,6 +264,53 @@ impl From<proto::ViewConfig> for ViewConfig {
                 .into_iter()
                 .map(|(x, y)| (x, y.into()))
                 .collect(),
+            group_by_depth: value.group_by_depth,
+        }
+    }
+}
+
+impl From<ViewConfigUpdate> for ViewConfig {
+    fn from(value: ViewConfigUpdate) -> Self {
+        ViewConfig {
+            group_by: value.group_by.unwrap_or_default(),
+            split_by: value.split_by.unwrap_or_default(),
+            columns: value.columns.unwrap_or_default(),
+            filter: value.filter.unwrap_or_default(),
+            filter_op: value.filter_op.unwrap_or_default(),
+            sort: value.sort.unwrap_or_default(),
+            expressions: value.expressions.unwrap_or_default(),
+            aggregates: value.aggregates.unwrap_or_default(),
+            group_by_depth: value.group_by_depth,
+        }
+    }
+}
+
+impl From<proto::ViewConfig> for ViewConfigUpdate {
+    fn from(value: proto::ViewConfig) -> Self {
+        ViewConfigUpdate {
+            group_by: Some(value.group_by),
+            split_by: Some(value.split_by),
+            columns: match value.columns.unwrap_or_default().opt_columns {
+                Some(columns_update::OptColumns::Columns(x)) => {
+                    Some(x.columns.into_iter().map(Some).collect())
+                },
+                _ => None,
+            },
+            filter: Some(value.filter.into_iter().map(|x| x.into()).collect()),
+            filter_op: Some(
+                proto::view_config::FilterReducer::try_from(value.filter_op)
+                    .unwrap_or_default()
+                    .into(),
+            ),
+            sort: Some(value.sort.into_iter().map(|x| x.into()).collect()),
+            expressions: Some(Expressions(value.expressions)),
+            aggregates: Some(
+                value
+                    .aggregates
+                    .into_iter()
+                    .map(|(x, y)| (x, y.into()))
+                    .collect(),
+            ),
             group_by_depth: value.group_by_depth,
         }
     }

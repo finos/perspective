@@ -20,7 +20,11 @@ import { format_cell } from "./format_cell.js";
  * @param {*} row_headers
  * @param {*} regularTable
  */
-export function* format_tree_header(paths = [], row_headers, regularTable) {
+export function* format_tree_header_row_path(
+    paths = [],
+    row_headers,
+    regularTable
+) {
     const plugins = regularTable[PRIVATE_PLUGIN_SYMBOL];
     for (let path of paths) {
         path = ["TOTAL", ...path];
@@ -41,6 +45,26 @@ export function* format_tree_header(paths = [], row_headers, regularTable) {
         }
 
         path.length = row_headers.length + 1;
+        yield path;
+    }
+}
+
+export function* format_tree_header(paths = [], row_headers, regularTable) {
+    const plugins = regularTable[PRIVATE_PLUGIN_SYMBOL];
+    for (let path of paths) {
+        const new_path = [""];
+        for (const idx in path) {
+            new_path.push(
+                format_cell.call(
+                    this,
+                    row_headers[idx],
+                    path[idx],
+                    plugins,
+                    true
+                )
+            );
+        }
+
         yield path;
     }
 }

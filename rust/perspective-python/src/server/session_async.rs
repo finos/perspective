@@ -85,7 +85,6 @@ impl PyAsyncSession {
     }
 
     pub async fn close(&self) -> PyResult<()> {
-
         AllowThreads(pin!(async move { self.session.write().await.take() }))
             .await
             .ok_or_else(|| {

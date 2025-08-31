@@ -38,7 +38,7 @@ struct ViewSubscriptionData {
     config: Rc<ViewConfig>,
     callback_id: Rc<Cell<u32>>,
     on_stats: Callback<ViewStats>,
-    on_update: Callback<()>,
+    on_update: Option<Callback<()>>,
     is_deleted: Rc<Cell<bool>>,
 }
 
@@ -51,7 +51,10 @@ pub struct ViewSubscription {
 impl ViewSubscriptionData {
     /// Main handler when underlying `View()` calls `on_update()`.
     async fn on_view_update(self) -> ApiResult<JsValue> {
-        self.on_update.emit(());
+        if let Some(on_update) = &self.on_update {
+            on_update.emit(());
+        };
+
         self.clone().update_view_stats().await?;
         Ok(JsValue::UNDEFINED)
     }
@@ -78,7 +81,10 @@ impl ViewSubscriptionData {
 
     async fn internal_delete(&self) -> ApiResult<()> {
         let view = &self.view;
-        view.remove_update(self.callback_id.get()).await?;
+        if self.on_update.is_some() {
+            view.remove_update(self.callback_id.get()).await?;
+        }
+
         view.delete().await?;
         self.is_deleted.set(true);
         Ok(())
@@ -96,12 +102,12 @@ impl ViewSubscription {
     /// * `view` - a Perspective `View()` on this `table`.
     /// * `on_stats` - a callback for metadata notifications, from Perspective's
     ///   `View.on_update()`.
-    pub fn new(
+    pub async fn new(
         view: perspective_client::View,
         config: ViewConfig,
         on_stats: Callback<ViewStats>,
-        on_update: Callback<()>,
-    ) -> Self {
+        on_update: Option<Callback<()>>,
+    ) -> Result<Self, ApiError> {
         let data = ViewSubscriptionData {
             view,
             config: config.into(),
@@ -111,30 +117,28 @@ impl ViewSubscription {
             is_deleted: Rc::default(),
         };
 
-        let emit = perspective_js::utils::LocalPollLoop::new({
-            clone!(data);
-            move |_| {
-                ApiFuture::spawn(data.clone().on_view_update());
-                Ok(JsValue::UNDEFINED)
-            }
-        });
+        if data.on_update.is_some() {
+            let emit = perspective_js::utils::LocalPollLoop::new({
+                clone!(data);
+                move |_| {
+                    ApiFuture::spawn(data.clone().on_view_update());
+                    Ok(JsValue::UNDEFINED)
+                }
+            });
 
-        ApiFuture::spawn({
             clone!(data.view, data.callback_id);
-            async move {
-                let result = view
-                    .on_update(
-                        Box::new(move |msg| emit.poll(msg)),
-                        OnUpdateOptions::default(),
-                    )
-                    .await?;
-                callback_id.set(result);
-                Ok(())
-            }
-        });
+            let result = view
+                .on_update(
+                    Box::new(move |msg| emit.poll(msg)),
+                    OnUpdateOptions::default(),
+                )
+                .await?;
+
+            callback_id.set(result);
+        }
 
         ApiFuture::spawn(data.clone().update_view_stats());
-        Self { data }
+        Ok(Self { data })
     }
 
     /// It is possible to re-use a `ViewSubscription` without a costly

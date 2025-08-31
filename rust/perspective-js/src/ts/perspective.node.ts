@@ -39,8 +39,6 @@ const uncompressed_client_wasm = await fs
     .then((buffer) => load_wasm_stage_0(buffer.buffer as ArrayBuffer));
 
 await perspective_client.default({ module_or_path: uncompressed_client_wasm });
-perspective_client.init();
-
 const SYNC_MODULE = await fs
     .readFile(path.join(__dirname, "../../dist/wasm/perspective-server.wasm"))
     .then((buffer) => load_wasm_stage_0(buffer.buffer as ArrayBuffer))
@@ -64,8 +62,6 @@ const SYNC_SESSION = SYNC_SERVER.make_session(
 SYNC_CLIENT = new perspective_client.Client(async (req: Uint8Array) => {
     await SYNC_SESSION.handle_request(req);
 });
-
-await SYNC_CLIENT.init();
 
 export class PerspectiveServer extends engine.PerspectiveServer {
     constructor(options?: engine.PerspectiveServerOptions) {

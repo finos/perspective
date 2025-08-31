@@ -61,7 +61,7 @@ pub struct SessionMetadataState {
 impl SessionMetadata {
     /// Creates a new `SessionMetadata` from a `JsPerspectiveTable`.
     pub(super) async fn from_table(table: &perspective_client::Table) -> ApiResult<Self> {
-        let features = table.get_features()?.clone();
+        let features = table.get_features().await?.clone();
         let column_names = table.columns().await?;
         let table_schema = table.schema().await?;
         let edit_port = table.make_port().await? as f64;
@@ -265,58 +265,44 @@ impl SessionMetadata {
         &'a self,
         name: &str,
     ) -> Option<Box<dyn Iterator<Item = Aggregate> + 'a>> {
-        maybe!({
-            let coltype = self.get_column_table_type(name)?;
-            let aggregates = coltype.aggregates_iter();
-            Some(match coltype {
-                ColumnType::Float | ColumnType::Integer => {
-                    let num_cols = self
-                        .get_expression_columns()
-                        .cloned()
-                        .chain(self.get_table_columns()?.clone().into_iter())
-                        .map(move |name| {
-                            self.get_column_table_type(&name)
-                                .map(|coltype| (name, coltype))
-                        })
-                        .collect::<Option<Vec<_>>>()?
-                        .into_iter()
-                        .filter(|(_, coltype)| {
-                            *coltype == ColumnType::Integer || *coltype == ColumnType::Float
-                        })
-                        .map(|(name, _)| {
-                            Aggregate::MultiAggregate(MultiAggregate::WeightedMean, name)
-                        });
-                    Box::new(aggregates.chain(num_cols)) as Box<dyn Iterator<Item = Aggregate>>
-                },
-                ColumnType::String => {
-                    let exp_cols = self
-                        .get_expression_columns()
-                        .cloned()
-                        .chain(self.get_table_columns()?.clone().into_iter())
-                        .map(move |name| {
-                            self.get_column_table_type(&name)
-                                .map(|coltype| (name, coltype))
-                        })
-                        .collect::<Option<Vec<_>>>()?;
+        let coltype = self.get_column_table_type(name)?;
+        let f = self.get_features()?.aggregates.get(&(coltype as u32))?;
 
-                    let max_cols = exp_cols
-                        .clone()
-                        .into_iter()
-                        .filter(|(_, coltype)| {
-                            *coltype == ColumnType::Integer || *coltype == ColumnType::Float
-                        })
-                        .map(|(name, _)| Aggregate::MultiAggregate(MultiAggregate::MaxBy, name));
-
-                    let min_cols = exp_cols
-                        .into_iter()
-                        .filter(|(_, coltype)| {
-                            *coltype == ColumnType::Integer || *coltype == ColumnType::Float
-                        })
-                        .map(|(name, _)| Aggregate::MultiAggregate(MultiAggregate::MinBy, name));
-                    Box::new(aggregates.chain(max_cols).chain(min_cols))
-                },
-                _ => aggregates,
+        let aggregates = f
+            .aggregates
+            .iter()
+            .flat_map(move |x| {
+                if x.args.is_empty() {
+                    Some(vec![Aggregate::SingleAggregate(x.name.to_string())])
+                } else {
+                    // todo: handle multi args
+                    let dtype = x.args.first().unwrap();
+                    Some(
+                        self.get_expression_columns()
+                            .cloned()
+                            .chain(self.get_table_columns()?.clone().into_iter())
+                            .map(move |name| {
+                                self.get_column_table_type(&name)
+                                    .map(|coltype| (name, coltype))
+                            })
+                            .collect::<Option<Vec<_>>>()?
+                            .into_iter()
+                            .filter(move |(_, coltype)| {
+                                *coltype as i32 == *dtype
+                                    || (coltype == &ColumnType::Integer
+                                        && *dtype == ColumnType::Float as i32)
+                                    || (coltype == &ColumnType::Float
+                                        && *dtype == ColumnType::Integer as i32)
+                            })
+                            .map(|(name, _)| {
+                                Aggregate::MultiAggregate(x.name.to_string(), vec![name])
+                            })
+                            .collect(),
+                    )
+                }
             })
-        })
+            .flatten();
+
+        Some(Box::new(aggregates))
     }
 }

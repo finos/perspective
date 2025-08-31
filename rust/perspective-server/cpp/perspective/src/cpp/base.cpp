@@ -573,7 +573,8 @@ str_to_aggtype(const std::string& str) {
     if (str == "pct sum parent" || str == "pct_sum_parent") {
         return t_aggtype::AGGTYPE_PCT_SUM_PARENT;
     }
-    if (str == "pct sum grand total" || str == "pct_sum_grand_total") {
+    if (str == "pct sum total" || str == "pct_sum_total"
+        || str == "pct sum grand total" || str == "pct_sum_grand_total") {
         return t_aggtype::AGGTYPE_PCT_SUM_GRAND_TOTAL;
     }
     if (str.find("udf_combiner_") != std::string::npos) {

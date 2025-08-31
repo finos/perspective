@@ -549,6 +549,9 @@ impl Component for ConfigSelector {
             move |_event| dragdrop.notify_drag_end()
         });
 
+        let metadata = ctx.props().session.metadata();
+        let features = metadata.get_features().unwrap();
+
         html! {
             <div slot="top_panel" id="top_panel" {class} ondragend={dragend}>
                 <LocalStyle href={css!("config-selector")} />
@@ -560,15 +563,16 @@ impl Component for ConfigSelector {
                         onmousedown={transpose.clone()}
                     />
                 }
-                <GroupBySelector
-                    name="group_by"
-                    parent={ctx.link().clone()}
-                    column_dropdown={column_dropdown.clone()}
-                    exclude={config.group_by.iter().cloned().collect::<HashSet<_>>()}
-                    is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::GroupBy)}
-                    dragdrop={&ctx.props().dragdrop}
-                >
-                    { for config.group_by.iter().map(|group_by| {
+                if features.group_by {
+                    <GroupBySelector
+                        name="group_by"
+                        parent={ctx.link().clone()}
+                        column_dropdown={column_dropdown.clone()}
+                        exclude={config.group_by.iter().cloned().collect::<HashSet<_>>()}
+                        is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::GroupBy)}
+                        dragdrop={&ctx.props().dragdrop}
+                    >
+                        { for config.group_by.iter().map(|group_by| {
                             html_nested! {
                                 <PivotColumn
                                     dragdrop={ &ctx.props().dragdrop }
@@ -578,24 +582,26 @@ impl Component for ConfigSelector {
                                 </PivotColumn>
                             }
                         }) }
-                </GroupBySelector>
-                if !config.split_by.is_empty() {
-                    <span
-                        id="transpose_button"
-                        class="rrow centered"
-                        title="Transpose Pivots"
-                        onmousedown={transpose}
-                    />
+                    </GroupBySelector>
                 }
-                <SplitBySelector
-                    name="split_by"
-                    parent={ctx.link().clone()}
-                    column_dropdown={column_dropdown.clone()}
-                    exclude={config.split_by.iter().cloned().collect::<HashSet<_>>()}
-                    is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::SplitBy)}
-                    dragdrop={&ctx.props().dragdrop}
-                >
-                    { for config.split_by.iter().map(|split_by| {
+                if features.split_by {
+                    if !config.split_by.is_empty() {
+                        <span
+                            id="transpose_button"
+                            class="rrow centered"
+                            title="Transpose Pivots"
+                            onmousedown={transpose}
+                        />
+                    }
+                    <SplitBySelector
+                        name="split_by"
+                        parent={ctx.link().clone()}
+                        column_dropdown={column_dropdown.clone()}
+                        exclude={config.split_by.iter().cloned().collect::<HashSet<_>>()}
+                        is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::SplitBy)}
+                        dragdrop={&ctx.props().dragdrop}
+                    >
+                        { for config.split_by.iter().map(|split_by| {
                             html_nested! {
                                 <PivotColumn
                                     dragdrop={ &ctx.props().dragdrop }
@@ -605,19 +611,21 @@ impl Component for ConfigSelector {
                                 </PivotColumn>
                             }
                         }) }
-                </SplitBySelector>
-                <SortSelector
-                    name="sort"
-                    allow_duplicates=true
-                    parent={ctx.link().clone()}
-                    column_dropdown={column_dropdown.clone()}
-                    exclude={config.sort.iter().map(|x| x.0.clone()).collect::<HashSet<_>>()}
-                    dragdrop={&ctx.props().dragdrop}
-                    is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::Sort).map(|(index, name)| {
+                    </SplitBySelector>
+                }
+                if features.sort {
+                    <SortSelector
+                        name="sort"
+                        allow_duplicates=true
+                        parent={ctx.link().clone()}
+                        column_dropdown={column_dropdown.clone()}
+                        exclude={config.sort.iter().map(|x| x.0.clone()).collect::<HashSet<_>>()}
+                        dragdrop={&ctx.props().dragdrop}
+                        is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::Sort).map(|(index, name)| {
                         (index, Sort(name, SortDir::Asc))
                     })}
-                >
-                    { for config.sort.iter().enumerate().map(|(idx, sort)| {
+                    >
+                        { for config.sort.iter().enumerate().map(|(idx, sort)| {
                             html_nested! {
                                 <SortColumn
                                     idx={ idx }
@@ -628,19 +636,21 @@ impl Component for ConfigSelector {
                                 </SortColumn>
                             }
                         }) }
-                </SortSelector>
-                <FilterSelector
-                    name="filter"
-                    allow_duplicates=true
-                    parent={ctx.link().clone()}
-                    {column_dropdown}
-                    exclude={config.filter.iter().map(|x| x.column().to_string()).collect::<HashSet<_>>()}
-                    dragdrop={&ctx.props().dragdrop}
-                    is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::Filter).map(|(index, name)| {
+                    </SortSelector>
+                }
+                if !features.filter_ops.is_empty() {
+                    <FilterSelector
+                        name="filter"
+                        allow_duplicates=true
+                        parent={ctx.link().clone()}
+                        {column_dropdown}
+                        exclude={config.filter.iter().map(|x| x.column().to_string()).collect::<HashSet<_>>()}
+                        dragdrop={&ctx.props().dragdrop}
+                        is_dragover={ctx.props().dragdrop.is_dragover(DragTarget::Filter).map(|(index, name)| {
                         (index, Filter::new(&name, "", FilterTerm::Scalar(Scalar::Null)))
                     })}
-                >
-                    { for config.filter.iter().enumerate().map(|(idx, filter)| {
+                    >
+                        { for config.filter.iter().enumerate().map(|(idx, filter)| {
                             let filter_keydown = ctx.link()
                                 .callback(move |txt| ConfigSelectorMsg::SetFilterValue(idx, txt));
 
@@ -656,7 +666,8 @@ impl Component for ConfigSelector {
                                 </FilterColumn>
                             }
                         }) }
-                </FilterSelector>
+                    </FilterSelector>
+                }
             </div>
         }
     }

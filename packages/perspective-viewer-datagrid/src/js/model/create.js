@@ -116,18 +116,8 @@ export async function createModel(regular, table, view, extend = {}) {
             type_changed;
     }
 
-    // Extract the entire expression string as typed by the user, so we can
-    // feed it into `validate_expressions` and get back the data types for
-    // each column without it being affected by a pivot.
-    const expressions = Array.isArray(config.expressions)
-        ? Object.fromEntries(
-              config.expressions.map((expr) => [expr[0], expr[1]])
-          )
-        : config.expressions;
-
     const [
         table_schema,
-        validated_expressions,
         num_rows,
         schema,
         expression_schema,
@@ -135,7 +125,6 @@ export async function createModel(regular, table, view, extend = {}) {
         _edit_port,
     ] = await Promise.all([
         table.schema(),
-        table.validate_expressions(expressions),
         view.num_rows(),
         view.schema(),
         view.expression_schema(),
@@ -170,7 +159,7 @@ export async function createModel(regular, table, view, extend = {}) {
     const _schema = { ...schema, ...expression_schema };
     const _table_schema = {
         ...table_schema,
-        ...validated_expressions.expression_schema,
+        ...expression_schema,
     };
 
     const _column_paths = column_paths.filter((path) => {

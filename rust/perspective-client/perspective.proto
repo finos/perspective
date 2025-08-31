@@ -214,12 +214,25 @@ message GetFeaturesResp {
     bool group_by = 1;
     bool split_by = 2;
     bool expressions = 3;
-    map<uint32, ColumnTypeOptions>  filter_ops = 4;
+    bool on_update = 4;
+    bool sort = 5;
+    map<uint32, ColumnTypeOptions> filter_ops = 6;
+    map<uint32, AggregateOptions> aggregates = 7;
 
     message ColumnTypeOptions {
         repeated string options = 1;
     }
+
+    message AggregateOptions {
+        repeated AggregateArgs aggregates = 1;
+    }
+
+    message AggregateArgs {
+        string name = 1;
+        repeated ColumnType args = 2;
+    }
 }
+
 
 // `Client::get_hosted_tables`
 message GetHostedTablesReq {

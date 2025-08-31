@@ -1341,6 +1341,8 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             const auto& features = resp.mutable_get_features_resp();
             features->set_group_by(true);
             features->set_split_by(true);
+            features->set_sort(true);
+            features->set_on_update(true);
             features->set_expressions(true);
             proto::GetFeaturesResp_ColumnTypeOptions opts;
             opts.add_options("==");
@@ -1384,6 +1386,91 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             opts.add_options("is null");
             (*features->mutable_filter_ops())[proto::ColumnType::BOOLEAN] =
                 opts2;
+
+            proto::GetFeaturesResp_AggregateOptions string_opts;
+            string_opts.add_aggregates()->set_name("count");
+            string_opts.add_aggregates()->set_name("any");
+            string_opts.add_aggregates()->set_name("distinct count");
+            string_opts.add_aggregates()->set_name("dominant");
+            string_opts.add_aggregates()->set_name("first");
+            string_opts.add_aggregates()->set_name("join");
+            string_opts.add_aggregates()->set_name("last");
+            string_opts.add_aggregates()->set_name("last by index");
+            string_opts.add_aggregates()->set_name("median");
+            string_opts.add_aggregates()->set_name("q1");
+            string_opts.add_aggregates()->set_name("q3");
+            string_opts.add_aggregates()->set_name("unique");
+            auto args1 = string_opts.add_aggregates();
+            args1->set_name("min by");
+            args1->add_args(proto::ColumnType::FLOAT);
+            auto args2 = string_opts.add_aggregates();
+            args2->set_name("max by");
+            args2->add_args(proto::ColumnType::FLOAT);
+            (*features->mutable_aggregates())[proto::ColumnType::STRING] =
+                string_opts;
+
+            (*features->mutable_aggregates())[proto::ColumnType::BOOLEAN] =
+                string_opts;
+
+            proto::GetFeaturesResp_AggregateOptions number_opts;
+            number_opts.add_aggregates()->set_name("sum");
+            number_opts.add_aggregates()->set_name("abs sum");
+            number_opts.add_aggregates()->set_name("any");
+            number_opts.add_aggregates()->set_name("avg");
+            number_opts.add_aggregates()->set_name("count");
+            number_opts.add_aggregates()->set_name("distinct count");
+            number_opts.add_aggregates()->set_name("dominant");
+            number_opts.add_aggregates()->set_name("first");
+            number_opts.add_aggregates()->set_name("high");
+            number_opts.add_aggregates()->set_name("low");
+            number_opts.add_aggregates()->set_name("max");
+            number_opts.add_aggregates()->set_name("min");
+            number_opts.add_aggregates()->set_name("high minus low");
+            number_opts.add_aggregates()->set_name("last by index");
+            number_opts.add_aggregates()->set_name("last minus first");
+            number_opts.add_aggregates()->set_name("last");
+            number_opts.add_aggregates()->set_name("mean");
+            number_opts.add_aggregates()->set_name("median");
+            number_opts.add_aggregates()->set_name("q1");
+            number_opts.add_aggregates()->set_name("q3");
+            number_opts.add_aggregates()->set_name("pct sum parent");
+            number_opts.add_aggregates()->set_name("pct sum total");
+            number_opts.add_aggregates()->set_name("stddev");
+            number_opts.add_aggregates()->set_name("sum abs");
+            number_opts.add_aggregates()->set_name("sum not null");
+            number_opts.add_aggregates()->set_name("unique");
+            number_opts.add_aggregates()->set_name("var");
+            auto args3 = number_opts.add_aggregates();
+            args3->set_name("weighted mean");
+            args3->add_args(proto::ColumnType::FLOAT);
+            (*features->mutable_aggregates())[proto::ColumnType::INTEGER] =
+                number_opts;
+
+            (*features->mutable_aggregates())[proto::ColumnType::FLOAT] =
+                number_opts;
+
+            proto::GetFeaturesResp_AggregateOptions datetime_opts;
+            datetime_opts.add_aggregates()->set_name("count");
+            datetime_opts.add_aggregates()->set_name("any");
+            datetime_opts.add_aggregates()->set_name("avg");
+            datetime_opts.add_aggregates()->set_name("distinct count");
+            datetime_opts.add_aggregates()->set_name("dominant");
+            datetime_opts.add_aggregates()->set_name("first");
+            datetime_opts.add_aggregates()->set_name("high");
+            datetime_opts.add_aggregates()->set_name("low");
+            datetime_opts.add_aggregates()->set_name("min");
+            datetime_opts.add_aggregates()->set_name("max");
+            datetime_opts.add_aggregates()->set_name("last by index");
+            datetime_opts.add_aggregates()->set_name("last");
+            datetime_opts.add_aggregates()->set_name("median");
+            datetime_opts.add_aggregates()->set_name("q1");
+            datetime_opts.add_aggregates()->set_name("q3");
+            datetime_opts.add_aggregates()->set_name("unique");
+            (*features->mutable_aggregates())[proto::ColumnType::DATE] =
+                datetime_opts;
+
+            (*features->mutable_aggregates())[proto::ColumnType::DATETIME] =
+                datetime_opts;
 
             push_resp(std::move(resp));
             break;

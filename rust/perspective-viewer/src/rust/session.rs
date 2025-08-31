@@ -623,11 +623,16 @@ impl Session {
             .ok_or_else(|| apierror!(NoTableError))?
             .clone();
 
-        let valid_recs = table
-            .validate_expressions(config.expressions.clone())
-            .await?;
+        let expression_names = if self.metadata().get_features().unwrap().expressions {
+            let valid_recs = table
+                .validate_expressions(config.expressions.clone())
+                .await?;
 
-        let expression_names = self.metadata_mut().update_expressions(&valid_recs)?;
+            self.metadata_mut().update_expressions(&valid_recs)?
+        } else {
+            HashSet::default()
+        };
+
         if config.columns.is_empty() {
             config.columns = table_columns.into_iter().map(Some).collect();
         }
@@ -727,7 +732,29 @@ impl<'a> ValidSession<'a> {
                 .clone()
                 .ok_or("`restore()` called before `load()`")?;
 
-            let view_config = self.0.borrow().config.clone();
+            let mut view_config = self.0.borrow().config.clone();
+
+            // Populate the aggreagtes with defaults as a courtesy to the
+            // virtual server api.
+            for col in view_config
+                .columns
+                .iter()
+                .flatten()
+                .chain(view_config.sort.iter().map(|x| &x.0))
+            {
+                if !view_config.aggregates.contains_key(col.as_str()) {
+                    let agg = self
+                        .0
+                        .metadata()
+                        .get_column_aggregates(col.as_str())
+                        .into_apierror()?
+                        .next()
+                        .into_apierror()?;
+
+                    let _ = view_config.aggregates.insert(col.to_string(), agg);
+                }
+            }
+
             let view = table.view(Some(view_config.into())).await?;
             let view_schema = view.schema().await?;
             self.0.metadata_mut().update_view_schema(&view_schema)?;
@@ -738,8 +765,15 @@ impl<'a> ValidSession<'a> {
 
             let sub = {
                 let config = self.0.borrow().config.clone();
-                let on_update = self.0.table_updated.callback();
-                ViewSubscription::new(view, config, on_stats, on_update)
+                let on_update = self
+                    .0
+                    .metadata()
+                    .get_features()
+                    .unwrap()
+                    .on_update
+                    .then(|| self.0.table_updated.callback());
+
+                ViewSubscription::new(view, config, on_stats, on_update).await?
             };
 
             let view = self.0.borrow_mut().view_sub.take();

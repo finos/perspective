@@ -207,7 +207,7 @@ const std = (nums) => {
             var table = await perspective.table(data2);
             var view = await table.view({
                 group_by: ["z"],
-                aggregates: { x: ["weighted mean", "y"] },
+                aggregates: { x: ["weighted mean", ["y"]] },
                 columns: ["x"],
             });
             var answer = [
@@ -231,7 +231,7 @@ const std = (nums) => {
             const view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: { x: ["weighted mean", "y"] },
+                aggregates: { x: ["weighted mean", ["y"]] },
             });
 
             const answer = [
@@ -845,7 +845,7 @@ const std = (nums) => {
             const view = await table.view({
                 columns: ["c"],
                 aggregates: {
-                    c: ["max by", "a"],
+                    c: ["max by", ["a"]],
                 },
                 group_by: ["b"],
             });
@@ -871,7 +871,7 @@ const std = (nums) => {
             const view = await table.view({
                 columns: ["c"],
                 aggregates: {
-                    c: ["min by", "a"],
+                    c: ["min by", ["a"]],
                 },
                 group_by: ["b"],
             });
@@ -897,7 +897,7 @@ const std = (nums) => {
             const view = await table.view({
                 columns: ["c"],
                 aggregates: {
-                    c: ["max by", "a"],
+                    c: ["max by", ["a"]],
                 },
                 group_by: ["b"],
                 filter: [["b", ">", 2]],
@@ -2352,7 +2352,7 @@ const std = (nums) => {
             ]);
             var view = await table.view({
                 group_by: ["a"],
-                aggregates: { y: ["weighted mean", "x"] },
+                aggregates: { y: ["weighted mean", ["x"]] },
                 columns: ["y"],
             });
             var answer = [

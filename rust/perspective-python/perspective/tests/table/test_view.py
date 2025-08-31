@@ -446,7 +446,9 @@ class TestView(object):
         ]
         tbl = Table(data)
         view = tbl.view(
-            aggregates={"y": ["weighted mean", "x"]}, group_by=["a"], columns=["y"]
+            aggregates={"y": ("weighted mean", ["x"])},
+            group_by=["a"],
+            columns=["y"],
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "y": (1.0 * 200 + 2 * 100) / (1.0 + 2)},
@@ -461,7 +463,9 @@ class TestView(object):
         ]
         tbl = Table(data)
         view = tbl.view(
-            aggregates={"y": ["weighted mean", "x"]}, group_by=["a"], columns=["y"]
+            aggregates={"y": ("weighted mean", ["x"])},
+            group_by=["a"],
+            columns=["y"],
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "y": (1 * 200 + (-2) * 100) / (1 - 2)},

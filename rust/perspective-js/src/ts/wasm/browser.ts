@@ -99,7 +99,6 @@ export async function worker(
         client.handle_response(json.data);
     });
 
-    await client.init();
     return client;
 }
 

@@ -585,7 +585,7 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             group_by=["computed"],
-            aggregates={"computed": ["weighted mean", "b"]},
+            aggregates={"computed": ("weighted mean", ["b"])},
             expressions={"computed": ' "a" + "b"'},
         )
         view2 = table.view(

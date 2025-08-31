@@ -88,14 +88,22 @@ impl Component for AggregateSelector {
                     .session
                     .metadata()
                     .get_column_table_type(&ctx.props().column)
-                    .map(|x| x.default_aggregate())
+                    .and_then(|x| {
+                        ctx.props().session.metadata().get_features().and_then(|y| {
+                            y.aggregates.get(&(x as u32)).and_then(|z| {
+                                z.aggregates
+                                    .first()
+                                    .map(|q| Aggregate::SingleAggregate(q.name.clone()))
+                            })
+                        })
+                    })
             })
-            .unwrap();
+            .unwrap_or_else(|| Aggregate::SingleAggregate("".to_string()));
 
         let values = self.aggregates.clone();
         let label = ctx.props().aggregate.as_ref().map(|x| match x {
             Aggregate::SingleAggregate(_) => "".to_string(),
-            Aggregate::MultiAggregate(x, _) => format!("{x}"),
+            Aggregate::MultiAggregate(x, _) => x.to_string(),
         });
 
         html! {
@@ -137,8 +145,8 @@ impl AggregateSelector {
             .session
             .metadata()
             .get_column_aggregates(&ctx.props().column)
-            .expect("Bad Aggs")
-            .collect::<Vec<_>>();
+            .map(|x| x.collect::<Vec<_>>())
+            .unwrap_or_default();
 
         let multi_aggregates2 = aggregates
             .clone()
@@ -149,40 +157,20 @@ impl AggregateSelector {
             })
             .collect::<HashSet<_>>()
             .into_iter()
-            .map(|x| match x {
-                MultiAggregate::WeightedMean => SelectItem::OptGroup(
-                    "weighted mean".into(),
+            .map(|x| {
+                SelectItem::OptGroup(
+                    x.clone().into(),
                     aggregates
                         .iter()
-                        .filter(|x| {
+                        .filter(|y| {
                             matches!(
-                                x,
-                                Aggregate::MultiAggregate(MultiAggregate::WeightedMean, _)
+                                y,
+                                Aggregate::MultiAggregate(z, _) if &x == z
                             )
                         })
                         .cloned()
                         .collect(),
-                ),
-                MultiAggregate::MaxBy => SelectItem::OptGroup(
-                    "max by".into(),
-                    aggregates
-                        .iter()
-                        .filter(|x| {
-                            matches!(x, Aggregate::MultiAggregate(MultiAggregate::MaxBy, _))
-                        })
-                        .cloned()
-                        .collect(),
-                ),
-                MultiAggregate::MinBy => SelectItem::OptGroup(
-                    "min by".into(),
-                    aggregates
-                        .iter()
-                        .filter(|x| {
-                            matches!(x, Aggregate::MultiAggregate(MultiAggregate::MinBy, _))
-                        })
-                        .cloned()
-                        .collect(),
-                ),
+                )
             })
             .collect::<Vec<_>>();
 

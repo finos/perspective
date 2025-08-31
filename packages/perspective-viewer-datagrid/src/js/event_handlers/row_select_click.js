@@ -29,7 +29,7 @@ export async function selectionListener(
         return;
     }
 
-    const id = this._ids[meta.y - meta.y0];
+    const id = this._ids?.[meta.y - meta.y0];
     if (meta && meta.y >= 0) {
         const selected = selected_rows_map.get(regularTable);
         const key_match =

@@ -85,7 +85,7 @@ export class PerspectiveView extends DOMWidgetView {
                     });
                 }
             );
-            await this.perspective_client.init();
+
             const tableName = this.model.get("table_name");
             if (!tableName) throw new Error("table_name not set in model");
             const table = this.perspective_client

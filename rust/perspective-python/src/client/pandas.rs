@@ -64,7 +64,7 @@ pub fn pandas_to_arrow_bytes<'py>(
             return Err(PyImportError::new_err(
                 "Perspective requires pyarrow to convert pandas DataFrames. Please install \
                  pyarrow.",
-            ))
+            ));
         },
     };
 

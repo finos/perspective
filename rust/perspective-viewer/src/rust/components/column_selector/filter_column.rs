@@ -125,8 +125,10 @@ impl FilterColumnProps {
     fn get_filter_ops(&self, col_type: ColumnType) -> Option<Vec<String>> {
         let metadata = self.session.metadata();
         let features = metadata.get_features()?;
-        // let col_type = metadata.get_column_table_type(column)?;
-        Some(features.filter_ops.get(&(col_type as u32))?.options.clone())
+        features
+            .filter_ops
+            .get(&(col_type as u32))
+            .map(|x| x.options.clone())
     }
 
     /// Update the filter comparison operator.

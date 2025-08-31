@@ -1349,7 +1349,7 @@ import * as expressions_common from "./common.js";
                 group_by: ["x"],
                 expressions: { column: `2 * "z"` },
                 aggregates: {
-                    column: ["weighted mean", "z"],
+                    column: ["weighted mean", ["z"]],
                 },
             });
 
@@ -1397,7 +1397,7 @@ import * as expressions_common from "./common.js";
                 split_by: ["y"],
                 expressions: { column: `2 * "z"` },
                 aggregates: {
-                    column: ["weighted mean", "z"],
+                    column: ["weighted mean", ["z"]],
                 },
             });
 
