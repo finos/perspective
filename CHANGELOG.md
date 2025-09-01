@@ -1,3 +1,24 @@
+# [v3.8.0](https://github.com/finos/perspective/releases/tag/v3.8.0)
+
+_1 September 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.4...v3.8.0))
+
+**Breaking**
+
+- Better `features` support [#3049](https://github.com/finos/perspective/pull/3049)
+- Update column paths when the colun set changes in `perspective-viewer-datagrid` [#3047](https://github.com/finos/perspective/pull/3047)
+
+Fixes
+
+- Fix concurrent `HTMLPerspectiveViewerElement::load` error [#3045](https://github.com/finos/perspective/pull/3045)
+- Fix `null` handling for cast ExprTK functions [#3040](https://github.com/finos/perspective/pull/3040)
+
+Misc
+
+- Fix Workspace.removeTable() [#3048](https://github.com/finos/perspective/pull/3048)
+- Move C++ source to `perspective-server` crate [#3038](https://github.com/finos/perspective/pull/3038)
+- Remove blog links [#3043](https://github.com/finos/perspective/pull/3043)
+- Add API docs for `perspective-react` [#3037](https://github.com/finos/perspective/pull/3037)
+
 # [v3.7.4](https://github.com/finos/perspective/releases/tag/v3.7.4)
 
 _21 July 2025_ ([Full changelog](https://github.com/finos/perspective/compare/v3.7.3...v3.7.4))

@@ -12,7 +12,7 @@
 
 [package]
 name = "perspective-client"
-version = "3.7.4"
+version = "3.8.0"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2024"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -31,7 +31,7 @@ include = [
 ]
 
 [features]
-default = ["generate-proto", "protobuf-src"]
+default = []
 
 # Should the project build the `proto.rs` via protoc from source or assume it
 # already exists?
