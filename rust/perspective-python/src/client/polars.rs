@@ -55,10 +55,7 @@ pub fn is_polars_lf(py: Python, df: &Bound<'_, PyAny>) -> PyResult<bool> {
 pub fn arrow_to_polars(py: Python<'_>, arrow: &[u8]) -> PyResult<Py<PyAny>> {
     let polars = PyModule::import(py, "polars")?;
     let bytes = PyBytes::new(py, arrow);
-    Ok(polars
-        .getattr("read_ipc_stream")?
-        .call1((bytes,))?
-        .unbind())
+    Ok(polars.getattr("read_ipc_stream")?.call1((bytes,))?.unbind())
 }
 
 pub fn polars_to_arrow_bytes<'py>(

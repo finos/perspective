@@ -130,18 +130,15 @@ async function build_all() {
     await build_rust();
     await build_web_assets();
 
-    // Typecheck
-    await $`npx tsc --project ./tsconfig.browser.json`.stdio(
-        "inherit",
-        "inherit",
-        "inherit"
-    );
-
-    await $`npx tsc --project ./tsconfig.node.json`.stdio(
-        "inherit",
-        "inherit",
-        "inherit"
-    );
+    // Typecheck;
+    try {
+        await $`tsc --project ./tsconfig.browser.json`;
+        await $`tsc --project ./tsconfig.node.json`;
+    } catch (e) {
+        console.error(e.stdout);
+        console.error(e.stderr);
+        process.exit(e.exitCode);
+    }
 }
 
 build_all();

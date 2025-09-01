@@ -204,12 +204,6 @@ impl Client {
     }
 
     #[wasm_bindgen]
-    pub async fn init(&self) -> ApiResult<()> {
-        self.client.clone().init().await?;
-        Ok(())
-    }
-
-    #[wasm_bindgen]
     pub async fn handle_response(&self, value: &JsValue) -> ApiResult<()> {
         let uint8array = Uint8Array::new(value);
         let slice = uint8array.to_vec();

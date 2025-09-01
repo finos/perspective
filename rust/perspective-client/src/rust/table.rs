@@ -218,8 +218,8 @@ impl Table {
     /// Get a metadata dictionary of the `perspective_server::Server`'s
     /// features, which is (currently) implementation specific, but there is
     /// only one implementation.
-    pub fn get_features(&self) -> ClientResult<Features> {
-        self.client.get_features()
+    pub async fn get_features(&self) -> ClientResult<Features> {
+        self.client.get_features().await
     }
 
     /// Returns the name of the index column for the table.

@@ -212,6 +212,7 @@ impl Component for ColumnSelector {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let config = ctx.props().session.get_view_config();
+
         let is_aggregated = config.is_aggregated();
         let columns_iter = ctx.props().column_selector_iter_set(&config);
         let onselect = ctx.link().callback(|()| ViewCreated);
@@ -241,7 +242,31 @@ impl Component for ColumnSelector {
                 + config.split_by.len()
                 + config.filter.len()
                 + config.sort.len()) as f64,
-            220.0,
+            ctx.props()
+                .session
+                .metadata()
+                .get_features()
+                .map(|x| {
+                    let mut y = 0.0;
+                    if !x.filter_ops.is_empty() {
+                        y += 1.0;
+                    }
+
+                    if x.group_by {
+                        y += 1.0;
+                    }
+
+                    if x.split_by {
+                        y += 1.0;
+                    }
+
+                    if x.sort {
+                        y += 1.0;
+                    }
+
+                    y * 55.0
+                })
+                .unwrap_or_default(),
         );
 
         let config_selector = html_nested! {
@@ -331,13 +356,26 @@ impl Component for ColumnSelector {
             28.0
         };
 
-        let add_column = html_nested! {
-            <ScrollPanelItem key="__add_expression__" size_hint={size}>
-                <AddExpressionButton
-                    on_open_expr_panel={&ctx.props().on_open_expr_panel}
-                    selected_column={ctx.props().selected_column.clone()}
-                />
-            </ScrollPanelItem>
+        let add_column = if ctx
+            .props()
+            .session
+            .metadata()
+            .get_features()
+            .unwrap()
+            .expressions
+        {
+            html_nested! {
+                <ScrollPanelItem key="__add_expression__" size_hint={size}>
+                    <AddExpressionButton
+                        on_open_expr_panel={&ctx.props().on_open_expr_panel}
+                        selected_column={ctx.props().selected_column.clone()}
+                    />
+                </ScrollPanelItem>
+            }
+        } else {
+            html_nested! {
+                <ScrollPanelItem key="__add_expression__" size_hint=0_f64><span /></ScrollPanelItem>
+            }
         };
 
         if inactive_children.is_empty() {

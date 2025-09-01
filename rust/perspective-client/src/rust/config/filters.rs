@@ -96,6 +96,12 @@ impl Display for FilterTerm {
     }
 }
 
+impl FilterTerm {
+    pub fn is_null(&self) -> bool {
+        matches!(self, FilterTerm::Scalar(Scalar::Null))
+    }
+}
+
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize, TS)]
 #[serde()]
 pub struct Filter(String, String, #[serde(default)] FilterTerm);

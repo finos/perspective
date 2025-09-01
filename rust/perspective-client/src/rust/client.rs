@@ -88,7 +88,7 @@ impl<U: Copy + 'static> SystemInfo<U> {
 
 /// Metadata about what features are supported by the `Server` to which this
 /// [`Client`] connects.
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Features(Arc<GetFeaturesResp>);
 
 impl Deref for Features {
@@ -376,21 +376,6 @@ impl Client {
         Ok(id)
     }
 
-    pub async fn init(&self) -> ClientResult<()> {
-        let msg = Request {
-            msg_id: self.gen_id(),
-            entity_id: "".to_owned(),
-            client_req: Some(ClientReq::GetFeaturesReq(GetFeaturesReq {})),
-        };
-
-        *self.features.lock().await = Some(Features(Arc::new(match self.oneshot(&msg).await? {
-            ClientResp::GetFeaturesResp(features) => Ok(features),
-            resp => Err(resp),
-        }?)));
-
-        Ok(())
-    }
-
     /// Generate a message ID unique to this client.
     pub(crate) fn gen_id(&self) -> u32 {
         self.id_gen.next()
@@ -461,14 +446,25 @@ impl Client {
             .map_err(|_| ClientError::Unknown(format!("Internal error for req {req}")))
     }
 
-    pub(crate) fn get_features(&self) -> ClientResult<Features> {
-        let features = self
-            .features
-            .try_lock()
-            .ok_or(ClientError::NotInitialized)?
-            .as_ref()
-            .ok_or(ClientError::NotInitialized)?
-            .clone();
+    pub(crate) async fn get_features(&self) -> ClientResult<Features> {
+        let mut guard = self.features.lock().await;
+        let features = if let Some(features) = &*guard {
+            features.clone()
+        } else {
+            let msg = Request {
+                msg_id: self.gen_id(),
+                entity_id: "".to_owned(),
+                client_req: Some(ClientReq::GetFeaturesReq(GetFeaturesReq {})),
+            };
+
+            let features = Features(Arc::new(match self.oneshot(&msg).await? {
+                ClientResp::GetFeaturesResp(features) => Ok(features),
+                resp => Err(resp),
+            }?));
+
+            *guard = Some(features.clone());
+            features
+        };
 
         Ok(features)
     }

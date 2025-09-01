@@ -2582,7 +2582,7 @@ import perspective from "../perspective_client";
                 group_by: ["y"],
                 columns: ['"x" + "z"'],
                 aggregates: {
-                    '"x" + "z"': ["weighted mean", "y"],
+                    '"x" + "z"': ["weighted mean", ["y"]],
                 },
                 expressions: { '"x" + "z"': '"x" + "z"' },
             });
@@ -2678,8 +2678,8 @@ import perspective from "../perspective_client";
             const view = await table.view({
                 group_by: ['"x" + "z"'],
                 aggregates: {
-                    x: ["weighted mean", '"x" + "z"'],
-                    '"x" + "z"': ["weighted mean", "y"],
+                    x: ["weighted mean", ['"x" + "z"']],
+                    '"x" + "z"': ["weighted mean", ["y"]],
                 },
                 expressions: { '"x" + "z"': '"x" + "z"' },
             });

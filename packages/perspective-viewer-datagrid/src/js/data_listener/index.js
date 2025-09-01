@@ -12,7 +12,10 @@
 
 import { PRIVATE_PLUGIN_SYMBOL } from "../model";
 import { format_cell } from "./format_cell.js";
-import { format_tree_header } from "./format_tree_header.js";
+import {
+    format_tree_header,
+    format_tree_header_row_path,
+} from "./format_tree_header.js";
 
 /**
  * Creates a new DataListener, suitable for passing to `regular-table`'s
@@ -86,7 +89,12 @@ export function createDataListener(viewer) {
             }
 
             this._last_window = new_window;
-            this._ids = columns.__ID__;
+            this._ids =
+                columns.__ID__ ||
+                Array(y1 - y0)
+                    .fill()
+                    .map((_, index) => [index + y0]);
+
             this._reverse_columns = this._column_paths
                 .slice(x0, x1)
                 .reduce((acc, x, i) => {
@@ -94,7 +102,7 @@ export function createDataListener(viewer) {
                     return acc;
                 }, new Map());
 
-            this._reverse_ids = this._ids.reduce((acc, x, i) => {
+            this._reverse_ids = this._ids?.reduce((acc, x, i) => {
                 acc.set(x?.join("|"), i);
                 return acc;
             }, new Map());
@@ -108,12 +116,6 @@ export function createDataListener(viewer) {
             column_paths = [];
 
         const is_settings_open = viewer.hasAttribute("settings");
-
-        // if (this._config.split_by?.length > 0) {
-        //     this._column_paths
-        // }
-
-        // for (const path of this._column_paths.slice(x0, x1)) {
         for (
             let ipath = x0;
             ipath < Math.min(x1, this._column_paths.length);
@@ -143,6 +145,7 @@ export function createDataListener(viewer) {
                     }
                 })
             );
+
             metadata.push(column);
             if (is_settings_open) {
                 path_parts.push("");
@@ -167,19 +170,27 @@ export function createDataListener(viewer) {
             last_reverse_columns = this._reverse_columns;
         }
 
-        return {
+        const is_row_path = columns.__ROW_PATH__ !== undefined;
+        const row_headers = Array.from(
+            (is_row_path
+                ? format_tree_header_row_path
+                : format_tree_header
+            ).call(
+                this,
+                columns.__ROW_PATH__,
+                this._config.group_by,
+                regularTable
+            )
+        );
+
+        const num_row_headers = row_headers[0]?.length;
+
+        const result = {
             num_column_headers: column_headers[0]?.length || 1,
-            num_row_headers: this._config.group_by.length + 1,
+            num_row_headers,
             num_rows: this._num_rows,
             num_columns: this._column_paths.length,
-            row_headers: Array.from(
-                format_tree_header.call(
-                    this,
-                    columns.__ROW_PATH__,
-                    this._config.group_by,
-                    regularTable
-                )
-            ),
+            row_headers,
             column_headers,
             data,
             metadata,
@@ -188,5 +199,7 @@ export function createDataListener(viewer) {
                 this._config.split_by.length
             ),
         };
+
+        return result;
     };
 }

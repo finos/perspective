@@ -13,8 +13,8 @@
 use std::fmt::Display;
 use std::str::FromStr;
 
-use crate::proto::ColumnType;
 use crate::ClientError;
+use crate::proto::ColumnType;
 
 impl Display for ColumnType {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {

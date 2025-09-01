@@ -85,16 +85,16 @@ pub struct ColumnWindow {
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS, PartialEq)]
 pub struct ViewWindow {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub start_row: Option<f32>,
+    pub start_row: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub start_col: Option<f32>,
+    pub start_col: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub end_row: Option<f32>,
+    pub end_row: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub end_col: Option<f32>,
+    pub end_col: Option<f64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<bool>,
@@ -121,6 +121,18 @@ impl From<ViewWindow> for ViewPort {
             start_col: window.start_col.map(|x| x.floor() as u32),
             end_row: window.end_row.map(|x| x.ceil() as u32),
             end_col: window.end_col.map(|x| x.ceil() as u32),
+        }
+    }
+}
+
+impl From<ViewPort> for ViewWindow {
+    fn from(window: ViewPort) -> Self {
+        ViewWindow {
+            start_row: window.start_row.map(|x| x as f64),
+            start_col: window.start_col.map(|x| x as f64),
+            end_row: window.end_row.map(|x| x as f64),
+            end_col: window.end_col.map(|x| x as f64),
+            ..ViewWindow::default()
         }
     }
 }
@@ -290,15 +302,21 @@ impl View {
     /// expressions created on this [`View`]. See [`View::schema`] for
     /// details.
     pub async fn expression_schema(&self) -> ClientResult<HashMap<String, ColumnType>> {
-        let msg = self.client_message(ClientReq::ViewExpressionSchemaReq(
-            ViewExpressionSchemaReq {},
-        ));
-        match self.client.oneshot(&msg).await? {
-            ClientResp::ViewExpressionSchemaResp(ViewExpressionSchemaResp { schema }) => Ok(schema
-                .into_iter()
-                .map(|(x, y)| (x, ColumnType::try_from(y).unwrap()))
-                .collect()),
-            resp => Err(resp.into()),
+        if self.client.get_features().await?.expressions {
+            let msg = self.client_message(ClientReq::ViewExpressionSchemaReq(
+                ViewExpressionSchemaReq {},
+            ));
+            match self.client.oneshot(&msg).await? {
+                ClientResp::ViewExpressionSchemaResp(ViewExpressionSchemaResp { schema }) => {
+                    Ok(schema
+                        .into_iter()
+                        .map(|(x, y)| (x, ColumnType::try_from(y).unwrap()))
+                        .collect())
+                },
+                resp => Err(resp.into()),
+            }
+        } else {
+            Ok([].into_iter().collect())
         }
     }
 
@@ -377,13 +395,7 @@ impl View {
 
     /// Render this `View` as a JSON string.
     pub async fn to_json_string(&self, window: ViewWindow) -> ClientResult<String> {
-        let viewport = ViewPort {
-            start_row: window.start_row.map(|x| x.floor() as u32),
-            start_col: window.start_col.map(|x| x.floor() as u32),
-            end_row: window.end_row.map(|x| x.ceil() as u32),
-            end_col: window.end_col.map(|x| x.ceil() as u32),
-        };
-
+        let viewport = ViewPort::from(window.clone());
         let msg = self.client_message(ClientReq::ViewToRowsStringReq(ViewToRowsStringReq {
             viewport: Some(viewport),
             id: window.id,
@@ -403,13 +415,7 @@ impl View {
     /// Renders this [`View`] as an [NDJSON](https://github.com/ndjson/ndjson-spec)
     /// formatted [`String`].
     pub async fn to_ndjson(&self, window: ViewWindow) -> ClientResult<String> {
-        let viewport = ViewPort {
-            start_row: window.start_row.map(|x| x.floor() as u32),
-            start_col: window.start_col.map(|x| x.floor() as u32),
-            end_row: window.end_row.map(|x| x.ceil() as u32),
-            end_col: window.end_col.map(|x| x.ceil() as u32),
-        };
-
+        let viewport = ViewPort::from(window.clone());
         let msg = self.client_message(ClientReq::ViewToNdjsonStringReq(ViewToNdjsonStringReq {
             viewport: Some(viewport),
             id: window.id,

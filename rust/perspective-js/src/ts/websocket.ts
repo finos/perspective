@@ -91,6 +91,5 @@ export async function websocket(
 
     client = new Client(send_message, on_close);
     await connect();
-    await client.init();
     return client;
 }

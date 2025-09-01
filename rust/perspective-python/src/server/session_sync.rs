@@ -68,8 +68,6 @@ impl PySession {
     pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
         py.allow_threads(|| {
             self.with_session(|session| {
-                
-
                 session
                     .handle_request(&data)
                     .block_on()
