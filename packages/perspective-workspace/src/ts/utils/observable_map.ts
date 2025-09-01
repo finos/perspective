@@ -25,12 +25,8 @@ export class ObservableMap<K, V> extends Map<K, V> {
     }
 
     delete(name: K) {
-        const result = this._delete_listener?.(name);
-        if (result) {
-            return super.delete(name);
-        } else {
-            return false;
-        }
+        this._delete_listener?.(name);
+        return super.delete(name);
     }
 
     addSetListener(listener: (name: K, val: V) => void) {
