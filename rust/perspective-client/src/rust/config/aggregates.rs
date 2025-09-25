@@ -63,6 +63,19 @@ impl From<Aggregate> for view_config::AggList {
 
 impl From<view_config::AggList> for Aggregate {
     fn from(value: view_config::AggList) -> Self {
-        Aggregate::SingleAggregate(value.aggregations.first().unwrap().clone())
+        if value.aggregations.len() == 1 {
+            Aggregate::SingleAggregate(value.aggregations.first().unwrap().clone())
+        } else {
+            Aggregate::MultiAggregate(
+                value.aggregations.first().unwrap().clone(),
+                value
+                    .aggregations
+                    .get(1)
+                    .unwrap()
+                    .split(",")
+                    .map(|x| x.to_owned())
+                    .collect(),
+            )
+        }
     }
 }

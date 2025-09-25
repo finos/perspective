@@ -1,6 +1,6 @@
 if(NOT WORKSPACE_ROOT)
-    message(STATUS "${Yellow}WORKSPACE_ROOT not set, assuming ${CMAKE_CURRENT_SOURCE_DIR}/../..${ColorReset}")
-    set(WORKSPACE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+    message(STATUS "${Yellow}WORKSPACE_ROOT not set, assuming ${CMAKE_CURRENT_SOURCE_DIR}/../../../..${ColorReset}")
+    set(WORKSPACE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../..")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
