@@ -120,10 +120,10 @@ t_aggspec::agg_str() const {
             return "sum";
         } break;
         case AGGTYPE_SUM_ABS: {
-            return "sum_abs";
+            return "sum abs";
         } break;
         case AGGTYPE_ABS_SUM: {
-            return "abs_sum";
+            return "abs sum";
         } break;
         case AGGTYPE_MUL: {
             return "mul";
@@ -135,7 +135,7 @@ t_aggspec::agg_str() const {
             return "mean";
         } break;
         case AGGTYPE_WEIGHTED_MEAN: {
-            return "weighted_mean";
+            return "weighted mean";
         } break;
         case AGGTYPE_UNIQUE: {
             return "unique";
@@ -156,13 +156,13 @@ t_aggspec::agg_str() const {
             return "join";
         } break;
         case AGGTYPE_SCALED_DIV: {
-            return "scaled_div";
+            return "scaled div";
         } break;
         case AGGTYPE_SCALED_ADD: {
-            return "scaled_add";
+            return "scaled add";
         } break;
         case AGGTYPE_SCALED_MUL: {
-            return "scaled_mul";
+            return "scaled mul";
         } break;
         case AGGTYPE_DOMINANT: {
             return "dominant";
@@ -171,13 +171,13 @@ t_aggspec::agg_str() const {
             return "first";
         } break;
         case AGGTYPE_LAST_BY_INDEX: {
-            return "last_by_index";
+            return "last by index";
         } break;
         case AGGTYPE_LAST_MINUS_FIRST: {
-            return "last_minus_first";
+            return "last minus first";
         } break;
         case AGGTYPE_PY_AGG: {
-            return "py_agg";
+            return "py agg";
         } break;
         case AGGTYPE_AND: {
             return "and";
@@ -186,13 +186,13 @@ t_aggspec::agg_str() const {
             return "or";
         } break;
         case AGGTYPE_LAST_VALUE: {
-            return "last_value";
+            return "last value";
         }
         case AGGTYPE_MAX_BY: {
-            return "max_by";
+            return "max by";
         }
         case AGGTYPE_MIN_BY: {
-            return "min_by";
+            return "min by";
         }
         case AGGTYPE_MAX: {
             return "max";
@@ -201,13 +201,13 @@ t_aggspec::agg_str() const {
             return "min";
         }
         case AGGTYPE_HIGH_WATER_MARK: {
-            return "high_water_mark";
+            return "high water mark";
         }
         case AGGTYPE_LOW_WATER_MARK: {
-            return "low_water_mark";
+            return "low water mark";
         }
         case AGGTYPE_HIGH_MINUS_LOW: {
-            return "high_minus_low";
+            return "high minuslow";
         } break;
         case AGGTYPE_UDF_COMBINER: {
             std::stringstream ss;
@@ -221,25 +221,25 @@ t_aggspec::agg_str() const {
             return ss.str();
         }
         case AGGTYPE_SUM_NOT_NULL: {
-            return "sum_not_null";
+            return "sum not null";
         }
         case AGGTYPE_MEAN_BY_COUNT: {
-            return "mean_by_count";
+            return "mean by count";
         }
         case AGGTYPE_IDENTITY: {
             return "identity";
         }
         case AGGTYPE_DISTINCT_COUNT: {
-            return "distinct_count";
+            return "distinct count";
         }
         case AGGTYPE_DISTINCT_LEAF: {
-            return "distinct_leaf";
+            return "distinct leaf";
         }
         case AGGTYPE_PCT_SUM_PARENT: {
-            return "pct_sum_parent";
+            return "pct sum parent";
         }
         case AGGTYPE_PCT_SUM_GRAND_TOTAL: {
-            return "pct_sum_grand_total";
+            return "pct sum grand total";
         }
         case AGGTYPE_VARIANCE: {
             return "variance";

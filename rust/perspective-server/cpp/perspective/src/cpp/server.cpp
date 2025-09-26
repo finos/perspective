@@ -2244,6 +2244,26 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                     ->add_columns(col);
             }
 
+            if (!view_config->get_row_pivots().empty()) {
+                for (const auto& aggspec : view_config->get_aggspecs()) {
+                    auto* proto_exprs = view_config_proto->mutable_aggregates();
+                    const auto agg = aggspec;
+                    if (aggspec.agg() == AGGTYPE_WEIGHTED_MEAN
+                        || aggspec.agg() == AGGTYPE_MAX_BY
+                        || aggspec.agg() == AGGTYPE_MIN_BY) {
+
+                        proto::ViewConfig_AggList agglist;
+                        agglist.add_aggregations(agg.agg_str());
+                        agglist.add_aggregations(agg.get_input_depnames()[1]);
+                        (*proto_exprs)[aggspec.name()] = agglist;
+                    } else {
+                        proto::ViewConfig_AggList agglist;
+                        agglist.add_aggregations(agg.agg_str());
+                        (*proto_exprs)[aggspec.name()] = agglist;
+                    }
+                }
+            }
+
             for (const auto& agg : view_config->get_row_pivots()) {
                 if (agg == "psp_pkey" || agg == "psp_okey") {
                     continue;
