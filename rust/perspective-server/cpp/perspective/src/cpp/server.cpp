@@ -2245,17 +2245,9 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             }
 
             if (!view_config->get_row_pivots().empty()) {
-                const auto& schema =
-                    m_resources.get_table_for_view(req.entity_id())
-                        ->get_schema();
                 for (const auto& aggspec : view_config->get_aggspecs()) {
                     auto* proto_exprs = view_config_proto->mutable_aggregates();
                     const auto agg = aggspec;
-                    const auto table_type = schema.get_dtype(aggspec.name());
-
-                    // TODO(texodus): This behavior is arbitrary, I nominate we
-                    // we kill it but it is anothe rbreaking change.
-
                     if (aggspec.agg() == AGGTYPE_WEIGHTED_MEAN
                         || aggspec.agg() == AGGTYPE_MAX_BY
                         || aggspec.agg() == AGGTYPE_MIN_BY) {
@@ -2264,11 +2256,7 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                         agglist.add_aggregations(agg.agg_str());
                         agglist.add_aggregations(agg.get_input_depnames()[1]);
                         (*proto_exprs)[aggspec.name()] = agglist;
-                    } else if ((is_numeric_type(table_type)
-                         && aggspec.agg() != AGGTYPE_SUM)
-                        || (!is_numeric_type(table_type)
-                            && aggspec.agg() != AGGTYPE_COUNT)) {
-
+                    } else {
                         proto::ViewConfig_AggList agglist;
                         agglist.add_aggregations(agg.agg_str());
                         (*proto_exprs)[aggspec.name()] = agglist;
