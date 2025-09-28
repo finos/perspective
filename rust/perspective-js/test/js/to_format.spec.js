@@ -173,7 +173,7 @@ const pivoted_output = [
                 int_float_string_data.slice(2).map((x) => {
                     x.datetime = +x.datetime;
                     return x;
-                })
+                }),
             );
             view.delete();
             table.delete();
@@ -204,7 +204,7 @@ const pivoted_output = [
                 int_float_string_data.slice(1).map((x) => {
                     x.datetime = +x.datetime;
                     return x;
-                })
+                }),
             );
             view.delete();
             table.delete();
@@ -223,7 +223,7 @@ const pivoted_output = [
                     .map((x) => {
                         x.datetime = +new Date(x.datetime);
                         return x;
-                    })
+                    }),
             );
             view.delete();
             table.delete();
@@ -254,7 +254,7 @@ const pivoted_output = [
                 int_float_string_data.slice(2).map((x) => {
                     x.datetime = +x.datetime;
                     return x;
-                })
+                }),
             );
             view.delete();
             table.delete();
@@ -732,11 +732,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -786,11 +786,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -815,11 +815,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -844,11 +844,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -869,11 +869,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -894,11 +894,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -922,11 +922,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -951,11 +951,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -979,11 +979,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();
@@ -1007,11 +1007,11 @@ const pivoted_output = [
             expect(json).toEqual(
                 json2.map((x) => {
                     x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
-                        (x) => x
+                        (x) => x,
                     );
                     delete x["string (Group by 1)"];
                     return x;
-                })
+                }),
             );
 
             view2.delete();

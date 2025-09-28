@@ -23,7 +23,7 @@ import { format_cell } from "./format_cell.js";
 export function* format_tree_header_row_path(
     paths = [],
     row_headers,
-    regularTable
+    regularTable,
 ) {
     const plugins = regularTable[PRIVATE_PLUGIN_SYMBOL];
     for (let path of paths) {
@@ -35,7 +35,7 @@ export function* format_tree_header_row_path(
             row_headers[path.length - 1],
             last,
             plugins,
-            true
+            true,
         );
 
         if (formatted instanceof HTMLElement) {
@@ -60,8 +60,8 @@ export function* format_tree_header(paths = [], row_headers, regularTable) {
                     row_headers[idx],
                     path[idx],
                     plugins,
-                    true
-                )
+                    true,
+                ),
             );
         }
 

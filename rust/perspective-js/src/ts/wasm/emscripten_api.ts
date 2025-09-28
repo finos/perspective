@@ -18,7 +18,7 @@ export type PspPtr = BigInt | number;
 export type EmscriptenServer = bigint | number;
 
 export async function compile_perspective(
-    wasmBinary: ArrayBuffer
+    wasmBinary: ArrayBuffer,
 ): Promise<perspective_server_t.MainModule> {
     const module = await perspective_server.default({
         locateFile(x: any) {
@@ -26,7 +26,7 @@ export async function compile_perspective(
         },
         instantiateWasm: async (
             imports: any,
-            receive: (_: WebAssembly.Instance) => void
+            receive: (_: WebAssembly.Instance) => void,
         ) => {
             imports["env"] = {
                 ...imports["env"],
@@ -37,7 +37,7 @@ export async function compile_perspective(
                     const ptr = module._psp_alloc(
                         module._psp_is_memory64()
                             ? (BigInt(bytes.byteLength + 1) as any as number)
-                            : bytes.byteLength + 1
+                            : bytes.byteLength + 1,
                     );
 
                     module.HEAPU8.set(bytes, Number(ptr));

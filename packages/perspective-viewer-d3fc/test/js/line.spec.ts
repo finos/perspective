@@ -35,7 +35,7 @@ test.describe("Line Tests", () => {
 
     run_standard_tests(
         "yline",
-        getSvgContentString("perspective-viewer perspective-viewer-d3fc-yline")
+        getSvgContentString("perspective-viewer perspective-viewer-d3fc-yline"),
     );
 });
 
@@ -107,7 +107,7 @@ test.describe("Line regressions", () => {
         await page.mouse.wheel(0, -100);
 
         const contents = await page.$(
-            "perspective-viewer-d3fc-yline .y2-axis.right-axis"
+            "perspective-viewer-d3fc-yline .y2-axis.right-axis",
         );
 
         test.expect(await contents?.innerText()).toEqual(`−1,800

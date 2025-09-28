@@ -136,8 +136,8 @@ class Command extends Function {
         if (Object.keys(this.#modified_env).length > 0) {
             console.warn(
                 `${chalk.bgYellow.black` Warning `} env '${JSON.stringify(
-                    this.#modified_env
-                )}' won't serialize'`
+                    this.#modified_env,
+                )}' won't serialize'`,
             );
 
             for (const key of Object.keys(this.#modified_env)) {
@@ -149,7 +149,7 @@ class Command extends Function {
             console.warn(
                 `${chalk.bgYellow.black` Warning `} cwd '${
                     this.#options.cwd
-                }' won't serialize`
+                }' won't serialize`,
             );
 
             cmd = `cd ${this.#options.cwd} && ${cmd}`;
@@ -215,7 +215,7 @@ class Command extends Function {
                     } else {
                         resolve(stdout.trimEnd());
                     }
-                }
+                },
             );
 
             if (!silent) {
@@ -347,14 +347,14 @@ function parse_bind_args(fragments, ...args) {
 process
     .on("unhandledRejection", (reason, p) => {
         console.error(
-            `${chalk.bgCyan.black` Unhandled Rejection `} ${chalk.bold(reason)}`
+            `${chalk.bgCyan.black` Unhandled Rejection `} ${chalk.bold(reason)}`,
         );
     })
     .on("uncaughtException", (err) => {
         console.error(
             `${chalk.bgRed.whiteBright.bold` Uncaught Exception `} ${chalk.bold(
-                err.message
-            )}`
+                err.message,
+            )}`,
         );
 
         console.debug(`\n${err.stack}\n`);

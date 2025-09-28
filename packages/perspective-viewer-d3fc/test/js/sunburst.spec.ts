@@ -35,7 +35,7 @@ test.describe("Sunburst Tests", () => {
     run_standard_tests(
         "sunburst",
         getSvgContentString(
-            "perspective-viewer perspective-viewer-d3fc-sunburst"
-        )
+            "perspective-viewer perspective-viewer-d3fc-sunburst",
+        ),
     );
 });

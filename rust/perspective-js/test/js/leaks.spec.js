@@ -19,7 +19,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
 const arr = fs.readFileSync(
-    require.resolve("superstore-arrow/superstore.lz4.arrow")
+    require.resolve("superstore-arrow/superstore.lz4.arrow"),
 ).buffer;
 
 /**
@@ -62,9 +62,8 @@ function generate_expressions() {
     };
 
     for (const op of ["+", "-", "*", "/", "^", "%"]) {
-        expressions[
-            `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`
-        ] = `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`;
+        expressions[`("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`] =
+            `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`;
     }
 
     for (const fn of ["sqrt", "log10", "deg2rad"]) {
@@ -132,7 +131,7 @@ test.describe("leaks", function () {
         test("update does not leak", async () => {
             const table = await perspective.table(
                 { x: "integer", y: "string" },
-                { index: "x" }
+                { index: "x" },
             );
             let count = 0;
             const view = await table.view();
@@ -186,7 +185,7 @@ test.describe("leaks", function () {
 
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
-                    Object.keys(expressions).length
+                    Object.keys(expressions).length,
                 );
 
                 await view.delete();
@@ -218,7 +217,7 @@ test.describe("leaks", function () {
 
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
-                    Object.keys(expressions).length
+                    Object.keys(expressions).length,
                 );
 
                 await view.delete();
@@ -245,7 +244,7 @@ test.describe("leaks", function () {
 
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
-                    Object.keys(expressions).length
+                    Object.keys(expressions).length,
                 );
 
                 await view.delete();
@@ -274,7 +273,7 @@ test.describe("leaks", function () {
 
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
-                    Object.keys(expressions).length
+                    Object.keys(expressions).length,
                 );
 
                 await view.delete();
@@ -306,7 +305,7 @@ test.describe("leaks", function () {
 
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(
-                    Object.keys(expressions).length
+                    Object.keys(expressions).length,
                 );
 
                 await view.delete();

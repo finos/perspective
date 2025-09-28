@@ -38,7 +38,7 @@ export function draggableComponent() {
                 const offsets = enforceContainerBoundaries(
                     this,
                     event.dx,
-                    event.dy
+                    event.dy,
                 );
 
                 this.style.left = `${this.offsetLeft + offsets.x}px`;

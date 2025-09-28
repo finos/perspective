@@ -129,7 +129,7 @@ function validate_binary_operations(output, expressions, operator) {
         }).toEqual({
             expr,
             result: output[left].map((v, idx) =>
-                calc_binary(operator, v, output[right][idx])
+                calc_binary(operator, v, output[right][idx]),
             ),
         });
     }
@@ -192,14 +192,14 @@ function validate_binary_operations(output, expressions, operator) {
                         });
                         await view.delete();
                         await table.delete();
-                    })
+                    }),
                 );
             });
 
             test.describe("unary", function () {
                 test("negative", async function () {
                     const table = await perspective.table(
-                        common.all_types_arrow.slice()
+                        common.all_types_arrow.slice(),
                     );
                     const expressions = generate_unary_operations("+");
                     const view = await table.view({
@@ -222,7 +222,7 @@ function validate_binary_operations(output, expressions, operator) {
             test.describe("binary", function () {
                 test("add", async function () {
                     const table = await perspective.table(
-                        common.all_types_arrow.slice()
+                        common.all_types_arrow.slice(),
                     );
                     const expressions = generate_binary_operations("+");
                     const view = await table.view({
@@ -243,7 +243,7 @@ function validate_binary_operations(output, expressions, operator) {
 
                 test("subtract", async function () {
                     const table = await perspective.table(
-                        common.all_types_arrow.slice()
+                        common.all_types_arrow.slice(),
                     );
                     const expressions = generate_binary_operations("-");
                     const view = await table.view({
@@ -264,7 +264,7 @@ function validate_binary_operations(output, expressions, operator) {
 
                 test("multiply", async function () {
                     const table = await perspective.table(
-                        common.all_types_arrow.slice()
+                        common.all_types_arrow.slice(),
                     );
                     const expressions = generate_binary_operations("*");
                     const view = await table.view({
@@ -285,7 +285,7 @@ function validate_binary_operations(output, expressions, operator) {
 
                 test("divide", async function () {
                     const table = await perspective.table(
-                        common.all_types_arrow.slice()
+                        common.all_types_arrow.slice(),
                     );
                     const expressions = generate_binary_operations("/");
 
@@ -307,7 +307,7 @@ function validate_binary_operations(output, expressions, operator) {
 
                 test("modulus", async function () {
                     const table = await perspective.table(
-                        common.all_types_arrow.slice()
+                        common.all_types_arrow.slice(),
                     );
                     const expressions = generate_binary_operations("%");
 
@@ -346,7 +346,7 @@ function validate_binary_operations(output, expressions, operator) {
 
                 test("==", async function () {
                     const table = await perspective.table(
-                        common.all_types_multi_arrow.slice()
+                        common.all_types_multi_arrow.slice(),
                     );
                     const expressions = [];
 
@@ -374,15 +374,15 @@ function validate_binary_operations(output, expressions, operator) {
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
                             result[left].map(
-                                (v, idx) => v == result[right][idx]
-                            )
+                                (v, idx) => v == result[right][idx],
+                            ),
                         );
                     }
                 });
 
                 test("!=", async function () {
                     const table = await perspective.table(
-                        common.all_types_multi_arrow.slice()
+                        common.all_types_multi_arrow.slice(),
                     );
                     const expressions = [];
 
@@ -410,15 +410,15 @@ function validate_binary_operations(output, expressions, operator) {
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
                             result[left].map(
-                                (v, idx) => v != result[right][idx]
-                            )
+                                (v, idx) => v != result[right][idx],
+                            ),
                         );
                     }
                 });
 
                 test(">", async function () {
                     const table = await perspective.table(
-                        common.all_types_multi_arrow.slice()
+                        common.all_types_multi_arrow.slice(),
                     );
                     const expressions = [];
 
@@ -445,14 +445,16 @@ function validate_binary_operations(output, expressions, operator) {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) => v > result[right][idx])
+                            result[left].map(
+                                (v, idx) => v > result[right][idx],
+                            ),
                         );
                     }
                 });
 
                 test("<", async function () {
                     const table = await perspective.table(
-                        common.all_types_multi_arrow.slice()
+                        common.all_types_multi_arrow.slice(),
                     );
                     const expressions = [];
 
@@ -479,14 +481,16 @@ function validate_binary_operations(output, expressions, operator) {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) => v < result[right][idx])
+                            result[left].map(
+                                (v, idx) => v < result[right][idx],
+                            ),
                         );
                     }
                 });
 
                 test(">=", async function () {
                     const table = await perspective.table(
-                        common.all_types_multi_arrow.slice()
+                        common.all_types_multi_arrow.slice(),
                     );
                     const expressions = [];
 
@@ -514,15 +518,15 @@ function validate_binary_operations(output, expressions, operator) {
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
                             result[left].map(
-                                (v, idx) => v >= result[right][idx]
-                            )
+                                (v, idx) => v >= result[right][idx],
+                            ),
                         );
                     }
                 });
 
                 test("<=", async function () {
                     const table = await perspective.table(
-                        common.all_types_multi_arrow.slice()
+                        common.all_types_multi_arrow.slice(),
                     );
                     const expressions = [];
 
@@ -550,8 +554,8 @@ function validate_binary_operations(output, expressions, operator) {
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
                             result[left].map(
-                                (v, idx) => v <= result[right][idx]
-                            )
+                                (v, idx) => v <= result[right][idx],
+                            ),
                         );
                     }
                 });
@@ -782,7 +786,7 @@ function validate_binary_operations(output, expressions, operator) {
                 ]);
                 expect(result['min("b")']).toEqual([1.5, 2.5, 3.5, 4.5]);
                 expect(
-                    result['min("b", 0.00000000001, -10, -100, -100.1)']
+                    result['min("b", 0.00000000001, -10, -100, -100.1)'],
                 ).toEqual([-100.1, -100.1, -100.1, -100.1]);
                 expect(result['min("a", "b")']).toEqual([1, 2, 3, 4]);
                 await view.delete();
@@ -823,7 +827,7 @@ function validate_binary_operations(output, expressions, operator) {
                 const result = await view.to_columns();
                 expect(result["max(1)"]).toEqual([1, 1, 1, 1]);
                 expect(
-                    result["max(2000000000000.11, 2000000000000.1)"]
+                    result["max(2000000000000.11, 2000000000000.1)"],
                 ).toEqual([
                     2000000000000.11, 2000000000000.11, 2000000000000.11,
                     2000000000000.11,
@@ -919,7 +923,7 @@ function validate_binary_operations(output, expressions, operator) {
                 const result = await view.to_columns();
                 expect(result['pow("a", 1)']).toEqual([1, 2, 3, 4]);
                 expect(result['pow("b", 3)']).toEqual(
-                    [1.5, 2.5, 3.5, 4.5].map((x) => Math.pow(x, 3))
+                    [1.5, 2.5, 3.5, 4.5].map((x) => Math.pow(x, 3)),
                 );
                 await view.delete();
                 await table.delete();
@@ -945,12 +949,12 @@ function validate_binary_operations(output, expressions, operator) {
 
                 const result = await view.to_columns();
                 expect(result['logn("a", 5)']).toEqual(
-                    [100, 200, 300, 400].map((x) => Math.log(x) / Math.log(5))
+                    [100, 200, 300, 400].map((x) => Math.log(x) / Math.log(5)),
                 );
                 expect(result['logn("b", 3)']).toEqual(
                     [100.5, 200.5, 300.5, 400.5].map(
-                        (x) => Math.log(x) / Math.log(3)
-                    )
+                        (x) => Math.log(x) / Math.log(3),
+                    ),
                 );
 
                 await view.delete();
@@ -977,18 +981,18 @@ function validate_binary_operations(output, expressions, operator) {
 
                 const result = await view.to_columns();
                 expect(
-                    result['root("a", 5)'].map((x) => Number(x.toFixed(5)))
+                    result['root("a", 5)'].map((x) => Number(x.toFixed(5))),
                 ).toEqual(
                     [100, 200, 300, 400].map((x) =>
-                        Number(Math.pow(x, 1 / 5).toFixed(5))
-                    )
+                        Number(Math.pow(x, 1 / 5).toFixed(5)),
+                    ),
                 );
                 expect(
-                    result['root("b", 3)'].map((x) => Number(x.toFixed(5)))
+                    result['root("b", 3)'].map((x) => Number(x.toFixed(5))),
                 ).toEqual(
                     [100.5, 200.5, 300.5, 400.5].map((x) =>
-                        Number(Math.pow(x, 1 / 3).toFixed(5))
-                    )
+                        Number(Math.pow(x, 1 / 3).toFixed(5)),
+                    ),
                 );
                 await view.delete();
                 await table.delete();
@@ -1014,10 +1018,10 @@ function validate_binary_operations(output, expressions, operator) {
 
                 const result = await view.to_columns();
                 expect(result['avg("a", 10, 20, 30, 40, "a")']).toEqual(
-                    [1, 2, 3, 4].map((x) => (x + x + 10 + 20 + 30 + 40) / 6)
+                    [1, 2, 3, 4].map((x) => (x + x + 10 + 20 + 30 + 40) / 6),
                 );
                 expect(result['avg("b", 3, 4, 5, "b")']).toEqual(
-                    [1.5, 2.5, 3.5, 4.5].map((x) => (x + x + 3 + 4 + 5) / 5)
+                    [1.5, 2.5, 3.5, 4.5].map((x) => (x + x + 3 + 4 + 5) / 5),
                 );
                 await view.delete();
                 await table.delete();
@@ -1043,10 +1047,10 @@ function validate_binary_operations(output, expressions, operator) {
 
                 const result = await view.to_columns();
                 expect(result['sum("a", 10, 20, 30, 40, "a")']).toEqual(
-                    [1, 2, 3, 4].map((x) => x + x + 10 + 20 + 30 + 40)
+                    [1, 2, 3, 4].map((x) => x + x + 10 + 20 + 30 + 40),
                 );
                 expect(result['sum("b", 3, 4, 5, "b")']).toEqual(
-                    [1.5, 2.5, 3.5, 4.5].map((x) => x + x + 3 + 4 + 5)
+                    [1.5, 2.5, 3.5, 4.5].map((x) => x + x + 3 + 4 + 5),
                 );
                 await view.delete();
                 await table.delete();
@@ -1097,12 +1101,12 @@ function validate_binary_operations(output, expressions, operator) {
 
                 const result = await view.to_columns();
                 expect(result['deg2rad("a")']).toEqual(
-                    [30, 60, 90, 120].map((x) => x * (Math.PI / 180))
+                    [30, 60, 90, 120].map((x) => x * (Math.PI / 180)),
                 );
                 expect(result['deg2rad("b")']).toEqual(
                     [25.5, 45.5, 88.721282, 91.12983].map(
-                        (x) => x * (Math.PI / 180)
-                    )
+                        (x) => x * (Math.PI / 180),
+                    ),
                 );
                 await view.delete();
                 await table.delete();
@@ -1124,13 +1128,13 @@ function validate_binary_operations(output, expressions, operator) {
                 await table.update({
                     a: [1, 2, 3, 4],
                     b: [25.5, 45.5, 88.721282, 91.12983].map(
-                        (x) => x * (Math.PI / 180)
+                        (x) => x * (Math.PI / 180),
                     ),
                 });
 
                 const result = await view.to_columns();
                 expect(result['rad2deg("a")']).toEqual(
-                    [1, 2, 3, 4].map((x) => x * (180 / Math.PI))
+                    [1, 2, 3, 4].map((x) => x * (180 / Math.PI)),
                 );
                 expect(result['rad2deg("b")']).toEqual([
                     25.5, 45.5, 88.721282, 91.12983,
@@ -1155,18 +1159,18 @@ function validate_binary_operations(output, expressions, operator) {
                 await table.update({
                     a: [1, 2, 3, 4],
                     b: [25.5, 45.5, 88.721282, 91.12983].map(
-                        (x) => x * (Math.PI / 180)
+                        (x) => x * (Math.PI / 180),
                     ),
                 });
 
                 const result = await view.to_columns();
                 expect(result['rad2deg("a")']).toEqual(
-                    [1, 2, 3, 4].map((x) => x * (180 / Math.PI))
+                    [1, 2, 3, 4].map((x) => x * (180 / Math.PI)),
                 );
                 const expected = [25.5, 45.5, 88.721282, 91.12983];
                 expect(result['rad2deg("b")'].length).toEqual(expected.length);
                 result['rad2deg("b")'].forEach((x, idx) =>
-                    expect(x).toBeCloseTo(expected[idx], 5)
+                    expect(x).toBeCloseTo(expected[idx], 5),
                 );
                 await view.delete();
                 await table.delete();
@@ -1318,12 +1322,12 @@ function validate_binary_operations(output, expressions, operator) {
 
                 const result = await view.to_columns();
                 expect(result['percent_of("a", 500)']).toEqual(
-                    [100, 200, 300, 400].map((x) => (x / 500) * 100)
+                    [100, 200, 300, 400].map((x) => (x / 500) * 100),
                 );
                 expect(result['percent_of("a", "b")']).toEqual(
                     [100, 200, 300, 400].map(
-                        (x, idx) => (x / result["b"][idx]) * 100
-                    )
+                        (x, idx) => (x / result["b"][idx]) * 100,
+                    ),
                 );
                 expect(result["percent_of(1, 3)"]).toEqual([
                     33.33333333333333, 33.33333333333333, 33.33333333333333,
@@ -1450,15 +1454,15 @@ function validate_binary_operations(output, expressions, operator) {
                 const result = await view.to_columns();
 
                 expect(
-                    result['mand("u" and "u", "u" and "z", "z" and "z")']
+                    result['mand("u" and "u", "u" and "z", "z" and "z")'],
                 ).toEqual(Array(4).fill(false));
 
                 expect(
-                    result["mand(is_null(null), is_not_null(null))"]
+                    result["mand(is_null(null), is_not_null(null))"],
                 ).toEqual(Array(4).fill(false));
 
                 expect(result["mand(true, true, true, true)"]).toEqual(
-                    Array(4).fill(true)
+                    Array(4).fill(true),
                 );
 
                 await view.delete();
@@ -1554,7 +1558,7 @@ function validate_binary_operations(output, expressions, operator) {
                 });
                 const result = await view.to_columns();
                 expect(
-                    result['mor("u" and "u", "u" and "z", "z" and "z")']
+                    result['mor("u" and "u", "u" and "z", "z" and "z")'],
                 ).toEqual([true, true, true, true]);
 
                 // The boolean false is a false

@@ -38,7 +38,7 @@ const D3FC_GLOBAL_STYLES = [d3fc_style_1.css, d3fc_style_2.css, style].map(
         const sheet = new CSSStyleSheet();
         sheet.replaceSync(x);
         return sheet;
-    }
+    },
 );
 
 const EXCLUDED_SETTINGS = [
@@ -66,7 +66,7 @@ export function register(...plugin_names: string[]) {
     const plugins = new Set(
         plugin_names.length > 0
             ? plugin_names
-            : charts.map((chart) => chart.plugin.name)
+            : charts.map((chart) => chart.plugin.name),
     );
 
     charts.forEach((chart) => {
@@ -81,7 +81,7 @@ export function register(...plugin_names: string[]) {
                 class extends HTMLPerspectiveViewerD3fcPluginElement {
                     _chart = chart;
                     static _chart = chart;
-                }
+                },
             );
 
             customElements
@@ -214,8 +214,8 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
 
         const svgs = Array.from(
             this.shadowRoot.querySelectorAll<SVGElement>(
-                "svg:not(#dragHandles)"
-            )
+                "svg:not(#dragHandles)",
+            ),
         );
 
         for (const svg of svgs.reverse()) {
@@ -236,7 +236,7 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
             if (!new_svg.hasAttribute("viewBox")) {
                 new_svg.setAttribute(
                     "viewBox",
-                    `0 0 ${img.width} ${img.height}`
+                    `0 0 ${img.width} ${img.height}`,
                 );
             }
 
@@ -272,7 +272,7 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
                 (svg.parentNode as HTMLElement).offsetLeft,
                 (svg.parentNode as HTMLElement).offsetTop,
                 img.width,
-                img.height
+                img.height,
             );
         }
 
@@ -284,14 +284,14 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
                 (canvas.parentNode as HTMLElement).offsetLeft,
                 (canvas.parentNode as HTMLElement).offsetTop,
                 canvas.width / window.devicePixelRatio,
-                canvas.height / window.devicePixelRatio
+                canvas.height / window.devicePixelRatio,
             );
         }
 
         return await new Promise(
             (x) => canvas.toBlob((blob) => x(blob)),
             // @ts-ignore
-            "image/png" // uhhhh, what is going on here?
+            "image/png", // uhhhh, what is going on here?
         );
     }
 
@@ -402,14 +402,14 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
                               acc.rows.push(col);
                           } else {
                               const len = col.__ROW_PATH__.filter(
-                                  (x) => x !== undefined
+                                  (x) => x !== undefined,
                               ).length;
                               acc.aggs[len] = col;
                               acc.aggs = acc.aggs.slice(0, len + 1);
                           }
                           return acc;
                       },
-                      { rows: [], aggs: [], agg_paths: [] }
+                      { rows: [], aggs: [], agg_paths: [] },
                   )
                 : {
                       rows: first_col.map((_, idx) => json.row(idx)),
@@ -447,7 +447,7 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
                             new Event("perspective-plugin-update", {
                                 bubbles: true,
                                 composed: true,
-                            })
+                            }),
                         );
                 }
                 obj[prop] = value;
@@ -466,7 +466,7 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
                 ...this._settings,
                 ...settings,
             },
-            handler
+            handler,
         );
 
         // If only a right-axis Y axis remains, reset the alt
@@ -507,7 +507,7 @@ class HTMLPerspectiveViewerD3fcPluginElement extends HTMLElement {
             if (this._settings.data.length > 0) {
                 this._chart(
                     containerDiv.attr("class", chartClass),
-                    this._settings
+                    this._settings,
                 );
             } else {
                 containerDiv.attr("class", `${chartClass} disabled`);

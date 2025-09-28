@@ -31,13 +31,13 @@ interface MappedSeriesArray extends Array<MappedSeries> {
 
 export function ohlcData(settings: Settings, data: DataRowsWithKey) {
     return splitIntoMultiSeries(settings, data, { excludeEmpty: true }).map(
-        (data) => seriesToOHLC(settings, data)
+        (data) => seriesToOHLC(settings, data),
     );
 }
 
 function seriesToOHLC(
     settings: Settings,
-    data: DataRowsWithKey
+    data: DataRowsWithKey,
 ): MappedSeriesArray {
     const labelfn = labelFunction(settings);
     const getNextOpen = (i) =>

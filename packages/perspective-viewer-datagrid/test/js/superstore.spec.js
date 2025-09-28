@@ -21,7 +21,7 @@ import * as prettier from "prettier";
 async function getDatagridContents(page) {
     const raw = await page.evaluate(async () => {
         const datagrid = document.querySelector(
-            "perspective-viewer perspective-viewer-datagrid"
+            "perspective-viewer perspective-viewer-datagrid",
         );
         if (!datagrid) {
             return "MISSING DATAGRID";
@@ -65,7 +65,7 @@ test.describe("Datagrid with superstore data set", () => {
 
         compareContentsToSnapshot(
             await getDatagridContents(page),
-            "row-headers-are-printed-correctly.txt"
+            "row-headers-are-printed-correctly.txt",
         );
     });
 
@@ -91,7 +91,7 @@ test.describe("Datagrid with superstore data set", () => {
 
         compareContentsToSnapshot(
             await getDatagridContents(page),
-            "column-headers-are-printed-correctly-split-by-a-date-column.txt"
+            "column-headers-are-printed-correctly-split-by-a-date-column.txt",
         );
     });
 
@@ -117,7 +117,7 @@ test.describe("Datagrid with superstore data set", () => {
 
         compareContentsToSnapshot(
             await getDatagridContents(page),
-            "a-filtered-to-empty-dataset-with-group-by-and-split-by-does-not-error-internally.txt"
+            "a-filtered-to-empty-dataset-with-group-by-and-split-by-does-not-error-internally.txt",
         );
     });
 
@@ -149,7 +149,7 @@ test.describe("Datagrid with superstore data set", () => {
             "table",
             "tbody",
             "tr",
-            "td"
+            "td",
         );
 
         const result = await page.evaluate(async () => {
@@ -161,7 +161,7 @@ test.describe("Datagrid with superstore data set", () => {
         });
 
         test.expect(result).toEqual(
-            '[{"State":"Test","City":"Henderson","Customer ID":"CG-12520"},{"State":"Kentucky","City":"Henderson","Customer ID":"CG-12520"},{"State":"California","City":"Los Angeles","Customer ID":"DV-13045"},{"State":"Florida","City":"Fort Lauderdale","Customer ID":"SO-20335"}]'
+            '[{"State":"Test","City":"Henderson","Customer ID":"CG-12520"},{"State":"Kentucky","City":"Henderson","Customer ID":"CG-12520"},{"State":"California","City":"Los Angeles","Customer ID":"DV-13045"},{"State":"Florida","City":"Fort Lauderdale","Customer ID":"SO-20335"}]',
         );
     });
 
@@ -202,7 +202,7 @@ test.describe("Datagrid with superstore data set", () => {
         });
 
         test.expect(result).toEqual(
-            '[{"State":"Test","City":"Henderson","Customer ID":"CG-12520"},{"State":"Kentucky","City":"Henderson","Customer ID":"CG-12520"},{"State":"California","City":"Los Angeles","Customer ID":"DV-13045"},{"State":"Florida","City":"Fort Lauderdale","Customer ID":"SO-20335"}]'
+            '[{"State":"Test","City":"Henderson","Customer ID":"CG-12520"},{"State":"Kentucky","City":"Henderson","Customer ID":"CG-12520"},{"State":"California","City":"Los Angeles","Customer ID":"DV-13045"},{"State":"Florida","City":"Fort Lauderdale","Customer ID":"SO-20335"}]',
         );
     });
 });
@@ -210,7 +210,7 @@ test.describe("Datagrid with superstore data set", () => {
 test.describe("Datagrid with superstore arrow data set", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(
-            "/tools/perspective-test/src/html/all-types-small-multi-arrow-test.html"
+            "/tools/perspective-test/src/html/all-types-small-multi-arrow-test.html",
         );
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -227,6 +227,6 @@ test.describe("Datagrid with superstore arrow data set", () => {
 
     test(
         `Filter based on date results in correct perspective-click event`,
-        runPerspectiveEventClickTest()
+        runPerspectiveEventClickTest(),
     );
 });

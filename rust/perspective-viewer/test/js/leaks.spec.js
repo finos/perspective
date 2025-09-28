@@ -40,7 +40,7 @@ test.describe("leaks", () => {
         // https://media-codings.com/articles/automatically-detect-memory-leaks-with-puppeteer
         await page.evaluate(() => window.gc());
         const heap1 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+            () => performance.memory.usedJSHeapSize,
         );
 
         for (var i = 0; i < 500; i++) {
@@ -62,7 +62,7 @@ test.describe("leaks", () => {
         // TODO: Not yet sure how to access window.gc() in Playwright
         await page.evaluate(() => window.gc());
         const heap2 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+            () => performance.memory.usedJSHeapSize,
         );
 
         expect((heap2 - heap1) / heap1).toBeLessThan(1);
@@ -85,7 +85,7 @@ test.describe("leaks", () => {
 
         await page.evaluate(() => window.gc());
         const heap1 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+            () => performance.memory.usedJSHeapSize,
         );
 
         for (var i = 0; i < 500; i++) {
@@ -109,7 +109,7 @@ test.describe("leaks", () => {
 
         await page.evaluate(() => window.gc());
         const heap2 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+            () => performance.memory.usedJSHeapSize,
         );
         expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
 
@@ -133,7 +133,7 @@ test.describe("leaks", () => {
 
         await page.evaluate(() => window.gc());
         const heap1 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+            () => performance.memory.usedJSHeapSize,
         );
 
         for (var i = 0; i < 500; i++) {
@@ -147,7 +147,7 @@ test.describe("leaks", () => {
 
         await page.evaluate(() => window.gc());
         const heap2 = await page.evaluate(
-            () => performance.memory.usedJSHeapSize
+            () => performance.memory.usedJSHeapSize,
         );
         expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
 

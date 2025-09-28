@@ -27,7 +27,7 @@ export async function websocket(
     WebSocket: typeof window.WebSocket,
     Client: typeof perspective_client.Client,
     url: string | URL,
-    options?: { maxPayload: number }
+    options?: { maxPayload: number },
 ): Promise<perspective_client.Client> {
     let client: perspective_client.Client, ws: WebSocket;
 

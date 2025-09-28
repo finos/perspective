@@ -17,7 +17,7 @@ import * as psp_websocket from "../websocket.ts";
 function invert_promise<T>(): [
     (t: T) => void,
     Promise<T>,
-    (e: string) => void
+    (e: string) => void,
 ] {
     let sender, reject;
     let receiver: Promise<T> = new Promise((x, y) => {
@@ -47,7 +47,7 @@ async function _init(ws: MessagePort | Worker, wasm: WebAssembly.Module) {
     ws.onmessageerror = console.error;
     ws.postMessage(
         { cmd: "init", args: [wasm] },
-        { transfer: wasm instanceof WebAssembly.Module ? [] : [wasm] }
+        { transfer: wasm instanceof WebAssembly.Module ? [] : [wasm] },
     );
 
     await receiver;
@@ -62,11 +62,11 @@ async function _init(ws: MessagePort | Worker, wasm: WebAssembly.Module) {
 export async function worker(
     module: Promise<typeof psp>,
     server_wasm: Promise<WebAssembly.Module>,
-    perspective_wasm_worker: Promise<SharedWorker | ServiceWorker | Worker>
+    perspective_wasm_worker: Promise<SharedWorker | ServiceWorker | Worker>,
 ) {
     let [wasm, webworker]: [
         WebAssembly.Module,
-        SharedWorker | ServiceWorker | Worker | MessagePort
+        SharedWorker | ServiceWorker | Worker | MessagePort,
     ] = await Promise.all([server_wasm, perspective_wasm_worker]);
 
     const { Client } = await module;
@@ -91,7 +91,7 @@ export async function worker(
         async () => {
             console.debug("Closing WebWorker");
             port.close();
-        }
+        },
     );
 
     await _init(port, wasm);
@@ -111,7 +111,7 @@ export async function worker(
  */
 export async function websocket(
     module: Promise<typeof psp>,
-    url: string | URL
+    url: string | URL,
 ) {
     const { Client } = await module;
     return await psp_websocket.websocket(WebSocket, Client, url);

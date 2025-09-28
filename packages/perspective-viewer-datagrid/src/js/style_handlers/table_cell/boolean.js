@@ -19,8 +19,8 @@ export function cell_style_boolean(plugin, td, metadata) {
             metadata.user === true
                 ? this._pos_fg_color
                 : metadata.user === false
-                ? this._neg_fg_color
-                : ["", 0, 0, 0, ""];
+                  ? this._neg_fg_color
+                  : ["", 0, 0, 0, ""];
         td.style.backgroundColor = "";
         td.style.color = hex;
     }

@@ -26,7 +26,7 @@ async function test_column(page, selector, selector2) {
         const header_button = viewer
             .querySelector("perspective-viewer-datagrid")
             .shadowRoot.querySelector(
-                "regular-table thead tr:last-child th" + selector
+                "regular-table thead tr:last-child th" + selector,
             );
 
         const rect = header_button.getBoundingClientRect();
@@ -83,14 +83,14 @@ test.describe("Column Style Tests", () => {
                 (evt) => {
                     // console.log(evt.type, evt.detail);
                     window.__events__.push(evt);
-                }
+                },
             );
 
             // Find the column config menu button
             const header_button = viewer
                 .querySelector("perspective-viewer-datagrid")
                 .shadowRoot.querySelector(
-                    "regular-table thead tr:last-child th"
+                    "regular-table thead tr:last-child th",
                 );
 
             // Get the button coords (slightly lower than center
@@ -108,7 +108,7 @@ test.describe("Column Style Tests", () => {
 
         // Await the style menu existing on the page
         const style_menu = await page.waitForSelector(
-            "#column-style-container"
+            "#column-style-container",
         );
 
         const { x: xx, y: yy } = await page.evaluate(async (style_menu) => {

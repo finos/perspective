@@ -60,14 +60,14 @@ export function createDataListener(viewer) {
             columns = JSON.parse(x);
             const y = Object.keys(columns);
             const new_col_paths = y.filter(
-                (x) => x !== "__ROW_PATH__" && x !== "__ID__"
+                (x) => x !== "__ROW_PATH__" && x !== "__ID__",
             );
 
             const old_length = this._column_paths.length;
             this._column_paths.splice(
                 new_window.start_col,
                 new_col_paths.length,
-                ...new_col_paths
+                ...new_col_paths,
             );
 
             if (this._column_paths.length !== old_length || old_length === 0) {
@@ -131,7 +131,7 @@ export function createDataListener(viewer) {
                 regularTable[PRIVATE_PLUGIN_SYMBOL]?.[
                     path_parts[this._config.split_by.length]
                 ]?.aggregate_depth || 0,
-                this._config.group_by.length
+                this._config.group_by.length,
             );
 
             data.push(
@@ -143,10 +143,10 @@ export function createDataListener(viewer) {
                             this,
                             path_parts[this._config.split_by.length],
                             x,
-                            regularTable[PRIVATE_PLUGIN_SYMBOL]
+                            regularTable[PRIVATE_PLUGIN_SYMBOL],
                         );
                     }
-                })
+                }),
             );
 
             metadata.push(column);
@@ -182,8 +182,8 @@ export function createDataListener(viewer) {
                 this,
                 columns.__ROW_PATH__,
                 this._config.group_by,
-                regularTable
-            )
+                regularTable,
+            ),
         );
 
         const num_row_headers = row_headers[0]?.length;
@@ -199,7 +199,7 @@ export function createDataListener(viewer) {
             metadata,
             column_header_merge_depth: Math.max(
                 0,
-                this._config.split_by.length
+                this._config.split_by.length,
             ),
         };
 

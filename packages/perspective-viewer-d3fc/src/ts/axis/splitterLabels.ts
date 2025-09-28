@@ -53,18 +53,18 @@ export const splitterLabels = (settings: Settings): SplitterLabels => {
             .classed("disabled", disabled)
             .text((d) => d.name)
             .style("color", (d) =>
-                coloured ? withoutOpacity(color(d.name)) : undefined
+                coloured ? withoutOpacity(color(d.name)) : undefined,
             )
             .on("click", (event, d) => {
                 if (disabled) return;
 
                 if (alt) {
                     settings.splitMainValues = settings.splitMainValues.filter(
-                        (v) => v != d.name
+                        (v) => v != d.name,
                     );
                 } else {
                     settings.splitMainValues = [d.name].concat(
-                        settings.splitMainValues || []
+                        settings.splitMainValues || [],
                     );
                 }
 

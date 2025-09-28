@@ -13,7 +13,7 @@
 export function group_header_style_listener(regularTable) {
     const header_depth = regularTable._view_cache.config.row_pivots.length - 1;
     let group_header_trs = Array.from(
-        regularTable.children[0].children[0].children
+        regularTable.children[0].children[0].children,
     );
 
     const m = [];
@@ -37,7 +37,7 @@ export function group_header_style_listener(regularTable) {
             td.classList.toggle("psp-header-border", needs_border);
             td.classList.toggle(
                 "psp-header-group-corner",
-                typeof metadata.x === "undefined"
+                typeof metadata.x === "undefined",
             );
 
             td.classList.toggle("psp-color-mode-bar", false);

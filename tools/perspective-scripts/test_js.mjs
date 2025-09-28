@@ -40,12 +40,12 @@ const IS_PLAYWRIGHT = get_scope().reduce(
             "perspective-workspace",
             "perspective-jupyterlab",
         ].includes(pkg),
-    false
+    false,
 );
 
 const IS_RUST = get_scope().reduce(
     (is_playwright, pkg) => is_playwright || ["perspective-rs"].includes(pkg),
-    false
+    false,
 );
 
 const IS_CI = process.env.CI || getarg("--ci") ? "CI=1" : "";

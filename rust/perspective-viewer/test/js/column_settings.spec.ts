@@ -26,7 +26,7 @@ export async function checkTab(
     columnSettingsSidebar: ColumnSettingsSidebar,
     active: boolean,
     expression: boolean,
-    hasStyles: boolean = true
+    hasStyles: boolean = true,
 ) {
     await columnSettingsSidebar.container.waitFor({
         state: "visible",
@@ -50,7 +50,7 @@ export async function checkTab(
         } else {
             test.fail(
                 true,
-                "No settings exist for non-expression, inactive columns!"
+                "No settings exist for non-expression, inactive columns!",
             );
         }
     }
@@ -157,7 +157,7 @@ test.describe("Plugin Styles", () => {
         const MAX_WIDTH = 350;
         let checkWidth = async () => {
             let width = await view.columnSettingsSidebar.container.evaluate(
-                (sidebar) => sidebar.getBoundingClientRect().width
+                (sidebar) => sidebar.getBoundingClientRect().width,
             );
             expect(width).toEqual(MAX_WIDTH);
         };
@@ -170,7 +170,7 @@ test.describe("Plugin Styles", () => {
         await editor.textarea.clear();
 
         await editor.textarea.type(
-            "'0000000000000000000000000000000000000000000000000000000000"
+            "'0000000000000000000000000000000000000000000000000000000000",
         );
         await checkWidth();
         await editor.textarea.clear();
@@ -189,9 +189,8 @@ test.describe("Plugin Styles", () => {
             settings: true,
         });
 
-        const col = await view.settingsPanel.inactiveColumns.getColumnByName(
-            "expr"
-        );
+        const col =
+            await view.settingsPanel.inactiveColumns.getColumnByName("expr");
         await col.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
         await checkTab(view.columnSettingsSidebar, false, true);
@@ -206,7 +205,7 @@ test.describe("Plugin Styles", () => {
         expect(await selectedTab()).toBe("Attributes");
         await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.clear();
         await view.columnSettingsSidebar.attributesTab.expressionEditor.textarea.type(
-            "'new expr value'"
+            "'new expr value'",
         );
         await view.columnSettingsSidebar.attributesTab.saveBtn.click();
         expect(await selectedTab()).toBe("Attributes");
@@ -246,7 +245,7 @@ test.describe("Plugin Styles", () => {
         // expect -ve color input on color range is present and has valid default value
         const getFgColorNeg = async () => {
             return view.columnSettingsSidebar.styleTab.container.locator(
-                "#fg-color-neg"
+                "#fg-color-neg",
             );
         };
         let fgColorNeg = await getFgColorNeg();

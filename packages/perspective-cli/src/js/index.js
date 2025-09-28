@@ -129,41 +129,41 @@ program
         JSON.parse(
             fs
                 .readFileSync(path.join(__dirname, "..", "..", "package.json"))
-                .toString()
-        ).version
+                .toString(),
+        ).version,
     )
     .description(
-        "A convenient command-line client for Perspective.js.  Can convert between Perspective supported format, or host a local web server."
+        "A convenient command-line client for Perspective.js.  Can convert between Perspective supported format, or host a local web server.",
     )
     .action(() => program.help());
 
 program
     .command("convert [filename]")
     .description(
-        "Convert a file into a new format.  Reads from STDIN if no filename is provided."
+        "Convert a file into a new format.  Reads from STDIN if no filename is provided.",
     )
     .option(
         "-f, --format <format>",
         "Which output format to use:  arrow, csv, columns, json.",
         /^(arrow|json|columns|csv)$/i,
-        "arrow"
+        "arrow",
     )
     .option(
         "-o, --output <filename>",
-        "Filename to write to.  If not supplied, writes to STDOUT."
+        "Filename to write to.  If not supplied, writes to STDOUT.",
     )
     .action(convert);
 
 program
     .command("host [filename]")
     .description(
-        "Host a file on a local Websocket/HTTP server using a server-side Perspective.  Reads from STDIN if no filename is provided"
+        "Host a file on a local Websocket/HTTP server using a server-side Perspective.  Reads from STDIN if no filename is provided",
     )
     .option(
         "-p, --port <port>",
         "Which port to bind to.",
         (x) => parseInt(x),
-        8080
+        8080,
     )
     .option("-a, --assets <path>", "Host from a working directory")
     .option("-o, --open", "Open a browser automagically.")

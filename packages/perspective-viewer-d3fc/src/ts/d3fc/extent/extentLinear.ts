@@ -47,7 +47,7 @@ export const extentLinear = function (): ExtentLinear {
     let paddingStrategy = defaultPadding();
 
     const instance: Partial<ExtentLinear> = function instance(
-        data
+        data,
     ): PaddingStrategy {
         let values = new Array(data.length);
         let _iteratorNormalCompletion = true;
@@ -93,19 +93,19 @@ export const extentLinear = function (): ExtentLinear {
             extent$$1[0] == null
                 ? d3Array.min(include)
                 : d3Array.min(
-                      [extent$$1[0]].concat(toConsumableArray(include))
+                      [extent$$1[0]].concat(toConsumableArray(include)),
                   );
         extent$$1[1] =
             extent$$1[1] == null
                 ? d3Array.max(include)
                 : d3Array.max(
-                      [extent$$1[1]].concat(toConsumableArray(include))
+                      [extent$$1[1]].concat(toConsumableArray(include)),
                   );
 
         if (symmetricalAbout != null) {
             let halfRange = Math.max(
                 Math.abs(extent$$1[1] - symmetricalAbout),
-                Math.abs(extent$$1[0] - symmetricalAbout)
+                Math.abs(extent$$1[0] - symmetricalAbout),
             );
             extent$$1[0] = symmetricalAbout - halfRange;
             extent$$1[1] = symmetricalAbout + halfRange;

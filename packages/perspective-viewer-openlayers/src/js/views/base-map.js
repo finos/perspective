@@ -113,7 +113,7 @@ function removeVectorLayer(container) {
 function setTileUrl(container) {
     const tileUrl = computedStyle(container)(
         "--map-tile-url",
-        DEFAULT_TILE_URL
+        DEFAULT_TILE_URL,
     );
     const url = tileUrl.trim().substring(1, tileUrl.length - 1);
 

@@ -34,7 +34,7 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
                 className: "lm-TabBar-tabLabel",
                 id: TabBarItems.Label,
             },
-            data.title.label || DEFAULT_TITLE
+            data.title.label || DEFAULT_TITLE,
         );
     }
 
@@ -44,7 +44,7 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
 
     renderTab(
         data: TabBar.IRenderData<any>,
-        onclick?: (this: HTMLElement, event: MouseEvent) => any
+        onclick?: (this: HTMLElement, event: MouseEvent) => any,
     ) {
         const title = data.title.caption;
         const key = this.createTabKey(data);
@@ -56,8 +56,8 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
             more.push(
                 h.div(
                     { onclick, className: "bookmarks-button" },
-                    h.div({ className: "bookmarks" })
-                )
+                    h.div({ className: "bookmarks" }),
+                ),
             );
         }
 
@@ -66,7 +66,7 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
             this.renderDragHandle(),
             ...more,
             this.renderLabel(data),
-            this.renderCloseIcon()
+            this.renderCloseIcon(),
         );
     }
 

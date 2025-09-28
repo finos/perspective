@@ -39,8 +39,8 @@ test.describe("Scatter Tests", () => {
     run_standard_tests(
         "xyscatter",
         getSvgContentString(
-            "perspective-viewer perspective-viewer-d3fc-xyscatter"
-        )
+            "perspective-viewer perspective-viewer-d3fc-xyscatter",
+        ),
     );
 
     test("Scatter charts with a 'label' field render the label", async ({
@@ -56,7 +56,7 @@ test.describe("Scatter Tests", () => {
         await compareSVGContentsToSnapshot(
             page,
             "perspective-viewer perspective-viewer-d3fc-xyscatter",
-            ["xyscatter-label.txt"]
+            ["xyscatter-label.txt"],
         );
     });
 
@@ -75,7 +75,7 @@ test.describe("Scatter Tests", () => {
         await compareSVGContentsToSnapshot(
             page,
             "perspective-viewer perspective-viewer-d3fc-xyscatter",
-            ["xyscatter-label-grouped.txt"]
+            ["xyscatter-label-grouped.txt"],
         );
     });
 });

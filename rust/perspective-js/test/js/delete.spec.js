@@ -98,7 +98,7 @@ function mock_fn() {
 
                 table.delete();
                 done();
-            }
+            },
         );
 
         it_old_behavior(
@@ -115,7 +115,7 @@ function mock_fn() {
                 view.delete();
                 table.delete();
                 done();
-            }
+            },
         );
     });
 })(perspective);

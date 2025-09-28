@@ -50,6 +50,6 @@ export const categoryColorMap = (container, data, valueFn = defaultValueFn) => {
 const getCategoryColors = (container) => {
     const computed = computedStyle(container);
     return defaultColors.map((defaultColor, i) =>
-        computed(`${CATEGORY_COLOR_VAR}${i + 1}`, defaultColor)
+        computed(`${CATEGORY_COLOR_VAR}${i + 1}`, defaultColor),
     );
 };

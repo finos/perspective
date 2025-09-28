@@ -20,7 +20,7 @@ export function getOrCreateElement(container, selector, createCallback) {
 export function isElementOverflowing(
     containerRect: DOMRect,
     innerElementRect: NodeRect,
-    direction: Orient = "right"
+    direction: Orient = "right",
 ) {
     if (direction === "right" || direction === "bottom") {
         return containerRect[direction] < innerElementRect[direction]
@@ -41,7 +41,7 @@ export function isElementOverlapping(
     axis: "x" | "y",
     immovableRect: DOMRect,
     elementRect: DOMRect,
-    fuzz = 0
+    fuzz = 0,
 ) {
     const dimension = axis === "x" ? "width" : "height";
 

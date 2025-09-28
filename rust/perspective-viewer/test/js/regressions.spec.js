@@ -91,7 +91,7 @@ test.describe("Regression tests", () => {
             });
 
             const filter = viewer.shadowRoot.querySelector(
-                ".pivot-column input[type=search]"
+                ".pivot-column input[type=search]",
             );
             filter.value = "C";
             const event = new Event("input", {
@@ -149,7 +149,7 @@ test.describe("Regression tests", () => {
             "0001",
             true,
             "perspective-viewer",
-            "input.num-filter"
+            "input.num-filter",
         );
 
         const value = await page.evaluate(async () => {

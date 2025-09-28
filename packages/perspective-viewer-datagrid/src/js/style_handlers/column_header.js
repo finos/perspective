@@ -20,7 +20,7 @@ function get_psp_type(metadata) {
 
 export function style_selected_column(regularTable, viewer, selectedColumn) {
     const group_header_trs = Array.from(
-        regularTable.children[0].children[0].children
+        regularTable.children[0].children[0].children,
     );
 
     const len = group_header_trs.length;
@@ -34,8 +34,8 @@ export function style_selected_column(regularTable, viewer, selectedColumn) {
                 i === len - (offset + 1)
                     ? "psp-column-titles"
                     : i === len - offset
-                    ? "psp-column-edit-buttons"
-                    : null;
+                      ? "psp-column-edit-buttons"
+                      : null;
             id ? tr.setAttribute("id", id) : tr.removeAttribute("id");
         });
     }
@@ -79,7 +79,7 @@ export function style_selected_column(regularTable, viewer, selectedColumn) {
 
 export function column_header_style_listener(regularTable, viewer) {
     let group_header_trs = Array.from(
-        regularTable.children[0].children[0].children
+        regularTable.children[0].children[0].children,
     );
 
     if (group_header_trs.length > 0) {
@@ -87,12 +87,12 @@ export function column_header_style_listener(regularTable, viewer) {
             this,
             regularTable,
             viewer,
-            this._column_settings_selected_column
+            this._column_settings_selected_column,
         );
 
         let [col_headers] = group_header_trs.splice(
             this._config.split_by.length,
-            1
+            1,
         );
 
         if (col_headers) {
@@ -100,13 +100,13 @@ export function column_header_style_listener(regularTable, viewer) {
                 this,
                 regularTable,
                 col_headers,
-                false
+                false,
             );
         }
 
         let [style_menu_headers] = group_header_trs.splice(
             this._config.split_by.length,
-            1
+            1,
         );
 
         if (style_menu_headers) {
@@ -114,7 +114,7 @@ export function column_header_style_listener(regularTable, viewer) {
                 this,
                 regularTable,
                 style_menu_headers,
-                true
+                true,
             );
         }
     }
@@ -140,42 +140,42 @@ function style_column_header_row(regularTable, col_headers, is_menu_row) {
         td.classList.toggle("psp-header-corner", is_corner);
         td.classList.toggle(
             "psp-header-sort-asc",
-            !is_menu_row && !!sort && sort[1] === "asc"
+            !is_menu_row && !!sort && sort[1] === "asc",
         );
 
         td.classList.toggle(
             "psp-header-sort-desc",
-            !is_menu_row && !!sort && sort[1] === "desc"
+            !is_menu_row && !!sort && sort[1] === "desc",
         );
 
         td.classList.toggle(
             "psp-header-sort-col-asc",
-            !is_menu_row && !!sort && sort[1] === "col asc"
+            !is_menu_row && !!sort && sort[1] === "col asc",
         );
 
         td.classList.toggle(
             "psp-header-sort-col-desc",
-            !is_menu_row && !!sort && sort[1] === "col desc"
+            !is_menu_row && !!sort && sort[1] === "col desc",
         );
 
         td.classList.toggle(
             "psp-header-sort-abs-asc",
-            !is_menu_row && !!sort && sort[1] === "asc abs"
+            !is_menu_row && !!sort && sort[1] === "asc abs",
         );
 
         td.classList.toggle(
             "psp-header-sort-abs-desc",
-            !is_menu_row && !!sort && sort[1] === "desc abs"
+            !is_menu_row && !!sort && sort[1] === "desc abs",
         );
 
         td.classList.toggle(
             "psp-header-sort-abs-col-asc",
-            !is_menu_row && !!sort && sort[1] === "col asc abs"
+            !is_menu_row && !!sort && sort[1] === "col asc abs",
         );
 
         td.classList.toggle(
             "psp-header-sort-abs-col-desc",
-            !is_menu_row && !!sort && sort[1] === "col desc abs"
+            !is_menu_row && !!sort && sort[1] === "col desc abs",
         );
 
         let type = get_psp_type.call(this, metadata);
@@ -190,20 +190,20 @@ function style_column_header_row(regularTable, col_headers, is_menu_row) {
             "psp-menu-enabled",
             (is_string || is_numeric || is_date || is_datetime) &&
                 !is_corner &&
-                metadata.column_header_y == this._config.split_by.length + 1
+                metadata.column_header_y == this._config.split_by.length + 1,
         );
 
         td.classList.toggle(
             "psp-sort-enabled",
             (is_string || is_numeric || is_date || is_datetime) &&
                 !is_corner &&
-                metadata.column_header_y === this._config.split_by.length
+                metadata.column_header_y === this._config.split_by.length,
         );
 
         td.classList.toggle(
             "psp-is-width-override",
             regularTable._column_sizes?.override[metadata.size_key] !==
-                undefined
+                undefined,
         );
     }
 }

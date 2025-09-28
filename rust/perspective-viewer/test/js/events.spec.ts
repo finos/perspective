@@ -118,7 +118,7 @@ test.describe("Events", () => {
             true,
             "perspective-viewer",
             "#status_bar",
-            "input"
+            "input",
         );
 
         const result = await page.evaluate(async () => {

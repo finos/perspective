@@ -25,7 +25,7 @@ export type TreeData = {
 export function treeData(settings: Settings) {
     const sets = {};
     const real_aggs = settings.realValues.map((x) =>
-        x === null ? null : settings.mainValues.find((y) => y.name === x)
+        x === null ? null : settings.mainValues.find((y) => y.name === x),
     );
     settings.data.forEach((d, j) => {
         const groups = Array.isArray(d.__ROW_PATH__)
@@ -55,7 +55,7 @@ export function treeData(settings: Settings) {
                         : getDataValue(
                               settings.agg_paths[j][i + 1] || d,
                               settings.mainValues[1],
-                              split
+                              split,
                           );
                     if (colorValue !== undefined) {
                         element.color = colorValue;
@@ -68,7 +68,7 @@ export function treeData(settings: Settings) {
                     element.tooltip = [];
                     for (let i = 2; i < settings.realValues.length; ++i) {
                         element.tooltip.push(
-                            getDataValue(d, real_aggs[i], split)
+                            getDataValue(d, real_aggs[i], split),
                         );
                     }
                 }
@@ -78,13 +78,13 @@ export function treeData(settings: Settings) {
                         element.size = getDataValue(
                             d,
                             settings.mainValues[0],
-                            ""
+                            "",
                         );
                     } else if (groups.length === settings.crossValues.length) {
                         const size = getDataValue(
                             d,
                             settings.mainValues[0],
-                            split
+                            split,
                         );
                         element.size = size > 0 ? size : 0;
                     }
@@ -129,7 +129,7 @@ export function treeData(settings: Settings) {
             d.label = toValue(
                 settings.crossValues[d.depth - 1 < 0 ? 0 : d.depth - 1]?.type ||
                     settings.mainValues[0].type,
-                d.data.name
+                d.data.name,
             );
         });
 
@@ -150,8 +150,8 @@ function getExtents(settings, [split, data]) {
     if (settings.realValues.length > 1 && settings.realValues[1] !== null) {
         const min = Math.min(
             ...settings.data.map((d) =>
-                getDataValue(d, settings.mainValues[1], split)
-            )
+                getDataValue(d, settings.mainValues[1], split),
+            ),
         );
         const max = Math.max(...data.map((d) => d.color));
         return [min, max];

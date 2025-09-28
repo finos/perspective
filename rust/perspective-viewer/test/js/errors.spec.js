@@ -33,7 +33,7 @@ test.describe("viewer.load() method", async () => {
             viewer.evaluate((viewer) => {
                 const errorTable = Promise.reject(new Error("blimpy"));
                 return viewer.load(errorTable);
-            })
+            }),
         ).rejects.toThrow("blimpy");
     });
 

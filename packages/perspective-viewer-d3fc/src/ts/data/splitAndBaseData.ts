@@ -23,7 +23,7 @@ export interface SplitAndBasedData {
 
 export function splitAndBaseData(
     settings: Settings,
-    data
+    data,
 ): SplitAndBasedData[][] {
     const labelfn = labelFunction(settings);
 
