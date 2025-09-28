@@ -20,9 +20,14 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "glob": "^11",
-        "xml-formatter": "2.4.0",
-        "react": "^18.0.0",
-        "react-dom": "^18.0.0"
+        "react": "catalog:",
+        "react-dom": "catalog:",
+        "tar": "catalog:",
+        "tsx": "catalog:",
+        "prettier": "catalog:",
+        "superstore-arrow": "catalog:",
+        "@playwright/test": "catalog:",
+        "@playwright/experimental-ct-react": "catalog:",
+        "zx": "catalog:"
     }
 }

@@ -13,14 +13,14 @@
 import * as fs from "node:fs";
 import sh from "../../tools/perspective-scripts/sh.mjs";
 import * as url from "url";
-import * as toml from "smol-toml";
+import * as toml from "@iarna/toml";
 import * as tar from "tar";
-import * as glob from "glob";
 import * as path from "path";
+import "zx/globals";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 const pkg = JSON.parse(
-    fs.readFileSync(__dirname + "/package.json", { encoding: "utf-8" })
+    fs.readFileSync(__dirname + "/package.json", { encoding: "utf-8" }),
 );
 
 let flags = "--release";
@@ -43,7 +43,7 @@ const cmd = sh();
 if (is_pyodide) {
     const emsdkdir = sh.path`${__dirname}/../../.emsdk`;
     const { emscripten } = JSON.parse(
-        fs.readFileSync(sh.path`${__dirname}/../../package.json`)
+        fs.readFileSync(sh.path`${__dirname}/../../package.json`),
     );
     cmd.sh`cd ${emsdkdir}`.sh`. ./emsdk_env.sh`
         .sh`./emsdk activate ${emscripten}`.sh`cd ${cwd}`;
@@ -87,7 +87,7 @@ if (build_wheel) {
             flags += ` --interpreter=${process.env.PYTHON}`;
         } else {
             console.warn(
-                "Expected PYTHON to be set in CONDA_BUILD environment, but it isn't.  maturin will likely detect the wrong Python."
+                "Expected PYTHON to be set in CONDA_BUILD environment, but it isn't.  maturin will likely detect the wrong Python.",
             );
         }
         // we need to generate proto.rs using conda's protoc, which is set in
@@ -118,11 +118,11 @@ if (build_sdist) {
     const data_dir = `perspective_python-${version}.data`;
     const testfile = path.join(
         data_dir,
-        "data/share/jupyter/labextensions/@finos/perspective-jupyterlab/package.json"
+        "data/share/jupyter/labextensions/@finos/perspective-jupyterlab/package.json",
     );
     if (!fs.existsSync(testfile)) {
         throw new Error(
-            "labextension is not present in data directory, please build `perspective-jupyterlab`"
+            "labextension is not present in data directory, please build `perspective-jupyterlab`",
         );
     }
     const readme_md = fs.readFileSync("./README.md");
@@ -134,7 +134,7 @@ if (build_sdist) {
     // Maturin does not yet support explicitly declaring `license-files` in
     // pyproject.toml.  See https://github.com/PyO3/maturin/pull/862
     // https://github.com/PyO3/maturin/issues/861
-    const crate_files = glob.globSync(Array.from(cargo["package"]["include"]));
+    const crate_files = glob.sync(Array.from(cargo["package"]["include"]));
     const wheel_dir = `../target/wheels`;
     fs.mkdirSync(wheel_dir, { recursive: true });
     await tar.create(
@@ -144,7 +144,7 @@ if (build_sdist) {
             prefix: `perspective_python-${version}`,
             strict: true,
         },
-        crate_files.concat(["PKG-INFO", data_dir])
+        crate_files.concat(["PKG-INFO", data_dir]),
     );
 }
 
@@ -156,8 +156,8 @@ if (!build_wheel && !build_sdist) {
     const dev_features = ["abi3"];
     cmd.sh(
         `maturin develop --features=${dev_features.join(
-            ","
-        )} ${flags} ${target}`
+            ",",
+        )} ${flags} ${target}`,
     );
 }
 
@@ -172,7 +172,7 @@ function generatePkgInfo(pyproject, cargo, readme_md) {
     const field = (name, value) => {
         if (typeof value !== "string") {
             throw new Error(
-                `PKG-INFO value for field ${name} was not a string:\n${value}`
+                `PKG-INFO value for field ${name} was not a string:\n${value}`,
             );
         }
         return `${name}: ${value}`;
@@ -186,7 +186,7 @@ function generatePkgInfo(pyproject, cargo, readme_md) {
         addField("Classifier", c);
     }
     for (const [extra, deps] of Object.entries(
-        project["optional-dependencies"]
+        project["optional-dependencies"],
     )) {
         for (const dep of deps) {
             addField("Requires-Dist", `${dep} ; extra == '${extra}'`);
@@ -203,7 +203,7 @@ function generatePkgInfo(pyproject, cargo, readme_md) {
     addField("Requires-Python", project["requires-python"]);
     addField(
         "Description-Content-Type",
-        "text/markdown; charset=UTF-8; variant=GFM"
+        "text/markdown; charset=UTF-8; variant=GFM",
     );
     addField("Project-URL", `Source Code, ${cargo.package.repository}`);
     lines.push("");

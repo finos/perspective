@@ -17,39 +17,28 @@
         "access": "public"
     },
     "scripts": {
-        "bench": "npm-run-all bench:build bench:run",
-        "bench:build": "echo \"No Benchmarks\"",
-        "bench:run": "echo \"No Benchmarks\"",
-        "build": "node build.mjs",
-        "clean": "npm-run-all clean:*",
-        "clean:dist": "rimraf dist",
-        "clean:lib": "rimraf lib",
-        "clean:labextension": "rimraf ../../rust/perspective-python/perspective/labextension",
-        "clean:nbextension": "rimraf ../../rust/perspective-python/perspective/nbextension/static",
-        "test:build": "node build.mjs --test",
-        "test:jupyter:build": "cpy \"test/arrow/*\" dist/esm",
+        "build": "node ./build.mjs",
+        "clean": "node ./clean.mjs",
         "test:jupyter": "__JUPYTERLAB_PORT__=6538 npx playwright test --config ../../tools/perspective-test/playwright.config.ts -- --jupyter",
-        "test": "npm-run-all test:build",
-        "version": "yarn build"
+        "test:jupyter:build": "node ./build.mjs --test"
     },
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "@finos/perspective-viewer-d3fc": "workspace:^",
-        "@finos/perspective-viewer-datagrid": "workspace:^",
-        "@finos/perspective-viewer-openlayers": "workspace:^",
+        "@finos/perspective-viewer-d3fc": "workspace:",
+        "@finos/perspective-viewer-datagrid": "workspace:",
+        "@finos/perspective-viewer-openlayers": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "@finos/perspective": "workspace:",
         "@jupyter-widgets/base": ">2 <5",
         "@jupyterlab/application": ">2 <5",
         "@lumino/application": "<3",
         "@lumino/widgets": "<3"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "workspace:^",
-        "@finos/perspective-test": "workspace:^",
+        "@finos/perspective-esbuild-plugin": "workspace:",
+        "@finos/perspective-test": "workspace:",
         "@jupyterlab/builder": "^4",
-        "copy-webpack-plugin": "~12",
         "@prospective.co/procss": "^0.1.16",
-        "cpy": "^9.0.1",
+        "copy-webpack-plugin": "~12",
         "zx": "^8.1.8"
     },
     "jupyterlab": {

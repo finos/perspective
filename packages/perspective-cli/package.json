@@ -12,9 +12,6 @@
         "perspective"
     ],
     "types": "index.d.ts",
-    "scripts": {
-        "clean": "rimraf build"
-    },
     "repository": {
         "type": "git",
         "url": "https://github.com/finos/perspective"
@@ -25,16 +22,16 @@
         "perspective": "perspective"
     },
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "@finos/perspective-viewer-d3fc": "workspace:^",
-        "@finos/perspective-viewer-datagrid": "workspace:^",
-        "@finos/perspective-viewer-openlayers": "workspace:^",
-        "@finos/perspective-workspace": "workspace:^",
-        "commander": "^2.19.0",
-        "puppeteer": "^23"
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "@finos/perspective-viewer-d3fc": "workspace:",
+        "@finos/perspective-viewer-datagrid": "workspace:",
+        "@finos/perspective-viewer-openlayers": "workspace:",
+        "@finos/perspective-workspace": "workspace:",
+        "commander": "catalog:",
+        "puppeteer": "catalog:"
     },
     "devDependencies": {
-        "@finos/perspective-test": "workspace:^"
+        "@finos/perspective-test": "workspace:"
     }
 }

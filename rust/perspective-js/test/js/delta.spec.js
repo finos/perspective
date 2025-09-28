@@ -13,7 +13,7 @@
 import { test, expect } from "@finos/perspective-test";
 import perspective from "./perspective_client";
 
-import * as _ from "underscore";
+import _ from "lodash";
 
 let data = [
     { x: 1, y: "a", z: true },

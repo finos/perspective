@@ -20,22 +20,21 @@
         "access": "public"
     },
     "scripts": {
-        "build": "node build.js",
-        "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
+        "build": "node ./build.mjs",
+        "clean": "node ./clean.mjs"
     },
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "d3": "^7.1.1",
-        "d3-color": "^3.0.1",
-        "gradient-parser": "1.0.2",
-        "less": "^4.1.0",
-        "ol": "^5.3.2"
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "d3": "catalog:",
+        "d3-color": "catalog:",
+        "gradient-parser": "catalog:",
+        "less": "catalog:",
+        "ol": "catalog:"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "workspace:^",
-        "@finos/perspective-test": "workspace:^",
-        "@prospective.co/procss": "^0.1.16"
+        "@finos/perspective-esbuild-plugin": "workspace:",
+        "@finos/perspective-test": "workspace:",
+        "@prospective.co/procss": "catalog:"
     }
 }

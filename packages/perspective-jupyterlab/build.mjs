@@ -10,10 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import cpy from "cpy";
 import { WasmPlugin } from "@finos/perspective-esbuild-plugin/wasm.js";
 import { WorkerPlugin } from "@finos/perspective-esbuild-plugin/worker.js";
-// import { AMDLoader } from "@finos/perspective-esbuild-plugin/amd.js";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import * as path from "node:path";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
@@ -33,7 +31,7 @@ const NBEXTENSION_PATH = path.resolve(
     "perspective",
     "perspective",
     "nbextension",
-    "static"
+    "static",
 );
 
 const TEST_BUILD = {
@@ -110,14 +108,14 @@ const NB_BUILDS = [
 function add(builder, path, path2) {
     builder.add(
         path,
-        fs.readFileSync(_require.resolve(path2 || path)).toString()
+        fs.readFileSync(_require.resolve(path2 || path)).toString(),
     );
 }
 
-const PROD_BUILD = [LAB_BUILD, ...NB_BUILDS];
-const BUILD = process.argv.some((x) => x == "--test")
-    ? [TEST_BUILD]
-    : PROD_BUILD;
+const IS_TEST = process.argv.some((x) => x == "--test");
+const BUILD = IS_TEST
+    ? [LAB_BUILD, ...NB_BUILDS, TEST_BUILD]
+    : [LAB_BUILD, ...NB_BUILDS];
 
 async function build_all() {
     fs.mkdirSync("dist/css", { recursive: true });
@@ -126,18 +124,21 @@ async function build_all() {
     add(builder3, "./index.less", "./src/less/index.less");
     fs.writeFileSync(
         "dist/css/perspective-jupyterlab.css",
-        builder3.compile().get("index.css")
+        builder3.compile().get("index.css"),
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
-    cpy(["src/less/*"], "dist/less");
+    fs.cpSync("src/less", "dist/less", { recursive: true });
     execSync("jupyter labextension build .", {
         stdio: "inherit",
     });
 
     const pkg = JSON.parse(fs.readFileSync("../../package.json").toString());
     const labext_dest = `../../rust/perspective-python/perspective_python-${pkg.version}.data/data/share/jupyter/labextensions/@finos/perspective-jupyterlab`;
-    await cpy(["dist/cjs/**/*"], labext_dest);
+    fs.cpSync("dist/cjs", labext_dest, { recursive: true });
+    if (IS_TEST) {
+        fs.cpSync("test/arrow", "dist/esm", { recursive: true });
+    }
 }
 
 build_all();

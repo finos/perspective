@@ -28,28 +28,28 @@
     ],
     "types": "dist/esm/perspective-viewer.d.ts",
     "scripts": {
-        "build": "node ./build.js",
-        "clean": "rimraf dist && rimraf build",
-        "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless",
-        "docs": "npx typedoc --tsconfig tsconfig.json --out ../../docs/static/viewer"
+        "build": "node ./build.mjs",
+        "clean": "node ./clean.mjs",
+        "docs": "node ./docs.mjs"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "pro_self_extracting_wasm": "0.0.9"
+        "@finos/perspective": "workspace:",
+        "pro_self_extracting_wasm": "catalog:"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "workspace:^",
-        "@finos/perspective-test": "workspace:^",
-        "@finos/perspective-metadata": "workspace:^",
-        "@prospective.co/procss": "0.1.16",
-        "@types/react": "^17.0.2",
-        "cpy": "^9.0.1",
-        "prettier": "^2.8.8",
-        "typedoc": "^0.28.7",
-        "typescript": "~5.2.2",
-        "zx": "8.3.0"
+        "@finos/perspective-esbuild-plugin": "workspace:",
+        "@finos/perspective-test": "workspace:",
+        "@finos/perspective-metadata": "workspace:",
+        "@prospective.co/procss": "catalog:",
+        "@playwright/test": "catalog:",
+        "@playwright/experimental-ct-react": "catalog:",
+        "@types/react": "catalog:",
+        "prettier": "catalog:",
+        "typedoc": "catalog:",
+        "typescript": "catalog:",
+        "zx": "catalog:"
     }
 }

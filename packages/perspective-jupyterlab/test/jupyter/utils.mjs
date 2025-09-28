@@ -13,7 +13,6 @@
 import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
-import * as rimraf from "rimraf";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
@@ -21,15 +20,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const notebook_template = JSON.parse(
     fs.readFileSync(__dirname + "/notebook_template.json", {
         encoding: "utf-8",
-    })
+    }),
 );
 
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "esm");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
 
 const remove_jupyter_artifacts = () => {
-    rimraf.sync(path.join(TEST_CONFIG_ROOT, "lab"));
-    rimraf.sync(path.join(DIST_ROOT, ".ipynb_checkpoints"));
+    fs.rmSync(path.join(TEST_CONFIG_ROOT, "lab"), {
+        recursive: true,
+        force: true,
+    });
+
+    fs.rmSync(path.join(DIST_ROOT, ".ipynb_checkpoints"), {
+        recursive: true,
+        force: true,
+    });
 };
 
 /**
@@ -106,7 +112,7 @@ export function test_jupyter(name, cells, body) {
     test(name, async ({ page }) => {
         await page.goto(
             `http://127.0.0.1:${process.env.__JUPYTERLAB_PORT__}/${url}`,
-            { waitUntil: "domcontentloaded" }
+            { waitUntil: "domcontentloaded" },
         );
         await body({ page });
     });
@@ -116,7 +122,7 @@ export async function default_body(page) {
     await execute_all_cells(page);
     const viewer = await page.waitForSelector(
         ".jp-OutputArea-output perspective-viewer",
-        { visible: true }
+        { visible: true },
     );
     await viewer.evaluate(async (viewer) => await viewer.flush());
     return viewer;
@@ -132,13 +138,13 @@ export async function execute_all_cells(page) {
     try {
         await page.waitForSelector(
             '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])',
-            { timeout: 1000 }
+            { timeout: 1000 },
         );
     } catch (e) {}
     // await new Promise((x) => setTimeout(x, 2000));
 
     await page.waitForSelector(
-        '.jp-Notebook-ExecutionIndicator[data-status="idle"]'
+        '.jp-Notebook-ExecutionIndicator[data-status="idle"]',
     );
 
     // Use our custom keyboard shortcut to run all cells
@@ -167,7 +173,7 @@ export async function add_and_execute_cell(page, cell_content) {
     await new Promise((x) => setTimeout(x, 100));
     // now while the element is still focused, click the run cell button
     await page.click(
-        'jp-button[data-command="notebook:run-cell-and-select-next"]'
+        'jp-button[data-command="notebook:run-cell-and-select-next"]',
     );
     await new Promise((x) => setTimeout(x, 100));
     // wait for kernel to stop running
@@ -186,7 +192,7 @@ export async function assert_no_error_in_cell(page, cell_content) {
     return await Promise.race([
         page
             .waitForSelector(
-                'div[data-mime-type="application/vnd.jupyter.stderr"]'
+                'div[data-mime-type="application/vnd.jupyter.stderr"]',
             )
             .then(() => false),
         page

@@ -10,11 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import tar from "tar";
+import * as tar from "tar";
 import fs from "fs";
-import * as glob from "glob";
 import path from "path";
 import url from "node:url";
+
+import "zx/globals";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +43,7 @@ export default async function run() {
                     stat.mtime = null;
                     stat.atime = null;
                     stat.ctime = null;
-                    stat.birthtime = null;
+                    // stat.birthtime = null;
                     return !path.endsWith(".DS_Store");
                 },
             },
@@ -50,7 +51,7 @@ export default async function run() {
                 ...glob.sync("dist/snapshots/**/*.txt", { cwd }),
                 ...glob.sync("dist/snapshots/**/*.html", { cwd }),
             ],
-            x
-        )
+            x,
+        ),
     );
 }

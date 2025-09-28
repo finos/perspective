@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import fs from "fs";
-import * as glob from "glob";
 import { Octokit } from "octokit";
 import { parseReleases } from "auto-changelog/src/releases.js";
 import { fetchTags } from "auto-changelog/src/tags.js";
@@ -179,7 +178,7 @@ async function update_changelog() {
     const json = await parseReleases(tags, options, onParsed);
     const changelog = await template(json);
     fs.writeFileSync("./CHANGELOG.md", changelog);
-    sh`git add CHANGELOG.md`.runSync();
+    $.sync`git add CHANGELOG.md`;
 }
 
 /**

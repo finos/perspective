@@ -579,6 +579,7 @@ else()
         -s NODEJS_CATCH_REJECTION=0 \
         -s USE_ES6_IMPORT_META=1 \
         -s EXPORT_ES6=1 \
+        -s EXPORTED_RUNTIME_METHODS=HEAPU8 \
         -s EXPORTED_FUNCTIONS=${PSP_EXPORTED_FUNCTIONS_JOINED} \
     ")
 
@@ -623,7 +624,7 @@ if(PSP_WASM_BUILD AND NOT PSP_PYTHON_BUILD)
     target_include_directories(perspective_esm SYSTEM PRIVATE ${all_deps_INCLUDE_DIRS})
     target_link_libraries(perspective_esm psp protos)
     target_compile_definitions(perspective_esm PRIVATE PSP_ENABLE_WASM=1)
-    target_link_options(perspective_esm PUBLIC -sENVIRONMENT="web"  ${PSP_SANITIZE_FLAGS})
+    target_link_options(perspective_esm PUBLIC -sENVIRONMENT=web  ${PSP_SANITIZE_FLAGS})
     set_target_properties(perspective_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./web/")
     set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective-server")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)

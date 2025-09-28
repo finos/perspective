@@ -10,14 +10,14 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "@finos/perspective-viewer-d3fc": "workspace:^",
-        "@finos/perspective-viewer-datagrid": "workspace:^",
-        "superstore-arrow": "^3.0.0"
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "@finos/perspective-viewer-d3fc": "workspace:",
+        "@finos/perspective-viewer-datagrid": "workspace:",
+        "superstore-arrow": "catalog:"
     },
     "devDependencies": {
-        "esbuild": "^0.25.5",
-        "http-server": "^14.1.1"
+        "esbuild": "catalog:",
+        "http-server": "catalog:"
     }
 }

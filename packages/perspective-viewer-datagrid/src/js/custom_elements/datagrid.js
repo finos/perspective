@@ -140,9 +140,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     async render(viewport) {
         const view = await this.parentElement.getView();
         const json = await view.to_columns(viewport);
-        const cols = await view
-            .column_paths()
-            .then((x) => x.slice(viewport.start_col, viewport.end_col));
+        const cols = await view.column_paths(viewport);
 
         const nrows = viewport.end_row - viewport.start_row;
         let out = "";

@@ -14,7 +14,7 @@ import { WebSocketServer, table } from "@finos/perspective";
 import { read_stdin, open_browser } from "./utils.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import program from "commander";
+import { program } from "commander";
 import puppeteer from "puppeteer";
 import { createRequire } from "node:module";
 import * as url from "node:url";
