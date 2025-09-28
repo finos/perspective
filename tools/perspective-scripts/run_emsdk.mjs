@@ -19,7 +19,7 @@ const cmd = sh(process.argv.slice(2).join(" "));
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 const emsdkdir = sh.path`${__dirname}/../../.emsdk`;
 const { emscripten } = JSON.parse(
-    fs.readFileSync(sh.path`${__dirname}/../../package.json`)
+    fs.readFileSync(sh.path`${__dirname}/../../package.json`),
 );
 
 if (!emscripten) {

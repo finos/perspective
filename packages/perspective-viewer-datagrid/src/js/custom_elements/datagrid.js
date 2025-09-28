@@ -62,7 +62,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     connectedCallback() {
         if (!this._toolbar) {
             this._toolbar = document.createElement(
-                "perspective-viewer-datagrid-toolbar"
+                "perspective-viewer-datagrid-toolbar",
             );
         }
 
@@ -152,7 +152,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
                     type,
                     this.regular_table[PRIVATE_PLUGIN_SYMBOL][
                         col_name.split("|").at(-1)
-                    ] || {}
+                    ] || {},
                 );
 
                 if (formatter) {

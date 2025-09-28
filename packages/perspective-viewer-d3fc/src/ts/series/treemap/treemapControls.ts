@@ -24,7 +24,7 @@ export function parentControls(container) {
             .append("div")
             .attr("class", "parent-controls")
             .style("display", hide ? "none" : "")
-            .html(template)
+            .html(template),
     );
 
     const controls = () => {

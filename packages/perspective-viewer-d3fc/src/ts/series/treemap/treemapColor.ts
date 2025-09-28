@@ -17,7 +17,7 @@ import { TreeData } from "../../data/treeData";
 
 export function treeColor(
     settings: Settings,
-    data: d3.HierarchyNode<TreeData>[]
+    data: d3.HierarchyNode<TreeData>[],
 ) {
     if (
         settings.realValues.length < 1 ||
@@ -46,7 +46,7 @@ export function treeColor(
 function getColors(nodes, colors = []) {
     nodes.children && nodes.children.length > 0
         ? nodes.children.forEach((child) =>
-              colors.concat(getColors(child, colors))
+              colors.concat(getColors(child, colors)),
           )
         : nodes.data.color && colors.push(nodes.data.color);
     return colors;

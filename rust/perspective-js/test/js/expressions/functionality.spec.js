@@ -25,7 +25,7 @@ import perspective from "../perspective_client";
         test.describe("if statements", function () {
             test("if without else should be invalid", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const validate = await table.validate_expressions([
                     'if ("w" > 1) 5;',
@@ -33,10 +33,10 @@ import perspective from "../perspective_client";
                 ]);
 
                 expect(
-                    validate.expression_schema['if ("w" > 1) 5;']
+                    validate.expression_schema['if ("w" > 1) 5;'],
                 ).toBeUndefined();
                 expect(
-                    validate.expression_schema['if ("w" > 1) 5']
+                    validate.expression_schema['if ("w" > 1) 5'],
                 ).toBeUndefined();
 
                 expect(validate.errors).toEqual({
@@ -59,7 +59,7 @@ import perspective from "../perspective_client";
 
             test.skip("if else with multiple return types should be invalid", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: {
@@ -84,7 +84,7 @@ import perspective from "../perspective_client";
 
             test("functional if", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -104,7 +104,7 @@ import perspective from "../perspective_client";
 
             test("functional if string", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -126,7 +126,7 @@ import perspective from "../perspective_client";
 
             test.skip("functional if bool", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -227,7 +227,7 @@ import perspective from "../perspective_client";
 
             test("ternary if", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: {
@@ -245,7 +245,7 @@ import perspective from "../perspective_client";
 
             test("ternary if string", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -265,7 +265,7 @@ import perspective from "../perspective_client";
 
             test.skip("ternary if bool", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -354,7 +354,7 @@ import perspective from "../perspective_client";
 
             test("if else", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -380,7 +380,7 @@ import perspective from "../perspective_client";
 
             test("if else if", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -392,15 +392,17 @@ import perspective from "../perspective_client";
 
                 const results = await view.to_columns();
                 expect(
-                    results['if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10']
+                    results['if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10'],
                 ).toEqual([10, 5, 15, 5]);
                 expect(
-                    results['if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10;']
+                    results[
+                        'if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10;'
+                    ],
                 ).toEqual([10, 5, 15, 5]);
                 expect(
                     results[
                         'if ("w" == 3.5) { \n15; } else if ("w" > 2) { \n5; } else { \n10;}'
-                    ]
+                    ],
                 ).toEqual([10, 5, 15, 5]);
                 view.delete();
                 table.delete();
@@ -410,7 +412,7 @@ import perspective from "../perspective_client";
         test.describe("Switch", function () {
             test("Switch on multiple columns", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -422,7 +424,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `switch { case "w" > 2: sqrt(144); case "y" == 'a': sqrt(121); default: 0; }`
-                    ]
+                    ],
                 ).toEqual([11, 12, 12, 12]);
 
                 await view.delete();
@@ -455,7 +457,7 @@ import perspective from "../perspective_client";
         test.describe("While loop", function () {
             test("Scalar while", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
 
                 // 2 ^ 10 = 1024
@@ -469,7 +471,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; }; x`
-                    ]
+                    ],
                 ).toEqual([1024, 1024, 1024, 1024]);
 
                 await view.delete();
@@ -478,7 +480,7 @@ import perspective from "../perspective_client";
 
             test("Scalar while 2", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
 
                 // 2 * 2 = 4, 4 * 4 = 16, 16 * 16 = 256
@@ -492,7 +494,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `var x := 2; var y := 0; while (y < 3) { x := x * x; y += 1; }; x`
-                    ]
+                    ],
                 ).toEqual([256, 256, 256, 256]);
 
                 await view.delete();
@@ -501,7 +503,7 @@ import perspective from "../perspective_client";
 
             test("While without semicolon should not validate", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
 
                 const schema = await table.validate_expressions({
@@ -521,7 +523,7 @@ import perspective from "../perspective_client";
 
             test("Column while", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -533,7 +535,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; }; x`
-                    ]
+                    ],
                 ).toEqual([3, 5, 7, 9]);
 
                 await view.delete();
@@ -542,7 +544,7 @@ import perspective from "../perspective_client";
 
             test.skip("Column while with break", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -554,7 +556,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; }; x`
-                    ]
+                    ],
                 ).toEqual([16.5, 30, 42, 54]);
 
                 await view.delete();
@@ -566,7 +568,7 @@ import perspective from "../perspective_client";
             test("For loop", async () => {
                 const expr = `var x := 0; for (var i := 0; i < 3; i += 1) { x += 1; }; x`;
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: { expression: expr },
@@ -581,7 +583,7 @@ import perspective from "../perspective_client";
 
             test("Scalar for", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -593,7 +595,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `for (var x := 0; x < 10; x += 1) { var y := x + 1; y}`
-                    ]
+                    ],
                 ).toEqual([10, 10, 10, 10]);
 
                 await view.delete();
@@ -602,7 +604,7 @@ import perspective from "../perspective_client";
 
             test("Column for", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -614,7 +616,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `for (var x := 0; x < 10; x += 1) { var y := "w" + 1; y}`
-                    ]
+                    ],
                 ).toEqual([2.5, 3.5, 4.5, 5.5]);
 
                 await view.delete();
@@ -623,7 +625,7 @@ import perspective from "../perspective_client";
 
             test.skip("for loop only valid on numbers", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 // `for (var x := today(); x < 10; x += 1) { var y := "w" + 1; y}`
                 const expressions = [
@@ -642,7 +644,7 @@ import perspective from "../perspective_client";
         test.describe.skip("Repeat loop", function () {
             test("Scalar repeat", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -654,7 +656,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `var x := 1; var y := 1; repeat x := x + (y * 2) until (x > 10)`
-                    ]
+                    ],
                 ).toEqual([11, 11, 11, 11]);
 
                 await view.delete();
@@ -663,7 +665,7 @@ import perspective from "../perspective_client";
 
             test("Column repeat", async function () {
                 const table = await perspective.table(
-                    expressions_common.int_float_data
+                    expressions_common.int_float_data,
                 );
                 const view = await table.view({
                     expressions: [
@@ -675,7 +677,7 @@ import perspective from "../perspective_client";
                 expect(
                     results[
                         `var x := 1; repeat x := x + ("x" * 2) until (x > 10)`
-                    ]
+                    ],
                 ).toEqual([16.5, 30, 42, 54]);
 
                 await view.delete();
@@ -687,7 +689,7 @@ import perspective from "../perspective_client";
     test.describe("Local variables", function () {
         test("Declare numeric", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { 1: "1", [`100.0000001`]: "100.0000001" },
@@ -705,7 +707,7 @@ import perspective from "../perspective_client";
 
         test("Declare string", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -724,7 +726,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     "'very long string that is very long and has many characters'"
-                ]
+                ],
             ).toEqual([
                 "very long string that is very long and has many characters",
                 "very long string that is very long and has many characters",
@@ -738,7 +740,7 @@ import perspective from "../perspective_client";
 
         test("Clear() and declare string", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
 
             const view = await table.view({
@@ -758,7 +760,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     "'very long string that is very long and has many characters'"
-                ]
+                ],
             ).toEqual([
                 "very long string that is very long and has many characters",
                 "very long string that is very long and has many characters",
@@ -781,7 +783,7 @@ import perspective from "../perspective_client";
             const results2 = await view2.to_columns();
             expect(results2["'hello'"]).toEqual(["hello"]);
             expect(
-                results2["'another very long string with many characters'"]
+                results2["'another very long string with many characters'"],
             ).toEqual(["another very long string with many characters"]);
 
             await view2.delete();
@@ -790,7 +792,7 @@ import perspective from "../perspective_client";
 
         test("Declare numeric var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -802,7 +804,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     `var x := 10; var y := -100.00005; var z := x + y; abs(z)`
-                ]
+                ],
             ).toEqual([90.00005, 90.00005, 90.00005, 90.00005]);
 
             await view.delete();
@@ -811,7 +813,7 @@ import perspective from "../perspective_client";
 
         test("Declare numeric var 0 and 1", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const expressions = ["1", "0", "var x := 1; x", "var x := 0; x"];
             const view = await table.view({
@@ -836,7 +838,7 @@ import perspective from "../perspective_client";
 
         test("Declare string var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -849,7 +851,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     `var x := 'long literal string here'; var y := 'long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`
-                ]
+                ],
             ).toEqual([
                 "strings: long literal string here, long literal string here",
                 "strings: long literal string here, long literal string here",
@@ -857,7 +859,7 @@ import perspective from "../perspective_client";
                 "strings: long literal string here, long literal string here",
             ]);
             expect(
-                results[`var x := 'hello'; var y := upper(x); lower(y);`]
+                results[`var x := 'hello'; var y := upper(x); lower(y);`],
             ).toEqual(["hello", "hello", "hello", "hello"]);
 
             await view.delete();
@@ -866,7 +868,7 @@ import perspective from "../perspective_client";
 
         test("Declare string var one long one short", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -878,7 +880,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`
-                ]
+                ],
             ).toEqual([
                 "abcdefghijklmnop123",
                 "abcdefghijklmnop123",
@@ -892,7 +894,7 @@ import perspective from "../perspective_client";
 
         test("Declare string var short", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: {
@@ -903,7 +905,7 @@ import perspective from "../perspective_client";
 
             const results = await view.to_columns();
             expect(
-                results[`var x := 'abc'; var y := '123'; concat(x, y)`]
+                results[`var x := 'abc'; var y := '123'; concat(x, y)`],
             ).toEqual(["abc123", "abc123", "abc123", "abc123"]);
 
             await view.delete();
@@ -912,7 +914,7 @@ import perspective from "../perspective_client";
 
         test("Clear() and Declare string var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -924,7 +926,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
-                ]
+                ],
             ).toEqual([
                 "Eabcdefghijklmn0123456789ABCDEFG",
                 "Eabcdefghijklmn0123456789ABCDEFG",
@@ -949,13 +951,13 @@ import perspective from "../perspective_client";
             expect(
                 results2[
                     "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
-                ]
+                ],
             ).toEqual(["Eabcdefghijklmn0123456789ABCDEFG"]);
 
             expect(
                 results2[
                     "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x"
-                ]
+                ],
             ).toEqual(["abcdefghijklmn"]);
 
             await view2.delete();
@@ -964,7 +966,7 @@ import perspective from "../perspective_client";
 
         test("Declare date var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -974,7 +976,7 @@ import perspective from "../perspective_client";
 
             const results = await view.to_columns();
             expect(
-                results[`var x := today(); var y := today(); x == y ? 1 : 0;`]
+                results[`var x := today(); var y := today(); x == y ? 1 : 0;`],
             ).toEqual([1, 1, 1, 1]);
 
             await view.delete();
@@ -983,7 +985,7 @@ import perspective from "../perspective_client";
 
         test("Declare datetime var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const now = new Date().getTime();
             const view = await table.view({
@@ -1002,7 +1004,7 @@ import perspective from "../perspective_client";
 
         test("Declare boolean var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -1013,7 +1015,7 @@ import perspective from "../perspective_client";
 
             const results = await view.to_columns();
             expect(
-                results[`var x := true; var y := false; x and y ? 1 : 0`]
+                results[`var x := true; var y := false; x and y ? 1 : 0`],
             ).toEqual([0, 0, 0, 0]);
             expect(results["var x := true; var y := false; x or y"]).toEqual([
                 true,
@@ -1028,7 +1030,7 @@ import perspective from "../perspective_client";
 
         test("Declare column as var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: {
@@ -1039,7 +1041,7 @@ import perspective from "../perspective_client";
 
             const results = await view.to_columns();
             expect(
-                results[`var x := "w"; var y := 1.5; x > 2.5 ? x : y`]
+                results[`var x := "w"; var y := 1.5; x > 2.5 ? x : y`],
             ).toEqual([1.5, 1.5, 3.5, 4.5]);
 
             await view.delete();
@@ -1048,7 +1050,7 @@ import perspective from "../perspective_client";
 
         test("Assign one type to var of another", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -1074,7 +1076,7 @@ import perspective from "../perspective_client";
 
         test("Assign to declared numeric var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -1088,7 +1090,7 @@ import perspective from "../perspective_client";
                 200.5, 200.5, 200.5, 200.5,
             ]);
             expect(
-                results[`var x := 10; var y := pow(x, 3); y := x; y`]
+                results[`var x := 10; var y := pow(x, 3); y := x; y`],
             ).toEqual([10, 10, 10, 10]);
 
             await view.delete();
@@ -1097,7 +1099,7 @@ import perspective from "../perspective_client";
 
         test("Assign to declared string var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -1109,7 +1111,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     `var x := 'long literal string here'; var y := lower('ANOTHER VERY LONG STRING HERE'); x := y`
-                ]
+                ],
             ).toEqual([
                 "another very long string here",
                 "another very long string here",
@@ -1147,7 +1149,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     `var x := today(); var y := today(); var z := "a"; (x > z) and (y > z) ? 1 : 0`
-                ]
+                ],
             ).toEqual([1, 1, 1, 0]);
 
             await view.delete();
@@ -1180,7 +1182,7 @@ import perspective from "../perspective_client";
             expect(
                 results[
                     `var x := now(); var y := now(); var z := "a"; (x > z) and (y > z) ? 1 : 0`
-                ]
+                ],
             ).toEqual([1, 1, 1, 0]);
 
             await view.delete();
@@ -1189,7 +1191,7 @@ import perspective from "../perspective_client";
 
         test("Assign to declared column as var", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
 
             // test type transitions as assignments happen - from str to int,
@@ -1220,7 +1222,7 @@ import perspective from "../perspective_client";
     test.describe("Functionality", function () {
         test("Should be able to create an expression column in `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -1247,7 +1249,7 @@ import perspective from "../perspective_client";
             expect(
                 result[
                     "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment"
-                ]
+                ],
             ).toEqual(Array(3).fill(10));
             await view.delete();
             await table.delete();
@@ -1255,7 +1257,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to alias a real column in `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.all_types_arrow.slice()
+                expressions_common.all_types_arrow.slice(),
             );
             const columns = await table.columns();
             const view = await table.view({
@@ -1277,7 +1279,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create an expression column with scalars in `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: {
@@ -1292,7 +1294,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create a string expression column with scalars in `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 group_by: ["'abc'"], // checks that the strings are interned
@@ -1307,7 +1309,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create a boolean expression column with scalars in `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -1338,7 +1340,7 @@ import perspective from "../perspective_client";
 
         test("Boolean scalars should not compare to numeric scalars", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -1369,7 +1371,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create an expression column with scalars and columns `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 columns: ['("w" + "x") ^ 2'],
@@ -1377,7 +1379,7 @@ import perspective from "../perspective_client";
             });
             const result = await view.to_columns();
             expect(result['("w" + "x") ^ 2']).toEqual(
-                [2.5, 4.5, 6.5, 8.5].map((x) => Math.pow(x, 2))
+                [2.5, 4.5, 6.5, 8.5].map((x) => Math.pow(x, 2)),
             );
             view.delete();
             table.delete();
@@ -1385,7 +1387,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create a boolean expression column with scalars and columns in `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [
@@ -1463,7 +1465,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create an expression column using an alias.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { "new column": '"w" + "x"' },
@@ -1476,7 +1478,7 @@ import perspective from "../perspective_client";
 
         test("Alias should be trimmed.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { "new column": '"w" + "x"' },
@@ -1499,7 +1501,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create an expression column using a very long alias.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: {
@@ -1511,7 +1513,7 @@ import perspective from "../perspective_client";
             expect(
                 result[
                     "new column with lots of different strings and names and lots of good characters"
-                ]
+                ],
             ).toEqual([2.5, 4.5, 6.5, 8.5]);
             await view.delete();
             await table.delete();
@@ -1519,7 +1521,7 @@ import perspective from "../perspective_client";
 
         test("Comments after the alias are not picked up.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: {
@@ -1534,7 +1536,7 @@ import perspective from "../perspective_client";
 
         test("Duplicate alias within the same view should resolve to the last expression.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
 
             const view = await table.view({
@@ -1563,7 +1565,7 @@ import perspective from "../perspective_client";
 
         test("Duplicate alias within the same view should resolve to the last expression, different types.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
 
             const view = await table.view({
@@ -1592,7 +1594,7 @@ import perspective from "../perspective_client";
 
         test("Duplicate alias across new views will not overwrite results in old view.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { "new column": '"w" + "x"' },
@@ -1606,7 +1608,7 @@ import perspective from "../perspective_client";
             });
 
             expect(await view.expression_schema()).toEqual(
-                await view2.expression_schema()
+                await view2.expression_schema(),
             );
 
             result = await view.to_columns();
@@ -1633,7 +1635,7 @@ import perspective from "../perspective_client";
         test("Should not be able to overwrite table column with an expression", async function () {
             expect.assertions(1);
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             let emit;
             let emitReject;
@@ -1648,7 +1650,7 @@ import perspective from "../perspective_client";
                 })
                 .catch((e) => {
                     expect(e.message.split("\n")[0]).toMatch(
-                        `Abort(): Value Error - expression \"w\" cannot overwrite an existing column.`
+                        `Abort(): Value Error - expression \"w\" cannot overwrite an existing column.`,
                     );
                     table.delete();
                     emit();
@@ -1662,7 +1664,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to overwrite expression column with one that returns a different type", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { "new column": '"w" + "x"' },
@@ -1686,7 +1688,7 @@ import perspective from "../perspective_client";
         test("A new view should not reference expression columns it did not create.", async function () {
             expect.assertions(2);
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -1703,7 +1705,7 @@ import perspective from "../perspective_client";
                 })
                 .catch((e) => {
                     expect(e.message).toMatch(
-                        `Abort(): Invalid column '"w" + "x"' found in View columns.\n`
+                        `Abort(): Invalid column '"w" + "x"' found in View columns.\n`,
                     );
                     view.delete();
                     table.delete();
@@ -1715,7 +1717,7 @@ import perspective from "../perspective_client";
 
         test("A view should be able to shadow real columns with an expression column", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: {
@@ -1779,7 +1781,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create multiple expression columns in `view()`", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
 
             const view = await table.view({
@@ -1803,7 +1805,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create multiple expression columns with unique names in multiple `view()`s", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: {
@@ -1870,7 +1872,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create multiple expression columns in multiple `view()`s, and arbitarily delete views.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -1929,7 +1931,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create multiple duplicate expression columns in multiple `view()`s, and delete preceding views without affecting later columns.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -1994,7 +1996,7 @@ import perspective from "../perspective_client";
 
         test("Multiple views inheriting the same expression columns with the same names should not conflict", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
 
             const view = await table.view({
@@ -2054,7 +2056,7 @@ import perspective from "../perspective_client";
 
         test("A view should be able to create an expression column with the same name as another deleted view's expression columns.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -2077,7 +2079,7 @@ import perspective from "../perspective_client";
 
         test("A view without expression columns should not serialize expression columns from other views.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -2104,18 +2106,18 @@ import perspective from "../perspective_client";
                 '"w" / "x"',
             ];
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: [expressions[0]].reduce(
                     (x, y) => Object.assign(x, { [y]: y }),
-                    {}
+                    {},
                 ),
             });
             const view2 = await table.view({
                 expressions: [expressions[0], expressions[1]].reduce(
                     (x, y) => Object.assign(x, { [y]: y }),
-                    {}
+                    {},
                 ),
             });
             const view3 = await table.view({
@@ -2179,7 +2181,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to create duplicate expressions in multiple views, and updates should propagate to both", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -2255,7 +2257,7 @@ import perspective from "../perspective_client";
         test("A new view should not inherit expression columns if not created.", async function () {
             expect.assertions(2);
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -2269,7 +2271,7 @@ import perspective from "../perspective_client";
                 });
             } catch (e) {
                 expect(e.message.split("\n")[0]).toEqual(
-                    `Abort(): Invalid column '"w" + "x"' found in View columns.`
+                    `Abort(): Invalid column '"w" + "x"' found in View columns.`,
                 );
             }
 
@@ -2279,7 +2281,7 @@ import perspective from "../perspective_client";
 
         test("The view's underlying table should not have a mutated schema.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 expressions: { '"w" + "x"': '"w" + "x"' },
@@ -2298,7 +2300,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to show an expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 columns: ['"w" + "x"'],
@@ -2312,7 +2314,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to hide an expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 columns: ["x"],
@@ -2333,7 +2335,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to group by on a non-expression column and get correct results for the expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 group_by: ["w"],
@@ -2354,7 +2356,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to group by on an expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 group_by: ['"w" + "x"'],
@@ -2375,7 +2377,7 @@ import perspective from "../perspective_client";
 
         test("Row-pivoted expression columns return correct column_paths()", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
 
             // default order
@@ -2424,7 +2426,7 @@ import perspective from "../perspective_client";
 
         test("Row-pivoted numeric expression columns return correct column_paths()", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const config = {
                 group_by: ["y"],
@@ -2476,7 +2478,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to split by on an expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 split_by: ['"w" + "x"'],
@@ -2511,7 +2513,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to row + split by on an expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 group_by: ['"w" + "x"'],
@@ -2697,7 +2699,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to filter on an expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 filter: [['"w" + "x"', ">", 6.5]],
@@ -2717,7 +2719,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to sort on an expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 sort: [['"w" + "x"', "desc"]],
@@ -2737,7 +2739,7 @@ import perspective from "../perspective_client";
 
         test("Should be able to sort on a hidden expression column.", async function () {
             const table = await perspective.table(
-                expressions_common.int_float_data
+                expressions_common.int_float_data,
             );
             const view = await table.view({
                 columns: ["w"],
@@ -2864,7 +2866,7 @@ import perspective from "../perspective_client";
 
                 for (const alias of Object.keys(expressions)) {
                     expect(results.expression_alias[alias]).toEqual(
-                        expressions[alias]
+                        expressions[alias],
                     );
                 }
                 table.delete();
@@ -3230,7 +3232,7 @@ import perspective from "../perspective_client";
                 const view = await table.view({
                     expressions: [expr].reduce(
                         (x, y) => Object.assign(x, { [y]: y }),
-                        {}
+                        {},
                     ),
                 });
                 const result = await view.to_columns();
@@ -3282,7 +3284,7 @@ import perspective from "../perspective_client";
                     {
                         a: [1, 2, 3, 4],
                     },
-                    { index: "a" }
+                    { index: "a" },
                 );
                 const view = await table.view({
                     expressions: { "index()": "index()" },
@@ -3301,7 +3303,7 @@ import perspective from "../perspective_client";
                     {
                         a: [1, 2, 3, 4],
                     },
-                    { index: "a" }
+                    { index: "a" },
                 );
 
                 const view = await table.view({
@@ -3358,7 +3360,7 @@ import perspective from "../perspective_client";
                 let vdicts = await table.validate_expressions(dict_exprs);
                 expect(vstrs.errors).toEqual(vdicts.errors);
                 expect(vstrs.expression_schema).toEqual(
-                    vdicts.expression_schema
+                    vdicts.expression_schema,
                 );
 
                 for (let [key, val] of Object.entries(vstrs.expression_alias)) {

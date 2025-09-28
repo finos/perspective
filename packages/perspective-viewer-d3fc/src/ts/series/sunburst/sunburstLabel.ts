@@ -35,7 +35,7 @@ export function cropLabel(d, targetWidth) {
             () =>
                 `${labelText
                     .substring(0, labelText.length - 3)
-                    .replace(/\s+$/, "")}...`
+                    .replace(/\s+$/, "")}...`,
         );
     }
 }

@@ -70,7 +70,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-xbar`
+                `perspective-viewer-d3fc-xbar`,
             );
 
             if (!plugin_element) {
@@ -79,12 +79,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.y-axis.left-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.y-axis.left-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 
@@ -103,7 +103,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-ybar`
+                `perspective-viewer-d3fc-ybar`,
             );
 
             if (!plugin_element) {
@@ -112,12 +112,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 
@@ -136,7 +136,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-ohlc`
+                `perspective-viewer-d3fc-ohlc`,
             );
 
             if (!plugin_element) {
@@ -145,12 +145,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 
@@ -169,7 +169,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-heatmap`
+                `perspective-viewer-d3fc-heatmap`,
             );
 
             if (!plugin_element) {
@@ -178,12 +178,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 
@@ -202,7 +202,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-yline`
+                `perspective-viewer-d3fc-yline`,
             );
 
             if (!plugin_element) {
@@ -211,12 +211,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 
@@ -235,7 +235,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-yarea`
+                `perspective-viewer-d3fc-yarea`,
             );
 
             if (!plugin_element) {
@@ -244,12 +244,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 
@@ -268,7 +268,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-yscatter`
+                `perspective-viewer-d3fc-yscatter`,
             );
 
             if (!plugin_element) {
@@ -277,12 +277,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 
@@ -301,7 +301,7 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
             }
 
             const plugin_element = viewer.querySelector(
-                `perspective-viewer-d3fc-candlestick`
+                `perspective-viewer-d3fc-candlestick`,
             );
 
             if (!plugin_element) {
@@ -310,12 +310,12 @@ test.describe("Axis Values With Grouped Data With A Date Field In The Group", ()
 
             const shadowRoot = plugin_element.shadowRoot;
             const dateTextElements = shadowRoot.querySelectorAll(
-                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text"
+                "div d3fc-group d3fc-svg.x-axis.bottom-axis svg g.group:last-child g.tick text",
             );
 
             // collect and return the actual date data to be used.
             return Array.from(dateTextElements).map((el) =>
-                el.textContent?.trim()
+                el.textContent?.trim(),
             );
         });
 

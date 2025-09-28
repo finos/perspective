@@ -16,7 +16,7 @@ import { Settings } from "../types";
 
 export function heatmapSeries(
     _settings: Settings,
-    color: d3.ScaleSequential<string>
+    color: d3.ScaleSequential<string>,
 ) {
     let series = fc.seriesCanvasHeatmap();
 

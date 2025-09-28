@@ -33,20 +33,20 @@ export const clickHandler =
                     x0:
                         Math.max(
                             0,
-                            Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))
+                            Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0)),
                         ) *
                         2 *
                         Math.PI,
                     x1:
                         Math.max(
                             0,
-                            Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))
+                            Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0)),
                         ) *
                         2 *
                         Math.PI,
                     y0: Math.max(0, d.y0 - p.depth),
                     y1: Math.max(0, d.y1 - p.depth),
-                })
+                }),
         );
 
         const t = g.transition().duration(skipTransition ? 0 : 750);
@@ -62,10 +62,10 @@ export const clickHandler =
             })
             .attr("fill-opacity", (d) => (arcVisible(d.target) ? 1 : 0))
             .attr("user-select", (d) =>
-                arcVisible(d.target) ? "initial" : "none"
+                arcVisible(d.target) ? "initial" : "none",
             )
             .style("pointer-events", (d) =>
-                arcVisible(d.target) ? "initial" : "none"
+                arcVisible(d.target) ? "initial" : "none",
             )
             .attrTween("d", (d) => () => drawArc(radius)(d.current));
 
@@ -79,6 +79,6 @@ export const clickHandler =
             .attr("fill-opacity", (d) => +labelVisible(d.target))
             .attrTween(
                 "transform",
-                (d) => () => labelTransform(d.current, radius)
+                (d) => () => labelTransform(d.current, radius),
             );
     };

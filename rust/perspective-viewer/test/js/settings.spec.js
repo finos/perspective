@@ -29,7 +29,7 @@ test.describe("Settings", () => {
     test.describe("Toggle", () => {
         test.beforeEach(async ({ page }) => {
             await page.goto(
-                "/rust/perspective-viewer/test/html/superstore.html"
+                "/rust/perspective-viewer/test/html/superstore.html",
             );
             await page.evaluate(async () => {
                 while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -90,7 +90,9 @@ test.describe("Settings", () => {
             await page.evaluate(async () => {
                 const viewer = document.querySelector("perspective-viewer");
                 viewer.load(
-                    new Promise((_, reject) => reject("Intentional Load Error"))
+                    new Promise((_, reject) =>
+                        reject("Intentional Load Error"),
+                    ),
                 );
                 try {
                     await viewer.restore({

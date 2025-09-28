@@ -179,22 +179,22 @@ export class FormatterCache {
             if (type === "date") {
                 this._formatters.set(
                     formatter_key,
-                    this.create_date_formatter(type, plugin)
+                    this.create_date_formatter(type, plugin),
                 );
             } else if (type === "datetime") {
                 this._formatters.set(
                     formatter_key,
-                    this.create_datetime_formatter(type, plugin)
+                    this.create_datetime_formatter(type, plugin),
                 );
             } else if (type === "integer" || type === "float") {
                 this._formatters.set(
                     formatter_key,
-                    this.create_number_formatter(type, plugin)
+                    this.create_number_formatter(type, plugin),
                 );
             } else if (type === "boolean") {
                 this._formatters.set(
                     formatter_key,
-                    this.create_boolean_formatter(type, plugin)
+                    this.create_boolean_formatter(type, plugin),
                 );
             } else {
                 this._formatters.set(formatter_key, false);

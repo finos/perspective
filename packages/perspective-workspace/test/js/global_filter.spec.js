@@ -107,10 +107,10 @@ function tests(context, compare) {
 
             document
                 .querySelector(
-                    ".workspace-master-widget perspective-viewer-datagrid"
+                    ".workspace-master-widget perspective-viewer-datagrid",
                 )
                 .shadowRoot.querySelector(
-                    "tbody tr:nth-child(6) th:last-of-type"
+                    "tbody tr:nth-child(6) th:last-of-type",
                 )
                 .dispatchEvent(event);
 

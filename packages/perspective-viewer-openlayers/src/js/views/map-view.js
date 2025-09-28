@@ -45,7 +45,7 @@ function mapView(container, config) {
     const shapeMap = categoryShapeMap(container, data);
     const vectorSource = new VectorSource({
         features: data.map((point) =>
-            featureFromPoint(point, colorMap, sizeMap, shapeMap)
+            featureFromPoint(point, colorMap, sizeMap, shapeMap),
         ),
         wrapX: false,
     });

@@ -225,7 +225,7 @@ const TEST_SPEC: Record<string, TestSpec> = {
 async function open(
     view: PageView,
     initial_state: TestSpec["initial_state"],
-    expr: boolean
+    expr: boolean,
 ): Promise<[ColumnSelector, SidebarState]> {
     const { active, open, columns } = initial_state;
 
@@ -252,11 +252,11 @@ async function open(
 
     let selector = active
         ? await view.settingsPanel.activeColumns.getColumnByName(
-              expr ? expr_name : view_columns[0]
+              expr ? expr_name : view_columns[0],
           )
         : expr
-        ? await view.settingsPanel.inactiveColumns.getColumnByName(expr_name)
-        : view.settingsPanel.inactiveColumns.getColumnByType("string");
+          ? await view.settingsPanel.inactiveColumns.getColumnByName(expr_name)
+          : view.settingsPanel.inactiveColumns.getColumnByType("string");
 
     let state: SidebarState;
     if (open) {
@@ -277,14 +277,14 @@ async function open(
 async function checkOutput(
     view: PageView,
     expected: ExpectedState,
-    initial_state: SidebarState
+    initial_state: SidebarState,
 ) {
     const POSSIBLE_TABS = ["Style", "Attributes"];
 
     const check_tabs = async (
         selectedTab: string,
         tabs: string[],
-        unexpected_tabs: string[]
+        unexpected_tabs: string[],
     ) => {
         if (selectedTab === "") {
             await view.columnSettingsSidebar.container
@@ -328,12 +328,12 @@ async function checkOutput(
             });
         } else {
             const unexpected_tabs = POSSIBLE_TABS.filter(
-                (t) => !initial_state.tabs.includes(t)
+                (t) => !initial_state.tabs.includes(t),
             );
             await check_tabs(
                 initial_state.selectedTab,
                 initial_state.tabs,
-                unexpected_tabs
+                unexpected_tabs,
             );
         }
     } else if ("closed" in expected) {
@@ -342,7 +342,7 @@ async function checkOutput(
         });
     } else {
         const unexpected_tabs = POSSIBLE_TABS.filter(
-            (t) => !expected.tabs.includes(t)
+            (t) => !expected.tabs.includes(t),
         );
         await check_tabs(expected.selectedTab, expected.tabs, unexpected_tabs);
     }
@@ -377,7 +377,7 @@ test.describe("Column Settings State on Interaction", () => {
 
     for (const [name, spec] of Object.entries(TEST_SPEC)) {
         for (const [col_type, expected_output] of Object.entries(
-            spec.outputs
+            spec.outputs,
         )) {
             const expr = col_type === "expr_col";
             for (const action of spec.actions) {
@@ -389,7 +389,7 @@ test.describe("Column Settings State on Interaction", () => {
                         const [selector, snapshot_state] = await open(
                             pageView,
                             spec.initial_state,
-                            expr
+                            expr,
                         );
                         switch (action) {
                             case "open": {
@@ -408,7 +408,7 @@ test.describe("Column Settings State on Interaction", () => {
                                 await pageView.settingsPanel.groupby("Row ID");
                                 await pageView.settingsPanel.removeViewParameter(
                                     "groupby",
-                                    "Row ID"
+                                    "Row ID",
                                 );
                                 break;
                             }
@@ -419,7 +419,7 @@ test.describe("Column Settings State on Interaction", () => {
                         await checkOutput(
                             pageView,
                             expected_output,
-                            snapshot_state
+                            snapshot_state,
                         );
                     });
                 }
@@ -430,37 +430,37 @@ test.describe("Column Settings State on Interaction", () => {
                         const [selector, snapshot_state] = await open(
                             pageView,
                             spec.initial_state,
-                            expr
+                            expr,
                         );
                         let selector_name = await selector.name.innerText();
                         switch (action) {
                             case "activate": {
                                 await pageView.settingsPanel.activeColumns.activateColumn(
-                                    selector_name
+                                    selector_name,
                                 );
                                 break;
                             }
                             case "groupby": {
                                 await pageView.settingsPanel.groupby(
-                                    selector_name
+                                    selector_name,
                                 );
                                 break;
                             }
                             case "splitby": {
                                 await pageView.settingsPanel.splitby(
-                                    selector_name
+                                    selector_name,
                                 );
                                 break;
                             }
                             case "orderby": {
                                 await pageView.settingsPanel.orderby(
-                                    selector_name
+                                    selector_name,
                                 );
                                 break;
                             }
                             case "where": {
                                 await pageView.settingsPanel.where(
-                                    selector_name
+                                    selector_name,
                                 );
                                 break;
                             }
@@ -475,7 +475,7 @@ test.describe("Column Settings State on Interaction", () => {
                         await checkOutput(
                             pageView,
                             expected_output,
-                            snapshot_state
+                            snapshot_state,
                         );
                     });
                 }
@@ -485,44 +485,44 @@ test.describe("Column Settings State on Interaction", () => {
                         const [selector, snapshot_state] = await open(
                             pageView,
                             spec.initial_state,
-                            expr
+                            expr,
                         );
                         switch (action) {
                             case "activate": {
                                 await selector.container.dragTo(
-                                    pageView.settingsPanel.activeColumns.columnSelector.last()
+                                    pageView.settingsPanel.activeColumns.columnSelector.last(),
                                 );
                                 break;
                             }
                             case "reorder": {
                                 await selector.container.dragTo(
                                     pageView.settingsPanel.activeColumns.columnSelector.nth(
-                                        1
-                                    )
+                                        1,
+                                    ),
                                 );
                                 break;
                             }
                             case "groupby": {
                                 await selector.container.dragTo(
-                                    pageView.settingsPanel.groupbyInput
+                                    pageView.settingsPanel.groupbyInput,
                                 );
                                 break;
                             }
                             case "splitby": {
                                 await selector.container.dragTo(
-                                    pageView.settingsPanel.splitbyInput
+                                    pageView.settingsPanel.splitbyInput,
                                 );
                                 break;
                             }
                             case "orderby": {
                                 await selector.container.dragTo(
-                                    pageView.settingsPanel.orderbyInput
+                                    pageView.settingsPanel.orderbyInput,
                                 );
                                 break;
                             }
                             case "where": {
                                 await selector.container.dragTo(
-                                    pageView.settingsPanel.whereInput
+                                    pageView.settingsPanel.whereInput,
                                 );
                                 break;
                             }
@@ -530,7 +530,7 @@ test.describe("Column Settings State on Interaction", () => {
                                 const aggregator =
                                     pageView.settingsPanel.inactiveColumns.columnSelector.first();
                                 await aggregator.dragTo(
-                                    pageView.settingsPanel.groupbyInput
+                                    pageView.settingsPanel.groupbyInput,
                                 );
                                 break;
                             }
@@ -538,7 +538,7 @@ test.describe("Column Settings State on Interaction", () => {
                                 let aggregator =
                                     pageView.settingsPanel.inactiveColumns.columnSelector.first();
                                 await aggregator.dragTo(
-                                    pageView.settingsPanel.groupbyInput
+                                    pageView.settingsPanel.groupbyInput,
                                 );
                                 aggregator = page
                                     .locator("#group_by .pivot-column")
@@ -546,14 +546,14 @@ test.describe("Column Settings State on Interaction", () => {
                                 await aggregator.dragTo(
                                     pageView.settingsPanel.activeColumns.container
                                         .locator(".column-selector-column")
-                                        .first()
+                                        .first(),
                                 );
                             }
                         }
                         await checkOutput(
                             pageView,
                             expected_output,
-                            snapshot_state
+                            snapshot_state,
                         );
                     });
                 }
@@ -571,11 +571,11 @@ test.describe("Unique Behaviors", () => {
             const [selector, state_snapshot] = await open(
                 view,
                 { open: true, active: true, columns: ["City"] },
-                false
+                false,
             );
 
             await selector.container.dragTo(
-                view.settingsPanel[`${destination}Input`]
+                view.settingsPanel[`${destination}Input`],
             );
             await checkOutput(
                 view,
@@ -585,7 +585,7 @@ test.describe("Unique Behaviors", () => {
                           type: "integer",
                       }
                     : { unchanged: true },
-                state_snapshot
+                state_snapshot,
             );
         });
         test(`${destination} - Multiple Active Columns - table_col`, async ({
@@ -595,11 +595,11 @@ test.describe("Unique Behaviors", () => {
             const [selector, state_snapshot] = await open(
                 view,
                 { open: true, active: true, columns: ["City", "State"] },
-                false
+                false,
             );
 
             await selector.container.dragTo(
-                view.settingsPanel[`${destination}Input`]
+                view.settingsPanel[`${destination}Input`],
             );
             await checkOutput(view, { closed: true }, state_snapshot);
         });
@@ -614,9 +614,8 @@ test.describe("Unique Behaviors", () => {
             plugin: "X/Y Scatter",
             columns: ["Row ID", "Postal Code", null, null, "Category"],
         });
-        let col = await view.settingsPanel.activeColumns.getColumnByName(
-            "Category"
-        );
+        let col =
+            await view.settingsPanel.activeColumns.getColumnByName("Category");
         await col.editBtn.click();
         await expect(view.columnSettingsSidebar.container).toBeVisible();
         view.settingsPanel.groupby("City");
@@ -635,7 +634,7 @@ test.describe("Unique Behaviors", () => {
         });
         const date = await view.settingsPanel.activeColumns.getColumnByName(
             "date",
-            true
+            true,
         );
         await date.editBtn.click();
         await view.columnSettingsSidebar.openTab("Style");
@@ -643,7 +642,7 @@ test.describe("Unique Behaviors", () => {
             await view.columnSettingsSidebar.styleTab.container.innerHTML();
         const datetime = await view.settingsPanel.activeColumns.getColumnByName(
             "datetime",
-            true
+            true,
         );
         await datetime.editBtn.click();
         const datetimeSnapshot =

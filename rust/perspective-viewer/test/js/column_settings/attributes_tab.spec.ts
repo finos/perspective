@@ -33,9 +33,8 @@ test.describe("Attributes Tab", () => {
             columns: ["expr"],
         });
 
-        let expr = await view.settingsPanel.activeColumns.getColumnByName(
-            "expr"
-        );
+        let expr =
+            await view.settingsPanel.activeColumns.getColumnByName("expr");
 
         await expr.editBtn.click();
         let input = view.columnSettingsSidebar.nameInput;
@@ -54,17 +53,18 @@ test.describe("Attributes Tab", () => {
         let input = view.columnSettingsSidebar.nameInput;
         expect(await input.evaluate((input) => input!.value)).toBe("");
         expect(await input.evaluate((input) => input!.placeholder)).toBe(
-            expr_value
+            expr_value,
         );
         // Reopening the column shows an empty header with placeholder text that matches
         await view.columnSettingsSidebar.closeBtn.click();
-        let expr = await view.settingsPanel.inactiveColumns.getColumnByName(
-            expr_value
-        );
+        let expr =
+            await view.settingsPanel.inactiveColumns.getColumnByName(
+                expr_value,
+            );
         await expr.editBtn.click();
         expect(await input.evaluate((input) => input!.value)).toBe("");
         expect(await input.evaluate((input) => input!.placeholder)).toBe(
-            expr_value
+            expr_value,
         );
         // Expression alias is the expression on serialization
         let config = await view.save();
@@ -80,19 +80,18 @@ test.describe("Attributes Tab", () => {
             columns: ["expr", "Row ID"],
             settings: true,
         });
-        let expr = await view.settingsPanel.activeColumns.getColumnByName(
-            "expr"
-        );
+        let expr =
+            await view.settingsPanel.activeColumns.getColumnByName("expr");
         await expr.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
         let input = view.columnSettingsSidebar.nameInput;
         await input.clear();
         await input.type("Row ID", { delay: 100 });
         await expect(view.columnSettingsSidebar.nameInputWrapper).toHaveClass(
-            /invalid/
+            /invalid/,
         );
         await expect(
-            view.columnSettingsSidebar.attributesTab.saveBtn
+            view.columnSettingsSidebar.attributesTab.saveBtn,
         ).toBeDisabled();
     });
     test("Tab Button Click enters 4 spaces.", async ({ page }) => {
@@ -102,9 +101,8 @@ test.describe("Attributes Tab", () => {
             columns: ["expr", "Row ID"],
             settings: true,
         });
-        let expr = await view.settingsPanel.activeColumns.getColumnByName(
-            "expr"
-        );
+        let expr =
+            await view.settingsPanel.activeColumns.getColumnByName("expr");
         await expr.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
 
@@ -115,7 +113,7 @@ test.describe("Attributes Tab", () => {
 
         await textarea.type("foo", { delay: 100 });
         expect(await textarea.evaluate((input) => input!.value)).toStrictEqual(
-            "foo12345"
+            "foo12345",
         );
 
         await page.keyboard.press("Tab");
@@ -124,7 +122,7 @@ test.describe("Attributes Tab", () => {
         expect(expected).toContain("\t");
 
         const caretPosition = await textarea.evaluate(
-            (input) => input!.selectionStart
+            (input) => input!.selectionStart,
         );
         expect(caretPosition).toBe(4); // length of foo + length of '\t' = 4;
     });
@@ -135,9 +133,8 @@ test.describe("Attributes Tab", () => {
             columns: ["expr", "Row ID"],
             settings: true,
         });
-        let expr = await view.settingsPanel.activeColumns.getColumnByName(
-            "expr"
-        );
+        let expr =
+            await view.settingsPanel.activeColumns.getColumnByName("expr");
         await expr.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
 
@@ -150,7 +147,7 @@ test.describe("Attributes Tab", () => {
         await expect(attributesTab.resetBtn).toBeEnabled();
         await attributesTab.resetBtn.click();
         expect(
-            await sidebar.nameInput.evaluate((input) => input!.value)
+            await sidebar.nameInput.evaluate((input) => input!.value),
         ).toStrictEqual("expr");
 
         let textarea = attributesTab.expressionEditor.textarea;
@@ -160,7 +157,7 @@ test.describe("Attributes Tab", () => {
         await expect(attributesTab.resetBtn).toBeEnabled();
         await attributesTab.resetBtn.click();
         expect(await textarea.evaluate((input) => input!.value)).toStrictEqual(
-            "12345"
+            "12345",
         );
     });
     test("Delete button", async ({ page }) => {
@@ -170,9 +167,8 @@ test.describe("Attributes Tab", () => {
             columns: ["expr", "Row ID"],
             settings: true,
         });
-        let expr = await view.settingsPanel.activeColumns.getColumnByName(
-            "expr"
-        );
+        let expr =
+            await view.settingsPanel.activeColumns.getColumnByName("expr");
         await expr.editBtn.click();
         await view.columnSettingsSidebar.openTab("Attributes");
         let attributesTab = view.columnSettingsSidebar.attributesTab;
@@ -194,7 +190,7 @@ test.describe("Attributes Tab", () => {
         await settingsPanel.createNewExpression("", "1234");
         await view.columnSettingsSidebar.nameInput.type("1234");
         await expect(
-            view.columnSettingsSidebar.nameInputWrapper
+            view.columnSettingsSidebar.nameInputWrapper,
         ).not.toHaveClass("invalid");
         // NOTE: Currently when you rename a column as the contents of its placeholder,
         // it gets serialized with the expression name. This confuses the components and it deserializes

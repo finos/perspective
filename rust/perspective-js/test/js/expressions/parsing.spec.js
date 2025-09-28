@@ -43,7 +43,7 @@ import * as common from "./common.js";
                     const view = await table.view({
                         expressions: [expression].reduce(
                             (x, y) => Object.assign(x, { [y]: y }),
-                            {}
+                            {},
                         ),
                     });
 
@@ -59,7 +59,7 @@ import * as common from "./common.js";
 
                     let result = await view.to_columns();
                     expect(
-                        result[expression].map((x) => (x ? new Date(x) : null))
+                        result[expression].map((x) => (x ? new Date(x) : null)),
                     ).toEqual(result.a.map((x) => common.year_bucket(x)));
 
                     view.delete();

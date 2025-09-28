@@ -19,7 +19,7 @@ function lint(dir) {
 
 lint(sh.path`./rust/perspective-server/cpp/perspective/src/cpp/*.cpp`);
 lint(
-    sh.path`./rust/perspective-server/cpp/perspective/src/include/perspective/*.h`
+    sh.path`./rust/perspective-server/cpp/perspective/src/include/perspective/*.h`,
 );
 lint(sh.path`./python/perspective/perspective/src/*.cpp`);
 lint(sh.path`./python/perspective/perspective/include/perspective/*.h`);

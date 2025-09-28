@@ -222,7 +222,7 @@ import * as expressions_common from "./common.js";
                         y: "string",
                         z: "boolean",
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({
@@ -267,7 +267,7 @@ import * as expressions_common from "./common.js";
                         y: "string",
                         z: "boolean",
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({
@@ -308,7 +308,7 @@ import * as expressions_common from "./common.js";
                         y: "string",
                         z: "boolean",
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({
@@ -373,7 +373,7 @@ import * as expressions_common from "./common.js";
                         y: "string",
                         z: "boolean",
                     },
-                    { limit: 2 }
+                    { limit: 2 },
                 );
 
                 const v1 = await table.view({
@@ -783,14 +783,14 @@ import * as expressions_common from "./common.js";
                         await validate_delta(
                             "column",
                             updated.delta,
-                            [11, 12, 13, 14]
+                            [11, 12, 13, 14],
                         );
                         const result = await v1.to_columns();
                         expect(result["column"]).toEqual([
                             11, 12, 13, 14, 11, 12, 13, 14,
                         ]);
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 let done;
@@ -821,7 +821,7 @@ import * as expressions_common from "./common.js";
                         await table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 await table.update(expressions_common.data);
@@ -868,7 +868,7 @@ import * as expressions_common from "./common.js";
                             20,
                         ]);
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 let done;
@@ -898,7 +898,7 @@ import * as expressions_common from "./common.js";
                         await table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 await table.update({
@@ -948,7 +948,7 @@ import * as expressions_common from "./common.js";
                             null,
                         ]);
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 let done;
@@ -978,7 +978,7 @@ import * as expressions_common from "./common.js";
                         await table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 await table.update({
@@ -1123,7 +1123,7 @@ import * as expressions_common from "./common.js";
                         y: ["a", "b", "c", "d"],
                         z: [now, now, now, now],
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const v1 = await table.view({

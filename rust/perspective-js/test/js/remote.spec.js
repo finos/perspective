@@ -64,7 +64,7 @@ test.describe("WebSocketManager", function () {
         const client_table = await client.open_table("test");
         client_table.view({ columns: ["z"] }).catch((error) => {
             expect(error.message).toContain(
-                "Abort(): Invalid column 'z' found in View columns.\n"
+                "Abort(): Invalid column 'z' found in View columns.\n",
             );
         });
 
@@ -107,7 +107,7 @@ test.describe("WebSocketManager", function () {
         const client_2_table = await client_2.open_table("test");
         client_1_table.view({ columns: ["z"] }).catch((error) => {
             expect(error.message).toContain(
-                "Abort(): Invalid column 'z' found in View columns.\n"
+                "Abort(): Invalid column 'z' found in View columns.\n",
             );
         });
 

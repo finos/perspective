@@ -24,19 +24,19 @@ import { WorkspaceMenu } from "./menu";
 
 export const createCommands = (
     workspace: PerspectiveWorkspace,
-    indicator: HTMLElement
+    indicator: HTMLElement,
 ) => {
     const commands = new CommandRegistry();
 
     commands.addCommand("workspace:export", {
         execute: async (args) => {
             const menu = document.createElement(
-                "perspective-export-menu"
+                "perspective-export-menu",
             ) as unknown as HTMLPerspectiveViewerExportMenu;
 
             workspace.apply_indicator_theme();
             const widget = workspace.getWidgetByName(
-                args.widget_name as string
+                args.widget_name as string,
             )!;
 
             menu.set_model(widget.viewer.get_model());
@@ -73,12 +73,12 @@ export const createCommands = (
     commands.addCommand("workspace:copy", {
         execute: async (args) => {
             const menu = document.createElement(
-                "perspective-copy-menu"
+                "perspective-copy-menu",
             ) as HTMLPerspectiveViewerCopyMenu;
 
             workspace.apply_indicator_theme();
             const widget = workspace.getWidgetByName(
-                args.widget_name as string
+                args.widget_name as string,
             )!;
             menu.set_model(widget.viewer.get_model());
 
@@ -132,11 +132,11 @@ export const createCommands = (
     commands.addCommand("workspace:newview", {
         execute: async (args) => {
             const widget = workspace.getWidgetByName(
-                args.widget_name as string
+                args.widget_name as string,
             );
 
             const target_widget = workspace.getWidgetByName(
-                args.target_widget_name as string
+                args.target_widget_name as string,
             )!;
 
             const config = await target_widget.save();
@@ -153,14 +153,14 @@ export const createCommands = (
         // iconClass: "menu-new-tables",
         isVisible: (args) => {
             const target_widget = workspace.getWidgetByName(
-                args.target_widget_name as string
+                args.target_widget_name as string,
             )!;
 
             return target_widget.title.label !== "";
         },
         label: (args) => {
             const target_widget = workspace.getWidgetByName(
-                args.target_widget_name as string
+                args.target_widget_name as string,
             )!;
 
             return target_widget.title.label || "untitled";
@@ -193,7 +193,7 @@ export const createCommands = (
         },
         isVisible: (args) => {
             const widget = workspace.getWidgetByName(
-                args.widget_name as string
+                args.widget_name as string,
             )!;
 
             return widget.parent! === (workspace.get_dock_panel() as Widget)
@@ -202,7 +202,7 @@ export const createCommands = (
         },
         label: (args) => {
             const widget = workspace.getWidgetByName(
-                args.widget_name as string
+                args.widget_name as string,
             )!;
             if (widget.viewer.hasAttribute("settings")) {
                 return "Close Settings";
@@ -216,7 +216,7 @@ export const createCommands = (
     commands.addCommand("workspace:duplicate", {
         execute: ({ widget_name }) =>
             workspace.duplicate(
-                workspace.getWidgetByName(widget_name as string)!
+                workspace.getWidgetByName(widget_name as string)!,
             ),
         // iconClass: "menu-duplicate",
         isVisible: (args) => {
@@ -232,7 +232,7 @@ export const createCommands = (
     commands.addCommand("workspace:master", {
         execute: (args) =>
             workspace.toggleMasterDetail(
-                workspace.getWidgetByName(args.widget_name as string)!
+                workspace.getWidgetByName(args.widget_name as string)!,
             ),
         isVisible: (args) => {
             return !!workspace.getWidgetByName(args.widget_name as string)

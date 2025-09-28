@@ -19,7 +19,7 @@ export function categoryPointSeries(
     settings: Settings,
     seriesKey: string,
     color: D3Scale,
-    symbols: D3Scale
+    symbols: D3Scale,
 ) {
     let series = fc.seriesSvgPoint().size(100);
     const opacity = settings.colorStyles && settings.colorStyles.opacity;
@@ -31,10 +31,10 @@ export function categoryPointSeries(
     series.decorate((selection) => {
         selection
             .style("stroke", (d) =>
-                withoutOpacity(color(d.colorValue || seriesKey))
+                withoutOpacity(color(d.colorValue || seriesKey)),
             )
             .style("fill", (d) =>
-                withOpacity(color(d.colorValue || seriesKey), opacity)
+                withOpacity(color(d.colorValue || seriesKey), opacity),
             );
     });
 

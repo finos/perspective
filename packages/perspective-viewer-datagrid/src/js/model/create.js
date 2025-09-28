@@ -116,42 +116,37 @@ export async function createModel(regular, table, view, extend = {}) {
             type_changed;
     }
 
-    const [
-        table_schema,
-        num_rows,
-        schema,
-        expression_schema,
-        _edit_port,
-    ] = await Promise.all([
-        table.schema(),
-        view.num_rows(),
-        view.schema(),
-        view.expression_schema(),
-        this.parentElement.getEditPort(),
-    ]);
+    const [table_schema, num_rows, schema, expression_schema, _edit_port] =
+        await Promise.all([
+            table.schema(),
+            view.num_rows(),
+            view.schema(),
+            view.expression_schema(),
+            this.parentElement.getEditPort(),
+        ]);
 
     const _plugin_background = chroma(
-        get_rule(regular, "--plugin--background", "#FFFFFF")
+        get_rule(regular, "--plugin--background", "#FFFFFF"),
     ).rgb();
 
     const _pos_fg_color = make_color_record(
-        get_rule(regular, "--rt-pos-cell--color", "#338DCD")
+        get_rule(regular, "--rt-pos-cell--color", "#338DCD"),
     );
 
     const _neg_fg_color = make_color_record(
-        get_rule(regular, "--rt-neg-cell--color", "#FF5942")
+        get_rule(regular, "--rt-neg-cell--color", "#FF5942"),
     );
 
     const _pos_bg_color = make_color_record(
-        blend(_pos_fg_color[0], _plugin_background)
+        blend(_pos_fg_color[0], _plugin_background),
     );
 
     const _neg_bg_color = make_color_record(
-        blend(_neg_fg_color[0], _plugin_background)
+        blend(_neg_fg_color[0], _plugin_background),
     );
 
     const _color = make_color_record(
-        get_rule(regular, "--active--color", "#ff0000")
+        get_rule(regular, "--active--color", "#ff0000"),
     );
 
     const _schema = { ...schema, ...expression_schema };
@@ -207,7 +202,7 @@ export async function createModel(regular, table, view, extend = {}) {
                     .getComputedStyle(regular)
                     .getPropertyValue("--datagrid-virtual-mode")
                     ?.trim() || "both",
-        }
+        },
     );
 
     return model;

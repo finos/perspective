@@ -154,7 +154,7 @@ const elem = document.getElementsByTagName("perspective-viewer")[0];
 
 // Bind to the server's worker instead of instantiating a Web Worker.
 const websocket = await perspective.websocket(
-    window.location.origin.replace("http", "ws")
+    window.location.origin.replace("http", "ws"),
 );
 
 // Bind the viewer to the preloaded data source.  `table` and `view` objects
@@ -184,10 +184,10 @@ itself) can be serialized or deserialized. This include all column, filter,
 pivot, expressions, etc. properties, as well as datagrid style settings, config
 panel visibility, and more. This overloaded feature covers a range of use cases:
 
--   Setting a `<perspective-viewer>`'s initial state after a `load()` call.
--   Updating a single or subset of properties, without modifying others.
--   Resetting some or all properties to their data-relative default.
--   Persisting a user's configuration to `localStorage` or a server.
+- Setting a `<perspective-viewer>`'s initial state after a `load()` call.
+- Updating a single or subset of properties, without modifying others.
+- Resetting some or all properties to their data-relative default.
+- Persisting a user's configuration to `localStorage` or a server.
 
 #### Serializing and deserializing the viewer state
 

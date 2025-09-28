@@ -32,7 +32,7 @@ export function treeColor(settings, data) {
                 settings,
                 null,
                 null,
-                flattenExtent(data.map((d) => d.extents))
+                flattenExtent(data.map((d) => d.extents)),
             );
         }
     }
@@ -42,7 +42,7 @@ export function treeColor(settings, data) {
 function getColors(nodes, colors = []) {
     nodes.children && nodes.children.length > 0
         ? nodes.children.forEach((child) =>
-              colors.concat(getColors(child, colors))
+              colors.concat(getColors(child, colors)),
           )
         : nodes.data.color && colors.push(nodes.data.color);
     return colors;

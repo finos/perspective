@@ -89,13 +89,23 @@ function clangFormatFix(dir) {
 }
 
 export function checkFormatting() {
-    formatLint(sh.path`./cpp/perspective/src/cpp/*.cpp`);
-    formatLint(sh.path`./cpp/perspective/src/include/perspective/*.h`);
+    formatLint(
+        sh.path`./rust/perspective-server/cpp/perspective/src/cpp/*.cpp`,
+    );
+
+    formatLint(
+        sh.path`./rust/perspective-server/cpp/perspective/src/include/perspective/*.h`,
+    );
     // tidyLint();
 }
 
 export function fixFormatting() {
     // tidyLint("-fix");
-    clangFormatFix(sh.path`./cpp/perspective/src/cpp/*.cpp`);
-    clangFormatFix(sh.path`./cpp/perspective/src/include/perspective/*.h`);
+    clangFormatFix(
+        sh.path`./rust/perspective-server/cpp/perspective/src/cpp/*.cpp`,
+    );
+
+    clangFormatFix(
+        sh.path`./rust/perspective-server/cpp/perspective/src/include/perspective/*.h`,
+    );
 }

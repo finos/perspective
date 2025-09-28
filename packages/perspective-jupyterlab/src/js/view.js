@@ -58,7 +58,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.luminoWidget = new PerspectiveJupyterWidget(
             undefined,
             this,
-            bindingMode
+            bindingMode,
         );
 
         // set up perspective_client
@@ -75,7 +75,7 @@ export class PerspectiveView extends DOMWidgetView {
                     const buffer = binary_msg.slice().buffer;
                     this.send(
                         { type: "binary_msg", client_id: this.psp_client_id },
-                        [buffer]
+                        [buffer],
                     );
                 },
                 () => {
@@ -83,7 +83,7 @@ export class PerspectiveView extends DOMWidgetView {
                         type: "hangup",
                         client_id: this.psp_client_id,
                     });
-                }
+                },
             );
 
             const tableName = this.model.get("table_name");
@@ -116,7 +116,7 @@ export class PerspectiveView extends DOMWidgetView {
         // add event handler to synchronize traitlet values
         this.luminoWidget.viewer.addEventListener(
             "perspective-config-update",
-            this._synchronize_state_dbg
+            this._synchronize_state_dbg,
         );
 
         // bind toggle_editable to this
@@ -302,7 +302,7 @@ export class PerspectiveView extends DOMWidgetView {
             // follow.
             this._client_view.on_update(
                 (updated) => this._client_view_update_callback(updated),
-                { mode: "row" }
+                { mode: "row" },
             );
         }
 
@@ -324,7 +324,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.luminoWidget.delete();
         this.luminoWidget.viewer.removeEventListener(
             "perspective-config-update",
-            this._synchronize_state_dbg
+            this._synchronize_state_dbg,
         );
     }
 

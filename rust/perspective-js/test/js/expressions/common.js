@@ -96,7 +96,7 @@ export const minute_bucket = function (val, multiplicity) {
     date.setSeconds(0);
     date.setMilliseconds(0);
     date.setMinutes(
-        Math.floor(date.getMinutes() / multiplicity) * multiplicity
+        Math.floor(date.getMinutes() / multiplicity) * multiplicity,
     );
     return date;
 };
@@ -157,7 +157,7 @@ export const year_bucket = function (val, multiplicity) {
     date.setDate(1);
     date.setMonth(0);
     date.setFullYear(
-        Math.floor(date.getFullYear() / multiplicity) * multiplicity
+        Math.floor(date.getFullYear() / multiplicity) * multiplicity,
     );
     return date;
 };

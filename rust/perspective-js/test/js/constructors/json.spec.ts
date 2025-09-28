@@ -62,7 +62,7 @@ test.describe("JSON", function () {
             enc.encode(JSON.stringify(TEST_JSON)),
             {
                 format: "columns",
-            }
+            },
         );
         const v = await table.view();
         const json = await v.to_json();
@@ -78,7 +78,7 @@ test.describe("JSON", function () {
             enc.encode(JSON.stringify(TEST_JSON)).buffer,
             {
                 format: "columns",
-            }
+            },
         );
         const v = await table.view();
         const json = await v.to_json();

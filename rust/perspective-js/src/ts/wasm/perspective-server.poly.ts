@@ -24,7 +24,7 @@ var printCharBuffers: Array<Array<number> | null> = [null, [], []];
 function UTF8ArrayToString(
     heapOrArray: Uint8Array | Array<number>,
     idx = 0,
-    maxBytesToRead = NaN
+    maxBytesToRead = NaN,
 ) {
     var endIdx = idx + maxBytesToRead;
     var endPtr = idx;
@@ -32,7 +32,7 @@ function UTF8ArrayToString(
     return UTF8Decoder.decode(
         heapOrArray instanceof Uint8Array
             ? heapOrArray.subarray(idx, endPtr)
-            : new Uint8Array(heapOrArray.slice(idx, endPtr))
+            : new Uint8Array(heapOrArray.slice(idx, endPtr)),
     );
 }
 
@@ -70,7 +70,7 @@ export default async function (obj: any) {
                 [ex],
                 {
                     traceStack: true,
-                }
+                },
             );
 
             // e.message = getExceptionMessage(e);
@@ -80,7 +80,7 @@ export default async function (obj: any) {
         clock_time_get(
             clk_id: number,
             ignored_precision: bigint,
-            ptime: bigint | number
+            ptime: bigint | number,
         ) {
             if (is_memory64) {
                 ptime = ptime as bigint;
@@ -161,7 +161,7 @@ export default async function (obj: any) {
             fd: number,
             iov: number | bigint,
             iovcnt: number | bigint,
-            pnum: number | bigint
+            pnum: number | bigint,
         ) {
             const HEAPU8 = new Uint8Array(wasm_memory.buffer);
 
@@ -225,7 +225,7 @@ export default async function (obj: any) {
 
             // @ts-ignore
             psp_module._initialize();
-        }
+        },
     );
 
     const extensions: Record<string, any> = {};

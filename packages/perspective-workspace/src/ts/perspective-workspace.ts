@@ -160,7 +160,7 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
             Array.from(this.querySelectorAll("perspective-viewer")).map((x) => {
                 const psp_widget = x as HTMLPerspectiveViewerElement;
                 return psp_widget.flush();
-            })
+            }),
         );
     }
 
@@ -244,7 +244,7 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
         this._resize_observer = undefined;
         if (is_auto_size) {
             this._resize_observer = new ResizeObserver((...args) =>
-                this.workspace?.update()
+                this.workspace?.update(),
             );
 
             this._resize_observer.observe(this);
@@ -270,7 +270,7 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
 
     private _light_dom_changed() {
         const viewers = Array.from(
-            this.childNodes
+            this.childNodes,
         ) as HTMLPerspectiveViewerElement[];
 
         for (const viewer of viewers) {
@@ -284,7 +284,7 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
             }
 
             this.workspace!.update_widget_for_viewer(
-                viewer as HTMLPerspectiveViewerElement
+                viewer as HTMLPerspectiveViewerElement,
             );
         }
 
@@ -302,5 +302,5 @@ export class HTMLPerspectiveWorkspaceElement extends HTMLElement {
 
 bindTemplate(
     template,
-    style
+    style,
 )(HTMLPerspectiveWorkspaceElement as unknown as CustomElementProto);

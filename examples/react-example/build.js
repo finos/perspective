@@ -34,5 +34,5 @@ await esbuild.build({
 
 fs.writeFileSync(
     path.join(__dirname, "dist/index.html"),
-    fs.readFileSync(path.join(__dirname, "src/index.html")).toString()
+    fs.readFileSync(path.join(__dirname, "src/index.html")).toString(),
 );

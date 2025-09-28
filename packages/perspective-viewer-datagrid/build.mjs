@@ -48,7 +48,7 @@ const BUILD = [
 function add(builder, path) {
     builder.add(
         path,
-        fs.readFileSync(path_mod.join("./src/less", path)).toString()
+        fs.readFileSync(path_mod.join("./src/less", path)).toString(),
     );
 }
 
@@ -63,14 +63,14 @@ async function compile_css() {
     add(builder1, "./regular_table.less");
     fs.writeFileSync(
         "dist/css/perspective-viewer-datagrid.css",
-        builder1.compile().get("regular_table.css")
+        builder1.compile().get("regular_table.css"),
     );
 
     const builder2 = new BuildCss("");
     add(builder2, "./toolbar.less");
     fs.writeFileSync(
         "dist/css/perspective-viewer-datagrid-toolbar.css",
-        builder2.compile().get("toolbar.css")
+        builder2.compile().get("toolbar.css"),
     );
 }
 

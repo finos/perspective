@@ -32,7 +32,7 @@ export function format_cell(
     title,
     val,
     plugins = {},
-    use_table_schema = false
+    use_table_schema = false,
 ) {
     if (val === null) {
         return null;
@@ -49,8 +49,8 @@ export function format_cell(
             0,
             Math.min(
                 MAX_BAR_WIDTH_PCT,
-                Math.abs(val / plugin.fg_gradient) * MAX_BAR_WIDTH_PCT
-            )
+                Math.abs(val / plugin.fg_gradient) * MAX_BAR_WIDTH_PCT,
+            ),
         );
 
         const div = this._div_factory.get();
@@ -58,7 +58,7 @@ export function format_cell(
         const pct = (a * 100).toFixed(2);
         div.setAttribute(
             "style",
-            `width:calc(${pct}% - 4px);position:absolute;${anchor}:2px;height:80%;top:10%;pointer-events:none;`
+            `width:calc(${pct}% - 4px);position:absolute;${anchor}:2px;height:80%;top:10%;pointer-events:none;`,
         );
 
         return div;

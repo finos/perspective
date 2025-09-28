@@ -49,7 +49,7 @@ export const preventTextCollisions = (nodes) => {
         .selectAll("text")
         .filter(
             (_, i, nodes) =>
-                select(nodes[i]).attr("style") === textVisibility.high
+                select(nodes[i]).attr("style") === textVisibility.high,
         )
         .each((_, i, nodes) => topNodes.push(nodes[i]));
 
@@ -57,7 +57,7 @@ export const preventTextCollisions = (nodes) => {
         .selectAll("text")
         .filter(
             (_, i, nodes) =>
-                select(nodes[i]).attr("style") === textVisibility.low
+                select(nodes[i]).attr("style") === textVisibility.low,
         )
         .each((_, i, nodes) => {
             const lowerNode = nodes[i];
@@ -67,20 +67,20 @@ export const preventTextCollisions = (nodes) => {
                         isElementOverlapping(
                             "x",
                             rect(topNode),
-                            rect(lowerNode)
+                            rect(lowerNode),
                         ) &&
                         isElementOverlapping(
                             "y",
                             rect(topNode),
                             rect(lowerNode),
-                            textCollisionFuzzFactorPx
-                        )
+                            textCollisionFuzzFactorPx,
+                        ),
                 )
                 .forEach(() =>
                     select(lowerNode).attr(
                         "dy",
-                        Number(select(lowerNode).attr("dy")) + textAdjustPx
-                    )
+                        Number(select(lowerNode).attr("dy")) + textAdjustPx,
+                    ),
                 );
         });
 };
@@ -96,7 +96,7 @@ export const selectVisibleNodes = (nodes) =>
     nodes.filter(
         (_, i, nodes) =>
             select(nodes[i]).selectAll("text").attr("style") !==
-            textVisibility.zero
+            textVisibility.zero,
     );
 
 export const adjustLabelsThatOverflow = (nodes) =>
@@ -127,7 +127,7 @@ const shrinkOrHideText = (d) => {
 const needsToShrinkOrHide = (d, rectRect, textRect) => {
     const resize_factor = Math.min(
         rectRect.height / textRect.height,
-        rectRect.width / textRect.width
+        rectRect.width / textRect.width,
     );
 
     if (resize_factor < 1) {

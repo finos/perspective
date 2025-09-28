@@ -46,7 +46,7 @@ test("Proxy session tunnels on_update callbacks through client", async () => {
         (x) => {
             resolveUpdate(x);
         },
-        { mode: "row" }
+        { mode: "row" },
     );
 
     // Enact table update through client's table handle, and assert that proxy
@@ -62,7 +62,7 @@ test("Proxy session tunnels on_update callbacks through client", async () => {
         {
             message: "Ensure proxy view updates with table",
             timeout: 10000,
-        }
+        },
     );
 
     expect(await proxyView.to_columns()).toStrictEqual({ abc: [123, 999] });

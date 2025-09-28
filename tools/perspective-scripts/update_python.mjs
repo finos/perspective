@@ -59,9 +59,9 @@ for (const version of VERSIONS) {
     fs.writeFileSync(
         `python/perspective/requirements/requirements-${version.replace(
             ".",
-            ""
+            "",
         )}.txt`,
-        output
+        output,
     );
 }
 

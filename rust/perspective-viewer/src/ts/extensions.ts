@@ -53,26 +53,26 @@ declare global {
     interface Document {
         createElement(
             tagName: "perspective-viewer",
-            options?: ElementCreationOptions
+            options?: ElementCreationOptions,
         ): HTMLPerspectiveViewerElement;
         createElement(
             tagName: "perspective-viewer-plugin",
-            options?: ElementCreationOptions
+            options?: ElementCreationOptions,
         ): HTMLPerspectiveViewerPluginElement;
         querySelector<E extends Element = Element>(selectors: string): E | null;
         querySelector(
-            selectors: "perspective-viewer"
+            selectors: "perspective-viewer",
         ): HTMLPerspectiveViewerElement | null;
     }
 
     interface CustomElementRegistry {
         get(
-            tagName: "perspective-viewer"
+            tagName: "perspective-viewer",
         ): typeof PerspectiveViewerElement &
             PerspectiveViewerElementExt &
             typeof HTMLElement;
         get(
-            tagName: "perspective-viewer-plugin"
+            tagName: "perspective-viewer-plugin",
         ): typeof HTMLPerspectiveViewerPluginElement;
     }
 }
@@ -96,25 +96,25 @@ export interface PerspectiveViewerElementExt {
     addEventListener(
         name: "perspective-click",
         cb: (e: CustomEvent) => void,
-        options?: { signal: AbortSignal }
+        options?: { signal: AbortSignal },
     ): void;
 
     addEventListener(
         name: "perspective-select",
         cb: (e: CustomEvent) => void,
-        options?: { signal: AbortSignal }
+        options?: { signal: AbortSignal },
     ): void;
 
     addEventListener(
         name: "perspective-toggle-settings",
         cb: (e: CustomEvent) => void,
-        options?: { signal: AbortSignal }
+        options?: { signal: AbortSignal },
     ): void;
 
     addEventListener(
         name: "perspective-config-update",
         cb: (e: CustomEvent) => void,
-        options?: { signal: AbortSignal }
+        options?: { signal: AbortSignal },
     ): void;
 
     removeEventListener(name: "perspective-click", cb: any): void;

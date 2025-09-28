@@ -78,7 +78,7 @@ export class PerspectiveTabBar extends TabBar<any> {
                         zIndex: titles.length + 1,
                         current,
                     } as TabBar.IRenderData<any>,
-                    onClick
+                    onClick,
                 );
             } else {
                 content[i] = (
@@ -98,7 +98,7 @@ export class PerspectiveTabBar extends TabBar<any> {
             this._workspace.element,
             {
                 commands,
-            }
+            },
         );
 
         this._menu.addClass("perspective-workspace-menu");
@@ -148,7 +148,7 @@ export class PerspectiveTabBar extends TabBar<any> {
             Array.from(this.contentNode.children).filter(
                 (x) =>
                     x.classList.contains("settings_open") &&
-                    x.classList.contains("lm-mod-current")
+                    x.classList.contains("lm-mod-current"),
             ).length > 0
         ) {
             this.contentNode.classList.add("inactive-blur");
@@ -173,7 +173,7 @@ export class PerspectiveTabBar extends TabBar<any> {
 
                 (parent as unknown as PerspectiveWorkspace).showContextMenu(
                     widget,
-                    event
+                    event,
                 );
 
                 if (!event.shiftKey) {
@@ -195,7 +195,7 @@ export class PerspectiveTabBar extends TabBar<any> {
                         return ElementExt.hitTest(
                             tab,
                             event.clientX,
-                            event.clientY
+                            event.clientY,
                         );
                     });
 
@@ -206,7 +206,7 @@ export class PerspectiveTabBar extends TabBar<any> {
                     const title = this.titles[index];
                     this._workspace._maximize(title.owner);
                     requestAnimationFrame(() =>
-                        title.owner.viewer.toggleConfig()
+                        title.owner.viewer.toggleConfig(),
                     );
 
                     return;

@@ -25,7 +25,7 @@ export type AdjustedOffsets = {
 export function enforceContainerBoundaries(
     innerNode: Element,
     offsetX: number,
-    offsetY: number
+    offsetY: number,
 ): AdjustedOffsets {
     const chartNodeRect: DOMRect = d3
         .select(getChartElement(innerNode).getContainer())
@@ -54,7 +54,7 @@ export function enforceContainerBoundaries(
             isElementOverflowing(
                 chartNodeRect,
                 draggedInnerNodeRect,
-                bound.edge
+                bound.edge,
             )
         ) {
             const adjustment =

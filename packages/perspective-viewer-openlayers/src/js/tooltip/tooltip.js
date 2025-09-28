@@ -168,10 +168,10 @@ export function createTooltip(container, map) {
         if (currentPoint) {
             const column_names = config.columns;
             const groupFilters = getFilter(
-                getListFromJoin(currentPoint.group, config.group_by)
+                getListFromJoin(currentPoint.group, config.group_by),
             );
             const categoryFilters = getFilter(
-                getListFromJoin(currentPoint.category, config.split_by)
+                getListFromJoin(currentPoint.category, config.split_by),
             );
             const filters = config.filter
                 .concat(groupFilters)
@@ -186,7 +186,7 @@ export function createTooltip(container, map) {
                         config: { filters },
                         row: currentPoint.row,
                     },
-                })
+                }),
             );
         }
     };
@@ -208,7 +208,7 @@ export function createTooltip(container, map) {
                 : {
                       name: c,
                       value: cols[i + fromIndex].toLocaleString(),
-                  }
+                  },
         );
         return composeList(list);
     };
@@ -243,8 +243,8 @@ export function createTooltip(container, map) {
                 item === null
                     ? ``
                     : `<li><span class="label">${sanitize(
-                          item.name
-                      )}</span></span>${sanitize(item.value)}</span></li>`
+                          item.name,
+                      )}</span></span>${sanitize(item.value)}</span></li>`,
             );
             return `<ul>${itemList.join("")}</ul>`;
         }
@@ -262,7 +262,7 @@ export function createTooltip(container, map) {
 
     const distanceBetween = (c1, c2) => {
         return Math.sqrt(
-            Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2)
+            Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2),
         );
     };
 

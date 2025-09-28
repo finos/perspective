@@ -38,8 +38,8 @@ export class PerspectivePollThread {
                     .catch(reject)
                     .finally(() => {
                         this.poll_handle = undefined;
-                    })
-            )
+                    }),
+            ),
         );
 
         return this.poll_handle;
@@ -68,7 +68,7 @@ export class PerspectiveServer {
         this.module = module;
         this.on_poll_request = options?.on_poll_request;
         this.server = module._psp_new_server(
-            !!options?.on_poll_request ? 1 : 0
+            !!options?.on_poll_request ? 1 : 0,
         ) as EmscriptenServer;
     }
 
@@ -76,7 +76,7 @@ export class PerspectiveServer {
      * Helper function to create server emitter/receiver pairs
      */
     make_session(
-        callback: (buffer: Uint8Array) => Promise<void>
+        callback: (buffer: Uint8Array) => Promise<void>,
     ): PerspectiveSession {
         const client_id = this.module._psp_new_session(this.server as any);
         this.clients.set(client_id, callback);
@@ -85,7 +85,7 @@ export class PerspectiveServer {
             this.server,
             client_id,
             this.clients,
-            this.on_poll_request && (() => this.on_poll_request!(this))
+            this.on_poll_request && (() => this.on_poll_request!(this)),
         );
     }
 
@@ -96,7 +96,7 @@ export class PerspectiveServer {
             polled,
             async (msg: ApiResponse) => {
                 await this.clients.get(msg.client_id)!(msg.data);
-            }
+            },
         );
     }
 
@@ -111,7 +111,7 @@ export class PerspectiveSession {
         private server: EmscriptenServer,
         private client_id: number,
         private client_map: Map<number, (buffer: Uint8Array) => Promise<void>>,
-        private on_poll_request?: () => Promise<void>
+        private on_poll_request?: () => Promise<void>,
     ) {}
 
     async handle_request(view: Uint8Array) {
@@ -125,9 +125,9 @@ export class PerspectiveSession {
                     viewPtr as any,
                     this.mod._psp_is_memory64()
                         ? (BigInt(view.byteLength) as any as number)
-                        : (view.byteLength as any)
+                        : (view.byteLength as any),
                 );
-            }
+            },
         );
 
         await decode_api_responses(this.mod, ptr, async (msg: ApiResponse) => {
@@ -152,7 +152,7 @@ export class PerspectiveSession {
                 } else {
                     await this.client_map.get(msg.client_id)!(msg.data);
                 }
-            }
+            },
         );
     }
 
@@ -164,12 +164,12 @@ export class PerspectiveSession {
 async function convert_typed_array_to_pointer(
     core: MainModule,
     array: Uint8Array,
-    callback: (_: PspPtr) => Promise<PspPtr>
+    callback: (_: PspPtr) => Promise<PspPtr>,
 ): Promise<PspPtr> {
     const ptr = core._psp_alloc(
         core._psp_is_memory64()
             ? (BigInt(array.byteLength) as any as number)
-            : (array.byteLength as any)
+            : (array.byteLength as any),
     );
 
     core.HEAPU8.set(array, Number(ptr));
@@ -205,13 +205,13 @@ async function convert_typed_array_to_pointer(
 async function decode_api_responses(
     core: MainModule,
     ptr: PspPtr,
-    callback: (_: ApiResponse) => Promise<void>
+    callback: (_: ApiResponse) => Promise<void>,
 ) {
     const is_64 = core._psp_is_memory64();
     const response = new DataView(
         core.HEAPU8.buffer,
         Number(ptr),
-        is_64 ? 12 : 8
+        is_64 ? 12 : 8,
     );
 
     const num_msgs = response.getUint32(0, true);
@@ -222,7 +222,7 @@ async function decode_api_responses(
     const messages = new DataView(
         core.HEAPU8.buffer,
         Number(msgs_ptr),
-        num_msgs * (is_64 ? 16 : 12)
+        num_msgs * (is_64 ? 16 : 12),
     );
 
     try {
@@ -242,7 +242,7 @@ async function decode_api_responses(
             const data = new Uint8Array(
                 core.HEAPU8.buffer,
                 Number(data_ptr),
-                data_len
+                data_len,
             );
 
             const resp = { client_id, data };
@@ -260,12 +260,12 @@ async function decode_api_responses(
         core._psp_free(
             is_64
                 ? (BigInt(messages.byteOffset) as any as number)
-                : (messages.byteOffset as any)
+                : (messages.byteOffset as any),
         );
         core._psp_free(
             is_64
                 ? (BigInt(response.byteOffset) as any as number)
-                : (response.byteOffset as any)
+                : (response.byteOffset as any),
         );
     }
 }

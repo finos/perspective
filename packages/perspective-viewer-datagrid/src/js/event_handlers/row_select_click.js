@@ -16,7 +16,7 @@ export async function selectionListener(
     regularTable,
     viewer,
     selected_rows_map,
-    event
+    event,
 ) {
     const meta = regularTable.getMeta(event.target);
     if (!viewer.hasAttribute("selectable")) return;
@@ -43,7 +43,7 @@ export async function selectionListener(
         const { row, column_names, config } = await getCellConfig(
             this,
             meta.y,
-            meta.x
+            meta.x,
         );
 
         if (is_deselect) {
@@ -65,7 +65,7 @@ export async function selectionListener(
                 bubbles: true,
                 composed: true,
                 detail,
-            })
+            }),
         );
     }
 }

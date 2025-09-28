@@ -398,7 +398,7 @@ async function match_delta(perspective, delta, expected) {
                     y: "date",
                     z: "float",
                 },
-                { index: "y" }
+                { index: "y" },
             );
             await table.update({
                 x: [1, 2, 3, 4],
@@ -432,7 +432,7 @@ async function match_delta(perspective, delta, expected) {
                     y: "datetime",
                     z: "float",
                 },
-                { index: "y" }
+                { index: "y" },
             );
             await table.update({
                 x: [1, 2, 3, 4],
@@ -466,7 +466,7 @@ async function match_delta(perspective, delta, expected) {
                     y: datetimes,
                     z: [1.5, 2.5, 3.5, 4.5],
                 },
-                { index: "y" }
+                { index: "y" },
             );
             const view = await table.view();
             await table.remove(datetimes.slice(0, 2));
@@ -506,7 +506,7 @@ async function match_delta(perspective, delta, expected) {
                     y: ["A"],
                     idx: [1],
                 },
-                { index: "idx" }
+                { index: "idx" },
             );
 
             const view = await table.view({
@@ -565,7 +565,7 @@ async function match_delta(perspective, delta, expected) {
                     x: "string",
                     y: "integer",
                 },
-                { index: "x" }
+                { index: "x" },
             );
 
             await table.update({
@@ -597,7 +597,7 @@ async function match_delta(perspective, delta, expected) {
                     x: "string",
                     y: "integer",
                 },
-                { index: "x" }
+                { index: "x" },
             );
 
             await table.update({
@@ -628,7 +628,7 @@ async function match_delta(perspective, delta, expected) {
                     x: "string",
                     y: "integer",
                 },
-                { index: "x" }
+                { index: "x" },
             );
 
             await table.update({
@@ -691,7 +691,7 @@ async function match_delta(perspective, delta, expected) {
                     x: "integer",
                     y: "integer",
                 },
-                { index: "x" }
+                { index: "x" },
             );
 
             for (let i = 0; i < 100; i++) {
@@ -1053,7 +1053,7 @@ async function match_delta(perspective, delta, expected) {
                     a: "string",
                     b: "string",
                 },
-                { index: "a" }
+                { index: "a" },
             );
             await table.update(arrows.dict_arrow.slice());
             const view = await table.view();
@@ -1073,7 +1073,7 @@ async function match_delta(perspective, delta, expected) {
                 {
                     a: "string",
                 },
-                { index: "a" }
+                { index: "a" },
             );
             await table.update(arrows.dict_arrow.slice());
             const view = await table.view();
@@ -1095,7 +1095,7 @@ async function match_delta(perspective, delta, expected) {
                     b: "string",
                     x: "integer",
                 },
-                { index: "a" }
+                { index: "a" },
             );
             await table.update(arrows.dict_arrow.slice());
             const view = await table.view();
@@ -1119,7 +1119,7 @@ async function match_delta(perspective, delta, expected) {
                     b: "float",
                     c: "string",
                 },
-                { index: "a" }
+                { index: "a" },
             );
 
             const view = await table.view();
@@ -1179,7 +1179,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 {
                     index: "a",
-                }
+                },
             );
             const view = await table.view();
             await table.update(arrows.int_float_str_arrow.slice());
@@ -1222,7 +1222,7 @@ async function match_delta(perspective, delta, expected) {
                 },
                 {
                     index: "a",
-                }
+                },
             );
             const view = await table.view();
             await table.update(arrows.int_float_str_arrow.slice());
@@ -1270,7 +1270,7 @@ async function match_delta(perspective, delta, expected) {
                     table.delete();
                     done();
                 },
-                { mode: "row" }
+                { mode: "row" },
             );
             await table.update(data);
         });
@@ -1292,10 +1292,10 @@ async function match_delta(perspective, delta, expected) {
                             done();
                         }
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(data);
-            }
+            },
         );
 
         it_old_behavior(
@@ -1316,10 +1316,10 @@ async function match_delta(perspective, delta, expected) {
                         table2.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table1.update(data);
-            }
+            },
         );
 
         it_old_behavior(
@@ -1343,10 +1343,10 @@ async function match_delta(perspective, delta, expected) {
                         table2.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table1.update(data);
-            }
+            },
         );
 
         it_old_behavior(
@@ -1383,7 +1383,7 @@ async function match_delta(perspective, delta, expected) {
                 table.delete();
                 done();
             },
-            { skip: true }
+            { skip: true },
         );
 
         it_old_behavior(
@@ -1413,7 +1413,7 @@ async function match_delta(perspective, delta, expected) {
                 view.delete();
                 table.delete();
                 done();
-            }
+            },
         );
 
         it_old_behavior(
@@ -1433,7 +1433,7 @@ async function match_delta(perspective, delta, expected) {
                     done();
                 });
                 await table.update(data);
-            }
+            },
         );
 
         it_old_behavior(
@@ -1461,7 +1461,7 @@ async function match_delta(perspective, delta, expected) {
                 }
 
                 await table.update(data);
-            }
+            },
         );
 
         it_old_behavior(
@@ -1495,7 +1495,7 @@ async function match_delta(perspective, delta, expected) {
                 }
 
                 await table.update(data);
-            }
+            },
         );
     });
 
@@ -1635,7 +1635,7 @@ async function match_delta(perspective, delta, expected) {
                     x: "date",
                     y: "integer",
                 },
-                { index: "x" }
+                { index: "x" },
             );
             await table.update(data);
             const view = await table.view();
@@ -1668,7 +1668,7 @@ async function match_delta(perspective, delta, expected) {
                     x: "datetime",
                     y: "integer",
                 },
-                { index: "x" }
+                { index: "x" },
             );
             await table.update(data);
             const view = await table.view();
@@ -1769,7 +1769,7 @@ async function match_delta(perspective, delta, expected) {
                     x: [1, 2, 3],
                     y: ["a", null, "c"],
                 },
-                { index: "y" }
+                { index: "y" },
             );
 
             const view = await table.view();
@@ -1814,7 +1814,7 @@ async function match_delta(perspective, delta, expected) {
                     table.delete();
                     done();
                 },
-                { mode: "row" }
+                { mode: "row" },
             );
             await table.update(data_2);
         });
@@ -1832,7 +1832,7 @@ async function match_delta(perspective, delta, expected) {
                     table.delete();
                     done();
                 },
-                { mode: "row" }
+                { mode: "row" },
             );
             await table.update(data_2);
         });
@@ -1880,7 +1880,7 @@ async function match_delta(perspective, delta, expected) {
                     await match_delta(
                         perspective,
                         updated.delta,
-                        expected.slice(0, 2)
+                        expected.slice(0, 2),
                     );
                     let json = await view.to_json();
                     expect(json).toEqual(expected);
@@ -1888,7 +1888,7 @@ async function match_delta(perspective, delta, expected) {
                     table.delete();
                     done();
                 },
-                { mode: "row" }
+                { mode: "row" },
             );
             await table.update(partial);
         });
@@ -1916,7 +1916,7 @@ async function match_delta(perspective, delta, expected) {
                         await match_delta(
                             perspective,
                             updated.delta,
-                            expected.slice(0, 2)
+                            expected.slice(0, 2),
                         );
                         let json = await view.to_json();
                         expect(json).toEqual(expected);
@@ -1924,11 +1924,11 @@ async function match_delta(perspective, delta, expected) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial);
             },
-            { skip: true }
+            { skip: true },
         );
 
         it_old_behavior(
@@ -1959,7 +1959,7 @@ async function match_delta(perspective, delta, expected) {
                         await match_delta(
                             perspective,
                             updated.delta,
-                            expected.slice(0, 2)
+                            expected.slice(0, 2),
                         );
                         let json = await view.to_json();
                         expect(json).toEqual(expected);
@@ -1967,12 +1967,12 @@ async function match_delta(perspective, delta, expected) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 for (const batch of batches) {
                     table.update(batch);
                 }
-            }
+            },
         );
 
         it_old_behavior(
@@ -2010,14 +2010,14 @@ async function match_delta(perspective, delta, expected) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 await table.update({
                     x: [4],
                     y: ["f"],
                 });
-            }
+            },
         );
 
         it_old_behavior(
@@ -2059,14 +2059,14 @@ async function match_delta(perspective, delta, expected) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 await table.update({
                     x: [4],
                     y: ["f"],
                 });
-            }
+            },
         );
 
         it_old_behavior(
@@ -2091,7 +2091,7 @@ async function match_delta(perspective, delta, expected) {
                         await match_delta(
                             perspective,
                             updated.delta,
-                            expected.slice(0, 2)
+                            expected.slice(0, 2),
                         );
                         let json = await view.to_json();
                         expect(json).toEqual(expected);
@@ -2099,10 +2099,10 @@ async function match_delta(perspective, delta, expected) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial);
-            }
+            },
         );
     });
 
@@ -2113,7 +2113,7 @@ async function match_delta(perspective, delta, expected) {
                     { x: 1, y: 1 },
                     { x: 2, y: 1 },
                 ],
-                { index: "x" }
+                { index: "x" },
             );
             await table.update([{ x: 2, y: null }]);
             var view = await table.view({
@@ -2797,7 +2797,7 @@ async function match_delta(perspective, delta, expected) {
                 view.remove_update(await sub1);
                 view.remove_update(await sub2);
                 await table.update(data);
-            }
+            },
         );
     });
 
@@ -2810,7 +2810,7 @@ async function match_delta(perspective, delta, expected) {
                     x: "integer",
                     y: "string",
                 },
-                { index: "x" }
+                { index: "x" },
             );
 
             flat_view = await table.view();
@@ -2874,7 +2874,7 @@ async function match_delta(perspective, delta, expected) {
 
                 const flat = await flat_view.to_json();
                 expect(await filtered_view.to_json()).toEqual(
-                    flat.filter((row) => row.y === "a")
+                    flat.filter((row) => row.y === "a"),
                 );
                 op++;
             }
@@ -2933,7 +2933,7 @@ async function match_delta(perspective, delta, expected) {
 
                 const flat = await flat_view.to_json();
                 expect(await filtered_view.to_json()).toEqual(
-                    flat.filter((row) => row.y === "a")
+                    flat.filter((row) => row.y === "a"),
                 );
                 op++;
             }
@@ -2953,7 +2953,7 @@ async function match_delta(perspective, delta, expected) {
 
                 // filtering
                 expect(await filtered_view.to_json()).toEqual(
-                    result.filter((row) => row.y === "b")
+                    result.filter((row) => row.y === "b"),
                 );
             }
 
@@ -2980,7 +2980,7 @@ async function match_delta(perspective, delta, expected) {
                         y: "b",
                     });
                     expect(filtered).toEqual(
-                        flat.filter((row) => row.y === "a")
+                        flat.filter((row) => row.y === "a"),
                     );
 
                     // partial updates not appends
@@ -2991,7 +2991,7 @@ async function match_delta(perspective, delta, expected) {
             // Remove "b" rows
             flat = await flat_view.to_json();
             await table.remove(
-                flat.filter((row) => row.y === "b").map((row) => row.x)
+                flat.filter((row) => row.y === "b").map((row) => row.x),
             );
             expect(await flat_view.to_json()).toEqual([
                 { x: 1, y: "a" },
@@ -3008,7 +3008,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "string",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3034,7 +3034,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "string",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3057,7 +3057,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "string",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3083,7 +3083,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "float",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3106,7 +3106,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "float",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3129,7 +3129,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "date",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3161,7 +3161,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "date",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3193,7 +3193,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "datetime",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3225,7 +3225,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "datetime",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3257,7 +3257,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "string",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3319,7 +3319,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "string",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
             const view = await tbl.view();
 
@@ -3392,7 +3392,7 @@ async function match_delta(perspective, delta, expected) {
                     index: "string",
                     x: "string",
                 },
-                { index: "index" }
+                { index: "index" },
             );
 
             for (let i = 0; i < 3; i++) {

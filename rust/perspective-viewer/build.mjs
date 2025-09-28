@@ -34,12 +34,12 @@ async function build_all() {
         `cargo bundle --target=${get_host()} -- perspective_viewer ${
             IS_DEBUG ? "" : "--release"
         }`,
-        INHERIT
+        INHERIT,
     );
 
     await compress(
         "dist/wasm/perspective-viewer.wasm",
-        "dist/wasm/perspective-viewer.wasm"
+        "dist/wasm/perspective-viewer.wasm",
     );
 
     // JavaScript

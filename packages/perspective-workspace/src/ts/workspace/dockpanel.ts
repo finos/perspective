@@ -45,7 +45,7 @@ export class PerspectiveDockPanel extends DockPanel {
 
     _onTabDetachRequested(
         sender: TabBar<Widget>,
-        args: TabBar.ITabDetachRequestedArgs<Widget>
+        args: TabBar.ITabDetachRequestedArgs<Widget>,
     ) {
         // @ts-ignore: accessing a private member `_onTabDetachRequested`
         super._onTabDetachRequested(sender, args);
@@ -78,7 +78,7 @@ export class PerspectiveDockPanel extends DockPanel {
     }
 
     static getWidgets(
-        layout: DockPanel.ILayoutConfig
+        layout: DockPanel.ILayoutConfig,
     ): PerspectiveViewerWidget[] {
         if (!!layout.main) {
             return PerspectiveDockPanel.getAreaWidgets(layout.main);
@@ -88,12 +88,12 @@ export class PerspectiveDockPanel extends DockPanel {
     }
 
     static getAreaWidgets(
-        layout: DockLayout.AreaConfig
+        layout: DockLayout.AreaConfig,
     ): PerspectiveViewerWidget[] {
         if (layout?.hasOwnProperty("children")) {
             const split_panel = layout as DockLayout.ISplitAreaConfig;
             return split_panel.children.flatMap((widget) =>
-                PerspectiveDockPanel.getAreaWidgets(widget)
+                PerspectiveDockPanel.getAreaWidgets(widget),
             );
         } else if (layout?.hasOwnProperty("widgets")) {
             const tab_panel = layout as DockLayout.ITabAreaConfig;
@@ -109,12 +109,12 @@ export class PerspectiveDockPanel extends DockPanel {
 
     static mapWidgets(
         widgetFunc: (widget: any) => any,
-        layout: any
+        layout: any,
     ): DockPanel.ILayoutConfig {
         if (!!layout.main) {
             layout.main = PerspectiveDockPanel.mapAreaWidgets(
                 widgetFunc,
-                layout.main
+                layout.main,
             );
         }
 
@@ -123,12 +123,12 @@ export class PerspectiveDockPanel extends DockPanel {
 
     static mapAreaWidgets(
         widgetFunc: (widget: any) => any,
-        layout: DockLayout.AreaConfig
+        layout: DockLayout.AreaConfig,
     ): DockLayout.AreaConfig {
         if (layout.hasOwnProperty("children")) {
             const split_panel = layout as DockLayout.ISplitAreaConfig;
             split_panel.children = split_panel.children.map((widget) =>
-                PerspectiveDockPanel.mapAreaWidgets(widgetFunc, widget)
+                PerspectiveDockPanel.mapAreaWidgets(widgetFunc, widget),
             );
         } else if (layout.hasOwnProperty("widgets")) {
             const tab_panel = layout as DockLayout.ITabAreaConfig;

@@ -15,7 +15,7 @@ import { DataRowsWithKey, Settings } from "../types";
 
 export function filterData(
     settings: Settings,
-    data: any[] | undefined = undefined
+    data: any[] | undefined = undefined,
 ) {
     const useData = data || settings.data;
     const len = settings.hideKeys?.length ?? 0;
@@ -39,13 +39,13 @@ export function filterDataByGroup(settings: Settings): DataRowsWithKey {
             ? newData.filter((row) => {
                   return Object.values(row).reduce(
                       (res, val) => res && !settings.hideKeys.includes(val),
-                      true
+                      true,
                   );
               })
             : newData.map((row) => {
                   const entries = Object.entries(row).filter(
                       ([key, _val]) =>
-                          !settings.hideKeys.includes(groupFromKey(key))
+                          !settings.hideKeys.includes(groupFromKey(key)),
                   );
                   return Object.fromEntries(entries);
               })

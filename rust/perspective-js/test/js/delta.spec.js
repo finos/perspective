@@ -43,7 +43,7 @@ async function match_delta(
     perspective,
     delta,
     expected,
-    formatter = "to_json"
+    formatter = "to_json",
 ) {
     const table = await perspective.table(delta);
     const view = await table.view();
@@ -82,7 +82,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -102,16 +102,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -123,7 +123,7 @@ function it_old_behavior(name, capture) {
                             y: "string",
                             z: "boolean",
                         },
-                        { index: "x" }
+                        { index: "x" },
                     );
                     let view = await table.view();
                     view.on_update(
@@ -136,13 +136,13 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update([
                         { x: 1, y: "a", z: true },
@@ -150,7 +150,7 @@ function it_old_behavior(name, capture) {
                         { x: 3, y: "c", z: true },
                         { x: 1, y: "d", z: false },
                     ]);
-                }
+                },
             );
 
             it_old_behavior("returns added rows", async function (done) {
@@ -167,7 +167,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -188,10 +188,10 @@ function it_old_behavior(name, capture) {
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(data);
-                }
+                },
             );
 
             it_old_behavior("returns deleted columns", async function (done) {
@@ -208,7 +208,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update([
                     { x: 1, y: null },
@@ -232,16 +232,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -253,7 +253,7 @@ function it_old_behavior(name, capture) {
                             y: "string",
                             z: "boolean",
                         },
-                        { index: "x" }
+                        { index: "x" },
                     );
                     let view = await table.view({
                         sort: [["x", "desc"]],
@@ -269,13 +269,13 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update([
                         { x: 1, y: "a", z: true },
@@ -284,7 +284,7 @@ function it_old_behavior(name, capture) {
                         { x: 1, y: "d", z: false },
                         { x: 4, y: "a", z: true },
                     ]);
-                }
+                },
             );
 
             it_old_behavior(
@@ -307,10 +307,10 @@ function it_old_behavior(name, capture) {
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(data);
-                }
+                },
             );
 
             it_old_behavior(
@@ -324,16 +324,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_nonseq);
-                }
+                },
             );
         });
 
@@ -355,7 +355,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -369,7 +369,7 @@ function it_old_behavior(name, capture) {
                             y: "string",
                             z: "boolean",
                         },
-                        { index: "x" }
+                        { index: "x" },
                     );
                     let columns = _.shuffle(await table.columns());
                     let view = await table.view({
@@ -385,13 +385,13 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update([
                         { x: 1, y: "a", z: true },
@@ -399,7 +399,7 @@ function it_old_behavior(name, capture) {
                         { x: 3, y: "c", z: true },
                         { x: 1, y: "d", z: false },
                     ]);
-                }
+                },
             );
 
             it_old_behavior("returns added rows", async function (done) {
@@ -419,7 +419,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -438,16 +438,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -469,10 +469,10 @@ function it_old_behavior(name, capture) {
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(data);
-                }
+                },
             );
 
             it_old_behavior("returns deleted columns", async function (done) {
@@ -492,7 +492,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update([
                     { x: 1, y: null },
@@ -514,16 +514,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_nonseq);
-                }
+                },
             );
         });
 
@@ -541,7 +541,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -555,7 +555,7 @@ function it_old_behavior(name, capture) {
                             y: "string",
                             z: "boolean",
                         },
-                        { index: "x" }
+                        { index: "x" },
                     );
                     let view = await table.view({
                         columns: ["z"],
@@ -570,13 +570,13 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update([
                         { x: 1, y: "a", z: true },
@@ -584,7 +584,7 @@ function it_old_behavior(name, capture) {
                         { x: 3, y: "c", z: true },
                         { x: 1, y: "d", z: false },
                     ]);
-                }
+                },
             );
 
             it_old_behavior("returns added rows", async function (done) {
@@ -600,7 +600,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -628,10 +628,10 @@ function it_old_behavior(name, capture) {
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(data);
-                }
+                },
             );
 
             it_old_behavior("returns deleted rows", async function (done) {
@@ -647,7 +647,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update([
                     { x: 1, y: null },
@@ -672,10 +672,10 @@ function it_old_behavior(name, capture) {
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_nonseq);
-                }
+                },
             );
         });
 
@@ -697,7 +697,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -712,7 +712,7 @@ function it_old_behavior(name, capture) {
                         y: ["a", "a", "a", "a"],
                         z: [100, 200, 100, 200],
                     },
-                    { index: "x" }
+                    { index: "x" },
                 );
 
                 const view = await table.view({
@@ -739,7 +739,7 @@ function it_old_behavior(name, capture) {
                         await table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
 
                 await table.update({
@@ -767,16 +767,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -797,10 +797,10 @@ function it_old_behavior(name, capture) {
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_z);
-                }
+                },
             );
 
             it_old_behavior("returns added rows", async function (done) {
@@ -821,7 +821,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -844,16 +844,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior("returns deleted columns", async function (done) {
@@ -871,7 +871,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update([
                     { x: 1, y: null },
@@ -900,16 +900,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_nonseq);
-                }
+                },
             );
 
             it_old_behavior(
@@ -931,17 +931,17 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             await view.delete();
                             await table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     await table.update(partial_change_y);
-                }
+                },
             );
         });
 
@@ -964,16 +964,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -995,16 +995,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1026,16 +1026,16 @@ function it_old_behavior(name, capture) {
                                 expected.slice(0, 3).map((x) => {
                                     delete x.__ROW_PATH__;
                                     return x;
-                                })
+                                }),
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             test.skip("returns changed rows when updated data in group by multi, hidden sort", async function () {
@@ -1062,13 +1062,13 @@ function it_old_behavior(name, capture) {
                             perspective,
                             updated.delta,
                             expected,
-                            "to_columns"
+                            "to_columns",
                         );
                         view.delete();
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -1091,16 +1091,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_z);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1122,16 +1122,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_z);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1152,16 +1152,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y_z);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1183,16 +1183,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y_z);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1214,10 +1214,10 @@ function it_old_behavior(name, capture) {
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_z);
-                }
+                },
             );
 
             it_old_behavior("returns added rows", async function (done) {
@@ -1238,7 +1238,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update(partial_change_y);
             });
@@ -1264,7 +1264,7 @@ function it_old_behavior(name, capture) {
                         table.delete();
                         done();
                     },
-                    { mode: "row" }
+                    { mode: "row" },
                 );
                 await table.update([
                     { x: 1, y: null },
@@ -1294,20 +1294,20 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update([
                         { x: 1, y: null },
                         { x: 2, y: null },
                         { x: 4, y: null },
                     ]);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1333,16 +1333,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_nonseq);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1376,16 +1376,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_nonseq);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1446,7 +1446,7 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
@@ -1454,10 +1454,10 @@ function it_old_behavior(name, capture) {
                         },
                         {
                             mode: "row",
-                        }
+                        },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1501,17 +1501,17 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             await view.delete();
                             await table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
 
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1549,7 +1549,7 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
@@ -1557,10 +1557,10 @@ function it_old_behavior(name, capture) {
                         },
                         {
                             mode: "row",
-                        }
+                        },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1600,7 +1600,7 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             await view.delete();
                             await table.delete();
@@ -1608,10 +1608,10 @@ function it_old_behavior(name, capture) {
                         },
                         {
                             mode: "row",
-                        }
+                        },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1621,7 +1621,7 @@ function it_old_behavior(name, capture) {
                         { x: [1], y: [100] },
                         {
                             index: "x",
-                        }
+                        },
                     );
                     let view = await table.view({
                         split_by: ["y"],
@@ -1635,7 +1635,7 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             view.delete();
                             table.delete();
@@ -1643,10 +1643,10 @@ function it_old_behavior(name, capture) {
                         },
                         {
                             mode: "row",
-                        }
+                        },
                     );
                     await table.update([{ x: 3, y: 100 }]);
-                }
+                },
             );
 
             it_old_behavior(
@@ -1683,16 +1683,16 @@ function it_old_behavior(name, capture) {
                             await match_delta(
                                 perspective,
                                 updated.delta,
-                                expected
+                                expected,
                             );
                             await view.delete();
                             await table.delete();
                             done();
                         },
-                        { mode: "row" }
+                        { mode: "row" },
                     );
                     await table.update(partial_change_y);
-                }
+                },
             );
         });
     });

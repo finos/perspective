@@ -26,7 +26,7 @@ export function init_server(
         | ArrayBuffer
         | Response
         | WebAssembly.Module,
-    disable_stage_0: boolean = false
+    disable_stage_0: boolean = false,
 ) {
     if (wasm instanceof Uint8Array) {
         GLOBAL_SERVER_WASM = Promise.resolve(wasm.buffer);
@@ -40,7 +40,7 @@ export function init_server(
 
     if (!disable_stage_0) {
         GLOBAL_SERVER_WASM = GLOBAL_SERVER_WASM.then((x) =>
-            load_wasm_stage_0(x).then((x) => x.buffer as ArrayBuffer)
+            load_wasm_stage_0(x).then((x) => x.buffer as ArrayBuffer),
         );
     }
 }
@@ -49,7 +49,7 @@ let GLOBAL_CLIENT_WASM: Promise<typeof psp>;
 
 async function compilerize(
     wasm: PerspectiveWasm,
-    disable_stage_0: boolean = false
+    disable_stage_0: boolean = false,
 ) {
     const wasm_buff = disable_stage_0 ? wasm : await load_wasm_stage_0(wasm);
     await wasm_module.default({ module_or_path: wasm_buff });
@@ -67,7 +67,7 @@ export function init_client(wasm: PerspectiveWasm, disable_stage_0 = false) {
     if (wasm instanceof Uint8Array) {
         GLOBAL_CLIENT_WASM = compilerize(
             wasm.buffer as ArrayBuffer,
-            disable_stage_0
+            disable_stage_0,
         );
     } else if (wasm instanceof ArrayBuffer) {
         GLOBAL_CLIENT_WASM = compilerize(wasm, disable_stage_0);
@@ -97,7 +97,7 @@ function get_server() {
     }
 
     return GLOBAL_SERVER_WASM.then((x) =>
-        x instanceof WebAssembly.Module ? x : x.slice(0)
+        x instanceof WebAssembly.Module ? x : x.slice(0),
     );
 }
 
@@ -120,7 +120,7 @@ export async function websocket(url: string | URL) {
 }
 
 export async function worker(
-    worker?: Promise<SharedWorker | ServiceWorker | Worker>
+    worker?: Promise<SharedWorker | ServiceWorker | Worker>,
 ) {
     if (typeof worker === "undefined") {
         worker = get_worker();

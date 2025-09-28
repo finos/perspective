@@ -17,12 +17,12 @@ import { splitIntoMultiSeries } from "./splitIntoMultiSeries";
 export function groupData(settings: Settings, data: any[]): any[] {
     const stack = { stack: false };
     const groupedSeries = splitIntoMultiSeries(settings, data, stack).map(
-        (data) => groupPointDataByMainValue(settings, data, stack)
+        (data) => groupPointDataByMainValue(settings, data, stack),
     );
 
     if (settings.mainValues.length > 1) {
         const flattenedSeries: any[] = groupedSeries.reduce((a, b) =>
-            a.concat(b)
+            a.concat(b),
         );
         return flattenedSeries;
     }
@@ -33,7 +33,7 @@ export function groupData(settings: Settings, data: any[]): any[] {
 export function groupAndStackData(settings: Settings, data) {
     const stack = { stack: true };
     return splitIntoMultiSeries(settings, data, stack).map((data) =>
-        groupPointDataByMainValue(settings, data, stack)
+        groupPointDataByMainValue(settings, data, stack),
     );
 }
 
@@ -60,7 +60,7 @@ function seriesDataFn(settings: Settings, data, { stack = false }) {
 function groupPointDataByMainValue(
     settings: Settings,
     data,
-    { stack = false }
+    { stack = false },
 ) {
     // Split data into a group for each aggregate (mainValue)
     const seriesFn = seriesDataFn(settings, data, { stack });

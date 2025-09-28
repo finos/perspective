@@ -21,7 +21,7 @@ export const getValueFormatterForRange = (min: number, max: number) => {
         return Math.abs(d) >= SI_MIN
             ? d3.format(".3s")(d)
             : Number.isInteger(d)
-            ? d3.format(",.0f")(d)
-            : d3.format(`,.${precision}f`)(d);
+              ? d3.format(",.0f")(d)
+              : d3.format(`,.${precision}f`)(d);
     };
 };

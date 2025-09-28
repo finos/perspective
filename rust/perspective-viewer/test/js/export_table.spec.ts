@@ -15,7 +15,7 @@ import * as path from "node:path";
 
 test.beforeEach(async ({ page }) => {
     const p = path.resolve(
-        "rust/perspective-viewer/test/html/superstore-single-threaded.html"
+        "rust/perspective-viewer/test/html/superstore-single-threaded.html",
     );
 
     await page.goto(`file://${p}`);

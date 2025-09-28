@@ -33,7 +33,7 @@ async function build_all() {
         await $`tsc --project ./tsconfig.json`.stdio(
             "inherit",
             "inherit",
-            "inherit"
+            "inherit",
         );
     } catch (e) {
         console.error(e);

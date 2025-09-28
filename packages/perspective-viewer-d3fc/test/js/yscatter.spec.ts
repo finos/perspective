@@ -34,7 +34,7 @@ test.describe("Y Scatter Tests", () => {
     run_standard_tests(
         "yscatter",
         getSvgContentString(
-            "perspective-viewer perspective-viewer-d3fc-yscatter"
-        )
+            "perspective-viewer perspective-viewer-d3fc-yscatter",
+        ),
     );
 });

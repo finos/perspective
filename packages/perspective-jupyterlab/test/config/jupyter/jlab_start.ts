@@ -41,10 +41,10 @@ const wait_for_jlab = async function () {
                 }
 
                 console.log(
-                    `Jupyterlab server has started on ${process.env.__JUPYTERLAB_PORT__}`
+                    `Jupyterlab server has started on ${process.env.__JUPYTERLAB_PORT__}`,
                 );
                 loaded = true;
-            }
+            },
         ).on("error", (err) => {
             if (num_errors > 50) {
                 kill_jlab();
@@ -68,14 +68,14 @@ export function start_jlab() {
             PACKAGE_ROOT,
             "test",
             "config",
-            "jupyter"
+            "jupyter",
         );
         process.env.JUPYTERLAB_SETTINGS_DIR = path.join(
             PACKAGE_ROOT,
             "test",
             "config",
             "jupyter",
-            "user_settings"
+            "user_settings",
         );
 
         // Start jupyterlab with a root to dist/esm where the notebooks will be.
@@ -103,7 +103,7 @@ export function start_jlab() {
                     NODE_OPTIONS: undefined,
                 },
                 // stdio: "inherit",
-            }
+            },
         );
 
         // Wait for Jupyterlab to start up
