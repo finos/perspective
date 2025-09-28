@@ -20,8 +20,8 @@ if (import.meta.url.startsWith("file:")) {
         const { default: run } = await import("./lint_headers.mjs");
         await run(true);
 
-        dotenv.config({ path: "./.perspectiverc" });
-        lint_js(true);
+        dotenv.config({ path: "./.perspectiverc", quiet: true });
+        await lint_js(true);
         lint_python(true);
         cppLint.fixFormatting();
     }

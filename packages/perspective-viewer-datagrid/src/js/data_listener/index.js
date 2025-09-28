@@ -32,7 +32,16 @@ export function createDataListener(viewer) {
     let last_reverse_columns;
     return async function dataListener(regularTable, x0, y0, x1, y1) {
         let columns = {};
-        let new_window;
+        const new_window = {
+            start_row: y0,
+            start_col: x0,
+            end_row: y1,
+            end_col: x1,
+            id: true,
+        };
+
+        let num_columns = null;
+
         if (x1 - x0 > 0 && y1 - y0 > 0) {
             this._is_old_viewport =
                 this._last_window?.start_row === y0 &&
@@ -40,52 +49,45 @@ export function createDataListener(viewer) {
                 this._last_window?.start_col === x0 &&
                 this._last_window?.end_col === x1;
 
-            new_window = {
-                start_row: y0,
-                start_col: x0,
-                end_row: y1,
-                end_col: x1,
-                id: true,
-            };
+            // if (this._config.split_by?.length > 0) {
+            const [x, z] = await Promise.all([
+                this._view.to_columns_string(new_window),
+                this._view.num_columns(),
+                // this._view.column_paths(new_window),
+            ]);
 
-            if (this._config.split_by?.length > 0) {
-                const [x, y] = await Promise.all([
-                    this._view.to_columns_string(new_window),
-                    this._view.column_paths(new_window),
+            num_columns = z;
+            columns = JSON.parse(x);
+            const y = Object.keys(columns);
+            const new_col_paths = y.filter(
+                (x) => x !== "__ROW_PATH__" && x !== "__ID__"
+            );
+
+            const old_length = this._column_paths.length;
+            this._column_paths.splice(
+                new_window.start_col,
+                new_col_paths.length,
+                ...new_col_paths
+            );
+
+            if (this._column_paths.length !== old_length || old_length === 0) {
+                const [a, b] = await Promise.all([
+                    this._view.schema(),
+                    this._view.expression_schema(),
                 ]);
 
-                columns = JSON.parse(x);
-                const new_col_paths = y.filter(
-                    (x) => x !== "__ROW_PATH__" && x !== "__ID__"
-                );
+                this._schema = { ...a, ...b };
+                for (let i = 0; i < new_col_paths.length; i++) {
+                    const column_path_parts = new_col_paths[i].split("|");
+                    const column =
+                        column_path_parts[this._config.split_by.length];
 
-                const old_length = this._column_paths.length;
-                this._column_paths.splice(
-                    new_window.start_col,
-                    new_col_paths.length,
-                    ...new_col_paths
-                );
+                    this._is_editable[i + new_window.start_col] =
+                        !!this._table_schema[column];
 
-                if (this._column_paths.length !== old_length) {
-                    const [a, b] = await Promise.all([
-                        this._view.schema(),
-                        this._view.expression_schema(),
-                    ]);
-
-                    this._schema = { ...a, ...b };
-                    for (let i = 0; i < new_col_paths.length; i++) {
-                        const column_path_parts = new_col_paths[i].split("|");
-                        const column =
-                            column_path_parts[this._config.split_by.length];
-
-                        this._column_types[i + new_window.start_col] =
-                            this._schema[column];
-                    }
+                    this._column_types[i + new_window.start_col] =
+                        this._schema[column];
                 }
-            } else {
-                columns = JSON.parse(
-                    await this._view.to_columns_string(new_window)
-                );
             }
 
             this._last_window = new_window;
@@ -108,6 +110,7 @@ export function createDataListener(viewer) {
             }, new Map());
         } else {
             this._div_factory.clear();
+            num_columns = await this._view.num_columns();
         }
 
         const data = [],
@@ -189,7 +192,7 @@ export function createDataListener(viewer) {
             num_column_headers: column_headers[0]?.length || 1,
             num_row_headers,
             num_rows: this._num_rows,
-            num_columns: this._column_paths.length,
+            num_columns,
             row_headers,
             column_headers,
             data,

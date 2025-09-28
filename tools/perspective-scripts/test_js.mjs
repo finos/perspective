@@ -12,7 +12,6 @@
 
 import sh from "./sh.mjs";
 import { getarg, run_with_scope, get_scope } from "./sh_perspective.mjs";
-import minimatch from "minimatch";
 
 // Unfortunately we have to handle parts of the Jupyter test case here,
 // as the Jupyter server needs to be run outside of the main Jest process.

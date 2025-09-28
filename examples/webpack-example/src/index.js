@@ -19,9 +19,13 @@ import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc/bar";
 import perspective from "@finos/perspective";
 import perspective_viewer from "@finos/perspective-viewer";
-import * as SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
-import * as CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
 
+// Depending on the phase of the moon (and to a lesser extend, your `webpack`
+// version), this may or may not have a default export.
+import SERVER_WASM from "@finos/perspective/dist/wasm/perspective-server.wasm";
+import CLIENT_WASM from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
+
+console.log(CLIENT_WASM);
 await Promise.all([
     perspective.init_server(SERVER_WASM),
     perspective_viewer.init_client(CLIENT_WASM),

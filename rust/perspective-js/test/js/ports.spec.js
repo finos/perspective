@@ -12,7 +12,7 @@
 
 import { test, expect } from "@finos/perspective-test";
 import perspective from "./perspective_client";
-import * as _ from "underscore";
+import _ from "lodash";
 
 const data = {
     w: [1.5, 2.5, 3.5, 4.5],

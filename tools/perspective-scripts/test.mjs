@@ -13,7 +13,7 @@
 import * as fs from "fs";
 import dotenv from "dotenv";
 
-dotenv.config({ path: "./.perspectiverc" });
+dotenv.config({ path: "./.perspectiverc", quiet: true });
 
 if (!fs.existsSync("./.perspectiverc") && !process.env.PACKAGE) {
     console.error("No .perspectiverc, running setup");

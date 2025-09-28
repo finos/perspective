@@ -6,32 +6,30 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
-    "dependencies": {
-        "@finos/perspective": "workspace:^"
-    },
     "exports": {
         ".": "./dist/esm/index.js"
     },
     "type": "module",
     "scripts": {
-        "build": "node ./build.js",
-        "clean": "rimraf dist",
-        "docs": "npx typedoc --tsconfig tsconfig.json --out ../../docs/static/react"
+        "build": "node ./build.mjs",
+        "clean": "node ./clean.mjs",
+        "docs": "node ./docs.mjs"
     },
     "publishConfig": {
         "access": "public"
     },
-    "peerDependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "@types/react": "^18",
-        "react": "^18",
-        "react-dom": "^18"
+    "dependencies": {
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "@types/react": "catalog:",
+        "react": "catalog:",
+        "react-dom": "catalog:"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "workspace:^",
-        "typescript": "~5.2.2",
-        "typedoc": "^0.28.7",
-        "zx": "^8.3.0"
+        "@finos/perspective-esbuild-plugin": "workspace:",
+        "superstore-arrow": "catalog:",
+        "typescript": "catalog:",
+        "typedoc": "catalog:",
+        "zx": "catalog:"
     }
 }

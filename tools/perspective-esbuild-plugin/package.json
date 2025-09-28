@@ -12,12 +12,11 @@
         "*.js",
         "README.md"
     ],
+    "dependencies": {
+        "esbuild": "catalog:"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/finos/perspective/packages/perspective-build"
-    },
-    "dependencies": {
-        "node-fetch": "^2.6.7",
-        "tar": "^6.1.11"
     }
 }

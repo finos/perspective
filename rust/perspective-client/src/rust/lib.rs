@@ -42,6 +42,7 @@ mod view;
 
 pub mod config;
 
+#[rustfmt::skip]
 #[allow(clippy::all)]
 mod proto;
 

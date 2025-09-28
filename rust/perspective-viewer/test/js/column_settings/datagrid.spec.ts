@@ -142,6 +142,9 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
 
             await table.element.evaluate((node) => (node.scrollLeft = 1000));
             await table.element.evaluate((node) => (node.scrollLeft = 0));
+            await page.evaluate(
+                async () => await new Promise((x) => requestAnimationFrame(x)),
+            );
             await selectedEditBtn.waitFor();
             await selectedTitle.waitFor();
             expect(

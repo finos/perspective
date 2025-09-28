@@ -16,9 +16,9 @@ import { WorkerPlugin } from "@finos/perspective-esbuild-plugin/worker.js";
 import { ResolvePlugin } from "@finos/perspective-esbuild-plugin/resolve.js";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
-import * as fs from "fs";
+import * as fs from "node:fs";
 import { createRequire } from "node:module";
-import { execSync } from "child_process";
+
 import "zx/globals";
 
 const _require = createRequire(import.meta.url);
@@ -146,7 +146,7 @@ async function build_all() {
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 
     try {
-        await $`npx tsc --project ./tsconfig.json`.stdio(
+        await $`tsc --project ./tsconfig.json`.stdio(
             "inherit",
             "inherit",
             "inherit"

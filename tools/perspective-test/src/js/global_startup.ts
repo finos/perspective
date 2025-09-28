@@ -10,9 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import tar from "tar";
-import fs from "fs";
-import path from "path";
+import * as tar from "tar";
+import fs from "node:fs";
+import path from "node:path";
 import url from "node:url";
 
 const __filename = url.fileURLToPath(import.meta.url);

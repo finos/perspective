@@ -31,6 +31,7 @@ pub fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     dst.define("RAPIDJSON_BUILD_EXAMPLES", "OFF");
     dst.define("ARROW_CXX_FLAGS_DEBUG", "-Wno-error");
     dst.define("PSP_PROTOC_PATH", protoc());
+    dst.define("CMAKE_COLOR_DIAGNOSTICS", "ON");
     dst.define(
         "PSP_PROTO_PATH",
         std::env::var("DEP_PERSPECTIVE_CLIENT_PROTO_PATH").unwrap(),

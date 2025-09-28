@@ -121,14 +121,12 @@ export async function createModel(regular, table, view, extend = {}) {
         num_rows,
         schema,
         expression_schema,
-        column_paths,
         _edit_port,
     ] = await Promise.all([
         table.schema(),
         view.num_rows(),
         view.schema(),
         view.expression_schema(),
-        view.column_paths(),
         this.parentElement.getEditPort(),
     ]);
 
@@ -162,18 +160,9 @@ export async function createModel(regular, table, view, extend = {}) {
         ...expression_schema,
     };
 
-    const _column_paths = column_paths.filter((path) => {
-        return path !== "__ROW_PATH__" && path !== "__ID__";
-    });
-
+    const _column_paths = [];
     const _is_editable = [];
     const _column_types = [];
-    for (const column_path of _column_paths) {
-        const column_path_parts = column_path.split("|");
-        const column = column_path_parts[config.split_by.length];
-        _column_types.push(_schema[column]);
-        _is_editable.push(!!table_schema[column]);
-    }
 
     let _edit_mode = this._edit_mode || "READ_ONLY";
     this._edit_button.dataset.editMode = _edit_mode;

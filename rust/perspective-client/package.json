@@ -10,9 +10,6 @@
     "type": "module",
     "license": "Apache-2.0",
     "scripts": {
-        "clean": "rimraf src/rust/proto.rs"
-    },
-    "devDependencies": {
-        "rimraf": "^6"
+        "clean": "rm src/rust/proto.rs"
     }
 }

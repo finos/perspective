@@ -14,7 +14,7 @@ import * as dotenv from "dotenv";
 import sh from "./sh.mjs";
 import { get_scope } from "./sh_perspective.mjs";
 
-dotenv.config({ path: "./.perspectiverc" });
+dotenv.config({ path: "./.perspectiverc", quiet: true });
 
 const scope = get_scope();
 if (scope.includes("perspective")) {
