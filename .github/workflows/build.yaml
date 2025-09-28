@@ -186,7 +186,7 @@ jobs:
             matrix:
                 os:
                     - ubuntu-22.04
-                    - macos-13
+                    - macos-14
                     - windows-2022
                 arch:
                     - aarch64
@@ -206,7 +206,7 @@ jobs:
                       arch: aarch64
                     - os: ubuntu-22.04
                       arch: aarch64
-                    - os: macos-13
+                    - os: macos-14
                       is-release: false
                     - os: windows-2022
                       is-release: false
@@ -492,7 +492,7 @@ jobs:
             matrix:
                 os:
                     - ubuntu-22.04
-                    - macos-13
+                    - macos-14
                     - windows-2022
                 arch:
                     - aarch64
@@ -507,7 +507,7 @@ jobs:
                       arch: aarch64
                     - os: ubuntu-22.04
                       arch: aarch64
-                    - os: macos-13
+                    - os: macos-14
                       is-release: false
                     - os: windows-2022
                       is-release: false
@@ -652,7 +652,7 @@ jobs:
             matrix:
                 os:
                     - ubuntu-22.04
-                    - macos-13
+                    - macos-14
                     - macos-14
                     - windows-2022
                 arch:
@@ -665,13 +665,13 @@ jobs:
                 is-release:
                     - ${{ startsWith(github.ref, 'refs/tags/v') || github.ref_name == 'master' }}
                 exclude:
-                    - os: macos-13
+                    - os: macos-14
                       is-release: false
                     - os: macos-14
                       is-release: false
                     - os: windows-2022
                       is-release: false
-                    - os: macos-13
+                    - os: macos-14
                       arch: aarch64
                     - os: macos-14
                       arch: x86_64
@@ -696,8 +696,8 @@ jobs:
 
             - uses: actions/download-artifact@v4
               with:
-                  # the macos-14 runner tests artifacts built on macos-13
-                  name: perspective-python-dist-${{ matrix.arch }}-${{ matrix.os == 'macos-14' && 'macos-13' || matrix.os }}-${{ matrix.python-version }}
+                  # the macos-14 runner tests artifacts built on macos-14
+                  name: perspective-python-dist-${{ matrix.arch }}-${{ matrix.os == 'macos-14' && 'macos-14' || matrix.os }}-${{ matrix.python-version }}
 
             - uses: ./.github/actions/install-wheel
 
@@ -947,11 +947,11 @@ jobs:
 
             - uses: actions/download-artifact@v4
               with:
-                  name: perspective-python-dist-aarch64-macos-13-3.9
+                  name: perspective-python-dist-aarch64-macos-14-3.9
 
             - uses: actions/download-artifact@v4
               with:
-                  name: perspective-python-dist-x86_64-macos-13-3.9
+                  name: perspective-python-dist-x86_64-macos-14-3.9
 
             - uses: actions/download-artifact@v4
               with:
