@@ -31,7 +31,7 @@ export interface AxisSplitter {
 export const axisSplitter = (
     settings: Settings,
     sourceData,
-    splitFn = dataSplitFunction
+    splitFn = dataSplitFunction,
 ): AxisSplitter => {
     let color: d3.ScaleOrdinal<string, unknown> | undefined = undefined;
     let data;
@@ -45,7 +45,7 @@ export const axisSplitter = (
     };
 
     const haveSplit: boolean = settings["mainValues"].some((m) =>
-        altValue(m.name)
+        altValue(m.name),
     );
 
     // Split the data into main and alt displays

@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import fs from "fs";
-import * as glob from "glob";
 import { Octokit } from "octokit";
 import { parseReleases } from "auto-changelog/src/releases.js";
 import { fetchTags } from "auto-changelog/src/tags.js";
@@ -28,7 +27,7 @@ import "zx/globals";
 const IS_NIGHTLY = process.argv.indexOf("--nightly") > -1;
 
 const PKG_VERSION = JSON.parse(fs.readFileSync("./package.json")).version.match(
-    /[0-9]+\.[0-9]+\.[0-9]+/
+    /[0-9]+\.[0-9]+\.[0-9]+/,
 )[0];
 
 const GIT_REV = await $`git show --no-patch --format=%ct HEAD`;
@@ -61,7 +60,7 @@ class GithubPRCache {
         console.log(
             `Fetching Github commits ${(this.page - 1) * 100} - ${
                 this.page * 100 - 1
-            }`
+            }`,
         );
         this._next_req = this.octokit.request(
             "GET /repos/{owner}/{repo}/pulls?state=closed&per_page={per_page}&page={page}",
@@ -70,7 +69,7 @@ class GithubPRCache {
                 repo: "perspective",
                 per_page: 100,
                 page: this.page++,
-            }
+            },
         );
         return ret;
     }
@@ -179,7 +178,7 @@ async function update_changelog() {
     const json = await parseReleases(tags, options, onParsed);
     const changelog = await template(json);
     fs.writeFileSync("./CHANGELOG.md", changelog);
-    sh`git add CHANGELOG.md`.runSync();
+    $.sync`git add CHANGELOG.md`;
 }
 
 /**
@@ -226,13 +225,13 @@ async function update_package_jsons() {
 
     // if (!IS_NIGHTLY) {
     const pyproject = toml.parse(
-        fs.readFileSync(`./rust/perspective-python/pyproject.toml`)
+        fs.readFileSync(`./rust/perspective-python/pyproject.toml`),
     );
 
     pyproject.tool.maturin.data = `perspective_python-${NEW_VERSION}.data`;
     fs.writeFileSync(
         `./rust/perspective-python/pyproject.toml`,
-        toml.stringify(pyproject)
+        toml.stringify(pyproject),
     );
     // }
 }

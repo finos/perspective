@@ -16,7 +16,7 @@ import { ScaleSequential, Settings } from "../types";
 
 export function barSeries(
     settings: Settings,
-    color: d3.ScaleOrdinal<string, unknown> | ScaleSequential
+    color: d3.ScaleOrdinal<string, unknown> | ScaleSequential,
 ) {
     let series =
         settings.mainValues.length > 1

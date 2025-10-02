@@ -14,7 +14,7 @@ import * as fs from "fs";
 import * as dotenv from "dotenv";
 import { run_with_scope } from "./sh_perspective.mjs";
 
-dotenv.config({ path: "./.perspectiverc" });
+dotenv.config({ path: "./.perspectiverc", quiet: true });
 
 if (!fs.existsSync("./.perspectiverc") && !process.env.PACKAGE) {
     console.error("No .perspectiverc, running setup");

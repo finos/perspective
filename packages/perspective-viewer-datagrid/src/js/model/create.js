@@ -116,44 +116,37 @@ export async function createModel(regular, table, view, extend = {}) {
             type_changed;
     }
 
-    const [
-        table_schema,
-        num_rows,
-        schema,
-        expression_schema,
-        column_paths,
-        _edit_port,
-    ] = await Promise.all([
-        table.schema(),
-        view.num_rows(),
-        view.schema(),
-        view.expression_schema(),
-        view.column_paths(),
-        this.parentElement.getEditPort(),
-    ]);
+    const [table_schema, num_rows, schema, expression_schema, _edit_port] =
+        await Promise.all([
+            table.schema(),
+            view.num_rows(),
+            view.schema(),
+            view.expression_schema(),
+            this.parentElement.getEditPort(),
+        ]);
 
     const _plugin_background = chroma(
-        get_rule(regular, "--plugin--background", "#FFFFFF")
+        get_rule(regular, "--plugin--background", "#FFFFFF"),
     ).rgb();
 
     const _pos_fg_color = make_color_record(
-        get_rule(regular, "--rt-pos-cell--color", "#338DCD")
+        get_rule(regular, "--rt-pos-cell--color", "#338DCD"),
     );
 
     const _neg_fg_color = make_color_record(
-        get_rule(regular, "--rt-neg-cell--color", "#FF5942")
+        get_rule(regular, "--rt-neg-cell--color", "#FF5942"),
     );
 
     const _pos_bg_color = make_color_record(
-        blend(_pos_fg_color[0], _plugin_background)
+        blend(_pos_fg_color[0], _plugin_background),
     );
 
     const _neg_bg_color = make_color_record(
-        blend(_neg_fg_color[0], _plugin_background)
+        blend(_neg_fg_color[0], _plugin_background),
     );
 
     const _color = make_color_record(
-        get_rule(regular, "--active--color", "#ff0000")
+        get_rule(regular, "--active--color", "#ff0000"),
     );
 
     const _schema = { ...schema, ...expression_schema };
@@ -162,18 +155,9 @@ export async function createModel(regular, table, view, extend = {}) {
         ...expression_schema,
     };
 
-    const _column_paths = column_paths.filter((path) => {
-        return path !== "__ROW_PATH__" && path !== "__ID__";
-    });
-
+    const _column_paths = [];
     const _is_editable = [];
     const _column_types = [];
-    for (const column_path of _column_paths) {
-        const column_path_parts = column_path.split("|");
-        const column = column_path_parts[config.split_by.length];
-        _column_types.push(_schema[column]);
-        _is_editable.push(!!table_schema[column]);
-    }
 
     let _edit_mode = this._edit_mode || "READ_ONLY";
     this._edit_button.dataset.editMode = _edit_mode;
@@ -218,7 +202,7 @@ export async function createModel(regular, table, view, extend = {}) {
                     .getComputedStyle(regular)
                     .getPropertyValue("--datagrid-virtual-mode")
                     ?.trim() || "both",
-        }
+        },
     );
 
     return model;

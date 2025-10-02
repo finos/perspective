@@ -35,32 +35,34 @@
         "tsconfig.json"
     ],
     "scripts": {
-        "build": "node ./build.js",
-        "clean": "rimraf dist && rimraf build && rimraf src/ts/ts-rs",
-        "docs": "npx typedoc --tsconfig tsconfig.browser.json --out ../../docs/static/browser && npx typedoc --tsconfig tsconfig.node.json --out ../../docs/static/node"
+        "build": "node ./build.mjs",
+        "clean": "node ./clean.mjs",
+        "docs": "node ./docs..mjs"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
-        "pro_self_extracting_wasm": "0.0.9",
-        "stoppable": "^1.1.0",
-        "ws": "^8.17.0"
+        "pro_self_extracting_wasm": "catalog:",
+        "stoppable": "catalog:",
+        "ws": "catalog:"
     },
     "devDependencies": {
-        "@finos/perspective-server": "workspace:^",
-        "@finos/perspective-esbuild-plugin": "workspace:^",
-        "@finos/perspective-metadata": "workspace:^",
-        "@finos/perspective-test": "workspace:^",
-        "@types/stoppable": "^1.1.0",
-        "@types/ws": "^8.18.1",
-        "apache-arrow": "18.1.0",
-        "cpy": "^9.0.1",
-        "lodash": "^4.17.21",
-        "moment": "^2.30.1",
-        "typedoc": "^0.28.7",
-        "typescript": "~5.2.2",
-        "underscore": "^1.13.6",
-        "zx": "8.3.0"
+        "@finos/perspective-esbuild-plugin": "workspace:",
+        "@finos/perspective-metadata": "workspace:",
+        "@finos/perspective-server": "workspace:",
+        "@finos/perspective-test": "workspace:",
+        "@playwright/experimental-ct-react": "catalog:",
+        "@playwright/test": "catalog:",
+        "@types/node": "catalog:",
+        "@types/ws": "catalog:",
+        "@types/stoppable": "catalog:",
+        "apache-arrow": "catalog:",
+        "superstore-arrow": "catalog:",
+        "lodash": "catalog:",
+        "moment": "catalog:",
+        "typedoc": "catalog:",
+        "typescript": "catalog:",
+        "zx": "catalog:"
     }
 }

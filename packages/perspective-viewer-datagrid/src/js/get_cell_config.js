@@ -13,7 +13,7 @@
 export default async function getCellConfig(
     { _view, _config },
     row_idx,
-    col_idx
+    col_idx,
 ) {
     const group_by = _config.group_by;
     const split_by = _config.split_by;

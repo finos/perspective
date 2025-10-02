@@ -31,7 +31,7 @@ async function build() {
 
     fs.writeFileSync(
         path.join(__dirname, "dist/index.html"),
-        fs.readFileSync(path.join(__dirname, "client/index.html")).toString()
+        fs.readFileSync(path.join(__dirname, "client/index.html")).toString(),
     );
 }
 

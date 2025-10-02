@@ -16,7 +16,7 @@ import { getValuesByColumn } from "../data/utils";
 import { Settings } from "../types";
 
 export function seriesColors(
-    settings: Settings
+    settings: Settings,
 ): d3.ScaleOrdinal<string, unknown> | null {
     const col =
         settings.data && settings.data.length > 0 ? settings.data[0] : {};
@@ -26,7 +26,7 @@ export function seriesColors(
 
 export function seriesColorsFromColumn(
     settings: Settings,
-    column
+    column,
 ): d3.ScaleOrdinal<string, unknown> | null {
     const data = getValuesByColumn(settings, column);
     const domain = [...new Set(data)].sort();
@@ -35,14 +35,14 @@ export function seriesColorsFromColumn(
 
 export function seriesColorsFromDistinct(
     settings: Settings,
-    data
+    data,
 ): d3.ScaleOrdinal<string, unknown> | null {
     let domain = [...new Set(data)];
     return colorScale().settings(settings).domain(domain)();
 }
 
 export function seriesColorsFromGroups(
-    settings: Settings
+    settings: Settings,
 ): d3.ScaleOrdinal<string, unknown> | null {
     const col = settings.data[0] ?? {};
     const inner = Object.keys(col)

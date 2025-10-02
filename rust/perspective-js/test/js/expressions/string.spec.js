@@ -25,7 +25,7 @@ const randchoice = (collection) =>
 const random_string = (
     max_length = 100,
     is_null = false,
-    input_values = CHARS
+    input_values = CHARS,
 ) => {
     if (is_null && Math.random() > 0.5) return null;
     const length = randint(1, max_length);
@@ -138,7 +138,7 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(result['length("a")']).toEqual(
-                result.a.map((x) => x.length)
+                result.a.map((x) => x.length),
             );
             view.delete();
             table.delete();
@@ -153,7 +153,7 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(result['length("a")']).toEqual(
-                result.a.map((x) => (x ? x.length : null))
+                result.a.map((x) => (x ? x.length : null)),
             );
             view.delete();
             table.delete();
@@ -182,7 +182,7 @@ const random_string = (
             expect(
                 result[
                     `order("a", 'deeeeef', 'fg', 'abcdefghijk', 'hhs', 'abc')`
-                ]
+                ],
             ).toEqual([4, 0, 1, 3, 2]);
 
             view.delete();
@@ -259,7 +259,7 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(
-                result[`order("a", 'deeeeef', 'abcdefghijk', 'abc')`]
+                result[`order("a", 'deeeeef', 'abcdefghijk', 'abc')`],
             ).toEqual([2, 0, null, null, 1]);
             view.delete();
             table.delete();
@@ -274,7 +274,7 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(result['upper("a")']).toEqual(
-                result.a.map((x) => x.toUpperCase())
+                result.a.map((x) => x.toUpperCase()),
             );
             view.delete();
             table.delete();
@@ -289,7 +289,7 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(result['upper("a")']).toEqual(
-                result.a.map((x) => (x ? x.toUpperCase() : null))
+                result.a.map((x) => (x ? x.toUpperCase() : null)),
             );
             view.delete();
             table.delete();
@@ -308,10 +308,10 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(result['upper("a")']).toEqual(
-                result.a.map((x) => (x ? x.toUpperCase() : null))
+                result.a.map((x) => (x ? x.toUpperCase() : null)),
             );
             expect(result['upper("b")']).toEqual(
-                result.b.map((x) => (x ? x.toUpperCase() : null))
+                result.b.map((x) => (x ? x.toUpperCase() : null)),
             );
             view.delete();
             table.delete();
@@ -326,7 +326,7 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(result['lower("a")']).toEqual(
-                result.a.map((x) => x.toLowerCase())
+                result.a.map((x) => x.toLowerCase()),
             );
             view.delete();
             table.delete();
@@ -341,7 +341,7 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(result['lower("a")']).toEqual(
-                result.a.map((x) => (x ? x.toLowerCase() : null))
+                result.a.map((x) => (x ? x.toLowerCase() : null)),
             );
             view.delete();
             table.delete();
@@ -362,10 +362,10 @@ const random_string = (
 
             let result = await view.to_columns();
             expect(result['lower("a")']).toEqual(
-                result.a.map((x) => (x ? x.toLowerCase() : null))
+                result.a.map((x) => (x ? x.toLowerCase() : null)),
             );
             expect(result['lower("b")']).toEqual(
-                result.b.map((x) => (x ? x.toLowerCase() : null))
+                result.b.map((x) => (x ? x.toLowerCase() : null)),
             );
             view.delete();
             table.delete();
@@ -383,11 +383,11 @@ const random_string = (
             });
             let result = await view.to_columns();
             expect(
-                result[`concat("a", ', ', 'here is a long string, ', "b")`]
+                result[`concat("a", ', ', 'here is a long string, ', "b")`],
             ).toEqual(
                 result.a.map(
-                    (x, idx) => x + ", here is a long string, " + result.b[idx]
-                )
+                    (x, idx) => x + ", here is a long string, " + result.b[idx],
+                ),
             );
             view.delete();
             table.delete();
@@ -405,12 +405,12 @@ const random_string = (
             });
             let result = await view.to_columns();
             let expected = result.a.map(
-                (x, idx) => x + ", here is a long string, " + result.b[idx]
+                (x, idx) => x + ", here is a long string, " + result.b[idx],
             );
             expected[1] = null;
             expected[2] = null;
             expect(
-                result[`concat("a", ', ', 'here is a long string, ', "b")`]
+                result[`concat("a", ', ', 'here is a long string, ', "b")`],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -434,12 +434,12 @@ const random_string = (
             });
             let result = await view.to_columns();
             let expected = result.a.map(
-                (x, idx) => x + ", here is a long string, " + result.b[idx]
+                (x, idx) => x + ", here is a long string, " + result.b[idx],
             );
             expected[1] = null;
             expected[2] = null;
             expect(
-                result[`concat("a", ', ', 'here is a long string, ', "b")`]
+                result[`concat("a", ', ', 'here is a long string, ', "b")`],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -457,11 +457,11 @@ const random_string = (
             });
             let result = await view.to_columns();
             let expected = result.a.map(
-                (x, idx) => x + ", here is a long string, " + result.b[idx]
+                (x, idx) => x + ", here is a long string, " + result.b[idx],
             );
             expected[2] = null;
             expect(
-                result[`concat("a", ', ', 'here is a long string, ', "b")`]
+                result[`concat("a", ', ', 'here is a long string, ', "b")`],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -489,7 +489,7 @@ const random_string = (
             expect(
                 result[
                     `upper(concat("a", ', ', 'here is a long string, ', "b"))`
-                ]
+                ],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -521,7 +521,7 @@ const random_string = (
             expect(
                 result[
                     `lower(concat("a", ', ', 'HERE is a long string, ', "b"))`
-                ]
+                ],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -541,7 +541,7 @@ const random_string = (
             expect(
                 result[
                     `order(lower(concat("a", ', ', 'HERE is a long string, ', "b")), 'very long string here, here is a long string, another long string is here')`
-                ]
+                ],
             ).toEqual([1, 0, null]);
             view.delete();
             table.delete();
@@ -565,7 +565,7 @@ const random_string = (
             expect(
                 result[
                     `upper(concat("a", ', ', 'here is a long string, ', "b"))`
-                ]
+                ],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -588,7 +588,7 @@ const random_string = (
             expect(
                 result[
                     `lower(concat("a", ', ', 'HERE is a long string, ', "b"))`
-                ]
+                ],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -607,13 +607,13 @@ const random_string = (
             let result = await view.to_columns();
             let expected = result.a.map(
                 (x, idx) =>
-                    (x + ", here is a long string, " + result.b[idx]).length
+                    (x + ", here is a long string, " + result.b[idx]).length,
             );
             expected[2] = null;
             expect(
                 result[
                     `length(concat("a", ', ', 'here is a long string, ', "b"))`
-                ]
+                ],
             ).toEqual(expected);
             view.delete();
             table.delete();
@@ -633,7 +633,7 @@ const random_string = (
             expect(
                 result[
                     `var x := concat("a", ', ', 'here is a long string, ', "b"); order(x, '𝓊⋁ẅ⤫𝛾𝓏, here is a long string, 𝑢ⱴⱳẍ𝘺𝘇ӑṣᶑᵴ', '𝕙ḗľᶅở щṏᵲɭⅾ, here is a long string, 𝕙ḗľᶅở щṏᵲɭⅾ')`
-                ]
+                ],
             ).toEqual([1, 0, 2]);
 
             view.delete();
@@ -680,7 +680,7 @@ const random_string = (
 
             let result = await view.to_columns();
             expect(
-                result[`concat("a", ', ', "b") == concat("a", ', ', "b")`]
+                result[`concat("a", ', ', "b") == concat("a", ', ', "b")`],
             ).toEqual([true, true, true, true, true]);
             view.delete();
             table.delete();
@@ -1036,7 +1036,7 @@ const random_string = (
             await expect(
                 table.view({
                     expressions,
-                })
+                }),
             ).rejects.toThrow();
 
             await table.delete();
@@ -1116,7 +1116,7 @@ const random_string = (
             await expect(
                 table.view({
                     expressions,
-                })
+                }),
             ).rejects.toThrow();
 
             await table.delete();
@@ -1142,11 +1142,11 @@ const random_string = (
             }
 
             expect(validated.errors[expressions[0]].error_message).toEqual(
-                "Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'",
             );
 
             expect(validated.errors[expressions[1]].error_message).toEqual(
-                "Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'",
             );
 
             expect(validated.errors[expressions[2]]).toEqual({
@@ -1186,11 +1186,11 @@ const random_string = (
             }
 
             expect(validated.errors[expressions[0]].error_message).toEqual(
-                "Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'",
             );
 
             expect(validated.errors[expressions[1]].error_message).toEqual(
-                "Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'",
             );
 
             expect(validated.errors[expressions[2]]).toEqual({
@@ -1559,9 +1559,9 @@ const random_string = (
                     const email = `${random_string(
                         30,
                         false,
-                        valid_address_chars
+                        valid_address_chars,
                     )}@${random_string(10, false, ALPHA)}.${randchoice(
-                        endings
+                        endings,
                     )}`;
                     data.push(email);
                 }
@@ -2070,10 +2070,10 @@ const random_string = (
             });
             const results = await view.to_columns();
             expect(results["substring('abcdef', 0)"]).toEqual(
-                Array(5).fill("abcdef")
+                Array(5).fill("abcdef"),
             );
             expect(results["substring('abcdef', 3)"]).toEqual(
-                Array(5).fill("def")
+                Array(5).fill("def"),
             );
             expect(results['substring("x", 3)']).toEqual([
                 ", def, efg",
@@ -2083,22 +2083,22 @@ const random_string = (
                 "45678",
             ]);
             expect(results['substring("y", 0, 3)']).toEqual(
-                Array(5).fill("abc")
+                Array(5).fill("abc"),
             );
             expect(results['substring("y", 1, 2)']).toEqual(
-                Array(5).fill("bc")
+                Array(5).fill("bc"),
             );
             expect(results['substring("y", 0)']).toEqual(results["y"]);
             expect(results['substring("y", 2, 2)']).toEqual(
-                Array(5).fill(null)
+                Array(5).fill(null),
             );
             expect(results['substring("y", 1, 1)']).toEqual(Array(5).fill("b"));
             expect(results['substring("x", -1)']).toEqual(Array(5).fill(null));
             expect(results['substring("x", 1, 10000)']).toEqual(
-                Array(5).fill(null)
+                Array(5).fill(null),
             );
             expect(results['substring("x", 10000)']).toEqual(
-                Array(5).fill(null)
+                Array(5).fill(null),
             );
             expect(results['substring("x", 5, 4)']).toEqual([
                 "def,",
@@ -2136,7 +2136,7 @@ const random_string = (
                     x: ["abc, def, efg", "abcdef", null, "", "12345678"],
                     y: [1, 2, 3, 4, 5],
                 },
-                { index: "y" }
+                { index: "y" },
             );
 
             const view = await table.view({
@@ -2274,7 +2274,7 @@ const random_string = (
                     x: ["abc, def, efg", "abcdef", null, "", "12345678"],
                     y: [1, 2, 3, 4, 5],
                 },
-                { index: "y" }
+                { index: "y" },
             );
 
             const view = await table.view({
@@ -2289,10 +2289,10 @@ const random_string = (
 
             expect(results['substring("x", 100)']).toEqual(Array(5).fill(null));
             expect(results['substring("x", 1, 300)']).toEqual(
-                Array(5).fill(null)
+                Array(5).fill(null),
             );
             expect(results['substring("x", -100)']).toEqual(
-                Array(5).fill(null)
+                Array(5).fill(null),
             );
 
             await table.remove([1, 2, 3, 4, 5]);
@@ -2311,7 +2311,7 @@ const random_string = (
                 str.substr(1, 300),
             ]);
             expect(results['substring("x", -100)']).toEqual(
-                Array(1).fill(null)
+                Array(1).fill(null),
             );
 
             await view.delete();
@@ -2328,9 +2328,9 @@ const random_string = (
                     const email = `${random_string(
                         30,
                         false,
-                        valid_address_chars
+                        valid_address_chars,
                     )}@${random_string(10, false, ALPHA)}.${randchoice(
-                        endings
+                        endings,
                     )}`;
                     data.push(email);
                 }
@@ -2416,11 +2416,11 @@ const random_string = (
                 const idx = result["b"][i];
                 expect(result["w"][i]).toEqual("abcdef-hijk");
                 expect(result["x"][i]).toEqual(
-                    source.replace(/[0-9]{4}$/, idx)
+                    source.replace(/[0-9]{4}$/, idx),
                 );
                 expect(result["y"][i]).toEqual(source);
                 expect(result["z"][i]).toEqual(
-                    source.replace(/^[0-9]{4}/, "long string, very cool!")
+                    source.replace(/^[0-9]{4}/, "long string, very cool!"),
                 );
             }
 
@@ -2487,11 +2487,14 @@ const random_string = (
                 const idx = result["b"][i];
                 expect(result["w"][i]).toEqual("abcdefhijk");
                 expect(result["x"][i]).toEqual(
-                    source.replace(/[0-9]{4}/g, () => idx)
+                    source.replace(/[0-9]{4}/g, () => idx),
                 );
                 expect(result["y"][i]).toEqual(source);
                 expect(result["z"][i]).toEqual(
-                    source.replace(/[0-9]{4}/g, () => "long string, very cool!")
+                    source.replace(
+                        /[0-9]{4}/g,
+                        () => "long string, very cool!",
+                    ),
                 );
             }
 

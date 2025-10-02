@@ -13,15 +13,15 @@
 export async function expandCollapseHandler(regularTable, event) {
     const meta = regularTable.getMeta(event.target);
     const is_collapse = event.target.classList.contains(
-        "psp-tree-label-collapse"
+        "psp-tree-label-collapse",
     );
     if (event.shiftKey && is_collapse) {
         this._view.set_depth(
-            meta.row_header.filter((x) => x !== undefined).length - 2
+            meta.row_header.filter((x) => x !== undefined).length - 2,
         );
     } else if (event.shiftKey) {
         this._view.set_depth(
-            meta.row_header.filter((x) => x !== undefined).length - 1
+            meta.row_header.filter((x) => x !== undefined).length - 1,
         );
     } else if (is_collapse) {
         this._view.collapse(meta.y);

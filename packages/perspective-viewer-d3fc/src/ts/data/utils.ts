@@ -20,13 +20,13 @@ import { Settings } from "../types";
  */
 export function getValuesByColumn(
     settings: Settings,
-    column: string | null
+    column: string | null,
 ): any[] {
     return settings.data
         .map((row) =>
             Object.entries(row)
                 .filter(([k, v]) => k.split("|").at(-1) === column && !!v)
-                .map(([_, v]) => v)
+                .map(([_, v]) => v),
         )
         .flat();
 }

@@ -49,8 +49,8 @@ export const domain = (): Domain => {
                 .reduce((acc, d, i, src) =>
                     i === 0 || acc <= d - src[i - 1]
                         ? acc
-                        : Math.abs(d - src[i - 1])
-                )
+                        : Math.abs(d - src[i - 1]),
+                ),
         );
 
         return Math.min(...gaps);

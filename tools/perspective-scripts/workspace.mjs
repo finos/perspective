@@ -42,12 +42,12 @@ export function getEmscriptenWheelPath() {
     const wheeljunk = "cp39-abi3-emscripten_3_1_58_wasm32";
     return path.join(
         rustWheelsDir,
-        `perspective_python-${pspVersion}-${wheeljunk}.whl`
+        `perspective_python-${pspVersion}-${wheeljunk}.whl`,
     );
 }
 /**
  * @returns memoized, deserialized contents of workspace package.json
  */
 export const getWorkspacePackageJson = memoize(() =>
-    JSON.parse(fs.readFileSync(path.join(workspaceRoot, "package.json")))
+    JSON.parse(fs.readFileSync(path.join(workspaceRoot, "package.json"))),
 );

@@ -15,8 +15,9 @@
 /// dependencies _or_ supported Python versions change - to update these deps
 /// otherwise is to invite the wrath of the CI gods.
 
-import sh from "./sh.mjs";
 import * as fs from "fs";
+
+import "zx/globals";
 
 const VERSIONS = [
     // "3.7",
@@ -27,7 +28,7 @@ const VERSIONS = [
 ];
 
 for (const version of VERSIONS) {
-    sh`
+    $.sync`
         pip3 install "python/perspective[dev]"
         --dry-run
         --report=report.json
@@ -58,9 +59,9 @@ for (const version of VERSIONS) {
     fs.writeFileSync(
         `python/perspective/requirements/requirements-${version.replace(
             ".",
-            ""
+            "",
         )}.txt`,
-        output
+        output,
     );
 }
 

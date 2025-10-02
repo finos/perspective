@@ -16,7 +16,7 @@ import { run_standard_tests } from "@finos/perspective-test";
 async function get_contents(page) {
     return await page.evaluate(async () => {
         const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-plugin"
+            "perspective-viewer perspective-viewer-plugin",
         );
 
         // Don't format - light DOM is CSV in a <pre> tag.
@@ -27,7 +27,7 @@ async function get_contents(page) {
 test.describe("Superstore", () => {
     test.beforeEach(async function init({ page }) {
         await page.goto(
-            "/node_modules/@finos/perspective-viewer/test/html/superstore.html"
+            "/node_modules/@finos/perspective-viewer/test/html/superstore.html",
         );
 
         await page.evaluate(async () => {
@@ -49,7 +49,7 @@ test.describe("Superstore", () => {
 test.describe("Superstore inline", () => {
     test.beforeEach(async function init({ page }) {
         await page.goto(
-            "/node_modules/@finos/perspective-viewer/test/html/superstore-inline.html"
+            "/node_modules/@finos/perspective-viewer/test/html/superstore-inline.html",
         );
 
         await page.evaluate(async () => {

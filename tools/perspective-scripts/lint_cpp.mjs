@@ -14,14 +14,15 @@ import sh from "./sh.mjs";
 import * as fs from "fs";
 import * as url from "url";
 import * as os from "os";
-import * as glob from "glob";
 import { execSync } from "child_process";
 import * as dotenv from "dotenv";
+
+import "zx/globals";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
 export function tidyLint(flags) {
-    dotenv.config({ path: "./.perspectiverc" });
+    dotenv.config({ path: "./.perspectiverc", quiet: true });
     // if (process.env.PSP_PROJECT === "js") {
     const cppPath = sh.path`${__dirname}/../../rust/perspective-server/cpp/perspective`;
     const cppDistPath = sh.path`${cppPath}/dist/release`;
@@ -64,7 +65,7 @@ function tidy(buildDir, sourceDir, flags) {
 
 const CLANG_TIDY = `run-clang-tidy`;
 const CLANG_FORMAT = fs.existsSync(
-    `${__dirname}/../../.llvm/llvm-toolchain/bin/clang-format`
+    `${__dirname}/../../.llvm/llvm-toolchain/bin/clang-format`,
 )
     ? `${__dirname}/../../.llvm/llvm-toolchain/bin/clang-format`
     : `clang-format`;
@@ -88,13 +89,23 @@ function clangFormatFix(dir) {
 }
 
 export function checkFormatting() {
-    formatLint(sh.path`./cpp/perspective/src/cpp/*.cpp`);
-    formatLint(sh.path`./cpp/perspective/src/include/perspective/*.h`);
+    formatLint(
+        sh.path`./rust/perspective-server/cpp/perspective/src/cpp/*.cpp`,
+    );
+
+    formatLint(
+        sh.path`./rust/perspective-server/cpp/perspective/src/include/perspective/*.h`,
+    );
     // tidyLint();
 }
 
 export function fixFormatting() {
     // tidyLint("-fix");
-    clangFormatFix(sh.path`./cpp/perspective/src/cpp/*.cpp`);
-    clangFormatFix(sh.path`./cpp/perspective/src/include/perspective/*.h`);
+    clangFormatFix(
+        sh.path`./rust/perspective-server/cpp/perspective/src/cpp/*.cpp`,
+    );
+
+    clangFormatFix(
+        sh.path`./rust/perspective-server/cpp/perspective/src/include/perspective/*.h`,
+    );
 }

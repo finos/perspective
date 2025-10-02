@@ -54,7 +54,7 @@ export async function activate(view) {
             this,
             this.regular_table,
             table,
-            view
+            view,
         );
 
         if (!this.model) {
@@ -69,32 +69,32 @@ export async function activate(view) {
             table_cell_style_listener.bind(
                 this.model,
                 this.regular_table,
-                viewer
-            )
+                viewer,
+            ),
         );
 
         this.regular_table.addStyleListener(
-            group_header_style_listener.bind(this.model, this.regular_table)
+            group_header_style_listener.bind(this.model, this.regular_table),
         );
 
         this.regular_table.addStyleListener(
             column_header_style_listener.bind(
                 this.model,
                 this.regular_table,
-                viewer
-            )
+                viewer,
+            ),
         );
 
         // uh ..
         this.regular_table.addEventListener(
             "click",
-            click_listener.bind(this.model, this.regular_table)
+            click_listener.bind(this.model, this.regular_table),
         );
 
         // tree collapse, expand, edit button headers
         this.regular_table.addEventListener(
             "mousedown",
-            mousedown_listener.bind(this.model, this.regular_table, viewer)
+            mousedown_listener.bind(this.model, this.regular_table, viewer),
         );
 
         // (Legacy) Row selection
@@ -104,8 +104,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_rows_map
-            )
+                selected_rows_map,
+            ),
         );
 
         this.regular_table.addEventListener(
@@ -114,8 +114,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_rows_map
-            )
+                selected_rows_map,
+            ),
         );
 
         this.regular_table.addEventListener(
@@ -124,14 +124,18 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_rows_map
-            )
+                selected_rows_map,
+            ),
         );
 
         // User event click
         this.regular_table.addEventListener(
             "click",
-            dispatch_click_listener.bind(this.model, this.regular_table, viewer)
+            dispatch_click_listener.bind(
+                this.model,
+                this.regular_table,
+                viewer,
+            ),
         );
 
         // Editing
@@ -141,22 +145,22 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                this
-            )
+                this,
+            ),
         );
         this.regular_table.addStyleListener(
             focus_style_listener.bind(
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
 
         // TODO relies on this.model._is_editable
         this.regular_table.addEventListener(
             "click",
-            clickListener.bind(this.model, this.regular_table, viewer)
+            clickListener.bind(this.model, this.regular_table, viewer),
         );
 
         this.regular_table.addEventListener(
@@ -165,8 +169,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
         this.regular_table.addEventListener(
             "focusout",
@@ -174,8 +178,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
         this.regular_table.addEventListener(
             "keydown",
@@ -183,8 +187,8 @@ export async function activate(view) {
                 this.model,
                 this.regular_table,
                 viewer,
-                selected_position_map
-            )
+                selected_position_map,
+            ),
         );
 
         // viewer event listeners
@@ -196,7 +200,7 @@ export async function activate(view) {
                         this.model,
                         this.regular_table,
                         viewer,
-                        event.detail.column_name
+                        event.detail.column_name,
                     );
                     if (!event.detail.open) {
                         this.model._column_settings_selected_column = null;
@@ -206,7 +210,7 @@ export async function activate(view) {
                     this.model._column_settings_selected_column =
                         event.detail.column_name;
                 }
-            }
+            },
         );
 
         this._initialized = true;
@@ -216,7 +220,7 @@ export async function activate(view) {
             this.regular_table,
             table,
             view,
-            this.model
+            this.model,
         );
     }
 }

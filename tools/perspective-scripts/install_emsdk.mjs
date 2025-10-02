@@ -21,9 +21,7 @@ const pkg = getWorkspacePackageJson();
 
 const emscripten = pkg.emscripten;
 
-dotenv.config({
-    path: "./.perspectiverc",
-});
+dotenv.config({ path: "./.perspectiverc", quiet: true });
 
 function base() {
     return sh.path`${getWorkspaceRoot()}/.emsdk`;

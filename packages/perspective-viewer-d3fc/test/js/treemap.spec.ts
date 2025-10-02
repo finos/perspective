@@ -36,7 +36,7 @@ test.describe("Treemap Tests", () => {
     run_standard_tests(
         "treemap",
         getSvgContentString(
-            "perspective-viewer perspective-viewer-d3fc-treemap"
-        )
+            "perspective-viewer perspective-viewer-d3fc-treemap",
+        ),
     );
 });

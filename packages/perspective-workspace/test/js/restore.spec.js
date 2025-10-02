@@ -51,7 +51,7 @@ function tests(context, compare) {
 
         return compare(
             page,
-            `${context}-restore-workspace-with-detail-only.txt`
+            `${context}-restore-workspace-with-detail-only.txt`,
         );
     });
 
@@ -90,7 +90,7 @@ function tests(context, compare) {
 
         return compare(
             page,
-            `${context}-restore-workspace-with-master-and-detail.txt`
+            `${context}-restore-workspace-with-master-and-detail.txt`,
         );
     });
 
@@ -113,7 +113,7 @@ function tests(context, compare) {
 
         return compare(
             page,
-            `${context}-restore-workspace-is-symmetric-with-addviewer.txt`
+            `${context}-restore-workspace-is-symmetric-with-addviewer.txt`,
         );
     });
 
@@ -151,7 +151,7 @@ function tests(context, compare) {
             }, config);
 
             test.expect(x).toEqual(
-                '<perspective-workspace id="workspace"><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_1" table="superstore" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" class="edit-mode-allowed" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_0" table="superstore" class="workspace-master-widget" selectable="" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer></perspective-workspace>'
+                '<perspective-workspace id="workspace"><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_1" table="superstore" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" class="edit-mode-allowed" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_0" table="superstore" class="workspace-master-widget" selectable="" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer></perspective-workspace>',
             );
 
             await page.evaluate(async (config) => {
@@ -162,7 +162,7 @@ function tests(context, compare) {
 
             return compare(
                 page,
-                `${context}-restore-a-blank-view-removes-master-panel.txt`
+                `${context}-restore-a-blank-view-removes-master-panel.txt`,
             );
         });
 
@@ -231,7 +231,7 @@ function tests(context, compare) {
             }, config);
 
             test.expect(x).toEqual(
-                '<perspective-workspace id="workspace"><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_1" table="superstore" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" class="edit-mode-allowed" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_0" table="superstore" class="workspace-master-widget" selectable="" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer></perspective-workspace>'
+                '<perspective-workspace id="workspace"><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_1" table="superstore" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" class="edit-mode-allowed" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer><perspective-viewer slot="PERSPECTIVE_GENERATED_ID_0" table="superstore" class="workspace-master-widget" selectable="" theme="Pro Light"><perspective-viewer-datagrid style="position: absolute; inset: 0px; opacity: 1;" data-edit-mode="READ_ONLY"></perspective-viewer-datagrid><perspective-viewer-datagrid-toolbar slot="plugin-settings"></perspective-viewer-datagrid-toolbar></perspective-viewer></perspective-workspace>',
             );
 
             await page.evaluate(async (config) => {
@@ -242,7 +242,7 @@ function tests(context, compare) {
 
             return compare(
                 page,
-                `${context}-restore-which-reseats-master-viewer.txt`
+                `${context}-restore-which-reseats-master-viewer.txt`,
             );
         });
     });

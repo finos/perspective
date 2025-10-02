@@ -15,7 +15,7 @@ import { API_VERSION } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
     await page.goto(
-        "/node_modules/@finos/perspective-viewer/test/html/plugin-priority-order.html"
+        "/node_modules/@finos/perspective-viewer/test/html/plugin-priority-order.html",
     );
     await page.evaluate(async () => {
         while (!window["__TEST_PERSPECTIVE_READY__"]) {

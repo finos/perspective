@@ -21,7 +21,7 @@ import * as arrows from "./test_arrows.js";
         perspective,
         delta,
         expected,
-        formatter = "to_json"
+        formatter = "to_json",
     ) {
         const table = await perspective.table(delta);
         const view = await table.view();
@@ -40,7 +40,7 @@ import * as arrows from "./test_arrows.js";
                     x: "integer",
                     group: "integer",
                 },
-                { limit: 10 }
+                { limit: 10 },
             );
 
             const data = [];
@@ -70,7 +70,7 @@ import * as arrows from "./test_arrows.js";
                     y: "string",
                     z: "boolean",
                 },
-                { limit: 2 }
+                { limit: 2 },
             );
 
             const v1 = await table.view();

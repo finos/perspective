@@ -37,8 +37,8 @@ export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
     const bg_tuple = is_positive
         ? pos_bg_color
         : is_negative
-        ? neg_bg_color
-        : ["", ...this._plugin_background, ""];
+          ? neg_bg_color
+          : ["", ...this._plugin_background, ""];
 
     {
         const [hex, r, g, b, _gradhex] = bg_tuple;
@@ -53,11 +53,11 @@ export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
         } else if (plugin?.number_bg_mode === "gradient") {
             const a = Math.max(
                 0,
-                Math.min(1, Math.abs(metadata.user / plugin.bg_gradient))
+                Math.min(1, Math.abs(metadata.user / plugin.bg_gradient)),
             );
             const source = this._plugin_background;
             const foreground = infer_foreground_from_background(
-                rgbaToRgb([r, g, b, a], source)
+                rgbaToRgb([r, g, b, a], source),
             );
 
             td.style.animation = "";
@@ -71,7 +71,7 @@ export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
                 td,
                 pos_bg_color,
                 neg_bg_color,
-                is_settings_open
+                is_settings_open,
             );
             td.style.backgroundColor = "";
         } else if (
@@ -91,14 +91,14 @@ export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
             return is_positive
                 ? plugin.pos_fg_color
                 : is_negative
-                ? plugin.neg_fg_color
-                : ["", ...this._plugin_background, ""];
+                  ? plugin.neg_fg_color
+                  : ["", ...this._plugin_background, ""];
         } else {
             return is_positive
                 ? this._pos_fg_color
                 : is_negative
-                ? this._neg_fg_color
-                : ["", ...this._plugin_background, ""];
+                  ? this._neg_fg_color
+                  : ["", ...this._plugin_background, ""];
         }
     })();
 
@@ -109,7 +109,7 @@ export function cell_style_numeric(plugin, td, metadata, is_settings_open) {
         if (plugin?.number_bg_mode === "color") {
             const source = this._plugin_background;
             const foreground = infer_foreground_from_background(
-                rgbaToRgb([bg_tuple[1], bg_tuple[2], bg_tuple[3], 1], source)
+                rgbaToRgb([bg_tuple[1], bg_tuple[2], bg_tuple[3], 1], source),
             );
             td.style.color = foreground;
         } else if (plugin?.number_bg_mode === "gradient") {

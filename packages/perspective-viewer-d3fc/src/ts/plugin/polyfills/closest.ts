@@ -18,7 +18,7 @@ if (!Element.prototype.matches) {
 
 if (!Element.prototype.closest) {
     Element.prototype.closest = function <
-        K extends keyof HTMLElementTagNameMap
+        K extends keyof HTMLElementTagNameMap,
     >(s: K): HTMLElementTagNameMap[K] {
         var el = this;
 

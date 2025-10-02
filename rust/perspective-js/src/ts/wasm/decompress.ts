@@ -27,7 +27,7 @@ interface Module extends WebAssembly.Exports {
 // load binary, as this may either be an `ArrayBuffer` or `URL` depending
 // on whether `inline` option was specified to `perspective-esbuild-plugin`.
 async function compile(
-    buffer: ArrayBuffer | Response | WebAssembly.Module | WebAssembly.Exports
+    buffer: ArrayBuffer | Response | WebAssembly.Module | WebAssembly.Exports,
 ): Promise<Module> {
     if (buffer instanceof Response) {
         return (await WebAssembly.instantiateStreaming(buffer)).instance
@@ -49,7 +49,7 @@ export async function load_wasm_stage_0(
         | ArrayBuffer
         | Response
         | WebAssembly.Module
-        | (() => Promise<ArrayBuffer>)
+        | (() => Promise<ArrayBuffer>),
 ): Promise<Uint8Array> {
     if (wasm instanceof Function) {
         wasm = await wasm();

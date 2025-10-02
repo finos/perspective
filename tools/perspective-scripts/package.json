@@ -13,6 +13,16 @@
     "author": "",
     "license": "Apache-2.0",
     "devDependencies": {
-        "zx": "^8.3.0"
+        "auto-changelog": "catalog:",
+        "fs-extra": "catalog:",
+        "inquirer": "catalog:",
+        "glob-gitignore": "catalog:",
+        "octokit": "catalog:",
+        "typescript": "catalog:",
+        "tsx": "catalog:",
+        "@iarna/toml": "catalog:",
+        "@playwright/experimental-ct-react": "catalog:",
+        "@playwright/test": "catalog:",
+        "zx": "catalog:"
     }
 }

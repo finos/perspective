@@ -12,7 +12,6 @@
 
 import sh from "./sh.mjs";
 import { getarg, run_with_scope, get_scope } from "./sh_perspective.mjs";
-import minimatch from "minimatch";
 
 // Unfortunately we have to handle parts of the Jupyter test case here,
 // as the Jupyter server needs to be run outside of the main Jest process.
@@ -41,12 +40,12 @@ const IS_PLAYWRIGHT = get_scope().reduce(
             "perspective-workspace",
             "perspective-jupyterlab",
         ].includes(pkg),
-    false
+    false,
 );
 
 const IS_RUST = get_scope().reduce(
     (is_playwright, pkg) => is_playwright || ["perspective-rs"].includes(pkg),
-    false
+    false,
 );
 
 const IS_CI = process.env.CI || getarg("--ci") ? "CI=1" : "";

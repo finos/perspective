@@ -13,102 +13,70 @@
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
-import { promisify } from "node:util";
-import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path_mod from "node:path";
 
-const exec = promisify(execSync);
-
 const BUILD = [
     {
-        entryPoints: [
-            "src/ts/index/area.ts",
-            "src/ts/index/bar.ts",
-            "src/ts/index/candlestick.ts",
-            "src/ts/index/column.ts",
-            "src/ts/index/heatmap.ts",
-            "src/ts/index/line.ts",
-            "src/ts/index/ohlc.ts",
-            "src/ts/index/sunburst.ts",
-            "src/ts/index/xy-scatter.ts",
-            "src/ts/index/y-scatter.ts",
-        ],
         define: {
             global: "window",
         },
-        plugins: [NodeModulesExternal()],
-        format: "esm",
-        metafile: false,
-        loader: {
-            ".css": "text",
-            ".html": "text",
-        },
-        outdir: "dist/esm",
-    },
-    {
-        entryPoints: ["src/ts/index.ts"],
-        define: {
-            global: "window",
-        },
+        entryPoints: ["src/js/index.js"],
         plugins: [NodeModulesExternal()],
         format: "esm",
         loader: {
             ".css": "text",
             ".html": "text",
         },
-        outfile: "dist/esm/perspective-viewer-d3fc.js",
+        outfile: "dist/esm/perspective-viewer-datagrid.js",
     },
     {
-        entryPoints: ["src/ts/index.ts"],
         define: {
             global: "window",
         },
+        entryPoints: ["src/js/index.js"],
         plugins: [],
         format: "esm",
         loader: {
             ".css": "text",
             ".html": "text",
         },
-        outfile: "dist/cdn/perspective-viewer-d3fc.js",
+        outfile: "dist/cdn/perspective-viewer-datagrid.js",
     },
 ];
 
 function add(builder, path) {
     builder.add(
         path,
-        fs.readFileSync(path_mod.join("./src/less", path)).toString()
+        fs.readFileSync(path_mod.join("./src/less", path)).toString(),
     );
 }
 
 async function compile_css() {
     fs.mkdirSync("dist/css", { recursive: true });
-    const builder = new BuildCss("");
-    add(builder, "./chart.less");
+    const builder1 = new BuildCss("");
+    add(builder1, "./pro.less");
+    add(builder1, "./mitered-headers.less");
+    add(builder1, "./row-hover.less");
+    add(builder1, "./sub-cell-scroll.less");
+    add(builder1, "./scrollbar.less");
+    add(builder1, "./regular_table.less");
     fs.writeFileSync(
-        "dist/css/perspective-viewer-d3fc.css",
-        builder.compile().get("chart.css")
+        "dist/css/perspective-viewer-datagrid.css",
+        builder1.compile().get("regular_table.css"),
+    );
+
+    const builder2 = new BuildCss("");
+    add(builder2, "./toolbar.less");
+    fs.writeFileSync(
+        "dist/css/perspective-viewer-datagrid-toolbar.css",
+        builder2.compile().get("toolbar.css"),
     );
 }
 
 async function build_all() {
-    // NOTE: compile_css and other build step must be run before tsc, because
-    // (for now) nothing runs after the tsc step.
     await compile_css();
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
-
-    // esbuild can handle typescript files, and strips out types from the output,
-    // but it is unable to check types, so we must run tsc as a separate step.
-    try {
-        await exec("tsc", { stdio: "inherit" });
-    } catch (error) {
-        console.error(error);
-        // tsc errors tend to get buried when running multiple package builds. If
-        // the perspective-viewer-d3fc build fails, then plugins will not be present
-        // when running tests, leading to a large number of tests failing, but without
-        // a great indication of why.
-        process.exit(1);
-    }
 }
 
 build_all();

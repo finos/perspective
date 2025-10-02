@@ -4,10 +4,8 @@
     "description": "Benchmark utility based on perspective",
     "private": true,
     "files": [
-        "src/**/*",
-        "perspective-metadata"
+        "src/**/*"
     ],
-    "bin": "perspective-metadata",
     "repository": {
         "type": "git",
         "url": "https://github.com/finos/perspective/packages/perspective-metadata"

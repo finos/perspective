@@ -15,7 +15,7 @@ export function style_cell_flash(
     td,
     [, , , , , pos_s, pos_e],
     [, , , , , neg_s, neg_e],
-    is_settings_open
+    is_settings_open,
 ) {
     const id = this._ids?.[metadata.dy]?.join("|");
     const metadata_path = (

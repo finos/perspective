@@ -17,7 +17,6 @@ import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.
 import * as fs from "node:fs";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
 import { compress } from "pro_self_extracting_wasm";
-import cpy from "cpy";
 
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
@@ -35,12 +34,12 @@ async function build_all() {
         `cargo bundle --target=${get_host()} -- perspective_viewer ${
             IS_DEBUG ? "" : "--release"
         }`,
-        INHERIT
+        INHERIT,
     );
 
     await compress(
         "dist/wasm/perspective-viewer.wasm",
-        "dist/wasm/perspective-viewer.wasm"
+        "dist/wasm/perspective-viewer.wasm",
     );
 
     // JavaScript
@@ -113,7 +112,7 @@ async function build_all() {
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 
     // Typecheck
-    execSync("npx tsc --project tsconfig.json", INHERIT);
+    execSync("tsc --project tsconfig.json", INHERIT);
 
     // Generate themes. `cargo` is not a great tool for this as there's no
     // simple way to find the output artifact.

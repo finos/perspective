@@ -56,7 +56,7 @@ const SYNC_SERVER = new engine.PerspectiveServer(SYNC_MODULE);
 //     new engine.PerspectivePollThread(SYNC_SERVER);
 
 const SYNC_SESSION = SYNC_SERVER.make_session(
-    async (resp) => await SYNC_CLIENT.handle_response(resp)
+    async (resp) => await SYNC_CLIENT.handle_response(resp),
 );
 
 SYNC_CLIENT = new perspective_client.Client(async (req: Uint8Array) => {
@@ -70,13 +70,13 @@ export class PerspectiveServer extends engine.PerspectiveServer {
 }
 
 export const make_session = async (
-    send_response: (buffer: Uint8Array) => Promise<void>
+    send_response: (buffer: Uint8Array) => Promise<void>,
 ) => SYNC_SERVER.make_session(send_response);
 
 // Helper function to create client emitter/receiver pairs
 export function make_client(
     send_request: (buffer: Uint8Array) => Promise<void>,
-    close?: Function
+    close?: Function,
 ) {
     return new perspective_client.Client(send_request, close);
 }
@@ -101,7 +101,7 @@ export async function cwd_static_file_handler(
     request: http.IncomingMessage,
     response: http.ServerResponse<http.IncomingMessage>,
     assets = ["./"],
-    { debug = true } = {}
+    { debug = true } = {},
 ) {
     let url =
         request.url
@@ -155,7 +155,7 @@ export async function cwd_static_file_handler(
 }
 
 function buffer_to_arraybuffer(
-    buffer: string | Buffer | ArrayBuffer | Buffer[] | Uint8Array
+    buffer: string | Buffer | ArrayBuffer | Buffer[] | Uint8Array,
 ): Uint8Array {
     if (typeof buffer === "string") {
         throw new Error("Unknown websocket message: " + buffer);
@@ -167,8 +167,8 @@ function buffer_to_arraybuffer(
         return new Uint8Array(
             buffer.buffer.slice(
                 buffer.byteOffset,
-                buffer.byteOffset + buffer.length
-            )
+                buffer.byteOffset + buffer.length,
+            ),
         );
     }
 }
@@ -193,7 +193,7 @@ export class WebSocketServer {
 
         port = typeof port === "undefined" ? 8080 : port;
         this._server = stoppable(
-            http.createServer((x, y) => cwd_static_file_handler(x, y, assets))
+            http.createServer((x, y) => cwd_static_file_handler(x, y, assets)),
         );
 
         this._wss = new HttpWebSocketServer({
@@ -206,7 +206,7 @@ export class WebSocketServer {
             const session = perspective_server.make_session(
                 async (proto: Uint8Array) => {
                     ws.send(buffer_to_arraybuffer(proto));
-                }
+                },
             );
 
             ws.on("message", (proto) => {
@@ -223,16 +223,16 @@ export class WebSocketServer {
             (
                 request: http.IncomingMessage,
                 socket: net.Socket,
-                head: Buffer
+                head: Buffer,
             ) => {
                 console.log("200 Websocket upgrade");
                 this._wss.handleUpgrade(
                     request,
                     socket as net.Socket,
                     head,
-                    (sock) => this._wss.emit("connection", sock, request)
+                    (sock) => this._wss.emit("connection", sock, request),
                 );
-            }
+            },
         );
 
         this._server.listen(port, () => {
@@ -277,7 +277,7 @@ export function table(
         | ArrayBuffer
         | Record<string, any>
         | Record<string, unknown>[],
-    options?: perspective_client.TableInitOptions
+    options?: perspective_client.TableInitOptions,
 ) {
     return SYNC_CLIENT.table(init_data, options);
 }
@@ -290,12 +290,12 @@ export function table(
  * @returns
  */
 export async function websocket(
-    url: string
+    url: string,
 ): Promise<perspective_client.Client> {
     return await psp_websocket.websocket(
         WebSocket as unknown as typeof window.WebSocket,
         perspective_client.Client,
-        url
+        url,
     );
 }
 

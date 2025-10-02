@@ -10,18 +10,18 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "@finos/perspective-viewer-d3fc": "workspace:^",
-        "@finos/perspective-viewer-datagrid": "workspace:^"
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "@finos/perspective-viewer-d3fc": "workspace:",
+        "@finos/perspective-viewer-datagrid": "workspace:"
     },
     "devDependencies": {
-        "arraybuffer-loader": "^1.0.8",
-        "css-loader": "^0.28.7",
-        "html-webpack-plugin": "^5.1.0",
-        "style-loader": "^0.18.2",
-        "file-loader": "^5",
-        "webpack": "^5",
-        "webpack-cli": "^5"
+        "arraybuffer-loader": "catalog:",
+        "css-loader": "catalog:",
+        "html-webpack-plugin": "catalog:",
+        "style-loader": "catalog:",
+        "superstore-arrow": "catalog:",
+        "webpack-cli": "catalog:",
+        "webpack": "catalog:"
     }
 }

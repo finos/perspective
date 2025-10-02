@@ -18,46 +18,46 @@ await register();
 declare global {
     interface CustomElementRegistry {
         get(
-            tagName: "perspective-viewer-d3fc-area"
+            tagName: "perspective-viewer-d3fc-area",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-xbar"
+            tagName: "perspective-viewer-d3fc-xbar",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-candlestick"
+            tagName: "perspective-viewer-d3fc-candlestick",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-ybar"
+            tagName: "perspective-viewer-d3fc-ybar",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-heatmap"
+            tagName: "perspective-viewer-d3fc-heatmap",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-yline"
+            tagName: "perspective-viewer-d3fc-yline",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-ohlc"
+            tagName: "perspective-viewer-d3fc-ohlc",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-sunburst"
+            tagName: "perspective-viewer-d3fc-sunburst",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-treemap"
+            tagName: "perspective-viewer-d3fc-treemap",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-xyline"
+            tagName: "perspective-viewer-d3fc-xyline",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-xyscatter"
+            tagName: "perspective-viewer-d3fc-xyscatter",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
         get(
-            tagName: "perspective-viewer-d3fc-yscatter"
+            tagName: "perspective-viewer-d3fc-yscatter",
         ): typeof HTMLPerspectiveViewerD3FCPluginElement;
 
         whenDefined(tagName: "perspective-viewer-d3fc-area"): Promise<void>;
         whenDefined(tagName: "perspective-viewer-d3fc-xbar"): Promise<void>;
         whenDefined(
-            tagName: "perspective-viewer-d3fc-candlestick"
+            tagName: "perspective-viewer-d3fc-candlestick",
         ): Promise<void>;
         whenDefined(tagName: "perspective-viewer-d3fc-ybar"): Promise<void>;
         whenDefined(tagName: "perspective-viewer-d3fc-heatmap"): Promise<void>;
@@ -67,7 +67,7 @@ declare global {
         whenDefined(tagName: "perspective-viewer-d3fc-treemap"): Promise<void>;
         whenDefined(tagName: "perspective-viewer-d3fc-xyline"): Promise<void>;
         whenDefined(
-            tagName: "perspective-viewer-d3fc-xyscatter"
+            tagName: "perspective-viewer-d3fc-xyscatter",
         ): Promise<void>;
         whenDefined(tagName: "perspective-viewer-d3fc-yscatter"): Promise<void>;
     }

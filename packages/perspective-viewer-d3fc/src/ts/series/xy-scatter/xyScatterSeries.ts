@@ -79,7 +79,7 @@ export default function xyScatterSeries(): XYScatterSeries {
 
         const scale_factor = interpolate_scale(
             [600, 0.1],
-            [1600, 1]
+            [1600, 1],
         )(container);
         const series = fc
             .seriesCanvasMulti()
@@ -93,9 +93,9 @@ export default function xyScatterSeries(): XYScatterSeries {
                         color,
                         label,
                         symbols,
-                        scale_factor
-                    )
-                )
+                        scale_factor,
+                    ),
+                ),
             );
 
         const axisDefault = () =>

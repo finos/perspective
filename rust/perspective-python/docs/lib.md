@@ -47,18 +47,18 @@ makes it simple to extend a Tornado server with virtual Perspective support.
 
 The `perspective` module exports several tools:
 
--   `Server` the constructor for a new isntance of the Perspective data engine.
--   The `perspective.widget` module exports `PerspectiveWidget`, the JupyterLab
-    widget for interactive visualization in a notebook cell.
--   The `perspective.handlers` modules exports web frameworks handlers that
-    interface with a `perspective-client` in JavaScript.
-    -   `perspective.handlers.tornado.PerspectiveTornadoHandler` for
-        [Tornado](https://www.tornadoweb.org/)
-    -   `perspective.handlers.starlette.PerspectiveStarletteHandler` for
-        [Starlette](https://www.starlette.io/) and
-        [FastAPI](https://fastapi.tiangolo.com)
-    -   `perspective.handlers.aiohttp.PerspectiveAIOHTTPHandler` for
-        [AIOHTTP](https://docs.aiohttp.org),
+- `Server` the constructor for a new isntance of the Perspective data engine.
+- The `perspective.widget` module exports `PerspectiveWidget`, the JupyterLab
+  widget for interactive visualization in a notebook cell.
+- The `perspective.handlers` modules exports web frameworks handlers that
+  interface with a `perspective-client` in JavaScript.
+    - `perspective.handlers.tornado.PerspectiveTornadoHandler` for
+      [Tornado](https://www.tornadoweb.org/)
+    - `perspective.handlers.starlette.PerspectiveStarletteHandler` for
+      [Starlette](https://www.starlette.io/) and
+      [FastAPI](https://fastapi.tiangolo.com)
+    - `perspective.handlers.aiohttp.PerspectiveAIOHTTPHandler` for
+      [AIOHTTP](https://docs.aiohttp.org),
 
 This user's guide provides an overview of the most common ways to use
 Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
@@ -98,11 +98,11 @@ A `Table` can be created from a dataset or a schema, the specifics of which are
 guide. In Python, however, Perspective supports additional data types that are
 commonly used when processing data:
 
--   `pandas.DataFrame`
--   `polars.DataFrame`
--   `bytes` (encoding an Apache Arrow)
--   `objects` (either extracting a repr or via reference)
--   `str` (encoding as a CSV)
+- `pandas.DataFrame`
+- `polars.DataFrame`
+- `bytes` (encoding an Apache Arrow)
+- `objects` (either extracting a repr or via reference)
+- `str` (encoding as a CSV)
 
 A `Table` is created in a similar fashion to its JavaScript equivalent:
 
@@ -278,7 +278,7 @@ _*index.html*_
     // Create a client that expects a Perspective server
     // to accept connections at the specified URL.
     const websocket = await perspective.websocket(
-        "ws://localhost:8888/websocket"
+        "ws://localhost:8888/websocket",
     );
 
     // Get a handle to the Table on the server
@@ -302,8 +302,8 @@ dataset, see
 
 We also provide examples for Starlette/FastAPI and AIOHTTP:
 
--   [Starlette Example Project](https://github.com/finos/perspective/tree/master/examples/python-starlette).
--   [AIOHTTP Example Project](https://github.com/finos/perspective/tree/master/examples/python-aiohttp).
+- [Starlette Example Project](https://github.com/finos/perspective/tree/master/examples/python-starlette).
+- [AIOHTTP Example Project](https://github.com/finos/perspective/tree/master/examples/python-aiohttp).
 
 ### Server-only Mode
 

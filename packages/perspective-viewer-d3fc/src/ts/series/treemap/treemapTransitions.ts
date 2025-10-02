@@ -35,7 +35,7 @@ export function returnToLevel(
     treemapSvg,
     rootNode,
     parentCtrls,
-    root_settings
+    root_settings,
 ) {
     if (settings.treemapLevel > 0) {
         const crossValues = rootNode.crossValue;
@@ -53,7 +53,7 @@ export function returnToLevel(
             parentCtrls,
             root_settings,
             1,
-            false
+            false,
         );
 
         settings.treemapRoute
@@ -67,7 +67,7 @@ export function returnToLevel(
                     nodesMerge,
                     d.depth,
                     rootNode,
-                    treemapDiv
+                    treemapDiv,
                 );
                 executeTransition(
                     d,
@@ -83,7 +83,7 @@ export function returnToLevel(
                     parentCtrls,
                     root_settings,
                     1,
-                    false
+                    false,
                 );
             });
     }
@@ -99,7 +99,7 @@ export function changeLevel(
     treemapSvg,
     rootNode,
     parentCtrls,
-    root_settings
+    root_settings,
 ) {
     if (!d.children) return;
 
@@ -123,7 +123,7 @@ export function changeLevel(
             nodesMerge,
             settings.treemapLevel,
             rootNode,
-            treemapDiv
+            treemapDiv,
         );
     }
 
@@ -139,7 +139,7 @@ export function changeLevel(
         settings.treemapLevel,
         crossValues,
         parentCtrls,
-        root_settings
+        root_settings,
     );
 }
 
@@ -157,7 +157,7 @@ function executeTransition(
     parentCtrls,
     root_settings,
     duration = 500,
-    recordLabelMap = true
+    recordLabelMap = true,
 ) {
     const parent = d.parent;
 
@@ -180,7 +180,7 @@ function executeTransition(
         .styleTween("opacity", (d) => () => d.current.opacity)
         .attrTween(
             "pointer-events",
-            (d) => () => d.target.visible ? "all" : "none"
+            (d) => () => (d.target.visible ? "all" : "none"),
         );
 
     rects
@@ -210,7 +210,7 @@ function executeTransition(
         .catch((ex) => {
             console.error(
                 "Exception completing promises after main transition",
-                ex
+                ex,
             );
             enableUserInteraction(nodesMerge, parentCtrls);
         });
@@ -239,7 +239,7 @@ function executeTransition(
                     treemapSvg,
                     rootNode,
                     parentCtrls,
-                    root_settings
+                    root_settings,
                     // duration
                 );
                 const viewer = treemapDiv.node().getRootNode()
@@ -264,7 +264,7 @@ async function fadeTextTransition(labels, treemapSvg, duration = 400) {
             const label = labels[i];
             const interpolation = d3.interpolate(
                 lockedOpacity(d),
-                targetOpacity(label)
+                targetOpacity(label),
             );
             return (t) => (d.current.opacity = interpolation(t));
         })
@@ -272,7 +272,7 @@ async function fadeTextTransition(labels, treemapSvg, duration = 400) {
         .end()
         .catch((ex) => console.error("Exception in text fade transition", ex))
         .then(() =>
-            labels.each((_, i, labels) => unlockTextOpacity(labels[i]))
+            labels.each((_, i, labels) => unlockTextOpacity(labels[i])),
         );
 }
 

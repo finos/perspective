@@ -13,7 +13,7 @@
 export function selectionStyleListener(
     regularTable,
     viewer,
-    selected_rows_map
+    selected_rows_map,
 ) {
     if (!viewer.hasAttribute("selectable")) return;
     const has_selected = selected_rows_map.has(regularTable);
@@ -27,15 +27,15 @@ export function selectionStyleListener(
             const id = this._ids[meta.y - meta.y0];
             const key_match = selected.reduce(
                 (agg, x, i) => agg && x === id[i],
-                true
+                true,
             );
             td.classList.toggle(
                 "psp-row-selected",
-                id.length === selected.length && key_match
+                id.length === selected.length && key_match,
             );
             td.classList.toggle(
                 "psp-row-subselected",
-                id.length !== selected.length && key_match
+                id.length !== selected.length && key_match,
             );
         }
     }
@@ -49,15 +49,15 @@ export function selectionStyleListener(
         } else {
             const key_match = selected.reduce(
                 (agg, x, i) => agg && x === id[i],
-                true
+                true,
             );
             th.classList.toggle(
                 "psp-row-selected",
-                id.length === selected.length && key_match
+                id.length === selected.length && key_match,
             );
             th.classList.toggle(
                 "psp-row-subselected",
-                id.length !== selected.length && key_match
+                id.length !== selected.length && key_match,
             );
         }
     }

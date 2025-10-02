@@ -293,7 +293,7 @@ let arrow_date_data = {
 // transform arrow strings into timestamps
 for (const k in arrow_date_data) {
     arrow_date_data[k] = arrow_date_data[k].map((d) =>
-        d ? new Date(d).getTime() : null
+        d ? new Date(d).getTime() : null,
     );
 }
 
@@ -634,7 +634,7 @@ function validate_typed_array(typed_array, column_data) {
                 if (ta !== undefined && column !== undefined) {
                     expect(ta[0].length).toEqual(cols[col].length);
                     expect(validate_typed_array(ta[0], cols[col])).toEqual(
-                        true
+                        true,
                     );
                 }
             }
@@ -656,7 +656,7 @@ function validate_typed_array(typed_array, column_data) {
                 if (ta !== undefined && column !== undefined) {
                     expect(ta[0].length).toEqual(cols[col].length);
                     expect(validate_typed_array(ta[0], cols[col])).toEqual(
-                        true
+                        true,
                     );
                 }
             }
@@ -685,7 +685,7 @@ function validate_typed_array(typed_array, column_data) {
             expect.assertions(1);
             perspective.table([1, 2, 3]).catch((error) => {
                 expect(error.message).toContain(
-                    "Abort(): Cannot determine data types without column names!\n"
+                    "Abort(): Cannot determine data types without column names!\n",
                 );
             });
         });
@@ -699,7 +699,7 @@ function validate_typed_array(typed_array, column_data) {
                 })
                 .catch((error) => {
                     expect(error.message).toContain(
-                        "Abort(): Invalid column 'abcd' found in View group_by.\n"
+                        "Abort(): Invalid column 'abcd' found in View group_by.\n",
                     );
                     table.delete();
                 });
@@ -712,7 +712,7 @@ function validate_typed_array(typed_array, column_data) {
                 await perspective.table([1, 2, 3]);
             } catch (error) {
                 expect(error.message).toContain(
-                    "Abort(): Cannot determine data types without column names!\n"
+                    "Abort(): Cannot determine data types without column names!\n",
                 );
             }
         });
@@ -727,7 +727,7 @@ function validate_typed_array(typed_array, column_data) {
                 });
             } catch (error) {
                 expect(error.message).toContain(
-                    "Abort(): Invalid column 'abcd' found in View group_by.\n"
+                    "Abort(): Invalid column 'abcd' found in View group_by.\n",
                 );
                 table.delete();
             }
@@ -834,7 +834,7 @@ function validate_typed_array(typed_array, column_data) {
             let view = await table.view();
             let result = await view.to_csv();
             expect(result).toEqual(
-                `"x","y"\n"Test, hello!",1\n"Test2""",2\n"Test3, Hello!""",3\n`
+                `"x","y"\n"Test, hello!",1\n"Test2""",2\n"Test3, Hello!""",3\n`,
             );
             view.delete();
             table.delete();
@@ -851,7 +851,7 @@ function validate_typed_array(typed_array, column_data) {
             let view = await table.view();
             let result = await view.to_csv();
             expect(result).toEqual(
-                `"x","y"\n"Test, hello!",1\n"Test2""",2\n"Test3, Hello!""",3\n`
+                `"x","y"\n"Test, hello!",1\n"Test2""",2\n"Test3, Hello!""",3\n`,
             );
             view.delete();
             table.delete();
@@ -897,7 +897,7 @@ function validate_typed_array(typed_array, column_data) {
                 ndjson.map(JSON.stringify).join("\n"),
                 {
                     format: "ndjson",
-                }
+                },
             );
             var view = await table.view();
             let result = await view.to_json();
@@ -1396,7 +1396,7 @@ function validate_typed_array(typed_array, column_data) {
 
         test("CSV Parses an ISO-8601 formatted string with milliseconds and timezone", async function () {
             let table = await perspective.table(
-                "d\n2008-09-15T10:00:00.123+05:45"
+                "d\n2008-09-15T10:00:00.123+05:45",
             );
             let view = await table.view();
             let result = await view.to_csv();
@@ -1440,7 +1440,7 @@ function validate_typed_array(typed_array, column_data) {
 
         test("CSV Parses an ISO-8601 formatted string with microseconds and timezone", async function () {
             let table = await perspective.table(
-                "d\n2008-09-15T15:30:00.123456+05:30"
+                "d\n2008-09-15T15:30:00.123456+05:30",
             );
             let view = await table.view();
             let result = await view.to_csv();
@@ -1484,7 +1484,7 @@ function validate_typed_array(typed_array, column_data) {
 
         test("CSV Parses an ISO-8601 formatted string with nanoseconds and timezone", async function () {
             let table = await perspective.table(
-                "d\n2008-09-15T15:15:00.123456789-05:15"
+                "d\n2008-09-15T15:15:00.123456789-05:15",
             );
             let view = await table.view();
             let result = await view.to_csv();
@@ -1746,7 +1746,7 @@ function validate_typed_array(typed_array, column_data) {
             function makeid() {
                 var text = "";
                 var possible = Array.from(Array(26).keys()).map((x) =>
-                    String.fromCharCode(x + 65)
+                    String.fromCharCode(x + 65),
                 );
                 for (var i = 0; i < 15; i++)
                     text +=
@@ -1807,7 +1807,7 @@ function validate_typed_array(typed_array, column_data) {
                     { a: "float", b: "float" },
                     {
                         limit: 3,
-                    }
+                    },
                 );
 
                 await table.update([
@@ -1833,7 +1833,7 @@ function validate_typed_array(typed_array, column_data) {
                     { a: "float", b: "float" },
                     {
                         limit: 3,
-                    }
+                    },
                 );
 
                 await table.update([
@@ -1851,7 +1851,7 @@ function validate_typed_array(typed_array, column_data) {
                     { a: "float", b: "float" },
                     {
                         limit: 3,
-                    }
+                    },
                 );
 
                 table2.update([{ a: 10 }, { b: 1 }, { a: 20 }, { b: 2 }]);

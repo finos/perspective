@@ -30,15 +30,13 @@ test("Integer/float styles", async ({ page }) => {
         plugin: "Datagrid",
         columns: ["Profit", "Row ID"],
     });
-    const profit = await view.settingsPanel.activeColumns.getColumnByName(
-        "Profit"
-    );
+    const profit =
+        await view.settingsPanel.activeColumns.getColumnByName("Profit");
     await profit.editBtn.click();
     const styleContainer = view.columnSettingsSidebar.styleTab.container;
     await styleContainer.locator("#fractional-digits-label").waitFor();
-    const rowId = await view.settingsPanel.activeColumns.getColumnByName(
-        "Row ID"
-    );
+    const rowId =
+        await view.settingsPanel.activeColumns.getColumnByName("Row ID");
     await rowId.editBtn.click();
     await styleContainer
         .getByText("Fractional Digits")
@@ -55,9 +53,8 @@ for (const name of ["Significant Digits", "Fractional Digits"]) {
             plugin: "Datagrid",
             columns: ["Profit"],
         });
-        const profit = await view.settingsPanel.activeColumns.getColumnByName(
-            "Profit"
-        );
+        const profit =
+            await view.settingsPanel.activeColumns.getColumnByName("Profit");
         await profit.editBtn.click();
         const styleContainer = view.columnSettingsSidebar.styleTab.container;
         await styleContainer
@@ -95,13 +92,12 @@ test.skip("Rounding Priority doesn't send unless Fractional and Significant Digi
         plugin: "Datagrid",
         columns: ["Profit"],
     });
-    const col = await view.settingsPanel.activeColumns.getColumnByName(
-        "Profit"
-    );
+    const col =
+        await view.settingsPanel.activeColumns.getColumnByName("Profit");
     await col.editBtn.click();
     const styleContainer = view.columnSettingsSidebar.styleTab.container;
     await expect(
-        styleContainer.locator("#Rounding-Priority-checkbox")
+        styleContainer.locator("#Rounding-Priority-checkbox"),
     ).toBeEnabled();
 
     const select = styleContainer

@@ -16,7 +16,7 @@ import { splitIntoMultiSeries } from "./splitIntoMultiSeries";
 
 export function pointData(settings: Settings, data) {
     return splitIntoMultiSeries(settings, data, { excludeEmpty: true }).map(
-        (data) => seriesToPoints(settings, data)
+        (data) => seriesToPoints(settings, data),
     );
 }
 

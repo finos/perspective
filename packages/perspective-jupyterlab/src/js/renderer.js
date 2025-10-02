@@ -79,7 +79,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                 // load arrow directly
                 data = Uint8Array.from(
                     atob(this._context.model.toString()),
-                    (c) => c.charCodeAt(0)
+                    (c) => c.charCodeAt(0),
                 ).buffer;
             } else if (this._type === "json") {
                 data = this._context.model.toJSON();
@@ -123,8 +123,8 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                                     (acc += String.fromCharCode.apply(null, [
                                         i,
                                     ])),
-                                ""
-                            )
+                                "",
+                            ),
                         );
                         this.context.model.fromString(resultAsB64);
                         this.context.save();
@@ -169,7 +169,7 @@ export class PerspectiveCSVFactory extends ABCWidgetFactory {
             {
                 context,
             },
-            "csv"
+            "csv",
         );
     }
 }
@@ -183,7 +183,7 @@ export class PerspectiveJSONFactory extends ABCWidgetFactory {
             {
                 context,
             },
-            "json"
+            "json",
         );
     }
 }
@@ -197,7 +197,7 @@ export class PerspectiveArrowFactory extends ABCWidgetFactory {
             {
                 context,
             },
-            "arrow"
+            "arrow",
         );
     }
 }

@@ -24,12 +24,12 @@ import { HTMLPerspectiveViewerDatagridToolbarElement } from "./custom_elements/t
 async function _register_element() {
     customElements.define(
         "perspective-viewer-datagrid-toolbar",
-        HTMLPerspectiveViewerDatagridToolbarElement
+        HTMLPerspectiveViewerDatagridToolbarElement,
     );
 
     customElements.define(
         "perspective-viewer-datagrid",
-        HTMLPerspectiveViewerDatagridPluginElement
+        HTMLPerspectiveViewerDatagridPluginElement,
     );
 
     await customElements.whenDefined("perspective-viewer");

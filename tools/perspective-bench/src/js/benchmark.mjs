@@ -282,31 +282,8 @@ function buffer_to_arraybuffer(buffer) {
  * @param {*} param0
  * @returns
  */
-async function start_server({ cwd_static_file_handler, make_session }) {
-    const { default: express } = await import("express");
-    const { default: expressWs } = await import("express-ws");
-
-    const app = expressWs(express()).app;
-    app.ws("/subscribe", async (ws) => {
-        const server = await make_session((proto) =>
-            ws.send(buffer_to_arraybuffer(proto))
-        );
-
-        ws.on("message", (proto) =>
-            server.handle_request(buffer_to_arraybuffer(proto))
-        );
-    });
-
-    app.use("/", (x, y) =>
-        cwd_static_file_handler(x, y, ["src/html/", "../.."], { debug: false })
-    );
-
-    const server = app.listen(8081, () => {
-        const port = server.address().port;
-        console.log(`Live benchmarks at http://localhost:${port}\n`);
-    });
-
-    return server;
+async function start_server({ cwd_static_file_handler, make_session, WebSocketServer }) {
+    return new WebSocketServer({assets: ["src/html/", "../.."], port: 8081})
 }
 
 /**

@@ -24,7 +24,7 @@ export function calculateSubTreeMap(
     nodesMerge,
     treemapLevel,
     rootNode,
-    treemapDiv
+    treemapDiv,
 ) {
     // We can approximate coordinates for most of the tree which will be shunted
     // beyond the viewable area. This approach alone results in excessive
@@ -34,7 +34,7 @@ export function calculateSubTreeMap(
         crossValues,
         nodesMerge,
         treemapLevel,
-        rootNode
+        rootNode,
     );
     d.mapLevel[treemapLevel].levelRoot = true;
     // Use the pre-existing d3 mechanism to calculate the subtree for the
@@ -43,7 +43,7 @@ export function calculateSubTreeMap(
         d,
         treemapDiv.node().getBoundingClientRect().width,
         treemapDiv.node().getBoundingClientRect().height,
-        treemapLevel
+        treemapLevel,
     );
 
     calculateTextOpacities(nodesMerge, treemapLevel);
@@ -82,7 +82,7 @@ function approximateAttributesForAllNodes(
     crossValues,
     nodesMerge,
     treemapLevel,
-    rootNode
+    rootNode,
 ) {
     const oldDimensions = {
         x: d.x0,
@@ -124,11 +124,11 @@ function recalculateVisibleSubTreeCoordinates(
     subTreeRoot,
     treeRootWidth,
     treeRootHeight,
-    treemapLevel
+    treemapLevel,
 ) {
     const treemapBlueprinter = treemapLayout(treeRootWidth, treeRootHeight);
     const treemapBlueprint = treemapBlueprinter(
-        hierarchy(subTreeRoot.data).sum((d) => d.size)
+        hierarchy(subTreeRoot.data).sum((d) => d.size),
     );
 
     const dummiedDescendants = treemapBlueprint.descendants();

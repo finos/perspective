@@ -44,7 +44,7 @@ export async function draw(view) {
     if (this._reset_select) {
         // filter, group_by, sort ... if (col-select) { columns, split_by }
         this.regular_table.dispatchEvent(
-            new CustomEvent("psp-deselect-all", { bubbles: false })
+            new CustomEvent("psp-deselect-all", { bubbles: false }),
         );
         this._reset_select = false;
     }
@@ -61,6 +61,6 @@ export async function draw(view) {
     this._toolbar.classList.toggle(
         "aggregated",
         this.model._config.group_by.length > 0 ||
-            this.model._config.split_by.length > 0
+            this.model._config.split_by.length > 0,
     );
 }

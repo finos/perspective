@@ -25,7 +25,7 @@ export function lineSeries(settings: Settings, color: D3Scale) {
             : 0);
     const stroke_width = Math.max(
         1,
-        Math.min(3, Math.floor(settings.size.width / estimated_size / 2))
+        Math.min(3, Math.floor(settings.size.width / estimated_size / 2)),
     );
 
     series = series.decorate((selection) => {

@@ -38,7 +38,7 @@ function overrideSymbols(settings: Settings, symbols): D3Scale {
     }
     const symbolCol = settings.realValues[4];
     const columnType = settings.mainValues.find(
-        (val) => val.name === symbolCol
+        (val) => val.name === symbolCol,
     )?.type;
     let domain: string[] = symbols.domain();
     let range = symbols.range();
@@ -139,7 +139,7 @@ function xyScatter(container: HTMLSelection, settings: Settings) {
                 "transform",
                 `translate(${containerSize.width / 2}, ${
                     containerSize.height / 2
-                })`
+                })`,
             )
             .each(function (data) {
                 const xyElement = d3.select(this);

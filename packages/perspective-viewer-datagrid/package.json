@@ -18,9 +18,8 @@
         "index.d.ts"
     ],
     "scripts": {
-        "build": "node build.js",
-        "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
+        "build": "node ./build.mjs",
+        "clean": "node ./clean.mjs"
     },
     "publishConfig": {
         "access": "public"
@@ -32,15 +31,15 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "chroma-js": "^1.3.4",
-        "regular-table": "=0.6.8"
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "chroma-js": "catalog:",
+        "regular-table": "catalog:"
     },
     "devDependencies": {
-        "@prospective.co/procss": "^0.1.16",
-        "@finos/perspective-esbuild-plugin": "workspace:^",
-        "@finos/perspective-test": "workspace:^",
-        "prettier": "^2.8.8"
+        "@prospective.co/procss": "catalog:",
+        "@finos/perspective-esbuild-plugin": "workspace:",
+        "@finos/perspective-test": "workspace:",
+        "prettier": "catalog:"
     }
 }

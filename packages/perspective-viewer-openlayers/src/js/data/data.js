@@ -41,7 +41,7 @@ export function getMapData(config) {
         Object.keys(rowPoints).forEach((key) => {
             const rowPoint = rowPoints[key];
             const cols = config.real_columns.map((c) =>
-                c ? rowPoint[c] : null
+                c ? rowPoint[c] : null,
             );
 
             points.push({

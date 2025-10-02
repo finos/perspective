@@ -18,7 +18,7 @@ test.describe("Events test", () => {
         page,
     }) => {
         await page.goto(
-            "/node_modules/@finos/perspective-test/src/html/basic-test.html"
+            "/node_modules/@finos/perspective-test/src/html/basic-test.html",
         );
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -51,7 +51,7 @@ test.describe("Events test", () => {
             await page.waitForFunction(() =>
                 document
                     .querySelector("perspective-viewer-d3fc-yline")!
-                    .shadowRoot!.querySelector(".y-label .splitter-label")
+                    .shadowRoot!.querySelector(".y-label .splitter-label"),
             )
         ).asElement();
 
@@ -75,7 +75,7 @@ test.describe("Events test", () => {
         await compareSVGContentsToSnapshot(
             page,
             "perspective-viewer perspective-viewer-d3fc-yline",
-            ["config-events.txt"]
+            ["config-events.txt"],
         );
     });
 
@@ -83,7 +83,7 @@ test.describe("Events test", () => {
         page,
     }) => {
         await page.goto(
-            "/node_modules/@finos/perspective-test/src/html/basic-test.html"
+            "/node_modules/@finos/perspective-test/src/html/basic-test.html",
         );
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -114,7 +114,7 @@ test.describe("Events test", () => {
                 // @ts-ignore
                 document
                     .querySelector("perspective-viewer-d3fc-yline")
-                    .shadowRoot.querySelector(".legend-container")
+                    .shadowRoot.querySelector(".legend-container"),
             )
         ).asElement();
 
@@ -153,7 +153,7 @@ test.describe("Events test", () => {
         await compareSVGContentsToSnapshot(
             page,
             "perspective-viewer perspective-viewer-d3fc-yline",
-            ["legend-events.txt"]
+            ["legend-events.txt"],
         );
     });
 });

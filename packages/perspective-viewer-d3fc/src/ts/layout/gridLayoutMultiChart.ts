@@ -44,7 +44,7 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
     let padding = null;
 
     const _gridLayoutMultiChart: Partial<GridLayoutMultiChart> = (
-        container
+        container,
     ) => {
         const outerContainer = getOrCreateElement(
             container,
@@ -55,13 +55,13 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
                     .attr("class", "outer-container")
                     .style("width", `calc(100% - ${padding ?? 0})`)
                     .style("height", `calc(100% - ${padding ?? 0})`)
-                    .style("padding-left", padding ?? 0)
+                    .style("padding-left", padding ?? 0),
         );
 
         const scrollContainer = getOrCreateElement(
             outerContainer,
             "div.inner-container",
-            () => outerContainer.append("div").attr("class", "inner-container")
+            () => outerContainer.append("div").attr("class", "inner-container"),
         );
 
         const innerRect = outerContainer.node().getBoundingClientRect();
@@ -73,7 +73,7 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
 
         const cols = Math.max(
             1,
-            Math.min(data.length, Math.floor(containerWidth / minSize))
+            Math.min(data.length, Math.floor(containerWidth / minSize)),
         );
         const rows = Math.ceil(data.length / cols);
 
@@ -83,8 +83,8 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
                 containerHeight,
                 Math.max(
                     containerHeight / rows,
-                    containerWidth / Math.max(cols, 1)
-                )
+                    containerWidth / Math.max(cols, 1),
+                ),
             ),
         };
 
@@ -95,11 +95,11 @@ export function gridLayoutMultiChart(): GridLayoutMultiChart {
         if (data.length > 1) {
             scrollContainer.style(
                 "grid-template-columns",
-                `repeat(${cols}, ${100 / cols}%)`
+                `repeat(${cols}, ${100 / cols}%)`,
             );
             scrollContainer.style(
                 "grid-template-rows",
-                `repeat(${rows}, ${containerSize.height}px)`
+                `repeat(${rows}, ${containerSize.height}px)`,
             );
         } else {
             scrollContainer.style("grid-template-columns", `repeat(1, 100%)`);

@@ -35,7 +35,7 @@ async function checkSaveDisabled(page, expr) {
 
 test.beforeEach(async ({ page }) => {
     await page.goto(
-        "/node_modules/@finos/perspective-viewer/test/html/superstore.html"
+        "/node_modules/@finos/perspective-viewer/test/html/superstore.html",
     );
     await page.evaluate(async () => {
         while (!window["__TEST_PERSPECTIVE_READY__"]) {
@@ -60,7 +60,7 @@ test.describe("Expressions", () => {
             () =>
                 !!document
                     .querySelector("perspective-viewer")
-                    .shadowRoot.querySelector("#add-expression")
+                    .shadowRoot.querySelector("#add-expression"),
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");
@@ -95,7 +95,7 @@ test.describe("Expressions", () => {
             () =>
                 !!document
                     .querySelector("perspective-viewer")
-                    .shadowRoot.querySelector("#add-expression")
+                    .shadowRoot.querySelector("#add-expression"),
         );
 
         await shadow_click(page, "perspective-viewer", "#add-expression");

@@ -16,7 +16,7 @@ import { ColorStyles, Settings } from "../types";
 
 export const initialiseStyles = (
     container: HTMLElement,
-    settings: Settings
+    settings: Settings,
 ) => {
     if (!settings.colorStyles) {
         const styles: ColorStyles = {
