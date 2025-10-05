@@ -112,7 +112,7 @@ function add(builder, path, path2) {
     );
 }
 
-const IS_TEST = process.argv.some((x) => x == "--test");
+const IS_TEST = process.argv.some((x) => x === "--test");
 const BUILD = IS_TEST
     ? [LAB_BUILD, ...NB_BUILDS, TEST_BUILD]
     : [LAB_BUILD, ...NB_BUILDS];
