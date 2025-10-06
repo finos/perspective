@@ -11,10 +11,12 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { IJupyterWidgetRegistry } from "@jupyter-widgets/base";
+import { Token } from "@lumino/coreutils";
 import { PerspectiveModel } from "./model";
 import { PerspectiveView } from "./view";
 import { PERSPECTIVE_VERSION } from "./version";
 const EXTENSION_ID = "@finos/perspective-jupyterlab";
+export const IPerspective = new Token(EXTENSION_ID);
 
 /**
  * PerspectiveJupyterPlugin Defines the Jupyterlab plugin, and registers `PerspectiveModel` and `PerspectiveView`
@@ -24,6 +26,7 @@ export const PerspectiveJupyterPlugin = {
     id: EXTENSION_ID,
     // @ts-ignore
     requires: [IJupyterWidgetRegistry],
+    provides: [IPerspective],
     activate: (app, registry) => {
         registry.registerWidget({
             name: EXTENSION_ID,

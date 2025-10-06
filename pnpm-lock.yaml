@@ -614,6 +614,9 @@ importers:
       '@lumino/application':
         specifier: <3
         version: 2.4.4
+      '@lumino/coreutils':
+        specifier: <3
+        version: 2.2.1
       '@lumino/widgets':
         specifier: <3
         version: 2.7.1

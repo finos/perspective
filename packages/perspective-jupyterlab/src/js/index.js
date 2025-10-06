@@ -22,6 +22,7 @@ await Promise.all([
 ]);
 
 export * from "./model";
+export { IPerspective } from "./plugin";
 export * from "./version";
 export * from "./view";
 export * from "./widget";
