@@ -59,3 +59,27 @@ Perspective also exposes a JS-only `mimerender-extension`. This lets you view
 this by right clicking one of these files and `Open With->CSVPerspective` (or
 `JSONPerspective` or `ArrowPerspective`). Perspective will also install itself
 as the default handler for opening `.arrow` files. -->
+
+## Depending on Perspective in your own JupyterLab Widget
+
+Perspective provides a [token for integration with JupyterLab's federated dependency model](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#plugins-interacting-with-each-other).
+This allows your plugin to simply depend on Perspective for initialization.
+
+In your plugin code:
+
+```javascript
+import {IPerspective} from "@finos/perspective-jupyterlab";
+
+export const MyCoolPlugin = {
+  activate,
+  id: "my-cool-plugin",
+  requires: [IPerspective],
+  autoStart: true,
+};
+
+// to use perspective, simply import. No initialization required
+import perspective from "@finos/perspective";
+```
+
+And remember to add `perspective-python` as a python dependency, to ensure
+the Perspective JupyterLab extension is installed.
