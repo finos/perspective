@@ -50,6 +50,22 @@
             "@jupyter-widgets/base": {
                 "bundled": false,
                 "singleton": true
+            },
+            "@finos/perspective": {
+                "bundled": true,
+                "singleton": true
+            },
+            "@finos/perspective-viewer": {
+                "bundled": true,
+                "singleton": true
+            },
+            "@finos/perspective-viewer-d3fc": {
+                "bundled": true,
+                "singleton": true
+            },
+            "@finos/perspective-viewer-datagrid": {
+                "bundled": true,
+                "singleton": true
             }
         },
         "discovery": {
