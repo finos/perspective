@@ -4,7 +4,7 @@
     "version": "3.8.0",
     "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
     "scripts": {
-        "start": "mkdir -p dist && node --experimental-wasm-memory64 --experimental-modules server.mjs",
+        "start": "mkdir -p dist && node --experimental-modules server.mjs",
         "repl": "node --experimental-repl-await"
     },
     "main": "index.mjs",

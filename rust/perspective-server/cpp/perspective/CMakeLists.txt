@@ -345,7 +345,7 @@ endif()
 set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Disable rapidjson tests")
 
 if(PSP_PYODIDE)
-    set(RELOCATABLE_FLAGS " -sRELOCATABLE=1 -sSIDE_MODULE=2 ")
+    set(RELOCATABLE_FLAGS " -sRELOCATABLE=1 -sSIDE_MODULE=2 -fwasm-exceptions -sSUPPORT_LONGJMP=wasm \ ")
     string(APPEND CMAKE_EXE_LINKER_FLAGS "${RELOCATABLE_FLAGS} -sWASM_BIGINT=1 ")
     string(APPEND CMAKE_C_FLAGS "${RELOCATABLE_FLAGS}")
     string(APPEND CMAKE_CXX_FLAGS "${RELOCATABLE_FLAGS}")
@@ -355,10 +355,10 @@ if(PSP_PYODIDE)
     string(APPEND CMAKE_CXX_FLAGS " -fvisibility=hidden")
 endif()
 
-if (PSP_PYODIDE AND NOT PSP_WASM_EXCEPTIONS)
-    # Emscripten exceptions
-    string(APPEND CMAKE_CXX_FLAGS " -fexceptions")
-endif()
+# if (PSP_PYODIDE AND NOT PSP_WASM_EXCEPTIONS)
+#     # Emscripten exceptions
+#     string(APPEND CMAKE_CXX_FLAGS " -fexceptions")
+# endif()
 
 # Build (read: download and extract) header-only dependencies from external sources
 set(all_deps_INCLUDE_DIRS "")
