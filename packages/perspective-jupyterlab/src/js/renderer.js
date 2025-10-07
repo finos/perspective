@@ -46,7 +46,6 @@ const baddialog = () => {
     });
 };
 
-const WORKER = perspective.worker();
 export class PerspectiveDocumentWidget extends DocumentWidget {
     constructor(options, type = "csv") {
         super({
@@ -102,7 +101,8 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                 table.replace(data);
             } catch (e) {
                 // construct new table
-                const table_promise = WORKER.table(data);
+                this.worker = await perspective.worker();
+                const table_promise = this.worker.table(data);
 
                 // load data
                 await this._psp.viewer.load(table_promise);
@@ -151,7 +151,8 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
         if (this._monitor) {
             this._monitor.dispose();
         }
-        this._psp.delete();
+
+        this.worker.terminate();
         super.dispose();
     }
 

@@ -91,6 +91,9 @@ export async function worker(
         async () => {
             console.debug("Closing WebWorker");
             port.close();
+            if (webworker instanceof Worker) {
+                webworker.terminate();
+            }
         },
     );
 

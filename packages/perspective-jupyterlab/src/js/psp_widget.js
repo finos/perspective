@@ -116,8 +116,8 @@ export class PerspectiveWidget extends Widget {
      * method) must be called in order for its memory to be reclaimed.
      */
 
-    delete() {
-        this.viewer.delete();
+    async delete() {
+        await this.viewer.delete();
     }
 
     /**

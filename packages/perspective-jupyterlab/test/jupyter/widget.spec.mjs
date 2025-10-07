@@ -35,6 +35,32 @@ const getEditMode = async (viewer) => {
 // utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
 describe_jupyter(
     () => {
+        test_jupyter(
+            "Open arrow and csv from file browser",
+            [],
+            async ({ page }) => {
+                await page.locator("#tab-key-1-7").click();
+                await page
+                    .locator(`.jp-DirListing-item[data-file-type="arrow"]`)
+                    .click({ button: "right" });
+
+                await page.hover(`.lm-Menu .lm-Menu-item[data-type="submenu"]`);
+                await page
+                    .locator(`.lm-Menu-item[data-command="filebrowser:open"]`)
+                    .click();
+
+                const num_columns = await page
+                    .locator("regular-table thead tr")
+                    .first()
+                    .evaluate((tr) => tr.childElementCount);
+
+                expect(num_columns).toEqual(14);
+                await expect(
+                    page.locator("regular-table tbody tr"),
+                ).toHaveCount(5);
+            },
+        );
+
         // Basics
         test_jupyter(
             "Loads data",
@@ -51,9 +77,9 @@ describe_jupyter(
 
                 expect(num_columns).toEqual(3);
                 await expect(
-                    page.locator("regular-table tbody tr")
+                    page.locator("regular-table tbody tr"),
                 ).toHaveCount(5);
-            }
+            },
         );
 
         test_jupyter(
@@ -78,9 +104,9 @@ describe_jupyter(
                 expect(num_columns).toEqual(3);
 
                 await expect(
-                    page.locator("regular-table tbody tr")
+                    page.locator("regular-table tbody tr"),
                 ).toHaveCount(10);
-            }
+            },
         );
 
         test_jupyter(
@@ -105,15 +131,16 @@ describe_jupyter(
                 expect(num_columns).toEqual(3);
 
                 await expect(
-                    page.locator("regular-table tbody tr")
+                    page.locator("regular-table tbody tr"),
                 ).toHaveCount(5);
-            }
+            },
         );
 
         test_jupyter(
             "Loads AsyncTable",
             [
                 `
+import asyncio
 server = perspective.Server()
 sync_client = server.new_local_client()
 sync_client.table({"Income": [5,4,3,2,1], "Expense": [4,3,2,1,1], "Profit": [1,1,1,1,0]}, name="Microstore")
@@ -133,9 +160,9 @@ async_table = await async_client.open_table("Microstore")`,
 
                 expect(num_columns).toEqual(3);
                 await expect(
-                    page.locator("regular-table tbody tr")
+                    page.locator("regular-table tbody tr"),
                 ).toHaveCount(5);
-            }
+            },
         );
 
         test_jupyter(
@@ -143,6 +170,7 @@ async_table = await async_client.open_table("Microstore")`,
             [
                 [
                     `
+import asyncio
 server = perspective.Server()
 sync_client = server.new_local_client()
 sync_table = sync_client.table(arrow_data)
@@ -165,9 +193,9 @@ async_table = await async_client.open_table(sync_table.get_name())`,
                 expect(num_columns).toEqual(3);
 
                 await expect(
-                    page.locator("regular-table tbody tr")
+                    page.locator("regular-table tbody tr"),
                 ).toHaveCount(10);
-            }
+            },
         );
         // Restore
 
@@ -189,7 +217,7 @@ async_table = await async_client.open_table(sync_table.get_name())`,
                 });
 
                 expect(settings).toEqual(false);
-            }
+            },
         );
 
         test_jupyter(
@@ -207,7 +235,7 @@ async_table = await async_client.open_table(sync_table.get_name())`,
                 const viewer = await default_body(page);
                 const edit_mode = await getEditMode(viewer);
                 expect(edit_mode).toEqual("EDIT");
-            }
+            },
         );
 
         test_jupyter(
@@ -228,12 +256,12 @@ async_table = await async_client.open_table(sync_table.get_name())`,
 
                 await add_and_execute_cell(
                     page,
-                    'w.plugin_config = {"edit_mode": "EDIT"}'
+                    'w.plugin_config = {"edit_mode": "EDIT"}',
                 );
 
                 edit_mode = await getEditMode(viewer);
                 expect(edit_mode).toEqual("EDIT");
-            }
+            },
         );
 
         test_jupyter(
@@ -255,14 +283,14 @@ async_table = await async_client.open_table(sync_table.get_name())`,
                 await viewer.evaluate(async (viewer) => {
                     const edit =
                         viewer.children[1].shadowRoot.querySelector(
-                            "span#edit_mode"
+                            "span#edit_mode",
                         );
                     edit.click();
                 });
 
                 edit_mode = await getEditMode(viewer);
                 expect(edit_mode).toEqual("EDIT");
-            }
+            },
         );
 
         test_jupyter(
@@ -328,7 +356,7 @@ w.filter = [["i8", "<", 50]]
 w.group_by = ["date"]
 w.split_by = ["bool"]
 w.sort = [["date", "asc"]]
-w.theme = "Pro Dark"`
+w.theme = "Pro Dark"`,
                 );
 
                 // grab the config again
@@ -353,7 +381,7 @@ w.theme = "Pro Dark"`
                     theme: "Pro Dark",
                     title: null,
                 });
-            }
+            },
         );
 
         test_jupyter(
@@ -439,10 +467,10 @@ assert w.plugin_config == {}
 assert w.settings == False
 assert w.sort == [["date", "asc"]]
 assert w.theme == "Pro Dark"
-"Passed"`
+"Passed"`,
                 );
                 expect(error_cells_dont_exist).toBe(true);
-            }
+            },
         );
 
         test_jupyter(
@@ -460,7 +488,7 @@ assert w.theme == "Pro Dark"
                     [
                         `assert w.table.view().to_columns() == {'a': [True, False, True], 'b': ['abc', 'def', 'ghi']}`,
                         `"Passed"`,
-                    ].join("\n")
+                    ].join("\n"),
                 );
                 expect(error_cells_dont_exist).toBe(true);
 
@@ -478,11 +506,11 @@ assert w.theme == "Pro Dark"
                     [
                         `assert w.table.view().to_columns() == {'a': [False, True, False], 'b': ['abc', 'def', 'ghi']}`,
                         `"Passed"`,
-                    ].join("\n")
+                    ].join("\n"),
                 );
 
                 expect(error_cells_dont_exist).toBe(true);
-            }
+            },
         );
 
         test_jupyter("Restores from saved config", [], async ({ page }) => {
@@ -496,7 +524,7 @@ table = client.table(arrow_data)
 w = perspective.widget.PerspectiveWidget(table)
 config = w.save()
 perpsective.PerspectiveWidget(df, **config)
-                        `
+                        `,
             );
             expect(errored).toBe(false);
         });
@@ -530,7 +558,7 @@ perpsective.PerspectiveWidget(df, **config)
 
                     await page.evaluate(async () => {
                         await document
-                            .querySelector("perspective-viewer")!
+                            .querySelector("perspective-viewer")
                             .flush();
                     });
                 }
@@ -542,9 +570,9 @@ perpsective.PerspectiveWidget(df, **config)
 
                 // expect(num_columns).toEqual(3);
                 await expect(
-                    page.locator("regular-table tbody tr")
+                    page.locator("regular-table tbody tr"),
                 ).toHaveCount(5);
-            }
+            },
         );
 
         // *************************
@@ -559,12 +587,12 @@ perpsective.PerspectiveWidget(df, **config)
                 // assert_no_error_in_cell runs add_and_execute_cell internally so only need to check one
                 const error_cells_dont_exist = await assert_no_error_in_cell(
                     page,
-                    "raise Exception('anything')"
+                    "raise Exception('anything')",
                 );
                 expect(error_cells_dont_exist).toBe(false);
-            }
+            },
         );
     },
-    { name: "Simple", root: path.join(__dirname, "..", "..") }
+    { name: "Simple", root: path.join(__dirname, "..", "..") },
 );
 // });
