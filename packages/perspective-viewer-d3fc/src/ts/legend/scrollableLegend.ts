@@ -95,7 +95,7 @@ export default (fromLegend, settings) => {
             .getBBox();
         legendElement.attr(
             "height",
-            cellContainerSize.height + controlsHeightPx
+            cellContainerSize.height + controlsHeightPx,
         );
 
         decorate(selection);
@@ -132,12 +132,12 @@ export default (fromLegend, settings) => {
             container
                 .append("g")
                 .attr("class", "legend-controls")
-                .html(legendControlsTemplate)
+                .html(legendControlsTemplate),
         );
 
     const getLegendElement = (container) =>
         getOrCreateElement(container, ".legend", () =>
-            container.append("svg").attr("class", "legend")
+            container.append("svg").attr("class", "legend"),
         );
 
     scrollableLegend.decorate = (...args) => {

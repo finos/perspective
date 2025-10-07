@@ -72,7 +72,8 @@ perspective-viewer:not([settings]) {
     }
 
     td.psp-menu-open {
-        box-shadow: inset -2px 0px 0px var(--icon--color),
+        box-shadow:
+            inset -2px 0px 0px var(--icon--color),
             inset 2px 0px 0px var(--icon--color);
     }
 
@@ -81,7 +82,8 @@ perspective-viewer:not([settings]) {
     }
 
     tr:last-child td.psp-menu-open {
-        box-shadow: inset -2px 0px 0px var(--icon--color),
+        box-shadow:
+            inset -2px 0px 0px var(--icon--color),
             inset 2px 0px 0px var(--icon--color),
             inset 0px -2px 0px var(--icon--color);
     }
@@ -371,14 +373,16 @@ regular-table
 regular-table tbody tr:hover {
     td.psp-select-region.psp-menu-open {
         &:not(.psp-row-selected):not(.psp-row-subselected) {
-            box-shadow: inset -2px 0px 0px var(--plugin--background),
+            box-shadow:
+                inset -2px 0px 0px var(--plugin--background),
                 inset 2px 0px 0px var(--plugin--background);
         }
     }
 }
 
 :host-context(perspective-viewer[settings]) td.psp-select-region.psp-menu-open {
-    box-shadow: inset -2px 0px 0px var(--plugin--background),
+    box-shadow:
+        inset -2px 0px 0px var(--plugin--background),
         inset 2px 0px 0px var(--plugin--background);
 }
 

@@ -106,7 +106,7 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             await selectedEditBtn.waitFor();
 
             expect(await compareNodes(nthEditBtn, selectedEditBtn, page)).toBe(
-                true
+                true,
             );
 
             await col.editBtn.click();
@@ -134,21 +134,24 @@ let runTests = (title: string, beforeEachAndLocalTests: () => void) => {
             await selectedEditBtn.waitFor();
             await selectedTitle.waitFor();
             expect(
-                await compareNodes(thirdEditBtn, selectedEditBtn, page)
+                await compareNodes(thirdEditBtn, selectedEditBtn, page),
             ).toBe(true);
             expect(await compareNodes(thirdTitle, selectedTitle, page)).toBe(
-                true
+                true,
             );
 
             await table.element.evaluate((node) => (node.scrollLeft = 1000));
             await table.element.evaluate((node) => (node.scrollLeft = 0));
+            await page.evaluate(
+                async () => await new Promise((x) => requestAnimationFrame(x)),
+            );
             await selectedEditBtn.waitFor();
             await selectedTitle.waitFor();
             expect(
-                await compareNodes(thirdEditBtn, selectedEditBtn, page)
+                await compareNodes(thirdEditBtn, selectedEditBtn, page),
             ).toBe(true);
             expect(await compareNodes(thirdTitle, selectedTitle, page)).toBe(
-                true
+                true,
             );
         });
     });
@@ -182,7 +185,7 @@ runTests("Datagrid Column Styles", () => {
 
         let oldContents = await td.evaluate((node) => node.innerHTML);
         let listener = await view.getEventListener(
-            "perspective-column-style-change"
+            "perspective-column-style-change",
         );
         await page
             .locator('div[data-value="Decimal"] select')
@@ -212,7 +215,7 @@ runTests("Datagrid Column Styles", () => {
             return node.style.cssText;
         });
         let listener = await view.getEventListener(
-            "perspective-column-style-change"
+            "perspective-column-style-change",
         );
         await checkbox.click();
         expect(await listener()).toBe(true);
@@ -245,7 +248,7 @@ runTests("Datagrid Column Styles", () => {
 
         let tdStyle = await td.evaluate((node) => node.style.cssText);
         let listener = await view.getEventListener(
-            "perspective-column-style-change"
+            "perspective-column-style-change",
         );
         await checkbox.check();
         expect(await listener()).toBe(true);
@@ -274,7 +277,7 @@ test.skip("Edit highlights go away when view re-draws", async ({ page }) => {
 runTests("Datagrid Column Styles - Split-by", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(
-            "/tools/perspective-test/src/html/superstore-test.html"
+            "/tools/perspective-test/src/html/superstore-test.html",
         );
 
         await page.evaluate(async () => {
@@ -288,7 +291,7 @@ runTests("Datagrid Column Styles - Split-by", () => {
         page,
     }) => {
         await page.goto(
-            "/tools/perspective-test/src/html/superstore-test.html"
+            "/tools/perspective-test/src/html/superstore-test.html",
         );
 
         await page.evaluate(async () => {

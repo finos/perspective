@@ -18,7 +18,7 @@ export function seriesLinearRange(
     _settings,
     data,
     valueName,
-    customExtent?: any
+    customExtent?: any,
 ) {
     return d3.scaleLinear().domain(getExtent(data, valueName, customExtent));
 }
@@ -27,7 +27,7 @@ export function seriesColorRange(
     settings: Settings,
     data: any[],
     valueName: ValueName,
-    customExtent = null
+    customExtent = null,
 ): d3.ScaleSequential<string> {
     let extent = getExtent(data, valueName, customExtent);
     let gradient = settings.colorStyles.gradient.full;
@@ -60,7 +60,7 @@ const multiInterpolator = (gradientPairs) => {
             (p, i) =>
                 i < gradientPairs.length - 1 &&
                 value <= gradientPairs[i + 1][0] &&
-                value > p[0]
+                value > p[0],
         );
         if (index === -1) {
             if (value <= gradientPairs[0][0]) {

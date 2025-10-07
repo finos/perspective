@@ -46,14 +46,14 @@ export default () => {
 
                 const zoomControls = getZoomControls(selection).style(
                     "display",
-                    noZoom ? "none" : ""
+                    noZoom ? "none" : "",
                 );
                 zoomControls
                     .select("#zoom-reset")
                     .on("click", () =>
                         selection
                             .select(chartPlotArea)
-                            .call(zoom.transform, d3.zoomIdentity)
+                            .call(zoom.transform, d3.zoomIdentity),
                     );
 
                 const oneYear = zoomControls
@@ -86,27 +86,27 @@ export default () => {
                             .select(chartPlotArea)
                             .call(
                                 zoom.transform,
-                                d3.zoomIdentity.translate(x, y).scale(k)
+                                d3.zoomIdentity.translate(x, y).scale(k),
                             );
                     };
 
                     oneYear.on(
                         "click",
                         dateClick((start, end) =>
-                            end.setYear(start.getFullYear() + 1)
-                        )
+                            end.setYear(start.getFullYear() + 1),
+                        ),
                     );
                     sixMonths.on(
                         "click",
                         dateClick((start, end) =>
-                            end.setMonth(start.getMonth() + 6)
-                        )
+                            end.setMonth(start.getMonth() + 6),
+                        ),
                     );
                     oneMonth.on(
                         "click",
                         dateClick((start, end) =>
-                            end.setMonth(start.getMonth() + 1)
-                        )
+                            end.setMonth(start.getMonth() + 1),
+                        ),
                     );
                 }
             });
@@ -226,7 +226,7 @@ export default () => {
                 .append("div")
                 .attr("class", "zoom-controls")
                 .style("display", "none")
-                .html(template)
+                .html(template),
         );
 
     const zoomableScale = (scale) => {

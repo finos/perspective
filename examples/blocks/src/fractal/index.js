@@ -92,7 +92,7 @@ function get_gui_params() {
             acc[x] = window[x].valueAsNumber;
             return acc;
         },
-        {}
+        {},
     );
 }
 
@@ -152,6 +152,6 @@ window.iterations.addEventListener("input", set_runnable);
 
 run.addEventListener(
     "click",
-    make_run_click_callback(await perspective.worker(), {})
+    make_run_click_callback(await perspective.worker(), {}),
 );
 run.dispatchEvent(new Event("click"));

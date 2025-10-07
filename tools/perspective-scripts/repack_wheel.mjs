@@ -20,7 +20,7 @@ const wheel_file = fs.readdirSync(".").filter((x) => x.endsWith(".whl"))[0];
 execSync(`wheel unpack ${wheel_file}`);
 const pkg_name = wheel_file.split("-").slice(0, 2).join("-");
 const version = pkg.version.replace(/-(rc|alpha|beta)\.\d+/, (x) =>
-    x.replace("-", "").replace(".", "")
+    x.replace("-", "").replace(".", ""),
 );
 
 const dest = `${pkg_name}/perspective_python-${version}.data`;

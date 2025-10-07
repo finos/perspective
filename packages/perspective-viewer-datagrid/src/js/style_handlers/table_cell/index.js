@@ -48,9 +48,9 @@ export function table_cell_style_listener(regularTable, viewer) {
                     : x - 1 <
                       Math.min(
                           this._config.group_by.length,
-                          plugin?.aggregate_depth
+                          plugin?.aggregate_depth,
                       ))(
-                metadata.row_header?.filter((x) => x !== undefined)?.length
+                metadata.row_header?.filter((x) => x !== undefined)?.length,
             );
 
             if (is_numeric) {
@@ -59,7 +59,7 @@ export function table_cell_style_listener(regularTable, viewer) {
                     plugin,
                     td,
                     metadata,
-                    is_settings_open
+                    is_settings_open,
                 );
             } else if (type === "boolean") {
                 cell_style_boolean.call(this, plugin, td, metadata);
@@ -74,7 +74,7 @@ export function table_cell_style_listener(regularTable, viewer) {
 
             td.classList.toggle(
                 "psp-bool-type",
-                type === "boolean" && metadata.user !== null
+                type === "boolean" && metadata.user !== null,
             );
 
             const is_th = td.tagName === "TH";
@@ -100,7 +100,7 @@ export function table_cell_style_listener(regularTable, viewer) {
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle(
                 "psp-color-mode-bar",
-                plugin?.number_fg_mode === "bar" && is_numeric
+                plugin?.number_fg_mode === "bar" && is_numeric,
             );
         }
     }

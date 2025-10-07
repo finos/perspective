@@ -16,7 +16,7 @@ const MOUSE_SELECTED_AREA_CLASS = "mouse-selected-area";
 export const addAreaMouseSelection = (
     datagrid,
     table,
-    { className = MOUSE_SELECTED_AREA_CLASS, selected = [] } = {}
+    { className = MOUSE_SELECTED_AREA_CLASS, selected = [] } = {},
 ) => {
     datagrid.model._selection_state = {
         selected_areas: selected,
@@ -25,21 +25,21 @@ export const addAreaMouseSelection = (
 
     table.addEventListener(
         "mousedown",
-        getMousedownListener(datagrid, table, className)
+        getMousedownListener(datagrid, table, className),
     );
 
     table.addEventListener(
         "mouseover",
-        getMouseoverListener(datagrid, table, className)
+        getMouseoverListener(datagrid, table, className),
     );
 
     table.addEventListener(
         "mouseup",
-        getMouseupListener(datagrid, table, className)
+        getMouseupListener(datagrid, table, className),
     );
 
     table.addStyleListener(() =>
-        applyMouseAreaSelections(datagrid, table, className)
+        applyMouseAreaSelections(datagrid, table, className),
     );
 
     return table;
@@ -80,7 +80,7 @@ const getMousedownListener = (datagrid, table, className) => (event) => {
                 datagrid,
                 table,
                 className,
-                datagrid.model._selection_state.selected_areas.concat([start])
+                datagrid.model._selection_state.selected_areas.concat([start]),
             );
 
             return;
@@ -107,22 +107,22 @@ const getMouseoverListener = (datagrid, table, className) => (event) => {
                     x0: Math.min(
                         meta.x,
                         datagrid.model._selection_state
-                            .CURRENT_MOUSEDOWN_COORDINATES.x
+                            .CURRENT_MOUSEDOWN_COORDINATES.x,
                     ),
                     x1: Math.max(
                         meta.x,
                         datagrid.model._selection_state
-                            .CURRENT_MOUSEDOWN_COORDINATES.x
+                            .CURRENT_MOUSEDOWN_COORDINATES.x,
                     ),
                     y0: Math.min(
                         meta.y,
                         datagrid.model._selection_state
-                            .CURRENT_MOUSEDOWN_COORDINATES.y
+                            .CURRENT_MOUSEDOWN_COORDINATES.y,
                     ),
                     y1: Math.max(
                         meta.y,
                         datagrid.model._selection_state
-                            .CURRENT_MOUSEDOWN_COORDINATES.y
+                            .CURRENT_MOUSEDOWN_COORDINATES.y,
                     ),
                 };
 
@@ -135,7 +135,7 @@ const getMouseoverListener = (datagrid, table, className) => (event) => {
                     className,
                     datagrid.model._selection_state.selected_areas.concat([
                         potentialSelection,
-                    ])
+                    ]),
                 );
             }
         }
@@ -181,22 +181,22 @@ const getMouseupListener = (datagrid, table, className) => (event) => {
                 x0: Math.min(
                     meta.x,
                     datagrid.model._selection_state
-                        .CURRENT_MOUSEDOWN_COORDINATES.x
+                        .CURRENT_MOUSEDOWN_COORDINATES.x,
                 ),
                 x1: Math.max(
                     meta.x,
                     datagrid.model._selection_state
-                        .CURRENT_MOUSEDOWN_COORDINATES.x
+                        .CURRENT_MOUSEDOWN_COORDINATES.x,
                 ),
                 y0: Math.min(
                     meta.y,
                     datagrid.model._selection_state
-                        .CURRENT_MOUSEDOWN_COORDINATES.y
+                        .CURRENT_MOUSEDOWN_COORDINATES.y,
                 ),
                 y1: Math.max(
                     meta.y,
                     datagrid.model._selection_state
-                        .CURRENT_MOUSEDOWN_COORDINATES.y
+                        .CURRENT_MOUSEDOWN_COORDINATES.y,
                 ),
             };
             datagrid.model._selection_state.selected_areas.push(selection);
@@ -246,7 +246,7 @@ export const applyMouseAreaSelections = (
     datagrid,
     table,
     className,
-    selected
+    selected,
 ) => {
     if (
         datagrid.model._edit_mode === "SELECT_REGION" ||

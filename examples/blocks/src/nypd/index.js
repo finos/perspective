@@ -62,11 +62,11 @@ async function fetch_progress(url) {
 }
 
 DARK_THEME = await fetch(
-    "/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css"
+    "/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css",
 ).then((x) => x.text());
 
 LIGHT_THEME = await fetch(
-    "/node_modules/@finos/perspective-workspace/dist/css/pro.css"
+    "/node_modules/@finos/perspective-workspace/dist/css/pro.css",
 ).then((x) => x.text());
 
 document.body.innerHTML = `
@@ -94,12 +94,12 @@ window.workspace.addEventListener(
     "workspace-new-view",
     ({ detail: { widget } }) => {
         widget.viewer.setAttribute("theme", theme_style_node.dataset.theme);
-    }
+    },
 );
 
 window.workspace.addTable(
     "ccrb",
-    (async () => worker.table(await fetch_progress(DATA_URL)))()
+    (async () => worker.table(await fetch_progress(DATA_URL)))(),
     // worker.table(await fetch_progress(DATA_URL))
 );
 

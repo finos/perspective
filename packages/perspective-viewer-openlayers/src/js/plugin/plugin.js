@@ -74,7 +74,7 @@ views.forEach(async (plugin) => {
             }
 
             delete() {}
-        }
+        },
     );
 
     await customElements.whenDefined("perspective-viewer");

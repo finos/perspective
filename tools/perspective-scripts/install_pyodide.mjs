@@ -30,12 +30,12 @@ function downloadPyodide() {
     const pyodideLock = path.join(downloadDir, "pyodide", "pyodide-lock.json");
     if (fs.existsSync(buildStamp) && fs.existsSync(pyodideLock)) {
         console.log(
-            `Pyodide ${pyodideVersion} already extracted to ${downloadDir}`
+            `Pyodide ${pyodideVersion} already extracted to ${downloadDir}`,
         );
     } else {
         fs.rmSync(buildStamp, { force: true });
         console.log(
-            `Downloading Pyodide ${pyodideVersion} from ${pyodideUrl}...`
+            `Downloading Pyodide ${pyodideVersion} from ${pyodideUrl}...`,
         );
         fs.mkdirSync(downloadDir, { recursive: true });
         execFileSync("wget", ["-O", tarball, pyodideUrl], {

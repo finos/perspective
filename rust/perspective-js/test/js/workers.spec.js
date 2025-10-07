@@ -15,7 +15,7 @@ import { test } from "@finos/perspective-test";
 test.describe("worker types", () => {
     test("Worker", async ({ page }) => {
         await page.goto(
-            "http://localhost:6598/node_modules/@finos/perspective/test/html/worker.html"
+            "http://localhost:6598/node_modules/@finos/perspective/test/html/worker.html",
         );
 
         await page.evaluate(async () => {
@@ -34,7 +34,7 @@ test.describe("worker types", () => {
 
     test("SharedWorker", async ({ page }) => {
         await page.goto(
-            "http://localhost:6598/node_modules/@finos/perspective/test/html/shared_worker.html"
+            "http://localhost:6598/node_modules/@finos/perspective/test/html/shared_worker.html",
         );
 
         await page.evaluate(async () => {
@@ -54,7 +54,7 @@ test.describe("worker types", () => {
     // Not supported https://github.com/microsoft/playwright/issues/30981
     test.skip("ServiceWorker", async ({ page }) => {
         await page.goto(
-            "/node_modules/@finos/perspective/test/html/service_worker.html"
+            "/node_modules/@finos/perspective/test/html/service_worker.html",
         );
 
         await page.evaluate(async () => {
@@ -73,7 +73,7 @@ test.describe("worker types", () => {
 
     test("No SharedWorker or ServiceWorker (embedded)", async ({ page }) => {
         await page.goto(
-            "http://localhost:6598/node_modules/@finos/perspective/test/html/test.html"
+            "http://localhost:6598/node_modules/@finos/perspective/test/html/test.html",
         );
 
         const s = await page.evaluate(async () => {
@@ -84,11 +84,11 @@ test.describe("worker types", () => {
             );
 
             const wasm = fetch(
-                "http://localhost:6598/node_modules/@finos/perspective/dist/wasm/perspective-js.wasm"
+                "http://localhost:6598/node_modules/@finos/perspective/dist/wasm/perspective-js.wasm",
             );
 
             const wasm2 = fetch(
-                "http://localhost:6598/node_modules/@finos/perspective/dist/wasm/perspective-server.wasm"
+                "http://localhost:6598/node_modules/@finos/perspective/dist/wasm/perspective-server.wasm",
             );
 
             perspective.init_client(wasm);
@@ -96,12 +96,12 @@ test.describe("worker types", () => {
 
             const worker = await perspective.worker(
                 new Worker(
-                    "http://localhost:6598/node_modules/@finos/perspective/dist/cdn/perspective-server.worker.js"
-                )
+                    "http://localhost:6598/node_modules/@finos/perspective/dist/cdn/perspective-server.worker.js",
+                ),
             );
 
             let resp = await fetch(
-                "http://localhost:6598/node_modules/@finos/perspective-test/assets/superstore.csv"
+                "http://localhost:6598/node_modules/@finos/perspective-test/assets/superstore.csv",
             );
 
             let csv = await resp.text();

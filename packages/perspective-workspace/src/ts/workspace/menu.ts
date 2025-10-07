@@ -23,7 +23,7 @@ export class WorkspaceMenu extends Menu {
     constructor(
         host: ShadowRoot,
         workspace: HTMLElement,
-        options: Menu.IOptions
+        options: Menu.IOptions,
     ) {
         options.renderer = new MenuRenderer();
         super(options);
@@ -102,7 +102,7 @@ class MenuRenderer extends Menu.Renderer {
             {
                 className: "lm-Menu-itemMnemonic p-Menu-itemMnemonic",
             },
-            char
+            char,
         );
 
         return [prefix, span, suffix];
@@ -114,7 +114,7 @@ class MenuRenderer extends Menu.Renderer {
             {
                 className: "lm-Menu-itemLabel p-Menu-itemLabel",
             },
-            content
+            content,
         );
     }
 
@@ -138,7 +138,7 @@ class MenuRenderer extends Menu.Renderer {
             },
             this.renderLabel(data),
             this.renderShortcut(data),
-            this.renderSubmenu(data)
+            this.renderSubmenu(data),
         );
     }
 }
@@ -149,7 +149,7 @@ class MenuRenderer extends Menu.Renderer {
 export function openSubmenu(
     submenu: Menu,
     itemNode: HTMLElement,
-    host: HTMLElement
+    host: HTMLElement,
 ): void {
     const windowData = getWindowData();
     let px = windowData.pageXOffset;

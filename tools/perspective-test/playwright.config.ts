@@ -21,7 +21,7 @@ import { get_scope } from "../perspective-scripts/sh_perspective.mjs";
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: "./.perspectiverc" });
+dotenv.config({ path: "./.perspectiverc", quiet: true });
 
 Error.stackTraceLimit = Infinity;
 
@@ -42,7 +42,7 @@ const package_venn = get_scope().reduce(
 
         return acc;
     },
-    { include: [] as string[], exclude: [] as string[] }
+    { include: [] as string[], exclude: [] as string[] },
 );
 
 let PACKAGE: string[] = [];
@@ -53,7 +53,7 @@ if (package_venn.include.length === 0) {
         .filter((x) => package_venn.exclude.indexOf(`!${x}`) === -1);
 } else {
     PACKAGE = package_venn.include.filter(
-        (x) => package_venn.exclude.indexOf(`!${x}`) === -1
+        (x) => package_venn.exclude.indexOf(`!${x}`) === -1,
     );
 }
 
@@ -194,11 +194,11 @@ let PROJECTS = (() => {
 const __require = createRequire(import.meta.url);
 
 const GLOBAL_SETUP_PATH = __require.resolve(
-    "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
+    "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts",
 );
 
 const GLOBAL_TEARDOWN_PATH = __require.resolve(
-    "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
+    "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts",
 );
 
 // See https://playwright.dev/docs/test-configuration.

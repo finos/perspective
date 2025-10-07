@@ -58,7 +58,7 @@ export class PerspectiveViewerWidget extends Widget {
     restore(
         config: psp_viewer.ViewerConfigUpdate & {
             table: string;
-        }
+        },
     ) {
         const { table, ...viewerConfig } = config;
         this._title = config.title as string;

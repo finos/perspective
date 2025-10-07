@@ -21,7 +21,7 @@ export const drawArc = <D extends SunburstData>(radius) =>
         .padRadius(radius)
         .innerRadius((d) => Math.max(1, (d.y0 - 1) * radius))
         .outerRadius((d) =>
-            Math.max((d.y0 - 1) * radius, (d.y1 - 1) * radius - 1)
+            Math.max((d.y0 - 1) * radius, (d.y1 - 1) * radius - 1),
         );
 
 export const arcVisible = (d) => d.y0 >= 1 && d.x1 > d.x0;

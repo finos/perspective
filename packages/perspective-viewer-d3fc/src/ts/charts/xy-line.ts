@@ -28,7 +28,7 @@ import { HTMLSelection, Settings } from "../types";
 
 function xyLine(container: HTMLSelection, settings: Settings) {
     const data = transposeData(
-        xySplitData(settings, filterDataByGroup(settings))
+        xySplitData(settings, filterDataByGroup(settings)),
     );
 
     const color = seriesColorsFromGroups(settings);

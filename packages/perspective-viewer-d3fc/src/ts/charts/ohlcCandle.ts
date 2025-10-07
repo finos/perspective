@@ -35,7 +35,7 @@ function ohlcCandle(seriesCanvas): Chart {
         const data = srcData.map((seriesData) => {
             const bollingerData = bollinger(seriesData);
             return seriesData.map((d, i) =>
-                Object.assign({ bollinger: bollingerData[i] }, d)
+                Object.assign({ bollinger: bollingerData[i] }, d),
             );
         });
 
@@ -54,7 +54,7 @@ function ohlcCandle(seriesCanvas): Chart {
             .scale(
                 keys.length > 1
                     ? (upColor as unknown as d3.ScaleOrdinal<string, unknown>)
-                    : null
+                    : null,
             );
 
         const series = ohlcCandleSeries(settings, seriesCanvas, upColor);
@@ -79,7 +79,7 @@ function ohlcCandle(seriesCanvas): Chart {
             .paddingStrategy(paddingStrategy)(data);
 
         const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
-            withGridLines(multi, settings).orient("vertical").canvas(true)
+            withGridLines(multi, settings).orient("vertical").canvas(true),
         );
 
         chart.yNice && chart.yNice();
@@ -93,8 +93,8 @@ function ohlcCandle(seriesCanvas): Chart {
                     series.filter(
                         (d) =>
                             d.crossValue >= zoom.xDomain[0] &&
-                            d.crossValue <= zoom.xDomain[1]
-                    )
+                            d.crossValue <= zoom.xDomain[1],
+                    ),
                 );
                 chart.yDomain(yAxis.domainFunction(zoomedData));
             })

@@ -27,11 +27,11 @@ export function cell_style_row_header(regularTable, td, metadata) {
     td.classList.toggle("psp-tree-label", is_not_empty && !is_leaf);
     td.classList.toggle(
         "psp-tree-label-expand",
-        is_not_empty && !is_leaf && !is_collapse
+        is_not_empty && !is_leaf && !is_collapse,
     );
     td.classList.toggle(
         "psp-tree-label-collapse",
-        is_not_empty && !is_leaf && is_collapse
+        is_not_empty && !is_leaf && is_collapse,
     );
     td.classList.toggle("psp-tree-leaf", is_not_empty && is_leaf);
 }

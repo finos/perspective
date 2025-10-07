@@ -41,8 +41,8 @@ export function showLegend(container, colorScale, extent) {
             "stroke",
             (d) =>
                 colorScale(
-                    ((100 - d) * (extent.max - extent.min)) / 100 + extent.min
-                ).stroke
+                    ((100 - d) * (extent.max - extent.min)) / 100 + extent.min,
+                ).stroke,
         );
 
     let maxLabelWidth = 0;

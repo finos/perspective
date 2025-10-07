@@ -186,7 +186,7 @@ export class PerspectiveWidget extends Widget {
         viewer.addEventListener(
             "contextmenu",
             (event) => event.stopPropagation(),
-            false
+            false,
         );
 
         const div = document.createElement("div");

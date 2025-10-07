@@ -17,6 +17,7 @@ import * as dotenv from "dotenv";
 
 const original = dotenv.config({
     path: "./.perspectiverc",
+    quiet: true,
 }).parsed;
 
 const CONFIG = new Proxy(
@@ -27,7 +28,7 @@ const CONFIG = new Proxy(
             if (this._values.PACKAGE && this._values.PACKAGE.startsWith("@")) {
                 this._values.PACKAGE = this._values.PACKAGE.slice(
                     2,
-                    this._values.PACKAGE.length - 1
+                    this._values.PACKAGE.length - 1,
                 ).replace(/\|/g, ",");
             }
         }
@@ -69,7 +70,7 @@ const CONFIG = new Proxy(
                     ) {
                         this._values.PACKAGE = this._values.PACKAGE.slice(
                             2,
-                            this._values.PACKAGE.length - 1
+                            this._values.PACKAGE.length - 1,
                         ).replace(/\|/g, ",");
                     }
 
@@ -96,7 +97,7 @@ const CONFIG = new Proxy(
                 return target[name];
             }
         },
-    }
+    },
 );
 
 const PROMPT_DEBUG = {

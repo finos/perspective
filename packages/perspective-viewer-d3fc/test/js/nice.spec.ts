@@ -47,7 +47,7 @@ test("nice accomodates small floating point range", async ({ page }) => {
         return document
             .querySelector("perspective-viewer-d3fc-xyscatter")
             ?.shadowRoot?.querySelectorAll(
-                ".legend-color svg #legend-axis g.tick text"
+                ".legend-color svg #legend-axis g.tick text",
             )
             ?.item(1)?.textContent;
     });

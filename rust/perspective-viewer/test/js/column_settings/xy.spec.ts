@@ -30,14 +30,14 @@ async function checkSymbolsSection(
     page: Page,
     columnName: string,
     searchVal: [string, string, string],
-    editVal: string
+    editVal: string,
 ) {
     // setup viewer
     let viewer = new PspViewer(page);
     let settingsPanel = await viewer.openSettingsPanel();
     const symbolsEditor = viewer.columnSettingsSidebar.styleTab.symbolsEditor;
     const symbolColumn = settingsPanel.container.locator(
-        "div[data-label=Symbol]"
+        "div[data-label=Symbol]",
     );
     await settingsPanel.selectPlugin("X/Y Scatter");
     await symbolColumn.waitFor();
@@ -66,7 +66,7 @@ async function checkSymbolsSection(
         await page.locator("perspective-dropdown .selected").waitFor();
         await keyInput.nth(inputIdx).press("Enter");
         expect((await key.nth(keyIdx).textContent())?.toLowerCase()).toContain(
-            val.toLowerCase()
+            val.toLowerCase(),
         );
     };
     let setValue = async (i, val) => {
@@ -88,7 +88,7 @@ async function checkSymbolsSection(
         await symbolsEditor.container
             .locator(".column_name")
             .first()
-            .textContent()
+            .textContent(),
     ).toContain(editVal);
 
     // remove

@@ -136,8 +136,8 @@ class Command extends Function {
         if (Object.keys(this.#modified_env).length > 0) {
             console.warn(
                 `${chalk.bgYellow.black` Warning `} env '${JSON.stringify(
-                    this.#modified_env
-                )}' won't serialize'`
+                    this.#modified_env,
+                )}' won't serialize'`,
             );
 
             for (const key of Object.keys(this.#modified_env)) {
@@ -149,7 +149,7 @@ class Command extends Function {
             console.warn(
                 `${chalk.bgYellow.black` Warning `} cwd '${
                     this.#options.cwd
-                }' won't serialize`
+                }' won't serialize`,
             );
 
             cmd = `cd ${this.#options.cwd} && ${cmd}`;
@@ -215,7 +215,7 @@ class Command extends Function {
                     } else {
                         resolve(stdout.trimEnd());
                     }
-                }
+                },
             );
 
             if (!silent) {
@@ -347,210 +347,16 @@ function parse_bind_args(fragments, ...args) {
 process
     .on("unhandledRejection", (reason, p) => {
         console.error(
-            `${chalk.bgCyan.black` Unhandled Rejection `} ${chalk.bold(reason)}`
+            `${chalk.bgCyan.black` Unhandled Rejection `} ${chalk.bold(reason)}`,
         );
     })
     .on("uncaughtException", (err) => {
         console.error(
             `${chalk.bgRed.whiteBright.bold` Uncaught Exception `} ${chalk.bold(
-                err.message
-            )}`
+                err.message,
+            )}`,
         );
 
         console.debug(`\n${err.stack}\n`);
         process.exit(1);
     });
-
-// /*******************************************************************************
-//  *
-//  * Tests
-//  */
-
-// function run_suite(tests) {
-//     for (const [actual, expected] of tests) {
-//         console.assert(
-//             actual == expected,
-//             `"${actual}" received, expected: "${expected}"\n${JSON.stringify([
-//                 actual,
-//                 expected,
-//             ])}`
-//         );
-//     }
-// }
-
-// async function run_tests() {
-//     const __dirname = url
-//         .fileURLToPath(new URL(".", import.meta.url))
-//         .slice(0, -1);
-
-//     run_suite([
-//         [sh`run -t${1}`, `run -t1`],
-//         [sh`run -t${undefined}`, `run`],
-//         [sh`run -t${true}`, `run -ttrue`],
-//         [sh`run -t${false}`, `run`],
-//         [sh`run -t${1} task`, `run -t1 task`],
-//         [sh`run -t${undefined} task`, `run task`],
-//         [sh`run -t="${1}"`, `run -t="1"`],
-//         [sh`run -t="${undefined}"`, `run`],
-//         [sh`run -t="${1}" task`, `run -t="1" task`],
-//         [sh`run -t="${undefined}" task`, `run task`],
-//         [sh`run -t${1} -u${2} task`, `run -t1 -u2 task`],
-//         [sh`run -t${1} -u${undefined} task`, `run -t1 task`],
-//         [sh`run -t${undefined} -u${2} task`, `run -u2 task`],
-//         [sh`run -t${undefined} -u${undefined} task`, `run task`],
-//         [sh`run -t"${undefined}" -u"${undefined}" task`, `run task`],
-//         [sh`run "${undefined}" task`, `run task`],
-//         [sh`run ${undefined} task`, `run task`],
-//         [sh`TEST=${undefined} run`, `run`],
-//         [sh`TEST=${1} run`, `TEST=1 run`],
-//         [sh`TEST=${1}`, `TEST=1`],
-//         [sh`TEST=${undefined}`, ``],
-//         [sh`this is a test`, `this is a test`],
-//         [sh`this is a test `, `this is a test `],
-//         [sh`echo ${"test"}`, 'echo "test"'],
-//         [
-//             sh`bash -c "${sh`./execute launch_rockets`}"`,
-//             `bash -c "./execute launch_rockets"`,
-//         ],
-//         [
-//             sh`bash -c ${sh`./execute launch_rockets`.toString()}`,
-//             `bash -c "./execute launch_rockets"`,
-//         ],
-//         [
-//             sh`bash -c ${sh`./execute launch_rockets`}`,
-//             `bash -c ./execute launch_rockets`,
-//         ],
-//         [
-//             sh`bash -c ${`./execute launch_rockets`}`,
-//             `bash -c "./execute launch_rockets"`,
-//         ],
-//         [
-//             sh`echo $(${sh`./execute launch_rockets`})`,
-//             `echo $(./execute launch_rockets)`,
-//         ],
-//         [
-//             sh`cd python/perspective`.sh(sh`python3 setup.py`),
-//             `cd python/perspective && python3 setup.py`,
-//         ],
-//         [sh`--test="${undefined}.0" ${1}`, `1`],
-//         [sh`echo $TEST`.env({ TEST: "test" }).execSync(), `test`],
-//         [await sh`echo test`.exec(), `test`],
-//         [await sh`echo test`(), `test`],
-//         [sh.env({ TEST: "test2" })`echo $TEST`.execSync(), `test2`],
-//         [sh`echo ${sh.path`./test`}`, `echo \"${process.cwd()}/test\"`],
-//         [sh`echo ${sh.path`test/obj`}`, `echo \"${process.cwd()}/test/obj\"`],
-//         [
-//             sh`echo ${sh.path`${__dirname}/test/obj`}`,
-//             `echo \"${__dirname}/test/obj\"`,
-//         ],
-//         [
-//             sh`echo $TEST`.env({ TEST: "test" }).toString(),
-//             "TEST=test echo $TEST",
-//         ],
-//         [
-//             sh(sh`echo $TEST`.env({ TEST: "test" })).toString(),
-//             "TEST=test echo $TEST",
-//         ],
-//         [sh`echo ${sh`$TEST`.env({ TEST: "test2" })}`.toString(), "echo $TEST"],
-//     ]);
-
-//     if (process.platform === "win32") {
-//         run_suite([
-//             [sh.path`a/b/c`, `${process.cwd()}\\a\\b\\c`],
-//             [
-//                 sh.path`${__dirname}/../cpp/perspective`,
-//                 `${process.cwd()}\\cpp\\perspective`,
-//             ],
-//             [
-//                 sh.path`${__dirname}/../python/perspective/dist`,
-//                 _path.resolve(__dirname, "..", "python", "perspective", "dist"),
-//             ],
-//             [
-//                 sh.path`${__dirname}/../cpp/perspective`,
-//                 _path.resolve(__dirname, "..", "cpp", "perspective"),
-//             ],
-//             [
-//                 sh.path`${__dirname}/../cmake`,
-//                 _path.resolve(__dirname, "..", "cmake"),
-//             ],
-//             [
-//                 sh.path`${sh.path`${__dirname}/../python/perspective/dist`}/cmake`,
-//                 _path.resolve(
-//                     _path.resolve(
-//                         __dirname,
-//                         "..",
-//                         "python",
-//                         "perspective",
-//                         "dist"
-//                     ),
-//                     "cmake"
-//                 ),
-//             ],
-//             [
-//                 sh.path`${sh.path`${__dirname}/../python/perspective/dist`}/obj`,
-//                 _path.resolve(
-//                     _path.resolve(
-//                         __dirname,
-//                         "..",
-//                         "python",
-//                         "perspective",
-//                         "dist"
-//                     ),
-//                     "obj"
-//                 ),
-//             ],
-//         ]);
-//     } else {
-//         run_suite([
-//             [sh.path`a/b/c`, `${process.cwd()}/a/b/c`],
-//             [
-//                 sh.path`${__dirname}/../cpp/perspective`,
-//                 `${process.cwd()}/cpp/perspective`,
-//             ],
-//             [
-//                 sh.path`${__dirname}/../python/perspective/dist`,
-//                 _path.resolve(__dirname, "..", "python", "perspective", "dist"),
-//             ],
-//             [
-//                 sh.path`${__dirname}/../cpp/perspective`,
-//                 _path.resolve(__dirname, "..", "cpp", "perspective"),
-//             ],
-//             [
-//                 sh.path`${__dirname}/../cmake`,
-//                 _path.resolve(__dirname, "..", "cmake"),
-//             ],
-//             [
-//                 sh.path`${sh.path`${__dirname}/../python/perspective/dist`}/cmake`,
-//                 _path.resolve(
-//                     _path.resolve(
-//                         __dirname,
-//                         "..",
-//                         "python",
-//                         "perspective",
-//                         "dist"
-//                     ),
-//                     "cmake"
-//                 ),
-//             ],
-//             [
-//                 sh.path`${sh.path`${__dirname}/../python/perspective/dist`}/obj`,
-//                 _path.resolve(
-//                     _path.resolve(
-//                         __dirname,
-//                         "..",
-//                         "python",
-//                         "perspective",
-//                         "dist"
-//                     ),
-//                     "obj"
-//                 ),
-//             ],
-//         ]);
-//     }
-// }
-
-// if (import.meta.url.startsWith("file:")) {
-//     if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
-//         run_tests();
-//     }
-// }

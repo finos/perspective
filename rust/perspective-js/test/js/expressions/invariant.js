@@ -47,7 +47,7 @@ const generator = function (length = 100, has_zero = true) {
                 const result = await view.to_columns();
                 const expected = array_equals(
                     result['("a" - "b") + "b"'],
-                    data["a"]
+                    data["a"],
                 );
                 view.delete();
                 table.delete();
@@ -65,7 +65,7 @@ const generator = function (length = 100, has_zero = true) {
                 const result = await view.to_columns();
                 const expected = array_equals(
                     result['("a" + "b") - "a" - "b"'],
-                    Array(data["a"].length).fill(0)
+                    Array(data["a"].length).fill(0),
                 );
                 view.delete();
                 table.delete();
@@ -87,12 +87,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['("a" + "b") - ("a" + "b")'],
-                        Array(data["a"].length).fill(0)
+                        Array(data["a"].length).fill(0),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             jsc.property("(x - x) == 0", generator(), async (data) => {
@@ -104,7 +104,7 @@ const generator = function (length = 100, has_zero = true) {
                 const result = await view.to_columns();
                 const expected = array_equals(
                     result['"a" - "a"'],
-                    Array(data["a"].length).fill(0)
+                    Array(data["a"].length).fill(0),
                 );
                 view.delete();
                 table.delete();
@@ -120,7 +120,7 @@ const generator = function (length = 100, has_zero = true) {
                 const result = await view.to_columns();
                 const expected = array_equals(
                     result['"a" / "a"'],
-                    Array(data["a"].length).fill(1)
+                    Array(data["a"].length).fill(1),
                 );
                 view.delete();
                 table.delete();
@@ -138,7 +138,7 @@ const generator = function (length = 100, has_zero = true) {
                 const result = await view.to_columns();
                 const expected = array_equals(
                     result['("a" + "a") - "a" - "a"'],
-                    Array(data["a"].length).fill(0)
+                    Array(data["a"].length).fill(0),
                 );
                 view.delete();
                 table.delete();
@@ -159,12 +159,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['sqrt(pow("a", 2))'],
-                        data["a"]
+                        data["a"],
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             // jsc.property(
@@ -201,12 +201,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['percent_of("a", "a")'],
-                        Array(data["a"].length).fill(100)
+                        Array(data["a"].length).fill(100),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             jsc.property(
@@ -221,12 +221,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['abs("a")'],
-                        data["a"]
+                        data["a"],
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
         });
 
@@ -244,12 +244,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"a" == "a"'],
-                        Array(data["a"].length).fill(true)
+                        Array(data["a"].length).fill(true),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             jsc.property(
@@ -265,12 +265,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"a" > "a"'],
-                        Array(data["a"].length).fill(false)
+                        Array(data["a"].length).fill(false),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             jsc.property(
@@ -286,12 +286,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"a" < "a"'],
-                        Array(data["a"].length).fill(false)
+                        Array(data["a"].length).fill(false),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             jsc.property(
@@ -315,12 +315,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"c" == "c"'],
-                        Array(data["c"].length).fill(true)
+                        Array(data["c"].length).fill(true),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             jsc.property(
@@ -344,12 +344,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"d" == "d"'],
-                        Array(data["d"].length).fill(true)
+                        Array(data["d"].length).fill(true),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
 
             jsc.property(
@@ -373,12 +373,12 @@ const generator = function (length = 100, has_zero = true) {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"d" == "d"'],
-                        Array(data["d"].length).fill(true)
+                        Array(data["d"].length).fill(true),
                     );
                     view.delete();
                     table.delete();
                     return expected;
-                }
+                },
             );
         });
     });

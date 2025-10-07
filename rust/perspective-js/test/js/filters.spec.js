@@ -266,7 +266,7 @@ const datetime_data_local = [
                     },
                     {
                         index: "c",
-                    }
+                    },
                 );
                 var view = await table.view({
                     group_by: ["a"],
@@ -476,7 +476,7 @@ const datetime_data_local = [
             // https://github.com/finos/perspective/issues/2881
             test("Arrow float32 filters", async function () {
                 const table = await perspective.table(
-                    arrows.float32_arrow.slice()
+                    arrows.float32_arrow.slice(),
                 );
 
                 const view = await table.view({ filter: [["score", "<", 93]] });
@@ -608,7 +608,7 @@ const datetime_data_local = [
                         ts: "datetime",
                         index: "string",
                     },
-                    { index: "index" }
+                    { index: "index" },
                 );
 
                 let x, y;

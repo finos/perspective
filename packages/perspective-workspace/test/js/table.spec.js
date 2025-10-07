@@ -47,7 +47,7 @@ function tests(context, compare) {
             await workspace.restore(config);
             await workspace.replaceTable(
                 "superstore",
-                window.__WORKER__.table("x\n1")
+                window.__WORKER__.table("x\n1"),
             );
             await window.__TABLE__.delete();
         }, config);
@@ -79,7 +79,7 @@ function tests(context, compare) {
             const workspace = document.getElementById("workspace");
             await workspace.addTable(
                 "errored",
-                new Promise((_, reject) => setTimeout(reject, 50))
+                new Promise((_, reject) => setTimeout(reject, 50)),
             );
 
             try {
@@ -93,12 +93,12 @@ function tests(context, compare) {
         // NOTE This is the error message we expect when `restore()` is called
         // without a `Table`, subject to change.
         expect(result).toEqual(
-            "Error: Failed to construct table from JsValue(undefined)"
+            "Error: Failed to construct table from JsValue(undefined)",
         );
         await page.evaluate(async () => {
             await workspace.replaceTable(
                 "errored",
-                window.__WORKER__.table("x\n1")
+                window.__WORKER__.table("x\n1"),
             );
         });
 
@@ -108,7 +108,7 @@ function tests(context, compare) {
 
         return compare(
             page,
-            `${context}-replace-table-works-with-errored-table.txt`
+            `${context}-replace-table-works-with-errored-table.txt`,
         );
     });
 

@@ -36,8 +36,8 @@ export function getGroupValues(data, settings) {
     const groupValues = (data.crossValue.split
         ? data.crossValue.split("|")
         : Array.isArray(data.crossValue)
-        ? data.crossValue
-        : [data.crossValue]) || [data.key];
+          ? data.crossValue
+          : [data.crossValue]) || [data.key];
     return groupValues.map((cross, i) => ({
         name: settings.crossValues[i].name,
         value: toValue(settings.crossValues[i].type, cross),
@@ -72,7 +72,7 @@ export function getDataValues(data, settings) {
             name: main.name,
             value: toValue(
                 main.type,
-                data.row[getDataRowKey(data.key, main, settings.realValues)]
+                data.row[getDataRowKey(data.key, main, settings.realValues)],
             ),
         }));
     }
@@ -84,7 +84,7 @@ export function getDataValues(data, settings) {
                 data.colorValue ||
                     data.mainValue - data.baseValue ||
                     data.mainValue ||
-                    data.mainValues
+                    data.mainValues,
             ),
         },
     ];
@@ -105,7 +105,7 @@ function getDataRowKey(key, main, realValues) {
         }
 
         const keyIncludesInvalidValueName = realValues.includes(
-            splitKey[splitKey.length - 1]
+            splitKey[splitKey.length - 1],
         );
 
         const validKeyPrefix = keyIncludesInvalidValueName

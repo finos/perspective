@@ -43,7 +43,7 @@ export interface CustomElementProto extends CustomElementConstructor {
 export function registerElement(
     templateString: string,
     styleString: string,
-    proto: CustomElementProto
+    proto: CustomElementProto,
 ) {
     const template = importTemplate(templateString);
     if (styleString) {

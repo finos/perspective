@@ -4,22 +4,23 @@
     "version": "3.8.0",
     "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
     "scripts": {
-        "start": "mkdirp dist && node --experimental-wasm-memory64 --experimental-modules server.mjs",
+        "start": "mkdir -p dist && node --experimental-wasm-memory64 --experimental-modules server.mjs",
         "repl": "node --experimental-repl-await"
     },
     "main": "index.mjs",
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "@finos/perspective-viewer-d3fc": "workspace:^",
-        "@finos/perspective-viewer-datagrid": "workspace:^",
-        "@finos/perspective-viewer-openlayers": "workspace:^",
-        "@finos/perspective-workspace": "workspace:^",
-        "superstore-arrow": "3.0.0"
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "@finos/perspective-viewer-d3fc": "workspace:",
+        "@finos/perspective-viewer-datagrid": "workspace:",
+        "@finos/perspective-viewer-openlayers": "workspace:",
+        "@finos/perspective-workspace": "workspace:",
+        "superstore-arrow": "catalog:"
     },
     "devDependencies": {
-        "esbuild": "^0.25.5"
+        "@zip.js/zip.js": "catalog:",
+        "esbuild": "catalog:"
     }
 }

@@ -33,11 +33,11 @@ export function keydownListener(table, viewer, selected_position_map, event) {
             table,
             viewer,
             selected_position_map,
-            event
+            event,
         );
     } else {
         console.debug(
-            `Mode ${this._edit_mode} for "keydown" event not yet implemented`
+            `Mode ${this._edit_mode} for "keydown" event not yet implemented`,
         );
     }
 }
@@ -55,7 +55,7 @@ export function clickListener(table, viewer, event) {
     } else if (this._edit_mode === "SELECT_REGION") {
     } else {
         console.debug(
-            `Mode ${this._edit_mode} for "click" event not yet implemented`
+            `Mode ${this._edit_mode} for "click" event not yet implemented`,
         );
     }
 }

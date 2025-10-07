@@ -14,7 +14,7 @@ import { execSync } from "child_process";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { PerspectiveEsbuildPlugin } from "@finos/perspective-esbuild-plugin";
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
-import cpy from "cpy";
+
 import "zx/globals";
 import { compress } from "pro_self_extracting_wasm";
 
@@ -109,17 +109,20 @@ async function build_rust() {
     const release_flag = IS_DEBUG ? "" : "--release";
     execSync(
         `PSP_ROOT_DIR=../.. cargo bundle --target=${get_host()} -- perspective_js ${release_flag} --features="export-init,talc-allocator"`,
-        INHERIT
+        INHERIT,
     );
 
     await compress(
         "dist/wasm/perspective-js.wasm",
-        "dist/wasm/perspective-js.wasm"
+        "dist/wasm/perspective-js.wasm",
     );
 }
 
 async function build_web_assets() {
-    await cpy(["../../rust/perspective-server/dist/web/*"], "dist/wasm");
+    fs.cpSync("../../rust/perspective-server/dist/web", "dist/wasm", {
+        recursive: true,
+    });
+
     await Promise.all(BUILD.map(build)).catch((e) => {
         console.error(e);
         process.exit(1);

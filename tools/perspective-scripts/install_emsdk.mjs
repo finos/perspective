@@ -17,13 +17,13 @@ import * as dotenv from "dotenv";
 import sh from "./sh.mjs";
 import { getWorkspaceRoot, getWorkspacePackageJson } from "./workspace.mjs";
 
+import "zx/globals";
+
 const pkg = getWorkspacePackageJson();
 
 const emscripten = pkg.emscripten;
 
-dotenv.config({
-    path: "./.perspectiverc",
-});
+dotenv.config({ path: "./.perspectiverc", quiet: true });
 
 function base() {
     return sh.path`${getWorkspaceRoot()}/.emsdk`;
@@ -68,4 +68,5 @@ if (!process.env.PSP_SKIP_EMSDK_INSTALL) {
     }
 
     toolchain_install();
+    $.sync`cd .emsdk && git apply ../tools/perspective-scripts/emsdk.patch`;
 }

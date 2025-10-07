@@ -33,7 +33,7 @@ test.describe("max_cells", () => {
         });
 
         const svg = await getSvgContentString(
-            "perspective-viewer-d3fc-treemap"
+            "perspective-viewer-d3fc-treemap",
         )(page);
 
         compareContentsToSnapshot(svg!, [

@@ -16,9 +16,9 @@ import { WorkerPlugin } from "@finos/perspective-esbuild-plugin/worker.js";
 import { ResolvePlugin } from "@finos/perspective-esbuild-plugin/resolve.js";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
 import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
-import * as fs from "fs";
+import * as fs from "node:fs";
 import { createRequire } from "node:module";
-import { execSync } from "child_process";
+
 import "zx/globals";
 
 const _require = createRequire(import.meta.url);
@@ -69,7 +69,7 @@ const BUILD = [
 function add(builder, path, path2) {
     builder.add(
         path,
-        fs.readFileSync(_require.resolve(path2 || path)).toString()
+        fs.readFileSync(_require.resolve(path2 || path)).toString(),
     );
 }
 
@@ -102,12 +102,12 @@ async function build_all() {
     add(builder3, "./injected.less", "./src/less/injected.less");
     fs.writeFileSync(
         "build/css/workspace.css",
-        builder3.compile().get("workspace.css")
+        builder3.compile().get("workspace.css"),
     );
 
     fs.writeFileSync(
         "build/css/injected.css",
-        builder3.compile().get("injected.css")
+        builder3.compile().get("injected.css"),
     );
 
     const pro = new BuildCss("./src/themes");
@@ -121,18 +121,18 @@ async function build_all() {
     add(
         pro_dark,
         "icons.less",
-        "@finos/perspective-viewer/src/themes/icons.less"
+        "@finos/perspective-viewer/src/themes/icons.less",
     );
     add(
         pro_dark,
         "intl.less",
-        "@finos/perspective-viewer/src/themes/intl.less"
+        "@finos/perspective-viewer/src/themes/intl.less",
     );
     add(pro_dark, "pro.less", "@finos/perspective-viewer/src/themes/pro.less");
     add(
         pro_dark,
         "pro-dark.less",
-        "@finos/perspective-viewer/src/themes/pro-dark.less"
+        "@finos/perspective-viewer/src/themes/pro-dark.less",
     );
     // add(builder2, "@finos/perspective-viewer/src/themes/pro-dark.less");
     // add(builder2, "pro-workspace.less", "./src/themes/pro.less");
@@ -140,16 +140,16 @@ async function build_all() {
     add(pro_dark, "output.scss", "./src/themes/pro-dark.less");
     fs.writeFileSync(
         "dist/css/pro-dark.css",
-        pro_dark.compile().get("output.css")
+        pro_dark.compile().get("output.css"),
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 
     try {
-        await $`npx tsc --project ./tsconfig.json`.stdio(
+        await $`tsc --project ./tsconfig.json`.stdio(
             "inherit",
             "inherit",
-            "inherit"
+            "inherit",
         );
     } catch (e) {
         process.exit(1);

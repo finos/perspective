@@ -44,7 +44,7 @@ export function cell_style_string(plugin, td, metadata) {
     ) {
         const source = this._plugin_background;
         const foreground = infer_foreground_from_background(
-            rgbaToRgb([r, g, b, 1], source)
+            rgbaToRgb([r, g, b, 1], source),
         );
         td.style.color = foreground;
         td.style.backgroundColor = hex;
@@ -72,7 +72,7 @@ export function cell_style_string(plugin, td, metadata) {
         const hex2 = color2.hex();
         const source = this._plugin_background;
         const foreground = infer_foreground_from_background(
-            rgbaToRgb([r, g, b, 1], source)
+            rgbaToRgb([r, g, b, 1], source),
         );
         td.style.color = foreground;
         td.style.backgroundColor = hex2;

@@ -18,7 +18,7 @@ export async function init_client(
         | Promise<Response | ArrayBuffer | Uint8Array>
         | Response
         | ArrayBuffer
-        | Uint8Array
+        | Uint8Array,
 ) {
     const module_or_path = await load_wasm_stage_0(wasm_binary);
     await wasm_module.default({ module_or_path });

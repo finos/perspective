@@ -33,9 +33,8 @@
     ],
     "types": "dist/esm/index.d.ts",
     "scripts": {
-        "prebuild": "mkdirp dist/esm",
-        "build": "node ./build.js",
-        "clean": "rimraf dist"
+        "build": "node ./build.mjs",
+        "clean": "node ./clean.mjs"
     },
     "publishConfig": {
         "access": "public"
@@ -47,23 +46,34 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "workspace:^",
-        "@finos/perspective-viewer": "workspace:^",
-        "chroma-js": "^1.3.4",
-        "d3fc": "^15.2.4",
-        "@d3fc/d3fc-chart": "^5.1.9",
-        "@d3fc/d3fc-element": "^6.2.0",
-        "d3-selection": "^3.0.0",
-        "d3-array": "^3.2.1",
-        "d3-svg-legend": "^2.25.6",
-        "d3": "^7.8.0",
-        "gradient-parser": "1.0.2"
+        "@finos/perspective": "workspace:",
+        "@finos/perspective-viewer": "workspace:",
+        "chroma-js": "catalog:",
+        "d3fc": "catalog:",
+        "@d3fc/d3fc-chart": "catalog:",
+        "@d3fc/d3fc-element": "catalog:",
+        "d3-selection": "catalog:",
+        "d3-array": "catalog:",
+        "d3-svg-legend": "catalog:",
+        "d3-color": "catalog:",
+        "d3": "catalog:",
+        "gradient-parser": "catalog:"
+    },
+    "overrides": {
+        "d3-svg-legend": {
+            "d3-array": ">=3 <4",
+            "d3-dispatch": ">=3 <4",
+            "d3-format": ">=3 <4",
+            "d3-scale": ">=4 <5",
+            "d3-selection": ">=3 <4",
+            "d3-transition": ">=3 <4"
+        }
     },
     "devDependencies": {
-        "@types/d3": "^7.0.0",
-        "@finos/perspective-esbuild-plugin": "workspace:^",
-        "@finos/perspective-test": "workspace:^",
-        "@prospective.co/procss": "^0.1.16",
-        "typescript": "~5.2.2"
+        "@finos/perspective-esbuild-plugin": "workspace:",
+        "@finos/perspective-test": "workspace:",
+        "@prospective.co/procss": "catalog:",
+        "@types/d3": "catalog:",
+        "typescript": "catalog:"
     }
 }

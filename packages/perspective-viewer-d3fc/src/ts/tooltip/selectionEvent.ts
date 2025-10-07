@@ -30,7 +30,7 @@ export const raiseEvent = (node, data, settings) => {
                 config: { filter },
                 row: data.row,
             },
-        })
+        }),
     );
 };
 
@@ -40,7 +40,7 @@ export const selectionEvent = () => {
     const _event = (selection) => {
         const node = selection.node();
         selection.on("click", (_event, data) =>
-            raiseEvent(node, data, settings)
+            raiseEvent(node, data, settings),
         );
     };
 

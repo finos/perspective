@@ -15,7 +15,7 @@ import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.j
 
 async function load() {
     let resp = await fetch(
-        "/node_modules/superstore-arrow/superstore.lz4.arrow"
+        "/node_modules/@finos/perspective-test/node_modules/superstore-arrow/superstore.lz4.arrow",
     );
 
     let arrow = await resp.arrayBuffer();

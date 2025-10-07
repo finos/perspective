@@ -82,10 +82,10 @@ export function sunburstSeries(): SunburstSeries {
             .select("path")
             .attr("fill-opacity", (d) => (arcVisible(d.current) ? 1 : 0))
             .attr("user-select", (d) =>
-                arcVisible(d.current) ? "initial" : "none"
+                arcVisible(d.current) ? "initial" : "none",
             )
             .style("pointer-events", (d) =>
-                arcVisible(d.current) ? "initial" : "none"
+                arcVisible(d.current) ? "initial" : "none",
             )
             .attr("d", (d) => drawArc(radius)(d.current));
         color && path.style("fill", (d) => color(d.data.color));
@@ -114,7 +114,7 @@ export function sunburstSeries(): SunburstSeries {
             label,
             radius,
             split,
-            settings
+            settings,
         );
         // NOTE: Double check to make sure that settings.sunburstLevel is a thing.
         if (settings.sunburstLevel) {

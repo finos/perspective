@@ -16,7 +16,7 @@ import { run_standard_tests } from "@finos/perspective-test";
 async function get_contents(page) {
     return await page.evaluate(async () => {
         const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-openlayers-scatter"
+            "perspective-viewer perspective-viewer-openlayers-scatter",
         );
         return viewer.innerHTML || "MISSING";
     });
@@ -25,7 +25,7 @@ async function get_contents(page) {
 test.describe("OpenLayers with superstore data set", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(
-            "/node_modules/@finos/perspective-viewer-openlayers/test/html/superstore.html"
+            "/node_modules/@finos/perspective-viewer-openlayers/test/html/superstore.html",
         );
         await page.evaluate(async () => {
             while (!window["__TEST_PERSPECTIVE_READY__"]) {

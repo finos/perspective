@@ -19,7 +19,7 @@ const isUp = (d) => d.closeValue >= d.openValue;
 export function ohlcCandleSeries(
     settings: Settings,
     seriesCanvas,
-    upColor: D3Scale
+    upColor: D3Scale,
 ) {
     const domain = upColor.domain();
     const downColor = colorScale()

@@ -15,7 +15,7 @@ import { test, expect } from "@finos/perspective-test";
 test.describe("browser focus", async () => {
     test.beforeEach(async function init({ page }) {
         await page.goto(
-            "/node_modules/@finos/perspective-viewer/test/html/superstore_with_input.html"
+            "/node_modules/@finos/perspective-viewer/test/html/superstore_with_input.html",
         );
 
         await page.evaluate(async () => {

@@ -37,7 +37,7 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
             "#container > d3fc-group > d3fc-svg.svg-plot-area.plot-area > svg > g:nth-child(2) > g > g:nth-child(1) > g > path",
             {
                 force: true,
-            }
+            },
         );
         await page.waitForSelector("#tooltip-values > li:nth-child(1)");
 
@@ -45,7 +45,7 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
             return document
                 .querySelector("perspective-viewer-d3fc-xyline")
                 ?.shadowRoot?.querySelector(
-                    "#tooltip-values > li:nth-child(2) > b"
+                    "#tooltip-values > li:nth-child(2) > b",
                 )?.textContent;
         });
 
@@ -76,7 +76,7 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
             "#container > d3fc-group > d3fc-svg.svg-plot-area.plot-area > svg > g:nth-child(2) > g > g:nth-child(1) > g > path",
             {
                 force: true,
-            }
+            },
         );
         await page.waitForSelector("#tooltip-values > li:nth-child(2)");
 
@@ -84,7 +84,7 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
             return document
                 .querySelector("perspective-viewer-d3fc-xyline")
                 ?.shadowRoot?.querySelector(
-                    "#tooltip-values > li:nth-child(2) > b"
+                    "#tooltip-values > li:nth-child(2) > b",
                 )?.textContent;
         });
 
@@ -115,7 +115,7 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
             "#container > d3fc-group > d3fc-svg.svg-plot-area.plot-area > svg > g:nth-child(2) > g > g:nth-child(1) > g > path",
             {
                 force: true,
-            }
+            },
         );
         await page.waitForSelector("#tooltip-values > li:nth-child(3)");
 
@@ -123,7 +123,7 @@ test.describe("Tooltip data values with various 'Split By' configurations", () =
             return document
                 .querySelector("perspective-viewer-d3fc-xyline")
                 ?.shadowRoot?.querySelector(
-                    "#tooltip-values > li:nth-child(2) > b"
+                    "#tooltip-values > li:nth-child(2) > b",
                 )?.textContent;
         });
 

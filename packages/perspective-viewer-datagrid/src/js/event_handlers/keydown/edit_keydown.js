@@ -39,48 +39,44 @@ function getPos() {
     }
 }
 
-const moveSelection = lock(async function (
-    table,
-    selected_position_map,
-    active_cell,
-    dx,
-    dy
-) {
-    const meta = table.getMeta(active_cell);
-    const num_columns = this._column_paths.length;
-    const num_rows = this._num_rows;
-    const selected_position = selected_position_map.get(table);
-    if (!selected_position) {
-        return;
-    }
+const moveSelection = lock(
+    async function (table, selected_position_map, active_cell, dx, dy) {
+        const meta = table.getMeta(active_cell);
+        const num_columns = this._column_paths.length;
+        const num_rows = this._num_rows;
+        const selected_position = selected_position_map.get(table);
+        if (!selected_position) {
+            return;
+        }
 
-    if (meta.x + dx < num_columns && 0 <= meta.x + dx) {
-        selected_position.x = meta.x + dx;
-    }
+        if (meta.x + dx < num_columns && 0 <= meta.x + dx) {
+            selected_position.x = meta.x + dx;
+        }
 
-    if (meta.y + dy < num_rows && 0 <= meta.y + dy) {
-        selected_position.y = meta.y + dy;
-    }
+        if (meta.y + dy < num_rows && 0 <= meta.y + dy) {
+            selected_position.y = meta.y + dy;
+        }
 
-    const xmin = Math.max(meta.x0 - 10, 0);
-    const xmax = Math.min(meta.x0 + 10, num_columns);
-    const ymin = Math.max(meta.y0 - 5, 0);
-    const ymax = Math.min(meta.y0 + 10, num_rows);
-    let x = meta.x0 + dx,
-        y = meta.y0 + dy;
-    while (
-        !focus_style_listener(table, undefined, selected_position_map) &&
-        x >= xmin &&
-        x < xmax &&
-        y >= ymin &&
-        y < ymax
-    ) {
-        await table.scrollToCell(x, y, num_columns, num_rows);
-        selected_position_map.set(table, selected_position);
-        x += dx;
-        y += dy;
-    }
-});
+        const xmin = Math.max(meta.x0 - 10, 0);
+        const xmax = Math.min(meta.x0 + 10, num_columns);
+        const ymin = Math.max(meta.y0 - 5, 0);
+        const ymax = Math.min(meta.y0 + 10, num_rows);
+        let x = meta.x0 + dx,
+            y = meta.y0 + dy;
+        while (
+            !focus_style_listener(table, undefined, selected_position_map) &&
+            x >= xmin &&
+            x < xmax &&
+            y >= ymin &&
+            y < ymax
+        ) {
+            await table.scrollToCell(x, y, num_columns, num_rows);
+            selected_position_map.set(table, selected_position);
+            x += dx;
+            y += dy;
+        }
+    },
+);
 
 function isLastCell(model, table, target) {
     const meta = table.getMeta(target);
@@ -104,7 +100,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                     selected_position_map,
                     target,
                     0,
-                    -1
+                    -1,
                 );
             } else {
                 moveSelection.call(
@@ -113,7 +109,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                     selected_position_map,
                     target,
                     0,
-                    1
+                    1,
                 );
             }
             break;
@@ -126,7 +122,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                     selected_position_map,
                     target,
                     -1,
-                    0
+                    0,
                 );
             }
             break;
@@ -138,7 +134,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                 selected_position_map,
                 target,
                 0,
-                -1
+                -1,
             );
             break;
         case "ArrowRight":
@@ -150,7 +146,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                     selected_position_map,
                     target,
                     1,
-                    0
+                    0,
                 );
             }
             break;
@@ -162,7 +158,7 @@ export function keydownListener(table, viewer, selected_position_map, event) {
                 selected_position_map,
                 target,
                 0,
-                1
+                1,
             );
             break;
         default:
