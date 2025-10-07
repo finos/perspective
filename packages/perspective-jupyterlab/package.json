@@ -55,10 +55,6 @@
                 "bundled": true,
                 "singleton": true
             },
-            "@finos/perspective-jupyterlab": {
-                "bundled": true,
-                "singleton": true
-            },
             "@finos/perspective-viewer": {
                 "bundled": true,
                 "singleton": true
