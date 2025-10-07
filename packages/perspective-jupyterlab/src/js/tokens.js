@@ -10,36 +10,19 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "@finos/perspective";
-import perspective_viewer from "@finos/perspective-viewer";
+import { Token } from "@lumino/coreutils";
 
-import server_wasm from "@finos/perspective/dist/wasm/perspective-server.wasm";
-import client_wasm from "@finos/perspective-viewer/dist/wasm/perspective-viewer.wasm";
-
-await Promise.all([
-    perspective_viewer.init_client(client_wasm),
-    perspective.init_server(server_wasm),
-]);
-
-export * from "./model";
-export * from "./tokens";
-export * from "./version";
-export * from "./view";
-export * from "./widget";
-
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
-import "@finos/perspective-viewer-openlayers";
-
-// NOTE: only expose the widget here
-import { PerspectiveJupyterPlugin } from "./plugin";
-
-let plugins = [PerspectiveJupyterPlugin];
-
-// Conditionally import renderers if running in jupyterlab only
-if (window && window._JUPYTERLAB) {
-    const { PerspectiveRenderers } = await import("./renderer");
-    plugins.push(PerspectiveRenderers);
-}
-
-export default plugins;
+export const IPerspective = new Token("@finos/perspective");
+export const IPerspectiveJupyterlab = new Token(
+    "@finos/perspective-jupyterlab",
+);
+export const IPerspectiveViewer = new Token("@finos/perspective-viewer");
+export const IPerspectiveViewerD3fc = new Token(
+    "@finos/perspective-viewer-d3fc",
+);
+export const IPerspectiveViewerDatagrid = new Token(
+    "@finos/perspective-viewer-datagrid",
+);
+export const IPerspectiveViewerOpenlayers = new Token(
+    "@finos/perspective-viewer-openlayers",
+);

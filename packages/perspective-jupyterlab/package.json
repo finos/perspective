@@ -55,6 +55,10 @@
                 "bundled": true,
                 "singleton": true
             },
+            "@finos/perspective-jupyterlab": {
+                "bundled": true,
+                "singleton": true
+            },
             "@finos/perspective-viewer": {
                 "bundled": true,
                 "singleton": true
@@ -64,6 +68,10 @@
                 "singleton": true
             },
             "@finos/perspective-viewer-datagrid": {
+                "bundled": true,
+                "singleton": true
+            },
+            "@finos/perspective-viewer-openlayers": {
                 "bundled": true,
                 "singleton": true
             }
