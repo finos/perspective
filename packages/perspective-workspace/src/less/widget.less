@@ -15,7 +15,8 @@
 .lm-DockPanel:not([data-mode="single-document"]) .viewer-container {
     border: var(--workspace-tabbar--border, 1px solid var(--inactive--color));
     border-width: var(--workspace-tabbar--border-width);
-    border-radius: var(--workspace-tabbar--border-radius, 0 0 6px 6px);
+    border-radius: 0 0 var(--workspace-tabbar--border-radius, 6px)
+        var(--workspace-tabbar--border-radius, 6px);
 }
 
 .viewer-container {

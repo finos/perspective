@@ -299,7 +299,8 @@
     border: var(--workspace-tabbar--border, 1px solid #ddd);
     border-width: var(--workspace-tabbar-tab--border-width);
     box-shadow: 0 13px 0 -12px var(--inactive--border-color);
-    border-radius: 6px 6px 0 0;
+    border-radius: var(--workspace-tabbar--border-radius, 6px)
+        var(--workspace-tabbar--border-radius, 6px) 0 0;
     background-color: var(--workspace-tabbar--background-color, white);
     height: 40px !important;
     max-height: 40px !important;
