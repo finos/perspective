@@ -121,8 +121,8 @@ perspective-viewer {
 :hover th.psp-tree-leaf.psp-row-selected,
 :hover th.psp-tree-label.psp-row-selected {
     color: white !important;
-    background-color: #ea7319 !important;
-    border-color: #ea7319 !important;
+    background-color: var(--selected-row--background-color, #ea7319) !important;
+    border-color: var(--selected-row--background-color, #ea7319) !important;
 }
 
 .psp-row-selected.psp-tree-label:not(:hover):before {

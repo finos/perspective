@@ -18,9 +18,7 @@ function isEditable(viewer, allowed = false) {
         this._config.split_by.length === 0;
     const selectable = viewer.hasAttribute("selectable");
     const editable =
-        allowed ||
-        viewer.querySelector("perspective-viewer-datagrid").dataset.editMode ===
-            "EDIT";
+        allowed || viewer.children[0]?.dataset?.editMode === "EDIT";
     return has_pivots && !selectable && editable;
 }
 
