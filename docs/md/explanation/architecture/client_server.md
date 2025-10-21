@@ -1,6 +1,6 @@
 # Client/Server replicated
 
-<img src="./architecture.sub3.svg" />
+<img src="./architecture.sub2.svg" />
 
 _For medium-sized, real-time, synchronized and/or editable data sets with many
 concurrent users._
