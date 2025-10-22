@@ -508,6 +508,7 @@ void
 t_ctx2::column_sort_by(const std::vector<t_sortspec>& sortby) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    m_column_sortby = sortby;
     m_ctraversal->sort_by(m_config, sortby, *(ctree()));
 }
 
@@ -576,6 +577,10 @@ t_ctx2::notify(const t_data_table& flattened) {
     }
     if (!m_sortby.empty()) {
         sort_by(m_sortby);
+    }
+
+    if (!m_column_sortby.empty()) {
+        column_sort_by(m_column_sortby);
     }
 }
 
@@ -650,6 +655,10 @@ t_ctx2::notify(
 
     if (!m_sortby.empty()) {
         sort_by(m_sortby);
+    }
+
+    if (!m_column_sortby.empty()) {
+        column_sort_by(m_column_sortby);
     }
 }
 
