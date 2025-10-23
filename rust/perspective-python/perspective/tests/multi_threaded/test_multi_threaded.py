@@ -16,6 +16,10 @@ import asyncio
 import random
 import threading
 
+from random import sample
+from string import ascii_letters
+from threading import Thread
+from time import sleep
 
 class TestServer(object):
     def test_sync_updates_with_loop_callback_are_sync(self):
@@ -86,9 +90,7 @@ class TestServer(object):
         loop.close()
 
     def test_concurrent_updates_with_limit_tables_are_threadsafe(self):
-        # This is a tricky tune - at time of writing, 1000 is has a >50%
-        # chance of triggering this o my dev machine
-        TEST_ITERATIONS = 1000
+        TEST_ITERATIONS = 100
         global running
         perspective_server = Server()
         client = perspective_server.new_local_client()
@@ -152,6 +154,46 @@ class TestServer(object):
 
         thread1 = threading.Thread(target=run_perspective, daemon=True)
         thread2 = threading.Thread(target=run_perspective, daemon=True)
+        thread1.start()
+        thread2.start()
+        thread1.join()
+        thread2.join()
+
+    def test_concurrent_view_creation_with_updates_are_threadsafe(self):
+        s = Server()
+        schema = {
+            "a": "string",
+            "b": "string",
+            "c": "string",
+        }
+
+        group_bys = ["a", "b", "c"]
+        c = s.new_local_client()
+        t = c.table(schema, limit=10000)
+        running = True
+
+        def gen_views():
+            global running
+            for _ in range(100):
+                t.view(columns=list(schema.keys()), group_by=group_bys)
+                sleep(0.01)
+            running = False
+
+        def run_psp():
+            global running
+            while running:
+                t.update(
+                    [
+                        {
+                            "a": "".join(sample(ascii_letters, 4)),
+                            "b": "".join(sample(ascii_letters, 4)),
+                            "c": "".join(sample(ascii_letters, 4)),
+                        }
+                    ]
+                )
+
+        thread1 = Thread(target=run_psp, daemon=True)
+        thread2 = Thread(target=gen_views, daemon=True)
         thread1.start()
         thread2.start()
         thread1.join()

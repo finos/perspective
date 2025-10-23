@@ -184,6 +184,15 @@ make_context(
 
     auto pool = table->get_pool();
     auto gnode = table->get_gnode();
+
+    if (!sortspec.empty()) {
+        ctx2->sort_by(sortspec);
+    }
+
+    if (!col_sortspec.empty()) {
+        ctx2->column_sort_by(col_sortspec);
+    }
+
     pool->register_context(
         gnode->get_id(),
         name,
@@ -201,14 +210,6 @@ make_context(
         ctx2->set_depth(t_header::HEADER_COLUMN, column_pivot_depth - 1);
     } else {
         ctx2->set_depth(t_header::HEADER_COLUMN, column_pivots.size());
-    }
-
-    if (!sortspec.empty()) {
-        ctx2->sort_by(sortspec);
-    }
-
-    if (!col_sortspec.empty()) {
-        ctx2->column_sort_by(col_sortspec);
     }
 
     return ctx2;
