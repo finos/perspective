@@ -553,14 +553,14 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     async onPerspectiveSelect(event: CustomEvent) {
-        const config = await (
-            event.target as HTMLPerspectiveViewerElement
-        ).save();
+        const viewer = event.target as HTMLPerspectiveViewerElement;
+        const config = await viewer.save();
         // perspective-select is already handled for hypergrid
 
         if (
             event.type === "perspective-click" &&
-            (config.plugin === "Datagrid" || config.plugin === null)
+            (viewer.classList.contains("workspace-master-widget") ||
+                config.plugin === null)
         ) {
             return;
         }
