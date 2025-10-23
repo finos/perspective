@@ -16,6 +16,37 @@ import {
     new_superstore_table,
 } from "./src/js/superstore.mjs";
 
+// Legacy: Array-based key generation with spread operators
+function createCacheKeyArrayBased(type, plugin) {
+    return [
+        type,
+        ...Object.values(plugin.date_format ?? {}),
+        ...Object.values(plugin.number_format ?? {}),
+    ].join("-");
+}
+
+// Optimized: Direct string concatenation with fast path
+function createCacheKeyOptimized(type, plugin) {
+    if (!plugin.date_format && !plugin.number_format) {
+        return type;
+    }
+    let key = type;
+    if (plugin.date_format) {
+        const df = plugin.date_format;
+        if (df.format) key += `-${df.format}`;
+        if (df.timeZone) key += `-${df.timeZone}`;
+        if (df.dateStyle) key += `-${df.dateStyle}`;
+        if (df.timeStyle) key += `-${df.timeStyle}`;
+    }
+    if (plugin.number_format) {
+        const nf = plugin.number_format;
+        if (nf.style) key += `-${nf.style}`;
+        if (nf.minimumFractionDigits !== undefined) key += `-${nf.minimumFractionDigits}`;
+        if (nf.maximumFractionDigits !== undefined) key += `-${nf.maximumFractionDigits}`;
+    }
+    return key;
+}
+
 export async function to_data_suite(perspective, metadata) {
     async function before_all() {
         const table = await perspective.table(new_superstore_table(metadata));
@@ -295,6 +326,116 @@ export async function table_suite(perspective, metadata) {
         },
         async test({ table, columns }) {
             return await perspective.table(columns);
+        },
+    });
+}
+
+export async function formatter_cache_suite(perspective, metadata) {
+    const TEST_CONFIGS = [
+        { type: "float", plugin: {} },
+        { type: "float", plugin: { number_format: { style: "decimal", minimumFractionDigits: 2, maximumFractionDigits: 2 } } },
+        { type: "datetime", plugin: { date_format: { dateStyle: "short", timeStyle: "medium", timeZone: "UTC" } } },
+        { type: "datetime", plugin: { date_format: { format: "custom", year: "numeric", month: "long", day: "2-digit", hour: "2-digit", minute: "2-digit" } } },
+    ];
+
+    // Simulate realistic workload: 1000 cell formats per iteration
+    const CELLS_PER_ITERATION = 1000;
+
+    await benchmark({
+        name: "FormatterCache (array-based) - empty config",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                createCacheKeyArrayBased("float", {});
+            }
+        },
+    });
+
+    await benchmark({
+        name: "FormatterCache (optimized) - empty config",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                createCacheKeyOptimized("float", {});
+            }
+        },
+    });
+
+    await benchmark({
+        name: "FormatterCache (array-based) - number format",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                createCacheKeyArrayBased("float", { 
+                    number_format: { style: "decimal", minimumFractionDigits: 2, maximumFractionDigits: 2 } 
+                });
+            }
+        },
+    });
+
+    await benchmark({
+        name: "FormatterCache (optimized) - number format",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                createCacheKeyOptimized("float", { 
+                    number_format: { style: "decimal", minimumFractionDigits: 2, maximumFractionDigits: 2 } 
+                });
+            }
+        },
+    });
+
+    await benchmark({
+        name: "FormatterCache (array-based) - complex date format",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                createCacheKeyArrayBased("datetime", { 
+                    date_format: { format: "custom", year: "numeric", month: "long", day: "2-digit", hour: "2-digit", minute: "2-digit" } 
+                });
+            }
+        },
+    });
+
+    await benchmark({
+        name: "FormatterCache (optimized) - complex date format",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                createCacheKeyOptimized("datetime", { 
+                    date_format: { format: "custom", year: "numeric", month: "long", day: "2-digit", hour: "2-digit", minute: "2-digit" } 
+                });
+            }
+        },
+    });
+
+    await benchmark({
+        name: "FormatterCache (array-based) - mixed workload",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                const config = TEST_CONFIGS[i % TEST_CONFIGS.length];
+                createCacheKeyArrayBased(config.type, config.plugin);
+            }
+        },
+    });
+
+    await benchmark({
+        name: "FormatterCache (optimized) - mixed workload",
+        metadata,
+        max_iterations: 100,
+        test() {
+            for (let i = 0; i < CELLS_PER_ITERATION; i++) {
+                const config = TEST_CONFIGS[i % TEST_CONFIGS.length];
+                createCacheKeyOptimized(config.type, config.plugin);
+            }
         },
     });
 }
