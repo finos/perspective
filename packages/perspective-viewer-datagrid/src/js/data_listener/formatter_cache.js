@@ -45,6 +45,57 @@ const LEGACY_CONFIG = {
     },
 };
 
+/**
+ * Generate a cache key for formatter lookup.
+ * Optimized to avoid array allocations and string concatenations.
+ */
+function createCacheKey(type, plugin) {
+    // Fast path for empty plugin configs (most common case)
+    if (!plugin.date_format && !plugin.number_format) {
+        return type;
+    }
+
+    // Build key manually to avoid array allocations and spread operators
+    let key = type;
+
+    if (plugin.date_format) {
+        const df = plugin.date_format;
+        // Only include defined properties to create stable keys
+        if (df.format) key += `-${df.format}`;
+        if (df.timeZone) key += `-${df.timeZone}`;
+        if (df.dateStyle) key += `-${df.dateStyle}`;
+        if (df.timeStyle) key += `-${df.timeStyle}`;
+        if (df.second) key += `-${df.second}`;
+        if (df.minute) key += `-${df.minute}`;
+        if (df.hour) key += `-${df.hour}`;
+        if (df.day) key += `-${df.day}`;
+        if (df.weekday) key += `-${df.weekday}`;
+        if (df.month) key += `-${df.month}`;
+        if (df.year) key += `-${df.year}`;
+        if (df.hour12 !== undefined) key += `-${df.hour12}`;
+        if (df.fractionalSecondDigits) key += `-${df.fractionalSecondDigits}`;
+    }
+
+    if (plugin.number_format) {
+        const nf = plugin.number_format;
+        // Include all number format properties
+        if (nf.style) key += `-${nf.style}`;
+        if (nf.minimumFractionDigits !== undefined)
+            key += `-${nf.minimumFractionDigits}`;
+        if (nf.maximumFractionDigits !== undefined)
+            key += `-${nf.maximumFractionDigits}`;
+        if (nf.minimumIntegerDigits !== undefined)
+            key += `-${nf.minimumIntegerDigits}`;
+        if (nf.useGrouping !== undefined) key += `-${nf.useGrouping}`;
+        if (nf.currency) key += `-${nf.currency}`;
+        if (nf.currencyDisplay) key += `-${nf.currencyDisplay}`;
+        if (nf.notation) key += `-${nf.notation}`;
+        if (nf.signDisplay) key += `-${nf.signDisplay}`;
+    }
+
+    return key;
+}
+
 export class FormatterCache {
     constructor() {
         this._formatters = new Map();
@@ -168,12 +219,9 @@ export class FormatterCache {
         return new FORMATTER_CONS[type](navigator.languages, {});
     }
 
-    get(type, plugin) {
-        let formatter_key = [
-            type,
-            ...Object.values(plugin.date_format ?? {}),
-            ...Object.values(plugin.number_format ?? {}),
-        ].join("-");
+    get(type, plugin = {}) {
+        // Use optimized cache key generation
+        const formatter_key = createCacheKey(type, plugin);
 
         if (!this._formatters.has(formatter_key)) {
             if (type === "date") {
@@ -202,5 +250,22 @@ export class FormatterCache {
         }
 
         return this._formatters.get(formatter_key);
+    }
+
+    /**
+     * Clear all cached formatters.
+     * Useful when language preferences change or to free memory.
+     */
+    clear() {
+        this._formatters.clear();
+    }
+
+    /**
+     * Get cache statistics for debugging/monitoring.
+     */
+    getStats() {
+        return {
+            formatterCount: this._formatters.size,
+        };
     }
 }

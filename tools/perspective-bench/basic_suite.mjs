@@ -64,6 +64,7 @@ perspective_bench.suite(
 
         globalThis.__SEND__ = (x) => process.send(x);
 
+        await all_benchmarks.formatter_cache_suite(client, metadata);
         await all_benchmarks.table_suite(client, metadata);
         await all_benchmarks.view_suite(client, metadata);
         await all_benchmarks.to_data_suite(client, metadata);
