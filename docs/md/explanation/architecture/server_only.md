@@ -1,6 +1,6 @@
 # Server-only
 
-<img src="./architecture.sub2.svg" />
+<img src="./architecture.sub3.svg" />
 
 _For extremely large datasets with a small number of concurrent users._
 
