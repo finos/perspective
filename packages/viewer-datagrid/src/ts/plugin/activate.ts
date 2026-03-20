@@ -69,11 +69,7 @@ export async function activate(
 
     if (!this._initialized) {
         this.innerHTML = "";
-        if (this.shadowRoot) {
-            this.shadowRoot.appendChild(this.regular_table);
-        } else {
-            this.appendChild(this.regular_table);
-        }
+        this.shadowRoot!.appendChild(this.regular_table);
 
         this.model = await createModel.call(
             this,

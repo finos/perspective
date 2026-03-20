@@ -130,6 +130,7 @@ export function run_standard_tests(
             `Pivot by a column`,
             runSimpleCompareTest(
                 {
+                    columns: ["Sales", "Profit", "Quantity"],
                     split_by: ["Category"],
                     settings: true,
                 },
@@ -155,8 +156,10 @@ export function run_standard_tests(
             `Pivot by two rows and two columns`,
             runSimpleCompareTest(
                 {
+                    columns: ["Sales", "Profit"],
                     group_by: ["Region", "State"],
                     split_by: ["Category", "Sub-Category"],
+                    filter: [["Category", "==", "Furniture"]],
                     settings: true,
                 },
                 extractContent,

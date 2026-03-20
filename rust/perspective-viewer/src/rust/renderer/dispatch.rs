@@ -43,6 +43,8 @@ impl Renderer {
         let is_solo = self.0.is_solo_panel.get();
         let _ = el.class_list().toggle_with_force("single", is_solo);
         let _ = el.class_list().toggle_with_force("multi", !is_solo);
+        let viewer = self.plugin_data.borrow().viewer_elem.clone();
+        stamp_plugin_host_state(&viewer, el);
     }
 
     pub fn stamp_theme(&self, plugin: Option<&JsPerspectiveViewerPlugin>) {

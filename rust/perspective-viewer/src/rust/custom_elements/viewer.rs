@@ -493,41 +493,17 @@ impl PerspectiveViewerElement {
             .dyn_into::<js_sys::Promise>()
             .unwrap_or_else(|_| js_sys::Promise::resolve(&table));
 
-        // Resolve the target panel. On an EMPTY element (zero panels):
-        //  - a synchronously-detectable `Client` registers inertly with NO panel (the
-        //    common `load(client)` — no phantom panel is left behind);
-        //  - otherwise (a resolved `Table`, or a `Promise` whose type isn't yet known)
-        //    the first panel is RESERVED synchronously here — a full panel model held
-        //    in the workspace's reservation slot, NOT placed — so its ordering position
-        //    is fixed at the call site: a `restore()` fired right after an unawaited
-        //    `load()` CLAIMS the reservation (placing it) and targets THIS panel, not a
-        //    second one. The reservation is likewise placed when the payload proves to
-        //    be a `Table` (or the load fails, surfacing its error), and discarded —
-        //    only while still unclaimed — for an inert `Client` payload. Placement and
-        //    discard are both atomic slot transfers (`Workspace::claim_reserved` /
-        //    `Workspace::take_reserved`), so an inert payload disposing a panel a
-        //    racing `restore` claimed is unrepresentable.
-        // A pre-existing active panel is used as-is (a `Client` registers
-        // inertly against it, never clearing its table).
         let (panel, notify) = match self.workspace.active_panel() {
             Some(panel) => (panel, None),
             None => {
-                // Empty element — classify the payload synchronously where possible.
                 if let Ok(Some(client)) =
                     try_from_js_option::<perspective_js::Client>(table.clone())
                 {
-                    // A resolved `Client` registers SYNCHRONOUSLY (so an unawaited
-                    // `load(client)` is visible to a `restore()` fired right after,
-                    // which creates the first panel and federates against loaded
-                    // clients) and creates NO panel — inert.
                     self.workspace
                         .set_default_client(client.get_client().clone());
                     return Ok(ApiFuture::new(async { Ok(()) }));
                 }
 
-                // A resolved `Table` (or a `Promise` whose type isn't yet known)
-                // adopts the pending reservation (a second `load()` on a
-                // still-empty element), else reserves a fresh panel model.
                 let panel = self.workspace.reserved_panel().unwrap_or_else(|| {
                     create_panel_model(
                         &self.elem,

@@ -261,7 +261,8 @@ impl Client {
                         JsReconnect::from(move |()| match reconnect.call0(&JsValue::UNDEFINED) {
                             Ok(x) => x.unchecked_into::<js_sys::Promise>(),
                             Err(e) => {
-                                // This error may occur when _invoking_ the function
+                                // This error may occur when _invoking_ the
+                                // function
                                 tracing::warn!("{:?}", e);
                                 js_sys::Promise::reject(&format!("C {e:?}").into())
                             },

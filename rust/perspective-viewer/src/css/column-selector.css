@@ -378,6 +378,7 @@
 
     #active-columns {
         display: flex;
+        position: relative;
         padding-bottom: 8px;
         padding-top: 6px;
     }

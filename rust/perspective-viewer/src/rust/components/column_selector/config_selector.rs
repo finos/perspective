@@ -563,10 +563,10 @@ impl Component for ConfigSelector {
         }
     }
 
-    // /// Should not render on change, as this component only depends on service
-    // /// state.
-    // fn changed(&mut self, _ctx: &Context<Self>, _old: &Self::Properties) -> bool
-    // {     false
+    // /// Should not render on change, as this component only depends on
+    // service /// state.
+    // fn changed(&mut self, _ctx: &Context<Self>, _old: &Self::Properties) ->
+    // bool {     false
     // }
 
     fn view(&self, ctx: &Context<Self>) -> Html {

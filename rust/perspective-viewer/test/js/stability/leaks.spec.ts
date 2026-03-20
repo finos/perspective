@@ -27,6 +27,11 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Memory Leaks", () => {
+    test.skip(
+        ({ browserName }) => browserName !== "chromium",
+        "performance.memory is a Chromium-only API",
+    );
+
     // This originally has a timeout of 120000
     test("elements > no leak on repeated element recreation", async ({
         page,
@@ -39,7 +44,7 @@ test.describe("Memory Leaks", () => {
 
         // From a helpful blog
         // https://media-codings.com/articles/automatically-detect-memory-leaks-with-puppeteer
-        await page.evaluate(() => window.gc());
+        await page.evaluate(() => window.gc?.());
         const heap1 = await page.evaluate(
             () => performance.memory.usedJSHeapSize,
         );
@@ -61,7 +66,7 @@ test.describe("Memory Leaks", () => {
         // TODO this is very generous memory allowance suggests we
         // leak ~0.1% per instance.
         // TODO: Not yet sure how to access window.gc() in Playwright
-        await page.evaluate(() => window.gc());
+        await page.evaluate(() => window.gc?.());
         const heap2 = await page.evaluate(
             () => performance.memory.usedJSHeapSize,
         );
@@ -84,7 +89,7 @@ test.describe("Memory Leaks", () => {
             await viewer.reset();
         }, viewer);
 
-        await page.evaluate(() => window.gc());
+        await page.evaluate(() => window.gc?.());
         const heap1 = await page.evaluate(
             () => performance.memory.usedJSHeapSize,
         );
@@ -108,7 +113,7 @@ test.describe("Memory Leaks", () => {
             }, viewer);
         }
 
-        await page.evaluate(() => window.gc());
+        await page.evaluate(() => window.gc?.());
         const heap2 = await page.evaluate(
             () => performance.memory.usedJSHeapSize,
         );
@@ -130,7 +135,7 @@ test.describe("Memory Leaks", () => {
             await viewer.reset();
         }, viewer);
 
-        await page.evaluate(() => window.gc());
+        await page.evaluate(() => window.gc?.());
         const heap1 = await page.evaluate(
             () => performance.memory.usedJSHeapSize,
         );
@@ -144,7 +149,7 @@ test.describe("Memory Leaks", () => {
             }, viewer);
         }
 
-        await page.evaluate(() => window.gc());
+        await page.evaluate(() => window.gc?.());
         const heap2 = await page.evaluate(
             () => performance.memory.usedJSHeapSize,
         );

@@ -211,8 +211,6 @@ impl InactiveColumnProps {
         let mut columns = self.view_config.columns.clone();
         let max_cols = self.renderer.metadata().config_column_names.len();
 
-        // Don't treat `None` at the end of the column list as columns, we'll refill
-        // these later
         if let Some(last_filled) = columns.iter().rposition(|x| !x.is_none()) {
             columns.truncate(last_filled + 1);
 

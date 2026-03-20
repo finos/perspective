@@ -47,8 +47,6 @@ import { RegularTableElement } from "regular-table";
 import type { CellScalar } from "regular-table/dist/esm/types.js";
 import { isMetaColumn } from "../model/meta_columns.js";
 
-type RenderTarget = "shadow" | "light";
-
 /**
  * The custom element class for this plugin.  The interface methods for this
  */
@@ -56,16 +54,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement
     extends HTMLElement
     implements IPerspectiveViewerPlugin
 {
-    private static _global_stylesheet_installed: boolean = false;
     private static _sheet: CSSStyleSheet | undefined;
-
-    // Determines whether this datagrid renders in the light DOM. This will
-    // break style encapsulation and may cause inconsistent behavior.
-    static renderTarget: RenderTarget =
-        window.CSS?.supports &&
-        window.CSS?.supports("selector(:host-context(foo))")
-            ? "shadow"
-            : "light";
 
     regular_table: RegularTableElement;
     model?: DatagridModel;
@@ -156,16 +145,8 @@ export class HTMLPerspectiveViewerDatagridPluginElement
             Elem._sheet.replaceSync(datagridStyles);
         }
 
-        if (Elem.renderTarget === "shadow") {
-            const shadow = this.attachShadow({ mode: "open" });
-            shadow.adoptedStyleSheets.push(Elem._sheet);
-        } else if (
-            Elem.renderTarget === "light" &&
-            !Elem._global_stylesheet_installed
-        ) {
-            Elem._global_stylesheet_installed = true;
-            document.adoptedStyleSheets.push(Elem._sheet);
-        }
+        const shadow = this.attachShadow({ mode: "open" });
+        shadow.adoptedStyleSheets.push(Elem._sheet);
     }
 
     connectedCallback(): void {

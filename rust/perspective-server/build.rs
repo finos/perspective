@@ -63,11 +63,11 @@ fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     );
 
     if cfg!(target_os = "macos") {
-        // Set CMAKE_OSX_ARCHITECTURES et al. for Mac builds.  Arrow does not forward on
-        // CMAKE_OSX_ARCHITECTURES but it does forward on a CMAKE_TOOLCHAIN_FILE. In
-        // Conda builds, the environment sets `CMAKE_ARGS` up with various
-        // toolchain arguments. This block may need to be patched out or
-        // adjusted for Conda.
+        // Set CMAKE_OSX_ARCHITECTURES et al. for Mac builds.  Arrow does not
+        // forward on CMAKE_OSX_ARCHITECTURES but it does forward on a
+        // CMAKE_TOOLCHAIN_FILE. In Conda builds, the environment sets
+        // `CMAKE_ARGS` up with various toolchain arguments. This block
+        // may need to be patched out or adjusted for Conda.
         let toolchain_file = match std::env::var("PSP_ARCH").as_deref() {
             Ok("x86_64") => Some("./cmake/toolchains/darwin-x86_64.cmake"),
             Ok("aarch64") => Some("./cmake/toolchains/darwin-arm64.cmake"),
@@ -116,9 +116,9 @@ fn cmake_build() -> Result<Option<PathBuf>, std::io::Error> {
     // which only reaches the top-level native tool.
     dst.env("CMAKE_BUILD_PARALLEL_LEVEL", num_cpus::get().to_string());
 
-    // Conda sets CMAKE_ARGS for e.g. cross-compiling toolchain in the environment -
-    // normally they are passed directly to a cmake invocation in the recipe,
-    // but our conda recipe doesn't directly invoke cmake
+    // Conda sets CMAKE_ARGS for e.g. cross-compiling toolchain in the
+    // environment - normally they are passed directly to a cmake invocation
+    // in the recipe, but our conda recipe doesn't directly invoke cmake
     if let Ok(cmake_args) = std::env::var("CMAKE_ARGS") {
         println!("cargo:warning=Setting CMAKE_ARGS from environment {cmake_args:?}");
         for arg in Shlex::new(&cmake_args) {
@@ -177,7 +177,8 @@ fn link_cmake_static_archives(dir: &Path) -> Result<(), std::io::Error> {
                         stem.expect("bad")[3..].to_string()
                     };
 
-                    // println!("cargo:warning=static link {} {}", a, dir.display());
+                    // println!("cargo:warning=static link {} {}", a,
+                    // dir.display());
                     println!("cargo:rustc-link-search=native={}", dir.display());
                     println!("cargo:rustc-link-lib=static={a}");
                 }

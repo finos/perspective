@@ -26,7 +26,8 @@ fn prost_build() -> Result<()> {
         println!("cargo:warning=MESSAGE Building in development mode");
         // let root_dir_env = std::env::var("PSP_ROOT_DIR").expect("Must set
         // PSP_ROOT_DIR"); let root_dir = Path::new(root_dir_env.as_str());
-        // let proto_file = Path::join(root_dir, "cpp/protos/perspective.proto");
+        // let proto_file = Path::join(root_dir,
+        // "cpp/protos/perspective.proto");
         let proto_file = Path::new("./perspective.proto");
         let include_path = proto_file
             .parent()
@@ -35,10 +36,11 @@ fn prost_build() -> Result<()> {
 
         println!("cargo:rerun-if-changed={}", proto_file.to_str().unwrap());
 
-        // prost_build reads PROTOC from the environment.  When the `protobuf-src`
-        // feature is enabled, the build script sets PROTOC to the one built by
-        // that crate. When protobuf-src is disabled, builders must set PROTOC
-        // in the environment to a protocol buffer compiler.
+        // prost_build reads PROTOC from the environment.  When the
+        // `protobuf-src` feature is enabled, the build script sets
+        // PROTOC to the one built by that crate. When protobuf-src is
+        // disabled, builders must set PROTOC in the environment to a
+        // protocol buffer compiler.
         #[cfg(feature = "protobuf-src")]
         unsafe {
             std::env::set_var("PROTOC", protobuf_src::protoc())

@@ -19,7 +19,8 @@ use perspective_js::utils::JsValueSerdeExt;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-use super::MainPanel;
+use super::{MainPanel, MainPanelMsg};
+use crate::ApiFuture;
 use crate::components::panel_menu::PanelCommand;
 use crate::js::{Layout, RegularLayout};
 use crate::renderer::SUBPIXEL_EPSILON;
@@ -59,21 +60,38 @@ impl MainPanel {
         let layout: RegularLayout = el.unchecked_into();
         let mut closed = Vec::new();
         let mut pending_insertions = std::mem::take(&mut self.pending_insertions);
+        let mut suspect_closes = std::mem::take(&mut self.suspect_closes);
         self.inserted.retain(|id| {
             if layout.contains_panel(id) {
                 pending_insertions.remove(id);
+                suspect_closes.remove(id);
                 true
             } else if pending_insertions.contains(id) {
                 // Issued to the layout but not yet in a committed tree —
                 // the pre-commit window, not a close.
                 true
+            } else if ctx.props().panel_ids.iter().any(|p| p.as_str() == id)
+                && suspect_closes.insert(id.clone())
+            {
+                true
             } else {
+                suspect_closes.remove(id);
                 closed.push(id.clone());
                 false
             }
         });
 
         self.pending_insertions = pending_insertions;
+        let recheck = !suspect_closes.is_empty();
+        self.suspect_closes = suspect_closes;
+        if recheck {
+            let link = ctx.link().clone();
+            ApiFuture::spawn(async move {
+                crate::utils::request_animation_frame().await;
+                link.send_message(MainPanelMsg::LayoutUpdated);
+                Ok(())
+            });
+        }
 
         let closed_any = !closed.is_empty();
         for id in closed {

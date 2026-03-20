@@ -55,10 +55,38 @@ export const test = base.extend<{
 
             page.setDefaultTimeout(5000);
 
+            const pending: Promise<void>[] = [];
             page.on("console", (msg) => {
-                let type = msg.type();
-                let text = msg.text();
-                logs[type] ? logs[type].push(text) : (logs[type] = [text]);
+                const type = msg.type();
+                const push = (text: string) => {
+                    logs[type] ? logs[type].push(text) : (logs[type] = [text]);
+                };
+
+                const args = msg.args();
+                if (args.length === 0) {
+                    push(msg.text());
+                    return;
+                }
+
+                pending.push(
+                    Promise.all(
+                        args.map((arg) =>
+                            arg
+                                .evaluate((v) =>
+                                    v instanceof Error
+                                        ? `${v.name}: ${v.message}`
+                                        : String(v),
+                                )
+                                .catch(() => undefined),
+                        ),
+                    ).then((parts) =>
+                        push(
+                            parts.every((p) => p !== undefined)
+                                ? parts.join(" ")
+                                : msg.text(),
+                        ),
+                    ),
+                );
             });
             let expectedLogsConstructor: any = {
                 warning: [[/Legacy `expressions` format/, { expected: false }]],
@@ -84,6 +112,7 @@ export const test = base.extend<{
             let expectedLogs = expectedLogsConstructor as ExpectedLogs;
 
             await use({ logs, expectedLogs });
+            await Promise.all(pending);
 
             Object.entries(expectedLogs).forEach(([type, filters]) => {
                 if (typeof filters == "function") {

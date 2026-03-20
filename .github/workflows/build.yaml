@@ -886,6 +886,7 @@ jobs:
               run: pnpm run test -- --fetch-snapshots
               env:
                   PACKAGE: "server,client,viewer,viewer-datagrid,viewer-charts,react"
+                  PSP_BROWSER_SUITE: chrome
                   PSP_SNAPSHOT_REPO: ${{ vars.PSP_SNAPSHOT_REPO }}
                   PSP_SNAPSHOT_TOKEN: ${{ secrets.PSP_SNAPSHOT_TOKEN }}
                   PSP_SNAPSHOT_REF: ${{ github.head_ref || github.ref_name }}
@@ -896,6 +897,69 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: perspective-js-test-results-node${{ matrix.node-version }}
+                  path: tools/test/dist/results
+                  if-no-files-found: ignore
+                  overwrite: true
+
+    # Firefox coverage for the browser UI suites only (viewer, datagrid,
+    # charts — the node/client suites are browser-independent), run in
+    # parallel with the release-grade matrix above: tags, `master`, or a
+    # `ci-full` dispatch (the same gate as the wasm64/node-26 entries).
+    test_js_firefox:
+        needs: [build_js, build_js_wasm64]
+        if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref_name == 'master' || github.event.inputs.ci-full }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-22.04
+                node-version: [22.x]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Config
+              id: config-step
+              uses: ./.github/actions/config
+
+            - name: Initialize Build
+              uses: ./.github/actions/install-deps
+              with:
+                  python: "false"
+                  rust: "false"
+                  cpp: "false"
+                  playwright: "true"
+                  skip_cache: ${{ steps.config-step.outputs.SKIP_CACHE }}
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-js-dist
+                  path: .
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: perspective-server-wasm64-dist
+                  path: rust/perspective-server/dist/wasm
+
+            - name: Run Tests
+              id: run_tests
+              run: pnpm run test -- --fetch-snapshots
+              env:
+                  # TODO(texodus): no GL firefox on GHA
+                  # PACKAGE: "viewer,viewer-datagrid,viewer-charts"
+                  PACKAGE: "viewer,viewer-datagrid"
+                  PSP_BROWSER_SUITE: firefox
+                  PSP_SNAPSHOT_REPO: ${{ vars.PSP_SNAPSHOT_REPO }}
+                  PSP_SNAPSHOT_TOKEN: ${{ secrets.PSP_SNAPSHOT_TOKEN }}
+                  PSP_SNAPSHOT_REF: ${{ github.head_ref || github.ref_name }}
+
+            - name: Upload Test Failures
+              if: ${{ failure() && steps.run_tests.outcome == 'failure' }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: perspective-js-test-results-firefox
                   path: tools/test/dist/results
                   if-no-files-found: ignore
                   overwrite: true

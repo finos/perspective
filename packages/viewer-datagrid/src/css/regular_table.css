@@ -99,12 +99,9 @@ perspective-viewer,
     }
 }
 
-perspective-viewer,
-:host-context(perspective-viewer) {
-    regular-table table thead tr:last-child th {
-        border-bottom-width: 1px;
-        border-bottom-color: var(--psp-inactive--border-color, #8b868045);
-    }
+regular-table table thead tr:last-child th {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--psp-inactive--border-color, #8b868045);
 }
 
 .psp-sort-enabled:hover {
@@ -133,13 +130,6 @@ td:focus {
     outline: #666;
     outline-style: dotted;
     outline-width: 1px;
-}
-
-perspective-viewer.dragging,
-:host-context(perspective-viewer.dragging) {
-    regular-table {
-        pointer-events: none;
-    }
 }
 
 .psp-header-border:last-child {
@@ -263,20 +253,12 @@ perspective-viewer.dragging,
     mask-image: var(--psp-icon--sort-abs-col-asc--mask-image);
 }
 
-/* Shift-key affordance: while the user holds Shift on the host
- * `<perspective-viewer>`, sort-arrow mask-image icons and tree
- * expand/collapse carets recolor to advertise their Shift-modified actions
- * (abs-sort and depth-level expand/collapse). Both `:host-context` (shadow
- * render target) and the bare selector (light render target) are emitted to
- * cover the runtime branch in datagrid.ts. */
-:host-context(perspective-viewer.shift-active)
-    :is(
-        .psp-header-sort-asc,
-        .psp-header-sort-desc,
-        .psp-header-sort-col-asc,
-        .psp-header-sort-col-desc
-    ):after,
-perspective-viewer.shift-active
+/* Shift-key affordance: while the user holds Shift, the host
+ * `<perspective-viewer>` mirrors its `shift-active` class onto this
+ * element, and sort-arrow mask-image icons and tree expand/collapse carets
+ * recolor to advertise their Shift-modified actions (abs-sort and
+ * depth-level expand/collapse). */
+:host(.shift-active)
     :is(
         .psp-header-sort-asc,
         .psp-header-sort-desc,
@@ -289,9 +271,7 @@ perspective-viewer.shift-active
     );
 }
 
-:host-context(perspective-viewer.shift-active)
-    :is(.psp-tree-label-expand, .psp-tree-label-collapse):before,
-perspective-viewer.shift-active
+:host(.shift-active)
     :is(.psp-tree-label-expand, .psp-tree-label-collapse):before {
     color: var(
         --shift-active--color,
@@ -409,9 +389,7 @@ regular-table:not(.flat-group-rollup-mode) {
     color: var(--psp-datagrid--neg-cell--color);
 }
 
-:host-context(perspective-viewer.shift-active)
-    .psp-is-width-override
-    .rt-column-resize {
+:host(.shift-active) .psp-is-width-override .rt-column-resize {
     border: 1px dashed
         var(
             --shift-active--color,
@@ -511,7 +489,7 @@ regular-table tbody tr:hover {
     }
 }
 
-:host-context(perspective-viewer[settings]) td.psp-select-region.psp-menu-open {
+:host([settings]) td.psp-select-region.psp-menu-open {
     box-shadow:
         inset -2px 0px 0px var(--psp--background-color),
         inset 2px 0px 0px var(--psp--background-color);
@@ -534,11 +512,8 @@ regular-table tbody tr:hover {
     );
 }
 
-perspective-viewer:not([settings]),
-:host-context(perspective-viewer:not([settings])) {
-    regular-table #psp-column-edit-buttons:after {
-        content: none;
-    }
+:host(:not([settings])) regular-table #psp-column-edit-buttons:after {
+    content: none;
 }
 
 /* Style the last row of the `<thead>` so that is has a bottom border. */

@@ -161,8 +161,6 @@ where
                 if freeze && self.frozen_size.is_none() {
                     let elem = self.elem.cast::<HtmlElement>().unwrap();
                     self.frozen_size = Some({
-                        // `offset_width` and family are `i32`, but Chrome _really_
-                        // uses fractional pixel widths for these which can only be
                         // recovered by parsing the generated stylesheet ...
                         let txt = window()
                             .unwrap()
@@ -178,7 +176,8 @@ where
                     });
                     true
                 } else if !freeze {
-                    // Don't render because the invoker will do so through `dragdrop`.
+                    // Don't render because the invoker will do so through
+                    // `dragdrop`.
                     self.frozen_size = None;
                     false
                 } else {
@@ -191,8 +190,8 @@ where
     fn view(&self, ctx: &Context<Self>) -> Html {
         let dragover = Callback::from(|_event: DragEvent| _event.prevent_default());
 
-        // On dragleave, signal the parent but no need to redraw as parent will call
-        // `change()` when resetting props.
+        // On dragleave, signal the parent but no need to redraw as parent will
+        // call `change()` when resetting props.
         let drag_container = DragDropContainer::new(
             {
                 let total = ctx.props().children.len();

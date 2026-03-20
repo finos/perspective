@@ -200,8 +200,6 @@ impl PerspectiveViewer {
                     ToggleSettingsComplete(update, resolve)
                 });
 
-                // P2: at CLOSE time the open-state geometry is measurable —
-                // cache the deltas the next OPEN needs to presize with.
                 if is_open {
                     self.settings_geometry.open_deltas =
                         measure_settings_open_deltas(&ctx.props().elem);
@@ -213,16 +211,6 @@ impl PerspectiveViewer {
                 let elem = ctx.props().elem.clone();
 
                 ApiFuture::spawn(async move {
-                    // Resize every visible plugin (not just the active one) to its
-                    // new cell as the settings pane toggles. The pane is the outer
-                    // SplitPanel, which emits no `before-resize`, so this is driven
-                    // explicitly here. CLOSING grows the cells, so pre-size each
-                    // plugin to its grown box BEFORE collapsing the pane; OPENING
-                    // shrinks them, so pre-size to the shrunk box (from the deltas
-                    // cached at the last close; the first-ever open has none and
-                    // stays reactive) BEFORE the pane mounts — either way, one
-                    // clean resize with the reactive pass after as the exactness
-                    // finalizer.
                     let result: ApiResult<JsValue> = async {
                         if is_open {
                             let presents = presize_visible_panels_grown(&workspace, &elem).await;
@@ -230,17 +218,7 @@ impl PerspectiveViewer {
                             callback.emit(notify);
                             presentation.set_settings_open(false, announce);
                             rendered.await?;
-                            // `notify` fires in `rendered()` (same task as the
-                            // Yew DOM patch) and this future resumes as one of
-                            // its microtasks — so the staged reveal below and
-                            // the pane's geometry change reach the screen in a
-                            // single paint.
                             presents.reveal();
-                            // I6: the exactness-finalizer resize is part of
-                            // what this toggle caused — await it here rather
-                            // than leaving it to the ResizeObserver (whose
-                            // continuous pass remains as the reactive
-                            // backstop).
                             resize_visible_panels(&workspace).await;
                         } else {
                             let presents = if let Some((delta_w, delta_h)) = open_deltas {

@@ -156,8 +156,8 @@ export class WebGLContextManager {
         this._cssHeight = cssHeight;
         this._dpr = dpr;
 
-        const width = Math.round(cssWidth * dpr);
-        const height = Math.round(cssHeight * dpr);
+        const width = Math.max(1, Math.round(cssWidth * dpr));
+        const height = Math.max(1, Math.round(cssHeight * dpr));
         const canvas = this._ctx.canvas;
         if (canvas.width !== width || canvas.height !== height) {
             canvas.width = width;
@@ -284,19 +284,19 @@ export class WebGLContextManager {
     }
 
     /**
-     * Ship the current canvas contents as an `ImageBitmap` to the host
-     * when a frame callback is registered and the surface is an
+     * Ship a copy of the current canvas contents as an `ImageBitmap` to
+     * the host when a frame callback is registered and the surface is an
      * `OffscreenCanvas`. Otherwise no-op (direct mode paints straight to
      * the visible drawing buffer).
      */
-    endFrame(): void {
+    async endFrame(): Promise<void> {
         if (!this._frameCallback) {
             return;
         }
 
         // A context lost mid-frame (our own `destroy`, or a browser
-        // eviction between paint and present) makes
-        // `transferToImageBitmap` throw. Bail quietly.
+        // eviction between paint and present) makes the bitmap copy
+        // throw. Bail quietly.
         if (this.isContextLost()) {
             return;
         }
@@ -311,7 +311,7 @@ export class WebGLContextManager {
             return;
         }
 
-        const bitmap = (canvas as OffscreenCanvas).transferToImageBitmap();
+        const bitmap = await createImageBitmap(canvas as OffscreenCanvas);
         this._frameCallback(bitmap);
     }
 

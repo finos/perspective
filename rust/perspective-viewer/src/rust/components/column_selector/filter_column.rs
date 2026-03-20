@@ -410,8 +410,6 @@ impl FilterColumnProps {
         self.metadata.get_column_table_type(filter.column())
     }
 
-    // Get the string value, suitable for the `value` field of a `FilterColumns`'s
-    // `<input>`.
     fn get_filter_input(&self) -> Option<String> {
         let filter_type = self.get_current_filter_type()?;
         match (&filter_type, &self.filter.term()) {
