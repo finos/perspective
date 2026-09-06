@@ -51,9 +51,7 @@ pub fn mount_plugin(
 }
 
 /// Given an async `task` which draws `plugin`, [`mount_plugin`] it, then run
-/// `task`. Requires the [`RenderGuard`] lock witness — plugin dispatch
-/// outside a locked run does not compile (invariants I3/I6 of the merge;
-/// see `SESSION_CONFIG_COHERENCE_PLAN.md`).
+/// `task`.
 pub async fn activate_plugin<T>(
     _guard: &RenderGuard,
     viewer: &HtmlElement,

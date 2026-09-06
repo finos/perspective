@@ -13,9 +13,7 @@
 
 :host #selected-columns .type-icon,
 :host #sub-columns .type-icon {
-    /* position: absolute; */
-    /* left: 15px; */
-    margin-left: 4px;
+    margin-left: 1px;
 }
 
 :host .icon {

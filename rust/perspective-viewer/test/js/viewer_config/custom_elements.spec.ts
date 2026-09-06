@@ -28,18 +28,19 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Custom Elements", () => {
-    test("registration > registers copy and export menu elements", async ({
+    test("registration > the menu hosts are not custom elements", async ({
         page,
     }) => {
-        const export_exists = await page.evaluate(async () => {
-            return !!window.customElements.get("perspective-export-menu");
-        });
+        const registered = await page.evaluate(async () => ({
+            viewer: !!window.customElements.get("perspective-viewer"),
+            export_menu: !!window.customElements.get("perspective-export-menu"),
+            copy_menu: !!window.customElements.get("perspective-copy-menu"),
+        }));
 
-        const copy_exists = await page.evaluate(async () => {
-            return !!window.customElements.get("perspective-copy-menu");
+        expect(registered).toEqual({
+            viewer: true,
+            export_menu: false,
+            copy_menu: false,
         });
-
-        expect(export_exists).toBeTruthy();
-        expect(copy_exists).toBeTruthy();
     });
 });

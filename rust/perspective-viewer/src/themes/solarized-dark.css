@@ -83,34 +83,3 @@ perspective-viewer [theme="Solarized Dark"] {
         #268bd2 100%
     );
 }
-
-perspective-context-menu[theme="Solarized Dark"],
-perspective-copy-menu[theme="Solarized Dark"],
-perspective-export-menu[theme="Solarized Dark"],
-perspective-dropdown[theme="Solarized Dark"],
-perspective-date-column-style[theme="Solarized Dark"],
-perspective-datetime-column-style[theme="Solarized Dark"],
-perspective-number-column-style[theme="Solarized Dark"],
-perspective-string-column-style[theme="Solarized Dark"] {
-    /* perspective-viewer-solarized--colors */
-    color: #586e75;
-    color-scheme: dark;
-    --psp--color: #586e75;
-    --psp-active--color: #268bd2;
-    --psp-error--color: #cb4b16;
-    --psp-inactive--color: #93a1a1;
-    --psp-inactive--border-color: var(--psp-inactive--color);
-    --psp--background-color: #fdf6e3;
-    --psp-column-type--float--color: #268bd2;
-    --psp-column-type--string--color: #cb4b16;
-    --psp-column-type--date--color: #2aa198;
-    --psp-column-type--boolean--color: #b58900;
-
-    /* perspective-viewer-solarized-dark--colors */
-    color: #93a1a1;
-    --psp-inactive--color: #586e75;
-    --psp-inactive--border-color: var(--psp-inactive--color);
-    --psp--background-color: #073642;
-
-    background-color: #073642;
-}

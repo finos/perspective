@@ -14,7 +14,8 @@ use std::collections::BTreeMap;
 
 use perspective_client::config::Filter;
 
-use crate::config::{CssKind, PanelViewerConfig, ViewerConfigInitial};
+use crate::config::{PanelViewerConfig, ViewerConfigInitial};
+use crate::utils::CssKind;
 
 /// The workspace config format (`{version, active?, layout, panels}`) —
 /// the multi-panel counterpart of the single-panel [`ViewerConfig`] — as

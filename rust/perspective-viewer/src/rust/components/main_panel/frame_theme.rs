@@ -21,42 +21,6 @@
 //! own per-panel themed background), but while the plugin is missing — not yet
 //! mounted, first draw pending, or torn down — the host-theme container shows
 //! through a panel themed differently, as a visible artifact.
-//!
-//! There is no native cascade channel from the light-DOM plugin to the frame
-//! (siblings in the flattened tree), so the value is mirrored imperatively:
-//! each panel's *plugin element* — light-DOM, slotted under the panel's slot,
-//! mounted eagerly at panel creation (`create_panel_model` /
-//! `Renderer::mount_active_plugin`) — is where the document theme rules
-//! actually resolve, so its computed `--psp--background-color` is copied onto
-//! the frame's inline style, where the frame's shadow parts inherit it. The
-//! plugin is the ONLY sound source element:
-//!
-//! - An owned hidden probe child of the viewer does NOT work: an *unslotted*
-//!   light-DOM child of a shadow host is outside the flattened tree, and
-//!   `getComputedStyle` returns all-empty for it even though the document rules
-//!   match it syntactically (selector matching is DOM-tree; style computation
-//!   is flat-tree).
-//! - The `<perspective-viewer-tab>` is slotted, but stamps its own `theme` attr
-//!   in `PanelTab::rendered` — an unordered sibling lifecycle relative to this
-//!   pass (the theme-stamp-lag class of bug).
-//! - The plugin's `theme` attr, by contrast, is stamped *synchronously at the
-//!   mutation sites* (`update_theme`, `restorePanel`, …) before the events that
-//!   schedule this render, so it is current when this pass reads it.
-//!
-//! A read is trusted ONLY when the plugin's stamped attr equals the theme
-//! being mirrored: a freshly-created panel's plugin is mounted *unstamped*
-//! (the attr first lands inside its first locked dispatch), and reading it
-//! early would silently mirror the HOST theme's values. Trusted reads seed
-//! [`MainPanel::theme_backgrounds`], the fallback for frames with no readable
-//! plugin (an unregistered plugin name stays lazily unmounted; plugin-switch
-//! and teardown transients). A frame with neither leaves the pass gate
-//! unlatched, so it retries on subsequent renders until the dispatch stamp
-//! lands (the render that follows that dispatch's `update_count` bump).
-//!
-//! Unlike the plugin `theme`/`active` stamps (see the NOTE in [`reconcile`]),
-//! the frame is pure viewer chrome — no plugin dispatch reads it — so
-//! stamping it from this async `rendered` pass cannot split a plugin draw
-//! across paints, and it needs no lock.
 
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
@@ -69,12 +33,7 @@ use crate::workspace::PanelId;
 /// `.rl-panel::part(container)` background resolves.
 const BACKGROUND_VAR: &str = "--psp--background-color";
 
-/// The inputs the frame backgrounds were last computed from; re-mirroring is
-/// skipped while these are unchanged, so the forced style recalcs of
-/// `getComputedStyle` don't run on every render (e.g. the per-update
-/// `update_count` renders of a streaming table). `available_themes` is part of
-/// the key because theme CSS registering late changes the *computed* value
-/// under an unchanged theme name.
+/// The inputs the frame backgrounds were last computed from.
 pub(super) type FrameThemeSnapshot = (
     Vec<PanelId>,
     Vec<(String, Option<String>)>,
@@ -82,12 +41,7 @@ pub(super) type FrameThemeSnapshot = (
 );
 
 impl MainPanel {
-    /// Mirror each panel's effective theme background (its own theme, else the
-    /// registry default — the same fallback the tab/menu use) onto its
-    /// `<regular-layout-frame>`'s inline `--psp--background-color`, read off
-    /// the panel's stamped plugin element (else the theme-keyed cache of prior
-    /// reads). A panel with no resolvable theme has the property removed,
-    /// falling back to the inherited host-theme value.
+    /// Mirror each panel's effective theme background.
     pub(super) fn stamp_frame_themes(&mut self, ctx: &Context<Self>) {
         let Some(layout) = self.layout_ref.cast::<web_sys::Element>() else {
             return;
@@ -104,8 +58,6 @@ impl MainPanel {
             return;
         }
 
-        // A theme-registry change can re-value an unchanged theme name, so
-        // cached reads from the previous registry are unsound.
         if let Some((_, _, prev_themes)) = &self.stamped_frame_themes
             && prev_themes != &snapshot.2
         {
@@ -155,19 +107,11 @@ impl MainPanel {
             }
         }
 
-        // Latch only a fully-resolved pass; an unresolved frame (unmounted or
-        // not-yet-stamped plugin) retries each render until its dispatch
-        // stamp lands.
         self.stamped_frame_themes = complete.then_some(snapshot);
     }
 }
 
-/// Read the computed [`BACKGROUND_VAR`] off `slot`'s plugin element — the
-/// viewer light-DOM child mounted under exactly that slot name (the tab and
-/// toolbar use `tab-`/`statusbar-extra-` prefixed slots). Requires the
-/// plugin's `theme` attr to already equal `theme` — during a plugin switch
-/// two elements briefly share the slot, and a freshly-mounted plugin is not
-/// yet stamped; both are disambiguated by the attr check.
+/// Read the computed [`BACKGROUND_VAR`] off `slot`'s plugin element.
 fn read_plugin_background(viewer: &web_sys::Element, slot: &str, theme: &str) -> Option<String> {
     let children = viewer.children();
     let plugin = (0..children.length())

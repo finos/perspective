@@ -123,9 +123,6 @@ fn window_frame_sql(frame: Option<&WindowFrame>) -> String {
     }
 }
 
-/// One `WindowSpec` as a SQL window-function expression - the 1:1 `OVER`
-/// mapping that keeps hot-tier and virtual-server semantics interchangeable
-/// (WINDOW_FUNCTIONS_PLAN Phase 5). `resolve` inlines expression-alias
 fn window_sql(
     w: &WindowSpec,
     resolve: &dyn Fn(&str) -> String,

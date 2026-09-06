@@ -15,7 +15,7 @@ use std::rc::Rc;
 use perspective_client::{ExprValidationError, clone};
 use yew::prelude::*;
 
-use super::form::code_editor::*;
+use super::code_editor::CodeEditor;
 use crate::session::{Session, SessionMetadataRc};
 use crate::tasks::{ExprValidation, validate_expression};
 

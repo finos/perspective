@@ -12,6 +12,11 @@
  */
 
 :host {
+    label.intl-label:before,
+    div.tab-title:before {
+        content: var(--psp-label--content);
+    }
+
     #column-style-container,
     #plugin-config-container,
     #window-editor-container {
@@ -28,6 +33,14 @@
             align-items: center;
             padding-left: 4px;
             margin: 0px;
+
+            &.enabled:before {
+                content: var(--psp-label--enabled--content, "Enabled");
+            }
+
+            &.disabled:before {
+                content: var(--psp-label--disabled--content, "Disabled");
+            }
         }
 
         .is-default-value .bool-field-container {

@@ -26,17 +26,14 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlInputElement, MouseEvent};
 use yew::{Callback, Html, Properties, function_component, html, use_callback};
 
-use crate::components::containers::select::{Select, SelectItem};
-use crate::components::form::color_selector::ColorSelector;
-use crate::components::form::multi_stop_gradient_selector::MultiStopGradientSelector;
-use crate::components::form::named_value_picker::NamedValuePicker;
-use crate::components::form::number_field::NumberField;
-use crate::components::form::optional_field::OptionalField;
-use crate::components::form::palette_selector::PaletteSelector;
-use crate::config::{
-    ColumnConfigFieldUpdate, CssColor, CssGradient, CssKind, CssPalette, EnumVariant,
-    GradientStopSpec, NamedValue, canonicalize_css_color, discrete_pair, gradient_to_css,
-    palette_name_for,
+use crate::config::{ColumnConfigFieldUpdate, EnumVariant, discrete_pair};
+use crate::ui::{
+    ColorSelector, MultiStopGradientSelector, NamedValuePicker, NumberField, OptionalField,
+    PaletteSelector, Select, SelectItem,
+};
+use crate::utils::{
+    CssColor, CssGradient, CssKind, CssPalette, GradientStopSpec, NamedValue,
+    canonicalize_css_color, gradient_to_css, palette_name_for,
 };
 
 fn emit(on_change: &Callback<ColumnConfigFieldUpdate>, key: &str, value: Option<Value>) {
@@ -150,9 +147,10 @@ pub fn BoolField(props: &BoolFieldProps) -> Html {
                         checked={current}
                         {oninput}
                     />
-                    <label for={format!("{}-checkbox", props.field_key)} class="bool-field-desc">
-                        { if current { "Enabled" } else { "Disabled" } }
-                    </label>
+                    <label
+                        for={format!("{}-checkbox", props.field_key)}
+                        class={if current { "bool-field-desc enabled" } else { "bool-field-desc disabled" }}
+                    />
                 </div>
             </OptionalField>
         </div>
@@ -346,7 +344,7 @@ pub fn PaletteField(props: &PaletteFieldProps) -> Html {
                 on_change={on_change_palette}
                 {on_reset}
                 {is_modified}
-                title={Some(format!("{}-label", props.field_key))}
+                label={Some(props.field_key.clone())}
             />
         </div>
     }
@@ -459,7 +457,7 @@ pub fn GradientStopsField(props: &GradientStopsFieldProps) -> Html {
                 on_change={on_change_stops}
                 {on_reset}
                 {is_modified}
-                title={Some(format!("{}-label", props.field_key))}
+                label={Some(props.field_key.clone())}
             />
         </div>
     }
@@ -555,7 +553,7 @@ pub fn ColorField(props: &ColorFieldProps) -> Html {
                 {on_color}
                 {on_reset}
                 {is_modified}
-                title={Some(format!("{}-label", props.field_key))}
+                label={Some(props.field_key.clone())}
             />
         </div>
     }

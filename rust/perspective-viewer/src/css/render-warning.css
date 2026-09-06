@@ -46,7 +46,7 @@
         }
 
         .plugin_information__icon:before {
-            content: var(--psp-icon-overflow-hint--content);
+            content: var(--psp-icon-overflow-hint--content, var(--psp-missing));
             height: 20px;
             font-family: var(
                 --overflow_hint--font-family,

@@ -33,9 +33,7 @@ instantiation). See `packages/anywidget/`.
 `test/jupyter/widget.spec.mjs` drives a real JupyterLab instance in Chromium
 via playwright. `test/config/jupyter/` boots the server (port 6538); each test
 generates its own notebook from `test/jupyter/notebook_template.json` into
-`dist/esm`, which doubles as the JupyterLab root directory. Most of the suite
-is currently `test_jupyter.skip`-gated pending the port to the anywidget
-implementation — see `JUPYTER_TEST_PLAN.md` (repo root) for the checklist.
+`dist/esm`, which doubles as the JupyterLab root directory.
 
 Prerequisites — the notebook kernel runs in whatever Python environment
 `jupyter` resolves to, so that environment needs:

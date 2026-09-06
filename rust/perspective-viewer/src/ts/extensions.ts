@@ -52,24 +52,11 @@ export class PerspectiveSelectDetail {
     }
 }
 
-import type {
-    ExportDropDownMenuElement,
-    CopyDropDownMenuElement,
-} from "../../dist/wasm/perspective-viewer.d.ts";
-
 // DOM extensions
 
 export type HTMLPerspectiveViewerElement = PerspectiveViewerElement &
     PerspectiveViewerElementExt &
     HTMLElement;
-
-export interface HTMLPerspectiveViewerExportMenuElement
-    extends HTMLElement,
-        ExportDropDownMenuElement {}
-
-export interface HTMLPerspectiveViewerCopyMenuElement
-    extends HTMLElement,
-        CopyDropDownMenuElement {}
 
 export type PerspectiveClickEventDetail = {
     config: ViewerConfigUpdate;

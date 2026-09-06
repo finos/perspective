@@ -10,11 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! Settings-sidebar handlers: the open/close toggle (with its presize
-//! choreography), the deferred divider's latest-wins presize pump
-//! (`PRESIZE_EVERYWHERE_PLAN.md` P1/P2), and the column-settings drawer. The
-//! presize sweeps themselves live in [`crate::tasks`] (`presize_panels`).
-
 use futures::channel::oneshot::{Sender, channel};
 use perspective_js::utils::*;
 use wasm_bindgen::prelude::*;
@@ -22,12 +17,13 @@ use yew::prelude::*;
 
 use super::PerspectiveViewer;
 use super::msg::PerspectiveViewerMsg::*;
-use crate::components::font_loader::FontLoaderStatus;
+use super::msg::{Divider, PaneTarget};
 use crate::components::settings_panel::SelectedTab;
 use crate::config::*;
 use crate::presentation::{ColumnSettingsTab, ColumnSettingsTarget, OpenColumnSettings};
 use crate::queries::get_current_column_locator;
 use crate::tasks::*;
+use crate::ui::FontLoaderStatus;
 
 /// The settings sidebar's geometry state, folded into one field on
 /// [`PerspectiveViewer`]: the pane/drawer width overrides, the divider
@@ -44,11 +40,9 @@ pub(super) struct SettingsGeometry {
     /// High-water-mark auto width reported by the settings panel.
     pub auto_width: f64,
 
-    /// Latest-wins presize pump for the (deferred) settings divider: the
-    /// newest proposed pane width not yet presized, and whether a pump
-    /// iteration is in flight. See `SettingsDividerMove`.
-    pub divider_target: Option<i32>,
-    pub divider_pumping: bool,
+    pub settings_divider: DividerPump,
+
+    pub column_settings_divider: DividerPump,
 
     /// Open-state geometry deltas `(layout_area.w − mpc.w, main_column.h −
     /// mpc.h)`, cached at settings *close* time — used to presize panels to
@@ -83,6 +77,29 @@ pub(super) struct SettingsGeometry {
     /// toggle, docked unmount) - used to presize for a drawer that MOUNTS
     /// directly into pinned mode, when it isn't in the DOM to measure.
     pub column_settings_docked_width: Option<f64>,
+}
+
+#[derive(Default)]
+pub(super) struct DividerPump {
+    pub target: Option<PaneTarget>,
+    pub pumping: bool,
+    pub finish_pending: bool,
+}
+
+impl SettingsGeometry {
+    fn pump_mut(&mut self, divider: Divider) -> &mut DividerPump {
+        match divider {
+            Divider::Settings => &mut self.settings_divider,
+            Divider::ColumnSettings => &mut self.column_settings_divider,
+        }
+    }
+
+    fn is_divider_deferred(&self, divider: Divider) -> bool {
+        match divider {
+            Divider::Settings => true,
+            Divider::ColumnSettings => self.column_settings_pinned,
+        }
+    }
 }
 
 impl PerspectiveViewer {
@@ -257,84 +274,143 @@ impl PerspectiveViewer {
         };
     }
 
-    pub(super) fn on_settings_panel_size_update(&mut self, x: Option<i32>) -> bool {
-        match x {
-            Some(x) => {
-                self.settings_geometry.pane_width_override = Some(x);
-                false
+    fn apply_pane_target(&mut self, divider: Divider, target: PaneTarget) -> bool {
+        let deferred = self.settings_geometry.is_divider_deferred(divider);
+        match (divider, target) {
+            (Divider::Settings, PaneTarget::Width(w)) => {
+                self.settings_geometry.pane_width_override = Some(w);
+                true
             },
-            None => {
+            (Divider::Settings, PaneTarget::Natural) => {
                 self.settings_geometry.pane_width_override = None;
                 self.settings_geometry.auto_width = 0.0;
                 self.on_settings_panel_dimensions_reset.emit(());
                 true
             },
+            (Divider::ColumnSettings, PaneTarget::Width(w)) => {
+                self.settings_geometry.column_settings_width_override = Some(w);
+                deferred
+            },
+            (Divider::ColumnSettings, PaneTarget::Natural) => {
+                self.settings_geometry.column_settings_width_override = None;
+                self.settings_geometry.column_settings_auto_width = 0.0;
+                true
+            },
         }
     }
 
-    pub(super) fn on_settings_divider_move(
+    pub(super) fn on_divider_move(
         &mut self,
         ctx: &Context<Self>,
-        pane_width: i32,
+        divider: Divider,
+        target: PaneTarget,
     ) -> bool {
+        if !self.settings_geometry.is_divider_deferred(divider) {
+            return self.apply_pane_target(divider, target);
+        }
+
         // Latest-wins: overwrite the pending target; start the pump if
         // idle. Intermediate targets that arrive while a presize is in
         // flight are dropped (mirrors `PresizeQueue`'s single queued
         // slot) — the pane tracks the pointer at content-render rate.
-        self.settings_geometry.divider_target = Some(pane_width);
-        if !self.settings_geometry.divider_pumping {
-            self.settings_geometry.divider_pumping = true;
-            ctx.link().send_message(SettingsDividerPump);
+        let pump = self.settings_geometry.pump_mut(divider);
+        pump.target = Some(target);
+        if !pump.pumping {
+            pump.pumping = true;
+            ctx.link().send_message(DividerPump(divider));
         }
 
         false
     }
 
-    pub(super) fn on_settings_divider_pump(&mut self, ctx: &Context<Self>) -> bool {
-        if let Some(pane_width) = self.settings_geometry.divider_target.take() {
-            let workspace = ctx.props().workspace.clone();
-            let elem = ctx.props().elem.clone();
-            let link = ctx.link().clone();
-            ApiFuture::spawn(async move {
-                let presents =
-                    presize_visible_panels_pane_width(&workspace, &elem, pane_width as f64).await;
-                link.send_message(SettingsDividerCommit(pane_width));
-                // Same task as the commit's re-render (whether Yew drained it
-                // synchronously inside `send_message` or deferred it to a
-                // microtask): the staged reveal and the pane-width geometry
-                // land in one paint.
-                presents.reveal();
-                Ok(())
-            });
-        } else {
-            self.settings_geometry.divider_pumping = false;
-        }
+    pub(super) fn on_divider_pump(&mut self, ctx: &Context<Self>, divider: Divider) -> bool {
+        let workspace = ctx.props().workspace.clone();
+        let pump = self.settings_geometry.pump_mut(divider);
+        let Some(target) = pump.target.take() else {
+            pump.pumping = false;
+            if std::mem::take(&mut pump.finish_pending) {
+                ApiFuture::spawn(async move {
+                    resize_visible_panels(&workspace).await;
+                    Ok(())
+                });
+            }
+
+            return false;
+        };
+
+        let elem = ctx.props().elem.clone();
+        let pane_width = match target {
+            PaneTarget::Width(w) => Some(w as f64),
+            PaneTarget::Natural => measure_pane_natural_width(&elem, divider.pane_selector()),
+        };
+
+        let link = ctx.link().clone();
+        ApiFuture::spawn(async move {
+            let presents = match pane_width {
+                Some(pane_width) => {
+                    presize_visible_panels_pane_width(
+                        &workspace,
+                        &elem,
+                        divider.pane_selector(),
+                        pane_width,
+                    )
+                    .await
+                },
+                None => StagedPresents::default(),
+            };
+
+            link.send_message(DividerCommit(divider, target));
+            presents.reveal();
+            Ok(())
+        });
 
         false
     }
 
-    pub(super) fn on_settings_divider_commit(
+    pub(super) fn on_divider_commit(
         &mut self,
         ctx: &Context<Self>,
-        pane_width: i32,
+        divider: Divider,
+        target: PaneTarget,
     ) -> bool {
         // Every visible panel has rendered at (approximately) its
         // target box — NOW move the geometry: the re-render below
-        // applies this width to the deferred `SplitPanel`'s controlled
+        // applies this target to the deferred `SplitPanel`'s controlled
         // `size`, in the same task as the presizes' inline clears.
-        self.settings_geometry.pane_width_override = Some(pane_width);
-        ctx.link().send_message(SettingsDividerPump);
+        self.apply_pane_target(divider, target);
+        if target == PaneTarget::Natural {
+            self.settings_geometry.pump_mut(divider).finish_pending = true;
+        }
+
+        ctx.link().send_message(DividerPump(divider));
         true
     }
 
-    pub(super) fn on_settings_divider_finish(&mut self, ctx: &Context<Self>) -> bool {
+    pub(super) fn on_divider_finish(&mut self, ctx: &Context<Self>, divider: Divider) -> bool {
+        if !self.settings_geometry.is_divider_deferred(divider) {
+            return false;
+        }
+
+        let pump = self.settings_geometry.pump_mut(divider);
+        if pump.pumping {
+            pump.finish_pending = true;
+        } else {
+            let workspace = ctx.props().workspace.clone();
+            ApiFuture::spawn(async move {
+                resize_visible_panels(&workspace).await;
+                Ok(())
+            });
+        }
+
+        false
+    }
+
+    fn resize_for_ratchet(&self, ctx: &Context<Self>) {
         let workspace = ctx.props().workspace.clone();
         ApiFuture::spawn(async move {
             resize_visible_panels(&workspace).await;
             Ok(())
         });
-
-        false
     }
 
     pub(super) fn on_settings_panel_tab_changed(&mut self, tab: SelectedTab) -> bool {
@@ -343,9 +419,10 @@ impl PerspectiveViewer {
         changed
     }
 
-    pub(super) fn on_settings_panel_auto_width(&mut self, w: f64) -> bool {
+    pub(super) fn on_settings_panel_auto_width(&mut self, ctx: &Context<Self>, w: f64) -> bool {
         if w > self.settings_geometry.auto_width {
             self.settings_geometry.auto_width = w;
+            self.resize_for_ratchet(ctx);
             true
         } else {
             false
@@ -397,19 +474,17 @@ impl PerspectiveViewer {
         true
     }
 
-    pub(super) fn on_column_settings_panel_size_update(&mut self, x: Option<i32>) -> bool {
-        self.settings_geometry.column_settings_width_override = x;
-        if x.is_none() {
-            self.settings_geometry.column_settings_auto_width = 0.0;
-            true
-        } else {
-            false
-        }
-    }
-
-    pub(super) fn on_column_settings_panel_auto_width(&mut self, w: f64) -> bool {
+    pub(super) fn on_column_settings_panel_auto_width(
+        &mut self,
+        ctx: &Context<Self>,
+        w: f64,
+    ) -> bool {
         if w > self.settings_geometry.column_settings_auto_width {
             self.settings_geometry.column_settings_auto_width = w;
+            if self.settings_geometry.column_settings_pinned {
+                self.resize_for_ratchet(ctx);
+            }
+
             true
         } else {
             false
@@ -561,12 +636,6 @@ impl PerspectiveViewer {
         true
     }
 
-    /// Toggling the debug tab re-renders the settings panel only — the
-    /// `DebugPanel` populates itself (`get_viewer_config` on mount +
-    /// change subscriptions), so no plugin dispatch is owed. The old
-    /// `just_render` here relied on the pre-amendment unconditional
-    /// `Unchanged → update` arm and repainted the plugin as a side effect
-    /// (`PLUGIN_DRAW_INVARIANT_PLAN.md` amendment, migration 2).
     pub(super) fn on_toggle_debug(&mut self, _ctx: &Context<Self>) -> bool {
         self.debug_open = !self.debug_open;
         true

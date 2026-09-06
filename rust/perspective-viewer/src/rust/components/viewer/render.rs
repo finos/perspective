@@ -22,15 +22,15 @@ use yew::prelude::*;
 
 use super::PerspectiveViewer;
 use super::msg::PerspectiveViewerMsg::*;
+use super::msg::{Divider, PaneTarget};
 use crate::components::column_settings_sidebar::ColumnSettingsPanel;
-use crate::components::containers::split_panel::SplitPanel;
-use crate::components::font_loader::FontLoader;
 use crate::components::main_panel::MainPanel;
 use crate::components::panel_menu::PanelCommand;
 use crate::components::settings_panel::SettingsPanel;
-use crate::components::style::StyleProvider;
+use crate::components::style::StyleSurface;
 use crate::queries::*;
 use crate::session::TableLoadState;
+use crate::ui::{FontLoader, SplitPanel, StyleProvider};
 
 impl PerspectiveViewer {
     pub(super) fn render(&self, ctx: &Context<Self>) -> Html {
@@ -57,10 +57,6 @@ impl PerspectiveViewer {
             sender: None,
             toggle: true,
         });
-
-        let on_column_settings_panel_resize = ctx
-            .link()
-            .callback(|(x, _)| ColumnSettingsPanelSizeUpdate(Some(x)));
 
         let on_close_settings = ctx
             .link()
@@ -135,9 +131,12 @@ impl PerspectiveViewer {
                     id="modal_panel"
                     class={classes!(is_pinned.then_some("pinned"))}
                     reverse=true
+                    deferred={is_pinned}
+                    size={self.settings_geometry.column_settings_width_override}
                     initial_size={self.settings_geometry.column_settings_width_override}
-                    on_reset={ctx.link().callback(|_| ColumnSettingsPanelSizeUpdate(None))}
-                    on_resize={on_column_settings_panel_resize}
+                    on_reset={ctx.link().callback(|_| DividerMove(Divider::ColumnSettings, PaneTarget::Natural))}
+                    on_resize={ctx.link().callback(|(x, _): (i32, i32)| DividerMove(Divider::ColumnSettings, PaneTarget::Width(x)))}
+                    on_resize_finished={ctx.link().callback(|_| DividerFinish(Divider::ColumnSettings))}
                 >
                     <ColumnSettingsPanel
                         {selected_column}
@@ -171,6 +170,7 @@ impl PerspectiveViewer {
                 {on_reset}
                 on_activate_panel={ctx.link().callback(|id| SetActivePanel(id, None))}
                 on_close_panel={ctx.link().callback(|id| ClosePanel(id, None))}
+                on_panel_closed={ctx.link().callback(PanelClosed)}
                 on_panel_command={ctx.link().batch_callback(|(id, cmd): (String, PanelCommand)| {
                     match cmd {
                         PanelCommand::New => vec![NewPanel(id)],
@@ -178,6 +178,7 @@ impl PerspectiveViewer {
                             vec![NewPanelFrom { client, table }]
                         },
                         PanelCommand::Duplicate => vec![DuplicatePanel(id)],
+                        PanelCommand::NewFromPanel(source) => vec![DuplicatePanel(source)],
                         PanelCommand::Reset => vec![ResetPanel(Some(id), false, None)],
                         PanelCommand::ToggleMaster => vec![ToggleMaster(id)],
                         PanelCommand::Close => vec![ClosePanel(id, None)],
@@ -233,8 +234,9 @@ impl PerspectiveViewer {
         };
 
         html! {
-            <StyleProvider root={ctx.props().elem.clone()}>
+            <StyleProvider root={ctx.props().elem.clone()} sheet={StyleSurface::Viewer.sheet()}>
                 <div id="component_container" class={is_single_panel}>
+                    <slot name="modal" />
                     <div id="layout_area">
                         <SplitPanel
                             id="app_panel"
@@ -243,9 +245,9 @@ impl PerspectiveViewer {
                             deferred=true
                             size={self.settings_geometry.pane_width_override}
                             initial_size={self.settings_geometry.pane_width_override}
-                            on_reset={ctx.link().callback(|_| SettingsPanelSizeUpdate(None))}
-                            on_resize={ctx.link().callback(|(x, _): (i32, i32)| SettingsDividerMove(x))}
-                            on_resize_finished={ctx.link().callback(|_| SettingsDividerFinish)}
+                            on_reset={ctx.link().callback(|_| DividerMove(Divider::Settings, PaneTarget::Natural))}
+                            on_resize={ctx.link().callback(|(x, _): (i32, i32)| DividerMove(Divider::Settings, PaneTarget::Width(x)))}
+                            on_resize_finished={ctx.link().callback(|_| DividerFinish(Divider::Settings))}
                         >
                             { settings_panel }
                             <div id="main_column_container">

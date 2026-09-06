@@ -14,7 +14,7 @@ use perspective_client::config::ColumnType;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::components::containers::dragdrop_list::*;
+use crate::components::dragdrop_list::*;
 use crate::components::type_icon::TypeIcon;
 use crate::presentation::Presentation;
 use crate::session::*;

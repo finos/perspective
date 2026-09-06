@@ -73,7 +73,7 @@ test.describe("Context menu styling", () => {
 
         await new_item.hover();
         const sub_item = new_item.locator(
-            ".context-menu-submenu .context-menu-item",
+            ".context-menu-submenu .dropdown-menu-item",
             { hasText: "load-viewer-csv" },
         );
 

@@ -19,8 +19,8 @@ use web_sys::*;
 use yew::html::ImplicitClone;
 use yew::prelude::*;
 
-use super::portal::PortalModal;
 use super::style::StyleSurface;
+use crate::ui::PortalModal;
 use crate::utils::*;
 
 #[derive(Default)]
@@ -157,7 +157,7 @@ impl Component for FunctionDropDownPortal {
             html! {
                 <PortalModal
                     tag_name="perspective-dropdown"
-                    surface={StyleSurface::FunctionDropdown}
+                    sheet={StyleSurface::FunctionDropdown.sheet()}
                     {target}
                     own_focus=false
                     {on_close}

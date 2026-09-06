@@ -30,7 +30,8 @@ pub struct RendererProps {
     /// internal `metadata` — `Rc::ptr_eq` works.
     pub config: Rc<PluginStaticConfig>,
 
-    /// Most recently emitted render limits, if any.
+    /// The most recently emitted render limits, only while a cap is in
+    /// effect.
     pub render_limits: Option<RenderLimits>,
 
     /// Names of all registered plugins, in registration order.

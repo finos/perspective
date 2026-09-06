@@ -21,9 +21,9 @@ use yew::html::ImplicitClone;
 use yew::prelude::*;
 
 use super::column_selector::InPlaceColumn;
-use super::portal::PortalModal;
 use super::style::StyleSurface;
 use crate::session::Session;
+use crate::ui::PortalModal;
 use crate::utils::*;
 use crate::*;
 
@@ -216,7 +216,7 @@ impl Component for ColumnDropDownPortal {
             html! {
                 <PortalModal
                     tag_name="perspective-dropdown"
-                    surface={StyleSurface::ColumnDropdown}
+                    sheet={StyleSurface::ColumnDropdown.sheet()}
                     {target}
                     own_focus=false
                     {on_close}

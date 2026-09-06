@@ -26,9 +26,6 @@
     clippy::fallible_impl_from,
     clippy::unneeded_field_pattern
 )]
-// Holding a `Ref` across an `await` is the sibling footgun of the config
-// write-back race this crate was rearchitected against (see
-// `SESSION_CONFIG_COHERENCE_PLAN.md`) — deny, don't warn.
 #![deny(clippy::await_holding_refcell_ref)]
 
 #[cfg(feature = "llm-agent")]
@@ -49,6 +46,7 @@ mod session;
 
 #[doc(hidden)]
 pub mod tasks;
+pub mod ui;
 pub mod utils;
 mod workspace;
 
@@ -61,9 +59,7 @@ use std::cell::RefCell;
 use perspective_js::utils::*;
 use wasm_bindgen::prelude::*;
 
-use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
 use crate::custom_elements::debug_plugin::PerspectiveDebugPluginElement;
-use crate::custom_elements::export_dropdown::ExportDropDownMenuElement;
 use crate::custom_elements::viewer::PerspectiveViewerElement;
 use crate::utils::define_web_component;
 
@@ -180,8 +176,6 @@ pub fn js_get_worker_url() -> Result<web_sys::Url, JsValue> {
 pub fn bootstrap_web_components(psp: &JsValue) {
     define_web_component::<PerspectiveViewerElement>(psp);
     define_web_component::<PerspectiveDebugPluginElement>(psp);
-    define_web_component::<CopyDropDownMenuElement>(psp);
-    define_web_component::<ExportDropDownMenuElement>(psp);
 }
 
 /// Defining the web components needs an extern struct to reference the

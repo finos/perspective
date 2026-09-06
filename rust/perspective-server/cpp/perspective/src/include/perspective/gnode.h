@@ -372,34 +372,14 @@ protected:
      * Expression Column Operations
      */
 
-    /**
-     * @brief Compute all expressions on each registered context using the
-     * flattened table. This method is called on the first update applied
-     * on an empty gstate master table.
-     */
     void
     _compute_expressions(const std::shared_ptr<t_data_table>& flattened_masked);
 
-    /**
-     * @brief Compute all expressions on each registered context using all
-     * data and transition tables. This method is called on all subsequent
-     * updates applied after the first update.
-     */
     void _compute_expressions(
         const std::shared_ptr<t_data_table>& master,
         const std::shared_ptr<t_data_table>& flattened
     );
 
-    /**
-     * @brief The window widening pass (WINDOW_FUNCTIONS_PLAN §2.3): apply
-     * the update batch to every registered context's window indexes, then
-     * append a synthesized "unchanged" row to `flattened` and the
-     * transitional port tables for each row OUTSIDE the batch whose window
-     * outputs may change. The ordinary pipeline then reports those rows'
-     * window deltas, and its per-row prev/current diffing suppresses the
-     * over-approximation. Must run after `m_gstate` is updated and before
-     * `_compute_expressions`.
-     */
     void _process_windows(
         const std::shared_ptr<t_data_table>& flattened,
         const std::vector<t_rlookup>& lookup

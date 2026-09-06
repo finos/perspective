@@ -70,6 +70,9 @@ pub struct ActiveColumnProps {
     #[prop_or_default]
     pub is_window: bool,
 
+    #[prop_or_default]
+    pub is_last_column: bool,
+
     /// Whether the expression/config edit button should be shown.  Computed
     /// by the parent (`is_expression || can_render_column_styles`).
     #[prop_or_default]
@@ -287,7 +290,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
-                        style={format!("--default-column-title:var(--column-selector-column-{path}--content)")}
+                        style={format!("--default-column-title:var(--psp-label--column-{path}--content)")}
                         data-index={ctx.props().idx.to_string()}
                         ondragenter={ondragenter.clone()}
                     >
@@ -301,7 +304,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
-                        style={format!("--default-column-title:var(--column-selector-column-{path}--content)")}
+                        style={format!("--default-column-title:var(--psp-label--column-{path}--content)")}
                         data-index={ctx.props().idx.to_string()}
                         ondragenter={ondragenter.clone()}
                     >
@@ -310,7 +313,9 @@ impl Component for ActiveColumn {
                 }
             },
             ((label, ColumnState::Named(name)), Some(col_type)) => {
-                let is_required = ctx.props().get_is_required(ctx.props().idx);
+                let is_required =
+                    ctx.props().is_last_column || ctx.props().get_is_required(ctx.props().idx);
+
                 let remove_column = if is_required {
                     None
                 } else {
@@ -360,7 +365,7 @@ impl Component for ActiveColumn {
                     <div
                         class={outer_classes}
                         data-label={label}
-                        style={format!("--default-column-title:var(--column-selector-column-{path}--content)")}
+                        style={format!("--default-column-title:var(--psp-label--column-{path}--content)")}
                         data-index={ctx.props().idx.to_string()}
                         {onmouseover}
                         {onmouseout}

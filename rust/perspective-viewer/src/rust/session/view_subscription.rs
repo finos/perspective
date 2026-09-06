@@ -10,10 +10,11 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use perspective_client::config::*;
+use perspective_client::proto::ViewDimensionsResp;
 use perspective_client::{OnUpdateOptions, View};
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
@@ -41,6 +42,10 @@ struct ViewSubscriptionData {
     on_stats: Callback<ViewStats>,
     on_update: Option<Callback<()>>,
     is_deleted: Rc<Cell<bool>>,
+
+    /// The bound `View`'s latest known dimensions, written before
+    /// `on_update`/`on_stats` fire.
+    dimensions: Rc<RefCell<Option<ViewDimensionsResp>>>,
 }
 
 /// A subscription to `on_update()` events from a Perspective `View()`, managing
@@ -52,20 +57,21 @@ pub struct ViewSubscription {
 impl ViewSubscriptionData {
     /// Main handler when underlying `View()` calls `on_update()`.
     async fn on_view_update(self) -> ApiResult<JsValue> {
+        self.clone().update_view_stats().await?;
         if let Some(on_update) = &self.on_update {
             on_update.emit(());
         };
 
-        self.clone().update_view_stats().await?;
         Ok(JsValue::UNDEFINED)
     }
 
     async fn update_view_stats(self) -> ApiResult<JsValue> {
         let dimensions = self.view.dimensions().await?;
-        let num_rows = dimensions.num_table_rows as u32;
-        let num_cols = dimensions.num_table_columns as u32;
-        let virtual_rows = dimensions.num_view_rows as u32;
-        let virtual_cols = dimensions.num_view_columns as u32;
+        let num_rows = dimensions.num_table_rows;
+        let num_cols = dimensions.num_table_columns;
+        let virtual_rows = dimensions.num_view_rows;
+        let virtual_cols = dimensions.num_view_columns;
+        *self.dimensions.borrow_mut() = Some(dimensions);
         let stats = ViewStats {
             num_table_cells: Some((num_rows, num_cols)),
             num_view_cells: Some((virtual_rows, virtual_cols)),
@@ -119,6 +125,7 @@ impl ViewSubscription {
             callback_id: Rc::default(),
             on_update,
             is_deleted: Rc::default(),
+            dimensions: Rc::default(),
         };
 
         if data.on_update.is_some() {
@@ -158,6 +165,12 @@ impl ViewSubscription {
     /// Getter for the underlying `View()`.
     pub const fn get_view(&self) -> &View {
         &self.data.view
+    }
+
+    /// The bound `View`'s latest known dimensions (`None` until the first
+    /// fetch resolves).
+    pub fn dimensions(&self) -> Option<ViewDimensionsResp> {
+        self.data.dimensions.borrow().clone()
     }
 
     /// User-facing snapshot of the [`ViewConfig`] the bound `View` was

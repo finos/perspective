@@ -694,11 +694,6 @@ t_gnode::_process_table(t_uindex port_id) {
     }
 #endif
 
-    // Window widening (WINDOW_FUNCTIONS_PLAN §2.3): must see the batch
-    // before contexts compute, and must run after the master update so new
-    // row locations are readable. `row_lookup` is aligned with the UNMASKED
-    // flattened - re-align it when the mask dropped rows, since the engine
-    // indexes it by masked row.
     if (flattened_masked.get() == _process_state.m_flattened_data_table.get()) {
         _process_windows(flattened_masked, row_lookup);
     } else {

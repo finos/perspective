@@ -76,17 +76,18 @@ const TEMPLATE = `<div>
     </label>
     <label class="field">
         <span class="field__label">Access key ID</span>
-        <input name="keyId" type="text" required />
+        <input name="keyId" type="text" required autocomplete="keyid"/>
     </label>
     <label class="field">
         <span class="field__label">Secret access key</span>
-        <input name="secret" type="password" required />
+        <input name="secret" type="password" autocomplete="new-password"  required />
     </label>
     <label class="field">
         <span class="field__label">Session token</span>
         <input
             name="token"
             type="password"
+            autocomplete="new-password" 
             placeholder="temporary credentials only"
         />
     </label>

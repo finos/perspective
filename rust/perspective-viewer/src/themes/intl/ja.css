@@ -10,15 +10,14 @@
  * ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ */
 
-perspective-viewer,
-perspective-dropdown {
+perspective-viewer {
     /* Config */
     --psp-label--group-by--content: "グループ化";
     --psp-label--split-by--content: "分割";
-    --psp-label--sort--content: "注文方法";
-    --psp-label--filter--content: "どこ";
+    --psp-label--sort--content: "並べ替え";
+    --psp-label--filter--content: "フィルター";
     --psp-label--transpose-button--content: "スワップ";
-    --psp-label--config-button--content: "構成、設定";
+    --psp-label--config-button--content: "設定";
     --psp-label--all-columns--content: "すべての列";
     --psp-label--untitled--content: "無題";
 
@@ -27,23 +26,29 @@ perspective-dropdown {
     --psp-plugin-name--treemap--content: "ツリーマップ";
     --psp-plugin-name--sunburst--content: "サンバースト";
     --psp-plugin-name--heatmap--content: "ヒートマップ";
-    --psp-plugin-name--x-bar--content: "Xバー";
-    --psp-plugin-name--y-bar--content: "アンドバー";
-    --psp-plugin-name--y-line--content: "そしてライン";
-    --psp-plugin-name--x-y-line--content: "X/Y ライン";
+    --psp-plugin-name--x-bar--content: "X 棒";
+    --psp-plugin-name--y-bar--content: "Y 棒";
+    --psp-plugin-name--y-line--content: "Y 折れ線";
+    --psp-plugin-name--x-y-line--content: "X/Y 折れ線";
     --psp-plugin-name--x-y-scatter--content: "X/Y 散布図";
     --psp-plugin-name--y-scatter--content: "Y散布図";
-    --psp-plugin-name--y-area--content: "とエリア";
-    --psp-plugin-name--ohlc--content: "痛い";
+    --psp-plugin-name--y-area--content: "Y 面";
+    --psp-plugin-name--ohlc--content: "OHLC";
     --psp-plugin-name--candlestick--content: "ローソク足";
+    --psp-plugin-name--density--content: "密度";
+    --psp-plugin-name--map-scatter--content: "地図散布図";
+    --psp-plugin-name--map-line--content: "地図折れ線";
+    --psp-plugin-name--map-density--content: "地図密度";
 
     /* Column Selector names */
-    --psp-label--column-columns--content: "コラム";
+    --psp-label--column-columns--content: "列";
     --psp-label--column-x-axis--content: "X軸";
     --psp-label--column-y-axis--content: "Y軸";
     --psp-label--column-color--content: "色";
     --psp-label--column-size--content: "サイズ";
     --psp-label--column-symbol--content: "シンボル";
+    --psp-label--column-longitude--content: "経度";
+    --psp-label--column-latitude--content: "緯度";
     --psp-label--column-label--content: "ラベル";
     --psp-label--column-tooltip--content: "ツールチップ";
     --psp-label--add-expression-button--content: "新しい列";
@@ -53,14 +58,19 @@ perspective-dropdown {
     --psp-label--no-results--content: "無効な列";
     --psp-datagrid--column-edit-button--content: "編集";
     --psp-label--copy-button--content: "コピー";
-    --psp-label--export-button--content: "輸出";
+    --psp-label--export-button--content: "エクスポート";
     --psp-label--reset-button--content: "リセット";
+    --psp-label--new-panel-button--content: "新規";
+    --psp-label--new-from-table--content: "テーブルから新規";
+    --psp-label--new-from-panel--content: "パネルから新規";
+    --psp-label--apply-button--content: "適用";
+    --psp-label--paste-button--content: "貼り付け";
     --psp-label--edit-mode-read-only--content: "読み取り専用";
     --psp-label--edit-mode-edit--content: "テキスト編集";
     --psp-label--edit-mode-select-row--content: "行を選択";
     --psp-label--edit-mode-select-column--content: "列を選択";
     --psp-label--edit-mode-select-region--content: "範囲を選択";
-    --psp-label--scroll-lock-toggle--content: "フリースクロ​​ール";
+    --psp-label--scroll-lock-toggle--content: "フリースクロール";
     --psp-label--scroll-lock-alt-toggle--content: "スクロールを揃える";
 
     /* Column Settings */
@@ -69,11 +79,10 @@ perspective-dropdown {
     --psp-label--timezone--content: "タイムゾーン";
     --psp-label--date-style--content: "日付スタイル";
     --psp-label--time-style--content: "時間スタイル";
-    --psp-label--foreground--content: "前景";
-    --psp-label--background--content: "背景";
     --psp-label--number-fg-mode--content: "前景";
     --psp-label--number-bg-mode--content: "背景";
-    --psp-label--pos-bg-color--content: "背景";
+    --psp-label--fg-colors--content: "前景";
+    --psp-label--bg-colors--content: "背景";
     --psp-label--datetime-color-mode--content: "色";
     --psp-label--string-color-mode--content: "色";
     --psp-label--series--content: "シリーズ";
@@ -85,9 +94,10 @@ perspective-dropdown {
     --psp-label--minimum-integer-digits--content: "整数の最小桁数";
     --psp-label--rounding-increment--content: "丸め増分";
     --psp-label--notation--content: "表記";
-    --psp-label--use-grouping--content: "グループ化を使用する";
-    --psp-label--sign-display--content: "サインディスプレイ";
-    --psp-label--max-value--content: "最大値";
+    --psp-label--use-grouping--content: "グループ化を使用";
+    --psp-label--sign-display--content: "符号表示";
+    --psp-label--enabled--content: "有効";
+    --psp-label--disabled--content: "無効";
     --psp-label--fg-gradient--content: "最大値";
     --psp-label--bg-gradient--content: "最大値";
     --psp-label--rounding-priority--content: "丸めの優先順位";
@@ -98,19 +108,19 @@ perspective-dropdown {
     --psp-label--year--content: "年";
     --psp-label--month--content: "月";
     --psp-label--day--content: "日";
-    --psp-label--weekday--content: "平日";
-    --psp-label--hour--content: "時間";
+    --psp-label--weekday--content: "曜日";
+    --psp-label--hour--content: "時";
     --psp-label--minute--content: "分";
-    --psp-label--second--content: "2番";
+    --psp-label--second--content: "秒";
     --psp-label--fractional-seconds--content: "小数秒";
     --psp-label--hours--content: "12/24時間";
 
     /* Tabs */
     --psp-label--style-tab--content: "スタイル";
-    --psp-label--attributes-tab--content: "属性";
+    --psp-label--attributes-tab--content: "式";
     --psp-label--window-tab--content: "ウィンドウ";
     --psp-label--window-source--content: "列";
-    --psp-label--window-order-by--content: "注文方法";
+    --psp-label--window-order-by--content: "並べ替え";
     --psp-label--window-partition-by--content: "パーティション";
     --psp-label--window-frame--content: "フレーム";
     --psp-label--window-offset--content: "オフセット";
@@ -138,13 +148,13 @@ perspective-dropdown {
     /* Plugin settings */
     --psp-label--edit-mode--content: "編集モード";
     --psp-label--scroll-lock--content: "スクロールロック";
-    --psp-label--chart-type--content: "チャートの種類";
+    --psp-label--chart-type--content: "グリフの種類";
 
     /* Plugin settings — viewer-charts */
     --psp-label--auto-alt-y-axis--content: "自動デュアルY軸";
-    --psp-label--facet-mode--content: "ファセットモード";
-    --psp-label--facet-zoom-mode--content: "ファセットズーム";
-    --psp-label--series-zoom-mode--content: "系列ズーム";
+    --psp-label--facet-mode--content: "分割モード";
+    --psp-label--facet-zoom-mode--content: "ズームモード";
+    --psp-label--series-zoom-mode--content: "系列ズームモード";
     --psp-label--line-width-px--content: "線の幅";
     --psp-label--point-size-px--content: "点のサイズ";
     --psp-label--band-inner-frac--content: "バンド幅";
@@ -160,8 +170,8 @@ perspective-dropdown {
     --psp-label--map-tile-provider--content: "地図プロバイダー";
     --psp-label--map-tile-alpha--content: "地図の不透明度";
     --psp-label--numeric-axes--content: "数値軸";
-    --psp-label--legend-mode--content: "凡例モード";
-    --psp-label--legend-size-mode--content: "凡例サイズ";
+    --psp-label--legend-mode--content: "配置モード";
+    --psp-label--legend-size-mode--content: "サイズモード";
     --psp-label--legend-width-px--content: "凡例の幅";
     --psp-label--legend-height-px--content: "凡例の高さ";
     --psp-label--legend-anchor--content: "凡例のアンカー";

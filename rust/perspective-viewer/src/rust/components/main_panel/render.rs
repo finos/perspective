@@ -18,7 +18,8 @@ use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
 use super::{MainPanel, MainPanelMsg, MainPanelProps};
-use crate::components::panel_menu::PanelMenu;
+use crate::components::new_panel_menu::NewPanelPick;
+use crate::components::panel_menu::{PanelCommand, PanelMenu};
 use crate::components::panel_tab::PanelTab;
 use crate::components::render_warning::RenderWarning;
 use crate::components::status_bar::StatusBar;
@@ -73,14 +74,26 @@ impl MainPanel {
             let active_slot = renderer.slot_name();
             // Panel-count chrome (`single`/`multi`, closable, draggable)
             let placed_count = ctx.props().workspace.placed_count();
+            let closing = self
+                .inserted
+                .iter()
+                .filter(|name| !ctx.props().panel_ids.iter().any(|id| id.as_str() == *name))
+                .map(|name| PanelId::from(name.as_str()))
+                .collect::<Vec<_>>();
             let cells = ctx
                 .props()
                 .panel_ids
                 .iter()
                 .filter(|id| !ctx.props().workspace.is_staged(id))
-                .map(|id| {
+                .map(|id| (id, false))
+                .chain(closing.iter().map(|id| (id, true)))
+                .map(|(id, is_closing)| {
                     let name = id.as_str().to_owned();
                     let mut class = classes!("rl-panel");
+                    if is_closing {
+                        class.push("closing");
+                    }
+
                     if placed_count > 1 {
                         if active_slot.as_deref() == Some(name.as_str()) {
                             class.push("active");
@@ -103,7 +116,9 @@ impl MainPanel {
                     let on_activate = ctx.props().on_activate_panel.clone();
                     let activate_name = name.clone();
                     let onpointerdown = Callback::from(move |_: web_sys::PointerEvent| {
-                        on_activate.emit(activate_name.clone());
+                        if !is_closing {
+                            on_activate.emit(activate_name.clone());
+                        }
                     });
 
                     // Right-click anywhere in the panel opens the context menu. This
@@ -214,23 +229,41 @@ impl MainPanel {
                     on_settings.emit(());
                 })
             };
+            let closing_tabs = closing.iter().filter_map(|id| {
+                let panel = ctx.props().workspace.closing_panel(id)?;
+                let title = panel.session.get_title().filter(|t| !t.is_empty());
+                let theme = panel.renderer.theme().or_else(|| {
+                    ctx.props()
+                        .presentation_props
+                        .available_themes
+                        .first()
+                        .cloned()
+                });
+                Some((id, panel.session, title, theme, true))
+            });
             let tabs = ctx
                 .props()
                 .panel_ids
                 .iter()
                 .filter(|id| !ctx.props().workspace.is_staged(id))
-                .map(|id| {
-                    let name = id.as_str().to_owned();
+                .filter_map(|id| {
+                    let panel = ctx.props().workspace.panel(id)?;
+                    let name = id.as_str();
                     let title = ctx
                         .props()
                         .panel_titles
                         .iter()
-                        .find(|(pid, _)| pid == &name)
+                        .find(|(pid, _)| pid == name)
                         .and_then(|(_, t)| t.clone());
-                    let active = active_slot.as_deref() == Some(name.as_str());
+                    let theme = ctx.props().effective_panel_theme(name);
+                    Some((id, panel.session, title, theme, false))
+                })
+                .chain(closing_tabs)
+                .map(|(id, session, title, theme, is_closing)| {
+                    let name = id.as_str().to_owned();
+                    let active = !is_closing && active_slot.as_deref() == Some(name.as_str());
                     let visible = !self.hidden_tabs.contains(name.as_str());
-                    let is_master = ctx.props().panel_masters.contains(id);
-                    let theme = ctx.props().effective_panel_theme(&name);
+                    let is_master = !is_closing && ctx.props().panel_masters.contains(id);
 
                     html! {
                         <PanelTab
@@ -238,14 +271,16 @@ impl MainPanel {
                             viewer={viewer_elem.clone()}
                             panel_id={name.clone()}
                             {title}
+                            {session}
                             {theme}
                             {active}
                             {visible}
                             {is_master}
                             {single}
-                            {closable}
+                            closable={closable && !is_closing}
                             {is_settings_open}
-                            {draggable}
+                            draggable={draggable && !is_closing}
+                            closing={is_closing}
                             on_select={on_select.clone()}
                             on_close={on_close.clone()}
                             on_open_settings={on_open_settings.clone()}
@@ -349,11 +384,27 @@ impl MainPanel {
             })
             .unwrap_or_default();
 
+        let on_new_panel = {
+            let on_command = ctx.props().on_panel_command.clone();
+            let id = renderer.slot_name().unwrap_or_default();
+            Callback::from(move |pick: NewPanelPick| {
+                let cmd = match pick {
+                    NewPanelPick::FromTable { client, table } => {
+                        PanelCommand::NewFrom { client, table }
+                    },
+                    NewPanelPick::FromPanel(source) => PanelCommand::NewFromPanel(source),
+                };
+
+                on_command.emit((id.clone(), cmd));
+            })
+        };
+
         html! {
             <div id="main_column">
                 <StatusBar
                     id="status_bar"
                     on_reset={ctx.props().on_reset.clone()}
+                    {on_new_panel}
                     session_props={ctx.props().session_props.clone()}
                     presentation_props={ctx.props().presentation_props.clone()}
                     is_settings_open={ctx.props().is_settings_open}

@@ -61,9 +61,13 @@ pub struct MainPanelProps {
     /// active panel.
     pub on_activate_panel: Callback<String>,
 
-    /// Fired with a panel id when its frame's close button removes it from the
-    /// layout, so the root can dispose the panel.
+    /// Fired with a panel id from a tab × (an app-initiated close): the root
+    /// removes it from the model at once and parks its engines.
     pub on_close_panel: Callback<String>,
+
+    /// Fired with a panel id once the `regular-layout` tree no longer holds
+    /// it, so the root can eject the parked panel.
+    pub on_panel_closed: Callback<String>,
 
     /// Fired with `(panel id, command)` when the panel context menu selects a
     /// command the root executes (New/Duplicate/Reset/ToggleMaster/Close).
@@ -202,6 +206,10 @@ pub struct MainPanel {
     /// listener": the old element left the DOM with the committed tree and
     /// every listener, and nothing ever noticed.
     listener_target: Option<web_sys::HtmlElement>,
+
+    /// Ids gone from the model whose `removePanel` has been issued to the
+    /// layout and not yet committed.
+    pending_removals: HashSet<String>,
 
     /// Per-panel `ResizeObserver`s, keyed by panel id, each observing that
     /// panel's slotted plugin element and resizing only that panel's
@@ -347,6 +355,7 @@ impl Component for MainPanel {
             main_panel_ref: NodeRef::default(),
             layout_ref: NodeRef::default(),
             inserted: Vec::new(),
+            pending_removals: HashSet::new(),
             _layout_update_listener: listener,
             _layout_select_listener: select_listener,
             _layout_before_resize_listener: before_resize_listener,
@@ -376,6 +385,7 @@ impl Component for MainPanel {
     }
 
     fn changed(&mut self, ctx: &Context<Self>, old: &Self::Properties) -> bool {
+        self.close_unstaged_panels(ctx, old);
         ctx.props() != old
     }
 
@@ -402,4 +412,18 @@ impl Component for MainPanel {
     }
 
     fn destroy(&mut self, _ctx: &Context<Self>) {}
+}
+
+impl MainPanel {
+    /// Report closed every panel gone from the model that the layout never
+    /// held, since it has no commit to wait for.
+    fn close_unstaged_panels(&self, ctx: &Context<Self>, old: &MainPanelProps) {
+        for id in &old.panel_ids {
+            if !ctx.props().panel_ids.contains(id)
+                && !self.inserted.iter().any(|n| n == id.as_str())
+            {
+                ctx.props().on_panel_closed.emit(id.as_str().to_owned());
+            }
+        }
+    }
 }

@@ -505,7 +505,10 @@ regular-table tbody tr:hover {
     #psp-column-edit-buttons
     th:not(.rt-group-corner)
     span:not(.rt-column-resize):before {
-    content: var(--psp-datagrid--column-edit-button--content, "Edit");
+    content: var(
+        --psp-datagrid--column-edit-button--content,
+        var(--psp-missing)
+    );
 }
 
 perspective-viewer:not([settings]),

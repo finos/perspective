@@ -26,7 +26,7 @@ use crate::presentation::{
     ColumnSettingsTab, ColumnSettingsTarget, DragDropProps, PresentationProps,
 };
 use crate::renderer::RendererProps;
-use crate::session::{SessionProps, TableLoadState, ViewStats};
+use crate::session::{SessionProps, TableLoadState};
 use crate::utils::Completion;
 
 /// The filter-bearing payload of a master panel's selection or click event
@@ -45,9 +45,31 @@ pub struct MasterSelection {
     pub cell_fallback: Option<Filter>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Divider {
+    Settings,
+    ColumnSettings,
+}
+
+impl Divider {
+    /// The shadow-DOM selector of the divider's resizable pane (pane 0 of
+    /// its `SplitPanel`; the flex-fill pane renders bare).
+    pub fn pane_selector(self) -> &'static str {
+        match self {
+            Self::Settings => "#app_panel > .split-panel-child",
+            Self::ColumnSettings => "#modal_panel > .split-panel-child",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PaneTarget {
+    Width(i32),
+    Natural,
+}
+
 #[derive(Debug)]
 pub enum PerspectiveViewerMsg {
-    ColumnSettingsPanelSizeUpdate(Option<i32>),
     ColumnSettingsPanelAutoWidth(f64),
     ToggleColumnSettingsPin,
     ToggleColumnSettingsPinComplete(Sender<()>),
@@ -84,11 +106,17 @@ pub enum PerspectiveViewerMsg {
     /// nudge runs complete (invariant I6).
     SetActivePanel(String, Option<Completion>),
 
-    /// The named panel's frame was closed (removed from the layout); remove it
-    /// from the workspace and dispose its engines. The `Completion` resolves
-    /// `removePanel()` after the eject's teardown run completes (invariant
-    /// I6) — carrying any teardown error, which was previously dropped.
+    /// Close the named panel: remove it from the workspace now but keep its
+    /// engines parked until [`Self::PanelClosed`] reports the layout commit
+    /// that reclaims its cell. The `Completion` resolves `removePanel()`
+    /// after the eject's teardown run completes (invariant I6) — carrying
+    /// any teardown error.
     ClosePanel(String, Option<Completion>),
+
+    /// `MainPanel` saw the named panel leave the `regular-layout` tree, so
+    /// dispose its parked panel, or close outright one the workspace still
+    /// holds.
+    PanelClosed(String),
 
     /// `restoreWorkspace` finished replacing the panel set in the
     /// `Workspace` (new models inserted, old panels ejected, layout staged):
@@ -130,26 +158,10 @@ pub enum PerspectiveViewerMsg {
     /// Some panel's title changed (any panel, via `_title_subscriptions`);
     /// re-render so the tab titles refresh.
     TitlesChanged,
-    SettingsPanelSizeUpdate(Option<i32>),
-
-    /// The settings-pane divider proposed a new pane width (per pointermove,
-    /// from the *deferred* `SplitPanel` — it has NOT been applied). Feeds the
-    /// latest-wins presize pump (`PRESIZE_EVERYWHERE_PLAN.md` P1): geometry
-    /// commits only after every visible panel has rendered at its target.
-    SettingsDividerMove(i32),
-
-    /// Run one pump iteration: presize all visible panels at the newest
-    /// proposed pane width, then commit it.
-    SettingsDividerPump,
-
-    /// Presize for this pane width completed — commit it (the deferred
-    /// `SplitPanel`'s controlled `size`), then pump again if a newer target
-    /// arrived meanwhile.
-    SettingsDividerCommit(i32),
-
-    /// Divider drag ended: reactively finalize every visible panel at its
-    /// exact settled cell (debounced no-op when the presizes were exact).
-    SettingsDividerFinish,
+    DividerMove(Divider, PaneTarget),
+    DividerPump(Divider),
+    DividerCommit(Divider, PaneTarget),
+    DividerFinish(Divider),
     SettingsPanelTabChanged(SelectedTab),
     SettingsPanelAutoWidth(f64),
     ToggleDebug,
@@ -203,10 +215,11 @@ pub enum PerspectiveViewerMsg {
     UpdateColumnSettingsCommit(Sender<()>),
     UpdateDragDrop(Box<DragDropProps>),
 
-    /// Update only stats-related fields of `session_props` without touching
-    /// `config`.  This prevents `stats_changed` events (e.g. from `reset()`)
-    /// from propagating a freshly-cleared config to the column selector.
-    UpdateSessionStats(Option<ViewStats>, Option<TableLoadState>),
+    /// Update only the stats-derived fields of `session_props`
+    /// (`has_table_cells`, `has_table`) without touching `config`.  This
+    /// prevents `stats_changed` events (e.g. from `reset()`) from propagating
+    /// a freshly-cleared config to the column selector.
+    UpdateSessionStats(bool, Option<TableLoadState>),
 
     /// Refresh the root's render snapshot of the `Workspace`-owned global
     /// filter set (dispatched by its `filters_changed` PubSub).

@@ -367,7 +367,6 @@ test.describe("Panel context menu", () => {
 
         await new_item.hover();
         const submenu = new_item.locator(".context-menu-submenu");
-        // Single client — a flat list of its hosted table names, no headers.
         await submenu.waitFor();
         await compareInnerHTMLToSnapshot(submenu);
         const prev_active = await page.evaluate(() =>
@@ -375,7 +374,7 @@ test.describe("Panel context menu", () => {
             document.querySelector("perspective-viewer")!.getActivePanel(),
         );
         await submenu
-            .locator(".context-menu-item", { hasText: "second-table" })
+            .locator(".dropdown-menu-item", { hasText: "second-table" })
             .click();
 
         // The menu inserts the panel synchronously but activates it only
@@ -436,7 +435,6 @@ test.describe("Panel context menu", () => {
 
         await new_item.hover();
         const submenu = new_item.locator(".context-menu-submenu");
-        // Two clients — a header row per client, tables grouped beneath.
         await submenu.waitFor();
         await compareInnerHTMLToSnapshot(submenu);
 
@@ -447,7 +445,7 @@ test.describe("Panel context menu", () => {
             document.querySelector("perspective-viewer")!.getActivePanel(),
         );
         await submenu
-            .locator(".context-menu-item", { hasText: "other-client-table" })
+            .locator(".dropdown-menu-item", { hasText: "other-client-table" })
             .click();
 
         // The menu inserts the panel synchronously but activates it only

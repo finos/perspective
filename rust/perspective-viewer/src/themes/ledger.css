@@ -20,6 +20,7 @@ perspective-viewer [theme="Ledger"] {
 
 perspective-viewer[theme="Ledger"],
 perspective-viewer [theme="Ledger"] {
+    color-scheme: light;
     --theme-paper-0: #fbf7ec;
     --theme-paper-1: #f4eedd;
     --theme-paper-2: #e6ddc4;
@@ -133,63 +134,4 @@ perspective-viewer [theme="Ledger"] {
         var(--theme-paper-1) 50%,
         var(--theme-green) 100%
     );
-}
-
-perspective-context-menu[theme="Ledger"],
-perspective-copy-menu[theme="Ledger"],
-perspective-export-menu[theme="Ledger"],
-perspective-dropdown[theme="Ledger"],
-perspective-date-column-style[theme="Ledger"],
-perspective-datetime-column-style[theme="Ledger"],
-perspective-number-column-style[theme="Ledger"],
-perspective-string-column-style[theme="Ledger"] {
-    --theme-paper-0: #fbf7ec;
-    --theme-paper-1: #f4eedd;
-    --theme-paper-2: #e6ddc4;
-    --theme-rule-0: #dfe7d9;
-    --theme-rule-1: #b9cbb3;
-    --theme-ink-0: #2b2a26;
-    --theme-ink-1: #5d574b;
-    --theme-ink-2: #a29c8e;
-    --theme-blue: #1f4e8c;
-    --theme-red: #b3261e;
-    --theme-green: #2e6b3a;
-    --theme-ochre: #b7791f;
-    --theme-violet: #5b3a8c;
-    --theme-sepia: #8a5a2b;
-    --theme-teal: #1d7a7a;
-    --theme-magenta: #a03a6a;
-    --theme-olive: #4a6b1f;
-
-    color: var(--theme-ink-0);
-    --psp--color: var(--theme-ink-0);
-    --psp-active--color: var(--theme-blue);
-    --psp-error--color: var(--theme-red);
-    --psp-inactive--color: var(--theme-ink-2);
-    --psp-inactive--border-color: var(--theme-paper-2);
-    --psp--background-color: var(--theme-paper-0);
-    --psp-active--background: rgba(31, 78, 140, 0.15);
-    --psp-expression--operator--color: var(--theme-ink-1);
-    --psp-expression--function--color: var(--theme-blue);
-    --psp-expression--psp-error--color: var(--theme-red);
-    --psp-warning--color: var(--theme-paper-0);
-    --psp-warning--background: var(--theme-ink-0);
-    --psp-icon-overflow-hint--color: rgba(43, 42, 38, 0.2);
-    --psp-placeholder--background: rgba(162, 156, 142, 0.3);
-    --psp-status-icon--connected--color: var(--theme-green);
-    --psp-status-icon--initializing--color: var(--theme-ochre);
-    --psp-status-icon--psp-error--color: var(--theme-red);
-    --psp-column-type--float--color: var(--theme-blue);
-    --psp-column-type--string--color: var(--theme-red);
-    --psp-column-type--date--color: var(--theme-teal);
-    --psp-column-type--boolean--color: var(--theme-ochre);
-
-    --psp-code-editor--symbol--color: var(--theme-ink-0);
-    --psp-code-editor--literal--color: var(--theme-blue);
-    --psp-code-editor--operator--color: var(--theme-sepia);
-    --psp-code-editor--comment--color: var(--theme-ink-2);
-    --psp-code-editor--column--color: var(--theme-violet);
-
-    background-color: #fbf7ec;
-    border: 1px solid #e6ddc4;
 }

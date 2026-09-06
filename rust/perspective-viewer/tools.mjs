@@ -59,14 +59,7 @@ const DOCS_DTS_FILES = [
     ["./dist/wasm/perspective-viewer.d.ts", "JS API"],
     ["../../packages/viewer-datagrid/src/ts/types.ts", "Datagrid Plugin"],
     ["../../packages/viewer-charts/src/ts/charts/chart.ts", "Charts Plugin"],
-
-    // Per-chart declarations: the `columns` role lists and what
-    // `group_by`/`split_by` draw in each chart family.
     ["../../packages/viewer-charts/src/ts/plugin/charts.ts", "Charts Plugin"],
-
-    // The `columns_config` per-column format wire types (ts-rs generated,
-    // rustdoc carried through) - `number_format`'s re-composed family and
-    // `date_format`'s Simple/Custom union.
     ["./src/ts/ts-rs/CustomNumberFormatConfig.ts", "Column Format"],
     ["./src/ts/ts-rs/NumberFormatStyle.ts", "Column Format"],
     ["./src/ts/ts-rs/Notation.ts", "Column Format"],

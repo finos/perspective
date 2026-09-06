@@ -26,20 +26,23 @@
 //! `on_close` fires exactly once, when the session ends (blur dismissal, a
 //! command selection, or the picker closing).
 
+use std::rc::Rc;
+
 use perspective_js::utils::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
-use crate::components::context_menu::{ContextMenu, ContextMenuEntry, ContextMenuItem};
 use crate::components::copy_dropdown::CopyDropDownMenu;
 use crate::components::export_dropdown::ExportDropDownMenu;
-use crate::components::portal::PortalModal;
+use crate::components::new_panel_menu::{HostedTables, NewPanelMenu, NewPanelPick};
 use crate::components::style::StyleSurface;
 use crate::config::*;
 use crate::js::copy_to_clipboard;
 use crate::presentation::Presentation;
+use crate::queries::fetch_hosted_tables;
 use crate::tasks::export_method_to_blob;
+use crate::ui::{ContextMenu, ContextMenuEntry, ContextMenuItem, MODAL_SLOT, PortalModal};
 use crate::utils::*;
 use crate::workspace::{PanelId, Workspace};
 
@@ -48,7 +51,13 @@ use crate::workspace::{PanelId, Workspace};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PanelCommand {
     New,
-    NewFrom { client: String, table: String },
+    NewFrom {
+        client: String,
+        table: String,
+    },
+
+    /// A fresh panel copied from the named panel.
+    NewFromPanel(String),
     Duplicate,
     Reset,
     Maximize,
@@ -133,8 +142,8 @@ pub enum PanelMenuMsg {
 }
 
 pub struct PanelMenu {
-    /// The session-long 0×0 cursor anchor element (appended to `<body>`) both
-    /// stages' `PortalModal`s position against; removed on destroy.
+    /// The session-long 0×0 cursor anchor element (a viewer light-DOM child)
+    /// both stages' `PortalModal`s position against; removed on destroy.
     anchor: HtmlElement,
 
     /// The open format picker, if the session is in its picker stage.
@@ -143,7 +152,7 @@ pub struct PanelMenu {
     /// The "New" sub-menu's data: `(client name, its hosted table names)` per
     /// loaded client, in registration order. `None` while the fetch spawned at
     /// menu open is still in flight.
-    tables: Option<Vec<(String, Vec<String>)>>,
+    tables: Option<HostedTables>,
 }
 
 impl Component for PanelMenu {
@@ -151,37 +160,20 @@ impl Component for PanelMenu {
     type Properties = PanelMenuProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let clients = ctx.props().workspace.clients();
+        let workspace = ctx.props().workspace.clone();
         let link = ctx.link().clone();
         ApiFuture::spawn(async move {
-            let mut tables = Vec::with_capacity(clients.len());
-            for client in clients {
-                // A failing client contributes an empty list rather than
-                // poisoning the whole menu.
-                let mut names = match client.get_hosted_table_names().await {
-                    Ok(names) => names,
-                    Err(err) => {
-                        tracing::warn!(
-                            "Failed to list tables for `Client` \"{}\": {err}",
-                            client.get_name()
-                        );
-
-                        vec![]
-                    },
-                };
-
-                // Server-side name order isn't meaningful (or stable) — list
-                // deterministically.
-                names.sort_unstable();
-                tables.push((client.get_name().to_owned(), names));
-            }
-
+            let tables = fetch_hosted_tables(&workspace).await;
             link.send_message(PanelMenuMsg::TablesLoaded(tables));
             Ok(())
         });
 
         Self {
-            anchor: session_anchor(ctx.props().x, ctx.props().y),
+            anchor: session_anchor(
+                ctx.props().presentation.viewer_elem(),
+                ctx.props().x,
+                ctx.props().y,
+            ),
             picker: None,
             tables: None,
         }
@@ -213,7 +205,7 @@ impl Component for PanelMenu {
                 false
             },
             PanelMenuMsg::TablesLoaded(tables) => {
-                self.tables = Some(tables);
+                self.tables = Some(Rc::new(tables));
                 self.picker.is_none()
             },
         }
@@ -229,7 +221,7 @@ impl Component for PanelMenu {
     fn destroy(&mut self, _ctx: &Context<Self>) {
         // The session ended (or the parent unmounted mid-session, e.g. the
         // target panel closed); don't leak the cursor anchor.
-        let _ = global::body().remove_child(&self.anchor);
+        self.anchor.remove();
     }
 }
 
@@ -254,7 +246,7 @@ impl PanelMenu {
             None => vec![ContextMenuEntry::Submenu {
                 label: "New".to_owned(),
                 on_select: None,
-                entries: self.new_submenu_entries(ctx),
+                entries: vec![ContextMenuEntry::Custom(self.new_submenu_body(ctx))],
             }],
             Some(panel_id) => {
                 let can_close = ctx.props().workspace.len() > 1;
@@ -263,7 +255,7 @@ impl PanelMenu {
                     ContextMenuEntry::Submenu {
                         label: "New".to_owned(),
                         on_select: Some(cmd(PanelCommand::New)),
-                        entries: self.new_submenu_entries(ctx),
+                        entries: vec![ContextMenuEntry::Custom(self.new_submenu_body(ctx))],
                     },
                     item("Duplicate", cmd(PanelCommand::Duplicate), false),
                     item("Reset", cmd(PanelCommand::Reset), false),
@@ -301,7 +293,7 @@ impl PanelMenu {
             <PortalModal
                 key="perspective-context-menu"
                 tag_name="perspective-context-menu"
-                surface={StyleSurface::ContextMenu}
+                sheet={StyleSurface::ContextMenu.sheet()}
                 target={Some(self.anchor.clone())}
                 own_focus=true
                 on_close={&on_close}
@@ -315,54 +307,35 @@ impl PanelMenu {
         }
     }
 
-    /// The "New" hover sub-menu's entries: every hosted `Table` name from
-    /// every loaded `Client`, flat for a single client, grouped under a
-    /// header row per client otherwise (client names are globally unique, so
-    /// the grouping also disambiguates table-name collisions).
-    fn new_submenu_entries(&self, ctx: &Context<Self>) -> Vec<ContextMenuEntry> {
-        let placeholder = |label: &str| {
-            vec![ContextMenuEntry::Item(ContextMenuItem {
-                label: label.to_owned(),
-                on_select: Callback::noop(),
-                disabled: true,
-            })]
-        };
+    /// The "New" hover sub-menu's body, the shared [`NewPanelMenu`].
+    fn new_submenu_body(&self, ctx: &Context<Self>) -> Html {
+        let panels = Rc::new(
+            ctx.props()
+                .workspace
+                .panel_ids()
+                .into_iter()
+                .filter_map(|id| {
+                    let panel = ctx.props().workspace.panel(&id)?;
+                    let title = panel.session.get_title().filter(|t| !t.is_empty());
+                    Some((id.as_str().to_owned(), title))
+                })
+                .collect::<Vec<_>>(),
+        );
 
-        let Some(clients) = &self.tables else {
-            return placeholder("Loading...");
-        };
+        let callback = ctx.link().batch_callback(|pick: NewPanelPick| {
+            let cmd = match pick {
+                NewPanelPick::FromTable { client, table } => {
+                    PanelMenuMsg::Command(PanelCommand::NewFrom { client, table })
+                },
+                NewPanelPick::FromPanel(id) => {
+                    PanelMenuMsg::Command(PanelCommand::NewFromPanel(id))
+                },
+            };
 
-        if clients.iter().all(|(_, tables)| tables.is_empty()) {
-            return placeholder("No tables");
-        }
+            vec![cmd, PanelMenuMsg::MenuClosed]
+        });
 
-        let multi = clients.len() > 1;
-        let mut entries = Vec::new();
-        for (client_name, tables) in clients {
-            if multi {
-                entries.push(ContextMenuEntry::Header(client_name.clone()));
-            }
-
-            for table in tables {
-                let on_select = {
-                    clone!(client_name, table);
-                    ctx.link().callback(move |_| {
-                        PanelMenuMsg::Command(PanelCommand::NewFrom {
-                            client: client_name.clone(),
-                            table: table.clone(),
-                        })
-                    })
-                };
-
-                entries.push(ContextMenuEntry::Item(ContextMenuItem {
-                    label: table.clone(),
-                    on_select,
-                    disabled: false,
-                }));
-            }
-        }
-
-        entries
+        html! { <NewPanelMenu tables={self.tables.clone()} {panels} {callback} /> }
     }
 
     /// Export/Copy format-picker spawned in place of the context menu, anchored
@@ -462,7 +435,7 @@ impl PanelMenu {
             <PortalModal
                 key={tag_name}
                 {tag_name}
-                surface={StyleSurface::DropdownMenu}
+                sheet={StyleSurface::DropdownMenu.sheet()}
                 {target}
                 own_focus=true
                 {on_close}
@@ -474,20 +447,21 @@ impl PanelMenu {
     }
 }
 
-/// Create a session-long 0×0 anchor element at viewport `(x, y)`, appended to
-/// `<body>`, for both stages' `PortalModal`s to position against.
-fn session_anchor(x: f64, y: f64) -> HtmlElement {
+/// Create the session-long 0×0 cursor anchor at viewport `(x, y)` as a
+/// light-DOM child of `viewer` in the modal slot.
+fn session_anchor(viewer: &HtmlElement, x: f64, y: f64) -> HtmlElement {
     let anchor: HtmlElement = global::document()
         .create_element("div")
         .unwrap()
         .unchecked_into();
 
+    let _ = anchor.set_attribute("slot", MODAL_SLOT);
     let style = anchor.style();
     let _ = style.set_property("position", "fixed");
     let _ = style.set_property("left", &format!("{x}px"));
     let _ = style.set_property("top", &format!("{y}px"));
     let _ = style.set_property("width", "0px");
     let _ = style.set_property("height", "0px");
-    let _ = global::body().append_child(&anchor);
+    let _ = viewer.append_child(&anchor);
     anchor
 }

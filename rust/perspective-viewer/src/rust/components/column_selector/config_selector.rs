@@ -21,8 +21,7 @@ use super::filter_column::*;
 use super::pivot_column::*;
 use super::sort_column::*;
 use crate::components::column_dropdown::{ColumnDropDownElement, ColumnDropDownPortal};
-use crate::components::containers::dragdrop_list::*;
-use crate::components::containers::select::{Select, SelectItem};
+use crate::components::dragdrop_list::*;
 use crate::components::filter_dropdown::{FilterDropDownElement, FilterDropDownPortal};
 use crate::config::PluginStaticConfig;
 use crate::presentation::Presentation;
@@ -30,6 +29,7 @@ use crate::renderer::*;
 use crate::session::drag_drop_update::*;
 use crate::session::*;
 use crate::tasks::apply_and_render;
+use crate::ui::{Select, SelectItem};
 use crate::utils::*;
 
 #[derive(Clone, Properties)]

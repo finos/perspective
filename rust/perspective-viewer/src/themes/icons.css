@@ -11,14 +11,6 @@
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ */
 
 perspective-viewer,
-perspective-context-menu,
-perspective-copy-menu,
-perspective-export-menu,
-perspective-dropdown,
-perspective-date-column-style,
-perspective-datetime-column-style,
-perspective-number-column-style,
-perspective-string-column-style,
 perspective-viewer-tab {
     /* Icons */
     --psp-column-type--integer--mask-image: url("../svg/number-type.svg");
@@ -69,6 +61,7 @@ perspective-viewer-tab {
     --psp-icon--lock--mask-image: url("../svg/lock.svg");
     --psp-icon--reset--mask-image: url("../svg/revert-icon.svg");
     --psp-icon--copy--mask-image: url("../svg/duplicate-icon.svg");
+    --psp-icon--new-panel--mask-image: url("../svg/new-panel-icon.svg");
     --psp-icon--theme--mask-image: url("../svg/theme-icon.svg");
 
     --psp-icon--drawer-tab--mask-image: url(../svg/drawer-tab.svg);

@@ -10,21 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! The render pipeline (see `SESSION_CONFIG_COHERENCE_PLAN.md`) — the ONE
-//! review surface for how config-driven renders happen.
-//!
-//! Invariants enforced here and by the types this composes:
-//! - **I1** config mutation is a synchronous commit
-//!   ([`Session::commit_view_config`]) — no async writer exists.
-//! - **I2** every run consumes an immutable snapshot taken inside the draw
-//!   lock; async stages never re-read the live config (the `ValidatedSnapshot`
-//!   type-state token).
-//! - **I3** runs serialize on the per-`Renderer` draw lock (the [`RenderGuard`]
-//!   witness — plugin dispatch without it does not compile) and every commit
-//!   schedules a run, so the final render always reflects the final commit.
-//! - **I5** the run pins a [`RenderContext`] so plugin read-backs mid-render
-//!   answer from the run's snapshot, never live state.
-
 use std::rc::Rc;
 
 use futures::future::LocalBoxFuture;
@@ -79,30 +64,10 @@ pub async fn bind_snapshot(
 /// legitimate concurrent public calls).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RunOrigin {
-    /// A public element API entry (`restore`, `restorePanel`, `reset`,
-    /// `load`, …): an explicit external request, so a run that reconciles
-    /// `Unchanged` with no state delta STILL repaints — the documented
-    /// no-op-restore refresh affordance (`update` source 6, "the user
-    /// asked" — `PLUGIN_DRAW_INVARIANT_PLAN.md` amendment).
     Public,
-    /// A host-initiated run (UI commits, unpause resumes, subscriptions):
-    /// a reconciled no-op dispatches nothing.
     Internal,
 }
 
-/// The ONE decision table mapping a run's [`BindDisposition`] to its plugin
-/// dispatch (`PLUGIN_DRAW_INVARIANT_PLAN.md`, as amended 2026-07-16):
-/// `plugin.draw` fires iff there is a NEW `View` — a REBUILD, or a
-/// freshly-selected plugin's first paint of the bound `View`
-/// (`promote_first_paint`). `plugin.update` fires iff the `View` is
-/// unchanged but a plugin-visible SOURCE changed: the `Adopted`
-/// config delta, a genuinely changed plugin/columns bucket this run
-/// delivered via `plugin.restore` (`plugin_state_changed`), or an explicit
-/// public API request ([`RunOrigin::Public`]). An INTERNAL run that
-/// reconciled `Unchanged` with no state delta dispatches NOTHING — no
-/// defensive repaints (this is what makes an inert plugin echo, e.g. the
-/// datagrid's `toggle_edit_mode` `restorePanel`, render-silent). Deferred
-/// binds dispatch nothing.
 pub async fn dispatch_bound(
     guard: &RenderGuard,
     renderer: &Renderer,
@@ -343,31 +308,6 @@ async fn render_run(
     }
 }
 
-/// One TRANSACTIONAL activation repaint (see the I5 audit gap in
-/// `SESSION_CONFIG_COHERENCE_PLAN.md` §4): under the panel's draw lock,
-/// stamp the `active` class + theme and `plugin.resize()` in ONE dispatch,
-/// so the activation-dependent chrome (e.g. the datagrid's edit
-/// column-header row, decided by its style listener reading that class) and
-/// the class that styles it land in a single paint commit, never split.
-///
-/// `resize`, NOT `draw`/`update`: activation creates no new `View` and
-/// changes no data (`plugin.draw` ⇔ new `View` —
-/// `PLUGIN_DRAW_INVARIANT_PLAN.md`), and a full dispatch on charts is a
-/// fetch + multi-blit repaint — the stacked-tab two-stage regression, paid
-/// by BOTH sides of every tab switch. `resize` is each plugin's cheap
-/// repaint-from-retained-state, and both built-ins skip it while hidden, so
-/// the OUTGOING (unslotted) panel's nudge costs nothing. Deliberately NOT
-/// debounced/throttled: activation is a one-shot interaction, not a data
-/// stream, and the throttle timer is a task boundary the browser paints
-/// across.
-///
-/// EXCEPTION: a panel whose `table_updated` redraws were dropped while it
-/// was hidden ([`Renderer::take_data_stale`]) HAS changed data — its
-/// retained frame is stale, so this activation dispatches one full
-/// `plugin.update` (same `View`, fresh data; `draw` stays reserved for new
-/// `View`s) instead of the chrome-only repaint. `draw_view` stamps the
-/// activation class + theme itself, so the atomicity contract above holds
-/// on this branch too.
 pub async fn activation_render(session: Session, renderer: Renderer) -> ApiResult<()> {
     let result = {
         clone!(session, renderer);

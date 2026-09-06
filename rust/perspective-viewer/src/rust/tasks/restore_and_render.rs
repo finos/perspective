@@ -10,10 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-//! Apply a full [`ViewerConfigUpdate`] (settings, theme, title, plugin,
-//! plugin_config, columns_config, view_config) and re-draw, on the snapshot
-//! pipeline (see `tasks/pipeline.rs` / `SESSION_CONFIG_COHERENCE_PLAN.md`).
-
 use futures::Future;
 use perspective_client::clone;
 
@@ -28,19 +24,6 @@ use crate::*;
 /// Apply a full [`ViewerConfigUpdate`] (theme, title, plugin selection,
 /// plugin config, columns config, view config) to the engines and re-draw.
 /// Returns an [`ApiFuture<()>`] which resolves when the draw completes.
-///
-/// `origin` says who initiated the restore ([`RunOrigin`]): a `Public`
-/// element-API call keeps the no-op-restore refresh affordance (an
-/// `Unchanged` reconcile still repaints via `update`); an `Internal`
-/// restore that reconciles `Unchanged` and changes no plugin state
-/// dispatches nothing.
-///
-/// This function owns the PRE-LOCK prologue only (element-level settings /
-/// title / host-theme mirror, plugin resolution, the synchronous config
-/// commit and spinner token); the run itself is
-/// [`locked_run`] with the caller's `task` awaited inside the lock. The
-/// `update`'s `table` field is NOT applied here — table binding is the
-/// `task`'s job (see `restore_panel` / `table_lifecycle`).
 pub fn restore_and_render(
     session: &Session,
     renderer: &Renderer,

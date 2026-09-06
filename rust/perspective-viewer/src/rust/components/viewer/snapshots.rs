@@ -22,7 +22,7 @@ use yew::prelude::*;
 use super::PerspectiveViewer;
 use crate::presentation::{DragDropProps, PresentationProps};
 use crate::renderer::RendererProps;
-use crate::session::{SessionProps, TableLoadState, ViewStats};
+use crate::session::{SessionProps, TableLoadState};
 use crate::tasks::resize_visible_panels;
 
 impl PerspectiveViewer {
@@ -59,12 +59,12 @@ impl PerspectiveViewer {
 
     pub(super) fn on_update_session_stats(
         &mut self,
-        stats: Option<ViewStats>,
+        has_table_cells: bool,
         has_table: Option<TableLoadState>,
     ) -> bool {
-        let changed =
-            stats != self.session_props.stats || has_table != self.session_props.has_table;
-        self.session_props.stats = stats;
+        let changed = has_table_cells != self.session_props.has_table_cells
+            || has_table != self.session_props.has_table;
+        self.session_props.has_table_cells = has_table_cells;
         self.session_props.has_table = has_table;
         changed
     }
@@ -146,11 +146,6 @@ impl PerspectiveViewer {
         changed
     }
 
-    /// LEVEL-triggered spinner count: ASSIGN the absolute in-flight
-    /// config-run count from the session's RAII accounting — any missed or
-    /// reordered notification is corrected by the next one, unlike the
-    /// edge-counted increment/decrement pair this replaces (see
-    /// `UPDATE_COUNT_REGRESSION_PLAN.md`).
     pub(super) fn on_update_in_flight(&mut self, count: u32) -> bool {
         let changed = count != self.update_count;
         self.update_count = count;

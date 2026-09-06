@@ -22,18 +22,15 @@ use crate::utils::*;
 
 /// Value-prop version: no PubSub subscriptions, no reducer.
 /// The parent (`StatusBar`) re-renders this component whenever
-/// `session_props.error/has_table/stats` or `update_count` change (via
-/// root's `UpdateInFlight` / `UpdateSession` messages).
+/// `session_props.error/has_table/has_table_cells` or `update_count` change
+/// (via root's `UpdateInFlight` / `UpdateSession` messages).
 #[derive(PartialEq, Properties)]
 pub struct StatusIndicatorProps {
     pub renderer: Renderer,
     pub session: Session,
-    /// Number of in-flight CONFIG-DRIVEN runs (>0 → "updating" spinner) —
-    /// a level-triggered snapshot of `Session::in_flight_config_runs`
-    /// (RAII-settled; see `UPDATE_COUNT_REGRESSION_PLAN.md`).
+
+    /// TODO(texodus): remove this
     pub update_count: u32,
-    /// Snapshot of session value props — read for `error`, `has_table`,
-    /// `stats` to derive the icon state.
     pub session_props: SessionProps,
 }
 
@@ -42,13 +39,7 @@ pub struct StatusIndicatorProps {
 /// reconnect callback when in an error state.
 #[function_component]
 pub fn StatusIndicator(props: &StatusIndicatorProps) -> Html {
-    let has_table_cells = props
-        .session_props
-        .stats
-        .as_ref()
-        .and_then(|s| s.num_table_cells)
-        .is_some();
-
+    let has_table_cells = props.session_props.has_table_cells;
     let state = if let Some(err) = &props.session_props.error {
         StatusIconState::Errored(
             err.message(),

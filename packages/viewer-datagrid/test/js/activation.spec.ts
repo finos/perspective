@@ -10,25 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// Regression spec for the activation two-frame artifact
-// (SESSION_CONFIG_COHERENCE_PLAN.md §4, I5 audit gap): activating a panel
-// used to flip the `active` class in an async render pass while the
-// datagrid's edit column-header `<tr>` arrived via a separately-scheduled,
-// throttled draw — so a paint could show the `:host(.active)` EDIT chrome
-// against the pre-activation DOM ("EDIT on the wrong row"). The class is
-// now stamped inside the locked dispatch immediately before the ONE
-// transactional draw per affected panel, so:
-//
-//  - The class and the row count may disagree only for the duration of
-//    that single draw (class stamps at dispatch start, DOM commits at draw
-//    end) — but the EDIT chrome can never paint on a row that is not a
-//    genuine edit-buttons row, at ANY frame (the row ids are assigned by
-//    the style pass of the same draw that creates/removes the row).
-//  - Once the activation settles, class ⟺ edit row, for every panel.
-//  - Activation costs `resize()` repaints only — ZERO `draw()`s (a `draw`
-//    would imply a new `View` — `PLUGIN_DRAW_INVARIANT_PLAN.md`) and zero
-//    update-path draws.
-
 import { expect, test } from "@perspective-dev/test";
 
 const TABLE = "load-viewer-csv";
@@ -176,13 +157,6 @@ test.describe("Panel activation", () => {
         );
 
         expect(result.violations).toEqual([]);
-
-        // Activation is CHROME-only: `plugin.draw` would imply a new `View`
-        // (`PLUGIN_DRAW_INVARIANT_PLAN.md` — it fires iff the pipeline
-        // REBUILT, never on activation), and the update path stays silent
-        // too — each affected panel repaints via `resize()`, which its
-        // style listeners ride to rebuild the EDIT chrome atomically with
-        // the stamped `active` class.
         for (const [k, count] of Object.entries(result.calls)) {
             if (k.endsWith(".draw")) {
                 expect(count, k).toBe(0);

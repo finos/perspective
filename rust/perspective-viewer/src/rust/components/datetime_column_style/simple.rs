@@ -12,9 +12,8 @@
 
 use yew::prelude::*;
 
-use crate::components::form::select_enum_field::SelectEnumField;
-use crate::components::modal::{ModalLink, SetModalLink};
 use crate::config::*;
+use crate::ui::{ModalLink, SelectEnumField, SetModalLink};
 use crate::utils::WeakScope;
 
 #[derive(Properties)]

@@ -49,7 +49,7 @@ pub fn send_column_config(
 
         clone!(session);
         renderer
-            .update_lazy(async move { Ok(session.get_view()) })
+            .update_lazy(async move { Ok(session.get_view_with_dimensions()) })
             .await?;
         renderer.column_style_changed.emit(columns_configs);
         Ok(())

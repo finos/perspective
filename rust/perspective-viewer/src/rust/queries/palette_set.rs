@@ -12,8 +12,8 @@
 
 use std::collections::BTreeMap;
 
-use crate::config::{CssKind, CssLiteralUse, NamedValue, assign_palette_names};
 use crate::presentation::Presentation;
+use crate::utils::{CssKind, CssLiteralUse, NamedValue, assign_palette_names};
 use crate::workspace::{PanelId, Workspace};
 
 /// Every CSS literal in use across the workspace, as `(panel id, use)`,

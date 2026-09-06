@@ -33,7 +33,7 @@ use crate::renderer::Renderer;
 use crate::session::*;
 use crate::tasks::*;
 use crate::utils::{Completion, spawn_owned};
-use crate::workspace::PanelId;
+use crate::workspace::{Panel, PanelId};
 
 impl PerspectiveViewer {
     pub(super) fn on_layout_changed(&mut self, ctx: &Context<Self>) -> bool {
@@ -136,16 +136,11 @@ impl PerspectiveViewer {
         true
     }
 
-    pub(super) fn on_close_panel(
-        &mut self,
-        ctx: &Context<Self>,
-        id: String,
-        completion: Option<Completion>,
-    ) -> bool {
-        let id = PanelId::from(id);
-
-        let was_active = ctx.props().workspace.active_id().as_ref() == Some(&id);
-        let removed = ctx.props().workspace.remove_panel(&id);
+    /// Remove `id` from the workspace and return the detached [`Panel`] with
+    /// its engines still alive, or `None` for an unknown id.
+    fn detach_panel(&mut self, ctx: &Context<Self>, id: &PanelId) -> Option<Panel> {
+        let was_active = ctx.props().workspace.active_id().as_ref() == Some(id);
+        let removed = ctx.props().workspace.remove_panel(id)?;
         if was_active {
             if let Some(next) = ctx.props().workspace.panel_ids().first().cloned() {
                 ctx.props().workspace.set_active(next);
@@ -164,17 +159,53 @@ impl PerspectiveViewer {
             self.retarget_active(ctx, new_session, new_renderer);
         }
 
-        let eject = removed.map(eject_panel);
-        match (eject, completion) {
-            (Some(eject), Some(completion)) => completion.resolve_after(eject),
-            (Some(eject), None) => spawn_owned("close-panel", eject),
-            (None, Some(completion)) => completion.resolve_after(async { Ok(()) }),
-            (None, None) => {},
-        }
-
         apply_global_filters(&ctx.props().workspace);
         self._title_subscriptions = subscribe_panel_titles(ctx);
+        Some(removed)
+    }
+
+    pub(super) fn on_close_panel(
+        &mut self,
+        ctx: &Context<Self>,
+        id: String,
+        completion: Option<Completion>,
+    ) -> bool {
+        let id = PanelId::from(id);
+        let Some(removed) = self.detach_panel(ctx, &id) else {
+            if let Some(completion) = completion {
+                completion.resolve_after(async { Ok(()) });
+            }
+
+            return false;
+        };
+
+        ctx.props().workspace.stash_closing(removed);
+        if let Some(completion) = completion {
+            self.pending_closes.insert(id, completion);
+        }
+
         true
+    }
+
+    pub(super) fn on_panel_closed(&mut self, ctx: &Context<Self>, id: String) -> bool {
+        let id = PanelId::from(id);
+        if let Some(panel) = ctx.props().workspace.take_closing(&id) {
+            let eject = eject_panel(panel);
+            match self.pending_closes.remove(&id) {
+                Some(completion) => completion.resolve_after(eject),
+                None => spawn_owned("close-panel", eject),
+            }
+
+            return false;
+        }
+
+        match self.detach_panel(ctx, &id) {
+            Some(panel) => {
+                spawn_owned("close-panel", eject_panel(panel));
+                true
+            },
+            None => false,
+        }
     }
 
     pub(super) fn on_duplicate_panel(&mut self, ctx: &Context<Self>, id: String) -> bool {

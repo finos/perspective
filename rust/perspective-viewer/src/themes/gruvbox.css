@@ -20,6 +20,7 @@ perspective-viewer [theme="Gruvbox Light"] {
 
 perspective-viewer[theme="Gruvbox Light"],
 perspective-viewer [theme="Gruvbox Light"] {
+    color-scheme: light;
     /* perspective-viewer-gruvbox-light--colors */
     --theme-fg0: #282828;
     --theme-fg1: #3c3836;
@@ -93,43 +94,4 @@ perspective-viewer [theme="Gruvbox Light"] {
         var(--theme-blue),
         var(--theme-alt-blue)
     ) !important;
-}
-
-perspective-context-menu[theme="Gruvbox Light"],
-perspective-copy-menu[theme="Gruvbox Light"],
-perspective-export-menu[theme="Gruvbox Light"],
-perspective-dropdown[theme="Gruvbox Light"] {
-    /* perspective-viewer-gruvbox-light--colors */
-    --theme-fg0: #282828;
-    --theme-fg1: #3c3836;
-    --theme-fg2: #7c6f64;
-    --theme-gray: #928374;
-    --theme-bg0: #fbf1c7;
-    --theme-bg1: #ebdbb2;
-    --theme-bg2: #a89984;
-    --theme-red: #cc241d;
-    --theme-green: #98871a;
-    --theme-yellow: #d79921;
-    --theme-blue: #458588;
-    --theme-purple: #b16286;
-    --theme-aqua: #689d5a;
-    --theme-orange: #d65d0e;
-    --theme-alt-red: #9d0006;
-    --theme-alt-green: #79740e;
-    --theme-alt-yellow: #b57614;
-    --theme-alt-blue: #076678;
-    --theme-alt-purple: #8f3f71;
-    --theme-alt-aqua: #427b58;
-    --theme-alt-orange: #af3a03;
-
-    color: var(--theme-fg1);
-    --psp--color: var(--theme-fg0);
-    --psp-inactive--color: var(--theme-fg2);
-    --psp-inactive--border-color: var(--theme-bg2);
-    --psp--background-color: var(--theme-bg0);
-    --psp-status-icon--connected--color: var(--theme-aqua);
-    --psp-status-icon--initializing--color: var(--theme-yellow);
-    --psp-status-icon--psp-error--color: var(--theme-red);
-
-    background-color: var(--theme-bg0);
 }

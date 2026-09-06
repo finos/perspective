@@ -38,10 +38,7 @@ use self::active_column::*;
 use self::add_expression_button::AddExpressionButton;
 use self::config_selector::ConfigSelector;
 use self::inactive_column::*;
-use super::containers::scroll_panel::*;
-use super::containers::split_panel::{Orientation, SplitPanel};
 use crate::components::column_dropdown::{ColumnDropDownElement, ColumnDropDownPortal};
-use crate::components::containers::scroll_panel_item::ScrollPanelItem;
 use crate::config::PluginStaticConfig;
 use crate::presentation::{ColumnLocator, ColumnSettingsTarget, DragDropContainer, Presentation};
 use crate::queries::{
@@ -51,6 +48,7 @@ use crate::renderer::*;
 use crate::session::drag_drop_update::*;
 use crate::session::*;
 use crate::tasks::apply_and_render;
+use crate::ui::{Orientation, ScrollPanel, ScrollPanelItem, SplitPanel};
 use crate::utils::*;
 
 #[derive(Properties)]
@@ -333,6 +331,7 @@ impl Component for ColumnSelector {
             prop_config.clone()
         };
 
+        let is_last_column = config.columns.len() == 1;
         let is_aggregated = config.is_aggregated();
         let columns_iter = ColumnsIteratorSet::new(&config, metadata, renderer, presentation);
         let onselect = ctx.link().callback(|()| Redraw);
@@ -468,6 +467,7 @@ impl Component for ColumnSelector {
                             {is_window}
                             {show_edit_btn}
                             {col_type}
+                            {is_last_column}
                             view_config={config.clone()}
                             metadata={metadata.clone()}
                             {name}

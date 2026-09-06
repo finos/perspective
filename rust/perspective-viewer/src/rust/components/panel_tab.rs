@@ -19,6 +19,10 @@ use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::prelude::*;
 
+use crate::components::rows_counter::RowsCounter;
+use crate::session::{Session, ViewStats};
+use crate::utils::Subscription;
+
 #[wasm_bindgen(inline_js = r#"
     export function define_panel_tab(name) {
         if (!customElements.get(name)) {
@@ -41,8 +45,6 @@ thread_local! {
     static ELEMENT_DEFINED: Cell<bool> = const { Cell::new(false) };
 
     /// The shared, constructed stylesheet adopted into every tab's ShadowRoot.
-    /// Built once from `panel-tab.css`; a constructed `CSSStyleSheet` is cheap
-    /// and safe to adopt into arbitrarily many roots.
     static TAB_SHEET: CssStyleSheet = {
         let sheet = CssStyleSheet::new().unwrap();
         sheet.replace_sync(include_str!("../../css/panel-tab.css"))
@@ -55,11 +57,6 @@ thread_local! {
 /// lifecycle callbacks — it exists only to own a ShadowRoot into which each
 /// tab's contents are rendered (so the tab's structure CSS is encapsulated in
 /// its `adoptedStyleSheets` rather than injected into `document.head`).
-///
-/// The host stays a *light-DOM* child of the viewer, so the per-panel `theme`
-/// attr is still matched by the document theme rules (`perspective-viewer
-/// [theme="X"]`); the `--psp-*` they set are inherited across the shadow
-/// boundary into the tab's contents.
 fn ensure_custom_element() {
     ELEMENT_DEFINED.with(|defined| {
         if !defined.get() {
@@ -90,16 +87,6 @@ fn adopt_sheet(shadow_root: &Element) {
 /// `<regular-layout-frame>` titlebar via a `<slot name="tab-{id}" slot="tab">`
 /// (rendered by `MainPanel`); the tab's *contents* live in the host's
 /// **ShadowRoot**, whose `adoptedStyleSheets` carry the structure CSS.
-///
-/// Keeping the host in the light DOM — like the plugin — is what lets
-/// *document* theme CSS (`perspective-viewer [theme="X"]`) reach it, so each
-/// panel's chrome is themed by the native cascade instead of a runtime-inlined
-/// string; the `--psp-*` those rules set are inherited across the shadow
-/// boundary into the contents. The host carries `part="tab"`, which
-/// `<regular-layout-frame>`'s pointer handler treats as a drag handle
-/// (regular-layout@>=0.6.0's custom-tab contract); the title is
-/// `pointer-events:none` so clicks fall through to the host (like the built-in
-/// `<regular-layout-tab>`).
 #[derive(Properties, PartialEq)]
 pub struct PanelTabProps {
     /// The `<perspective-viewer>` host element; the tab is attached here as a
@@ -111,6 +98,10 @@ pub struct PanelTabProps {
 
     /// The panel's title; falls back to the id when `None`.
     pub title: Option<String>,
+
+    /// This panel's own `Session`, whose `stats_changed` the tab subscribes
+    /// to directly so a stats tick re-renders only this tab.
+    pub session: Session,
 
     /// This panel's effective theme. Reflected onto the host's `theme`
     /// attribute so the document theme rules (`perspective-viewer [theme="X"]`)
@@ -146,6 +137,11 @@ pub struct PanelTabProps {
     /// affordance for opening the settings panel (there is deliberately none
     /// at zero panels).
     pub is_settings_open: bool,
+
+    /// `true` while this panel's close awaits its layout commit, which keeps
+    /// the tab rendered but inert.
+    #[prop_or_default]
+    pub closing: bool,
 
     /// `false` for a lone panel — suppresses the tab rearrange-drag.
     /// `<regular-layout-frame>` arms a drag from any `part="tab"` pointerdown,
@@ -189,56 +185,81 @@ const TITLE_PLACEHOLDER: &str = "untitled";
 
 pub enum PanelTabMsg {
     /// A pointerdown on the tab host. Selects the panel; and when it's the
-    /// second within [`DBLCLICK_MS`], enters title-edit mode. Carries the
-    /// event `timeStamp` (ms). We synthesize the double-click from pointerdown
-    /// because `<regular-layout-frame>` calls `setPointerCapture` +
-    /// `preventDefault` on the tab's pointerdown (to arm a drag), which
-    /// suppresses the browser's synthesized `click`/`dblclick` — so a native
-    /// `dblclick` listener never fires on the tab.
+    /// second within [`DBLCLICK_MS`], enters title-edit mode.
     PointerDown(f64),
     Close,
+
     /// The tab's open-settings button (shown while the settings sidebar is
     /// closed, in the close button's place).
     OpenSettings,
     ContextMenu(f64, f64),
+
     /// Track the live `<input>` value while editing (drives the auto-sizer).
     EditInput(String),
+
     /// Commit the edited title to the panel's session (blur / Enter).
     CommitEdit,
+
     /// Abandon the edit, restoring the previous title (Escape).
     CancelEdit,
+
+    /// This panel's `Session::stats_changed` fired; re-read the stats.
+    StatsChanged,
 }
 
 pub struct PanelTab {
     host: HtmlElement,
-    /// The host's open ShadowRoot; the tab's contents are portaled here (stored
-    /// as `Element` for `create_portal`, matching `PortalModal`).
     shadow_root: Element,
-    /// `pointerdown` listener on the host (kept alive); selects this panel and
-    /// synthesizes double-click-to-edit (see [`PanelTabMsg::PointerDown`]).
     _pointerdown: Closure<dyn FnMut(PointerEvent)>,
-    /// `contextmenu` listener on the host (kept alive); opens the panel menu.
     _contextmenu: Closure<dyn FnMut(MouseEvent)>,
-    /// Current `draggable` prop, shared into the `pointerdown` closure so a
-    /// prop change (lone ⇄ multi panel) takes effect without re-creating it.
     draggable: Rc<Cell<bool>>,
+
     /// `timeStamp` (ms) of the last host pointerdown, for synthesizing
-    /// double-clicks. `NEG_INFINITY` until the first pointerdown.
+    /// double-clicks.
     last_pointerdown: f64,
+
     /// `true` while the title is being edited (renders an `<input>`).
     editing: bool,
+
     /// Live edited value; controls the `<input>` and the auto-sizer width.
     edit_value: String,
+
     /// The edit `<input>`, for focusing on edit entry.
     input_ref: NodeRef,
+
     /// Focus + select-all the input on the next render after entering edit
     /// mode.
     focus_pending: bool,
+
+    /// The `theme` prop value last written to the host.
+    stamped_theme: Option<Option<String>>,
+
+    /// This panel's `Table`/`View` dimensions, rendered as the `RowsCounter`
+    /// after the title.
+    stats: Option<ViewStats>,
+
+    /// Subscription to `session.stats_changed`, armed only while the tab is
+    /// `visible`.
+    _stats_sub: Option<Subscription>,
 }
 
 impl PanelTab {
     fn slot_name(panel_id: &str) -> String {
-        format!("tab-{panel_id}")
+        format!("tab-{}", panel_id)
+    }
+
+    /// Arm the `session.stats_changed` subscription and take a fresh stats
+    /// snapshot.
+    fn arm_stats(&mut self, ctx: &Context<Self>) {
+        let cb = ctx.link().callback(|_: ()| PanelTabMsg::StatsChanged);
+        self._stats_sub = Some(ctx.props().session.stats_changed.add_notify_listener(&cb));
+        self.stats = ctx.props().session.get_table_stats();
+    }
+
+    /// Drop the stats subscription and snapshot.
+    fn disarm_stats(&mut self) {
+        self._stats_sub = None;
+        self.stats = None;
     }
 
     /// Enter title-edit mode, seeding the input with the *real* title (empty
@@ -261,14 +282,18 @@ impl PanelTab {
     /// tab of every stack, not just the single active panel; `single`/`multi`
     /// reflect the host viewer's panel count. The shadow CSS keys off
     /// `:host(.active)` / `:host(.visible)` / `:host(.single)`.
-    fn sync_class(&self, active: bool, visible: bool, single: bool) {
-        let mut class = Vec::with_capacity(3);
+    fn sync_class(&self, active: bool, visible: bool, single: bool, closing: bool) {
+        let mut class = Vec::with_capacity(4);
         if active {
             class.push("active");
         }
 
         if visible {
             class.push("visible");
+        }
+
+        if closing {
+            class.push("closing");
         }
 
         class.push(if single { "single" } else { "multi" });
@@ -331,7 +356,7 @@ impl Component for PanelTab {
         let _ = host
             .add_event_listener_with_callback("contextmenu", contextmenu.as_ref().unchecked_ref());
 
-        Self {
+        let mut tab = Self {
             host,
             shadow_root,
             _pointerdown: pointerdown,
@@ -342,7 +367,16 @@ impl Component for PanelTab {
             edit_value: String::new(),
             input_ref: NodeRef::default(),
             focus_pending: false,
+            stamped_theme: None,
+            stats: None,
+            _stats_sub: None,
+        };
+
+        if ctx.props().visible {
+            tab.arm_stats(ctx);
         }
+
+        tab
     }
 
     fn changed(&mut self, ctx: &Context<Self>, old: &Self::Properties) -> bool {
@@ -350,6 +384,12 @@ impl Component for PanelTab {
             let _ = self
                 .host
                 .set_attribute("slot", &Self::slot_name(&ctx.props().panel_id));
+        }
+
+        if !ctx.props().visible {
+            self.disarm_stats();
+        } else if self._stats_sub.is_none() || ctx.props().session != old.session {
+            self.arm_stats(ctx);
         }
 
         self.draggable.set(ctx.props().draggable);
@@ -399,6 +439,12 @@ impl Component for PanelTab {
 
                 self.editing = false;
                 true
+            },
+            PanelTabMsg::StatsChanged => {
+                let stats = ctx.props().session.get_table_stats();
+                let changed = stats != self.stats;
+                self.stats = stats;
+                changed
             },
         }
     }
@@ -465,6 +511,7 @@ impl Component for PanelTab {
                 <span class="psp-tab-caret" />
                 // <span class="psp-tab-grip" />
                 { title_html }
+                if ctx.props().visible { <RowsCounter stats={self.stats.clone()} /> }
                 if ctx.props().is_master { <span class="psp-tab-master" /> }
                 if !ctx.props().is_settings_open {
                     <button class="psp-tab-settings" onpointerdown={on_open_settings} />
@@ -478,14 +525,24 @@ impl Component for PanelTab {
     }
 
     fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
-        self.sync_class(ctx.props().active, ctx.props().visible, ctx.props().single);
-        match &ctx.props().theme {
-            Some(theme) => {
-                let _ = self.host.set_attribute("theme", theme);
-            },
-            None => {
-                let _ = self.host.remove_attribute("theme");
-            },
+        self.sync_class(
+            ctx.props().active,
+            ctx.props().visible,
+            ctx.props().single,
+            ctx.props().closing,
+        );
+        let theme = &ctx.props().theme;
+        if self.stamped_theme.as_ref() != Some(theme) {
+            match theme {
+                Some(theme) => {
+                    let _ = self.host.set_attribute("theme", theme);
+                },
+                None => {
+                    let _ = self.host.remove_attribute("theme");
+                },
+            }
+
+            self.stamped_theme = Some(theme.clone());
         }
 
         if !self.host.is_connected() {

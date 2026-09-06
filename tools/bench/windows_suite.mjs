@@ -10,12 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// Window-function streaming benchmark (WINDOW_FUNCTIONS_PLAN Phase 4):
-// sustained tail-append and mid-edit throughput with k active window
-// columns vs. a windowless baseline view on the same stream. Run manually:
-//
-//     pnpm run --filter @perspective-dev/bench bench_windows
-
 import perspective from "@perspective-dev/client";
 
 const SCHEMA = {
@@ -49,7 +43,7 @@ function window_specs(k) {
                 partition_by: ["sym"],
                 ...w,
             },
-        ])
+        ]),
     );
 }
 
@@ -75,7 +69,7 @@ async function scenario(k) {
     const view = await table.view(
         window_names.length > 0
             ? { columns: ["id", ...window_names], windows }
-            : {}
+            : {},
     );
 
     // tail appends

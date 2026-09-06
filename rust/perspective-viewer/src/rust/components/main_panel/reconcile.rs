@@ -190,15 +190,20 @@ impl MainPanel {
             self.inserted.push(name.to_owned());
         }
 
-        // Remove cells whose panels are gone.
+        let mut pending = std::mem::take(&mut self.pending_removals);
         self.inserted.retain(|name| {
             if panel_ids.iter().any(|id| id.as_str() == name) {
-                true
-            } else {
-                let _ = layout.remove_panel(name);
-                false
+                return true;
             }
+
+            if pending.insert(name.clone()) {
+                let _ = layout.remove_panel(name);
+            }
+
+            true
         });
+
+        self.pending_removals = pending;
 
         // A removed panel can't stay "maximized" (regular-layout drops the
         // maximize stylesheet when its panel leaves the layout).

@@ -12,14 +12,14 @@
  */
 
 :host {
-    position: fixed;
-    z-index: 10000;
+    background-color: var(--psp--background-color, #ffffff);
+    color: var(--psp--color, #161616);
+    border: 1px solid var(--psp-inactive--color, #ababab);
+    border-radius: 0 0 2px 2px;
     outline: none;
     font-size: 0.75em;
-    border: inherit;
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
+    box-shadow: var(--psp-dropdown--box-shadow);
     user-select: none;
-    background-color: white;
     padding: 6px;
     display: flex;
     flex-direction: column;

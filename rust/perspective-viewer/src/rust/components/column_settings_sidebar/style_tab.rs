@@ -26,22 +26,21 @@ use self::primitive_field::{
     BoolField, ColorField, EnumField, GradientStopsField, NumberFieldPrimitive, PaletteField,
 };
 use crate::components::column_settings_sidebar::style_tab::symbol::SymbolStyle;
-use crate::components::containers::control_group::ControlGroup;
 use crate::components::datetime_column_style::DatetimeColumnStyle;
 use crate::components::number_series_style::NumberSeriesStyle;
 use crate::components::string_column_style::StringColumnStyle;
 use crate::components::style_controls::CustomNumberFormat;
 use crate::config::{
-    ColumnConfigFieldUpdate, ControlSpec, CssKind, CustomNumberFormatConfig,
-    DatetimeColumnStyleConfig, NamedValue, NumberFormatDefaults, NumberSeriesStyleConfig,
-    StringColumnStyleConfig,
+    ColumnConfigFieldUpdate, ControlSpec, CustomNumberFormatConfig, DatetimeColumnStyleConfig,
+    NumberFormatDefaults, NumberSeriesStyleConfig, StringColumnStyleConfig,
 };
 use crate::presentation::Presentation;
 use crate::queries::{fetch_column_abs_max, get_column_config_schema, named_values};
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::tasks::send_column_config;
-use crate::utils::PtrEqRc;
+use crate::ui::ControlGroup;
+use crate::utils::{CssKind, NamedValue, PtrEqRc};
 use crate::workspace::Workspace;
 
 #[derive(Clone, PartialEq, Properties)]

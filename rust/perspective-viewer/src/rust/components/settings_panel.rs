@@ -19,8 +19,7 @@ use yew::prelude::*;
 use super::column_selector::ColumnSelector;
 use super::plugin_selector::PluginSelector;
 use super::plugin_tab::PluginTab;
-use crate::components::containers::sidebar_close_button::SidebarCloseButton;
-use crate::components::form::debug::DebugPanel;
+use crate::components::debug_panel::DebugPanel;
 use crate::config::{PluginStaticConfig, PluginUpdate};
 use crate::presentation::{ColumnLocator, ColumnSettingsTarget, OpenColumnSettings, Presentation};
 use crate::queries::classify_column;
@@ -28,6 +27,7 @@ use crate::renderer::*;
 use crate::session::column_defaults_update::*;
 use crate::session::*;
 use crate::tasks::update_plugin_and_render;
+use crate::ui::SidebarCloseButton;
 use crate::utils::*;
 use crate::workspace::Workspace;
 

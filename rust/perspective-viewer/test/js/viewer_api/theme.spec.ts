@@ -141,4 +141,41 @@ test.describe("Theme", () => {
 
         expect(themeAttr).toBe("Pro Light");
     });
+
+    test("theme picker stamps the tab host in the same task as the plugin", async ({
+        page,
+    }) => {
+        const result = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer")!;
+            await viewer.getTable();
+            await viewer.restore({ theme: "Pro Light", settings: true });
+            const plugin = viewer.querySelector("perspective-viewer-plugin")!;
+            const tab = viewer.querySelector("perspective-viewer-tab")!;
+            const before = tab.getAttribute("theme");
+            const at_plugin_stamp = new Promise<string | null>((resolve) => {
+                const observer = new MutationObserver((records) => {
+                    if (records.some((r) => r.target === plugin)) {
+                        observer.disconnect();
+                        resolve(tab.getAttribute("theme"));
+                    }
+                });
+
+                observer.observe(viewer, {
+                    attributes: true,
+                    attributeFilter: ["theme"],
+                    subtree: true,
+                });
+            });
+
+            const select = viewer.shadowRoot!.querySelector(
+                "#theme_selector",
+            ) as HTMLSelectElement;
+            select.value = "Pro Dark";
+            select.dispatchEvent(new Event("input", { bubbles: true }));
+            return { before, at_plugin_stamp: await at_plugin_stamp };
+        });
+
+        expect(result.before).toBe("Pro Light");
+        expect(result.at_plugin_stamp).toBe("Pro Dark");
+    });
 });
