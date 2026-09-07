@@ -59,14 +59,14 @@
         "access": "public"
     },
     "dependencies": {
-        "@perspective-dev/client": "workspace:",
+        "@perspective-dev/client": "workspace:^",
         "pro_self_extracting_wasm": "catalog:",
         "regular-layout": "catalog:"
     },
     "devDependencies": {
-        "@perspective-dev/esbuild-plugin": "workspace:",
-        "@perspective-dev/test": "workspace:",
-        "@perspective-dev/metadata": "workspace:",
+        "@perspective-dev/esbuild-plugin": "workspace:^",
+        "@perspective-dev/test": "workspace:^",
+        "@perspective-dev/metadata": "workspace:^",
         "lightningcss": "catalog:",
         "@playwright/test": "catalog:",
         "@playwright/experimental-ct-react": "catalog:",

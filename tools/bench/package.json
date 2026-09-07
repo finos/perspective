@@ -22,8 +22,8 @@
     "author": "",
     "license": "Apache-2.0",
     "devDependencies": {
-        "@perspective-dev/client": "workspace:",
-        "@perspective-dev/viewer-charts": "workspace:",
+        "@perspective-dev/client": "workspace:^",
+        "@perspective-dev/viewer-charts": "workspace:^",
         "@playwright/test": "catalog:",
         "microtime": "catalog:",
         "superstore-arrow": "catalog:",
