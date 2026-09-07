@@ -19,7 +19,7 @@ import threading
 from random import sample
 from string import ascii_letters
 from threading import Thread
-from time import sleep
+from time import sleep, time
 
 class TestServer(object):
     def test_sync_updates_with_loop_callback_are_sync(self):
@@ -199,3 +199,57 @@ class TestServer(object):
         thread2.start()
         thread1.join()
         thread2.join()
+
+    def test_to_columns_id_while_filtered_rows_shrink(self):
+        from concurrent.futures import ThreadPoolExecutor
+
+        executor = ThreadPoolExecutor()
+        poll_lock = threading.Lock()
+
+        def poll(server):
+            try:
+                server.poll()
+            finally:
+                poll_lock.release()
+
+        def on_poll_request(server):
+            if poll_lock.acquire(blocking=False):
+                executor.submit(poll, server)
+
+        perspective_server = Server(on_poll_request=on_poll_request)
+        client = perspective_server.new_local_client()
+        table = client.table(
+            {"a": "float", "index": "integer"}, index="index", name="test"
+        )
+
+        stop = threading.Event()
+
+        def feed():
+            while not stop.is_set():
+                table.update(
+                    [
+                        {"a": random.random() * 100, "index": random.randint(0, 200)}
+                        for _ in range(50)
+                    ]
+                )
+                sleep(0.001)
+
+        thread = threading.Thread(target=feed)
+        thread.start()
+        reader = perspective_server.new_local_client()
+        view = reader.open_table("test").view(filter=[["a", ">", 50]])
+        deadline = time() + 2.5
+        checked = 0
+        try:
+            while time() < deadline:
+                n = view.num_rows()
+                cols = view.to_columns(start_row=0, end_row=n, id=True)
+                assert len(cols["__ID__"]) == len(cols["a"])
+                assert all(len(x) == 1 for x in cols["__ID__"])
+                checked += 1
+        finally:
+            stop.set()
+            thread.join()
+            executor.shutdown()
+
+        assert checked > 0

@@ -128,6 +128,7 @@ private:
      * @return t_uindex
      */
     t_uindex get_slice_idx(t_uindex ridx, t_uindex cidx) const;
+    void resync_rows();
 
     std::shared_ptr<CTX_T> m_ctx;
     t_uindex m_start_row;

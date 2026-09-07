@@ -162,10 +162,11 @@ impl GetFeaturesResp {
     }
 }
 
-type BoxFn<I, O> = Box<dyn Fn(I) -> O + Send + Sync + 'static>;
 type Box2Fn<I, J, O> = Box<dyn Fn(I, J) -> O + Send + Sync + 'static>;
 
 type Subscriptions<C> = Arc<RwLock<HashMap<u32, C>>>;
+type UpdateCallback =
+    Arc<dyn Fn(Response) -> BoxFuture<'static, Result<(), ClientError>> + Send + Sync + 'static>;
 type OnErrorCallback =
     Box2Fn<ClientError, Option<ReconnectCallback>, BoxFuture<'static, Result<(), ClientError>>>;
 
@@ -253,7 +254,7 @@ pub struct Client {
     id_gen: IDGen,
     subscriptions_errors: Subscriptions<OnErrorCallback>,
     subscriptions_once: Subscriptions<OnceCallback>,
-    subscriptions: Subscriptions<BoxFn<Response, BoxFuture<'static, Result<(), ClientError>>>>,
+    subscriptions: Subscriptions<UpdateCallback>,
 }
 
 impl PartialEq for Client {
@@ -327,8 +328,11 @@ impl Client {
             drop(wr);
             handler(msg)?;
             return Ok(true);
-        } else if let Some(handler) = self.subscriptions.try_read().unwrap().get(&msg.msg_id) {
-            drop(wr);
+        }
+
+        let handler = self.subscriptions.read().await.get(&msg.msg_id).cloned();
+        drop(wr);
+        if let Some(handler) = handler {
             handler(msg).await?;
             return Ok(true);
         }
@@ -461,7 +465,7 @@ impl Client {
         self.subscriptions
             .write()
             .await
-            .insert(msg.msg_id, Box::new(move |x| Box::pin(on_update(x))));
+            .insert(msg.msg_id, Arc::new(move |x| Box::pin(on_update(x))));
 
         tracing::debug!("SEND {}", msg);
         if let Err(e) = (self.send)(msg).await {
