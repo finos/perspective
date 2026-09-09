@@ -34,7 +34,7 @@ use crate::client::client_async::AsyncClient;
 ///   there are updates that need to be flushed, after which you must
 ///   _eventually_ call [`Server::poll`] (or else no updates will be processed).
 ///   This optimization allows batching updates, depending on context.
-#[pyclass(subclass, module = "perspective")]
+#[pyclass(subclass, skip_from_py_object, module = "perspective")]
 #[derive(Clone)]
 pub struct Server {
     pub server: perspective_server::Server,
@@ -52,7 +52,7 @@ impl Server {
                     let f = f.clone();
                     let server = server.clone();
                     Box::pin(async move {
-                        Python::with_gil(|py| {
+                        Python::attach(|py| {
                             f.call1(py, (Server { server }.into_py_any(py).unwrap(),))
                         })?;
                         Ok(())
@@ -116,7 +116,7 @@ impl Server {
     /// `poll()` _must_ be called after [`Table::update`] or [`Table::remove`]
     /// and `on_poll_request` is notified, or the changes will not be applied.
     pub fn poll(&self, py: Python<'_>) -> PyResult<()> {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.server
                 .poll()
                 .block_on()

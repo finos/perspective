@@ -12,14 +12,14 @@ pandas==2.3.0
 pdoc==15.0.3
 polars==1.13.1
 psutil==6.0.0
-pyarrow==21
+pyarrow==23.0.1
 pytest-asyncio==0.25.3
 pytest-sugar==1.0.0
 pytest-timeout==2.3.1
 pytest==8.2.2
 pytest>=7.4.3
 ruff>=0.5.3
-tornado==6.4.1
+tornado==6.5.8
 traitlets==5.14.3
 websocket-client==1.8.0
 wheel==0.46.3

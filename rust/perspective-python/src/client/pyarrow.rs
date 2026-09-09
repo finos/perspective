@@ -59,6 +59,6 @@ pub fn to_arrow_bytes<'py>(
     // Get the value from the sink and convert it to Python bytes
     let value = sink.call_method0("getvalue")?;
     let obj = value.call_method0("to_pybytes")?;
-    let pybytes = obj.downcast_into::<PyBytes>()?;
+    let pybytes = obj.cast_into::<PyBytes>()?;
     Ok(pybytes)
 }

@@ -33,9 +33,7 @@ where
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let waker = cx.waker();
-        Python::with_gil(|py| {
-            py.allow_threads(|| pin!(&mut self.0).poll(&mut Context::from_waker(waker)))
-        })
+        Python::attach(|py| py.detach(|| pin!(&mut self.0).poll(&mut Context::from_waker(waker))))
     }
 }
 
@@ -81,6 +79,13 @@ mod trivial {
         {
             unimplemented!("TrivialRuntime::spawn")
         }
+
+        fn spawn_blocking<F>(_f: F) -> Self::JoinHandle
+        where
+            F: FnOnce() + Send + 'static,
+        {
+            unimplemented!("TrivialRuntime::spawn_blocking")
+        }
     }
 
     impl ContextExt for TrivialRuntime {
@@ -102,7 +107,7 @@ mod trivial {
     #[allow(unused)]
     pub fn into_future(
         awaitable: Bound<PyAny>,
-    ) -> PyResult<impl Future<Output = PyResult<PyObject>> + Send + use<>> {
+    ) -> PyResult<impl Future<Output = PyResult<Py<PyAny>>> + Send + use<>> {
         pyo3_async_runtimes::generic::into_future::<TrivialRuntime>(awaitable)
     }
 }

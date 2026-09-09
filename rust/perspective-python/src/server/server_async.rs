@@ -27,7 +27,7 @@ use super::session_async::PyConnection;
 use crate::py_async::AllowThreads;
 
 /// @private
-#[pyclass(subclass, module = "perspective")]
+#[pyclass(subclass, skip_from_py_object, module = "perspective")]
 #[derive(Clone)]
 pub struct AsyncServer {
     pub server: Server,
@@ -45,7 +45,7 @@ impl AsyncServer {
                     let f = f.clone();
                     let server = server.clone();
                     Box::pin(async move {
-                        Python::with_gil(|py| {
+                        Python::attach(|py| {
                             f.call1(py, (AsyncServer { server }.into_py_any(py).unwrap(),))
                         })?;
                         Ok(())

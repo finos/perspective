@@ -68,7 +68,7 @@ fn from_dict(py: Python<'_>, pydict: &Bound<'_, PyDict>) -> Result<Option<Update
         .get_item(first_key)?
         .ok_or_else(|| PyValueError::new_err("Bad Input"))?;
 
-    if first_item.downcast::<PyList>().is_ok() {
+    if first_item.cast::<PyList>().is_ok() {
         let json_module = PyModule::import(py, "json")?;
         let string = json_module.call_method("dumps", (pydict,), None)?;
         Ok(Some(UpdateData::JsonColumns(string.extract::<String>()?)))
@@ -84,13 +84,13 @@ pub impl UpdateData {
         format: Option<TableReadFormat>,
     ) -> Result<Option<UpdateData>, PyErr> {
         let py = input.py();
-        if let Ok(pybytes) = input.downcast::<PyBytes>() {
+        if let Ok(pybytes) = input.cast::<PyBytes>() {
             from_arrow(pybytes, format)
-        } else if let Ok(pystring) = input.downcast::<PyString>() {
+        } else if let Ok(pystring) = input.cast::<PyString>() {
             from_string(pystring, format)
-        } else if let Ok(pylist) = input.downcast::<PyList>() {
+        } else if let Ok(pylist) = input.cast::<PyList>() {
             from_list(py, pylist)
-        } else if let Ok(pydict) = input.downcast::<PyDict>() {
+        } else if let Ok(pydict) = input.cast::<PyDict>() {
             from_dict(py, pydict)
         } else {
             Ok(None)

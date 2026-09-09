@@ -20,7 +20,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyBytes};
 
-#[pyclass(module = "perspective")]
+#[pyclass(skip_from_py_object, module = "perspective")]
 #[derive(Clone)]
 pub struct PySession {
     pub(crate) session: Arc<std::sync::RwLock<Option<LocalSession>>>,
@@ -34,7 +34,7 @@ impl SessionHandler for PyConnectionSync {
         &'a mut self,
         msg: &'a [u8],
     ) -> Result<(), perspective_server::ServerError> {
-        Python::with_gil(move |py| {
+        Python::attach(move |py| {
             self.0
                 .call1(py, (PyBytes::new(py, msg),))
                 .map(|_| ())
@@ -66,7 +66,7 @@ impl PySession {
 #[pymethods]
 impl PySession {
     pub fn handle_request(&self, py: Python<'_>, data: Vec<u8>) -> PyResult<()> {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.with_session(|session| {
                 session
                     .handle_request(&data)
@@ -77,7 +77,7 @@ impl PySession {
     }
 
     pub fn close(&self, py: Python<'_>) -> PyResult<()> {
-        let z = py.allow_threads(|| {
+        let z = py.detach(|| {
             let lock = self
                 .session
                 .write()

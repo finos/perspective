@@ -28,7 +28,7 @@ use crate::py_err::ResultTClientErrorExt;
 use crate::server::Server;
 
 pub(crate) fn py_to_table_ref(val: &Bound<'_, PyAny>) -> PyResult<TableRef> {
-    if let Ok(t) = val.downcast::<Table>() {
+    if let Ok(t) = val.cast::<Table>() {
         let table_ref = t.borrow();
         Ok(TableRef::from(&*table_ref.0.table))
     } else if let Ok(name) = val.extract::<String>() {
@@ -52,7 +52,7 @@ pub(crate) fn parse_join_type(join_type: Option<&str>) -> PyResult<JoinType> {
     }
 }
 
-pub(crate) fn scalar_to_py(py: Python<'_>, scalar: &Scalar) -> PyObject {
+pub(crate) fn scalar_to_py(py: Python<'_>, scalar: &Scalar) -> Py<PyAny> {
     match scalar {
         Scalar::Float(x) => x.into_pyobject(py).unwrap().into_any().unbind(),
         Scalar::String(x) => x.into_pyobject(py).unwrap().into_any().unbind(),
@@ -68,7 +68,7 @@ pub(crate) trait PyFutureExt: Future {
         Self::Output: Ungil,
     {
         use pollster::FutureExt;
-        py.allow_threads(move || self.block_on())
+        py.detach(move || self.block_on())
     }
 }
 
@@ -735,7 +735,7 @@ impl View {
         &self,
         py: Python<'_>,
         column_name: String,
-    ) -> PyResult<(PyObject, PyObject)> {
+    ) -> PyResult<(Py<PyAny>, Py<PyAny>)> {
         self.0.get_min_max(column_name).py_block_on(py)
     }
 
