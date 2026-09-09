@@ -20,12 +20,10 @@ use yew::prelude::*;
 
 use crate::components::column_dropdown::{ColumnDropDownElement, ColumnDropDownPortal};
 use crate::components::column_selector::{ColumnSelectorColumnRow, InPlaceColumn, PivotColumn};
-use crate::components::containers::dragdrop_list::{
-    DragContext, DragDropList, DragDropListItemProps,
-};
-use crate::components::containers::select::{Select, SelectItem};
+use crate::components::dragdrop_list::{DragContext, DragDropList, DragDropListItemProps};
 use crate::presentation::Presentation;
 use crate::session::{Session, SessionMetadataRc};
+use crate::ui::{IntlLabel, Select, SelectItem};
 use crate::utils::{AddListener, DragEffect, DragTarget, Subscription};
 
 /// The declared capabilities of one window aggregate, for a `source` column
@@ -910,7 +908,7 @@ impl Component for WindowEditor {
                 <div id="window-editor-slots">{ source_list }{ order_list }{ partition_list }</div>
                 <div id="window-editor-container">
                     if show_frame {
-                        <div class="column-style-label"><label id="window-frame-label" /></div>
+                        <div class="column-style-label"><IntlLabel name="window-frame" /></div>
                         <div class="row">
                             <Select<String>
                                 id="window-frame-type"
@@ -944,7 +942,7 @@ impl Component for WindowEditor {
                     }
                     if show_offset {
                         <div class="column-style-label">
-                            <label id="window-offset-label" class="indent" />
+                            <IntlLabel name="window-offset" class="indent" />
                         </div>
                         <div class="row">
                             <input
@@ -958,7 +956,7 @@ impl Component for WindowEditor {
                     }
                     if show_alpha {
                         <div class="column-style-label">
-                            <label id="window-alpha-label" class="indent" />
+                            <IntlLabel name="window-alpha" class="indent" />
                         </div>
                         <div class="row">
                             <input

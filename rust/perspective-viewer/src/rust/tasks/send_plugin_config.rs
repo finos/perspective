@@ -44,7 +44,7 @@ pub fn send_plugin_config(session: &Session, renderer: &Renderer, update: Column
                 .restore(&plugin_token, Some(&columns_configs))?;
             clone!(session);
             renderer
-                .update_lazy(async move { Ok(session.get_view()) })
+                .update_lazy(async move { Ok(session.get_view_with_dimensions()) })
                 .await?;
             renderer.plugin_config_changed.emit(plugin_config);
         }

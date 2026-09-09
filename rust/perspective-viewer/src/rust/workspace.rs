@@ -327,6 +327,11 @@ struct WorkspaceData {
     /// Fires on every [`PanelPhase`] transition.
     staged_changed: Rc<PubSub<()>>,
 
+    /// Panels removed from `panels` whose layout cell has not yet been
+    /// reclaimed, so their engines and plugin pixels stay alive until the
+    /// commit.
+    closing: Vec<Panel>,
+
     /// Coalesced `layout_changed`/`active_changed` delivery (see
     /// [`LayoutEmitter`]).
     emitter: LayoutEmitter,
@@ -352,6 +357,7 @@ impl Workspace {
             pending_layout: None,
             effects: EffectLedger::default(),
             staged_changed: Rc::new(PubSub::default()),
+            closing: Vec::new(),
             emitter: LayoutEmitter::default(),
         })))
     }
@@ -821,6 +827,35 @@ impl Workspace {
         }
 
         removed
+    }
+
+    /// Park a panel just removed by [`Self::remove_panel`] until its layout
+    /// cell is reclaimed (see [`WorkspaceData::closing`]).
+    pub fn stash_closing(&self, panel: Panel) {
+        self.0.borrow_mut().closing.push(panel);
+    }
+
+    /// A parked closing panel by id (clone; shares engine state).
+    pub fn closing_panel(&self, id: &PanelId) -> Option<Panel> {
+        self.0
+            .borrow()
+            .closing
+            .iter()
+            .find(|p| &p.id == id)
+            .cloned()
+    }
+
+    /// Un-park a closing panel for disposal, once its cell is gone.
+    pub fn take_closing(&self, id: &PanelId) -> Option<Panel> {
+        let mut data = self.0.borrow_mut();
+        let idx = data.closing.iter().position(|p| &p.id == id)?;
+        Some(data.closing.remove(idx))
+    }
+
+    /// Un-park EVERY closing panel — element teardown must dispose them
+    /// too, or their `View`/plugin would leak.
+    pub fn take_all_closing(&self) -> Vec<Panel> {
+        std::mem::take(&mut self.0.borrow_mut().closing)
     }
 
     /// Set the active panel. Returns `false` (no-op) if `id` is not a known

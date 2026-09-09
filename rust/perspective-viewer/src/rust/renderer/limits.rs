@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use perspective_client::proto::ViewDimensionsResp;
 use perspective_js::utils::ApiError;
 
 use crate::config::PluginStaticConfig;
@@ -31,16 +32,34 @@ pub struct RenderLimits {
     pub max_rows: Option<usize>,
 }
 
-/// Compute the row/column caps for `view` against the plugin's static
-/// limits. `render_warning` is the renderer-state flag controlling
-/// whether the warning is currently armed; when `false`, an oversized
-/// view renders uncapped (the user has dismissed the warning).
+impl RenderLimits {
+    /// The column cap is in effect (fewer columns render than the view has).
+    pub fn is_col_capped(&self) -> bool {
+        self.max_cols.is_some_and(|x| x < self.num_cols)
+    }
+
+    /// The row cap is in effect (fewer rows render than the view has).
+    pub fn is_row_capped(&self) -> bool {
+        self.max_rows.is_some_and(|x| x < self.num_rows)
+    }
+
+    /// Either cap is in effect — exactly when the render warning shows.
+    pub fn is_capped(&self) -> bool {
+        self.is_col_capped() || self.is_row_capped()
+    }
+}
+
+/// Compute the row/column caps for `view` from its already-fetched
+/// `dimensions` against the plugin's static limits. `render_warning` is the
+/// renderer-state flag controlling whether the warning is currently armed;
+/// when `false`, an oversized view renders uncapped (the user has dismissed
+/// the warning).
 pub async fn get_row_and_col_limits(
+    dimensions: &ViewDimensionsResp,
     view: &perspective_client::View,
     config: &PluginStaticConfig,
     render_warning: bool,
 ) -> Result<RenderLimits, ApiError> {
-    let dimensions = view.dimensions().await?;
     let num_cols = dimensions.num_view_columns as usize;
     let num_rows = dimensions.num_view_rows as usize;
     match (config.max_columns, render_warning) {

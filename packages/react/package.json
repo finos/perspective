@@ -34,14 +34,14 @@
         "access": "public"
     },
     "dependencies": {
-        "@perspective-dev/client": "workspace:",
-        "@perspective-dev/viewer": "workspace:",
+        "@perspective-dev/client": "workspace:^",
+        "@perspective-dev/viewer": "workspace:^",
         "@types/react": "catalog:",
         "react": "catalog:",
         "react-dom": "catalog:"
     },
     "devDependencies": {
-        "@perspective-dev/esbuild-plugin": "workspace:",
+        "@perspective-dev/esbuild-plugin": "workspace:^",
         "superstore-arrow": "catalog:",
         "typescript": "catalog:",
         "typedoc": "catalog:",

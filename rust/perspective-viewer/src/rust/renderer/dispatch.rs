@@ -19,6 +19,7 @@ use std::future::Future;
 use std::rc::Rc;
 
 use perspective_client::View;
+use perspective_client::proto::ViewDimensionsResp;
 use perspective_js::utils::{ApiResult, ResultTApiErrorExt};
 use wasm_bindgen::prelude::*;
 use web_sys::*;
@@ -44,23 +45,25 @@ impl Renderer {
         let _ = el.class_list().toggle_with_force("multi", !is_solo);
     }
 
-    /// Stamp this panel's effective `theme` attribute.
     pub fn stamp_theme(&self, plugin: Option<&JsPerspectiveViewerPlugin>) {
+        let theme = self.theme();
         let active_plugin = self.active_plugin();
         if let Some(plugin) = plugin.or(active_plugin.as_ref()) {
-            let theme_elem = plugin.unchecked_ref::<HtmlElement>();
-            match self.theme() {
-                Some(theme)
-                    if theme_elem.get_attribute("theme").as_deref() != Some(theme.as_str()) =>
-                {
-                    let _ = theme_elem.set_attribute("theme", &theme);
-                },
-                Some(_) => {},
-                None => {
-                    let _ = theme_elem.remove_attribute("theme");
-                },
-            }
+            stamp_theme_attr(plugin.unchecked_ref::<Element>(), theme.as_deref());
         }
+
+        if let Some(tab) = self.tab_host() {
+            stamp_theme_attr(&tab, theme.as_deref());
+        }
+    }
+
+    fn tab_host(&self) -> Option<Element> {
+        let slot = format!("tab-{}", self.slot_name()?);
+        let viewer = self.plugin_data.borrow().viewer_elem.clone();
+        let children = viewer.children();
+        (0..children.length())
+            .filter_map(|i| children.item(i))
+            .find(|el| el.get_attribute("slot").as_deref() == Some(slot.as_str()))
     }
 
     /// Restyle the active plugin and re-draw.
@@ -78,8 +81,14 @@ impl Renderer {
             self.stamp_active(&plugin);
             plugin.restyle();
             *self.0.captured_theme.borrow_mut() = Some(stamped_theme);
-            let mut limits =
-                get_row_and_col_limits(&ctx.view, &meta, self.is_render_warning_enabled()).await?;
+            let dimensions = ctx.view.dimensions().await?;
+            let mut limits = get_row_and_col_limits(
+                &dimensions,
+                &ctx.view,
+                &meta,
+                self.is_render_warning_enabled(),
+            )
+            .await?;
 
             limits.is_update = true;
             plugin
@@ -215,6 +224,7 @@ impl Renderer {
                         };
 
                         self.stamp_active(&jsplugin);
+                        self.0.presized_box.set(None);
                         jsplugin.resize().await?;
                         Ok(None)
                     },
@@ -241,7 +251,33 @@ impl Renderer {
         self.stamp_active(&plugin);
         self.clear_presize()?;
         if plugin.capabilities().presize {
-            return plugin.presize(width, height).await;
+            let Some(present) = plugin.presize(width, height).await? else {
+                return Ok(None);
+            };
+
+            self.0.presized_box.set(Some((width, height)));
+            let inline = js_sys::Reflect::get(&present, &"inline".into())
+                .ok()
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
+
+            if inline {
+                self.0.presized_box.set(None);
+            }
+
+            let renderer = self.clone();
+            let wrapped = Closure::once_into_js(move || {
+                let filled = present
+                    .call0(&JsValue::NULL)
+                    .map(|v| v.as_bool() != Some(false))
+                    .unwrap_or(false);
+
+                if !filled {
+                    renderer.0.presized_box.set(None);
+                }
+            });
+
+            return Ok(Some(wrapped.unchecked_into::<js_sys::Function>()));
         }
 
         let main_panel: &web_sys::HtmlElement = plugin.unchecked_ref();
@@ -278,6 +314,7 @@ impl Renderer {
             }
 
             result?;
+            self.0.presized_box.set(Some((width, height)));
         }
 
         Ok(None)
@@ -307,14 +344,16 @@ impl Renderer {
     pub async fn draw_fresh(&self, guard: &RenderGuard, view: FreshView) -> ApiResult<()> {
         let timer = self.render_timer();
         timer
-            .capture_time(self.draw_view(guard, view.view(), false))
+            .capture_time(self.draw_view(guard, view.view(), false, None))
             .await
     }
 
     /// Repaint the ALREADY-BOUND `view` on the active plugin.
     pub async fn update_bound(&self, guard: &RenderGuard, view: &View) -> ApiResult<()> {
         let timer = self.render_timer();
-        timer.capture_time(self.draw_view(guard, view, true)).await
+        timer
+            .capture_time(self.draw_view(guard, view, true, None))
+            .await
     }
 
     /// Mint the [`FreshView`] full-draw witness for a plugin that has never
@@ -363,7 +402,7 @@ impl Renderer {
     /// Redraw an already-bound view, debounced.
     pub async fn update_lazy(
         &self,
-        view: impl Future<Output = ApiResult<Option<View>>>,
+        view: impl Future<Output = ApiResult<Option<(View, Option<ViewDimensionsResp>)>>>,
     ) -> ApiResult<()> {
         let timer = self.render_timer();
         self.draw_lock()
@@ -382,14 +421,14 @@ impl Renderer {
                 }
 
                 self.mount_active_plugin()?;
-                if let Some(view) = view.await? {
+                if let Some((view, dimensions)) = view.await? {
                     let _pin = self
                         .cached_context()
                         .map(|ctx| self.pin_context(&guard, ctx));
 
                     let timer = self.render_timer();
                     timer
-                        .capture_time(self.draw_view(&guard, &view, true))
+                        .capture_time(self.draw_view(&guard, &view, true, dimensions))
                         .await
                 } else {
                     tracing::debug!("Render skipped, no `View` attached");
@@ -399,11 +438,14 @@ impl Renderer {
             .await
     }
 
+    /// `dimensions` is the caller's already-fetched view dimensions, or
+    /// `None` to fetch here.
     async fn draw_view(
         &self,
         _guard: &RenderGuard,
         view: &perspective_client::View,
         is_update: bool,
+        dimensions: Option<ViewDimensionsResp>,
     ) -> ApiResult<()> {
         debug_assert!(
             !is_update || self.cached_context().is_none() || self.render_context().is_some(),
@@ -420,8 +462,14 @@ impl Renderer {
         };
 
         let meta = self.metadata();
+        let dimensions = match dimensions {
+            Some(dimensions) => dimensions,
+            None => view.dimensions().await?,
+        };
+
         let mut limits =
-            get_row_and_col_limits(view, &meta, self.is_render_warning_enabled()).await?;
+            get_row_and_col_limits(&dimensions, view, &meta, self.is_render_warning_enabled())
+                .await?;
 
         limits.is_update = is_update;
         if let Some(cb) = self.0.on_render_limits_changed.borrow().as_ref() {
@@ -440,6 +488,7 @@ impl Renderer {
         }
 
         self.0.data_stale.set(false);
+        self.0.presized_box.set(None);
         let result = if is_update {
             let task = plugin.update(view.clone().into(), limits.max_cols, limits.max_rows, false);
             activate_plugin(_guard, &viewer_elem, &plugin, slot.as_deref(), task).await
@@ -497,5 +546,17 @@ impl Drop for PresizePendingGuard {
     fn drop(&mut self) {
         let cell = &self.0.0.presize_pending;
         cell.set(cell.get() - 1);
+    }
+}
+
+fn stamp_theme_attr(el: &Element, theme: Option<&str>) {
+    match theme {
+        Some(theme) if el.get_attribute("theme").as_deref() != Some(theme) => {
+            let _ = el.set_attribute("theme", theme);
+        },
+        Some(_) => {},
+        None => {
+            let _ = el.remove_attribute("theme");
+        },
     }
 }

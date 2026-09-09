@@ -77,11 +77,11 @@ const TEMPLATE = `<dialog class="modal">
         </label>
         <label class="field">
             <span class="field__label">Model</span>
-            <input name="model" type="text" placeholder="provider default" />
+            <input name="model" type="text" placeholder="provider default" autocomplete="model" />
         </label>
         <label class="field">
             <span class="field__label">API key</span>
-            <input name="apiKey" type="password" placeholder="sk-…" />
+            <input name="apiKey" type="password" autocomplete="new-password" placeholder="sk-…" />
         </label>
         <label class="field">
             <span class="field__label">Base URL</span>

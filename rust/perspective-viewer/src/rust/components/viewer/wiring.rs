@@ -280,28 +280,14 @@ pub(super) fn create_active_subscriptions(
 
         let sub1 = session.table_loaded.add_notify_listener(&cb);
         let sub2 = session.table_unloaded.add_notify_listener(&cb);
-        // Snapshot refresh on every RECONCILED commit (SKIP/REUSE/paused
-        // included), not just `View` construction.
         let sub3 = session.commit_reconciled.add_notify_listener(&cb);
         let sub4 = session.view_config_changed.add_notify_listener(&cb);
         let sub5 = session.title_changed.add_notify_listener(&cb);
-
-        // The `StatusIndicator` spinner count. LEVEL-triggered: the payload
-        // is the ABSOLUTE in-flight config-run count (RAII-settled by
-        // `ConfigRunToken`), which the handler ASSIGNS — replacing the
-        // edge-counted `view_config_changed`+1/`view_created`−1 pair, whose
-        // pairing the pipeline does not guarantee (stuck-spinner
-        // regression — see `UPDATE_COUNT_REGRESSION_PLAN.md`).
         let sub6 = session
             .run_state_changed
             .add_listener(ctx.link().callback(UpdateInFlight));
 
-        // Stats fetch resolution (populates session.column_stats) triggers
-        // a fresh `SessionProps` so `column_stats` reaches downstream
-        // components and the StyleTab re-queries the schema with the
-        // new value.
         let sub7 = session.column_stats_changed.add_notify_listener(&cb);
-
         vec![sub1, sub2, sub3, sub4, sub5, sub6, sub7]
     };
 
@@ -311,12 +297,6 @@ pub(super) fn create_active_subscriptions(
             move |_: JsPerspectiveViewerPlugin| UpdateRenderer(Box::new(renderer.to_props(None)))
         });
 
-        // Re-snapshot RendererProps when the plugin_config bucket
-        // changes (in-tab edit via `send_plugin_config`, JSON paste via
-        // `restore_and_render`, full clear via `reset_all` with
-        // `all=true`). Without this, `RendererProps.plugin_config`
-        // would stay frozen at its construct-time value and `PluginTab`
-        // would render stale.
         let cb_plugin_config = ctx.link().callback({
             let renderer = renderer.clone();
             move |_: serde_json::Map<String, serde_json::Value>| {
@@ -413,7 +393,7 @@ pub(super) fn inject_active_callbacks(
         let s = session.clone();
         let cb = ctx
             .link()
-            .callback(move |_: ()| UpdateSessionStats(s.get_table_stats(), s.has_table()));
+            .callback(move |_: ()| UpdateSessionStats(s.has_table_cells(), s.has_table()));
 
         *session.on_stats_changed.borrow_mut() = Some(cb);
     }

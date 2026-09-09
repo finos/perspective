@@ -68,15 +68,15 @@
         "access": "public"
     },
     "dependencies": {
-        "@perspective-dev/server": "workspace:",
+        "@perspective-dev/server": "workspace:^",
         "pro_self_extracting_wasm": "catalog:",
         "stoppable": "catalog:",
         "ws": "catalog:"
     },
     "devDependencies": {
-        "@perspective-dev/esbuild-plugin": "workspace:",
-        "@perspective-dev/metadata": "workspace:",
-        "@perspective-dev/test": "workspace:",
+        "@perspective-dev/esbuild-plugin": "workspace:^",
+        "@perspective-dev/metadata": "workspace:^",
+        "@perspective-dev/test": "workspace:^",
         "@clickhouse/client-web": "catalog:",
         "@duckdb/duckdb-wasm": "catalog:",
         "@playwright/experimental-ct-react": "catalog:",

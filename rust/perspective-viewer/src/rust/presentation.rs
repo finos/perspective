@@ -11,7 +11,6 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 mod column_locator;
-pub mod drag_helpers;
 mod props;
 mod sheets;
 
@@ -28,15 +27,14 @@ use yew::html::ImplicitClone;
 use yew::prelude::*;
 
 pub use self::column_locator::{
-    ColumnLocator, ColumnSettingsTab, ColumnSettingsTarget, ColumnTab, OpenColumnSettings,
-};
-pub use self::drag_helpers::{DragDropContainer, DragEndCallback};
-use self::drag_helpers::{
-    DragTargetState, PointerDownCallback, clear_document_selection, closest_draggable,
+    ColumnLocator, ColumnSettingsTab, ColumnSettingsTarget, OpenColumnSettings,
 };
 pub use self::props::{DragDropProps, PresentationProps};
-use crate::config::{CssKind, NamedValue, assign_palette_names};
-use crate::utils::*;
+pub use crate::ui::{DragDropContainer, DragEndCallback};
+use crate::ui::{
+    DragTargetState, PointerDownCallback, clear_document_selection, closest_draggable,
+};
+use crate::utils::{CssKind, NamedValue, assign_palette_names, *};
 
 #[derive(Clone, Debug)]
 struct DragFrom {
@@ -75,14 +73,7 @@ pub struct PresentationHandle {
     pub agent: crate::agent::AgentSlot,
 
     /// The available themes as detected in the browser environment or set
-    /// explicitly when CORS prevents detection — a MEMO of a document
-    /// external, not component state. `None` until first parsed (detection
-    /// is expensive and must wait for `document.styleSheets`). Sync-readable
-    /// (a `RefCell`, never borrowed across an await) so synchronous paths
-    /// ("stamp with commit" — panel creation, theme mutation sites) can
-    /// derive the registry default without awaiting registry init; derived
-    /// values (e.g. the default theme = first registered) are computed from
-    /// it on demand, never mirrored.
+    /// explicitly when CORS prevents detection.
     themes: RefCell<Option<Vec<String>>>,
 
     /// Single-flight guard for the stylesheet parse that populates
@@ -93,12 +84,6 @@ pub struct PresentationHandle {
 
     /// Whether the host's theme was ever EXPLICITLY chosen — authored as a
     /// `theme` attribute, or set by name through [`Self::set_theme_name`].
-    ///
-    /// `false` means the host merely displays the registry default, which
-    /// [`Self::reset_themes`] is free to move; `true` pins the selection
-    /// until it leaves the registry. The `theme` attribute alone cannot
-    /// carry this, because `init` stamps it unconditionally so the document
-    /// cascade has a theme to match.
     theme_selected: Cell<bool>,
 
     palette: RefCell<BTreeMap<String, String>>,
@@ -138,26 +123,12 @@ pub struct PresentationHandle {
     /// the duration of the drag.
     drag_target: RefCell<Option<DragTargetState>>,
 
-    /// `(open, announce)` — `announce` says this toggle is the SOLE carrier
-    /// of the config change (a user gesture: toolbar, `toggleConfig`), so
-    /// the element must emit `toggle-settings` + a config-update for it. An
-    /// API restore's toggle is announced by its own view-config commit
-    /// dispatch instead — announcing here too would double-emit, the first
-    /// carrying the intermediate config (settings flipped, view fields not
-    /// yet committed).
     pub settings_open_changed: PubSub<(bool, bool)>,
-
-    /// Injected callback from the root component, replacing the former
-    /// `is_workspace_changed: PubSub` field.
     pub on_is_workspace_changed: RefCell<Option<Callback<bool>>>,
     pub settings_before_open_changed: PubSub<bool>,
     pub column_settings_open_changed: PubSub<(bool, Option<String>)>,
     pub theme_config_updated: PubSub<(PtrEqRc<Vec<String>>, Option<usize>)>,
     pub on_eject: PubSub<()>,
-
-    /// Fires for status-bar / main-panel pointer events that target the
-    /// statusbar element. `wire_element_events` formats the `PointerEvent`'s
-    /// `type_()` into a `perspective-statusbar-{type}` `CustomEvent` name.
     pub statusbar_pointer_event: PubSub<PointerEvent>,
 }
 

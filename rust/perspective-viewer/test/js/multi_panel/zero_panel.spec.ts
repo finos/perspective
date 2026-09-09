@@ -226,7 +226,9 @@ test.describe("Zero panels", () => {
 
         await new_item.hover();
         const submenu = new_item.locator(".context-menu-submenu");
-        await submenu.locator(".context-menu-item", { hasText: TABLE }).click();
+        await submenu
+            .locator(".dropdown-menu-item", { hasText: TABLE })
+            .click();
         await page.waitForFunction(
             () =>
                 // @ts-ignore

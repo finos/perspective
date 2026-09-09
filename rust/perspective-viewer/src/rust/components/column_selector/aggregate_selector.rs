@@ -16,10 +16,10 @@ use itertools::Itertools;
 use perspective_client::config::*;
 use yew::prelude::*;
 
-use crate::components::containers::select::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::tasks::apply_and_render;
+use crate::ui::{Select, SelectItem};
 use crate::utils::{PtrEqRc, spawn_owned};
 
 #[derive(Properties)]

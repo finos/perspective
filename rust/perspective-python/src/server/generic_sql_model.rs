@@ -82,13 +82,13 @@ impl PyGenericSQLVirtualServerModel {
         config: Py<PyAny>,
         schema: Option<Py<PyAny>>,
     ) -> PyResult<String> {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let config: ViewConfig = pythonize::depythonize(config.bind(py))
                 .map_err(|e| PyValueError::new_err(e.to_string()))?;
 
             let schema = match &schema {
                 Some(schema) => {
-                    self.parse_schema(schema.downcast_bound::<PyDict>(py).map_err(|_| {
+                    self.parse_schema(schema.cast_bound::<PyDict>(py).map_err(|_| {
                         PyValueError::new_err("Schema must be a dict mapping column names to types")
                     })?)?
                 },
@@ -108,17 +108,16 @@ impl PyGenericSQLVirtualServerModel {
         viewport: Py<PyAny>,
         schema: Py<PyAny>,
     ) -> PyResult<String> {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let config: ViewConfig = pythonize::depythonize(config.bind(py))
                 .map_err(|e| PyValueError::new_err(e.to_string()))?;
 
             let viewport: PyViewPort = pythonize::depythonize(viewport.bind(py))
                 .map_err(|e| PyValueError::new_err(e.to_string()))?;
 
-            let schema =
-                self.parse_schema(schema.downcast_bound::<PyDict>(py).map_err(|_| {
-                    PyValueError::new_err("Schema must be a dict mapping column names to types")
-                })?)?;
+            let schema = self.parse_schema(schema.cast_bound::<PyDict>(py).map_err(|_| {
+                PyValueError::new_err("Schema must be a dict mapping column names to types")
+            })?)?;
 
             self.inner
                 .view_get_data(view_id, &config, &viewport.into(), &schema)
@@ -144,7 +143,7 @@ impl PyGenericSQLVirtualServerModel {
         column_name: &str,
         config: Py<PyAny>,
     ) -> PyResult<String> {
-        let config: ViewConfig = Python::with_gil(|py| {
+        let config: ViewConfig = Python::attach(|py| {
             pythonize::depythonize(config.bind(py))
                 .map_err(|e| PyValueError::new_err(e.to_string()))
         })?;

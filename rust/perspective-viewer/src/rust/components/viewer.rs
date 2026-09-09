@@ -27,6 +27,7 @@ mod settings;
 mod snapshots;
 mod wiring;
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use futures::channel::oneshot::Sender;
@@ -40,13 +41,13 @@ pub use self::msg::PerspectiveViewerMsg;
 use self::msg::PerspectiveViewerMsg::*;
 use self::settings::SettingsGeometry;
 use self::wiring::*;
-use super::font_loader::{FontLoaderProps, FontLoaderStatus};
 use crate::presentation::{Presentation, PresentationProps};
 use crate::renderer::{RendererProps, *};
 use crate::session::{SessionProps, *};
 use crate::tasks::*;
+use crate::ui::{FontLoaderProps, FontLoaderStatus};
 use crate::utils::*;
-use crate::workspace::Workspace;
+use crate::workspace::{PanelId, Workspace};
 
 #[derive(Clone, Properties)]
 pub struct PerspectiveViewerProps {
@@ -98,6 +99,10 @@ pub struct PerspectiveViewer {
     on_resize: Rc<PubSub<()>>,
     on_settings_panel_dimensions_reset: Rc<PubSub<()>>,
     settings_open: bool,
+
+    /// `removePanel()` completions awaiting their panel's `PanelClosed`
+    /// (the deferred eject — see `ClosePanel`).
+    pending_closes: HashMap<PanelId, Completion>,
 
     /// Render snapshot of the `Workspace`-owned global filter set (see
     /// `Workspace::global_filters`); refreshed by `UpdateGlobalFilters` via
@@ -210,6 +215,7 @@ impl Component for PerspectiveViewer {
             on_resize: Default::default(),
             on_settings_panel_dimensions_reset: Default::default(),
             settings_open: false,
+            pending_closes: HashMap::new(),
             global_filters: Vec::new(),
             settings_geometry: Default::default(),
             session_props,
@@ -305,6 +311,7 @@ impl Component for PerspectiveViewer {
             LayoutChanged => self.on_layout_changed(ctx),
             SetActivePanel(id, completion) => self.on_set_active_panel(ctx, id, completion),
             ClosePanel(id, completion) => self.on_close_panel(ctx, id, completion),
+            PanelClosed(id) => self.on_panel_closed(ctx, id),
             CommitWorkspaceRestore(id) => self.on_commit_workspace_restore(ctx, id),
             DuplicatePanel(id) => self.on_duplicate_panel(ctx, id),
             NewPanel(id) => self.on_new_panel(ctx, id),
@@ -325,20 +332,18 @@ impl Component for PerspectiveViewer {
             ToggleSettingsComplete(update, resolve) => {
                 self.on_toggle_settings_complete(ctx, update, resolve)
             },
-            SettingsPanelSizeUpdate(x) => self.on_settings_panel_size_update(x),
-            SettingsDividerMove(w) => self.on_settings_divider_move(ctx, w),
-            SettingsDividerPump => self.on_settings_divider_pump(ctx),
-            SettingsDividerCommit(w) => self.on_settings_divider_commit(ctx, w),
-            SettingsDividerFinish => self.on_settings_divider_finish(ctx),
+            DividerMove(divider, target) => self.on_divider_move(ctx, divider, target),
+            DividerPump(divider) => self.on_divider_pump(ctx, divider),
+            DividerCommit(divider, target) => self.on_divider_commit(ctx, divider, target),
+            DividerFinish(divider) => self.on_divider_finish(ctx, divider),
             SettingsPanelTabChanged(tab) => self.on_settings_panel_tab_changed(tab),
-            SettingsPanelAutoWidth(w) => self.on_settings_panel_auto_width(w),
+            SettingsPanelAutoWidth(w) => self.on_settings_panel_auto_width(ctx, w),
             OpenColumnSettings {
                 target,
                 sender,
                 toggle,
             } => self.on_open_column_settings(ctx, target, sender, toggle),
-            ColumnSettingsPanelSizeUpdate(x) => self.on_column_settings_panel_size_update(x),
-            ColumnSettingsPanelAutoWidth(w) => self.on_column_settings_panel_auto_width(w),
+            ColumnSettingsPanelAutoWidth(w) => self.on_column_settings_panel_auto_width(ctx, w),
             ToggleColumnSettingsPin => self.on_toggle_column_settings_pin(ctx),
             ToggleColumnSettingsPinComplete(resolve) => {
                 self.on_toggle_column_settings_pin_complete(resolve)

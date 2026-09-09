@@ -15,12 +15,6 @@ use std::future::Future;
 use futures::channel::oneshot;
 use perspective_js::utils::*;
 
-/// A completion handle for message-based public API methods (invariant I6 —
-/// see `SESSION_CONFIG_COHERENCE_PLAN.md`): its ONLY resolution API is
-/// [`Completion::resolve_after`], which takes a run future — so resolving a
-/// public method's promise at message-handling time (before the renders it
-/// caused have drawn) is unwritable, not merely discouraged. Dropping an
-/// unresolved `Completion` rejects the caller as cancelled.
 pub struct Completion(Option<oneshot::Sender<ApiResult<()>>>);
 
 impl Completion {

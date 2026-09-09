@@ -10,42 +10,47 @@
  * ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ */
 
-perspective-viewer,
-perspective-dropdown {
+perspective-viewer {
     /* Config */
     --psp-label--group-by--content: "Agrupar por";
     --psp-label--split-by--content: "Dividir por";
     --psp-label--sort--content: "Ordenar por";
-    --psp-label--filter--content: "Dónde";
-    --psp-label--transpose-button--content: "Intercambio";
+    --psp-label--filter--content: "Filtrar";
+    --psp-label--transpose-button--content: "Intercambiar";
     --psp-label--config-button--content: "Configurar";
     --psp-label--all-columns--content: "Todas las columnas";
-    --psp-label--untitled--content: "Intitulado";
+    --psp-label--untitled--content: "Sin título";
 
     /* Plugin names */
     --psp-plugin-name--datagrid--content: "Cuadrícula de datos";
     --psp-plugin-name--treemap--content: "Mapa de árbol";
-    --psp-plugin-name--sunburst--content: "resplandor solar";
+    --psp-plugin-name--sunburst--content: "Sunburst";
     --psp-plugin-name--heatmap--content: "Mapa de calor";
-    --psp-plugin-name--x-bar--content: "Barra X";
-    --psp-plugin-name--y-bar--content: "Y Bar";
-    --psp-plugin-name--y-line--content: "Y Line";
+    --psp-plugin-name--x-bar--content: "Barras X";
+    --psp-plugin-name--y-bar--content: "Barras Y";
+    --psp-plugin-name--y-line--content: "Línea Y";
     --psp-plugin-name--x-y-line--content: "Línea X/Y";
     --psp-plugin-name--x-y-scatter--content: "Dispersión X/Y";
     --psp-plugin-name--y-scatter--content: "Dispersión Y";
-    --psp-plugin-name--y-area--content: "Y Area";
-    --psp-plugin-name--ohlc--content: "Ay";
-    --psp-plugin-name--candlestick--content: "Candelero";
+    --psp-plugin-name--y-area--content: "Área Y";
+    --psp-plugin-name--ohlc--content: "OHLC";
+    --psp-plugin-name--candlestick--content: "Velas";
+    --psp-plugin-name--density--content: "Densidad";
+    --psp-plugin-name--map-scatter--content: "Dispersión en mapa";
+    --psp-plugin-name--map-line--content: "Línea en mapa";
+    --psp-plugin-name--map-density--content: "Densidad en mapa";
 
     /* Column Selector names */
-    --psp-label--column-columns--content: "columnas";
+    --psp-label--column-columns--content: "Columnas";
     --psp-label--column-x-axis--content: "Eje X";
-    --psp-label--column-y-axis--content: "Y Axis";
+    --psp-label--column-y-axis--content: "Eje Y";
     --psp-label--column-color--content: "Color";
     --psp-label--column-size--content: "Tamaño";
     --psp-label--column-symbol--content: "Símbolo";
+    --psp-label--column-longitude--content: "Longitud";
+    --psp-label--column-latitude--content: "Latitud";
     --psp-label--column-label--content: "Etiqueta";
-    --psp-label--column-tooltip--content: "Información sobre herramientas";
+    --psp-label--column-tooltip--content: "Descripción emergente";
     --psp-label--add-expression-button--content: "Nueva columna";
 
     /* Toolbar */
@@ -53,7 +58,12 @@ perspective-dropdown {
     --psp-datagrid--column-edit-button--content: "Editar";
     --psp-label--copy-button--content: "Copiar";
     --psp-label--export-button--content: "Exportar";
-    --psp-label--reset-button--content: "Reiniciar";
+    --psp-label--reset-button--content: "Restablecer";
+    --psp-label--new-panel-button--content: "Nuevo";
+    --psp-label--new-from-table--content: "Nuevo desde tabla";
+    --psp-label--new-from-panel--content: "Nuevo desde panel";
+    --psp-label--apply-button--content: "Aplicar";
+    --psp-label--paste-button--content: "Pegar";
     --psp-label--edit-mode-read-only--content: "Solo lectura";
     --psp-label--edit-mode-edit--content: "Edición de texto";
     --psp-label--edit-mode-select-row--content: "Seleccionar fila";
@@ -68,11 +78,10 @@ perspective-dropdown {
     --psp-label--timezone--content: "Zona horaria";
     --psp-label--date-style--content: "Estilo de fecha";
     --psp-label--time-style--content: "Estilo de hora";
-    --psp-label--foreground--content: "Primer plano";
-    --psp-label--background--content: "Fondo";
     --psp-label--number-fg-mode--content: "Primer plano";
     --psp-label--number-bg-mode--content: "Fondo";
-    --psp-label--pos-bg-color--content: "Fondo";
+    --psp-label--fg-colors--content: "Primer plano";
+    --psp-label--bg-colors--content: "Fondo";
     --psp-label--datetime-color-mode--content: "Color";
     --psp-label--string-color-mode--content: "Color";
     --psp-label--series--content: "Serie";
@@ -85,29 +94,30 @@ perspective-dropdown {
     --psp-label--rounding-increment--content: "Incremento de redondeo";
     --psp-label--notation--content: "Notación";
     --psp-label--use-grouping--content: "Usar agrupación";
-    --psp-label--sign-display--content: "Visualización de letreros";
-    --psp-label--max-value--content: "Valor máximo";
+    --psp-label--sign-display--content: "Mostrar signo";
+    --psp-label--enabled--content: "Activado";
+    --psp-label--disabled--content: "Desactivado";
     --psp-label--fg-gradient--content: "Valor máximo";
     --psp-label--bg-gradient--content: "Valor máximo";
     --psp-label--rounding-priority--content: "Prioridad de redondeo";
     --psp-label--rounding-mode--content: "Modo de redondeo";
     --psp-label--trailing-zero-display--content: "Visualización del cero final";
     --psp-label--fractional-digits--content: "Dígitos fraccionarios";
-    --psp-label--significant-digits--content: "Dígitos significantes";
+    --psp-label--significant-digits--content: "Dígitos significativos";
     --psp-label--year--content: "Año";
     --psp-label--month--content: "Mes";
     --psp-label--day--content: "Día";
-    --psp-label--weekday--content: "Día laborable";
+    --psp-label--weekday--content: "Día de la semana";
     --psp-label--hour--content: "Hora";
     --psp-label--minute--content: "Minuto";
     --psp-label--second--content: "Segundo";
     --psp-label--fractional-seconds--content: "Segundos fraccionarios";
     --psp-label--hours--content: "12/24 Horas";
-    --psp-label--aggregate-depth--content: "Profundidad agregada";
+    --psp-label--aggregate-depth--content: "Profundidad de agregación";
 
     /* Tabs */
     --psp-label--style-tab--content: "Estilo";
-    --psp-label--attributes-tab--content: "Atributos";
+    --psp-label--attributes-tab--content: "Expresión";
     --psp-label--window-tab--content: "Ventana";
     --psp-label--window-source--content: "Columna";
     --psp-label--window-order-by--content: "Ordenar por";
@@ -138,11 +148,11 @@ perspective-dropdown {
     /* Plugin settings */
     --psp-label--edit-mode--content: "Modo de edición";
     --psp-label--scroll-lock--content: "Bloqueo de desplazamiento";
-    --psp-label--chart-type--content: "Tipo de gráfico de series";
+    --psp-label--chart-type--content: "Tipo de glifo";
 
     /* Plugin settings — viewer-charts */
     --psp-label--auto-alt-y-axis--content: "Eje Y dual automático";
-    --psp-label--facet-mode--content: "Modo de facetas";
+    --psp-label--facet-mode--content: "Modo de división";
     --psp-label--facet-zoom-mode--content: "Zoom de facetas";
     --psp-label--series-zoom-mode--content: "Zoom de series";
     --psp-label--line-width-px--content: "Ancho de línea";
@@ -160,8 +170,8 @@ perspective-dropdown {
     --psp-label--map-tile-provider--content: "Proveedor de mapa";
     --psp-label--map-tile-alpha--content: "Opacidad del mapa";
     --psp-label--numeric-axes--content: "Ejes numéricos";
-    --psp-label--legend-mode--content: "Modo de leyenda";
-    --psp-label--legend-size-mode--content: "Tamaño de leyenda";
+    --psp-label--legend-mode--content: "Modo de colocación";
+    --psp-label--legend-size-mode--content: "Modo de tamaño";
     --psp-label--legend-width-px--content: "Ancho de leyenda";
     --psp-label--legend-height-px--content: "Altura de leyenda";
     --psp-label--legend-anchor--content: "Anclaje de leyenda";
@@ -177,7 +187,7 @@ perspective-dropdown {
     --psp-label--group-density--content: "Densidad";
     --psp-label--group-basemap--content: "Mapa base";
     --psp-label--group-legend--content: "Leyenda";
-    --psp-label--group-tooltip--content: "Descripciones";
+    --psp-label--group-tooltip--content: "Descripciones emergentes";
     --psp-label--group-color--content: "Color";
     --psp-label--group-format--content: "Formato";
     --psp-label--column-size-override--content: "Ancho de columna";

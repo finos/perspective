@@ -82,15 +82,6 @@ test.describe("Pooled blit WebGL contexts", () => {
 
         await waitOneFrame(page);
         await waitOneFrame(page);
-
-        // Assert every viewer's CONFIG before touching pixels: the historical
-        // failure mode here was not context eviction but a load→restore race
-        // reverting `columns` to the table default — which rendered MORE
-        // pixels and hijacked `ref = max(...)` below, failing the correct
-        // viewers with a misleading "evicted context" message (see
-        // SESSION_CONFIG_COHERENCE_PLAN.md and the viewer's
-        // load_restore_race.spec.ts). With configs asserted uniform, the
-        // max-as-reference pixel check is sound.
         const configs = await page.evaluate(async () => {
             const out: string[][] = [];
             for (const v of Array.from(

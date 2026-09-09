@@ -16,9 +16,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::{
-    CssKind, CustomNumberFormatConfig, DatetimeFormatType, KeyValueOpts,
-    NumberSeriesStyleDefaultConfig,
+    CustomNumberFormatConfig, DatetimeFormatType, KeyValueOpts, NumberSeriesStyleDefaultConfig,
 };
+use crate::utils::{CssKind, GradientStopSpec, canonicalize_gradient_stops};
 
 /// The full schema for one column at one point in time. Plugins may return
 /// different schemas for the same column based on the column's current
@@ -152,31 +152,6 @@ pub struct EnumVariant {
     pub value: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
-}
-
-/// One stop of a [`ControlSpec::GradientStops`] value in its in-memory
-/// form: a `#rrggbb` color at `offset` ∈ `[0, 1]`.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct GradientStopSpec {
-    pub color: String,
-    pub offset: f64,
-}
-
-/// The [`ControlSpec::GradientStops`] canonical stop order: offsets
-/// clamped to `[0, 1]` and rounded to 3 decimals, stops sorted stably
-/// by offset.
-pub fn canonicalize_gradient_stops(mut stops: Vec<GradientStopSpec>) -> Vec<GradientStopSpec> {
-    for stop in &mut stops {
-        stop.offset = (stop.offset.clamp(0.0, 1.0) * 1000.0).round() / 1000.0;
-    }
-
-    stops.sort_by(|a, b| {
-        a.offset
-            .partial_cmp(&b.offset)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-
-    stops
 }
 
 /// Fit `stops` to a `discrete` field's fixed pair: an over-length value

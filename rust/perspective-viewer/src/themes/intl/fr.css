@@ -10,13 +10,12 @@
  * ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ */
 
-perspective-viewer,
-perspective-dropdown {
+perspective-viewer {
     /* Config */
-    --psp-label--group-by--content: "Par groupe";
-    --psp-label--split-by--content: "Divisé par";
-    --psp-label--sort--content: "Commandé par";
-    --psp-label--filter--content: "Où";
+    --psp-label--group-by--content: "Grouper par";
+    --psp-label--split-by--content: "Diviser par";
+    --psp-label--sort--content: "Trier par";
+    --psp-label--filter--content: "Filtrer";
     --psp-label--transpose-button--content: "Échanger";
     --psp-label--config-button--content: "Configurer";
     --psp-label--all-columns--content: "Toutes les colonnes";
@@ -25,17 +24,21 @@ perspective-dropdown {
     /* Plugin names */
     --psp-plugin-name--datagrid--content: "Grille de données";
     --psp-plugin-name--treemap--content: "Treemap";
-    --psp-plugin-name--sunburst--content: "Coup de soleil";
+    --psp-plugin-name--sunburst--content: "Sunburst";
     --psp-plugin-name--heatmap--content: "Carte de chaleur";
-    --psp-plugin-name--x-bar--content: "Barre X";
-    --psp-plugin-name--y-bar--content: "Et le bar";
-    --psp-plugin-name--y-line--content: "et ligne";
+    --psp-plugin-name--x-bar--content: "Barres X";
+    --psp-plugin-name--y-bar--content: "Barres Y";
+    --psp-plugin-name--y-line--content: "Ligne Y";
     --psp-plugin-name--x-y-line--content: "Ligne X/Y";
     --psp-plugin-name--x-y-scatter--content: "Dispersion X/Y";
     --psp-plugin-name--y-scatter--content: "Dispersion Y";
-    --psp-plugin-name--y-area--content: "et la superficie";
-    --psp-plugin-name--ohlc--content: "Aie";
-    --psp-plugin-name--candlestick--content: "Chandelier";
+    --psp-plugin-name--y-area--content: "Aire Y";
+    --psp-plugin-name--ohlc--content: "OHLC";
+    --psp-plugin-name--candlestick--content: "Chandeliers";
+    --psp-plugin-name--density--content: "Densité";
+    --psp-plugin-name--map-scatter--content: "Dispersion sur carte";
+    --psp-plugin-name--map-line--content: "Ligne sur carte";
+    --psp-plugin-name--map-density--content: "Densité sur carte";
 
     /* Column Selector names */
     --psp-label--column-columns--content: "Colonnes";
@@ -44,6 +47,8 @@ perspective-dropdown {
     --psp-label--column-color--content: "Couleur";
     --psp-label--column-size--content: "Taille";
     --psp-label--column-symbol--content: "Symbole";
+    --psp-label--column-longitude--content: "Longitude";
+    --psp-label--column-latitude--content: "Latitude";
     --psp-label--column-label--content: "Étiquette";
     --psp-label--column-tooltip--content: "Info-bulle";
     --psp-label--add-expression-button--content: "Nouvelle colonne";
@@ -51,15 +56,20 @@ perspective-dropdown {
     /* Toolbar */
     --psp-label--no-results--content: "Colonne invalide";
     --psp-datagrid--column-edit-button--content: "Modifier";
-    --psp-label--copy-button--content: "Copie";
+    --psp-label--copy-button--content: "Copier";
     --psp-label--export-button--content: "Exporter";
     --psp-label--reset-button--content: "Réinitialiser";
+    --psp-label--new-panel-button--content: "Nouveau";
+    --psp-label--new-from-table--content: "Nouveau depuis une table";
+    --psp-label--new-from-panel--content: "Nouveau depuis un panneau";
+    --psp-label--apply-button--content: "Appliquer";
+    --psp-label--paste-button--content: "Coller";
     --psp-label--edit-mode-read-only--content: "Lecture seule";
     --psp-label--edit-mode-edit--content: "Édition de texte";
     --psp-label--edit-mode-select-row--content: "Sélectionner ligne";
     --psp-label--edit-mode-select-column--content: "Sélectionner colonne";
     --psp-label--edit-mode-select-region--content: "Sélectionner région";
-    --psp-label--scroll-lock-toggle--content: "Défilement gratuit";
+    --psp-label--scroll-lock-toggle--content: "Défilement libre";
     --psp-label--scroll-lock-alt-toggle--content: "Aligner le défilement";
 
     /* Column Settings */
@@ -67,12 +77,11 @@ perspective-dropdown {
     --psp-label--format--content: "Format";
     --psp-label--timezone--content: "Fuseau horaire";
     --psp-label--date-style--content: "Style de date";
-    --psp-label--time-style--content: "Style temporel";
-    --psp-label--foreground--content: "Premier plan";
-    --psp-label--background--content: "Arrière-plan";
+    --psp-label--time-style--content: "Style d'heure";
     --psp-label--number-fg-mode--content: "Premier plan";
     --psp-label--number-bg-mode--content: "Arrière-plan";
-    --psp-label--pos-bg-color--content: "Arrière-plan";
+    --psp-label--fg-colors--content: "Premier plan";
+    --psp-label--bg-colors--content: "Arrière-plan";
     --psp-label--datetime-color-mode--content: "Couleur";
     --psp-label--string-color-mode--content: "Couleur";
     --psp-label--series--content: "Série";
@@ -85,8 +94,9 @@ perspective-dropdown {
     --psp-label--rounding-increment--content: "Incrément d'arrondi";
     --psp-label--notation--content: "Notation";
     --psp-label--use-grouping--content: "Utiliser le regroupement";
-    --psp-label--sign-display--content: "Affichage des panneaux";
-    --psp-label--max-value--content: "Valeur max";
+    --psp-label--sign-display--content: "Affichage du signe";
+    --psp-label--enabled--content: "Activé";
+    --psp-label--disabled--content: "Désactivé";
     --psp-label--fg-gradient--content: "Valeur max";
     --psp-label--bg-gradient--content: "Valeur max";
     --psp-label--rounding-priority--content: "Priorité d'arrondi";
@@ -100,17 +110,17 @@ perspective-dropdown {
     --psp-label--weekday--content: "Jour de la semaine";
     --psp-label--hour--content: "Heure";
     --psp-label--minute--content: "Minute";
-    --psp-label--second--content: "Deuxième";
+    --psp-label--second--content: "Seconde";
     --psp-label--fractional-seconds--content: "Fractions de secondes";
     --psp-label--hours--content: "12/24 heures";
-    --psp-label--aggregate-depth--content: "Profondeur globale";
+    --psp-label--aggregate-depth--content: "Profondeur d'agrégation";
 
     /* Tabs */
     --psp-label--style-tab--content: "Style";
-    --psp-label--attributes-tab--content: "Les attributs";
+    --psp-label--attributes-tab--content: "Expression";
     --psp-label--window-tab--content: "Fenêtre";
     --psp-label--window-source--content: "Colonne";
-    --psp-label--window-order-by--content: "Commandé par";
+    --psp-label--window-order-by--content: "Trier par";
     --psp-label--window-partition-by--content: "Partitionner par";
     --psp-label--window-frame--content: "Cadre";
     --psp-label--window-offset--content: "Décalage";
@@ -138,11 +148,11 @@ perspective-dropdown {
     /* Plugin settings */
     --psp-label--edit-mode--content: "Mode édition";
     --psp-label--scroll-lock--content: "Verrouillage du défilement";
-    --psp-label--chart-type--content: "Type de graphique";
+    --psp-label--chart-type--content: "Type de glyphe";
 
     /* Plugin settings — viewer-charts */
     --psp-label--auto-alt-y-axis--content: "Axe Y double automatique";
-    --psp-label--facet-mode--content: "Mode facette";
+    --psp-label--facet-mode--content: "Mode de division";
     --psp-label--facet-zoom-mode--content: "Zoom facette";
     --psp-label--series-zoom-mode--content: "Zoom séries";
     --psp-label--line-width-px--content: "Épaisseur de ligne";
@@ -160,8 +170,8 @@ perspective-dropdown {
     --psp-label--map-tile-provider--content: "Fournisseur de carte";
     --psp-label--map-tile-alpha--content: "Opacité de la carte";
     --psp-label--numeric-axes--content: "Axes numériques";
-    --psp-label--legend-mode--content: "Mode légende";
-    --psp-label--legend-size-mode--content: "Taille de légende";
+    --psp-label--legend-mode--content: "Mode de placement";
+    --psp-label--legend-size-mode--content: "Mode de taille";
     --psp-label--legend-width-px--content: "Largeur de légende";
     --psp-label--legend-height-px--content: "Hauteur de légende";
     --psp-label--legend-anchor--content: "Ancrage de légende";

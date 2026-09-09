@@ -10,30 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// Regression spec for the source-gated dispatch amendment
-// (PLUGIN_DRAW_INVARIANT_PLAN.md, "Amendment: source-gated dispatch"
-// 2026-07-16), tests B1–B4:
-//
-//  - B1 (the motivating bug): an initial `restore()` carrying a
-//    `plugin_config` used to render TWICE — the restore run's `draw`, then
-//    a stray `update` ~25ms later. The datagrid's `restore()` called
-//    `toggle_edit_mode`, which echoed
-//    `restore({plugin_config: {edit_mode}})` back into the host — an
-//    inert restore whose run reconciled `Unchanged` and repainted anyway.
-//    The echo is now gated to user gestures, so boot is exactly ONE `draw`.
-//  - B2: the public no-op-restore refresh affordance is PRESERVED —
-//    `viewer.restore({})` on a drawn viewer still repaints, via `update`
-//    (`RunOrigin::Public`, update source 6).
-//  - B3: a genuinely-changed `plugin_config` restore on a drawn viewer
-//    delivers exactly one `update` (source 3), never a `draw`.
-//  - B4: the toolbar-click request path stays alive — clicking the edit
-//    button persists the mode into the host config (`save()` round-trip)
-//    and repaints.
-//  - B6 (the raycasting escape, captured-theme revision): a boot restore
-//    CARRYING a `theme` renders once — the first paint already captures
-//    the stamped theme, so the restyle tail (`needs_restyle()`) must
-//    no-op; a GENUINE theme change on the drawn viewer still restyles.
-
 import { expect, test } from "@perspective-dev/test";
 
 const TABLE = "load-viewer-csv";

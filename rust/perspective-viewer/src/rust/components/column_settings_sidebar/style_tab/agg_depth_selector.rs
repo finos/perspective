@@ -13,8 +13,8 @@
 use perspective_client::clone;
 use yew::{Callback, Html, Properties, function_component, html};
 
-use crate::components::form::number_field::NumberField;
 use crate::config::ColumnConfigFieldUpdate;
+use crate::ui::NumberField;
 
 // ░░░█▀█░█▀▄░█▀█░█▀█░█▀▀░█▀▄░▀█▀░▀█▀░█▀▀░█▀▀░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 // ░░░█▀▀░█▀▄░█░█░█▀▀░█▀▀░█▀▄░░█░░░█░░█▀▀░▀▀█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

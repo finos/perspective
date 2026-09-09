@@ -120,6 +120,10 @@ pub struct RendererData {
     /// [`Renderer::presize_with_box`] presize calls.
     presize_pending: Cell<u32>,
 
+    /// The `(width, height)` the plugin last painted at through a presize,
+    /// consumed by the post-commit reactive resize.
+    presized_box: Cell<Option<(f64, f64)>>,
+
     /// Debounce slot for geometry tasks (`resize` / presize), separate from
     /// the default slot data-update redraws coalesce on. Invariant: a
     /// geometry request must never resolve via a parked DATA task — a
@@ -160,14 +164,7 @@ pub struct RendererData {
 
     /// The effective theme stamped at the active plugin's last `--psp-*`
     /// CSS CAPTURE — its first paint ([`Renderer::draw_view`]) or last
-    /// [`Renderer::restyle_all`]. `None` = no capture has happened. The
-    /// state behind [`Renderer::needs_restyle`]: restyle necessity is a
-    /// comparison against what the plugin actually captured, never
-    /// inferred from which call site mutated a theme record (the
-    /// raycasting boot double render — see
-    /// `PLUGIN_DRAW_INVARIANT_PLAN.md`, captured-theme revision). Same
-    /// lifecycle as [`Self::has_drawn`]: cleared on plugin swap,
-    /// `dispose` and `delete`; written only inside locked dispatches.
+    /// [`Renderer::restyle_all`].
     captured_theme: RefCell<Option<Option<String>>>,
 
     /// The [`RenderContext`] of the currently-bound `View` (built at bind
@@ -268,6 +265,7 @@ impl Renderer {
             plugin_config_changed: Default::default(),
             render_warning: Cell::new(true),
             presize_pending: Cell::new(0),
+            presized_box: Cell::new(None),
             on_render_limits_changed: Default::default(),
             slot_name: Default::default(),
             theme: Default::default(),
@@ -315,14 +313,7 @@ impl Renderer {
 
     /// Whether the active plugin's captured `--psp-*` CSS is STALE — the
     /// effective theme differs from the one stamped at the plugin's last
-    /// CSS capture (first paint / last restyle). The state-keyed gate for
-    /// every theme-driven `restyle_all` (the `has_drawn` analog for
-    /// `restyle` — `PLUGIN_DRAW_INVARIANT_PLAN.md`, captured-theme
-    /// revision): a caller that just mutated a theme RECORD may not need a
-    /// restyle at all if the plugin's capture already reflects the new
-    /// value (e.g. the same restore also performed the first paint,
-    /// post-stamp). `false` when no capture exists yet — the owed first
-    /// paint captures fresh by construction ("stamp before draw").
+    /// CSS capture (first paint / last restyle).
     pub fn needs_restyle(&self) -> bool {
         match &*self.0.captured_theme.borrow() {
             Some(captured) => *captured != self.theme(),
@@ -336,17 +327,6 @@ impl Renderer {
     /// [`Self::delete`], which clears the entire light DOM). Removes the
     /// plugin (`slot=<id>`) and any panel-scoped aux element it mounted
     /// (e.g. the datagrid toolbar, `slot=statusbar-extra-<id>`).
-    ///
-    /// The teardown is DEFERRED through this renderer's draw lock: spawned
-    /// draws are uncancellable, so a synchronous `plugin.delete()` here could
-    /// land mid-`plugin.draw()`, which the serialized-call contract forbids
-    /// (see [`crate::js::plugin`]). Deferral is invisible — the caller
-    /// (`eject_panel`) has already removed the panel from the `Workspace`, so
-    /// the same commit unmounts its frame and the plugin element sits
-    /// unslotted (unrendered) until teardown lands; panel ids are never
-    /// reused, so it can't collide with a replacement panel's slot. Draws
-    /// still queued behind the lock no-op via the synchronous session reset
-    /// (`get_view()` → `None`).
     pub fn dispose(&self) -> ApiFuture<()> {
         self.0.has_drawn.set(false);
         self.0.captured_theme.borrow_mut().take();
@@ -486,6 +466,12 @@ impl Renderer {
     /// its first draw) would falsify.
     pub fn is_plugin_activated(&self) -> ApiResult<bool> {
         Ok(self.0.has_drawn.get())
+    }
+
+    /// Take the box the plugin last painted at through a presize (see
+    /// `RendererData::presized_box`).
+    pub fn take_presized_box(&self) -> Option<(f64, f64)> {
+        self.0.presized_box.take()
     }
 
     /// Mount the selected plugin element into the viewer's light DOM without
@@ -695,6 +681,7 @@ impl Renderer {
     /// suitable for passing as a Yew prop.  Called by the root component
     /// whenever a renderer-related PubSub event fires.
     pub fn to_props(&self, render_limits: Option<RenderLimits>) -> RendererProps {
+        let render_limits = render_limits.filter(RenderLimits::is_capped);
         let has_plugin = self.active_plugin().is_some();
         if has_plugin {
             let config = self.metadata();

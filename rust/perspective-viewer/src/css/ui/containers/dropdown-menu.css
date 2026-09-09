@@ -1,0 +1,50 @@
+/* ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+ * ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+ * ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+ * ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+ * ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+ * ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+ * ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+ * ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+ * ┃ This file is part of the Perspective library, distributed under the terms ┃
+ * ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+ * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+ */
+
+@import "./dropdown-menu-items.css";
+
+:host {
+    overflow: visible;
+    background-color: var(--psp--background-color, #ffffff);
+    color: var(--psp--color, #161616);
+    border: 1px solid var(--psp-inactive--color, #ababab);
+    border-radius: 0 0 2px 2px;
+    outline: none;
+    box-shadow: var(--psp-dropdown--box-shadow);
+    user-select: none;
+    padding: 8px;
+
+    display: flex;
+    flex-direction: column;
+    min-width: 80px;
+
+    code {
+        font-family: var(--psp-interface-monospace--font-family), monospace;
+    }
+
+    input {
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-bottom: 1px solid var(--psp-inactive--color, #ccc);
+        background: transparent;
+        font-family: var(--psp-interface-monospace--font-family), monospace;
+        color: inherit;
+        outline: none;
+    }
+
+    .invalid {
+        color: var(--psp-error--color, #ff0000);
+        border-color: var(--psp-error--color, #ff0000);
+    }
+}

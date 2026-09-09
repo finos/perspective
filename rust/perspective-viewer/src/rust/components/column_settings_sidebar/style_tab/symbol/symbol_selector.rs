@@ -13,7 +13,7 @@
 use itertools::Itertools;
 use yew::{Callback, Html, Properties, function_component, html};
 
-use crate::components::containers::select::{Select, SelectItem};
+use crate::ui::{Select, SelectItem};
 use crate::utils::PtrEqRc;
 
 #[derive(Properties, PartialEq)]

@@ -13,9 +13,8 @@
 use web_sys::{HtmlInputElement, InputEvent};
 use yew::prelude::*;
 
-use super::modal::{ModalLink, SetModalLink};
-use crate::components::form::select_enum_field::SelectEnumField;
 use crate::config::*;
+use crate::ui::{IntlLabel, ModalLink, SelectEnumField, SetModalLink};
 use crate::utils::WeakScope;
 
 #[derive(Properties)]
@@ -113,7 +112,7 @@ impl Component for NumberSeriesStyle {
             });
             html! {
                 <div class="row">
-                    <label id="stack-label" />
+                    <IntlLabel name="stack" />
                     <input type="checkbox" id="stack-checkbox" {checked} {oninput} />
                 </div>
             }

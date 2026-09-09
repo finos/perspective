@@ -22,11 +22,10 @@ use perspective_js::utils::global::navigator;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-use super::modal::{ModalLink, SetModalLink};
 use crate::components::datetime_column_style::custom::DatetimeStyleCustom;
 use crate::components::datetime_column_style::simple::DatetimeStyleSimple;
-use crate::components::form::select_value_field::SelectValueField;
 use crate::config::*;
+use crate::ui::{ModalLink, SelectValueField, SetModalLink};
 use crate::utils::WeakScope;
 
 /// Format-only widget for `datetime` columns. Renders the `date_format`

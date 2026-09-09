@@ -13,7 +13,10 @@
 
 :host {
     #add-expression-button:before {
-        content: var(--psp-label--add-expression-button--content, "New Column");
+        content: var(
+            --psp-label--add-expression-button--content,
+            var(--psp-missing)
+        );
         text-transform: uppercase;
         font-size: 0.8333333em;
     }
@@ -90,7 +93,7 @@
             display: inline-flex;
             -webkit-mask-size: cover;
             mask-size: cover;
-            margin-left: 9px;
+            margin-left: 6px;
             -webkit-mask-image: var(--psp-icon--add-expression--mask-image);
             mask-image: var(--psp-icon--add-expression--mask-image);
             &:before {
@@ -103,7 +106,7 @@
         /* Text label of the button e.g. "New Column" */
         & > span {
             align-self: center;
-            margin-left: 7.5px;
+            margin-left: 7px;
             text-overflow: ellipsis;
             white-space: nowrap;
             pointer-events: none;
@@ -202,7 +205,7 @@
             font-family: var(--psp-button--font-family, inherit);
             cursor: pointer;
             padding: 2px 4px 0 4px;
-            margin-right: 4px;
+            margin-right: 1px;
             margin-left: auto;
             border-radius: 3px;
             &:hover,
@@ -346,7 +349,7 @@
         top: -30px;
         display: inline-flex;
         align-items: flex-end;
-        content: var(--psp-label--all-columns--content, "All Columns");
+        content: var(--psp-label--all-columns--content, var(--psp-missing));
     }
 
     #sub-columns .scroll-panel-container {

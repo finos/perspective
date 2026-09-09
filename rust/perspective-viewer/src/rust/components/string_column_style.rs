@@ -12,9 +12,8 @@
 
 use yew::prelude::*;
 
-use super::modal::{ModalLink, SetModalLink};
-use crate::components::form::select_enum_field::SelectEnumField;
 use crate::config::*;
+use crate::ui::{ModalLink, SelectEnumField, SetModalLink};
 use crate::utils::WeakScope;
 
 /// Format-only widget for [`String`] columns. Renders the `format` enum

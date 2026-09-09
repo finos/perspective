@@ -19,7 +19,7 @@ use super::client_async::AsyncClient;
 use super::client_sync::{Client as SyncClient, PyFutureExt};
 use crate::py_err::ResultTClientErrorExt;
 
-#[pyclass(module = "perspective")]
+#[pyclass(skip_from_py_object, module = "perspective")]
 #[derive(Clone)]
 pub struct ProxySession(perspective_client::ProxySession);
 
@@ -31,9 +31,9 @@ impl ProxySession {
     /// passed to it.
     #[new]
     fn new(py: Python<'_>, client: Py<PyAny>, handle_request: Py<PyAny>) -> PyResult<Self> {
-        let client = if let Ok(py_client) = client.downcast_bound::<AsyncClient>(py) {
+        let client = if let Ok(py_client) = client.cast_bound::<AsyncClient>(py) {
             py_client.borrow().client.clone()
-        } else if let Ok(py_client) = client.downcast_bound::<SyncClient>(py) {
+        } else if let Ok(py_client) = client.cast_bound::<SyncClient>(py) {
             py_client.borrow().0.client.clone()
         } else {
             return Err(PyTypeError::new_err(
@@ -44,7 +44,7 @@ impl ProxySession {
         let callback = {
             move |msg: &[u8]| {
                 let msg = msg.to_vec();
-                Python::with_gil(|py| {
+                Python::attach(|py| {
                     let bytes = PyBytes::new(py, &msg);
                     handle_request.call1(py, (bytes,))?;
                     Ok(())

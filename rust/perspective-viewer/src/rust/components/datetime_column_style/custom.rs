@@ -14,10 +14,8 @@ use std::rc::Rc;
 
 use yew::prelude::*;
 
-use crate::components::form::number_field::NumberField;
-use crate::components::form::select_value_field::SelectValueField;
-use crate::components::modal::{ModalLink, SetModalLink};
 use crate::config::*;
+use crate::ui::{ModalLink, NumberField, SelectValueField, SetModalLink};
 use crate::utils::WeakScope;
 
 #[derive(Properties)]

@@ -196,7 +196,7 @@ export async function build_all() {
         fs.writeFileSync(`dist/css/${name}.css`, code);
     }
 
-    const intl_langs = ["de", "es", "fr", "ja", "pt", "zh"];
+    const intl_langs = ["ar", "de", "es", "fr", "ja", "pt", "zh"];
     for (const lang of intl_langs) {
         const filename = `./src/themes/intl/${lang}.css`;
         const { code } = await bundleAsyncCss({

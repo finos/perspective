@@ -46,10 +46,9 @@
         box-shadow: 0 1px 0 0px var(--psp-inactive--color);
         z-index: 6;
         display: var(--psp-status-bar--display, flex);
-        gap: 4px;
         align-items: center;
         background: var(--psp--background-color);
-        padding: var(--psp-status-bar--padding, 0 31px 0 4px);
+        padding: var(--psp-status-bar--padding, 0 26px 0 4px);
         position: relative;
         height: var(--psp-status-bar--height, 38px);
         min-height: var(--psp-status-bar--height, 38px);
@@ -69,21 +68,28 @@
             flex: 1 1000 auto;
         }
 
-        span#rows {
-            display: flex;
-            align-items: flex-end;
-            gap: 6px;
-            flex: 0 1000 auto;
-            overflow: hidden;
-            margin: 0px 0px;
-            pointer-events: none;
-            span {
-                margin: 0 !important;
+        #panel-bar {
+            flex: 0 0 auto;
+            height: 100%;
+        }
+
+        span#new_panel {
+            & > .icon {
+                -webkit-mask-image: var(--psp-icon--new-panel--mask-image);
+                mask-image: var(--psp-icon--new-panel--mask-image);
+                display: inline-flex;
+                &:before {
+                    line-height: 0;
+                    content: var(--psp-icon--new-panel--mask-image);
+                    visibility: hidden;
+                }
             }
 
-            span.x,
-            span.total {
-                color: var(--psp-inactive--color);
+            span:not(.icon):before {
+                content: var(
+                    --psp-label--new-panel-button--content,
+                    var(--psp-missing)
+                );
             }
         }
 
@@ -371,7 +377,10 @@
             }
 
             span:not(.icon):before {
-                content: var(--psp-label--export-button--content, "Export");
+                content: var(
+                    --psp-label--export-button--content,
+                    var(--psp-missing)
+                );
             }
         }
 
@@ -400,7 +409,10 @@
                 }
             }
             span:not(.icon):before {
-                content: var(--psp-label--reset-button--content);
+                content: var(
+                    --psp-label--reset-button--content,
+                    var(--psp-missing)
+                );
             }
         }
 
@@ -418,7 +430,10 @@
             }
 
             span:not(.icon):before {
-                content: var(--psp-label--copy-button--content);
+                content: var(
+                    --psp-label--copy-button--content,
+                    var(--psp-missing)
+                );
             }
         }
 
@@ -440,8 +455,12 @@
                 height: 100%;
             }
 
+            .select-arrow {
+                margin: 0;
+            }
+
             & > .icon {
-                margin: 0 6px 0 4px;
+                margin: 0 2px 0 2px;
                 height: auto;
                 -webkit-mask-image: var(--psp-icon--theme--mask-image);
                 mask-image: var(--psp-icon--theme--mask-image);
@@ -451,6 +470,10 @@
                     content: var(--psp-icon--theme--mask-image);
                     visibility: hidden;
                 }
+            }
+
+            & > .dropdown-width-container {
+                padding-left: 5px;
             }
         }
 
@@ -488,6 +511,10 @@
             }
         }
 
+        .modal-target .button > span.icon-label {
+            display: none !important;
+        }
+
         .hover-target {
             margin: 0;
             display: inline-flex;
@@ -495,11 +522,15 @@
             align-items: center;
 
             &:focus-within,
-            &:hover,
-            &.modal-target {
+            &:hover:not(.modal-target) {
                 box-shadow:
                     -4px 0 0 var(--psp--color),
                     4px 0 0 var(--psp--color);
+            }
+
+            &:focus-within,
+            &:hover,
+            &.modal-target {
                 background-color: var(--psp--color);
             }
 

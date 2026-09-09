@@ -19,14 +19,14 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::components::containers::dragdrop_list::*;
-use crate::components::containers::select::*;
+use crate::components::dragdrop_list::*;
 use crate::components::filter_dropdown::FilterDropDownElement;
 use crate::components::type_icon::TypeIcon;
 use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
 use crate::tasks::apply_and_render;
+use crate::ui::{Select, SelectItem};
 use crate::utils::*;
 
 #[derive(Clone, Properties)]

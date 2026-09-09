@@ -10,15 +10,6 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// Regression spec for the stacked-chart tab-activation artifact
-// (`PLUGIN_DRAW_INVARIANT_PLAN.md`): activating a tab used to FULL-`draw()`
-// both sides of the switch — and a chart `draw()` is a fetch plus a
-// multi-blit repaint (`resetAllZooms` emits an intermediate frame before
-// `loadAndRender`'s complete one), painted over a canvas the hidden-tab
-// 0×0 resize had cleared. Under the invariant, `plugin.draw` fires iff
-// there is a NEW `View` — activation dispatches `resize()` only, and the
-// hidden panel's `resize()` self-guards.
-
 import { expect, test } from "@perspective-dev/test";
 import type { Page } from "@playwright/test";
 import { gotoBasic, waitOneFrame } from "./helpers";

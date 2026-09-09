@@ -20,9 +20,9 @@ use super::update_data::UpdateDataExt;
 use crate::py_err::ResultTClientErrorExt;
 
 fn psp_type_from_py_type(_py: Python<'_>, val: Bound<'_, PyAny>) -> PyResult<ColumnType> {
-    if let Ok(pystr) = val.downcast::<PyString>() {
+    if let Ok(pystr) = val.cast::<PyString>() {
         ColumnType::try_from(pystr.to_string_lossy().as_ref()).into_pyerr()
-    } else if let Ok(val) = val.downcast::<PyType>() {
+    } else if let Ok(val) = val.cast::<PyType>() {
         let (module, typename) = (val.module()?, val.name()?);
         match (
             module.to_string_lossy().as_ref(),
@@ -50,7 +50,7 @@ fn from_dict(py: Python<'_>, pydict: &Bound<'_, PyDict>) -> Result<TableData, Py
         .get_item(first_key)?
         .ok_or_else(|| PyValueError::new_err("Schema has no columns"))?;
 
-    if first_item.downcast::<PyList>().is_ok() {
+    if first_item.cast::<PyList>().is_ok() {
         let json_module = PyModule::import(py, "json")?;
         let string = json_module.call_method("dumps", (pydict,), None)?;
         Ok(UpdateData::JsonColumns(string.extract::<String>()?).into())
@@ -70,17 +70,17 @@ pub impl TableData {
         input: Bound<'_, PyAny>,
         format: Option<TableReadFormat>,
     ) -> Result<TableData, PyErr> {
-        if let Ok(view) = input.downcast::<crate::client::client_async::AsyncView>() {
+        if let Ok(view) = input.cast::<crate::client::client_async::AsyncView>() {
             Ok(TableData::View((*view.borrow().view).clone()))
-        } else if let Ok(view) = input.downcast::<crate::client::client_sync::View>() {
+        } else if let Ok(view) = input.cast::<crate::client::client_sync::View>() {
             Ok(TableData::View((*view.borrow().0.view).clone()))
         } else if let Some(update) = UpdateData::from_py_partial(&input, format)? {
             Ok(TableData::Update(update))
-        } else if let Ok(pylist) = input.downcast::<PyList>() {
+        } else if let Ok(pylist) = input.cast::<PyList>() {
             let json_module = PyModule::import(input.py(), "json")?;
             let string = json_module.call_method("dumps", (pylist,), None)?;
             Ok(UpdateData::JsonRows(string.extract::<String>()?).into())
-        } else if let Ok(pydict) = input.downcast::<PyDict>() {
+        } else if let Ok(pydict) = input.cast::<PyDict>() {
             from_dict(input.py(), pydict)
         } else {
             Err(PyTypeError::new_err(format!(

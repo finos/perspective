@@ -22,6 +22,7 @@ use yew::prelude::*;
 use super::MainPanel;
 use crate::components::panel_menu::PanelCommand;
 use crate::js::{Layout, RegularLayout};
+use crate::renderer::SUBPIXEL_EPSILON;
 use crate::tasks::resize_callback;
 
 impl MainPanel {
@@ -42,11 +43,9 @@ impl MainPanel {
         false
     }
 
+    /// Report closed every panel this commit dropped from the layout, and
+    /// re-render so its frame leaves the DOM in the commit's paint.
     pub(super) fn on_layout_updated(&mut self, ctx: &Context<Self>) -> bool {
-        // A panel still tracked in `inserted` but no longer present in
-        // the layout (calculatePath → null) was removed by the layout —
-        // i.e. its frame's close button was pressed. Report it for
-        // disposal.
         let Some(el) = self.layout_ref.cast::<web_sys::HtmlElement>() else {
             return false;
         };
@@ -68,9 +67,13 @@ impl MainPanel {
             }
         });
 
+        let closed_any = !closed.is_empty();
         for id in closed {
-            ctx.props().on_close_panel.emit(id);
+            self.pending_removals.remove(&id);
+            ctx.props().on_panel_closed.emit(id);
         }
+
+        let reissue = self.forget_dropped_removals(&layout);
 
         // A layout change (divider drag, insert, restore) reflows the
         // grid cells without resizing the host, so the host
@@ -92,6 +95,19 @@ impl MainPanel {
             if let Some(panel) = ctx.props().workspace.panel(id)
                 && panel.renderer.is_plugin_activated().unwrap_or(false)
             {
+                if let Some((w, h)) = panel.renderer.take_presized_box()
+                    && let Some(plugin) = panel.renderer.active_plugin()
+                {
+                    let rect = plugin
+                        .unchecked_ref::<web_sys::Element>()
+                        .get_bounding_client_rect();
+                    if (rect.width() - w).abs() <= SUBPIXEL_EPSILON
+                        && (rect.height() - h).abs() <= SUBPIXEL_EPSILON
+                    {
+                        continue;
+                    }
+                }
+
                 resize_callback(&panel.session, &panel.renderer).emit(());
             }
         }
@@ -111,8 +127,25 @@ impl MainPanel {
             self.hidden_tabs = hidden;
             true
         } else {
-            false
+            closed_any || reissue
         }
+    }
+
+    /// Forget every issued removal whose panel survived the commit, so the
+    /// next `reconcile` re-issues it.
+    fn forget_dropped_removals(&mut self, layout: &RegularLayout) -> bool {
+        let dropped = self
+            .pending_removals
+            .iter()
+            .filter(|id| layout.contains_panel(id))
+            .cloned()
+            .collect::<Vec<_>>();
+        let reissue = !dropped.is_empty();
+        for id in dropped {
+            self.pending_removals.remove(&id);
+        }
+
+        reissue
     }
 
     pub(super) fn on_tab_selected(&self, ctx: &Context<Self>, name: String) -> bool {
@@ -169,10 +202,6 @@ impl MainPanel {
 
                 self.maximized = None;
             },
-            // The stage menu (no target panel) offers ONLY `NewFrom`, whose
-            // handler resolves the client/table purely from the loaded-clients
-            // registry — the panel id is unused there, so the empty id never
-            // reaches a panel lookup.
             cmd => ctx
                 .props()
                 .on_panel_command

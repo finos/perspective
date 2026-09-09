@@ -10,32 +10,35 @@
  * ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ */
 
-perspective-viewer,
-perspective-dropdown {
+perspective-viewer {
     /* Config */
-    --psp-label--group-by--content: "通过...分组";
+    --psp-label--group-by--content: "分组依据";
     --psp-label--split-by--content: "分割依据";
-    --psp-label--sort--content: "订购依据";
-    --psp-label--filter--content: "在哪里";
+    --psp-label--sort--content: "排序依据";
+    --psp-label--filter--content: "筛选";
     --psp-label--transpose-button--content: "交换";
     --psp-label--config-button--content: "配置";
-    --psp-label--all-columns--content: "所有栏目";
+    --psp-label--all-columns--content: "所有列";
     --psp-label--untitled--content: "无标题";
 
     /* Plugin names */
     --psp-plugin-name--datagrid--content: "数据网格";
     --psp-plugin-name--treemap--content: "树形图";
-    --psp-plugin-name--sunburst--content: "旭日";
-    --psp-plugin-name--heatmap--content: "热图";
-    --psp-plugin-name--x-bar--content: "X吧";
-    --psp-plugin-name--y-bar--content: "和酒吧";
-    --psp-plugin-name--y-line--content: "和线";
-    --psp-plugin-name--x-y-line--content: "X/Y线";
+    --psp-plugin-name--sunburst--content: "旭日图";
+    --psp-plugin-name--heatmap--content: "热力图";
+    --psp-plugin-name--x-bar--content: "X 条形图";
+    --psp-plugin-name--y-bar--content: "Y 条形图";
+    --psp-plugin-name--y-line--content: "Y 折线图";
+    --psp-plugin-name--x-y-line--content: "X/Y 折线图";
     --psp-plugin-name--x-y-scatter--content: "X/Y 散点图";
     --psp-plugin-name--y-scatter--content: "Y 散点图";
-    --psp-plugin-name--y-area--content: "和面积";
-    --psp-plugin-name--ohlc--content: "哎哟";
-    --psp-plugin-name--candlestick--content: "烛台";
+    --psp-plugin-name--y-area--content: "Y 面积图";
+    --psp-plugin-name--ohlc--content: "OHLC";
+    --psp-plugin-name--candlestick--content: "蜡烛图";
+    --psp-plugin-name--density--content: "密度图";
+    --psp-plugin-name--map-scatter--content: "地图散点图";
+    --psp-plugin-name--map-line--content: "地图折线图";
+    --psp-plugin-name--map-density--content: "地图密度图";
 
     /* Column Selector names */
     --psp-label--column-columns--content: "列";
@@ -43,17 +46,24 @@ perspective-dropdown {
     --psp-label--column-y-axis--content: "Y轴";
     --psp-label--column-color--content: "颜色";
     --psp-label--column-size--content: "尺寸";
-    --psp-label--column-symbol--content: "象征";
+    --psp-label--column-symbol--content: "符号";
+    --psp-label--column-longitude--content: "经度";
+    --psp-label--column-latitude--content: "纬度";
     --psp-label--column-label--content: "标签";
     --psp-label--column-tooltip--content: "工具提示";
-    --psp-label--add-expression-button--content: "新专栏";
+    --psp-label--add-expression-button--content: "新建列";
 
     /* Toolbar */
     --psp-label--no-results--content: "无效列";
     --psp-datagrid--column-edit-button--content: "编辑";
     --psp-label--copy-button--content: "复制";
-    --psp-label--export-button--content: "出口";
+    --psp-label--export-button--content: "导出";
     --psp-label--reset-button--content: "重置";
+    --psp-label--new-panel-button--content: "新建";
+    --psp-label--new-from-table--content: "从表新建";
+    --psp-label--new-from-panel--content: "从面板新建";
+    --psp-label--apply-button--content: "应用";
+    --psp-label--paste-button--content: "粘贴";
     --psp-label--edit-mode-read-only--content: "只读";
     --psp-label--edit-mode-edit--content: "文本编辑";
     --psp-label--edit-mode-select-row--content: "选择行";
@@ -68,16 +78,15 @@ perspective-dropdown {
     --psp-label--timezone--content: "时区";
     --psp-label--date-style--content: "日期样式";
     --psp-label--time-style--content: "时间风格";
-    --psp-label--foreground--content: "前景";
-    --psp-label--background--content: "背景";
     --psp-label--number-fg-mode--content: "前景";
     --psp-label--number-bg-mode--content: "背景";
-    --psp-label--pos-bg-color--content: "背景";
+    --psp-label--fg-colors--content: "前景";
+    --psp-label--bg-colors--content: "背景";
     --psp-label--datetime-color-mode--content: "颜色";
     --psp-label--string-color-mode--content: "颜色";
     --psp-label--series--content: "系列";
     --psp-label--color-range--content: "颜色范围";
-    --psp-label--style--content: "风格";
+    --psp-label--style--content: "样式";
     --psp-label--stack--content: "堆叠";
     --psp-label--alt-axis--content: "副轴";
     --psp-label--interpolate--content: "插值空值";
@@ -85,32 +94,33 @@ perspective-dropdown {
     --psp-label--rounding-increment--content: "舍入增量";
     --psp-label--notation--content: "符号";
     --psp-label--use-grouping--content: "使用分组";
-    --psp-label--sign-display--content: "标志展示";
-    --psp-label--max-value--content: "最大值";
+    --psp-label--sign-display--content: "符号显示";
+    --psp-label--enabled--content: "已启用";
+    --psp-label--disabled--content: "已禁用";
     --psp-label--fg-gradient--content: "最大值";
     --psp-label--bg-gradient--content: "最大值";
     --psp-label--rounding-priority--content: "舍入优先级";
     --psp-label--rounding-mode--content: "舍入模式";
     --psp-label--trailing-zero-display--content: "尾随零显示";
-    --psp-label--fractional-digits--content: "小数位";
+    --psp-label--fractional-digits--content: "小数位数";
     --psp-label--significant-digits--content: "有效数字";
     --psp-label--year--content: "年";
     --psp-label--month--content: "月";
-    --psp-label--day--content: "天";
-    --psp-label--weekday--content: "工作日";
+    --psp-label--day--content: "日";
+    --psp-label--weekday--content: "星期";
     --psp-label--hour--content: "小时";
     --psp-label--minute--content: "分钟";
-    --psp-label--second--content: "第二";
+    --psp-label--second--content: "秒";
     --psp-label--fractional-seconds--content: "小数秒";
     --psp-label--hours--content: "12/24 小时";
     --psp-label--aggregate-depth--content: "聚合深度";
 
     /* Tabs */
-    --psp-label--style-tab--content: "风格";
-    --psp-label--attributes-tab--content: "属性";
+    --psp-label--style-tab--content: "样式";
+    --psp-label--attributes-tab--content: "表达式";
     --psp-label--window-tab--content: "窗口";
     --psp-label--window-source--content: "列";
-    --psp-label--window-order-by--content: "订购依据";
+    --psp-label--window-order-by--content: "排序依据";
     --psp-label--window-partition-by--content: "分区依据";
     --psp-label--window-frame--content: "框架";
     --psp-label--window-offset--content: "偏移";
@@ -138,13 +148,13 @@ perspective-dropdown {
     /* Plugin settings */
     --psp-label--edit-mode--content: "编辑模式";
     --psp-label--scroll-lock--content: "滚动锁定";
-    --psp-label--chart-type--content: "图表类型";
+    --psp-label--chart-type--content: "图元类型";
 
     /* Plugin settings — viewer-charts */
     --psp-label--auto-alt-y-axis--content: "自动双Y轴";
-    --psp-label--facet-mode--content: "分面模式";
-    --psp-label--facet-zoom-mode--content: "分面缩放";
-    --psp-label--series-zoom-mode--content: "系列缩放";
+    --psp-label--facet-mode--content: "分割模式";
+    --psp-label--facet-zoom-mode--content: "缩放模式";
+    --psp-label--series-zoom-mode--content: "系列缩放模式";
     --psp-label--line-width-px--content: "线宽";
     --psp-label--point-size-px--content: "点大小";
     --psp-label--band-inner-frac--content: "带宽";
@@ -160,8 +170,8 @@ perspective-dropdown {
     --psp-label--map-tile-provider--content: "地图提供商";
     --psp-label--map-tile-alpha--content: "地图不透明度";
     --psp-label--numeric-axes--content: "数值坐标轴";
-    --psp-label--legend-mode--content: "图例模式";
-    --psp-label--legend-size-mode--content: "图例大小";
+    --psp-label--legend-mode--content: "放置模式";
+    --psp-label--legend-size-mode--content: "大小模式";
     --psp-label--legend-width-px--content: "图例宽度";
     --psp-label--legend-height-px--content: "图例高度";
     --psp-label--legend-anchor--content: "图例锚点";

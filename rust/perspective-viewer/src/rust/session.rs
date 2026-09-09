@@ -24,6 +24,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 use perspective_client::config::*;
+use perspective_client::proto::ViewDimensionsResp;
 use perspective_client::{Client, ClientError, ReconnectCallback, View};
 use perspective_js::apierror;
 use perspective_js::utils::*;
@@ -56,11 +57,7 @@ pub struct SessionHandle {
     pub table_loaded: PubSub<()>,
     pub table_unloaded: PubSub<bool>,
 
-    /// Fires when a `View` was CREATED — literally: `bind_view`'s REBUILD
-    /// path constructed and bound a new engine `View`. Nothing else may
-    /// emit this (a SKIP/REUSE/paused reconcile is [`Self::commit_reconciled`],
-    /// which REBUILD also emits) — overloading it broke consumers that
-    /// relied on the name's meaning (see `UPDATE_COUNT_REGRESSION_PLAN.md`).
+    /// Fires when a `View` was CREATED — literally.
     pub view_created: PubSub<()>,
 
     /// Fires exactly once per locked run that RECONCILED the committed
@@ -74,43 +71,23 @@ pub struct SessionHandle {
     pub view_config_changed: PubSub<()>,
     pub title_changed: PubSub<Option<String>>,
 
-    /// Count of in-flight CONFIG-DRIVEN pipeline runs (commit → run
-    /// settled), incremented by [`Session::begin_config_run`] and
-    /// decremented when the returned [`ConfigRunToken`] drops. Drives the
-    /// `StatusIndicator` "updating" spinner via [`Self::run_state_changed`].
-    /// Pure redraws (resize, activation nudges, `just_render`) do NOT
-    /// count — the spinner means "a config requery is in flight".
+    /// Count of in-flight CONFIG-DRIVEN pipeline runs.
     in_flight_config_runs: Cell<u32>,
 
     /// Fires with the ABSOLUTE [`Self::in_flight_config_runs`] count after
-    /// every change. LEVEL-triggered by design: subscribers ASSIGN the
-    /// payload rather than accumulate deltas, so a dropped or reordered
-    /// notification is corrected by the next one — the delta-counting
-    /// (`view_config_changed`+1 / `view_created`−1) design this replaces
-    /// drifted whenever those streams weren't perfectly paired (see
-    /// `UPDATE_COUNT_REGRESSION_PLAN.md`).
+    /// every change.
     pub run_state_changed: PubSub<u32>,
 
     /// Fires when the user clicks the status indicator while in
-    /// [`StatusIconState::Normal`]. `wire_panel_events` is the only
-    /// listener and fans this out as the `perspective-status-indicator-click`
-    /// `CustomEvent`.
+    /// [`StatusIconState::Normal`].
     pub status_indicator_clicked: PubSub<()>,
 
-    /// Per-column numeric stats cache. Populated by the
-    /// `fetch_column_abs_max` task and consumed by the schema-query
-    /// path so plugins emit gradient defaults without
-    /// per-render `View::get_min_max` round trips. Cleared
-    /// synchronously inside [`Session::commit_view_config`].
+    /// Per-column numeric stats cache.
     column_stats: RefCell<HashMap<String, ColumnStats>>,
 
     /// Memoized snapshots used by [`Session::to_props`] to keep
     /// `PtrEqRc` identity stable across repeated `to_props()` calls
-    /// when the underlying value hasn't changed. Without this, every
-    /// `PubSub` fire (including `column_stats_changed`) produces a
-    /// fresh `Rc` for `config` / `metadata`, triggering downstream
-    /// `use_effect_with(view_config, ...)` effects to spuriously
-    /// refire — closing a loop with the stats fetch path.
+    /// when the underlying value hasn't changed.
     cached_config: RefCell<Option<PtrEqRc<ViewConfig>>>,
     cached_metadata: RefCell<Option<SessionMetadataRc>>,
 
@@ -131,18 +108,7 @@ pub struct SessionHandle {
     load_generation: Cell<u32>,
 
     /// Open between a `load()` call and its payload's classification as
-    /// `Table`/`Client` ([`PendingLoad`]). While `Some` the payload type is
-    /// unknown, so its RESET/no-RESET disposition cannot be decided yet — but
-    /// the window's POSITION on the config-commit stream is fixed at the
-    /// `load()` call site. During the window, config commits still apply live
-    /// (so `save()` stays coherent — I1) but ALSO append their raw delta to
-    /// the journal, and config-driven binds DEFER ([`Session::snapshot`]'s
-    /// caller [`crate::tasks::bind_snapshot`]) — the incoming config must
-    /// never draw against the still-bound outgoing table (hold the last
-    /// frame). Classified as `Table` the journal replays over a reset base
-    /// (`reset ∘ Δ₁ ∘ Δ₂ …`, the program-order result the old synchronous
-    /// reset guaranteed); as `Client` it is dropped (no reset — live already
-    /// carries every Δ). See `SESSION_CONFIG_COHERENCE_PLAN.md`.
+    /// `Table`/`Client` ([`PendingLoad`]).
     pending_load: RefCell<Option<PendingLoad>>,
 
     /// Coalesces `view_config_changed`: multiple synchronous commits in one
@@ -165,8 +131,11 @@ pub struct SessionHandle {
     /// new value.
     pub column_stats_changed: PubSub<()>,
 
-    /// Injected callback from the root component, replacing the former
-    /// `stats_changed: PubSub` field.  Fires when view stats are updated.
+    /// Fires when view stats are updated.
+    pub stats_changed: PubSub<()>,
+
+    /// Injected callback from the root component, driving
+    /// `session_props.has_table_cells` for the active panel.
     pub on_stats_changed: RefCell<Option<Callback<()>>>,
 
     /// Injected callback from the root component, replacing the former
@@ -279,13 +248,7 @@ pub struct ResetOptions {
 #[derive(Clone)]
 pub struct Session(Rc<SessionHandle>);
 
-/// RAII spinner accounting for one config-driven pipeline run (see
-/// [`Session::begin_config_run`] and `UPDATE_COUNT_REGRESSION_PLAN.md`):
-/// created when the run is scheduled — immediately after its commit — and
-/// moved INTO the run future, so `Drop` settles the count on every exit
-/// path: completion, error, cancellation, and runs that never reach
-/// `bind_view` (the deferred-draw restore). A stranded count is
-/// unrepresentable; there is no other writer.
+/// RAII spinner accounting for one config-driven pipeline run.
 pub struct ConfigRunToken(Session);
 
 impl Drop for ConfigRunToken {
@@ -664,8 +627,25 @@ impl Session {
             .map(|sub| sub.get_view().clone())
     }
 
+    /// The bound `View` together with its latest known dimensions, read under
+    /// one borrow so they always belong together.
+    pub fn get_view_with_dimensions(&self) -> Option<(View, Option<ViewDimensionsResp>)> {
+        self.borrow()
+            .view_sub
+            .as_ref()
+            .map(|sub| (sub.get_view().clone(), sub.dimensions()))
+    }
+
     pub(crate) fn get_table_stats(&self) -> Option<ViewStats> {
         self.borrow().stats.clone()
+    }
+
+    /// Whether the stats snapshot carries table dimensions.
+    pub(crate) fn has_table_cells(&self) -> bool {
+        self.borrow()
+            .stats
+            .as_ref()
+            .is_some_and(|s| s.num_table_cells.is_some())
     }
 
     pub fn get_view_config(&'_ self) -> Ref<'_, ViewConfig> {
@@ -924,15 +904,6 @@ impl Session {
     /// Emit `view_config_changed` coalesced to one event per microtask batch.
     /// Stats are cleared synchronously per commit (idempotent — an
     /// already-empty cache no-ops, so rapid commit sequences fetch once).
-    ///
-    /// CONTRACT: this channel is COALESCED and DEFERRED — N same-batch
-    /// commits produce ONE emission, on a microtask AFTER the mutation.
-    /// Subscribers must be batch-tolerant snapshot refreshers (they re-read
-    /// live state; today: the root `SessionProps` snapshot and the debug
-    /// panel). It is NOT suitable for per-commit accounting — pairing its
-    /// edges against any other event stream WILL drift (the stuck-spinner
-    /// regression, `UPDATE_COUNT_REGRESSION_PLAN.md`); run accounting is
-    /// [`Self::begin_config_run`]'s RAII token instead.
     fn notify_view_config_changed(&self) {
         self.clear_column_stats();
         if !self.0.config_event_scheduled.replace(true) {
@@ -1218,6 +1189,8 @@ impl Session {
         if let Some(cb) = self.on_stats_changed.borrow().as_ref() {
             cb.emit(());
         }
+
+        self.stats_changed.emit(());
     }
 
     fn all_columns(&self) -> Vec<String> {
@@ -1258,7 +1231,10 @@ impl Session {
 
         SessionProps {
             config,
-            stats: data.stats.clone(),
+            has_table_cells: data
+                .stats
+                .as_ref()
+                .is_some_and(|s| s.num_table_cells.is_some()),
             has_table: if data.table.is_some() {
                 Some(TableLoadState::Loaded)
             } else if data.is_loading {
@@ -1290,15 +1266,7 @@ pub struct ConfigSnapshot {
 pub struct ValidatedSnapshot(ConfigSnapshot);
 
 /// Type-state witness that a `View` is NEW for the plugin about to render
-/// it — `plugin.draw()`'s contract (see `PLUGIN_DRAW_INVARIANT_PLAN.md`:
-/// `draw` fires iff there is a new `View`, never otherwise). Minted in
-/// exactly two places: [`Session::bind_view`]'s REBUILD arm (a new engine
-/// `View` was constructed) and
-/// [`crate::renderer::Renderer::promote_first_paint`] (a freshly-selected
-/// plugin owes its first paint of the bound `View`). Do NOT construct it
-/// anywhere else — `Renderer::draw_fresh` is the only consumer, and this
-/// witness is what makes "full draw without a new `View`" (the stacked-chart
-/// activation regression) uncompilable.
+/// it.
 pub struct FreshView(View);
 
 impl FreshView {

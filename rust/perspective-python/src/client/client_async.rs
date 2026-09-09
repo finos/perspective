@@ -36,8 +36,9 @@ use crate::py_async::{self, AllowThreads};
 use crate::py_err::{PyPerspectiveError, ResultTClientErrorExt};
 
 fn py_to_table_ref_async(val: &Bound<'_, PyAny>) -> PyResult<TableRef> {
-    if let Ok(t) = val.extract::<AsyncTable>() {
-        Ok(TableRef::from(t.table.as_ref()))
+    if let Ok(t) = val.cast::<AsyncTable>() {
+        let table = t.borrow();
+        Ok(TableRef::from(table.table.as_ref()))
     } else if let Ok(name) = val.extract::<String>() {
         Ok(TableRef::from(name))
     } else {
@@ -69,7 +70,7 @@ fn parse_list_flatten(value: Option<String>) -> PyResult<Option<ListFlatten>> {
 /// `AsyncClient` and Perspective objects derived from it have _async_ APIs,
 /// suitable for integration with a Python event loop like `asyncio`.
 /// @private
-#[pyclass(module = "perspective")]
+#[pyclass(skip_from_py_object, module = "perspective")]
 #[derive(Clone)]
 pub struct AsyncClient {
     pub(crate) client: Client,
@@ -98,7 +99,7 @@ impl AsyncClient {
         let client = Client::new_with_callback(
             name.as_deref(),
             asyncfn!(handle_request, async move |msg| {
-                if let Some(fut) = Python::with_gil(move |py| -> PyResult<_> {
+                if let Some(fut) = Python::attach(move |py| -> PyResult<_> {
                     let ret = handle_request.call1(py, (PyBytes::new(py, &msg),))?;
                     if isawaitable(ret.bind(py)).unwrap_or(false) {
                         Ok(Some(py_async::py_into_future(ret.into_bound(py))?))
@@ -107,7 +108,7 @@ impl AsyncClient {
                     }
                 })? {
                     let result = fut.await;
-                    Python::with_gil(|_| {
+                    Python::attach(|_| {
                         result
                             .map(|_| ())
                             .map_err(perspective_server::ServerError::from)
@@ -132,7 +133,7 @@ impl AsyncClient {
     /// [`Client`] once connected.
     pub async fn handle_response(&self, bytes: Py<PyBytes>) -> PyResult<bool> {
         self.client
-            .handle_response(Python::with_gil(|py| bytes.as_bytes(py)))
+            .handle_response(Python::attach(|py| bytes.as_bytes(py)))
             .await
             .into_pyerr()
     }
@@ -201,8 +202,8 @@ impl AsyncClient {
         list_flatten: Option<Py<PyString>>,
     ) -> PyResult<AsyncTable> {
         let client = self.client.clone();
-        let py_client = Python::with_gil(|_| self.clone());
-        let table = Python::with_gil(|py| {
+        let py_client = Python::attach(|_| self.clone());
+        let table = Python::attach(|py| {
             let mut options = TableInitOptions {
                 name: name.map(|x| x.extract::<String>(py)).transpose()?,
                 page_to_disk,
@@ -288,7 +289,7 @@ impl AsyncClient {
         name: Option<String>,
         right_on: Option<String>,
     ) -> PyResult<AsyncTable> {
-        let (left_ref, right_ref) = Python::with_gil(|py| {
+        let (left_ref, right_ref) = Python::attach(|py| {
             let left_ref = py_to_table_ref_from_owned(py, &left)?;
             let right_ref = py_to_table_ref_from_owned(py, &right)?;
             Ok::<_, PyErr>((left_ref, right_ref))
@@ -332,11 +333,11 @@ impl AsyncClient {
     /// [`Client`]) are called.
     pub async fn on_hosted_tables_update(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let callback = Box::new(move || {
-            let callback = Python::with_gil(|py| Py::clone_ref(&callback_py, py));
+            let callback = Python::attach(|py| Py::clone_ref(&callback_py, py));
             async move {
                 let aggregate_errors: PyResult<()> = {
-                    let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
-                    Python::with_gil(|py| {
+                    let callback = Python::attach(|py| Py::clone_ref(&callback, py));
+                    Python::attach(|py| {
                         callback.call0(py)?;
                         Ok(())
                     })
@@ -372,7 +373,7 @@ impl AsyncClient {
     /// CPU usage.
     pub async fn system_info(&self) -> PyResult<Py<PyAny>> {
         let sysinfo = self.client.system_info().await.into_pyerr()?;
-        Python::with_gil(|py| Ok(pythonize::pythonize(py, &sysinfo)?.unbind()))
+        Python::attach(|py| Ok(pythonize::pythonize(py, &sysinfo)?.unbind()))
     }
 
     /// Terminates this [`Client`], cleaning up any [`crate::View`] handles the
@@ -399,7 +400,7 @@ impl AsyncClient {
 /// cannot be changed after the [`AsyncTable`] has been created. Columns cannot
 /// be added or deleted after creation either, but a [`AsyncView`] can be used
 /// to select an arbitrary set of columns from the [`AsyncTable`].
-#[pyclass]
+#[pyclass(skip_from_py_object)]
 #[derive(Clone)]
 pub struct AsyncTable {
     pub(super) table: Arc<Table>,
@@ -505,10 +506,9 @@ impl AsyncTable {
     /// when the _delete_ event occurs.
     pub async fn on_delete(&self, callback_py: Py<PyAny>) -> PyResult<u32> {
         let callback = {
-            let callback_py = Python::with_gil(|py| Py::clone_ref(&callback_py, py));
+            let callback_py = Python::attach(|py| Py::clone_ref(&callback_py, py));
             Box::new(move || {
-                Python::with_gil(|py| callback_py.call0(py))
-                    .expect("`on_delete()` callback failed");
+                Python::attach(|py| callback_py.call0(py)).expect("`on_delete()` callback failed");
             })
         };
 
@@ -540,7 +540,7 @@ impl AsyncTable {
     pub async fn remove(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
         let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(input.into_bound(py), format))?;
+        let table_data = Python::attach(|py| UpdateData::from_py(input.into_bound(py), format))?;
         table.remove(table_data).await.into_pyerr()
     }
 
@@ -564,7 +564,7 @@ impl AsyncTable {
     pub async fn replace(&self, input: Py<PyAny>, format: Option<String>) -> PyResult<()> {
         let table = &self.table;
         let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
-        let table_data = Python::with_gil(|py| UpdateData::from_py(input.into_bound(py), format))?;
+        let table_data = Python::attach(|py| UpdateData::from_py(input.into_bound(py), format))?;
         table.replace(table_data).await.into_pyerr()
     }
 
@@ -596,7 +596,7 @@ impl AsyncTable {
         port_id: Option<u32>,
         format: Option<String>,
     ) -> PyResult<()> {
-        let input_data: Py<PyAny> = Python::with_gil(|py| {
+        let input_data: Py<PyAny> = Python::attach(|py| {
             let input = input.into_bound(py);
             let data = if pyarrow::is_arrow_table(py, &input)? {
                 pyarrow::to_arrow_bytes(py, &input)?.into_any()
@@ -613,7 +613,7 @@ impl AsyncTable {
         let table = &self.table;
         let format = TableReadFormat::parse(format).map_err(PyPerspectiveError::new_err)?;
         let table_data =
-            Python::with_gil(|py| UpdateData::from_py(input_data.into_bound(py), format))?;
+            Python::attach(|py| UpdateData::from_py(input_data.into_bound(py), format))?;
         let options = UpdateOptions { port_id, format };
         AllowThreads(pin!(table.update(table_data, options)))
             .await
@@ -623,14 +623,14 @@ impl AsyncTable {
 
     /// Validates the given expressions.
     pub async fn validate_expressions(&self, expressions: Py<PyAny>) -> PyResult<Py<PyAny>> {
-        let expressions = Python::with_gil(|py| depythonize(expressions.bind(py)))?;
+        let expressions = Python::attach(|py| depythonize(expressions.bind(py)))?;
         let records = self
             .table
             .validate_expressions(expressions)
             .await
             .into_pyerr()?;
 
-        Python::with_gil(|py| Ok(pythonize::pythonize(py, &records)?.unbind()))
+        Python::attach(|py| Ok(pythonize::pythonize(py, &records)?.unbind()))
     }
 
     /// Returns a table's [`Schema`], a mapping of column names to column types.
@@ -677,7 +677,7 @@ impl AsyncTable {
     #[pyo3(signature = (**kwargs))]
     pub async fn view(&self, kwargs: Option<Py<PyDict>>) -> PyResult<AsyncView> {
         let config = kwargs
-            .map(|config| Python::with_gil(|py| depythonize(config.bind(py))))
+            .map(|config| Python::attach(|py| depythonize(config.bind(py))))
             .transpose()?;
 
         let view = self.table.view(config).await.into_pyerr()?;
@@ -701,7 +701,7 @@ impl AsyncTable {
 /// query parameters are composable, in that each parameter works independently
 /// _and_ in conjunction with each other, and there is no limit to the number of
 /// pivots, filters, etc. which can be applied.
-#[pyclass]
+#[pyclass(skip_from_py_object)]
 #[derive(Clone)]
 pub struct AsyncView {
     pub(crate) view: Arc<View>,
@@ -718,7 +718,7 @@ impl AsyncView {
     /// A column path shows the columns that a given cell belongs to after
     /// pivots are applied.
     pub async fn column_paths(&self, window: Option<Py<PyDict>>) -> PyResult<Vec<String>> {
-        let window: ColumnWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ColumnWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
 
@@ -750,7 +750,7 @@ impl AsyncView {
     ///   of `split_by` groups.
     pub async fn dimensions(&self) -> PyResult<Py<PyAny>> {
         let dim = self.view.dimensions().await.into_pyerr()?;
-        Python::with_gil(|py| Ok(pythonize::pythonize(py, &dim)?.unbind()))
+        Python::attach(|py| Ok(pythonize::pythonize(py, &dim)?.unbind()))
     }
 
     pub async fn expand(&self, index: u32) -> PyResult<u32> {
@@ -779,7 +779,7 @@ impl AsyncView {
     /// created this [`View`].
     pub async fn get_config(&self) -> PyResult<Py<PyAny>> {
         let config = self.view.get_config().await.into_pyerr()?;
-        Python::with_gil(|py| Ok(pythonize::pythonize(py, &config)?.unbind()))
+        Python::attach(|py| Ok(pythonize::pythonize(py, &config)?.unbind()))
     }
 
     /// Calculates the [min, max] of the leaf nodes of a column `column_name`.
@@ -787,9 +787,9 @@ impl AsyncView {
     /// # Returns
     ///
     /// A tuple of [min, max], whose types are column and aggregate dependent.
-    pub async fn get_min_max(&self, name: String) -> PyResult<(PyObject, PyObject)> {
+    pub async fn get_min_max(&self, name: String) -> PyResult<(Py<PyAny>, Py<PyAny>)> {
         let (min, max) = self.view.get_min_max(name).await.into_pyerr()?;
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             Ok((
                 super::client_sync::scalar_to_py(py, &min),
                 super::client_sync::scalar_to_py(py, &max),
@@ -844,8 +844,7 @@ impl AsyncView {
         let callback = {
             let callback_py = Arc::new(callback_py);
             Box::new(move || {
-                Python::with_gil(|py| callback_py.call0(py))
-                    .expect("`on_delete()` callback failed");
+                Python::attach(|py| callback_py.call0(py)).expect("`on_delete()` callback failed");
             })
         };
 
@@ -876,11 +875,11 @@ impl AsyncView {
     #[pyo3(signature=(callback, mode=None))]
     pub async fn on_update(&self, callback: Py<PyAny>, mode: Option<String>) -> PyResult<u32> {
         let callback = move |x: OnUpdateData| {
-            let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
+            let callback = Python::attach(|py| Py::clone_ref(&callback, py));
             async move {
                 let aggregate_errors: PyResult<()> = {
-                    let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
-                    Python::with_gil(|py| {
+                    let callback = Python::attach(|py| Py::clone_ref(&callback, py));
+                    Python::attach(|py| {
                         match &x.delta {
                             None => callback.call1(py, (x.port_id,))?,
                             Some(delta) => {
@@ -940,9 +939,9 @@ impl AsyncView {
     /// ```
     pub async fn on_remove(&self, callback: Py<PyAny>) -> PyResult<u32> {
         let callback = move |x: OnRemoveData| {
-            let callback = Python::with_gil(|py| Py::clone_ref(&callback, py));
+            let callback = Python::attach(|py| Py::clone_ref(&callback, py));
             async move {
-                let aggregate_errors: PyResult<()> = Python::with_gil(|py| {
+                let aggregate_errors: PyResult<()> = Python::attach(|py| {
                     match &x.indices {
                         None => callback.call1(py, (x.port_id,))?,
                         Some(indices) => {
@@ -975,36 +974,36 @@ impl AsyncView {
 
     #[pyo3(signature=(**window))]
     pub async fn to_dataframe(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ViewWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
         let arrow = self.view.to_arrow(window).await.into_pyerr()?;
-        Python::with_gil(|py| arrow_to_pandas(py, &arrow))
+        Python::attach(|py| arrow_to_pandas(py, &arrow))
     }
 
     #[pyo3(signature=(**window))]
     pub async fn to_polars(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ViewWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
         let arrow = self.view.to_arrow(window).await.into_pyerr()?;
-        Python::with_gil(|py| arrow_to_polars(py, &arrow))
+        Python::attach(|py| arrow_to_polars(py, &arrow))
     }
 
     /// Serializes a [`View`] to the Apache Arrow data format.
     #[pyo3(signature=(**window))]
     pub async fn to_arrow(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyBytes>> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ViewWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
         let arrow = self.view.to_arrow(window).await.into_pyerr()?;
-        Ok(Python::with_gil(|py| PyBytes::new(py, &arrow).into()))
+        Ok(Python::attach(|py| PyBytes::new(py, &arrow).into()))
     }
 
     /// Serializes this [`View`] to CSV data in a standard format.
     #[pyo3(signature=(**window))]
     pub async fn to_csv(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ViewWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
 
@@ -1015,7 +1014,7 @@ impl AsyncView {
     /// save additional round trip serialize/deserialize cycles.
     #[pyo3(signature=(**window))]
     pub async fn to_columns_string(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ViewWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
 
@@ -1027,7 +1026,7 @@ impl AsyncView {
     #[pyo3(signature = (**window))]
     pub async fn to_columns(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         let json = self.to_columns_string(window).await?;
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let json_module = PyModule::import(py, "json")?;
             let records = json_module.call_method1("loads", (json,))?;
             Ok(records.unbind())
@@ -1037,7 +1036,7 @@ impl AsyncView {
     /// Render this `View` as a JSON string.
     #[pyo3(signature=(window=None))]
     pub async fn to_json_string(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ViewWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
 
@@ -1048,7 +1047,7 @@ impl AsyncView {
     /// formatted `String`.
     #[pyo3(signature=(window=None))]
     pub async fn to_ndjson(&self, window: Option<Py<PyDict>>) -> PyResult<String> {
-        let window: ViewWindow = Python::with_gil(|py| window.map(|x| depythonize(x.bind(py))))
+        let window: ViewWindow = Python::attach(|py| window.map(|x| depythonize(x.bind(py))))
             .transpose()?
             .unwrap_or_default();
 
@@ -1059,7 +1058,7 @@ impl AsyncView {
     #[pyo3(signature = (**window))]
     pub async fn to_records(&self, window: Option<Py<PyDict>>) -> PyResult<Py<PyAny>> {
         let json = self.to_json_string(window).await?;
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let json_module = PyModule::import(py, "json")?;
             let records = json_module.call_method1("loads", (json,))?;
             Ok(records.unbind())

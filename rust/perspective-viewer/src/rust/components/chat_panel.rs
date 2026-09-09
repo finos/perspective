@@ -18,7 +18,7 @@
 use yew::prelude::*;
 
 use crate::agent::{AgentSlot, ChatEntry, render_markdown};
-use crate::components::form::mirrored_textarea::MirroredTextarea;
+use crate::ui::MirroredTextarea;
 
 #[derive(Properties, PartialEq)]
 struct ChatReasoningProps {

@@ -1,5 +1,5 @@
-<svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(0.5, 0.5)">
-    <path d="M 9.457 12.48 L 6.477 9.5 L 9.457 6.52 C 9.652 6.325 9.652 6.008 9.457 5.813 C 9.261 5.618 8.945 5.618 8.75 5.813 L 5.416 9.146 L 5.063 9.5 L 8.75 13.187 C 8.945 13.382 9.261 13.382 9.457 13.187 C 9.652 12.992 9.652 12.675 9.457 12.48 Z M 13.791 12.48 L 10.811 9.5 L 13.791 6.52 C 13.986 6.325 13.986 6.008 13.791 5.813 C 13.596 5.618 13.279 5.618 13.084 5.813 L 9.397 9.5 L 13.084 13.187 C 13.279 13.382 13.596 13.382 13.791 13.187 C 13.986 12.992 13.986 12.675 13.791 12.48 Z M -0.5 4.206 C -0.5 1.608 1.608 -0.5 4.206 -0.5 L 30.088 -0.5 L 30.088 19.5 L 4.206 19.5 C 1.608 19.5 -0.5 17.392 -0.5 14.794 L -0.5 4.206 Z" fill="#042121"></path>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#042121" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <defs><mask id="m"><rect width="20" height="20" fill="white"/>
+    <path d="M14 6l-3.5 4 3.5 4M9.5 6L6 10l3.5 4" stroke="black" stroke-width="1.3"/></mask></defs>
+    <path d="M4.5 0.5H19.5V19.5H4.5A4 4 0 0 1 0.5 15.5V4.5A4 4 0 0 1 4.5 0.5Z" fill="#042121" stroke="none" mask="url(#m)"/>
 </svg>

@@ -16,7 +16,7 @@
     border-radius: 8px;
     background-color: var(--bg-color);
     color: var(--text-color);
-    padding: 20px 22px;
+    padding: 0px 22px;
     width: min(560px, 92vw);
     max-height: 86vh;
     overflow-y: auto;

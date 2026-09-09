@@ -209,11 +209,6 @@ write_int(t_column& out, t_uindex ridx, std::int64_t value) {
     out.set_scalar(ridx, s);
 }
 
-// Aggregate the frame positions [lo, hi] of one ordered partition and write
-// the result for the row at position `hi`. Direct recompute per output row -
-// no accumulator state, no float drift (WINDOW_FUNCTIONS_PLAN §2.4).
-// Aggregating ops only; positional/recursive ops dispatch in
-// `recompute_range`.
 template <typename ROWS_T>
 void
 apply_frame(

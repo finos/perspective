@@ -1,0 +1,185 @@
+/* ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+ * ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+ * ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+ * ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+ * ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+ * ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+ * ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+ * ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+ * ┃ This file is part of the Perspective library, distributed under the terms ┃
+ * ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+ * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ */
+
+perspective-viewer {
+    --psp-label--group-by--content: "تجميع حسب";
+    --psp-label--split-by--content: "تقسيم حسب";
+    --psp-label--sort--content: "ترتيب حسب";
+    --psp-label--filter--content: "تصفية";
+    --psp-label--transpose-button--content: "تبديل";
+    --psp-label--config-button--content: "تكوين";
+    --psp-label--all-columns--content: "كل الأعمدة";
+    --psp-label--untitled--content: "بدون عنوان";
+
+    --psp-plugin-name--datagrid--content: "شبكة البيانات";
+    --psp-plugin-name--treemap--content: "خريطة شجرية";
+    --psp-plugin-name--sunburst--content: "مخطط شمسي";
+    --psp-plugin-name--heatmap--content: "خريطة حرارية";
+    --psp-plugin-name--x-bar--content: "أعمدة X";
+    --psp-plugin-name--y-bar--content: "أعمدة Y";
+    --psp-plugin-name--y-line--content: "خط Y";
+    --psp-plugin-name--x-y-line--content: "خط X/Y";
+    --psp-plugin-name--x-y-scatter--content: "تشتت X/Y";
+    --psp-plugin-name--y-scatter--content: "تشتت Y";
+    --psp-plugin-name--y-area--content: "مساحة Y";
+    --psp-plugin-name--ohlc--content: "OHLC";
+    --psp-plugin-name--candlestick--content: "شموع يابانية";
+    --psp-plugin-name--density--content: "الكثافة";
+    --psp-plugin-name--map-scatter--content: "تشتت على الخريطة";
+    --psp-plugin-name--map-line--content: "خط على الخريطة";
+    --psp-plugin-name--map-density--content: "كثافة على الخريطة";
+
+    --psp-label--column-columns--content: "الأعمدة";
+    --psp-label--column-x-axis--content: "المحور X";
+    --psp-label--column-y-axis--content: "المحور Y";
+    --psp-label--column-color--content: "اللون";
+    --psp-label--column-size--content: "الحجم";
+    --psp-label--column-symbol--content: "الرمز";
+    --psp-label--column-longitude--content: "خط الطول";
+    --psp-label--column-latitude--content: "خط العرض";
+    --psp-label--column-label--content: "التسمية";
+    --psp-label--column-tooltip--content: "تلميح";
+    --psp-label--add-expression-button--content: "عمود جديد";
+
+    --psp-label--no-results--content: "عمود غير صالح";
+    --psp-datagrid--column-edit-button--content: "تحرير";
+    --psp-label--copy-button--content: "نسخ";
+    --psp-label--export-button--content: "تصدير";
+    --psp-label--reset-button--content: "إعادة تعيين";
+    --psp-label--new-panel-button--content: "جديد";
+    --psp-label--new-from-table--content: "جديد من جدول";
+    --psp-label--new-from-panel--content: "جديد من لوحة";
+    --psp-label--apply-button--content: "تطبيق";
+    --psp-label--paste-button--content: "لصق";
+    --psp-label--edit-mode-read-only--content: "للقراءة فقط";
+    --psp-label--edit-mode-edit--content: "تحرير النص";
+    --psp-label--edit-mode-select-row--content: "تحديد صف";
+    --psp-label--edit-mode-select-column--content: "تحديد عمود";
+    --psp-label--edit-mode-select-region--content: "تحديد منطقة";
+    --psp-label--scroll-lock-toggle--content: "تمرير حر";
+    --psp-label--scroll-lock-alt-toggle--content: "تمرير محاذى";
+
+    --psp-label--color--content: "اللون";
+    --psp-label--format--content: "التنسيق";
+    --psp-label--timezone--content: "المنطقة الزمنية";
+    --psp-label--date-style--content: "نمط التاريخ";
+    --psp-label--time-style--content: "نمط الوقت";
+    --psp-label--number-fg-mode--content: "المقدمة";
+    --psp-label--number-bg-mode--content: "الخلفية";
+    --psp-label--fg-colors--content: "المقدمة";
+    --psp-label--bg-colors--content: "الخلفية";
+    --psp-label--datetime-color-mode--content: "اللون";
+    --psp-label--string-color-mode--content: "اللون";
+    --psp-label--series--content: "السلسلة";
+    --psp-label--color-range--content: "نطاق الألوان";
+    --psp-label--style--content: "النمط";
+    --psp-label--stack--content: "تكديس";
+    --psp-label--alt-axis--content: "محور بديل";
+    --psp-label--minimum-integer-digits--content: "الحد الأدنى للأرقام الصحيحة";
+    --psp-label--rounding-increment--content: "زيادة التقريب";
+    --psp-label--notation--content: "الترميز";
+    --psp-label--use-grouping--content: "استخدام التجميع";
+    --psp-label--sign-display--content: "عرض الإشارة";
+    --psp-label--enabled--content: "مفعّل";
+    --psp-label--disabled--content: "معطّل";
+    --psp-label--aggregate-depth--content: "عمق التجميع";
+    --psp-label--fg-gradient--content: "القيمة القصوى";
+    --psp-label--bg-gradient--content: "القيمة القصوى";
+    --psp-label--rounding-priority--content: "أولوية التقريب";
+    --psp-label--rounding-mode--content: "وضع التقريب";
+    --psp-label--trailing-zero-display--content: "عرض الأصفار اللاحقة";
+    --psp-label--fractional-digits--content: "الأرقام العشرية";
+    --psp-label--significant-digits--content: "الأرقام المعنوية";
+    --psp-label--year--content: "السنة";
+    --psp-label--month--content: "الشهر";
+    --psp-label--day--content: "اليوم";
+    --psp-label--weekday--content: "يوم الأسبوع";
+    --psp-label--hour--content: "الساعة";
+    --psp-label--minute--content: "الدقيقة";
+    --psp-label--second--content: "الثانية";
+    --psp-label--fractional-seconds--content: "أجزاء الثانية";
+    --psp-label--hours--content: "12/24 ساعة";
+
+    --psp-label--group-axes--content: "المحاور";
+    --psp-label--group-facets--content: "الأوجه";
+    --psp-label--group-glyph--content: "الأشكال";
+    --psp-label--group-density--content: "الكثافة";
+    --psp-label--group-basemap--content: "الخريطة الأساسية";
+    --psp-label--group-legend--content: "مفتاح الرسم";
+    --psp-label--group-tooltip--content: "التلميحات";
+    --psp-label--group-color--content: "اللون";
+    --psp-label--group-format--content: "التنسيق";
+    --psp-label--column-size-override--content: "عرض العمود";
+
+    --psp-label--style-tab--content: "النمط";
+    --psp-label--attributes-tab--content: "التعبير";
+    --psp-label--window-tab--content: "النافذة";
+    --psp-label--query-tab--content: "الاستعلام";
+    --psp-label--plugin-tab--content: "الإضافة";
+    --psp-label--debug-tab--content: "JSON";
+    --psp-label--chat-tab--content: "الدردشة";
+
+    --psp-label--chat-reasoning--content: "الاستدلال";
+    --psp-label--chat-send--content: "إرسال";
+    --psp-label--chat-stop--content: "إيقاف";
+    --psp-label--chat-placeholder--content: "اسأل عن بياناتك…";
+
+    --psp-label--role--x-axis--content: "المحور X";
+    --psp-label--role--y-axis--content: "المحور Y";
+    --psp-label--role--series--content: "السلسلة";
+    --psp-label--role--hierarchy--content: "التسلسل الهرمي";
+    --psp-label--role--facets--content: "الأوجه";
+    --psp-label--role--row-groups--content: "مجموعات الصفوف";
+    --psp-label--role--column-groups--content: "مجموعات الأعمدة";
+
+    --psp-label--window-source--content: "العمود";
+    --psp-label--window-order-by--content: "ترتيب حسب";
+    --psp-label--window-partition-by--content: "تجزئة حسب";
+    --psp-label--window-frame--content: "الإطار";
+    --psp-label--window-offset--content: "الإزاحة";
+    --psp-label--window-alpha--content: "ألفا";
+
+    --psp-label--edit-mode--content: "وضع التحرير";
+    --psp-label--scroll-lock--content: "قفل التمرير";
+    --psp-label--chart-type--content: "نوع الشكل";
+
+    --psp-label--auto-alt-y-axis--content: "محور Y تلقائي";
+    --psp-label--facet-mode--content: "وضع التقسيم";
+    --psp-label--facet-zoom-mode--content: "وضع التكبير";
+    --psp-label--series-zoom-mode--content: "وضع تكبير السلسلة";
+    --psp-label--line-width-px--content: "عرض الخط";
+    --psp-label--point-size-px--content: "حجم النقطة";
+    --psp-label--band-inner-frac--content: "عرض النطاق";
+    --psp-label--bar-inner-pad--content: "تباعد الأعمدة";
+    --psp-label--wick-width-px--content: "عرض الفتيل";
+    --psp-label--ohlc-line-width-px--content: "عرض خط OHLC";
+    --psp-label--include-zero--content: "تضمين الصفر";
+    --psp-label--domain-mode--content: "وضع المجال";
+    --psp-label--gradient-color-mode--content: "وضع اللون";
+    --psp-label--gradient-radius-px--content: "نصف قطر التدرج";
+    --psp-label--gradient-intensity--content: "الشدة";
+    --psp-label--gradient-heat-max--content: "الحد الأقصى للحرارة";
+    --psp-label--map-tile-provider--content: "مزود الخريطة";
+    --psp-label--map-tile-alpha--content: "عتامة الخريطة";
+    --psp-label--numeric-axes--content: "محاور رقمية";
+    --psp-label--interpolate--content: "استيفاء القيم الفارغة";
+    --psp-label--legend-mode--content: "وضع الموضع";
+    --psp-label--legend-size-mode--content: "وضع الحجم";
+    --psp-label--legend-width-px--content: "العرض";
+    --psp-label--legend-height-px--content: "الارتفاع";
+    --psp-label--legend-anchor--content: "المرساة";
+    --psp-label--legend-x--content: "إزاحة X";
+    --psp-label--legend-y--content: "إزاحة Y";
+    --psp-label--legend-opacity--content: "العتامة";
+    --psp-label--tooltip-max-column-px--content: "أقصى عرض للعمود";
+    --psp-label--tooltip-opacity--content: "العتامة";
+}

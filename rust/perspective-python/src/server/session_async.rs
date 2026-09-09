@@ -22,7 +22,7 @@ use pyo3::types::{PyAny, PyBytes};
 
 use crate::py_async::{self, AllowThreads};
 
-#[pyclass(module = "perspective")]
+#[pyclass(skip_from_py_object, module = "perspective")]
 #[derive(Clone)]
 pub struct PyAsyncSession {
     pub session: Arc<async_lock::RwLock<Option<LocalSession>>>,
@@ -36,7 +36,7 @@ impl SessionHandler for PyConnection {
         &'a mut self,
         msg: &'a [u8],
     ) -> Result<(), perspective_server::ServerError> {
-        let result = Python::with_gil(move |py| {
+        let result = Python::attach(move |py| {
             self.0
                 .call1(py, (PyBytes::new(py, msg),))
                 .and_then(|x| py_async::py_into_future(x.into_bound(py)))
@@ -44,7 +44,7 @@ impl SessionHandler for PyConnection {
         .await;
 
         // test
-        Python::with_gil(|_py| {
+        Python::attach(|_py| {
             result
                 .map(|_| ())
                 .map_err(perspective_server::ServerError::from)

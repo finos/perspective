@@ -1,13 +1,8 @@
-<svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs></defs>
-    <rect x="3" y="4" width="15" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
-    </rect>
-    <rect x="5" y="6.973" width="13" height="4"
-        style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;"></rect>
-    <rect x="7" y="10" width="11" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
-    </rect>
-    <rect x="5" y="13" width="13" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
-    </rect>
-    <rect x="3" y="16" width="15" height="1" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 0px;">
-    </rect>
+<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none" stroke="#042121" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 4.5h15"/>
+    <path d="M5 7.5h13"/>
+    <path d="M7 10.5h11"/>
+    <path d="M5 13.5h13"/>
+    <path d="M3 16.5h15"/>
+    <rect x="5" y="7" width="13" height="4" fill="#042121" stroke="none"/>
 </svg>

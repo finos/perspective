@@ -19,9 +19,9 @@ use web_sys::*;
 use yew::html::ImplicitClone;
 use yew::prelude::*;
 
-use super::portal::PortalModal;
 use super::style::StyleSurface;
 use crate::session::Session;
+use crate::ui::PortalModal;
 use crate::utils::*;
 use crate::*;
 
@@ -219,7 +219,7 @@ impl Component for FilterDropDownPortal {
             html! {
                 <PortalModal
                     tag_name="perspective-dropdown"
-                    surface={StyleSurface::FilterDropdown}
+                    sheet={StyleSurface::FilterDropdown.sheet()}
                     {target}
                     own_focus=false
                     {on_close}

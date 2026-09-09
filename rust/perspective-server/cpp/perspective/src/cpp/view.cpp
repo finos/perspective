@@ -1972,6 +1972,7 @@ View<T>::to_rows(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     auto& col_names = slice->get_column_names();
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -2007,10 +2008,11 @@ View<T>::to_rows(
                 std::pair<t_uindex, t_uindex> pair{r, 0};
                 std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
                 const auto keys = m_ctx->get_pkeys(vec);
-                const t_tscalar& scalar = keys[0];
                 writer.Key("__ID__");
                 writer.StartArray();
-                write_scalar(scalar, is_formatted, writer);
+                if (!keys.empty()) {
+                    write_scalar(keys[0], is_formatted, writer);
+                }
                 writer.EndArray();
             }
 
@@ -2060,6 +2062,7 @@ View<t_ctx1>::to_rows(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const auto& col_names = slice->get_column_names();
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -2157,6 +2160,7 @@ View<t_ctx2>::to_rows(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const auto& col_names = slice->get_column_names();
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -2305,6 +2309,7 @@ View<T>::to_ndjson(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const auto& col_names = slice->get_column_names();
     if (start_row == end_row || (start_col == end_col && !has_row_path)) {
         return "";
@@ -2341,10 +2346,11 @@ View<T>::to_ndjson(
                 std::pair<t_uindex, t_uindex> pair{r, 0};
                 std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
                 const auto keys = m_ctx->get_pkeys(vec);
-                const t_tscalar& scalar = keys[0];
                 writer.Key("__ID__");
                 writer.StartArray();
-                write_scalar(scalar, is_formatted, writer);
+                if (!keys.empty()) {
+                    write_scalar(keys[0], is_formatted, writer);
+                }
                 writer.EndArray();
             }
 
@@ -2394,6 +2400,7 @@ View<t_ctx1>::to_ndjson(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const auto& col_names = slice->get_column_names();
     if (start_row == end_row || (start_col == end_col && !has_row_path)) {
         return "";
@@ -2495,6 +2502,7 @@ View<t_ctx2>::to_ndjson(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const auto& col_names = slice->get_column_names();
     if (start_row == end_row || (start_col == end_col && !has_row_path)) {
         return "";
@@ -2595,6 +2603,7 @@ View<T>::to_columns(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const std::vector<std::vector<t_tscalar>>& col_names =
         slice->get_column_names();
 
@@ -2627,9 +2636,10 @@ View<T>::to_columns(
             std::pair<t_uindex, t_uindex> pair{x, 0};
             std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
             const auto keys = m_ctx->get_pkeys(vec);
-            const t_tscalar& scalar = keys[0];
             writer.StartArray();
-            write_scalar(scalar, is_formatted, writer);
+            if (!keys.empty()) {
+                write_scalar(keys[0], is_formatted, writer);
+            }
             writer.EndArray();
         }
 
@@ -2661,6 +2671,7 @@ View<t_ctx1>::to_columns(
     PSP_READ_LOCK(*get_lock());
 
     auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const auto& col_names = slice->get_column_names();
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -2731,6 +2742,7 @@ View<t_ctx2>::to_columns(
     PSP_GIL_UNLOCK();
     PSP_READ_LOCK(*get_lock());
     const auto slice = get_data(start_row, end_row, start_col, end_col);
+    end_row = start_row + slice->num_rows();
     const auto& col_names = slice->get_column_names();
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);

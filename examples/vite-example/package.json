@@ -8,10 +8,10 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@perspective-dev/client": "workspace:",
-        "@perspective-dev/viewer": "workspace:",
-        "@perspective-dev/viewer-charts": "workspace:",
-        "@perspective-dev/viewer-datagrid": "workspace:",
+        "@perspective-dev/client": "workspace:^",
+        "@perspective-dev/viewer": "workspace:^",
+        "@perspective-dev/viewer-charts": "workspace:^",
+        "@perspective-dev/viewer-datagrid": "workspace:^",
         "superstore-arrow": "catalog:"
     },
     "devDependencies": {

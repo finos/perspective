@@ -12,10 +12,6 @@
  */
 
 :host {
-    div.tab-title#Debug:before {
-        content: var(--psp-label--debug-tab--content, "Debug JSON");
-    }
-
     #debug-panel-overflow {
         overflow: hidden;
         display: flex;
@@ -54,6 +50,34 @@
                 &:not([disabled]):hover {
                     background-color: var(--psp--color);
                     color: var(--psp--background-color);
+                }
+
+                &#debug-panel-apply:before {
+                    content: var(
+                        --psp-label--apply-button--content,
+                        var(--psp-missing)
+                    );
+                }
+
+                &#debug-panel-reset:before {
+                    content: var(
+                        --psp-label--reset-button--content,
+                        var(--psp-missing)
+                    );
+                }
+
+                &#debug-panel-copy:before {
+                    content: var(
+                        --psp-label--copy-button--content,
+                        var(--psp-missing)
+                    );
+                }
+
+                &#debug-panel-paste:before {
+                    content: var(
+                        --psp-label--paste-button--content,
+                        var(--psp-missing)
+                    );
                 }
 
                 &[disabled] {

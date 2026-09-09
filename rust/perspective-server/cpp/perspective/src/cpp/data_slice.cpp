@@ -13,6 +13,8 @@
 #include <perspective/first.h>
 #include <perspective/data_slice.h>
 
+#include <algorithm>
+
 namespace perspective {
 
 template <typename CTX_T>
@@ -37,6 +39,7 @@ t_data_slice<CTX_T>::t_data_slice(
     m_slice(slice),
     m_column_names(column_names) {
     m_stride = m_end_col - m_start_col;
+    resync_rows();
 }
 
 template <typename CTX_T>
@@ -63,6 +66,15 @@ t_data_slice<CTX_T>::t_data_slice(
     m_column_names(column_names),
     m_column_indices(column_indices) {
     m_stride = m_end_col - m_start_col;
+    resync_rows();
+}
+
+template <typename CTX_T>
+void
+t_data_slice<CTX_T>::resync_rows() {
+    const t_uindex nrows = static_cast<t_uindex>(m_ctx->get_row_count());
+    m_start_row = std::min(m_start_row, nrows);
+    m_end_row = std::max(m_start_row, std::min(m_end_row, nrows));
 }
 
 template <typename CTX_T>

@@ -12,6 +12,8 @@
 
 use std::fmt::Display;
 
+use crate::ui::TabItem;
+
 /// Locates a view column.
 /// Table columns are those defined on the table, but their types will reflect
 /// the view type, not the table type.
@@ -110,10 +112,4 @@ impl OpenColumnSettings {
     }
 }
 
-pub trait ColumnTab: PartialEq + Display + Clone + Default + 'static {}
-
-impl ColumnTab for String {}
-
-impl ColumnTab for &'static str {}
-
-impl ColumnTab for ColumnSettingsTab {}
+impl TabItem for ColumnSettingsTab {}

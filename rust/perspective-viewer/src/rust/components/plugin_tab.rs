@@ -22,13 +22,13 @@ use yew::prelude::*;
 use crate::components::column_settings_sidebar::style_tab::primitive_field::{
     BoolField, ColorField, EnumField, NumberFieldPrimitive,
 };
-use crate::components::containers::control_group::ControlGroup;
 use crate::config::ControlSpec;
 use crate::presentation::Presentation;
 use crate::queries::get_plugin_config_schema;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::tasks::send_plugin_config;
+use crate::ui::ControlGroup;
 use crate::utils::PtrEqRc;
 
 #[derive(Clone, PartialEq, Properties)]

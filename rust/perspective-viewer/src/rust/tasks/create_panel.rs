@@ -60,7 +60,7 @@ fn wire_panel_render_sub(session: &Session, renderer: &Renderer) -> Subscription
             clone!(renderer, session);
             ApiFuture::spawn(async move {
                 renderer
-                    .update_lazy(async move { Ok(session.get_view()) })
+                    .update_lazy(async move { Ok(session.get_view_with_dimensions()) })
                     .await
                     .ignore_view_delete()
                     .map(|_| ())

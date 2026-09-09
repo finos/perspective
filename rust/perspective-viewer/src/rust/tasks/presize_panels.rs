@@ -166,13 +166,14 @@ pub async fn presize_visible_panels_open(
 pub async fn presize_visible_panels_pane_width(
     workspace: &Workspace,
     elem: &web_sys::HtmlElement,
+    pane_sel: &str,
     pane_width: f64,
 ) -> StagedPresents {
     let Some(mpc) = shadow_rect(elem, "#main_panel_container") else {
         return StagedPresents::default();
     };
 
-    let Some(pane) = shadow_rect(elem, "#app_panel > .split-panel-child") else {
+    let Some(pane) = shadow_rect(elem, pane_sel) else {
         return StagedPresents::default();
     };
 
@@ -306,6 +307,28 @@ fn shadow_rect(elem: &web_sys::HtmlElement, sel: &str) -> Option<web_sys::DomRec
             .ok()??
             .get_bounding_client_rect(),
     )
+}
+
+/// The width the `SplitPanel` pane at `pane_sel` takes with no divider
+/// override, measured under one forced synchronous layout that no paint or
+/// `ResizeObserver` can observe, or `None` when the pane isn't in the DOM.
+pub fn measure_pane_natural_width(elem: &web_sys::HtmlElement, pane_sel: &str) -> Option<f64> {
+    let pane = elem
+        .shadow_root()?
+        .query_selector(pane_sel)
+        .ok()??
+        .dyn_into::<web_sys::HtmlElement>()
+        .ok()?;
+
+    let style = pane.style();
+    let css_text = style.css_text();
+    let class_name = pane.class_name();
+    style.set_css_text("");
+    let _ = pane.class_list().remove_1("is-width-override");
+    let width = pane.get_bounding_client_rect().width();
+    style.set_css_text(&css_text);
+    pane.set_class_name(&class_name);
+    Some(width)
 }
 
 /// The open-state geometry deltas cached for the next settings *open* (P2):

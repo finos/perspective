@@ -34,6 +34,7 @@ pub fn delete_all<T: Component>(workspace: &Workspace, root: &Root<T>) -> ApiFut
         let panels = workspace
             .take_reserved()
             .into_iter()
+            .chain(workspace.take_all_closing())
             .chain(
                 workspace
                     .panel_ids()

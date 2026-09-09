@@ -108,7 +108,7 @@
                 display: flex;
                 align-items: center;
                 position: relative;
-                padding-right: 8px;
+                padding-right: 3px;
 
                 .column_name {
                     display: block;
@@ -216,23 +216,25 @@
         #group_by label.pivot-selector-label:before {
             content: var(
                 --psp-label--pivot--content,
-                var(--psp-label--group-by--content, "Group By")
+                var(--psp-label--group-by--content, var(--psp-missing))
             );
         }
 
         #group_by label.pivot-selector-label:after {
-            content: "(" var(--psp-label--group-by--content, "Group By") ")";
+            content: "(" var(--psp-label--group-by--content, var(--psp-missing))
+                ")";
         }
 
         #split_by label.pivot-selector-label:before {
             content: var(
                 --psp-label--pivot--content,
-                var(--psp-label--split-by--content, "Split By")
+                var(--psp-label--split-by--content, var(--psp-missing))
             );
         }
 
         #split_by label.pivot-selector-label:after {
-            content: "(" var(--psp-label--split-by--content, "Split By") ")";
+            content: "(" var(--psp-label--split-by--content, var(--psp-missing))
+                ")";
         }
 
         #group_by label.pivot-selector-label:after,
@@ -244,25 +246,31 @@
         }
 
         #sort label.pivot-selector-label:before {
-            content: var(--psp-label--sort--content, "Order By");
+            content: var(--psp-label--sort--content, var(--psp-missing));
         }
 
         #filter label.pivot-selector-label:before {
-            content: var(--psp-label--filter--content, "Where");
+            content: var(--psp-label--filter--content, var(--psp-missing));
         }
 
         #window-source label.pivot-selector-label:before {
-            content: var(--psp-label--window-source--content, "Column");
+            content: var(
+                --psp-label--window-source--content,
+                var(--psp-missing)
+            );
         }
 
         #window-order-by label.pivot-selector-label:before {
-            content: var(--psp-label--window-order-by--content, "Order By");
+            content: var(
+                --psp-label--window-order-by--content,
+                var(--psp-missing)
+            );
         }
 
         #window-partition-by label.pivot-selector-label:before {
             content: var(
                 --psp-label--window-partition-by--content,
-                "Partition By"
+                var(--psp-missing)
             );
         }
 

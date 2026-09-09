@@ -14,6 +14,7 @@
 :host {
     --settings-panel-z-index: 10;
     --psp--color: #ff0000;
+    --psp-missing: "__MISSING__";
 }
 
 :host(.shift-active) .shift-alt-icon {
@@ -89,7 +90,9 @@
     pointer-events: var(--override-content-pointer-events);
 }
 
-::slotted(:not([slot^="statusbar-extra"]):not([slot^="tab-"])) {
+::slotted(
+    :not([slot^="statusbar-extra"]):not([slot^="tab-"]):not([slot="modal"])
+) {
     position: absolute;
     inset: 0;
     background-color: var(--psp--background-color) !important;
@@ -100,7 +103,10 @@
         -1.75px 2.75px 0 2.75px var(--psp-inactive--color);
 }
 
-.overlay ::slotted(:not([slot^="statusbar-extra"]):not([slot^="tab-"])) {
+.overlay
+    ::slotted(
+        :not([slot^="statusbar-extra"]):not([slot^="tab-"]):not([slot="modal"])
+    ) {
     box-shadow:
         2.25px 2.25px 0 2.25px var(--psp--background-color),
         -2.25px 2.25px 0 2.25px var(--psp--background-color),
@@ -338,7 +344,6 @@
         z-index: 0;
         position: relative;
         height: 100%;
-        box-shadow: var(--plugin--box-shadow, none);
         overflow: hidden;
         border: var(--psp-plugin--border, none);
         background: var(
@@ -487,8 +492,9 @@
         }
 
         & > .split-panel-divider {
+            background-color: #00000020;
             border-top: 1px solid var(--psp-inactive--color, #6e6e6e);
-            border-bottom: 2px solid var(--psp-inactive--color, #6e6e6e);
+            border-bottom: 1px solid var(--psp-inactive--color, #6e6e6e);
             margin-left: -9px;
             margin-right: 0px;
             flex: 0 0 4px;
@@ -584,9 +590,11 @@
         }
 
         .settings_tab {
+            overflow: hidden;
+            text-overflow: ellipsis;
             border-right: 1px solid var(--psp-inactive--color);
             cursor: pointer;
-            padding: 6px 8px;
+            padding: 5px 8px 7px 8px;
             font-size: var(--label--font-size, 0.75em);
             text-transform: uppercase;
             flex: 0 1 100px;
@@ -605,7 +613,7 @@
             background-color: transparent;
             border-bottom: 1px solid transparent;
             box-shadow: 0px 9px 0px -8px var(--psp-inactive--color);
-            height: calc(100% - 1px);
+            height: 23px;
         }
     }
 
@@ -639,36 +647,28 @@
     }
 
     .sidebar_border {
-        height: 2px;
+        height: 3px;
+        border-bottom: 1px solid var(--psp-inactive--color, #6e6e6e);
         width: 100%;
-        background-color: var(--psp-inactive--color, #6e6e6e);
-        margin-top: 1px;
+        background-color: rgba(0, 0, 0, 0.15);
         flex-shrink: 0;
         flex-grow: 0;
     }
 
     #query_tabbar_tab:before {
-        content: var(--psp-label--query-tab--content);
+        content: var(--psp-label--query-tab--content, var(--psp-missing));
     }
 
     #plugin_tabbar_tab:before {
-        content: var(--psp-label--plugin-tab--content);
+        content: var(--psp-label--plugin-tab--content, var(--psp-missing));
     }
 
     #debug_tabbar_tab:before {
-        content: var(--psp-label--debug-tab--content);
+        content: var(--psp-label--debug-tab--content, var(--psp-missing));
     }
 
     #chat_tabbar_tab:before {
-        content: var(--psp-label--chat-tab--content);
-    }
-
-    label#stack-label:before {
-        content: var(--psp-label--stack--content, "Stack");
-    }
-
-    label#alt_axis-label:before {
-        content: var(--psp-label--alt-axis--content, "Alt Axis");
+        content: var(--psp-label--chat-tab--content, var(--psp-missing));
     }
 }
 
@@ -853,7 +853,10 @@
             user-select: none;
             &:before {
                 text-transform: uppercase;
-                content: var(--psp-label--chat-reasoning--content);
+                content: var(
+                    --psp-label--chat-reasoning--content,
+                    var(--psp-missing)
+                );
                 font-size: var(--psp-label--font-size, 0.75em);
             }
         }
@@ -898,7 +901,7 @@
         align-items: flex-end;
 
         /* The prompt is a `MirroredTextarea` (see
-         * `form/mirrored-textarea.css`): it is exactly as tall as its
+         * `ui/form/mirrored-textarea.css`): it is exactly as tall as its
          * text, so this wrapper owns the visible box and caps how far
          * that growth goes before it scrolls instead. */
         #chat_input_scroll {
@@ -933,7 +936,10 @@
                      * `placeholder` attribute is untranslatable and is
                      * kept only for assistive tech. */
                     &.is-empty:before {
-                        content: var(--psp-label--chat-placeholder--content);
+                        content: var(
+                            --psp-label--chat-placeholder--content,
+                            var(--psp-missing)
+                        );
                         color: var(--psp-inactive--color, #6e6e6e);
                     }
                 }
@@ -965,11 +971,11 @@
         }
 
         #chat_send_button:before {
-            content: var(--psp-label--chat-send--content);
+            content: var(--psp-label--chat-send--content, var(--psp-missing));
         }
 
         #chat_stop_button:before {
-            content: var(--psp-label--chat-stop--content);
+            content: var(--psp-label--chat-stop--content, var(--psp-missing));
         }
     }
 

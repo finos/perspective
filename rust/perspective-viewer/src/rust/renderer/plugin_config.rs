@@ -26,6 +26,7 @@ use super::Renderer;
 use crate::config::*;
 use crate::queries::resolve_abs_max;
 use crate::session::Session;
+use crate::utils::{CssKind, CssLiteralUse, parse_var_ref, resolve_css_refs};
 
 /// A per-column config map. Each inner [`serde_json::Map`] is a flat collection
 /// of plugin-defined JSON keys whose shape is dictated by the active plugin's

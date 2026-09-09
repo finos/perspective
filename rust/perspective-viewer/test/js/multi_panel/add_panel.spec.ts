@@ -146,7 +146,7 @@ test.describe("Adding panels, full-stack", () => {
 
         await new_item.hover();
         await new_item
-            .locator(".context-menu-submenu .context-menu-item", {
+            .locator(".context-menu-submenu .dropdown-menu-item", {
                 hasText: TABLE,
             })
             .click();

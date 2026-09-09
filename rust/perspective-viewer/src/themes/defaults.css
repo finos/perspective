@@ -15,15 +15,7 @@
 @import "./intl.css";
 
 perspective-viewer,
-:where(perspective-viewer [theme]),
-perspective-context-menu,
-perspective-copy-menu,
-perspective-export-menu,
-perspective-dropdown,
-perspective-date-column-style,
-perspective-datetime-column-style,
-perspective-number-column-style,
-perspective-string-column-style {
+:where(perspective-viewer [theme]) {
     --psp-button--font-size: 16px;
     --psp-config-button--padding: 15px 8px 6px 8px;
     --psp-column-selector--font-size: 16px;
@@ -73,19 +65,4 @@ perspective-string-column-style {
     --psp-status-icon--connected--color: initial;
     --psp-status-icon--initializing--color: initial;
     --psp-status-icon--psp-error--color: initial;
-}
-
-perspective-context-menu,
-perspective-copy-menu,
-perspective-export-menu,
-perspective-dropdown,
-perspective-date-column-style,
-perspective-datetime-column-style,
-perspective-number-column-style,
-perspective-string-column-style {
-    background-color: white;
-    border: 1px solid var(--psp-inactive--color);
-    border-radius: 0 0 2px 2px;
-    --psp-label--column-style-pos-color--content: "+";
-    --psp-label--column-style-neg-color--content: "-";
 }

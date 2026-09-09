@@ -13,8 +13,5 @@
 //! Each file in `custom_elements` exports a single struct which will be the
 //! public [`wasm_bindgen`] API to a JavaScript Custom Element.
 
-pub mod copy_dropdown;
 pub mod debug_plugin;
-pub mod export_dropdown;
-pub mod modal;
 pub mod viewer;

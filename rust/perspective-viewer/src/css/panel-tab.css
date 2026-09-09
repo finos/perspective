@@ -90,6 +90,10 @@
     mask-image: var(--psp-icon--active-indicator--mask-image);
 }
 
+:host([part~="tab"].closing) {
+    pointer-events: none;
+}
+
 /* A lone tab (its viewer has a single plugin child) has no stack to open —
  * no caret. Must follow the `.active` rule (equal specificity) to win when
  * the lone tab is also active. */
@@ -137,6 +141,25 @@
     font: inherit;
     text-overflow: ellipsis;
     outline: none;
+}
+
+span#rows {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-left: 12px;
+    margin-right: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 0 100000000 auto;
+}
+
+span#rows span.x,
+span#rows span.total {
+    text-overflow: ellipsis;
+    color: var(--psp-inactive--color);
 }
 
 .psp-tab-master {

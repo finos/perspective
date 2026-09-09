@@ -173,7 +173,7 @@
     height: 22px;
     user-select: none;
     white-space: nowrap;
-    width: 37px;
+    width: 33px;
 }
 
 .button > span {
@@ -213,7 +213,7 @@
     line-height: 1;
     font-size: 9px;
     background-color: var(--psp--color);
-    width: 35px;
+    width: 31px;
     text-align: center;
     border-radius: 0 0 3px 3px;
 }

@@ -512,31 +512,13 @@ impl PerspectiveViewerElement {
                         .expect("just-reserved panel is present")
                 });
 
-                // Carrying `Some(notify)` marks this load as the reservation's
-                // owner — the only call that may place or discard it below.
                 (panel, Some(self.layout_changed_notify()))
             },
         };
 
-        // A `Table` payload targets this panel's engines; a `Client` registers
-        // inertly against it. Selecting the panel here (not at construction)
-        // keeps the registry race safe — by `load()` time real plugins have
-        // registered.
         let session = panel.session;
         let renderer = panel.renderer;
-
-        // Open the pending-load window SYNCHRONOUSLY, at the call site — this
-        // is what fixes the ordering. The payload's RESET disposition (a
-        // `Table` resets the view; a `Client` does not) is unknown until the
-        // promise resolves, but the window's POSITION on the config-commit
-        // stream is fixed NOW. A `restore()` a caller fires immediately after
-        // this unawaited `load()` (the React prop-binding pattern, which has
-        // no async ordering guarantees) commits INTO this window's journal and
-        // is replayed over the reset base if the payload proves to be a
-        // `Table` — so a moved-async reset can no longer clobber a later
-        // commit. See `SESSION_CONFIG_COHERENCE_PLAN.md`.
         let generation = session.begin_pending_load();
-
         clone!(self.workspace, self.presentation);
         Ok(ApiFuture::new_throttled(async move {
             let _effect = effect;
