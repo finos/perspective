@@ -1,6 +1,18 @@
+# [v5.4.0](https://github.com/perspective-dev/perspective/releases/tag/v5.4.0)
+
+_9 September 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.3.1...v5.4.0))
+
+Features
+
+- Workspace menu [#3228](https://github.com/finos/perspective/pull/3228)
+
+Fixes
+
+- Add `View::on_remove`, better ExprTK coercion [#3227](https://github.com/finos/perspective/pull/3227)
+
 # [v5.3.1](https://github.com/perspective-dev/perspective/releases/tag/v5.3.1)
 
-_4 September 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.3.1...v5.3.1))
+_4 September 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.3.0...v5.3.1))
 
 Features
 
