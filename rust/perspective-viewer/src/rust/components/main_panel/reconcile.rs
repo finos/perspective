@@ -111,6 +111,7 @@ impl MainPanel {
         if self.listener_target.as_ref() != Some(&el) {
             if self.listener_target.is_some() {
                 self.inserted.clear();
+                self.pending_insertions.clear();
             }
 
             let _ = el.add_event_listener_with_callback(
@@ -188,6 +189,7 @@ impl MainPanel {
             let path = JsValue::from(js_sys::Array::of1(&JsValue::from_f64(index as f64)));
             let _ = layout.insert_panel(name, path, JsValue::from_bool(true));
             self.inserted.push(name.to_owned());
+            self.pending_insertions.insert(name.to_owned());
         }
 
         let mut pending = std::mem::take(&mut self.pending_removals);
@@ -197,6 +199,7 @@ impl MainPanel {
             }
 
             if pending.insert(name.clone()) {
+                self.pending_insertions.remove(name);
                 let _ = layout.remove_panel(name);
             }
 

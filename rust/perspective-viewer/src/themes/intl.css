@@ -208,4 +208,12 @@ perspective-viewer {
     --psp-label--legend-opacity--content: "Opacity";
     --psp-label--tooltip-max-column-px--content: "Max column width";
     --psp-label--tooltip-opacity--content: "Opacity";
+
+    /* Derived tables */
+    --psp-label--derive-table--content: "Derive table";
+    --psp-label--derive-table-title--content: "Derive a new table from this view";
+    --psp-label--derived-snapshot--content: "snapshot";
+    --psp-label--derived-snapshot-title--content: "This data source does not stream - this table's data is fixed at the point it was derived.";
+    --psp-label--derived-release-title--content: "Back to the parent table";
+    --psp-label--derived-release-delete-title--content: "Back to the parent table - shift-click to delete this one";
 }

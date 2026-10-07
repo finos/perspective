@@ -24,7 +24,7 @@ use crate::components::dragdrop_list::{DragContext, DragDropList, DragDropListIt
 use crate::presentation::Presentation;
 use crate::session::{Session, SessionMetadataRc};
 use crate::ui::{IntlLabel, Select, SelectItem};
-use crate::utils::{AddListener, DragEffect, DragTarget, Subscription};
+use crate::utils::{AddListener, DragEffect, DragTarget, Subscription, left_click};
 
 /// The declared capabilities of one window aggregate, for a `source` column
 /// type. Which controls an aggregate needs is the data model's to state - the
@@ -846,9 +846,10 @@ impl Component for WindowEditor {
                             WindowSortDir::Asc
                         };
 
-                        let onmousedown = ctx
-                            .link()
-                            .callback(|_: MouseEvent| WindowEditorMsg::ToggleOrderDir);
+                        let onmousedown = left_click(
+                            ctx.link()
+                                .callback(|_: MouseEvent| WindowEditorMsg::ToggleOrderDir),
+                        );
 
                         yew::html_nested! {
                             <WindowSlotColumn

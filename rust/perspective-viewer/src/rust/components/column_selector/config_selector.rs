@@ -600,7 +600,7 @@ impl Component for ConfigSelector {
             _ => None,
         };
 
-        let transpose = ctx.link().callback(|_| ConfigSelectorMsg::TransposePivots);
+        let transpose = left_click(ctx.link().callback(|_| ConfigSelectorMsg::TransposePivots));
         let column_dropdown = self.column_dropdown.clone();
         let mut class = classes!();
 

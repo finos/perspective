@@ -135,19 +135,13 @@ impl PortalModal {
 
     fn position_against_target(&mut self, target: &HtmlElement) {
         let target_rect = target.get_bounding_client_rect();
-        let height = target_rect.height();
-        let width = target_rect.width();
-        let top = target_rect.top();
-        let left = target_rect.left();
-
         if !self.visible {
-            self.top = top + height - 1.0;
-            self.left = left;
-            self.visible = false;
+            self.top = target_rect.top() + target_rect.height() - 1.0;
+            self.left = target_rect.left();
         } else {
-            let anchor = calc_relative_position(&self.host, top, left, height, width);
-            self.anchor.set(anchor);
             let modal_rect = self.host.get_bounding_client_rect();
+            let anchor = calc_relative_position(&target_rect, &modal_rect);
+            self.anchor.set(anchor);
             let (new_top, new_left) = calc_anchor_position(anchor, &target_rect, &modal_rect);
             self.top = new_top;
             self.left = new_left;

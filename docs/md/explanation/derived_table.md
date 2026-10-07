@@ -313,6 +313,11 @@ the base up. The row for the panel's own table carries a close button:
 - **Shift+click** rebinds _and_ deletes the derived table, which is offered only
   when that panel is the only thing reading it.
 
+A "full" reset — shift-clicking the status bar's **Reset** button, or
+`reset(true)` / `resetPanel` with `reset_all` from the API — tears the whole
+derived state down: every panel bound to a derived `Table` is released to its
+root table, and every derivation (pending ones included) is deleted.
+
 A backend which cannot promote a `View` to a `Table` reports so through the
 `view_derivations` capability, and the control is hidden for panels on that
 client. Where a backend can derive but does not stream — DuckDB and PostgreSQL —

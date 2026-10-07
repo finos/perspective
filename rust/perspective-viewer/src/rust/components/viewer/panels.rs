@@ -28,11 +28,12 @@ use super::wiring::{
     subscribe_panel_titles,
 };
 use crate::config::ViewerConfigInitial;
+use crate::derived::suggest_name;
 use crate::queries::*;
 use crate::renderer::Renderer;
 use crate::session::*;
 use crate::tasks::*;
-use crate::utils::{Completion, spawn_owned};
+use crate::utils::{Completion, PtrEqRc, spawn_owned};
 use crate::workspace::{Panel, PanelId};
 
 impl PerspectiveViewer {
@@ -215,7 +216,9 @@ impl PerspectiveViewer {
             let workspace = ctx.props().workspace.clone();
             let notify = ctx.link().callback(|_: ()| LayoutChanged);
             let activate = ctx.link().callback(|id| SetActivePanel(id, None));
+            let effect = workspace.effects().guard();
             ApiFuture::spawn(async move {
+                let _effect = effect;
                 let config = panel
                     .renderer
                     .clone()
@@ -247,6 +250,39 @@ impl PerspectiveViewer {
         false
     }
 
+    pub(super) fn on_derive_panel(&mut self, ctx: &Context<Self>, id: String) -> bool {
+        if let Some(panel) = ctx.props().workspace.panel(&PanelId::from(id)) {
+            let presentation = ctx.props().presentation.clone();
+            let workspace = ctx.props().workspace.clone();
+            let effect = workspace.effects().guard();
+            ApiFuture::spawn(async move {
+                let _effect = effect;
+                let config = PtrEqRc::new(panel.session.get_view_config().clone());
+                let table = panel.session.get_table().map(|x| x.get_name().to_owned());
+                let name = suggest_name(
+                    &fetch_hosted_tables(&workspace)
+                        .await
+                        .into_iter()
+                        .flat_map(|(_, tables)| tables)
+                        .collect(),
+                    &config,
+                    &table,
+                );
+
+                create_derived(
+                    &panel.session,
+                    &panel.renderer,
+                    &presentation,
+                    &workspace,
+                    name,
+                )
+                .await
+            });
+        }
+
+        false
+    }
+
     pub(super) fn on_new_panel(&mut self, ctx: &Context<Self>, id: String) -> bool {
         if let Some(panel) = ctx.props().workspace.panel(&PanelId::from(id)) {
             let Some(table_name) = panel.session.get_table().map(|t| t.get_name().to_owned())
@@ -260,7 +296,9 @@ impl PerspectiveViewer {
             let workspace = ctx.props().workspace.clone();
             let notify = ctx.link().callback(|_: ()| LayoutChanged);
             let activate = ctx.link().callback(|id| SetActivePanel(id, None));
+            let effect = workspace.effects().guard();
             ApiFuture::spawn(async move {
+                let _effect = effect;
                 let client = panel.session.get_client();
                 let new_id = create_panel(
                     &elem,
@@ -306,7 +344,9 @@ impl PerspectiveViewer {
         let workspace = ctx.props().workspace.clone();
         let notify = ctx.link().callback(|_: ()| LayoutChanged);
         let activate = ctx.link().callback(|id| SetActivePanel(id, None));
+        let effect = workspace.effects().guard();
         ApiFuture::spawn(async move {
+            let _effect = effect;
             let new_id = create_panel(
                 &elem,
                 &presentation,

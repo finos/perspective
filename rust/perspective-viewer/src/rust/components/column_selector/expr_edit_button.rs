@@ -13,6 +13,7 @@
 use yew::prelude::*;
 
 use super::ColumnSettingsTarget;
+use crate::utils::left_click;
 
 #[derive(PartialEq, Clone, Properties)]
 pub struct ExprEditButtonProps {
@@ -41,10 +42,10 @@ pub struct ExprEditButtonProps {
 /// when pressed, it opens up the expression editor side-panel.
 #[function_component]
 pub fn ExprEditButton(p: &ExprEditButtonProps) -> Html {
-    let onmousedown = yew::use_callback(p.clone(), |_, p| {
+    let onmousedown = left_click(yew::use_callback(p.clone(), |_, p| {
         p.on_open_expr_panel
             .emit(ColumnSettingsTarget::Column(p.name.clone()))
-    });
+    }));
 
     let class = if p.is_disabled {
         "expression-edit-button disabled"

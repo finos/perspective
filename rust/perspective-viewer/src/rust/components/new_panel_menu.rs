@@ -29,12 +29,23 @@ pub type HostedTables = Rc<Vec<(String, Vec<String>)>>;
 /// `(panel id, title)` per panel, in layout-insertion order.
 pub type PanelLabels = Rc<Vec<(String, Option<String>)>>;
 
+/// Consumer count per derived `Table` name, which marks those rows and gates
+/// their delete affordance.
+pub type DerivedCounts = Rc<std::collections::BTreeMap<String, usize>>;
+
 #[derive(Properties, PartialEq)]
 pub struct NewPanelMenuProps {
     /// `None` while the hosted-table fetch is in flight.
     pub tables: Option<HostedTables>,
     pub panels: PanelLabels,
     pub callback: Callback<NewPanelPick>,
+
+    #[prop_or_default]
+    pub derived: DerivedCounts,
+
+    /// Delete a derived `Table`, offered only where nothing reads it.
+    #[prop_or_default]
+    pub on_delete: Option<Callback<String>>,
 }
 
 /// The "New" menu body shared by the status bar dropdown and the context
@@ -58,7 +69,48 @@ pub fn NewPanelMenu(props: &NewPanelMenuProps) -> Html {
                             client: client.clone(),
                             table: table.clone(),
                         });
-                        html! { <span class="dropdown-menu-item" {onmousedown}>{ table }</span> }
+
+                        let consumers = props.derived.get(table).copied();
+                        let mut class = classes!("dropdown-menu-item");
+                        if consumers.is_some() {
+                            class.push("is-derived");
+                        }
+
+                        let on_delete = props
+                            .on_delete
+                            .clone()
+                            .filter(|_| consumers == Some(0))
+                            .map(|cb| {
+                                let table = table.clone();
+                                Callback::from(move |event: MouseEvent| {
+                                    event.stop_propagation();
+                                    cb.emit(table.clone());
+                                })
+                            });
+
+                        html! {
+                            <span {class} {onmousedown}>
+                                { table }
+                                if let Some(count) = consumers.filter(|x| *x > 0) {
+                                    <span class="derived_consumers">{ count }</span>
+                                }
+                                if let Some(on_delete) = on_delete {
+                                    <span
+                                        class="derived_delete"
+                                        title="Delete this derived table"
+                                        onmousedown={on_delete}
+                                        // The menu stays OPEN after a delete, so the
+                                        // CLICK half of the gesture must not bubble to
+                                        // the context-menu flyout's Submenu row, whose
+                                        // own `onclick` would fire "New" AND close the
+                                        // session.
+                                        onclick={Callback::from(|event: MouseEvent| {
+                                            event.stop_propagation();
+                                        })}
+                                    />
+                                }
+                            </span>
+                        }
                     });
 
                     html! {
@@ -94,4 +146,20 @@ pub fn NewPanelMenu(props: &NewPanelMenuProps) -> Html {
             <div class="dropdown-group-container">{ panels }</div>
         </div>
     }
+}
+
+/// Consumer counts for every derived `Table` the workspace owns.
+pub fn derived_counts(
+    workspace: &crate::workspace::Workspace,
+) -> crate::components::new_panel_menu::DerivedCounts {
+    std::rc::Rc::new(
+        workspace
+            .derived_names()
+            .into_iter()
+            .map(|name| {
+                let count = workspace.derived_consumers(&name);
+                (name, count)
+            })
+            .collect(),
+    )
 }

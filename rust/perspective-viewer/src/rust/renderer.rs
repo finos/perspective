@@ -554,6 +554,30 @@ impl Renderer {
     /// empty panel frame. NOTE eager mounting is exactly why
     /// [`Self::is_plugin_activated`] must be an explicit has-drawn flag, not
     /// DOM-connectedness.
+    /// Rename this renderer's slot (and its mounted light-DOM elements'
+    /// `slot` attributes) ahead of an eject whose slot name a replacement
+    /// panel reuses, so the async [`Self::dispose`] sweep cannot remove the
+    /// successor's elements.
+    pub fn retire_slot(&self) {
+        let Some(slot) = self.slot_name() else {
+            return;
+        };
+
+        let viewer = self.0.borrow().viewer_elem.clone();
+        let slots = [slot.clone(), format!("statusbar-extra-{slot}")];
+        let children = viewer.children();
+        for idx in 0..children.length() {
+            if let Some(el) = children.item(idx)
+                && let Some(s) = el.get_attribute("slot")
+                && slots.contains(&s)
+            {
+                let _ = el.set_attribute("slot", &format!("{s}-retired"));
+            }
+        }
+
+        self.set_slot_name(&format!("{slot}-retired"));
+    }
+
     pub fn mount_active_plugin(&self) -> ApiResult<()> {
         if let Some(plugin) = self.active_plugin() {
             let viewer_elem = self.0.borrow().viewer_elem.clone();

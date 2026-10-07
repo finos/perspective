@@ -96,9 +96,10 @@ impl Component for SortColumn {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let onclick = ctx
-            .link()
-            .callback(|event: MouseEvent| SortColumnMsg::SortDirClick(event.shift_key()));
+        let onclick = left_click(
+            ctx.link()
+                .callback(|event: MouseEvent| SortColumnMsg::SortDirClick(event.shift_key())),
+        );
 
         let dragstart = Callback::from({
             let event_name = ctx.props().sort.0.to_owned();

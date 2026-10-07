@@ -206,4 +206,12 @@ perspective-viewer {
     --psp-label--group-column--content: "列";
     --psp-label--group-format--content: "書式";
     --psp-label--column-size-override--content: "列の幅";
+
+    /* Derived tables */
+    --psp-label--derive-table--content: "テーブルを派生";
+    --psp-label--derive-table-title--content: "このビューから新しいテーブルを派生します";
+    --psp-label--derived-snapshot--content: "スナップショット";
+    --psp-label--derived-snapshot-title--content: "このデータソースはストリーミングしません - このテーブルのデータは派生した時点で固定されます。";
+    --psp-label--derived-release-title--content: "親テーブルに戻る";
+    --psp-label--derived-release-delete-title--content: "親テーブルに戻る - Shiftクリックで削除";
 }

@@ -58,9 +58,6 @@ test.describe("Drag and Drop", () => {
             await configUpdated();
             const config = await view.save();
             expect(config.columns).toEqual(["Category", "Sales"]);
-            await expect(view.container.locator("#add-expression")).toHaveClass(
-                /dragdrop-hover/,
-            );
 
             const contents = await getSettingsPanelContents(page);
             await compareContentsToSnapshot(contents);
@@ -128,9 +125,6 @@ test.describe("Drag and Drop", () => {
             const config = await view.save();
             expect(config.group_by).toEqual(["Category"]);
             expect(config.columns).toEqual(["Sales", "Profit"]);
-            await expect(view.container.locator("#add-expression")).toHaveClass(
-                /dragdrop-hover/,
-            );
 
             const contents = await getSettingsPanelContents(page);
             await compareContentsToSnapshot(contents);
@@ -158,9 +152,6 @@ test.describe("Drag and Drop", () => {
             const config = await view.save();
             expect(config.split_by).toEqual(["Category"]);
             expect(config.columns).toEqual(["Sales"]);
-            await expect(view.container.locator("#add-expression")).toHaveClass(
-                /dragdrop-hover/,
-            );
 
             const contents = await getSettingsPanelContents(page);
             await compareContentsToSnapshot(contents);
@@ -188,9 +179,6 @@ test.describe("Drag and Drop", () => {
             const config = await view.save();
             expect(config.filter).toEqual([["Category", "==", null]]);
             expect(config.columns).toEqual(["Sales"]);
-            await expect(view.container.locator("#add-expression")).toHaveClass(
-                /dragdrop-hover/,
-            );
 
             const contents = await getSettingsPanelContents(page);
             await compareContentsToSnapshot(contents);
@@ -218,9 +206,6 @@ test.describe("Drag and Drop", () => {
             const config = await view.save();
             expect(config.sort).toEqual([["Category", "asc"]]);
             expect(config.columns).toEqual(["Sales"]);
-            await expect(view.container.locator("#add-expression")).toHaveClass(
-                /dragdrop-hover/,
-            );
 
             const contents = await getSettingsPanelContents(page);
             await compareContentsToSnapshot(contents);

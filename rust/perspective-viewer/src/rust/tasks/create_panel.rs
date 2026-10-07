@@ -31,11 +31,18 @@ use crate::*;
 pub(crate) fn wire_panel_subs(
     elem: &HtmlElement,
     presentation: &Presentation,
+    workspace: &Workspace,
     session: &Session,
     renderer: &Renderer,
 ) -> Vec<Subscription> {
     let mut subs = vec![wire_panel_render_sub(session, renderer)];
-    subs.extend(wire_panel_events(elem, session, renderer, presentation));
+    subs.extend(wire_panel_events(
+        elem,
+        session,
+        renderer,
+        presentation,
+        workspace,
+    ));
     subs
 }
 
@@ -192,7 +199,7 @@ pub(crate) fn create_panel_model(
     let renderer = Renderer::new(elem);
     let id = id.unwrap_or_else(|| workspace.generate_id());
     renderer.set_slot_name(id.as_str());
-    let subs = wire_panel_subs(elem, presentation, &session, &renderer);
+    let subs = wire_panel_subs(elem, presentation, workspace, &session, &renderer);
     let panel = Panel::new(id.clone(), session.clone(), renderer.clone(), subs);
     match placement {
         Placement::Placed => workspace.insert_panel(panel, PanelPhase::Placed),

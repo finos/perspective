@@ -20,6 +20,7 @@ use serde_json::Value;
 use ts_rs::TS;
 use wasm_bindgen::prelude::*;
 
+use crate::config::TableRef;
 use crate::renderer::ColumnConfigMap;
 
 /// The state of an entire `custom_elements::PerspectiveViewerElement` component
@@ -30,18 +31,18 @@ use crate::renderer::ColumnConfigMap;
 /// single-panel format flattens back to the legacy shape.
 #[derive(Debug, Default, Serialize, PartialEq, TS)]
 #[serde(deny_unknown_fields)]
-pub struct ViewerConfig<V: TS = String> {
+pub struct ViewerConfig<V: TS = String, T: TS = TableRef> {
     pub settings: bool,
 
     #[serde(flatten)]
-    pub panel: PanelViewerConfig<V>,
+    pub panel: PanelViewerConfig<V, T>,
 }
 
 /// The per-panel state of a [`ViewerConfig`] — everything except the
 /// element-level `settings` flag. This is the `panels` entry type of the
 /// workspace config format.
 #[derive(Debug, Default, Serialize, PartialEq, TS)]
-pub struct PanelViewerConfig<V: TS = String> {
+pub struct PanelViewerConfig<V: TS = String, T: TS = TableRef> {
     /// The `@perspective-dev/viewer` version that wrote this config,
     /// stamped on save and used to migrate older tokens. Callers do not
     /// set it.
@@ -66,11 +67,11 @@ pub struct PanelViewerConfig<V: TS = String> {
     /// the active plugin; see `get_style_schema`.
     pub plugin_config: serde_json::Map<String, Value>,
 
-    /// Name of the `Table` this panel renders, as hosted on the panel's
-    /// `Client`. Every placed panel has a table binding (creation
-    /// requires one by type — [`ViewerConfigInitial`]), so the saved
-    /// config carries it unconditionally.
-    pub table: String,
+    /// The `Table` this panel renders: its hosted name in a
+    /// [`WorkspaceConfig`] `panels` entry (`T = String`), and a
+    /// [`TableRef`] — a name, or a recursively inlined derived-table
+    /// definition — in the single-panel `save()` format.
+    pub table: T,
 
     /// Selected theme NAME (e.g. `"Pro Dark"`) — not a CSS value. Valid
     /// names are the Perspective themes loaded on the page, which
@@ -84,11 +85,37 @@ pub struct PanelViewerConfig<V: TS = String> {
     pub view_config: ViewConfig,
 }
 
-impl<V: TS> Deref for ViewerConfig<V> {
-    type Target = PanelViewerConfig<V>;
+impl<V: TS, T: TS> Deref for ViewerConfig<V, T> {
+    type Target = PanelViewerConfig<V, T>;
 
     fn deref(&self) -> &Self::Target {
         &self.panel
+    }
+}
+
+impl<V: TS, T: TS> PanelViewerConfig<V, T> {
+    /// The same config with the `table` slot mapped, which is how the
+    /// single-panel emitters convert a bound name to its inline form.
+    pub fn map_table<U: TS>(self, f: impl FnOnce(T) -> U) -> PanelViewerConfig<V, U> {
+        PanelViewerConfig {
+            version: self.version,
+            columns_config: self.columns_config,
+            plugin: self.plugin,
+            plugin_config: self.plugin_config,
+            table: f(self.table),
+            theme: self.theme,
+            title: self.title,
+            view_config: self.view_config,
+        }
+    }
+}
+
+impl<V: TS, T: TS> ViewerConfig<V, T> {
+    pub fn map_table<U: TS>(self, f: impl FnOnce(T) -> U) -> ViewerConfig<V, U> {
+        ViewerConfig {
+            settings: self.settings,
+            panel: self.panel.map_table(f),
+        }
     }
 }
 
@@ -102,7 +129,7 @@ pub static API_VERSION: LazyLock<&'static str> = LazyLock::new(|| {
     pkg.version
 });
 
-impl ViewerConfig {
+impl<V: TS + Serialize, T: TS + Serialize> ViewerConfig<V, T> {
     /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
     pub fn encode(&self) -> ApiResult<JsValue> {
         Ok(JsValue::from_serde_ext(self)?)
@@ -150,10 +177,11 @@ pub struct ViewerConfigUpdate {
     #[ts(optional)]
     pub title: TitleUpdate,
 
-    /// Name of the `Table` to render, as hosted on this panel's
-    /// `Client`. Rebinding an existing panel to another table keeps the
-    /// rest of the config, so column names that do not exist in the new
-    /// table will fail validation.
+    /// The `Table` to render: a name as hosted on this panel's `Client`,
+    /// or an inline derived-table definition to materialize (reusing a
+    /// structurally identical derived `Table` when one exists). Rebinding
+    /// an existing panel keeps the rest of the config, so column names
+    /// that do not exist in the new table will fail validation.
     #[serde(default)]
     #[ts(as = "Option<_>")]
     #[ts(optional)]
@@ -305,7 +333,7 @@ impl From<ViewerConfigInitial> for ViewerConfigUpdate {
             version: up(value.version),
             plugin: up(value.plugin),
             title: up(value.title),
-            table: OptionalUpdate::Update(value.table),
+            table: OptionalUpdate::Update(value.table.into()),
             theme: up(value.theme),
             settings: OptionalUpdate::Missing,
             plugin_config: up(value.plugin_config),
@@ -350,6 +378,8 @@ impl TryFrom<ViewerConfigUpdate> for ViewerConfigInitial {
             return Err(ApiError::new(CREATE_REQUIRES_TABLE));
         };
 
+        let table = table.name()?.to_owned();
+
         Ok(Self {
             table,
             version: down(version),
@@ -393,7 +423,7 @@ pub type PluginUpdate = OptionalUpdate<String>;
 pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
 pub type TitleUpdate = OptionalUpdate<String>;
-pub type TableUpdate = OptionalUpdate<String>;
+pub type TableUpdate = OptionalUpdate<TableRef>;
 pub type VersionUpdate = OptionalUpdate<String>;
 pub type ColumnConfigUpdate = OptionalUpdate<ColumnConfigMap>;
 pub type PluginConfigUpdate = OptionalUpdate<serde_json::Map<String, Value>>;

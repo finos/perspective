@@ -652,10 +652,12 @@ impl Presentation {
             _ => None,
         };
 
-        self.end_drag();
+        self.reset_drag_state();
         if let Some(action) = action {
             self.drop_received.emit(action);
         }
+
+        self.emit_drag_end();
     }
 
     /// Start the drag/drop action with the name of the column being dragged.
@@ -681,11 +683,26 @@ impl Presentation {
     }
 
     fn end_drag(&self) {
+        self.reset_drag_state();
+        self.emit_drag_end();
+    }
+
+    fn reset_drag_state(&self) {
         self.drag_target.borrow_mut().take();
         *self.drag_state.borrow_mut() = DragState::NoDrag;
-        if let Some(cb) = self.on_dragend.borrow().as_ref() {
-            cb.emit(());
-        }
+    }
+
+    /// Notify the root one microtask late, so a drop's config edit (itself
+    /// notified through a microtask) lands in the same render batch.
+    fn emit_drag_end(&self) {
+        let emit = self.on_dragend.borrow().clone();
+        ApiFuture::spawn(async move {
+            if let Some(cb) = emit {
+                cb.emit(());
+            }
+
+            Ok(())
+        });
     }
 
     /// Register a `dragend` listener on the host `<perspective-viewer>`

@@ -34,6 +34,7 @@ extern "C" {
 pub type SyncUpdatePanelsResult = (
     Vec<(PanelId, Session, Renderer, ViewerConfigUpdate)>,
     std::vec::Vec<perspective_js::utils::ApiFuture<()>>,
+    Option<std::collections::BTreeMap<String, crate::config::DerivedTableConfig>>,
 );
 
 /// Synchronously apply a `WorkspaceConfigUpdate` to the element's models
@@ -47,6 +48,7 @@ pub fn sync_update_panels(
         active,
         layout,
         panels,
+        derived_tables,
         global_filters,
         masters,
         palette,
@@ -75,12 +77,28 @@ pub fn sync_update_panels(
         // zero-panel empty stage — the former table-less fallback panel was
         // exactly the blank-panel state this type exists to preclude.
         Some(panels) => {
+            // Eject the outgoing set FIRST so each saved id is free to be
+            // reused — panels keep their SAVED ids (`saveWorkspace` writes
+            // them back; `active`/`masters` and user configs address panels
+            // by these names across the round-trip).
+            if let Some(panel) = this.workspace.take_reserved() {
+                panel.renderer.retire_slot();
+                eject_tasks.push(eject_panel(panel, Disposal::Reject));
+            }
+
+            for old in &old_ids {
+                if let Some(panel) = this.workspace.remove_panel(old) {
+                    panel.renderer.retire_slot();
+                    eject_tasks.push(eject_panel(panel, Disposal::Reject));
+                }
+            }
+
             for (saved_id, config) in panels {
                 let (fresh, session, renderer, config) = create_panel_model(
                     &this.elem,
                     &this.presentation,
                     &this.workspace,
-                    None,
+                    Some(PanelId::from(saved_id.as_str())),
                     config.into(),
                     None,
                     Placement::Placed,
@@ -88,16 +106,6 @@ pub fn sync_update_panels(
 
                 id_map.insert(saved_id, fresh.as_str().to_owned());
                 contents.push((fresh, session, renderer, config));
-            }
-
-            if let Some(panel) = this.workspace.take_reserved() {
-                eject_tasks.push(eject_panel(panel, Disposal::Reject));
-            }
-
-            for old in &old_ids {
-                if let Some(panel) = this.workspace.remove_panel(old) {
-                    eject_tasks.push(eject_panel(panel, Disposal::Reject));
-                }
             }
         },
         None => {
@@ -119,6 +127,25 @@ pub fn sync_update_panels(
         if !replace {
             this.workspace.layout_staged().emit(());
         }
+    } else if replace && contents.len() > 1 {
+        // No saved tree: synthesize the equal-split default so a
+        // multi-panel replace still mounts in ONE layout commit —
+        // per-cell `insertPanel` commits are async, and a commit landing
+        // between two inserts drops the later one.
+        this.workspace
+            .set_pending_layout(crate::js::Layout::Split(crate::js::SplitLayout {
+                orientation: crate::js::Orientation::Horizontal,
+                sizes: vec![1.0 / contents.len() as f64; contents.len()],
+                children: contents
+                    .iter()
+                    .map(|(id, ..)| {
+                        crate::js::Layout::Tab(crate::js::TabLayout {
+                            tabs: vec![id.as_str().to_owned()],
+                            selected: Some(0),
+                        })
+                    })
+                    .collect(),
+            }));
     }
 
     // Phase 3 — the single visible commit
@@ -222,5 +249,5 @@ pub fn sync_update_panels(
         OptionalUpdate::Update(filters) => this.workspace.set_global_filters(filters),
     }
 
-    Ok((contents, eject_tasks))
+    Ok((contents, eject_tasks, derived_tables))
 }

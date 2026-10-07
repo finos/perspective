@@ -43,8 +43,8 @@ pub use self::op_queue::{EditDelta, OpCtx, OpKind, StepFuture, Ticket};
 use self::panel_state::effective;
 pub use self::panel_state::{Binding, OverlayClause, PanelState};
 pub use self::props::{SessionProps, TableLoadState};
-pub use self::view_subscription::ViewStats;
 use self::view_subscription::*;
+pub use self::view_subscription::{ViewStats, ViewSubscription};
 use crate::config::PluginStaticConfig;
 use crate::utils::*;
 
@@ -604,6 +604,18 @@ impl Session {
         }
 
         self.0.queue.reject_all(disposal.into());
+    }
+
+    /// Take the bound `View` out WITHOUT deleting it, so it can feed a derived
+    /// `Table`, leaving the next bind nothing to dispose of.
+    pub fn take_view_sub(&self) -> Option<ViewSubscription> {
+        self.borrow_mut().view_sub.take()
+    }
+
+    /// Put a subscription taken by [`Self::take_view_sub`] back, for a
+    /// derivation which could not complete.
+    pub fn put_view_sub(&self, sub: ViewSubscription) {
+        self.borrow_mut().view_sub = Some(sub);
     }
 
     pub(crate) fn is_disposed(&self) -> bool {
@@ -1609,7 +1621,7 @@ impl Session {
 
                 match agg {
                     Err(_) => {
-                        tracing::warn!("No default aggregate for column '{}' found, skipping", col)
+                        tracing::debug!("No default aggregate for column '{}' found, skipping", col)
                     },
                     Ok(agg) => _ = view_config.aggregates.insert(col.to_string(), agg),
                 };

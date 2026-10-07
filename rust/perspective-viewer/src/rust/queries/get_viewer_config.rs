@@ -26,7 +26,7 @@ pub async fn get_viewer_config(
     session: &Session,
     renderer: &Renderer,
     presentation: &Presentation,
-) -> ApiResult<ViewerConfig> {
+) -> ApiResult<ViewerConfig<String, String>> {
     let version = config::API_VERSION.to_string();
     let mut view_config = if let Some(rendered) = session.get_rendered_view_config() {
         (*rendered).clone()

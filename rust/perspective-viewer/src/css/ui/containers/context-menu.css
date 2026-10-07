@@ -73,7 +73,8 @@
             padding-left: 12px;
         }
 
-        &:hover > .context-menu-submenu {
+        &:hover > .context-menu-submenu,
+        & > .context-menu-submenu.open {
             display: flex;
         }
     }
@@ -94,6 +95,16 @@
     color: var(--psp--color);
     border: 1px solid var(--psp-inactive--color);
     box-shadow: var(--psp-dropdown--box-shadow);
+
+    &.flip-x {
+        left: auto;
+        right: 100%;
+    }
+
+    &.flip-y {
+        top: auto;
+        bottom: -1px;
+    }
 }
 
 .context-menu-submenu > .new-panel-menu {

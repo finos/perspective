@@ -148,7 +148,7 @@ test.describe("saveWorkspace / restoreWorkspace", () => {
         expect(ws.layout.type).toBe("split-layout");
         expect(ws.layout.children.length).toBe(2);
 
-        // Panel configs round-trip (ids are regenerated, so compare by value).
+        // Panel configs round-trip; compare by value.
         const by_title = Object.fromEntries(
             (Object.values(ws.panels) as any[]).map((c) => [c.title, c]),
         );
@@ -178,6 +178,25 @@ test.describe("saveWorkspace / restoreWorkspace", () => {
         // One master, remapped to the fresh id of the "One" panel.
         expect(ws.masters.length).toBe(1);
         expect(ws.panels[ws.masters[0]].title).toBe("One");
+    });
+
+    test("restoreWorkspace without a layout places every panel under its saved id", async ({
+        page,
+    }) => {
+        const threw = await restoreWorkspaceThrew(page, {
+            panels: {
+                one: { table: TABLE, title: "One" },
+                two: { table: TABLE, title: "Two", group_by: ["Region"] },
+            },
+        });
+
+        expect(threw).toBe(false);
+        expect((await panel_names(page)).sort()).toEqual(["one", "two"]);
+        const ws = await saveWorkspace(page);
+        expect(Object.keys(ws.panels).sort()).toEqual(["one", "two"]);
+        await expect(
+            page.locator("perspective-viewer regular-layout-frame"),
+        ).toHaveCount(2);
     });
 
     test("restoreWorkspace without a panels map keeps the panels", async ({

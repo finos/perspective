@@ -149,19 +149,21 @@ fn dispatch_config_update(
     session: &Session,
     renderer: &Renderer,
     presentation: &Presentation,
+    workspace: &Workspace,
 ) {
     if session.get_table().is_none() && session.pending_table().is_none() {
         return;
     }
 
-    clone!(session, renderer, presentation);
+    clone!(session, renderer, presentation, workspace);
     let elem = elem.clone();
     let tracker = session.clone();
     tracker.track_dispatch(async move {
         let viewer_config = renderer
             .clone()
             .with_lock(async { get_viewer_config(&session, &renderer, &presentation).await })
-            .await?;
+            .await?
+            .map_table(|name| workspace.inline_table_ref(&name));
 
         if viewer_config.view_config != Default::default()
             && Some(&viewer_config) != session.last_dispatched_config.borrow().as_deref()
@@ -215,7 +217,13 @@ pub fn wire_element_events(
         clone!(elem, presentation, workspace);
         move |_| {
             if let Some(panel) = workspace.active_panel() {
-                dispatch_config_update(&elem, &panel.session, &panel.renderer, &presentation);
+                dispatch_config_update(
+                    &elem,
+                    &panel.session,
+                    &panel.renderer,
+                    &presentation,
+                    &workspace,
+                );
             }
         }
     });
@@ -234,7 +242,13 @@ pub fn wire_element_events(
 
             dispatch_event(&elem, "toggle-settings", open).unwrap();
             if let Some(panel) = workspace.active_panel() {
-                dispatch_config_update(&elem, &panel.session, &panel.renderer, &presentation);
+                dispatch_config_update(
+                    &elem,
+                    &panel.session,
+                    &panel.renderer,
+                    &presentation,
+                    &workspace,
+                );
             }
         }
     });
@@ -328,12 +342,13 @@ pub fn wire_panel_events(
     session: &Session,
     renderer: &Renderer,
     presentation: &Presentation,
+    workspace: &Workspace,
 ) -> Vec<Subscription> {
     let plugin_sub = renderer.plugin_changed.add_listener({
-        clone!(elem, session, renderer, presentation);
+        clone!(elem, session, renderer, presentation, workspace);
         move |plugin| {
             dispatch_plugin_changed(&elem, &renderer, &plugin);
-            dispatch_config_update(&elem, &session, &renderer, &presentation);
+            dispatch_config_update(&elem, &session, &renderer, &presentation, &workspace);
         }
     });
 
@@ -343,13 +358,13 @@ pub fn wire_panel_events(
     // paused-`load()` case). The dispatcher dedups, so REBUILD's pairing
     // with `view_created` can't double-fire it.
     let view_sub = session.commit_reconciled.add_listener({
-        clone!(elem, session, renderer, presentation);
-        move |_| dispatch_config_update(&elem, &session, &renderer, &presentation)
+        clone!(elem, session, renderer, presentation, workspace);
+        move |_| dispatch_config_update(&elem, &session, &renderer, &presentation, &workspace)
     });
 
     let title_sub = session.title_changed.add_listener({
-        clone!(elem, session, renderer, presentation);
-        move |_| dispatch_config_update(&elem, &session, &renderer, &presentation)
+        clone!(elem, session, renderer, presentation, workspace);
+        move |_| dispatch_config_update(&elem, &session, &renderer, &presentation, &workspace)
     });
 
     let unload_sub = session.table_unloaded.add_listener({
@@ -365,22 +380,22 @@ pub fn wire_panel_events(
     });
 
     let select_sub = renderer.selection_changed.add_listener({
-        clone!(elem, session, renderer, presentation);
+        clone!(elem, session, renderer, presentation, workspace);
         move |window: Option<ViewWindow>| {
             let detail = JsValue::from_serde_ext(&window).unwrap();
             annotate_panel(&detail, &renderer);
             let _ = dispatch_panel_event(&elem, &renderer, "select", &detail);
-            dispatch_config_update(&elem, &session, &renderer, &presentation);
+            dispatch_config_update(&elem, &session, &renderer, &presentation, &workspace);
         }
     });
 
     let column_style_sub = renderer.column_style_changed.add_listener({
-        clone!(elem, session, renderer, presentation);
+        clone!(elem, session, renderer, presentation, workspace);
         move |cfg: ColumnConfigMap| {
             let detail = JsValue::from_serde_ext(&cfg).unwrap();
             annotate_panel(&detail, &renderer);
             let _ = dispatch_panel_event(&elem, &renderer, "column-style-change", &detail);
-            dispatch_config_update(&elem, &session, &renderer, &presentation);
+            dispatch_config_update(&elem, &session, &renderer, &presentation, &workspace);
         }
     });
 

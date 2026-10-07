@@ -24,7 +24,7 @@ use crate::components::column_selector::{EmptyColumn, InPlaceColumn, InvalidColu
 use crate::components::type_icon::TypeIcon;
 use crate::presentation::{DragDropContainer, Presentation};
 use crate::ui::intl_slug;
-use crate::utils::DragTarget;
+use crate::utils::{DragTarget, left_click};
 
 #[derive(Properties, Derivative)]
 #[derivative(Clone(bound = ""))]
@@ -244,7 +244,7 @@ where
                 .map(|x| V::is_self_move(x))
                 .unwrap_or_default();
 
-            let close = ctx.props().parent.callback(|_| V::close(0));
+            let close = left_click(ctx.props().parent.callback(|_| V::close(0)));
             let dragenter = ctx.props().parent.callback({
                 let container_noderef = container_noderef.clone();
                 move |event: DragEvent| {
@@ -332,7 +332,7 @@ where
                 .into_iter()
                 .enumerate()
                 .map(|(idx, column)| {
-                    let close = ctx.props().parent.callback(move |_| V::close(idx));
+                    let close = left_click(ctx.props().parent.callback(move |_| V::close(idx)));
                     let dragenter = ctx.props().parent.callback({
                         let link = ctx.link().clone();
                         let container_noderef = container_noderef.clone();
@@ -441,7 +441,7 @@ where
                                     </div>
                                     <span
                                         class="toggle-mode is_column_active"
-                                        onmousedown={ctx.props().parent.callback(move |_| V::close(0))}
+                                        onmousedown={left_click(ctx.props().parent.callback(move |_| V::close(0)))}
                                     />
                                 </div>
                             } else if show_empty {

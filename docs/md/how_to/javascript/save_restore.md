@@ -122,16 +122,62 @@ keys are ignored).
 
 Like `restore()`, `restoreWorkspace()` applies an _update_: a field that is
 absent leaves that part of the element unchanged, `null` resets it to its
-default, and a value replaces it. `panels` is the whole panel set — when
-present every existing panel is replaced (`{}` empties the element); when
-absent the panels are kept, and `layout`, `active` and `masters` name them by
-their existing ids. So a cross-filter can be applied to the current panels
-without re-creating them:
+default, and a value replaces it. `panels` is the whole panel set — when present
+every existing panel is replaced (`{}` empties the element); when absent the
+panels are kept, and `layout`, `active` and `masters` name them by their
+existing ids. So a cross-filter can be applied to the current panels without
+re-creating them:
 
 ```javascript
 await elem.restoreWorkspace({ global_filters: [["Region", "==", "West"]] });
 await elem.restoreWorkspace({ global_filters: null }); // clear
 ```
+
+### Derived tables
+
+A workspace token carries a top-level `derived_tables` map, one entry per
+derived `Table` the element owns, each naming the `table` its source `View`
+reads plus that view's config:
+
+```javascript
+await elem.restoreWorkspace({
+    panels: { one: { table: "Region Totals", plugin: "Datagrid" } },
+    derived_tables: {
+        "Region Totals": { table: "superstore", group_by: ["Region"] },
+    },
+});
+```
+
+Within a workspace token, panels refer to tables by name, so a panel entry never
+contains a derivation of its own — `one` above simply binds `"Region Totals"`.
+Entries may name another derived table as their `table`, and they are built
+parent-first regardless of the order they appear in.
+
+`derived_tables` follows the same update rule as `panels`: absent keeps the
+current set, a value replaces it entirely, and `{}` deletes every derived table.
+An entry whose definition has not changed is reused rather than rebuilt.
+
+A derived table whose `table` is not hosted yet does not fail the restore — it
+and anything under it wait, along with the panels bound to them, and are built
+when the parent table appears. A dependency cycle is rejected outright.
+
+The single-panel format inlines instead: `save()` of a panel bound to a derived
+table writes the whole definition recursively in the `table` field, so the token
+is self-contained:
+
+```javascript
+await elem.restore({
+    plugin: "Datagrid",
+    table: { table: "superstore", group_by: ["Region"] },
+});
+```
+
+`restore()` rebinds to an existing derived table when one was built from a
+structurally identical definition, and otherwise creates one under a generated
+name. Only the single-panel `restore()` accepts the inline form — in
+`restoreWorkspace()` every `table` field is a name.
+
+See [Derived tables](../../explanation/derived_table.md).
 
 ## Colors, palettes and gradients
 

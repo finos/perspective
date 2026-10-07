@@ -367,6 +367,7 @@ pub fn SettingsPanel(props: &SettingsPanelProps) -> Html {
                     presentation={presentation.clone()}
                     renderer={renderer.clone()}
                     session={session.clone()}
+                    workspace={props.workspace.clone()}
                     initial_width={width}
                     on_auto_width={on_auto_width.clone()}
                     on_dimensions_reset={&props.on_dimensions_reset}
