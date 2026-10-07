@@ -26,6 +26,10 @@ struct BundleArgs {
     #[arg(short, long)]
     release: bool,
 
+    /// Compile with the `fast` profile?
+    #[arg(long, conflicts_with = "release")]
+    fast: bool,
+
     /// Extra features to build with
     #[arg(long)]
     features: Option<String>,
@@ -33,11 +37,39 @@ struct BundleArgs {
 
 use wasm_bindgen_cli_support::{Bindgen, EncodeInto};
 
+/// The `cargo` profile to build and bundle.
+#[derive(Clone, Copy, PartialEq)]
+enum Profile {
+    Dev,
+    Release,
+    Fast,
+}
+
+impl Profile {
+    /// The `cargo build` arguments which select this profile.
+    fn cargo_args(self) -> &'static [&'static str] {
+        match self {
+            Profile::Dev => &[],
+            Profile::Release => &["--release"],
+            Profile::Fast => &["--profile", "fast"],
+        }
+    }
+
+    /// The name of this profile's directory under the `cargo` target dir.
+    fn dir(self) -> &'static str {
+        match self {
+            Profile::Dev => "debug",
+            Profile::Release => "release",
+            Profile::Fast => "fast",
+        }
+    }
+}
+
 /// Run the packages `build` task with the appropriate flags. These can't be
 /// defined in the `/.cargo/config.toml` because they would define this build
 /// script's parameters also, and there is no way to reset e.g. the `target`
 /// field to the host platform.
-fn build(pkg: Option<&str>, is_release: bool, features: Vec<String>) {
+fn build(pkg: Option<&str>, profile: Profile, features: Vec<String>) {
     let features = format!("tracing/release_max_level_warn,{}", features.join(","));
 
     // Build RUSTFLAGS including target-specific flags from config.toml and new
@@ -56,11 +88,8 @@ fn build(pkg: Option<&str>, is_release: bool, features: Vec<String>) {
         .args(["--lib"])
         .args(["--features", &features])
         .args(["--target", "wasm32-unknown-unknown"])
-        .args(["-Z", "build-std=std,panic_abort"]);
-
-    if is_release {
-        cmd.args(["--release"]);
-    }
+        .args(["-Z", "build-std=std,panic_abort"])
+        .args(profile.cargo_args());
 
     if let Some(pkg) = pkg {
         cmd.args(["-p", pkg]);
@@ -93,16 +122,16 @@ fn target_dir() -> PathBuf {
 }
 
 /// Generate the `wasm-bindgen` JavaScript and WASM bindings.
-fn bindgen(outdir: &Path, artifact: &str, is_release: bool) {
+fn bindgen(outdir: &Path, artifact: &str, profile: Profile) {
     let input = target_dir()
         .join("wasm32-unknown-unknown")
-        .join(if is_release { "release" } else { "debug" })
+        .join(profile.dir())
         .join(format!("{artifact}.wasm"));
 
     Bindgen::new()
         .web(true)
         .unwrap()
-        .keep_debug(!is_release)
+        .keep_debug(profile == Profile::Dev)
         .input_path(input)
         .encode_into(EncodeInto::Always)
         .typescript(true)
@@ -168,8 +197,8 @@ fn wasm_opt_version(bin: &Path) -> Option<u32> {
 }
 
 /// Run `wasm-opt` and output the new binary on top of the old one.
-fn opt(outpath: &Path, is_release: bool) {
-    if !is_release {
+fn opt(outpath: &Path, profile: Profile) {
+    if profile != Profile::Release {
         return;
     }
 
@@ -208,7 +237,12 @@ fn opt(outpath: &Path, is_release: bool) {
 fn main() {
     let args = BundleArgs::parse();
     let outdir = Path::new("dist/wasm");
-    let is_release = args.release;
+    let profile = match (args.release, args.fast) {
+        (_, true) => Profile::Fast,
+        (true, _) => Profile::Release,
+        _ => Profile::Dev,
+    };
+
     let package = args.artifact.clone().replace('_', "-");
     let outpath = &Path::new(outdir).join(format!(
         "{}.wasm",
@@ -222,9 +256,9 @@ fn main() {
         .map(|x| x.to_string())
         .collect();
 
-    build(Some(package.as_str()), is_release, features);
-    bindgen(outdir, args.artifact.as_str(), is_release);
-    opt(outpath, is_release);
+    build(Some(package.as_str()), profile, features);
+    bindgen(outdir, args.artifact.as_str(), profile);
+    opt(outpath, profile);
 }
 
 trait SimpleCommand {

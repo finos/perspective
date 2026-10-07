@@ -111,6 +111,20 @@ else()
     endif()
 endif()
 
+if(DEFINED ENV{PSP_FAST} AND NOT DEFINED ENV{PSP_DEBUG})
+    set(PSP_FAST_BUILD ON)
+    set(PSP_OPT_LEVEL "-O1")
+    set(PSP_LTO_FLAGS "")
+    if(NOT WIN32)
+        set(CMAKE_C_FLAGS_RELEASE "-O1 -DNDEBUG")
+        set(CMAKE_CXX_FLAGS_RELEASE "-O1 -DNDEBUG")
+    endif()
+else()
+    set(PSP_FAST_BUILD OFF)
+    set(PSP_OPT_LEVEL "-O3")
+    set(PSP_LTO_FLAGS "-flto")
+endif()
+
 if(DEFINED ENV{PSP_HEAP_INSTRUMENTS})
     set(PSP_HEAP_INSTRUMENTS ON)
 else()
@@ -196,6 +210,8 @@ if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
     add_definitions(-DPSP_STORAGE_VERIFY)
     add_definitions(-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST)
     add_definitions(-D_GLIBCXX_ASSERTIONS)
+elseif(PSP_FAST_BUILD)
+    set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Yellow}Building FAST${ColorReset}")
 else()
     set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building RELEASE${ColorReset}")
 endif()
@@ -266,12 +282,12 @@ if(PSP_WASM_BUILD)
         endif()
     else()
         set(OPT_FLAGS " \
-            -O3 -g${DEBUG_LEVEL} \
+            ${PSP_OPT_LEVEL} -g${DEBUG_LEVEL} \
             -mbulk-memory \
             -msimd128 \
             -mrelaxed-simd \
             -fopenmp-simd \
-            -flto \
+            ${PSP_LTO_FLAGS} \
             --emit-tsd=perspective-server.d.ts \
         ")
         if (PSP_WASM_EXCEPTIONS)
@@ -315,7 +331,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             endif ()
         else()
             set(OPT_FLAGS " \
-                -O3 \
+                ${PSP_OPT_LEVEL} \
                 -fexceptions \
                 -g1 \
                 -fopenmp-simd \
@@ -343,17 +359,17 @@ endif()
 
 if (PSP_WASM_EXCEPTIONS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \
-        -O3 \
+        ${PSP_OPT_LEVEL} \
         -g${DEBUG_LEVEL} \
     ")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
         -fwasm-exceptions \
-        -O3 \
+        ${PSP_OPT_LEVEL} \
         -g${DEBUG_LEVEL} \
     ")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-    -O3 \
+    ${PSP_OPT_LEVEL} \
     ")
 endif()
 
@@ -380,7 +396,7 @@ if(PSP_PYODIDE)
 endif()
 
 if(PSP_WASM_BUILD AND NOT CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
-    set(PSP_DEP_SIMD_FLAGS " -flto -mbulk-memory -msimd128 -mrelaxed-simd ")
+    set(PSP_DEP_SIMD_FLAGS " ${PSP_LTO_FLAGS} -mbulk-memory -msimd128 -mrelaxed-simd ")
     string(APPEND CMAKE_C_FLAGS "${PSP_DEP_SIMD_FLAGS}")
     string(APPEND CMAKE_CXX_FLAGS "${PSP_DEP_SIMD_FLAGS}")
 endif()

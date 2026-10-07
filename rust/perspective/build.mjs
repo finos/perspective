@@ -15,6 +15,8 @@ import { execSync } from "child_process";
 let flags = "--release";
 if (!!process.env.PSP_DEBUG) {
     flags = "";
+} else if (!!process.env.PSP_FAST) {
+    flags = "--profile fast";
 }
 
 const env = { ...process.env };

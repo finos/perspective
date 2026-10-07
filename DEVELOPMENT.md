@@ -98,6 +98,7 @@ Other useful options:
 | Variable              | Effect                                                     |
 | --------------------- | ---------------------------------------------------------- |
 | `PSP_DEBUG=1`         | Debug build                                                |
+| `PSP_FAST=1`          | Release build with `-O1`, no LTO and no `wasm-opt`         |
 | `PSP_BUILD_VERBOSE=1` | Verbose C++ build output                                   |
 | `PSP_NUM_CPUS=<n>`    | Limit C++ build parallelism                                |
 | `PSP_WASM64=1`        | Also build the `wasm64` (Memory64) engine                  |

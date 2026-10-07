@@ -32,6 +32,8 @@ import {
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
 
+const IS_FAST = !IS_DEBUG && !!process.env.PSP_FAST;
+
 const INHERIT = {
     stdio: "inherit",
     stderr: "inherit",
@@ -39,8 +41,9 @@ const INHERIT = {
 
 export async function build_all() {
     if (!process.env.PSP_SKIP_WASM) {
+        const release_flag = IS_DEBUG ? "" : IS_FAST ? "--fast" : "--release";
         execSync(
-            `cargo bundle --target=${get_host()} -- perspective_viewer ${IS_DEBUG ? "" : "--release"}`,
+            `cargo bundle --target=${get_host()} -- perspective_viewer ${release_flag}`,
             {
                 ...INHERIT,
                 env: { ...process.env, PSP_ROOT_DIR: "../.." },

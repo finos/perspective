@@ -630,6 +630,57 @@ test.describe("Window columns", () => {
         ]);
     });
 
+    test("row_number is offered for any source and saves without a frame", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            await viewer.restore({
+                plugin: "Debug",
+                settings: true,
+                columns: ["Row ID", "Region"],
+            });
+        });
+
+        await page.click("#add-expression");
+        await page.click("#Window");
+        await page.dragAndDrop(
+            '.column-selector-draggable:has-text("Region")',
+            "#window-source",
+        );
+
+        const select = page.locator(
+            "#window-source .aggregate-selector-wrapper select",
+        );
+        await select
+            .locator("option", { hasText: "row_number" })
+            .waitFor({ state: "attached" });
+        await select.selectOption("row_number");
+        await expect(select).toHaveValue("row_number");
+        await expect(page.locator("#window-frame-type")).toHaveCount(0);
+
+        await page.fill("#window-order-by .column-empty-input", "Row ID");
+        await page.press("#window-order-by .column-empty-input", "Enter");
+        await page.fill("input.sidebar_header_title", "rn");
+        await page.click("#psp-expression-editor-button-save");
+        await page.waitForFunction(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            const saved = await viewer.save();
+            return Object.keys(saved.windows ?? {}).length === 1;
+        });
+
+        const saved = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            return await viewer.save();
+        });
+
+        expect(saved.windows["rn"]).toEqual({
+            column: "Region",
+            aggregate: "row_number",
+            order_by: ["Row ID", "asc"],
+        });
+    });
+
     test("drawer width is trap-doored across editor tab switches", async ({
         page,
     }) => {

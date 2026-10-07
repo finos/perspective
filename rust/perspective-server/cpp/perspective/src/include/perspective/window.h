@@ -37,7 +37,8 @@ enum class t_window_op : std::uint8_t {
     WINDOW_OP_LEAD,
     WINDOW_OP_DIFF,
     WINDOW_OP_RATE,
-    WINDOW_OP_EMA
+    WINDOW_OP_EMA,
+    WINDOW_OP_ROW_NUMBER
 };
 
 enum class t_window_frame_type : std::uint8_t {

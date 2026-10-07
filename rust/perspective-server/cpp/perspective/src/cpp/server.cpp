@@ -1842,6 +1842,7 @@ ProtoServer::build_view_config(
                 {"diff", t_window_op::WINDOW_OP_DIFF},
                 {"rate", t_window_op::WINDOW_OP_RATE},
                 {"ema", t_window_op::WINDOW_OP_EMA},
+                {"row_number", t_window_op::WINDOW_OP_ROW_NUMBER},
             };
 
         const auto op_entry = WINDOW_OPS.find(w.op());
@@ -1953,6 +1954,17 @@ ProtoServer::build_view_config(
                     || w.alpha() > 1) {
                     PSP_COMPLAIN_AND_ABORT(
                         "Window `ema` requires `alpha` in (0, 1]"
+                    );
+                }
+                break;
+            case t_window_op::WINDOW_OP_ROW_NUMBER:
+                if (has_frame
+                    && frame_type
+                        != t_window_frame_type::
+                            WINDOW_FRAME_CUMULATIVE) {
+                    PSP_COMPLAIN_AND_ABORT(
+                        "Window `row_number` is positional; it does "
+                        "not accept a `rows` or `range` frame"
                     );
                 }
                 break;
@@ -2278,6 +2290,9 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
             // `ema` is recursive - a smoothing factor, never a frame.
             *numeric_aggs.add_options() =
                 window_agg("ema", no_frames, false, true, proto::ColumnType::FLOAT);
+            *numeric_aggs.add_options() = window_agg(
+                "row_number", no_frames, false, false, proto::ColumnType::INTEGER
+            );
 
             proto::GetFeaturesResp_WindowAggregateOptions any_aggs;
             *any_aggs.add_options() =
@@ -2290,6 +2305,9 @@ ProtoServer::_handle_request(std::uint32_t client_id, Request&& req) {
                 window_agg("lag", no_frames, true, false, std::nullopt);
             *any_aggs.add_options() =
                 window_agg("lead", no_frames, true, false, std::nullopt);
+            *any_aggs.add_options() = window_agg(
+                "row_number", no_frames, false, false, proto::ColumnType::INTEGER
+            );
 
             auto& window_aggs = *features->mutable_window_aggregates();
             window_aggs[proto::ColumnType::INTEGER] = numeric_aggs;

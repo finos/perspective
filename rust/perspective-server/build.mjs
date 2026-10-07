@@ -19,7 +19,12 @@ import "zx/globals";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
-const env = process.env.PSP_DEBUG ? "debug" : "release";
+const env = process.env.PSP_DEBUG
+    ? "debug"
+    : process.env.PSP_FAST
+      ? "fast"
+      : "release";
+
 const cwd = path.join(process.cwd(), "build", env);
 const cmake_dir = path.join(__dirname, "cpp", "perspective");
 const { compress } = await import("pro_self_extracting_wasm");
@@ -69,7 +74,7 @@ try {
             `cmake`,
             cmake_dir,
             ...cmake_flags,
-            `-DCMAKE_BUILD_TYPE=${env}`,
+            `-DCMAKE_BUILD_TYPE=${env === "debug" ? "debug" : "release"}`,
             `-DRAPIDJSON_BUILD_EXAMPLES=OFF`,
             `-DPSP_PROTO_PATH=${pp.dir}`,
             `-DCMAKE_COLOR_DIAGNOSTICS=ON`,

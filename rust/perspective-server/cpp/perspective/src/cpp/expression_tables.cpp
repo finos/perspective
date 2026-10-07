@@ -111,15 +111,21 @@ t_expression_tables::calculate_transitions(
         int(num_cols),
         [&column_names, &existed_column, this](int cidx) {
             const std::string& cname = column_names[cidx];
-            const t_column& prev_column = *(m_prev->get_const_column(cname));
+            t_column& prev_column = *(m_prev->get_column(cname));
             const t_column& current_column =
                 *(m_current->get_const_column(cname));
             std::shared_ptr<t_column> transition_column =
                 m_transitions->get_column(cname);
 
             for (t_uindex ridx = 0; ridx < transition_column->size(); ++ridx) {
-                bool row_existed =
-                    existed_column.get_nth<bool>(ridx) != nullptr;
+                bool row_existed = *(existed_column.get_nth<bool>(ridx));
+                if (!row_existed) {
+                    prev_column.clear(ridx);
+                    transition_column->set_nth<std::uint8_t>(
+                        ridx, VALUE_TRANSITION_NEQ_FT
+                    );
+                    continue;
+                }
 
                 t_tscalar prev_value = prev_column.get_scalar(ridx);
                 t_tscalar curr_value = current_column.get_scalar(ridx);
@@ -130,29 +136,14 @@ t_expression_tables::calculate_transitions(
                     prev_valid && curr_valid && (prev_value == curr_value);
 
                 t_value_transition transition;
-
-                // Use a small subset of `t_value_transitions` that are
-                // relevant - I have not implemented the code paths in
-                // `calc_transitions` that are not referenced elsewhere, i.e.
-                // by a context or by a tree implementation.
-                if (row_existed) {
-                    if (prev_curr_eq) {
-                        // Row existed before, and the current value is
-                        // the same as the previous value.
-                        transition = VALUE_TRANSITION_EQ_TT;
-                    } else if (!prev_valid && curr_valid) {
-                        // Previous value was a null, new value is valid.
-                        transition = VALUE_TRANSITION_NEQ_FT;
-                    } else if (prev_valid && !curr_valid) {
-                        transition = VALUE_TRANSITION_NEQ_TF;
-                    } else {
-                        // Previous value was not null, new value is
-                        // not null, and previous value != new value
-                        transition = VALUE_TRANSITION_NEQ_TT;
-                    }
-                } else {
-                    // Row did not exist before and was added
+                if (prev_curr_eq) {
+                    transition = VALUE_TRANSITION_EQ_TT;
+                } else if (!prev_valid && curr_valid) {
                     transition = VALUE_TRANSITION_NEQ_FT;
+                } else if (prev_valid && !curr_valid) {
+                    transition = VALUE_TRANSITION_NEQ_TF;
+                } else {
+                    transition = VALUE_TRANSITION_NEQ_TT;
                 }
 
                 transition_column->set_nth<std::uint8_t>(ridx, transition);

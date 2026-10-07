@@ -21,6 +21,8 @@ import { compress } from "pro_self_extracting_wasm";
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
 
+const IS_FAST = !IS_DEBUG && !!process.env.PSP_FAST;
+
 const BUILD = [
     {
         entryPoints: ["src/ts/perspective-server.worker.ts"],
@@ -104,7 +106,7 @@ function get_host() {
 }
 
 async function build_rust() {
-    const release_flag = IS_DEBUG ? "" : "--release";
+    const release_flag = IS_DEBUG ? "" : IS_FAST ? "--fast" : "--release";
     execSync(
         `PSP_ROOT_DIR=../.. cargo bundle --target=${get_host()} -- perspective_js ${release_flag} --features="export-init,talc-allocator"`,
         INHERIT,

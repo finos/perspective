@@ -62,10 +62,10 @@ An unpivoted `View` yields a `Table` with the `View`'s own columns, including
 `View`'s `columns`, and its `limit` is inherited as well.
 
 A pivoted `View` yields the table you see on screen. Each `group_by` column
-becomes a typed key column of the same name, and each data column takes the
-name `View::column_paths` gives it. A column that is both a `group_by` key and
-one of the `View`'s `columns` would collide with itself, so that aggregate is
-qualified by its aggregate, as in `"Region (count)"` or
+becomes a typed key column of the same name, and each data column takes the name
+`View::column_paths` gives it. A column that is both a `group_by` key and one of
+the `View`'s `columns` would collide with itself, so that aggregate is qualified
+by its aggregate, as in `"Region (count)"` or
 `"Sales (weighted mean by Weight)"`; the key is always the bare column name:
 
 ```
@@ -115,7 +115,7 @@ Declare the columns up front to accept values that have not arrived yet:
 ```javascript
 const derived = await client.table(view, {
     schema: {
-        "Region": "string",
+        Region: "string",
         "Mon|Sales": "float",
         "Tue|Sales": "float",
         "Wed|Sales": "float",
@@ -289,6 +289,43 @@ place for a pivoted `View`.
 On a [Virtual Server](./virtual_servers.md) a derived `Table` is a snapshot of
 the `View` taken when it is created, since a virtual `View` is itself a
 snapshot.
+
+## In the viewer
+
+`<perspective-viewer>` exposes derivation from the settings sidebar's query tab
+and from the panel's right-click context menu. **Derive table** (at the bottom
+of the settings panel) and the context menu's **Derive Table** each create a
+derived `Table` under a generated name — `"superstore GROUP BY Region"`-style —
+from whatever the panel currently displays, then rebind the panel to it. Both
+require a pivoted view.
+
+A derived `Table` created this way is an ordinary named table in the workspace:
+it appears in the table pickers and the "New" menu, other panels may bind to it,
+and it outlives the panel that created it. The "New" menu marks derived rows,
+shows how many panels and tables read each one, and offers a delete button once
+nothing does.
+
+The panel's derivation chain appears above the control, one row per table from
+the base up. The row for the panel's own table carries a close button:
+
+- **Click** rebinds the panel to the parent table, restoring the config the
+  derived table was created with. The derived table itself is untouched.
+- **Shift+click** rebinds _and_ deletes the derived table, which is offered only
+  when that panel is the only thing reading it.
+
+A backend which cannot promote a `View` to a `Table` reports so through the
+`view_derivations` capability, and the control is hidden for panels on that
+client. Where a backend can derive but does not stream — DuckDB and PostgreSQL —
+each level is badged as a snapshot, because its data is fixed at the moment it
+was derived.
+
+Derived tables persist in `saveWorkspace()` output under the top-level
+`derived_tables` key, each entry naming the `table` its source `View` reads and
+that view's config. Workspace panels refer to tables by name; the single-panel
+`save()` format instead inlines the definition recursively in its `table` field,
+so the token is self-contained, and `restore()` rebinds to a structurally
+identical derived table or creates one under a generated name. See
+[Save & restore](../how_to/javascript/save_restore.md).
 
 ## Changes to `client.table(view)`
 

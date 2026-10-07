@@ -44,6 +44,13 @@ codegen-units = 1
 lto = true
 strip = true
 
+[profile.fast]
+inherits = "release"
+opt-level = 1
+codegen-units = 256
+lto = "off"
+incremental = true
+
 # These are only respected when `cargo` is invoked from the project root
 [patch.crates-io]
 # simd-adler32 = { git = "https://github.com/mcountryman/simd-adler32.git", rev = "b279034d9eb554c3e5e0af523db044f08d8297ba" }

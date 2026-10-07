@@ -1467,4 +1467,100 @@ const pivot_data = [
             table.delete();
         });
     });
+
+    test.describe("Expression aggregates over rows inserted while a view is live", function () {
+        const SCHEMA = {
+            id: "integer",
+            side: "string",
+            price: "float",
+            timestamp: "datetime",
+        };
+
+        async function insert_batches(table, n_batches, batch_size) {
+            let id = 0;
+            for (let b = 0; b < n_batches; b++) {
+                const rows = [];
+                for (let i = 0; i < batch_size; i++) {
+                    rows.push({
+                        id,
+                        side: id % 2 ? "buy" : "sell",
+                        price: 20 + (id % 4) * 0.5,
+                        timestamp: new Date(b * 60_000),
+                    });
+                    id++;
+                }
+
+                await table.update(rows);
+            }
+        }
+
+        async function expect_oracle(config, n_batches = 4, batch_size = 5) {
+            const table = await perspective.table(SCHEMA, { index: "id" });
+            const live = await table.view(config);
+            await insert_batches(table, n_batches, batch_size);
+            const oracle = await table.view(config);
+            const live_result = await live.to_columns();
+            const oracle_result = await oracle.to_columns();
+            expect(live_result).toEqual(oracle_result);
+            await oracle.delete();
+            await live.delete();
+            await table.delete();
+            return oracle_result;
+        }
+
+        test("String conditional expression sums under group_by", async function () {
+            await expect_oracle({
+                group_by: ["side"],
+                columns: ["v"],
+                expressions: { v: `if("side"=='buy'){-1}else{1}` },
+            });
+        });
+
+        test("String conditional expression sums under split_by", async function () {
+            await expect_oracle({
+                group_by: ["side"],
+                split_by: ["side"],
+                columns: ["v"],
+                expressions: { v: `if("side"=='buy'){-1}else{1}` },
+            });
+        });
+
+        test("Groups born after the first batch are not null", async function () {
+            const result = await expect_oracle({
+                group_by: [`bucket("timestamp", 'm')`],
+                columns: ["v"],
+                expressions: {
+                    [`bucket("timestamp", 'm')`]: `bucket("timestamp", 'm')`,
+                    v: `if("side"=='buy'){-1}else{1}`,
+                },
+            });
+
+            expect(result["__ROW_PATH__"].length).toEqual(5);
+            for (const value of result["v"]) {
+                expect(value).not.toEqual(null);
+            }
+        });
+
+        test("Expression group_by and split_by with conditional value", async function () {
+            await expect_oracle({
+                group_by: [`bucket("timestamp", 'm')`],
+                split_by: [`bucket("price", 0.5)`],
+                columns: ["v"],
+                expressions: {
+                    [`bucket("timestamp", 'm')`]: `bucket("timestamp", 'm')`,
+                    [`bucket("price", 0.5)`]: `bucket("price", 0.5)`,
+                    v: `if("side"=='buy'){-1}else{1}`,
+                },
+            });
+        });
+
+        test("String conditional expression as group_by", async function () {
+            await expect_oracle({
+                group_by: ["g"],
+                columns: ["price"],
+                aggregates: { price: "sum" },
+                expressions: { g: `if("side"=='buy'){'B'}else{'S'}` },
+            });
+        });
+    });
 })(perspective);

@@ -78,6 +78,7 @@ WINDOW_AGGREGATES = [
     {"name": "lead", "offset": True},
     {"name": "diff", "offset": True, "result_type": "float"},
     {"name": "rate", "frames": ["range"], "result_type": "float"},
+    {"name": "row_number", "result_type": "float"},
 ]
 
 WINDOW_AGGREGATES_ANY = [
@@ -86,6 +87,7 @@ WINDOW_AGGREGATES_ANY = [
     {"name": "max", "frames": FRAMES},
     {"name": "lag", "offset": True},
     {"name": "lead", "offset": True},
+    {"name": "row_number", "result_type": "float"},
 ]
 
 FILTER_OPS = [
