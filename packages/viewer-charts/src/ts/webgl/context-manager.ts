@@ -317,9 +317,9 @@ export class WebGLContextManager {
 
     /**
      * Resolve when every GL command submitted up to this call has been
-     * executed by the GPU. WebGL2 issues a `fenceSync` and polls
-     * `clientWaitSync` (yielding to the task queue between polls); WebGL1
-     * falls back to a blocking `gl.finish()` (acceptable in a worker).
+     * executed by the GPU, polling a WebGL2 fence with a flush on every
+     * poll and falling back to a blocking `gl.finish()` on WebGL1 or on
+     * `WAIT_FAILED`.
      */
     async awaitGpuFence(): Promise<void> {
         if (!this._ctx.isWebGL2) {
@@ -335,9 +335,12 @@ export class WebGLContextManager {
         }
 
         try {
-            let flags: GLbitfield = gl.SYNC_FLUSH_COMMANDS_BIT;
             while (true) {
-                const status = gl.clientWaitSync(fence, flags, 0);
+                const status = gl.clientWaitSync(
+                    fence,
+                    gl.SYNC_FLUSH_COMMANDS_BIT,
+                    0,
+                );
                 if (
                     status === gl.ALREADY_SIGNALED ||
                     status === gl.CONDITION_SATISFIED
@@ -350,7 +353,6 @@ export class WebGLContextManager {
                     return;
                 }
 
-                flags = 0;
                 await this._yieldToTask();
 
                 if (this._destroyed) {

@@ -124,8 +124,8 @@ catalogs:
       specifier: '=0.6.1'
       version: 0.6.1
     regular-table:
-      specifier: '=0.9.1'
-      version: 0.9.1
+      specifier: '=0.9.2'
+      version: 0.9.2
     stoppable:
       specifier: '=1.1.0'
       version: 1.1.0
@@ -811,7 +811,7 @@ importers:
         version: link:../../rust/perspective-viewer
       regular-table:
         specifier: 'catalog:'
-        version: 0.9.1
+        version: 0.9.2
     devDependencies:
       '@perspective-dev/esbuild-plugin':
         specifier: workspace:^
@@ -4512,8 +4512,8 @@ packages:
   regular-layout@0.6.1:
     resolution: {integrity: sha512-vGDEFACgFbS/d5kLWJ6AMWY/3DYaZoF1P8+y4KIDnPUFqUQgV5bV8avX7836izmexfmz6ik8JZ4V0Xo4FhaZGQ==}
 
-  regular-table@0.9.1:
-    resolution: {integrity: sha512-3I/2I3NEhmyScCevW/r1AE9hyUkqrPRMDsgo/nDnGXhpXVZOxUddJQGBmEMLgyc7OSaQSzl9BtXllnMqw1MwCA==}
+  regular-table@0.9.2:
+    resolution: {integrity: sha512-E5EjrGEp6Pxo55nPCqv//gq4R6yyQZjUJby+PUT+k+eJd327MsZpar6Eem27fTTkzqV5I7BsvzArCySDnzl1Jg==}
     engines: {node: '>=16'}
 
   relateurl@0.2.7:
@@ -9305,7 +9305,7 @@ snapshots:
 
   regular-layout@0.6.1: {}
 
-  regular-table@0.9.1: {}
+  regular-table@0.9.2: {}
 
   relateurl@0.2.7: {}
 
