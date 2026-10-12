@@ -232,7 +232,8 @@ impl DebugPanelProps {
                 &props.renderer,
                 &props.presentation,
             )
-            .await?;
+            .await?
+            .map_table(|name| props.workspace.inline_table_ref(&name));
             let json = JsValue::from_serde_ext(&config)?;
             let js_string =
                 js_sys::JSON::stringify_with_replacer_and_space(&json, &JsValue::NULL, &2.into())?;

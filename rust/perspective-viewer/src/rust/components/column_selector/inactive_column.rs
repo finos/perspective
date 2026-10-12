@@ -132,9 +132,10 @@ impl Component for InactiveColumn {
             .get_column_table_type(&ctx.props().name)
             .unwrap_or(ColumnType::String);
 
-        let add_column = ctx
-            .link()
-            .callback(|event: MouseEvent| InactiveColumnMsg::ActivateColumn(event.shift_key()));
+        let add_column =
+            left_click(ctx.link().callback(|event: MouseEvent| {
+                InactiveColumnMsg::ActivateColumn(event.shift_key())
+            }));
 
         let ondragend = ctx.props().ondragend.reform(|_| {});
         let ondragstart = ctx.link().callback({

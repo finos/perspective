@@ -206,4 +206,12 @@ perspective-viewer {
     --psp-label--group-column--content: "Columna";
     --psp-label--group-format--content: "Formato";
     --psp-label--column-size-override--content: "Ancho de columna";
+
+    /* Derived tables */
+    --psp-label--derive-table--content: "Derivar tabla";
+    --psp-label--derive-table-title--content: "Derivar una nueva tabla a partir de esta vista";
+    --psp-label--derived-snapshot--content: "instantánea";
+    --psp-label--derived-snapshot-title--content: "Esta fuente de datos no transmite en continuo - los datos de esta tabla quedan fijados en el momento de su derivación.";
+    --psp-label--derived-release-title--content: "Volver a la tabla padre";
+    --psp-label--derived-release-delete-title--content: "Volver a la tabla padre - mayús+clic para eliminarla";
 }

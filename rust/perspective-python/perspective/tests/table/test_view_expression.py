@@ -2109,3 +2109,148 @@ class TestViewExpression(object):
         ]
         validate = table.validate_expressions(expressions)
         assert validate["expression_schema"] == {}
+
+
+LIVE_INSERT_SCHEMA = {
+    "id": "integer",
+    "side": "string",
+    "price": "float",
+    "timestamp": "datetime",
+}
+
+
+class TestViewExpressionLiveInserts(object):
+    def _insert_batches(self, table, n_batches=4, batch_size=5):
+        next_id = 0
+        for b in range(n_batches):
+            rows = []
+            for _ in range(batch_size):
+                rows.append(
+                    {
+                        "id": next_id,
+                        "side": "buy" if next_id % 2 else "sell",
+                        "price": 20 + (next_id % 4) * 0.5,
+                        "timestamp": datetime(2020, 1, 1, 0, b),
+                    }
+                )
+                next_id += 1
+
+            table.update(rows)
+
+    def _expect_oracle(self, **config):
+        table = Table(LIVE_INSERT_SCHEMA, index="id")
+        live = table.view(**config)
+        self._insert_batches(table)
+        oracle = table.view(**config)
+        live_result = live.to_columns()
+        oracle_result = oracle.to_columns()
+        assert live_result == oracle_result
+        oracle.delete()
+        live.delete()
+        table.delete()
+        return oracle_result
+
+    def test_string_conditional_sum_under_group_by(self):
+        self._expect_oracle(
+            group_by=["side"],
+            columns=["v"],
+            expressions={"v": "if(\"side\"=='buy'){-1}else{1}"},
+        )
+
+    def test_string_conditional_sum_under_split_by(self):
+        self._expect_oracle(
+            group_by=["side"],
+            split_by=["side"],
+            columns=["v"],
+            expressions={"v": "if(\"side\"=='buy'){-1}else{1}"},
+        )
+
+    def test_groups_born_after_first_batch_not_null(self):
+        result = self._expect_oracle(
+            group_by=["bucket(\"timestamp\", 'm')"],
+            columns=["v"],
+            expressions={
+                "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+                "v": "if(\"side\"=='buy'){-1}else{1}",
+            },
+        )
+
+        assert len(result["__ROW_PATH__"]) == 5
+        assert all(value is not None for value in result["v"])
+
+    def test_expression_pivots_with_conditional_value(self):
+        self._expect_oracle(
+            group_by=["bucket(\"timestamp\", 'm')"],
+            split_by=["bucket(\"price\", 0.5)"],
+            columns=["v"],
+            expressions={
+                "bucket(\"timestamp\", 'm')": "bucket(\"timestamp\", 'm')",
+                "bucket(\"price\", 0.5)": "bucket(\"price\", 0.5)",
+                "v": "if(\"side\"=='buy'){-1}else{1}",
+            },
+        )
+
+    def test_string_conditional_as_group_by(self):
+        self._expect_oracle(
+            group_by=["g"],
+            columns=["price"],
+            aggregates={"price": "sum"},
+            expressions={"g": "if(\"side\"=='buy'){'B'}else{'S'}"},
+        )
+
+
+class TestViewWindowRowNumber(object):
+    def test_view_window_row_number(self):
+        table = Table(
+            {
+                "t": [3, 1, 2, 4, 2],
+                "sym": ["a", "a", "b", "b", "a"],
+                "price": [30.0, 10.0, 100.0, 200.0, 20.0],
+            }
+        )
+        view = table.view(
+            columns=["t", "sym", "rn"],
+            sort=[["t", "asc"], ["sym", "asc"]],
+            windows={
+                "rn": {
+                    "column": "price",
+                    "aggregate": "row_number",
+                    "order_by": ["t", "asc"],
+                }
+            },
+        )
+
+        assert view.schema()["rn"] == "integer"
+        result = view.to_columns()
+        assert result["t"] == [1, 2, 2, 3, 4]
+        assert result["sym"] == ["a", "a", "b", "a", "b"]
+        assert result["rn"] == [1, 3, 2, 4, 5]
+        view.delete()
+        table.delete()
+
+    def test_view_window_row_number_partitioned(self):
+        table = Table(
+            {
+                "t": [3, 1, 2, 4, 2],
+                "sym": ["a", "a", "b", "b", "a"],
+                "price": [30.0, 10.0, 100.0, 200.0, 20.0],
+            }
+        )
+        view = table.view(
+            columns=["t", "sym", "rn"],
+            sort=[["sym", "asc"], ["t", "asc"]],
+            windows={
+                "rn": {
+                    "column": "price",
+                    "aggregate": "row_number",
+                    "order_by": ["t", "asc"],
+                    "partition_by": ["sym"],
+                }
+            },
+        )
+
+        result = view.to_columns()
+        assert result["sym"] == ["a", "a", "a", "b", "b"]
+        assert result["rn"] == [1, 2, 3, 1, 2]
+        view.delete()
+        table.delete()

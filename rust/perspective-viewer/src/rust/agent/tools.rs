@@ -482,7 +482,7 @@ pub struct ToolError(String);
 /// applied config.
 fn retyped_columns(
     session: &crate::session::Session,
-    config: &crate::config::ViewerConfig,
+    config: &crate::config::ViewerConfig<String, String>,
 ) -> Vec<Value> {
     let metadata = session.metadata();
     config

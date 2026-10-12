@@ -236,7 +236,8 @@ impl PerspectiveViewerElement {
 
     async fn workspace_config(this: Self, full_palette: bool) -> ApiResult<JsValue> {
         this.workspace.effects().settle().await;
-        let mut panels: std::collections::BTreeMap<String, PanelViewerConfig> = Default::default();
+        let mut panels: std::collections::BTreeMap<String, PanelViewerConfig<String, String>> =
+            Default::default();
         for id in &this.workspace.panel_ids() {
             let panel = this.workspace.panel(id).into_apierror()?;
             let config = panel
@@ -287,6 +288,7 @@ impl PerspectiveViewerElement {
             active,
             layout,
             panels,
+            derived_tables: this.workspace.derived_configs(),
             global_filters: this.workspace.global_filters(),
             masters: this
                 .workspace
@@ -1129,6 +1131,7 @@ impl PerspectiveViewerElement {
                 Create(Box<ViewerConfigInitial>),
             }
 
+            crate::tasks::resolve_table_ref(&this.workspace, &mut update, missing).await?;
             let notify = this.layout_changed_notify();
             let target = match this.workspace.panel_or_active(id.as_ref()) {
                 // An existing (or the active) panel — update it in place.
@@ -1259,7 +1262,22 @@ impl PerspectiveViewerElement {
             let _effect = effect;
             let RestoreWorkspaceOptions { wait_for_table } = parse_options(options)?;
             let missing = MissingTable::from_wait(wait_for_table);
-            let (contents, eject_tasks) = sync_update_panels(&this, update)?;
+            let (contents, eject_tasks, derived_tables) = sync_update_panels(&this, update)?;
+
+            // The outgoing panels' ejects must settle BEFORE the derived
+            // pass: a stale derivation is undeletable (and so cannot be
+            // redefined or pruned) while an ejecting panel still holds a
+            // `View` on it. Their errors are surfaced LAST, after the
+            // replacement set is in place.
+            let ejected = join_all(eject_tasks)
+                .await
+                .into_iter()
+                .collect::<ApiResult<Vec<_>>>();
+
+            if let Some(derived_tables) = derived_tables.clone() {
+                crate::tasks::apply_derived_tables(&this.workspace, derived_tables).await?;
+            }
+
             let fresh = contents
                 .iter()
                 .map(|(id, ..)| id.clone())
@@ -1298,11 +1316,12 @@ impl PerspectiveViewerElement {
 
             results.into_iter().collect::<ApiResult<Vec<_>>>()?;
             this.rerender_retained_overlays(&fresh).await?;
-            join_all(eject_tasks)
-                .await
-                .into_iter()
-                .collect::<ApiResult<Vec<_>>>()?;
+            if let Some(derived_tables) = derived_tables {
+                let keep = derived_tables.keys().cloned().collect();
+                crate::tasks::prune_derived(&this.workspace, &keep).await?;
+            }
 
+            ejected?;
             Ok(())
         });
 
@@ -1383,7 +1402,9 @@ impl PerspectiveViewerElement {
                 })
                 .await?;
 
-            viewer_config.encode()
+            viewer_config
+                .map_table(|name| this.workspace.inline_table_ref(&name))
+                .encode()
         });
 
         js_sys::Promise::from(fut).unchecked_into()
@@ -1447,9 +1468,14 @@ impl PerspectiveViewerElement {
             };
 
             let panel = this.resolve_panel(name)?;
-            let blob =
-                export_method_to_blob(&panel.session, &panel.renderer, &this.presentation, method)
-                    .await?;
+            let blob = export_method_to_blob(
+                &panel.session,
+                &panel.renderer,
+                &this.presentation,
+                &this.workspace,
+                method,
+            )
+            .await?;
             let is_chart = panel.renderer.is_chart();
             download(
                 format!("untitled{}", method.as_filename(is_chart)).as_ref(),
@@ -1495,8 +1521,14 @@ impl PerspectiveViewerElement {
             };
 
             let panel = this.resolve_panel(name)?;
-            export_method_to_jsvalue(&panel.session, &panel.renderer, &this.presentation, method)
-                .await
+            export_method_to_jsvalue(
+                &panel.session,
+                &panel.renderer,
+                &this.presentation,
+                &this.workspace,
+                method,
+            )
+            .await
         })
     }
 
@@ -1534,8 +1566,13 @@ impl PerspectiveViewerElement {
             };
 
             let panel = this.resolve_panel(name)?;
-            let js_task =
-                export_method_to_blob(&panel.session, &panel.renderer, &this.presentation, method);
+            let js_task = export_method_to_blob(
+                &panel.session,
+                &panel.renderer,
+                &this.presentation,
+                &this.workspace,
+                method,
+            );
             copy_to_clipboard(js_task, MimeType::TextPlain).await
         })
     }
@@ -1551,7 +1588,9 @@ impl PerspectiveViewerElement {
     /// # Arguments
     ///
     /// - `reset_all` - If set, will clear expressions and column settings as
-    ///   well.
+    ///   well, and tear down the element's ENTIRE derived-table state: every
+    ///   panel bound to a derived `Table` is released to its root table, and
+    ///   every derivation (pending ones included) is deleted.
     /// - `options` - An optional `{panel?: string}`; the panel to reset, or
     ///   every panel when omitted.
     ///

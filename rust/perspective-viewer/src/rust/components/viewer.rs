@@ -246,27 +246,37 @@ impl Component for PerspectiveViewer {
                 // config, so they survive. The `Completion`
                 // resolves only after ALL panels' reset runs complete
                 // (invariant I6 — previously it rode the active panel only,
-                // and the other panels' runs were unowned).
-                let workspace = &ctx.props().workspace;
+                // and the other panels' runs were unowned). An "all" reset
+                // FIRST purges the element's derived state (releasing any
+                // derived-bound panel to its root table), so the per-panel
+                // resets run against the surviving base bindings.
+                let workspace = ctx.props().workspace.clone();
+                let presentation = ctx.props().presentation.clone();
                 let origins = workspace.clear_global_filters();
-                clear_master_selections(workspace, origins);
-                let mut tasks = Vec::new();
-                for (id, panel) in workspace
-                    .panel_ids()
-                    .into_iter()
-                    .filter_map(|id| workspace.panel(&id).map(|p| (id, p)))
-                {
-                    let _ = id;
-                    drop(broadcast_overlay(workspace, &panel));
-                    tasks.push(reset_all(
-                        &panel.session,
-                        &panel.renderer,
-                        &ctx.props().presentation,
-                        all,
-                    ));
-                }
-
+                clear_master_selections(&workspace, origins);
+                let effect = workspace.effects().guard();
                 let run = async move {
+                    let _effect = effect;
+                    if all {
+                        crate::tasks::purge_derived(&workspace, &presentation).await?;
+                    }
+
+                    let mut tasks = Vec::new();
+                    for (id, panel) in workspace
+                        .panel_ids()
+                        .into_iter()
+                        .filter_map(|id| workspace.panel(&id).map(|p| (id, p)))
+                    {
+                        let _ = id;
+                        drop(broadcast_overlay(&workspace, &panel));
+                        tasks.push(reset_all(
+                            &panel.session,
+                            &panel.renderer,
+                            &presentation,
+                            all,
+                        ));
+                    }
+
                     futures::future::join_all(tasks)
                         .await
                         .into_iter()
@@ -289,15 +299,23 @@ impl Component for PerspectiveViewer {
                 // rebuilt view re-applies it via `effective_view_config`,
                 // keeping a detail panel consistent with the rest of the
                 // workspace. A dangling id no-ops (dropping `sender` rejects
-                // the API promise).
+                // the API promise). An "all" reset FIRST purges the
+                // element's derived state (releasing every derived-bound
+                // panel to its root table) — "all" means the same thing from
+                // the status bar gesture and the `resetPanel()` API.
                 let id = id.map(crate::workspace::PanelId::from);
                 if let Some(panel) = ctx.props().workspace.panel_or_active(id.as_ref()) {
-                    let run = reset_all(
-                        &panel.session,
-                        &panel.renderer,
-                        &ctx.props().presentation,
-                        all,
-                    );
+                    let workspace = ctx.props().workspace.clone();
+                    let presentation = ctx.props().presentation.clone();
+                    let effect = workspace.effects().guard();
+                    let run = async move {
+                        let _effect = effect;
+                        if all {
+                            crate::tasks::purge_derived(&workspace, &presentation).await?;
+                        }
+
+                        reset_all(&panel.session, &panel.renderer, &presentation, all).await
+                    };
 
                     match sender {
                         Some(completion) => completion.resolve_after(run),
@@ -315,6 +333,7 @@ impl Component for PerspectiveViewer {
             PanelClosed(id) => self.on_panel_closed(ctx, id),
             CommitWorkspaceRestore(id) => self.on_commit_workspace_restore(ctx, id),
             DuplicatePanel(id) => self.on_duplicate_panel(ctx, id),
+            DerivePanel(id) => self.on_derive_panel(ctx, id),
             NewPanel(id) => self.on_new_panel(ctx, id),
             NewPanelFrom { client, table } => self.on_new_panel_from(ctx, client, table),
 

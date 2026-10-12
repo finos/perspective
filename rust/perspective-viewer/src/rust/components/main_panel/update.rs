@@ -58,14 +58,22 @@ impl MainPanel {
 
         let layout: RegularLayout = el.unchecked_into();
         let mut closed = Vec::new();
+        let mut pending_insertions = std::mem::take(&mut self.pending_insertions);
         self.inserted.retain(|id| {
             if layout.contains_panel(id) {
+                pending_insertions.remove(id);
+                true
+            } else if pending_insertions.contains(id) {
+                // Issued to the layout but not yet in a committed tree —
+                // the pre-commit window, not a close.
                 true
             } else {
                 closed.push(id.clone());
                 false
             }
         });
+
+        self.pending_insertions = pending_insertions;
 
         let closed_any = !closed.is_empty();
         for id in closed {
@@ -160,6 +168,18 @@ impl MainPanel {
         x: f64,
         y: f64,
     ) -> bool {
+        // A frame-less right-click (status bar, sidebars) targets the
+        // ACTIVE panel, validated against the workspace so a stale slot
+        // name after an eject falls back to the target-less stage menu.
+        let id = id.or_else(|| {
+            ctx.props().renderer.slot_name().filter(|name| {
+                ctx.props()
+                    .workspace
+                    .panel(&crate::workspace::PanelId::from(name.as_str()))
+                    .is_some()
+            })
+        });
+
         // Make the right-clicked panel active so active-targeting
         // commands (e.g. Reset) act on it; then show the menu.
         if let Some(id) = &id {

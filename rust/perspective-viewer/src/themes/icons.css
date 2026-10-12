@@ -63,6 +63,7 @@ perspective-viewer-tab {
     --psp-icon--reset--mask-image: url("../svg/revert-icon.svg");
     --psp-icon--copy--mask-image: url("../svg/duplicate-icon.svg");
     --psp-icon--new-panel--mask-image: url("../svg/new-panel-icon.svg");
+    --psp-derived--mask-image: url("../svg/derived.svg");
     --psp-icon--theme--mask-image: url("../svg/theme-icon.svg");
 
     --psp-icon--drawer-tab--mask-image: url(../svg/drawer-tab.svg);

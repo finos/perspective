@@ -43,6 +43,11 @@ struct ViewSubscriptionData {
     on_update: Option<Callback<()>>,
     is_deleted: Rc<Cell<bool>>,
 
+    /// Set by [`ViewSubscription::quiesce`]: the engine registration is gone
+    /// and BOTH emit channels are dead, including any update already in
+    /// flight when the flag flipped.
+    quiesced: Rc<Cell<bool>>,
+
     /// The bound `View`'s latest known dimensions, written before
     /// `on_update`/`on_stats` fire.
     dimensions: Rc<RefCell<Option<ViewDimensionsResp>>>,
@@ -57,8 +62,14 @@ pub struct ViewSubscription {
 impl ViewSubscriptionData {
     /// Main handler when underlying `View()` calls `on_update()`.
     async fn on_view_update(self) -> ApiResult<JsValue> {
+        if self.quiesced.get() {
+            return Ok(JsValue::UNDEFINED);
+        }
+
         self.clone().update_view_stats().await?;
-        if let Some(on_update) = &self.on_update {
+        if let Some(on_update) = &self.on_update
+            && !self.quiesced.get()
+        {
             on_update.emit(());
         };
 
@@ -66,6 +77,10 @@ impl ViewSubscriptionData {
     }
 
     async fn update_view_stats(self) -> ApiResult<JsValue> {
+        if self.quiesced.get() {
+            return Ok(JsValue::UNDEFINED);
+        }
+
         let dimensions = self.view.dimensions().await?;
         let num_rows = dimensions.num_table_rows;
         let num_cols = dimensions.num_table_columns;
@@ -80,7 +95,10 @@ impl ViewSubscriptionData {
             is_split_by: !self.config.split_by.is_empty(),
         };
 
-        self.on_stats.emit(stats);
+        if !self.quiesced.get() {
+            self.on_stats.emit(stats);
+        }
+
         Ok(JsValue::UNDEFINED)
     }
 
@@ -90,7 +108,7 @@ impl ViewSubscriptionData {
         }
 
         let view = &self.view;
-        if self.on_update.is_some() {
+        if self.on_update.is_some() && !self.quiesced.get() {
             view.remove_update(self.callback_id.get()).await?;
         }
 
@@ -125,6 +143,7 @@ impl ViewSubscription {
             callback_id: Rc::default(),
             on_update,
             is_deleted: Rc::default(),
+            quiesced: Rc::default(),
             dimensions: Rc::default(),
         };
 
@@ -189,6 +208,26 @@ impl ViewSubscription {
     /// decide SKIP / REUSE / REBUILD.
     pub fn build_config(&self) -> Rc<ViewConfig> {
         self.data.build_config.clone()
+    }
+
+    /// Permanently detach this subscription from its `Session` — the engine
+    /// `on_update` registration removed and both emit channels silenced
+    /// (in-flight updates included) — leaving a bare keep-alive handle for a
+    /// `View` that now feeds a derived `Table` rather than this panel.
+    pub async fn quiesce(&self) -> ApiResult<()> {
+        if self.data.quiesced.get() {
+            return Ok(());
+        }
+
+        if self.data.on_update.is_some() {
+            self.data
+                .view
+                .remove_update(self.data.callback_id.get())
+                .await?;
+        }
+
+        self.data.quiesced.set(true);
+        Ok(())
     }
 
     /// Delete this `View`. Neglecting to call this method before a

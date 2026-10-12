@@ -112,6 +112,7 @@
             pointer-events: none;
         }
 
+        &:hover,
         &.modal-target,
         &.dragdrop-hover {
             color: var(--psp--background-color);
@@ -570,5 +571,158 @@
                 width: calc(100% - 27px);
             }
         }
+    }
+}
+
+:host {
+    #derived_stack {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 4px;
+        gap: 4px;
+    }
+
+    .derived_level {
+        display: flex;
+        align-items: center;
+        /* height: 18px; */
+        width: 100%;
+        /* padding: 0px 6px; */
+        color: var(--psp-inactive--color, #ababab);
+        /* font-size: var(--label--font-size, 0.75em); */
+    }
+
+    #derived_stack:before {
+        content: "Subqueries";
+        font-size: var(--label--font-size, 0.75em);
+    }
+
+    .derived_icon {
+        background-repeat: no-repeat;
+        background-color: var(--psp-inactive--color);
+        display: inline-block;
+        -webkit-mask-size: cover;
+        mask-size: cover;
+        flex-shrink: 0;
+        line-height: 0;
+        -webkit-mask-image: var(--psp-derived--mask-image);
+        mask-image: var(--psp-derived--mask-image);
+        &:before {
+            content: var(--psp-derived--mask-image);
+            visibility: hidden;
+        }
+    }
+
+    .is-own .derived_icon {
+        background-color: var(--psp--color);
+    }
+
+    .derived_level:hover .derived_label_wrapper {
+        border-color: var(--psp--color);
+        color: var(--psp--color);
+    }
+
+    .derived_level:hover .derived_icon:before {
+        background-color: var(--psp--color);
+    }
+
+    .derived_label_wrapper {
+        height: 24px;
+        border: 1px solid var(--psp-inactive--color);
+        border-radius: 2px;
+        flex: 1 1 0;
+        min-width: 0;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        padding-left: 7px;
+        padding-right: 4px;
+        gap: 6px;
+    }
+
+    .derived_label {
+        flex: 1 1 0;
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .derived_consumers {
+        opacity: 0.6;
+    }
+
+    .derived_consumers::before {
+        content: "x";
+    }
+
+    .derived_snapshot::before {
+        content: var(
+            --psp-label--derived-snapshot--content,
+            var(--psp-missing)
+        );
+        opacity: 0.6;
+    }
+
+    .derived_release {
+        cursor: pointer;
+        -webkit-mask-image: var(--psp-icon--close--mask-image);
+        mask-image: var(--psp-icon--close--mask-image);
+        mask-size: cover;
+        background-color: currentColor;
+        width: 14px;
+        height: 14px;
+        flex: 0 0 14px;
+        margin: 0 6.5px;
+    }
+
+    .derived_release.disabled {
+        cursor: inherit;
+        pointer-events: none;
+        background-color: var(--psp-inactive--color);
+    }
+
+    .derived_release:hover {
+        color: var(--psp--color, inherit);
+    }
+
+    #derived_stack {
+        flex: 0 0 auto;
+        margin-top: auto;
+        margin-right: 0px;
+        padding-top: 12px;
+        bottom: 0px;
+    }
+
+    .derived_level.is-own {
+        color: var(--psp--color, inherit);
+    }
+
+    .derived_create:before {
+        content: var(--psp-label--derive-table--content, var(--psp-missing));
+    }
+
+    .derived_create {
+        cursor: pointer;
+        border-radius: 3px;
+        border: 1px solid var(--psp-inactive--color);
+        display: flex;
+        align-items: center;
+        height: 24px;
+        line-height: 18px;
+        flex-direction: row;
+        justify-content: center;
+        font-size: var(--label--font-size, 0.75em);
+        color: var(--psp-inactive--color);
+        text-transform: uppercase;
+        /* margin-top: 12px; */
+    }
+
+    .derived_create:hover {
+        color: var(--psp--background-color);
+        background-color: var(--psp--color);
+        border-color: var(--psp--color);
     }
 }

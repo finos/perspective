@@ -384,10 +384,15 @@ test.describe("Expressions", () => {
         let addExprButton = await page.waitForSelector("#add-expression");
         let notHovered = await addExprButton.getAttribute("class");
         expect(notHovered).toBeNull();
+        const background = () =>
+            addExprButton.evaluate(
+                (el) => getComputedStyle(el).backgroundColor,
+            );
 
+        const idle = await background();
         await addExprButton.hover();
-        let hovered = await addExprButton.getAttribute("class");
-        expect(hovered).toBe("dragdrop-hover");
+        await expect.poll(background).not.toBe(idle);
+        expect(await addExprButton.getAttribute("class")).toBeNull();
     });
 
     // Currently does not work in Firefox!

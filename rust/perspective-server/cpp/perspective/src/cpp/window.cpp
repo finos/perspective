@@ -588,6 +588,7 @@ t_window_engine::resolve_dtype(t_window_op op, t_dtype source_dtype) {
         case t_window_op::WINDOW_OP_DIFF:
             return numeric ? DTYPE_FLOAT64 : DTYPE_NONE;
         case t_window_op::WINDOW_OP_COUNT:
+        case t_window_op::WINDOW_OP_ROW_NUMBER:
             return DTYPE_INT64;
         case t_window_op::WINDOW_OP_MIN:
         case t_window_op::WINDOW_OP_MAX:
@@ -617,6 +618,7 @@ t_window_engine::is_implemented(t_window_op op, t_window_frame_type frame) {
         case t_window_op::WINDOW_OP_LEAD:
         case t_window_op::WINDOW_OP_DIFF:
         case t_window_op::WINDOW_OP_EMA:
+        case t_window_op::WINDOW_OP_ROW_NUMBER:
             // Frame-independent; frame legality is enforced at `View`
             // construction.
             return true;
@@ -632,6 +634,7 @@ t_window_class
 t_window_engine::class_of(const t_window_spec& spec) {
     switch (spec.m_op) {
         case t_window_op::WINDOW_OP_EMA:
+        case t_window_op::WINDOW_OP_ROW_NUMBER:
             return t_window_class::WINDOW_CLASS_CUMULATIVE;
         case t_window_op::WINDOW_OP_LAG:
         case t_window_op::WINDOW_OP_DIFF:
@@ -877,6 +880,17 @@ t_window_engine::recompute_range(
             }
         } break;
         case t_window_class::WINDOW_CLASS_CUMULATIVE: {
+            if (spec.m_op == t_window_op::WINDOW_OP_ROW_NUMBER) {
+                for (std::size_t pos = lo; pos < rows.size(); ++pos) {
+                    write_int(
+                        out,
+                        rows[pos].m_ridx,
+                        static_cast<std::int64_t>(pos) + 1
+                    );
+                }
+                break;
+            }
+
             if (state.m_needs_prefix) {
                 partition.m_prefix_sum.resize(rows.size());
                 partition.m_prefix_sumsq.resize(rows.size());

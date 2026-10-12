@@ -81,15 +81,20 @@ property does.</div>
 | `diff` | This row's value minus the value `offset` rows behind | `float` |
 | `rate` | Rate of change across the frame | `float` |
 | `ema` | Exponential moving average, smoothed by `alpha` | `float` |
+| `row_number` | 1-based position of the row in its partition's order | `integer` |
 
 `sum`, `avg`, `stddev`, `var`, `diff`, `rate` and `ema` require a numeric
 input column.
 
+`row_number` numbers rows, not values: it ignores `column` (any column
+satisfies it), never skips a row whose input is null, and breaks ties on
+`order_by` by primary key.
+
 ### Frame compatibility
 
 - `sum`, `avg`, `count`, `min`, `max`, `stddev` and `var` accept any frame.
-- `lag`, `lead`, `diff` and `ema` are frame-independent — they are computed
-  from row offsets rather than a frame.
+- `lag`, `lead`, `diff`, `ema` and `row_number` are frame-independent — they
+  are computed from row positions rather than a frame.
 - **`rate` requires a `range` frame**, and is invalid with `rows` or
   `cumulative`.
 

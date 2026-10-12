@@ -133,6 +133,8 @@ if (process.env.PACKAGE) {
         let flags = "--release";
         if (!!process.env.PSP_DEBUG) {
             flags = "";
+        } else if (!!process.env.PSP_FAST) {
+            flags = "--profile fast";
         }
 
         if (

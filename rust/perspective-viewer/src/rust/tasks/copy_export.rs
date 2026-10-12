@@ -29,6 +29,7 @@ use crate::queries::{export_app, get_viewer_config};
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::*;
+use crate::workspace::Workspace;
 
 fn tag_name_to_package(plugin: &JsPerspectiveViewerPlugin) -> String {
     let tag_name = plugin.unchecked_ref::<web_sys::HtmlElement>().tag_name();
@@ -118,6 +119,7 @@ pub async fn export_method_to_blob(
     session: &Session,
     renderer: &Renderer,
     presentation: &Presentation,
+    workspace: &Workspace,
     method: ExportMethod,
 ) -> ApiResult<web_sys::Blob> {
     let viewport = renderer.get_selection();
@@ -197,6 +199,7 @@ pub async fn export_method_to_blob(
         ExportMethod::JsonConfig => js_sys::JSON::stringify(
             &get_viewer_config(session, renderer, presentation)
                 .await?
+                .map_table(|name| workspace.inline_table_ref(&name))
                 .encode()?,
         )?
         .as_blob(),
@@ -208,6 +211,7 @@ pub async fn export_method_to_jsvalue(
     session: &Session,
     renderer: &Renderer,
     presentation: &Presentation,
+    workspace: &Workspace,
     method: ExportMethod,
 ) -> ApiResult<JsValue> {
     let viewport = renderer.get_selection();
@@ -286,6 +290,7 @@ pub async fn export_method_to_jsvalue(
         ExportMethod::Plugin => txt_as_jsvalue(session, renderer, viewport).await?.into(),
         ExportMethod::JsonConfig => get_viewer_config(session, renderer, presentation)
             .await?
+            .map_table(|name| workspace.inline_table_ref(&name))
             .encode()?,
     })
 }

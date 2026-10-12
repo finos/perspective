@@ -219,7 +219,9 @@ impl Component for ColumnSettingsPanel {
 
     fn changed(&mut self, ctx: &yew::prelude::Context<Self>, old_props: &Self::Properties) -> bool {
         let next = Initials::of(ctx.props());
-        if ctx.props().selected_column != old_props.selected_column || next != self.initials() {
+        if ctx.props().selected_column != old_props.selected_column
+            || next != Initials::of(old_props)
+        {
             self.reset_to(ctx, next);
         } else {
             self.refresh_derived(ctx);
@@ -540,15 +542,6 @@ impl ColumnSettingsPanel {
             || self.header_value != self.initial_header_value;
         let valid = self.expr_valid && self.header_valid;
         self.save_enabled = changed && valid;
-    }
-
-    fn initials(&self) -> Initials {
-        Initials {
-            column_name: self.column_name.clone(),
-            expr: self.initial_expr_value.clone(),
-            header: self.initial_header_value.clone(),
-            window: self.initial_window_value.clone(),
-        }
     }
 
     fn refresh_derived(&mut self, ctx: &yew::prelude::Context<Self>) {

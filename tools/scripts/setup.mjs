@@ -100,11 +100,20 @@ const CONFIG = new Proxy(
     },
 );
 
-const PROMPT_DEBUG = {
-    type: "confirm",
-    name: "PSP_DEBUG",
-    message: "Run debug build?",
-    default: CONFIG["PSP_DEBUG"] || false,
+const PROMPT_BUILD_MODE = {
+    type: "list",
+    name: "PSP_BUILD_MODE",
+    message: "Build mode?",
+    default: CONFIG["PSP_DEBUG"]
+        ? "debug"
+        : CONFIG["PSP_FAST"]
+          ? "fast"
+          : "prod",
+    choices: [
+        { name: "prod", value: "prod" },
+        { name: "fast", value: "fast" },
+        { name: "debug", value: "debug" },
+    ],
 };
 
 const PROMPT_DOCKER = {
@@ -245,7 +254,17 @@ async function focus_package() {
 }
 
 async function javascript_options() {
-    const new_config = await inquirer.prompt([PROMPT_DEBUG, PROMPT_DOCKER]);
+    const { PSP_BUILD_MODE, ...new_config } = await inquirer.prompt([
+        PROMPT_BUILD_MODE,
+        PROMPT_DOCKER,
+    ]);
+
+    if (PSP_BUILD_MODE === "debug") {
+        new_config.PSP_DEBUG = 1;
+    } else if (PSP_BUILD_MODE === "fast") {
+        new_config.PSP_FAST = 1;
+    }
+
     CONFIG.add(new_config);
     CONFIG.write();
 }

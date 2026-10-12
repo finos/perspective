@@ -1032,4 +1032,339 @@ test.describe("Window columns", function () {
         await view.delete();
         await table.delete();
     });
+
+    test("row_number orders by order_by, not insertion order", async function () {
+        const table = await perspective.table({
+            t: "integer",
+            sym: "string",
+            price: "float",
+        });
+        await table.update(data);
+        const view = await table.view({
+            columns: ["t", "sym", "rn"],
+            sort: [
+                ["t", "asc"],
+                ["sym", "asc"],
+            ],
+            windows: {
+                rn: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "asc"],
+                },
+            },
+        });
+
+        const schema = await view.schema();
+        expect(schema["rn"]).toBe("integer");
+        const result = await view.to_columns();
+        expect(result["t"]).toEqual([1, 2, 2, 3, 4]);
+        expect(result["sym"]).toEqual(["a", "a", "b", "a", "b"]);
+        expect(result["rn"]).toEqual([1, 3, 2, 4, 5]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("row_number restarts per partition", async function () {
+        const table = await perspective.table({
+            t: "integer",
+            sym: "string",
+            price: "float",
+        });
+        await table.update(data);
+        const view = await table.view({
+            columns: ["t", "sym", "rn"],
+            sort: [
+                ["sym", "asc"],
+                ["t", "asc"],
+            ],
+            windows: {
+                rn: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "asc"],
+                    partition_by: ["sym"],
+                },
+            },
+        });
+
+        const result = await view.to_columns();
+        expect(result["sym"]).toEqual(["a", "a", "a", "b", "b"]);
+        expect(result["rn"]).toEqual([1, 2, 3, 1, 2]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("row_number descending numbers from the largest order key", async function () {
+        const table = await perspective.table({
+            t: "integer",
+            sym: "string",
+            price: "float",
+        });
+        await table.update(data);
+        const view = await table.view({
+            columns: ["t", "rn"],
+            sort: [["t", "asc"]],
+            filter: [["sym", "==", "a"]],
+            windows: {
+                rn: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "desc"],
+                    partition_by: ["sym"],
+                },
+            },
+        });
+
+        const result = await view.to_columns();
+        expect(result["t"]).toEqual([1, 2, 3]);
+        expect(result["rn"]).toEqual([3, 2, 1]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("row_number does not skip rows whose source value is null", async function () {
+        const table = await perspective.table({
+            t: "integer",
+            price: "float",
+        });
+        await table.update([
+            { t: 1, price: 10 },
+            { t: 2, price: null },
+            { t: 3, price: 30 },
+        ]);
+        const view = await table.view({
+            columns: ["t", "rn", "n"],
+            sort: [["t", "asc"]],
+            windows: {
+                rn: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "asc"],
+                },
+                n: {
+                    column: "price",
+                    aggregate: "count",
+                    order_by: ["t", "asc"],
+                    cumulative: true,
+                },
+            },
+        });
+
+        const result = await view.to_columns();
+        expect(result["rn"]).toEqual([1, 2, 3]);
+        expect(result["n"]).toEqual([1, 1, 2]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("row_number breaks order key ties by primary key in both directions", async function () {
+        const table = await perspective.table(
+            { id: "integer", t: "integer", price: "float" },
+            { index: "id" },
+        );
+        await table.update([
+            { id: 3, t: 1, price: 1 },
+            { id: 1, t: 1, price: 2 },
+            { id: 2, t: 0, price: 3 },
+        ]);
+        const view = await table.view({
+            columns: ["id", "asc", "desc"],
+            sort: [["id", "asc"]],
+            windows: {
+                asc: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "asc"],
+                },
+                desc: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "desc"],
+                },
+            },
+        });
+
+        const result = await view.to_columns();
+        expect(result["id"]).toEqual([1, 2, 3]);
+        expect(result["asc"]).toEqual([2, 1, 3]);
+        expect(result["desc"]).toEqual([1, 3, 2]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("streaming insert renumbers successors and reports their delta", async function () {
+        const table = await perspective.table(
+            { t: "integer", sym: "string", price: "float" },
+            { index: "t" },
+        );
+        await table.update([
+            { t: 1, sym: "a", price: 10 },
+            { t: 2, sym: "b", price: 20 },
+            { t: 3, sym: "a", price: 30 },
+            { t: 4, sym: "a", price: 40 },
+        ]);
+        const view = await table.view({
+            columns: ["t", "sym", "rn"],
+            windows: {
+                rn: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "asc"],
+                    partition_by: ["sym"],
+                },
+            },
+        });
+        await view.to_columns();
+
+        const delta = new Promise((resolve) => {
+            view.on_update((updated) => resolve(updated.delta), {
+                mode: "row",
+            });
+        });
+        await table.update([{ t: 0, sym: "a", price: 0 }]);
+
+        const delta_table = await perspective.table(await delta);
+        const delta_view = await delta_table.view({ sort: [["t", "asc"]] });
+        const result = await delta_view.to_columns();
+        expect(result["t"]).toEqual([0, 1, 3, 4]);
+        expect(result["rn"]).toEqual([1, 2, 3, 4]);
+        await delta_view.delete();
+        await delta_table.delete();
+
+        const after = await view.to_columns();
+        const by_t = Object.fromEntries(
+            after["t"].map((t, i) => [t, after["rn"][i]]),
+        );
+        expect(by_t).toEqual({ 0: 1, 1: 2, 2: 1, 3: 3, 4: 4 });
+        await view.delete();
+        await table.delete();
+    });
+
+    test("remove renumbers successors without a gap", async function () {
+        const table = await perspective.table(
+            { t: "integer", price: "float" },
+            { index: "t" },
+        );
+        await table.update([
+            { t: 1, price: 10 },
+            { t: 2, price: 20 },
+            { t: 3, price: 30 },
+        ]);
+        const view = await table.view({
+            columns: ["t", "rn"],
+            sort: [["t", "asc"]],
+            windows: {
+                rn: {
+                    column: "price",
+                    aggregate: "row_number",
+                    order_by: ["t", "asc"],
+                },
+            },
+        });
+        await view.to_columns();
+        await table.remove([1]);
+
+        const result = await view.to_columns();
+        expect(result["t"]).toEqual([2, 3]);
+        expect(result["rn"]).toEqual([1, 2]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("row_number with omitted order_by numbers in primary key order", async function () {
+        const table = await perspective.table(
+            { id: "integer", price: "float" },
+            { index: "id" },
+        );
+        await table.update([
+            { id: 30, price: 1 },
+            { id: 10, price: 2 },
+            { id: 20, price: 3 },
+        ]);
+        const view = await table.view({
+            columns: ["id", "rn"],
+            sort: [["id", "asc"]],
+            windows: {
+                rn: {
+                    column: "price",
+                    aggregate: "row_number",
+                },
+            },
+        });
+
+        const result = await view.to_columns();
+        expect(result["id"]).toEqual([10, 20, 30]);
+        expect(result["rn"]).toEqual([1, 2, 3]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("row_number rejects rows and range frames but accepts cumulative", async function () {
+        const table = await perspective.table({
+            t: "integer",
+            price: "float",
+        });
+        await table.update(data.map(({ t, price }) => ({ t, price })));
+        const rn = {
+            column: "price",
+            aggregate: "row_number",
+            order_by: ["t", "asc"],
+        };
+
+        await expect(
+            table.view({ windows: { rn: { ...rn, rows: 2 } } }),
+        ).rejects.toThrow();
+        await expect(
+            table.view({ windows: { rn: { ...rn, range: 2 } } }),
+        ).rejects.toThrow();
+
+        const view = await table.view({
+            columns: ["rn"],
+            sort: [["t", "asc"]],
+            windows: { rn: { ...rn, cumulative: true } },
+        });
+        const result = await view.to_columns();
+        expect(result["rn"]).toEqual([1, 2, 3, 4, 5]);
+        await view.delete();
+        await table.delete();
+    });
+
+    test("row_number works as a group_by key and as an aggregate input", async function () {
+        const table = await perspective.table({
+            t: "integer",
+            sym: "string",
+            price: "float",
+        });
+        await table.update(data);
+        const rn = {
+            column: "price",
+            aggregate: "row_number",
+            order_by: ["t", "asc"],
+            partition_by: ["sym"],
+        };
+
+        const keyed = await table.view({
+            group_by: ["rn"],
+            columns: ["price"],
+            aggregates: { price: "sum" },
+            windows: { rn },
+        });
+        const keyed_result = await keyed.to_columns();
+        expect(keyed_result["__ROW_PATH__"]).toEqual([[], [1], [2], [3]]);
+        expect(keyed_result["price"]).toEqual([360, 110, 220, 30]);
+        await keyed.delete();
+
+        const agg = await table.view({
+            group_by: ["sym"],
+            columns: ["rn"],
+            aggregates: { rn: "max" },
+            windows: { rn },
+        });
+        const agg_result = await agg.to_columns();
+        expect(agg_result["__ROW_PATH__"]).toEqual([[], ["a"], ["b"]]);
+        expect(agg_result["rn"]).toEqual([3, 3, 2]);
+        await agg.delete();
+        await table.delete();
+    });
 });

@@ -179,6 +179,7 @@ impl PerspectiveViewer {
                             vec![NewPanelFrom { client, table }]
                         },
                         PanelCommand::Duplicate => vec![DuplicatePanel(id)],
+                        PanelCommand::Derive => vec![DerivePanel(id)],
                         PanelCommand::NewFromPanel(source) => vec![DuplicatePanel(source)],
                         PanelCommand::Reset => vec![ResetPanel(Some(id), false, None)],
                         PanelCommand::ToggleMaster => vec![ToggleMaster(id)],

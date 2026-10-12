@@ -39,36 +39,30 @@ impl ModalAnchor {
     }
 }
 
-/// Given the bounds of the target element as previously computed, as well as
-/// the browser's viewport and the bounds of the already-connected modal element
-/// itself, determine the best anchor point to keep the element on-screen.
-pub fn calc_relative_position(
-    elem: &HtmlElement,
-    _top: f64,
-    left: f64,
-    height: f64,
-    width: f64,
-) -> ModalAnchor {
+/// Pick the anchor that keeps a modal of `modal`'s size on-screen when opened
+/// against `target`, from those rects alone so repeated calls agree.
+pub fn calc_relative_position(target: &DomRect, modal: &DomRect) -> ModalAnchor {
     let window = global::window();
-    let rect = elem.get_bounding_client_rect();
     let inner_width = window.inner_width().unwrap().as_f64().unwrap();
     let inner_height = window.inner_height().unwrap().as_f64().unwrap();
-    let rect_top = rect.top();
-    let rect_height = rect.height();
-    let rect_width = rect.width();
-    let rect_left = rect.left();
+    let top = target.top();
+    let left = target.left();
+    let height = target.height();
+    let width = target.width();
+    let modal_height = modal.height();
+    let modal_width = modal.width();
 
-    let elem_over_y = inner_height < rect_top + rect_height;
-    let elem_over_x = inner_width < rect_left + rect_width;
-    let target_over_x = inner_width < rect_left + width;
-    let target_over_y = inner_height < rect_top + height;
+    let elem_over_y = inner_height < top + height - 1.0 + modal_height;
+    let elem_over_x = inner_width < left + modal_width;
+    let target_over_x = inner_width < left + width;
+    let target_over_y = inner_height < top + height;
 
     // modal/target
     match (elem_over_y, elem_over_x, target_over_x, target_over_y) {
         (true, _, true, true) => ModalAnchor::BottomRightTopLeft,
         (true, _, true, false) => ModalAnchor::BottomRightBottomLeft,
         (true, true, false, _) => {
-            if left + width - rect_width > 0.0 {
+            if left + width - modal_width > 0.0 {
                 ModalAnchor::BottomRightTopRight
             } else {
                 ModalAnchor::BottomLeftTopLeft
@@ -77,7 +71,7 @@ pub fn calc_relative_position(
         (true, false, false, _) => ModalAnchor::BottomLeftTopLeft,
         (false, true, true, _) => ModalAnchor::TopRightTopLeft,
         (false, true, false, _) => {
-            if left + width - rect_width > 0.0 {
+            if left + width - modal_width > 0.0 {
                 ModalAnchor::TopRightBottomRight
             } else {
                 ModalAnchor::TopLeftBottomLeft

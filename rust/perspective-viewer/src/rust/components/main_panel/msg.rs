@@ -49,12 +49,14 @@ pub enum MainPanelMsg {
     BeforeResize(web_sys::Event),
 
     /// A right-click opened the panel context menu (target panel id, client
-    /// x, y). Fired by the imperative `contextmenu` listener on the panel
-    /// container — see `_contextmenu_listener` — and by each `PanelTab`.
+    /// x, y). Fired by the imperative `contextmenu` listener on the viewer
+    /// host — see `_contextmenu_listener` — and by each `PanelTab`.
     /// `Some(id)` activates that panel and opens its
     /// [`PanelMenu`](crate::components::panel_menu::PanelMenu) at the
-    /// cursor; `None` is the EMPTY stage (zero panels) — a target-less menu
-    /// offering only "New", whose items create the first panel.
+    /// cursor; `None` (no frame on the composed path — status bar,
+    /// sidebars, the empty stage) resolves to the ACTIVE panel, else to a
+    /// target-less menu offering only "New", whose items create the first
+    /// panel.
     ContextMenu(Option<String>, f64, f64),
 
     /// Dismiss the panel context menu (the menu session ended).

@@ -13,6 +13,7 @@
 use yew::prelude::*;
 
 use crate::renderer::limits::RenderLimits;
+use crate::utils::left_click;
 
 #[derive(Properties, PartialEq)]
 pub struct RenderWarningProps {
@@ -76,7 +77,7 @@ pub fn render_warning(props: &RenderWarningProps) -> Html {
         };
 
         let on_dismiss = props.on_dismiss.clone();
-        let onclick = Callback::from(move |_: MouseEvent| on_dismiss.emit(()));
+        let onclick = left_click(Callback::from(move |_: MouseEvent| on_dismiss.emit(())));
         html! {
             <>
                 <div

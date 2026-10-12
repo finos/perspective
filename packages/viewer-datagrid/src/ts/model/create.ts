@@ -57,7 +57,7 @@ function window_output_type(
     source_column: string,
     table_schema: Schema,
 ): ColumnType {
-    if (aggregate === "count") {
+    if (aggregate === "count" || aggregate === "row_number") {
         return "integer";
     }
 

@@ -15,11 +15,13 @@
 mod blob;
 mod download;
 mod dragdrop;
+mod mouse;
 mod request_animation_frame;
 mod selection;
 
 pub use self::blob::*;
 pub use self::download::*;
 pub use self::dragdrop::*;
+pub use self::mouse::*;
 pub use self::request_animation_frame::*;
 pub use self::selection::*;

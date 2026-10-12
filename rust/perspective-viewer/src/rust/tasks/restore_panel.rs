@@ -90,13 +90,12 @@ async fn plan_binding(
     rebind: Rebind,
     missing: MissingTable,
 ) -> ApiResult<Option<BindPlan>> {
-    let OptionalUpdate::Update(name) = table else {
+    let OptionalUpdate::Update(table) = table else {
         return Ok(Some(BindPlan::Keep));
     };
 
-    let same = session
-        .get_table()
-        .is_some_and(|t| t.get_name() == name.as_str());
+    let name = table.name()?;
+    let same = session.get_table().is_some_and(|t| t.get_name() == name);
 
     if same && !session.is_errored() && renderer.failure().is_none() {
         return Ok(Some(BindPlan::Keep));
@@ -109,7 +108,7 @@ async fn plan_binding(
 
     if table.is_none()
         && rebind == Rebind::Complete
-        && session.pending_table().as_deref() == Some(name.as_str())
+        && session.pending_table().as_deref() == Some(name)
     {
         return Ok(None);
     }
@@ -123,7 +122,7 @@ async fn plan_binding(
         },
         None => BindPlan::Pend {
             client,
-            name: name.clone(),
+            name: name.to_owned(),
             reset,
         },
     }))
@@ -191,12 +190,28 @@ pub(crate) async fn restore_panel_step(
     mode: RestoreMode,
     rebind: Rebind,
     origin: RunOrigin,
-    update: ViewerConfigUpdate,
+    mut update: ViewerConfigUpdate,
     errors: RestoreErrors,
     missing: MissingTable,
 ) -> ApiResult<()> {
     let active = matches!(mode, RestoreMode::Existing { active: true });
     let fresh = matches!(mode, RestoreMode::Fresh);
+
+    crate::tasks::resolve_table_ref(workspace, &mut update, missing).await?;
+
+    // A derived definition parked in the pending registry is a known-future
+    // table, never an unknown name — bind as PEND whatever the caller's
+    // missing-table mode.
+    let missing = match &update.table {
+        OptionalUpdate::Update(table)
+            if table
+                .name()
+                .is_ok_and(|name| workspace.is_derived_pending(name)) =>
+        {
+            MissingTable::Pend
+        },
+        _ => missing,
+    };
 
     renderer.check_plugin_update(&update.plugin)?;
     let Some(plan) = plan_binding(
@@ -222,6 +237,7 @@ pub(crate) async fn restore_panel_step(
         .slot_name()
         .map(|id| overlay_for(workspace, &PanelId::from(id)));
 
+    let rebound = !matches!(plan, BindPlan::Keep);
     let prepared = prepare(
         session,
         renderer,
@@ -243,6 +259,10 @@ pub(crate) async fn restore_panel_step(
     }
 
     result?;
+    if rebound {
+        workspace.bindings_changed().emit(());
+    }
+
     if fresh {
         renderer.resize().await.unwrap_or_log();
     }

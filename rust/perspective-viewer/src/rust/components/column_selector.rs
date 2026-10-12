@@ -15,6 +15,7 @@ mod add_expression_button;
 mod aggregate_selector;
 mod column_selector_column_row;
 mod config_selector;
+mod derived_control;
 mod empty_column;
 mod expr_edit_button;
 mod filter_column;
@@ -37,6 +38,7 @@ use yew::prelude::*;
 use self::active_column::*;
 use self::add_expression_button::AddExpressionButton;
 use self::config_selector::ConfigSelector;
+use self::derived_control::DerivedControl;
 use self::inactive_column::*;
 use crate::components::column_dropdown::{ColumnDropDownElement, ColumnDropDownPortal};
 use crate::config::PluginStaticConfig;
@@ -50,6 +52,7 @@ use crate::session::*;
 use crate::tasks::apply_and_render;
 use crate::ui::{Orientation, ScrollPanel, ScrollPanelItem, SplitPanel};
 use crate::utils::*;
+use crate::workspace::Workspace;
 
 #[derive(Properties)]
 pub struct ColumnSelectorProps {
@@ -83,6 +86,7 @@ pub struct ColumnSelectorProps {
     // State
     pub session: Session,
     pub renderer: Renderer,
+    pub workspace: Workspace,
     pub presentation: Presentation,
 
     /// Fires when this component is resized via the UI.
@@ -391,6 +395,20 @@ impl Component for ColumnSelector {
                 .unwrap_or_default(),
         );
 
+        let derived_control = html_nested! {
+            <ScrollPanelItem key="derived_control" size_hint=0_f64>
+                <DerivedControl
+                    session={ctx.props().session.clone()}
+                    renderer={ctx.props().renderer.clone()}
+                    presentation={ctx.props().presentation.clone()}
+                    workspace={ctx.props().workspace.clone()}
+                    metadata={ctx.props().metadata.clone()}
+                    view_config={ctx.props().view_config.clone()}
+                    table={ctx.props().session.get_table().map(|x| x.get_name().to_owned())}
+                />
+            </ScrollPanelItem>
+        };
+
         let config_selector = html_nested! {
             <ScrollPanelItem key="config_selector" {size_hint}>
                 <ConfigSelector
@@ -572,7 +590,7 @@ impl Component for ColumnSelector {
                     drop={ondrop}
                     on_resize={&ctx.props().on_resize}
                     on_dimensions_reset={&self.on_reset}
-                    children={std::iter::once(config_selector).chain(active_columns).collect::<Vec<_>>()}
+                    children={std::iter::once(derived_control).chain(std::iter::once(config_selector)).chain(active_columns).collect::<Vec<_>>()}
                 />
             </div>
         }];

@@ -35,13 +35,13 @@ use yew::prelude::*;
 
 use crate::components::copy_dropdown::CopyDropDownMenu;
 use crate::components::export_dropdown::ExportDropDownMenu;
-use crate::components::new_panel_menu::{HostedTables, NewPanelMenu, NewPanelPick};
+use crate::components::new_panel_menu::{HostedTables, NewPanelMenu, NewPanelPick, derived_counts};
 use crate::components::style::StyleSurface;
 use crate::config::*;
 use crate::js::copy_to_clipboard;
 use crate::presentation::Presentation;
 use crate::queries::fetch_hosted_tables;
-use crate::tasks::export_method_to_blob;
+use crate::tasks::{can_derive, delete_derived, export_method_to_blob};
 use crate::ui::{ContextMenu, ContextMenuEntry, ContextMenuItem, MODAL_SLOT, PortalModal};
 use crate::utils::*;
 use crate::workspace::{PanelId, Workspace};
@@ -59,6 +59,10 @@ pub enum PanelCommand {
     /// A fresh panel copied from the named panel.
     NewFromPanel(String),
     Duplicate,
+
+    /// Promote the panel's current `View` to a derived `Table` under a
+    /// generated name, and rebind the panel to it.
+    Derive,
     Reset,
     Maximize,
     Restore,
@@ -153,6 +157,10 @@ pub struct PanelMenu {
     /// loaded client, in registration order. `None` while the fetch spawned at
     /// menu open is still in flight.
     tables: Option<HostedTables>,
+
+    /// Keeps the [`Workspace::hosted_tables_changed`] listener attached for
+    /// the menu session, so the open listing tracks table creates/deletes.
+    _tables_sub: Subscription,
 }
 
 impl Component for PanelMenu {
@@ -160,13 +168,25 @@ impl Component for PanelMenu {
     type Properties = PanelMenuProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let workspace = ctx.props().workspace.clone();
-        let link = ctx.link().clone();
-        ApiFuture::spawn(async move {
-            let tables = fetch_hosted_tables(&workspace).await;
-            link.send_message(PanelMenuMsg::TablesLoaded(tables));
-            Ok(())
-        });
+        let fetch = {
+            let workspace = ctx.props().workspace.clone();
+            let link = ctx.link().clone();
+            move || {
+                clone!(workspace, link);
+                ApiFuture::spawn(async move {
+                    let tables = fetch_hosted_tables(&workspace).await;
+                    link.send_message(PanelMenuMsg::TablesLoaded(tables));
+                    Ok(())
+                });
+            }
+        };
+
+        fetch();
+        let _tables_sub = ctx
+            .props()
+            .workspace
+            .hosted_tables_changed()
+            .add_listener(move |_| fetch());
 
         Self {
             anchor: session_anchor(
@@ -176,6 +196,7 @@ impl Component for PanelMenu {
             ),
             picker: None,
             tables: None,
+            _tables_sub,
         }
     }
 
@@ -251,6 +272,13 @@ impl PanelMenu {
             Some(panel_id) => {
                 let can_close = ctx.props().workspace.len() > 1;
                 let is_master = ctx.props().workspace.is_master(&PanelId::from(panel_id));
+                let panel = ctx.props().workspace.panel(&PanelId::from(panel_id));
+                let can_derive_view = panel.as_ref().is_some_and(|x| {
+                    let config = x.session.get_view_config();
+                    let is_pivoted = !config.group_by.is_empty() || !config.split_by.is_empty();
+                    is_pivoted && can_derive(&x.session)
+                });
+
                 vec![
                     ContextMenuEntry::Submenu {
                         label: "New".to_owned(),
@@ -258,6 +286,7 @@ impl PanelMenu {
                         entries: vec![ContextMenuEntry::Custom(self.new_submenu_body(ctx))],
                     },
                     item("Duplicate", cmd(PanelCommand::Duplicate), false),
+                    item("Derive Table", cmd(PanelCommand::Derive), !can_derive_view),
                     item("Reset", cmd(PanelCommand::Reset), false),
                     item(
                         "Export",
@@ -335,7 +364,25 @@ impl PanelMenu {
             vec![cmd, PanelMenuMsg::MenuClosed]
         });
 
-        html! { <NewPanelMenu tables={self.tables.clone()} {panels} {callback} /> }
+        let workspace = ctx.props().workspace.clone();
+        let on_delete = Callback::from(move |name: String| {
+            let workspace = workspace.clone();
+            let effect = workspace.effects().guard();
+            ApiFuture::spawn(async move {
+                let _effect = effect;
+                delete_derived(&workspace, &name).await
+            });
+        });
+
+        html! {
+            <NewPanelMenu
+                tables={self.tables.clone()}
+                {panels}
+                {callback}
+                derived={derived_counts(&ctx.props().workspace)}
+                {on_delete}
+            />
+        }
     }
 
     /// Export/Copy format-picker spawned in place of the context menu, anchored
@@ -364,18 +411,20 @@ impl PanelMenu {
                     clone!(presentation);
                     let session = panel.session.clone();
                     let renderer = panel.renderer.clone();
+                    let workspace = ctx.props().workspace.clone();
                     let link = ctx.link().clone();
                     Callback::from(move |file: ExportFile| {
                         if file.name.is_empty() {
                             return;
                         }
 
-                        clone!(session, renderer, presentation, link);
+                        clone!(session, renderer, presentation, workspace, link);
                         ApiFuture::spawn(async move {
                             let blob = export_method_to_blob(
                                 &session,
                                 &renderer,
                                 &presentation,
+                                &workspace,
                                 file.method,
                             )
                             .await?;
@@ -400,14 +449,16 @@ impl PanelMenu {
                     clone!(presentation);
                     let session = panel.session.clone();
                     let renderer = panel.renderer.clone();
+                    let workspace = ctx.props().workspace.clone();
                     let link = ctx.link().clone();
                     Callback::from(move |file: ExportFile| {
-                        clone!(session, renderer, presentation, link);
+                        clone!(session, renderer, presentation, workspace, link);
                         ApiFuture::spawn(async move {
                             let task = export_method_to_blob(
                                 &session,
                                 &renderer,
                                 &presentation,
+                                &workspace,
                                 file.method,
                             );
                             copy_to_clipboard(task, file.method.mimetype(file.is_chart)).await?;

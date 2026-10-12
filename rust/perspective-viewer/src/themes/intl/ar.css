@@ -197,4 +197,12 @@ perspective-viewer {
     --psp-label--legend-opacity--content: "العتامة";
     --psp-label--tooltip-max-column-px--content: "أقصى عرض للعمود";
     --psp-label--tooltip-opacity--content: "العتامة";
+
+    /* Derived tables */
+    --psp-label--derive-table--content: "اشتقاق جدول";
+    --psp-label--derive-table-title--content: "اشتقاق جدول جديد من هذا العرض";
+    --psp-label--derived-snapshot--content: "لقطة";
+    --psp-label--derived-snapshot-title--content: "مصدر البيانات هذا لا يبث التحديثات - بيانات هذا الجدول ثابتة عند لحظة اشتقاقه.";
+    --psp-label--derived-release-title--content: "العودة إلى الجدول الأصل";
+    --psp-label--derived-release-delete-title--content: "العودة إلى الجدول الأصل - انقر مع الضغط على Shift لحذفه";
 }

@@ -303,4 +303,31 @@ describeDuckDB("windows", (getClient) => {
         expect(result[first].length).toBe(rows.length);
         await view.delete();
     });
+
+    test("row_number partitioned by Region counts from one in Row ID order", async function () {
+        const rows = await raw_rows(getClient());
+        const running = {};
+        const expected = rows.map((r) => {
+            running[r.region] = (running[r.region] ?? 0) + 1;
+            return running[r.region];
+        });
+
+        const table = await getClient().open_table("memory.superstore");
+        const view = await table.view({
+            columns: ["Row ID", "rn"],
+            sort: [["Row ID", "asc"]],
+            windows: {
+                rn: {
+                    column: "Sales",
+                    aggregate: "row_number",
+                    order_by: ["Row ID", "asc"],
+                    partition_by: ["Region"],
+                },
+            },
+        });
+
+        const result = await view.to_columns();
+        expect(result["rn"].map(Number)).toEqual(expected);
+        await view.delete();
+    });
 });

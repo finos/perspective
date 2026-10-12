@@ -12,10 +12,152 @@
 
 use std::collections::BTreeMap;
 
-use perspective_client::config::Filter;
+use perspective_client::config::{Filter, ViewConfig};
 
 use crate::config::{OptionalUpdate, PanelViewerConfig, ViewerConfigInitial};
 use crate::utils::CssKind;
+
+/// A derived `Table`'s definition: the `Table` its source `View` reads, and
+/// the config of that `View`; generic over the `table` slot, which is a name
+/// in the workspace `derived_tables` map and a recursive [`TableRef`] when
+/// inlined in a single-panel config.
+#[derive(Clone, Debug, PartialEq, serde::Deserialize, serde::Serialize, ts_rs::TS)]
+pub struct DerivedTableConfig<T: ts_rs::TS = String> {
+    /// The `Table` this derivation reads, which may itself be another
+    /// derived `Table`.
+    pub table: T,
+
+    #[serde(flatten)]
+    pub view_config: ViewConfig,
+}
+
+/// What may occupy a `table` position in a single-panel config: a hosted
+/// `Table`'s name, or an inline derived-table definition recursing through
+/// its own `table` field until a concrete name.
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
+#[serde(untagged)]
+pub enum TableRef {
+    Name(String),
+    Derived(Box<DerivedTableConfig<TableRef>>),
+}
+
+/// Hand-written because the derived decl's recursion sits in a generic alias
+/// instantiation (`DerivedTableConfig<TableRef>`), which TypeScript expands
+/// eagerly and rejects as circular; recursion is legal only deferred through
+/// an object-literal node.
+impl ts_rs::TS for TableRef {
+    type OptionInnerType = Self;
+    type WithoutGenerics = Self;
+
+    fn docs() -> Option<String> {
+        Some(
+            "/**\n * What may occupy a `table` position in a single-panel config: a hosted\n * \
+             `Table`'s name, or an inline derived-table definition recursing through\n * its own \
+             `table` field until a concrete name.\n */\n"
+                .to_owned(),
+        )
+    }
+
+    fn name() -> String {
+        "TableRef".to_owned()
+    }
+
+    fn decl() -> String {
+        format!(
+            "type TableRef = string | (Omit<{}, \"table\"> & {{ table: TableRef }});",
+            <DerivedTableConfig as ts_rs::TS>::ident()
+        )
+    }
+
+    fn decl_concrete() -> String {
+        <Self as ts_rs::TS>::decl()
+    }
+
+    fn inline() -> String {
+        format!(
+            "string | (Omit<{}, \"table\"> & {{ table: TableRef }})",
+            <DerivedTableConfig as ts_rs::TS>::ident()
+        )
+    }
+
+    fn inline_flattened() -> String {
+        panic!("`TableRef` cannot be flattened")
+    }
+
+    fn visit_dependencies(visitor: &mut impl ts_rs::TypeVisitor)
+    where
+        Self: 'static,
+    {
+        visitor.visit::<DerivedTableConfig>();
+    }
+
+    fn output_path() -> Option<std::path::PathBuf> {
+        Some(std::path::PathBuf::from("TableRef.ts"))
+    }
+}
+
+impl Default for TableRef {
+    fn default() -> Self {
+        Self::Name(String::default())
+    }
+}
+
+impl From<String> for TableRef {
+    fn from(value: String) -> Self {
+        Self::Name(value)
+    }
+}
+
+impl TableRef {
+    /// The concrete `Table` name, or an error for an inline definition which
+    /// a restore boundary has not resolved.
+    pub fn name(&self) -> Result<&str, perspective_js::utils::ApiError> {
+        match self {
+            Self::Name(name) => Ok(name),
+            Self::Derived(_) => Err(perspective_js::utils::ApiError::new(
+                "Unresolved inline derived table",
+            )),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for TableRef {
+    /// Hand-written (not `untagged`) so a malformed inline definition
+    /// reports its own error instead of "data did not match any variant".
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct TableRefVisitor;
+        impl<'de> serde::de::Visitor<'de> for TableRefVisitor {
+            type Value = TableRef;
+
+            fn expecting(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                fmt.write_str("a table name or an inline derived table definition")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(TableRef::Name(value.to_owned()))
+            }
+
+            fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::MapAccess<'de>,
+            {
+                let config = <DerivedTableConfig<TableRef> as serde::Deserialize>::deserialize(
+                    serde::de::value::MapAccessDeserializer::new(map),
+                )?;
+
+                Ok(TableRef::Derived(Box::new(config)))
+            }
+        }
+
+        deserializer.deserialize_any(TableRefVisitor)
+    }
+}
 
 /// The workspace config format (`{version, active?, layout, panels}`) —
 /// the multi-panel counterpart of the single-panel [`ViewerConfig`] — as
@@ -39,7 +181,14 @@ pub struct WorkspaceConfig {
     /// DETERMINISTIC (sorted) key order — a fresh `HashMap` per call
     /// iterates in a per-instance random order, which made consecutive
     /// `save()` outputs byte-unstable.
-    pub panels: BTreeMap<String, PanelViewerConfig>,
+    pub panels: BTreeMap<String, PanelViewerConfig<String, String>>,
+
+    /// Named derived `Table`s, each a `View` of its `parent` promoted to a
+    /// `Table`. A `BTreeMap` for the same determinism reason as `panels`.
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    #[ts(as = "Option<_>")]
+    #[ts(optional)]
+    pub derived_tables: BTreeMap<String, DerivedTableConfig>,
 
     /// The element-level global (master/detail cross-) filters. A transient
     /// overlay on every detail panel's view — persisted here, never in a
@@ -91,6 +240,13 @@ pub struct WorkspaceConfigUpdate {
     #[serde(default)]
     #[ts(optional)]
     pub panels: Option<BTreeMap<String, ViewerConfigInitial>>,
+
+    /// The complete replacement set of derived `Table`s, in any order (they
+    /// are built parent-first); absent keeps the current ones, `{}` deletes
+    /// them all.
+    #[serde(default)]
+    #[ts(optional)]
+    pub derived_tables: Option<BTreeMap<String, DerivedTableConfig>>,
 
     /// The element-level cross-filter set applied to every detail panel as
     /// one unattributed bucket, replacing the current set; `null` clears it.

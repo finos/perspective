@@ -12,6 +12,8 @@
 
 use yew::{Callback, Html, Properties, function_component, html};
 
+use crate::utils::left_click;
+
 #[derive(Properties, PartialEq, Clone)]
 pub struct SaveSettingsProps {
     pub save_enabled: bool,
@@ -26,9 +28,9 @@ pub struct SaveSettingsProps {
 
 #[function_component(SaveSettings)]
 pub fn save_settings(props: &SaveSettingsProps) -> Html {
-    let reset = props.on_reset.reform(|_| ());
-    let save = props.on_save.reform(|_| ());
-    let delete = props.on_delete.reform(|_| ());
+    let reset = left_click(props.on_reset.reform(|_| ()));
+    let save = left_click(props.on_save.reform(|_| ()));
+    let delete = left_click(props.on_delete.reform(|_| ()));
     html! {
         <div id="save-settings-wrapper">
             if props.show_danger_zone {

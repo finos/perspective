@@ -195,6 +195,22 @@ impl Component for ScrollPanel {
         };
 
         let width_style = format!("width:{}px", self.viewport_width.max(0.0));
+        let mut rows = windowed_items
+            .iter()
+            .cloned()
+            .map(Html::from)
+            .collect::<Vec<_>>();
+
+        if !ctx.props().omit_autosize_div {
+            rows.push(html! {
+                <div
+                    key="__scroll-panel-auto-width__"
+                    class="scroll-panel-auto-width"
+                    style={width_style}
+                />
+            });
+        }
+
         let items = if !windowed_items.is_empty() {
             let onscroll = ctx.link().batch_callback(|_| {
                 vec![
@@ -214,16 +230,7 @@ impl Component for ScrollPanel {
                     ondrop={&ctx.props().drop}
                     class={ctx.props().class.clone()}
                 >
-                    <div class="scroll-panel-container" style={window_style}>
-                        { for windowed_items.iter().cloned().map(Html::from) }
-                        if !ctx.props().omit_autosize_div {
-                            <div
-                                key="__scroll-panel-auto-width__"
-                                class="scroll-panel-auto-width"
-                                style={width_style}
-                            />
-                        }
-                    </div>
+                    <div class="scroll-panel-container" style={window_style}>{ for rows }</div>
                     <div class="scroll-panel-content" style={content_style} />
                 </div>
             }

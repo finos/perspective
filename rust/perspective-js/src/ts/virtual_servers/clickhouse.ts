@@ -92,6 +92,7 @@ const WINDOW_AGGREGATES: WindowAggSpec[] = [
     { name: "lead", offset: true },
     { name: "diff", offset: true, result_type: "float" },
     { name: "rate", frames: ["range"], result_type: "float" },
+    { name: "row_number", result_type: "float" },
 ];
 
 const WINDOW_AGGREGATES_ANY: WindowAggSpec[] = [
@@ -100,6 +101,7 @@ const WINDOW_AGGREGATES_ANY: WindowAggSpec[] = [
     { name: "max", frames: FRAMES },
     { name: "lag", offset: true },
     { name: "lead", offset: true },
+    { name: "row_number", result_type: "float" },
 ];
 
 const FILTER_OPS = [

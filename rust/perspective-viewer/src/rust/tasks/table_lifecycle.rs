@@ -86,6 +86,10 @@ pub(crate) async fn sweep_table_bindings(
     workspace: &Workspace,
     presentation: &Presentation,
 ) -> ApiResult<()> {
+    if let Err(err) = super::resume_derived(workspace).await {
+        tracing::warn!("Failed to resume derived tables: {err}");
+    }
+
     for panel in workspace.panels() {
         if let Some(name) = panel.session.get_table().map(|t| t.get_name().to_owned())
             && let Some(client) = panel.session.get_client()
@@ -104,6 +108,7 @@ pub(crate) async fn sweep_table_bindings(
         }
     }
 
+    workspace.hosted_tables_changed().emit(());
     Ok(())
 }
 
@@ -158,7 +163,7 @@ async fn bind_pending(
                 };
 
                 let update = ViewerConfigUpdate {
-                    table: OptionalUpdate::Update(name),
+                    table: OptionalUpdate::Update(name.into()),
                     plugin_config: OptionalUpdate::Update(renderer.committed_plugin_config()),
                     columns_config: OptionalUpdate::Update(renderer.committed_columns_configs()),
                     ..ViewerConfigUpdate::default()

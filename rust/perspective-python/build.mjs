@@ -27,6 +27,8 @@ let flags = "--release";
 let features = [];
 if (!!process.env.PSP_DEBUG) {
     flags = "";
+} else if (!!process.env.PSP_FAST) {
+    flags = "--profile fast";
 }
 
 const is_pyodide = !!process.env.PSP_PYODIDE;

@@ -132,6 +132,10 @@ pub enum PerspectiveViewerMsg {
     /// panel appended to the layout.
     DuplicatePanel(String),
 
+    /// Promote the named panel's current `View` to a derived `Table` under a
+    /// generated name, rebinding the panel to it.
+    DerivePanel(String),
+
     /// New panel: a fresh (default-config) panel bound to the named panel's
     /// table (from the default client).
     NewPanel(String),

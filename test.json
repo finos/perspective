@@ -1,0 +1,55 @@
+[
+    {
+        "plugin": "Datagrid",
+        "table": {
+            "table": "superstore",
+            "group_by": ["State"],
+            "group_rollup_mode": "flat",
+            "columns": ["Sales", "Profit"],
+            "aggregates": {
+                "Profit": ["weighted mean", ["Row ID"]],
+                "Sales": ["weighted mean", ["Postal Code"]]
+            }
+        },
+        "title": "Superstore",
+        "group_by": ["State"],
+        "expressions": {
+            "\"Sales\" - \"Profit\"": "\"Sales\" - \"Profit\""
+        },
+        "columns": ["Sales", "Profit", "\"Sales\" - \"Profit\""]
+    },
+    {
+        "settings": true,
+        "version": "5.5.1",
+        "columns_config": {},
+        "plugin": "Datagrid",
+        "plugin_config": {},
+        "table": {
+            "table": "superstore",
+            "group_by": ["State"],
+            "split_by": [],
+            "sort": [],
+            "filter": [],
+            "group_rollup_mode": "flat",
+            "split_rollup_mode": "flat",
+            "expressions": {},
+            "columns": ["Sales"],
+            "aggregates": {
+                "Sales": "sum"
+            }
+        },
+        "theme": "Pro Light",
+        "title": "Superstore",
+        "group_by": ["State"],
+        "split_by": ["New Column 1"],
+        "sort": [],
+        "filter": [],
+        "group_rollup_mode": "rollup",
+        "split_rollup_mode": "flat",
+        "expressions": {
+            "New Column 1": "\"Sales\" > 20000"
+        },
+        "columns": ["Sales"],
+        "aggregates": {}
+    }
+]

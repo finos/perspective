@@ -21,7 +21,9 @@ use super::status_indicator::StatusIndicator;
 use crate::components::copy_dropdown::CopyDropDownMenu;
 use crate::components::export_dropdown::ExportDropDownMenu;
 use crate::components::global_filter_bar::GlobalFilterBar;
-use crate::components::new_panel_menu::{HostedTables, NewPanelMenu, NewPanelPick, PanelLabels};
+use crate::components::new_panel_menu::{
+    HostedTables, NewPanelMenu, NewPanelPick, PanelLabels, derived_counts,
+};
 use crate::components::style::StyleSurface;
 use crate::config::*;
 use crate::js::*;
@@ -109,6 +111,10 @@ pub enum StatusBarMsg {
 
     /// A pick in the "New" dropdown.
     NewPanelPick(NewPanelPick),
+
+    /// The hosted-table set changed: refresh the "New" dropdown's listing
+    /// in place, if it is open.
+    RefreshTables,
     Export,
     Copy,
     CloseExport,
@@ -131,16 +137,41 @@ pub struct StatusBar {
     /// The "New" dropdown's anchor and listings while it is open.
     new_menu: Option<(HtmlElement, HostedTables, PanelLabels)>,
 
+    /// Keeps the [`Workspace::hosted_tables_changed`] listener attached for
+    /// the component's lifetime.
+    _tables_sub: Subscription,
+
     /// Bumped per "New" click; a resolving fetch opens only if it is still
     /// the newest one.
     new_generation: u32,
+}
+
+impl StatusBar {
+    /// Fetch the hosted-table listing and (re)open the "New" dropdown with
+    /// it, guarded by `new_generation` against stale resolutions.
+    fn spawn_tables_fetch(&mut self, ctx: &Context<Self>) {
+        self.new_generation = self.new_generation.wrapping_add(1);
+        let generation = self.new_generation;
+        let workspace = ctx.props().workspace.clone();
+        let link = ctx.link().clone();
+        ApiFuture::spawn(async move {
+            let tables = fetch_hosted_tables(&workspace).await;
+            link.send_message(StatusBarMsg::OpenNewPanel(generation, Rc::new(tables)));
+            Ok(())
+        });
+    }
 }
 
 impl Component for StatusBar {
     type Message = StatusBarMsg;
     type Properties = StatusBarProps;
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
+        let _tables_sub = ctx.props().workspace.hosted_tables_changed().add_listener({
+            let link = ctx.link().clone();
+            move |_| link.send_message(StatusBarMsg::RefreshTables)
+        });
+
         Self {
             copy_ref: NodeRef::default(),
             export_ref: NodeRef::default(),
@@ -149,6 +180,7 @@ impl Component for StatusBar {
             copy_target: None,
             export_target: None,
             new_menu: None,
+            _tables_sub,
             new_generation: 0,
         }
     }
@@ -161,15 +193,13 @@ impl Component for StatusBar {
                 false
             },
             StatusBarMsg::NewPanel => {
-                self.new_generation = self.new_generation.wrapping_add(1);
-                let generation = self.new_generation;
-                let workspace = ctx.props().workspace.clone();
-                let link = ctx.link().clone();
-                ApiFuture::spawn(async move {
-                    let tables = fetch_hosted_tables(&workspace).await;
-                    link.send_message(StatusBarMsg::OpenNewPanel(generation, Rc::new(tables)));
-                    Ok(())
-                });
+                self.spawn_tables_fetch(ctx);
+                false
+            },
+            StatusBarMsg::RefreshTables => {
+                if self.new_menu.is_some() {
+                    self.spawn_tables_fetch(ctx);
+                }
 
                 false
             },
@@ -201,11 +231,13 @@ impl Component for StatusBar {
             },
             StatusBarMsg::CloseNewPanel => {
                 self.new_menu = None;
+                self.new_generation = self.new_generation.wrapping_add(1);
                 true
             },
             StatusBarMsg::NewPanelPick(pick) => {
                 ctx.props().on_new_panel.emit(pick);
                 self.new_menu = None;
+                self.new_generation = self.new_generation.wrapping_add(1);
                 true
             },
             StatusBarMsg::ResetTheme => {
@@ -280,23 +312,34 @@ impl Component for StatusBar {
         }
 
         // TODO Memoizing these would reduce some vdom diffing later on
-        let onclose = ctx.link().callback(|_| StatusBarMsg::Eject);
+        let onclose = left_click(ctx.link().callback(|_| StatusBarMsg::Eject));
         let onpointerdown = ctx.link().callback(StatusBarMsg::PointerEvent);
-        let onexport = ctx.link().callback(|event: MouseEvent| {
+        let onexport = left_click(ctx.link().callback(|event: MouseEvent| {
             event.prevent_default();
             StatusBarMsg::Export
-        });
-        let oncopy = ctx.link().callback(|event: MouseEvent| {
+        }));
+        let oncopy = left_click(ctx.link().callback(|event: MouseEvent| {
             event.prevent_default();
             StatusBarMsg::Copy
-        });
-        let onreset = ctx.link().callback(StatusBarMsg::Reset);
-        let onnew = ctx.link().callback(|event: MouseEvent| {
+        }));
+        let onreset = left_click(ctx.link().callback(StatusBarMsg::Reset));
+        let onnew = left_click(ctx.link().callback(|event: MouseEvent| {
             event.prevent_default();
             StatusBarMsg::NewPanel
-        });
+        }));
         let on_new_select = ctx.link().callback(StatusBarMsg::NewPanelPick);
         let on_close_new = ctx.link().callback(|_| StatusBarMsg::CloseNewPanel);
+        let on_delete_derived = {
+            let workspace = ctx.props().workspace.clone();
+            Callback::from(move |name: String| {
+                let workspace = workspace.clone();
+                let effect = workspace.effects().guard();
+                ApiFuture::spawn(async move {
+                    let _effect = effect;
+                    delete_derived(&workspace, &name).await
+                });
+            })
+        };
 
         // Project only the *active* panel's plugin toolbar into the shared status
         // bar. Each panel's toolbar slots into `statusbar-extra-{its-panel-id}`
@@ -325,6 +368,7 @@ impl Component for StatusBar {
                         &props.session,
                         &props.renderer,
                         &props.presentation,
+                        &props.workspace,
                         x.method,
                     );
                     let result = copy_to_clipboard(task, mime).await;
@@ -351,6 +395,7 @@ impl Component for StatusBar {
                             &props.session,
                             &props.renderer,
                             &props.presentation,
+                            &props.workspace,
                             x.method,
                         )
                         .await
@@ -456,6 +501,8 @@ impl Component for StatusBar {
                                 tables={Some(tables.clone())}
                                 panels={panels.clone()}
                                 callback={on_new_select}
+                                derived={derived_counts(&ctx.props().workspace)}
+                                on_delete={on_delete_derived}
                             />
                         }
                     </PortalModal>

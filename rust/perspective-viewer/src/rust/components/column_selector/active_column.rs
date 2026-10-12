@@ -328,7 +328,7 @@ impl Component for ActiveColumn {
                 let remove_column = if is_required {
                     None
                 } else {
-                    Some(ctx.link().callback({
+                    Some(left_click(ctx.link().callback({
                         let event_name = name.to_owned();
                         move |event: MouseEvent| {
                             ActiveColumnMsg::DeactivateColumn(
@@ -336,7 +336,7 @@ impl Component for ActiveColumn {
                                 event.shift_key(),
                             )
                         }
-                    }))
+                    })))
                 };
 
                 let ondragend = &ctx.props().ondragend.reform(|_| ());
