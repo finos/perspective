@@ -1,6 +1,29 @@
+# [v5.6.0](https://github.com/perspective-dev/perspective/releases/tag/v5.6.0)
+
+_13 October 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.5.1...v5.6.0))
+
+**Breaking**
+
+- Derived `Table` support for `@perspective-dev/viewer` [#3249](https://github.com/finos/perspective/pull/3249)
+- Zero-cost `table(view)` [#3246](https://github.com/finos/perspective/pull/3246)
+- Add `Table::describe` [#3239](https://github.com/finos/perspective/pull/3239)
+
+Features
+
+- Firefox support [#3252](https://github.com/finos/perspective/pull/3252)
+
+Fixes
+
+- Remove inline builds [#3242](https://github.com/finos/perspective/pull/3242)
+
+Misc
+
+- Update Pyodide build to Python 3.14 / 2026 [#3245](https://github.com/finos/perspective/pull/3245)
+- Fix project metadata and add "Use Cases" to docs [#3240](https://github.com/finos/perspective/pull/3240)
+
 # [v5.5.1](https://github.com/perspective-dev/perspective/releases/tag/v5.5.1)
 
-_18 September 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.5.0...v5.5.1))
+_17 September 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.5.0...v5.5.1))
 
 Features
 
