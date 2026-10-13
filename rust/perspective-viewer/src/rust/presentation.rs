@@ -233,6 +233,8 @@ impl Presentation {
         self.viewer_elem
             .toggle_attribute_with_force("settings", opt)
             .unwrap();
+
+        crate::utils::stamp_plugin_host_state_all(&self.viewer_elem);
     }
 
     pub fn is_settings_open(&self) -> bool {

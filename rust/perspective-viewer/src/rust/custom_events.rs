@@ -103,8 +103,8 @@ fn dispatch_column_settings_open_changed(
     event_init.set_detail(&JsValue::from(
         json!({"open": open, "column_name": column_name}),
     ));
-    // Bubble so the event still reaches the host (and any public listeners) even
-    // though it's dispatched on a panel's plugin below it.
+    // Bubble so the event still reaches the host (and any public listeners)
+    // even though it's dispatched on a panel's plugin below it.
     event_init.set_bubbles(true);
     let event = web_sys::CustomEvent::new_with_event_init_dict(
         "perspective-toggle-column-settings",
@@ -116,8 +116,8 @@ fn dispatch_column_settings_open_changed(
     // viewer hosts every panel's plugin under one element, and each datagrid
     // listens for this event on itself — so dispatching on the host (which the
     // event bubbles to) would highlight EVERY datagrid. The column settings
-    // apply to the active panel, so scope the highlight to its plugin; fall back
-    // to the host if none is drawn.
+    // apply to the active panel, so scope the highlight to its plugin; fall
+    // back to the host if none is drawn.
     let target: web_sys::EventTarget = workspace
         .active_id()
         .and_then(|id| workspace.panel(&id))

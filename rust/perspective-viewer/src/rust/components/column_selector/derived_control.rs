@@ -163,8 +163,8 @@ impl Component for DerivedControl {
             read_intl_string(viewer, slug).unwrap_or_else(|| fallback.to_owned())
         };
 
-        // let _create_title = intl("derive-table-title", "Derive a new table from this
-        // view");
+        // let _create_title = intl("derive-table-title", "Derive a new table
+        // from this view");
         let snapshot_title = intl(
             "derived-snapshot-title",
             "This data source does not stream - this table's data is fixed at the point it was \

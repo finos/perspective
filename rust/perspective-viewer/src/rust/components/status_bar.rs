@@ -341,10 +341,6 @@ impl Component for StatusBar {
             })
         };
 
-        // Project only the *active* panel's plugin toolbar into the shared status
-        // bar. Each panel's toolbar slots into `statusbar-extra-{its-panel-id}`
-        // (see datagrid `toolbar.ts`); the active panel's id comes from the
-        // active renderer this status bar is bound to.
         let extra_slot = ctx
             .props()
             .renderer

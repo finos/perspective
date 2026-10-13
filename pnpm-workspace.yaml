@@ -59,7 +59,7 @@ catalog:
     "react-dom": ">17 <20"
     "react": ">17 <20"
     "regular-layout": "=0.6.1"
-    "regular-table": "=0.9.1"
+    "regular-table": "=0.9.2"
     "stoppable": "=1.1.0"
     "ws": "^8.17.0"
 
@@ -120,3 +120,6 @@ catalog:
     "webpack": ">=5 <6"
     "web-worker": "1.4.1"
     "zx": ">=8 <9"
+
+minimumReleaseAgeExclude:
+  - regular-table@0.9.2

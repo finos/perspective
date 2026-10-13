@@ -12,13 +12,11 @@
 
 use std::cell::{Cell, Ref, RefCell};
 use std::future::Future;
-use std::iter::{Iterator, repeat_with};
 use std::rc::Rc;
 
 use futures::future::{join_all, select_all};
 use perspective_js::utils::{global, *};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::{JsCast, intern};
 use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
 
@@ -119,29 +117,13 @@ impl FontLoaderProps {
         self.state.on_update.emit(());
 
         for (family, weight) in preload_fonts.iter() {
-            let task = timeout_font_task(family, weight);
-            let mut block_fonts: PromiseSet = vec![ApiFuture::new(task)];
-
-            for entry in font_iter(global::document().fonts().values()) {
-                let font_face = js_sys::Reflect::get(&entry, &intern("value").into())?
-                    .dyn_into::<web_sys::FontFace>()?;
-
-                if family == &font_face.family().replace('"', "")
-                    && (weight == &font_face.weight()
-                        || (font_face.weight() == "normal" && weight == "400"))
-                {
-                    block_fonts.push(ApiFuture::new(async move {
-                        Ok(JsFuture::from(font_face.loaded()?).await?)
-                    }));
-                }
-            }
+            let block_fonts: PromiseSet = vec![
+                ApiFuture::new(timeout_font_task(family, weight)),
+                ApiFuture::new(await_font(family.clone(), weight.clone())),
+            ];
 
             let fut = async { select_all(block_fonts).await.0 };
             block_promises.push(ApiFuture::new(fut))
-        }
-
-        if block_promises.len() != preload_fonts.len() {
-            web_sys::console::warn_1(&format!("Missing preload fonts {:?}", preload_fonts).into());
         }
 
         let res = join_all(block_promises)
@@ -153,6 +135,25 @@ impl FontLoaderProps {
         self.state.status.set(FontLoaderStatus::Finished);
         self.state.on_update.emit(());
         res
+    }
+}
+
+/// Resolve once the `@font-face`s needed to render [`FONT_TEST_SAMPLE`] in
+/// `(family, weight)` are loaded — `FontFaceSet.load(spec, text)` both
+/// triggers and awaits exactly those SUBSET faces, never a sibling
+/// unicode-range face the page may never use. It resolves EMPTY while the
+/// family has no registration at all (its stylesheet may still be fetching,
+/// and Firefox registers lazily-parsed faces later than Chrome), so poll.
+async fn await_font(family: String, weight: String) -> ApiResult<JsValue> {
+    let spec = format!("{weight} 12px \"{family}\"");
+    loop {
+        let fonts = global::document().fonts();
+        let loaded = JsFuture::from(fonts.load_with_text(&spec, FONT_TEST_SAMPLE)).await?;
+        if js_sys::Array::from(&loaded).length() > 0 {
+            return Ok(JsValue::UNDEFINED);
+        }
+
+        set_timeout(100).await?;
     }
 }
 
@@ -197,17 +198,4 @@ fn parse_fonts(txt: &str) -> Vec<(String, String)> {
         .filter_map(parse_font)
         .flatten()
         .collect::<Vec<_>>()
-}
-
-fn font_iter(
-    iter: web_sys::FontFaceSetIterator,
-) -> impl Iterator<Item = web_sys::FontFaceSetIteratorResult> {
-    repeat_with(move || iter.next())
-        .filter_map(|x| x.ok())
-        .take_while(|entry| {
-            !js_sys::Reflect::get(entry, &intern("done").into())
-                .unwrap()
-                .as_bool()
-                .unwrap()
-        })
 }

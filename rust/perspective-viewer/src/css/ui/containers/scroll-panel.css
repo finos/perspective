@@ -23,6 +23,9 @@
     }
 
     .scroll-panel-content {
-        position: relative;
+        position: absolute;
+        width: 1px;
+        padding-bottom: inherit;
+        box-sizing: content-box;
     }
 }

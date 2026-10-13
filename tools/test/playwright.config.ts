@@ -15,6 +15,8 @@ import path from "path";
 import * as dotenv from "dotenv";
 import { createRequire } from "node:module";
 import url from "node:url";
+import fs from "node:fs";
+import os from "node:os";
 import { execSync } from "child_process";
 // @ts-ignore -- sh_perspective.mjs is plain JS without type declarations
 import { get_scope } from "../scripts/sh_perspective.mjs";
@@ -66,6 +68,26 @@ if (package_venn.include.length === 0) {
     );
 }
 
+const FIREFOX_HOME = path.join(os.tmpdir(), "psp-playwright-firefox-home");
+fs.mkdirSync(FIREFOX_HOME, { recursive: true });
+
+/// The harness browser mode: "full" (default) runs every suite under both
+/// browsers, "chrome" runs every suite under Chrome only, and "firefox" runs
+/// ONLY the viewer/datagrid/charts browser suites under Firefox (no node
+/// projects, no react/jupyterlab).
+const BROWSER_SUITE = (process.env.PSP_BROWSER_SUITE || "full").toLowerCase();
+
+const SUITE_DEVICES: Record<string, string[]> = {
+    full: ["Desktop Chrome", "Desktop Firefox"],
+    chrome: ["Desktop Chrome"],
+    firefox: ["Desktop Firefox"],
+};
+
+const SUITE_DEVICE_LIST = (SUITE_DEVICES[BROWSER_SUITE] ??
+    SUITE_DEVICES.full) as (keyof typeof DEVICE_OPTIONS)[];
+
+const FIREFOX_SUITE_PACKAGES = ["viewer", "viewer-datagrid", "viewer-charts"];
+
 const DEVICE_OPTIONS = {
     "Desktop Chrome": {
         // Lock DPR to 1 so WebGL viewport / canvas backing sizes are
@@ -92,6 +114,17 @@ const DEVICE_OPTIONS = {
                 "--force-color-profile=srgb",
                 "--disable-lcd-text",
             ],
+        },
+    },
+    "Desktop Firefox": {
+        launchOptions: {
+            env: {
+                ...(process.env as Record<string, string>),
+                CFFIXED_USER_HOME: FIREFOX_HOME,
+            },
+            firefoxUserPrefs: {
+                "dom.event.contextmenu.shift_suppresses_event": false,
+            },
         },
     },
 };
@@ -141,9 +174,7 @@ let PROJECTS = (() => {
     const acc: ProjectConfig[] = [];
     if (RUN_JUPYTERLAB) {
         for (const pkg of BROWSER_AND_PYTHON_PACKAGES) {
-            for (const device of Object.keys(
-                DEVICE_OPTIONS,
-            ) as (keyof typeof DEVICE_OPTIONS)[]) {
+            for (const device of SUITE_DEVICE_LIST) {
                 acc.push({
                     name: `${pkg.packageName}-${device
                         .toLowerCase()
@@ -164,20 +195,27 @@ let PROJECTS = (() => {
             }
         }
     } else {
-        for (const pkg of NODE_PACKAGES) {
-            if (PACKAGE == undefined || PACKAGE.includes(pkg.packageName)) {
-                acc.push({
-                    name: `${pkg.packageName}-node`,
-                    testDir: path.join(__dirname, "../../", pkg.testDir),
-                });
+        if (BROWSER_SUITE !== "firefox") {
+            for (const pkg of NODE_PACKAGES) {
+                if (PACKAGE == undefined || PACKAGE.includes(pkg.packageName)) {
+                    acc.push({
+                        name: `${pkg.packageName}-node`,
+                        testDir: path.join(__dirname, "../../", pkg.testDir),
+                    });
+                }
             }
         }
 
         for (const pkg of BROWSER_PACKAGES) {
+            if (
+                BROWSER_SUITE === "firefox" &&
+                !FIREFOX_SUITE_PACKAGES.includes(pkg.packageName)
+            ) {
+                continue;
+            }
+
             if (PACKAGE == undefined || PACKAGE.includes(pkg.packageName)) {
-                for (const device of Object.keys(
-                    DEVICE_OPTIONS,
-                ) as (keyof typeof DEVICE_OPTIONS)[]) {
+                for (const device of SUITE_DEVICE_LIST) {
                     acc.push({
                         name: `${pkg.packageName}-${device
                             .toLowerCase()
@@ -232,9 +270,6 @@ export default defineConfig({
     projects: PROJECTS,
     outputDir: "dist/results",
     use: {
-        launchOptions: {
-            slowMo: 500, // 500 milliseconds delay
-        },
         headless: !process.env.PSP_HEADED,
         ctPort: 3100,
         viewport: { width: 1280, height: 720 },

@@ -83,12 +83,14 @@ pub(crate) async fn prepare(
     renderer.check_plugin_update(&plugin)?;
     let named = renderer.resolve_plugin_update(&plugin);
     let (target, swap_idx) = renderer.resolve_target(&plugin)?;
+    let rebinds = !matches!(plan, BindPlan::Keep);
     let defaults = match &named {
         Some((_, metadata)) => ViewDefaults::Swap(metadata),
+        None if rebinds && matches!(plugin, OptionalUpdate::Update(_)) => {
+            ViewDefaults::Swap(&target.static_config)
+        },
         None => ViewDefaults::Rollup(&target.static_config),
     };
-
-    let rebinds = !matches!(plan, BindPlan::Keep);
     let view = session
         .prepare_view(plan, view_config, defaults, overlay)
         .await?;

@@ -1977,7 +1977,6 @@ dependencies = [
 name = "perspective-js"
 version = "5.5.1"
 dependencies = [
- "anyhow",
  "arrow-array",
  "arrow-ipc",
  "arrow-schema",
@@ -2008,7 +2007,6 @@ dependencies = [
 name = "perspective-lint"
 version = "5.5.1"
 dependencies = [
- "glob",
  "yew-fmt",
 ]
 

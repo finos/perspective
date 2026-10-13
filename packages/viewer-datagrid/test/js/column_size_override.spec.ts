@@ -174,7 +174,7 @@ test.describe("column_size_override", () => {
         const pos = (await resize_handle(page, 0).boundingBox())!;
         await page.mouse.move(pos.x + 2, pos.y + 5);
         await page.mouse.down();
-        await page.mouse.move(pos.x - 120, pos.y + 5);
+        await page.mouse.move(pos.x - 100, pos.y + 5);
         await page.mouse.up();
         await wait_for_override(page, "Ship Mode", true);
 

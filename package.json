@@ -62,7 +62,7 @@
         "postinstall": "npm-run-all postinstall:*",
         "postinstall:binaryen": "node tools/scripts/install_binaryen.mjs",
         "postinstall:emsdk": "node tools/scripts/install_emsdk.mjs",
-        "postinstall:playwright": "pnpm exec playwright install --with-deps chromium",
+        "postinstall:playwright": "pnpm exec playwright install --with-deps chromium firefox",
         "postinstall:vscode": "cp -n ./.vscode/settings.default.json ./.vscode/settings.json || true",
         "install_llvm": "node tools/scripts/install_llvm.mjs",
         "install_pyodide": "node tools/scripts/install_pyodide.mjs",

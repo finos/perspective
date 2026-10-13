@@ -156,8 +156,8 @@ export class WebGLContextManager {
         this._cssHeight = cssHeight;
         this._dpr = dpr;
 
-        const width = Math.round(cssWidth * dpr);
-        const height = Math.round(cssHeight * dpr);
+        const width = Math.max(1, Math.round(cssWidth * dpr));
+        const height = Math.max(1, Math.round(cssHeight * dpr));
         const canvas = this._ctx.canvas;
         if (canvas.width !== width || canvas.height !== height) {
             canvas.width = width;
@@ -284,19 +284,19 @@ export class WebGLContextManager {
     }
 
     /**
-     * Ship the current canvas contents as an `ImageBitmap` to the host
-     * when a frame callback is registered and the surface is an
+     * Ship a copy of the current canvas contents as an `ImageBitmap` to
+     * the host when a frame callback is registered and the surface is an
      * `OffscreenCanvas`. Otherwise no-op (direct mode paints straight to
      * the visible drawing buffer).
      */
-    endFrame(): void {
+    async endFrame(): Promise<void> {
         if (!this._frameCallback) {
             return;
         }
 
         // A context lost mid-frame (our own `destroy`, or a browser
-        // eviction between paint and present) makes
-        // `transferToImageBitmap` throw. Bail quietly.
+        // eviction between paint and present) makes the bitmap copy
+        // throw. Bail quietly.
         if (this.isContextLost()) {
             return;
         }
@@ -311,15 +311,15 @@ export class WebGLContextManager {
             return;
         }
 
-        const bitmap = (canvas as OffscreenCanvas).transferToImageBitmap();
+        const bitmap = await createImageBitmap(canvas as OffscreenCanvas);
         this._frameCallback(bitmap);
     }
 
     /**
      * Resolve when every GL command submitted up to this call has been
-     * executed by the GPU. WebGL2 issues a `fenceSync` and polls
-     * `clientWaitSync` (yielding to the task queue between polls); WebGL1
-     * falls back to a blocking `gl.finish()` (acceptable in a worker).
+     * executed by the GPU, polling a WebGL2 fence with a flush on every
+     * poll and falling back to a blocking `gl.finish()` on WebGL1 or on
+     * `WAIT_FAILED`.
      */
     async awaitGpuFence(): Promise<void> {
         if (!this._ctx.isWebGL2) {
@@ -335,9 +335,12 @@ export class WebGLContextManager {
         }
 
         try {
-            let flags: GLbitfield = gl.SYNC_FLUSH_COMMANDS_BIT;
             while (true) {
-                const status = gl.clientWaitSync(fence, flags, 0);
+                const status = gl.clientWaitSync(
+                    fence,
+                    gl.SYNC_FLUSH_COMMANDS_BIT,
+                    0,
+                );
                 if (
                     status === gl.ALREADY_SIGNALED ||
                     status === gl.CONDITION_SATISFIED
@@ -350,7 +353,6 @@ export class WebGLContextManager {
                     return;
                 }
 
-                flags = 0;
                 await this._yieldToTask();
 
                 if (this._destroyed) {

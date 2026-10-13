@@ -51,7 +51,6 @@ if (IS_CI) {
 
 function playwright(pkg, is_jlab) {
     const pkg_name = pkg ? `"${pkg}" ` : "";
-    console.log(`-- Running ${pkg_name}Playwright test suite`);
     const args = process.argv
         .slice(2)
         .filter(
@@ -59,10 +58,18 @@ function playwright(pkg, is_jlab) {
                 x !== "--" &&
                 x !== "--ci" &&
                 x !== "--jupyter" &&
-                x !== "--fetch-snapshots",
+                x !== "--fetch-snapshots" &&
+                x !== "--chrome" &&
+                x !== "--firefox",
         );
 
     const env = { ...process.env, TZ: "UTC" };
+    if (getarg("--chrome")) {
+        env.PSP_BROWSER_SUITE = "chrome";
+    } else if (getarg("--firefox")) {
+        env.PSP_BROWSER_SUITE = "firefox";
+    }
+
     if (is_jlab) {
         env.PSP_JUPYTERLAB_TESTS = "1";
         env.__JUPYTERLAB_PORT__ = "6538";
@@ -83,6 +90,10 @@ function playwright(pkg, is_jlab) {
     if (pkg) {
         env.PACKAGE = pkg;
     }
+
+    console.log(
+        `-- Running ${pkg_name}Playwright "${env.PSP_BROWSER_SUITE || "full"}" test suite`,
+    );
 
     const cmd = [
         "pnpm",

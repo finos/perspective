@@ -49,15 +49,34 @@ pub async fn request_animation_frame() {
 
 /// An `async` which awaits the browser's `load` event, which is automatically
 /// bypassed if `document.readyState` indicates this has already occurred.
+/// Resolve once the DOM is interactive and every linked stylesheet has
+/// APPLIED (`link.sheet` set) — the point at which computed styles are
+/// readable. Never await the `load` EVENT here: an in-flight `@font-face`
+/// request delays `load` on Firefox, and the font loader that depends on
+/// this function is itself what manages those requests.
 pub async fn await_dom_loaded() -> ApiResult<()> {
-    let state = global::document().ready_state();
-    if state == "complete" || state == "loaded" {
-        Ok(())
-    } else {
-        let (sender, receiver) = channel::<()>();
-        let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
-        global::window().add_event_listener_with_callback("load", jsfun.unchecked_ref())?;
-        Ok(receiver.await?)
+    loop {
+        let document = global::document();
+        let state = document.ready_state();
+        if state == "complete" || state == "loaded" {
+            return Ok(());
+        }
+
+        if state != "loading" {
+            let links = document.query_selector_all("link[rel=stylesheet]")?;
+            let applied = (0..links.length()).all(|i| {
+                links
+                    .item(i)
+                    .and_then(|node| node.dyn_into::<web_sys::HtmlLinkElement>().ok())
+                    .is_none_or(|link| link.sheet().is_some())
+            });
+
+            if applied {
+                return Ok(());
+            }
+        }
+
+        set_timeout(50).await?;
     }
 }
 

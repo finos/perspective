@@ -112,6 +112,7 @@ impl MainPanel {
             if self.listener_target.is_some() {
                 self.inserted.clear();
                 self.pending_insertions.clear();
+                self.suspect_closes.clear();
             }
 
             let _ = el.add_event_listener_with_callback(
@@ -184,7 +185,8 @@ impl MainPanel {
             // horizontal) rather than the default (path `[]`), which would
             // *stack* into the root tab-layout — a stack only renders its
             // selected tab, and without frame chrome there's no tab-bar to
-            // reach the others. Splitting keeps every panel visible side-by-side.
+            // reach the others. Splitting keeps every panel visible
+            // side-by-side.
             let index = self.inserted.len();
             let path = JsValue::from(js_sys::Array::of1(&JsValue::from_f64(index as f64)));
             let _ = layout.insert_panel(name, path, JsValue::from_bool(true));

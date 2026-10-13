@@ -667,7 +667,8 @@ impl PyVirtualServer {
         Python::attach(|py| {
             let bytes_vec = bytes.as_bytes(py).to_vec();
 
-            // Use futures::executor::block_on to run the async code synchronously
+            // Use futures::executor::block_on to run the async code
+            // synchronously
             let result = futures::executor::block_on(async {
                 self.0.handle_request(bytes::Bytes::from(bytes_vec)).await
             });

@@ -27,4 +27,3 @@ default = []
 
 [dependencies]
 yew-fmt = { version = "0.6.3", artifact = "bin", optional = true }
-glob = "0.3.1"

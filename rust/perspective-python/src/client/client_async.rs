@@ -359,7 +359,8 @@ impl AsyncClient {
                     })
                 };
 
-                // TODO These are unrecoverable errors - we should mark them as such
+                // TODO These are unrecoverable errors - we should mark them as
+                // such
                 if let Err(err) = aggregate_errors {
                     tracing::warn!("Error in on_hosted_tables_update callback: {:?}", err);
                 }

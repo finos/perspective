@@ -786,10 +786,51 @@ export function tooltipValue(
     return i >= 0 ? cells[i + 1] : undefined;
 }
 
+/** Poll for a pinned tooltip for up to `timeoutMs`, since the pin lands only after the source row resolves. */
+export async function waitPinnedTooltip(
+    page: Page,
+    timeoutMs: number,
+): Promise<string[] | null> {
+    return await page.evaluate(async (timeoutMs) => {
+        const read = () => {
+            const host = document.querySelector(
+                'perspective-viewer > [slot]:not([slot^="tab-"])',
+            );
+
+            const tip = host?.shadowRoot?.querySelector(".webgl-tooltip");
+            return tip
+                ? [...tip.children].map((c) => (c.textContent ?? "").trim())
+                : null;
+        };
+
+        const deadline = performance.now() + timeoutMs;
+        for (;;) {
+            const cells = read();
+            if (cells && cells.length > 0) {
+                return cells;
+            }
+
+            if (performance.now() >= deadline) {
+                return null;
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 5));
+        }
+    }, timeoutMs);
+}
+
+/** Click a grid over the plot and collect distinct pinned tooltips, stopping once `minDistinct` are found. */
 export async function sweepPinnedTooltips(
     page: Page,
-    step: { x: number; y: number } = { x: 0.02, y: 0.05 },
+    options: {
+        step?: { x: number; y: number };
+        minDistinct?: number;
+        settleMs?: number;
+    } = {},
 ): Promise<string[][]> {
+    const step = options.step ?? { x: 0.02, y: 0.05 };
+    const minDistinct = options.minDistinct ?? 8;
+    const settleMs = options.settleMs ?? 100;
     const box = await page.evaluate(() => {
         const host = document.querySelector(
             'perspective-viewer > [slot]:not([slot^="tab-"])',
@@ -812,9 +853,12 @@ export async function sweepPinnedTooltips(
         for (let fy = 0.05; fy <= 0.96; fy += step.y) {
             await page.mouse.move(box.x + box.w * fx, box.y + box.h * fy);
             await page.mouse.click(box.x + box.w * fx, box.y + box.h * fy);
-            const cells = await readPinnedTooltip(page);
+            const cells = await waitPinnedTooltip(page, settleMs);
             if (cells && cells.length > 0) {
                 seen.set(JSON.stringify(cells), cells);
+                if (seen.size >= minDistinct) {
+                    return [...seen.values()];
+                }
             }
         }
     }

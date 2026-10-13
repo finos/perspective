@@ -146,6 +146,8 @@ web-sys.features = [
   "FontFaceSet",
   "FontFaceSetIterator",
   "FontFaceSetIteratorResult",
+  "HtmlLinkElement",
+  "StyleSheet",
   "Headers",
   "HtmlCanvasElement",
   "HtmlCollection",

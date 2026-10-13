@@ -1022,7 +1022,8 @@ impl<'a> ViewQueryContext<'a> {
                 .iter()
                 .any(|Sort(_, dir)| *dir != SortDir::None && !is_col_sort(dir));
             if self.config.group_by.len() > 1 && has_row_sort {
-                // Hierarchical flat sort — mirrors rollup logic but without GROUPING_ID
+                // Hierarchical flat sort — mirrors rollup logic but without
+                // GROUPING_ID
                 for gidx in 0..self.config.group_by.len() {
                     let is_leaf = gidx >= self.config.group_by.len() - 1;
                     for (sidx, Sort(sort_col, sort_dir)) in self.config.sort.iter().enumerate() {

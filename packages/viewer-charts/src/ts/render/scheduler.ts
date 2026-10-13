@@ -380,18 +380,16 @@ async function present(entry: Entry): Promise<void> {
         // on resize. Failures fall through to the same present-failed
         // path as the fence.
         entry.render2D();
-        entry.glManager.endFrame();
+        await entry.glManager.endFrame();
         for (const w of entry.waiters) {
             w.resolve();
         }
     } catch (err) {
         console.error("scheduler: present failed", err);
-        // Still call `endFrame` so the canvas state is consistent —
-        // `transferToImageBitmap` clears the offscreen, and skipping
-        // it would leave a stale image bound to a context the host
-        // already considers presented.
+        // Still ship a frame so the host does not hold a stale image for
+        // a context it already considers presented.
         try {
-            entry.glManager.endFrame();
+            await entry.glManager.endFrame();
         } catch {
             // Swallow: already in a failure path.
         }

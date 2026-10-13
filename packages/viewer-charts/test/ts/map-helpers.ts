@@ -174,7 +174,7 @@ export async function pollMeanColor(
     page: Page,
     region: PlotRegionFrac,
     pred: (c: MeanColor) => boolean,
-    timeoutMs = 8000,
+    timeoutMs = 15_000,
 ): Promise<MeanColor> {
     const start = Date.now();
     for (;;) {

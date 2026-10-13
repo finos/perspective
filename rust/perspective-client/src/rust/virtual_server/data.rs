@@ -759,8 +759,9 @@ impl VirtualDataSlice {
             // viewer-charts' `with_typed_arrays` callback needs the
             // per-level columns inline in the Arrow stream — its
             // categorical-axis resolver, numeric-position lookup, and
-            // tree hierarchy walker all do `columns.get(\`__ROW_PATH_${n}__\`)`.
-            // Keeping the columns here lets `render_to_arrow_ipc`
+            // tree hierarchy walker all do
+            // `columns.get(\`__ROW_PATH_${n}__\`)`. Keeping the
+            // columns here lets `render_to_arrow_ipc`
             // serialize them naturally, matching native
             // `perspective-server`'s `to_arrow` output.
             if name == "__GROUPING_ID__" {

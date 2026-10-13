@@ -257,9 +257,9 @@ impl Component for ActiveColumn {
         };
 
         let ondragenter = ctx.props().ondragenter.reform(move |event: DragEvent| {
-            // Safari does not set `relatedTarget` so this event must be allowed to
-            // bubble so we can count entry/exit stacks to determine true
-            // `"dragleave"`.
+            // Safari does not set `relatedTarget` so this event must be allowed
+            // to bubble so we can count entry/exit stacks to
+            // determine true `"dragleave"`.
             if event.related_target().is_some() {
                 event.stop_propagation();
                 event.prevent_default();

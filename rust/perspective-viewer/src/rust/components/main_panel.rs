@@ -220,6 +220,12 @@ pub struct MainPanel {
     /// panels mid-restore).
     pending_insertions: HashSet<String>,
 
+    /// MODEL-held panels observed absent from exactly one committed tree,
+    /// awaiting the next `regular-layout-update` (rescheduled one frame out)
+    /// to confirm a layout-originated close — an unrelated removal's commit
+    /// can report a live sibling absent transiently.
+    suspect_closes: HashSet<String>,
+
     /// Per-panel `ResizeObserver`s, keyed by panel id, each observing that
     /// panel's slotted plugin element and resizing only that panel's
     /// `Renderer`. Bound in `BeforeResize` for the DRAGGED panel only (it is
@@ -289,8 +295,9 @@ impl Component for MainPanel {
         }) as Box<dyn FnMut(web_sys::Event)>);
 
         // `preventDefault()` synchronously suspends the layout's resize commit
-        // (the event is cancelable); the component then pre-sizes each panel and
-        // calls `resumeResize` to release it (see `MainPanelMsg::BeforeResize`).
+        // (the event is cancelable); the component then pre-sizes each panel
+        // and calls `resumeResize` to release it (see
+        // `MainPanelMsg::BeforeResize`).
         let before_resize_cb = ctx.link().callback(MainPanelMsg::BeforeResize);
         let before_resize_listener = Closure::wrap(Box::new(move |event: web_sys::Event| {
             event.prevent_default();
@@ -382,6 +389,7 @@ impl Component for MainPanel {
             inserted: Vec::new(),
             pending_removals: HashSet::new(),
             pending_insertions: HashSet::new(),
+            suspect_closes: HashSet::new(),
             _layout_update_listener: listener,
             _layout_select_listener: select_listener,
             _layout_before_resize_listener: before_resize_listener,

@@ -53,6 +53,7 @@ impl Drop for ShiftListeners {
             win.remove_event_listener_with_callback("keyup", self.keyup.as_ref().unchecked_ref());
         let _ = win.remove_event_listener_with_callback("blur", self.blur.as_ref().unchecked_ref());
         let _ = self.elem.class_list().remove_1("shift-active");
+        crate::utils::stamp_plugin_host_state_all(&self.elem);
     }
 }
 
@@ -62,6 +63,7 @@ pub(super) fn install_shift_listeners(elem: web_sys::HtmlElement) -> ShiftListen
         Closure::wrap(Box::new(move |event: KeyboardEvent| {
             if event.key() == "Shift" {
                 let _ = elem.class_list().add_1("shift-active");
+                crate::utils::stamp_plugin_host_state_all(&elem);
             }
         }) as Box<dyn FnMut(KeyboardEvent)>)
     };
@@ -71,6 +73,7 @@ pub(super) fn install_shift_listeners(elem: web_sys::HtmlElement) -> ShiftListen
         Closure::wrap(Box::new(move |event: KeyboardEvent| {
             if event.key() == "Shift" {
                 let _ = elem.class_list().remove_1("shift-active");
+                crate::utils::stamp_plugin_host_state_all(&elem);
             }
         }) as Box<dyn FnMut(KeyboardEvent)>)
     };
@@ -79,6 +82,7 @@ pub(super) fn install_shift_listeners(elem: web_sys::HtmlElement) -> ShiftListen
         let elem = elem.clone();
         Closure::wrap(Box::new(move |_: FocusEvent| {
             let _ = elem.class_list().remove_1("shift-active");
+            crate::utils::stamp_plugin_host_state_all(&elem);
         }) as Box<dyn FnMut(FocusEvent)>)
     };
 

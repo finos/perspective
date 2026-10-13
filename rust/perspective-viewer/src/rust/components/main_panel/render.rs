@@ -58,19 +58,21 @@ impl MainPanel {
         let on_dismiss_warning = dismiss_render_warning_callback(session, renderer);
 
         // Each panel's plugin is mounted in the viewer's light DOM under its
-        // panel-id slot (see `renderer::activate`). Render one `<regular-layout>`
-        // cell per panel: a concrete `<div name=…>` wrapper (which
-        // `regular-layout` grid-places via its `::slotted([name])` rule — that
-        // only matches *direct*, non-`<slot>` children, hence the wrapper) whose
-        // inner forwarding `<slot>` projects the light-DOM plugin into the placed
-        // cell. The `<regular-layout>` element is ALWAYS rendered — at zero
-        // panels it is merely empty (its tree collapses to a childless split,
-        // and it paints nothing of its own), which keeps the stage CSS
-        // (viewer.css keys the stage background + inset bleed on the element)
-        // and the attached listeners alive across empty↔populated transitions.
+        // panel-id slot (see `renderer::activate`). Render one
+        // `<regular-layout>` cell per panel: a concrete `<div name=…>`
+        // wrapper (which `regular-layout` grid-places via its
+        // `::slotted([name])` rule — that only matches *direct*,
+        // non-`<slot>` children, hence the wrapper) whose
+        // inner forwarding `<slot>` projects the light-DOM plugin into the
+        // placed cell. The `<regular-layout>` element is ALWAYS
+        // rendered — at zero panels it is merely empty (its tree
+        // collapses to a childless split, and it paints nothing of its
+        // own), which keeps the stage CSS (viewer.css keys the stage
+        // background + inset bleed on the element) and the attached
+        // listeners alive across empty↔populated transitions.
         let plugin_area = {
-            // The active panel (whose engines the status bar/settings target) is
-            // the one the active renderer is bound to.
+            // The active panel (whose engines the status bar/settings target)
+            // is the one the active renderer is bound to.
             let active_slot = renderer.slot_name();
             // Panel-count chrome (`single`/`multi`, closable, draggable)
             let placed_count = ctx.props().workspace.placed_count();
@@ -99,20 +101,25 @@ impl MainPanel {
                             class.push("active");
                         }
                     } else {
-                        // Lone panel: can't be closed to zero — hide the close button
-                        // (see viewer.css) and skip the active outline.
+                        // Lone panel: can't be closed to zero — hide the close
+                        // button (see viewer.css) and
+                        // skip the active outline.
                         class.push("single");
                     }
 
-                    // Activate this panel on pointerdown anywhere in it (body or
-                    // titlebar), so *working* in a panel — not only clicking its tab
-                    // — targets it with the shared settings/toolbar. regular-layout
-                    // emits `regular-layout-select` on tab clicks only, which left
-                    // body interaction unable to change the active panel. Tab clicks
-                    // still also fire `-select`, but that dispatch is async (after
-                    // `restore`) so it lands after this synchronous handler — within a
-                    // stack, switching tabs still resolves to the clicked panel.
-                    // Re-activating the already-active panel is a no-op upstream.
+                    // Activate this panel on pointerdown anywhere in it (body
+                    // or titlebar), so *working* in a panel
+                    // — not only clicking its tab — targets
+                    // it with the shared settings/toolbar. regular-layout
+                    // emits `regular-layout-select` on tab clicks only, which
+                    // left body interaction unable to
+                    // change the active panel. Tab clicks
+                    // still also fire `-select`, but that dispatch is async
+                    // (after `restore`) so it lands after
+                    // this synchronous handler — within a
+                    // stack, switching tabs still resolves to the clicked
+                    // panel. Re-activating the
+                    // already-active panel is a no-op upstream.
                     let on_activate = ctx.props().on_activate_panel.clone();
                     let activate_name = name.clone();
                     let onpointerdown = Callback::from(move |_: web_sys::PointerEvent| {
@@ -121,25 +128,33 @@ impl MainPanel {
                         }
                     });
 
-                    // Right-click anywhere in the panel opens the context menu. This
-                    // is handled by the imperative `contextmenu` listener on the
+                    // Right-click anywhere in the panel opens the context menu.
+                    // This is handled by the imperative
+                    // `contextmenu` listener on the
                     // panel container (see `_contextmenu_listener`), NOT a Yew
-                    // `oncontextmenu` here: the plugin body is light-DOM attached by
-                    // the renderer, so Yew's delegated handler — which walks the vdom
-                    // — never matches a right-click on it, leaving the native menu.
+                    // `oncontextmenu` here: the plugin body is light-DOM
+                    // attached by the renderer, so Yew's
+                    // delegated handler — which walks the vdom
+                    // — never matches a right-click on it, leaving the native
+                    // menu.
 
                     // `<regular-layout-frame>` gives each panel a titlebar (its
-                    // `slot="tab"`) and a `::part(container)`. Two forwarding `<slot>`s
-                    // project our light-DOM nodes in: `name` → the plugin (into the
-                    // container), and `tab-<name>` (with `slot="tab"`) → this panel's
-                    // `<PanelTab>` (into the titlebar). Both targets live in the
-                    // viewer's light DOM, so the slots — being in the viewer's shadow —
-                    // collect them and forward them one level deeper into the frame.
+                    // `slot="tab"`) and a `::part(container)`. Two forwarding
+                    // `<slot>`s project our light-DOM nodes
+                    // in: `name` → the plugin (into the
+                    // container), and `tab-<name>` (with `slot="tab"`) → this
+                    // panel's `<PanelTab>` (into the
+                    // titlebar). Both targets live in the
+                    // viewer's light DOM, so the slots — being in the viewer's
+                    // shadow — collect them and forward
+                    // them one level deeper into the frame.
                     //
-                    // The frame no longer carries the theme: the per-panel theme is
-                    // applied directly to the light-DOM plugin + tab (each stamped with
-                    // a `theme` attribute) via the `perspective-viewer [theme="X"]`
-                    // document rules, so it themes through the native cascade instead
+                    // The frame no longer carries the theme: the per-panel
+                    // theme is applied directly to the
+                    // light-DOM plugin + tab (each stamped with
+                    // a `theme` attribute) via the `perspective-viewer
+                    // [theme="X"]` document rules, so it
+                    // themes through the native cascade instead
                     // of a scraped/inlined `--psp-*` block.
                     html! {
                         <regular-layout-frame
@@ -154,10 +169,11 @@ impl MainPanel {
                     }
                 });
 
-            // Per-panel tab titles: regular-layout's tabs render their label from
-            // a `--regular-layout-<id>--title` custom property (a CSS string). We
-            // set one per titled panel on the `<regular-layout>` host; they
-            // inherit into each frame/tab's shadow.
+            // Per-panel tab titles: regular-layout's tabs render their label
+            // from a `--regular-layout-<id>--title` custom property
+            // (a CSS string). We set one per titled panel on the
+            // `<regular-layout>` host; they inherit into each
+            // frame/tab's shadow.
             let title_style = ctx
                 .props()
                 .panel_titles
@@ -171,10 +187,11 @@ impl MainPanel {
 
             // One `<PanelTab>` per panel, mounted in the viewer's light DOM and
             // forwarded into its frame's titlebar by the `tab-<id>` slot above.
-            // Rendered as siblings of `<regular-layout>` (their DOM placement is
-            // irrelevant — each portals itself onto the viewer host). `on_select`
-            // drives regular-layout's own `select` (the `regular-layout-select`
-            // listener picks up activation).
+            // Rendered as siblings of `<regular-layout>` (their DOM placement
+            // is irrelevant — each portals itself onto the viewer
+            // host). `on_select` drives regular-layout's own
+            // `select` (the `regular-layout-select` listener picks
+            // up activation).
             let viewer_elem = ctx.props().presentation.viewer_elem().clone();
             // A lone panel can't be closed to zero, and has nowhere to be
             // dragged — so it's neither closable nor draggable; its tab also
@@ -199,12 +216,13 @@ impl MainPanel {
             // `regular-layout` on the re-render. Driving the layout first — and
             // discovering the close via the `regular-layout-update` DOM event —
             // ran the layout-update resize fan-out over a still-present-but-
-            // doomed panel, spawning an (uncancellable) draw that then raced its
-            // disposal ("restore() called before load()").
+            // doomed panel, spawning an (uncancellable) draw that then raced
+            // its disposal ("restore() called before load()").
             let on_close = ctx.props().on_close_panel.clone();
-            // Commit an in-tab title edit to that panel's own session — the same
-            // `title_changed` → `TitlesChanged` refresh loop that used to be
-            // driven by the status bar re-renders the tab with the new title.
+            // Commit an in-tab title edit to that panel's own session — the
+            // same `title_changed` → `TitlesChanged` refresh loop
+            // that used to be driven by the status bar re-renders
+            // the tab with the new title.
             let on_rename = {
                 let workspace = ctx.props().workspace.clone();
                 Callback::from(move |(id, title): (String, Option<String>)| {

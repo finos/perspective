@@ -710,7 +710,8 @@ impl VirtualServerHandler for JsServerHandler {
             }
 
             // Lock the mutex and take ownership of the inner data
-            // We can't unwrap the Arc because the JsValue might still hold a reference
+            // We can't unwrap the Arc because the JsValue might still hold a
+            // reference
             let VirtualDataSlice(_obj, arc) = data;
             let slice = std::mem::take(&mut *arc.lock().unwrap()).unwrap();
             Ok(slice)

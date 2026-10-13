@@ -504,8 +504,8 @@ impl Renderer {
     /// permanently pins the per-renderer store to the built-in `Debug`
     /// (init-order race, surfaces on Safari).
     pub fn active_plugin(&self) -> Option<JsPerspectiveViewerPlugin> {
-        // Bail on `plugins_idx` BEFORE touching `plugin_store`, so an unselected
-        // renderer never snapshots the registry.
+        // Bail on `plugins_idx` BEFORE touching `plugin_store`, so an
+        // unselected renderer never snapshots the registry.
         let idx = self.selected_idx()?;
         self.0.borrow_mut().plugin_store.plugins().get(idx).cloned()
     }

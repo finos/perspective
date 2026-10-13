@@ -58,6 +58,8 @@ test.describe("Events", () => {
                 columns: ["Profit", "Sales"],
             });
 
+            // @ts-ignore
+            await viewer.flush();
             return config;
         });
 

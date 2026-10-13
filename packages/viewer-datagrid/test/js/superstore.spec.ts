@@ -155,6 +155,7 @@ test.describe("Datagrid with superstore data set", () => {
             "td",
         );
 
+        await page.keyboard.press("Enter");
         const result = await page.evaluate(async () => {
             await window.__promise__;
             const view = await document
@@ -206,7 +207,10 @@ test.describe("Datagrid with superstore data set", () => {
         await td.click();
         await td.asElement().fill("Test");
         await page.evaluate(() =>
-            (document.activeElement as HTMLElement | null)?.blur(),
+            (
+                document.querySelector("perspective-viewer-datagrid")!
+                    .shadowRoot!.activeElement as HTMLElement | null
+            )?.blur(),
         );
         const result = await page.evaluate(async () => {
             await window.__promise__;

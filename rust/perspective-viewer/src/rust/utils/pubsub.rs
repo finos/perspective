@@ -127,7 +127,6 @@ impl<T: Clone + 'static> PubSub<T> {
     }
 
     /// Convert [`PubSub::emit`] to a `Box<dyn Fn(T)>`.
-    #[must_use]
     pub fn as_boxfn(&self) -> Box<dyn Fn(T) + 'static> {
         let internal = PubSub(self.0.clone());
         Box::new(move |val: T| internal.emit(val))
