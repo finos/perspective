@@ -344,9 +344,10 @@ export class SeriesChart extends CategoricalYChart {
     _lastCatTicks: number[] | null = null;
 
     /**
-     * Per-category X coordinate in real data units (numeric axis mode
-     * only). `null` in category mode — line/scatter/area glyphs fall
-     * back to using `catIdx` directly as the X coordinate.
+     * Per-category X coordinate in real data units (numeric axis mode),
+     * or the `group_pad`-widened coordinate in category mode.
+     * `null` otherwise — glyphs fall back to using `catIdx` directly as
+     * the X coordinate.
      */
     _categoryPositions: Float64Array | null = null;
 
@@ -611,6 +612,7 @@ export class SeriesChart extends CategoricalYChart {
             autoAltYAxis: this._pluginConfig.auto_alt_y_axis,
             bandInnerFrac: this._pluginConfig.band_inner_frac,
             barInnerPad: this._pluginConfig.bar_inner_pad,
+            groupPad: this._pluginConfig.group_pad,
             includeZero: this._pluginConfig.include_zero,
             facetSplits,
             scratchBars: this._bars,

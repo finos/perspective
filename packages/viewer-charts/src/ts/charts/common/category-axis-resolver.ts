@@ -128,6 +128,36 @@ export function resolveNumericCategoryDomain(
 }
 
 /**
+ * Category-mode axis coordinates that widen each boundary by `pad` per outer `group_by` level starting a new run there, or `null` when no gap applies.
+ */
+export function resolveGroupedCategoryPositions(
+    rowPaths: CategoricalLevel[],
+    numCategories: number,
+    pad: number,
+): Float64Array | null {
+    if (!(pad > 0) || rowPaths.length < 2 || numCategories === 0) {
+        return null;
+    }
+
+    const positions = new Float64Array(numCategories);
+    for (let d = 0; d < rowPaths.length - 1; d++) {
+        for (const run of rowPaths[d].runs) {
+            if (run.startIdx > 0 && run.startIdx < numCategories) {
+                positions[run.startIdx] += pad;
+            }
+        }
+    }
+
+    let acc = 0;
+    for (let i = 0; i < numCategories; i++) {
+        acc += positions[i];
+        positions[i] = i + acc;
+    }
+
+    return positions;
+}
+
+/**
  * Decide whether the categorical axis should render as a stringified
  * category axis or a true numeric axis. Numeric mode is only used when
  * there is exactly one `group_by` level AND that level is a non-string,

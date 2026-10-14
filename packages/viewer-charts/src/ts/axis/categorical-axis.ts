@@ -19,7 +19,11 @@ import {
     rotatedLabelsOverlap,
     truncateLabel,
 } from "./label-geometry";
-import { type GroupRun, runsInRange } from "./categorical-axis-core";
+import {
+    type GroupRun,
+    positionsInRange,
+    runsInRange,
+} from "./categorical-axis-core";
 import type { Theme } from "../theme/theme";
 
 export interface CategoricalLevel {
@@ -32,6 +36,11 @@ export interface CategoricalDomain {
     levels: CategoricalLevel[];
     numRows: number;
     levelLabels: string[];
+
+    /**
+     * Ascending per-row axis coordinate; absent means row `i` sits at `i`.
+     */
+    positions?: ArrayLike<number>;
 }
 
 interface LevelTickLayout {
@@ -48,12 +57,27 @@ const LEAF_LEVEL_WIDTH_MIN = 55;
 const OUTER_LEVEL_WIDTH = 60;
 const LEAF_LABEL_PADDING = 10;
 
-function categoryIndexToPixelX(layout: PlotLayout, index: number): number {
-    return layout.dataToPixel(index, 0).px;
+function categoryCoord(
+    positions: ArrayLike<number> | undefined,
+    index: number,
+): number {
+    return positions ? positions[index] : index;
 }
 
-function categoryIndexToPixelY(layout: PlotLayout, index: number): number {
-    return layout.dataToPixel(0, index).py;
+function categoryIndexToPixelX(
+    layout: PlotLayout,
+    positions: ArrayLike<number> | undefined,
+    index: number,
+): number {
+    return layout.dataToPixel(categoryCoord(positions, index), 0).px;
+}
+
+function categoryIndexToPixelY(
+    layout: PlotLayout,
+    positions: ArrayLike<number> | undefined,
+    index: number,
+): number {
+    return layout.dataToPixel(0, categoryCoord(positions, index)).py;
 }
 
 function leafLevelLayout(
@@ -190,9 +214,15 @@ function visibleRowWindow(
     a: number,
     b: number,
     flip: boolean,
+    positions: ArrayLike<number> | undefined,
 ): [number, number] | null {
     const lo = flip ? Math.min(a, b) : a;
     const hi = flip ? Math.max(a, b) : b;
+    if (positions) {
+        const [first, last] = positionsInRange(positions, numRows, lo, hi);
+        return last < first ? null : [first, last];
+    }
+
     const visMin = Math.max(0, Math.ceil(lo));
     const visMax = Math.min(numRows - 1, Math.floor(hi));
     return visMax < visMin ? null : [visMin, visMax];
@@ -206,7 +236,8 @@ function visibleRowWindow(
  */
 function clippedRuns(
     runs: GroupRun[],
-    pixelOf: (idx: number) => number,
+    positions: ArrayLike<number> | undefined,
+    pixelOf: (coord: number) => number,
     mainStart: number,
     mainEnd: number,
 ): Array<{
@@ -218,8 +249,8 @@ function clippedRuns(
 }> {
     const out = [];
     for (const run of runs) {
-        const nearEdge = pixelOf(run.startIdx - 0.5);
-        const farEdge = pixelOf(run.endIdx + 0.5);
+        const nearEdge = pixelOf(categoryCoord(positions, run.startIdx) - 0.5);
+        const farEdge = pixelOf(categoryCoord(positions, run.endIdx) + 0.5);
         const nearClip = Math.max(mainStart, Math.min(nearEdge, farEdge));
         const farClip = Math.min(mainEnd, Math.max(nearEdge, farEdge));
         if (farClip > nearClip) {
@@ -255,6 +286,7 @@ export function renderCategoricalXTicks(
         layout.paddedXMin,
         layout.paddedXMax,
         false,
+        domain.positions,
     );
     if (!win) {
         return;
@@ -275,6 +307,7 @@ export function renderCategoricalXTicks(
                 ctx,
                 layout,
                 level,
+                domain.positions,
                 visMin,
                 visMax,
                 rowTop,
@@ -287,6 +320,7 @@ export function renderCategoricalXTicks(
                 ctx,
                 layout,
                 level,
+                domain.positions,
                 visMin,
                 visMax,
                 rowTop,
@@ -310,6 +344,7 @@ function renderLeafLevel(
     ctx: Context2D,
     layout: PlotLayout,
     level: CategoricalLevel,
+    positions: ArrayLike<number> | undefined,
     visMin: number,
     visMax: number,
     rowTop: number,
@@ -334,7 +369,7 @@ function renderLeafLevel(
     ctx.fillStyle = tickColor;
     ctx.beginPath();
     for (const r of tickRows) {
-        const px = categoryIndexToPixelX(layout, r);
+        const px = categoryIndexToPixelX(layout, positions, r);
         if (px < plot.x - 1 || px > plot.x + plot.width + 1) {
             continue;
         }
@@ -360,7 +395,7 @@ function renderLeafLevel(
         height: number;
     }[] = [];
     for (const r of tickRows) {
-        const px = categoryIndexToPixelX(layout, r);
+        const px = categoryIndexToPixelX(layout, positions, r);
         if (px < plot.x - 1 || px > plot.x + plot.width + 1) {
             continue;
         }
@@ -402,6 +437,7 @@ function renderOuterLevel(
     ctx: Context2D,
     layout: PlotLayout,
     level: CategoricalLevel,
+    positions: ArrayLike<number> | undefined,
     visMin: number,
     visMax: number,
     rowTop: number,
@@ -416,7 +452,8 @@ function renderOuterLevel(
 
     const clipped = clippedRuns(
         runs,
-        (idx) => categoryIndexToPixelX(layout, idx),
+        positions,
+        (coord) => layout.dataToPixel(coord, 0).px,
         plot.x,
         plot.x + plot.width,
     );
@@ -518,6 +555,7 @@ export function renderCategoricalYTicks(
         layout.paddedYMin,
         layout.paddedYMax,
         true,
+        domain.positions,
     );
     if (!win) {
         return;
@@ -538,6 +576,7 @@ export function renderCategoricalYTicks(
                 ctx,
                 layout,
                 level,
+                domain.positions,
                 visMin,
                 visMax,
                 colRight,
@@ -549,6 +588,7 @@ export function renderCategoricalYTicks(
                 ctx,
                 layout,
                 level,
+                domain.positions,
                 visMin,
                 visMax,
                 colRight,
@@ -577,6 +617,7 @@ function renderLeafLevelY(
     ctx: Context2D,
     layout: PlotLayout,
     level: CategoricalLevel,
+    positions: ArrayLike<number> | undefined,
     visMin: number,
     visMax: number,
     colRight: number,
@@ -594,7 +635,7 @@ function renderLeafLevelY(
     ctx.fillStyle = tickColor;
     ctx.beginPath();
     for (let r = visMin; r <= visMax; r += step) {
-        const py = categoryIndexToPixelY(layout, r);
+        const py = categoryIndexToPixelY(layout, positions, r);
         if (py < plot.y - 1 || py > plot.y + plot.height + 1) {
             continue;
         }
@@ -609,7 +650,7 @@ function renderLeafLevelY(
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     for (let r = visMin; r <= visMax; r += step) {
-        const py = categoryIndexToPixelY(layout, r);
+        const py = categoryIndexToPixelY(layout, positions, r);
         if (py < plot.y - 1 || py > plot.y + plot.height + 1) {
             continue;
         }
@@ -627,6 +668,7 @@ function renderOuterLevelY(
     ctx: Context2D,
     layout: PlotLayout,
     level: CategoricalLevel,
+    positions: ArrayLike<number> | undefined,
     visMin: number,
     visMax: number,
     colRight: number,
@@ -642,7 +684,8 @@ function renderOuterLevelY(
 
     const clipped = clippedRuns(
         runs,
-        (idx) => categoryIndexToPixelY(layout, idx),
+        positions,
+        (coord) => layout.dataToPixel(0, coord).py,
         plot.y,
         plot.y + plot.height,
     );

@@ -173,6 +173,7 @@ perspective-viewer {
     --psp-label--point-size-px--content: "点のサイズ";
     --psp-label--band-inner-frac--content: "バンド幅";
     --psp-label--bar-inner-pad--content: "バー間隔";
+    --psp-label--group-pad--content: "グループ間隔";
     --psp-label--wick-width-px--content: "ヒゲの幅";
     --psp-label--ohlc-line-width-px--content: "OHLC線の幅";
     --psp-label--include-zero--content: "ゼロを含める";

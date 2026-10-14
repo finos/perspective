@@ -173,6 +173,7 @@ perspective-viewer {
     --psp-label--point-size-px--content: "点大小";
     --psp-label--band-inner-frac--content: "带宽";
     --psp-label--bar-inner-pad--content: "条形间距";
+    --psp-label--group-pad--content: "分组间距";
     --psp-label--wick-width-px--content: "影线宽度";
     --psp-label--ohlc-line-width-px--content: "OHLC线宽";
     --psp-label--include-zero--content: "包含零";

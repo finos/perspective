@@ -186,6 +186,7 @@ perspective-viewer {
     --psp-label--point-size-px--content: "Point size";
     --psp-label--band-inner-frac--content: "Band width";
     --psp-label--bar-inner-pad--content: "Bar padding";
+    --psp-label--group-pad--content: "Group padding";
     --psp-label--wick-width-px--content: "Wick width";
     --psp-label--ohlc-line-width-px--content: "OHLC line width";
     --psp-label--include-zero--content: "Include zero";
