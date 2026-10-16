@@ -78,12 +78,39 @@ viewer.agentConfig({
 });
 ```
 
+## What the agent can do
+
+The agent acts only through tools, each gated by an _entitlement_. Pass
+`entitlements` to `agentConfig` to grant a subset; the default grants every
+entitlement except `read_data`. A tool whose entitlement is withheld is never
+offered to the model.
+
+| Entitlement      | Tools                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `read_view`      | `get_schema`, `get_view_config`, `list_plugins`, `validate_expression`, `get_style_schema`, `list_panels`, `get_workspace` |
+| `configure_view` | `set_view_config`                                                                                                         |
+| `manage_layout`  | `add_panel`, `remove_panel`, `activate_panel`, `set_workspace`                                                            |
+| `read_docs`      | `search_docs`                                                                                                             |
+
+`manage_layout` covers the whole dashboard: adding and removing panels, and
+through `set_workspace` arranging them into a grid, defining derived tables,
+linking master/detail panels and setting the shared palette. Withhold it to
+keep the agent to configuring the existing panels:
+
+```javascript
+viewer.agentConfig({
+    ...providers.anthropic,
+    apiKey: "sk-ant-...",
+    entitlements: ["read_view", "configure_view", "read_docs"],
+});
+```
+
 ## The documentation bundle
 
 `<perspective-viewer>` publishes a metadata bundle at
 `dist/docs/perspective-docs.json` containing a searchable corpus of the
-Perspective documentation plus generated JSON schemas for the viewer's config
-types. Passing it as `docs` is optional, but without it the agent will not be
+Perspective documentation on configuring the viewer, plus generated JSON
+schemas for the viewer's config types. Passing it as `docs` is optional, but without it the agent will not be
 very capable — it is what lets the agent look things up rather than guess:
 
 ```javascript

@@ -120,6 +120,11 @@ A `saveWorkspace()` token is a `WorkspaceConfig`
 single-panel `restore()` will _not_ restore the layout (its `panels`/`layout`
 keys are ignored).
 
+The `layout` field is the tree arranging the panels into a grid of rows and
+columns or stacks of tabs, naming every panel id exactly once. See
+[Arranging panels: layouts and dashboards](./layout.md) for its format and for
+rearranging, resizing and stacking existing panels.
+
 Like `restore()`, `restoreWorkspace()` applies an _update_: a field that is
 absent leaves that part of the element unchanged, `null` resets it to its
 default, and a value replaces it. `panels` is the whole panel set — when present

@@ -122,11 +122,13 @@ fn panel_property() -> Value {
 /// config properties the AGENT contract requires beyond the public type
 /// (unioned into the definition's `required`, stated outright in the
 /// fallback) — the tool body must enforce the same fields at dispatch.
+/// `omit` lists public properties the agent contract withholds.
 fn spliced_config(
     schemas: Option<&HashMap<String, Value>>,
     key: &str,
     description: &str,
     require: &[&str],
+    omit: &[&str],
 ) -> (Value, Option<Value>) {
     match schemas.and_then(|x| x.get(key)) {
         Some(schema) => {
@@ -141,7 +143,14 @@ fn spliced_config(
                 .clone()
                 .unwrap_or_else(|| json!({ "type": "object" }));
 
+            if let Some(properties) = config["properties"].as_object_mut() {
+                for field in omit {
+                    properties.remove(*field);
+                }
+            }
+
             let mut required = config["required"].as_array().cloned().unwrap_or_default();
+            required.retain(|x| !omit.iter().any(|field| x == field));
             for field in require {
                 if !required.iter().any(|x| x == field) {
                     required.push(json!(field));
@@ -163,6 +172,8 @@ fn spliced_config(
                 definitions.insert(key.to_owned(), original);
             }
 
+            let reachable = reachable_definitions(&config, &definitions);
+            definitions.retain(|name, _| reachable.contains(name));
             let definitions = (!definitions.is_empty()).then(|| Value::Object(definitions));
             (config, definitions)
         },
@@ -177,14 +188,59 @@ fn spliced_config(
     }
 }
 
+fn definition_refs(node: &Value, out: &mut Vec<String>) {
+    match node {
+        Value::Object(map) => {
+            for (key, value) in map {
+                match value
+                    .as_str()
+                    .and_then(|x| x.strip_prefix("#/definitions/"))
+                {
+                    Some(name) if key == "$ref" => out.push(name.to_owned()),
+                    _ => definition_refs(value, out),
+                }
+            }
+        },
+        Value::Array(values) => {
+            for value in values {
+                definition_refs(value, out);
+            }
+        },
+        _ => {},
+    }
+}
+
+fn reachable_definitions(
+    root: &Value,
+    definitions: &serde_json::Map<String, Value>,
+) -> Vec<String> {
+    let mut pending = Vec::new();
+    definition_refs(root, &mut pending);
+    let mut reachable = Vec::new();
+    while let Some(name) = pending.pop() {
+        if reachable.contains(&name) {
+            continue;
+        }
+
+        if let Some(definition) = definitions.get(&name) {
+            definition_refs(definition, &mut pending);
+        }
+
+        reachable.push(name);
+    }
+
+    reachable
+}
+
 fn config_parameters(
     schemas: Option<&HashMap<String, Value>>,
     key: &str,
     description: &str,
     with_panel: bool,
     require: &[&str],
+    omit: &[&str],
 ) -> Value {
-    let (config, definitions) = spliced_config(schemas, key, description, require);
+    let (config, definitions) = spliced_config(schemas, key, description, require, omit);
     let mut properties = json!({ "config": config });
     if with_panel {
         properties["panel"] = panel_property();
@@ -252,6 +308,7 @@ static TOOLS: &[Tool] = &[
                 "ViewerConfigUpdate",
                 "A partial ViewerConfigUpdate patch",
                 true,
+                &[],
                 &[],
             )
         },
@@ -348,6 +405,7 @@ static TOOLS: &[Tool] = &[
                 "The new panel's ViewerConfigInitial (`table` and `columns` required)",
                 false,
                 &["table", "columns"],
+                &[],
             )
         },
         call: |elem, ctx, args| Box::pin(elem.tool_add_panel(ctx, args)),
@@ -391,6 +449,45 @@ static TOOLS: &[Tool] = &[
             })
         },
         call: |elem, ctx, args| Box::pin(elem.tool_activate_panel(ctx, args)),
+    },
+    Tool {
+        name: "get_workspace",
+        description: "Get the dashboard's workspace state: the `layout` tree arranging the \
+                      panels, each panel's `title`, `plugin` and `table`, the active panel, and \
+                      the element-level `derived_tables`, `masters`, `global_filters` and \
+                      `palette`. Call this before `set_workspace` - its `layout` must name every \
+                      panel id listed here.",
+        entitlement: Entitlement::ReadView,
+        available: always,
+        parameters: |_| json!({ "type": "object", "properties": {} }),
+        call: |elem, ctx, args| Box::pin(elem.tool_get_workspace(ctx, args)),
+    },
+    Tool {
+        name: "set_workspace",
+        description: "Apply a field-wise update to the dashboard's workspace state; absent fields \
+                      are unchanged and `null` resets. `layout` arranges the panels into a grid: \
+                      nested `split-layout`s (`orientation` `horizontal` = side by side, \
+                      `vertical` = stacked; `sizes` are fractions summing to 1, one per child) \
+                      whose leaves are `tab-layout` stacks of panel ids, naming EVERY panel \
+                      exactly once. `derived_tables` is the COMPLETE set of derived tables (keep \
+                      existing entries), each a pivoted/filtered view of `table` that panels can \
+                      then bind by name via add_panel. `masters` are panels whose row selection \
+                      cross-filters the others through `global_filters`. Panels themselves are \
+                      created and removed with add_panel / remove_panel. Returns the workspace \
+                      state after the update.",
+        entitlement: Entitlement::ManageLayout,
+        available: always,
+        parameters: |schemas| {
+            config_parameters(
+                schemas,
+                "WorkspaceConfigUpdate",
+                "A partial WorkspaceConfigUpdate (`panels` excluded)",
+                false,
+                &[],
+                &["panels"],
+            )
+        },
+        call: |elem, ctx, args| Box::pin(elem.tool_set_workspace(ctx, args)),
     },
     Tool {
         name: "search_docs",
@@ -575,6 +672,11 @@ struct AddPanelArgs {
 #[derive(Deserialize)]
 struct PanelNameArgs {
     panel: String,
+}
+
+#[derive(Deserialize)]
+struct SetWorkspaceArgs {
+    config: serde_json::Map<String, Value>,
 }
 
 #[derive(Deserialize)]
@@ -795,6 +897,29 @@ fn schema_object(schema: &ColumnConfigSchema) -> Value {
 }
 
 const SEARCH_DOCS_LIMIT: usize = 4;
+
+/// A `restoreWorkspace` update returning each field of `update` to its value
+/// in the `saveWorkspace` token `snapshot`.
+fn workspace_rollback(snapshot: &Value, update: &serde_json::Map<String, Value>) -> Value {
+    let mut rollback = serde_json::Map::new();
+    for key in update.keys() {
+        let saved = snapshot.get(key).filter(|x| !x.is_null()).cloned();
+        let value = match key.as_str() {
+            "layout" => saved,
+            "derived_tables" => Some(saved.unwrap_or_else(|| json!({}))),
+            "active" | "masters" | "global_filters" | "palette" => {
+                Some(saved.unwrap_or(Value::Null))
+            },
+            _ => None,
+        };
+
+        if let Some(value) = value {
+            rollback.insert(key.clone(), value);
+        }
+    }
+
+    Value::Object(rollback)
+}
 
 /// Tool bodies and their shared helpers — plain (non-bindgen) methods.
 impl PerspectiveViewerElement {
@@ -1072,6 +1197,160 @@ impl PerspectiveViewerElement {
         let panel = self.agent_panel(None).ok()?;
         let client = panel.session.get_client()?;
         client.get_hosted_table_names().await.ok()
+    }
+
+    async fn tool_get_workspace(&self, _ctx: &ToolCtx, _args: Value) -> Result<Value, ToolError> {
+        let token = self.agent_save_workspace().await?;
+        Ok(self.agent_workspace_summary(&token))
+    }
+
+    /// Applies via the public `restoreWorkspace()`, restoring the touched
+    /// fields from a `saveWorkspace()` snapshot on failure.
+    async fn tool_set_workspace(&self, ctx: &ToolCtx, args: Value) -> Result<Value, ToolError> {
+        let args: SetWorkspaceArgs = serde_json::from_value(args)?;
+        if args.config.contains_key("panels") {
+            return Err(ToolError(
+                "`panels` cannot be set with set_workspace - create, configure and remove panels \
+                 with `add_panel`, `set_view_config` and `remove_panel`, then arrange them with \
+                 `layout`."
+                    .to_owned(),
+            ));
+        }
+
+        let snapshot = self.agent_save_workspace().await?;
+        if let Some(derived) = args.config.get("derived_tables") {
+            self.agent_check_derived(&snapshot, derived).await?;
+        }
+
+        let update = Value::Object(args.config.clone());
+        if let Err(err) = self.agent_restore_workspace(&update).await {
+            let rollback = workspace_rollback(&snapshot, &args.config);
+            if let Err(rollback_err) = self.agent_restore_workspace(&rollback).await {
+                return Err(ToolError(format!(
+                    "{err} (restoring the previous workspace also failed: {rollback_err})"
+                )));
+            }
+
+            return Err(with_docs_hint(ctx, err));
+        }
+
+        let token = self.agent_save_workspace().await?;
+        Ok(self.agent_workspace_summary(&token))
+    }
+
+    /// Reject a `derived_tables` set that drops a table a panel reads, or
+    /// whose entries read a table that will not exist.
+    async fn agent_check_derived(
+        &self,
+        snapshot: &Value,
+        derived: &Value,
+    ) -> Result<(), ToolError> {
+        let Some(derived) = derived.as_object() else {
+            return Ok(());
+        };
+
+        let current = snapshot["derived_tables"]
+            .as_object()
+            .map(|x| x.keys().cloned().collect::<Vec<_>>())
+            .unwrap_or_default();
+
+        let mut dropped = snapshot["panels"]
+            .as_object()
+            .into_iter()
+            .flat_map(|panels| panels.values())
+            .filter_map(|config| config["table"].as_str())
+            .filter(|table| current.iter().any(|x| x == table) && !derived.contains_key(*table))
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+
+        dropped.sort();
+        dropped.dedup();
+        if !dropped.is_empty() {
+            return Err(ToolError(format!(
+                "`derived_tables` is the COMPLETE set of derived tables, not a patch: {dropped:?} \
+                 are read by panels and must stay in it (current derived tables: {current:?})"
+            )));
+        }
+
+        let Some(hosted) = self.agent_hosted_table_names().await else {
+            return Ok(());
+        };
+
+        let loaded = hosted
+            .into_iter()
+            .filter(|x| !current.contains(x))
+            .collect::<Vec<_>>();
+
+        for (name, config) in derived {
+            let Some(parent) = config["table"].as_str() else {
+                continue;
+            };
+
+            if !derived.contains_key(parent) && !loaded.iter().any(|x| x == parent) {
+                return Err(ToolError(format!(
+                    "Derived table `{name}` reads unknown table `{parent}` - its `table` must be \
+                     a loaded table or another entry in `derived_tables` (loaded tables: \
+                     {loaded:?})"
+                )));
+            }
+        }
+
+        Ok(())
+    }
+
+    fn agent_workspace_summary(&self, token: &Value) -> Value {
+        let panels = token["panels"]
+            .as_object()
+            .into_iter()
+            .flatten()
+            .map(|(id, config)| {
+                (
+                    id.clone(),
+                    json!({
+                        "title": config["title"],
+                        "plugin": config["plugin"],
+                        "table": config["table"],
+                    }),
+                )
+            })
+            .collect::<serde_json::Map<_, _>>();
+
+        let or = |key: &str, default: Value| {
+            token
+                .get(key)
+                .filter(|x| !x.is_null())
+                .cloned()
+                .unwrap_or(default)
+        };
+
+        json!({
+            "active": self.agent_active_name(),
+            "layout": token["layout"],
+            "panels": panels,
+            "derived_tables": or("derived_tables", json!({})),
+            "masters": or("masters", json!([])),
+            "global_filters": or("global_filters", json!([])),
+            "palette": or("palette", json!({})),
+        })
+    }
+
+    async fn agent_save_workspace(&self) -> Result<Value, ToolError> {
+        let options = js_sys::Object::new();
+        js_sys::Reflect::set(&options, &JsValue::from_str("full_palette"), &JsValue::TRUE)?;
+
+        let saved = self.saveWorkspace(Some(options.unchecked_into()));
+        let promise: js_sys::Promise = JsValue::from(saved).unchecked_into();
+        let token = wasm_bindgen_futures::JsFuture::from(promise).await?;
+        let json = String::from(js_sys::JSON::stringify(&token)?);
+        Ok(serde_json::from_str(&json)?)
+    }
+
+    async fn agent_restore_workspace(&self, update: &Value) -> Result<(), ToolError> {
+        let js_update = js_sys::JSON::parse(&update.to_string())?;
+        let restored = self.restoreWorkspace(js_update.unchecked_into(), None);
+        let promise: js_sys::Promise = JsValue::from(restored).unchecked_into();
+        wasm_bindgen_futures::JsFuture::from(promise).await?;
+        Ok(())
     }
 
     async fn tool_remove_panel(&self, _ctx: &ToolCtx, args: Value) -> Result<Value, ToolError> {

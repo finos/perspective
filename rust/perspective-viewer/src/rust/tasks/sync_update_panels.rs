@@ -64,6 +64,16 @@ pub fn sync_update_panels(
 
     let old_ids = this.workspace.panel_ids();
     let replace = panels.is_some();
+    if let Some(layout) = &layout {
+        let ids = match &panels {
+            Some(panels) => panels.keys().cloned().collect::<Vec<_>>(),
+            None => old_ids.iter().map(|id| id.as_str().to_owned()).collect(),
+        };
+
+        layout
+            .validate(&ids)
+            .map_err(|e| ApiError::from(JsValue::from_str(&e)))?;
+    }
 
     // Phase 1 — models only, NO renders and NO draws
     let mut id_map: HashMap<String, String> = Default::default();

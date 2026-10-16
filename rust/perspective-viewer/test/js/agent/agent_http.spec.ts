@@ -165,11 +165,13 @@ test.describe("llm-agent http transport", () => {
                 "get_schema",
                 "get_style_schema",
                 "get_view_config",
+                "get_workspace",
                 "list_panels",
                 "list_plugins",
                 "remove_panel",
                 "search_docs",
                 "set_view_config",
+                "set_workspace",
                 "validate_expression",
             ]);
         }

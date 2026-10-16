@@ -77,6 +77,46 @@ test.beforeEach(async ({ page }) => {
     });
 });
 
+async function allToolResults(page) {
+    return await page.evaluate(() => {
+        const calls = window["__AGENT_CALLS__"];
+        return calls[calls.length - 1].messages
+            .filter((m) => m.role === "tool")
+            .map((m) => JSON.parse(m.content));
+    });
+}
+
+const BUNDLE = "/rust/perspective-viewer/dist/docs/perspective-docs.json";
+
+const RETRIEVAL_GOLDENS: [string, (result: any) => boolean][] = [
+    [
+        "arrange panels grid",
+        (x) => x.path === "docs/md/how_to/javascript/layout.md",
+    ],
+    [
+        "dashboard layout",
+        (x) => x.path === "docs/md/how_to/javascript/layout.md",
+    ],
+    [
+        "side by side panels",
+        (x) => x.path === "docs/md/how_to/javascript/layout.md",
+    ],
+    [
+        "stack panels tabs",
+        (x) => x.path === "docs/md/how_to/javascript/layout.md",
+    ],
+    [
+        "resize panel sizes",
+        (x) => x.path === "docs/md/how_to/javascript/layout.md",
+    ],
+    [
+        "split-layout orientation",
+        (x) => x.path === "docs/md/how_to/javascript/layout.md",
+    ],
+    ["master detail filter", (x) => x.title.includes("Master/detail")],
+    ["derived table workspace", (x) => /derived/i.test(x.title)],
+];
+
 async function lastToolResult(page) {
     return await page.evaluate(() => {
         const calls = window["__AGENT_CALLS__"];
@@ -227,6 +267,121 @@ test.describe("llm-agent search_docs", () => {
         }
 
         expect(result.system).toContain("search_docs");
+    });
+
+    test("the packaged corpus covers only viewer configuration", async ({
+        page,
+    }) => {
+        const paths = await page.evaluate(async (url) => {
+            const bundle = await (await fetch(url)).json();
+            return bundle.chunks.map((x) => x.path);
+        }, BUNDLE);
+
+        for (const excluded of [
+            "docs/md/how_to/python/",
+            "docs/md/use_cases/",
+            "docs/md/integrations/",
+            "docs/md/tutorials/",
+            "rust/perspective-viewer/docs/",
+            "docs/md/FAQ.md",
+            "docs/md/how_to/javascript/installation.md",
+        ]) {
+            expect(paths.filter((x) => x.startsWith(excluded))).toEqual([]);
+        }
+
+        for (const included of [
+            "docs/md/how_to/javascript/layout.md",
+            "docs/md/how_to/javascript/save_restore.md",
+            "docs/md/explanation/derived_table.md",
+            "docs/md/explanation/view/config/expressions.md",
+            "docs/md/glossary.md",
+            "rust/perspective-client/docs/expression_gen.md",
+            "rust/perspective-viewer/dist/wasm/perspective-viewer.d.ts",
+            "packages/viewer-datagrid/src/ts/types.ts",
+            "packages/viewer-charts/src/ts/charts/chart.ts",
+            "rust/perspective-viewer/src/ts/ts-rs/Layout.ts",
+        ]) {
+            expect(paths).toContain(included);
+        }
+
+        const titles = await page.evaluate(async (url) => {
+            const bundle = await (await fetch(url)).json();
+            return bundle.chunks.map((x) => x.title);
+        }, BUNDLE);
+
+        for (const engine of [
+            "to_arrow",
+            "get_hosted_table_names",
+            "_fullRender",
+        ]) {
+            expect(titles.filter((x) => x.endsWith(`» ${engine}`))).toEqual([]);
+        }
+    });
+
+    test("the packaged corpus retrieves the layout and workspace docs", async ({
+        page,
+    }) => {
+        await page.evaluate(
+            async ({ url, queries }) => {
+                const viewer = document.querySelector("perspective-viewer");
+                viewer.agentConfig({
+                    name: "webllm",
+                    maxTurns: queries.length + 2,
+                    docs: fetch(url),
+                    engine: window["__MAKE_ENGINE__"]([
+                        ...queries.map((query) => ({
+                            tool: "search_docs",
+                            args: { query, limit: 4 },
+                        })),
+                        { text: "Searched." },
+                    ]),
+                });
+
+                await viewer.agentPrompt("How do I arrange a dashboard?");
+            },
+            { url: BUNDLE, queries: RETRIEVAL_GOLDENS.map(([q]) => q) },
+        );
+
+        const results = await allToolResults(page);
+        expect(results.length).toEqual(RETRIEVAL_GOLDENS.length);
+        RETRIEVAL_GOLDENS.forEach(([query, matches], idx) => {
+            expect(
+                results[idx].results.some(matches),
+                `search_docs("${query}")`,
+            ).toBe(true);
+        });
+    });
+
+    test("the packaged bundle schema for set_workspace omits panels", async ({
+        page,
+    }) => {
+        const params = await page.evaluate(async (url) => {
+            const viewer = document.querySelector("perspective-viewer");
+            viewer.agentConfig({
+                name: "webllm",
+                docs: fetch(url),
+                engine: window["__MAKE_ENGINE__"]([{ text: "ok" }]),
+            });
+
+            await viewer.agentPrompt("hello");
+            return window["__AGENT_CALLS__"][0].tools.find(
+                (x) => x.function.name === "set_workspace",
+            ).function.parameters;
+        }, BUNDLE);
+
+        const config_props = Object.keys(params.properties.config.properties);
+        expect(config_props).toContain("layout");
+        expect(config_props).toContain("derived_tables");
+        expect(config_props).toContain("masters");
+        expect(config_props).toContain("global_filters");
+        expect(config_props).not.toContain("panels");
+        expect(params.definitions?.ViewerConfigInitial).toBeUndefined();
+        for (const ref of JSON.stringify(params).match(
+            /#\/definitions\/[^"]+/g,
+        ) ?? []) {
+            const name = ref.slice("#/definitions/".length);
+            expect(params.definitions[name]).toBeDefined();
+        }
     });
 
     test("the packaged corpus answers an expression query", async ({

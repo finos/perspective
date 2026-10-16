@@ -229,7 +229,8 @@ pub struct WorkspaceConfigUpdate {
     #[ts(optional)]
     pub active: OptionalUpdate<String>,
 
-    /// The layout tree to stage, naming `panels` keys or existing panel ids.
+    /// The layout tree to stage, naming every `panels` key (or, without
+    /// `panels`, every existing panel id) exactly once.
     #[serde(default)]
     #[ts(optional)]
     pub layout: Option<crate::js::Layout>,

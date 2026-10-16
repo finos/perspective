@@ -55,6 +55,7 @@
     - [Loading data](./how_to/javascript/loading_data.md)
     - [Theming](./how_to/javascript/theming.md)
     - [Saving and restoring UI state](./how_to/javascript/save_restore.md)
+    - [Arranging panels: layouts and dashboards](./how_to/javascript/layout.md)
     - [Listening for events](./how_to/javascript/events.md)
     - [Plugin render limits](./how_to/javascript/plugin_settings.md)
     - [Map tile sources](./how_to/javascript/map_tile_sources.md)

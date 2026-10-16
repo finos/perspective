@@ -162,7 +162,8 @@ impl RegularLayout {
     }
 }
 
-/// The orientation of a [`SplitLayout`].
+/// The direction a [`SplitLayout`] divides its space in: `horizontal` places
+/// children side by side as columns, `vertical` stacks them as rows.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, ts_rs::TS)]
 #[serde(rename_all = "lowercase")]
 pub enum Orientation {
@@ -170,8 +171,8 @@ pub enum Orientation {
     Vertical,
 }
 
-/// A serde mirror of `regular-layout`'s serialized layout tree, as returned by
-/// [`RegularLayout::save`] and accepted by [`RegularLayout::restore`].
+/// A dashboard's panel arrangement: nested splits whose leaves are tab stacks
+/// of panel ids, naming every panel exactly once.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, ts_rs::TS)]
 #[serde(tag = "type")]
 pub enum Layout {
@@ -184,13 +185,21 @@ pub enum Layout {
     Tab(TabLayout),
 }
 
+/// A row or column of child layouts, nested to form a grid.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, ts_rs::TS)]
 pub struct SplitLayout {
+    /// Child layouts, in left-to-right or top-to-bottom order.
     pub children: Vec<Layout>,
+
+    /// Each child's fraction of the split, one per child, summing to 1.
     pub sizes: Vec<f64>,
+
+    /// Whether children sit side by side (`horizontal`) or stacked
+    /// (`vertical`).
     pub orientation: Orientation,
 }
 
+/// A stack of panels shown as tabs, one visible at a time.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, ts_rs::TS)]
 pub struct TabLayout {
     /// Panel ids (slot names) in this stack.
@@ -304,6 +313,114 @@ impl Layout {
                 }
 
                 None
+            },
+        }
+    }
+
+    /// Check that this tree names each of `ids` exactly once and is
+    /// well-formed, describing the first violation found.
+    pub fn validate(&self, ids: &[String]) -> Result<(), String> {
+        if let Layout::Split(split) = self
+            && split.children.is_empty()
+            && split.sizes.is_empty()
+            && ids.is_empty()
+        {
+            return Ok(());
+        }
+
+        let mut seen = Vec::new();
+        self.validate_node("layout", ids, &mut seen)?;
+        let missing = ids
+            .iter()
+            .filter(|id| !seen.contains(id))
+            .collect::<Vec<_>>();
+
+        if !missing.is_empty() {
+            return Err(format!(
+                "Invalid layout: panels {missing:?} are missing - a layout must name every panel \
+                 exactly once (panels: {ids:?})"
+            ));
+        }
+
+        Ok(())
+    }
+
+    fn validate_node(
+        &self,
+        path: &str,
+        ids: &[String],
+        seen: &mut Vec<String>,
+    ) -> Result<(), String> {
+        match self {
+            Layout::Split(split) => {
+                if split.children.is_empty() {
+                    return Err(format!("Invalid layout: {path}.children is empty"));
+                }
+
+                if split.sizes.len() != split.children.len() {
+                    return Err(format!(
+                        "Invalid layout: {path}.sizes has {} entries for {} children - give one \
+                         size per child",
+                        split.sizes.len(),
+                        split.children.len()
+                    ));
+                }
+
+                if let Some(size) = split.sizes.iter().find(|x| !x.is_finite() || **x <= 0.0) {
+                    return Err(format!(
+                        "Invalid layout: {path}.sizes contains {size} - sizes must be positive \
+                         fractions"
+                    ));
+                }
+
+                let total: f64 = split.sizes.iter().sum();
+                if (total - 1.0).abs() > 1e-6 {
+                    return Err(format!(
+                        "Invalid layout: {path}.sizes sum to {total} - sizes are fractions of the \
+                         split and must sum to 1"
+                    ));
+                }
+
+                for (index, child) in split.children.iter().enumerate() {
+                    child.validate_node(&format!("{path}.children[{index}]"), ids, seen)?;
+                }
+
+                Ok(())
+            },
+            Layout::Tab(tab) => {
+                if tab.tabs.is_empty() {
+                    return Err(format!("Invalid layout: {path}.tabs is empty"));
+                }
+
+                if let Some(selected) = tab.selected
+                    && selected >= tab.tabs.len()
+                {
+                    return Err(format!(
+                        "Invalid layout: {path}.selected is {selected} but {path}.tabs has {} \
+                         entries",
+                        tab.tabs.len()
+                    ));
+                }
+
+                for name in &tab.tabs {
+                    if !ids.contains(name) {
+                        return Err(format!(
+                            "Invalid layout: {path}.tabs names unknown panel \"{name}\" (panels: \
+                             {ids:?})"
+                        ));
+                    }
+
+                    if seen.contains(name) {
+                        return Err(format!(
+                            "Invalid layout: panel \"{name}\" appears more than once - a layout \
+                             must name every panel exactly once"
+                        ));
+                    }
+
+                    seen.push(name.clone());
+                }
+
+                Ok(())
             },
         }
     }
