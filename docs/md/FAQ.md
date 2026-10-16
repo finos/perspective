@@ -68,7 +68,8 @@ published wheels.
 Perspective no longer exports bundler plugins. Instead, you must manually
 bootstrap the WASM binaries using your bundler's asset handling. See
 [Importing with or without a bundler](./how_to/javascript/importing.md) for
-complete examples for Vite, Webpack, esbuild, CDN, and inline builds.
+complete examples for Vite, Webpack, esbuild and CDN usage. Prebuilt _inline_
+bundles (with the WebAssembly embedded in the `.js`) are no longer published.
 
 <!-- _Related: [#1734](https://github.com/perspective-dev/perspective/issues/1734),
 [#2725](https://github.com/perspective-dev/perspective/issues/2725),
@@ -172,12 +173,24 @@ updates.
 
 ### Can I compose filters with OR logic?
 
-Perspective
+Yes. Perspective
 [filters](./explanation/view/config/selection_and_ordering.md#filter) are
-composed with AND logic by default. As an alternative, you can use
-[expression columns](./explanation/view/config/expressions.md) to create a
-boolean column that encodes your OR logic (or any arbitrary multi-column
-predicate), then filter on that column:
+composed with AND logic by default; set `filter_op: "or"` to compose them with
+OR instead:
+
+```javascript
+const view = await table.view({
+    filter: [
+        ["State", "==", "Texas"],
+        ["State", "==", "California"],
+    ],
+    filter_op: "or",
+});
+```
+
+For a mix of AND and OR (or any arbitrary multi-column predicate), use an
+[expression column](./explanation/view/config/expressions.md) to create a
+boolean column that encodes the logic, then filter on that column:
 
 ```javascript
 const view = await table.view({
@@ -309,16 +322,23 @@ Or import just the dark theme directly:
 
 ### Can I create a custom cell renderer for the datagrid?
 
-The datagrid plugin supports custom styling via
-[`column_config`](https://perspective-dev.github.io/viewer/types/src_ts_ts-rs_ColumnConfigValues.ts.ColumnConfigValues.html)
-and CSS custom properties, but custom cell renderers require building a custom
-plugin.
+The datagrid plugin supports per-column styling (colors, bars, gradients,
+number and date formats, fonts and alignment) via a panel's `columns_config`,
+grid-wide options via `plugin_config`, and CSS custom properties — see the
+`ColumnConfig` and `DatagridPluginConfig` types in
+[`@perspective-dev/viewer-datagrid`](https://github.com/perspective-dev/perspective/blob/master/packages/viewer-datagrid/src/ts/types.ts).
+Custom cell renderers require building a custom plugin.
 
 <!-- _Related: [#1508](https://github.com/perspective-dev/perspective/issues/1508)_ -->
 
 ### How do I customize chart colors?
 
-Chart colors can be customized via
+Per column, via a panel's `columns_config`: chart columns take a `palette` (an
+ordered list of series colors) or a `gradient`, written as CSS
+`linear-gradient(...)` strings. A multi-panel viewer can also share named
+colors across every panel through the workspace `palette`. See
+[Colors, palettes and gradients](./how_to/javascript/save_restore.md#colors-palettes-and-gradients).
+The default colors come from the theme's
 [CSS custom properties](./how_to/javascript/theming.md#custom-themes) on the
 `<perspective-viewer>` element.
 
@@ -434,8 +454,8 @@ Yes, by creating a duplicate/alias for your column via
 ```javascript
 await viewer.restore({
     columns: ["Sales", "Sales 2"],
-    expresions: { "Sales 2": '"Sales"' },
-    aggregate: {
+    expressions: { "Sales 2": '"Sales"' },
+    aggregates: {
         Sales: "sum",
         "Sales 2": "avg",
     },
@@ -446,9 +466,25 @@ await viewer.restore({
 
 ### Can I compute a ratio between aggregated columns?
 
-Use [expression columns](./explanation/view/config/expressions.md) on an
-aggregated View to compute ratios. Define an expression that divides one column
-by another.
+Not with an expression on the same `View`:
+[expression columns](./explanation/view/config/expressions.md) are evaluated
+per row _before_ aggregation, so `"Profit" / "Sales"` computes each row's ratio
+and then aggregates those ratios. To divide the aggregates themselves, group in
+a [derived `Table`](./explanation/derived_table.md) and add the expression on
+top of it, where each row is already a group:
+
+```javascript
+await viewer.restore({
+    table: {
+        table: "superstore",
+        group_by: ["Region"],
+        group_rollup_mode: "flat",
+        columns: ["Sales", "Profit"],
+    },
+    columns: ["Region", "Margin"],
+    expressions: { Margin: '"Profit" / "Sales"' },
+});
+```
 
 <!-- _Related:
 [#2994](https://github.com/perspective-dev/perspective/discussions/2994),
@@ -470,10 +506,10 @@ Perspective natively accepts
 
 Perspective accepts (see [Loading data](./explanation/table/loading_data.md)):
 
-- **JavaScript**: JSON (row-oriented or column-oriented objects), CSV strings,
-  Apache Arrow `ArrayBuffer`
-- **Python**: `dict`, `list`, `pandas.DataFrame`, `pyarrow.Table`, CSV strings,
-  Apache Arrow bytes
+- **JavaScript**: JSON (row-oriented or column-oriented objects), NDJSON, CSV
+  strings, Apache Arrow `ArrayBuffer`
+- **Python**: `dict`, `list`, `pandas.DataFrame`, `polars.DataFrame`,
+  `pyarrow.Table`, NDJSON, CSV strings, Apache Arrow bytes
 
 <!-- _Related: [#929](https://github.com/perspective-dev/perspective/issues/929),
 [#2524](https://github.com/perspective-dev/perspective/issues/2524)_ -->
@@ -541,7 +577,10 @@ with an `index` option, and pass the index values to remove.
 
 Use
 [`viewer.save()` and `viewer.restore()`](./how_to/javascript/save_restore.md) to
-serialize and deserialize the full viewer configuration.
+serialize and deserialize a panel's configuration. For a multi-panel viewer,
+`viewer.saveWorkspace()` and `viewer.restoreWorkspace()` serialize every panel
+together with the [layout](./how_to/javascript/layout.md), derived tables,
+master/detail links and palette.
 
 <!-- _Related: [#1501](https://github.com/perspective-dev/perspective/issues/1501),
 [#1560](https://github.com/perspective-dev/perspective/issues/1560)_ -->
@@ -557,9 +596,17 @@ The settings panel can be toggled programmatically via
 
 ### Can I collapse row groups by default?
 
-Row group can be closed imperatively via
-[`view.set_depth()`](./explanation/view/advanced.md). Expansion state is not
-persisted or configurable via the `save`/`restore` API currently.
+Yes — set `group_by_depth` in the `View` config to open the row groups only to
+that depth (`1` shows just the top-level groups):
+
+```javascript
+await viewer.restore({ group_by: ["Region", "State"], group_by_depth: 1 });
+```
+
+Rows can also be expanded and collapsed imperatively via
+[`view.set_depth()`, `expand()` and `collapse()`](./explanation/view/advanced.md).
+Expansion state is not persisted: `save()` does not emit `group_by_depth` or
+individually expanded rows.
 
 <!-- _Related:
 [#2695](https://github.com/perspective-dev/perspective/discussions/2695),

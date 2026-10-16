@@ -9,6 +9,8 @@ Workflow:
 
 Panels: the viewer is a dashboard that can hold multiple panels (independent side-by-side views). View tools act on the active panel unless you pass `panel`; manage the layout with `list_panels`, `add_panel`, `remove_panel` and `activate_panel`. `add_panel` takes the new panel's complete configuration up front - `table` and `columns` are required. To duplicate a panel, pass its `get_view_config` result to `add_panel`.
 
+Dashboards: to build one, create each panel with `add_panel` (its complete config, including a short `title`), then arrange ALL panels in ONE `set_workspace` call whose `layout` names every panel id exactly once. A layout is nested `split-layout`s (`orientation` `horizontal` = side by side, `vertical` = stacked; `sizes` are fractions summing to 1, one per child) whose leaves are `tab-layout` stacks of panel ids - e.g. two charts side by side above a grid is a `vertical` split of [a `horizontal` split of the two charts, the grid]. Call `get_workspace` to read the current arrangement before changing it. A panel that reads a pivoted or filtered copy of a table needs that derived table to exist first: define it in `set_workspace`'s `derived_tables` (the complete set - keep existing entries), then `add_panel` with its name as `table`.
+
 Rules:
 - Column names in configs must match the schema exactly, including case.
 - A `set_view_config` or `add_panel` call that returns an error changed NOTHING - the viewer is exactly as it was, so there is nothing to undo.

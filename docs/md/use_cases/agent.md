@@ -36,6 +36,17 @@ lines of JSON, and the numbers are computed by the engine, not the model.
 - Because the engine is incremental, an agent-built view over streaming data
   keeps updating after the conversation ends.
 
+## Whole dashboards from one prompt
+
+The agent manages the viewer's panels as well as their configuration. Asked
+for "sales by sub-category and a treemap by region side by side, with the
+pivoted grid underneath", it adds each panel with its own chart and title,
+then arranges them into a two-over-one grid in a single layout update. It can
+also stack panels as tabs, resize rows and columns, define a derived table for
+panels to share, and link a master panel so that selecting a row filters the
+others. See [Arranging panels](../how_to/javascript/layout.md) for the layout
+format it writes.
+
 ## Any model, including local ones
 
 The agent speaks the OpenAI chat-completions convention, so it works with
@@ -55,9 +66,9 @@ connection options.
 
 ## Driving Perspective from your own agent
 
-The agent uses no private hooks. `restore()`, `save()`, `Table.schema()` and
-`View` are the complete surface, and a view configuration is plain JSON — so
-an external agent, a notebook assistant or an MCP tool can produce the same
-results by emitting a `ViewerConfig`. The guide is published for that purpose
+The agent uses no private hooks. `restore()`, `save()`, `restoreWorkspace()`,
+`saveWorkspace()`, `Table.schema()` and `View` are the complete surface, and a
+view configuration is plain JSON — so an external agent, a notebook assistant
+or an MCP tool can produce the same results by emitting a `ViewerConfig`. The guide is published for that purpose
 as Markdown at [`/llms.txt`](https://perspective-dev.github.io/llms.txt) and
 [`/llms-full.txt`](https://perspective-dev.github.io/llms-full.txt).

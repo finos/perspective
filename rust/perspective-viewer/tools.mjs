@@ -49,43 +49,99 @@ export const resolveNPM = (url) => ({
     },
 });
 
-const DOCS_MD_ROOTS = ["../../docs/md"];
-const DOCS_MD_FILES = [
-    "../../rust/perspective-client/docs/expression_gen.md",
-    "./docs/viewer.md",
+const DOCS_ROOT = "../../docs/md";
+
+const DOCS_SUMMARY = `${DOCS_ROOT}/SUMMARY.md`;
+
+const DOCS_SUBTREES = [
+    "explanation/view.md",
+    "explanation/derived_table.md",
+    "how_to/javascript/viewer.md",
+    "glossary.md",
 ];
+
+const DOCS_MD_FILES = ["../../rust/perspective-client/docs/expression_gen.md"];
 
 const DOCS_DTS_FILES = [
-    ["./dist/wasm/perspective-viewer.d.ts", "JS API"],
-    ["../../packages/viewer-datagrid/src/ts/types.ts", "Datagrid Plugin"],
-    ["../../packages/viewer-charts/src/ts/charts/chart.ts", "Charts Plugin"],
-    ["../../packages/viewer-charts/src/ts/plugin/charts.ts", "Charts Plugin"],
-    ["./src/ts/ts-rs/CustomNumberFormatConfig.ts", "Column Format"],
-    ["./src/ts/ts-rs/NumberFormatStyle.ts", "Column Format"],
-    ["./src/ts/ts-rs/Notation.ts", "Column Format"],
-    ["./src/ts/ts-rs/CustomDatetimeStyleConfig.ts", "Column Format"],
-    ["./src/ts/ts-rs/SimpleDatetimeStyleConfig.ts", "Column Format"],
+    {
+        file: "./dist/wasm/perspective-viewer.d.ts",
+        prefix: "JS API",
+        scope: ["class PerspectiveViewerElement"],
+    },
+    {
+        file: "../../packages/viewer-datagrid/src/ts/types.ts",
+        prefix: "Datagrid Plugin",
+        scope: [
+            "type EditMode",
+            "type Align",
+            "interface ColumnConfig",
+            "interface DatagridPluginConfig",
+        ],
+    },
+    {
+        file: "../../packages/viewer-charts/src/ts/charts/chart.ts",
+        prefix: "Charts Plugin",
+        scope: ["interface FacetConfig", "interface PluginConfig"],
+    },
+    {
+        file: "../../packages/viewer-charts/src/ts/plugin/charts.ts",
+        prefix: "Charts Plugin",
+    },
+    ...[
+        "CustomNumberFormatConfig",
+        "NumberFormatStyle",
+        "Notation",
+        "CustomDatetimeStyleConfig",
+        "SimpleDatetimeStyleConfig",
+    ].map((x) => ({ file: `./src/ts/ts-rs/${x}.ts`, prefix: "Column Format" })),
+    ...[
+        "WorkspaceConfigUpdate",
+        "Layout",
+        "SplitLayout",
+        "TabLayout",
+        "Orientation",
+        "DerivedTableConfig",
+    ].map((x) => ({ file: `./src/ts/ts-rs/${x}.ts`, prefix: "Workspace" })),
 ];
 
-const DOCS_MD_EXCLUDE = ["SUMMARY.md"];
-const DOCS_MIN_FILE_BYTES = 200;
 const DOCS_MERGE_UNDER = 500;
 const DOCS_SPLIT_OVER = 2500;
-const DOCS_RAW_BUDGET = 400_000;
+const DOCS_RAW_BUDGET = 250_000;
 
-function* walkMarkdown(root) {
-    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-        const full = path.join(root, entry.name);
-        if (entry.isDirectory()) {
-            yield* walkMarkdown(full);
-        } else if (
-            entry.name.endsWith(".md") &&
-            !DOCS_MD_EXCLUDE.includes(entry.name) &&
-            fs.statSync(full).size >= DOCS_MIN_FILE_BYTES
-        ) {
-            yield full;
+function repoPath(file) {
+    return path.relative(path.resolve("../.."), path.resolve(file));
+}
+
+// Every page in the `SUMMARY.md` table of contents that is one of `roots`
+// or nested beneath one.
+function summarySubtrees(summary, roots) {
+    const files = [];
+    const found = new Set();
+    let depth = null;
+    for (const line of fs.readFileSync(summary, "utf8").split("\n")) {
+        const entry = line.match(/^(\s*)- \[[^\]]*\]\(\.\/([^)]+)\)/);
+        if (!entry) {
+            depth = line.startsWith("#") ? null : depth;
+            continue;
+        }
+
+        const [, indent, file] = entry;
+        if (depth !== null && indent.length > depth) {
+            files.push(path.join(path.dirname(summary), file));
+        } else if (roots.includes(file)) {
+            depth = indent.length;
+            found.add(file);
+            files.push(path.join(path.dirname(summary), file));
+        } else {
+            depth = null;
         }
     }
+
+    for (const root of roots.filter((x) => !found.has(x))) {
+        console.warn(`docs corpus: \`${root}\` is not in ${summary}`);
+    }
+
+    return files;
 }
 
 // Split one markdown file on heading boundaries, breadcrumbing titles.
@@ -102,7 +158,7 @@ function chunkMarkdown(file, text) {
             const base = path.basename(file, ".md");
             const parts = crumbs[0] === base ? crumbs : [base, ...crumbs];
             const title = parts.filter(Boolean).join(" » ");
-            chunks.push({ title, path: path.basename(file), text: body });
+            chunks.push({ title, path: repoPath(file), text: body });
         }
     };
 
@@ -126,6 +182,69 @@ function chunkMarkdown(file, text) {
 
     flush();
     return chunks;
+}
+
+// The end offset of the declaration starting at `start`: its matching
+// `}` for a class or interface, its terminating `;` for a type alias.
+function declarationEnd(text, start, kind) {
+    let depth = 0;
+    for (let i = start; i < text.length; i++) {
+        const ch = text[i];
+        if (text.startsWith("/*", i)) {
+            const close = text.indexOf("*/", i + 2);
+            if (close < 0) {
+                break;
+            }
+
+            i = close + 1;
+        } else if (text.startsWith("//", i)) {
+            i = text.indexOf("\n", i);
+        } else if (ch === '"' || ch === "'" || ch === "`") {
+            let j = i + 1;
+            while (j < text.length && text[j] !== ch) {
+                j += text[j] === "\\" ? 2 : 1;
+            }
+
+            i = j;
+        } else if (ch === "{") {
+            depth += 1;
+        } else if (ch === "}") {
+            depth -= 1;
+            if (depth === 0 && kind !== "type") {
+                return i + 1;
+            }
+        } else if (ch === ";" && depth === 0 && kind === "type") {
+            return i + 1;
+        }
+
+        if (i < 0) {
+            break;
+        }
+    }
+
+    return text.length;
+}
+
+// The source text of each `scope` declaration (e.g. `"interface Foo"`),
+// including its leading JSDoc.
+function scopeDeclarations(file, text, scope) {
+    return scope
+        .map((decl) => {
+            const [kind, name] = decl.split(/\s+/);
+            const re = new RegExp(
+                `(?:\\/\\*\\*(?:(?!\\*\\/)[\\s\\S])*\\*\\/\\s*)?(?:export\\s+)?(?:declare\\s+)?${kind}\\s+${name}\\b`,
+            );
+
+            const match = re.exec(text);
+            if (!match) {
+                console.warn(`docs corpus: \`${decl}\` not found in ${file}`);
+                return "";
+            }
+
+            const body = match.index + match[0].length;
+            return text.slice(match.index, declarationEnd(text, body, kind));
+        })
+        .join("\n");
 }
 
 // Each JSDoc block + its following declaration signature is one chunk;
@@ -158,7 +277,7 @@ function chunkDts(file, text, prefix) {
 
         chunks.push({
             title: `${prefix} » ${name}`,
-            path: path.basename(file),
+            path: repoPath(file),
             text: `${sig}\n\n${prose}`,
         });
     }
@@ -219,6 +338,7 @@ function normalizeChunks(chunks) {
 const TOOL_SCHEMA_TYPES = [
     ["ViewerConfigUpdate", "src/ts/ts-rs/ViewerConfigUpdate.ts"],
     ["ViewerConfigInitial", "src/ts/ts-rs/ViewerConfigInitial.ts"],
+    ["WorkspaceConfigUpdate", "src/ts/ts-rs/WorkspaceConfigUpdate.ts"],
 ];
 
 // Inline every definition whose GENERATED NAME is not a legible
@@ -300,21 +420,26 @@ async function buildToolSchemas() {
 export async function buildDocsCorpus() {
     const chunks = [];
     const md_files = [
-        ...DOCS_MD_ROOTS.filter(fs.existsSync).flatMap((x) => [
-            ...walkMarkdown(x),
-        ]),
-        ...DOCS_MD_FILES.filter(fs.existsSync),
-    ];
+        ...summarySubtrees(DOCS_SUMMARY, DOCS_SUBTREES),
+        ...DOCS_MD_FILES,
+    ].filter((file) => {
+        if (!fs.existsSync(file)) {
+            console.warn(`docs corpus: ${file} missing, skipping`);
+            return false;
+        }
+
+        return true;
+    });
 
     for (const file of md_files) {
         chunks.push(...chunkMarkdown(file, fs.readFileSync(file, "utf8")));
     }
 
-    for (const [file, prefix] of DOCS_DTS_FILES) {
+    for (const { file, prefix, scope } of DOCS_DTS_FILES) {
         if (fs.existsSync(file)) {
-            chunks.push(
-                ...chunkDts(file, fs.readFileSync(file, "utf8"), prefix),
-            );
+            const text = fs.readFileSync(file, "utf8");
+            const scoped = scope ? scopeDeclarations(file, text, scope) : text;
+            chunks.push(...chunkDts(file, scoped, prefix));
         } else {
             console.warn(`docs corpus: ${file} missing, skipping API chunks`);
         }
@@ -325,7 +450,7 @@ export async function buildDocsCorpus() {
     const json = JSON.stringify(bundle);
     if (json.length > DOCS_RAW_BUDGET) {
         console.warn(
-            `docs corpus: ${json.length} bytes exceeds the ${DOCS_RAW_BUDGET} raw budget - consider pruning the manifest`,
+            `docs corpus: ${json.length} bytes exceeds the ${DOCS_RAW_BUDGET} raw budget - consider pruning DOCS_SUBTREES`,
         );
     }
 

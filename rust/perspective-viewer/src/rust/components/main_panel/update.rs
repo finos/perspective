@@ -19,8 +19,7 @@ use perspective_js::utils::JsValueSerdeExt;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-use super::{MainPanel, MainPanelMsg};
-use crate::ApiFuture;
+use super::MainPanel;
 use crate::components::panel_menu::PanelCommand;
 use crate::js::{Layout, RegularLayout};
 use crate::renderer::SUBPIXEL_EPSILON;
@@ -59,47 +58,26 @@ impl MainPanel {
 
         let layout: RegularLayout = el.unchecked_into();
         let mut closed = Vec::new();
-        let mut pending_insertions = std::mem::take(&mut self.pending_insertions);
-        let mut suspect_closes = std::mem::take(&mut self.suspect_closes);
+        let on_screen = &mut self.on_screen;
         self.inserted.retain(|id| {
             if layout.contains_panel(id) {
-                pending_insertions.remove(id);
-                suspect_closes.remove(id);
+                on_screen.insert(id.clone());
                 true
-            } else if pending_insertions.contains(id) {
-                // Issued to the layout but not yet in a committed tree —
-                // the pre-commit window, not a close.
-                true
-            } else if ctx.props().panel_ids.iter().any(|p| p.as_str() == id)
-                && suspect_closes.insert(id.clone())
+            } else if on_screen.remove(id)
+                || !ctx.props().panel_ids.iter().any(|p| p.as_str() == id)
             {
-                true
-            } else {
-                suspect_closes.remove(id);
                 closed.push(id.clone());
                 false
+            } else {
+                true
             }
         });
-
-        self.pending_insertions = pending_insertions;
-        let recheck = !suspect_closes.is_empty();
-        self.suspect_closes = suspect_closes;
-        if recheck {
-            let link = ctx.link().clone();
-            ApiFuture::spawn(async move {
-                crate::utils::request_animation_frame().await;
-                link.send_message(MainPanelMsg::LayoutUpdated);
-                Ok(())
-            });
-        }
 
         let closed_any = !closed.is_empty();
         for id in closed {
             self.pending_removals.remove(&id);
             ctx.props().on_panel_closed.emit(id);
         }
-
-        let reissue = self.forget_dropped_removals(&layout);
 
         // A layout change (divider drag, insert, restore) reflows the
         // grid cells without resizing the host, so the host
@@ -153,25 +131,8 @@ impl MainPanel {
             self.hidden_tabs = hidden;
             true
         } else {
-            closed_any || reissue
+            closed_any
         }
-    }
-
-    /// Forget every issued removal whose panel survived the commit, so the
-    /// next `reconcile` re-issues it.
-    fn forget_dropped_removals(&mut self, layout: &RegularLayout) -> bool {
-        let dropped = self
-            .pending_removals
-            .iter()
-            .filter(|id| layout.contains_panel(id))
-            .cloned()
-            .collect::<Vec<_>>();
-        let reissue = !dropped.is_empty();
-        for id in dropped {
-            self.pending_removals.remove(&id);
-        }
-
-        reissue
     }
 
     pub(super) fn on_tab_selected(&self, ctx: &Context<Self>, name: String) -> bool {

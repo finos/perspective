@@ -212,19 +212,9 @@ pub struct MainPanel {
     /// layout and not yet committed.
     pending_removals: HashSet<String>,
 
-    /// Ids whose `insertPanel` has been issued to the layout and not yet
-    /// observed in a committed tree: layout commits are async, so a
-    /// multi-insert reconcile sees `regular-layout-update` events BETWEEN
-    /// commits, and close detection must not mistake the pre-commit window
-    /// for a user close (it once disposed the second of two restored
-    /// panels mid-restore).
-    pending_insertions: HashSet<String>,
-
-    /// MODEL-held panels observed absent from exactly one committed tree,
-    /// awaiting the next `regular-layout-update` (rescheduled one frame out)
-    /// to confirm a layout-originated close — an unrelated removal's commit
-    /// can report a live sibling absent transiently.
-    suspect_closes: HashSet<String>,
+    /// Ids observed in a committed layout tree, the only model-held panels a
+    /// later commit can report closed.
+    on_screen: HashSet<String>,
 
     /// Per-panel `ResizeObserver`s, keyed by panel id, each observing that
     /// panel's slotted plugin element and resizing only that panel's
@@ -388,8 +378,7 @@ impl Component for MainPanel {
             layout_ref: NodeRef::default(),
             inserted: Vec::new(),
             pending_removals: HashSet::new(),
-            pending_insertions: HashSet::new(),
-            suspect_closes: HashSet::new(),
+            on_screen: HashSet::new(),
             _layout_update_listener: listener,
             _layout_select_listener: select_listener,
             _layout_before_resize_listener: before_resize_listener,
@@ -442,7 +431,7 @@ impl Component for MainPanel {
                 );
         }
 
-        self.size_staging_wrappers();
+        self.size_staging_wrappers(ctx);
         self.reconcile(ctx);
         self.stamp_frame_themes(ctx);
     }

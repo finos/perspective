@@ -91,6 +91,43 @@ A visualization hosted by `<perspective-viewer>` — the Datagrid, or one of
 the WebGL charts (bar, line, area, scatter, heatmap, treemap, sunburst,
 candlestick, OHLC, maps).
 
+## Panel
+
+One view inside a `<perspective-viewer>`: a plugin showing one `View` of one
+`Table`, with its own configuration and `title`. A viewer holds one or more
+panels, arranged by its layout.
+
+## Workspace
+
+The whole state of a multi-panel `<perspective-viewer>` — every panel, the
+layout, derived tables, master/detail roles and the palette — as saved by
+`saveWorkspace()` and applied by `restoreWorkspace()`. See
+[Saving and restoring UI state](./how_to/javascript/save_restore.md#multi-panel-viewers).
+
+## Layout
+
+The arrangement of a viewer's panels into a dashboard grid: nested
+`split-layout` rows and columns whose cells are `tab-layout` stacks of panels.
+See [Arranging panels](./how_to/javascript/layout.md).
+
+## Master/detail
+
+Linked panels: selecting a row in a _master_ panel cross-filters every
+_detail_ panel through the viewer's `global_filters`. See
+[Master/detail cross-filtering](./how_to/javascript/layout.md#masterdetail-cross-filtering).
+
+## Derived table
+
+A `Table` built from a `View` of another table — a pivoted, filtered or
+aggregated copy that panels can bind by name and that stays current as its
+source changes. See [Derived `Table`s](./explanation/derived_table.md).
+
+## Palette
+
+Named colors, palettes and gradients shared by every panel of a workspace, as
+`--psp-user--*` CSS custom properties referenced from column styles. See
+[Colors, palettes and gradients](./how_to/javascript/save_restore.md#colors-palettes-and-gradients).
+
 ## Client, Server
 
 A `Server` owns tables and executes queries. A `Client` is a handle to a

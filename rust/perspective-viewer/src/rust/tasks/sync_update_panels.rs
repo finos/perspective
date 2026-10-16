@@ -64,6 +64,16 @@ pub fn sync_update_panels(
 
     let old_ids = this.workspace.panel_ids();
     let replace = panels.is_some();
+    if let Some(layout) = &layout {
+        let ids = match &panels {
+            Some(panels) => panels.keys().cloned().collect::<Vec<_>>(),
+            None => old_ids.iter().map(|id| id.as_str().to_owned()).collect(),
+        };
+
+        layout
+            .validate(&ids)
+            .map_err(|e| ApiError::from(JsValue::from_str(&e)))?;
+    }
 
     // Phase 1 — models only, NO renders and NO draws
     let mut id_map: HashMap<String, String> = Default::default();
@@ -127,25 +137,6 @@ pub fn sync_update_panels(
         if !replace {
             this.workspace.layout_staged().emit(());
         }
-    } else if replace && contents.len() > 1 {
-        // No saved tree: synthesize the equal-split default so a
-        // multi-panel replace still mounts in ONE layout commit —
-        // per-cell `insertPanel` commits are async, and a commit landing
-        // between two inserts drops the later one.
-        this.workspace
-            .set_pending_layout(crate::js::Layout::Split(crate::js::SplitLayout {
-                orientation: crate::js::Orientation::Horizontal,
-                sizes: vec![1.0 / contents.len() as f64; contents.len()],
-                children: contents
-                    .iter()
-                    .map(|(id, ..)| {
-                        crate::js::Layout::Tab(crate::js::TabLayout {
-                            tabs: vec![id.as_str().to_owned()],
-                            selected: Some(0),
-                        })
-                    })
-                    .collect(),
-            }));
     }
 
     // Phase 3 — the single visible commit
