@@ -403,7 +403,7 @@ export function applyBodyCellStyles(
 
         // Apply row header styling
         if (isHeader) {
-            cell_style_row_header(model, regularTable, td, metadata as any);
+            cell_style_row_header(model, td, metadata as any);
         }
 
         // Apply tree selection styling (SELECT_ROW_TREE).

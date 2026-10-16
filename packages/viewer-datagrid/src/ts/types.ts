@@ -546,6 +546,9 @@ export interface DatagridModel {
     _series_color_map: Map<string, Map<string, number>>;
     _series_color_seed: Map<string, number>;
     _last_window?: ViewWindow;
+
+    /** Row-header depth of each fetched row from `start_row`, including one row past the viewport. */
+    _row_header_depths?: { start_row: number; depths: number[] };
     _is_old_viewport?: boolean;
     _reverse_columns?: Map<string, number>;
     _reverse_ids?: Map<string, number>;
