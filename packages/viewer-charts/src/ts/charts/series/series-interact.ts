@@ -24,6 +24,10 @@ import {
     layoutForRecord,
 } from "./series-render";
 import { tooltipStyleOf } from "../../interaction/tooltip-grid";
+import {
+    nearestPosition,
+    positionsInRange,
+} from "../../axis/categorical-axis-core";
 
 const POINT_HIT_RADIUS_PX = 10;
 
@@ -308,6 +312,24 @@ function hitTestPoints(
     let best: SeriesChartRecord | null = null;
 
     const positions = chart._categoryPositions;
+    const radiusData = POINT_HIT_RADIUS_PX / pxPerDataX;
+    let catMin: number;
+    let catMax: number;
+    if (!positions) {
+        catMin = Math.max(0, Math.floor(dataX - radiusData));
+        catMax = Math.min(N - 1, Math.ceil(dataX + radiusData));
+    } else if (chart._categoryAxisMode === "category") {
+        [catMin, catMax] = positionsInRange(
+            positions,
+            N,
+            dataX - radiusData,
+            dataX + radiusData,
+        );
+    } else {
+        catMin = 0;
+        catMax = N - 1;
+    }
+
     for (const s of chart._series) {
         if (s.chartType !== chartType) {
             continue;
@@ -330,19 +352,6 @@ function hitTestPoints(
 
         const dataY = s.axis === 1 ? dataYRight : dataYLeft;
         const pyPerData = s.axis === 1 ? pxPerDataYRight : pxPerDataYLeft;
-
-        // In numeric mode the per-category X positions aren't dense so
-        // the catIdx-based narrowing doesn't apply — fall back to a
-        // full sweep. In category mode, narrow to ±radius around dataX.
-        const catMin = positions
-            ? 0
-            : Math.max(0, Math.floor(dataX - POINT_HIT_RADIUS_PX / pxPerDataX));
-        const catMax = positions
-            ? N - 1
-            : Math.min(
-                  N - 1,
-                  Math.ceil(dataX + POINT_HIT_RADIUS_PX / pxPerDataX),
-              );
 
         for (let c = catMin; c <= catMax; c++) {
             const idx = c * S + s.seriesId;
@@ -388,13 +397,20 @@ function hitTestAreas(
     aggRange?: { start: number; end: number },
 ): { idx: number; bar: SeriesChartRecord | null } | null {
     // Closest category to the mouse; an area covers every [cat - 0.5, cat + 0.5]
-    // slot, so use `round(dataX)` as the candidate index.
-    const cat = Math.round(dataX);
+    // slot, so use the nearest category center as the candidate index.
+    const grouped =
+        chart._categoryAxisMode === "category"
+            ? chart._categoryPositions
+            : null;
+    const cat = grouped
+        ? nearestPosition(grouped, chart._numCategories, dataX)
+        : Math.round(dataX);
     if (cat < 0 || cat >= chart._numCategories) {
         return null;
     }
 
-    if (Math.abs(dataX - cat) > 0.5) {
+    const catX = grouped ? grouped[cat] : cat;
+    if (Math.abs(dataX - catX) > 0.5) {
         return null;
     }
 
@@ -483,7 +499,7 @@ function hitTestAreas(
                     aggIdx: s.aggIdx,
                     splitIdx: s.splitIdx,
                     seriesId: s.seriesId,
-                    xCenter: cat,
+                    xCenter: catX,
                     halfWidth: 0.5,
                     y0: 0,
                     y1: v,

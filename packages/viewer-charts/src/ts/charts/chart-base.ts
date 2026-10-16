@@ -221,9 +221,9 @@ export abstract class AbstractChart implements ChartImplementation {
      * (driven from the host's `plugin.restore()`) and read by render-
      * path glyphs (`line_width_px`, `point_size_px`, etc.) and by the
      * build pipelines (`auto_alt_y_axis`, `band_inner_frac`,
-     * `bar_inner_pad`). Defaults preserve the previous compile-time
-     * constants so first-frame rendering before `restore()` matches
-     * the pre-refactor output.
+     * `bar_inner_pad`, `group_pad`). Defaults preserve the previous
+     * compile-time constants so first-frame rendering before `restore()`
+     * matches the pre-refactor output.
      */
     _pluginConfig: PluginConfig = { ...DEFAULT_PLUGIN_CONFIG };
 
@@ -601,8 +601,9 @@ export abstract class AbstractChart implements ChartImplementation {
      * `wick_width_px`, `ohlc_line_width_px`) are read directly from
      * `_pluginConfig` by their respective glyphs on each draw — no
      * sync needed. Build-time fields (`auto_alt_y_axis`,
-     * `band_inner_frac`, `bar_inner_pad`) are read by the pipeline
-     * inputs in `uploadAndRender`; they take effect on next data load.
+     * `band_inner_frac`, `bar_inner_pad`, `group_pad`) are read by
+     * the pipeline inputs in `uploadAndRender`; they take effect on next
+     * data load.
      */
     setPluginConfig(cfg: PluginConfig): void {
         // Persistence echo vs. real change: a restore whose legend

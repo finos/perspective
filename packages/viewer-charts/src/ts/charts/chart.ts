@@ -369,6 +369,11 @@ export interface PluginConfig {
     bar_inner_pad: number;
 
     /**
+     * Extra category gap, in leaf-band units, added per outer `group_by` level that changes across a category boundary.
+     */
+    group_pad: number;
+
+    /**
      * Candlestick wick stroke width in CSS pixels. Replaces
      * `WICK_WIDTH_PX`.
      */
@@ -547,6 +552,7 @@ export const DEFAULT_PLUGIN_CONFIG: PluginConfig = {
     point_size_px: 8.0,
     band_inner_frac: 0.5,
     bar_inner_pad: 0.1,
+    group_pad: 0,
     wick_width_px: 1.0,
     ohlc_line_width_px: 1.0,
     gradient_radius_px: 32.0,

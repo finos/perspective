@@ -123,3 +123,71 @@ export function runsInRange(
 
     return out;
 }
+
+/**
+ * Inclusive `[first, last]` index range of the ascending `positions[0..n)` entries inside `[lo, hi]`, empty when `first > last`.
+ */
+export function positionsInRange(
+    positions: ArrayLike<number>,
+    n: number,
+    lo: number,
+    hi: number,
+): [number, number] {
+    let l = 0;
+    let r = n;
+    while (l < r) {
+        const m = (l + r) >>> 1;
+        if (positions[m] < lo) {
+            l = m + 1;
+        } else {
+            r = m;
+        }
+    }
+
+    const first = l;
+    r = n;
+    while (l < r) {
+        const m = (l + r) >>> 1;
+        if (positions[m] <= hi) {
+            l = m + 1;
+        } else {
+            r = m;
+        }
+    }
+
+    return [first, l - 1];
+}
+
+/**
+ * Index of the ascending `positions[0..n)` entry nearest to `x`, or `-1` when `n` is 0.
+ */
+export function nearestPosition(
+    positions: ArrayLike<number>,
+    n: number,
+    x: number,
+): number {
+    if (n === 0) {
+        return -1;
+    }
+
+    let l = 0;
+    let r = n;
+    while (l < r) {
+        const m = (l + r) >>> 1;
+        if (positions[m] < x) {
+            l = m + 1;
+        } else {
+            r = m;
+        }
+    }
+
+    if (l === 0) {
+        return 0;
+    }
+
+    if (l === n) {
+        return n - 1;
+    }
+
+    return x - positions[l - 1] <= positions[l] - x ? l - 1 : l;
+}

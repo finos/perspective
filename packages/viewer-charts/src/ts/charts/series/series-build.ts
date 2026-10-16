@@ -20,6 +20,7 @@ import {
     resolveAxisMode,
     resolveCategoryAxis,
     resolveNumericCategoryDomain,
+    resolveGroupedCategoryPositions,
     resolveValueCategoryDomain,
     type AxisMode,
     type NumericCategoryDomain,
@@ -270,10 +271,13 @@ export interface SeriesPipelineInput {
      *  - `bandInnerFrac` / `barInnerPad` — band-slot geometry forwarded
      *    to `computeSlotGeometry`. Replace the `BAND_INNER_FRAC` /
      *    `BAR_INNER_PAD` constants.
+     *  - `groupPad` — extra category gap per outer `group_by` level
+     *    changing across a boundary (category mode only).
      */
     autoAltYAxis: boolean;
     bandInnerFrac: number;
     barInnerPad: number;
+    groupPad: number;
 
     /**
      * Anchor value-axis extents to zero. When `true` (bar / area
@@ -331,9 +335,10 @@ export interface SeriesPipelineResult {
     numericCategoryDomain: NumericCategoryDomain | null;
 
     /**
-     * Per-category X coordinate in real data units. Populated only in
-     * numeric axis mode — `null` in category mode where catIdx itself
-     * is the position. Indexed by `catIdx` (0..numCategories-1).
+     * Per-category X coordinate in real data units. Populated in
+     * numeric axis mode, and in category mode when `groupPad`
+     * widens group boundaries; otherwise `null` and catIdx itself is
+     * the position. Indexed by `catIdx` (0..numCategories-1).
      */
     categoryPositions: Float64Array | null;
 
@@ -423,6 +428,7 @@ export function buildSeriesPipeline(
         autoAltYAxis,
         bandInnerFrac,
         barInnerPad,
+        groupPad,
         includeZero,
         facetSplits,
         scratchBars,
@@ -589,6 +595,12 @@ export function buildSeriesPipeline(
             numericCategoryDomain = resolved.numericCategoryDomain;
             numericBandWidth = resolved.numericCategoryDomain.bandWidth;
         }
+    } else if (axisMode.mode === "category") {
+        categoryPositions = resolveGroupedCategoryPositions(
+            rowPaths,
+            N,
+            groupPad,
+        );
     }
 
     // Per-band slot geometry — `computeSlotGeometry` returns values in

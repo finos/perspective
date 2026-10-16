@@ -129,6 +129,7 @@ const SERIES_FIELDS: readonly PluginConfigField[] = [
     "point_size_px",
     "band_inner_frac",
     "bar_inner_pad",
+    "group_pad",
     ...LEGEND_FIELDS,
     ...TOOLTIP_FIELDS,
 ];

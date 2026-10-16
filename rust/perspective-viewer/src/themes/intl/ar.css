@@ -175,6 +175,7 @@ perspective-viewer {
     --psp-label--point-size-px--content: "حجم النقطة";
     --psp-label--band-inner-frac--content: "عرض النطاق";
     --psp-label--bar-inner-pad--content: "تباعد الأعمدة";
+    --psp-label--group-pad--content: "تباعد المجموعات";
     --psp-label--wick-width-px--content: "عرض الفتيل";
     --psp-label--ohlc-line-width-px--content: "عرض خط OHLC";
     --psp-label--include-zero--content: "تضمين الصفر";

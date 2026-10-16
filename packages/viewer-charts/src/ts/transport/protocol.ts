@@ -170,10 +170,11 @@ export interface InitMsg {
     /**
      * Initial plugin-scoped global config. Seeds the chart impl's
      * `_pluginConfig` before the first `loadAndRender` so the build
-     * pipeline (`auto_alt_y_axis`, `band_inner_frac`, `bar_inner_pad`)
-     * and render-path uniforms see correct values on the very first
-     * frame. The host's later `restore({ plugin_config })` arrives as
-     * a `setPluginConfig` control msg.
+     * pipeline (`auto_alt_y_axis`, `band_inner_frac`, `bar_inner_pad`,
+     * `group_pad`) and render-path uniforms see correct values on
+     * the very first frame. The host's later
+     * `restore({ plugin_config })` arrives as a `setPluginConfig`
+     * control msg.
      */
     pluginConfig: PluginConfig;
 
@@ -278,8 +279,8 @@ export interface SetColumnsConfigMsg {
  * `_facetConfig.zoom_mode`, `_autoFitValue`) in `setPluginConfig` and
  * the host posts a `redraw` so render-path uniform changes (line
  * widths, point size) take effect on the next frame. Build-time
- * fields (`auto_alt_y_axis`, `band_inner_frac`, `bar_inner_pad`) take
- * effect on the next `loadAndRender`.
+ * fields (`auto_alt_y_axis`, `band_inner_frac`, `bar_inner_pad`,
+ * `group_pad`) take effect on the next `loadAndRender`.
  */
 export interface SetPluginConfigMsg {
     kind: "setPluginConfig";

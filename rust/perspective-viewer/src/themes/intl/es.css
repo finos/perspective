@@ -173,6 +173,7 @@ perspective-viewer {
     --psp-label--point-size-px--content: "Tamaño del punto";
     --psp-label--band-inner-frac--content: "Ancho de banda";
     --psp-label--bar-inner-pad--content: "Separación de barras";
+    --psp-label--group-pad--content: "Separación de grupos";
     --psp-label--wick-width-px--content: "Ancho de mecha";
     --psp-label--ohlc-line-width-px--content: "Ancho de línea OHLC";
     --psp-label--include-zero--content: "Incluir cero";

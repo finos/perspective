@@ -52,6 +52,7 @@ import {
     renderCategoricalYTicks,
     type CategoricalDomain,
 } from "../../axis/categorical-axis";
+import { positionsInRange } from "../../axis/categorical-axis-core";
 import {
     bottomRowLayouts,
     buildFacetGrid,
@@ -410,10 +411,17 @@ export function renderBarFrame(
     // units; numeric mode reads min/max from the data-unit
     // `_numericCategoryDomain`. Horizontal mode flips the Y domain so
     // catIdx=0 sits at the top (handled below in the projection call).
-    const catMin = numericCat ? chart._numericCategoryDomain!.min : -0.5;
+    const catPositions = chart._categoryPositions;
+    const catMin = numericCat
+        ? chart._numericCategoryDomain!.min
+        : catPositions
+          ? catPositions[0] - 0.5
+          : -0.5;
     const catMax = numericCat
         ? chart._numericCategoryDomain!.max
-        : chart._numCategories - 0.5;
+        : catPositions
+          ? catPositions[chart._numCategories - 1] + 0.5
+          : chart._numCategories - 0.5;
 
     const valMin = chart._leftDomain.min;
     const valMax = chart._leftDomain.max;
@@ -525,6 +533,7 @@ export function renderBarFrame(
         levels: chart._rowPaths,
         numRows: chart._numCategories,
         levelLabels: chart._groupBy.slice(),
+        positions: groupedCategoryPositions(chart),
     };
 
     // Categorical value-axis sizing. Y Bar puts the value axis on the
@@ -1056,6 +1065,7 @@ function renderFacetedBarFrame(
         levels: chart._rowPaths,
         numRows: chart._numCategories,
         levelLabels: chart._groupBy.slice(),
+        positions: groupedCategoryPositions(chart),
     };
     chart._lastYDomain = {
         min: visValMin,
@@ -1933,37 +1943,19 @@ function mapDomainToCatRange(
         return { lo: 0, hi: -1 };
     }
 
-    // Lower bound: smallest idx where positions[idx] >= visMin.
-    let l = 0;
-    let r = n;
-    while (l < r) {
-        const m = (l + r) >>> 1;
-        if (positions[m] < visMin) {
-            l = m + 1;
-        } else {
-            r = m;
-        }
-    }
+    const [first, last] = positionsInRange(positions, n, visMin, visMax);
+    return { lo: Math.max(0, first - 1), hi: Math.min(n - 1, last + 1) };
+}
 
-    const lo = Math.max(0, l - 1);
-
-    // Upper bound: smallest idx where positions[idx] > visMax (`l` after
-    // loop). `l` itself is one past the last in-range catIdx, so the
-    // inclusive `hi` for an exactly-overlapping band is `l - 1`; the
-    // `+1`-then-clamp expands by one to capture partial-overlap bands.
-    l = 0;
-    r = n;
-    while (l < r) {
-        const m = (l + r) >>> 1;
-        if (positions[m] <= visMax) {
-            l = m + 1;
-        } else {
-            r = m;
-        }
-    }
-
-    const hi = Math.min(n - 1, l);
-    return { lo, hi };
+/**
+ * The `group_pad`-widened category coordinates, or `undefined` when the category axis is unit-spaced or numeric.
+ */
+function groupedCategoryPositions(
+    chart: SeriesChart,
+): Float64Array | undefined {
+    return chart._categoryAxisMode === "category"
+        ? (chart._categoryPositions ?? undefined)
+        : undefined;
 }
 
 function newSeriesAutoFitCache(): SeriesAutoFitCache {
