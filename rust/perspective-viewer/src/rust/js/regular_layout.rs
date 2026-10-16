@@ -202,7 +202,112 @@ pub struct TabLayout {
     pub selected: Option<usize>,
 }
 
+/// A normalized `[0, 1]` rectangle of the layout box (regular-layout's
+/// `ViewWindow`).
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ViewWindow {
+    pub row_start: f64,
+    pub row_end: f64,
+    pub col_start: f64,
+    pub col_end: f64,
+}
+
 impl Layout {
+    /// Mirror of regular-layout's `insert_child(tree, name, [index],
+    /// orientation)`, the single-index split insert `MainPanel::reconcile`
+    /// issues.
+    pub fn insert_split(&self, index: usize, name: &str, orientation: Orientation) -> Layout {
+        let leaf = Layout::Tab(TabLayout {
+            tabs: vec![name.to_owned()],
+            selected: None,
+        });
+
+        match self {
+            Layout::Split(split) if split.orientation == orientation => {
+                let index = index.min(split.children.len());
+                let mut children = split.children.clone();
+                let mut sizes = split.sizes.clone();
+                children.insert(index, leaf);
+                sizes.insert(index, 1.0 / (children.len() - 1).max(1) as f64);
+                let total: f64 = sizes.iter().sum();
+                let sizes = if total.is_finite() && total > 0.0 {
+                    sizes.iter().map(|size| size / total).collect()
+                } else {
+                    vec![1.0 / children.len() as f64; children.len()]
+                };
+
+                Layout::Split(SplitLayout {
+                    children,
+                    sizes,
+                    orientation,
+                })
+            },
+            _ => Layout::Split(SplitLayout {
+                children: if index == 0 {
+                    vec![leaf, self.clone()]
+                } else {
+                    vec![self.clone(), leaf]
+                },
+                sizes: vec![0.5, 0.5],
+                orientation,
+            }),
+        }
+    }
+
+    /// The normalized box the visible panel `name` occupies (mirror of
+    /// regular-layout's `calculate_presize_paths`).
+    pub fn view_window(&self, name: &str) -> Option<ViewWindow> {
+        self.view_window_in(name, ViewWindow {
+            row_start: 0.0,
+            row_end: 1.0,
+            col_start: 0.0,
+            col_end: 1.0,
+        })
+    }
+
+    fn view_window_in(&self, name: &str, window: ViewWindow) -> Option<ViewWindow> {
+        match self {
+            Layout::Tab(tab) => {
+                let selected = tab.tabs.get(tab.selected.unwrap_or(0));
+                (selected.map(String::as_str) == Some(name)).then_some(window)
+            },
+            Layout::Split(split) => {
+                let vertical = split.orientation == Orientation::Vertical;
+                let (start, end) = if vertical {
+                    (window.row_start, window.row_end)
+                } else {
+                    (window.col_start, window.col_end)
+                };
+
+                let mut pos = start;
+                for (child, size) in split.children.iter().zip(&split.sizes) {
+                    let next = pos + (end - start) * size;
+                    let child_window = if vertical {
+                        ViewWindow {
+                            row_start: pos,
+                            row_end: next,
+                            ..window
+                        }
+                    } else {
+                        ViewWindow {
+                            col_start: pos,
+                            col_end: next,
+                            ..window
+                        }
+                    };
+
+                    if let Some(found) = child.view_window_in(name, child_window) {
+                        return Some(found);
+                    }
+
+                    pos = next;
+                }
+
+                None
+            },
+        }
+    }
+
     /// Collect every panel id (slot name) in the tree, depth-first.
     pub fn slot_names(&self) -> Vec<String> {
         match self {

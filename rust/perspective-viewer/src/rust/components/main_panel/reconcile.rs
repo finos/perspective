@@ -21,7 +21,8 @@ use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
 use super::MainPanel;
-use crate::js::RegularLayout;
+use crate::js::{Layout, Orientation, RegularLayout};
+use crate::workspace::PanelId;
 
 /// Layout interaction tuning constants, applied via
 /// [`RegularLayout::restore_physics`] when the layout element mounts.
@@ -40,18 +41,10 @@ const LAYOUT_PHYSICS: LayoutPhysics = LayoutPhysics {
 };
 
 impl MainPanel {
-    /// Size each STAGED panel's hidden wrapper (`.psp-staging` — see
-    /// `MainPanel::render` and `PanelPhase::Staging`) to its PREDICTED
-    /// post-insert cell: an equal share of the layout box's width (the
-    /// reconcile insert splits the root horizontally with equal
-    /// redistribution) minus the frame-chrome fallback the presize sweep
-    /// uses. Prediction only — the staged first draw renders at these
-    /// dimensions, and any delta from the real committed cell is
-    /// reconciled by the post-commit reactive resize (free when exact,
-    /// via the charts transport's dims-unchanged guard). Imperative
-    /// because it MEASURES the committed layout box, which a `view()`
-    /// style prop cannot.
-    pub(super) fn size_staging_wrappers(&self) {
+    /// Size each STAGED panel's hidden `.psp-staging` wrapper to the exact
+    /// plugin box its promote insert will commit (see
+    /// `.plan/DUPLICATE_STAGING_PREDICTION_PLAN.md`).
+    pub(super) fn size_staging_wrappers(&self, ctx: &Context<Self>) {
         let Some(root) = self.main_panel_ref.cast::<web_sys::Element>() else {
             return;
         };
@@ -64,23 +57,70 @@ impl MainPanel {
             return;
         }
 
-        let Some(layout) = self.layout_ref.cast::<web_sys::HtmlElement>() else {
+        let Some(el) = self.layout_ref.cast::<web_sys::HtmlElement>() else {
             return;
         };
 
-        let stage = layout.get_bounding_client_rect();
-        let shares = (self.inserted.len() + wrappers.length() as usize).max(1) as f64;
-        let (chrome_w, chrome_h) = crate::tasks::CHROME_FALLBACK;
-        let width = (stage.width() / shares - chrome_w).max(0.0);
-        let height = (stage.height() - chrome_h).max(0.0);
+        let layout: &RegularLayout = el.unchecked_ref();
+        let Ok(mut tree) = layout.save().into_serde_ext::<Layout>() else {
+            return;
+        };
+
+        let (chrome_w, chrome_h) = self
+            .placed_chrome(ctx, layout)
+            .unwrap_or(crate::tasks::CHROME_FALLBACK);
+
+        let mut index = self.inserted.len();
         for i in 0..wrappers.length() {
-            if let Some(node) = wrappers.get(i)
-                && let Some(el) = node.dyn_ref::<web_sys::HtmlElement>()
-            {
-                let _ = el.style().set_property("width", &format!("{width}px"));
-                let _ = el.style().set_property("height", &format!("{height}px"));
-            }
+            let Some(wrapper) = wrappers
+                .get(i)
+                .and_then(|node| node.dyn_into::<web_sys::HtmlElement>().ok())
+            else {
+                continue;
+            };
+
+            let Some(name) = wrapper.get_attribute("data-panel") else {
+                continue;
+            };
+
+            tree = tree.insert_split(index, &name, Orientation::Horizontal);
+            index += 1;
+            let Some(window) = tree
+                .view_window(&name)
+                .and_then(|window| JsValue::from_serde_ext(&window).ok())
+            else {
+                continue;
+            };
+
+            let cell: web_sys::DomRect = layout.real_coordinates(&window).unchecked_into();
+            let width = (cell.width() - chrome_w).max(0.0);
+            let height = (cell.height() - chrome_h).max(0.0);
+            let _ = wrapper.style().set_property("width", &format!("{width}px"));
+            let _ = wrapper
+                .style()
+                .set_property("height", &format!("{height}px"));
         }
+    }
+
+    /// The frame chrome around a placed, visible plugin, measured from the
+    /// first such panel.
+    fn placed_chrome(&self, ctx: &Context<Self>, layout: &RegularLayout) -> Option<(f64, f64)> {
+        let layout_el: &web_sys::Element = layout.unchecked_ref();
+        self.inserted.iter().find_map(|name| {
+            let panel = ctx.props().workspace.panel(&PanelId::from(name.as_str()))?;
+            if !panel.renderer.is_plugin_activated().unwrap_or(false)
+                || panel.renderer.is_plugin_hidden()
+            {
+                return None;
+            }
+
+            let plugin = panel.renderer.active_plugin()?;
+            let frame = layout_el
+                .query_selector(&format!("regular-layout-frame[name=\"{name}\"]"))
+                .ok()??;
+
+            crate::tasks::plugin_chrome(&frame, plugin.unchecked_ref())
+        })
     }
 
     /// Reconcile the `<regular-layout>` grid against `panel_ids`: `insertPanel`
@@ -111,8 +151,7 @@ impl MainPanel {
         if self.listener_target.as_ref() != Some(&el) {
             if self.listener_target.is_some() {
                 self.inserted.clear();
-                self.pending_insertions.clear();
-                self.suspect_closes.clear();
+                self.on_screen.clear();
             }
 
             let _ = el.add_event_listener_with_callback(
@@ -191,7 +230,6 @@ impl MainPanel {
             let path = JsValue::from(js_sys::Array::of1(&JsValue::from_f64(index as f64)));
             let _ = layout.insert_panel(name, path, JsValue::from_bool(true));
             self.inserted.push(name.to_owned());
-            self.pending_insertions.insert(name.to_owned());
         }
 
         let mut pending = std::mem::take(&mut self.pending_removals);
@@ -201,7 +239,6 @@ impl MainPanel {
             }
 
             if pending.insert(name.clone()) {
-                self.pending_insertions.remove(name);
                 let _ = layout.remove_panel(name);
             }
 

@@ -127,25 +127,6 @@ pub fn sync_update_panels(
         if !replace {
             this.workspace.layout_staged().emit(());
         }
-    } else if replace && contents.len() > 1 {
-        // No saved tree: synthesize the equal-split default so a
-        // multi-panel replace still mounts in ONE layout commit —
-        // per-cell `insertPanel` commits are async, and a commit landing
-        // between two inserts drops the later one.
-        this.workspace
-            .set_pending_layout(crate::js::Layout::Split(crate::js::SplitLayout {
-                orientation: crate::js::Orientation::Horizontal,
-                sizes: vec![1.0 / contents.len() as f64; contents.len()],
-                children: contents
-                    .iter()
-                    .map(|(id, ..)| {
-                        crate::js::Layout::Tab(crate::js::TabLayout {
-                            tabs: vec![id.as_str().to_owned()],
-                            selected: Some(0),
-                        })
-                    })
-                    .collect(),
-            }));
     }
 
     // Phase 3 — the single visible commit

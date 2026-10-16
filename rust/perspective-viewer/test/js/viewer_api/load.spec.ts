@@ -136,6 +136,7 @@ test.describe("Viewer Load", () => {
         await page.goto("/rust/perspective-viewer/test/html/blank.html", {
             waitUntil: "networkidle",
         });
+        await page.waitForFunction(() => "WORKER" in window);
 
         await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer");
