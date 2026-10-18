@@ -94,13 +94,33 @@ export function createDataListener(
                 this._last_window?.start_col === x0 &&
                 this._last_window?.end_col === x1;
 
+            const lookahead =
+                this._config.group_by.length > 0 && y1 < this._num_rows ? 1 : 0;
+
             const [x, z] = await Promise.all([
-                this._view.to_columns_string(new_window as any),
+                this._view.to_columns_string({
+                    ...new_window,
+                    end_row: y1 + lookahead,
+                } as any),
                 this._view.num_columns(),
             ]);
 
             num_columns = z;
             columns = JSON.parse(x as string) as ColumnData;
+            const is_flat_rollup = this._config.group_rollup_mode === "flat";
+            this._row_header_depths = {
+                start_row: y0,
+                depths: (columns.__ROW_PATH__ ?? []).map((path) =>
+                    is_flat_rollup ? path.length : path.length + 1,
+                ),
+            };
+
+            if (lookahead > 0) {
+                for (const key of Object.keys(columns)) {
+                    columns[key] = columns[key]?.slice(0, y1 - y0);
+                }
+            }
+
             const y = Object.keys(columns);
             // `isMetaColumn` covers `__ROW_PATH__`, `__ID__`,
             // `__GROUPING_ID__`, and the per-level `__ROW_PATH_<n>__`

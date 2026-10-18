@@ -10,12 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import {
-    CellMetadata,
-    CellMetadataRowHeader,
-} from "regular-table/dist/esm/types.js";
+import { CellMetadataRowHeader } from "regular-table/dist/esm/types.js";
 import type { DatagridModel } from "../../types.js";
-import { RegularTableElement } from "regular-table";
 
 /**
  * Classify a `<th>` row-header cell as a tree label, leaf or indent spacer by
@@ -23,7 +19,6 @@ import { RegularTableElement } from "regular-table";
  */
 export function cell_style_row_header(
     model: DatagridModel,
-    regularTable: RegularTableElement,
     td: HTMLElement,
     metadata: CellMetadataRowHeader,
 ): void {
@@ -33,15 +28,11 @@ export function cell_style_row_header(
     const is_label = metadata.value !== undefined && x === label_x;
     const is_spacer = !is_flat && x < label_x;
     const is_leaf = x >= model._config.group_by.length;
-    const next = regularTable.getMeta({
-        dx: 0,
-        dy: (metadata.y ?? 0) - (metadata.y0 ?? 0) + 1,
-    } as CellMetadata);
+    const depths = model._row_header_depths;
+    const next_depth =
+        depths?.depths[(metadata.y ?? 0) - depths.start_row + 1] ?? 0;
 
-    const is_collapse =
-        next &&
-        next.row_header &&
-        typeof next.row_header[x + 1] !== "undefined";
+    const is_collapse = next_depth > x + 1;
 
     td.classList.toggle("psp-tree-spacer", is_spacer);
     td.classList.toggle("psp-tree-label", is_label && !is_leaf);
