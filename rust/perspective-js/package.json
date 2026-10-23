@@ -74,7 +74,6 @@
     },
     "dependencies": {
         "@perspective-dev/server": "workspace:^",
-        "pro_self_extracting_wasm": "catalog:",
         "stoppable": "catalog:",
         "ws": "catalog:"
     },
@@ -93,6 +92,7 @@
         "superstore-arrow": "catalog:",
         "lodash": "catalog:",
         "moment": "catalog:",
+        "pro_self_extracting_wasm": "catalog:",
         "typedoc": "catalog:",
         "typescript": "catalog:",
         "web-worker": "catalog:",

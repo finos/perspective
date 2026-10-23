@@ -10,8 +10,44 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-// @ts-ignore
-import { extract } from "pro_self_extracting_wasm";
+type ModType = {
+    resize: (x: number) => number;
+    memory: WebAssembly.Memory;
+    compile: (x: number, y: number) => number;
+};
+
+export async function extract(input: any) {
+    let bin: WebAssembly.WebAssemblyInstantiatedSource;
+    if (input instanceof Response) {
+        bin = await WebAssembly.instantiateStreaming(input);
+    } else if (typeof input === "string") {
+        bin = await WebAssembly.instantiateStreaming(fetch(input));
+    } else if (input instanceof ArrayBuffer) {
+        bin = await WebAssembly.instantiate(input);
+    } else {
+        bin = input;
+    }
+
+    const inst = bin.instance.exports as ModType;
+    const [payload] = WebAssembly.Module.customSections(
+        bin.module,
+        "psp-runtime",
+    );
+
+    const [raw_length_view] = WebAssembly.Module.customSections(
+        bin.module,
+        "psp-len",
+    );
+
+    const raw_length = new DataView(raw_length_view).getUint32(0, true);
+    const ptr = inst.resize(payload.byteLength);
+    new Uint8Array(inst.memory.buffer).set(new Uint8Array(payload), ptr);
+    const offset = inst.compile(payload.byteLength, raw_length);
+    return new Uint8Array(inst.memory.buffer).slice(
+        offset,
+        raw_length + offset,
+    );
+}
 
 if (typeof WebAssembly === "undefined") {
     throw new Error("WebAssembly not supported.");
@@ -23,27 +59,6 @@ interface Module extends WebAssembly.Exports {
     memory: WebAssembly.Memory;
 }
 
-// Perform a silly dance to deal with the different ways webpack and esbuild
-// load binary, as this may either be an `ArrayBuffer` or `URL` depending
-// on whether `inline` option was specified to `perspective-esbuild-plugin`.
-async function compile(
-    buffer: ArrayBuffer | Response | WebAssembly.Module | WebAssembly.Exports,
-): Promise<Module> {
-    if (buffer instanceof Response) {
-        return (await WebAssembly.instantiateStreaming(buffer)).instance
-            .exports as Module;
-    } else if (buffer instanceof WebAssembly.Module) {
-        return (await WebAssembly.instantiate(buffer)).exports as Module;
-    } else if (buffer instanceof WebAssembly.Instance) {
-        return buffer.exports as Module;
-    } else if (buffer instanceof ArrayBuffer) {
-        return (await WebAssembly.instantiate(buffer as BufferSource)).instance
-            .exports as Module;
-    } else {
-        return buffer as Module;
-    }
-}
-
 export async function load_wasm_stage_0(
     wasm:
         | ArrayBuffer
@@ -53,6 +68,10 @@ export async function load_wasm_stage_0(
 ): Promise<Uint8Array> {
     if (wasm instanceof Function) {
         wasm = await wasm();
+    }
+
+    if (wasm instanceof Promise) {
+        wasm = await wasm;
     }
 
     try {
