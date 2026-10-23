@@ -35,7 +35,7 @@ use crate::components::type_icon::TypeIconType;
 use crate::components::window_editor::WindowEditorProps;
 use crate::presentation::{ColumnLocator, ColumnSettingsTab, Presentation};
 use crate::queries::{has_column_config, is_pivot_only_column};
-use crate::renderer::Renderer;
+use crate::renderer::{ConfigDefaultsSlots, Renderer};
 use crate::session::{Session, SessionMetadataRc};
 use crate::tasks::{
     delete_expr, delete_window, save_expr, save_window, update_expr, update_window,
@@ -71,6 +71,10 @@ pub struct ColumnSettingsPanelProps {
     /// Active plugin name.
     pub plugin_name: Option<String>,
 
+    /// The page-wide config defaults the Style tab's schema applies.
+    #[derivative(Debug = "ignore")]
+    pub config_defaults: PtrEqRc<ConfigDefaultsSlots>,
+
     /// Session metadata snapshot — threaded from `SessionProps`.
     pub metadata: SessionMetadataRc,
 
@@ -102,6 +106,7 @@ impl PartialEq for ColumnSettingsPanelProps {
         self.selected_column == other.selected_column
             && self.selected_tab == other.selected_tab
             && self.plugin_name == other.plugin_name
+            && self.config_defaults == other.config_defaults
             && self.metadata == other.metadata
             && self.view_config == other.view_config
             && self.column_stats == other.column_stats
@@ -490,6 +495,7 @@ impl Component for ColumnSettingsPanel {
             view_config: ctx.props().view_config.clone(),
             metadata: ctx.props().metadata.clone(),
             column_stats: ctx.props().column_stats.clone(),
+            config_defaults: ctx.props().config_defaults.clone(),
             selected_theme: ctx.props().selected_theme.clone(),
             presentation: ctx.props().presentation.clone(),
             renderer: ctx.props().renderer.clone(),

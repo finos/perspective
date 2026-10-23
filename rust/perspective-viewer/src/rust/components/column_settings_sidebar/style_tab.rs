@@ -35,7 +35,8 @@ use crate::components::number_series_style::NumberSeriesStyle;
 use crate::components::style_controls::CustomNumberFormat;
 use crate::config::{
     Alignment, ColumnConfigFieldUpdate, ControlSpec, CustomNumberFormatConfig,
-    DatetimeColumnStyleConfig, FontToggle, NumberFormatDefaults, NumberSeriesStyleConfig,
+    DatetimeColumnStyleConfig, DatetimeFormat, FontToggle, NumberFormatDefaults,
+    NumberSeriesStyleConfig,
 };
 use crate::presentation::Presentation;
 use crate::queries::{fetch_column_abs_max, get_column_config_schema, named_values};
@@ -61,6 +62,9 @@ pub struct StyleTabProps {
     /// Per-column stats snapshot — threaded from `SessionProps`.
     pub column_stats: PtrEqRc<HashMap<String, crate::session::ColumnStats>>,
 
+    /// The page-wide config defaults the schema applies.
+    pub config_defaults: PtrEqRc<crate::renderer::ConfigDefaultsSlots>,
+
     /// Selected theme name, threaded for PortalModal consumers.
     pub selected_theme: Option<String>,
 
@@ -85,11 +89,6 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
     // is cleared on `view_config_changed`; on cache miss we spawn the
     // fetch and let `column_stats_changed` drive the re-render via
     // `SessionProps`.
-    let abs_max = props
-        .column_stats
-        .get(&props.column_name)
-        .and_then(|s| s.abs_max);
-
     yew::use_effect_with((props.column_name.clone(), props.view_config.clone()), {
         let session = props.session.clone();
         let column_name = props.column_name.clone();
@@ -121,10 +120,9 @@ pub fn StyleTab(props: &StyleTabProps) -> Html {
     let schema = get_column_config_schema(
         &props.renderer,
         &props.view_config,
-        &props.metadata,
+        &props.session,
         &props.column_name,
         raw_config.as_ref(),
-        abs_max,
     );
 
     let on_change = {
@@ -262,7 +260,9 @@ fn render_leaf(spec: ControlSpec, keys: &[String], ctx: &FieldRenderCtx) -> Opti
         ControlSpec::DatetimeFormat { default } => {
             let config: Option<DatetimeColumnStyleConfig> = deser_sub(raw_config);
             let enable_time_config = props.ty.unwrap() == ColumnType::Datetime;
-            let default_format = Rc::new(default.unwrap_or_default());
+            let default_format = Rc::new(
+                DatetimeFormat::base(enable_time_config).overlay(&default.unwrap_or_default()),
+            );
             html! {
                 <DatetimeColumnStyle
                     {enable_time_config}

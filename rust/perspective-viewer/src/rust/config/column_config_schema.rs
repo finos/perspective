@@ -13,10 +13,11 @@
 use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 use super::{
-    CustomNumberFormatConfig, DatetimeFormatType, KeyValueOpts, NumberSeriesStyleDefaultConfig,
+    ChartType, CustomNumberFormatConfig, DatetimeFormat, KeyValueOpts,
+    NumberSeriesStyleDefaultConfig,
 };
 use crate::utils::{CssKind, GradientStopSpec, canonicalize_gradient_stops};
 
@@ -168,7 +169,7 @@ pub enum ControlSpec {
         /// Plugin-declared default `date_format`, shown by the editor in
         /// unedited fields and elided from serialized configs.
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        default: Option<DatetimeFormatType>,
+        default: Option<DatetimeFormat>,
     },
     NumberSeriesStyle {
         default: NumberSeriesStyleDefaultConfig,
@@ -497,6 +498,279 @@ impl ControlSpec {
                 fields.iter().flat_map(|f| f.serialized_keys()).collect()
             },
         }
+    }
+}
+
+/// Default overrides resolved for one schema: the value each overridden key
+/// resolves to across the override layers alone, keyed by serialized key.
+pub type OverrideValues = Map<String, Value>;
+
+impl ColumnConfigSchema {
+    /// Substitute the values `layers` resolve to into this schema's defaults,
+    /// returning the override-only value of every key applied and the rejected
+    /// `(key, error)` pairs.
+    pub fn apply_defaults(
+        &mut self,
+        layers: &[&Map<String, Value>],
+        is_float: bool,
+    ) -> (OverrideValues, Vec<(String, String)>) {
+        let (resolved, mut errors) = resolve_layers(layers);
+        let mut applied = OverrideValues::new();
+        fn walk(
+            fields: &mut [ControlSpec],
+            resolved: &OverrideValues,
+            is_float: bool,
+            applied: &mut OverrideValues,
+            errors: &mut Vec<(String, String)>,
+        ) {
+            for spec in fields {
+                if let ControlSpec::Group { fields, .. } = spec {
+                    walk(fields, resolved, is_float, applied, errors);
+                    continue;
+                }
+
+                let keys: Vec<String> = spec
+                    .serialized_keys()
+                    .into_iter()
+                    .map(str::to_owned)
+                    .collect();
+
+                for key in keys {
+                    let Some(value) = resolved.get(&key) else {
+                        continue;
+                    };
+
+                    match spec.apply_default(&key, value, is_float) {
+                        Ok(Some(delivered)) => {
+                            applied.insert(key, delivered);
+                        },
+                        Ok(None) => {},
+                        Err(error) => errors.push((key, error)),
+                    }
+                }
+            }
+        }
+
+        walk(
+            &mut self.fields,
+            &resolved,
+            is_float,
+            &mut applied,
+            &mut errors,
+        );
+
+        (applied, errors)
+    }
+}
+
+/// The value each key resolves to across `layers`, lowest first: the highest
+/// layer's value for plain keys, and the layered fold for `date_format` and
+/// `number_format`.
+fn resolve_layers(layers: &[&Map<String, Value>]) -> (OverrideValues, Vec<(String, String)>) {
+    let mut resolved = OverrideValues::new();
+    let mut errors = vec![];
+    let mut date_format: Option<DatetimeFormat> = None;
+    let mut number_format: Option<CustomNumberFormatConfig> = None;
+    for layer in layers {
+        for (key, value) in layer.iter() {
+            match key.as_str() {
+                "date_format" => match serde_json::from_value::<DatetimeFormat>(value.clone())
+                    .map_err(|e| e.to_string())
+                    .and_then(|f| f.validate().map(|_| f))
+                {
+                    Ok(format) => {
+                        date_format = Some(date_format.unwrap_or_default().overlay(&format));
+                    },
+                    Err(error) => errors.push((key.clone(), error)),
+                },
+                "number_format" => {
+                    match serde_json::from_value::<CustomNumberFormatConfig>(value.clone()) {
+                        Ok(format) => {
+                            number_format =
+                                Some(number_format.unwrap_or_default().overlay(&format));
+                        },
+                        Err(error) => errors.push((key.clone(), error.to_string())),
+                    }
+                },
+                _ => {
+                    resolved.insert(key.clone(), value.clone());
+                },
+            }
+        }
+    }
+
+    if let Some(format) = date_format.and_then(|f| serde_json::to_value(f).ok()) {
+        resolved.insert("date_format".to_owned(), format);
+    }
+
+    if let Some(format) = number_format.and_then(|f| serde_json::to_value(f).ok()) {
+        resolved.insert("number_format".to_owned(), format);
+    }
+
+    (resolved, errors)
+}
+
+fn expect_str(value: &Value) -> Result<&str, String> {
+    value
+        .as_str()
+        .ok_or_else(|| format!("expected a string, got `{value}`"))
+}
+
+fn expect_bool(value: &Value) -> Result<bool, String> {
+    value
+        .as_bool()
+        .ok_or_else(|| format!("expected a boolean, got `{value}`"))
+}
+
+fn expect_number(value: &Value, min: Option<f64>, max: Option<f64>) -> Result<f64, String> {
+    let num = value
+        .as_f64()
+        .ok_or_else(|| format!("expected a number, got `{value}`"))?;
+
+    if min.is_some_and(|min| num < min) || max.is_some_and(|max| num > max) {
+        return Err(format!(
+            "{num} is outside {}..={}",
+            min.map(|x| x.to_string()).unwrap_or_default(),
+            max.map(|x| x.to_string()).unwrap_or_default()
+        ));
+    }
+
+    Ok(num)
+}
+
+impl ControlSpec {
+    /// Substitute the resolved default override `value` for `key` into this
+    /// control, returning the value to deliver for it, or `None` when it does
+    /// not own `key`.
+    pub fn apply_default(
+        &mut self,
+        key: &str,
+        value: &Value,
+        is_float: bool,
+    ) -> Result<Option<Value>, String> {
+        match self {
+            ControlSpec::Enum {
+                key: k,
+                variants,
+                default,
+            } if k == key => {
+                let value = expect_str(value)?;
+                if !variants.iter().any(|v| v.value == value) {
+                    let expected = variants
+                        .iter()
+                        .map(|v| format!("`{}`", v.value))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+
+                    return Err(format!("`{value}` is not one of {expected}"));
+                }
+
+                *default = value.to_owned();
+            },
+            ControlSpec::Font {
+                key: k, default, ..
+            } if k == key => {
+                *default = expect_str(value)?.to_owned();
+            },
+            ControlSpec::Font {
+                size: Some(size), ..
+            } if size.key == key => {
+                size.default = expect_number(value, size.min, size.max)?;
+            },
+            ControlSpec::Font { bold, italic, .. }
+                if [&*bold, &*italic]
+                    .into_iter()
+                    .flatten()
+                    .any(|toggle| toggle.key == key) =>
+            {
+                let value = expect_bool(value)?;
+                for toggle in [bold, italic].into_iter().flatten() {
+                    if toggle.key == key {
+                        toggle.default = value;
+                    }
+                }
+            },
+            ControlSpec::Alignment {
+                key: k,
+                default,
+                corners,
+            } if k == key => {
+                let src = expect_str(value)?;
+                let alignment =
+                    Alignment::parse(src).ok_or_else(|| format!("`{src}` is not an alignment"))?;
+
+                if *corners && !alignment.is_corner() {
+                    return Err(format!("`{src}` is not a corner"));
+                }
+
+                *default = Some(alignment);
+            },
+            ControlSpec::Bool { key: k, default } if k == key => {
+                *default = expect_bool(value)?;
+            },
+            ControlSpec::Number {
+                key: k,
+                default,
+                min,
+                max,
+                default_stat,
+                ..
+            } if k == key => {
+                *default = expect_number(value, *min, *max)?;
+                *default_stat = None;
+            },
+            ControlSpec::String {
+                key: k, default, ..
+            } if k == key => {
+                *default = expect_str(value)?.to_owned();
+            },
+            ControlSpec::Color { key: k, default } if k == key => {
+                *default = CssKind::Color.canonicalize(expect_str(value)?)?;
+                return Ok(Some(Value::String(default.clone())));
+            },
+            ControlSpec::Palette {
+                key: k, default, ..
+            } if k == key => {
+                *default = CssKind::Palette.canonicalize(expect_str(value)?)?;
+                return Ok(Some(Value::String(default.clone())));
+            },
+            ControlSpec::GradientStops {
+                key: k, default, ..
+            } if k == key => {
+                *default = CssKind::Gradient.canonicalize(expect_str(value)?)?;
+                return Ok(Some(Value::String(default.clone())));
+            },
+            ControlSpec::DatetimeFormat { default } if key == "date_format" => {
+                let format: DatetimeFormat =
+                    serde_json::from_value(value.clone()).map_err(|e| e.to_string())?;
+
+                *default = Some(default.clone().unwrap_or_default().overlay(&format));
+            },
+            ControlSpec::NumberFormat { default } if key == "number_format" => {
+                let format: CustomNumberFormatConfig =
+                    serde_json::from_value(value.clone()).map_err(|e| e.to_string())?;
+
+                let resolved = default.clone().unwrap_or_default().overlay(&format);
+                resolved.validate(is_float)?;
+                *default = Some(resolved);
+            },
+            ControlSpec::NumberSeriesStyle { default } if key == "chart_type" => {
+                default.chart_type = serde_json::from_value::<ChartType>(value.clone())
+                    .map_err(|e| e.to_string())?;
+            },
+            ControlSpec::NumberSeriesStyle { default } if key == "stack" => {
+                default.stack = Some(expect_bool(value)?);
+            },
+            ControlSpec::Symbols { .. } if key == "symbols" => {
+                return Err("`symbols` has no overridable default".to_owned());
+            },
+            ControlSpec::AggregateDepth if key == "aggregate_depth" => {
+                return Err("`aggregate_depth` has no overridable default".to_owned());
+            },
+            _ => return Ok(None),
+        }
+
+        Ok(Some(value.clone()))
     }
 }
 

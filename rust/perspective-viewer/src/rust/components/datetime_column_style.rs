@@ -13,6 +13,7 @@
 mod custom;
 mod simple;
 
+use std::fmt::Display;
 use std::rc::Rc;
 use std::sync::LazyLock;
 
@@ -28,17 +29,15 @@ use crate::config::*;
 use crate::ui::{ModalLink, SelectValueField, SetModalLink};
 use crate::utils::WeakScope;
 
-/// Format-only widget for `datetime` columns. Renders the `date_format`
-/// hierarchy (Simple|Custom + timezone); color/color-mode UI is provided
-/// externally as primitive `Enum` + `Color` schema fields.
+/// The `date_format` editor for `date` and `datetime` columns.
 #[derive(Properties, Derivative)]
 #[derivative(Debug)]
 pub struct DatetimeColumnStyleProps {
     pub enable_time_config: bool,
     pub config: Option<DatetimeColumnStyleConfig>,
 
-    /// The active plugin's declared default `date_format`.
-    pub default_format: Rc<DatetimeFormatType>,
+    /// The format the column inherits when it stores none.
+    pub default_format: Rc<DatetimeFormat>,
 
     #[prop_or_default]
     pub on_change: Callback<ColumnConfigFieldUpdate>,
@@ -65,15 +64,64 @@ impl PartialEq for DatetimeColumnStyleProps {
     }
 }
 
+/// A display-field edit, applied to the shown shape given the shape a reset
+/// restores.
+pub type ShapeEdit = Rc<dyn Fn(&DatetimeFormat, &DatetimeFormat) -> DatetimeFormat>;
+
 pub enum DatetimeColumnStyleMsg {
-    SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig),
-    CustomDatetimeStyleConfigChanged(CustomDatetimeStyleConfig),
+    ShapeChanged(ShapeEdit),
+    ToParts,
+    ToPreset,
     TimezoneChanged(Option<String>),
+    Hour12Changed(Option<bool>),
+}
+
+/// A display field's select value: one of its forms, or not shown.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PartChoice<T> {
+    Shown(T),
+    Hidden,
+}
+
+impl<T: Display> Display for PartChoice<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Shown(x) => x.fmt(f),
+            Self::Hidden => f.write_str("disabled"),
+        }
+    }
+}
+
+impl<T> From<Option<T>> for PartChoice<T> {
+    fn from(value: Option<T>) -> Self {
+        value.map_or(Self::Hidden, Self::Shown)
+    }
+}
+
+impl<T> PartChoice<T> {
+    /// The field value this choice stores, given the value a reset restores.
+    pub fn resolve(choice: Option<Self>, reset: Option<T>) -> Option<T> {
+        match choice {
+            None => reset,
+            Some(Self::Hidden) => None,
+            Some(Self::Shown(x)) => Some(x),
+        }
+    }
+}
+
+/// Every form of `T`, then [`PartChoice::Hidden`] when `hideable`.
+pub fn part_choices<T: strum::IntoEnumIterator>(hideable: bool) -> Rc<Vec<PartChoice<T>>> {
+    let mut values: Vec<_> = T::iter().map(PartChoice::Shown).collect();
+    if hideable {
+        values.push(PartChoice::Hidden);
+    }
+
+    Rc::new(values)
 }
 
 #[derive(Debug)]
 pub struct DatetimeColumnStyle {
-    config: DatetimeColumnStyleConfig,
+    stored: DatetimeFormat,
 }
 
 impl Component for DatetimeColumnStyle {
@@ -83,122 +131,168 @@ impl Component for DatetimeColumnStyle {
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
         Self {
-            config: ctx.props().config.clone().unwrap_or_default(),
+            stored: stored_format(ctx.props()),
         }
     }
 
     fn changed(&mut self, ctx: &Context<Self>, old: &Self::Properties) -> bool {
-        let mut rerender = false;
-        let mut new_config = ctx.props().config.clone().unwrap_or_default();
-        if self.config != new_config {
-            std::mem::swap(&mut self.config, &mut new_config);
-            rerender = true;
-        }
-        if old.enable_time_config != ctx.props().enable_time_config
-            || old.default_format != ctx.props().default_format
-        {
-            rerender = true;
-        }
+        let stored = stored_format(ctx.props());
+        let rerender = self.stored != stored
+            || old.enable_time_config != ctx.props().enable_time_config
+            || old.default_format != ctx.props().default_format;
+
+        self.stored = stored;
         rerender
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            DatetimeColumnStyleMsg::TimezoneChanged(val) => {
-                let mut format = self.effective_format(ctx);
-                if Some(&*USER_TIMEZONE) != val.as_ref() {
-                    *format.time_zone_mut() = val;
+        let inherited = &*ctx.props().default_format;
+        let with_time = ctx.props().enable_time_config;
+        let next = match msg {
+            DatetimeColumnStyleMsg::ShapeChanged(edit) => {
+                let effective = inherited.overlay(&self.stored);
+                let reset_shape = if effective.has_parts() {
+                    parts_reset_shape(inherited, with_time)
                 } else {
-                    *format.time_zone_mut() = None;
+                    preset_reset_shape(inherited, with_time)
+                };
+
+                let shape = edit(&effective.shape(), &reset_shape);
+                if !shape.has_shape() {
+                    return false;
                 }
 
-                self.set_format(ctx, format);
-                self.dispatch_config(ctx);
-                true
+                self.stored.with_shape(&shape)
             },
-            DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(simple) => {
-                self.set_format(ctx, DatetimeFormatType::Simple(simple));
-                self.dispatch_config(ctx);
-                true
+            DatetimeColumnStyleMsg::ToParts => self
+                .stored
+                .with_shape(&parts_reset_shape(inherited, with_time)),
+            DatetimeColumnStyleMsg::ToPreset => self
+                .stored
+                .with_shape(&preset_reset_shape(inherited, with_time)),
+            DatetimeColumnStyleMsg::TimezoneChanged(time_zone) => DatetimeFormat {
+                time_zone: time_zone.filter(|tz| *tz != inherited_time_zone(inherited)),
+                ..self.stored.clone()
             },
-            DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged(custom) => {
-                self.set_format(ctx, DatetimeFormatType::Custom(custom));
-                self.dispatch_config(ctx);
-                true
+            DatetimeColumnStyleMsg::Hour12Changed(hour12) => DatetimeFormat {
+                hour12: hour12.filter(|h| *h != inherited_hour12(inherited)),
+                ..self.stored.clone()
             },
+        };
+
+        self.stored = next.diff(inherited);
+        let mut value = serde_json::Map::new();
+        if !self.stored.is_empty()
+            && let Ok(format) = serde_json::to_value(&self.stored)
+        {
+            value.insert("date_format".to_owned(), format);
         }
+
+        ctx.props().on_change.emit(ColumnConfigFieldUpdate {
+            keys: ctx.props().keys.clone(),
+            value,
+        });
+
+        true
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let format = self.effective_format(ctx);
-        let (date_style_default, time_style_default) = match &*ctx.props().default_format {
-            DatetimeFormatType::Simple(simple) => (simple.date_style, simple.time_style),
-            DatetimeFormatType::Custom(_) => {
-                (SimpleDatetimeFormat::Short, SimpleDatetimeFormat::Medium)
-            },
-        };
-
-        let simple_reset = {
-            let default_format = ctx.props().default_format.clone();
-            ctx.link().callback(move |_| {
-                DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(match &*default_format {
-                    DatetimeFormatType::Simple(simple) => simple.clone(),
-                    DatetimeFormatType::Custom(_) => SimpleDatetimeStyleConfig::default(),
-                })
-            })
-        };
-
+        let inherited = &*ctx.props().default_format;
+        let with_time = ctx.props().enable_time_config;
+        let effective = inherited.overlay(&self.stored);
+        let hour_values = Rc::new(vec!["12 Hour", "24 Hour"]);
+        let hour_label = |hour12: bool| if hour12 { "12 Hour" } else { "24 Hour" };
         html! {
-            <>
-                <div id="column-style-container" class="datetime-column-style-container">
-                    if ctx.props().enable_time_config {
-                        <SelectValueField<String>
-                            label="timezone"
-                            values={ALL_TIMEZONES.with(|x| (*x).clone())}
-                            default_value={(*USER_TIMEZONE).clone()}
-                            on_change={ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged)}
-                            current_value={format.time_zone().as_ref().unwrap_or(&*USER_TIMEZONE).clone()}
-                        />
+            <div id="column-style-container" class="datetime-column-style-container">
+                if with_time {
+                    <SelectValueField<String>
+                        label="timezone"
+                        values={ALL_TIMEZONES.with(|x| (*x).clone())}
+                        default_value={inherited_time_zone(inherited)}
+                        on_change={ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged)}
+                        current_value={inherited_time_zone(&effective)}
+                    />
+                    <SelectValueField<&'static str>
+                        label="hours"
+                        values={hour_values}
+                        default_value={hour_label(inherited_hour12(inherited))}
+                        on_change={ctx.link().callback(|x: Option<&'static str>| DatetimeColumnStyleMsg::Hour12Changed(x.map(|x| x == "12 Hour")))}
+                        current_value={hour_label(inherited_hour12(&effective))}
+                    />
+                }
+                if effective.has_parts() {
+                    if with_time {
+                        <div class="row">
+                            <button
+                                id="datetime_format"
+                                data-title="Custom"
+                                data-title-hover="Switch to Simple"
+                                onclick={ctx.link().callback(|_| DatetimeColumnStyleMsg::ToPreset)}
+                            />
+                        </div>
                     }
-                    if let DatetimeFormatType::Simple(config) = &format {
-                        if ctx.props().enable_time_config {
-                            <div class="row">
-                                <button
-                                    id="datetime_format"
-                                    data-title="Simple"
-                                    data-title-hover="Switch to Custom"
-                                    onclick={ctx.link().callback(|_| DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged(CustomDatetimeStyleConfig::default()))}
-                                />
-                            </div>
-                        }
-                        <DatetimeStyleSimple
-                            enable_time_config={ctx.props().enable_time_config}
-                            on_change={ctx.link().callback(DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged)}
-                            config={config.clone()}
-                            {date_style_default}
-                            {time_style_default}
-                        />
-                    } else if let DatetimeFormatType::Custom(config) = &format {
-                        if ctx.props().enable_time_config {
-                            <div class="row">
-                                <button
-                                    id="datetime_format"
-                                    data-title="Custom"
-                                    data-title-hover="Switch to Simple"
-                                    onclick={simple_reset}
-                                />
-                            </div>
-                        }
-                        <DatetimeStyleCustom
-                            enable_time_config={ctx.props().enable_time_config}
-                            on_change={ctx.link().callback(DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged)}
-                            config={config.clone()}
-                        />
+                    <DatetimeStyleCustom
+                        enable_time_config={with_time}
+                        shape={effective.shape()}
+                        default_shape={parts_reset_shape(inherited, with_time)}
+                        on_change={ctx.link().callback(DatetimeColumnStyleMsg::ShapeChanged)}
+                    />
+                } else {
+                    if with_time {
+                        <div class="row">
+                            <button
+                                id="datetime_format"
+                                data-title="Simple"
+                                data-title-hover="Switch to Custom"
+                                onclick={ctx.link().callback(|_| DatetimeColumnStyleMsg::ToParts)}
+                            />
+                        </div>
                     }
-                </div>
-            </>
+                    <DatetimeStyleSimple
+                        enable_time_config={with_time}
+                        shape={effective.shape()}
+                        default_shape={preset_reset_shape(inherited, with_time)}
+                        on_change={ctx.link().callback(DatetimeColumnStyleMsg::ShapeChanged)}
+                    />
+                }
+            </div>
         }
     }
+}
+
+fn parts_reset_shape(inherited: &DatetimeFormat, with_time: bool) -> DatetimeFormat {
+    if inherited.has_parts() {
+        inherited.shape()
+    } else {
+        DatetimeFormat::parts_base(with_time)
+    }
+}
+
+fn preset_reset_shape(inherited: &DatetimeFormat, with_time: bool) -> DatetimeFormat {
+    if inherited.has_preset() {
+        inherited.shape()
+    } else {
+        DatetimeFormat::base(with_time)
+    }
+}
+
+fn stored_format(props: &DatetimeColumnStyleProps) -> DatetimeFormat {
+    props
+        .config
+        .as_ref()
+        .and_then(|config| config.date_format.clone())
+        .unwrap_or_default()
+}
+
+fn inherited_time_zone(format: &DatetimeFormat) -> String {
+    format
+        .time_zone
+        .clone()
+        .unwrap_or_else(|| (*USER_TIMEZONE).clone())
+}
+
+fn inherited_hour12(format: &DatetimeFormat) -> bool {
+    format.hour12.unwrap_or(*USER_HOUR12)
 }
 
 #[wasm_bindgen]
@@ -228,32 +322,13 @@ static USER_TIMEZONE: LazyLock<String> = LazyLock::new(|| {
     .unwrap()
 });
 
-impl DatetimeColumnStyle {
-    fn effective_format(&self, ctx: &Context<Self>) -> DatetimeFormatType {
-        self.config
-            .date_format
-            .clone()
-            .unwrap_or_else(|| (*ctx.props().default_format).clone())
-    }
-
-    fn set_format(&mut self, ctx: &Context<Self>, format: DatetimeFormatType) {
-        self.config.date_format = (format != *ctx.props().default_format).then_some(format);
-    }
-
-    /// When this config has changed, we must signal the wrapper element.
-    fn dispatch_config(&self, ctx: &Context<Self>) {
-        let value = if self.config == DatetimeColumnStyleConfig::default() {
-            serde_json::Map::new()
-        } else {
-            match serde_json::to_value(&self.config) {
-                Ok(serde_json::Value::Object(m)) => m,
-                _ => serde_json::Map::new(),
-            }
-        };
-
-        ctx.props().on_change.emit(ColumnConfigFieldUpdate {
-            keys: ctx.props().keys.clone(),
-            value,
-        });
-    }
-}
+static USER_HOUR12: LazyLock<bool> = LazyLock::new(|| {
+    js_sys::Reflect::get(
+        &js_sys::Intl::DateTimeFormat::new(&navigator().languages(), &json!({"hour": "numeric"}))
+            .resolved_options(),
+        &JsValue::from("hour12"),
+    )
+    .ok()
+    .and_then(|x| x.as_bool())
+    .unwrap_or(true)
+});

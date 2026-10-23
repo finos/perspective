@@ -204,7 +204,100 @@ class DebugFormatPlugin extends DebugStyledPlugin {
         } else if (type === "date" || type === "datetime") {
             fields.push({
                 kind: "DatetimeFormat",
-                default: { dateStyle: "medium", timeStyle: "disabled" },
+                default: { dateStyle: "medium" },
+            });
+        }
+
+        return { fields };
+    }
+}
+
+class DebugDefaultsPlugin extends DebugStyledPlugin {
+    get_static_config() {
+        return {
+            name: "Debug Defaults",
+            select_mode: "toggle",
+            config_column_names: ["Columns"],
+            priority: 0,
+            can_render_column_styles: true,
+        };
+    }
+
+    plugin_config_schema() {
+        return {
+            fields: [
+                {
+                    kind: "Enum",
+                    key: "edit_mode",
+                    default: "READ_ONLY",
+                    variants: [
+                        { value: "EDIT", label: "Edit" },
+                        { value: "READ_ONLY", label: "Read-only" },
+                    ],
+                },
+                {
+                    kind: "Number",
+                    key: "group_pad",
+                    default: 0,
+                    min: 0,
+                    max: 2,
+                    step: 0.01,
+                },
+                { kind: "Bool", key: "legend_on", default: false },
+            ],
+        };
+    }
+
+    column_config_schema(type) {
+        const fields = [
+            {
+                kind: "Font",
+                key: "font_family",
+                default: "monospace",
+                size: { key: "font_size", default: 12, min: 6, max: 32 },
+                bold: { key: "font_bold", default: false },
+            },
+            {
+                kind: "Alignment",
+                key: "anchor",
+                default: "top-left",
+                corners: true,
+            },
+            { kind: "String", key: "label", default: "" },
+            { kind: "Color", key: "color", default: "#2771a8" },
+            {
+                kind: "Palette",
+                key: "palette",
+                default: "linear-gradient(to right, #2771a8, #8b86ff, #ff471e)",
+                max: 6,
+            },
+            { kind: "Number", key: "width", default: 10, min: 0, max: 100 },
+            {
+                kind: "Enum",
+                key: "mode",
+                default: "none",
+                variants: [
+                    { value: "none", label: "None" },
+                    { value: "bar", label: "Bar" },
+                ],
+            },
+            {
+                kind: "Symbols",
+                default: { keys: "row", values: ["circle", "square"] },
+            },
+            { kind: "AggregateDepth" },
+        ];
+
+        if (type === "integer" || type === "float") {
+            fields.push({ kind: "NumberFormat" });
+            fields.push({
+                kind: "NumberSeriesStyle",
+                default: { chart_type: "bar" },
+            });
+        } else if (type === "date" || type === "datetime") {
+            fields.push({
+                kind: "DatetimeFormat",
+                default: { dateStyle: "medium" },
             });
         }
 
@@ -215,11 +308,13 @@ class DebugFormatPlugin extends DebugStyledPlugin {
 customElements.define("perspective-viewer-debug-styled", DebugStyledPlugin);
 customElements.define("perspective-viewer-debug-alt", DebugAltPlugin);
 customElements.define("perspective-viewer-debug-format", DebugFormatPlugin);
+customElements.define("perspective-viewer-debug-defaults", DebugDefaultsPlugin);
 
 const Viewer = customElements.get("perspective-viewer");
 Viewer.registerPlugin("perspective-viewer-debug-styled");
 Viewer.registerPlugin("perspective-viewer-debug-alt");
 Viewer.registerPlugin("perspective-viewer-debug-format");
+Viewer.registerPlugin("perspective-viewer-debug-defaults");
 
 async function load() {
     const resp = await fetch(

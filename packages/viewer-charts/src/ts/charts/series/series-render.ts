@@ -1171,6 +1171,7 @@ function paintBarChromeOverlay(chart: SeriesChart): void {
                 max: chart._numericCategoryDomain.max,
                 isDate: chart._numericCategoryDomain.isDate,
                 label: chart._numericCategoryDomain.label,
+                dateModifiers: chart._numericCategoryDomain.dateModifiers,
             },
             ticks: chart._lastCatTicks,
         };
@@ -1332,6 +1333,7 @@ function renderFacetedBarChromeOverlay(chart: SeriesChart): void {
               max: chart._numericCategoryDomain!.max,
               isDate: chart._numericCategoryDomain!.isDate,
               label: chart._numericCategoryDomain!.label,
+              dateModifiers: chart._numericCategoryDomain!.dateModifiers,
           }
         : null;
 
@@ -1726,6 +1728,7 @@ function renderBarTooltipCanvas(chart: SeriesChart): void {
             stepTickFormatter(
                 chart._numericCategoryDomain?.isDate,
                 chart._lastCatTicks,
+                chart._numericCategoryDomain?.dateModifiers,
             );
         categoryText = catFmt(chart._categoryPositions[b.catIdx]);
     } else {

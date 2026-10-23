@@ -349,6 +349,52 @@ impl NumberFormatDefaults {
 }
 
 impl CustomNumberFormatConfig {
+    /// `upper` layered over this format field by field, with `style` and
+    /// `notation` each taken whole.
+    pub fn overlay(&self, upper: &Self) -> Self {
+        Self {
+            _style: upper._style.clone().or_else(|| self._style.clone()),
+            minimum_integer_digits: upper.minimum_integer_digits.or(self.minimum_integer_digits),
+            minimum_fraction_digits: upper
+                .minimum_fraction_digits
+                .or(self.minimum_fraction_digits),
+            maximum_fraction_digits: upper
+                .maximum_fraction_digits
+                .or(self.maximum_fraction_digits),
+            minimum_significant_digits: upper
+                .minimum_significant_digits
+                .or(self.minimum_significant_digits),
+            maximum_significant_digits: upper
+                .maximum_significant_digits
+                .or(self.maximum_significant_digits),
+            rounding_priority: upper.rounding_priority.or(self.rounding_priority),
+            rounding_increment: upper.rounding_increment.or(self.rounding_increment),
+            rounding_mode: upper.rounding_mode.or(self.rounding_mode),
+            trailing_zero_display: upper.trailing_zero_display.or(self.trailing_zero_display),
+            _notation: upper._notation.clone().or_else(|| self._notation.clone()),
+            use_grouping: upper.use_grouping.or(self.use_grouping),
+            sign_display: upper.sign_display.or(self.sign_display),
+        }
+    }
+
+    /// `Err` when either digit range this format resolves to under `is_float`
+    /// has its minimum above its maximum.
+    pub fn validate(&self, is_float: bool) -> Result<(), String> {
+        let defaults = NumberFormatDefaults::resolve(Some(self), is_float);
+        for (name, (min, max)) in [
+            ("FractionDigits", defaults.fraction),
+            ("SignificantDigits", defaults.significant),
+        ] {
+            if min > max {
+                return Err(format!(
+                    "`minimum{name}` {min} exceeds `maximum{name}` {max}; set both bounds"
+                ));
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn filter_default(self, defaults: &NumberFormatDefaults) -> Self {
         let (frac_min, frac_max) = defaults.fraction;
         let rounding_increment = self.rounding_increment;

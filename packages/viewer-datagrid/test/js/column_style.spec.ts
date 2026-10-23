@@ -569,8 +569,7 @@ test.describe("Column Style Tests", () => {
                 columns_config: {
                     "Order Date": {
                         date_format: {
-                            date_style: "full",
-                            time_style: "medium",
+                            dateStyle: "full",
                         },
                     },
                 },
@@ -601,8 +600,8 @@ test.describe("Column Style Tests", () => {
                 columns_config: {
                     "Order Date": {
                         date_format: {
-                            date_style: "long",
-                            time_style: "long",
+                            dateStyle: "long",
+                            timeStyle: "long",
                         },
                     },
                 },

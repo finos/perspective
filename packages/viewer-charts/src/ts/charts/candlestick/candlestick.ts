@@ -264,6 +264,7 @@ export class CandlestickChart extends CategoricalYChart {
             groupBy: this._groupBy,
             splitBy: this._splitBy,
             groupByTypes: this._groupByTypes,
+            dateModifiers: this._columnDateModifiers,
             bandInnerFrac: this._pluginConfig.band_inner_frac,
             barInnerPad: this._pluginConfig.bar_inner_pad,
             scratchCandles: this._candles,

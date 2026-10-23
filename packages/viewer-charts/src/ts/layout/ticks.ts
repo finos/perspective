@@ -10,6 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import type { DateFormatModifiers } from "@perspective-dev/viewer/column-format";
+
 function niceNum(value: number, round: boolean): number {
     const exp = Math.floor(Math.log10(value));
     const frac = value / Math.pow(10, exp);
@@ -72,13 +74,14 @@ export function computeNiceTicks(
 export function stepTickFormatter(
     isDate: boolean | undefined,
     ticks: number[] | null | undefined,
+    modifiers?: DateFormatModifiers,
 ): (v: number) => string {
     if (!isDate) {
         return formatTickValue;
     }
 
     const step = ticks && ticks.length > 1 ? ticks[1] - ticks[0] : 0;
-    return (v: number) => formatDateTickValue(v, step);
+    return (v: number) => formatDateTickValue(v, step, modifiers);
 }
 
 /**
@@ -128,19 +131,21 @@ export function formatTickValue(val: number): string {
  * toLocale*` constructs a fresh `DateTimeFormat` (plus its ICU
  * backing) on EVERY call — ~30µs each — which turned per-row label
  * synthesis over large pivots into a multi-second stall. A cached
- * formatter's `format()` is ~1µs. Keyed by precision tier; the
+ * formatter's `format()` is ~1µs. Keyed by precision tier and date options; the
  * default locale is fixed for the lifetime of the worker, so entries
  * never invalidate.
  */
 const DATE_FORMAT_CACHE = new Map<string, Intl.DateTimeFormat>();
 
 function cachedDateFormat(
-    key: string,
+    tier: string,
     options: Intl.DateTimeFormatOptions,
+    modifiers?: DateFormatModifiers,
 ): Intl.DateTimeFormat {
+    const key = `${tier}|${modifiers?.timeZone ?? ""}|${modifiers?.hour12 ?? ""}`;
     let fmt = DATE_FORMAT_CACHE.get(key);
     if (!fmt) {
-        fmt = new Intl.DateTimeFormat(undefined, options);
+        fmt = new Intl.DateTimeFormat(undefined, { ...options, ...modifiers });
         DATE_FORMAT_CACHE.set(key, fmt);
     }
 
@@ -151,7 +156,11 @@ function cachedDateFormat(
  * Format a timestamp (ms since epoch) as a human-readable date/time label.
  * Adapts precision based on the tick spacing.
  */
-export function formatDateTickValue(val: number, stepMs?: number): string {
+export function formatDateTickValue(
+    val: number,
+    stepMs?: number,
+    modifiers?: DateFormatModifiers,
+): string {
     const d = new Date(val);
     if (isNaN(d.getTime())) {
         return formatTickValue(val);
@@ -165,49 +174,73 @@ export function formatDateTickValue(val: number, stepMs?: number): string {
 
         if (stepMs >= DAY * 28) {
             // Monthly or longer — show year-month
-            return cachedDateFormat("ym", {
-                year: "numeric",
-                month: "short",
-            }).format(d);
+            return cachedDateFormat(
+                "ym",
+                {
+                    year: "numeric",
+                    month: "short",
+                },
+                modifiers,
+            ).format(d);
         }
 
         if (stepMs >= DAY) {
             // Daily — show month and day
-            return cachedDateFormat("md", {
-                month: "short",
-                day: "numeric",
-            }).format(d);
+            return cachedDateFormat(
+                "md",
+                {
+                    month: "short",
+                    day: "numeric",
+                },
+                modifiers,
+            ).format(d);
         }
 
         if (stepMs >= HOUR) {
             // Hourly
-            return cachedDateFormat("mdh", {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-            }).format(d);
+            return cachedDateFormat(
+                "mdh",
+                {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                },
+                modifiers,
+            ).format(d);
         }
 
         if (stepMs >= MINUTE) {
             // Minutes
-            return cachedDateFormat("hm", {
-                hour: "numeric",
-                minute: "2-digit",
-            }).format(d);
+            return cachedDateFormat(
+                "hm",
+                {
+                    hour: "numeric",
+                    minute: "2-digit",
+                },
+                modifiers,
+            ).format(d);
         }
 
         // Sub-minute
-        return cachedDateFormat("hms", {
-            hour: "numeric",
-            minute: "2-digit",
-            second: "2-digit",
-        }).format(d);
+        return cachedDateFormat(
+            "hms",
+            {
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+            },
+            modifiers,
+        ).format(d);
     }
 
     // Default: show date only
-    return cachedDateFormat("ymd", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    }).format(d);
+    return cachedDateFormat(
+        "ymd",
+        {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        },
+        modifiers,
+    ).format(d);
 }

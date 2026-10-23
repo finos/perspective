@@ -57,7 +57,7 @@ pub fn send_column_config(
                             .await;
 
                         let plugin_token = wasm_bindgen::JsValue::from_serde_ext(
-                            &renderer.committed_plugin_config(),
+                            &renderer.plugin_config_materialized(&view_config_snapshot),
                         )
                         .unwrap();
 
@@ -70,11 +70,9 @@ pub fn send_column_config(
                             .update_lazy(async move { Ok(session.get_view_with_dimensions()) })
                             .await?;
 
-                        renderer
-                            .columns_config_changed
-                            .emit(columns_configs.clone());
-
-                        renderer.column_style_changed.emit(columns_configs);
+                        let stored = renderer.committed_columns_configs();
+                        renderer.columns_config_changed.emit(stored.clone());
+                        renderer.column_style_changed.emit(stored);
                         Ok(())
                     }
                     .boxed_local(),

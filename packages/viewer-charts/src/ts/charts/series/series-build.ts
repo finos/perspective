@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import type { DateFormatModifiers } from "@perspective-dev/viewer/column-format";
 import type { ColumnDataMap } from "../../data/view-reader";
 import { buildSplitGroups } from "../../data/split-groups";
 import type {
@@ -252,6 +253,9 @@ export interface SeriesPipelineInput {
      * mode for single-level group_bys.
      */
     groupByTypes: Record<string, string>;
+
+    /** Per-column `timeZone`/`hour12` adaptive date labels apply. */
+    dateModifiers?: ReadonlyMap<string, DateFormatModifiers>;
     columnsConfig: Record<string, ColumnChartConfig> | undefined;
 
     /**
@@ -423,6 +427,7 @@ export function buildSeriesPipeline(
         groupBy,
         splitBy,
         groupByTypes,
+        dateModifiers,
         columnsConfig,
         defaultChartType,
         autoAltYAxis,
@@ -488,6 +493,7 @@ export function buildSeriesPipeline(
         groupBy.length,
         levelTypes,
         axisMode,
+        groupBy.map((name) => dateModifiers?.get(name)),
     );
 
     if (numCategories === 0) {
@@ -589,6 +595,9 @@ export function buildSeriesPipeline(
             groupBy[0] ?? "",
             axisMode.numericType === "date" ||
                 axisMode.numericType === "datetime",
+            axisMode.numericType === "datetime"
+                ? dateModifiers?.get(groupBy[0])
+                : undefined,
         );
         if (resolved) {
             categoryPositions = resolved.categoryPositions;

@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 use strum::EnumIter;
 use ts_rs::TS;
 
+/// A `dateStyle` or `timeStyle` preset.
 #[derive(Clone, Copy, Debug, Default, Deserialize, EnumIter, Eq, PartialEq, Serialize, TS)]
 pub enum SimpleDatetimeFormat {
     #[serde(rename = "full")]
@@ -31,29 +32,6 @@ pub enum SimpleDatetimeFormat {
     #[default]
     #[serde(rename = "short")]
     Short,
-
-    #[serde(rename = "disabled")]
-    Disabled,
-}
-
-impl SimpleDatetimeFormat {
-    pub fn is_short(&self) -> bool {
-        self == &Self::Short
-    }
-
-    pub fn is_medium(&self) -> bool {
-        self == &Self::Medium
-    }
-
-    pub const fn values() -> &'static [Self] {
-        &[
-            Self::Full,
-            Self::Long,
-            Self::Medium,
-            Self::Short,
-            Self::Disabled,
-        ]
-    }
 }
 
 impl Display for SimpleDatetimeFormat {
@@ -63,7 +41,6 @@ impl Display for SimpleDatetimeFormat {
             Self::Long => "long",
             Self::Medium => "medium",
             Self::Short => "short",
-            Self::Disabled => "disabled",
         };
 
         write!(f, "{text}")
@@ -79,7 +56,6 @@ impl FromStr for SimpleDatetimeFormat {
             "long" => Ok(Self::Long),
             "medium" => Ok(Self::Medium),
             "short" => Ok(Self::Short),
-            "disabled" => Ok(Self::Disabled),
             x => Err(format!("Unknown DatetimeFormat::{x}")),
         }
     }

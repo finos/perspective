@@ -216,6 +216,7 @@ test.describe("Datetime format defaults", () => {
         const config = (await view.save()) as any;
         expect(config.columns_config["Order Date"].date_format).toEqual({
             dateStyle: "medium",
+            timeStyle: "medium",
         });
     });
 
@@ -234,7 +235,9 @@ test.describe("Datetime format defaults", () => {
         await expect(dateStyle.locator("select")).toHaveValue("medium");
     });
 
-    test("legacy preset serializes under an override", async ({ page }) => {
+    test("a preset other than the declared one stores the whole shape", async ({
+        page,
+    }) => {
         const view = new PageView(page);
         await view.restore({
             settings: true,
@@ -248,7 +251,7 @@ test.describe("Datetime format defaults", () => {
 
         const config = (await view.save()) as any;
         expect(config.columns_config["Order Date"].date_format).toEqual({
-            timeStyle: "disabled",
+            dateStyle: "short",
         });
     });
 });

@@ -15,9 +15,12 @@ import {
     createNumberFormatter,
     createDatetimeFormatter,
     createDateFormatter,
+    dateFormatModifiers,
+    hasDateFormatShape,
     sourceColumn,
     type NumberFormatConfig,
     type DateFormatConfig,
+    type DateFormatModifiers,
 } from "@perspective-dev/viewer/column-format";
 import type { ColumnDataMap } from "../data/view-reader";
 import { LazyRowFetcher } from "../data/lazy-row";
@@ -213,6 +216,15 @@ export abstract class AbstractChart implements ChartImplementation {
      * caller falls back to the chart's hand-rolled tick formatter.
      */
     _columnFormatters: Map<string, (v: number) => string> = new Map();
+
+    /**
+     * Per-column `timeZone`/`hour12` of a datetime `date_format` that sets
+     * no display fields, which adaptive axis labels apply.
+     */
+    _columnDateModifiers: Map<string, DateFormatModifiers> = new Map();
+
+    /** Per-column value formatters for those same columns. */
+    _columnValueFormatters: Map<string, (v: number) => string> = new Map();
     _defaultChartType: string | undefined = undefined;
     _facetConfig: FacetConfig = { ...DEFAULT_FACET_CONFIG };
 
@@ -437,6 +449,7 @@ export abstract class AbstractChart implements ChartImplementation {
 
     setGroupByTypes(schema: Record<string, string>): void {
         this._groupByTypes = schema;
+        this._rebuildColumnFormatters();
     }
 
     setColumnsConfig(cfg: Record<string, any>): void {
@@ -448,12 +461,14 @@ export abstract class AbstractChart implements ChartImplementation {
 
     /**
      * Rebuild {@link _columnFormatters} from `_columnsConfig` +
-     * `_columnTypes`. Called from both `setColumnsConfig` and
-     * `setColumnTypes` since either side of the (config, types) pair
-     * can arrive first depending on the host's restore order. Idempotent.
+     * `_columnTypes` / `_groupByTypes`. Called from `setColumnsConfig`,
+     * `setColumnTypes` and `setGroupByTypes` since the config and types
+     * can arrive in any order. Idempotent.
      */
     private _rebuildColumnFormatters(): void {
         this._columnFormatters = new Map();
+        this._columnDateModifiers = new Map();
+        this._columnValueFormatters = new Map();
         for (const [name, columnCfg] of Object.entries(this._columnsConfig)) {
             // `_columnTypes` is the post-aggregation `view.schema()` map
             // and doesn't key group_by source columns; fall back to
@@ -465,6 +480,21 @@ export abstract class AbstractChart implements ChartImplementation {
             const fmt = this._compileColumnFormatter(type, columnCfg);
             if (fmt) {
                 this._columnFormatters.set(name, fmt);
+            }
+
+            const dateFormat = columnCfg?.date_format as
+                | DateFormatConfig
+                | undefined;
+
+            const modifiers = dateFormatModifiers(dateFormat);
+            if (type === "datetime" && modifiers && !fmt) {
+                this._columnDateModifiers.set(name, modifiers);
+                const intl = createDatetimeFormatter(
+                    dateFormat,
+                    CHART_DATETIME_DEFAULTS,
+                );
+
+                this._columnValueFormatters.set(name, (v) => intl.format(v));
             }
         }
     }
@@ -495,7 +525,7 @@ export abstract class AbstractChart implements ChartImplementation {
 
         if (type === "datetime") {
             const dateFormat = cfg.date_format as DateFormatConfig | undefined;
-            if (!dateFormat) {
+            if (!hasDateFormatShape(dateFormat)) {
                 return undefined;
             }
 
@@ -508,7 +538,7 @@ export abstract class AbstractChart implements ChartImplementation {
 
         if (type === "date") {
             const dateFormat = cfg.date_format as DateFormatConfig | undefined;
-            if (!dateFormat) {
+            if (!hasDateFormatShape(dateFormat)) {
                 return undefined;
             }
 
@@ -560,6 +590,14 @@ export abstract class AbstractChart implements ChartImplementation {
             return undefined;
         }
 
+        const valueFormatter = columnName
+            ? this._columnValueFormatters.get(sourceColumn(columnName))
+            : undefined;
+
+        if (valueFormatter) {
+            return valueFormatter;
+        }
+
         // `_columnTypes` is the post-aggregation schema and doesn't
         // key group_by source columns (their post-aggregate form is
         // `__ROW_PATH_N__`); fall back to `_groupByTypes` so date /
@@ -574,6 +612,18 @@ export abstract class AbstractChart implements ChartImplementation {
         }
 
         return DEFAULT_VALUE_FORMATTER;
+    }
+
+    /**
+     * The `timeZone`/`hour12` adaptive labels for `columnName` apply, when
+     * its `date_format` sets only those.
+     */
+    getDateModifiers(
+        columnName: string | null | undefined,
+    ): DateFormatModifiers | undefined {
+        return columnName
+            ? this._columnDateModifiers.get(sourceColumn(columnName))
+            : undefined;
     }
 
     setDefaultChartType(chartType: string): void {

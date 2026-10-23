@@ -10,122 +10,72 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::rc::Rc;
+
 use yew::prelude::*;
 
+use super::{PartChoice, ShapeEdit, part_choices};
 use crate::config::*;
-use crate::ui::{ModalLink, SelectEnumField, SetModalLink};
-use crate::utils::WeakScope;
+use crate::ui::SelectValueField;
 
-#[derive(Properties)]
+#[derive(Properties, PartialEq)]
 pub struct DatetimeStyleSimpleProps {
     pub enable_time_config: bool,
-    pub config: SimpleDatetimeStyleConfig,
 
-    /// The plugin-declared default preset for each style select.
-    #[prop_or(SimpleDatetimeFormat::Short)]
-    pub date_style_default: SimpleDatetimeFormat,
+    /// The preset shown.
+    pub shape: DatetimeFormat,
 
-    #[prop_or(SimpleDatetimeFormat::Medium)]
-    pub time_style_default: SimpleDatetimeFormat,
+    /// The preset a field's reset restores.
+    pub default_shape: DatetimeFormat,
 
-    #[prop_or_default]
-    pub on_change: Callback<SimpleDatetimeStyleConfig>,
-
-    #[prop_or_default]
-    weak_link: WeakScope<DatetimeStyleSimple>,
+    pub on_change: Callback<ShapeEdit>,
 }
 
-impl ModalLink<DatetimeStyleSimple> for DatetimeStyleSimpleProps {
-    fn weak_link(&self) -> &'_ WeakScope<DatetimeStyleSimple> {
-        &self.weak_link
-    }
-}
+/// The `dateStyle`/`timeStyle` editor.
+#[function_component(DatetimeStyleSimple)]
+pub fn datetime_style_simple(props: &DatetimeStyleSimpleProps) -> Html {
+    type PresetField = SelectValueField<PartChoice<SimpleDatetimeFormat>>;
+    let date_values = part_choices::<SimpleDatetimeFormat>(
+        props.enable_time_config && props.shape.time_style.is_some(),
+    );
 
-impl PartialEq for DatetimeStyleSimpleProps {
-    fn eq(&self, other: &Self) -> bool {
-        self.enable_time_config == other.enable_time_config
-            && self.config == other.config
-            && self.date_style_default == other.date_style_default
-            && self.time_style_default == other.time_style_default
-    }
-}
-
-pub enum DatetimeStyleSimpleMsg {
-    DateStyleChanged(Option<SimpleDatetimeFormat>),
-    TimeStyleChanged(Option<SimpleDatetimeFormat>),
-}
-
-/// `DatetimeStyleSimple` represents the variation of the options parameter to
-/// `Intl.DatetimeFormat()` which supports `timeStyle` and `dateStyle`. These
-/// options are mutually exclusive with those of `DatetimeStyleCustom`, hence
-/// the two-struct model for this options parameter.
-pub struct DatetimeStyleSimple {
-    config: SimpleDatetimeStyleConfig,
-}
-
-impl Component for DatetimeStyleSimple {
-    type Message = DatetimeStyleSimpleMsg;
-    type Properties = DatetimeStyleSimpleProps;
-
-    fn create(ctx: &Context<Self>) -> Self {
-        ctx.set_modal_link();
-        Self {
-            config: ctx.props().config.clone(),
-        }
-    }
-
-    // TODO could be more conservative here with re-rendering
-    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            DatetimeStyleSimpleMsg::DateStyleChanged(format) => {
-                self.config.date_style = format.unwrap_or(ctx.props().date_style_default);
-                self.dispatch_config(ctx);
-                true
+    let time_values = part_choices::<SimpleDatetimeFormat>(props.shape.date_style.is_some());
+    let on_date = props.on_change.reform(|choice| -> ShapeEdit {
+        Rc::new(
+            move |shape: &DatetimeFormat, reset: &DatetimeFormat| DatetimeFormat {
+                date_style: PartChoice::resolve(choice, reset.date_style),
+                ..shape.clone()
             },
-            DatetimeStyleSimpleMsg::TimeStyleChanged(format) => {
-                self.config.time_style = format.unwrap_or(ctx.props().time_style_default);
-                self.dispatch_config(ctx);
-                true
+        )
+    });
+
+    let on_time = props.on_change.reform(|choice| -> ShapeEdit {
+        Rc::new(
+            move |shape: &DatetimeFormat, reset: &DatetimeFormat| DatetimeFormat {
+                time_style: PartChoice::resolve(choice, reset.time_style),
+                ..shape.clone()
             },
-        }
-    }
+        )
+    });
 
-    // Always re-render when config changes.
-    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
-        let mut new_config = ctx.props().config.clone();
-        if self.config != new_config {
-            std::mem::swap(&mut self.config, &mut new_config);
-            true
-        } else {
-            false
-        }
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        html! {
-            <>
-                <SelectEnumField<SimpleDatetimeFormat>
-                    label="date-style"
-                    on_change={ctx.link().callback(DatetimeStyleSimpleMsg::DateStyleChanged)}
-                    current_value={self.config.date_style}
-                    default_value={ctx.props().date_style_default}
+    html! {
+        <>
+            <PresetField
+                label="date-style"
+                values={date_values}
+                default_value={PartChoice::from(props.default_shape.date_style)}
+                current_value={PartChoice::from(props.shape.date_style)}
+                on_change={on_date}
+            />
+            if props.enable_time_config {
+                <PresetField
+                    label="time-style"
+                    values={time_values}
+                    default_value={PartChoice::from(props.default_shape.time_style)}
+                    current_value={PartChoice::from(props.shape.time_style)}
+                    on_change={on_time}
                 />
-                if ctx.props().enable_time_config {
-                    <SelectEnumField<SimpleDatetimeFormat>
-                        label="time-style"
-                        on_change={ctx.link().callback(DatetimeStyleSimpleMsg::TimeStyleChanged)}
-                        current_value={self.config.time_style}
-                        default_value={ctx.props().time_style_default}
-                    />
-                }
-            </>
-        }
-    }
-}
-
-impl DatetimeStyleSimple {
-    /// When this config has changed, we must signal the wrapper element.
-    fn dispatch_config(&self, ctx: &Context<Self>) {
-        ctx.props().on_change.emit(self.config.clone());
+            }
+        </>
     }
 }

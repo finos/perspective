@@ -63,8 +63,11 @@ pub fn send_plugin_config(session: &Session, renderer: &Renderer, update: Column
 /// announce the plugin-level change.
 pub(super) async fn deliver_plugin_config(session: &Session, renderer: &Renderer) -> ApiResult<()> {
     let plugin_config = renderer.committed_plugin_config();
-    let plugin_token = wasm_bindgen::JsValue::from_serde_ext(&plugin_config).unwrap();
     let view_config_snapshot = session.committed_view_config().clone();
+    let plugin_token = wasm_bindgen::JsValue::from_serde_ext(
+        &renderer.plugin_config_materialized(&view_config_snapshot),
+    )
+    .unwrap();
     let columns_configs = renderer
         .all_columns_configs_materialized(&view_config_snapshot, session)
         .await;

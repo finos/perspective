@@ -47,12 +47,16 @@ pub fn sync_update_panels(
     let WorkspaceConfigUpdate {
         active,
         layout,
-        panels,
+        mut panels,
         derived_tables,
         global_filters,
         masters,
         palette,
     } = update.into_serde_ext()?;
+
+    for panel in panels.iter_mut().flat_map(|panels| panels.values_mut()) {
+        panel.migrate();
+    }
 
     let palette = match palette {
         OptionalUpdate::Missing => None,

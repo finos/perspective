@@ -20,7 +20,7 @@ use serde_json::Value;
 use ts_rs::TS;
 use wasm_bindgen::prelude::*;
 
-use crate::config::TableRef;
+use crate::config::{TableRef, migrate_date_formats};
 use crate::renderer::ColumnConfigMap;
 
 /// The state of an entire `custom_elements::PerspectiveViewerElement` component
@@ -234,9 +234,17 @@ impl ViewerConfigUpdate {
         Ok(update.into_serde_ext()?)
     }
 
-    pub fn migrate(&self) -> ApiResult<Self> {
-        // TODO: Call the migrate script from js
-        Ok(self.clone())
+    /// Rewrite the parts of this config written by an older viewer into their
+    /// current form.
+    pub fn migrate(&mut self) {
+        if let OptionalUpdate::Update(columns) = &mut self.columns_config {
+            let version = match &self.version {
+                OptionalUpdate::Update(version) => Some(version.as_str()),
+                _ => None,
+            };
+
+            migrate_date_formats(version, columns);
+        }
     }
 }
 
@@ -299,6 +307,14 @@ impl ViewerConfigInitial {
     /// Decode a `JsValue` by auto-detecting format from JavaScript type.
     pub fn decode(config: &JsValue) -> ApiResult<Self> {
         Ok(config.into_serde_ext()?)
+    }
+
+    /// Rewrite the parts of this config written by an older viewer into their
+    /// current form.
+    pub fn migrate(&mut self) {
+        if let Some(columns) = &mut self.columns_config {
+            migrate_date_formats(self.version.as_deref(), columns);
+        }
     }
 
     /// A default-config panel bound to `table` (the "New panel" menus).

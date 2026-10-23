@@ -37,7 +37,7 @@ function tickFormatter(
         return override;
     }
 
-    return stepTickFormatter(domain.isDate, ticks);
+    return stepTickFormatter(domain.isDate, ticks, domain.dateModifiers);
 }
 
 /**

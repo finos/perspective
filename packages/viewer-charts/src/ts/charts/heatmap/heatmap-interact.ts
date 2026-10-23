@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import type { DateFormatModifiers } from "@perspective-dev/viewer/column-format";
 import type { HeatmapChart } from "./heatmap";
 import type { HeatmapCell } from "./heatmap-build";
 import { renderCanvasTooltip } from "../../interaction/tooltip-controller";
@@ -223,7 +224,10 @@ export function renderHeatmapTooltip(chart: HeatmapChart): void {
     let yLevels: CategoricalLevel[];
     let xPositions: Float64Array | null;
     let yPositions: Float64Array | null;
-    let xNumericDomain: { isDate?: boolean } | null;
+    let xNumericDomain: {
+        isDate?: boolean;
+        dateModifiers?: DateFormatModifiers;
+    } | null;
     let facetLabel: string | null = null;
 
     if (chart._hoveredFacetIdx >= 0) {
@@ -297,6 +301,7 @@ export function renderHeatmapTooltip(chart: HeatmapChart): void {
                   stepTickFormatter(
                       xNumericDomain?.isDate,
                       computeNiceTicks(layout.paddedXMin, layout.paddedXMax, 6),
+                      xNumericDomain?.dateModifiers,
                   )
               )(xPositions[cell.xIdx])
             : xPath;

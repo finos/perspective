@@ -35,7 +35,10 @@ pub(crate) fn wire_panel_subs(
     session: &Session,
     renderer: &Renderer,
 ) -> Vec<Subscription> {
-    let mut subs = vec![wire_panel_render_sub(session, renderer)];
+    let mut subs = vec![
+        wire_panel_render_sub(session, renderer),
+        super::wire_config_defaults_sub(session, renderer),
+    ];
     subs.extend(wire_panel_events(
         elem,
         session,
