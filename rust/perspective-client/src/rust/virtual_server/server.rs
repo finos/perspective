@@ -110,6 +110,26 @@ impl<T: VirtualServerHandler> VirtualServer<T> {
         }
     }
 
+    /// Deletes every view this server still holds, as closing a native
+    /// `Session` does, returning the first handler error after attempting all.
+    pub async fn close(&mut self) -> Result<(), VirtualServerError<T::Error>> {
+        let mut result = Ok(());
+        for view_id in self.view_configs.keys().cloned().collect::<Vec<_>>() {
+            if let Err(err) = self.handler.view_delete(&view_id).await
+                && result.is_ok()
+            {
+                result = Err(err.into());
+            }
+
+            self.view_to_table.shift_remove(&view_id);
+            self.view_configs.shift_remove(&view_id);
+            self.view_schemas.shift_remove(&view_id);
+            self.view_descriptions.shift_remove(&view_id);
+        }
+
+        result
+    }
+
     async fn get_cached_view_schema(
         &mut self,
         entity_id: &str,

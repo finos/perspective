@@ -135,7 +135,8 @@ class VirtualServerHandler:
         `view_name`, into the `PerspectiveColumn` serialization API injected
         via `data`. The push-only `PerspectiveColumn` type can handle casting
         Python types as input, but once a type is pushed to a column name it
-        must not be changed.
+        must not be changed. `data` is consumed when this method returns, and
+        any later use of a retained reference raises `ValueError`.
         """
 
         pass

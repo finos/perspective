@@ -429,6 +429,7 @@ jobs:
                   javascript: "false"
                   arch: ${{ matrix.arch }}
                   manylinux: "false"
+                  python: "false"
                   ccache: native-rust-${{ matrix.os }}-${{ matrix.arch }}
                   ccache_variant: ${{ contains(matrix.os, 'windows') && 'sccache' || 'ccache' }}
                   cargo_cache: ${{ contains(matrix.os, 'windows') && 'true' || 'false' }}
@@ -1038,6 +1039,9 @@ jobs:
               with:
                   name: perspective-anywidget-dist
                   path: rust/perspective-python/perspective/widget/static
+
+            - name: Install DuckDB compat
+              run: python -m pip install --no-deps --target rust/perspective-python/.duckdb-compat -r rust/perspective-python/requirements-duckdb-compat.txt
 
             - name: Run Tests
               run: pnpm run test

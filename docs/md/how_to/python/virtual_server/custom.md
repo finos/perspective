@@ -69,7 +69,8 @@ class MyHandler(VirtualServerHandler):
     def view_get_data(self, view_name, config, viewport, data):
         # Serialize the rectangular slice `viewport` of the temporary table
         # `view_name` into `data`, a push-only `VirtualDataSlice`. Once a
-        # type has been pushed for a column name it must not change.
+        # type has been pushed for a column name it must not change. `data`
+        # is consumed when this method returns.
         pass
 ```
 
@@ -87,7 +88,11 @@ class MyHandler(VirtualServerHandler):
 The WebSocket handlers call `new_session(callback)` once per connection, so
 the object passed as `perspective_server` must provide it. Wrap your handler
 in a `perspective.VirtualServer` — which owns the protocol — and return one
-session per client:
+session per client. Each session must provide `handle_request(msg)` and
+`close()`, which the handlers call when the connection ends;
+`VirtualServer.close()` deletes the views the client left open, via
+`view_delete`. `close()` should also release the session's callback (which may
+otherwise form a reference cycle and leak):
 
 ```python
 import perspective
@@ -99,6 +104,11 @@ class MyVirtualSession:
 
     def handle_request(self, msg):
         self.callback(self.session.handle_request(msg))
+
+    def close(self):
+        session, self.session, self.callback = self.session, None, None
+        if session is not None:
+            session.close()
 
 
 class MyVirtualServer:

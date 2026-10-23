@@ -166,7 +166,8 @@ def client(pg_db):
 
     session = server.new_session(handle_response)
     c = Client(handle_request)
-    return c
+    yield c
+    session.close()
 
 
 def approx(x):
@@ -617,8 +618,8 @@ class TestPostgresSort:
         view.delete()
 
     def test_sort_with_multi_level_group_by(self, client):
-        # Hierarchical rollup sort - exercises the `first_value(...) OVER
-        # __WINDOW_N__` emission, which must be that spelling for Postgres
+        # Hierarchical rollup sort - exercises the inline `first_value(...)
+        # OVER (...)` emission, which must be that spelling for Postgres
         # (DuckDB's `first` does not exist).
         table = client.open_table("psp_test.superstore")
         view = table.view(

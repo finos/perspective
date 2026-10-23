@@ -69,7 +69,8 @@ def client():
 
     session = server.new_session(handle_response)
     c = Client(handle_request)
-    return c
+    yield c
+    session.close()
 
 
 class TestPolarsClient:

@@ -63,6 +63,7 @@ Vagrantfile
 vcpkg
 venv/
 rust/perspective-python/perspective_python-*.data
+rust/perspective-python/.duckdb-compat
 .pytest-cache/
 docs/static/python
 docs/static/node

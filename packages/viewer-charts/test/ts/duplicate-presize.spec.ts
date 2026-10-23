@@ -10,8 +10,8 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { test, expect } from "../helpers.ts";
-import { armInvariants, assertCoherent } from "./harness.ts";
+import { expect, test } from "@perspective-dev/test";
+import { gotoBasic } from "./helpers";
 
 const TABLE = "load-viewer-csv";
 
@@ -65,15 +65,8 @@ type Frame = {
 };
 
 test.beforeEach(async ({ page }) => {
-    await page.goto("/rust/perspective-viewer/test/html/superstore-all.html");
-    await page.evaluate(async () => {
-        while (!window["__TEST_PERSPECTIVE_READY__"]) {
-            await new Promise((x) => setTimeout(x, 10));
-        }
-    });
+    await gotoBasic(page);
 });
-
-armInvariants(test);
 
 async function setup(page, config): Promise<void> {
     await page.evaluate(async (config) => {
@@ -184,6 +177,5 @@ test.describe("Duplicate staged presize", () => {
         const frames = await duplicate(page, "two", 4);
         expect(drawn(frames).length).toBeGreaterThan(0);
         expect(stretched(frames)).toEqual([]);
-        await assertCoherent(page);
     });
 });

@@ -111,6 +111,11 @@ class ClickhouseVirtualSession:
     def handle_request(self, msg):
         self.callback(self.session.handle_request(msg))
 
+    def close(self):
+        session, self.session, self.callback = self.session, None, None
+        if session is not None:
+            session.close()
+
 
 class ClickhouseVirtualServer:
     def __init__(self, db):
