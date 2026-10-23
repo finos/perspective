@@ -1,3 +1,18 @@
+# [v5.6.1](https://github.com/perspective-dev/perspective/releases/tag/v5.6.1)
+
+_23 October 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.6.0...v5.6.1))
+
+Features
+
+- Workspace support for `&lt;perspective-viewer&gt;` Agent [#3254](https://github.com/finos/perspective/pull/3254)
+- Add `group_pad` hierarchal axis `plugin_config` option for `viewer-ch… [#3255](https://github.com/finos/perspective/pull/3255)
+
+Fixes
+
+- Fix Virtual Server bugs [#3265](https://github.com/finos/perspective/pull/3265)
+- Fix datagrid last row collapse indicator [#3257](https://github.com/finos/perspective/pull/3257)
+- Fix stale filter value in `&lt;perspective-viewer&gt;` [#3256](https://github.com/finos/perspective/pull/3256)
+
 # [v5.6.0](https://github.com/perspective-dev/perspective/releases/tag/v5.6.0)
 
 _13 October 2026_ ([Full changelog](https://github.com/finos/perspective/compare/v5.5.1...v5.6.0))

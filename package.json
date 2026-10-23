@@ -4,7 +4,7 @@
         "type": "git",
         "url": "https://github.com/perspective-dev/perspective"
     },
-    "version": "5.6.0",
+    "version": "5.6.1",
     "changelog": {
         "labels": {
             "enhancement": "Added",
