@@ -69,7 +69,8 @@ class MyHandler(VirtualServerHandler):
     def view_get_data(self, view_name, config, viewport, data):
         # Serialize the rectangular slice `viewport` of the temporary table
         # `view_name` into `data`, a push-only `VirtualDataSlice`. Once a
-        # type has been pushed for a column name it must not change.
+        # type has been pushed for a column name it must not change. `data`
+        # is consumed when this method returns.
         pass
 ```
 

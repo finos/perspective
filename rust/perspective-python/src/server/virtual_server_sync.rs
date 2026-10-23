@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+use std::error::Error;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
@@ -394,8 +395,9 @@ impl VirtualServerHandler for PyServerHandler {
         let window: PyViewPort = viewport.clone().into();
         Box::pin(async move {
             Python::attach(|py| {
-                let data =
-                    PyVirtualDataSlice(Arc::new(Mutex::new(VirtualDataSlice::new(config.clone()))));
+                let data = PyVirtualDataSlice(Arc::new(Mutex::new(Some(VirtualDataSlice::new(
+                    config.clone(),
+                )))));
                 let _ = handler.call_method1(
                     py,
                     pyo3::intern!(py, "view_get_data"),
@@ -408,7 +410,7 @@ impl VirtualServerHandler for PyServerHandler {
                     ),
                 )?;
 
-                Ok(Mutex::into_inner(Arc::try_unwrap(data.0).unwrap()).unwrap())
+                data.take()
             })
         })
     }
@@ -442,25 +444,47 @@ impl From<perspective_client::proto::ViewPort> for PyViewPort {
 
 #[derive(Clone)]
 #[pyclass(skip_from_py_object, name = "VirtualDataSlice")]
-pub struct PyVirtualDataSlice(Arc<Mutex<VirtualDataSlice>>);
+pub struct PyVirtualDataSlice(Arc<Mutex<Option<VirtualDataSlice>>>);
+
+impl PyVirtualDataSlice {
+    /// Runs `f` on the slice, raising if it was already consumed by
+    /// `view_get_data`.
+    fn with_slice<T>(
+        &self,
+        f: impl FnOnce(&mut VirtualDataSlice) -> Result<T, Box<dyn Error>>,
+    ) -> PyResult<T> {
+        let mut guard = self
+            .0
+            .lock()
+            .map_err(|e| PyValueError::new_err(e.to_string()))?;
+        let slice = guard.as_mut().ok_or_else(consumed_error)?;
+        f(slice).map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
+    /// Moves the slice out, leaving any Python references holding a consumed
+    /// slice.
+    fn take(&self) -> PyResult<VirtualDataSlice> {
+        self.0
+            .lock()
+            .map_err(|e| PyValueError::new_err(e.to_string()))?
+            .take()
+            .ok_or_else(consumed_error)
+    }
+}
+
+fn consumed_error() -> PyErr {
+    PyValueError::new_err("VirtualDataSlice already discarded")
+}
 
 #[pymethods]
 impl PyVirtualDataSlice {
     #[allow(clippy::wrong_self_convention)]
     pub fn from_arrow_ipc(&self, ipc: &[u8]) -> PyResult<()> {
-        self.0
-            .lock()
-            .unwrap()
-            .from_arrow_ipc(ipc)
-            .map_err(|e| PyValueError::new_err(e.to_string()))
+        self.with_slice(|slice| slice.from_arrow_ipc(ipc))
     }
 
     pub fn render_to_columns_json(&self) -> PyResult<String> {
-        self.0
-            .lock()
-            .unwrap()
-            .render_to_columns_json(RowPathStyle::Sidecar, false)
-            .map_err(|e| PyValueError::new_err(e.to_string()))
+        self.with_slice(|slice| slice.render_to_columns_json(RowPathStyle::Sidecar, false))
     }
 
     #[pyo3(signature=(dtype, name, index, val, grouping_id = None))]
@@ -493,22 +517,18 @@ impl PyVirtualDataSlice {
     ) -> PyResult<()> {
         Python::attach(|py| {
             if val.is_none(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, None as Option<String>)
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, None as Option<String>)
+                })?;
             } else if let Ok(val) = val.cast_bound::<PyString>(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(
+                self.with_slice(|slice| {
+                    slice.set_col(
                         name,
                         grouping_id,
                         index as usize,
                         val.extract::<String>().ok(),
                     )
-                    .unwrap();
+                })?;
             } else {
                 tracing::error!("Unhandled")
             };
@@ -527,17 +547,13 @@ impl PyVirtualDataSlice {
     ) -> PyResult<()> {
         Python::attach(|py| {
             if val.is_none(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, None as Option<i32>)
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, None as Option<i32>)
+                })?;
             } else if let Ok(val) = val.extract::<i32>(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, Some(val))
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, Some(val))
+                })?;
             } else {
                 tracing::error!("Unhandled")
             };
@@ -556,17 +572,13 @@ impl PyVirtualDataSlice {
     ) -> PyResult<()> {
         Python::attach(|py| {
             if val.is_none(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, None as Option<f64>)
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, None as Option<f64>)
+                })?;
             } else if let Ok(val) = val.extract::<f64>(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, Some(val))
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, Some(val))
+                })?;
             } else {
                 tracing::error!("Unhandled")
             };
@@ -585,17 +597,13 @@ impl PyVirtualDataSlice {
     ) -> PyResult<()> {
         Python::attach(|py| {
             if val.is_none(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, None as Option<bool>)
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, None as Option<bool>)
+                })?;
             } else if let Ok(val) = val.extract::<bool>(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, Some(val))
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, Some(val))
+                })?;
             } else {
                 tracing::error!("Unhandled")
             };
@@ -614,11 +622,9 @@ impl PyVirtualDataSlice {
     ) -> PyResult<()> {
         Python::attach(|py| {
             if val.is_none(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, None as Option<i64>)
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, None as Option<i64>)
+                })?;
             } else if let Ok(val) = val.cast_bound::<PyDate>(py) {
                 let dt: DateTime<Utc> = Utc
                     .with_ymd_and_hms(
@@ -631,17 +637,13 @@ impl PyVirtualDataSlice {
                     )
                     .unwrap();
                 let timestamp = dt.timestamp() * 1000;
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, Some(timestamp))
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, Some(timestamp))
+                })?;
             } else if let Ok(val) = val.extract::<i64>(py) {
-                self.0
-                    .lock()
-                    .unwrap()
-                    .set_col(name, grouping_id, index as usize, Some(val))
-                    .unwrap();
+                self.with_slice(|slice| {
+                    slice.set_col(name, grouping_id, index as usize, Some(val))
+                })?;
             } else {
                 tracing::error!("Unhandled")
             };
