@@ -11,6 +11,8 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import asyncio
+import gc
+import weakref
 
 import duckdb
 import pytest
@@ -53,8 +55,8 @@ class TestVirtualSessionClose:
         db = make_db()
         session, client = make_session(db)
         table = client.open_table("memory.data")
-        table.view(group_by=["x"])
-        table.view()
+        table.view(columns=["x"], group_by=["x"])
+        table.view(columns=["x"])
         assert len(table_names(db)) == 3
         session.close()
         assert table_names(db) == {"data"}
@@ -62,7 +64,7 @@ class TestVirtualSessionClose:
     def test_close_skips_deleted_views(self):
         db = make_db()
         session, client = make_session(db)
-        view = client.open_table("memory.data").view()
+        view = client.open_table("memory.data").view(columns=["x"])
         view.delete()
         session.close()
         assert table_names(db) == {"data"}
@@ -72,6 +74,23 @@ class TestVirtualSessionClose:
         session, _ = make_session(db)
         session.close()
         assert table_names(db) == {"data"}
+
+    def test_close_is_idempotent(self):
+        db = make_db()
+        session, client = make_session(db)
+        client.open_table("memory.data").view(columns=["x"])
+        session.close()
+        session.close()
+        assert table_names(db) == {"data"}
+
+    def test_close_releases_client_cycle(self):
+        session, client = make_session(make_db())
+        client.open_table("memory.data").view(columns=["x"])
+        callback = weakref.ref(session.callback)
+        session.close()
+        del client
+        gc.collect()
+        assert callback() is None
 
     def test_bundled_sessions_close(self):
         from perspective.virtual_servers.clickhouse import ClickhouseVirtualSession

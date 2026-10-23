@@ -162,19 +162,60 @@ fn test_table_make_view_with_sort_multi_group_by_and_split_by() {
 
     assert!(
         sql.contains("PARTITION BY (\"__GROUPING_ID__\" >> 1)"),
-        "expected shifted __GROUPING_ID__ in WINDOW: {}",
+        "expected shifted __GROUPING_ID__ in window: {}",
         sql
     );
 
     assert!(
-        sql.contains("first_value(\"__SORT_0__\") OVER __WINDOW_0__"),
-        "expected first_value(\"__SORT_0__\") OVER __WINDOW_0__: {}",
+        sql.contains(
+            "first_value(\"__SORT_0__\") OVER (PARTITION BY (\"__GROUPING_ID__\" >> 1), \
+             \"__ROW_PATH_0__\" ORDER BY \"__ROW_PATH_0__\", \"__ROW_PATH_1__\")"
+        ),
+        "expected inline window for first_value(\"__SORT_0__\"): {}",
+        sql
+    );
+
+    assert!(
+        !sql.contains(" WINDOW "),
+        "should not emit a named WINDOW clause: {}",
         sql
     );
 
     assert!(
         !sql.contains("GROUPING_ID(\"region\")"),
-        "should not have GROUPING_ID function in WINDOW: {}",
+        "should not have GROUPING_ID function in window: {}",
+        sql
+    );
+}
+
+#[test]
+fn test_table_make_view_with_sort_multi_group_by_partitions_by_group_columns() {
+    let builder = GenericSQLVirtualServerModel::new(GenericSQLVirtualServerModelArgs::default());
+    let mut config = ViewConfig::default();
+    config.columns = vec![Some("value".to_string())];
+    config.group_by = vec!["region".to_string(), "category".to_string()];
+    config.sort = vec![Sort("value".to_string(), SortDir::Desc)];
+    config.aggregates = HashMap::from([(
+        "value".to_string(),
+        Aggregate::SingleAggregate("sum".to_string()),
+    )]);
+
+    let sql = builder
+        .table_make_view("source_table", "dest_view", &config, &IndexMap::new())
+        .unwrap();
+
+    assert!(
+        sql.contains(
+            "first_value(sum(\"value\")) OVER (PARTITION BY GROUPING_ID(\"region\"), \"region\" \
+             ORDER BY \"region\", \"category\") DESC"
+        ),
+        "expected inline window partitioned by group columns: {}",
+        sql
+    );
+
+    assert!(
+        !sql.contains(" WINDOW "),
+        "should not emit a named WINDOW clause: {}",
         sql
     );
 }

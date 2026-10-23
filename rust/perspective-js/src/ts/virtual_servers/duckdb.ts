@@ -185,7 +185,7 @@ function duckdbTypeToPsp(name: string): ColumnType {
         ["bigint", "hugeint", "uhugeint", "uinteger", "ubigint"].includes(
             name,
         ) ||
-        ["float", "real", "double", "varint"].includes(name) ||
+        ["float", "real", "double", "varint", "bignum"].includes(name) ||
         ["int64", "uint32", "uint64", "float32", "float64"].includes(name) ||
         name.startsWith("decimal") ||
         name.startsWith("numeric")

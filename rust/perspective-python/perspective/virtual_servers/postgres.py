@@ -152,8 +152,10 @@ class PostgresVirtualSession:
         self.callback(self.session.handle_request(msg))
 
     def close(self):
+        session, self.session, self.callback = self.session, None, None
         try:
-            self.session.close()
+            if session is not None:
+                session.close()
         finally:
             self.handler.close()
 

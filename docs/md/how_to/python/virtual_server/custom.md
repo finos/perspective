@@ -91,7 +91,8 @@ in a `perspective.VirtualServer` — which owns the protocol — and return one
 session per client. Each session must provide `handle_request(msg)` and
 `close()`, which the handlers call when the connection ends;
 `VirtualServer.close()` deletes the views the client left open, via
-`view_delete`:
+`view_delete`. `close()` should also release the session's callback (which may
+otherwise form a reference cycle and leak):
 
 ```python
 import perspective
@@ -105,7 +106,9 @@ class MyVirtualSession:
         self.callback(self.session.handle_request(msg))
 
     def close(self):
-        self.session.close()
+        session, self.session, self.callback = self.session, None, None
+        if session is not None:
+            session.close()
 
 
 class MyVirtualServer:

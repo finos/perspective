@@ -87,6 +87,21 @@ def _load_coerce_types(db):
     """)
 
 
+
+def approx_floats(value):
+    """`value` with every `float` in it compared approximately."""
+    if isinstance(value, float):
+        return pytest.approx(value)
+
+    if isinstance(value, list):
+        return [approx_floats(x) for x in value]
+
+    if isinstance(value, dict):
+        return {k: approx_floats(v) for k, v in value.items()}
+
+    return value
+
+
 @pytest.fixture(scope="module")
 def client():
     db = duckdb.connect()
@@ -106,7 +121,8 @@ def client():
 
     session = server.new_session(handle_response)
     c = Client(handle_request)
-    return c
+    yield c
+    session.close()
 
 
 class TestDuckDBClient:
@@ -244,13 +260,13 @@ class TestDuckDBGroupBy:
         num_rows = view.num_rows()
         assert num_rows == 5
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "Sales": 2297200.860299955},
             {"__ROW_PATH__": ["Central"], "Sales": 501239.8908000005},
             {"__ROW_PATH__": ["East"], "Sales": 678781.2399999979},
             {"__ROW_PATH__": ["South"], "Sales": 391721.9050000003},
             {"__ROW_PATH__": ["West"], "Sales": 725457.8245000006},
-        ]
+        ])
         view.delete()
 
     def test_multi_level_group_by(self, client):
@@ -261,7 +277,7 @@ class TestDuckDBGroupBy:
             aggregates={"Sales": "sum"},
         )
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "Sales": 2297200.860299955},
             {"__ROW_PATH__": ["Central"], "Sales": 501239.8908000005},
             {"__ROW_PATH__": ["Central", "Furniture"], "Sales": 163797.16380000004},
@@ -282,7 +298,7 @@ class TestDuckDBGroupBy:
             {"__ROW_PATH__": ["West", "Furniture"], "Sales": 252612.7435000003},
             {"__ROW_PATH__": ["West", "Office Supplies"], "Sales": 220853.24900000007},
             {"__ROW_PATH__": ["West", "Technology"], "Sales": 251991.83199999997},
-        ]
+        ])
         view.delete()
 
     def test_group_by_with_count_aggregate(self, client):
@@ -310,12 +326,12 @@ class TestDuckDBGroupBy:
             aggregates={"Sales": "avg"},
         )
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "Sales": 229.8580008304938},
             {"__ROW_PATH__": ["Furniture"], "Sales": 349.83488698727007},
             {"__ROW_PATH__": ["Office Supplies"], "Sales": 119.32410089611732},
             {"__ROW_PATH__": ["Technology"], "Sales": 452.70927612344155},
-        ]
+        ])
         view.delete()
 
     def test_group_by_with_min_aggregate(self, client):
@@ -372,7 +388,7 @@ class TestDuckDBSplitBy:
         ]
 
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {
                 "__ROW_PATH__": [],
                 "Central|Sales": 501239.8908000005,
@@ -401,7 +417,7 @@ class TestDuckDBSplitBy:
                 "South|Sales": 148771.9079999999,
                 "West|Sales": 251991.83199999997,
             },
-        ]
+        ])
         view.delete()
 
     def test_split_by_without_group_by(self, client):
@@ -560,12 +576,12 @@ class TestDuckDBFilter:
         num_rows = view.num_rows()
         assert num_rows == 4
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "Sales": 725457.8245000006},
             {"__ROW_PATH__": ["Furniture"], "Sales": 252612.7435000003},
             {"__ROW_PATH__": ["Office Supplies"], "Sales": 220853.24900000007},
             {"__ROW_PATH__": ["Technology"], "Sales": 251991.83199999997},
-        ]
+        ])
         view.delete()
 
 
@@ -611,13 +627,13 @@ class TestDuckDBSort:
             aggregates={"Sales": "sum"},
         )
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "Sales": 2297200.860299955},
             {"__ROW_PATH__": ["West"], "Sales": 725457.8245000006},
             {"__ROW_PATH__": ["East"], "Sales": 678781.2399999979},
             {"__ROW_PATH__": ["Central"], "Sales": 501239.8908000005},
             {"__ROW_PATH__": ["South"], "Sales": 391721.9050000003},
-        ]
+        ])
         view.delete()
 
     def test_multi_column_sort(self, client):
@@ -638,6 +654,55 @@ class TestDuckDBSort:
             {"Region": "Central", "Sales": 5443.96, "Quantity": 4},
         ]
         view.delete()
+
+    @pytest.mark.parametrize("split_by", [[], ["Segment"]])
+    def test_sort_with_multi_level_group_by(self, client, split_by):
+        table = client.open_table("memory.superstore")
+        view = table.view(
+            columns=["Sales"],
+            group_by=["Region", "Category"],
+            split_by=split_by,
+            sort=[["Sales", "desc"]],
+            aggregates={"Sales": "sum"},
+        )
+        paths = [row["__ROW_PATH__"] for row in view.to_json()]
+        assert paths == [[]] + [
+            path
+            for region, categories in MULTI_LEVEL_SORT_LEAVES.items()
+            for path in [[region]] + [[region, c] for c in categories]
+        ]
+        view.delete()
+
+    @pytest.mark.parametrize("split_by", [[], ["Segment"]])
+    def test_sort_with_multi_level_group_by_flat(self, client, split_by):
+        table = client.open_table("memory.superstore")
+        view = table.view(
+            columns=["Sales"],
+            group_by=["Region", "Category"],
+            split_by=split_by,
+            group_rollup_mode="flat",
+            sort=[["Sales", "desc"]],
+            aggregates={"Sales": "sum"},
+        )
+        paths = [
+            row["__ROW_PATH__"]
+            for row in view.to_json()
+            if len(row["__ROW_PATH__"]) == 2
+        ]
+        assert paths == [
+            [region, c]
+            for region, categories in MULTI_LEVEL_SORT_LEAVES.items()
+            for c in categories
+        ]
+        view.delete()
+
+
+MULTI_LEVEL_SORT_LEAVES = {
+    "West": ["Furniture", "Technology", "Office Supplies"],
+    "East": ["Technology", "Furniture", "Office Supplies"],
+    "Central": ["Technology", "Office Supplies", "Furniture"],
+    "South": ["Technology", "Office Supplies", "Furniture"],
+}
 
 
 DESCRIBE_CONFIGS = [
@@ -783,13 +848,13 @@ class TestDuckDBExpressions:
             aggregates={"total": "sum"},
         )
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "total": 2583597.882000014},
             {"__ROW_PATH__": ["Central"], "total": 540946.2532999996},
             {"__ROW_PATH__": ["East"], "total": 770304.0199999991},
             {"__ROW_PATH__": ["South"], "total": 438471.33530000027},
             {"__ROW_PATH__": ["West"], "total": 833876.2733999988},
-        ]
+        ])
         view.delete()
 
 
@@ -888,12 +953,12 @@ class TestDuckDBCombinedOperations:
             aggregates={"Sales": "sum"},
         )
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "Sales": 725457.8245000006},
             {"__ROW_PATH__": ["Furniture"], "Sales": 252612.7435000003},
             {"__ROW_PATH__": ["Technology"], "Sales": 251991.83199999997},
             {"__ROW_PATH__": ["Office Supplies"], "Sales": 220853.24900000007},
-        ]
+        ])
         view.delete()
 
     def test_split_by_group_by_filter(self, client):
@@ -918,7 +983,7 @@ class TestDuckDBCombinedOperations:
         assert num_rows == 4
 
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {
                 "__ROW_PATH__": [],
                 "Central|Sales": 332883.0567999998,
@@ -947,7 +1012,7 @@ class TestDuckDBCombinedOperations:
                 "South|Sales": 108955.79400000005,
                 "West|Sales": 165134.77900000007,
             },
-        ]
+        ])
         view.delete()
 
     def test_split_by_only(self, client):
@@ -990,13 +1055,13 @@ class TestDuckDBCombinedOperations:
             aggregates={"profitmargin": "avg"},
         )
         json = view.to_json()
-        assert json == [
+        assert json == approx_floats([
             {"__ROW_PATH__": [], "profitmargin": 12.031392972104467},
             {"__ROW_PATH__": ["West"], "profitmargin": 21.948661793784012},
             {"__ROW_PATH__": ["East"], "profitmargin": 16.722695960406636},
             {"__ROW_PATH__": ["South"], "profitmargin": 16.35190329218107},
             {"__ROW_PATH__": ["Central"], "profitmargin": -10.407293926323575},
-        ]
+        ])
         view.delete()
 
 

@@ -12,6 +12,7 @@
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 import { getPyodideDistDir } from "@perspective-dev/scripts/pyodide.mjs";
 import { getEmscriptenWheelPath } from "@perspective-dev/scripts/workspace.mjs";
 
@@ -53,15 +54,49 @@ if (process.env.PSP_PYODIDE) {
         execOpts,
     );
 } else {
-    execFileSync(
-        "pytest",
-        [
-            "perspective/tests",
-            "-W error",
-            "--timeout=300",
-            "--capture=sys",
-            ...process.argv.slice(2),
-        ],
-        execOpts,
-    );
+    const pytestArgs = [
+        "-W error",
+        "--timeout=300",
+        "--capture=sys",
+        ...process.argv.slice(2),
+    ];
+
+    execFileSync("pytest", ["perspective/tests", ...pytestArgs], execOpts);
+    const compatDir = path.join(import.meta.dirname, ".duckdb-compat");
+    if (fs.existsSync(compatDir)) {
+        const env = {
+            ...process.env,
+            PYTHONPATH: [compatDir, process.env.PYTHONPATH]
+                .filter(Boolean)
+                .join(path.delimiter),
+        };
+
+        execFileSync(
+            "python",
+            [
+                "-c",
+                "import duckdb; print('DuckDB compat:', duckdb.__version__)",
+            ],
+            { ...execOpts, env },
+        );
+
+        try {
+            execFileSync(
+                "pytest",
+                [
+                    "perspective/tests/virtual_servers/test_duckdb.py",
+                    ...pytestArgs,
+                ],
+                { ...execOpts, env },
+            );
+        } catch (e) {
+            if (e.status !== 5) {
+                throw e;
+            }
+        }
+    } else {
+        console.warn(
+            `Skipping DuckDB compat suite, install with: pip install --no-deps --target ${compatDir} -r requirements-duckdb-compat.txt`,
+        );
+    }
 }

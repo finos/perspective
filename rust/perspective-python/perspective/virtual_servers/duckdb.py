@@ -11,13 +11,13 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import io
-import duckdb
-import perspective
-import pyarrow.ipc as ipc
-
-from datetime import datetime
 import logging
+from datetime import datetime
 
+import duckdb
+from pyarrow import ipc
+
+import perspective
 from perspective.virtual_servers import VirtualServerHandler, sql_table_describe
 
 logger = logging.getLogger(__name__)
@@ -155,7 +155,9 @@ class DuckDBVirtualSession:
         self.callback(self.session.handle_request(msg))
 
     def close(self):
-        self.session.close()
+        session, self.session, self.callback = self.session, None, None
+        if session is not None:
+            session.close()
 
 
 class DuckDBVirtualServer:
@@ -278,7 +280,7 @@ class DuckDBVirtualServerHandler(VirtualServerHandler):
     def view_get_data(self, view_name, config, schema, viewport, data):
         query = self.sql_builder.view_get_data(view_name, config, viewport, schema)
         result = self.db.sql(query)
-        arrow_table = result.fetch_arrow_table()
+        arrow_table = result.to_arrow_table()
         buf = io.BytesIO()
         with ipc.new_stream(buf, arrow_table.schema) as writer:
             writer.write_table(arrow_table)
@@ -315,9 +317,8 @@ def duckdb_type_to_psp(name):
     # Wider than `Int32`, or fractional - all coerce to `Float64`.
     if (
         name in ("BIGINT", "HUGEINT", "UHUGEINT", "UINTEGER", "UBIGINT")
-        or name in ("FLOAT", "REAL", "DOUBLE", "VARINT")
-        or name.startswith("DECIMAL")
-        or name.startswith("NUMERIC")
+        or name in ("FLOAT", "REAL", "DOUBLE", "VARINT", "BIGNUM")
+        or name.startswith(("DECIMAL", "NUMERIC"))
     ):
         return "float"
 
@@ -333,12 +334,8 @@ def duckdb_type_to_psp(name):
     # arrives dictionary-encoded), `JSON`, `UUID`, `BLOB`, `INTERVAL`,
     # and the nested types.
     if not (
-        name.startswith("VARCHAR")
-        or name.startswith("ENUM")
+        name.startswith(("VARCHAR", "ENUM", "STRUCT", "MAP", "UNION"))
         or name in ("JSON", "UUID", "BLOB", "BIT", "INTERVAL")
-        or name.startswith("STRUCT")
-        or name.startswith("MAP")
-        or name.startswith("UNION")
         or name.endswith("[]")
     ):
         # Unknown, not fatal - the column still renders, as text. Raising

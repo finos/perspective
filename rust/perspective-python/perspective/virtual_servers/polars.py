@@ -72,7 +72,9 @@ class PolarsVirtualSession:
         self.callback(self.session.handle_request(msg))
 
     def close(self):
-        self.session.close()
+        session, self.session, self.callback = self.session, None, None
+        if session is not None:
+            session.close()
 
 
 class PolarsVirtualServer:

@@ -404,11 +404,10 @@ impl<'a> ViewQueryContext<'a> {
 
     /// Builds the inner `SELECT` query (without the outer `CREATE TABLE`
     /// wrapper) for the four `group_by` x `split_by` combinations, appending
-    /// `WINDOW` and `ORDER BY` clauses as needed.
+    /// an `ORDER BY` clause as needed.
     pub(crate) fn build_query(&self) -> String {
         let where_sql = self.where_sql();
         let order_by = self.order_by_clauses();
-        let windows = self.window_clauses();
         let mut query = match self.query_orientation() {
             QueryOrientation::Flat => {
                 let select = self.select_clauses().join(", ");
@@ -639,10 +638,6 @@ impl<'a> ViewQueryContext<'a> {
                 format!("WITH __PSP_PIVOT_SRC__ AS ({}) SELECT * FROM {}", src, from)
             },
         };
-
-        if !windows.is_empty() {
-            query = format!("{} WINDOW {}", query, windows.join(", "));
-        }
 
         if !order_by.is_empty() {
             query = format!("{} ORDER BY {}", query, order_by.join(", "));
@@ -1037,8 +1032,10 @@ impl<'a> ViewQueryContext<'a> {
                                 clauses.push(format!("\"__SORT_{}__\" {}", sidx, dir));
                             } else {
                                 clauses.push(format!(
-                                    "first_value(\"__SORT_{}__\") OVER __WINDOW_{}__ {}",
-                                    sidx, gidx, dir
+                                    "first_value(\"__SORT_{}__\") OVER {} {}",
+                                    sidx,
+                                    self.window_spec(gidx),
+                                    dir
                                 ));
                             }
                         } else {
@@ -1052,10 +1049,10 @@ impl<'a> ViewQueryContext<'a> {
                                 ));
                             } else {
                                 clauses.push(format!(
-                                    "first_value({}({})) OVER __WINDOW_{}__ {}",
+                                    "first_value({}({})) OVER {} {}",
                                     agg,
                                     self.col_name(sort_col),
-                                    gidx,
+                                    self.window_spec(gidx),
                                     dir
                                 ));
                             }
@@ -1108,8 +1105,10 @@ impl<'a> ViewQueryContext<'a> {
                             clauses.push(format!("\"__SORT_{}__\" {}", sidx, dir));
                         } else {
                             clauses.push(format!(
-                                "first_value(\"__SORT_{}__\") OVER __WINDOW_{}__ {}",
-                                sidx, gidx, dir
+                                "first_value(\"__SORT_{}__\") OVER {} {}",
+                                sidx,
+                                self.window_spec(gidx),
+                                dir
                             ));
                         }
                     } else {
@@ -1118,10 +1117,10 @@ impl<'a> ViewQueryContext<'a> {
                             clauses.push(format!("{}({}) {}", agg, self.col_name(sort_col), dir));
                         } else {
                             clauses.push(format!(
-                                "first_value({}({})) OVER __WINDOW_{}__ {}",
+                                "first_value({}({})) OVER {} {}",
                                 agg,
                                 self.col_name(sort_col),
-                                gidx,
+                                self.window_spec(gidx),
                                 dir
                             ));
                         }
@@ -1142,60 +1141,48 @@ impl<'a> ViewQueryContext<'a> {
         clauses
     }
 
-    fn window_clauses(&self) -> Vec<String> {
-        if self.config.sort.is_empty() || self.config.group_by.len() <= 1 {
-            return Vec::new();
-        }
-
-        let mut clauses = Vec::new();
-        for gidx in 0..(self.config.group_by.len() - 1) {
-            let partition = self.row_path_aliases[..=gidx].join(", ");
-            if self.is_flat_mode() {
-                // Flat mode: partition by row path only (no GROUPING_ID)
-                if !self.config.split_by.is_empty() {
-                    let order = self.row_path_aliases.join(", ");
-                    clauses.push(format!(
-                        "__WINDOW_{}__ AS (PARTITION BY {} ORDER BY {})",
-                        gidx, partition, order,
-                    ));
-                } else {
-                    clauses.push(format!(
-                        "__WINDOW_{}__ AS (PARTITION BY {} ORDER BY {})",
-                        gidx,
-                        partition,
-                        self.group_col_names.join(", ")
-                    ));
-                }
-            } else if !self.config.split_by.is_empty() {
-                let shift = self.config.group_by.len() - 1 - gidx;
-                let grouping_expr = if shift > 0 {
-                    format!("(\"__GROUPING_ID__\" >> {})", shift)
-                } else {
-                    "\"__GROUPING_ID__\"".to_string()
-                };
-
-                let order = self.row_path_aliases.join(", ");
-                clauses.push(format!(
-                    "__WINDOW_{}__ AS (PARTITION BY {}, {} ORDER BY {})",
-                    gidx, grouping_expr, partition, order,
-                ));
-            } else {
-                let sub_groups = self.config.group_by[..=gidx]
-                    .iter()
-                    .map(|c| self.col_name(c))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                clauses.push(format!(
-                    "__WINDOW_{}__ AS (PARTITION BY {}({}), {} ORDER BY {})",
-                    gidx,
-                    self.grouping_fn,
-                    sub_groups,
+    /// Returns the inline window specification for the `gidx` group level's
+    /// sort.
+    fn window_spec(&self, gidx: usize) -> String {
+        let partition = self.row_path_aliases[..=gidx].join(", ");
+        let group_partition = self.group_col_names[..=gidx].join(", ");
+        if self.is_flat_mode() {
+            // Flat mode: partition by row path only (no GROUPING_ID)
+            if !self.config.split_by.is_empty() {
+                format!(
+                    "(PARTITION BY {} ORDER BY {})",
                     partition,
+                    self.row_path_aliases.join(", ")
+                )
+            } else {
+                format!(
+                    "(PARTITION BY {} ORDER BY {})",
+                    group_partition,
                     self.group_col_names.join(", ")
-                ));
+                )
             }
-        }
+        } else if !self.config.split_by.is_empty() {
+            let shift = self.config.group_by.len() - 1 - gidx;
+            let grouping_expr = if shift > 0 {
+                format!("(\"__GROUPING_ID__\" >> {})", shift)
+            } else {
+                "\"__GROUPING_ID__\"".to_string()
+            };
 
-        clauses
+            format!(
+                "(PARTITION BY {}, {} ORDER BY {})",
+                grouping_expr,
+                partition,
+                self.row_path_aliases.join(", ")
+            )
+        } else {
+            format!(
+                "(PARTITION BY {}({}), {} ORDER BY {})",
+                self.grouping_fn,
+                group_partition,
+                group_partition,
+                self.group_col_names.join(", ")
+            )
+        }
     }
 }

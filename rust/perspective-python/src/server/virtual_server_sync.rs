@@ -473,7 +473,7 @@ impl PyVirtualDataSlice {
 }
 
 fn consumed_error() -> PyErr {
-    PyValueError::new_err("VirtualDataSlice already discarded")
+    PyValueError::new_err("VirtualDataSlice was consumed when view_get_data returned")
 }
 
 #[pymethods]
