@@ -154,6 +154,9 @@ class DuckDBVirtualSession:
     def handle_request(self, msg):
         self.callback(self.session.handle_request(msg))
 
+    def close(self):
+        self.session.close()
+
 
 class DuckDBVirtualServer:
     def __init__(self, db):

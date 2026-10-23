@@ -75,7 +75,7 @@ Changelog = "https://github.com/perspective-dev/perspective/blob/master/CHANGELO
 jupyter = ["anywidget>=0.9"]
 tornado = ["tornado>=5,<7"]
 aiohttp = ["aiohttp>=2,<4"]
-starlette = ["starlette<1"]
+starlette = ["starlette<2"]
 
 [tool.maturin]
 module-name = "perspective"

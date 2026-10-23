@@ -71,6 +71,9 @@ class PolarsVirtualSession:
     def handle_request(self, msg):
         self.callback(self.session.handle_request(msg))
 
+    def close(self):
+        self.session.close()
+
 
 class PolarsVirtualServer:
     def __init__(self, tables):

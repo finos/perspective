@@ -53,11 +53,10 @@ class PerspectiveStarletteHandler(object):
         try:
             await self._websocket.accept()
             while True:
-                message = await self._websocket.receive()
-                self._websocket._raise_on_disconnect(message)
+                message = await self._websocket.receive_bytes()
                 if self._executor is not None:
-                    self._executor.submit(self.session.handle_request, message["bytes"])
+                    self._executor.submit(self.session.handle_request, message)
                 else:
-                    self.session.handle_request(message["bytes"])
+                    self.session.handle_request(message)
         finally:
             self.session.close()

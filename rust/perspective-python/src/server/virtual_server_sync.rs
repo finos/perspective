@@ -665,6 +665,15 @@ impl PyVirtualServer {
         ))))
     }
 
+    /// Deletes every view this session still holds.
+    pub fn close(&mut self) -> PyResult<()> {
+        match futures::executor::block_on(self.0.close()).get_internal_error() {
+            Ok(()) => Ok(()),
+            Err(Ok(x)) => Err(x),
+            Err(Err(x)) => Err(PyValueError::new_err(x)),
+        }
+    }
+
     pub fn handle_request(&mut self, bytes: Py<PyBytes>) -> PyResult<Py<PyBytes>> {
         Python::attach(|py| {
             let bytes_vec = bytes.as_bytes(py).to_vec();

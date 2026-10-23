@@ -144,11 +144,18 @@ STRING_FILTER_OPS = COMPARE_OPS + ["LIKE"]
 
 class PostgresVirtualSession:
     def __init__(self, callback, conninfo):
-        self.session = perspective.VirtualServer(PostgresVirtualServerHandler(conninfo))
+        self.handler = PostgresVirtualServerHandler(conninfo)
+        self.session = perspective.VirtualServer(self.handler)
         self.callback = callback
 
     def handle_request(self, msg):
         self.callback(self.session.handle_request(msg))
+
+    def close(self):
+        try:
+            self.session.close()
+        finally:
+            self.handler.close()
 
 
 class PostgresVirtualServer:
@@ -184,6 +191,9 @@ class PostgresVirtualServerHandler(VirtualServerHandler):
                 "describe_template": "SELECT * FROM ({}) AS __psp_describe__ LIMIT 0",
             }
         )
+
+    def close(self):
+        self.db.close()
 
     def get_features(self):
         return {

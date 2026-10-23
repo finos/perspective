@@ -429,6 +429,7 @@ jobs:
                   javascript: "false"
                   arch: ${{ matrix.arch }}
                   manylinux: "false"
+                  python: "false"
                   ccache: native-rust-${{ matrix.os }}-${{ matrix.arch }}
                   ccache_variant: ${{ contains(matrix.os, 'windows') && 'sccache' || 'ccache' }}
                   cargo_cache: ${{ contains(matrix.os, 'windows') && 'true' || 'false' }}

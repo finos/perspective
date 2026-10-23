@@ -19,6 +19,7 @@ pytest-timeout==2.3.1
 pytest==8.2.2
 pytest>=7.4.3
 ruff>=0.5.3
+starlette==1.6.0
 tornado==6.5.8
 traitlets==5.14.3
 websocket-client==1.8.0

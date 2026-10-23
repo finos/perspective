@@ -88,7 +88,10 @@ class MyHandler(VirtualServerHandler):
 The WebSocket handlers call `new_session(callback)` once per connection, so
 the object passed as `perspective_server` must provide it. Wrap your handler
 in a `perspective.VirtualServer` — which owns the protocol — and return one
-session per client:
+session per client. Each session must provide `handle_request(msg)` and
+`close()`, which the handlers call when the connection ends;
+`VirtualServer.close()` deletes the views the client left open, via
+`view_delete`:
 
 ```python
 import perspective
@@ -100,6 +103,9 @@ class MyVirtualSession:
 
     def handle_request(self, msg):
         self.callback(self.session.handle_request(msg))
+
+    def close(self):
+        self.session.close()
 
 
 class MyVirtualServer:
