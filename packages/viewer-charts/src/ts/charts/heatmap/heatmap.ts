@@ -226,6 +226,7 @@ export class HeatmapChart extends AbstractChart {
                     groupBy: this._groupBy,
                     splitBy: this._splitBy,
                     groupByTypes: this._groupByTypes,
+                    dateModifiers: this._columnDateModifiers,
                 });
                 const instanceStart = allCells.length;
 
@@ -307,6 +308,7 @@ export class HeatmapChart extends AbstractChart {
                 groupBy: this._groupBy,
                 splitBy: this._splitBy,
                 groupByTypes: this._groupByTypes,
+                dateModifiers: this._columnDateModifiers,
             });
 
             this._facets = [];

@@ -177,6 +177,15 @@ for charts and text for the datagrid.
 | `restyleElement()` | Re-read CSS and repaint |
 | `getPlugin(name?)` / `getAllPlugins()` | Look up registered plugins |
 
+The element class also has page-wide static methods:
+
+| Method | Description |
+|---|---|
+| `registerPlugin(name)` | Register a plugin custom element |
+| `setPluginConfigDefaults(defaults, options?)` / `setColumnConfigDefaults(defaults, options?)` | Replace plugins' `plugin_config` / `columns_config` defaults |
+| `getPluginConfigDefaults()` / `getColumnConfigDefaults()` | Read the replaced defaults |
+
 See [Saving and restoring UI state](./save_restore.md) for the `save`/`restore`
-formats and the panel selector, and
-[Plugin render limits](./plugin_settings.md) for `getPlugin`.
+formats and the panel selector,
+[Plugin render limits](./plugin_settings.md) for `getPlugin`, and
+[Configuration defaults](./config_defaults.md) for the defaults methods.

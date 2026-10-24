@@ -96,6 +96,7 @@ impl PerspectiveViewer {
                     {view_config}
                     plugin_config={self.renderer_props.plugin_config.clone()}
                     columns_config={self.renderer_props.columns_config.clone()}
+                    config_defaults={self.renderer_props.config_defaults.clone()}
                     {drag_column}
                     metadata={metadata.clone()}
                     open_column_settings={self.presentation_props.open_column_settings.clone()}
@@ -150,6 +151,7 @@ impl PerspectiveViewer {
                         on_toggle_pin={ctx.link().callback(|()| ToggleColumnSettingsPin)}
                         {on_select_tab}
                         plugin_name={self.renderer_props.plugin_name.clone()}
+                        config_defaults={self.renderer_props.config_defaults.clone()}
                         {metadata}
                         view_config={self.session_props.config.clone()}
                         column_stats={self.session_props.column_stats.clone()}

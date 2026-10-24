@@ -108,7 +108,9 @@ export type * from "../../src/ts/ts-rs/GetViewMode.d.ts";
 export type * from "../../src/ts/ts-rs/CustomNumberFormatConfig.d.ts";
 export type * from "../../src/ts/ts-rs/NumberFormatStyle.d.ts";
 export type * from "../../src/ts/ts-rs/Notation.d.ts";
-export type * from "../../src/ts/ts-rs/DatetimeFormatType.d.ts";
+export type * from "../../src/ts/ts-rs/DatetimeFormat.d.ts";
+export type * from "../../src/ts/ts-rs/ConfigDefaultsOptions.d.ts";
+export type * from "../../src/ts/ts-rs/ColumnConfigDefaultsOptions.d.ts";
 
 import type {GetTableOptions} from "../../src/ts/ts-rs/GetTableOptions.d.ts";
 import type {PanelOptions} from "../../src/ts/ts-rs/PanelOptions.d.ts";
@@ -116,6 +118,8 @@ import type {RestoreOptions} from "../../src/ts/ts-rs/RestoreOptions.d.ts";
 import type {RestoreWorkspaceOptions} from "../../src/ts/ts-rs/RestoreWorkspaceOptions.d.ts";
 import type {AddPanelOptions} from "../../src/ts/ts-rs/AddPanelOptions.d.ts";
 import type {SaveWorkspaceOptions} from "../../src/ts/ts-rs/SaveWorkspaceOptions.d.ts";
+import type {ConfigDefaultsOptions} from "../../src/ts/ts-rs/ConfigDefaultsOptions.d.ts";
+import type {ColumnConfigDefaultsOptions} from "../../src/ts/ts-rs/ColumnConfigDefaultsOptions.d.ts";
 import type {ExportOptions} from "../../src/ts/ts-rs/ExportOptions.d.ts";
 import type {GetClientOptions} from "../../src/ts/ts-rs/GetClientOptions.d.ts";
 import type {GetViewOptions} from "../../src/ts/ts-rs/GetViewOptions.d.ts";
@@ -133,6 +137,105 @@ import type {WorkspaceConfigUpdate} from "../../src/ts/ts-rs/WorkspaceConfigUpda
 pub fn registerPlugin(name: &str) {
     use crate::renderer::*;
     PLUGIN_REGISTRY.register_plugin(name);
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(typescript_type = "Record<string, unknown> | null")]
+    pub type JsConfigDefaults;
+
+    #[wasm_bindgen(typescript_type = "ConfigDefaultsOptions")]
+    pub type JsConfigDefaultsOptions;
+
+    #[wasm_bindgen(typescript_type = "ColumnConfigDefaultsOptions")]
+    pub type JsColumnConfigDefaultsOptions;
+
+    #[wasm_bindgen(
+        typescript_type = "Array<{ plugin?: string; defaults: Record<string, unknown> }>"
+    )]
+    pub type JsPluginConfigDefaultsSlots;
+
+    #[wasm_bindgen(
+        typescript_type = "Array<{ plugin?: string; type?: ColumnType; defaults: Record<string, \
+                           unknown> }>"
+    )]
+    pub type JsColumnConfigDefaultsSlots;
+}
+
+fn defaults_options<T: Default + serde::de::DeserializeOwned>(
+    options: Option<impl Into<JsValue>>,
+) -> ApiResult<T> {
+    match options {
+        None => Ok(T::default()),
+        Some(options) => Ok(options.into().into_serde_ext()?),
+    }
+}
+
+/// Merge `defaults` into the `plugin_config` defaults every
+/// `<perspective-viewer>` on the page applies, where a `null` value removes a
+/// default and a `null` `defaults` clears the slot.
+///
+/// # Arguments
+///
+/// - `defaults` - Values keyed like `plugin_config`, or `null`.
+/// - `options.plugin` - Limits the defaults to the named plugin.
+///
+/// # JavaScript Examples
+///
+/// ```javascript
+/// customElements.get("perspective-viewer").setPluginConfigDefaults({group_pad: 10});
+/// ```
+#[wasm_bindgen]
+#[allow(non_snake_case)]
+pub fn setPluginConfigDefaults(
+    defaults: JsConfigDefaults,
+    options: Option<JsConfigDefaultsOptions>,
+) -> ApiResult<()> {
+    let config::ConfigDefaultsOptions { plugin } = defaults_options(options)?;
+    renderer::set_plugin_config_defaults(&defaults, plugin.as_deref())
+}
+
+/// Merge `defaults` into the `columns_config` defaults every
+/// `<perspective-viewer>` on the page applies, where a `null` value removes a
+/// default and a `null` `defaults` clears the slot.
+///
+/// # Arguments
+///
+/// - `defaults` - Values keyed like one `columns_config` entry, or `null`.
+/// - `options.plugin` - Limits the defaults to the named plugin.
+/// - `options.type` - Limits the defaults to columns of this view type.
+///
+/// # JavaScript Examples
+///
+/// ```javascript
+/// customElements
+///     .get("perspective-viewer")
+///     .setColumnConfigDefaults({date_format: {timeZone: "UTC"}}, {type: "datetime"});
+/// ```
+#[wasm_bindgen]
+#[allow(non_snake_case)]
+pub fn setColumnConfigDefaults(
+    defaults: JsConfigDefaults,
+    options: Option<JsColumnConfigDefaultsOptions>,
+) -> ApiResult<()> {
+    let config::ColumnConfigDefaultsOptions { plugin, ty } = defaults_options(options)?;
+    renderer::set_column_config_defaults(&defaults, plugin.as_deref(), ty.as_deref())
+}
+
+/// The `plugin_config` defaults set by [`setPluginConfigDefaults`], one entry
+/// per slot.
+#[wasm_bindgen]
+#[allow(non_snake_case)]
+pub fn getPluginConfigDefaults() -> ApiResult<JsPluginConfigDefaultsSlots> {
+    Ok(renderer::get_plugin_config_defaults()?.unchecked_into())
+}
+
+/// The `columns_config` defaults set by [`setColumnConfigDefaults`], one entry
+/// per slot.
+#[wasm_bindgen]
+#[allow(non_snake_case)]
+pub fn getColumnConfigDefaults() -> ApiResult<JsColumnConfigDefaultsSlots> {
+    Ok(renderer::get_column_config_defaults()?.unchecked_into())
 }
 
 /// Register this crate's Custom Elements in the browser's current session.

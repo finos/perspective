@@ -855,7 +855,7 @@ fn control_schema_entries(spec: &ControlSpec) -> Vec<(String, Value)> {
         },
         ControlSpec::DatetimeFormat { .. } => vec![(
             "date_format".to_owned(),
-            json!({ "description": "Datetime display format: a style preset or custom format fields" }),
+            json!({ "description": "Datetime display format, a subset of `Intl.DateTimeFormatOptions`: either `dateStyle`/`timeStyle` presets or per-part fields (`weekday`, `year`, `month`, `day`, `hour`, `minute`, `second`, `fractionalSecondDigits`), never both, plus optional `timeZone` and `hour12`; a missing display field is not shown" }),
         )],
         ControlSpec::NumberSeriesStyle { .. } => vec![
             (
@@ -1413,10 +1413,9 @@ impl PerspectiveViewerElement {
                     get_column_config_schema(
                         &panel.renderer,
                         &view_config,
-                        &metadata,
+                        &panel.session,
                         column,
                         current,
-                        None,
                     )
                     .ok(),
                 )

@@ -29,7 +29,6 @@ export const CHART_NUMBER_DEFAULTS: NumberFormatConfig = {
 
 export const CHART_DATETIME_DEFAULTS: DateFormatConfig = {
     dateStyle: "medium",
-    timeStyle: "disabled",
 };
 
 export const CHART_DATE_DEFAULTS: DateFormatConfig = {

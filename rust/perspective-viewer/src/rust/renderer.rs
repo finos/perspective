@@ -18,6 +18,7 @@
 //! references throughout the application.
 
 mod activate;
+mod config_defaults;
 mod dispatch;
 pub mod limits;
 mod plugin_config;
@@ -40,9 +41,10 @@ use yew::html::ImplicitClone;
 use yew::prelude::*;
 
 use self::activate::*;
+pub use self::config_defaults::*;
 pub use self::limits::RenderLimits;
 pub use self::plugin_config::{
-    ColumnConfigMap, ColumnRole, PluginScopedConfig, PreparedRenderer, ValidatedColumnsConfig,
+    ColumnConfigMap, PluginScopedConfig, PreparedRenderer, ValidatedColumnsConfig,
     ValidatedPluginConfig,
 };
 use self::plugin_store::*;
@@ -129,6 +131,10 @@ pub struct RendererData {
     /// (edit, restore or reset), unlike `column_style_changed` which covers
     /// edits only.
     pub columns_config_changed: PubSub<ColumnConfigMap>,
+
+    /// Fires after the page-wide config defaults changed and this panel's
+    /// plugin received them.
+    pub config_defaults_changed: PubSub<()>,
 
     /// `true` while the active plugin's "rendering N of M" warning is
     /// dismissable.
@@ -272,6 +278,7 @@ impl Renderer {
             column_style_changed: Default::default(),
             plugin_config_changed: Default::default(),
             columns_config_changed: Default::default(),
+            config_defaults_changed: Default::default(),
             render_warning: Cell::new(true),
             presize_pending: Cell::new(0),
             presized_box: Cell::new(None),
@@ -688,8 +695,7 @@ impl Renderer {
     /// and draw it belongs to. `None` ensures *some* plugin is selected (the
     /// registry default) without changing an existing selection. Returns
     /// whether the active plugin changed (`None`'s default-selection case
-    /// reports `false`, preserving first-selection semantics for the
-    /// swap-restore pass in the draw tasks).
+    /// reports `false`).
     pub fn commit_plugin(&self, idx: Option<usize>) -> ApiResult<bool> {
         let idx = match idx {
             Some(idx) => idx,
@@ -815,7 +821,7 @@ impl Renderer {
     }
 }
 
-fn make_short_name(name: &str) -> String {
+pub(crate) fn make_short_name(name: &str) -> String {
     name.to_lowercase()
         .chars()
         .filter(|x| x.is_alphabetic())
@@ -850,6 +856,7 @@ impl Renderer {
                 is_chart,
                 plugin_config,
                 columns_config,
+                config_defaults: CONFIG_DEFAULTS.with(ConfigDefaults::slots),
                 render_error: self.failure(),
             }
         } else {
@@ -861,6 +868,7 @@ impl Renderer {
                 is_chart: false,
                 plugin_config: PtrEqRc::default(),
                 columns_config: PtrEqRc::default(),
+                config_defaults: CONFIG_DEFAULTS.with(ConfigDefaults::slots),
                 render_error: self.failure(),
             }
         }

@@ -184,6 +184,31 @@ name. Only the single-panel `restore()` accepts the inline form — in
 
 See [Derived tables](../../explanation/derived_table.md).
 
+## Datetime formats
+
+A `date` or `datetime` column's `date_format` is a subset of
+`Intl.DateTimeFormatOptions`: either the `dateStyle`/`timeStyle` presets or
+per-part fields (`weekday`, `year`, `month`, `day`, `hour`, `minute`, `second`,
+`fractionalSecondDigits`), never both, plus optional `timeZone` and `hour12`. As
+in `Intl`, a display field that is left out is not shown:
+
+```javascript
+await viewer.restore({
+    columns_config: {
+        "Order Date": { date_format: { dateStyle: "long", timeZone: "UTC" } },
+    },
+});
+```
+
+A column inherits the plugin's display fields until it sets any of them, and
+inherits `timeZone` and `hour12` individually.
+
+Configs saved before 5.7.0 used a `"disabled"` value and a `format: "custom"`
+marker, and a missing preset field meant `short` date or `medium` time.
+`restore()` rewrites these into the current form with the same rendering. A
+hand-written config with no `version` and a missing preset field takes the
+current meaning: `{ dateStyle: "long" }` now shows the date alone.
+
 ## Colors, palettes and gradients
 
 Per-column color styling lives in a panel's `columns_config`, keyed by column

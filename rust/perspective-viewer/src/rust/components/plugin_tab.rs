@@ -27,7 +27,7 @@ use crate::components::column_settings_sidebar::style_tab::primitive_field::{
 use crate::config::{Alignment, ControlSpec, FontToggle};
 use crate::presentation::Presentation;
 use crate::queries::get_plugin_config_schema;
-use crate::renderer::Renderer;
+use crate::renderer::{ConfigDefaultsSlots, Renderer};
 use crate::session::Session;
 use crate::tasks::send_plugin_config;
 use crate::ui::ControlGroup;
@@ -49,6 +49,9 @@ pub struct PluginTabProps {
     /// prop — no `Renderer::get_plugin_config()` reads against the
     /// interior-mutable handle.
     pub plugin_config: PtrEqRc<serde_json::Map<String, serde_json::Value>>,
+
+    /// The page-wide config defaults the schema applies.
+    pub config_defaults: PtrEqRc<ConfigDefaultsSlots>,
 
     // State
     pub presentation: Presentation,
@@ -76,7 +79,11 @@ pub fn PluginTab(props: &PluginTabProps) -> Html {
         let view_config = props.view_config.clone();
         let plugin_config = props.plugin_config.clone();
         use_memo(
-            (props.plugin_config.clone(), props.view_config.clone()),
+            (
+                props.plugin_config.clone(),
+                props.view_config.clone(),
+                props.config_defaults.clone(),
+            ),
             move |_| match get_plugin_config_schema(&renderer, &view_config, Some(&plugin_config)) {
                 Ok(schema) => schema.fields,
                 Err(error) => {

@@ -67,11 +67,11 @@ export class FormatterCache {
     }
 
     get(type: ColumnType, plugin: PluginConfig): Formatter | false | undefined {
-        const formatter_key = [
+        const formatter_key = JSON.stringify([
             type,
-            ...Object.values(plugin.date_format ?? {}),
-            ...Object.values(plugin.number_format ?? {}),
-        ].join("-");
+            plugin.date_format ?? null,
+            plugin.number_format ?? null,
+        ]);
 
         if (!this._formatters.has(formatter_key)) {
             if (type === "date") {

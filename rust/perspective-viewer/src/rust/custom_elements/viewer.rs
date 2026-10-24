@@ -178,8 +178,16 @@ pub struct PerspectiveViewerElement {
 
 impl CustomElementMetadata for PerspectiveViewerElement {
     const CUSTOM_ELEMENT_NAME: &'static str = "perspective-viewer";
-    const STATICS: &'static [&'static str] =
-        ["registerPlugin", "get_wasm_module", "get_worker_url"].as_slice();
+    const STATICS: &'static [&'static str] = [
+        "registerPlugin",
+        "get_wasm_module",
+        "get_worker_url",
+        "setPluginConfigDefaults",
+        "setColumnConfigDefaults",
+        "getPluginConfigDefaults",
+        "getColumnConfigDefaults",
+    ]
+    .as_slice();
 }
 
 impl PerspectiveViewerElement {
@@ -1100,6 +1108,7 @@ impl PerspectiveViewerElement {
             let _effect = effect;
             let id = name.map(PanelId::from);
             let mut update = ViewerConfigUpdate::decode(&update)?;
+            update.migrate();
             let settings = std::mem::replace(&mut update.settings, OptionalUpdate::Missing);
             enum Target {
                 Existing { panel: Panel, active: bool },
@@ -2018,7 +2027,8 @@ impl PerspectiveViewerElement {
         ApiFuture::new(async move {
             let _effect = effect;
             let AddPanelOptions { wait_for_table } = parse_options(options)?;
-            let config = ViewerConfigInitial::decode(&config)?;
+            let mut config = ViewerConfigInitial::decode(&config)?;
+            config.migrate();
             let id = create_panel(
                 &elem,
                 &presentation,

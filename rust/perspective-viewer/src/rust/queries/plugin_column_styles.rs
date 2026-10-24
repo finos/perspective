@@ -10,14 +10,12 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-use itertools::Itertools;
 use perspective_client::config::ViewConfig;
-use perspective_js::utils::{ApiResult, JsValueSerdeExt};
+use perspective_js::utils::ApiResult;
 
-use super::column_locator::is_pivot_only_column;
 use crate::config::ColumnConfigSchema;
-use crate::renderer::{ColumnRole, Renderer};
-use crate::session::SessionMetadata;
+use crate::renderer::Renderer;
+use crate::session::Session;
 
 /// Queries the active plugin for its plugin-scoped [`ColumnConfigSchema`] as
 /// it applies to `current_value`.
@@ -26,15 +24,7 @@ pub fn get_plugin_config_schema(
     view_config: &ViewConfig,
     current_value: Option<&serde_json::Map<String, serde_json::Value>>,
 ) -> ApiResult<ColumnConfigSchema> {
-    let plugin = renderer.ensure_plugin_selected()?;
-    let view_config_js =
-        wasm_bindgen::JsValue::from_serde_ext(view_config).unwrap_or(wasm_bindgen::JsValue::NULL);
-    let current_js = wasm_bindgen::JsValue::from_serde_ext(&current_value)
-        .unwrap_or(wasm_bindgen::JsValue::NULL);
-    let raw = plugin._plugin_config_schema(&view_config_js, &current_js)?;
-    serde_wasm_bindgen::from_value::<ColumnConfigSchema>(raw)
-        .map(|schema| schema.canonicalize())
-        .map_err(|e| e.into())
+    renderer.query_plugin_config_schema(view_config, current_value)
 }
 
 /// Queries the active plugin for the per-column [`ColumnConfigSchema`].
@@ -44,62 +34,15 @@ pub fn get_plugin_config_schema(
 pub fn get_column_config_schema(
     renderer: &Renderer,
     view_config: &ViewConfig,
-    metadata: &SessionMetadata,
+    session: &Session,
     column_name: &str,
     current_value: Option<&serde_json::Map<String, serde_json::Value>>,
-    abs_max: Option<f64>,
 ) -> ApiResult<ColumnConfigSchema> {
-    let plugin = renderer.ensure_plugin_selected()?;
-    let plugin_config = renderer.metadata();
-    let names = &plugin_config.config_column_names;
-    let group = view_config
-        .columns
-        .iter()
-        .find_position(|maybe_s| maybe_s.as_deref() == Some(column_name))
-        .and_then(|(idx, _)| names.get(idx))
-        .map(|s| s.as_str());
-
-    let role = if !is_pivot_only_column(column_name, view_config) {
-        ColumnRole::Column
-    } else if view_config.split_by.iter().any(|x| x == column_name) {
-        ColumnRole::SplitBy
-    } else {
-        ColumnRole::GroupBy
-    };
-
-    let view_type = match role {
-        ColumnRole::Column => metadata.get_column_view_type(column_name),
-        _ => metadata
-            .get_column_table_type(column_name)
-            .or_else(|| metadata.get_column_view_type(column_name)),
-    };
-
-    let Some(view_type) = view_type else {
-        return Ok(ColumnConfigSchema { fields: vec![] });
-    };
-
-    // Route through serde_json so maps serialize as plain JS objects
-    // rather than `Map` instances — plugin code accesses these with
-    // property syntax, not `.get()`.
-    let current_js = wasm_bindgen::JsValue::from_serde_ext(&current_value)
-        .unwrap_or(wasm_bindgen::JsValue::NULL);
-    let view_config_js =
-        wasm_bindgen::JsValue::from_serde_ext(view_config).unwrap_or(wasm_bindgen::JsValue::NULL);
-
-    let plugin_config_js = wasm_bindgen::JsValue::from_serde_ext(&renderer.get_plugin_config())
-        .unwrap_or(wasm_bindgen::JsValue::NULL);
-
-    let raw = plugin._column_config_schema(
-        &view_type.to_string(),
-        group,
+    renderer.query_column_config_schema_with(
+        view_config,
+        session,
         column_name,
-        &current_js,
-        &view_config_js,
-        &plugin_config_js,
-        role.as_str(),
-    )?;
-
-    serde_wasm_bindgen::from_value::<ColumnConfigSchema>(raw)
-        .map(|schema| schema.canonicalize().resolve_stat_defaults(abs_max))
-        .map_err(|e| e.into())
+        current_value,
+        &renderer.get_plugin_config(),
+    )
 }

@@ -167,10 +167,6 @@ pub fn just_render(session: &Session, renderer: &Renderer) -> ApiResult<ApiFutur
 pub(crate) struct Committed {
     /// A plugin selection was committed; its element must be activated.
     pub activate: bool,
-
-    /// ...and it REPLACED an earlier selection (a first selection is not a
-    /// swap, and does not force a `plugin.restore`).
-    pub plugin_swapped: bool,
     pub plugin_config_changed: bool,
     pub columns_config_changed: bool,
 }
@@ -282,17 +278,11 @@ pub(crate) async fn run_locked(
                 renderer.mount_active_plugin()?;
             }
 
-            let plugin_swapped = match &committed {
-                Some(committed) => {
-                    if committed.activate {
-                        renderer.activate_committed_plugin()?;
-                    }
-
-                    committed.plugin_swapped
-                },
+            match &committed {
+                Some(committed) if committed.activate => renderer.activate_committed_plugin()?,
+                Some(_) => {},
                 None => {
                     renderer.ensure_plugin_selected()?;
-                    false
                 },
             };
             let plugin = renderer.active_plugin().ok_or("No Plugin")?;
@@ -315,34 +305,34 @@ pub(crate) async fn run_locked(
             };
 
             let view_config_snapshot = session.committed_view_config().clone();
-            let changed = match committed {
-                Some(committed) => {
-                    let changed =
-                        committed.plugin_config_changed || committed.columns_config_changed;
+            let changed = committed
+                .as_ref()
+                .is_some_and(|c| c.plugin_config_changed || c.columns_config_changed);
 
-                    if changed || plugin_swapped {
-                        let plugin_config = renderer.committed_plugin_config();
-                        let plugin_update =
-                            JsValue::from_serde_ext(&plugin_config).unwrap_or(JsValue::NULL);
+            if changed || !renderer.is_plugin_activated()? {
+                let plugin_config = renderer.committed_plugin_config();
+                let plugin_update = JsValue::from_serde_ext(
+                    &renderer.plugin_config_materialized(&view_config_snapshot),
+                )
+                .unwrap_or(JsValue::NULL);
 
-                        let columns_config = renderer
-                            .all_columns_configs_materialized(&view_config_snapshot, &session)
-                            .await;
+                let columns_config = renderer
+                    .all_columns_configs_materialized(&view_config_snapshot, &session)
+                    .await;
 
-                        plugin.restore(&plugin_update, Some(&columns_config))?;
-                        if committed.columns_config_changed {
-                            renderer.columns_config_changed.emit(columns_config);
-                        }
-
-                        if committed.plugin_config_changed {
-                            renderer.plugin_config_changed.emit(plugin_config);
-                        }
+                plugin.restore(&plugin_update, Some(&columns_config))?;
+                if let Some(committed) = &committed {
+                    if committed.columns_config_changed {
+                        renderer
+                            .columns_config_changed
+                            .emit(renderer.committed_columns_configs());
                     }
 
-                    changed
-                },
-                None => false,
-            };
+                    if committed.plugin_config_changed {
+                        renderer.plugin_config_changed.emit(plugin_config);
+                    }
+                }
+            }
 
             if spec
                 .presentation

@@ -21,12 +21,16 @@ import {
     drawYTickColumn,
 } from "./axis-primitives";
 import type { Theme } from "../theme/theme";
+import type { DateFormatModifiers } from "@perspective-dev/viewer/column-format";
 
 export interface AxisDomain {
     min: number;
     max: number;
     label: string;
     isDate?: boolean;
+
+    /** The `timeZone`/`hour12` adaptive date labels on this axis apply. */
+    dateModifiers?: DateFormatModifiers;
 }
 
 export interface TickResult {
@@ -77,7 +81,7 @@ function tickFmt(
         return override;
     }
 
-    return stepTickFormatter(domain.isDate, ticks);
+    return stepTickFormatter(domain.isDate, ticks, domain.dateModifiers);
 }
 
 /**

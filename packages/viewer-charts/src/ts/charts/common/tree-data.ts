@@ -312,7 +312,14 @@ export function processTreeChunk(
             // Uses the same formatter as `resolveCategoryAxis`.
             const levelName = chart._groupBy[n];
             const levelType = chart._groupByTypes[levelName] ?? "string";
-            rpCols.push(synthesizeStringLevel(rp, rp.values.length, levelType));
+            rpCols.push(
+                synthesizeStringLevel(
+                    rp,
+                    rp.values.length,
+                    levelType,
+                    chart.getDateModifiers(levelName),
+                ),
+            );
         } else {
             break;
         }

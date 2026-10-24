@@ -64,6 +64,9 @@ pub struct SettingsPanelProps {
     /// from `RendererProps` into `ColumnSelector`.
     pub columns_config: PtrEqRc<ColumnConfigMap>,
 
+    /// The page-wide config defaults, forwarded into `PluginTab`.
+    pub config_defaults: PtrEqRc<ConfigDefaultsSlots>,
+
     /// Column currently being dragged (if any) — threaded to show drag
     /// highlights without per-component `DragDrop` PubSub subscriptions.
     pub drag_column: Option<String>,
@@ -119,6 +122,7 @@ impl PartialEq for SettingsPanelProps {
             && self.view_config == rhs.view_config
             && self.plugin_config == rhs.plugin_config
             && self.columns_config == rhs.columns_config
+            && self.config_defaults == rhs.config_defaults
             && self.drag_column == rhs.drag_column
             && self.metadata == rhs.metadata
             && self.open_column_settings == rhs.open_column_settings
@@ -376,6 +380,7 @@ pub fn SettingsPanel(props: &SettingsPanelProps) -> Html {
                 <PluginTab
                     view_config={props.view_config.clone()}
                     plugin_config={props.plugin_config.clone()}
+                    config_defaults={props.config_defaults.clone()}
                     presentation={presentation.clone()}
                     renderer={renderer.clone()}
                     session={session.clone()}

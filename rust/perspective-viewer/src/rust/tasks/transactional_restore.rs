@@ -252,7 +252,6 @@ fn commit(
         title,
     } = prepared;
 
-    let had_plugin = renderer.active_plugin().is_some();
     let activate = plugin.is_some();
     let binding = session.commit_view(view, title);
     let changed = renderer.commit(PreparedRenderer {
@@ -265,7 +264,6 @@ fn commit(
 
     let committed = Committed {
         activate,
-        plugin_swapped: activate && had_plugin,
         plugin_config_changed: changed.plugin_config,
         columns_config_changed: changed.columns_config,
     };

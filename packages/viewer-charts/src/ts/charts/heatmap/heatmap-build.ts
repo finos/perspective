@@ -10,6 +10,7 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+import type { DateFormatModifiers } from "@perspective-dev/viewer/column-format";
 import type { ColumnDataMap } from "../../data/view-reader";
 import type { CategoricalLevel } from "../../axis/categorical-axis";
 import { buildGroupRuns } from "../../axis/categorical-axis-core";
@@ -40,6 +41,9 @@ export interface HeatmapPipelineInput {
      * decision when there's a single split_by.
      */
     groupByTypes: Record<string, string>;
+
+    /** Per-column `timeZone`/`hour12` adaptive date labels apply. */
+    dateModifiers?: ReadonlyMap<string, DateFormatModifiers>;
 }
 
 export interface HeatmapPipelineResult {
@@ -100,7 +104,8 @@ export interface HeatmapPipelineResult {
 export function buildHeatmapPipeline(
     input: HeatmapPipelineInput,
 ): HeatmapPipelineResult {
-    const { columns, numRows, groupBy, splitBy, groupByTypes } = input;
+    const { columns, numRows, groupBy, splitBy, groupByTypes, dateModifiers } =
+        input;
 
     const xAxisMode = resolveAxisMode(groupBy, groupByTypes);
 
@@ -134,6 +139,7 @@ export function buildHeatmapPipeline(
         groupBy.length,
         levelTypes,
         xAxisMode,
+        groupBy.map((name) => dateModifiers?.get(name)),
     );
 
     // Numeric X domain: sourced from `__ROW_PATH_0__`'s raw values when
@@ -149,6 +155,9 @@ export function buildHeatmapPipeline(
             groupBy[0] ?? "",
             xAxisMode.numericType === "date" ||
                 xAxisMode.numericType === "datetime",
+            xAxisMode.numericType === "datetime"
+                ? dateModifiers?.get(groupBy[0])
+                : undefined,
         );
         if (resolved) {
             xPositions = resolved.categoryPositions;
@@ -202,6 +211,9 @@ export function buildHeatmapPipeline(
                 splitBy[0] ?? "",
                 yAxisModeRaw.numericType === "date" ||
                     yAxisModeRaw.numericType === "datetime",
+                yAxisModeRaw.numericType === "datetime"
+                    ? dateModifiers?.get(splitBy[0])
+                    : undefined,
             );
             if (resolved) {
                 yAxisMode = yAxisModeRaw;

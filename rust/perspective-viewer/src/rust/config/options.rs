@@ -15,6 +15,7 @@
 //! re-exported from the crate's `typescript_custom_section`) alongside the
 //! config types, rather than hand-maintained.
 
+use perspective_client::proto::ColumnType;
 use serde::Deserialize;
 use ts_rs::TS;
 
@@ -142,4 +143,25 @@ pub struct SaveWorkspaceOptions {
     #[serde(default)]
     #[ts(optional)]
     pub full_palette: Option<bool>,
+}
+
+/// Options for the static `setPluginConfigDefaults()` method.
+#[derive(Deserialize, Default, TS)]
+pub struct ConfigDefaultsOptions {
+    /// Limits the defaults to the named plugin.
+    #[ts(optional)]
+    pub plugin: Option<String>,
+}
+
+/// Options for the static `setColumnConfigDefaults()` method.
+#[derive(Deserialize, Default, TS)]
+pub struct ColumnConfigDefaultsOptions {
+    /// Limits the defaults to the named plugin.
+    #[ts(optional)]
+    pub plugin: Option<String>,
+
+    /// Limits the defaults to columns of this view type.
+    #[serde(rename = "type")]
+    #[ts(optional, as = "Option<ColumnType>")]
+    pub ty: Option<String>,
 }

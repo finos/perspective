@@ -288,6 +288,9 @@ function buildXDomain(
         label:
             chart._xLabel || (chart._xIsRowIndex ? "Row" : chart._xName || ""),
         isDate,
+        dateModifiers: isDate
+            ? chart.getDateModifiers(chart._xName)
+            : undefined,
     };
 }
 
@@ -302,6 +305,9 @@ function buildYDomain(
         max,
         label: chart._yLabel || chart._yName,
         isDate,
+        dateModifiers: isDate
+            ? chart.getDateModifiers(chart._yName)
+            : undefined,
     };
 }
 
@@ -1424,10 +1430,18 @@ function cartesianAxisIndicators(
     } else {
         const xFmt =
             xOverride ??
-            stepTickFormatter(chart._lastXDomain?.isDate, chart._lastXTicks);
+            stepTickFormatter(
+                chart._lastXDomain?.isDate,
+                chart._lastXTicks,
+                chart._lastXDomain?.dateModifiers,
+            );
         const yFmt =
             yOverride ??
-            stepTickFormatter(chart._lastYDomain?.isDate, chart._lastYTicks);
+            stepTickFormatter(
+                chart._lastYDomain?.isDate,
+                chart._lastYTicks,
+                chart._lastYDomain?.dateModifiers,
+            );
         xText = xFmt(dataX);
         yText = yFmt(dataY);
     }

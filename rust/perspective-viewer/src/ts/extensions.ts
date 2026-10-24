@@ -14,7 +14,9 @@ import type { HTMLPerspectiveViewerPluginElement } from "./plugin";
 import type { PerspectiveViewerElement } from "../../dist/wasm/perspective-viewer.js";
 import type React from "react";
 import type { ViewerConfigUpdate } from "./ts-rs/ViewerConfigUpdate.js";
-import type { ViewWindow, Filter } from "@perspective-dev/client";
+import type { ColumnType, ViewWindow, Filter } from "@perspective-dev/client";
+import type { ConfigDefaultsOptions } from "./ts-rs/ConfigDefaultsOptions.js";
+import type { ColumnConfigDefaultsOptions } from "./ts-rs/ColumnConfigDefaultsOptions.js";
 import type { PerspectiveSelectDetail } from "./select-detail.ts";
 
 export { PerspectiveSelectDetail } from "./select-detail.ts";
@@ -149,6 +151,73 @@ export interface PerspectiveViewerElementExt {
      * ```
      */
     registerPlugin(name: string): Promise<void>;
+
+    /**
+     * Merge `defaults` into the `plugin_config` defaults every
+     * `<perspective-viewer>` on the page applies.
+     *
+     * @category Plugin
+     * @param defaults Values keyed like `plugin_config`, where `null` removes
+     * a default, or `null` to clear the slot.
+     * @param options `plugin` limits the defaults to one plugin.
+     * @example
+     * ```javascript
+     * customElements
+     *     .get("perspective-viewer")
+     *     .setPluginConfigDefaults({ group_pad: 10 });
+     * ```
+     */
+    setPluginConfigDefaults(
+        defaults: Record<string, unknown> | null,
+        options?: ConfigDefaultsOptions,
+    ): void;
+
+    /**
+     * Merge `defaults` into the `columns_config` defaults every
+     * `<perspective-viewer>` on the page applies.
+     *
+     * @category Plugin
+     * @param defaults Values keyed like one `columns_config` entry, where
+     * `null` removes a default, or `null` to clear the slot.
+     * @param options `plugin` limits the defaults to one plugin, `type` to
+     * columns of one view type.
+     * @example
+     * ```javascript
+     * customElements
+     *     .get("perspective-viewer")
+     *     .setColumnConfigDefaults(
+     *         { date_format: { timeZone: "UTC" } },
+     *         { type: "datetime" },
+     *     );
+     * ```
+     */
+    setColumnConfigDefaults(
+        defaults: Record<string, unknown> | null,
+        options?: ColumnConfigDefaultsOptions,
+    ): void;
+
+    /**
+     * The `plugin_config` defaults set by `setPluginConfigDefaults()`, one
+     * entry per slot.
+     *
+     * @category Plugin
+     */
+    getPluginConfigDefaults(): Array<{
+        plugin?: string;
+        defaults: Record<string, unknown>;
+    }>;
+
+    /**
+     * The `columns_config` defaults set by `setColumnConfigDefaults()`, one
+     * entry per slot.
+     *
+     * @category Plugin
+     */
+    getColumnConfigDefaults(): Array<{
+        plugin?: string;
+        type?: ColumnType;
+        defaults: Record<string, unknown>;
+    }>;
 
     get_wasm_module(): WebAssembly.Module;
 

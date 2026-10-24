@@ -25,6 +25,7 @@ use serde_json::Value;
 use wasm_bindgen::prelude::*;
 
 use super::Renderer;
+use super::config_defaults::{CONFIG_DEFAULTS, ConfigDefaults};
 use super::state::PluginRef;
 use crate::config::*;
 use crate::js::plugin::JsPerspectiveViewerPlugin;
@@ -237,7 +238,7 @@ pub fn validate_columns_config(
                     }
 
                     resolve_css(&col, &mut cfg);
-                    strip_default_values(&schema, &mut cfg);
+                    strip_default_values(&schema, &mut cfg, view_type_of(&col));
                 }
 
                 stripped.push((col, cfg));
@@ -568,18 +569,22 @@ impl Renderer {
         out
     }
 
-    /// Restore-prep snapshot: like [`Self::all_columns_configs`], but
-    /// for each column also materializes any `ControlSpec::Number`
-    /// fields the schema declares with `include: true` that aren't
-    /// already in the bucket entry. The materialized value is the
-    /// schema's `default`, which the schema computes from cached
-    /// column stats (via [`Self::query_column_config_schema`]).
+    /// The active plugin's committed per-column configs as delivered to it:
+    /// stored values plus default overrides and `include: true` numbers it does
+    /// not store.
     pub async fn all_columns_configs_materialized(
         &self,
         view_config: &ViewConfig,
         session: &Session,
     ) -> ColumnConfigMap {
         let mut configs = self.committed_columns_configs();
+        let plugin = self.metadata().name.clone();
+        if CONFIG_DEFAULTS.with(|d| d.slots().has_column_layers(&plugin)) {
+            for column in configurable_columns(view_config) {
+                configs.entry(column).or_default();
+            }
+        }
+
         let mut to_warm: Vec<String> = vec![];
         for (col, entry) in &configs {
             if session
@@ -589,11 +594,13 @@ impl Renderer {
             {
                 continue;
             }
-            let Ok(schema) =
-                self.query_column_config_schema(view_config, session, col, Some(entry))
+
+            let current = Some(entry).filter(|e| !e.is_empty());
+            let Ok(schema) = self.query_column_config_schema(view_config, session, col, current)
             else {
                 continue;
             };
+
             let needs_warm = schema.leaf_fields().into_iter().any(|f| {
                 matches!(
                     f,
@@ -605,6 +612,7 @@ impl Renderer {
                     } if !entry.contains_key(key)
                 )
             });
+
             if needs_warm {
                 to_warm.push(col.clone());
             }
@@ -619,14 +627,28 @@ impl Renderer {
             join_all(futs).await;
         }
 
+        let Ok(target) = self.active_target() else {
+            return configs;
+        };
+
+        let plugin_config = self.committed_plugin_config();
+        let env = ColumnSchemaEnv {
+            view_config,
+            session,
+            view_schema: None,
+            column_stats: true,
+            plugin_config: &plugin_config,
+        };
+
         for (col, entry) in &mut configs {
-            let Ok(schema) =
-                self.query_column_config_schema(view_config, session, col, Some(entry))
+            let current = Some(&*entry).filter(|e| !e.is_empty()).cloned();
+            let Ok(resolved) =
+                self.query_column_config_schema_resolved(&target, &env, col, current.as_ref())
             else {
                 continue;
             };
 
-            for field in schema.leaf_fields() {
+            for field in resolved.schema.leaf_fields() {
                 let ControlSpec::Number {
                     key,
                     default,
@@ -647,9 +669,30 @@ impl Renderer {
 
                 entry.insert(key.clone(), serde_json::Value::Number(num));
             }
+
+            materialize_overrides(entry, &resolved);
         }
 
+        configs.retain(|_, entry| !entry.is_empty());
         configs
+    }
+
+    /// The active plugin's committed `plugin_config` as delivered to it: stored
+    /// values plus the default overrides it does not store.
+    pub fn plugin_config_materialized(&self, view_config: &ViewConfig) -> ConfigMap {
+        let mut config = self.committed_plugin_config();
+        let plugin = self.metadata().name.clone();
+        let has_layers = CONFIG_DEFAULTS.with(|d| !d.slots().plugin_layers(&plugin).is_empty());
+
+        if has_layers
+            && let Ok(target) = self.active_target()
+            && let Ok(resolved) =
+                self.query_plugin_config_schema_resolved(&target, view_config, Some(&config))
+        {
+            materialize_overrides(&mut config, &resolved);
+        }
+
+        config
     }
 
     /// Clear the active plugin's per-column config map.
@@ -733,7 +776,8 @@ impl Renderer {
             }
 
             self.resolve_css_refs_in(&column_name, &mut update.value);
-            strip_default_values(&schema, &mut update.value);
+            let view_type = session.metadata().get_column_view_type(&column_name);
+            strip_default_values(&schema, &mut update.value, view_type);
         }
 
         let next = self.edit_bucket(&n, |bucket| {
@@ -802,10 +846,10 @@ impl Renderer {
         }
     }
 
-    /// Synchronously query the active plugin's [`ColumnConfigSchema`] as it
-    /// applies to `current_value`, the plugin-config state the schema should
-    /// describe.
-    fn query_plugin_config_schema(
+    /// The active plugin's plugin-level [`ColumnConfigSchema`] for
+    /// `current_value`, the plugin-config state it should describe, with
+    /// default overrides applied.
+    pub(crate) fn query_plugin_config_schema(
         &self,
         view_config: &ViewConfig,
         current_value: Option<&ConfigMap>,
@@ -814,27 +858,63 @@ impl Renderer {
         self.query_plugin_config_schema_for(&target, view_config, current_value)
     }
 
-    /// [`Self::query_plugin_config_schema`] against an explicit target.
     fn query_plugin_config_schema_for(
         &self,
         target: &PluginTarget,
         view_config: &ViewConfig,
         current_value: Option<&ConfigMap>,
     ) -> ApiResult<ColumnConfigSchema> {
+        self.query_plugin_config_schema_resolved(target, view_config, current_value)
+            .map(|resolved| resolved.schema)
+    }
+
+    fn query_plugin_config_schema_resolved(
+        &self,
+        target: &PluginTarget,
+        view_config: &ViewConfig,
+        current_value: Option<&ConfigMap>,
+    ) -> ApiResult<ResolvedSchema> {
+        let defaults = CONFIG_DEFAULTS.with(ConfigDefaults::slots);
+        let plugin = &target.static_config.name;
+        let layers = defaults.plugin_layers(plugin);
+        let current = with_plain_overrides(current_value, &layers);
         let view_config_js = JsValue::from_serde_ext(view_config).unwrap_or(JsValue::NULL);
-        let current_js = JsValue::from_serde_ext(&current_value).unwrap_or(JsValue::NULL);
+        let current_js = JsValue::from_serde_ext(&current).unwrap_or(JsValue::NULL);
         let raw = target
             .element
             ._plugin_config_schema(&view_config_js, &current_js)?;
 
-        serde_wasm_bindgen::from_value::<ColumnConfigSchema>(raw)
-            .map(|schema| schema.canonicalize())
-            .map_err(|e| e.into())
+        let schema = serde_wasm_bindgen::from_value::<ColumnConfigSchema>(raw)?.canonicalize();
+        Ok(ResolvedSchema::apply(schema, &layers, None, plugin, None))
     }
 
-    /// Per-column counterpart of [`query_plugin_config_schema`]. Used by
-    /// the columns-config write paths (strip-on-write) and the
-    /// restore-prep snapshot (materialize-on-read).
+    /// The active plugin's [`ColumnConfigSchema`] for `column_name` under
+    /// `plugin_config`, with default overrides applied; empty until the view's
+    /// schema is known.
+    pub(crate) fn query_column_config_schema_with(
+        &self,
+        view_config: &ViewConfig,
+        session: &Session,
+        column_name: &str,
+        current_value: Option<&ConfigMap>,
+        plugin_config: &ConfigMap,
+    ) -> ApiResult<ColumnConfigSchema> {
+        if !session.metadata().has_view_schema() {
+            return Ok(ColumnConfigSchema::default());
+        }
+
+        let target = self.active_target()?;
+        let env = ColumnSchemaEnv {
+            view_config,
+            session,
+            view_schema: None,
+            column_stats: true,
+            plugin_config,
+        };
+
+        self.query_column_config_schema_for(&target, &env, column_name, current_value)
+    }
+
     fn query_column_config_schema(
         &self,
         view_config: &ViewConfig,
@@ -854,10 +934,6 @@ impl Renderer {
         self.query_column_config_schema_for(&target, &env, column_name, current_value)
     }
 
-    /// [`Self::query_column_config_schema`] against an explicit target: the
-    /// column's group comes from the TARGET's static config, and its view type
-    /// from `view_schema` when given (a config not yet bound to a `View`), else
-    /// from the bound `View`'s schema.
     fn query_column_config_schema_for(
         &self,
         target: &PluginTarget,
@@ -865,6 +941,17 @@ impl Renderer {
         column_name: &str,
         current_value: Option<&ConfigMap>,
     ) -> ApiResult<ColumnConfigSchema> {
+        self.query_column_config_schema_resolved(target, env, column_name, current_value)
+            .map(|resolved| resolved.schema)
+    }
+
+    fn query_column_config_schema_resolved(
+        &self,
+        target: &PluginTarget,
+        env: &ColumnSchemaEnv<'_>,
+        column_name: &str,
+        current_value: Option<&ConfigMap>,
+    ) -> ApiResult<ResolvedSchema> {
         let ColumnSchemaEnv {
             view_config,
             session,
@@ -909,10 +996,14 @@ impl Renderer {
         };
 
         let Some(view_type) = view_type else {
-            return Ok(ColumnConfigSchema { fields: vec![] });
+            return Ok(ResolvedSchema::default());
         };
 
-        let current_js = JsValue::from_serde_ext(&current_value).unwrap_or(JsValue::NULL);
+        let defaults = CONFIG_DEFAULTS.with(ConfigDefaults::slots);
+        let plugin = &target.static_config.name;
+        let layers = defaults.column_layers(plugin, view_type);
+        let current = with_plain_overrides(current_value, &layers);
+        let current_js = JsValue::from_serde_ext(&current).unwrap_or(JsValue::NULL);
         let view_config_js = JsValue::from_serde_ext(view_config).unwrap_or(JsValue::NULL);
         let plugin_config_js = JsValue::from_serde_ext(plugin_config).unwrap_or(JsValue::NULL);
         let raw = target.element._column_config_schema(
@@ -933,9 +1024,17 @@ impl Renderer {
             })
             .flatten();
 
-        serde_wasm_bindgen::from_value::<ColumnConfigSchema>(raw)
-            .map(|schema| schema.canonicalize().resolve_stat_defaults(abs_max))
-            .map_err(|e| e.into())
+        let schema = serde_wasm_bindgen::from_value::<ColumnConfigSchema>(raw)?
+            .canonicalize()
+            .resolve_stat_defaults(abs_max);
+
+        Ok(ResolvedSchema::apply(
+            schema,
+            &layers,
+            Some(view_type),
+            plugin,
+            Some(column_name),
+        ))
     }
 
     /// Merge an update into the active plugin's plugin-level config map:
@@ -993,7 +1092,7 @@ impl Renderer {
                 tracing::error!("Dropping `plugin_config`.`{key}`: {error}");
             }
 
-            strip_default_values(schema, &mut update.value);
+            strip_default_values(schema, &mut update.value, None);
         }
 
         self.edit_bucket(&n, |bucket| {
@@ -1021,14 +1120,177 @@ impl Renderer {
     }
 }
 
-/// Canonicalize every CSS-valued key of `map` and check every `Enum`-valued
-/// key against its variants, removing and reporting the keys that fail.
-/// The schema is the one queried for `map`'s own values, so an `Enum`'s
-/// variants are exactly the values the column's type accepts.
+/// A schema with default overrides applied, and the override-only value of
+/// every key they set.
+#[derive(Default)]
+struct ResolvedSchema {
+    schema: ColumnConfigSchema,
+    overrides: OverrideValues,
+    view_type: Option<ColumnType>,
+}
+
+impl ResolvedSchema {
+    fn apply(
+        mut schema: ColumnConfigSchema,
+        layers: &[&ConfigMap],
+        view_type: Option<ColumnType>,
+        plugin: &str,
+        column: Option<&str>,
+    ) -> Self {
+        if layers.is_empty() {
+            return Self {
+                schema,
+                overrides: OverrideValues::new(),
+                view_type,
+            };
+        }
+
+        let (overrides, errors) =
+            schema.apply_defaults(layers, view_type == Some(ColumnType::Float));
+
+        let column = column
+            .map(|column| format!(" column `{column}`"))
+            .unwrap_or_default();
+
+        for (key, error) in errors {
+            CONFIG_DEFAULTS.with(|d| {
+                d.report(format!(
+                    "Ignoring default override `{key}` for plugin `{plugin}`{column}: {error}"
+                ))
+            });
+        }
+
+        Self {
+            schema,
+            overrides,
+            view_type,
+        }
+    }
+
+    /// The `number_format` default this schema resolves to, overrides included.
+    fn number_format_default(&self) -> Option<CustomNumberFormatConfig> {
+        self.schema
+            .leaf_fields()
+            .into_iter()
+            .find_map(|spec| match spec {
+                ControlSpec::NumberFormat { default } => Some(default.clone().unwrap_or_default()),
+                _ => None,
+            })
+    }
+}
+
+/// `current` with every non-object value of `layers` it lacks, the highest
+/// layer winning.
+fn with_plain_overrides(current: Option<&ConfigMap>, layers: &[&ConfigMap]) -> Option<ConfigMap> {
+    if layers.is_empty() {
+        return current.cloned();
+    }
+
+    let mut out = current.cloned().unwrap_or_default();
+    for layer in layers.iter().rev() {
+        for (key, value) in layer.iter() {
+            if !value.is_object() && !out.contains_key(key) {
+                out.insert(key.clone(), value.clone());
+            }
+        }
+    }
+
+    Some(out)
+}
+
+/// Every column a plugin may configure under `view_config`.
+fn configurable_columns(view_config: &ViewConfig) -> Vec<String> {
+    view_config
+        .columns
+        .iter()
+        .flatten()
+        .chain(view_config.group_by.iter())
+        .chain(view_config.split_by.iter())
+        .cloned()
+        .collect()
+}
+
+/// Write the overrides `resolved` applied into `entry`, a stored config being
+/// delivered: plain keys it lacks, and each format layered under its stored
+/// value.
+fn materialize_overrides(entry: &mut ConfigMap, resolved: &ResolvedSchema) {
+    for (key, value) in &resolved.overrides {
+        match key.as_str() {
+            "date_format" => {
+                let Ok(overrides) = serde_json::from_value::<DatetimeFormat>(value.clone()) else {
+                    continue;
+                };
+
+                let stored = stored_format::<DatetimeFormat>(entry, key);
+                if let Ok(delivered) = serde_json::to_value(overrides.overlay(&stored)) {
+                    entry.insert(key.clone(), delivered);
+                }
+            },
+            "number_format" => {
+                let Ok(overrides) =
+                    serde_json::from_value::<CustomNumberFormatConfig>(value.clone())
+                else {
+                    continue;
+                };
+
+                let stored = stored_format::<CustomNumberFormatConfig>(entry, key);
+                let mut delivered = overrides.overlay(&stored);
+                let full = NumberFormatDefaults::resolve(
+                    Some(
+                        &resolved
+                            .number_format_default()
+                            .unwrap_or_default()
+                            .overlay(&stored),
+                    ),
+                    resolved.view_type == Some(ColumnType::Float),
+                );
+
+                if delivered.minimum_fraction_digits.is_some()
+                    != delivered.maximum_fraction_digits.is_some()
+                {
+                    delivered.minimum_fraction_digits = Some(full.fraction.0);
+                    delivered.maximum_fraction_digits = Some(full.fraction.1);
+                }
+
+                if delivered.minimum_significant_digits.is_some()
+                    != delivered.maximum_significant_digits.is_some()
+                {
+                    delivered.minimum_significant_digits = Some(full.significant.0);
+                    delivered.maximum_significant_digits = Some(full.significant.1);
+                }
+
+                if let Ok(delivered) = serde_json::to_value(delivered) {
+                    entry.insert(key.clone(), delivered);
+                }
+            },
+            _ => {
+                entry.entry(key.clone()).or_insert_with(|| value.clone());
+            },
+        }
+    }
+}
+
+fn stored_format<T: serde::de::DeserializeOwned + Default>(entry: &ConfigMap, key: &str) -> T {
+    entry
+        .get(key)
+        .and_then(|value| serde_json::from_value(value.clone()).ok())
+        .unwrap_or_default()
+}
+
+/// Canonicalize every CSS-valued key of `map`, check every `Enum`-valued key
+/// against its variants and every format against its type, removing and
+/// reporting the keys that fail.
 fn normalize_values(
     schema: &ColumnConfigSchema,
     map: &mut serde_json::Map<String, serde_json::Value>,
 ) -> Vec<(String, String)> {
+    let leaves = schema.leaf_fields();
+    let owns = |key: &str, matches: fn(&ControlSpec) -> bool| {
+        leaves
+            .iter()
+            .any(|spec| matches(spec) && spec.serialized_keys().contains(&key))
+    };
+
     let mut errors = vec![];
     for (key, value) in map.iter_mut() {
         if let Some(kind) = schema.css_kind_of(key) {
@@ -1052,6 +1314,20 @@ fn normalize_values(
 
                 errors.push((key.clone(), format!("{value} is not one of {expected}")));
             }
+        } else if owns(key, |spec| {
+            matches!(spec, ControlSpec::DatetimeFormat { .. })
+        }) {
+            let checked = serde_json::from_value::<DatetimeFormat>(value.clone())
+                .map_err(|e| e.to_string())
+                .and_then(|format| format.validate());
+
+            if let Err(error) = checked {
+                errors.push((key.clone(), error));
+            }
+        } else if owns(key, |spec| matches!(spec, ControlSpec::NumberFormat { .. }))
+            && let Err(error) = serde_json::from_value::<CustomNumberFormatConfig>(value.clone())
+        {
+            errors.push((key.clone(), error.to_string()));
         }
     }
 
@@ -1065,6 +1341,7 @@ fn normalize_values(
 fn strip_default_values(
     schema: &ColumnConfigSchema,
     map: &mut serde_json::Map<String, serde_json::Value>,
+    view_type: Option<ColumnType>,
 ) {
     let leaves = schema.leaf_fields();
     map.retain(|key, value| {
@@ -1072,6 +1349,50 @@ fn strip_default_values(
             .iter()
             .any(|spec| matches_declared_default(spec, key, value))
     });
+
+    for spec in leaves {
+        match spec {
+            ControlSpec::DatetimeFormat { default } => {
+                let Some(Ok(stored)) = map
+                    .get("date_format")
+                    .map(|v| serde_json::from_value::<DatetimeFormat>(v.clone()))
+                else {
+                    continue;
+                };
+
+                let inherited = DatetimeFormat::base(view_type == Some(ColumnType::Datetime))
+                    .overlay(&default.clone().unwrap_or_default());
+
+                let diff = stored.diff(&inherited);
+                match serde_json::to_value(&diff) {
+                    Ok(value) if !diff.is_empty() => map.insert("date_format".to_owned(), value),
+                    _ => map.remove("date_format"),
+                };
+            },
+            ControlSpec::NumberFormat { default } => {
+                let Some(Ok(stored)) = map
+                    .get("number_format")
+                    .map(|v| serde_json::from_value::<CustomNumberFormatConfig>(v.clone()))
+                else {
+                    continue;
+                };
+
+                let defaults = NumberFormatDefaults::resolve(
+                    default.as_ref(),
+                    view_type == Some(ColumnType::Float),
+                );
+
+                let filtered = stored.filter_default(&defaults);
+                match serde_json::to_value(&filtered) {
+                    Ok(value) if filtered != CustomNumberFormatConfig::default() => {
+                        map.insert("number_format".to_owned(), value)
+                    },
+                    _ => map.remove("number_format"),
+                };
+            },
+            _ => {},
+        }
+    }
 }
 
 fn matches_declared_default(spec: &ControlSpec, key: &str, value: &Value) -> bool {

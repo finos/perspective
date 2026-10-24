@@ -602,6 +602,7 @@ export class SeriesChart extends CategoricalYChart {
             groupBy: this._groupBy,
             splitBy: this._splitBy,
             groupByTypes: this._groupByTypes,
+            dateModifiers: this._columnDateModifiers,
             columnsConfig: this._columnsConfig,
             defaultChartType: this._defaultChartType as
                 | "bar"

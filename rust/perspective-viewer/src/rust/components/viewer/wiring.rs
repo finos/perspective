@@ -325,7 +325,16 @@ pub(super) fn create_active_subscriptions(
             .columns_config_changed
             .add_listener(cb_columns_config);
 
-        vec![sub1, sub2, sub3]
+        let cb_config_defaults = ctx.link().callback({
+            let renderer = renderer.clone();
+            move |()| UpdateRenderer(Box::new(renderer.to_props(None)))
+        });
+
+        let sub4 = renderer
+            .config_defaults_changed
+            .add_listener(cb_config_defaults);
+
+        vec![sub1, sub2, sub3, sub4]
     };
 
     let mut subscriptions = Vec::new();

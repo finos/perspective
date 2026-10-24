@@ -58,6 +58,7 @@
     - [Arranging panels: layouts and dashboards](./how_to/javascript/layout.md)
     - [Listening for events](./how_to/javascript/events.md)
     - [Plugin render limits](./how_to/javascript/plugin_settings.md)
+    - [Configuration defaults](./how_to/javascript/config_defaults.md)
     - [Map tile sources](./how_to/javascript/map_tile_sources.md)
     - [Configuring the LLM agent](./how_to/javascript/agent.md)
 - [Virtual Servers](./how_to/javascript/virtual_server.md)

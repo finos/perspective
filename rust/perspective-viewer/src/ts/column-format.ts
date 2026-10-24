@@ -18,17 +18,13 @@
  *
  * The format configs mirror the `Intl.NumberFormatOptions` /
  * `Intl.DateTimeFormatOptions` shapes one-for-one — they're written
- * straight into the respective constructors. The `date_format.format`
- * discriminator ("simple" | "custom") selects between two derivation
- * paths: simple uses `dateStyle` / `timeStyle`, custom uses the
- * per-field overrides (year / month / day / ...).
+ * straight into the respective constructors.
  */
 
 import type { CustomNumberFormatConfig } from "./ts-rs/CustomNumberFormatConfig.d.ts";
 import type { NumberFormatStyle } from "./ts-rs/NumberFormatStyle.d.ts";
 import type { Notation } from "./ts-rs/Notation.d.ts";
-import type { DatetimeFormatType } from "./ts-rs/DatetimeFormatType.d.ts";
-import type { SimpleDatetimeStyleConfig } from "./ts-rs/SimpleDatetimeStyleConfig.d.ts";
+import type { DatetimeFormat } from "./ts-rs/DatetimeFormat.d.ts";
 
 /**
  * A numeric column's `number_format` (`columns_config` value), exactly as
@@ -42,18 +38,58 @@ export type NumberFormatConfig = CustomNumberFormatConfig &
     Partial<Notation>;
 
 /**
- * A datetime column's `date_format` (`columns_config` value) — the Rust
- * `DatetimeFormatType` union: a `Simple` preset (`dateStyle` /
- * `timeStyle`), or per-part custom fields discriminated by
- * `format: "custom"`.
+ * A datetime column's `date_format` (`columns_config` value), a subset of
+ * `Intl.DateTimeFormatOptions`.
  */
-export type DateFormatConfig = DatetimeFormatType;
+export type DateFormatConfig = DatetimeFormat;
 
-/** Narrow a [`DateFormatConfig`] to its `Simple` arm, if it is one. */
-function simple_config(
-    cfg?: DateFormatConfig,
-): SimpleDatetimeStyleConfig | undefined {
-    return cfg && !("format" in cfg) ? cfg : undefined;
+/** The `date_format` keys that apply as one group. */
+export const DATE_FORMAT_SHAPE_KEYS = [
+    "dateStyle",
+    "timeStyle",
+    "weekday",
+    "year",
+    "month",
+    "day",
+    "hour",
+    "minute",
+    "second",
+    "fractionalSecondDigits",
+] as const satisfies readonly (keyof DateFormatConfig)[];
+
+/** The `date_format` keys that apply individually. */
+export const DATE_FORMAT_MODIFIER_KEYS = [
+    "timeZone",
+    "hour12",
+] as const satisfies readonly (keyof DateFormatConfig)[];
+
+/** Whether `cfg` sets any of the `date_format` keys that apply as one group. */
+export function hasDateFormatShape(
+    cfg: DateFormatConfig | undefined,
+): cfg is DateFormatConfig {
+    return DATE_FORMAT_SHAPE_KEYS.some((key) => cfg?.[key] !== undefined);
+}
+
+/** The `date_format` options that apply individually. */
+export type DateFormatModifiers = Pick<
+    Intl.DateTimeFormatOptions,
+    "timeZone" | "hour12"
+>;
+
+/** The `date_format` keys of `cfg` that apply individually, if it sets any. */
+export function dateFormatModifiers(
+    cfg: DateFormatConfig | undefined,
+): DateFormatModifiers | undefined {
+    const out: DateFormatModifiers = {};
+    if (cfg?.timeZone !== undefined) {
+        out.timeZone = cfg.timeZone;
+    }
+
+    if (cfg?.hour12 !== undefined) {
+        out.hour12 = cfg.hour12;
+    }
+
+    return Object.keys(out).length > 0 ? out : undefined;
 }
 
 /**
@@ -71,17 +107,31 @@ const NUMERIC_LEGACY_DEFAULTS: Record<string, Intl.NumberFormatOptions> = {
 };
 
 /**
- * Default `Intl.DateTimeFormatOptions` applied when a datetime column has
- * no `date_format` configured.
+ * The viewer's own `date_format` for a datetime column, below every plugin
+ * and override layer.
  */
-const DATETIME_LEGACY_DEFAULTS: Intl.DateTimeFormatOptions = {
+const DATETIME_BASE: DateFormatConfig = {
     dateStyle: "short",
     timeStyle: "medium",
 };
 
-const DATE_LEGACY_DEFAULTS: Intl.DateTimeFormatOptions = {
+const DATE_BASE: DateFormatConfig & { dateStyle: "short" } = {
     dateStyle: "short",
 };
+
+const NUMBER_FORMAT_GROUPS: readonly (readonly string[])[] = [
+    [
+        "style",
+        "currency",
+        "currencyDisplay",
+        "currencySign",
+        "unit",
+        "unitDisplay",
+    ],
+    ["notation", "compactDisplay"],
+    ["minimumFractionDigits", "maximumFractionDigits"],
+    ["minimumSignificantDigits", "maximumSignificantDigits"],
+];
 
 function mergeNumberOptions(
     base: Intl.NumberFormatOptions,
@@ -95,20 +145,12 @@ function mergeNumberOptions(
     }
 
     const merged: Record<string, unknown> = { ...base };
-    if (
-        "minimumFractionDigits" in explicit ||
-        "maximumFractionDigits" in explicit
-    ) {
-        delete merged.minimumFractionDigits;
-        delete merged.maximumFractionDigits;
-    }
-
-    if (
-        "minimumSignificantDigits" in explicit ||
-        "maximumSignificantDigits" in explicit
-    ) {
-        delete merged.minimumSignificantDigits;
-        delete merged.maximumSignificantDigits;
+    for (const group of NUMBER_FORMAT_GROUPS) {
+        if (group.some((key) => key in explicit)) {
+            for (const key of group) {
+                delete merged[key];
+            }
+        }
     }
 
     return Object.assign(merged, explicit) as Intl.NumberFormatOptions;
@@ -136,90 +178,67 @@ export function createNumberFormatter(
 }
 
 /**
- * `defaults` is the calling plugin's declared default `date_format`,
- * applied only when `cfg` is wholly absent.
+ * `cfg` layered over `defaults`, then over `base`, by the `date_format`
+ * group rule, as `Intl.DateTimeFormat` options.
+ */
+export function resolveDateFormat(
+    cfg: DateFormatConfig | undefined,
+    defaults: DateFormatConfig | undefined,
+    base: DateFormatConfig,
+): Intl.DateTimeFormatOptions {
+    const layers = [cfg, defaults, base];
+    const shape: DateFormatConfig = layers.find(hasDateFormatShape) ?? {};
+    const opts: DateFormatConfig = {};
+    const copy = <K extends keyof DateFormatConfig>(
+        key: K,
+        from: DateFormatConfig | undefined,
+    ) => {
+        if (from !== undefined && from[key] !== undefined) {
+            opts[key] = from[key];
+        }
+    };
+
+    for (const key of DATE_FORMAT_SHAPE_KEYS) {
+        copy(key, shape);
+    }
+
+    for (const key of DATE_FORMAT_MODIFIER_KEYS) {
+        copy(
+            key,
+            layers.find((layer) => layer?.[key] !== undefined),
+        );
+    }
+
+    return opts;
+}
+
+/**
+ * `defaults` is the calling plugin's declared default `date_format`, which
+ * `cfg` overrides by the `date_format` group rule.
  */
 export function createDatetimeFormatter(
     cfg?: DateFormatConfig,
     defaults?: DateFormatConfig,
 ): Intl.DateTimeFormat {
-    cfg = cfg ?? defaults;
-    if (!cfg || !("format" in cfg)) {
-        const preset = simple_config(cfg);
-        const opts: Intl.DateTimeFormatOptions = {
-            timeZone: preset?.timeZone ?? undefined,
-            dateStyle:
-                preset?.dateStyle === "disabled"
-                    ? undefined
-                    : (preset?.dateStyle ?? DATETIME_LEGACY_DEFAULTS.dateStyle),
-            timeStyle:
-                preset?.timeStyle === "disabled"
-                    ? undefined
-                    : (preset?.timeStyle ?? DATETIME_LEGACY_DEFAULTS.timeStyle),
-        };
-
-        return new Intl.DateTimeFormat(navigator.languages as string[], opts);
-    }
-
-    // Per-part fields are the shared `CustomDatetimeFormat` enum; the
-    // editor only writes each part's `Intl`-valid subset, so the
-    // narrowing casts below are presentation-only.
-    const opts: Intl.DateTimeFormatOptions = {
-        timeZone: cfg.timeZone ?? undefined,
-        hour12: cfg.hour12 ?? true,
-        fractionalSecondDigits: cfg.fractionalSecondDigits as
-            | 1
-            | 2
-            | 3
-            | undefined,
-    };
-    if (cfg.year !== "disabled") {
-        opts.year = (cfg.year ??
-            "2-digit") as Intl.DateTimeFormatOptions["year"];
-    }
-    if (cfg.month !== "disabled") {
-        opts.month = (cfg.month ??
-            "numeric") as Intl.DateTimeFormatOptions["month"];
-    }
-    if (cfg.day !== "disabled") {
-        opts.day = (cfg.day ?? "numeric") as Intl.DateTimeFormatOptions["day"];
-    }
-    if (cfg.weekday && cfg.weekday !== "disabled") {
-        opts.weekday = cfg.weekday as Intl.DateTimeFormatOptions["weekday"];
-    }
-    if (cfg.hour !== "disabled") {
-        opts.hour = (cfg.hour ??
-            "numeric") as Intl.DateTimeFormatOptions["hour"];
-    }
-    if (cfg.minute !== "disabled") {
-        opts.minute = (cfg.minute ??
-            "numeric") as Intl.DateTimeFormatOptions["minute"];
-    }
-    if (cfg.second !== "disabled") {
-        opts.second = (cfg.second ??
-            "numeric") as Intl.DateTimeFormatOptions["second"];
-    }
-    return new Intl.DateTimeFormat(navigator.languages as string[], opts);
+    return new Intl.DateTimeFormat(
+        navigator.languages as string[],
+        resolveDateFormat(cfg, defaults, DATETIME_BASE),
+    );
 }
 
 /**
- * `defaults` follows the same contract as
- * [`createDatetimeFormatter`]: the plugin's declared default
- * `date_format`, applied only when `cfg` is wholly absent.
+ * `defaults` follows the same contract as [`createDatetimeFormatter`];
+ * only `dateStyle` applies, in UTC.
  */
 export function createDateFormatter(
     cfg?: DateFormatConfig,
     defaults?: DateFormatConfig,
 ): Intl.DateTimeFormat {
-    const preset = simple_config(cfg ?? defaults);
-    const opts: Intl.DateTimeFormatOptions = {
+    const { dateStyle } = resolveDateFormat(cfg, defaults, DATE_BASE);
+    return new Intl.DateTimeFormat(navigator.languages as string[], {
         timeZone: "utc",
-        dateStyle:
-            preset?.dateStyle === "disabled"
-                ? undefined
-                : (preset?.dateStyle ?? DATE_LEGACY_DEFAULTS.dateStyle),
-    };
-    return new Intl.DateTimeFormat(navigator.languages as string[], opts);
+        dateStyle: dateStyle ?? DATE_BASE.dateStyle,
+    });
 }
 
 /**

@@ -21,6 +21,7 @@
 //! [`Renderer`]: crate::renderer::Renderer
 //! [`Presentation`]: crate::presentation::Presentation
 
+mod apply_config_defaults;
 mod apply_global_filters;
 mod auto_pause;
 mod copy_export;
@@ -55,6 +56,7 @@ pub(crate) const STAGING_DEADLINE_MS: i32 = 500;
 /// [`presize_panels::plugin_chrome`]).
 pub(crate) const CHROME_FALLBACK: (f64, f64) = (8.0, 33.0);
 
+pub(crate) use self::apply_config_defaults::*;
 pub use self::apply_global_filters::*;
 pub use self::auto_pause::*;
 pub use self::copy_export::*;

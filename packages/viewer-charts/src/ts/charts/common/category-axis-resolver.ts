@@ -17,6 +17,7 @@ import type {
 } from "../../axis/categorical-axis";
 import { buildGroupRuns } from "../../axis/categorical-axis-core";
 import { formatTickValue, formatDateTickValue } from "../../layout/ticks";
+import type { DateFormatModifiers } from "@perspective-dev/viewer/column-format";
 
 export interface CategoryAxisResult {
     /**
@@ -62,6 +63,9 @@ export interface NumericCategoryDomain {
      * Data-unit width of one category band, from min adjacent delta.
      */
     bandWidth: number;
+
+    /** The `timeZone`/`hour12` adaptive date labels on this axis apply. */
+    dateModifiers?: DateFormatModifiers;
 }
 
 /**
@@ -80,6 +84,7 @@ export function resolveNumericCategoryDomain(
     rowOffset: number,
     label: string,
     isDate: boolean,
+    dateModifiers?: DateFormatModifiers,
 ): {
     categoryPositions: Float64Array;
     numericCategoryDomain: NumericCategoryDomain;
@@ -123,6 +128,7 @@ export function resolveNumericCategoryDomain(
             isDate,
             label,
             bandWidth: minDelta,
+            dateModifiers: isDate ? dateModifiers : undefined,
         },
     };
 }
@@ -186,6 +192,7 @@ function formatLevelValue(
     value: number,
     valid: boolean,
     levelType: string,
+    dateModifiers?: DateFormatModifiers,
 ): string {
     // `value` can be `undefined` even when `valid` claims otherwise — an
     // out-of-bounds read when a row window outran the delivered Arrow
@@ -199,8 +206,12 @@ function formatLevelValue(
         return value ? "true" : "false";
     }
 
-    if (levelType === "date" || levelType === "datetime") {
+    if (levelType === "date") {
         return formatDateTickValue(value);
+    }
+
+    if (levelType === "datetime") {
+        return formatDateTickValue(value, undefined, dateModifiers);
     }
 
     if (levelType === "integer") {
@@ -225,6 +236,7 @@ export function synthesizeStringLevel(
     rp: ColumnData,
     numRows: number,
     levelType: string,
+    dateModifiers?: DateFormatModifiers,
 ): { indices: Int32Array; dictionary: string[] } {
     const values = rp.values!;
     const valid = rp.valid;
@@ -245,7 +257,7 @@ export function synthesizeStringLevel(
         const v = values[r] as number;
         let dictIdx = valueIdx.get(v);
         if (dictIdx === undefined) {
-            const label = formatLevelValue(v, true, levelType);
+            const label = formatLevelValue(v, true, levelType, dateModifiers);
             dictIdx = seen.get(label);
             if (dictIdx === undefined) {
                 dictIdx = dictionary.length;
@@ -283,6 +295,7 @@ export function resolveCategoryAxis(
     groupByLen: number,
     levelTypes: string[] = [],
     axisMode?: AxisMode,
+    levelDateModifiers: (DateFormatModifiers | undefined)[] = [],
 ): CategoryAxisResult {
     if (axisMode?.mode === "numeric") {
         const rp = columns.get("__ROW_PATH_0__");
@@ -325,7 +338,14 @@ export function resolveCategoryAxis(
             });
         } else if (rp.values) {
             const levelType = levelTypes[n] ?? "string";
-            rawRowPaths.push(synthesizeStringLevel(rp, numRows, levelType));
+            rawRowPaths.push(
+                synthesizeStringLevel(
+                    rp,
+                    numRows,
+                    levelType,
+                    levelDateModifiers[n],
+                ),
+            );
         } else {
             break;
         }
